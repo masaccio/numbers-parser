@@ -1,6 +1,71 @@
 import json
-import importlib
-import pkgutil
+
+from generated import KNArchives_pb2 as KNArchives
+from generated import KNArchives_sos_pb2 as KNArchives_sos
+from generated import KNCommandArchives_pb2 as KNCommandArchives
+from generated import KNCommandArchives_sos_pb2 as KNCommandArchives_sos
+from generated import TSAArchives_pb2 as TSAArchives
+from generated import TSAArchives_sos_pb2 as TSAArchives_sos
+from generated import TSACommandArchives_sos_pb2 as TSACommandArchives_sos
+from generated import TSCEArchives_pb2 as TSCEArchives
+from generated import TSCH3DArchives_pb2 as TSCH3DArchives
+from generated import TSCHArchives_Common_pb2 as TSCHArchives_Common
+from generated import TSCHArchives_GEN_pb2 as TSCHArchives_GEN
+from generated import TSCHArchives_pb2 as TSCHArchives
+from generated import TSCHArchives_sos_pb2 as TSCHArchives_sos
+from generated import TSCHCommandArchives_pb2 as TSCHCommandArchives
+from generated import TSCHPreUFFArchives_pb2 as TSCHPreUFFArchives
+from generated import TSDArchives_pb2 as TSDArchives
+from generated import TSDArchives_sos_pb2 as TSDArchives_sos
+from generated import TSDCommandArchives_pb2 as TSDCommandArchives
+from generated import TSKArchives_pb2 as TSKArchives
+from generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
+from generated import TSPDatabaseMessages_pb2 as TSPDatabaseMessages
+from generated import TSPMessages_pb2 as TSPMessages
+from generated import TSSArchives_pb2 as TSSArchives
+from generated import TSSArchives_sos_pb2 as TSSArchives_sos
+from generated import TSTArchives_pb2 as TSTArchives
+from generated import TSTArchives_sos_pb2 as TSTArchives_sos
+from generated import TSTCommandArchives_pb2 as TSTCommandArchives
+from generated import TSTStylePropertyArchiving_pb2 as \
+    TSTStylePropertyArchiving
+from generated import TSWPArchives_pb2 as TSWPArchives
+from generated import TSWPArchives_sos_pb2 as TSWPArchives_sos
+from generated import TSWPCommandArchives_pb2 as TSWPCommandArchives
+
+PROTO_FILES = [
+    KNArchives,
+    KNArchives_sos,
+    KNCommandArchives,
+    KNCommandArchives_sos,
+    TSAArchives,
+    TSAArchives_sos,
+    TSACommandArchives_sos,
+    TSCEArchives,
+    TSCH3DArchives,
+    TSCHArchives_Common,
+    TSCHArchives_GEN,
+    TSCHArchives,
+    TSCHArchives_sos,
+    TSCHCommandArchives,
+    TSCHPreUFFArchives,
+    TSDArchives,
+    TSDArchives_sos,
+    TSDCommandArchives,
+    TSKArchives,
+    TSPArchiveMessages,
+    TSPDatabaseMessages,
+    TSPMessages,
+    TSSArchives,
+    TSSArchives_sos,
+    TSTArchives,
+    TSTArchives_sos,
+    TSTCommandArchives,
+    TSTStylePropertyArchiving,
+    TSWPArchives,
+    TSWPArchives_sos,
+    TSWPCommandArchives,
+]
 
 TSPRegistryMapping = json.loads("""
 {
@@ -551,11 +616,7 @@ TSPRegistryMapping = json.loads("""
 
 def compute_maps():
     name_class_map = {}
-    proto_files = [
-        importlib.import_module('generated.' + name)
-        for _, name, _ in pkgutil.iter_modules(['generated'])
-    ]
-    for file in proto_files:
+    for file in PROTO_FILES:
         for message_name in file.DESCRIPTOR.message_types_by_name:
             message_type = getattr(file, message_name)
             name_class_map[message_type.DESCRIPTOR.full_name] = \
