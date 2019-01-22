@@ -1,0 +1,512 @@
+syntax = "proto2";
+
+import "TSPMessages.proto";
+package TSK;
+
+enum StructuredTextImportType {
+  ImportType_UNKNOWN = 0;
+  ImportType_DELIMITED = 1;
+  ImportType_FIXEDWIDTH = 2;
+}
+
+message TreeNode {
+  optional string name = 1;
+  repeated .TSP.Reference children = 2;
+  optional .TSP.Reference object = 3;
+}
+
+message CommandHistory {
+  message SelectionBehaviorEntry {
+    required .TSP.Reference command = 1;
+    required .TSP.Reference command_selection_behavior = 2;
+  }
+  required uint32 undo_count = 1;
+  repeated .TSP.Reference commands = 2;
+  repeated .TSP.Reference marked_redo_commands = 3 [deprecated = true];
+  optional .TSP.Reference pending_preflight_command = 4 [deprecated = true];
+  repeated .TSK.CommandHistory.SelectionBehaviorEntry selection_behavior_entries = 5;
+  optional bool fixed_radar_13365177 = 10;
+}
+
+message CollaborationCommandHistory {
+  repeated .TSK.CollaborationCommandHistoryItem undo_items = 1;
+  repeated .TSK.CollaborationCommandHistoryItem redo_items = 2;
+  optional .TSP.UUID local_identifier = 3;
+  repeated .TSP.Reference undo_transformer_entries = 4;
+  repeated .TSP.Reference redo_transformer_entries = 5;
+}
+
+message CollaborationCommandHistoryItem {
+  optional .TSP.Reference command = 1;
+  optional string action_string = 2;
+  optional .TSP.Reference selection_behavior = 3;
+  optional .TSP.Reference coalescing_group = 4;
+  optional uint64 revision_sequence = 5;
+}
+
+message CollaborationCommandHistoryCoalescingGroup {
+  repeated .TSP.Reference nodes = 1;
+  optional bool did_coalesce_all_commands = 2 [default = false];
+}
+
+message CollaborationCommandHistoryCoalescingGroupNode {
+  optional .TSP.Reference command = 1;
+}
+
+message CollaborationCommandHistoryOriginatingCommandAcknowledgementObserver {
+  optional .TSP.Reference coalescing_group = 1;
+  optional .TSP.Reference node = 2;
+}
+
+message DocumentArchive {
+  optional string locale_identifier = 4;
+  optional .TSP.Reference annotation_author_storage = 7;
+  repeated .TSP.Reference activity_log_entries = 8;
+  optional string creation_locale_identifier = 9;
+  optional bool prevent_image_conversion_on_open = 10;
+  optional bool has_floating_locale = 11;
+  optional bool has_user_defined_locale = 12;
+}
+
+message DocumentSupportCollaborationState {
+  optional .TSP.Reference collaboration_command_history = 1;
+  optional .TSP.Reference collaboration_session_state = 2;
+}
+
+message DocumentSupportArchive {
+  optional .TSP.Reference command_history = 1;
+  optional uint32 undo_count = 4;
+  optional uint32 redo_count = 5;
+  optional string undo_action_string = 6;
+  optional string redo_action_string = 7;
+  optional .TSP.Reference web_state = 8;
+  optional bool is_in_collaboration_mode = 9 [default = false];
+  optional string action_string_localization = 12;
+  optional .TSP.Reference collaboration_state = 13;
+  optional .TSP.Reference command_selection_behavior_history = 2 [deprecated = true];
+  optional .TSP.Reference view_state = 3 [deprecated = true];
+  optional .TSP.Reference collaboration_command_history = 10 [deprecated = true];
+  optional .TSP.Reference collaboration_session_state = 11 [deprecated = true];
+}
+
+message ViewStateArchive {
+  required .TSP.Reference view_state_root = 1;
+}
+
+message CommandArchive {
+  optional .TSP.Reference undoRedoState = 1 [deprecated = true];
+  optional .TSP.Reference undoCollection = 2;
+  optional bool shadowed_by_transform = 3;
+  optional bool shadowed_by_commit = 4;
+  optional bool remote = 5;
+  optional bool should_hold_until_group_commit = 6;
+}
+
+message CommandGroupArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSP.Reference commands = 2;
+  optional .TSP.IndexSet process_results = 3;
+  optional string action_string = 4;
+}
+
+message InducedCommandCollectionArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TSP.Reference inducing_command = 2;
+  repeated .TSP.Reference induced_commands = 3;
+  optional .TSP.IndexSet indexes_of_processed_induced_commands = 4;
+}
+
+message FinalCommandPairArchive {
+  required .TSK.CommandArchive super = 1;
+  required .TSP.Reference command = 2;
+  optional bool command_process_result = 3 [default = false];
+  required .TSP.Reference final_command = 4;
+  optional bool final_command_process_result = 5 [default = false];
+}
+
+message CommandContainerArchive {
+  repeated .TSP.Reference commands = 1;
+}
+
+message ShuffleMappingArchive {
+  message Entry {
+    required uint32 from = 1;
+    required uint32 to = 2;
+  }
+  required uint32 start_index = 1;
+  required uint32 end_index = 2;
+  repeated .TSK.ShuffleMappingArchive.Entry entries = 3;
+  optional bool is_vertical = 4 [default = true];
+  optional bool is_move_operation = 5 [default = false];
+  optional uint32 first_moved_index = 6 [default = 0];
+  optional uint32 destination_index_for_move = 7 [default = 0];
+  optional uint32 number_of_indexes_moved = 8 [default = 0];
+}
+
+message ProgressiveCommandGroupArchive {
+  required .TSK.CommandGroupArchive super = 1;
+}
+
+message FormatStructArchive {
+  required uint32 format_type = 1;
+  optional uint32 decimal_places = 2;
+  optional string currency_code = 3;
+  optional uint32 negative_style = 4;
+  optional bool show_thousands_separator = 5;
+  optional bool use_accounting_style = 6;
+  optional uint32 duration_style = 7;
+  optional uint32 base = 8;
+  optional uint32 base_places = 9;
+  optional bool base_use_minus_sign = 10;
+  optional uint32 fraction_accuracy = 11;
+  optional bool suppress_date_format = 12;
+  optional bool suppress_time_format = 13;
+  optional string date_time_format = 14;
+  optional uint32 duration_unit_largest = 15;
+  optional uint32 duration_unit_smallest = 16;
+  optional uint32 custom_id = 17;
+  optional string custom_format_string = 18;
+  optional double scale_factor = 19;
+  optional bool requires_fraction_replacement = 20;
+  optional double control_minimum = 21;
+  optional double control_maximum = 22;
+  optional double control_increment = 23;
+  optional uint32 control_format_type = 24;
+  optional uint32 slider_orientation = 25;
+  optional uint32 slider_position = 26;
+  optional uint32 decimal_width = 27;
+  optional uint32 min_integer_width = 28;
+  optional uint32 num_nonspace_integer_digits = 29;
+  optional uint32 num_nonspace_decimal_digits = 30;
+  optional uint32 index_from_right_last_integer = 31;
+  repeated string interstitial_strings = 32;
+  optional .TSP.IndexSet inters_str_insertion_indexes = 33;
+  optional uint32 num_hash_decimal_digits = 34;
+  optional uint32 total_num_decimal_digits = 35;
+  optional bool is_complex = 36;
+  optional bool contains_integer_token = 37;
+  optional uint32 multiple_choice_list_initial_value = 38;
+  optional uint32 multiple_choice_list_id = 39;
+  optional bool use_automatic_duration_units = 40;
+  optional .TSP.UUID custom_uid = 41;
+  optional .TSK.CustomFormatArchive custom_format = 42;
+  optional bool uses_plus_sign = 43;
+  optional string bool_true_string = 44;
+  optional string bool_false_string = 45;
+  extensions 10000 to 19999;
+}
+
+message CustomFormatArchive {
+  message Condition {
+    required uint32 condition_type = 1;
+    optional float condition_value = 2;
+    required .TSK.FormatStructArchive condition_format = 3;
+    optional double condition_value_dbl = 4;
+  }
+  required string name = 1;
+  required uint32 format_type_pre_bnc = 2;
+  required .TSK.FormatStructArchive default_format = 3;
+  repeated .TSK.CustomFormatArchive.Condition conditions = 4;
+  optional uint32 format_type = 5;
+}
+
+message CustomFormatListArchive {
+  repeated .TSP.UUID uuids = 1;
+  repeated .TSK.CustomFormatArchive custom_formats = 2;
+}
+
+message AnnotationAuthorArchive {
+  optional string name = 1;
+  optional .TSP.Color color = 2;
+  optional string public_id = 3;
+  optional bool is_public_author = 4;
+}
+
+message DeprecatedChangeAuthorArchive {
+  optional string name = 1;
+  optional .TSP.Color change_color = 2;
+}
+
+message AnnotationAuthorStorageArchive {
+  repeated .TSP.Reference annotation_author = 1;
+}
+
+message SetAnnotationAuthorColorCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TSP.Reference annotation_author = 2;
+  optional .TSP.Color color = 3;
+  optional .TSP.Color old_color = 4;
+}
+
+message CommandSelectionBehaviorArchive {
+  optional .TSK.SelectionPathArchive archived_selection = 8;
+  optional .TSK.SelectionPathArchive archived_old_selection = 1;
+  optional .TSK.SelectionPathArchive archived_new_selection = 2;
+  optional uint64 selection_flags = 3;
+  optional uint64 additional_forward_selection_flags = 4;
+  optional uint64 additional_reverse_selection_flags = 5;
+  optional .TSP.Reference forward_selection_path_transformer = 6;
+  optional .TSP.Reference reverse_selection_path_transformer = 7;
+  repeated .TSP.Reference additional_selection_behaviors = 9;
+}
+
+message SelectionPathTransformerArchive {
+  repeated .TSP.Reference selection_transformers = 1;
+}
+
+message SelectionPathArchive {
+  repeated .TSP.Reference ordered_selections = 1;
+}
+
+message DocumentSelectionArchive {
+  optional .TSP.Reference document_root = 1;
+}
+
+message IdOperationArgs {
+  required .TSP.UUIDPath id_path = 1;
+}
+
+message AddIdOperationArgs {
+  required .TSK.IdOperationArgs super = 1;
+  required int32 index = 2;
+}
+
+message RemoveIdOperationArgs {
+  required .TSK.IdOperationArgs super = 1;
+  required int32 index = 2;
+}
+
+message RearrangeIdOperationArgs {
+  required .TSK.IdOperationArgs super = 1;
+  required int32 from_index = 2;
+  required int32 to_index = 3;
+}
+
+message IdPlacementOperationArgs {
+  required .TSK.IdOperationArgs super = 1;
+  required int32 from_index = 2;
+  required int32 to_index = 3;
+}
+
+message NullCommandArchive {
+  required .TSK.CommandArchive super = 1;
+}
+
+message GroupCommitCommandArchive {
+  required .TSK.CommandArchive super = 1;
+}
+
+message UpgradeDocPostProcessingCommandArchive {
+  required .TSK.CommandArchive super = 1;
+}
+
+message InducedCommandCollectionCommitCommandArchive {
+  required .TSK.CommandArchive super = 1;
+}
+
+message ExecuteTestBetweenRollbackAndReapplyCommandArchive {
+  required .TSK.CommandArchive super = 1;
+}
+
+message ChangeDocumentPackageTypeCommandArchive {
+  enum PackageType {
+    Default = 0;
+    Directory = 1;
+    SingleFile = 2;
+  }
+  required .TSK.CommandArchive super = 1;
+  required .TSK.ChangeDocumentPackageTypeCommandArchive.PackageType new_package_type = 2;
+  required .TSK.ChangeDocumentPackageTypeCommandArchive.PackageType old_package_type = 3;
+}
+
+message CreateLocalStorageSnapshotCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  optional string snapshot_id = 2;
+}
+
+message Address {
+  optional .TSK.Address parent = 1;
+  extensions 100 to 536870911;
+}
+
+message IdAddress {
+  optional string identifier = 1;
+  extend .TSK.Address {
+    optional .TSK.IdAddress id_address = 100;
+  }
+}
+
+message RangeAddress {
+  optional string range_list = 1;
+  extend .TSK.Address {
+    optional .TSK.RangeAddress range_address = 101;
+  }
+}
+
+message Operation {
+  required bool noop = 1;
+  extensions 100 to 536870911;
+}
+
+message UpdateOperation {
+  optional string property_name = 1;
+  extend .TSK.Operation {
+    optional .TSK.UpdateOperation update_operation = 100;
+  }
+}
+
+message UpdateIdOperation {
+  required .TSK.Address address = 1;
+  extend .TSK.Operation {
+    optional .TSK.UpdateIdOperation update_id_operation = 101;
+  }
+}
+
+message ReplaceOperation {
+  extend .TSK.Operation {
+    optional .TSK.ReplaceOperation replace_operation = 102;
+  }
+}
+
+message ReplaceRangeOperation {
+  required uint64 insert_length = 1;
+  required .TSK.Address address = 2;
+  optional bool preserve_lower_priority_location = 3 [default = false];
+  extend .TSK.Operation {
+    optional .TSK.ReplaceRangeOperation replace_range_operation = 103;
+  }
+}
+
+message IdPlacementBaseOperation {
+  enum IdPlacementType {
+    ADD = 0;
+    REMOVE = 1;
+    REARRANGE = 2;
+    PLACEMENT = 3;
+  }
+  required .TSK.Address address = 1;
+  required int32 from_index = 2;
+  required int32 to_index = 3;
+  required .TSK.IdPlacementBaseOperation.IdPlacementType placement_type = 4;
+  required bool dominating = 5;
+  extend .TSK.Operation {
+    optional .TSK.IdPlacementBaseOperation id_placement_base_operation = 104;
+  }
+}
+
+message IdPlacementAddOperation {
+  required int32 object_count = 1;
+  required int32 object_counter_space = 2;
+  extend .TSK.Operation {
+    optional .TSK.IdPlacementAddOperation id_placement_add_operation = 105;
+  }
+}
+
+message IdPlacementPlacementOperation {
+  extend .TSK.Operation {
+    optional .TSK.IdPlacementPlacementOperation id_placement_placement_operation = 106;
+  }
+}
+
+message UpdateRangeOperation {
+  required .TSK.Address address = 1;
+  required uint32 transform_behavior = 2;
+  extend .TSK.Operation {
+    optional .TSK.UpdateRangeOperation update_range_operation = 107;
+  }
+}
+
+message IdPlacementRearrangeOperation {
+  extend .TSK.Operation {
+    optional .TSK.IdPlacementRearrangeOperation id_placement_rearrange_operation = 108;
+  }
+}
+
+message IdPlacementRemoveOperation {
+  required int32 object_count = 1;
+  required int32 object_counter_space = 2;
+  extend .TSK.Operation {
+    optional .TSK.IdPlacementRemoveOperation id_placement_remove_operation = 109;
+  }
+}
+
+message OperationTransformer {
+  required bool higher_priority = 1;
+  repeated .TSK.Operation operations = 2;
+}
+
+message TransformerEntry {
+  required uint64 sequence = 1;
+  required double creation_time = 2;
+  required .TSK.OperationTransformer transformer = 3;
+}
+
+message OutgoingCommandQueueItem {
+  optional .TSP.Reference command = 1;
+  optional string serialized_json_without_data_base64_encoded_string = 2;
+  optional .TSP.DataReference serialized_json_without_data_base64_encoded_data = 4;
+  repeated .TSK.OutgoingCommandQueueItemUUIDToDataMapEntry uuid_to_data_map_entries = 3;
+}
+
+message OutgoingCommandQueueItemUUIDToDataMapEntry {
+  required .TSP.UUID uuid = 1;
+  required .TSP.DataReference data = 2;
+}
+
+message CollaborationDocumentSessionState {
+  message AcknowledgementObserverEntry {
+    required .TSP.UUID command_identifier = 1;
+    repeated .TSP.Reference acknowledgement_observers = 2;
+  }
+  repeated string collaborator_ids = 1;
+  optional int32 mailbox_request_document_revision_sequence = 10;
+  optional string mailbox_request_document_revision_identifier = 11;
+  repeated .TSP.Reference send_pending_command_queue_items = 2;
+  repeated .TSP.Reference rsvp_command_queue_items = 3;
+  optional bool last_send_pending_command_queue_item_was_moved_from_rsvp_command_queue = 12 [default = false];
+  optional .TSP.UUID last_too_old_command_identifier = 16;
+  repeated .TSP.Reference collaborator_cursor_transformer_entries = 4;
+  repeated .TSP.Reference acknowledged_commands_pending_resume_process_diffs = 5;
+  repeated .TSP.Reference skipped_acknowledged_commands_pending_resume_process_diffs = 15;
+  repeated .TSP.Reference unprocessed_commands_pending_resume_process_diffs = 6;
+  repeated .TSP.Reference unprocessed_collaborator_cursor_transformer_entries_pending_resume_process_diffs = 9;
+  repeated .TSP.Reference transformer_from_unprocessed_command_operations_entries = 8;
+  repeated .TSK.CollaborationDocumentSessionState.AcknowledgementObserverEntry command_acknowledgement_observer_entries = 7;
+  optional int32 last_command_send_marker_sequence = 13;
+  optional string last_command_send_marker_identifier = 14;
+}
+
+message NativeContentDescription {
+  optional string app_name = 1;
+  optional string app_version = 2;
+  optional string document_id = 3;
+  repeated .TSP.Reference drawable_descriptions = 4;
+}
+
+message PencilAnnotationStorageArchive {
+  optional int32 attached_location = 1;
+  optional .TSP.Point markup_offset = 2;
+  optional .TSP.DataReference rasterized_image = 3;
+  optional .TSP.DataReference encoded_drawing = 4;
+  optional .TSP.Path drawing_path = 5;
+  optional .TSP.Point strokes_bounding_box_origin = 6;
+  optional .TSP.Size strokes_bounding_box_size = 7;
+  optional int32 attached_type = 8;
+  optional .TSP.Size original_attached_size = 9;
+}
+
+message StructuredTextImportSettings {
+  required .TSK.StructuredTextImportType type = 1;
+  required int32 starting_row = 2;
+  repeated string decimal_separators = 3;
+  repeated string thousands_separators = 4;
+  optional bool transpose_rows_and_columns = 5;
+  repeated string delimiters = 6;
+  repeated string text_qualifiers = 7;
+  optional bool collapse_consecutive = 8;
+  optional .TSP.IndexSet column_offsets = 9;
+  optional bool automatic_delimiters = 10;
+  optional bool automatic_offsets = 11;
+  optional uint64 source_encoding = 12;
+}
+

@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+import "TSACommandArchives_sos.proto";
+import "TSKArchives.proto";
+import "TSPMessages.proto";
+package KN;
+
+message InducedVerifyDocumentWithServerCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSP.UUID slide_node_id_list = 2;
+  optional bool slide_node_id_list_undefined = 3;
+}
+
+message InducedVerifyDrawableZOrdersWithServerCommandArchive {
+  required .TSA.InducedVerifyDrawableZOrdersWithServerCommandArchive super = 1;
+}
+

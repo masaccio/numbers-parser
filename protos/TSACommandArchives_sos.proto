@@ -1,0 +1,29 @@
+syntax = "proto2";
+
+import "TSAArchives_sos.proto";
+import "TSKArchives.proto";
+import "TSPMessages.proto";
+package TSA;
+
+message InducedVerifyDrawableZOrdersWithServerCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSA.DrawableZOrderListArchive server_drawable_z_order_lists = 2;
+  optional bool server_drawable_z_order_lists_undefined = 3;
+}
+
+message VerifyDocumentWithServerCommandArchive {
+  required .TSK.CommandArchive super = 1;
+}
+
+message VerifyDrawableZOrdersWithServerCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSP.UUID drawable_id_list = 2;
+  optional bool drawable_id_list_undefined = 3;
+}
+
+message VerifyObjectsWithServerCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSP.UUID object_id_list = 2;
+  optional bool object_id_list_undefined = 3;
+}
+

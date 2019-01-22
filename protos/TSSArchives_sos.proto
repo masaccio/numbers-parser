@@ -1,0 +1,50 @@
+syntax = "proto2";
+
+import "TSPMessages.proto";
+package TSS;
+
+message SpecSetBoolArchive {
+  required bool value = 1;
+  required bool unset = 2;
+}
+
+message SpecSetColorArchive {
+  optional .TSP.Color color = 1;
+  required bool unset = 2;
+}
+
+message SpecSetDoubleArchive {
+  required double value = 1;
+  required bool unset = 2;
+}
+
+message SpecSetIntegerArchive {
+  required int32 value = 1;
+  required bool unset = 2;
+}
+
+message SpecSetStringArchive {
+  optional string value = 1;
+  required bool unset = 2;
+}
+
+message SpecBoolArchive {
+  optional .TSS.SpecSetBoolArchive spec_set_bool = 1;
+}
+
+message SpecColorArchive {
+  optional .TSS.SpecSetColorArchive spec_set_color = 1;
+}
+
+message SpecDoubleArchive {
+  optional .TSS.SpecSetDoubleArchive spec_set_double = 1;
+}
+
+message SpecIntegerArchive {
+  optional .TSS.SpecSetIntegerArchive spec_set_integer = 1;
+}
+
+message SpecStringArchive {
+  optional .TSS.SpecSetStringArchive spec_set_string = 1;
+}
+
