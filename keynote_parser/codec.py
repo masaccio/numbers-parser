@@ -142,12 +142,12 @@ class IWAArchiveSegment(object):
     @classmethod
     def from_dict(cls, _dict):
         return cls(
-            dict_to_message(_dict['header']),
+            dict_to_header(_dict['header']),
             [dict_to_message(o) for o in _dict['objects']])
 
     def to_dict(self):
         return {
-            "header": message_to_dict(self.header),
+            "header": header_to_dict(self.header),
             "objects": [message_to_dict(message) for message in self.objects],
         }
 
@@ -158,7 +158,6 @@ class IWAArchiveSegment(object):
             object_length = len(obj.SerializeToString())
             provided_length = message_info.length
             if object_length != provided_length:
-                print "OBJECT LENGTH MISMATCH:", object_length, provided_length
                 message_info.length = object_length
         return ''.join([
             _VarintBytes(self.header.ByteSize()),
@@ -174,10 +173,24 @@ def message_to_dict(message):
     return output
 
 
+def header_to_dict(message):
+    output = message_to_dict(message)
+    for message_info in output['messageInfos']:
+        del message_info['length']
+    return output
+
+
 def dict_to_message(_dict):
     _type = _dict['_pbtype']
     del _dict['_pbtype']
     return ParseDict(_dict, NAME_CLASS_MAP[_type]())
+
+
+def dict_to_header(_dict):
+    for message_info in _dict['messageInfos']:
+        # set a dummy length value that we'll overwrite later
+        message_info['length'] = 0
+    return dict_to_message(_dict)
 
 
 def get_archive_info_and_remainder(buf):

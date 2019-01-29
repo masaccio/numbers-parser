@@ -29,16 +29,19 @@ pip install keynote-parser
 
 ```bash 
 # Unpack MyPresentation.key into ./MyPresentation/
-keynote-parser MyPresentation.key
+keynote-parser unpack MyPresentation.key
+
 # Re-pack ./MyPresentation/ into MyPresentation.out.key 
-keynote-parser ./MyPresentation/
+keynote-parser pack ./MyPresentation/
+
+# List the files within a Keynote archive
+keynote-parser ls MyPresentation.key
 
 # Dump a particular .iwa file into its yaml representation on stdout
-keynote-parser ./MyPresentation/Index/test.iwa
+keynote-parser cat MyPresentation.key /Index/Slide-00001.iwa
 
-# Serialize a .yaml file into its corresponding .iwa file on stdout
-# (this will output binary data on stdout - careful!)
-keynote-parser ./MyPresentation/Index/test.iwa.yaml > test.iwa
+# Replace text within a Keynote file in-place
+keynote-parser replace MyPresentation.key --find "hello world" --replace "hello dolly"
 ```
 
 ## Updates
