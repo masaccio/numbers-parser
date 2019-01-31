@@ -1,17 +1,22 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import zip
+from builtins import str
+from builtins import object
 import sys
 import yaml
 import struct
 import snappy
 import traceback
 
-from mapping import NAME_CLASS_MAP, ID_NAME_MAP
+from .mapping import NAME_CLASS_MAP, ID_NAME_MAP
 
 from google.protobuf.internal.encoder import _VarintBytes
 from google.protobuf.internal.decoder import _DecodeVarint32
 from google.protobuf.json_format import MessageToDict
-from protobuf_patch import ParseDict
+from .protobuf_patch import ParseDict
 
-from generated.TSPArchiveMessages_pb2 import ArchiveInfo
+from .generated.TSPArchiveMessages_pb2 import ArchiveInfo
 
 
 class IWAFile(object):
@@ -45,7 +50,7 @@ class IWAFile(object):
         }
 
     def to_buffer(self):
-        return ''.join([
+        return b''.join([
             chunk.to_buffer() for chunk in self.chunks
         ])
 
@@ -59,12 +64,16 @@ class IWACompressedChunk(object):
         while data:
             header = data[:4]
 
-            if ord(header[0]) != 0x00:
+            first_byte = header[0]
+            if not isinstance(first_byte, int):
+                first_byte = ord(first_byte)
+
+            if first_byte != 0x00:
                 raise ValueError(
                     "IWA chunk does not start with 0x00! (found %x)" %
-                    ord(header[0]))
+                    first_byte)
 
-            length = struct.unpack('<I', header[1:] + '\0')[0]
+            length = struct.unpack_from('<I', bytes(header[1:]) + bytes([0]))[0]
             chunk = data[4:4 + length]
             data = data[4 + length:]
 
@@ -78,7 +87,7 @@ class IWACompressedChunk(object):
 
     @classmethod
     def from_buffer(cls, data):
-        data = ''.join(cls._decompress_all(data))
+        data = b''.join(cls._decompress_all(data))
         archives = []
         while data:
             archive, data = IWAArchiveSegment.from_buffer(data)
@@ -97,10 +106,10 @@ class IWACompressedChunk(object):
         }
 
     def to_buffer(self):
-        payload = snappy.compress(''.join([
+        payload = snappy.compress(b''.join([
             archive.to_buffer() for archive in self.archives
         ]))
-        return '\x00' + struct.pack('<I', len(payload))[:3] + payload
+        return b'\x00' + struct.pack('<I', len(payload))[:3] + payload
 
 
 class IWAArchiveSegment(object):
@@ -159,7 +168,7 @@ class IWAArchiveSegment(object):
             provided_length = message_info.length
             if object_length != provided_length:
                 message_info.length = object_length
-        return ''.join([
+        return b''.join([
             _VarintBytes(self.header.ByteSize()),
             self.header.SerializeToString()
         ] + [
@@ -205,8 +214,8 @@ if __name__ == "__main__":
     for filename in sys.argv[1:]:
         try:
             iwa_file = IWAFile.from_file(filename)
-            print yaml.safe_dump(
+            print(yaml.safe_dump(
                 iwa_file.to_dict(),
-                default_flow_style=False)
+                default_flow_style=False))
         except Exception as e:
-            print "FAILED", traceback.format_exc(e)
+            print("FAILED", traceback.format_exc(e))

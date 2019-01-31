@@ -6,7 +6,7 @@ MULTILINE_FILENAME = './tests/data/multiline-oneslide.iwa'
 
 
 def roundtrip(filename):
-    with open(filename, 'r') as f:
+    with open(filename, 'rb') as f:
         test_data = f.read()
     file = codec.IWAFile.from_buffer(test_data)
     assert file is not None

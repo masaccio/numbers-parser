@@ -1,8 +1,10 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import argparse
 
 from collections import Counter
-from file_utils import pack, unpack, ls, cat, replace
-from replacement import Replacement, parse_json
+from .file_utils import pack, unpack, ls, cat, replace
+from .replacement import Replacement, parse_json
 
 
 def parse_replacements(**kwargs):
@@ -46,16 +48,16 @@ def replace_command(path, **kwargs):
     if find and _replace:
         replacements.append(Replacement(find, _replace))
     if not replacements:
-        print "WARNING: No replacements passed. No change."
+        print("WARNING: No replacements passed. No change.")
         return
-    print replacements
-    for ((old, new), count) in Counter(
-            replace(path, output, replacements)).iteritems():
+    print(replacements)
+    for ((old, new), count) in list(Counter(
+            replace(path, output, replacements)).items()):
         if count == 1:
-            print "Replaced %s with %s." % (repr(old), repr(new))
+            print("Replaced %s with %s." % (repr(old), repr(new)))
         else:
-            print "Replaced %s with %s %d times." % (
-                repr(old), repr(new), count)
+            print("Replaced %s with %s %d times." % (
+                repr(old), repr(new), count))
 
 
 def add_replacement_arg(parser):

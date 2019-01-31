@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import yaml
 
@@ -5,7 +7,7 @@ from glob import glob
 from tqdm import tqdm
 from zipfile import ZipFile
 
-from codec import IWAFile
+from .codec import IWAFile
 
 
 def ensure_directory_exists(prefix, path):
@@ -40,8 +42,8 @@ def unpack(filepath, target_dir=None, replacements=[]):
                             out.write(content)
                         continue
                     except Exception as e:
-                        print "Failed to unpack %s" % zipinfo.filename
-                        print e
+                        print("Failed to unpack %s" % zipinfo.filename)
+                        print(e)
                 with open(target_path, 'w') as out:
                     out.write(file_contents)
 
@@ -51,7 +53,7 @@ def ls(filepath):
         for zipinfo in sorted(zipfile.filelist, key=lambda x: x.filename):
             if zipinfo.filename.endswith('/'):
                 continue
-            print zipinfo.filename
+            print(zipinfo.filename)
 
 
 def cat(filepath, filename, replacements=[], raw=False):
@@ -64,9 +66,9 @@ def cat(filepath, filename, replacements=[], raw=False):
                     data = replacement.perform_on(data)
                 content = yaml.safe_dump(
                     data, default_flow_style=False)
-                print content
+                print(content)
             else:
-                print file_contents
+                print(file_contents)
 
 
 def replace(filepath, output_path, replacements=[]):
@@ -76,7 +78,7 @@ def replace(filepath, output_path, replacements=[]):
     def on_replace(replacement, old, new):
         completed_replacements.append((old, new))
 
-    print "Reading from %s..." % filepath
+    print("Reading from %s..." % filepath)
     with ZipFile(filepath, 'r') as zipfile:
         for zipinfo in tqdm(zipfile.filelist, desc='Finding...'):
             if zipinfo.filename.endswith('iwa'):
@@ -101,9 +103,9 @@ def replace(filepath, output_path, replacements=[]):
                     continue
             with zipfile.open(zipinfo, 'r') as f:
                 files_to_write[zipinfo.filename] = f.read()
-    print "Writing to %s..." % output_path
+    print("Writing to %s..." % output_path)
     with ZipFile(output_path, 'w') as zipfile:
-        for filename, contents in tqdm(files_to_write.iteritems(),
+        for filename, contents in tqdm(iter(list(files_to_write.items())),
                                        total=len(files_to_write),
                                        desc='Replacing...'):
             zipfile.writestr(filename, contents)
@@ -134,6 +136,6 @@ def pack(filepath, target_file=None, replacements=[]):
                             data)
                         continue
                     except Exception:
-                        print "Failed to pack %s" % filename
+                        print("Failed to pack %s" % filename)
                         raise
                 zipfile.writestr(zip_filename, file_contents)

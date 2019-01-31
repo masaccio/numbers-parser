@@ -32,6 +32,7 @@
 # this file provides an alternative implementation of some Protobuf methods
 # so that we can serialize/deserialize Protobuf files properly as dictionaries.
 
+from builtins import str
 from google.protobuf import descriptor
 
 from google.protobuf.descriptor import FieldDescriptor
