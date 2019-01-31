@@ -1,0 +1,11 @@
+language: python
+python:
+  - "2.7"
+install:
+  - sudo apt-get install -qq libsnappy-dev protobuf-compiler
+  - pip install -r requirements.txt
+before_script:
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)
+script:
+  - make
+  - pytest
