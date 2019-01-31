@@ -44,6 +44,28 @@ keynote-parser cat MyPresentation.key /Index/Slide-00001.iwa
 keynote-parser replace MyPresentation.key --find "hello world" --replace "hello dolly"
 ```
 
+### Formats
+
+`keynote-parser` supports reading a list of replacements from a JSON file passed in
+as `--replacements`. This file must have the form:
+
+```json
+{
+  "replacements": [
+    {
+      "find": "regexp to search for",
+      "replace": "string to replace with"
+    },
+    ...
+  ]
+}
+```
+
+This argument can be passed to `keynote-parser replace` to replace text in a Keynote
+file in-place. It can also be passed to `keynote-parser pack` to pack a directory
+into a Keynote file, replacing text along the way.
+
+
 ## Updates
 
 As `keynote-parser` includes private Protobuf definitions extracted from a copy of Keynote,
