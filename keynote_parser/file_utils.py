@@ -3,6 +3,9 @@ from __future__ import absolute_import
 import os
 import yaml
 
+from PIL import Image
+from io import BytesIO
+
 from glob import glob
 from tqdm import tqdm
 from zipfile import ZipFile
@@ -100,6 +103,27 @@ def replace(filepath, output_path, replacements=[]):
                             on_replace=on_replace)
                     files_to_write[zipinfo.filename] = \
                         IWAFile.from_dict(data).to_buffer()
+                    continue
+            if zipinfo.filename.startswith("Data/"):
+                file_has_changed = False
+                for replacement in replacements:
+                    repl_filepart, repl_ext = replacement.find.split(".")
+                    data_filename = zipinfo.filename.replace("Data/", "")
+                    if data_filename.startswith(repl_filepart):
+                        # Scale this file to the appropriate size
+                        with zipfile.open(zipinfo, 'r') as f:
+                            image = Image.open(f)
+                        with open(replacement.replace, 'rb') as f:
+                            read_image = Image.open(f)
+                            with BytesIO() as output:
+                                read_image \
+                                    .thumbnail(image.size, Image.ANTIALIAS)
+                                read_image.save(output, image.format)
+                                files_to_write[zipinfo.filename] = \
+                                    output.getvalue()
+                        file_has_changed = True
+                        break
+                if file_has_changed:
                     continue
             with zipfile.open(zipinfo, 'r') as f:
                 files_to_write[zipinfo.filename] = f.read()
