@@ -73,7 +73,8 @@ class IWACompressedChunk(object):
                     "IWA chunk does not start with 0x00! (found %x)" %
                     first_byte)
 
-            length = struct.unpack_from('<I', bytes(header[1:]) + bytes([0]))[0]
+            unpacked = struct.unpack_from('<I', bytes(header[1:]) + b'\x00')
+            length = unpacked[0]
             chunk = data[4:4 + length]
             data = data[4 + length:]
 

@@ -44,7 +44,7 @@ def unpack(filepath, target_dir=None, replacements=[]):
                     except Exception as e:
                         print("Failed to unpack %s" % zipinfo.filename)
                         print(e)
-                with open(target_path, 'w') as out:
+                with open(target_path, 'wb') as out:
                     out.write(file_contents)
 
 
