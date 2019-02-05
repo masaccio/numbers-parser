@@ -1,6 +1,6 @@
 # keynote-parser
 
-<img src="https://travis-ci.com/psobot/keynote-parser.svg?branch=master" alt="build:">
+<a href="https://travis-ci.org/psobot/keynote-parser"><img src="https://travis-ci.com/psobot/keynote-parser.svg?branch=master" alt="build:" /></a>
 
 `keynote-parser` is a Python module for unpacking and re-packing
 [Apple Keynote](https://www.apple.com/keynote/) `.key` files. It supports Keynote
@@ -67,6 +67,17 @@ This argument can be passed to `keynote-parser replace` to replace text in a Key
 file in-place. It can also be passed to `keynote-parser pack` to pack a directory
 into a Keynote file, replacing text along the way.
 
+#### Replacing Images
+
+The `replacements` json format can also be used to replace images in a Keynote file.
+To do so:
+
+* Use the `keynote-parser ls` command to determine the name of the image to replace.
+* Set the `find` pattern to the image's name, with the `-\d\d\d` suffix removed.
+* Set the `replace` field to the local path to the replacement image.
+
+`keynote-parser` will automatically rescale the replacement image to fit all of the
+sizes of the target image.
 
 ## Updates
 
