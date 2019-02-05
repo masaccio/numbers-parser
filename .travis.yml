@@ -18,4 +18,4 @@ before_script:
   - export PYTHONPATH=$PYTHONPATH:$(pwd)
 script:
   - make
-  - pytest
+  - pytest --cov=keynote_parser

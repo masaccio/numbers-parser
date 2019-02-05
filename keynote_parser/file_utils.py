@@ -48,6 +48,7 @@ def zip_file_reader(path, progress=True):
 
 def directory_reader(path, progress=True):
     iterator = glob(path + '/**/**') + glob(path + '/**')
+    iterator = sorted(iterator)
     if progress:
         iterator = tqdm(iterator)
     for filename in iterator:
@@ -138,6 +139,66 @@ def zip_file_sink(output_path):
                 zipfile.writestr(filename, contents)
 
 
+def process_file(
+    filename,
+    handle,
+    sink,
+    replacements=[],
+    raw=False,
+    on_replace=None
+):
+    contents = None
+    if '.iwa' in filename and not raw:
+        contents = handle.read()
+        if filename.endswith('.yaml'):
+            file = IWAFile.from_dict(yaml.load(contents))
+            filename = filename.replace('.yaml', '')
+        else:
+            file = IWAFile.from_buffer(contents)
+
+        file_has_changed = False
+        for replacement in replacements:
+            # Replacing in a file is expensive, so let's
+            # avoid doing so if possible.
+            if replacement.should_replace(file):
+                file_has_changed = True
+                break
+
+        if file_has_changed:
+            data = file.to_dict()
+            for replacement in replacements:
+                data = replacement.perform_on(
+                    data,
+                    on_replace=on_replace)
+            sink(filename, IWAFile.from_dict(data))
+        else:
+            sink(filename, file)
+        return
+
+    if filename.startswith("Data/"):
+        file_has_changed = False
+        for replacement in replacements:
+            repl_filepart, repl_ext = replacement.find.split(".")
+            data_filename = filename.replace("Data/", "")
+            if data_filename.startswith(repl_filepart):
+                # Scale this file to the appropriate size
+                image = Image.open(handle)
+                with open(replacement.replace, 'rb') as f:
+                    read_image = Image.open(f)
+                    with BytesIO() as output:
+                        read_image.thumbnail(
+                            image.size,
+                            Image.ANTIALIAS)
+                        read_image.save(output, image.format)
+                        sink(filename, output.getvalue())
+                file_has_changed = True
+                break
+
+        if file_has_changed:
+            return
+    sink(filename, contents or handle.read())
+
+
 def process(input_path, output_path, replacements=[], subfile=None, raw=False):
     completed_replacements = []
 
@@ -148,55 +209,6 @@ def process(input_path, output_path, replacements=[], subfile=None, raw=False):
         if not sink.uses_stdout:
             print("Reading from %s..." % input_path)
         for filename, handle in file_reader(input_path, not sink.uses_stdout):
-            contents = None
-            if '.iwa' in filename and not raw:
-                contents = handle.read()
-                if filename.endswith('.yaml'):
-                    file = IWAFile.from_dict(yaml.load(contents))
-                    filename = filename.replace('.yaml', '')
-                else:
-                    file = IWAFile.from_buffer(contents)
-
-                file_has_changed = False
-                for replacement in replacements:
-                    # Replacing in a file is expensive, so let's
-                    # avoid doing so if possible.
-                    if replacement.should_replace(file):
-                        file_has_changed = True
-                        break
-
-                if file_has_changed:
-                    data = file.to_dict()
-                    for replacement in replacements:
-                        data = replacement.perform_on(
-                            data,
-                            on_replace=on_replace)
-                    sink(filename, IWAFile.from_dict(data))
-                else:
-                    sink(filename, file)
-                continue
-
-            if filename.startswith("Data/"):
-                file_has_changed = False
-                for replacement in replacements:
-                    repl_filepart, repl_ext = replacement.find.split(".")
-                    data_filename = filename.replace("Data/", "")
-                    if data_filename.startswith(repl_filepart):
-                        # Scale this file to the appropriate size
-                        image = Image.open(handle)
-                        with open(replacement.replace, 'rb') as f:
-                            read_image = Image.open(f)
-                            with BytesIO() as output:
-                                read_image.thumbnail(
-                                    image.size,
-                                    Image.ANTIALIAS)
-                                read_image.save(output, image.format)
-                                sink(filename, output.getvalue())
-                        file_has_changed = True
-                        break
-
-                if file_has_changed:
-                    continue
-            sink(filename, contents or handle.read())
+            process_file(filename, handle, sink, replacements, raw, on_replace)
 
     return completed_replacements

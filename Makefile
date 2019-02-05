@@ -28,5 +28,5 @@ clean:
 	rm -rf dist
 
 test: all
-	python -m pytest .
-	python3 -m pytest .
+	python -m pytest . --cov=keynote_parser -W ignore::DeprecationWarning
+	python3 -m pytest . --cov=keynote_parser -W ignore::DeprecationWarning
