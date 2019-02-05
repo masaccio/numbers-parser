@@ -1,7 +1,10 @@
 from __future__ import print_function
 from __future__ import absolute_import
+
 import os
+import sys
 import yaml
+from contextlib import contextmanager
 
 from PIL import Image
 from io import BytesIO
@@ -22,72 +25,138 @@ def ensure_directory_exists(prefix, path):
         pass
 
 
-def unpack(filepath, target_dir=None, replacements=[]):
-    """Unpack a .key file into a directory, writing iwa files as yaml files."""
-    if not target_dir:
-        target_dir = filepath.replace('.key', '')
-    with ZipFile(filepath, 'r') as zipfile:
-        for zipinfo in tqdm(zipfile.filelist):
-            if zipinfo.filename.endswith('/'):
-                continue
-            with zipfile.open(zipinfo) as f:
-                file_contents = f.read()
-                ensure_directory_exists(target_dir, zipinfo.filename)
-                target_path = os.path.join(target_dir, zipinfo.filename)
-                if zipinfo.filename.endswith('iwa'):
-                    try:
-                        data = IWAFile.from_buffer(file_contents).to_dict()
-                        for replacement in replacements:
-                            data = replacement.perform_on(data)
-                        content = yaml.safe_dump(
-                            data, default_flow_style=False)
-                        with open(target_path + '.yaml', 'w') as out:
-                            out.write(content)
-                        continue
-                    except Exception as e:
-                        print("Failed to unpack %s" % zipinfo.filename)
-                        print(e)
-                with open(target_path, 'wb') as out:
-                    out.write(file_contents)
+def file_reader(path, progress=True):
+    if path.endswith('.key'):
+        return zip_file_reader(path, progress)
+    else:
+        return directory_reader(path, progress)
 
 
-def ls(filepath):
-    with ZipFile(filepath, 'r') as zipfile:
-        for zipinfo in sorted(zipfile.filelist, key=lambda x: x.filename):
-            if zipinfo.filename.endswith('/'):
-                continue
-            print(zipinfo.filename)
+def zip_file_reader(path, progress=True):
+    zipfile = ZipFile(path, 'r')
+    iterator = sorted(zipfile.filelist, key=lambda x: x.filename)
+    if progress:
+        iterator = tqdm(iterator)
+    for zipinfo in iterator:
+        if zipinfo.filename.endswith('/'):
+            continue
+        if progress:
+            iterator.set_description("Reading {}...".format(zipinfo.filename))
+        with zipfile.open(zipinfo) as handle:
+            yield (zipinfo.filename, handle)
 
 
-def cat(filepath, filename, replacements=[], raw=False):
-    with ZipFile(filepath, 'r') as zipfile:
-        with zipfile.open(filename) as f:
-            file_contents = f.read()
-            if filename.endswith('iwa') and not raw:
-                data = IWAFile.from_buffer(file_contents).to_dict()
-                for replacement in replacements:
-                    data = replacement.perform_on(data)
-                content = yaml.safe_dump(
-                    data, default_flow_style=False)
-                print(content)
+def directory_reader(path, progress=True):
+    iterator = glob(path + '/**/**') + glob(path + '/**')
+    if progress:
+        iterator = tqdm(iterator)
+    for filename in iterator:
+        if os.path.isdir(filename):
+            continue
+        rel_filename = filename.replace(path + '/', '')
+        if progress:
+            iterator.set_description("Reading {}...".format(rel_filename))
+        with open(filename) as handle:
+            yield (rel_filename, handle)
+
+
+def file_sink(path, raw=False, subfile=None):
+    if path == "-":
+        if subfile:
+            return cat_sink(subfile, raw)
+        else:
+            return ls_sink()
+    if path.endswith('.key'):
+        return zip_file_sink(path)
+    return dir_file_sink(path, raw=raw)
+
+
+@contextmanager
+def dir_file_sink(target_dir, raw=False):
+    def accept(filename, contents):
+        ensure_directory_exists(target_dir, filename)
+        target_path = os.path.join(target_dir, filename)
+        if isinstance(contents, IWAFile) and not raw:
+            target_path += ".yaml"
+        with open(target_path, 'wb') as out:
+            if isinstance(contents, IWAFile):
+                if raw:
+                    out.write(contents.to_buffer())
+                else:
+                    yaml.safe_dump(
+                        contents.to_dict(),
+                        out,
+                        default_flow_style=False)
             else:
-                print(file_contents)
+                out.write(contents)
+    accept.uses_stdout = False
+    yield accept
 
 
-def replace(filepath, output_path, replacements=[]):
+@contextmanager
+def ls_sink():
+    def accept(filename, contents):
+        print(filename)
+    accept.uses_stdout = True
+    yield accept
+
+
+@contextmanager
+def cat_sink(subfile, raw):
+    def accept(filename, contents):
+        if filename == subfile:
+            if isinstance(contents, IWAFile):
+                if raw:
+                    sys.stdout.buffer.write(contents.to_buffer())
+                else:
+                    print(yaml.safe_dump(
+                        contents.to_dict(),
+                        default_flow_style=False))
+            else:
+                sys.stdout.buffer.write(contents)
+    accept.uses_stdout = True
+    yield accept
+
+
+@contextmanager
+def zip_file_sink(output_path):
     files_to_write = {}
+
+    def accept(filename, contents):
+        files_to_write[filename] = contents
+    accept.uses_stdout = False
+
+    yield accept
+
+    print("Writing to %s..." % output_path)
+    with ZipFile(output_path, 'w') as zipfile:
+        for filename, contents in tqdm(iter(list(files_to_write.items())),
+                                       total=len(files_to_write)):
+            if isinstance(contents, IWAFile):
+                zipfile.writestr(filename, contents.to_buffer())
+            else:
+                zipfile.writestr(filename, contents)
+
+
+def process(input_path, output_path, replacements=[], subfile=None, raw=False):
     completed_replacements = []
 
     def on_replace(replacement, old, new):
         completed_replacements.append((old, new))
 
-    print("Reading from %s..." % filepath)
-    with ZipFile(filepath, 'r') as zipfile:
-        for zipinfo in tqdm(zipfile.filelist, desc='Finding...'):
-            if zipinfo.filename.endswith('iwa'):
-                with zipfile.open(zipinfo, 'r') as f:
-                    file_contents = f.read()
-                file = IWAFile.from_buffer(file_contents)
+    with file_sink(output_path, subfile=subfile) as sink:
+        if not sink.uses_stdout:
+            print("Reading from %s..." % input_path)
+        for filename, handle in file_reader(input_path, not sink.uses_stdout):
+            contents = None
+            if '.iwa' in filename and not raw:
+                contents = handle.read()
+                if filename.endswith('.yaml'):
+                    file = IWAFile.from_dict(yaml.load(contents))
+                    filename = filename.replace('.yaml', '')
+                else:
+                    file = IWAFile.from_buffer(contents)
+
                 file_has_changed = False
                 for replacement in replacements:
                     # Replacing in a file is expensive, so let's
@@ -95,71 +164,39 @@ def replace(filepath, output_path, replacements=[]):
                     if replacement.should_replace(file):
                         file_has_changed = True
                         break
+
                 if file_has_changed:
                     data = file.to_dict()
                     for replacement in replacements:
                         data = replacement.perform_on(
                             data,
                             on_replace=on_replace)
-                    files_to_write[zipinfo.filename] = \
-                        IWAFile.from_dict(data).to_buffer()
-                    continue
-            if zipinfo.filename.startswith("Data/"):
+                    sink(filename, IWAFile.from_dict(data))
+                else:
+                    sink(filename, file)
+                continue
+
+            if filename.startswith("Data/"):
                 file_has_changed = False
                 for replacement in replacements:
                     repl_filepart, repl_ext = replacement.find.split(".")
-                    data_filename = zipinfo.filename.replace("Data/", "")
+                    data_filename = filename.replace("Data/", "")
                     if data_filename.startswith(repl_filepart):
                         # Scale this file to the appropriate size
-                        with zipfile.open(zipinfo, 'r') as f:
-                            image = Image.open(f)
+                        image = Image.open(handle)
                         with open(replacement.replace, 'rb') as f:
                             read_image = Image.open(f)
                             with BytesIO() as output:
-                                read_image \
-                                    .thumbnail(image.size, Image.ANTIALIAS)
+                                read_image.thumbnail(
+                                    image.size,
+                                    Image.ANTIALIAS)
                                 read_image.save(output, image.format)
-                                files_to_write[zipinfo.filename] = \
-                                    output.getvalue()
+                                sink(filename, output.getvalue())
                         file_has_changed = True
                         break
+
                 if file_has_changed:
                     continue
-            with zipfile.open(zipinfo, 'r') as f:
-                files_to_write[zipinfo.filename] = f.read()
-    print("Writing to %s..." % output_path)
-    with ZipFile(output_path, 'w') as zipfile:
-        for filename, contents in tqdm(iter(list(files_to_write.items())),
-                                       total=len(files_to_write),
-                                       desc='Replacing...'):
-            zipfile.writestr(filename, contents)
+            sink(filename, contents or handle.read())
 
     return completed_replacements
-
-
-def pack(filepath, target_file=None, replacements=[]):
-    """Pack a directory into a .key file, writing yaml files as iwa files."""
-    if target_file is None:
-        target_file = filepath + '.out.key'
-    with ZipFile(target_file, 'w') as zipfile:
-        all_files = glob(filepath + '/**/**') + glob(filepath + '/**')
-        for filename in tqdm(all_files):
-            if os.path.isdir(filename):
-                continue
-            with open(filename) as f:
-                file_contents = f.read()
-                zip_filename = filename.replace(filepath + '/', '')
-                if zip_filename.endswith('.yaml'):
-                    try:
-                        data = yaml.load(file_contents)
-                        for replacement in replacements:
-                            data = replacement.perform_on(data)
-                        data = IWAFile.from_dict(data).to_buffer()
-                        zipfile.writestr(
-                            zip_filename.replace('.yaml', ''),
-                            data)
-                        continue
-                    except Exception:
-                        print("Failed to pack %s" % filename)
-                        raise
-                zipfile.writestr(zip_filename, file_contents)

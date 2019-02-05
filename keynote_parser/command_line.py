@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import argparse
 
 from collections import Counter
-from .file_utils import pack, unpack, ls, cat, replace
+from .file_utils import process
 from .replacement import Replacement, parse_json
 
 
@@ -15,34 +15,35 @@ def parse_replacements(**kwargs):
         return []
 
 
-def unpack_command(path, output=None, **kwargs):
-    unpack(
-        path,
-        target_dir=output,
+def unpack_command(input, output=None, **kwargs):
+    process(
+        input,
+        output or input.replace('.key', ''),
         replacements=parse_replacements(**kwargs))
 
 
-def pack_command(path, output=None, **kwargs):
-    pack(
-        path,
-        target_file=output,
+def pack_command(input, output=None, **kwargs):
+    process(
+        input,
+        output or (input + ".key"),
         replacements=parse_replacements(**kwargs))
 
 
-def ls_command(path, **kwargs):
-    ls(path)
+def ls_command(input, **kwargs):
+    process(input, '-')
 
 
-def cat_command(path, filename, **kwargs):
-    cat(
-        path,
-        filename,
+def cat_command(input, filename, **kwargs):
+    process(
+        input,
+        '-',
+        subfile=filename,
         replacements=parse_replacements(**kwargs),
         raw=kwargs.get('raw'))
 
 
-def replace_command(path, **kwargs):
-    output = kwargs.get('output', None) or path
+def replace_command(input, **kwargs):
+    output = kwargs.get('output', None) or input
     replacements = parse_replacements(**kwargs)
     find, _replace = kwargs.get('find'), kwargs.get('replace')
     if find and _replace:
@@ -52,7 +53,7 @@ def replace_command(path, **kwargs):
         return
     print(replacements)
     for ((old, new), count) in list(Counter(
-            replace(path, output, replacements)).items()):
+            process(input, output, replacements)).items()):
         if count == 1:
             print("Replaced %s with %s." % (repr(old), repr(new)))
         else:
@@ -72,7 +73,7 @@ def main():
     subparsers = parser.add_subparsers()
 
     parser_unpack = subparsers.add_parser('unpack')
-    parser_unpack.add_argument("path", help="a .key file")
+    parser_unpack.add_argument("input", help="a .key file")
     parser_unpack.add_argument(
         "--output",
         help="a directory name to unpack into")
@@ -81,7 +82,7 @@ def main():
 
     parser_pack = subparsers.add_parser('pack')
     parser_pack.add_argument(
-        "path",
+        "input",
         help="a directory of an unpacked .key file")
     parser_pack.add_argument(
         "--output",
@@ -90,11 +91,11 @@ def main():
     parser_pack.set_defaults(func=pack_command)
 
     parser_ls = subparsers.add_parser('ls')
-    parser_ls.add_argument("path", help="a .key file")
+    parser_ls.add_argument("input", help="a .key file")
     parser_ls.set_defaults(func=ls_command)
 
     parser_cat = subparsers.add_parser('cat')
-    parser_cat.add_argument("path", help="a .key file")
+    parser_cat.add_argument("input", help="a .key file")
     parser_cat.add_argument(
         "filename",
         help="a file within that .key file to cat, decoding .iwa to .yaml")
@@ -106,7 +107,7 @@ def main():
     parser_cat.set_defaults(func=cat_command)
 
     parser_replace = subparsers.add_parser('replace')
-    parser_replace.add_argument("path", help="a .key file")
+    parser_replace.add_argument("input", help="a .key file")
     parser_replace.add_argument("--output", help="a .key file to output to")
     parser_replace.add_argument(
         "--find",
