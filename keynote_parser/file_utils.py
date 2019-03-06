@@ -178,7 +178,10 @@ def process_file(
     if filename.startswith("Data/"):
         file_has_changed = False
         for replacement in replacements:
-            repl_filepart, repl_ext = replacement.find.split(".")
+            find_parts = replacement.find.split(".")
+            if len(find_parts) != 2:
+                continue
+            repl_filepart, repl_ext = find_parts
             data_filename = filename.replace("Data/", "")
             if data_filename.startswith(repl_filepart):
                 # Scale this file to the appropriate size
