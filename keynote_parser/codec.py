@@ -13,8 +13,7 @@ from .mapping import NAME_CLASS_MAP, ID_NAME_MAP
 
 from google.protobuf.internal.encoder import _VarintBytes
 from google.protobuf.internal.decoder import _DecodeVarint32
-from google.protobuf.json_format import MessageToDict
-from .protobuf_patch import ParseDict
+from google.protobuf.json_format import MessageToDict, ParseDict
 
 from .generated.TSPArchiveMessages_pb2 import ArchiveInfo
 
