@@ -87,7 +87,8 @@ def dir_file_sink(target_dir, raw=False):
                     yaml.safe_dump(
                         contents.to_dict(),
                         out,
-                        default_flow_style=False)
+                        default_flow_style=False,
+                        encoding="utf-8")
             else:
                 out.write(contents)
     accept.uses_stdout = False
@@ -112,7 +113,8 @@ def cat_sink(subfile, raw):
                 else:
                     print(yaml.safe_dump(
                         contents.to_dict(),
-                        default_flow_style=False))
+                        default_flow_style=False,
+                        encoding="utf-8"))
             else:
                 sys.stdout.buffer.write(contents)
     accept.uses_stdout = True
