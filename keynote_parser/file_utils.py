@@ -57,7 +57,7 @@ def directory_reader(path, progress=True):
         rel_filename = filename.replace(path + '/', '')
         if progress:
             iterator.set_description("Reading {}...".format(rel_filename))
-        with open(filename) as handle:
+        with open(filename, 'rb') as handle:
             yield (rel_filename, handle)
 
 
@@ -214,6 +214,16 @@ def process(input_path, output_path, replacements=[], subfile=None, raw=False):
         if not sink.uses_stdout:
             print("Reading from %s..." % input_path)
         for filename, handle in file_reader(input_path, not sink.uses_stdout):
-            process_file(filename, handle, sink, replacements, raw, on_replace)
+            try:
+                process_file(
+                    filename,
+                    handle,
+                    sink,
+                    replacements,
+                    raw,
+                    on_replace)
+            except Exception as e:
+                raise ValueError(
+                    "Failed to process file %s due to: %s" % (filename, e))
 
     return completed_replacements
