@@ -14,6 +14,7 @@ from tqdm import tqdm
 from zipfile import ZipFile
 
 from .codec import IWAFile
+from .unicode_utils import fix_unicode
 
 
 def ensure_directory_exists(prefix, path):
@@ -109,14 +110,14 @@ def cat_sink(subfile, raw):
         if filename == subfile:
             if isinstance(contents, IWAFile):
                 if raw:
-                    sys.stdout.buffer.write(contents.to_buffer())
+                    sys.stdout.write(contents.to_buffer())
                 else:
                     print(yaml.safe_dump(
                         contents.to_dict(),
                         default_flow_style=False,
                         encoding="utf-8"))
             else:
-                sys.stdout.buffer.write(contents)
+                sys.stdout.write(contents)
     accept.uses_stdout = True
     yield accept
 
@@ -153,7 +154,8 @@ def process_file(
     if '.iwa' in filename and not raw:
         contents = handle.read()
         if filename.endswith('.yaml'):
-            file = IWAFile.from_dict(yaml.load(contents))
+            file = IWAFile.from_dict(
+                yaml.load(fix_unicode(contents.decode('utf-8'))))
             filename = filename.replace('.yaml', '')
         else:
             file = IWAFile.from_buffer(contents)
