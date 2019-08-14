@@ -54,7 +54,16 @@ class Replacement(object):
         the text box 2^16 points tall, eventually forcing it to crash.
         """
         text = _dict['text'][0]
-        new_offsets = [0] + [i + 1 for i, c in enumerate(text) if c == '\n']
+
+        new_offsets = [0]
+
+        surrogate_pair_correction = 0
+        for i, c in enumerate(text):
+            if c == '\n':
+                new_offsets.append(i + 1 + surrogate_pair_correction)
+            if ord(c) > 0x10000:
+                surrogate_pair_correction += 1
+
         entries = _dict['tableParaStyle']['entries']
         if len(entries) != len(new_offsets):
             raise NotImplementedError(

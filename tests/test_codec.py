@@ -5,6 +5,7 @@ from keynote_parser.unicode_utils import fix_unicode
 
 SIMPLE_FILENAME = './tests/data/simple-oneslide.iwa'
 MULTILINE_FILENAME = './tests/data/multiline-oneslide.iwa'
+MULTILINE_SURROGATE_FILENAME = './tests/data/multiline-surrogate.iwa'
 MULTICHUNK_FILENAME = './tests/data/multi-chunk.iwa'
 EMOJI_FILENAME = './tests/data/emoji-oneslide.iwa'
 EMOJI_FILENAME_PY2_YAML = './tests/data/emoji-oneslide.py2.yaml'
@@ -25,6 +26,10 @@ def test_iwa_simple_roundtrip():
 
 def test_iwa_multiline_roundtrip():
     roundtrip(MULTILINE_FILENAME)
+
+
+def test_iwa_multiline_surrogate_roundtrip():
+    roundtrip(MULTILINE_SURROGATE_FILENAME)
 
 
 def test_iwa_emoji_roundtrip():
