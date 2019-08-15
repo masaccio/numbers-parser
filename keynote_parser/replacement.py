@@ -61,7 +61,7 @@ class Replacement(object):
         for i, c in enumerate(text):
             if c == '\n':
                 new_offsets.append(i + 1 + surrogate_pair_correction)
-            if ord(c) > 0x10000:
+            if ord(c) > 0xFFFF:
                 surrogate_pair_correction += 1
 
         entries = _dict['tableParaStyle']['entries']
