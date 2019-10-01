@@ -192,7 +192,10 @@ def header_to_dict(message):
 def dict_to_message(_dict):
     _type = _dict['_pbtype']
     del _dict['_pbtype']
-    return ParseDict(_dict, NAME_CLASS_MAP[_type]())
+    return ParseDict(
+        _dict,
+        NAME_CLASS_MAP[_type](),
+        ignore_unknown_fields=True)
 
 
 def dict_to_header(_dict):

@@ -119,7 +119,10 @@ def main():
     parser_replace.set_defaults(func=replace_command)
 
     args = parser.parse_args()
-    args.func(**vars(args))
+    if hasattr(args, 'func'):
+        args.func(**vars(args))
+    else:
+        parser.print_help()
 
 
 if __name__ == "__main__":

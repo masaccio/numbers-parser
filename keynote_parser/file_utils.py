@@ -110,14 +110,14 @@ def cat_sink(subfile, raw):
         if filename == subfile:
             if isinstance(contents, IWAFile):
                 if raw:
-                    sys.stdout.write(contents.to_buffer())
+                    sys.stdout.buffer.write(contents.to_buffer())
                 else:
                     print(yaml.safe_dump(
                         contents.to_dict(),
                         default_flow_style=False,
-                        encoding="utf-8"))
+                        encoding="utf-8").decode('ascii'))
             else:
-                sys.stdout.write(contents)
+                sys.stdout.buffer.write(contents)
     accept.uses_stdout = True
     yield accept
 
