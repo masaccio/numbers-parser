@@ -141,6 +141,7 @@ message TileRowInfo {
   optional uint32 storage_version = 5;
   optional bytes cell_storage_buffer = 6;
   optional bytes cell_offsets = 7;
+  optional bool has_wide_offsets = 8;
 }
 
 message Tile {
@@ -151,6 +152,7 @@ message Tile {
   repeated .TST.TileRowInfo rowInfos = 5;
   optional uint32 storage_version = 6;
   optional bool last_saved_in_BNC = 7;
+  optional bool should_use_wide_rows = 8;
 }
 
 message TileStorage {
@@ -159,6 +161,8 @@ message TileStorage {
     required .TSP.Reference tile = 2;
   }
   repeated .TST.TileStorage.Tile tiles = 1;
+  optional uint32 tile_size = 2;
+  optional bool should_use_wide_rows = 3;
 }
 
 message PopUpMenuModel {
@@ -218,6 +222,8 @@ message ImportWarningSetArchive {
   optional bool error_cell_with_no_formula = 13 [default = false];
   optional bool unsupported_cond_format = 14 [default = false];
   optional string original_data_format = 15;
+  optional bool formula_warning_filtered_column_formula_not_copied = 16 [default = false];
+  optional bool duration_format_range_changed = 17 [default = false];
 }
 
 message CellRefImportWarningSetPairArchive {
@@ -259,6 +265,13 @@ message TableDataList {
   }
   required .TST.TableDataList.ListType listType = 1;
   required uint32 nextListID = 2;
+  repeated .TST.TableDataList.ListEntry entries = 3;
+  repeated .TSP.Reference segments = 4;
+}
+
+message TableDataListSegment {
+  required .TST.TableDataList.ListType list_type = 1;
+  required .TSP.Range key_range = 2;
   repeated .TST.TableDataList.ListEntry entries = 3;
 }
 
@@ -322,7 +335,10 @@ message TableInfoArchive {
   optional .TSP.Reference view_column_row_uids = 6;
   optional .TSP.UUID group_by_uuid = 7;
   optional .TSP.UUID hidden_states_uuid = 8;
-  optional uint32 formula_coord_space = 9;
+  optional uint32 formula_coord_space_in_pre40 = 9 [deprecated = true];
+  optional uint32 formula_coord_space = 10;
+  optional .TSCE.CoordMapperArchive pasteboard_coord_mapper = 13;
+  optional .TST.MasterLayoutArchive master_layout = 14;
 }
 
 message CategoryInfoArchive {
@@ -503,6 +519,8 @@ message TableModelArchive {
   optional .TST.HiddenStatesOwnerArchive hidden_states_owner = 70;
   optional .TST.CategoryOwnerArchive category_owner = 81;
   optional .TST.PencilAnnotationOwnerArchive pencil_annotation_owner = 82;
+  optional string from_group_by_uid = 83;
+  optional .TSCE.HauntedOwnerArchive haunted_owner = 84;
 }
 
 message SummaryModelArchive {
@@ -599,6 +617,8 @@ message Cell {
   optional uint32 cell_format_kind = 29;
   optional .TSK.FormatStructArchive text_format = 30;
   optional .TSK.FormatStructArchive boolean_format = 31;
+  optional uint64 decimal_value_low = 32;
+  optional uint64 decimal_value_high = 33;
 }
 
 message MergeRegionMapArchive {
@@ -622,6 +642,24 @@ message CellListArchive {
     optional .TST.Cell cell = 1;
   }
   repeated .TST.CellListArchive.OptionalCell cells = 1;
+  optional uint32 trailing_empty_cell_count = 2;
+}
+
+message ConcurrentCellMapArchive {
+  repeated .TSP.Reference cell_lists = 1;
+  required bool uid_based = 2;
+  repeated .TST.MergeOperationArchive merge_actions = 3;
+  optional bool may_modify_formulas_in_cells = 4 [default = true];
+  optional bool may_modify_values_referenced_by_formulas = 5 [default = true];
+}
+
+message ConcurrentCellListArchive {
+  message OptionalCell {
+    optional .TST.Cell cell = 1;
+  }
+  repeated .TST.ConcurrentCellListArchive.OptionalCell cells = 1;
+  optional .TSP.UUIDRectArchive cell_uid_range = 2;
+  optional .TST.CellRange cell_range = 3;
 }
 
 message CellFormatAndValueArchive {
@@ -643,6 +681,8 @@ message CellFormatAndValueArchive {
   optional .TSP.Reference formatted_rich_text_value = 17;
   required bool apply_spare_format_only = 18;
   required bool spare_format_type = 19;
+  optional uint64 decimal_low = 20;
+  optional uint64 decimal_high = 21;
 }
 
 message CellSpecArchive {
@@ -665,11 +705,20 @@ message CellDiffArchive {
   required .TSS.CommandPropertyMapArchive property_map_to_reset = 2;
 }
 
+message CellDiffArray {
+  optional .TSP.LargeArray large_array = 1;
+}
+
+message CellDiffArraySegment {
+  optional .TSP.LargeArraySegment large_array_segment = 1;
+  repeated .TST.CellDiffArchive elements = 2;
+}
+
 message CellDiffMapArchive {
   required bool uid_based = 1;
-  repeated .TSCE.CellCoordinateArchive expanded_cell_ids = 5;
-  required .TST.CellUIDListArchive cell_uids = 2;
-  repeated .TSP.Reference cell_diffs = 4;
+  repeated .TSCE.CellCoordinateArchive expanded_cell_ids = 2;
+  required .TST.CellUIDListArchive cell_uids = 3;
+  optional .TSP.Reference cell_diff_array = 4;
 }
 
 message DoubleStyleMapArchive {
@@ -905,7 +954,9 @@ message BooleanNodeArchive {
 
 message NumberNodeArchive {
   required .TST.ExpressionNodeArchive super = 1;
-  required double number = 2;
+  optional double number = 2;
+  optional uint64 decimal_low = 3;
+  optional uint64 decimal_high = 4;
 }
 
 message StringNodeArchive {
@@ -1249,6 +1300,47 @@ message SummaryCellVendorArchive {
 message CategoryOrderArchive {
   required .TSP.Reference table_info = 1;
   required .TSP.Reference uid_map = 2;
+}
+
+message HeaderNameMgrTileArchive {
+  message NameFragmentArchive {
+    required string name_fragment = 1;
+    required .TSCE.CellCoordinateArchive name_precedent = 2;
+    optional .TSCE.UidCellRefSetArchive uses_of_name_fragment = 3;
+  }
+  required string first_fragment = 1;
+  required string last_fragment = 2;
+  repeated .TST.HeaderNameMgrTileArchive.NameFragmentArchive name_frag_entries = 3;
+}
+
+message HeaderNameMgrArchive {
+  message PerTableArchive {
+    required .TSP.UUID table_uid = 1;
+    required .TSCE.CellCoordinateArchive per_table_precedent = 2;
+    optional bool is_deleted = 3;
+    repeated .TSP.UUID header_row_uids = 5;
+    repeated .TSP.UUID header_column_uids = 6;
+    repeated .TSP.UUID update_header_row_uids = 7;
+    repeated .TSP.UUID update_header_column_uids = 8;
+  }
+  required .TSP.UUID owner_uid = 1;
+  optional .TSP.UUID nrm_owner_uid = 2;
+  repeated .TST.HeaderNameMgrArchive.PerTableArchive per_tables = 3;
+  repeated .TSP.Reference name_frag_tiles = 4;
+}
+
+message WidthHeightCacheFittingEntry {
+  optional uint32 fitting_index = 1;
+  optional float fitting_size = 2;
+}
+
+message WidthHeightCache {
+  repeated .TST.WidthHeightCacheFittingEntry rows_fitting_entries = 1;
+  optional uint32 columns_count = 3;
+}
+
+message MasterLayoutArchive {
+  optional .TST.WidthHeightCache width_height_cache = 1;
 }
 
 extend .TSS.CommandPropertyEntryArchive {

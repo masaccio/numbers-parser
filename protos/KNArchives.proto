@@ -168,6 +168,7 @@ message BuildAttributesArchive {
   optional bool custom_shine = 33;
   optional double custom_scale_amount = 34;
   optional double custom_travel_distance = 35;
+  optional bool custom_cursor = 36;
   optional string database_animationType = 1 [deprecated = true];
   optional string database_effect = 2 [deprecated = true];
   optional uint32 database_direction = 3 [deprecated = true];
@@ -217,6 +218,13 @@ message SlideArchive {
     required string tag = 1;
     required .TSP.Reference info = 2;
   }
+  message InstructionalTextMap {
+    message InstructionalTextMapEntry {
+      optional .TSP.Reference info = 1;
+      required string instructional_text = 2;
+    }
+    repeated .KN.SlideArchive.InstructionalTextMap.InstructionalTextMapEntry instructional_text_for_infos = 1;
+  }
   required .TSP.Reference style = 1;
   repeated .TSP.Reference builds = 2;
   repeated .KN.BuildChunkArchive buildChunkArchives = 3 [deprecated = true];
@@ -229,6 +237,7 @@ message SlideArchive {
   repeated .TSP.Reference owned_drawables = 7;
   repeated .TSP.Reference drawables_z_order = 42;
   repeated .KN.SlideArchive.SageTagMapEntry sage_tag_to_info_map = 28;
+  optional .KN.SlideArchive.InstructionalTextMap instructional_text_map = 45;
   optional string name = 10;
   optional .TSD.GeometryArchive titlePlaceholderGeometry = 11;
   optional uint32 titlePlaceholderShapeStyleIndex = 12;
@@ -289,6 +298,7 @@ message SlideNodeArchive {
   optional uint32 has_explicit_builds_cache_version = 27;
   optional bool has_explicit_builds_is_up_to_date = 23 [deprecated = true];
   repeated .KN.SlideNodeArchive.SlideSpecificHyperlinkMapEntry slideSpecificHyperlinkMap = 24;
+  optional bool has_background_alpha = 28;
   optional .TSP.Reference database_thumbnail = 3 [deprecated = true];
   repeated .TSP.Reference database_thumbnails = 9 [deprecated = true];
 }
@@ -334,6 +344,7 @@ message UIStateArchive {
   optional bool show_slide_guides = 16;
   optional bool show_master_guides = 17;
   optional bool shows_comments = 18;
+  optional bool comments_printing_toggle_enabled = 39;
   repeated .TSP.Reference collapsed_slide_nodes = 19;
   repeated .TSP.Reference outline_collapsed_slide_nodes = 28;
   repeated .TSP.Reference outline_has_body_slide_nodes = 30;
@@ -352,6 +363,30 @@ message UIStateArchive {
   optional float mobile_light_table_zoom_scale = 35;
   optional bool mobile_light_table_hides_skipped_slides = 36;
   optional .TSP.Reference freehand_drawing_toolkit_state = 37;
+  optional .TSP.Reference selection_path_transformer = 38;
+}
+
+message IOSRestorableViewStateRootArchive {
+  optional .KN.IOSSavedPlaybackStateArchive saved_playback_state = 1;
+}
+
+message IOSSavedPlaybackStateArchive {
+  enum PresentationType {
+    Manual = 1;
+    Record = 2;
+    PlayRecording = 3;
+    Rehearse = 4;
+    Showcast = 5;
+  }
+  optional .KN.IOSSavedPlaybackStateArchive.PresentationType presentation_type = 1;
+  optional uint32 slide_node_index = 2;
+  optional uint32 event_index = 3;
+  repeated string breadcrumb_trail = 4;
+  optional bool had_external_display = 5;
+  optional bool is_elapsed_time_started = 6;
+  optional double elapsed_time_start_time = 7;
+  optional double recording_playback_current_time = 8;
+  optional bool should_show_slide_navigator = 9;
 }
 
 message CanvasSelectionArchive {
@@ -361,6 +396,9 @@ message CanvasSelectionArchive {
   repeated .TSP.IndexSet action_ghost_indexes = 3;
   repeated .TSP.Reference build_chunks = 4;
   repeated uint32 database_action_ghost_indexes = 2 [deprecated = true];
+}
+
+message ActionGhostSelectionArchive {
 }
 
 message ThemeCustomTimingCurveArchive {
@@ -447,6 +485,7 @@ message PasteboardNativeStorageArchive {
   repeated .KN.ThemeCustomTimingCurveArchive custom_effect_timing_curves = 14;
   repeated string original_slide_node_UUIDs = 15;
   optional bool slide_nodes_have_datas_needing_download = 16;
+  optional .KN.TransitionArchive transition = 17;
 }
 
 message PrototypeForUndoMasterChangeArchive {
@@ -468,11 +507,16 @@ message RecordingArchive {
   optional .KN.RecordingArchive.RecordingSyncStateEnum sync_state_enum = 4 [default = kRecordingSyncStateInSyncWithShow, deprecated = true];
   optional .TSP.Date modification_date = 5;
   optional .KN.RecordingSyncState sync_state = 6;
+  optional .KN.RecordingCorrectionHistory correction_history = 7;
 }
 
 message RecordingSyncState {
   optional .TSP.UUID out_of_sync_token = 1;
   optional bool can_clear_out_of_sync_token = 2 [default = false];
+}
+
+message RecordingCorrectionHistory {
+  optional bool did_add_missing_events_for_radar_49654305 = 1;
 }
 
 message RecordingEventTrackArchive {

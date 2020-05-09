@@ -38,12 +38,18 @@ message StylesheetArchive {
     required .TSP.Reference parent = 1;
     repeated .TSP.Reference children = 2;
   }
+  message VersionedStyles {
+    repeated .TSP.Reference styles = 1;
+    repeated .TSS.StylesheetArchive.IdentifiedStyleEntry identifier_to_style_map = 2;
+    repeated .TSS.StylesheetArchive.StyleChildrenEntry parent_to_children_style_map = 3;
+  }
   repeated .TSP.Reference styles = 1;
   repeated .TSS.StylesheetArchive.IdentifiedStyleEntry identifier_to_style_map = 2;
   optional .TSP.Reference parent = 3;
   optional bool is_locked = 4 [default = true];
   repeated .TSS.StylesheetArchive.StyleChildrenEntry parent_to_children_style_map = 5;
   optional bool can_cull_styles = 6 [default = false];
+  optional .TSS.StylesheetArchive.VersionedStyles styles_for_10_0 = 7;
 }
 
 message ThemeArchive {

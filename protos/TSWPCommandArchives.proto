@@ -96,6 +96,8 @@ message StorageActionCommandArchive {
     kKindCreateRuby = 35;
     kKindModifyRuby = 36;
     kKindRemoveRuby = 37;
+    kKindTateChuYoko = 38;
+    kKindDropCapStyle = 39;
   }
   optional .TSK.CommandArchive super = 1;
   optional .TSP.UUIDPath storage = 2;
@@ -107,6 +109,8 @@ message StorageActionCommandArchive {
   optional bool coalesceable = 8;
   optional bool coalescing_text = 9;
   optional bool should_migrate_styles = 10;
+  optional .TSK.DataReferenceRecord changed_data_reference_record = 11;
+  optional string coalescing_property = 12;
 }
 
 message SetColumnStyleCommandArchive {
@@ -205,7 +209,7 @@ message ModifyTOCSettingsBaseCommandArchive {
 
 message ModifyTOCSettingsForTOCInfoCommandArchive {
   optional .TSWP.ModifyTOCSettingsBaseCommandArchive super = 1;
-  optional .TSP.Reference toc_info = 2;
+  optional .TSP.UUIDPath toc_info_uuid_path = 2;
 }
 
 message ModifyTOCSettingsPresetForThemeCommandArchive {

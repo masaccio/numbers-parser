@@ -36,6 +36,7 @@ message CommandSlideInsertDrawablesArchive {
   required bool update_geometry_to_match_object_placeholder = 5;
   repeated .TSP.UUID ids_of_drawables_using_object_placeholder_geometry = 6;
   repeated string sage_placeholder_tags_list = 7;
+  repeated string instructional_text_list = 20;
   optional .TSP.Reference undo_archive = 8;
   optional bool is_pasting = 9;
   repeated .TSP.Reference insert_build_descriptions = 10;
@@ -56,6 +57,18 @@ message CommandSlideSetPlaceholdersForTagsArchive {
   repeated string old_tags = 5;
 }
 
+message CommandMasterSlideSetPlaceholderForTagArchive {
+  required .KN.CommandSlideSetPlaceholdersForTagsArchive super = 1;
+  required .TSP.UUID placeholder_id = 2;
+  optional string tag = 3;
+}
+
+message CommandSlidePropagateSetPlaceholderForTagArchive {
+  required .KN.CommandSlideSetPlaceholdersForTagsArchive super = 1;
+  required .TSP.UUID placeholder_id = 2;
+  required .TSP.UUID original_id = 3;
+}
+
 message CommandSlideRemoveDrawableArchive {
   required .TSK.CommandArchive super = 1;
   required .TSP.UUID slide_id = 2;
@@ -63,6 +76,7 @@ message CommandSlideRemoveDrawableArchive {
   required .KN.MixedIdOperationArgs args_list = 4;
   repeated uint32 drawable_indexes_for_undo = 10;
   repeated string placeholderTags = 5;
+  repeated string instructional_text_list = 11;
   repeated .TSP.Reference insert_build_descriptions = 6;
   repeated .TSP.Reference remove_build_descriptions = 7;
   repeated .TSP.Reference drawables_using_object_placeholder_geometry = 8;
@@ -194,7 +208,6 @@ message CommandShowRemoveSlideArchive {
   repeated .TSP.Reference slide_nodes_for_depth_fix_up = 7;
   repeated uint32 depths_of_slide_nodes_for_depth_fix_up = 8;
   repeated uint32 old_depths_of_slide_nodes_for_depth_fix_up = 9;
-  repeated .TSP.UUID ids_of_master_slides_being_removed_if_unused = 10;
   repeated bool collapsed_state_of_slide_nodes_being_removed = 11;
 }
 
@@ -225,8 +238,7 @@ message CommandSetThemeCustomEffectTimingCurveArchive {
 }
 
 message CommandMoveMastersArchive {
-  required .TSK.CommandArchive super = 1;
-  required .TSP.Reference theme = 2;
+  required .TSD.ContainerReorderChildrenCommandArchive super = 1;
   repeated .TSP.Reference master_slides = 3;
   repeated .TSP.Reference previous_indexes_keys = 4;
   repeated uint32 previous_indexes_values = 5;
@@ -235,27 +247,28 @@ message CommandMoveMastersArchive {
 
 message CommandInsertMasterArchive {
   required .TSK.CommandArchive super = 1;
-  required .TSP.Reference theme = 2;
-  required .TSP.Reference master_slide_node = 3;
-  required uint32 insertion_index = 4;
-  required bool was_inserted_with_drop = 5;
-  repeated .TSP.UUID custom_format_keys = 6;
+  repeated .TSP.Reference undo_master_change_commands = 7;
+  required bool set_inserted_slide_as_default_master_slide = 8;
+  optional .TSP.Reference undo_replacement_master_slide_node = 9;
+}
+
+message CommandPrimitiveInsertMasterArchive {
+  required .TSD.ContainerInsertChildrenCommandArchive super = 1;
+  required bool was_inserted_with_drop = 2;
+  repeated .TSP.UUID custom_format_keys = 3;
+  repeated .TSP.Reference previous_classic_theme_records = 4;
 }
 
 message CommandRemoveMasterArchive {
   required .TSK.CommandArchive super = 1;
-  required .TSP.Reference theme = 2;
-  required .TSP.Reference master_slide_node = 3;
-  required uint32 previous_index = 4;
-  optional .TSP.Reference master_change_commands = 5;
-  optional bool default_master_slide_node_was_replaced = 6;
+  optional .TSP.Reference replacement_master_slide_node = 5;
+  repeated .TSP.Reference master_change_commands = 6;
+  optional bool default_master_slide_node_was_replaced = 7;
 }
 
-message CommandRenameMasterArchive {
-  required .TSK.CommandArchive super = 1;
-  required .TSP.Reference master_slide = 2;
-  required string master_name = 3;
-  optional string old_master_name = 4;
+message CommandPrimitiveRemoveMasterArchive {
+  required .TSD.ContainerRemoveChildrenCommandArchive super = 1;
+  repeated .TSP.Reference previous_classic_theme_records = 3;
 }
 
 message CommandSlideInsertBuildArchive {
@@ -420,13 +433,6 @@ message CommandMasterSetBodyStylesArchive {
   repeated .TSP.Reference old_list_styles = 6;
 }
 
-message CommandMasterSetSlideObjectsLayerWithMasterArchive {
-  required .TSK.CommandArchive super = 1;
-  required .TSP.Reference master = 2;
-  required bool new_value = 3;
-  required bool old_value = 4;
-}
-
 message CommandChangeMasterSlideArchive {
   required .TSK.CommandArchive super = 1;
   required .TSP.UUIDPath slide_id_path = 2;
@@ -443,9 +449,9 @@ message CommandSlidePrimitiveSetMasterArchive {
   optional .TSP.Reference old_master_node = 4;
 }
 
-message CommandSlideReapplyMasterArchive {
+message CommandSlideResetMasterBackgroundObjectsArchive {
   required .TSK.CommandArchive super = 1;
-  required .TSP.Reference reapply_accumulated_command = 2;
+  optional .TSP.UUIDPath slide_id_path = 2;
 }
 
 message CommandShowSetSoundtrack {
@@ -491,8 +497,6 @@ message CanvasSelectionTransformerArchive {
 }
 
 message ActionGhostSelectionTransformerArchive {
-  required .TSD.DrawableSelectionTransformerArchive super = 1;
-  repeated .TSP.UUID untransformed_action_build_uuids_for_ghosts = 2;
 }
 
 message DocumentSelectionTransformerArchive {
@@ -522,6 +526,6 @@ message SlideCollectionSelectionTransformerArchive {
 message OutlineSelectionTransformerArchive {
   required .KN.SlideCollectionSelectionTransformerHelperArchive transformer_helper = 1;
   optional bool can_have_range_in_selected_paragraph = 2 [default = false];
-  repeated .TSK.Address selection_range_addresses = 3;
+  repeated .TSK.RangeAddress selection_range_addresses = 3;
 }
 

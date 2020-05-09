@@ -200,6 +200,11 @@ message LargeUUIDArraySegment {
   repeated .TSP.UUID elements = 2;
 }
 
+message LargeLazyObjectArraySegment {
+  optional .TSP.LargeArraySegment large_array_segment = 1;
+  repeated .TSP.Reference elements = 2;
+}
+
 message LargeObjectArraySegment {
   optional .TSP.LargeArraySegment large_array_segment = 1;
   repeated .TSP.Reference elements = 2;
@@ -213,6 +218,7 @@ message LargeArray {
   optional bool should_delay_archiving = 5;
   optional uint32 delayed_archiving_priority = 6;
   optional bool store_outside_object_archive = 7;
+  optional uint64 estimated_byte_size = 8;
 }
 
 message LargeNumberArray {
@@ -220,6 +226,10 @@ message LargeNumberArray {
 }
 
 message LargeStringArray {
+  optional .TSP.LargeArray large_array = 1;
+}
+
+message LargeLazyObjectArray {
   optional .TSP.LargeArray large_array = 1;
 }
 

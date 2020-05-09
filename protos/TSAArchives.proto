@@ -119,6 +119,8 @@ message ChangeDocumentLocaleCommandArchive {
   optional .TSK.CommandArchive super = 1;
   optional string old_locale_id = 2;
   optional string new_locale_id = 3;
+  optional .TSK.FormattingSymbolsArchive old_formatting_symbols = 4;
+  optional .TSK.FormattingSymbolsArchive new_formatting_symbols = 5;
 }
 
 message InducedVerifyObjectsWithServerCommandArchive {
@@ -129,6 +131,12 @@ message InducedVerifyObjectsWithServerCommandArchive {
   optional bool server_object_s_o_s_string_list_undefined = 5;
   required bool pending_recalc = 6;
   required double remote_data_sync_key = 7;
+}
+
+message InducedVerifyTransformHistoryWithServerCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSK.OperationStorageEntry server_operation_storage_entries = 2;
+  optional bool server_operation_storage_entries_undefined = 3;
 }
 
 message StyleUpdatePropertyMapCommandArchive {

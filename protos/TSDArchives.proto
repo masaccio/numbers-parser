@@ -150,6 +150,7 @@ message ImageFillArchive {
   optional .TSP.Size fillsize = 4;
   optional .TSP.DataReference originalimagedata = 7 [deprecated = true];
   optional bool interpretsUntaggedImageDataAsGeneric = 8;
+  optional .TSP.Color referencecolor = 9;
   optional .TSP.Reference database_imagedata = 1;
   optional .TSP.Reference database_originalimagedata = 5;
 }
@@ -338,6 +339,7 @@ message ContainerArchive {
 message GroupArchive {
   required .TSD.DrawableArchive super = 1;
   repeated .TSP.Reference children = 2;
+  optional .TSP.Reference fake_shape_for_empty_group = 3;
   extensions 100 to 536870911;
 }
 
@@ -563,7 +565,7 @@ message PencilAnnotationStorageArchive {
   optional int32 attached_location = 1;
   optional .TSP.Point markup_offset = 2;
   optional .TSP.DataReference rasterized_image = 3;
-  optional .TSP.DataReference encoded_drawing = 4;
+  optional .TSP.DataReference legacy_encoded_drawing = 4;
   optional .TSP.Path drawing_path = 5;
   optional .TSP.Point strokes_bounding_box_origin = 6;
   optional .TSP.Size strokes_bounding_box_size = 7;
@@ -574,7 +576,16 @@ message PencilAnnotationStorageArchive {
   optional uint64 visible_strokes_count = 12;
   optional .TSP.Color pen_color = 13;
   optional int32 tool_type = 14;
-  repeated .TSP.Reference sub_storages = 15;
+  repeated .TSP.Reference callout_sub_storages = 15;
+  optional .TSP.Date creation_date = 16;
+  optional double pencil_annotation_drawing_scale = 17;
+  optional int32 compound_annotation_type = 18;
+  repeated .TSP.Reference sub_storages = 19;
+  optional .TSP.DataReference encoded_drawing = 20;
+  optional .TSP.Point stroke_points_frame_origin = 21;
+  optional .TSP.Size stroke_points_frame_size = 22;
+  optional .TSP.Point rendered_frame_origin = 23;
+  optional .TSP.Size rendered_frame_size = 24;
 }
 
 message SpecColorFillSetColorArchive {

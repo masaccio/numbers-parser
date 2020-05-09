@@ -101,6 +101,13 @@ message ChartSupportsRoundedCornersArchive {
   }
 }
 
+message ChartSupportsSeriesPropertySpacingArchive {
+  extend .TSCH.ChartArchive {
+    optional bool supports_series_value_label_spacing = 10027;
+    optional bool supports_series_error_bar_spacing = 10028;
+  }
+}
+
 message ChartGridArchive {
   message ChartGridRowColumnIdMap {
     message Entry {

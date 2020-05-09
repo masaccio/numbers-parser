@@ -111,6 +111,8 @@ message StorageArchive {
   optional .TSWP.ParaDataAttributeTable table_para_bidi = 24;
   optional .TSWP.OverlappingFieldAttributeTable table_overlapping_highlight = 25;
   optional .TSWP.OverlappingFieldAttributeTable table_pencil_annotation = 26;
+  optional .TSWP.ObjectAttributeTable table_tatechuyoko = 27;
+  optional .TSWP.ObjectAttributeTable table_drop_cap_style = 28;
 }
 
 message HighlightArchive {
@@ -198,6 +200,12 @@ message CharacterStylePropertiesArchive {
   optional string compatibility_font_name = 39;
   optional bool is_named_point_size = 40;
   optional bool capitalization_uses_linguistics = 41;
+  optional bool tate_chu_yoko = 42;
+  optional bool tsd_stroke_null = 43;
+  optional .TSD.StrokeArchive tsd_stroke = 44;
+  optional bool tsd_fill_null = 45;
+  optional .TSD.FillArchive tsd_fill = 46;
+  optional bool tsd_fill_should_fill_text_container = 47;
 }
 
 message CharacterStyleArchive {
@@ -294,6 +302,7 @@ message ParagraphStylePropertiesArchive {
   optional bool following_style_null = 41;
   optional .TSP.Reference following_style = 42;
   optional bool show_in_bookmarks_list = 43;
+  optional bool show_in_toc_navigator = 44;
 }
 
 message ParagraphStyleArchive {
@@ -480,6 +489,7 @@ message ShapeStylePropertiesArchive {
   optional bool vertical_text = 8;
   optional bool paragraph_style_null = 9;
   optional .TSP.Reference paragraph_style = 10;
+  optional bool vertical_text_40 = 11;
 }
 
 message ShapeStyleArchive {
@@ -496,6 +506,7 @@ message ThemePresetsArchive {
   repeated .TSP.Reference toc_settings_presets = 5;
   repeated .TSP.Reference character_style_presets = 6;
   repeated .TSP.Reference paragraph_style_presets = 7;
+  repeated .TSP.Reference dropcap_style_presets = 8;
   extend .TSS.ThemeArchive {
     optional .TSWP.ThemePresetsArchive extension = 110;
   }
@@ -681,6 +692,7 @@ message TOCInfoArchive {
   optional .TSP.Reference toc_settings = 2;
   repeated .TSP.Reference toc_entry_data = 3;
   repeated .TSP.Range page_number_ranges = 4;
+  optional bool sync_toc_settings_with_toc_navigator = 5;
 }
 
 message TOCLayoutHintArchive {
@@ -853,6 +865,10 @@ message RubyFieldArchive {
   optional string ruby_text = 2;
 }
 
+message TateChuYokoFieldArchive {
+  optional .TSWP.SmartFieldArchive super = 1;
+}
+
 message ChangeArchive {
   enum ChangeKind {
     kChangeKindInsertion = 1;
@@ -886,6 +902,47 @@ message FlowInfoArchive {
 message FlowInfoContainerArchive {
   repeated .TSP.Reference flow_infos = 1;
   optional uint32 next_user_interface_identifier = 2;
+}
+
+message DropCapArchive {
+  enum DropCapType {
+    TSWPDropCapTypeText = 0;
+    TSWPDropCapTypeShape = 1;
+    TSWPDropCapTypeImage = 2;
+  }
+  enum DropCapWrapType {
+    TSWPDropCapWrapTypeRectangular = 0;
+    TSWPDropCapWrapTypeContour = 1;
+    TSWPDropCapWrapTypeNone = 2;
+  }
+  optional .TSWP.DropCapArchive.DropCapType type = 1 [default = TSWPDropCapTypeText];
+  optional uint32 number_of_lines = 2 [default = 3];
+  optional uint32 number_of_raised_lines = 3 [default = 0];
+  optional float deprecated_outdent = 4;
+  optional double outdent = 11 [default = 0];
+  optional float deprecated_padding = 5;
+  optional double padding = 12 [default = 0];
+  optional .TSWP.DropCapArchive.DropCapWrapType wrap_type = 6 [default = TSWPDropCapWrapTypeRectangular];
+  optional bool shape_enabled = 7 [default = false];
+  optional float deprecated_corner_radius = 8;
+  optional double corner_radius = 13 [default = 0];
+  optional float deprecated_character_scale = 9;
+  optional double character_scale = 14 [default = 1];
+  optional uint32 number_of_characters = 10 [default = 1];
+}
+
+message DropCapStylePropertiesArchive {
+  optional .TSWP.DropCapArchive drop_cap = 1;
+  optional .TSD.StrokeArchive drop_cap_shape_stroke = 3;
+  optional bool drop_cap_shape_fill_null = 4;
+  optional .TSD.FillArchive drop_cap_shape_fill = 5;
+}
+
+message DropCapStyleArchive {
+  required .TSS.StyleArchive super = 1;
+  optional uint32 override_count = 10 [default = 0];
+  optional .TSWP.CharacterStylePropertiesArchive char_properties = 11;
+  optional .TSWP.DropCapStylePropertiesArchive drop_cap_properties = 12;
 }
 
 extend .TSS.CommandPropertyEntryArchive {
