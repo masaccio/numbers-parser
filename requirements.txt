@@ -3,7 +3,7 @@ protobuf==3.8.0
 tqdm==4.14.0
 python-snappy==0.5.3
 PyYAML==4.2b1
-Pillow==5.4.1
+Pillow==6.2.2
 
 # For building/testing
 future==0.17.1

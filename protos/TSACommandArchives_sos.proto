@@ -11,6 +11,19 @@ message InducedVerifyDrawableZOrdersWithServerCommandArchive {
   optional bool server_drawable_z_order_lists_undefined = 3;
 }
 
+message PropagateMasterChangeCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSP.UUID uuids_of_previously_visited_objects = 2;
+  optional bool uuids_of_previously_visited_objects_undefined = 3;
+}
+
+message CommandReapplyMasterArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSP.UUID items_to_visit = 2;
+  optional bool items_to_visit_undefined = 3;
+  required bool is_undo = 4;
+}
+
 message VerifyDocumentWithServerCommandArchive {
   required .TSK.CommandArchive super = 1;
 }
@@ -25,5 +38,11 @@ message VerifyObjectsWithServerCommandArchive {
   required .TSK.CommandArchive super = 1;
   repeated .TSP.UUID object_id_list = 2;
   optional bool object_id_list_undefined = 3;
+}
+
+message VerifyTransformHistoryWithServerCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  required int32 sequence_start = 2;
+  required int32 sequence_end = 3;
 }
 

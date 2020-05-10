@@ -76,6 +76,17 @@ message CommandApplyCellMapArchive {
   repeated .TSP.Reference formula_rewrite_commands = 8;
 }
 
+message CommandApplyConcurrentCellMapArchive {
+  required .TST.TableCommandArchive super = 1;
+  required .TSP.Reference redo_concurrent_cell_map = 2;
+  optional .TSP.Reference undo_concurrent_cell_map = 3;
+  optional .TSP.Reference undo_formula_rewrite_command = 4;
+  repeated .TSP.UUID custom_format_keys = 5;
+  optional uint32 merge_owner_rollback_index = 6;
+  required bool is_from_paste = 7;
+  repeated .TSP.Reference formula_rewrite_commands = 8;
+}
+
 message CommandChangeFreezeHeaderStateArchive {
   required .TST.TableCommandArchive super = 1;
   required .TST.TableDimensionArchive direction = 2;
@@ -85,11 +96,12 @@ message CommandChangeFreezeHeaderStateArchive {
 
 message CommandDeleteCellsArchive {
   required .TST.TableCommandArchive super = 1;
-  required .TST.CellUIDListArchive cell_uid_list = 2;
-  optional .TSP.Reference inverse_cell_map = 3;
   optional bool update_border_visibility = 4;
   optional bool invalidate_comments = 5;
   optional bool invalidate_comments_valid = 6;
+  optional .TST.CellUIDRegionArchive cell_uid_region = 7;
+  optional .TST.CellUIDListArchive summary_cell_uid_list = 8;
+  optional .TSP.Reference inverse_concurrent_cell_map = 9;
 }
 
 message CommandDeleteCellContentsArchive {
@@ -158,7 +170,6 @@ message CommandInsertColumnsOrRowsArchive {
   required .TST.TableCommandArchive super = 1;
   required .TST.ColumnRowBundleArchive bundle = 2;
   optional .TSP.Reference cell_map = 3;
-  required .TSP.UUID src_row_column_uid = 11;
   optional .TSP.Reference undo_commands = 4;
   optional .TSP.Reference undo_cell_map = 5;
   optional .TST.TableSortOrderUIDArchive sort_order = 6;
@@ -166,6 +177,8 @@ message CommandInsertColumnsOrRowsArchive {
   optional bool should_edge_expand_formula_ranges = 8;
   optional bool was_categorized = 9;
   repeated .TSP.UUID undo_order = 10;
+  required .TSP.UUID src_row_column_uid = 11;
+  required .TSP.UUID opp_row_column_uid = 12;
 }
 
 message ColumnRowBundleArchive {
@@ -317,6 +330,8 @@ message CommandSetWasCutArchive {
   required .TSP.UUID prev_from_table_uid = 3;
   required bool was_cut = 4;
   required bool prev_was_cut = 5;
+  required .TSP.UUID from_group_by_uid = 6;
+  required .TSP.UUID prev_from_group_by_uid = 7;
 }
 
 message CommandStyleCellsArchive {
@@ -759,6 +774,11 @@ message RegionSelectionTransformerArchive {
   optional .TSP.UUIDCoordArchive origin_cell_uid = 3;
   required .TSP.UUIDCoordArchive anchor_cell_uid = 4;
   required .TSP.UUIDCoordArchive cursor_cell_uid = 5;
+}
+
+message StrokeSelectionTransformerArchive {
+  required .TST.TableSubSelectionTransformerBaseArchive super = 1;
+  required .TSP.Reference archived_selection = 2;
 }
 
 message RowColumnSelectionTransformerArchive {

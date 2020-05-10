@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+import "TSPMessages.proto";
+import "TSWPArchives_sos.proto";
+import "TSWPCommandArchives.proto";
+package TSWP;
+
+message CharacterStyleChangePropertyCommand_GArchive {
+  required .TSWP.StorageActionCommandArchive super = 1;
+  repeated .TSP.Range range_list = 2;
+  optional bool range_list_undefined = 3;
+  repeated .TSWP.CharacterStylePropertyChangeSetArchive change_list = 4;
+  optional bool change_list_undefined = 5;
+  required bool disable_character_style_promotion = 6;
+}
+
+message ParagraphStyleChangePropertyCommand_GArchive {
+  required .TSWP.StorageActionCommandArchive super = 1;
+  repeated .TSP.Range range_list = 2;
+  optional bool range_list_undefined = 3;
+  repeated .TSWP.ParagraphStylePropertyChangeSetArchive change_list = 4;
+  optional bool change_list_undefined = 5;
+}
+

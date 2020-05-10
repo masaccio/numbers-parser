@@ -1,14 +1,14 @@
 syntax = "proto2";
 
-import "TSPMessages.proto";
-import "TSKArchives.proto";
-import "TSSArchives.proto";
-import "TSDArchives.proto";
-import "TSDCommandArchives.proto";
+import "TSCH3DArchives.proto";
 import "TSCHArchives_Common.proto";
 import "TSCHArchives_GEN.proto";
-import "TSCH3DArchives.proto";
 import "TSCHArchives.proto";
+import "TSDArchives.proto";
+import "TSDCommandArchives.proto";
+import "TSKArchives.proto";
+import "TSPMessages.proto";
+import "TSSArchives.proto";
 import "TSWPArchives.proto";
 package TSCH;
 
