@@ -4,8 +4,8 @@
 from setuptools import setup, find_packages
 import os
 
+import keynote_parser
 import codecs
-import re
 
 # io.open is needed for projects that support Python 2.7
 # It ensures open() defaults to text mode with universal newlines,
@@ -37,18 +37,15 @@ def read(*filenames, **kwargs):
     return sep.join(buf)
 
 
-def find_meta(meta):
-    """Extract __*meta*__ from META_FILE."""
-    re_str = r"^__{meta}__ = ['\"]([^'\"]*)['\"]".format(meta=meta)
-    meta_match = re.search(re_str, META_FILE, re.M)
-    if meta_match:
-        return meta_match.group(1)
-    raise RuntimeError("Unable to find __{meta}__ string.".format(meta=meta))
-
-
 NAME = "keynote-parser"
-PACKAGE_NAME = "keynote_parser"
-META_FILE = read(os.path.join(PACKAGE_NAME, "__init__.py"))
+
+
+def find_meta(meta):
+    attr = getattr(keynote_parser, "__{meta}__".format(meta=meta), None)
+    if not attr:
+        raise RuntimeError("Unable to find __{meta}__ string.".format(meta=meta))
+    return attr
+
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
