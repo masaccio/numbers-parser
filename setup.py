@@ -1,6 +1,11 @@
+#!/usr/bin/env python
+
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
-from os import path
+import os
+
+import codecs
+import re
 
 # io.open is needed for projects that support Python 2.7
 # It ensures open() defaults to text mode with universal newlines,
@@ -8,11 +13,42 @@ from os import path
 # Python 3 only projects can skip this import
 from io import open
 
-here = path.abspath(path.dirname(__file__))
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(os.path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
+
+
+#####
+# Helper functions
+#####
+def read(*filenames, **kwargs):
+    """
+    Build an absolute path from ``*filenames``, and  return contents of
+    resulting file.  Defaults to UTF-8 encoding.
+    """
+    encoding = kwargs.get("encoding", "utf-8")
+    sep = kwargs.get("sep", "\n")
+    buf = []
+    for fl in filenames:
+        with codecs.open(os.path.join(HERE, fl), "rb", encoding) as f:
+            buf.append(f.read())
+    return sep.join(buf)
+
+
+def find_meta(meta):
+    """Extract __*meta*__ from META_FILE."""
+    re_str = r"^__{meta}__ = ['\"]([^'\"]*)['\"]".format(meta=meta)
+    meta_match = re.search(re_str, META_FILE, re.M)
+    if meta_match:
+        return meta_match.group(1)
+    raise RuntimeError("Unable to find __{meta}__ string.".format(meta=meta))
+
+
+NAME = "keynote-parser"
+PACKAGE_NAME = "keynote_parser"
+META_FILE = read(os.path.join(PACKAGE_NAME, "__init__.py"))
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
@@ -29,18 +65,18 @@ setup(
     # There are some restrictions on what makes a valid project name
     # specification here:
     # https://packaging.python.org/specifications/core-metadata/#name
-    name='keynote-parser',
+    name=NAME,
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
     #
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.10.0',  # major.keynoteversion.patch
+    version=find_meta("version"),
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#summary
-    description='A tool for manipulating Apple Keynote presentation files.',
+    description=find_meta("description"),
     # This is an optional longer description of your project that represents
     # the body of text which users will see when they visit PyPI.
     #
@@ -65,13 +101,13 @@ setup(
     #
     # This field corresponds to the "Home-Page" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    url='https://github.com/psobot/keynote-parser',
+    url=find_meta('url'),
     # This should be your name or the name of the organization which owns the
     # project.
-    author='Peter Sobot',
+    author=find_meta('author'),
     # This should be a valid email address corresponding to the author listed
     # above.
-    author_email='github@petersobot.com',
+    author_email=find_meta('email'),
     # Classifiers help users find your project by categorizing it.
     #
     # For a list of valid classifiers, see https://pypi.org/classifiers/
@@ -121,6 +157,7 @@ setup(
         'PyYAML>=4.2b1',
         'Pillow==6.2.2',
         'future==0.17.1',
+        'colorama>=0.4.3',
     ],
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"

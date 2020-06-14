@@ -86,12 +86,11 @@ def dir_file_sink(target_dir, raw=False):
                     out.write(contents.to_buffer())
                 else:
                     yaml.safe_dump(
-                        contents.to_dict(),
-                        out,
-                        default_flow_style=False,
-                        encoding="utf-8")
+                        contents.to_dict(), out, default_flow_style=False, encoding="utf-8"
+                    )
             else:
                 out.write(contents)
+
     accept.uses_stdout = False
     yield accept
 
@@ -100,6 +99,7 @@ def dir_file_sink(target_dir, raw=False):
 def ls_sink():
     def accept(filename, contents):
         print(filename)
+
     accept.uses_stdout = True
     yield accept
 
@@ -112,12 +112,14 @@ def cat_sink(subfile, raw):
                 if raw:
                     sys.stdout.buffer.write(contents.to_buffer())
                 else:
-                    print(yaml.safe_dump(
-                        contents.to_dict(),
-                        default_flow_style=False,
-                        encoding="utf-8").decode('ascii'))
+                    print(
+                        yaml.safe_dump(
+                            contents.to_dict(), default_flow_style=False, encoding="utf-8"
+                        ).decode('ascii')
+                    )
             else:
                 sys.stdout.buffer.write(contents)
+
     accept.uses_stdout = True
     yield accept
 
@@ -128,34 +130,28 @@ def zip_file_sink(output_path):
 
     def accept(filename, contents):
         files_to_write[filename] = contents
+
     accept.uses_stdout = False
 
     yield accept
 
     print("Writing to %s..." % output_path)
     with ZipFile(output_path, 'w') as zipfile:
-        for filename, contents in tqdm(iter(list(files_to_write.items())),
-                                       total=len(files_to_write)):
+        for filename, contents in tqdm(
+            iter(list(files_to_write.items())), total=len(files_to_write)
+        ):
             if isinstance(contents, IWAFile):
                 zipfile.writestr(filename, contents.to_buffer())
             else:
                 zipfile.writestr(filename, contents)
 
 
-def process_file(
-    filename,
-    handle,
-    sink,
-    replacements=[],
-    raw=False,
-    on_replace=None
-):
+def process_file(filename, handle, sink, replacements=[], raw=False, on_replace=None):
     contents = None
     if '.iwa' in filename and not raw:
         contents = handle.read()
         if filename.endswith('.yaml'):
-            file = IWAFile.from_dict(
-                yaml.load(fix_unicode(contents.decode('utf-8'))))
+            file = IWAFile.from_dict(yaml.load(fix_unicode(contents.decode('utf-8'))))
             filename = filename.replace('.yaml', '')
         else:
             file = IWAFile.from_buffer(contents)
@@ -171,9 +167,7 @@ def process_file(
         if file_has_changed:
             data = file.to_dict()
             for replacement in replacements:
-                data = replacement.perform_on(
-                    data,
-                    on_replace=on_replace)
+                data = replacement.perform_on(data, on_replace=on_replace)
             sink(filename, IWAFile.from_dict(data))
         else:
             sink(filename, file)
@@ -193,9 +187,7 @@ def process_file(
                 with open(replacement.replace, 'rb') as f:
                     read_image = Image.open(f)
                     with BytesIO() as output:
-                        read_image.thumbnail(
-                            image.size,
-                            Image.ANTIALIAS)
+                        read_image.thumbnail(image.size, Image.ANTIALIAS)
                         read_image.save(output, image.format)
                         sink(filename, output.getvalue())
                 file_has_changed = True
@@ -217,15 +209,8 @@ def process(input_path, output_path, replacements=[], subfile=None, raw=False):
             print("Reading from %s..." % input_path)
         for filename, handle in file_reader(input_path, not sink.uses_stdout):
             try:
-                process_file(
-                    filename,
-                    handle,
-                    sink,
-                    replacements,
-                    raw,
-                    on_replace)
+                process_file(filename, handle, sink, replacements, raw, on_replace)
             except Exception as e:
-                raise ValueError(
-                    "Failed to process file %s due to: %s" % (filename, e))
+                raise ValueError("Failed to process file %s due to: %s" % (filename, e))
 
     return completed_replacements
