@@ -31,6 +31,10 @@ class MacOSAppVersion(object):
         return self.short_version_tuple[0]
 
     @property
+    def minor(self):
+        return self.short_version_tuple[1]
+
+    @property
     def short_version_comparator(self):
         return sum(
             [
