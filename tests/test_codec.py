@@ -14,7 +14,7 @@ EMOJI_FILENAME_PY3_YAML = './tests/data/emoji-oneslide.py3.yaml'
 def roundtrip(filename):
     with open(filename, 'rb') as f:
         test_data = f.read()
-    file = codec.IWAFile.from_buffer(test_data)
+    file = codec.IWAFile.from_buffer(test_data, filename)
     assert file is not None
     assert file.to_buffer() == test_data
 
@@ -33,22 +33,20 @@ def test_iwa_emoji_roundtrip():
 
 def test_yaml_parse_py2_emoji():
     with open(EMOJI_FILENAME_PY2_YAML, 'rb') as handle:
-        file = codec.IWAFile.from_dict(yaml.load(
-            fix_unicode(handle.read().decode('utf-8'))))
+        file = codec.IWAFile.from_dict(yaml.load(fix_unicode(handle.read().decode('utf-8'))))
         assert file is not None
 
 
 def test_yaml_parse_py3_emoji():
     with open(EMOJI_FILENAME_PY3_YAML, 'rb') as handle:
-        file = codec.IWAFile.from_dict(yaml.load(
-            fix_unicode(handle.read().decode('utf-8'))))
+        file = codec.IWAFile.from_dict(yaml.load(fix_unicode(handle.read().decode('utf-8'))))
         assert file is not None
 
 
 def test_iwa_multichunk_roundtrip():
     with open(MULTICHUNK_FILENAME, 'rb') as f:
         test_data = f.read()
-    file = codec.IWAFile.from_buffer(test_data)
+    file = codec.IWAFile.from_buffer(test_data, MULTICHUNK_FILENAME)
     assert file is not None
-    rt_as_dict = codec.IWAFile.from_buffer(file.to_buffer()).to_dict()
+    rt_as_dict = codec.IWAFile.from_buffer(file.to_buffer(), MULTICHUNK_FILENAME).to_dict()
     assert rt_as_dict == file.to_dict()
