@@ -8,7 +8,7 @@ MULTILINE_SURROGATE_FILENAME = './tests/data/multiline-surrogate.iwa'
 def test_iwa_multiline_surrogate_replacement():
     with open(MULTILINE_SURROGATE_FILENAME, 'rb') as f:
         test_data = f.read()
-    file = codec.IWAFile.from_buffer(test_data)
+    file = codec.IWAFile.from_buffer(test_data, MULTILINE_SURROGATE_FILENAME)
     data = file.to_dict()
     replacement = Replacement("\\$REPLACE_ME", "replaced!")
     replaced = replacement.perform_on(data)

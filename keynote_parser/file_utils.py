@@ -154,7 +154,7 @@ def process_file(filename, handle, sink, replacements=[], raw=False, on_replace=
             file = IWAFile.from_dict(yaml.load(fix_unicode(contents.decode('utf-8'))))
             filename = filename.replace('.yaml', '')
         else:
-            file = IWAFile.from_buffer(contents)
+            file = IWAFile.from_buffer(contents, filename)
 
         file_has_changed = False
         for replacement in replacements:
