@@ -46,13 +46,14 @@ SIMPLE_CONTENTS = [
     'Metadata/Properties.plist',
     'preview-micro.jpg',
     'preview-web.jpg',
-    'preview.jpg']
+    'preview.jpg',
+]
 
 
 def test_read_simple():
     reader = file_utils.zip_file_reader(SIMPLE_FILENAME, progress=False)
-    sorted_files = sorted([filename for filename, handle in reader])
-    assert sorted_files == SIMPLE_CONTENTS
+    sorted_filenames = sorted([filename for filename, handle in reader])
+    assert sorted_filenames == SIMPLE_CONTENTS
 
 
 def test_process_single_file():

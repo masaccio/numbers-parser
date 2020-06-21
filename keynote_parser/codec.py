@@ -8,26 +8,16 @@ import yaml
 import struct
 import snappy
 import traceback
-import warnings
+from functools import partial
 
 from .mapping import NAME_CLASS_MAP, ID_NAME_MAP
 
 from google.protobuf.internal.encoder import _VarintBytes
 from google.protobuf.internal.decoder import _DecodeVarint32
 from google.protobuf.json_format import MessageToDict, ParseDict
+from google.protobuf.message import EncodeError
 
 from .generated.TSPArchiveMessages_pb2 import ArchiveInfo
-
-
-class NotImplementedWarning(RuntimeWarning):
-    def __init__(self, file):
-        super(NotImplementedWarning, self).__init__(
-            (
-                "File %s uses 'should_merge' - not yet sure how to handle. "
-                "Some data, builds, transitions, or other features may be lost."
-            )
-            % file
-        )
 
 
 class IWAFile(object):
@@ -40,7 +30,7 @@ class IWAFile(object):
             return cls.from_buffer(f.read(), filename)
 
     @classmethod
-    def from_buffer(cls, data, filename):
+    def from_buffer(cls, data, filename=None):
         chunks = []
         while data:
             chunk, data = IWACompressedChunk.from_buffer(data, filename)
@@ -62,6 +52,9 @@ class IWAFile(object):
 class IWACompressedChunk(object):
     def __init__(self, archives):
         self.archives = archives
+
+    def __eq__(self, other):
+        return self.archives == other.archives
 
     @classmethod
     def _decompress_all(cls, data):
@@ -89,7 +82,7 @@ class IWACompressedChunk(object):
                 yield chunk
 
     @classmethod
-    def from_buffer(cls, data, filename):
+    def from_buffer(cls, data, filename=None):
         data = b''.join(cls._decompress_all(data))
         archives = []
         while data:
@@ -109,6 +102,40 @@ class IWACompressedChunk(object):
         return b'\x00' + struct.pack('<I', len(payload))[:3] + payload
 
 
+class ProtobufPatch(object):
+    def __init__(self, data):
+        self.data = data
+
+    def __eq__(self, other):
+        return self.data == other.data
+
+    def __repr__(self):
+        return "<%s %s>" % (self.__class__.__name__, self.data)
+
+    def to_dict(self):
+        return message_to_dict(self.data)
+
+    @classmethod
+    def FromString(cls, message_info, proto_klass, data):
+        if len(message_info.diff_field_path.path) != 1:
+            raise NotImplementedError(
+                "Not sure how to deserialize ProtobufPatch without exactly one diff_field_path. "
+                "Message info was:\n%s\nObject was:\n%s" % (message_info, data)
+            )
+        if message_info.fields_to_remove:
+            raise NotImplementedError(
+                "Not sure how to deserialize ProtobufPatch with fields_to_remove. "
+                "Message info was:\n%s\nObject was:\n%s" % (message_info, data)
+            )
+        for diff_path in message_info.diff_field_path.path:
+            patched_field = proto_klass.DESCRIPTOR.fields_by_number[diff_path]
+            field_message_class = NAME_CLASS_MAP[patched_field.message_type.full_name]
+            return cls(field_message_class.FromString(data))
+
+    def SerializeToString(self):
+        return self.data.SerializePartialToString()
+
+
 class IWAArchiveSegment(object):
     def __init__(self, header, objects):
         self.header = header
@@ -117,8 +144,15 @@ class IWAArchiveSegment(object):
     def __eq__(self, other):
         return self.header == other.header and self.objects == other.objects
 
+    def __repr__(self):
+        return "<%s identifier=%s objects=%s>" % (
+            self.__class__.__name__,
+            self.header.identifier,
+            repr(self.objects).replace("\n", " ").replace("  ", " "),
+        )
+
     @classmethod
-    def from_buffer(cls, buf, filename):
+    def from_buffer(cls, buf, filename=None):
         archive_info, payload = get_archive_info_and_remainder(buf)
         if not repr(archive_info):
             raise ValueError("Segment doesn't seem to start with an ArchiveInfo!")
@@ -127,19 +161,24 @@ class IWAArchiveSegment(object):
 
         n = 0
         for message_info in archive_info.message_infos:
-            if message_info.type == 0:
-                if archive_info.should_merge:
-                    warnings.warn(NotImplementedWarning(filename))
-                    n += message_info.length
-                    continue
             try:
-                klass = ID_NAME_MAP[message_info.type]
+                if message_info.type == 0 and archive_info.should_merge and payloads:
+                    base_message = archive_info.message_infos[message_info.base_message_index]
+                    klass = partial(
+                        ProtobufPatch.FromString, message_info, ID_NAME_MAP[base_message.type]
+                    )
+                else:
+                    klass = ID_NAME_MAP[message_info.type]
             except KeyError:
                 raise NotImplementedError(
                     "Don't know how to parse Protobuf message type " + str(message_info.type)
                 )
             try:
-                output = klass.FromString(payload[n : n + message_info.length])
+                message_payload = payload[n : n + message_info.length]
+                if hasattr(klass, 'FromString'):
+                    output = klass.FromString(message_payload)
+                else:
+                    output = klass(message_payload)
             except Exception as e:
                 raise ValueError(
                     "Failed to deserialize %s payload of length %d: %s"
@@ -152,7 +191,16 @@ class IWAArchiveSegment(object):
 
     @classmethod
     def from_dict(cls, _dict):
-        return cls(dict_to_header(_dict['header']), [dict_to_message(o) for o in _dict['objects']])
+        header = dict_to_header(_dict['header'])
+        objects = []
+        for message_info, o in zip(header.message_infos, _dict['objects']):
+            if message_info.diff_field_path and '_pbtype' not in o:
+                base_message_info = header.message_infos[message_info.base_message_index]
+                message_class = ID_NAME_MAP[base_message_info.type]
+                objects.append(ProtobufPatch(message_class, o))
+            else:
+                objects.append(dict_to_message(o))
+        return cls(header, objects)
 
     def to_dict(self):
         return {
@@ -164,10 +212,16 @@ class IWAArchiveSegment(object):
         # Each message_info as part of the header needs to be updated
         # so that its length matches the object contained within.
         for obj, message_info in zip(self.objects, self.header.message_infos):
-            object_length = len(obj.SerializeToString())
-            provided_length = message_info.length
-            if object_length != provided_length:
-                message_info.length = object_length
+            try:
+                object_length = len(obj.SerializeToString())
+                provided_length = message_info.length
+                if object_length != provided_length:
+                    message_info.length = object_length
+            except EncodeError as e:
+                raise ValueError(
+                    "Failed to encode object: %s\nObject: '%s'\nMessage info: %s"
+                    % (e, repr(obj), message_info)
+                )
         return b''.join(
             [_VarintBytes(self.header.ByteSize()), self.header.SerializeToString()]
             + [obj.SerializeToString() for obj in self.objects]
@@ -175,6 +229,8 @@ class IWAArchiveSegment(object):
 
 
 def message_to_dict(message):
+    if hasattr(message, 'to_dict'):
+        return message.to_dict()
     output = MessageToDict(message)
     output['_pbtype'] = type(message).DESCRIPTOR.full_name
     return output
