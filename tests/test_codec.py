@@ -43,13 +43,13 @@ def test_iwa_message_type_zero_roundtrip():
 
 def test_yaml_parse_py2_emoji():
     with open(EMOJI_FILENAME_PY2_YAML, 'rb') as handle:
-        file = codec.IWAFile.from_dict(yaml.load(fix_unicode(handle.read().decode('utf-8'))))
+        file = codec.IWAFile.from_dict(yaml.safe_load(fix_unicode(handle.read().decode('utf-8'))))
         assert file is not None
 
 
 def test_yaml_parse_py3_emoji():
     with open(EMOJI_FILENAME_PY3_YAML, 'rb') as handle:
-        file = codec.IWAFile.from_dict(yaml.load(fix_unicode(handle.read().decode('utf-8'))))
+        file = codec.IWAFile.from_dict(yaml.safe_load(fix_unicode(handle.read().decode('utf-8'))))
         assert file is not None
 
 

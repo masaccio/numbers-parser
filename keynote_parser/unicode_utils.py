@@ -8,12 +8,21 @@ that result in runtime exceptions. It's Bad.
 This file aims to manually do some pre-parsing on the Yaml strings before
 decoding to ensure that whichever version of Python is doing the decoding
 can successfully parse the string.
+
+Russell Cottrell's wonderful Surrogate Pair Calculator
+(http://www.russellcottrell.com/greek/utilities/SurrogatePairCalculator.htm)
+has been invaluable in understanding how to do this translation manually,
+including the fact that Unicode surrogate pairs are only valid if the first
+element is between 0xD800 and 0xDBFF, and the second element is between
+0xDC00 and 0xDFFF.
 """
 
 import re
 import sys
 
-PY2_SURROGATE_PAIR_RE = re.compile(r'\\u([A-Fa-f0-9]{4})\\u([A-Fa-f0-9]{4})')
+PY2_SURROGATE_PAIR_RE = re.compile(
+    r'\\u([Dd][89a-bA-B][0-9a-fA-F]{2})\\u([Dd][c-fC-F][0-9a-fA-F]{2})'
+)
 PY3_MULTIBYTE_RE = re.compile(r'\\U([A-Fa-f0-9]{8})')
 
 
@@ -37,12 +46,8 @@ def to_py3_compatible(input):
         character = from_surrogate_pair(high, low)
         if not character:
             continue
-        input = input.replace(
-            "\\u%s\\u%s" % (high, low),
-            "\\U%08x" % character)
-        input = input.replace(
-            "\\U%s\\U%s" % (high, low),
-            "\\U%08x" % character)
+        input = input.replace("\\u%s\\u%s" % (high, low), "\\U%08x" % character)
+        input = input.replace("\\U%s\\U%s" % (high, low), "\\U%08x" % character)
     return input
 
 
@@ -50,12 +55,8 @@ def to_py2_compatible(input):
     """Convert an input string containing UTF-16 to Unicode surrogate pairs"""
     for multibyte_char in PY3_MULTIBYTE_RE.findall(input):
         high, low = to_surrogate_pair(multibyte_char)
-        input = input.replace(
-            "\\u%s" % multibyte_char,
-            "\\u%04x\\u%04x" % (high, low))
-        input = input.replace(
-            "\\U%s" % multibyte_char,
-            "\\u%04x\\u%04x" % (high, low))
+        input = input.replace("\\u%s" % multibyte_char, "\\u%04x\\u%04x" % (high, low))
+        input = input.replace("\\U%s" % multibyte_char, "\\u%04x\\u%04x" % (high, low))
     return input
 
 
