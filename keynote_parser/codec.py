@@ -98,8 +98,14 @@ class IWACompressedChunk(object):
         return {"archives": [archive.to_dict() for archive in self.archives]}
 
     def to_buffer(self):
-        payload = snappy.compress(b''.join([archive.to_buffer() for archive in self.archives]))
-        return b'\x00' + struct.pack('<I', len(payload))[:3] + payload
+        uncompressed = b''.join([archive.to_buffer() for archive in self.archives])
+        payloads = []
+        while uncompressed:
+            payloads.append(snappy.compress(uncompressed[:65536]))
+            uncompressed = uncompressed[65536:]
+        return b''.join(
+            [b'\x00' + struct.pack('<I', len(payload))[:3] + payload for payload in payloads]
+        )
 
 
 class ProtobufPatch(object):

@@ -10,19 +10,24 @@ EMOJI_FILENAME = './tests/data/emoji-oneslide.iwa'
 MESSAGE_TYPE_ZERO_FILENAME = './tests/data/message-type-zero.iwa'
 EMOJI_FILENAME_PY2_YAML = './tests/data/emoji-oneslide.py2.yaml'
 EMOJI_FILENAME_PY3_YAML = './tests/data/emoji-oneslide.py3.yaml'
+VERY_BIG_SLIDE = './tests/data/very-big-slide.iwa'
 
 
 def roundtrip(filename):
     with open(filename, 'rb') as f:
         test_data = f.read()
     file = codec.IWAFile.from_buffer(test_data, filename)
+    roundtrip_iwa_file(file, test_data)
+
+
+def roundtrip_iwa_file(file, binary):
     assert file is not None
     for chunk in file.chunks:
         for archive in chunk.archives:
             assert codec.IWAArchiveSegment.from_buffer(archive.to_buffer())[0] == archive
         assert codec.IWACompressedChunk.from_buffer(chunk.to_buffer())[0] == chunk
-    assert file.to_dict()
-    assert file.to_buffer() == test_data
+    assert codec.IWAFile.from_buffer(file.to_buffer()).to_dict() == file.to_dict()
+    assert file.to_buffer() == binary
 
 
 def test_iwa_simple_roundtrip():
@@ -60,3 +65,7 @@ def test_iwa_multichunk_roundtrip():
     assert file is not None
     rt_as_dict = codec.IWAFile.from_buffer(file.to_buffer(), MULTICHUNK_FILENAME).to_dict()
     assert rt_as_dict == file.to_dict()
+
+
+def test_roundtrip_very_big():
+    roundtrip(VERY_BIG_SLIDE)
