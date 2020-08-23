@@ -3,7 +3,13 @@ from __future__ import absolute_import
 
 import os
 import sys
+
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
 import yaml
+
 from contextlib import contextmanager
 
 from PIL import Image
@@ -86,8 +92,12 @@ def dir_file_sink(target_dir, raw=False):
                 if raw:
                     out.write(contents.to_buffer())
                 else:
-                    yaml.safe_dump(
-                        contents.to_dict(), out, default_flow_style=False, encoding="utf-8"
+                    yaml.dump(
+                        contents.to_dict(),
+                        out,
+                        default_flow_style=False,
+                        encoding="utf-8",
+                        Dumper=Dumper,
                     )
             else:
                 out.write(contents)
@@ -114,8 +124,11 @@ def cat_sink(subfile, raw):
                     sys.stdout.buffer.write(contents.to_buffer())
                 else:
                     print(
-                        yaml.safe_dump(
-                            contents.to_dict(), default_flow_style=False, encoding="utf-8"
+                        yaml.dump(
+                            contents.to_dict(),
+                            default_flow_style=False,
+                            encoding="utf-8",
+                            Dumper=Dumper,
                         ).decode('ascii')
                     )
             else:
@@ -152,7 +165,9 @@ def process_file(filename, handle, sink, replacements=[], raw=False, on_replace=
     if '.iwa' in filename and not raw:
         contents = handle.read()
         if filename.endswith('.yaml'):
-            file = IWAFile.from_dict(yaml.safe_load(fix_unicode(contents.decode('utf-8'))))
+            file = IWAFile.from_dict(
+                yaml.load(fix_unicode(contents.decode('utf-8')), Loader=Loader)
+            )
             filename = filename.replace('.yaml', '')
         else:
             file = IWAFile.from_buffer(contents, filename)
