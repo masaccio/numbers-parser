@@ -48,7 +48,8 @@ def zip_file_reader(path, progress=True):
 
 
 def directory_reader(path, progress=True):
-    iterator = glob(path + '/**/**') + glob(path + '/**')
+    # Python <3.5 doesn't support glob with recursive, so this will have to do.
+    iterator = set(sum([glob(path + ('/**' * i)) for i in range(10)], []))
     iterator = sorted(iterator)
     if progress:
         iterator = tqdm(iterator)
