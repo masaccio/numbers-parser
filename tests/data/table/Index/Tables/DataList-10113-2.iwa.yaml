@@ -1,0 +1,15 @@
+chunks:
+- archives:
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10113'
+      messageInfos:
+      - type: 6005
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TST.TableDataList
+      listType: CONTROL_CELL_SPEC
+      nextListID: 1

@@ -1,0 +1,2848 @@
+chunks:
+- archives:
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '1'
+      messageInfos:
+      - objectReferences:
+        - '9405'
+        - '9406'
+        - '9407'
+        - '9475'
+        - '9408'
+        - '9409'
+        type: 1
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: KN.DocumentArchive
+      show:
+        identifier: '9409'
+      super:
+        calculationEngine:
+          identifier: '9406'
+        canUseHevc: false
+        collaborativeMediaCompatibilityUpgradeDidFail: false
+        customFormatList:
+          identifier: '9407'
+        documentLanguage: en
+        functionBrowserState:
+          identifier: '9408'
+        needsMediaCompatibilityUpgrade: false
+        super:
+          annotationAuthorStorage:
+            identifier: '9405'
+          creationLocaleIdentifier: en_US
+          hasUserDefinedLocale: false
+          localeIdentifier: en_US
+          preventImageConversionOnOpen: true
+          shouldMeasureNegativelyTrackedTextCorrectly: true
+          useOptimizedTextVerticalAlignment: true
+        templateIdentifier: Application/White/Wide
+        viewState:
+          identifier: '9475'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9407'
+      messageInfos:
+      - type: 222
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TSK.CustomFormatListArchive
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9408'
+      messageInfos:
+      - type: 601
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TSA.FunctionBrowserStateArchive
+      currentFunction: 0
+      recentFunctions:
+      - 15
+      - 168
+      - 88
+      - 84
+      - 30
+      - 31
+      - 62
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9409'
+      messageInfos:
+      - objectReferences:
+        - '9367'
+        - '8717'
+        - '9410'
+        - '8722'
+        type: 2
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: KN.ShowArchive
+      automaticallyPlaysUponOpen: false
+      autoplayBuildDelay: 2.0
+      autoplayTransitionDelay: 5.0
+      idleTimerActive: false
+      idleTimerDelay: 900.0
+      loopPresentation: false
+      mode: kKNShowModeNormal
+      size:
+        height: 1080.0
+        width: 1920.0
+      slideTree:
+        slides:
+        - identifier: '9367'
+      soundtrack:
+        identifier: '8722'
+      stylesheet:
+        identifier: '9410'
+      theme:
+        identifier: '8717'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9367'
+      messageInfos:
+      - dataReferences:
+        - '223'
+        fieldInfos:
+        - path:
+            path:
+            - 27
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 26
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        objectReferences:
+        - '9368'
+        type: 4
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: KN.SlideNodeArchive
+      buildEventCountCacheVersion: 4294967295
+      depth: 1
+      hasBackgroundAlpha: false
+      hasBuilds: false
+      hasExplicitBuilds: false
+      hasExplicitBuildsCacheVersion: 1
+      hasNote: false
+      hasTransition: false
+      isHidden: false
+      isSlideNumberVisible: false
+      slide:
+        identifier: '9368'
+      thumbnailSizes:
+      - height: 200.0
+        width: 356.0
+      thumbnails:
+      - identifier: '223'
+      thumbnailsAreDirty: false
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '8717'
+      messageInfos:
+      - dataReferences:
+        - '15'
+        - '16'
+        objectReferences:
+        - '8784'
+        - '8757'
+        - '8758'
+        - '8759'
+        - '8760'
+        - '8761'
+        - '8762'
+        - '8763'
+        - '8764'
+        - '8765'
+        - '8766'
+        - '8767'
+        - '8768'
+        - '8769'
+        - '8772'
+        - '8773'
+        - '8774'
+        - '8775'
+        - '8776'
+        - '8777'
+        - '8778'
+        - '8779'
+        - '8780'
+        - '8781'
+        - '8782'
+        - '8783'
+        - '8723'
+        - '8724'
+        - '8725'
+        - '8726'
+        - '8727'
+        - '8751'
+        - '8752'
+        - '8753'
+        - '8754'
+        - '8755'
+        - '8756'
+        - '8728'
+        - '8729'
+        - '8730'
+        - '8731'
+        - '8732'
+        - '8733'
+        - '8739'
+        - '8742'
+        - '8743'
+        - '8934'
+        - '8956'
+        - '8978'
+        - '9000'
+        - '9022'
+        - '9044'
+        - '9067'
+        - '9091'
+        - '9114'
+        - '9137'
+        - '9160'
+        - '9183'
+        - '9355'
+        type: 10
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: KN.ThemeArchive
+      defaultMasterSlideNode:
+        identifier: '9355'
+      defaultMasterSlideNodeIsOurBestGuess: true
+      masters:
+      - identifier: '9355'
+      super:
+        '[TSCH.ChartPresetsArchive.extension]':
+          chartPresets:
+          - identifier: '9067'
+          - identifier: '9091'
+          - identifier: '9114'
+          - identifier: '9137'
+          - identifier: '9160'
+          - identifier: '9183'
+        '[TSD.ThemePresetsArchive.extension]':
+          drawingLineStylePresets:
+          - identifier: '8784'
+          gradientFillPresets:
+          - gradient:
+              advancedGradient: false
+              anglegradient:
+                gradientangle: 4.712389
+              opacity: 1.0
+              stops:
+              - color:
+                  a: 1.0
+                  b: 0.99999994
+                  g: 0.75772834
+                  model: rgb
+                  r: 0.33759224
+                  rgbspace: srgb
+                fraction: 0.0
+                inflection: 0.5
+              - color:
+                  a: 1.0
+                  b: 0.72913665
+                  g: 0.46245933
+                  model: rgb
+                  r: 1.6018515e-07
+                  rgbspace: srgb
+                fraction: 1.0
+                inflection: 0.5
+              type: Linear
+          - gradient:
+              advancedGradient: false
+              anglegradient:
+                gradientangle: 4.712389
+              opacity: 1.0
+              stops:
+              - color:
+                  a: 1.0
+                  b: 0.8119124
+                  g: 0.9048587
+                  model: rgb
+                  r: 0.08815592
+                  rgbspace: srgb
+                fraction: 0.0
+                inflection: 0.5
+              - color:
+                  a: 1.0
+                  b: 0.46413118
+                  g: 0.48426753
+                  model: rgb
+                  r: 1.2671924e-07
+                  rgbspace: srgb
+                fraction: 1.0
+                inflection: 0.5
+              type: Linear
+          - gradient:
+              advancedGradient: false
+              anglegradient:
+                gradientangle: 4.712389
+              opacity: 1.0
+              stops:
+              - color:
+                  a: 1.0
+                  b: 0.21206394
+                  g: 0.8482562
+                  model: rgb
+                  r: 0.3784469
+                  rgbspace: srgb
+                fraction: 0.0
+                inflection: 0.5
+              - color:
+                  a: 1.0
+                  b: 0.0017366839
+                  g: 0.44276616
+                  model: rgb
+                  r: 0.0050650947
+                  rgbspace: srgb
+                fraction: 1.0
+                inflection: 0.5
+              type: Linear
+          - gradient:
+              advancedGradient: false
+              anglegradient:
+                gradientangle: 4.712389
+              opacity: 1.0
+              stops:
+              - color:
+                  a: 1.0
+                  b: 0.1964553
+                  g: 0.88637894
+                  model: rgb
+                  r: 0.9821816
+                  rgbspace: srgb
+                fraction: 0.0
+                inflection: 0.5
+              - color:
+                  a: 1.0
+                  b: 0.0
+                  g: 0.57770604
+                  model: rgb
+                  r: 1.0
+                  rgbspace: srgb
+                fraction: 1.0
+                inflection: 0.5
+              type: Linear
+          - gradient:
+              advancedGradient: false
+              anglegradient:
+                gradientangle: 4.712389
+              opacity: 1.0
+              stops:
+              - color:
+                  a: 1.0
+                  b: 0.30555555
+                  g: 0.3906772
+                  model: rgb
+                  r: 0.99999994
+                  rgbspace: srgb
+                fraction: 0.0
+                inflection: 0.5
+              - color:
+                  a: 1.0
+                  b: 0.0
+                  g: 0.09132572
+                  model: rgb
+                  r: 0.70822424
+                  rgbspace: srgb
+                fraction: 1.0
+                inflection: 0.5
+              type: Linear
+          - gradient:
+              advancedGradient: false
+              anglegradient:
+                gradientangle: 4.712389
+              opacity: 1.0
+              stops:
+              - color:
+                  a: 1.0
+                  b: 0.6561881
+                  g: 0.3721912
+                  model: rgb
+                  r: 0.9377977
+                  rgbspace: srgb
+                fraction: 0.0
+                inflection: 0.5
+              - color:
+                  a: 1.0
+                  b: 0.37013626
+                  g: 0.09791588
+                  model: rgb
+                  r: 0.59953314
+                  rgbspace: srgb
+                fraction: 1.0
+                inflection: 0.5
+              type: Linear
+          imageFillPresets:
+          - image:
+              fillsize:
+                height: 300.0
+                width: 300.0
+              imagedata:
+                identifier: '15'
+              interpretsUntaggedImageDataAsGeneric: true
+              referencecolor:
+                a: 1.0
+                b: 0.6862745
+                g: 0.5647059
+                model: rgb
+                r: 0.3529412
+                rgbspace: srgb
+              technique: Tile
+              tint:
+                a: 0.5
+                b: 1.0
+                g: 0.7577199
+                model: rgb
+                r: 0.33634925
+                rgbspace: srgb
+          - image:
+              fillsize:
+                height: 300.0
+                width: 300.0
+              imagedata:
+                identifier: '15'
+              interpretsUntaggedImageDataAsGeneric: true
+              referencecolor:
+                a: 1.0
+                b: 0.5921569
+                g: 0.63529414
+                model: rgb
+                r: 0.22745098
+                rgbspace: srgb
+              technique: Tile
+              tint:
+                a: 0.5
+                b: 0.8119124
+                g: 0.9048587
+                model: rgb
+                r: 0.08815592
+                rgbspace: srgb
+          - image:
+              fillsize:
+                height: 300.0
+                width: 300.0
+              imagedata:
+                identifier: '16'
+              interpretsUntaggedImageDataAsGeneric: true
+              referencecolor:
+                a: 1.0
+                b: 0.36862746
+                g: 0.6862745
+                model: rgb
+                r: 0.4509804
+                rgbspace: srgb
+              technique: Tile
+              tint:
+                a: 0.5
+                b: 0.21206394
+                g: 0.8482562
+                model: rgb
+                r: 0.3784469
+                rgbspace: srgb
+          - image:
+              fillsize:
+                height: 300.0
+                width: 300.0
+              imagedata:
+                identifier: '15'
+              interpretsUntaggedImageDataAsGeneric: true
+              referencecolor:
+                a: 1.0
+                b: 0.18431373
+                g: 0.4745098
+                model: rgb
+                r: 0.6862745
+                rgbspace: srgb
+              technique: Tile
+              tint:
+                a: 0.5
+                b: 0.0
+                g: 0.57770604
+                model: rgb
+                r: 1.0
+                rgbspace: srgb
+          - image:
+              fillsize:
+                height: 300.0
+                width: 300.0
+              imagedata:
+                identifier: '15'
+              interpretsUntaggedImageDataAsGeneric: true
+              referencecolor:
+                a: 1.0
+                b: 0.20784314
+                g: 0.2509804
+                model: rgb
+                r: 0.6509804
+                rgbspace: srgb
+              technique: Tile
+              tint:
+                a: 0.5
+                b: 0.046555065
+                g: 0.13482949
+                model: rgb
+                r: 0.9321255
+                rgbspace: srgb
+          - image:
+              fillsize:
+                height: 300.0
+                width: 300.0
+              imagedata:
+                identifier: '15'
+              interpretsUntaggedImageDataAsGeneric: true
+              referencecolor:
+                a: 1.0
+                b: 0.42745098
+                g: 0.26666668
+                model: rgb
+                r: 0.58431375
+                rgbspace: srgb
+              technique: Tile
+              tint:
+                a: 0.5
+                b: 0.48277956
+                g: 0.16231453
+                model: rgb
+                r: 0.79732686
+                rgbspace: srgb
+          imageStylePresets:
+          - identifier: '8772'
+          - identifier: '8773'
+          - identifier: '8774'
+          - identifier: '8775'
+          - identifier: '8776'
+          - identifier: '8777'
+          lineStylePresets:
+          - identifier: '8757'
+          - identifier: '8758'
+          - identifier: '8759'
+          - identifier: '8760'
+          - identifier: '8761'
+          - identifier: '8762'
+          movieStylePresets:
+          - identifier: '8778'
+          - identifier: '8779'
+          - identifier: '8780'
+          - identifier: '8781'
+          - identifier: '8782'
+          - identifier: '8783'
+          shadowPresets:
+          - angle: 90.0
+            color:
+              a: 1.0
+              b: 0.0
+              g: 0.0
+              model: rgb
+              r: 0.0
+              rgbspace: srgb
+            isEnabled: true
+            offset: 2.0
+            opacity: 0.5
+            radius: 5
+            type: TSDDropShadow
+          - angle: 45.0
+            color:
+              a: 1.0
+              b: 0.0
+              g: 0.0
+              model: rgb
+              r: 0.0
+              rgbspace: srgb
+            isEnabled: true
+            offset: 5.0
+            opacity: 0.5
+            radius: 4
+            type: TSDDropShadow
+          - angle: 90.0
+            color:
+              a: 1.0
+              b: 0.0
+              g: 0.0
+              model: rgb
+              r: 0.0
+              rgbspace: srgb
+            isEnabled: true
+            offset: 8.0
+            opacity: 0.5
+            radius: 10
+            type: TSDDropShadow
+          - angle: 45.0
+            color:
+              a: 1.0
+              b: 0.0
+              g: 0.0
+              model: rgb
+              r: 0.0
+              rgbspace: srgb
+            isEnabled: true
+            offset: 0.0
+            opacity: 0.75
+            radius: 10
+            type: TSDDropShadow
+          - angle: 90.0
+            color:
+              a: 1.0
+              b: 0.0
+              g: 0.0
+              model: rgb
+              r: 0.0
+              rgbspace: srgb
+            curvedShadow:
+              curve: -0.12309546
+            isEnabled: true
+            offset: 0.665777
+            opacity: 1.0
+            radius: 15
+            type: TSDCurvedShadow
+          - angle: 90.0
+            color:
+              a: 1.0
+              b: 0.0
+              g: 0.0
+              model: rgb
+              r: 0.0
+              rgbspace: srgb
+            curvedShadow:
+              curve: 0.16487873
+            isEnabled: true
+            offset: 1.0
+            opacity: 0.75
+            radius: 15
+            type: TSDCurvedShadow
+          - angle: 0.0
+            color:
+              a: 1.0
+              b: 0.0
+              g: 0.0
+              model: rgb
+              r: 0.0
+              rgbspace: srgb
+            contactShadow:
+              height: 0.17364818
+              offset: 0.0
+            isEnabled: true
+            offset: 0.0
+            opacity: 0.75
+            radius: 28
+            type: TSDContactShadow
+          - angle: 0.0
+            color:
+              a: 1.0
+              b: 0.0
+              g: 0.0
+              model: rgb
+              r: 0.0
+              rgbspace: srgb
+            contactShadow:
+              height: 0.25
+              offset: 9.41875
+            isEnabled: true
+            offset: 9.41875
+            opacity: 0.75
+            radius: 30
+            type: TSDContactShadow
+          shapeStylePresets:
+          - identifier: '8763'
+          - identifier: '8764'
+          - identifier: '8765'
+          - identifier: '8766'
+          - identifier: '8767'
+          - identifier: '8768'
+          textboxStylePresets:
+          - identifier: '8769'
+        '[TST.ThemePresetsArchive.extension]':
+          tableStylePresets:
+          - identifier: '8934'
+          - identifier: '8956'
+          - identifier: '8978'
+          - identifier: '9000'
+          - identifier: '9022'
+          - identifier: '9044'
+        '[TSWP.ThemePresetsArchive.extension]':
+          characterStylePresets:
+          - identifier: '8751'
+          - identifier: '8752'
+          - identifier: '8753'
+          - identifier: '8754'
+          - identifier: '8755'
+          - identifier: '8756'
+          listStylePresets:
+          - identifier: '8723'
+          - identifier: '8724'
+          - identifier: '8725'
+          - identifier: '8726'
+          - identifier: '8727'
+          paragraphStylePresets:
+          - identifier: '8728'
+          - identifier: '8729'
+          - identifier: '8730'
+          - identifier: '8731'
+          - identifier: '8732'
+          - identifier: '8733'
+          - identifier: '8739'
+          - identifier: '8742'
+          - identifier: '8743'
+        colorPresets:
+        - a: 1.0
+          b: 0.99999994
+          g: 0.99999994
+          model: rgb
+          r: 0.9999966
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.8360306
+          g: 0.8360306
+          model: rgb
+          r: 0.8360306
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.57230663
+          g: 0.57230663
+          model: rgb
+          r: 0.57230675
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.3703636
+          g: 0.37036353
+          model: rgb
+          r: 0.3703636
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.0
+          g: 0.0
+          model: rgb
+          r: 0.0
+          rgbspace: srgb
+        - a: 0.0
+          b: 0.0
+          g: 0.0
+          model: rgb
+          r: 0.0
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.99999994
+          g: 0.75772834
+          model: rgb
+          r: 0.33759224
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.99999994
+          g: 0.6336031
+          model: rgb
+          r: 0.00063899887
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.72913665
+          g: 0.46245933
+          model: rgb
+          r: 1.6018515e-07
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.5
+          g: 0.30124682
+          model: rgb
+          r: 0.001130718
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.9161599
+          g: 0.99046546
+          model: rgb
+          r: 0.45002198
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.8119124
+          g: 0.9048587
+          model: rgb
+          r: 0.08815592
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.615274
+          g: 0.65958506
+          model: rgb
+          r: 2.1320419e-07
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.46413118
+          g: 0.48426753
+          model: rgb
+          r: 1.2671924e-07
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.30738842
+          g: 0.9803099
+          model: rgb
+          r: 0.5346361
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.21206394
+          g: 0.8482562
+          model: rgb
+          r: 0.3784469
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.0017174729
+          g: 0.6937541
+          model: rgb
+          r: 0.11306291
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.0017366839
+          g: 0.44276616
+          model: rgb
+          r: 0.0050650947
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.40172586
+          g: 0.98754984
+          model: rgb
+          r: 0.99950236
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.1964553
+          g: 0.88637894
+          model: rgb
+          r: 0.9821816
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.0
+          g: 0.7305998
+          model: rgb
+          r: 0.9741331
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.0
+          g: 0.57770604
+          model: rgb
+          r: 1.0
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.5529262
+          g: 0.5887385
+          model: rgb
+          r: 1.0
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.30555555
+          g: 0.3906772
+          model: rgb
+          r: 0.99999994
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.046555065
+          g: 0.13482949
+          model: rgb
+          r: 0.9321255
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.0
+          g: 0.09132572
+          model: rgb
+          r: 0.70822424
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.77604073
+          g: 0.5513293
+          model: rgb
+          r: 1.0
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.6561881
+          g: 0.3721912
+          model: rgb
+          r: 0.9377977
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.48277956
+          g: 0.16231453
+          model: rgb
+          r: 0.79732686
+          rgbspace: srgb
+        - a: 1.0
+          b: 0.37013626
+          g: 0.09791588
+          model: rgb
+          r: 0.59953314
+          rgbspace: srgb
+        documentStylesheet:
+          identifier: '9410'
+        themeIdentifier: White
+      uuid: 666B202E-F9BB-4CA4-B8B2-C09B05ADD8EC
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '8934'
+      messageInfos:
+      - objectReferences:
+        - '9411'
+        type: 6008
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.TableStylePresetArchive
+      styleNetwork:
+        identifier: '9411'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9411'
+      messageInfos:
+      - fieldInfos:
+        - path:
+            path:
+            - 27
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 26
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 25
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 24
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 23
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 32
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 31
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 30
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 29
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 28
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 17
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 16
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 15
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 14
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 13
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 22
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 21
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 20
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 19
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 18
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        objectReferences:
+        - '8913'
+        - '8915'
+        - '8916'
+        - '8917'
+        - '8914'
+        - '8745'
+        - '8746'
+        - '8744'
+        - '8933'
+        - '8918'
+        - '8919'
+        - '8920'
+        - '8921'
+        - '8922'
+        - '8923'
+        - '8924'
+        - '8925'
+        - '8926'
+        - '8927'
+        - '8928'
+        - '8929'
+        - '8930'
+        - '8931'
+        - '8932'
+        type: 6247
+        version:
+        - 2
+        - 4
+        - 0
+      - objectReferences:
+        - '8913'
+        - '8915'
+        - '8916'
+        - '8917'
+        - '8914'
+        - '8745'
+        - '8746'
+        - '8744'
+        - '8933'
+        type: 6247
+        version:
+        - 2
+        - 0
+        - 0
+    objects:
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '8914'
+      bodyTextStyle:
+        identifier: '8746'
+      categoryLevel1Style:
+        identifier: '8918'
+      categoryLevel1TextStyle:
+        identifier: '8745'
+      categoryLevel2Style:
+        identifier: '8919'
+      categoryLevel2TextStyle:
+        identifier: '8745'
+      categoryLevel3Style:
+        identifier: '8920'
+      categoryLevel3TextStyle:
+        identifier: '8745'
+      categoryLevel4Style:
+        identifier: '8921'
+      categoryLevel4TextStyle:
+        identifier: '8745'
+      categoryLevel5Style:
+        identifier: '8922'
+      categoryLevel5TextStyle:
+        identifier: '8745'
+      footerRowStyle:
+        identifier: '8917'
+      footerRowTextStyle:
+        identifier: '8746'
+      headerColumnStyle:
+        identifier: '8916'
+      headerColumnTextStyle:
+        identifier: '8745'
+      headerRowStyle:
+        identifier: '8915'
+      headerRowTextStyle:
+        identifier: '8745'
+      labelLevel1Style:
+        identifier: '8923'
+      labelLevel1TextStyle:
+        identifier: '8928'
+      labelLevel2Style:
+        identifier: '8924'
+      labelLevel2TextStyle:
+        identifier: '8929'
+      labelLevel3Style:
+        identifier: '8925'
+      labelLevel3TextStyle:
+        identifier: '8930'
+      labelLevel4Style:
+        identifier: '8926'
+      labelLevel4TextStyle:
+        identifier: '8931'
+      labelLevel5Style:
+        identifier: '8927'
+      labelLevel5TextStyle:
+        identifier: '8932'
+      presetId: 0
+      tableNameShapeStyle:
+        identifier: '8933'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '8913'
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '8914'
+      bodyTextStyle:
+        identifier: '8746'
+      footerRowStyle:
+        identifier: '8917'
+      footerRowTextStyle:
+        identifier: '8746'
+      headerColumnStyle:
+        identifier: '8916'
+      headerColumnTextStyle:
+        identifier: '8745'
+      headerRowStyle:
+        identifier: '8915'
+      headerRowTextStyle:
+        identifier: '8745'
+      presetId: 0
+      tableNameShapeStyle:
+        identifier: '8933'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '8913'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '8956'
+      messageInfos:
+      - objectReferences:
+        - '9412'
+        type: 6008
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.TableStylePresetArchive
+      styleNetwork:
+        identifier: '9412'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9412'
+      messageInfos:
+      - fieldInfos:
+        - path:
+            path:
+            - 27
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 26
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 25
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 24
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 23
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 32
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 31
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 30
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 29
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 28
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 17
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 16
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 15
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 14
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 13
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 22
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 21
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 20
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 19
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 18
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        objectReferences:
+        - '8935'
+        - '8937'
+        - '8938'
+        - '8939'
+        - '8936'
+        - '8747'
+        - '8746'
+        - '8744'
+        - '8955'
+        - '8940'
+        - '8941'
+        - '8942'
+        - '8943'
+        - '8944'
+        - '8945'
+        - '8946'
+        - '8947'
+        - '8948'
+        - '8949'
+        - '8950'
+        - '8951'
+        - '8952'
+        - '8953'
+        - '8954'
+        type: 6247
+        version:
+        - 2
+        - 4
+        - 0
+      - objectReferences:
+        - '8935'
+        - '8937'
+        - '8938'
+        - '8939'
+        - '8936'
+        - '8747'
+        - '8746'
+        - '8744'
+        - '8955'
+        type: 6247
+        version:
+        - 2
+        - 0
+        - 0
+    objects:
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '8936'
+      bodyTextStyle:
+        identifier: '8746'
+      categoryLevel1Style:
+        identifier: '8940'
+      categoryLevel1TextStyle:
+        identifier: '8747'
+      categoryLevel2Style:
+        identifier: '8941'
+      categoryLevel2TextStyle:
+        identifier: '8747'
+      categoryLevel3Style:
+        identifier: '8942'
+      categoryLevel3TextStyle:
+        identifier: '8747'
+      categoryLevel4Style:
+        identifier: '8943'
+      categoryLevel4TextStyle:
+        identifier: '8747'
+      categoryLevel5Style:
+        identifier: '8944'
+      categoryLevel5TextStyle:
+        identifier: '8747'
+      footerRowStyle:
+        identifier: '8939'
+      footerRowTextStyle:
+        identifier: '8746'
+      headerColumnStyle:
+        identifier: '8938'
+      headerColumnTextStyle:
+        identifier: '8747'
+      headerRowStyle:
+        identifier: '8937'
+      headerRowTextStyle:
+        identifier: '8747'
+      labelLevel1Style:
+        identifier: '8945'
+      labelLevel1TextStyle:
+        identifier: '8950'
+      labelLevel2Style:
+        identifier: '8946'
+      labelLevel2TextStyle:
+        identifier: '8951'
+      labelLevel3Style:
+        identifier: '8947'
+      labelLevel3TextStyle:
+        identifier: '8952'
+      labelLevel4Style:
+        identifier: '8948'
+      labelLevel4TextStyle:
+        identifier: '8953'
+      labelLevel5Style:
+        identifier: '8949'
+      labelLevel5TextStyle:
+        identifier: '8954'
+      presetId: 1
+      tableNameShapeStyle:
+        identifier: '8955'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '8935'
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '8936'
+      bodyTextStyle:
+        identifier: '8746'
+      footerRowStyle:
+        identifier: '8939'
+      footerRowTextStyle:
+        identifier: '8746'
+      headerColumnStyle:
+        identifier: '8938'
+      headerColumnTextStyle:
+        identifier: '8747'
+      headerRowStyle:
+        identifier: '8937'
+      headerRowTextStyle:
+        identifier: '8747'
+      presetId: 1
+      tableNameShapeStyle:
+        identifier: '8955'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '8935'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '8978'
+      messageInfos:
+      - objectReferences:
+        - '9413'
+        type: 6008
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.TableStylePresetArchive
+      styleNetwork:
+        identifier: '9413'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9413'
+      messageInfos:
+      - fieldInfos:
+        - path:
+            path:
+            - 27
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 26
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 25
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 24
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 23
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 32
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 31
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 30
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 29
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 28
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 17
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 16
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 15
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 14
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 13
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 22
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 21
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 20
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 19
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 18
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        objectReferences:
+        - '8957'
+        - '8959'
+        - '8960'
+        - '8961'
+        - '8958'
+        - '8747'
+        - '8749'
+        - '8744'
+        - '8977'
+        - '8962'
+        - '8963'
+        - '8964'
+        - '8965'
+        - '8966'
+        - '8967'
+        - '8968'
+        - '8969'
+        - '8970'
+        - '8971'
+        - '8972'
+        - '8973'
+        - '8974'
+        - '8975'
+        - '8976'
+        type: 6247
+        version:
+        - 2
+        - 4
+        - 0
+      - objectReferences:
+        - '8957'
+        - '8959'
+        - '8960'
+        - '8961'
+        - '8958'
+        - '8747'
+        - '8749'
+        - '8744'
+        - '8977'
+        type: 6247
+        version:
+        - 2
+        - 0
+        - 0
+    objects:
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '8958'
+      bodyTextStyle:
+        identifier: '8749'
+      categoryLevel1Style:
+        identifier: '8962'
+      categoryLevel1TextStyle:
+        identifier: '8747'
+      categoryLevel2Style:
+        identifier: '8963'
+      categoryLevel2TextStyle:
+        identifier: '8747'
+      categoryLevel3Style:
+        identifier: '8964'
+      categoryLevel3TextStyle:
+        identifier: '8747'
+      categoryLevel4Style:
+        identifier: '8965'
+      categoryLevel4TextStyle:
+        identifier: '8747'
+      categoryLevel5Style:
+        identifier: '8966'
+      categoryLevel5TextStyle:
+        identifier: '8747'
+      footerRowStyle:
+        identifier: '8961'
+      footerRowTextStyle:
+        identifier: '8747'
+      headerColumnStyle:
+        identifier: '8960'
+      headerColumnTextStyle:
+        identifier: '8747'
+      headerRowStyle:
+        identifier: '8959'
+      headerRowTextStyle:
+        identifier: '8747'
+      labelLevel1Style:
+        identifier: '8967'
+      labelLevel1TextStyle:
+        identifier: '8972'
+      labelLevel2Style:
+        identifier: '8968'
+      labelLevel2TextStyle:
+        identifier: '8973'
+      labelLevel3Style:
+        identifier: '8969'
+      labelLevel3TextStyle:
+        identifier: '8974'
+      labelLevel4Style:
+        identifier: '8970'
+      labelLevel4TextStyle:
+        identifier: '8975'
+      labelLevel5Style:
+        identifier: '8971'
+      labelLevel5TextStyle:
+        identifier: '8976'
+      presetId: 2
+      tableNameShapeStyle:
+        identifier: '8977'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '8957'
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '8958'
+      bodyTextStyle:
+        identifier: '8749'
+      footerRowStyle:
+        identifier: '8961'
+      footerRowTextStyle:
+        identifier: '8747'
+      headerColumnStyle:
+        identifier: '8960'
+      headerColumnTextStyle:
+        identifier: '8747'
+      headerRowStyle:
+        identifier: '8959'
+      headerRowTextStyle:
+        identifier: '8747'
+      presetId: 2
+      tableNameShapeStyle:
+        identifier: '8977'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '8957'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9000'
+      messageInfos:
+      - objectReferences:
+        - '9414'
+        type: 6008
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.TableStylePresetArchive
+      styleNetwork:
+        identifier: '9414'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9414'
+      messageInfos:
+      - fieldInfos:
+        - path:
+            path:
+            - 27
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 26
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 25
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 24
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 23
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 32
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 31
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 30
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 29
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 28
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 17
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 16
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 15
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 14
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 13
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 22
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 21
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 20
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 19
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 18
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        objectReferences:
+        - '8979'
+        - '8981'
+        - '8982'
+        - '8983'
+        - '8980'
+        - '8745'
+        - '8746'
+        - '8744'
+        - '8999'
+        - '8984'
+        - '8985'
+        - '8986'
+        - '8987'
+        - '8988'
+        - '8989'
+        - '8990'
+        - '8991'
+        - '8992'
+        - '8993'
+        - '8994'
+        - '8995'
+        - '8996'
+        - '8997'
+        - '8998'
+        type: 6247
+        version:
+        - 2
+        - 4
+        - 0
+      - objectReferences:
+        - '8979'
+        - '8981'
+        - '8982'
+        - '8983'
+        - '8980'
+        - '8745'
+        - '8746'
+        - '8744'
+        - '8999'
+        type: 6247
+        version:
+        - 2
+        - 0
+        - 0
+    objects:
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '8980'
+      bodyTextStyle:
+        identifier: '8746'
+      categoryLevel1Style:
+        identifier: '8984'
+      categoryLevel1TextStyle:
+        identifier: '8745'
+      categoryLevel2Style:
+        identifier: '8985'
+      categoryLevel2TextStyle:
+        identifier: '8745'
+      categoryLevel3Style:
+        identifier: '8986'
+      categoryLevel3TextStyle:
+        identifier: '8745'
+      categoryLevel4Style:
+        identifier: '8987'
+      categoryLevel4TextStyle:
+        identifier: '8745'
+      categoryLevel5Style:
+        identifier: '8988'
+      categoryLevel5TextStyle:
+        identifier: '8745'
+      footerRowStyle:
+        identifier: '8983'
+      footerRowTextStyle:
+        identifier: '8745'
+      headerColumnStyle:
+        identifier: '8982'
+      headerColumnTextStyle:
+        identifier: '8745'
+      headerRowStyle:
+        identifier: '8981'
+      headerRowTextStyle:
+        identifier: '8745'
+      labelLevel1Style:
+        identifier: '8989'
+      labelLevel1TextStyle:
+        identifier: '8994'
+      labelLevel2Style:
+        identifier: '8990'
+      labelLevel2TextStyle:
+        identifier: '8995'
+      labelLevel3Style:
+        identifier: '8991'
+      labelLevel3TextStyle:
+        identifier: '8996'
+      labelLevel4Style:
+        identifier: '8992'
+      labelLevel4TextStyle:
+        identifier: '8997'
+      labelLevel5Style:
+        identifier: '8993'
+      labelLevel5TextStyle:
+        identifier: '8998'
+      presetId: 3
+      tableNameShapeStyle:
+        identifier: '8999'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '8979'
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '8980'
+      bodyTextStyle:
+        identifier: '8746'
+      footerRowStyle:
+        identifier: '8983'
+      footerRowTextStyle:
+        identifier: '8745'
+      headerColumnStyle:
+        identifier: '8982'
+      headerColumnTextStyle:
+        identifier: '8745'
+      headerRowStyle:
+        identifier: '8981'
+      headerRowTextStyle:
+        identifier: '8745'
+      presetId: 3
+      tableNameShapeStyle:
+        identifier: '8999'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '8979'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9022'
+      messageInfos:
+      - objectReferences:
+        - '9415'
+        type: 6008
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.TableStylePresetArchive
+      styleNetwork:
+        identifier: '9415'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9415'
+      messageInfos:
+      - fieldInfos:
+        - path:
+            path:
+            - 27
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 26
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 25
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 24
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 23
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 32
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 31
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 30
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 29
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 28
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 17
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 16
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 15
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 14
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 13
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 22
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 21
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 20
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 19
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 18
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        objectReferences:
+        - '9001'
+        - '9003'
+        - '9004'
+        - '9005'
+        - '9002'
+        - '8745'
+        - '8746'
+        - '8744'
+        - '9021'
+        - '9006'
+        - '9007'
+        - '9008'
+        - '9009'
+        - '9010'
+        - '9011'
+        - '9012'
+        - '9013'
+        - '9014'
+        - '9015'
+        - '9016'
+        - '9017'
+        - '9018'
+        - '9019'
+        - '9020'
+        type: 6247
+        version:
+        - 2
+        - 4
+        - 0
+      - objectReferences:
+        - '9001'
+        - '9003'
+        - '9004'
+        - '9005'
+        - '9002'
+        - '8745'
+        - '8746'
+        - '8744'
+        - '9021'
+        type: 6247
+        version:
+        - 2
+        - 0
+        - 0
+    objects:
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '9002'
+      bodyTextStyle:
+        identifier: '8746'
+      categoryLevel1Style:
+        identifier: '9006'
+      categoryLevel1TextStyle:
+        identifier: '8745'
+      categoryLevel2Style:
+        identifier: '9007'
+      categoryLevel2TextStyle:
+        identifier: '8745'
+      categoryLevel3Style:
+        identifier: '9008'
+      categoryLevel3TextStyle:
+        identifier: '8745'
+      categoryLevel4Style:
+        identifier: '9009'
+      categoryLevel4TextStyle:
+        identifier: '8745'
+      categoryLevel5Style:
+        identifier: '9010'
+      categoryLevel5TextStyle:
+        identifier: '8745'
+      footerRowStyle:
+        identifier: '9005'
+      footerRowTextStyle:
+        identifier: '8745'
+      headerColumnStyle:
+        identifier: '9004'
+      headerColumnTextStyle:
+        identifier: '8745'
+      headerRowStyle:
+        identifier: '9003'
+      headerRowTextStyle:
+        identifier: '8745'
+      labelLevel1Style:
+        identifier: '9011'
+      labelLevel1TextStyle:
+        identifier: '9016'
+      labelLevel2Style:
+        identifier: '9012'
+      labelLevel2TextStyle:
+        identifier: '9017'
+      labelLevel3Style:
+        identifier: '9013'
+      labelLevel3TextStyle:
+        identifier: '9018'
+      labelLevel4Style:
+        identifier: '9014'
+      labelLevel4TextStyle:
+        identifier: '9019'
+      labelLevel5Style:
+        identifier: '9015'
+      labelLevel5TextStyle:
+        identifier: '9020'
+      presetId: 4
+      tableNameShapeStyle:
+        identifier: '9021'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '9001'
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '9002'
+      bodyTextStyle:
+        identifier: '8746'
+      footerRowStyle:
+        identifier: '9005'
+      footerRowTextStyle:
+        identifier: '8745'
+      headerColumnStyle:
+        identifier: '9004'
+      headerColumnTextStyle:
+        identifier: '8745'
+      headerRowStyle:
+        identifier: '9003'
+      headerRowTextStyle:
+        identifier: '8745'
+      presetId: 4
+      tableNameShapeStyle:
+        identifier: '9021'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '9001'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9044'
+      messageInfos:
+      - objectReferences:
+        - '9416'
+        type: 6008
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.TableStylePresetArchive
+      styleNetwork:
+        identifier: '9416'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9416'
+      messageInfos:
+      - fieldInfos:
+        - path:
+            path:
+            - 27
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 26
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 25
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 24
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 23
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 32
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 31
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 30
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 29
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 28
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 17
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 16
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 15
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 14
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 13
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 22
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 21
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 20
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 19
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 18
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        objectReferences:
+        - '9023'
+        - '9025'
+        - '9026'
+        - '9027'
+        - '9024'
+        - '8748'
+        - '8746'
+        - '8744'
+        - '9043'
+        - '9028'
+        - '9029'
+        - '9030'
+        - '9031'
+        - '9032'
+        - '9033'
+        - '9034'
+        - '9035'
+        - '9036'
+        - '9037'
+        - '9038'
+        - '9039'
+        - '9040'
+        - '9041'
+        - '9042'
+        type: 6247
+        version:
+        - 2
+        - 4
+        - 0
+      - objectReferences:
+        - '9023'
+        - '9025'
+        - '9026'
+        - '9027'
+        - '9024'
+        - '8748'
+        - '8746'
+        - '8744'
+        - '9043'
+        type: 6247
+        version:
+        - 2
+        - 0
+        - 0
+    objects:
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '9024'
+      bodyTextStyle:
+        identifier: '8746'
+      categoryLevel1Style:
+        identifier: '9028'
+      categoryLevel1TextStyle:
+        identifier: '8748'
+      categoryLevel2Style:
+        identifier: '9029'
+      categoryLevel2TextStyle:
+        identifier: '8748'
+      categoryLevel3Style:
+        identifier: '9030'
+      categoryLevel3TextStyle:
+        identifier: '8748'
+      categoryLevel4Style:
+        identifier: '9031'
+      categoryLevel4TextStyle:
+        identifier: '8748'
+      categoryLevel5Style:
+        identifier: '9032'
+      categoryLevel5TextStyle:
+        identifier: '8748'
+      footerRowStyle:
+        identifier: '9027'
+      footerRowTextStyle:
+        identifier: '8748'
+      headerColumnStyle:
+        identifier: '9026'
+      headerColumnTextStyle:
+        identifier: '8748'
+      headerRowStyle:
+        identifier: '9025'
+      headerRowTextStyle:
+        identifier: '8748'
+      labelLevel1Style:
+        identifier: '9033'
+      labelLevel1TextStyle:
+        identifier: '9038'
+      labelLevel2Style:
+        identifier: '9034'
+      labelLevel2TextStyle:
+        identifier: '9039'
+      labelLevel3Style:
+        identifier: '9035'
+      labelLevel3TextStyle:
+        identifier: '9040'
+      labelLevel4Style:
+        identifier: '9036'
+      labelLevel4TextStyle:
+        identifier: '9041'
+      labelLevel5Style:
+        identifier: '9037'
+      labelLevel5TextStyle:
+        identifier: '9042'
+      presetId: 5
+      tableNameShapeStyle:
+        identifier: '9043'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '9023'
+    - _pbtype: TST.TableStyleNetworkArchive
+      bodyCellStyle:
+        identifier: '9024'
+      bodyTextStyle:
+        identifier: '8746'
+      footerRowStyle:
+        identifier: '9027'
+      footerRowTextStyle:
+        identifier: '8748'
+      headerColumnStyle:
+        identifier: '9026'
+      headerColumnTextStyle:
+        identifier: '8748'
+      headerRowStyle:
+        identifier: '9025'
+      headerRowTextStyle:
+        identifier: '8748'
+      presetId: 5
+      tableNameShapeStyle:
+        identifier: '9043'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '9023'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9067'
+      messageInfos:
+      - objectReferences:
+        - '9045'
+        - '9046'
+        - '9047'
+        - '9048'
+        - '9049'
+        - '9050'
+        - '9051'
+        - '9052'
+        - '9053'
+        - '9054'
+        - '9055'
+        - '9057'
+        - '9058'
+        - '9059'
+        - '9060'
+        - '9061'
+        - '9062'
+        - '9063'
+        - '9064'
+        - '9065'
+        - '9066'
+        type: 5020
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - '[TSCH.preset_reference_line_styles]':
+        referenceLineStyles:
+        - identifier: '9066'
+      _pbtype: TSCH.ChartStylePreset
+      categoryAxisStyles:
+      - identifier: '9049'
+      chartStyle:
+        identifier: '9045'
+      legendStyle:
+        identifier: '9046'
+      paragraphStyles:
+      - identifier: '9057'
+      - identifier: '9058'
+      - identifier: '9059'
+      - identifier: '9060'
+      - identifier: '9061'
+      - identifier: '9062'
+      - identifier: '9063'
+      - identifier: '9064'
+      - identifier: '9065'
+      seriesStyles:
+      - identifier: '9050'
+      - identifier: '9051'
+      - identifier: '9052'
+      - identifier: '9053'
+      - identifier: '9054'
+      - identifier: '9055'
+      uuid: v6gea8j3QDy1eaBI1xQnHg==
+      valueAxisStyles:
+      - identifier: '9047'
+      - identifier: '9048'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9091'
+      messageInfos:
+      - objectReferences:
+        - '9068'
+        - '9069'
+        - '9070'
+        - '9071'
+        - '9072'
+        - '9073'
+        - '9074'
+        - '9075'
+        - '9076'
+        - '9077'
+        - '9078'
+        - '9080'
+        - '9081'
+        - '9082'
+        - '9083'
+        - '9084'
+        - '9085'
+        - '9086'
+        - '9087'
+        - '9088'
+        - '9089'
+        - '9090'
+        type: 5020
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - '[TSCH.preset_reference_line_styles]':
+        referenceLineStyles:
+        - identifier: '9090'
+      _pbtype: TSCH.ChartStylePreset
+      categoryAxisStyles:
+      - identifier: '9072'
+      chartStyle:
+        identifier: '9068'
+      legendStyle:
+        identifier: '9069'
+      paragraphStyles:
+      - identifier: '9080'
+      - identifier: '9081'
+      - identifier: '9082'
+      - identifier: '9083'
+      - identifier: '9084'
+      - identifier: '9085'
+      - identifier: '9086'
+      - identifier: '9087'
+      - identifier: '9088'
+      - identifier: '9089'
+      seriesStyles:
+      - identifier: '9073'
+      - identifier: '9074'
+      - identifier: '9075'
+      - identifier: '9076'
+      - identifier: '9077'
+      - identifier: '9078'
+      uuid: MxuGoOvVTGC70gpINlNv6Q==
+      valueAxisStyles:
+      - identifier: '9070'
+      - identifier: '9071'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9114'
+      messageInfos:
+      - objectReferences:
+        - '9092'
+        - '9093'
+        - '9094'
+        - '9095'
+        - '9096'
+        - '9097'
+        - '9098'
+        - '9099'
+        - '9100'
+        - '9101'
+        - '9102'
+        - '9104'
+        - '9105'
+        - '9106'
+        - '9107'
+        - '9108'
+        - '9109'
+        - '9110'
+        - '9111'
+        - '9112'
+        - '9113'
+        type: 5020
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - '[TSCH.preset_reference_line_styles]':
+        referenceLineStyles:
+        - identifier: '9113'
+      _pbtype: TSCH.ChartStylePreset
+      categoryAxisStyles:
+      - identifier: '9096'
+      chartStyle:
+        identifier: '9092'
+      legendStyle:
+        identifier: '9093'
+      paragraphStyles:
+      - identifier: '9104'
+      - identifier: '9105'
+      - identifier: '9106'
+      - identifier: '9107'
+      - identifier: '9108'
+      - identifier: '9109'
+      - identifier: '9110'
+      - identifier: '9111'
+      - identifier: '9112'
+      seriesStyles:
+      - identifier: '9097'
+      - identifier: '9098'
+      - identifier: '9099'
+      - identifier: '9100'
+      - identifier: '9101'
+      - identifier: '9102'
+      uuid: GNzky0ziRRSgC9xK31kvHw==
+      valueAxisStyles:
+      - identifier: '9094'
+      - identifier: '9095'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9137'
+      messageInfos:
+      - objectReferences:
+        - '9115'
+        - '9116'
+        - '9117'
+        - '9118'
+        - '9119'
+        - '9120'
+        - '9121'
+        - '9122'
+        - '9123'
+        - '9124'
+        - '9125'
+        - '9127'
+        - '9128'
+        - '9129'
+        - '9130'
+        - '9131'
+        - '9132'
+        - '9133'
+        - '9134'
+        - '9135'
+        - '9136'
+        type: 5020
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - '[TSCH.preset_reference_line_styles]':
+        referenceLineStyles:
+        - identifier: '9136'
+      _pbtype: TSCH.ChartStylePreset
+      categoryAxisStyles:
+      - identifier: '9119'
+      chartStyle:
+        identifier: '9115'
+      legendStyle:
+        identifier: '9116'
+      paragraphStyles:
+      - identifier: '9127'
+      - identifier: '9128'
+      - identifier: '9129'
+      - identifier: '9130'
+      - identifier: '9131'
+      - identifier: '9132'
+      - identifier: '9133'
+      - identifier: '9134'
+      - identifier: '9135'
+      seriesStyles:
+      - identifier: '9120'
+      - identifier: '9121'
+      - identifier: '9122'
+      - identifier: '9123'
+      - identifier: '9124'
+      - identifier: '9125'
+      uuid: eiSW9o/bTPWbiQIcxmRsqw==
+      valueAxisStyles:
+      - identifier: '9117'
+      - identifier: '9118'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9160'
+      messageInfos:
+      - objectReferences:
+        - '9138'
+        - '9139'
+        - '9140'
+        - '9141'
+        - '9142'
+        - '9143'
+        - '9144'
+        - '9145'
+        - '9146'
+        - '9147'
+        - '9148'
+        - '9150'
+        - '9151'
+        - '9152'
+        - '9153'
+        - '9154'
+        - '9155'
+        - '9156'
+        - '9157'
+        - '9158'
+        - '9159'
+        type: 5020
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - '[TSCH.preset_reference_line_styles]':
+        referenceLineStyles:
+        - identifier: '9159'
+      _pbtype: TSCH.ChartStylePreset
+      categoryAxisStyles:
+      - identifier: '9142'
+      chartStyle:
+        identifier: '9138'
+      legendStyle:
+        identifier: '9139'
+      paragraphStyles:
+      - identifier: '9150'
+      - identifier: '9151'
+      - identifier: '9152'
+      - identifier: '9153'
+      - identifier: '9154'
+      - identifier: '9155'
+      - identifier: '9156'
+      - identifier: '9157'
+      - identifier: '9158'
+      seriesStyles:
+      - identifier: '9143'
+      - identifier: '9144'
+      - identifier: '9145'
+      - identifier: '9146'
+      - identifier: '9147'
+      - identifier: '9148'
+      uuid: UjdAmHNkS5C+Aks02vrEiA==
+      valueAxisStyles:
+      - identifier: '9140'
+      - identifier: '9141'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9183'
+      messageInfos:
+      - objectReferences:
+        - '9161'
+        - '9162'
+        - '9163'
+        - '9164'
+        - '9165'
+        - '9166'
+        - '9167'
+        - '9168'
+        - '9169'
+        - '9170'
+        - '9171'
+        - '9173'
+        - '9174'
+        - '9175'
+        - '9176'
+        - '9177'
+        - '9178'
+        - '9179'
+        - '9180'
+        - '9181'
+        - '9182'
+        type: 5020
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - '[TSCH.preset_reference_line_styles]':
+        referenceLineStyles:
+        - identifier: '9182'
+      _pbtype: TSCH.ChartStylePreset
+      categoryAxisStyles:
+      - identifier: '9165'
+      chartStyle:
+        identifier: '9161'
+      legendStyle:
+        identifier: '9162'
+      paragraphStyles:
+      - identifier: '9173'
+      - identifier: '9174'
+      - identifier: '9175'
+      - identifier: '9176'
+      - identifier: '9177'
+      - identifier: '9178'
+      - identifier: '9179'
+      - identifier: '9180'
+      - identifier: '9181'
+      seriesStyles:
+      - identifier: '9166'
+      - identifier: '9167'
+      - identifier: '9168'
+      - identifier: '9169'
+      - identifier: '9170'
+      - identifier: '9171'
+      uuid: grB/vmrSQ0mYvxCl/XruNg==
+      valueAxisStyles:
+      - identifier: '9163'
+      - identifier: '9164'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9355'
+      messageInfos:
+      - dataReferences:
+        - '210'
+        fieldInfos:
+        - path:
+            path:
+            - 27
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 26
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        objectReferences:
+        - '9356'
+        type: 4
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: KN.SlideNodeArchive
+      buildEventCountCacheVersion: 4294967295
+      depth: 1
+      hasBackgroundAlpha: false
+      hasBuilds: false
+      hasExplicitBuildsCacheVersion: 4294967295
+      hasNote: false
+      hasTransition: false
+      isHidden: false
+      isSlideNumberVisible: false
+      slide:
+        identifier: '9356'
+      thumbnailSizes:
+      - height: 200.0
+        width: 356.0
+      thumbnails:
+      - identifier: '210'
+      thumbnailsAreDirty: false
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '8722'
+      messageInfos:
+      - type: 21
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: KN.Soundtrack
+      mode: kKNSoundtrackModePlayOnce
+      volume: 1.0

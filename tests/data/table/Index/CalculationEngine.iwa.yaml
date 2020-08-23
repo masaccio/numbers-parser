@@ -1,0 +1,2015 @@
+chunks:
+- archives:
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9406'
+      messageInfos:
+      - fieldInfos:
+        - path:
+            path:
+            - 2
+            - 6
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        objectReferences:
+        - '10797'
+        - '10798'
+        - '10799'
+        - '10800'
+        - '10801'
+        - '10802'
+        - '10803'
+        - '10804'
+        - '10805'
+        - '9476'
+        - '9477'
+        type: 4000
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TSCE.CalculationEngineArchive
+      dependencyTracker:
+        formulaOwnerDependencies:
+        - identifier: '10797'
+        - identifier: '10798'
+        - identifier: '10799'
+        - identifier: '10800'
+        - identifier: '10801'
+        - identifier: '10802'
+        - identifier: '10803'
+        - identifier: '10804'
+        - identifier: '10805'
+        - identifier: '9476'
+        formulaOwnerInfo:
+        - cellDependencies:
+            cellRecord:
+            - column: 0
+              containsAFormula: true
+              edges:
+                packedEdgeWithoutOwner:
+                - 16908288
+              row: 0
+            - column: 1
+              containsAFormula: true
+              edges: {}
+              row: 0
+            - column: 2
+              containsAFormula: true
+              edges: {}
+              row: 0
+            - column: 3
+              containsAFormula: true
+              edges: {}
+              row: 0
+          cellErrors: {}
+          formulaOwnerId:
+            uuidW0: 2804104334
+            uuidW1: 759960105
+            uuidW2: 1812348586
+            uuidW3: 1957462757
+          rangeDependencies: {}
+          spanningColumnDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          spanningRowDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          volatileDependencies: {}
+          wholeOwnerDependencies: {}
+        - cellDependencies: {}
+          cellErrors: {}
+          formulaOwnerId:
+            uuidW0: 2101685586
+            uuidW1: 1414121349
+            uuidW2: 3526192777
+            uuidW3: 3971501235
+          rangeDependencies: {}
+          spanningColumnDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          spanningRowDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          volatileDependencies: {}
+          wholeOwnerDependencies: {}
+        - cellDependencies: {}
+          cellErrors: {}
+          formulaOwnerId:
+            uuidW0: 3578956755
+            uuidW1: 1162487785
+            uuidW2: 3859187372
+            uuidW3: 3956038839
+          rangeDependencies: {}
+          spanningColumnDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          spanningRowDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          volatileDependencies: {}
+          wholeOwnerDependencies: {}
+        - cellDependencies: {}
+          cellErrors: {}
+          formulaOwnerId:
+            uuidW0: 3503180417
+            uuidW1: 3645017511
+            uuidW2: 2828703625
+            uuidW3: 988498528
+          rangeDependencies: {}
+          spanningColumnDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          spanningRowDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          volatileDependencies: {}
+          wholeOwnerDependencies: {}
+        - cellDependencies: {}
+          cellErrors: {}
+          formulaOwnerId:
+            uuidW0: 749790559
+            uuidW1: 2739850155
+            uuidW2: 3452903352
+            uuidW3: 2216504347
+          rangeDependencies: {}
+          spanningColumnDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          spanningRowDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          volatileDependencies: {}
+          wholeOwnerDependencies: {}
+        - cellDependencies: {}
+          cellErrors: {}
+          formulaOwnerId:
+            uuidW0: 281304056
+            uuidW1: 1061625793
+            uuidW2: 3570392484
+            uuidW3: 2737534173
+          rangeDependencies: {}
+          spanningColumnDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          spanningRowDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          volatileDependencies: {}
+          wholeOwnerDependencies: {}
+        - cellDependencies: {}
+          cellErrors: {}
+          formulaOwnerId:
+            uuidW0: 3677821563
+            uuidW1: 3460311511
+            uuidW2: 669644199
+            uuidW3: 4009706014
+          rangeDependencies: {}
+          spanningColumnDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          spanningRowDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          volatileDependencies: {}
+          wholeOwnerDependencies: {}
+        - cellDependencies: {}
+          cellErrors: {}
+          formulaOwner:
+            identifier: '10133'
+          formulaOwnerId:
+            uuidW0: 163619140
+            uuidW1: 1363362659
+            uuidW2: 3052291772
+            uuidW3: 27936965
+          rangeDependencies: {}
+          spanningColumnDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 3
+              bottomRightRow: 4
+              topLeftColumn: 0
+              topLeftRow: 0
+            totalRangeForDeletedTable:
+              bottomRightColumn: 3
+              bottomRightRow: 4
+              topLeftColumn: 0
+              topLeftRow: 0
+          spanningRowDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 3
+              bottomRightRow: 4
+              topLeftColumn: 0
+              topLeftRow: 0
+            totalRangeForDeletedTable:
+              bottomRightColumn: 3
+              bottomRightRow: 4
+              topLeftColumn: 0
+              topLeftRow: 0
+          volatileDependencies: {}
+          wholeOwnerDependencies: {}
+        - cellDependencies: {}
+          cellErrors: {}
+          formulaOwnerId:
+            uuidW0: 1427487647
+            uuidW1: 2605614930
+            uuidW2: 1398110616
+            uuidW3: 1185490675
+          rangeDependencies: {}
+          spanningColumnDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          spanningRowDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          volatileDependencies: {}
+          wholeOwnerDependencies: {}
+        - cellDependencies: {}
+          cellErrors: {}
+          formulaOwnerId:
+            uuidW0: 3496792579
+            uuidW1: 2454052682
+            uuidW2: 1200270780
+            uuidW3: 2656623972
+          rangeDependencies: {}
+          spanningColumnDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          spanningRowDependencies:
+            bodyRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+            totalRangeForDeletedTable:
+              bottomRightColumn: 32767
+              bottomRightRow: 2147483647
+              topLeftColumn: 32767
+              topLeftRow: 2147483647
+          volatileDependencies: {}
+          wholeOwnerDependencies: {}
+        numberOfFormulas: '4'
+        ownerIdMap:
+          mapEntry:
+          - internalOwnerId: 40
+            ownerId:
+              uuidW0: 3063856600
+              uuidW1: 2169050873
+              uuidW2: 3111829635
+              uuidW3: 361632763
+          - internalOwnerId: 39
+            ownerId:
+              uuidW0: 2579701379
+              uuidW1: 2504879391
+              uuidW2: 2412420277
+              uuidW3: 3508157167
+          - internalOwnerId: 38
+            ownerId:
+              uuidW0: 291991216
+              uuidW1: 222792076
+              uuidW2: 3755632568
+              uuidW3: 1003480739
+          - internalOwnerId: 37
+            ownerId:
+              uuidW0: 2963493842
+              uuidW1: 2537718757
+              uuidW2: 1670865559
+              uuidW3: 4084131277
+          - internalOwnerId: 36
+            ownerId:
+              uuidW0: 1853129426
+              uuidW1: 273583327
+              uuidW2: 51579531
+              uuidW3: 3316818122
+          - internalOwnerId: 35
+            ownerId:
+              uuidW0: 2013245298
+              uuidW1: 2822969179
+              uuidW2: 3464106156
+              uuidW3: 1100690162
+          - internalOwnerId: 34
+            ownerId:
+              uuidW0: 3891833912
+              uuidW1: 3008096069
+              uuidW2: 1370451613
+              uuidW3: 3720995313
+          - internalOwnerId: 33
+            ownerId:
+              uuidW0: 1427487647
+              uuidW1: 2605614930
+              uuidW2: 1398110616
+              uuidW3: 1185490675
+            subFormulaOwnerUid:
+              baseOwnerUid:
+                lower: '5855598033156219204'
+                upper: '119988354076788412'
+              ownerKind: 9
+          - internalOwnerId: 32
+            ownerId:
+              uuidW0: 2804104334
+              uuidW1: 759960105
+              uuidW2: 1812348586
+              uuidW3: 1957462757
+            subFormulaOwnerUid:
+              baseOwnerUid:
+                lower: '5855598033156219204'
+                upper: '119988354076788412'
+              ownerKind: 8
+          - internalOwnerId: 31
+            ownerId:
+              uuidW0: 2101685586
+              uuidW1: 1414121349
+              uuidW2: 3526192777
+              uuidW3: 3971501235
+            subFormulaOwnerUid:
+              baseOwnerUid:
+                lower: '6073604948632087890'
+                upper: '17057467923874803337'
+              ownerKind: 7
+          - internalOwnerId: 30
+            ownerId:
+              uuidW0: 3578956755
+              uuidW1: 1162487785
+              uuidW2: 3859187372
+              uuidW3: 3956038839
+            subFormulaOwnerUid:
+              baseOwnerUid:
+                lower: '5855598033156219204'
+                upper: '119988354076788412'
+              ownerKind: 5
+          - internalOwnerId: 29
+            ownerId:
+              uuidW0: 3503180417
+              uuidW1: 3645017511
+              uuidW2: 2828703625
+              uuidW3: 988498528
+            subFormulaOwnerUid:
+              baseOwnerUid:
+                lower: '5855598033156219204'
+                upper: '119988354076788412'
+              ownerKind: 10
+          - internalOwnerId: 28
+            ownerId:
+              uuidW0: 749790559
+              uuidW1: 2739850155
+              uuidW2: 3452903352
+              uuidW3: 2216504347
+            subFormulaOwnerUid:
+              baseOwnerUid:
+                lower: '5855598033156219204'
+                upper: '119988354076788412'
+              ownerKind: 3
+          - internalOwnerId: 27
+            ownerId:
+              uuidW0: 281304056
+              uuidW1: 1061625793
+              uuidW2: 3570392484
+              uuidW3: 2737534173
+            subFormulaOwnerUid:
+              baseOwnerUid:
+                lower: '5855598033156219204'
+                upper: '119988354076788412'
+              ownerKind: 11
+          - internalOwnerId: 26
+            ownerId:
+              uuidW0: 3677821563
+              uuidW1: 3460311511
+              uuidW2: 669644199
+              uuidW3: 4009706014
+            subFormulaOwnerUid:
+              baseOwnerUid:
+                lower: '5855598033156219204'
+                upper: '119988354076788412'
+              ownerKind: 4
+          - internalOwnerId: 25
+            ownerId:
+              uuidW0: 163619140
+              uuidW1: 1363362659
+              uuidW2: 3052291772
+              uuidW3: 27936965
+            subFormulaOwnerUid:
+              baseOwnerUid:
+                lower: '5855598033156219204'
+                upper: '119988354076788412'
+              ownerKind: 1
+          - internalOwnerId: 24
+            ownerId:
+              uuidW0: 641213400
+              uuidW1: 3158703006
+              uuidW2: 571238078
+              uuidW3: 428153627
+          - internalOwnerId: 23
+            ownerId:
+              uuidW0: 1053672909
+              uuidW1: 2085110150
+              uuidW2: 1232261030
+              uuidW3: 2303849157
+          - internalOwnerId: 22
+            ownerId:
+              uuidW0: 2857214812
+              uuidW1: 4250426
+              uuidW2: 8483464
+              uuidW3: 1415950953
+          - internalOwnerId: 21
+            ownerId:
+              uuidW0: 725785321
+              uuidW1: 2856533289
+              uuidW2: 1025490072
+              uuidW3: 2636660883
+          - internalOwnerId: 20
+            ownerId:
+              uuidW0: 4207964073
+              uuidW1: 3679324975
+              uuidW2: 673190560
+              uuidW3: 1939494691
+          - internalOwnerId: 19
+            ownerId:
+              uuidW0: 3673774458
+              uuidW1: 1682961866
+              uuidW2: 2769695374
+              uuidW3: 2232874219
+          - internalOwnerId: 18
+            ownerId:
+              uuidW0: 3856966157
+              uuidW1: 3443663491
+              uuidW2: 301994169
+              uuidW3: 3403787959
+          - internalOwnerId: 17
+            ownerId:
+              uuidW0: 1836217676
+              uuidW1: 3393317747
+              uuidW2: 2964699316
+              uuidW3: 1849428444
+          - internalOwnerId: 16
+            ownerId:
+              uuidW0: 576274401
+              uuidW1: 2017628291
+              uuidW2: 450069919
+              uuidW3: 3792501747
+          - internalOwnerId: 15
+            ownerId:
+              uuidW0: 336602136
+              uuidW1: 1548298942
+              uuidW2: 4074519208
+              uuidW3: 1551021051
+          - internalOwnerId: 14
+            ownerId:
+              uuidW0: 1560576510
+              uuidW1: 1733021495
+              uuidW2: 4054043275
+              uuidW3: 3808514784
+          - internalOwnerId: 13
+            ownerId:
+              uuidW0: 2677682170
+              uuidW1: 71440502
+              uuidW2: 1144848000
+              uuidW3: 1066874538
+          - internalOwnerId: 12
+            ownerId:
+              uuidW0: 2848181224
+              uuidW1: 508502614
+              uuidW2: 2594151581
+              uuidW3: 3707920868
+          - internalOwnerId: 11
+            ownerId:
+              uuidW0: 2841347905
+              uuidW1: 2521522579
+              uuidW2: 3850829493
+              uuidW3: 712867435
+          - internalOwnerId: 10
+            ownerId:
+              uuidW0: 3749504868
+              uuidW1: 3494651410
+              uuidW2: 460052916
+              uuidW3: 2305761772
+          - internalOwnerId: 9
+            ownerId:
+              uuidW0: 522178811
+              uuidW1: 3511365471
+              uuidW2: 2562435731
+              uuidW3: 2501138348
+          - internalOwnerId: 8
+            ownerId:
+              uuidW0: 976932741
+              uuidW1: 4265919595
+              uuidW2: 3892293515
+              uuidW3: 463489497
+          - internalOwnerId: 7
+            ownerId:
+              uuidW0: 3399471622
+              uuidW1: 2790086385
+              uuidW2: 3133017534
+              uuidW3: 2089819299
+          - internalOwnerId: 6
+            ownerId:
+              uuidW0: 2892020076
+              uuidW1: 2202248279
+              uuidW2: 3018454940
+              uuidW3: 2545075675
+          - internalOwnerId: 5
+            ownerId:
+              uuidW0: 3578199665
+              uuidW1: 2671955954
+              uuidW2: 2179912352
+              uuidW3: 645408654
+          - internalOwnerId: 4
+            ownerId:
+              uuidW0: 2082333211
+              uuidW1: 172323769
+              uuidW2: 1038859925
+              uuidW3: 4102540648
+          - internalOwnerId: 3
+            ownerId:
+              uuidW0: 4102252340
+              uuidW1: 122167872
+              uuidW2: 471194506
+              uuidW3: 171587676
+          - internalOwnerId: 2
+            ownerId:
+              uuidW0: 501771310
+              uuidW1: 3930433903
+              uuidW2: 2743306373
+              uuidW3: 3234243656
+          - internalOwnerId: 1
+            ownerId:
+              uuidW0: 488188986
+              uuidW1: 2453828437
+              uuidW2: 2598972047
+              uuidW3: 3493388934
+          - internalOwnerId: 0
+            ownerId:
+              uuidW0: 3496792579
+              uuidW1: 2454052682
+              uuidW2: 1200270780
+              uuidW3: 2656623972
+            subFormulaOwnerUid:
+              baseOwnerUid:
+                lower: '10540076015347880451'
+                upper: '11410113078709890492'
+              ownerKind: 7
+      documentRandomSeed: '8478683457916384430'
+      documentTimestamp: 619907200.439332
+      documentTimezone: America/New_York
+      excelImportDateMode: DATE_MODE_1904_LEGACY
+      groupNodeMap: {}
+      namedReferenceManager:
+        identifier: '9477'
+      uuidReferenceMap: {}
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10797'
+      messageInfos:
+      - type: 4008
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TSCE.FormulaOwnerDependenciesArchive
+      baseOwnerUid:
+        lower: '5855598033156219204'
+        upper: '119988354076788412'
+      cellDependencies:
+        cellRecord:
+        - column: 0
+          expandedEdges:
+            edgeWithoutOwnerColumns:
+            - 2
+            edgeWithoutOwnerRows:
+            - 0
+          row: 0
+        - column: 1
+          expandedEdges: {}
+          row: 0
+        - column: 2
+          expandedEdges: {}
+          row: 0
+        - column: 3
+          expandedEdges: {}
+          row: 0
+      cellErrors: {}
+      formulaOwnerUid:
+        lower: '3264003800043830414'
+        upper: '8407238526265343658'
+      internalFormulaOwnerId: 32
+      ownerKind: 8
+      rangeDependencies: {}
+      spanningColumnDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      spanningRowDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      volatileDependencies:
+        volatileGeometryCellRefs: {}
+        volatileLocaleCells: {}
+        volatileRandomCells: {}
+        volatileRemoteDataCells: {}
+        volatileSheetTableNameCells: {}
+        volatileTimeCells: {}
+      wholeOwnerDependencies:
+        dependentCells: {}
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10798'
+      messageInfos:
+      - type: 4008
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TSCE.FormulaOwnerDependenciesArchive
+      baseOwnerUid:
+        lower: '6073604948632087890'
+        upper: '17057467923874803337'
+      cellDependencies: {}
+      cellErrors: {}
+      formulaOwnerUid:
+        lower: '6073604948632087890'
+        upper: '17057467923874803337'
+      internalFormulaOwnerId: 31
+      ownerKind: 7
+      rangeDependencies: {}
+      spanningColumnDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      spanningRowDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      volatileDependencies:
+        volatileGeometryCellRefs: {}
+        volatileLocaleCells: {}
+        volatileRandomCells: {}
+        volatileRemoteDataCells: {}
+        volatileSheetTableNameCells: {}
+        volatileTimeCells: {}
+      wholeOwnerDependencies:
+        dependentCells: {}
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10799'
+      messageInfos:
+      - type: 4008
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TSCE.FormulaOwnerDependenciesArchive
+      baseOwnerUid:
+        lower: '5855598033156219204'
+        upper: '119988354076788412'
+      cellDependencies: {}
+      cellErrors: {}
+      formulaOwnerUid:
+        lower: '4992847022153436115'
+        upper: '16991057439069996716'
+      internalFormulaOwnerId: 30
+      ownerKind: 5
+      rangeDependencies: {}
+      spanningColumnDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      spanningRowDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      volatileDependencies:
+        volatileGeometryCellRefs: {}
+        volatileLocaleCells: {}
+        volatileRandomCells: {}
+        volatileRemoteDataCells: {}
+        volatileSheetTableNameCells: {}
+        volatileTimeCells: {}
+      wholeOwnerDependencies:
+        dependentCells: {}
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10800'
+      messageInfos:
+      - type: 4008
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TSCE.FormulaOwnerDependenciesArchive
+      baseOwnerUid:
+        lower: '5855598033156219204'
+        upper: '119988354076788412'
+      cellDependencies: {}
+      cellErrors: {}
+      formulaOwnerUid:
+        lower: '15655231006595500673'
+        upper: '4245568852732843913'
+      internalFormulaOwnerId: 29
+      ownerKind: 10
+      rangeDependencies: {}
+      spanningColumnDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      spanningRowDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      volatileDependencies:
+        volatileGeometryCellRefs: {}
+        volatileLocaleCells: {}
+        volatileRandomCells: {}
+        volatileRemoteDataCells: {}
+        volatileSheetTableNameCells: {}
+        volatileTimeCells: {}
+      wholeOwnerDependencies:
+        dependentCells: {}
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10801'
+      messageInfos:
+      - type: 4008
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TSCE.FormulaOwnerDependenciesArchive
+      baseOwnerUid:
+        lower: '5855598033156219204'
+        upper: '119988354076788412'
+      cellDependencies: {}
+      cellErrors: {}
+      formulaOwnerUid:
+        lower: '11767566812415321439'
+        upper: '9519813685259739064'
+      internalFormulaOwnerId: 28
+      ownerKind: 3
+      rangeDependencies: {}
+      spanningColumnDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      spanningRowDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      volatileDependencies:
+        volatileGeometryCellRefs: {}
+        volatileLocaleCells: {}
+        volatileRandomCells: {}
+        volatileRemoteDataCells: {}
+        volatileSheetTableNameCells: {}
+        volatileTimeCells: {}
+      wholeOwnerDependencies:
+        dependentCells: {}
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10802'
+      messageInfos:
+      - type: 4008
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TSCE.FormulaOwnerDependenciesArchive
+      baseOwnerUid:
+        lower: '5855598033156219204'
+        upper: '119988354076788412'
+      cellDependencies: {}
+      cellErrors: {}
+      formulaOwnerUid:
+        lower: '4559648061806369784'
+        upper: '11757619748287798692'
+      internalFormulaOwnerId: 27
+      ownerKind: 11
+      rangeDependencies: {}
+      spanningColumnDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      spanningRowDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      volatileDependencies:
+        volatileGeometryCellRefs: {}
+        volatileLocaleCells: {}
+        volatileRandomCells: {}
+        volatileRemoteDataCells: {}
+        volatileSheetTableNameCells: {}
+        volatileTimeCells: {}
+      wholeOwnerDependencies:
+        dependentCells: {}
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10803'
+      messageInfos:
+      - type: 4008
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TSCE.FormulaOwnerDependenciesArchive
+      baseOwnerUid:
+        lower: '5855598033156219204'
+        upper: '119988354076788412'
+      cellDependencies: {}
+      cellErrors: {}
+      formulaOwnerUid:
+        lower: '14861924777395165819'
+        upper: '17221556197374162343'
+      internalFormulaOwnerId: 26
+      ownerKind: 4
+      rangeDependencies: {}
+      spanningColumnDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      spanningRowDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      volatileDependencies:
+        volatileGeometryCellRefs: {}
+        volatileLocaleCells: {}
+        volatileRandomCells: {}
+        volatileRemoteDataCells: {}
+        volatileSheetTableNameCells: {}
+        volatileTimeCells: {}
+      wholeOwnerDependencies:
+        dependentCells: {}
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10804'
+      messageInfos:
+      - type: 4008
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TSCE.FormulaOwnerDependenciesArchive
+      baseOwnerUid:
+        lower: '5855598033156219204'
+        upper: '119988354076788412'
+      cellDependencies: {}
+      cellErrors: {}
+      formulaOwner:
+        identifier: '10133'
+      formulaOwnerUid:
+        lower: '5855598033156219204'
+        upper: '119988354076788412'
+      internalFormulaOwnerId: 25
+      ownerKind: 1
+      rangeDependencies: {}
+      spanningColumnDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 3
+          bottomRightRow: 4
+          topLeftColumn: 0
+          topLeftRow: 0
+        totalRangeForTable:
+          bottomRightColumn: 3
+          bottomRightRow: 4
+          topLeftColumn: 0
+          topLeftRow: 0
+      spanningRowDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 3
+          bottomRightRow: 4
+          topLeftColumn: 0
+          topLeftRow: 0
+        totalRangeForTable:
+          bottomRightColumn: 3
+          bottomRightRow: 4
+          topLeftColumn: 0
+          topLeftRow: 0
+      volatileDependencies:
+        volatileGeometryCellRefs: {}
+        volatileLocaleCells: {}
+        volatileRandomCells: {}
+        volatileRemoteDataCells: {}
+        volatileSheetTableNameCells: {}
+        volatileTimeCells: {}
+      wholeOwnerDependencies:
+        dependentCells: {}
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10805'
+      messageInfos:
+      - type: 4008
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TSCE.FormulaOwnerDependenciesArchive
+      baseOwnerUid:
+        lower: '5855598033156219204'
+        upper: '119988354076788412'
+      cellDependencies: {}
+      cellErrors: {}
+      formulaOwnerUid:
+        lower: '11191030911746816927'
+        upper: '5091643680236075416'
+      internalFormulaOwnerId: 33
+      ownerKind: 9
+      rangeDependencies: {}
+      spanningColumnDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      spanningRowDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      volatileDependencies:
+        volatileGeometryCellRefs: {}
+        volatileLocaleCells: {}
+        volatileRandomCells: {}
+        volatileRemoteDataCells: {}
+        volatileSheetTableNameCells: {}
+        volatileTimeCells: {}
+      wholeOwnerDependencies:
+        dependentCells: {}
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9476'
+      messageInfos:
+      - type: 4008
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TSCE.FormulaOwnerDependenciesArchive
+      baseOwnerUid:
+        lower: '10540076015347880451'
+        upper: '11410113078709890492'
+      cellDependencies: {}
+      cellErrors: {}
+      formulaOwnerUid:
+        lower: '10540076015347880451'
+        upper: '11410113078709890492'
+      internalFormulaOwnerId: 0
+      ownerKind: 7
+      rangeDependencies: {}
+      spanningColumnDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      spanningRowDependencies:
+        bodyRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+        totalRangeForTable:
+          bottomRightColumn: 32767
+          bottomRightRow: 2147483647
+          topLeftColumn: 32767
+          topLeftRow: 2147483647
+      volatileDependencies:
+        volatileGeometryCellRefs: {}
+        volatileLocaleCells: {}
+        volatileRandomCells: {}
+        volatileRemoteDataCells: {}
+        volatileSheetTableNameCells: {}
+        volatileTimeCells: {}
+      wholeOwnerDependencies:
+        dependentCells: {}
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9477'
+      messageInfos:
+      - objectReferences:
+        - '9484'
+        type: 4003
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TSCE.NamedReferenceManagerArchive
+      referenceTracker:
+        identifier: '9484'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '9484'
+      messageInfos:
+      - type: 4004
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TSCE.ReferenceTrackerArchive
+      uuid:
+        uuidW0: 3496792579
+        uuidW1: 2454052682
+        uuidW2: 1200270780
+        uuidW3: 2656623972
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10133'
+      messageInfos:
+      - fieldInfos:
+        - path:
+            path:
+            - 10
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 8
+          type: Message
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 7
+          type: Message
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 5
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 6
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 4
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        objectReferences:
+        - '10134'
+        - '10135'
+        - '10136'
+        type: 6000
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.TableInfoArchive
+      categoryOrder:
+        identifier: '10136'
+      formulaCoordSpace: 0
+      groupByUuid:
+        lower: '3264003800043830414'
+        upper: '8407238526265343658'
+      hiddenStatesUuid:
+        lower: '17024321268244748995'
+        upper: '7040763546829690034'
+      summaryModel:
+        identifier: '10135'
+      super:
+        aspectRatioLocked: false
+        exteriorTextWrap:
+          alphaThreshold: 0.5
+          direction: 2
+          fitType: 1
+          isHtmlWrap: false
+          margin: 12.0
+          type: 4
+        geometry:
+          angle: 0.0
+          flags: 3
+          position:
+            x: 133.0
+            y: 140.0
+          size:
+            height: 800.0
+            width: 1654.0
+        locked: false
+        parent:
+          identifier: '9368'
+      tableModel:
+        identifier: '10134'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10134'
+      messageInfos:
+      - fieldInfos:
+        - path:
+            path:
+            - 82
+          type: Message
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 81
+          type: Message
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 70
+          type: Message
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 80
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 79
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 78
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 77
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 76
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 75
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 74
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 73
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 72
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 71
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 69
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 68
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 67
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 65
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 64
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 63
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 62
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 61
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 60
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 66
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 4
+            - 22
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        - path:
+            path:
+            - 4
+            - 21
+          type: ObjectReference
+          unknownFieldRule: IgnoreAndPreserveUntilModified
+        objectReferences:
+        - '10107'
+        - '10137'
+        - '10138'
+        - '10108'
+        - '10109'
+        - '10112'
+        - '10114'
+        - '10115'
+        - '10116'
+        - '10117'
+        - '10110'
+        - '10118'
+        - '10139'
+        - '10113'
+        - '10111'
+        - '8913'
+        - '8915'
+        - '8916'
+        - '8917'
+        - '8914'
+        - '8745'
+        - '8746'
+        - '8918'
+        - '8919'
+        - '8920'
+        - '8921'
+        - '8922'
+        - '8923'
+        - '8924'
+        - '8925'
+        - '8926'
+        - '8927'
+        - '8928'
+        - '8929'
+        - '8930'
+        - '8931'
+        - '8932'
+        - '8744'
+        - '8933'
+        - '10140'
+        - '10141'
+        - '10142'
+        - '10143'
+        - '10144'
+        type: 6001
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.TableModelArchive
+      baseColumnRowUids:
+        identifier: '10141'
+      baseDataStore:
+        columnHeaders:
+          identifier: '10137'
+        columnTileTree: {}
+        commentStorageTable:
+          identifier: '10116'
+        conditionalstyletable:
+          identifier: '10110'
+        controlCellSpecTable:
+          identifier: '10113'
+        formatTable:
+          identifier: '10111'
+        formatTablePreBnc:
+          identifier: '10118'
+        formulaErrorTable:
+          identifier: '10114'
+        formulaTable:
+          identifier: '10112'
+        importWarningSetTable:
+          identifier: '10117'
+        multipleChoiceListFormatTable:
+          identifier: '10139'
+        nextColumnStripID: 0
+        nextRowStripID: 1
+        richTextTable:
+          identifier: '10115'
+        rowHeaders:
+          bucketHashFunction: 1
+          buckets:
+          - identifier: '10138'
+        rowTileTree:
+          nodes:
+          - key: 0
+            value: 0
+        storageVersionPreBnc: 4
+        stringTable:
+          identifier: '10108'
+        styleTable:
+          identifier: '10109'
+        tiles:
+          tileSize: 256
+          tiles:
+          - tile:
+              identifier: '10107'
+            tileid: 0
+      bodyCellStyle:
+        identifier: '8914'
+      bodyTextStyle:
+        identifier: '8746'
+      categoryLevel1Style:
+        identifier: '8918'
+      categoryLevel1TextStyle:
+        identifier: '8745'
+      categoryLevel2Style:
+        identifier: '8919'
+      categoryLevel2TextStyle:
+        identifier: '8745'
+      categoryLevel3Style:
+        identifier: '8920'
+      categoryLevel3TextStyle:
+        identifier: '8745'
+      categoryLevel4Style:
+        identifier: '8921'
+      categoryLevel4TextStyle:
+        identifier: '8745'
+      categoryLevel5Style:
+        identifier: '8922'
+      categoryLevel5TextStyle:
+        identifier: '8745'
+      categoryOwner:
+        groupBy:
+        - aggsInGroupRootFormula:
+            column: 3
+            row: 0
+          columnOrderChangedFormula:
+            column: 4
+            row: 0
+          groupByUid:
+            lower: '3264003800043830414'
+            upper: '8407238526265343658'
+          groupNodeRoot:
+            formatManager: {}
+            groupUid:
+              lower: '1'
+              upper: '0'
+          groupingColumnHeadersFormula:
+            column: 2
+            row: 0
+          groupingColumnsFormula:
+            column: 1
+            row: 0
+          indirectAggTypeChangeFormula:
+            column: 0
+            row: 0
+          isEnabled: false
+          rowOrderChangedFormula:
+            column: 5
+            row: 0
+        ownerUid:
+          lower: '5280932477503985790'
+          upper: '15261779503436122259'
+      conditionalStyleFormulaOwnerId:
+        uuidW0: 749790559
+        uuidW1: 2739850155
+        uuidW2: 3452903352
+        uuidW3: 2216504347
+      defaultColumnWidth: 360.0
+      defaultRowHeight: 46.17578125
+      footerRowStyle:
+        identifier: '8917'
+      footerRowTextStyle:
+        identifier: '8746'
+      headerColumnStyle:
+        identifier: '8916'
+      headerColumnTextStyle:
+        identifier: '8745'
+      headerRowStyle:
+        identifier: '8915'
+      headerRowTextStyle:
+        identifier: '8745'
+      hiddenStateFormulaOwnerForColumns:
+        identifier: '10143'
+      hiddenStateFormulaOwnerForRows:
+        identifier: '10144'
+      hiddenStatesOwner:
+        hiddenStates:
+        - columnHiddenStateExtent:
+            hiddenStateExtentUid:
+              lower: '4559648061806369784'
+              upper: '11757619748287798692'
+            needsToUpdateFilterSetForImport: false
+            rowOrColumnDirection: ColumnDirection
+          hiddenStatesUid:
+            lower: '17024321268244748995'
+            upper: '7040763546829690034'
+          rowHiddenStateExtent:
+            hiddenStateExtentUid:
+              lower: '14861924777395165819'
+              upper: '17221556197374162343'
+            needsToUpdateFilterSetForImport: false
+            rowOrColumnDirection: RowDirection
+        ownerUid:
+          lower: '236514915096832055'
+          upper: '1289772035559678608'
+      labelLevel1Style:
+        identifier: '8923'
+      labelLevel1TextStyle:
+        identifier: '8928'
+      labelLevel2Style:
+        identifier: '8924'
+      labelLevel2TextStyle:
+        identifier: '8929'
+      labelLevel3Style:
+        identifier: '8925'
+      labelLevel3TextStyle:
+        identifier: '8930'
+      labelLevel4Style:
+        identifier: '8926'
+      labelLevel4TextStyle:
+        identifier: '8931'
+      labelLevel5Style:
+        identifier: '8927'
+      labelLevel5TextStyle:
+        identifier: '8932'
+      mergeOwner:
+        formulaStore:
+          nextFormulaIndex: 0
+        ownerId:
+          uuidW0: 3578956755
+          uuidW1: 1162487785
+          uuidW2: 3859187372
+          uuidW3: 3956038839
+      numberOfColumns: 4
+      numberOfRows: 5
+      pencilAnnotationOwner:
+        formulaStore:
+          nextFormulaIndex: 0
+        ownerId:
+          uuidW0: 3503180417
+          uuidW1: 3645017511
+          uuidW2: 2828703625
+          uuidW3: 988498528
+      repeatingHeaderColumnsEnabled: true
+      repeatingHeaderRowsEnabled: true
+      sortOrder:
+        type: entire_table
+      sortRuleReferenceTracker:
+        referenceTracker:
+          identifier: '10140'
+      strokeSidecar:
+        identifier: '10142'
+      styleApplyClearsAll: false
+      tableId: 44A1C009-6343-4351-BC46-EEB5C548AA01
+      tableName: Table 1
+      tableNameHeight: 0.0
+      tableNameShapeStyle:
+        identifier: '8933'
+      tableNameStyle:
+        identifier: '8744'
+      tableStyle:
+        identifier: '8913'
+      tableStylePreset:
+        identifier: '8934'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10140'
+      messageInfos:
+      - type: 4004
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TSCE.ReferenceTrackerArchive
+      uuid:
+        uuidW0: 2101685586
+        uuidW1: 1414121349
+        uuidW2: 3526192777
+        uuidW3: 3971501235
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10141'
+      messageInfos:
+      - type: 6267
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.ColumnRowUIDMapArchive
+      columnIndexForUid:
+      - 1
+      - 2
+      - 0
+      - 3
+      columnUidForIndex:
+      - 2
+      - 0
+      - 1
+      - 3
+      rowIndexForUid:
+      - 3
+      - 4
+      - 1
+      - 0
+      - 2
+      rowUidForIndex:
+      - 3
+      - 2
+      - 4
+      - 0
+      - 1
+      sortedColumnUids:
+      - lower: '18152606508248807012'
+        upper: '5992436090904102495'
+      - lower: '7609487265636110777'
+        upper: '8374153030977839989'
+      - lower: '15814437097741397640'
+        upper: '9684664027734782599'
+      - lower: '2508540226075710076'
+        upper: '15292762354104528135'
+      sortedRowUids:
+      - lower: '1630514795976821106'
+        upper: '2266980003384916594'
+      - lower: '6057108598150649109'
+        upper: '2743992070016574806'
+      - lower: '1794789988594008922'
+        upper: '2831572007585000915'
+      - lower: '15294775678102296925'
+        upper: '8811394045754371732'
+      - lower: '17613570780829583116'
+        upper: '12625682355408353296'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10142'
+      messageInfos:
+      - type: 6305
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.StrokeSidecarArchive
+      columnCount: 4
+      maxOrder: 2
+      rowCount: 5
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10143'
+      messageInfos:
+      - type: 6204
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.HiddenStateFormulaOwnerArchive
+      needsToUpdateFilterSetForImport: false
+      ownerId:
+        uuidW0: 281304056
+        uuidW1: 1061625793
+        uuidW2: 3570392484
+        uuidW3: 2737534173
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10144'
+      messageInfos:
+      - type: 6204
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.HiddenStateFormulaOwnerArchive
+      needsToUpdateFilterSetForImport: false
+      ownerId:
+        uuidW0: 3677821563
+        uuidW1: 3460311511
+        uuidW2: 669644199
+        uuidW3: 4009706014
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10135'
+      messageInfos:
+      - objectReferences:
+        - '10222'
+        - '10145'
+        - '10146'
+        - '10223'
+        - '10224'
+        - '10227'
+        - '10229'
+        - '10230'
+        - '10231'
+        - '10232'
+        - '10225'
+        - '10233'
+        - '10812'
+        - '10228'
+        - '10226'
+        - '10148'
+        - '10149'
+        type: 6316
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TST.SummaryModelArchive
+      aggregateFormulaOwnerUuid:
+        lower: '11191030911746816927'
+        upper: '5091643680236075416'
+      categoryColumnWidth: 50.0
+      columnRowUids:
+        identifier: '10148'
+      dataStore:
+        columnHeaders:
+          identifier: '10145'
+        columnTileTree: {}
+        commentStorageTable:
+          identifier: '10231'
+        conditionalstyletable:
+          identifier: '10225'
+        controlCellSpecTable:
+          identifier: '10228'
+        formatTable:
+          identifier: '10226'
+        formatTablePreBnc:
+          identifier: '10233'
+        formulaErrorTable:
+          identifier: '10229'
+        formulaTable:
+          identifier: '10227'
+        importWarningSetTable:
+          identifier: '10232'
+        multipleChoiceListFormatTable:
+          identifier: '10812'
+        nextColumnStripID: 0
+        nextRowStripID: 1
+        richTextTable:
+          identifier: '10230'
+        rowHeaders:
+          bucketHashFunction: 1
+          buckets:
+          - identifier: '10146'
+        rowTileTree:
+          nodes:
+          - key: 0
+            value: 0
+        storageVersionPreBnc: 4
+        stringTable:
+          identifier: '10223'
+        styleTable:
+          identifier: '10224'
+        tiles:
+          tileSize: 256
+          tiles:
+          - tile:
+              identifier: '10222'
+            tileid: 0
+      labelRowHeightList:
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      labelRowVisibilityList:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      summaryCellVendor:
+        identifier: '10149'
+      summaryRowHeightList:
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      tableInfo:
+        identifier: '10133'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10148'
+      messageInfos:
+      - type: 6267
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.ColumnRowUIDMapArchive
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10149'
+      messageInfos:
+      - type: 6317
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TST.SummaryCellVendorArchive
+      tableInfo:
+        identifier: '10133'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10136'
+      messageInfos:
+      - objectReferences:
+        - '10150'
+        type: 6318
+        version:
+        - 3
+        - 2
+        - 10
+    objects:
+    - _pbtype: TST.CategoryOrderArchive
+      tableInfo:
+        identifier: '10133'
+      uidMap:
+        identifier: '10150'
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10150'
+      messageInfos:
+      - type: 6267
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.ColumnRowUIDMapArchive

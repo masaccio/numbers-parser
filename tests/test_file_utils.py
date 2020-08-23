@@ -2,6 +2,7 @@ from keynote_parser import codec, file_utils
 
 SIMPLE_FILENAME = './tests/data/simple-oneslide.key'
 PHOTO_FILENAME = './tests/data/photo-oneslide.key'
+TABLE_FILENAME = './tests/data/table.key'
 
 SIMPLE_SLIDE_KEY = 'Index/Slide-8060.iwa'
 SIMPLE_CONTENTS = [
@@ -54,6 +55,16 @@ def test_read_simple():
     reader = file_utils.zip_file_reader(SIMPLE_FILENAME, progress=False)
     sorted_filenames = sorted([filename for filename, handle in reader])
     assert sorted_filenames == SIMPLE_CONTENTS
+
+
+def test_table_matches():
+    key_reader = file_utils.zip_file_reader(TABLE_FILENAME, progress=False)
+    dir_reader = file_utils.directory_reader(TABLE_FILENAME.replace('.key', ''), progress=False)
+
+    # Ensure we don't miss nested sub-directories when reading
+    key_filenames = set([filename for filename, _ in key_reader])
+    dir_filenames = set([filename.replace('.yaml', '') for filename, _ in dir_reader])
+    assert key_filenames == dir_filenames
 
 
 def test_process_single_file():

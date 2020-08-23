@@ -1,0 +1,15 @@
+chunks:
+- archives:
+  - header:
+      _pbtype: TSP.ArchiveInfo
+      identifier: '10139'
+      messageInfos:
+      - type: 6005
+        version:
+        - 1
+        - 0
+        - 5
+    objects:
+    - _pbtype: TST.TableDataList
+      listType: MULTIPLE_CHOICE_LIST_FORMAT
+      nextListID: 1
