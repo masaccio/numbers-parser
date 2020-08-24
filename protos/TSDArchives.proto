@@ -5,11 +5,11 @@ import "TSKArchives.proto";
 import "TSSArchives.proto";
 package TSD;
 
-enum LineJoin {
-  MiterJoin = 0;
-  RoundJoin = 1;
-  BevelJoin = 2;
-}
+  enum LineJoin {
+    MiterJoin = 0;
+    RoundJoin = 1;
+    BevelJoin = 2;
+  }
 
 message EdgeInsetsArchive {
   required float top = 1;
@@ -145,7 +145,7 @@ message ImageFillArchive {
     ScaleToFit = 4;
   }
   optional .TSP.DataReference imagedata = 6;
-  optional .TSD.ImageFillArchive.ImageFillTechnique technique = 2 [default = NaturalSize];
+  optional .TSD.ImageFillArchive.ImageFillTechnique technique = 2;
   optional .TSP.Color tint = 3;
   optional .TSP.Size fillsize = 4;
   optional .TSP.DataReference originalimagedata = 7 [deprecated = true];
@@ -209,7 +209,7 @@ message PatternedStrokeArchive {
 
 message LineEndArchive {
   optional .TSP.Path path = 1;
-  optional .TSD.LineJoin line_join = 2 [default = MiterJoin];
+  optional .TSD.LineJoin line_join = 2;
   optional .TSP.Point end_point = 3;
   optional bool is_filled = 4;
   optional string identifier = 5;
@@ -222,12 +222,12 @@ message ShadowArchive {
     TSDCurvedShadow = 2;
   }
   optional .TSP.Color color = 1;
-  optional float angle = 2 [default = 315];
-  optional float offset = 3 [default = 5];
+  optional float angle = 2 [default = 315.0];
+  optional float offset = 3 [default = 5.0];
   optional int32 radius = 4 [default = 1];
-  optional float opacity = 5 [default = 1];
+  optional float opacity = 5 [default = 1.0];
   optional bool is_enabled = 6 [default = true];
-  optional .TSD.ShadowArchive.ShadowType type = 7 [default = TSDDropShadow];
+  optional .TSD.ShadowArchive.ShadowType type = 7;
   optional .TSD.DropShadowArchive dropShadow = 8;
   optional .TSD.ContactShadowArchive contactShadow = 9;
   optional .TSD.CurvedShadowArchive curvedShadow = 10;
@@ -237,12 +237,12 @@ message DropShadowArchive {
 }
 
 message ContactShadowArchive {
-  optional float height = 2 [default = 0.2];
-  optional float offset = 4 [default = 0];
+  optional float height = 2 [default = 0.20000000298023224];
+  optional float offset = 4;
 }
 
 message CurvedShadowArchive {
-  optional float curve = 1 [default = 0.6];
+  optional float curve = 1 [default = 0.6000000238418579];
 }
 
 message ReflectionArchive {
@@ -260,10 +260,10 @@ message ImageAdjustmentsArchive {
   optional float temperature = 8;
   optional float tint = 9;
   optional float bottom_level = 10;
-  optional float top_level = 11 [default = 1];
+  optional float top_level = 11 [default = 1.0];
   optional float gamma = 12;
-  optional bool enhance = 13 [default = false];
-  optional bool represents_sage_adjustments = 14 [default = false];
+  optional bool enhance = 13;
+  optional bool represents_sage_adjustments = 14;
 }
 
 message ShapeStylePropertiesArchive {
@@ -278,7 +278,7 @@ message ShapeStylePropertiesArchive {
 
 message ShapeStyleArchive {
   required .TSS.StyleArchive super = 1;
-  optional uint32 override_count = 10 [default = 0];
+  optional uint32 override_count = 10;
   optional .TSD.ShapeStylePropertiesArchive shape_properties = 11;
 }
 
@@ -291,7 +291,7 @@ message MediaStylePropertiesArchive {
 
 message MediaStyleArchive {
   required .TSS.StyleArchive super = 1;
-  optional uint32 override_count = 10 [default = 0];
+  optional uint32 override_count = 10;
   optional .TSD.MediaStylePropertiesArchive media_properties = 11;
 }
 
@@ -305,9 +305,9 @@ message ThemePresetsArchive {
   repeated .TSP.Reference image_style_presets = 7;
   repeated .TSP.Reference movie_style_presets = 8;
   repeated .TSP.Reference drawing_line_style_presets = 9;
-  extend .TSS.ThemeArchive {
-    optional .TSD.ThemePresetsArchive extension = 100;
-  }
+extend .TSS.ThemeArchive {
+  optional .TSD.ThemePresetsArchive extension = 100;
+}
 }
 
 message ThemeReplaceFillPresetCommandArchive {
@@ -328,6 +328,10 @@ message DrawableArchive {
   optional bool aspect_ratio_locked = 7;
   optional string accessibility_description = 8;
   repeated .TSP.Reference pencil_annotations = 9;
+  optional .TSP.Reference title = 10;
+  optional .TSP.Reference caption = 11;
+  optional bool title_hidden = 12;
+  optional bool caption_hidden = 13;
 }
 
 message ContainerArchive {
@@ -352,9 +356,9 @@ message FreehandDrawingArchive {
   optional .TSP.Reference spacer_shape = 1;
   optional double opacity = 2;
   optional .TSD.FreehandDrawingAnimationArchive animation = 3;
-  extend .TSD.GroupArchive {
-    optional .TSD.FreehandDrawingArchive freehand_drawing_archive = 100;
-  }
+extend .TSD.GroupArchive {
+  optional .TSD.FreehandDrawingArchive freehand_drawing_archive = 100;
+}
 }
 
 message ShapeArchive {
@@ -395,6 +399,7 @@ message ImageArchive {
   optional .TSP.Reference database_originalData = 8;
   optional .TSP.Path traced_path = 19;
   optional .TSD.Attribution attribution = 20;
+  optional bool should_trace_pdf_content = 21;
   extensions 100 to 999;
 }
 
@@ -407,9 +412,9 @@ message ImageDataAttributes {
   optional .TSP.Size pixel_size = 1;
   optional bool image_is_srgb = 2;
   optional bool should_be_interpreted_as_generic_if_untagged = 3;
-  extend .TSP.DataAttributes {
-    optional .TSD.ImageDataAttributes image_data_attributes = 100;
-  }
+extend .TSP.DataAttributes {
+  optional .TSD.ImageDataAttributes image_data_attributes = 100;
+}
 }
 
 message MovieArchive {
@@ -427,12 +432,13 @@ message MovieArchive {
   optional float endTime = 4;
   optional float posterTime = 5;
   optional uint32 loopOptionAsInteger = 6 [deprecated = true];
-  optional .TSD.MovieArchive.MovieLoopOption loop_option = 24 [default = None];
+  optional .TSD.MovieArchive.MovieLoopOption loop_option = 24;
   optional float volume = 7;
   optional bool autoPlay = 8 [deprecated = true];
   optional bool audioOnly = 9;
   optional bool streaming = 18;
   optional bool nativeAudioRecording = 27;
+  optional bool playsAcrossSlides = 28;
   optional .TSP.DataReference posterImageData = 15;
   optional .TSP.DataReference audioOnlyImageData = 16;
   optional bool poster_image_generated_with_alpha_support = 23;
@@ -445,6 +451,7 @@ message MovieArchive {
   optional .TSP.Size originalSize = 20;
   optional .TSP.Size naturalSize = 21;
   optional .TSD.Attribution attribution = 26;
+  optional .TSD.MovieFingerprint fingerprint = 29;
 }
 
 message ExteriorTextWrapArchive {
@@ -476,7 +483,7 @@ message FreehandDrawingToolkitUIState {
     Fill = 3;
   }
   optional .TSP.Color current_color = 1 [deprecated = true];
-  optional .TSD.FreehandDrawingToolkitUIState.FreehandDrawingToolType most_recent_pen_tool_type = 2 [default = Pen];
+  optional .TSD.FreehandDrawingToolkitUIState.FreehandDrawingToolType most_recent_pen_tool_type = 2;
   optional float pen_tool_opacity = 3;
   optional float pen_tool_unscaled_width = 4;
   optional float pencil_tool_opacity = 5;
@@ -490,6 +497,9 @@ message FreehandDrawingToolkitUIState {
   optional .TSP.Color pencil_tool_color = 13;
   optional .TSP.Color crayon_tool_color = 14;
   optional .TSP.Color fill_tool_color = 15;
+}
+
+message StandinCaptionArchive {
 }
 
 message GuideArchive {
@@ -653,8 +663,35 @@ message Attribution {
   optional string author_url = 5;
 }
 
+message MovieFingerprint {
+  repeated .TSD.MovieFingerprintTrack tracks = 1;
+  repeated uint32 version = 2;
+}
+
+message MovieFingerprintTrack {
+  optional string media_type = 1;
+  optional bool enabled = 2;
+  optional int64 total_sample_data_length = 3;
+  optional string sample_data_digest_string = 4;
+  optional int64 time_range_start_value = 5;
+  optional int32 time_range_start_timescale = 6;
+  optional bool time_range_start_is_valid = 7;
+  optional int64 time_range_duration_value = 8;
+  optional int32 time_range_duration_timescale = 9;
+  optional bool time_range_duration_is_valid = 10;
+  optional .TSP.Size natural_size = 11;
+  optional double preferred_transform_a = 12;
+  optional double preferred_transform_b = 13;
+  optional double preferred_transform_c = 14;
+  optional double preferred_transform_d = 15;
+  optional double preferred_transform_tx = 16;
+  optional double preferred_transform_ty = 17;
+  optional double preferred_volume = 18;
+  optional string language_code = 19;
+  optional string extended_language_tag = 20;
+}
+
 extend .TSS.CommandPropertyEntryArchive {
   optional .TSD.FillArchive fill = 200;
   optional .TSD.StrokeArchive stroke = 201;
 }
-

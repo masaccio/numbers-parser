@@ -9,93 +9,100 @@ import "TSWPArchives.proto";
 import "TSTStylePropertyArchiving.proto";
 package TST;
 
-enum CellType {
-  genericCellType = 0;
-  spanCellType = 1;
-  numberCellType = 2;
-  textCellType = 3;
-  formulaCellType = 4;
-  dateCellType = 5;
-  boolCellType = 6;
-  durationCellType = 7;
-  formulaErrorCellType = 8;
-  automaticCellType = 9;
-}
+  enum CellType {
+    genericCellType = 0;
+    spanCellType = 1;
+    numberCellType = 2;
+    textCellType = 3;
+    formulaCellType = 4;
+    dateCellType = 5;
+    boolCellType = 6;
+    durationCellType = 7;
+    formulaErrorCellType = 8;
+    automaticCellType = 9;
+  }
 
-enum CellValueType {
-  emptyCellValueType = 0;
-  numberCellValueType = 1;
-  stringCellValueType = 2;
-  providedCellValueType = 3;
-  dateCellValueType = 4;
-  boolCellValueType = 5;
-  durationCellValueType = 6;
-  errorCellValueType = 7;
-  richTextCellType = 8;
-  currencyCellValueType = 9;
-}
+  enum CellValueType {
+    emptyCellValueType = 0;
+    numberCellValueType = 1;
+    stringCellValueType = 2;
+    providedCellValueType = 3;
+    dateCellValueType = 4;
+    boolCellValueType = 5;
+    durationCellValueType = 6;
+    errorCellValueType = 7;
+    richTextCellType = 8;
+    currencyCellValueType = 9;
+  }
 
-enum TableDimensionArchive {
-  dimensionRow = 0;
-  dimensionColumn = 1;
-}
+  enum TableDimensionArchive {
+    dimensionRow = 0;
+    dimensionColumn = 1;
+  }
 
-enum SelectionTypeArchive {
-  deprecatedCellSelectionType = 0;
-  rowSelectionType = 1;
-  columnSelectionType = 2;
-  deprecatedCellEditingSelectionType = 3;
-  deprecatedTableNameSelectionType = 4;
-  deprecatedTableSelectionType = 5;
-  regionSelectionType = 6;
-  noSelectionType = 7;
-}
+  enum SelectionTypeArchive {
+    deprecatedCellSelectionType = 0;
+    rowSelectionType = 1;
+    columnSelectionType = 2;
+    deprecatedCellEditingSelectionType = 3;
+    deprecatedTableNameSelectionType = 4;
+    deprecatedTableSelectionType = 5;
+    regionSelectionType = 6;
+    noSelectionType = 7;
+  }
 
-enum FillDirectionArchive {
-  kTSTFillDownArchive = 1;
-  kTSTFillUpArchive = 2;
-  kTSTFillRightArchive = 3;
-  kTSTFillLeftArchive = 4;
-}
+  enum FillDirectionArchive {
+    kTSTFillDownArchive = 1;
+    kTSTFillUpArchive = 2;
+    kTSTFillRightArchive = 3;
+    kTSTFillLeftArchive = 4;
+  }
 
-enum MergeActionArchive {
-  mergeActionInsert = 1;
-  mergeActionRemove = 2;
-  mergeActionShrink = 3;
-  mergeActionGrow = 4;
-}
+  enum MergeActionArchive {
+    mergeActionInsert = 1;
+    mergeActionRemove = 2;
+    mergeActionShrink = 3;
+    mergeActionGrow = 4;
+  }
 
-enum HideShowActionArchive {
-  hideShowActionHide = 0;
-  hideShowActionShow = 1;
-}
+  enum HideShowActionArchive {
+    hideShowActionHide = 0;
+    hideShowActionShow = 1;
+  }
 
-enum GroupingType {
-  UNIQUE = 0;
-  YEAR = 1;
-  MONTH = 2;
-  DAYOFWEEK = 3;
-  DAY = 4;
-  YEARWEEK = 5;
-  YEARQUARTER = 6;
-  ROUND_0 = 10;
-}
+  enum GroupingType {
+    UNIQUE = 0;
+    YEAR = 1;
+    MONTH = 2;
+    DAYOFWEEK = 3;
+    DAY = 4;
+    YEARWEEK = 5;
+    YEARQUARTER = 6;
+    ROUND_0 = 10;
+  }
 
-enum AggregateType {
-  NONE = 0;
-  COUNT = 1;
-  TOTAL = 2;
-  AVERAGE = 3;
-  MIN = 4;
-  MAX = 5;
-  GROUPVALUE = 9;
-  BODYROWS = 10;
-  INDIRECT = 11;
-}
+  enum AggregateType {
+    NONE = 0;
+    COUNT = 1;
+    TOTAL = 2;
+    AVERAGE = 3;
+    MIN = 4;
+    MAX = 5;
+    GROUPVALUE = 9;
+    BODYROWS = 10;
+    INDIRECT = 11;
+  }
 
 message CellID {
   required fixed32 packedData = 1;
   optional .TSCE.CellCoordinateArchive expanded_coord = 2;
+}
+
+message CellUIDLookupListArchive {
+  optional .TSCE.UidLookupListArchive column_uids = 1;
+  optional .TSCE.UidLookupListArchive row_uids = 2;
+  repeated int32 column_indexes = 3;
+  repeated int32 row_indexes = 4;
 }
 
 message CellUIDListArchive {
@@ -103,6 +110,7 @@ message CellUIDListArchive {
   repeated .TSP.UUID column_uids = 2;
   repeated int32 compressed_row_indexes = 3;
   repeated int32 compressed_column_indexes = 4;
+  optional .TST.CellUIDLookupListArchive uncompressed_lookup_list = 5;
 }
 
 message TableSize {
@@ -189,6 +197,7 @@ message ImportWarningSetArchive {
     required .TST.ImportWarningSetArchive.FormulaWarningType formula_warning_type = 1;
     optional string original_formula = 2;
     optional string supplementary_text = 3;
+    optional int32 formula_warning_type_int = 4;
   }
   enum FormulaWarningType {
     THREE_D_REFERENCE = 1;
@@ -208,22 +217,22 @@ message ImportWarningSetArchive {
     TRANSPOSED_WITH_ISSUES_UNCHANGED = 15;
   }
   optional .TST.ImportWarningSetArchive.FormulaImportWarning formula_import_warning = 1;
-  optional bool cond_format_above_avg_equal_avg = 2 [default = false];
-  optional bool cond_format_above_avg_std_dev = 3 [default = false];
-  optional bool cond_format_complex_formula = 4 [default = false];
-  optional bool cond_format_contains_errors = 5 [default = false];
-  optional bool cond_format_expr = 6 [default = false];
-  optional bool cond_format_not_contains_errors = 7 [default = false];
-  optional bool cond_format_parameters_not_all_same_type = 8 [default = false];
-  optional bool cond_format_stop_if_true = 9 [default = false];
-  optional bool cond_format_unsupported_operator = 10 [default = false];
-  optional bool cond_format_unsupported_styling = 11 [default = false];
-  optional bool cond_format_unsupported_time_period = 12 [default = false];
-  optional bool error_cell_with_no_formula = 13 [default = false];
-  optional bool unsupported_cond_format = 14 [default = false];
+  optional bool cond_format_above_avg_equal_avg = 2;
+  optional bool cond_format_above_avg_std_dev = 3;
+  optional bool cond_format_complex_formula = 4;
+  optional bool cond_format_contains_errors = 5;
+  optional bool cond_format_expr = 6;
+  optional bool cond_format_not_contains_errors = 7;
+  optional bool cond_format_parameters_not_all_same_type = 8;
+  optional bool cond_format_stop_if_true = 9;
+  optional bool cond_format_unsupported_operator = 10;
+  optional bool cond_format_unsupported_styling = 11;
+  optional bool cond_format_unsupported_time_period = 12;
+  optional bool error_cell_with_no_formula = 13;
+  optional bool unsupported_cond_format = 14;
   optional string original_data_format = 15;
-  optional bool formula_warning_filtered_column_formula_not_copied = 16 [default = false];
-  optional bool duration_format_range_changed = 17 [default = false];
+  optional bool formula_warning_filtered_column_formula_not_copied = 16;
+  optional bool duration_format_range_changed = 17;
 }
 
 message CellRefImportWarningSetPairArchive {
@@ -791,13 +800,13 @@ message FilterRuleArchive {
 
 message TableStyleArchive {
   required .TSS.StyleArchive super = 1;
-  optional uint32 override_count = 10 [default = 0];
+  optional uint32 override_count = 10;
   optional .TST.TableStylePropertiesArchive table_properties = 11;
 }
 
 message CellStyleArchive {
   required .TSS.StyleArchive super = 1;
-  optional uint32 override_count = 10 [default = 0];
+  optional uint32 override_count = 10;
   optional .TST.CellStylePropertiesArchive cell_properties = 11;
 }
 
@@ -890,10 +899,10 @@ message FilterSetArchive {
     FilterSetArchiveTypeAll = 0;
     FilterSetArchiveTypeAny = 1;
   }
-  optional .TST.FilterSetArchive.FilterSetType type = 1 [default = FilterSetArchiveTypeAll];
+  optional .TST.FilterSetArchive.FilterSetType type = 1;
   optional bool is_enabled = 2 [default = true];
   repeated .TST.FilterRuleArchive filter_rules = 3;
-  optional bool needs_formula_rewrite_for_import = 4 [default = false];
+  optional bool needs_formula_rewrite_for_import = 4;
   repeated uint32 filter_offsets = 5;
   repeated bool filter_enabled = 6;
 }
@@ -912,7 +921,7 @@ message HiddenStateExtentArchive {
   repeated .TST.HiddenStateExtentArchive.RowOrColumnState hidden_states = 2;
   required .TST.HiddenStateExtentArchive.RowOrColumnDirection row_or_column_direction = 3;
   repeated .TSCE.CellValueArchive threshold_value = 5;
-  optional bool needs_to_update_filter_set_for_import = 6 [default = false];
+  optional bool needs_to_update_filter_set_for_import = 6;
   repeated .TSP.UUID collapsed_group_uids = 7;
 }
 
@@ -943,8 +952,8 @@ message FormulaArchive {
 
 message ExpressionNodeArchive {
   repeated .TSP.Reference children = 1;
-  optional uint64 first_index = 2 [default = 0];
-  optional uint64 last_index = 3 [default = 0];
+  optional uint64 first_index = 2;
+  optional uint64 last_index = 3;
 }
 
 message BooleanNodeArchive {
@@ -1080,7 +1089,7 @@ message CompletionTokenAttachmentArchive {
 message HiddenStateFormulaOwnerArchive {
   optional .TSP.CFUUIDArchive owner_id = 1;
   repeated .TSCE.CellValueArchive threshold_value = 2;
-  optional bool needs_to_update_filter_set_for_import = 3 [default = false];
+  optional bool needs_to_update_filter_set_for_import = 3;
 }
 
 message FormulaStoreArchive {
@@ -1196,6 +1205,7 @@ message CategoryOwnerArchive {
     optional .TSCE.CellCoordinateArchive aggs_in_group_root_formula = 9;
     optional .TSCE.CellCoordinateArchive column_order_changed_formula = 11;
     optional .TSCE.CellCoordinateArchive row_order_changed_formula = 12;
+    optional .TSCE.CellCoordinateArchive row_order_changed_ignoring_recalc_formula = 13;
   }
   required .TSP.UUID owner_uid = 1;
   repeated .TST.CategoryOwnerArchive.GroupByArchive group_by = 2;
@@ -1350,4 +1360,3 @@ extend .TSS.CommandPropertyEntryArchive {
   optional .TST.CommentStorageWrapperArchive comment_storage = 504;
   optional .TST.CellSpecArchive cell_spec = 505;
 }
-

@@ -135,8 +135,9 @@ message TableStrokePresetArchive {
 message ThemePresetsArchive {
   repeated .TSP.Reference table_style_presets = 1;
   repeated .TSP.Reference table_cell_stroke_presets = 2;
-  extend .TSS.ThemeArchive {
-    optional .TST.ThemePresetsArchive extension = 200;
-  }
+extend .TSS.ThemeArchive {
+  optional .TST.ThemePresetsArchive extension = 200;
 }
+}
+
 

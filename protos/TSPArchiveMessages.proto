@@ -11,16 +11,16 @@ message ArchiveInfo {
 
 message MessageInfo {
   required uint32 type = 1;
-  repeated uint32 version = 2 [packed = true];
+  repeated uint32 version = 2;
   required uint32 length = 3;
   repeated .TSP.FieldInfo field_infos = 4;
-  repeated uint64 object_references = 5 [packed = true];
-  repeated uint64 data_references = 6 [packed = true];
+  repeated uint64 object_references = 5;
+  repeated uint64 data_references = 6;
   optional uint32 base_message_index = 7;
-  repeated uint32 diff_merge_version = 8 [packed = true];
+  repeated uint32 diff_merge_version = 8;
   optional .TSP.FieldPath diff_field_path = 9;
   repeated .TSP.FieldPath fields_to_remove = 10;
-  repeated uint32 diff_read_version = 11 [packed = true];
+  repeated uint32 diff_read_version = 11;
 }
 
 message FieldInfo {
@@ -42,33 +42,33 @@ message FieldInfo {
     PreserveNewerValue = 2;
   }
   required .TSP.FieldPath path = 1;
-  optional .TSP.FieldInfo.Type type = 2 [default = Value];
-  optional .TSP.FieldInfo.UnknownFieldRule unknown_field_rule = 3 [default = IgnoreAndPreserveUntilModified];
-  repeated uint64 object_references = 4 [packed = true];
-  repeated uint64 data_references = 5 [packed = true];
-  optional .TSP.FieldInfo.KnownFieldRule known_field_rule = 6 [default = None];
-  repeated uint32 known_field_version = 7 [packed = true];
+  optional .TSP.FieldInfo.Type type = 2;
+  optional .TSP.FieldInfo.UnknownFieldRule unknown_field_rule = 3;
+  repeated uint64 object_references = 4;
+  repeated uint64 data_references = 5;
+  optional .TSP.FieldInfo.KnownFieldRule known_field_rule = 6;
+  repeated uint32 known_field_version = 7;
   optional string known_field_feature_identifier = 8;
 }
 
 message FieldPath {
-  repeated uint32 path = 1 [packed = true];
+  repeated uint32 path = 1;
 }
 
 message ComponentInfo {
   required uint64 identifier = 1;
   required string preferred_locator = 2;
   optional string locator = 3;
-  repeated uint32 document_read_version = 4 [packed = true];
-  repeated uint32 document_write_version = 5 [packed = true];
+  repeated uint32 document_read_version = 4;
+  repeated uint32 document_write_version = 5;
   repeated .TSP.ComponentExternalReference external_references = 6;
   repeated .TSP.ComponentDataReference data_references = 7;
-  optional bool is_stored_outside_object_archive = 10 [default = false];
+  optional bool is_stored_outside_object_archive = 10;
   repeated .TSP.ObjectUUIDMapEntry object_uuid_map_entries = 11;
-  optional uint64 save_token = 12 [default = 0];
+  optional uint64 save_token = 12;
   repeated .TSP.FeatureInfo feature_infos = 13;
-  repeated uint32 component_read_version = 14 [packed = true];
-  repeated uint32 component_required_version = 15 [packed = true];
+  repeated uint32 component_read_version = 14;
+  repeated uint32 component_required_version = 15;
   optional uint32 compression_algorithm = 16;
   optional bool can_be_dropped = 17;
   repeated .TSP.ComponentExternalReference versioned_external_references = 18;
@@ -92,8 +92,8 @@ message ObjectUUIDMapEntry {
 
 message FeatureInfo {
   required string identifier = 1;
-  repeated uint32 read_version = 2 [packed = true];
-  repeated uint32 write_version = 3 [packed = true];
+  repeated uint32 read_version = 2;
+  repeated uint32 write_version = 3;
 }
 
 message PackageMetadata {
@@ -106,28 +106,28 @@ message PackageMetadata {
   optional .TSP.DocumentRevision revision = 2;
   repeated .TSP.ComponentInfo components = 3;
   repeated .TSP.DataInfo datas = 4;
-  repeated uint32 read_version = 5 [packed = true];
-  repeated uint32 write_version = 6 [packed = true];
-  repeated uint32 file_format_version = 7 [packed = true];
-  optional uint64 save_token = 8 [default = 0];
-  optional .TSP.PackageMetadata.PackageType preferred_package_type = 9 [default = Default];
+  repeated uint32 read_version = 5;
+  repeated uint32 write_version = 6;
+  repeated uint32 file_format_version = 7;
+  optional uint64 save_token = 8;
+  optional .TSP.PackageMetadata.PackageType preferred_package_type = 9;
   optional .TSP.Reference data_metadata_map = 10;
   repeated .TSP.ComponentInfo versioned_components = 11;
 }
 
 message DocumentRevision {
-  optional int32 sequence_32 = 3 [default = 0];
+  optional int32 sequence_32 = 3;
   optional string identifier = 2;
-  optional uint64 sequence_64 = 1 [default = 0];
+  optional uint64 sequence_64 = 1;
 }
 
 message PasteboardMetadata {
-  repeated uint32 version = 1 [packed = true];
+  repeated uint32 version = 1;
   required string app_name = 2;
   repeated .TSP.DataInfo datas = 3;
   optional .TSP.UUID source_document_uuid = 5;
   optional .TSP.Reference data_metadata_map = 6;
-  repeated uint32 read_version = 7 [packed = true];
+  repeated uint32 read_version = 7;
 }
 
 message DataInfo {
@@ -142,7 +142,7 @@ message DataInfo {
   optional string document_resource_locator = 5;
   optional bytes source_bookmark_data = 6;
   optional string remote_url = 7;
-  optional bool can_download = 8 [default = false];
+  optional bool can_download = 8;
   optional .TSP.DataInfo.DownloadPriority download_priority = 9 [default = Default];
   optional .TSP.DataAttributes attributes = 10;
   optional .TSP.EncryptionInfo encryption_info = 11;
@@ -173,22 +173,22 @@ message EncryptionBlockInfo {
 }
 
 message ViewStateMetadata {
-  repeated uint32 version = 1 [packed = true];
+  repeated uint32 version = 1;
   optional .TSP.UUID version_uuid = 4;
   required .TSP.ComponentInfo component = 3;
   repeated .TSP.ObjectUUIDMapEntry external_object_uuid_map_entries = 5;
-  repeated uint32 read_version = 6 [packed = true];
+  repeated uint32 read_version = 6;
 }
 
 message ObjectSerializationMetadata {
-  repeated uint32 version = 1 [packed = true];
+  repeated uint32 version = 1;
   optional .TSP.UUID source_document_uuid = 2;
   optional .TSP.UUID version_uuid = 3;
   required .TSP.ComponentInfo component = 4;
   repeated .TSP.DataInfo datas = 5;
   repeated .TSP.ObjectUUIDMapEntry external_object_uuid_map_entries = 6;
   optional .TSP.Reference data_metadata_map = 7;
-  repeated uint32 read_version = 8 [packed = true];
+  repeated uint32 read_version = 8;
 }
 
 message ObjectSerializationDirectory {
@@ -208,4 +208,5 @@ message SupportMetadata {
   optional bool is_in_collaboration_mode = 1;
   repeated .TSP.DataReference acknowledged_server_data = 2;
 }
+
 

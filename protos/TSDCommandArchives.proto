@@ -7,12 +7,17 @@ import "TSDArchives.proto";
 import "TSDArchives_sos.proto";
 package TSD;
 
-enum CommentCommandVariant {
-  BaseComment = 0;
-  AddReply = 1;
-  EditReply = 2;
-  DeleteReply = 3;
-}
+  enum CommentCommandVariant {
+    BaseComment = 0;
+    AddReply = 1;
+    EditReply = 2;
+    DeleteReply = 3;
+  }
+
+  enum CaptionOrTitleKind {
+    Caption = 1;
+    Title = 2;
+  }
 
 message UndoObjectArchive {
   optional .TSP.Reference stylesheet = 2;
@@ -170,6 +175,7 @@ message MovieSetValueCommandArchive {
     optional .TSD.MovieSetValueCommandArchive.LoopOption loopOption = 6;
     optional float volume = 7;
     optional .TSP.DataReference media = 8;
+    optional bool playsAcrossSlides = 9;
   }
   enum LoopOption {
     None = 0;
@@ -435,4 +441,29 @@ message FreehandDrawingAnimationCommandArchive {
   optional .TSD.FreehandDrawingAnimationArchive animation = 2;
   optional .TSD.FreehandDrawingAnimationArchive old_animation = 3;
 }
+
+message InsertCaptionOrTitleCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TSP.UUIDPath drawable_info_id_path = 2;
+  optional .TSP.Reference caption_or_title_info = 3;
+  optional .TSP.UUID added_caption_or_title_uuid = 4;
+  optional .TSD.CaptionOrTitleKind caption_or_title_kind = 5;
+  optional .TSP.Reference undo_object = 6;
+}
+
+message RemoveCaptionOrTitleCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TSP.UUIDPath drawable_info_id_path = 2;
+  optional .TSP.Reference removed_caption_or_title_info = 3;
+  optional .TSP.UUID removed_caption_or_title_uuid = 4;
+  optional .TSD.CaptionOrTitleKind caption_or_title_kind = 5;
+}
+
+message SetCaptionOrTitleVisibilityCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSD.CaptionOrTitleKind caption_or_title_kind = 2;
+  optional bool hidden = 3;
+  optional bool was_hidden = 4;
+}
+
 

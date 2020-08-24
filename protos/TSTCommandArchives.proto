@@ -11,30 +11,30 @@ import "TSTArchives.proto";
 import "TSTArchives_sos.proto";
 package TST;
 
-enum TableArea {
-  TableAreaBody = 1;
-  TableAreaHeaderRow = 2;
-  TableAreaHeaderColumn = 3;
-  TableAreaFooterRow = 4;
-}
+  enum TableArea {
+    TableAreaBody = 1;
+    TableAreaHeaderRow = 2;
+    TableAreaHeaderColumn = 3;
+    TableAreaFooterRow = 4;
+  }
 
-enum TableAreaTransition {
-  TableAreaTransitionHeaderRowToBody = 1;
-  TableAreaTransitionBodyToHeaderRow = 2;
-  TableAreaTransitionFooterRowToBody = 3;
-  TableAreaTransitionBodyToFooterRow = 4;
-  TableAreaTransitionHeaderColumnToBody = 5;
-  TableAreaTransitionBodyToHeaderColumn = 6;
-}
+  enum TableAreaTransition {
+    TableAreaTransitionHeaderRowToBody = 1;
+    TableAreaTransitionBodyToHeaderRow = 2;
+    TableAreaTransitionFooterRowToBody = 3;
+    TableAreaTransitionBodyToFooterRow = 4;
+    TableAreaTransitionHeaderColumnToBody = 5;
+    TableAreaTransitionBodyToHeaderColumn = 6;
+  }
 
-enum ColumnRowTypeEnum {
-  ColumnRowTypeAnchor = 0;
-  ColumnRowTypeHeaderRow = 1;
-  ColumnRowTypeBodyRow = 2;
-  ColumnRowTypeFooterRow = 3;
-  ColumnRowTypeHeaderColumn = 4;
-  ColumnRowTypeBodyColumn = 5;
-}
+  enum ColumnRowTypeEnum {
+    ColumnRowTypeAnchor = 0;
+    ColumnRowTypeHeaderRow = 1;
+    ColumnRowTypeBodyRow = 2;
+    ColumnRowTypeFooterRow = 3;
+    ColumnRowTypeHeaderColumn = 4;
+    ColumnRowTypeBodyColumn = 5;
+  }
 
 message TableCommandArchive {
   required .TSK.CommandArchive super = 1;
@@ -813,4 +813,5 @@ message CommandRewritePencilAnnotationFormulasArchive {
   required .TSCE.FormulasForUndoArchive formulas_to_rewrite = 3;
   repeated .TST.CommandRewritePencilAnnotationFormulasArchive.AnnotationPair annotations_for_undo = 4;
 }
+
 
