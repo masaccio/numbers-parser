@@ -5,7 +5,7 @@ __author__ = "Peter Sobot"
 import keynote_parser.macos_app_version
 
 __major_version__ = 1
-__patch_version__ = 0
+__patch_version__ = 1
 __supported_keynote_version__ = keynote_parser.macos_app_version.MacOSAppVersion(
     "10.1", "6913", "1A148"
 )
