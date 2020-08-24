@@ -4,28 +4,28 @@ import "TSPMessages.proto";
 import "TSKArchives.proto";
 package TSS;
 
-enum ValueType {
-  ObjectType = 0;
-  IntType = 1;
-  FloatType = 2;
-  DoubleType = 3;
-}
+  enum ValueType {
+    ObjectType = 0;
+    IntType = 1;
+    FloatType = 2;
+    DoubleType = 3;
+  }
 
-enum PropertyType {
-  InvalidPropertyType = 1;
-  NullPropertyType = 2;
-  IntegerPropertyType = 3;
-  FloatPropertyType = 4;
-  DoublePropertyType = 5;
-  NSStringPropertyType = 6;
-  TSPObjectPropertyType = 7;
-}
+  enum PropertyType {
+    InvalidPropertyType = 1;
+    NullPropertyType = 2;
+    IntegerPropertyType = 3;
+    FloatPropertyType = 4;
+    DoublePropertyType = 5;
+    NSStringPropertyType = 6;
+    TSPObjectPropertyType = 7;
+  }
 
 message StyleArchive {
   optional string name = 1;
   optional string style_identifier = 2;
   optional .TSP.Reference parent = 3;
-  optional bool is_variation = 4 [default = false];
+  optional bool is_variation = 4;
   optional .TSP.Reference stylesheet = 5;
 }
 
@@ -48,8 +48,9 @@ message StylesheetArchive {
   optional .TSP.Reference parent = 3;
   optional bool is_locked = 4 [default = true];
   repeated .TSS.StylesheetArchive.StyleChildrenEntry parent_to_children_style_map = 5;
-  optional bool can_cull_styles = 6 [default = false];
+  optional bool can_cull_styles = 6;
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_10_0 = 7;
+  optional .TSS.StylesheetArchive.VersionedStyles styles_for_10_1 = 8;
 }
 
 message ThemeArchive {
@@ -149,4 +150,3 @@ message CommandPropertyMapArchive {
 extend .TSS.CommandPropertyEntryArchive {
   optional .TSP.Color color = 8;
 }
-

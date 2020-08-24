@@ -169,6 +169,7 @@ message BuildAttributesArchive {
   optional double custom_scale_amount = 34;
   optional double custom_travel_distance = 35;
   optional bool custom_cursor = 36;
+  optional bool custom_align_to_path = 37;
   optional string database_animationType = 1 [deprecated = true];
   optional string database_effect = 2 [deprecated = true];
   optional uint32 database_direction = 3 [deprecated = true];
@@ -195,7 +196,7 @@ message PlaceholderArchive {
     kKindObjectPlaceholder = 4;
   }
   required .TSWP.ShapeInfoArchive super = 1;
-  optional .KN.PlaceholderArchive.Kind kind = 2 [default = kKindPlaceholder];
+  optional .KN.PlaceholderArchive.Kind kind = 2;
 }
 
 message NoteArchive {
@@ -256,7 +257,7 @@ message SlideArchive {
   repeated .TSP.Reference bodyListStyles = 35;
   optional string thumbnailTextForTitlePlaceholder = 37;
   optional string thumbnailTextForBodyPlaceholder = 38;
-  optional bool slideObjectsLayerWithMaster = 41 [default = false];
+  optional bool slideObjectsLayerWithMaster = 41;
   optional .TSP.Reference master = 17;
   repeated .TSD.GuideArchive staticGuides = 18;
   optional .TSP.Reference userDefinedGuideStorage = 36;
@@ -287,7 +288,7 @@ message SlideNodeArchive {
   required bool hasBuilds = 6 [deprecated = true];
   required bool hasTransition = 7;
   optional bool hasNote = 8;
-  optional bool isSlideNumberVisible = 18 [default = false];
+  optional bool isSlideNumberVisible = 18;
   optional string uniqueIdentifier = 11 [deprecated = true];
   optional string copyFromSlideIdentifier = 12;
   optional uint32 slideSpecificHyperlinkCount = 13 [deprecated = true];
@@ -318,7 +319,7 @@ message DesktopUILayoutArchive {
   optional bool notes_visible = 3;
   optional bool light_table_visible = 5;
   optional bool inspector_pane_visible = 6 [default = true];
-  optional .KN.DesktopUILayoutArchive.InspectorPaneViewMode inspector_pane_view_mode = 7 [default = kInspectorPaneViewModeFormat];
+  optional .KN.DesktopUILayoutArchive.InspectorPaneViewMode inspector_pane_view_mode = 7;
   optional bool showing_master_slides = 8;
   optional bool inspector_pane_autohidden = 9;
   optional bool element_list_visible = 10;
@@ -364,6 +365,8 @@ message UIStateArchive {
   optional bool mobile_light_table_hides_skipped_slides = 36;
   optional .TSP.Reference freehand_drawing_toolkit_state = 37;
   optional .TSP.Reference selection_path_transformer = 38;
+  optional bool shows_mobile_outline = 40;
+  optional bool editing_disabled = 41;
 }
 
 message IOSRestorableViewStateRootArchive {
@@ -436,11 +439,11 @@ message ShowArchive {
   optional bool slideNumbersVisible = 6;
   optional .TSP.Reference recording = 7;
   optional bool loop_presentation = 8;
-  optional .KN.ShowArchive.KNShowMode mode = 9 [default = kKNShowModeNormal];
-  optional double autoplay_transition_delay = 10 [default = 5];
-  optional double autoplay_build_delay = 11 [default = 2];
+  optional .KN.ShowArchive.KNShowMode mode = 9;
+  optional double autoplay_transition_delay = 10 [default = 5.0];
+  optional double autoplay_build_delay = 11 [default = 2.0];
   optional bool idle_timer_active = 15;
-  optional double idle_timer_delay = 16 [default = 900];
+  optional double idle_timer_delay = 16 [default = 900.0];
   optional .TSP.Reference soundtrack = 17;
   optional bool automatically_plays_upon_open = 18;
   optional .TSP.Reference slideList = 19;
@@ -464,7 +467,7 @@ message SlideStylePropertiesArchive {
 
 message SlideStyleArchive {
   required .TSS.StyleArchive super = 1;
-  optional uint32 override_count = 10 [default = 0];
+  optional uint32 override_count = 10;
   optional .KN.SlideStylePropertiesArchive slide_properties = 11;
 }
 
@@ -504,7 +507,7 @@ message RecordingArchive {
   repeated .TSP.Reference event_tracks = 1;
   optional .TSP.Reference movie_track = 2;
   optional double duration = 3;
-  optional .KN.RecordingArchive.RecordingSyncStateEnum sync_state_enum = 4 [default = kRecordingSyncStateInSyncWithShow, deprecated = true];
+  optional .KN.RecordingArchive.RecordingSyncStateEnum sync_state_enum = 4 [deprecated = true];
   optional .TSP.Date modification_date = 5;
   optional .KN.RecordingSyncState sync_state = 6;
   optional .KN.RecordingCorrectionHistory correction_history = 7;
@@ -512,7 +515,7 @@ message RecordingArchive {
 
 message RecordingSyncState {
   optional .TSP.UUID out_of_sync_token = 1;
-  optional bool can_clear_out_of_sync_token = 2 [default = false];
+  optional bool can_clear_out_of_sync_token = 2;
 }
 
 message RecordingCorrectionHistory {
@@ -525,7 +528,7 @@ message RecordingEventTrackArchive {
 }
 
 message RecordingEventArchive {
-  optional double start_time = 1 [default = -1];
+  optional double start_time = 1 [default = -1.0];
   optional .KN.RecordingNavigationEventArchive navigation_event_archive = 1000;
   optional .KN.RecordingLaserEventArchive laser_event_archive = 1001;
   optional .KN.RecordingPauseEventArchive pause_event_archive = 1002;
@@ -541,7 +544,7 @@ message RecordingNavigationEventArchive {
   optional .TSP.UUID target_slide_node_id = 4;
   optional .TSP.Reference target_slide_node_reference = 1;
   optional uint32 target_event_index = 2;
-  optional .KN.RecordingNavigationEventArchive.RecordingNavigationEventAnimationPhase animation_phase = 3 [default = kRecordingNavigationEventAnimationNone];
+  optional .KN.RecordingNavigationEventArchive.RecordingNavigationEventAnimationPhase animation_phase = 3;
 }
 
 message RecordingLaserEventArchive {
@@ -556,7 +559,7 @@ message RecordingPauseEventArchive {
     kRecordingPauseEventTypeConcealWithBlack = 2;
     kRecordingPauseEventTypeConcealWithWhite = 3;
   }
-  optional .KN.RecordingPauseEventArchive.RecordingPauseEventType pause_event_type = 1 [default = kRecordingPauseEventTypeResume];
+  optional .KN.RecordingPauseEventArchive.RecordingPauseEventType pause_event_type = 1;
 }
 
 message RecordingMovieEventArchive {
@@ -572,6 +575,8 @@ message RecordingMovieEventArchive {
   optional .TSP.Reference movie_info_reference = 1;
   optional .KN.RecordingMovieEventArchive.RecordingMovieEventType movie_event_type = 2 [default = kRecordingMovieEventSeek];
   optional double movie_event_value = 3;
+  optional .TSP.Reference movie_info_that_played_across_slides_reference = 4;
+  optional .TSP.UUID movie_slide_node_id = 5;
 }
 
 message RecordingMovieTrackArchive {
@@ -581,7 +586,7 @@ message RecordingMovieTrackArchive {
 
 message MovieSegmentArchive {
   optional .TSP.DataReference movie_data = 3;
-  optional double start_time = 2 [default = -1];
+  optional double start_time = 2 [default = -1.0];
   optional .TSP.Reference database_movie_data = 1;
 }
 
@@ -592,7 +597,7 @@ message Soundtrack {
     kKNSoundtrackModeDoNotPlay = 2;
   }
   optional double volume = 1;
-  optional .KN.Soundtrack.SoundtrackMode mode = 2 [default = kKNSoundtrackModePlayOnce];
+  optional .KN.Soundtrack.SoundtrackMode mode = 2;
   repeated .TSP.DataReference movie_media = 3;
 }
 
@@ -628,4 +633,5 @@ message MixedIdOperationArgs {
   repeated .TSK.RemoveIdOperationArgs remove_args_list = 4;
   repeated .TSK.IdPlacementOperationArgs hide_placeholder_args_list = 5;
 }
+
 

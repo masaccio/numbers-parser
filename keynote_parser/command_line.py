@@ -82,13 +82,13 @@ def main():
 
     parser_unpack = subparsers.add_parser('unpack')
     parser_unpack.add_argument("input", help="a .key file")
-    parser_unpack.add_argument("--output", help="a directory name to unpack into")
+    parser_unpack.add_argument("--output", "-o", help="a directory name to unpack into")
     add_replacement_arg(parser_unpack)
     parser_unpack.set_defaults(func=unpack_command)
 
     parser_pack = subparsers.add_parser('pack')
     parser_pack.add_argument("input", help="a directory of an unpacked .key file")
-    parser_pack.add_argument("--output", help="a keynote file name to unpack into")
+    parser_pack.add_argument("--output", "-o", help="a keynote file name to unpack into")
     add_replacement_arg(parser_pack)
     parser_pack.set_defaults(func=pack_command)
 
@@ -109,7 +109,7 @@ def main():
 
     parser_replace = subparsers.add_parser('replace')
     parser_replace.add_argument("input", help="a .key file")
-    parser_replace.add_argument("--output", help="a .key file to output to")
+    parser_replace.add_argument("--output", "-o", help="a .key file to output to")
     parser_replace.add_argument("--find", help="a pattern to search for in text")
     parser_replace.add_argument("--replace", help="a string to replace with")
     add_replacement_arg(parser_replace)

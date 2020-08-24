@@ -11,10 +11,10 @@ import "TSTArchives.proto";
 import "KNArchives.proto";
 package KN;
 
-enum AnimationReferent {
-  kRelativeToStart = 1;
-  kRelativeToEnd = 2;
-}
+  enum AnimationReferent {
+    kRelativeToStart = 1;
+    kRelativeToEnd = 2;
+  }
 
 message UIStateCommandGroupArchive {
   required .TSK.CommandGroupArchive super = 1;
@@ -125,8 +125,8 @@ message CommandShowMarkOutOfSyncRecordingArchive {
   required .TSK.CommandArchive super = 1;
   required .TSP.Reference show = 2;
   optional .TSP.Reference old_recording = 3;
-  optional bool old_is_recording_out_of_sync = 4 [default = false];
-  optional bool new_is_recording_out_of_sync = 5 [default = false];
+  optional bool old_is_recording_out_of_sync = 4;
+  optional bool new_is_recording_out_of_sync = 5;
   optional .TSP.Date old_modification_date = 6;
   optional .TSP.Date new_modification_date = 7;
 }
@@ -179,7 +179,7 @@ message CommandShowInsertSlideArchive {
   repeated .TSP.Reference slide_nodes_for_depth_fix_up = 7;
   repeated uint32 depths_of_slide_nodes_for_depth_fix_up = 8;
   repeated uint32 old_depths_of_slide_nodes_for_depth_fix_up = 9;
-  optional .KN.CommandShowInsertSlideArchive.Kind kind = 10 [default = kKindInsertSlide];
+  optional .KN.CommandShowInsertSlideArchive.Kind kind = 10;
   repeated .TSP.Reference master_nodes_being_inserted = 11;
   repeated .TSP.UUID custom_format_keys = 12;
   repeated bool collapsed_state_of_slide_nodes_being_inserted = 13;
@@ -515,7 +515,7 @@ message OutlineCanvasSelectionTransformerArchive {
 message SlideCollectionSelectionTransformerHelperArchive {
   repeated .TSP.UUIDPath slide_nodes = 1;
   optional .TSP.UUIDPath slide_node_to_edit = 2;
-  optional bool slide_collection_is_theme = 3 [default = false];
+  optional bool slide_collection_is_theme = 3;
   optional uint32 previous_primary_selected_index = 4;
 }
 
@@ -525,7 +525,8 @@ message SlideCollectionSelectionTransformerArchive {
 
 message OutlineSelectionTransformerArchive {
   required .KN.SlideCollectionSelectionTransformerHelperArchive transformer_helper = 1;
-  optional bool can_have_range_in_selected_paragraph = 2 [default = false];
+  optional bool can_have_range_in_selected_paragraph = 2;
   repeated .TSK.RangeAddress selection_range_addresses = 3;
 }
+
 
