@@ -3,6 +3,8 @@ from __future__ import absolute_import
 from builtins import zip
 from builtins import str
 from builtins import object
+from future.utils import raise_from
+
 import sys
 import yaml
 import struct
@@ -21,8 +23,9 @@ from .generated.TSPArchiveMessages_pb2 import ArchiveInfo
 
 
 class IWAFile(object):
-    def __init__(self, chunks):
+    def __init__(self, chunks, filename=None):
         self.chunks = chunks
+        self.filename = filename
 
     @classmethod
     def from_file(cls, filename):
@@ -31,19 +34,31 @@ class IWAFile(object):
 
     @classmethod
     def from_buffer(cls, data, filename=None):
-        chunks = []
-        while data:
-            chunk, data = IWACompressedChunk.from_buffer(data, filename)
-            chunks.append(chunk)
+        try:
+            chunks = []
+            while data:
+                chunk, data = IWACompressedChunk.from_buffer(data, filename)
+                chunks.append(chunk)
 
-        return cls(chunks)
+            return cls(chunks, filename)
+        except Exception as e:
+            if filename:
+                raise_from(ValueError("Failed to deserialize " + filename), e)
+            else:
+                raise
 
     @classmethod
     def from_dict(cls, _dict):
         return cls([IWACompressedChunk.from_dict(chunk) for chunk in _dict['chunks']])
 
     def to_dict(self):
-        return {"chunks": [chunk.to_dict() for chunk in self.chunks]}
+        try:
+            return {"chunks": [chunk.to_dict() for chunk in self.chunks]}
+        except Exception as e:
+            if self.filename:
+                raise_from(ValueError("Failed to serialize " + self.filename), e)
+            else:
+                raise
 
     def to_buffer(self):
         return b''.join([chunk.to_buffer() for chunk in self.chunks])
