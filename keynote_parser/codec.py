@@ -20,6 +20,9 @@ from google.protobuf.message import EncodeError
 from .generated.TSPArchiveMessages_pb2 import ArchiveInfo
 
 
+MAX_FLOAT = 340282346638528859811704183484516925440.000000000000000000
+
+
 class IWAFile(object):
     def __init__(self, chunks):
         self.chunks = chunks
@@ -249,9 +252,26 @@ def header_to_dict(message):
     return output
 
 
+def _work_around_protobuf_max_float_handling(_dict):
+    """
+    protobuf==3.13.0 includes a check to make sure that any `float` value
+    parsed from a Python dictionary must be less than FLOAT_MAX. Unfortunately,
+    when parsing from YAML, serialized FLOAT_MAX values round to slightly over FLOAT_MAX.
+    This is a nasty hack to fix that.
+    """
+    for k, v in _dict.items():
+        if isinstance(v, dict):
+            _work_around_protobuf_max_float_handling(v)
+        elif isinstance(v, float):
+            if v > MAX_FLOAT:
+                _dict[k] = MAX_FLOAT
+    return _dict
+
+
 def dict_to_message(_dict):
     _type = _dict['_pbtype']
     del _dict['_pbtype']
+    _dict = _work_around_protobuf_max_float_handling(_dict)
     return ParseDict(_dict, NAME_CLASS_MAP[_type](), ignore_unknown_fields=True)
 
 

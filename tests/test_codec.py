@@ -1,7 +1,15 @@
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
+
 import yaml
+import pytest
 from keynote_parser import codec
 from keynote_parser.unicode_utils import fix_unicode
+from keynote_parser.generated.TSCHArchives_GEN_pb2 import ChartSeriesStyleArchive as Archive
 
+from google.protobuf.json_format import MessageToDict, ParseDict
 
 SIMPLE_FILENAME = './tests/data/simple-oneslide.iwa'
 MULTILINE_FILENAME = './tests/data/multiline-oneslide.iwa'
@@ -11,6 +19,8 @@ MESSAGE_TYPE_ZERO_FILENAME = './tests/data/message-type-zero.iwa'
 EMOJI_FILENAME_PY2_YAML = './tests/data/emoji-oneslide.py2.yaml'
 EMOJI_FILENAME_PY3_YAML = './tests/data/emoji-oneslide.py3.yaml'
 VERY_BIG_SLIDE = './tests/data/very-big-slide.iwa'
+MAX_FLOAT = 340282346638528859811704183484516925440.0000000000000000000000
+TOO_BIG_FLOAT = 3.4028235e+38
 
 
 def roundtrip(filename):
@@ -69,3 +79,14 @@ def test_iwa_multichunk_roundtrip():
 
 def test_roundtrip_very_big():
     roundtrip(VERY_BIG_SLIDE)
+
+
+@pytest.mark.parametrize('big_float', (MAX_FLOAT, TOO_BIG_FLOAT))
+def test_too_big_float_deserialization(big_float):
+    test_archive = Archive(tschchartseriesareasymbolsize=big_float)
+    test_archive_as_dict = MessageToDict(test_archive)
+    serialized = yaml.dump(test_archive_as_dict, Dumper=Dumper)
+    deserialized = yaml.load(serialized, Loader=Loader)
+    deserialized = codec._work_around_protobuf_max_float_handling(deserialized)
+    deserialized_as_message = ParseDict(deserialized, Archive())
+    assert deserialized_as_message == test_archive

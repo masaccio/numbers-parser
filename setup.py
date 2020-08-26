@@ -148,12 +148,12 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'protobuf>=3.8.0',
+        'protobuf>=3.13.0',
         'tqdm>=4.14.0',
         'python-snappy>=0.5.3',
-        'PyYAML>=4.2b1',
-        'Pillow==6.2.2',
-        'future==0.17.1',
+        'PyYAML>=5.3.1',
+        'Pillow>=6.2.2',
+        'future>=0.17.1',
         'colorama>=0.4.3',
     ],
     # List additional groups of dependencies here (e.g. development
