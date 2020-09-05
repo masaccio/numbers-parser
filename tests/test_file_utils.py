@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from keynote_parser import codec, file_utils
 
 SIMPLE_FILENAME = "./tests/data/simple-oneslide.key"
