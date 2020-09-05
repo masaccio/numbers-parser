@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 from keynote_parser import codec, file_utils
 
-SIMPLE_FILENAME = './tests/data/simple-oneslide.key'
-PHOTO_FILENAME = './tests/data/photo-oneslide.key'
-TABLE_FILENAME = './tests/data/table.key'
+SIMPLE_FILENAME = "./tests/data/simple-oneslide.key"
+PHOTO_FILENAME = "./tests/data/photo-oneslide.key"
+TABLE_FILENAME = "./tests/data/table.key"
+UNICODE_ASSET_FILENAME = "./tests/data/unicode-asset-filename.key"
 
 SIMPLE_SLIDE_KEY = 'Index/Slide-8060.iwa'
 SIMPLE_CONTENTS = [
@@ -50,6 +52,8 @@ SIMPLE_CONTENTS = [
     'preview.jpg',
 ]
 
+UNICODE_ASSET_FILENAME_ASSET_NAME = u"Data/unicode-filename-würfel-8913.png"
+
 
 def test_read_simple():
     reader = file_utils.zip_file_reader(SIMPLE_FILENAME, progress=False)
@@ -91,3 +95,18 @@ def test_process_single_file():
 
     archive = archives[0]
     assert archive.header.identifier == 8060
+
+
+def test_unicode_asset_filename():
+    reader = file_utils.zip_file_reader(UNICODE_ASSET_FILENAME, progress=False)
+
+    results = {}
+
+    def sink(filename, contents):
+        results[filename] = contents
+
+    for filename, handle in reader:
+        if filename == u"Data/unicode-filename-würfel-8913.png":
+            file_utils.process_file(filename, handle, sink)
+
+    assert len(results) == 1
