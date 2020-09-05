@@ -51,7 +51,7 @@ SIMPLE_CONTENTS = [
     'preview.jpg',
 ]
 
-UNICODE_ASSET_FILENAME_ASSET_NAME = "Data/unicode-filename-würfel-8913.png"
+UNICODE_ASSET_FILENAME_ASSET_NAME = u"Data/unicode-filename-würfel-8913.png"
 
 
 def test_read_simple():
