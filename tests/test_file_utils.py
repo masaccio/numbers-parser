@@ -106,7 +106,7 @@ def test_unicode_asset_filename():
         results[filename] = contents
 
     for filename, handle in reader:
-        if filename == "Data/unicode-filename-würfel-8913.png":
+        if filename == u"Data/unicode-filename-würfel-8913.png":
             file_utils.process_file(filename, handle, sink)
 
     assert len(results) == 1
