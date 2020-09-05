@@ -24,7 +24,7 @@ in Keynote files in response to external scripts.
 ## Installation
 
 ```bash
-pip install keynote-parser
+pip3 install keynote-parser
 ```
 
 ## Usage

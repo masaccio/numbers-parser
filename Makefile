@@ -6,10 +6,10 @@ PROTO_CLASSES = $(patsubst protos/%.proto,keynote_parser/generated/%_pb2.py,$(PR
 all: $(PROTO_CLASSES) keynote_parser/generated/__init__.py
 
 install: $(PROTO_CLASSES) keynote_parser/generated/__init__.py keynote_parser/*
-	python setup.py install
+	python3 setup.py install
 
 upload: $(PROTO_CLASSES) keynote_parser/generated/__init__.py keynote_parser/*
-	python setup.py upload
+	python3 setup.py upload
 
 keynote_parser/generated:
 	mkdir -p keynote_parser/generated
@@ -17,7 +17,7 @@ keynote_parser/generated:
 	# protoc will put them into their own Python packages. This is not desirable
 	# for import rules in Python, so we replace non-final period characters with
 	# underscores.
-	python protos/rename_proto_files.py protos
+	python3 protos/rename_proto_files.py protos
 
 
 keynote_parser/generated/%_pb2.py: protos/%.proto keynote_parser/generated
@@ -34,5 +34,4 @@ clean:
 	rm -rf dist
 
 test: all
-	python -m pytest . --cov=keynote_parser -W ignore::DeprecationWarning
 	python3 -m pytest . --cov=keynote_parser -W ignore::DeprecationWarning
