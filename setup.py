@@ -152,7 +152,7 @@ setup(
         'tqdm>=4.14.0',
         'python-snappy>=0.5.3',
         'PyYAML>=5.3.1',
-        'Pillow>=6.2.2',
+        'Pillow>=7.1.0',
         'future>=0.17.1',
         'colorama>=0.4.3',
     ],
