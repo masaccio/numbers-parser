@@ -39,8 +39,17 @@ def file_reader(path, progress=True):
         return directory_reader(path, progress)
 
 
+def fix_zip_member_filename(filename):
+    if sys.version_info.major == 2:
+        return filename.decode("utf-8")
+    else:
+        return filename.encode("cp437").decode("utf-8")
+
+
 def zip_file_reader(path, progress=True):
-    zipfile = ZipFile(path, 'r')
+    zipfile = ZipFile(path, "r")
+    for _file in zipfile.filelist:
+        _file.filename = fix_zip_member_filename(_file.filename)
     iterator = sorted(zipfile.filelist, key=lambda x: x.filename)
     if progress:
         iterator = tqdm(iterator)
