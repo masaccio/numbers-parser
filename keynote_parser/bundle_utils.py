@@ -27,7 +27,7 @@ def get_installed_keynote_version():
     version_dict = plistlib.load(fp)
     return MacOSAppVersion(
         version_dict['CFBundleShortVersionString'],
-        int(version_dict['CFBundleVersion']),
+        version_dict['CFBundleVersion'],
         version_dict['ProductBuildVersion'],
     )
 
