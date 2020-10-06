@@ -2,11 +2,11 @@ class MacOSAppVersion(object):
     def __init__(self, short_version_string, bundle_version, build_version):
         self.short_version_string = short_version_string
         self.short_version_tuple = [int(x) for x in short_version_string.split('.')]
-        self.bundle_version = int(bundle_version)
+        self.bundle_version = bundle_version
         self.build_version = build_version
 
     def __str__(self):
-        return "%s (%d, %s)" % (self.short_version_string, self.bundle_version, self.build_version)
+        return "%s (%s, %s)" % (self.short_version_string, self.bundle_version, self.build_version)
 
     def __lt__(self, value):
         if not isinstance(value, MacOSAppVersion):
