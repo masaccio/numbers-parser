@@ -481,9 +481,11 @@ message FreehandDrawingToolkitUIState {
     Pencil = 1;
     Crayon = 2;
     Fill = 3;
+    Eraser = 4;
+    MarqueeSelect = 5;
   }
   optional .TSP.Color current_color = 1 [deprecated = true];
-  optional .TSD.FreehandDrawingToolkitUIState.FreehandDrawingToolType most_recent_pen_tool_type = 2;
+  optional .TSD.FreehandDrawingToolkitUIState.FreehandDrawingToolType most_recent_restorable_tool_type = 2;
   optional float pen_tool_opacity = 3;
   optional float pen_tool_unscaled_width = 4;
   optional float pencil_tool_opacity = 5;

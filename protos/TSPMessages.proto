@@ -241,35 +241,5 @@ message LargeUUIDArray {
   optional .TSP.LargeArray large_array = 1;
 }
 
-message StringToObjectDictionaryElement {
-  required string key = 1;
-  required .TSP.Reference object = 2;
-}
-
-message LargeDictionarySegment {
-  optional bool should_delay_archiving = 1;
-  optional uint32 delayed_archiving_priority = 2;
-  optional string package_locator = 3;
-}
-
-message LargeStringToObjectDictionarySegment {
-  optional .TSP.LargeDictionarySegment large_dictionary_segment = 1;
-  repeated .TSP.StringToObjectDictionaryElement elements = 2;
-}
-
-message LargeDictionary {
-  repeated .TSP.Range ranges = 1;
-  repeated .TSP.Reference segments = 2;
-  optional uint64 count = 3;
-  optional uint64 max_segment_object_count = 4;
-  optional uint64 max_segment_size = 5;
-  optional bool should_delay_archiving = 6;
-  optional uint32 delayed_archiving_priority = 7;
-  optional bool store_outside_object_archive = 8;
-}
-
-message LargeStringToObjectDictionary {
-  optional .TSP.LargeDictionary large_dictionary = 1;
-}
 
 
