@@ -15,25 +15,41 @@ message TreeNode {
   optional .TSP.Reference object = 3;
 }
 
-message CommandHistory {
-  message SelectionBehaviorEntry {
-    required .TSP.Reference command = 1;
-    required .TSP.Reference command_selection_behavior = 2;
-  }
+message LocalCommandHistoryItem {
+  optional .TSP.Reference command = 1;
+  optional .TSP.Reference selection_behavior = 2;
+}
+
+message LocalCommandHistoryArray {
+  required .TSP.LargeArray large_array = 1;
+}
+
+message LocalCommandHistoryArraySegment {
+  required .TSP.LargeObjectArraySegment large_object_array_segment = 1;
+}
+
+message LocalCommandHistory {
   required uint32 undo_count = 1;
-  repeated .TSP.Reference commands = 2;
-  repeated .TSP.Reference marked_redo_commands = 3 [deprecated = true];
-  optional .TSP.Reference pending_preflight_command = 4 [deprecated = true];
-  repeated .TSK.CommandHistory.SelectionBehaviorEntry selection_behavior_entries = 5;
+  optional .TSP.Reference items_array = 2;
   optional bool fixed_radar_13365177 = 10;
 }
 
+message CollaborationCommandHistoryArray {
+  required .TSP.LargeArray large_array = 1;
+}
+
+message CollaborationCommandHistoryArraySegment {
+  required .TSP.LargeObjectArraySegment large_object_array_segment = 1;
+}
+
 message CollaborationCommandHistory {
-  repeated .TSK.CollaborationCommandHistoryItem undo_items = 1;
-  repeated .TSK.CollaborationCommandHistoryItem redo_items = 2;
-  optional .TSP.UUID local_identifier = 3;
-  repeated .TSP.Reference undo_transformer_entries = 4;
-  repeated .TSP.Reference redo_transformer_entries = 5;
+  message ItemList {
+    optional .TSP.Reference items_array = 1;
+    repeated .TSP.Reference transformer_entries = 2;
+  }
+  optional .TSP.UUID local_identifier = 1;
+  optional .TSK.CollaborationCommandHistory.ItemList undo_items = 2;
+  optional .TSK.CollaborationCommandHistory.ItemList redo_items = 3;
 }
 
 message CollaborationCommandHistoryItem {
@@ -555,6 +571,20 @@ message DataReferenceRecord {
   repeated .TSK.DataReferenceRecord.ContainerUUIDToReferencedDataPair added_container_uuid_to_referenced_data_pairs = 1;
   repeated .TSK.DataReferenceRecord.ContainerUUIDToReferencedDataPair removed_container_uuid_to_referenced_data_pairs = 2;
   repeated .TSP.DataReference unbounded_referenced_datas = 3;
+}
+
+message PencilAnnotationUIState {
+  enum PencilAnnotationToolType {
+    Pen = 0;
+    Highlighter = 1;
+  }
+  optional .TSK.PencilAnnotationUIState.PencilAnnotationToolType current_tool_type = 1;
+  optional .TSP.Color pen_tool_color = 2;
+  optional float pen_tool_opacity = 3;
+  optional float pen_tool_width = 4;
+  optional .TSP.Color highlighter_tool_color = 5;
+  optional float highlighter_tool_opacity = 6;
+  optional float highlighter_tool_width = 7;
 }
 
 

@@ -51,6 +51,7 @@ message StylesheetArchive {
   optional bool can_cull_styles = 6;
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_10_0 = 7;
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_10_1 = 8;
+  optional .TSS.StylesheetArchive.VersionedStyles styles_for_10_2 = 9;
 }
 
 message ThemeArchive {

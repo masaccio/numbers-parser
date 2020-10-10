@@ -49,6 +49,7 @@ message DocumentArchive {
   optional .TSP.Reference annotation_cache_deprecated_2 = 13;
   optional bool collaborative_media_compatibility_upgrade_did_fail = 14;
   optional bool can_use_hevc = 15;
+  optional bool is_content_master = 16;
 }
 
 message FunctionBrowserStateArchive {
@@ -161,6 +162,15 @@ message GalleryInfoSetValueCommandArchive {
   optional .TSA.GalleryInfoProperty property = 3;
   optional .TSA.GalleryInfoSetValueCommandArchive.PropertyValue value = 4;
   optional .TSA.GalleryInfoSetValueCommandArchive.PropertyValue old_value = 5;
+}
+
+message GalleryInfoInsertItemsCommandArchive {
+  required .TSD.ContainerInsertChildrenCommandArchive super = 1;
+  repeated .TSP.Reference items = 2;
+}
+
+message GalleryInfoRemoveItemsCommandArchive {
+  required .TSD.ContainerRemoveChildrenCommandArchive super = 1;
 }
 
 message GalleryItemSetGeometryCommand {

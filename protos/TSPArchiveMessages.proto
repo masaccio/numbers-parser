@@ -73,6 +73,8 @@ message ComponentInfo {
   optional bool can_be_dropped = 17;
   repeated .TSP.ComponentExternalReference versioned_external_references = 18;
   optional bool is_wasteful = 19;
+  repeated uint64 ambiguous_object_identifiers = 20;
+  optional uint32 required_package_identifier = 21;
 }
 
 message ComponentExternalReference {
@@ -146,6 +148,7 @@ message DataInfo {
   optional .TSP.DataInfo.DownloadPriority download_priority = 9 [default = Default];
   optional .TSP.DataAttributes attributes = 10;
   optional .TSP.EncryptionInfo encryption_info = 11;
+  optional bytes last_mismatched_digest = 12;
   optional string pasteboard_external_file_path = 99;
 }
 
@@ -200,8 +203,21 @@ message ObjectSerializationDirectory {
   repeated .TSP.ObjectSerializationDirectory.Entry entries = 1;
 }
 
+message DataPropertiesEntryV1 {
+  required bytes digest = 1;
+  optional bool expects_matched_digest = 2;
+  optional double creation_time_interval_since_1970 = 3;
+  repeated uint32 creation_version = 4;
+  optional bytes last_mismatched_digest = 5;
+}
+
+message DataPropertiesV1 {
+  repeated .TSP.DataPropertiesEntryV1 properties = 1;
+}
+
 message DocumentMetadata {
   optional bool is_in_collaboration_mode = 1;
+  optional .TSP.DataPropertiesV1 data_properties_v1 = 3;
 }
 
 message SupportMetadata {
