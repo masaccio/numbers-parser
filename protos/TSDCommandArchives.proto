@@ -7,17 +7,17 @@ import "TSDArchives.proto";
 import "TSDArchives_sos.proto";
 package TSD;
 
-  enum CommentCommandVariant {
-    BaseComment = 0;
-    AddReply = 1;
-    EditReply = 2;
-    DeleteReply = 3;
-  }
+enum CommentCommandVariant {
+  BaseComment = 0;
+  AddReply = 1;
+  EditReply = 2;
+  DeleteReply = 3;
+}
 
-  enum CaptionOrTitleKind {
-    Caption = 1;
-    Title = 2;
-  }
+enum CaptionOrTitleKind {
+  Caption = 1;
+  Title = 2;
+}
 
 message UndoObjectArchive {
   optional .TSP.Reference stylesheet = 2;
@@ -465,5 +465,4 @@ message SetCaptionOrTitleVisibilityCommandArchive {
   optional bool hidden = 3;
   optional bool was_hidden = 4;
 }
-
 

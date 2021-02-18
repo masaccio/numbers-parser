@@ -755,4 +755,3 @@ message ChartStylePropertyChangeSetArchive {
   optional bool default_title_paragraph_style_index_undefined = 46;
 }
 
-

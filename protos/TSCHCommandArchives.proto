@@ -12,37 +12,37 @@ import "TSSArchives.proto";
 import "TSWPArchives.proto";
 package TSCH;
 
-  enum StyleOwnerType {
-    chart_info = 1;
-    legend_model = 2;
-    chart_axis = 3;
-    chart_series = 4;
-    reference_line = 5;
-  }
+enum StyleOwnerType {
+  chart_info = 1;
+  legend_model = 2;
+  chart_axis = 3;
+  chart_series = 4;
+  reference_line = 5;
+}
 
-  enum StyleSwapType {
-    chart_style = 1;
-    chart_non_style = 2;
-    legend_style = 3;
-    legend_non_style = 4;
-    value_axis_style = 5;
-    value_axis_non_style = 6;
-    category_axis_style = 7;
-    category_axis_non_style = 8;
-    series_theme_style = 9;
-    series_private_style = 10;
-    series_non_style = 11;
-    paragraph_style = 12;
-    reference_line_style = 13;
-    reference_line_non_style = 14;
-    reference_line_theme_style = 15;
-  }
+enum StyleSwapType {
+  chart_style = 1;
+  chart_non_style = 2;
+  legend_style = 3;
+  legend_non_style = 4;
+  value_axis_style = 5;
+  value_axis_non_style = 6;
+  category_axis_style = 7;
+  category_axis_non_style = 8;
+  series_theme_style = 9;
+  series_private_style = 10;
+  series_non_style = 11;
+  paragraph_style = 12;
+  reference_line_style = 13;
+  reference_line_non_style = 14;
+  reference_line_theme_style = 15;
+}
 
-  enum ApplyPresetBehavior {
-    remove_overrides = 1;
-    preserve_overrides = 2;
-    preserve_appearance = 3;
-  }
+enum ApplyPresetBehavior {
+  remove_overrides = 1;
+  preserve_overrides = 2;
+  preserve_appearance = 3;
+}
 
 message StyleOwnerPath {
   repeated .TSP.UUID uuids = 1;
@@ -284,7 +284,7 @@ message CommandChartApplyTheme {
 
 message CommandChartApplyPreset {
   required .TSCH.ChartCommandArchive super = 1;
-  optional .TSCH.ApplyPresetBehavior behavior = 2;
+  optional .TSCH.ApplyPresetBehavior behavior = 2 [default = remove_overrides];
   optional .TSP.Reference preset = 3;
   optional .TSP.Reference old_preset = 4;
   optional bool should_apply_swap_tuples = 5;
@@ -433,5 +433,4 @@ message ChartSubselectionTransformerArchive {
 message CDESelectionTransformerArchive {
   optional .TSP.Reference cde_selection = 1;
 }
-
 

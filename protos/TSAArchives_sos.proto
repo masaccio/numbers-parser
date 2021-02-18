@@ -9,4 +9,3 @@ message DrawableZOrderListArchive {
   optional bool drawable_id_list_undefined = 3;
 }
 
-

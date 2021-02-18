@@ -3,11 +3,11 @@ syntax = "proto2";
 import "TSPMessages.proto";
 package TSK;
 
-  enum StructuredTextImportType {
-    ImportType_UNKNOWN = 0;
-    ImportType_DELIMITED = 1;
-    ImportType_FIXEDWIDTH = 2;
-  }
+enum StructuredTextImportType {
+  ImportType_UNKNOWN = 0;
+  ImportType_DELIMITED = 1;
+  ImportType_FIXEDWIDTH = 2;
+}
 
 message TreeNode {
   optional string name = 1;
@@ -62,7 +62,7 @@ message CollaborationCommandHistoryItem {
 
 message CollaborationCommandHistoryCoalescingGroup {
   repeated .TSP.Reference nodes = 1;
-  optional bool did_coalesce_all_commands = 2;
+  optional bool did_coalesce_all_commands = 2 [default = false];
 }
 
 message CollaborationCommandHistoryCoalescingGroupNode {
@@ -155,7 +155,7 @@ message DocumentSupportArchive {
   optional string undo_action_string = 6;
   optional string redo_action_string = 7;
   optional .TSP.Reference web_state = 8;
-  optional bool is_in_collaboration_mode = 9;
+  optional bool is_in_collaboration_mode = 9 [default = false];
   optional string action_string_localization = 12;
   optional .TSP.Reference collaboration_state = 13;
   optional .TSP.Reference command_selection_behavior_history = 2 [deprecated = true];
@@ -197,17 +197,17 @@ message InducedCommandCollectionArchive {
 message PropagatedCommandCollectionArchive {
   required .TSK.CommandArchive super = 1;
   required .TSP.Reference propagatable_command = 2;
-  optional bool propagatable_command_process_result = 3;
+  optional bool propagatable_command_process_result = 3 [default = false];
   required .TSP.Reference propagating_command = 4;
-  optional bool propagating_command_process_result = 5;
+  optional bool propagating_command_process_result = 5 [default = false];
 }
 
 message FinalCommandPairArchive {
   required .TSK.CommandArchive super = 1;
   required .TSP.Reference command = 2;
-  optional bool command_process_result = 3;
+  optional bool command_process_result = 3 [default = false];
   required .TSP.Reference final_command = 4;
-  optional bool final_command_process_result = 5;
+  optional bool final_command_process_result = 5 [default = false];
 }
 
 message CommandContainerArchive {
@@ -223,10 +223,10 @@ message ShuffleMappingArchive {
   required uint32 end_index = 2;
   repeated .TSK.ShuffleMappingArchive.Entry entries = 3;
   optional bool is_vertical = 4 [default = true];
-  optional bool is_move_operation = 5;
-  optional uint32 first_moved_index = 6;
-  optional uint32 destination_index_for_move = 7;
-  optional uint32 number_of_indexes_moved = 8;
+  optional bool is_move_operation = 5 [default = false];
+  optional uint32 first_moved_index = 6 [default = 0];
+  optional uint32 destination_index_for_move = 7 [default = 0];
+  optional uint32 number_of_indexes_moved = 8 [default = 0];
 }
 
 message ProgressiveCommandGroupArchive {
@@ -430,18 +430,18 @@ message Operation {
     ReplaceRange = 6;
   }
   optional .TSK.Operation.OperationType type = 1 [default = ReplaceRange];
-  optional bool noop = 2;
-  repeated fixed64 address_identifier = 3;
+  optional bool noop = 2 [default = false];
+  repeated fixed64 address_identifier = 3 [packed = true];
   optional uint64 insert_length = 4 [default = 1];
-  optional bool preserve_lower_priority_location = 5;
-  repeated uint32 range_list = 6;
+  optional bool preserve_lower_priority_location = 5 [default = false];
+  repeated uint32 range_list = 6 [packed = true];
   optional uint32 transform_behavior = 7 [default = 7];
   optional uint32 property_id = 8;
   optional int32 from_index = 9 [default = -1];
   optional int32 to_index = 10 [default = -1];
-  optional bool dominating = 11;
+  optional bool dominating = 11 [default = false];
   optional int32 object_count = 12 [default = -1];
-  optional int32 object_counter_space = 13;
+  optional int32 object_counter_space = 13 [default = 0];
 }
 
 message OperationTransformer {
@@ -481,14 +481,14 @@ message CollaborationDocumentSessionState {
   repeated .TSP.Reference transformer_from_unprocessed_command_operations_entries = 8;
   optional int32 mailbox_request_document_revision_sequence = 10;
   optional string mailbox_request_document_revision_identifier = 11;
-  optional bool last_send_pending_command_queue_item_was_moved_from_rsvp_command_queue = 12;
+  optional bool last_send_pending_command_queue_item_was_moved_from_rsvp_command_queue = 12 [default = false];
   optional int32 last_command_send_marker_sequence = 13;
   optional string last_command_send_marker_identifier = 14;
   repeated .TSP.Reference skipped_acknowledged_commands_pending_resume_process_diffs = 15;
   optional .TSP.UUID last_too_old_command_identifier = 16;
   optional .TSP.Reference unprocessed_operation_entries_pending_resume_process_diffs = 17;
   optional .TSP.Reference send_pending_command_queue = 18;
-  optional uint64 count_of_send_pending_command_queue_items_moved_from_rsvp_queue = 19;
+  optional uint64 count_of_send_pending_command_queue_items_moved_from_rsvp_queue = 19 [default = 0];
   optional .TSP.UUID last_enqueued_document_load_command_identifier = 20;
 }
 
@@ -516,14 +516,14 @@ message StructuredTextImportSettings {
 
 message OperationStorageCommandOperationsEntry {
   optional bool command_identifier_same_as_revision_identifier = 1;
-  repeated fixed64 command_identifier = 2;
+  repeated fixed64 command_identifier = 2 [packed = true];
   repeated .TSK.Operation operations = 3;
   optional bool server_originated = 4;
   optional uint64 coalesced_command_entry_count = 5;
 }
 
 message OperationStorageEntry {
-  repeated fixed64 document_revision_identifier = 1;
+  repeated fixed64 document_revision_identifier = 1 [packed = true];
   optional int32 document_revision_sequence_delta = 2;
   repeated .TSK.OperationStorageCommandOperationsEntry command_operation_entries = 3;
   optional double first_entry_creation_time = 4;
@@ -546,11 +546,11 @@ message OperationStorage {
   required .TSP.Reference entries = 1;
   required uint64 operation_count = 2;
   optional int32 last_document_revision_sequence = 3;
-  repeated fixed64 last_document_revision_identifier = 4;
+  repeated fixed64 last_document_revision_identifier = 4 [packed = true];
   optional int32 last_unskippable_document_revision_before_entries_sequence = 5;
-  repeated fixed64 last_unskippable_document_revision_before_entries_identifier = 6;
+  repeated fixed64 last_unskippable_document_revision_before_entries_identifier = 6 [packed = true];
   optional int32 last_unskippable_document_revision_in_entries_sequence = 7;
-  repeated fixed64 last_unskippable_document_revision_in_entries_identifier = 8;
+  repeated fixed64 last_unskippable_document_revision_in_entries_identifier = 8 [packed = true];
   optional .TSP.IndexSet days_with_an_entry = 9;
 }
 
@@ -578,7 +578,7 @@ message PencilAnnotationUIState {
     Pen = 0;
     Highlighter = 1;
   }
-  optional .TSK.PencilAnnotationUIState.PencilAnnotationToolType current_tool_type = 1;
+  optional .TSK.PencilAnnotationUIState.PencilAnnotationToolType current_tool_type = 1 [default = Pen];
   optional .TSP.Color pen_tool_color = 2;
   optional float pen_tool_opacity = 3;
   optional float pen_tool_width = 4;
@@ -586,5 +586,4 @@ message PencilAnnotationUIState {
   optional float highlighter_tool_opacity = 6;
   optional float highlighter_tool_width = 7;
 }
-
 

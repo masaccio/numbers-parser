@@ -48,4 +48,3 @@ message SpecStringArchive {
   optional .TSS.SpecSetStringArchive spec_set_string = 1;
 }
 
-

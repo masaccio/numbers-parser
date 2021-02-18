@@ -9,16 +9,16 @@ import "TSWPArchives.proto";
 import "TSWPArchives_sos.proto";
 package TSWP;
 
-  enum ObjectPropertyType {
-    kObjectPropertyTypeBool = 0;
-    kObjectPropertyTypeFloat = 1;
-    kObjectPropertyTypeInteger = 2;
-    kObjectPropertyTypeString = 3;
-    kObjectPropertyTypeIdPath = 4;
-    kObjectPropertyTypeFill = 5;
-    kObjectPropertyTypeColor = 6;
-    kObjectPropertyTypeShadow = 7;
-  }
+enum ObjectPropertyType {
+  kObjectPropertyTypeBool = 0;
+  kObjectPropertyTypeFloat = 1;
+  kObjectPropertyTypeInteger = 2;
+  kObjectPropertyTypeString = 3;
+  kObjectPropertyTypeIdPath = 4;
+  kObjectPropertyTypeFill = 5;
+  kObjectPropertyTypeColor = 6;
+  kObjectPropertyTypeShadow = 7;
+}
 
 message DummyCommandArchive {
   required uint32 foo = 1;
@@ -54,7 +54,7 @@ message TextCommandArchive {
   optional uint32 redo_restore_range_location = 6;
   optional uint32 redo_restore_range_length = 7;
   optional uint32 text_command_flags = 9;
-  optional .TSWP.TextCommandArchive.Kind kind = 10;
+  optional .TSWP.TextCommandArchive.Kind kind = 10 [default = kKindContained];
 }
 
 message StorageActionCommandArchive {
@@ -103,7 +103,7 @@ message StorageActionCommandArchive {
   optional .TSP.UUIDPath storage = 2;
   optional .TSWP.UndoTransaction undo_transaction = 3;
   optional uint32 text_command_flags = 4;
-  optional .TSWP.StorageActionCommandArchive.Kind kind = 5;
+  optional .TSWP.StorageActionCommandArchive.Kind kind = 5 [default = kKindContained];
   repeated .TSP.UUID custom_format_keys = 6;
   optional bool is_forward_inverse_command = 7;
   optional bool coalesceable = 8;
@@ -356,7 +356,7 @@ message UpdateFlowInfoCommandArchive {
     kModeCompensate = 3;
   }
   optional .TSK.CommandArchive super = 1;
-  optional .TSWP.UpdateFlowInfoCommandArchive.Mode command_mode = 2;
+  optional .TSWP.UpdateFlowInfoCommandArchive.Mode command_mode = 2 [default = kModeRearrange];
   optional .TSP.UUIDPath flow_info_uuid_path = 3;
   optional .TSP.UUIDPath text_box_id_path_to_add_or_remove = 4;
   repeated .TSP.UUIDPath text_box_id_paths_at_start = 5;
@@ -406,20 +406,15 @@ message ContainedObjectsCommandArchive {
   required .TSK.CommandArchive super = 1;
   required .TSP.Reference target = 2;
   repeated .TSP.Reference objects = 3;
-  oneof undo_object {
-    .TSP.Reference undo_object_for_commit = 4;
-    .TSP.Reference undo_object_for_make_inverse = 5;
-  }
-  oneof behavior {
-    .TSWP.ContainedObjectsCommandArchive.AddBehaviorArgs add_behavior_args = 6;
-    .TSWP.ContainedObjectsCommandArchive.RemoveBehaviorArgs remove_behavior_args = 7;
-    .TSWP.ContainedObjectsCommandArchive.RearrangeBehaviorArgs rearrange_behavior_args = 8;
-  }
+  optional .TSP.Reference undo_object_for_commit = 4;
+  optional .TSP.Reference undo_object_for_make_inverse = 5;
+  optional .TSWP.ContainedObjectsCommandArchive.AddBehaviorArgs add_behavior_args = 6;
+  optional .TSWP.ContainedObjectsCommandArchive.RemoveBehaviorArgs remove_behavior_args = 7;
+  optional .TSWP.ContainedObjectsCommandArchive.RearrangeBehaviorArgs rearrange_behavior_args = 8;
   optional string container_name = 9;
 }
 
 message EquationInfoGeometryCommandArchive {
   optional .TSD.MediaInfoGeometryCommandArchive super = 1;
 }
-
 

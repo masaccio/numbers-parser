@@ -135,4 +135,3 @@ message TableStylePropertyChangeSetArchive {
   optional bool category_level5_interior_stroke_undefined = 104;
 }
 
-

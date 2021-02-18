@@ -41,15 +41,15 @@ message ChartArchive {
   optional .TSP.Reference owned_preset = 23;
   optional bool is_dirty = 24;
   extensions 10000 to 536870911;
-extend .TSCH.ChartDrawableArchive {
-  optional .TSCH.ChartArchive unity = 10000;
-}
+  extend .TSCH.ChartDrawableArchive {
+    optional .TSCH.ChartArchive unity = 10000;
+  }
 }
 
 message ChartMultiDataIndexUpgrade {
-extend .TSCH.ChartArchive {
-  optional bool upgraded_to_ui_state = 10021;
-}
+  extend .TSCH.ChartArchive {
+    optional bool upgraded_to_ui_state = 10021;
+  }
 }
 
 message ChartGarlicMinMaxUpgrade {
@@ -57,9 +57,9 @@ message ChartGarlicMinMaxUpgrade {
   optional double horizontal_max = 2;
   optional double value_min = 3;
   optional double value_max = 4;
-extend .TSCH.ChartArchive {
-  optional .TSCH.ChartGarlicMinMaxUpgrade garlic_min_max_upgrade = 10010;
-}
+  extend .TSCH.ChartArchive {
+    optional .TSCH.ChartGarlicMinMaxUpgrade garlic_min_max_upgrade = 10010;
+  }
 }
 
 message ChartGarlicLabelFormatUpgrade {
@@ -69,43 +69,43 @@ message ChartGarlicLabelFormatUpgrade {
   optional string horizontal_prefix = 4;
   optional string horizontal_suffix = 5;
   optional bool horizontal_use_separator = 6;
-extend .TSCH.ChartArchive {
-  optional .TSCH.ChartGarlicLabelFormatUpgrade garlic_label_format_upgrade = 10011;
-}
+  extend .TSCH.ChartArchive {
+    optional .TSCH.ChartGarlicLabelFormatUpgrade garlic_label_format_upgrade = 10011;
+  }
 }
 
 message ChartPasteboardAdditionsArchive {
-extend .TSCH.ChartArchive {
-  optional uint32 preset_index_for_pasteboard = 10000;
-  optional bytes preset_uuid_for_pasteboard = 10001;
-  optional .TSP.Reference custom_format_list_for_pasteboard = 10003;
-}
+  extend .TSCH.ChartArchive {
+    optional uint32 preset_index_for_pasteboard = 10000;
+    optional bytes preset_uuid_for_pasteboard = 10001;
+    optional .TSP.Reference custom_format_list_for_pasteboard = 10003;
+  }
 }
 
 message ChartPreserveAppearanceForPresetArchive {
-extend .TSCH.ChartArchive {
-  optional bool appearance_preserved_for_preset = 10023;
-}
+  extend .TSCH.ChartArchive {
+    optional bool appearance_preserved_for_preset = 10023;
+  }
 }
 
 message ChartSupportsProportionalBendedCalloutLinesArchive {
-extend .TSCH.ChartArchive {
-  optional bool supports_proportional_bended_callout_lines = 10024;
-}
+  extend .TSCH.ChartArchive {
+    optional bool supports_proportional_bended_callout_lines = 10024;
+  }
 }
 
 message ChartSupportsRoundedCornersArchive {
-extend .TSCH.ChartArchive {
-  optional bool deprecated_supports_rounded_corners = 10025;
-  optional bool supports_rounded_corners = 10026;
-}
+  extend .TSCH.ChartArchive {
+    optional bool deprecated_supports_rounded_corners = 10025;
+    optional bool supports_rounded_corners = 10026;
+  }
 }
 
 message ChartSupportsSeriesPropertySpacingArchive {
-extend .TSCH.ChartArchive {
-  optional bool supports_series_value_label_spacing = 10027;
-  optional bool supports_series_error_bar_spacing = 10028;
-}
+  extend .TSCH.ChartArchive {
+    optional bool supports_series_value_label_spacing = 10027;
+    optional bool supports_series_error_bar_spacing = 10028;
+  }
 }
 
 message ChartGridArchive {
@@ -149,9 +149,9 @@ message ChartStylePreset {
 
 message ChartPresetsArchive {
   repeated .TSP.Reference chart_presets = 1;
-extend .TSS.ThemeArchive {
-  optional .TSCH.ChartPresetsArchive extension = 120;
-}
+  extend .TSS.ThemeArchive {
+    optional .TSCH.ChartPresetsArchive extension = 120;
+  }
 }
 
 message PropertyValueStorageContainerArchive {
@@ -225,16 +225,16 @@ message ChartUIState {
 }
 
 message ChartUIStateMultiDataIndexUpgrade {
-extend .TSCH.ChartUIState {
-  optional bool upgraded_from_model = 10022;
-}
+  extend .TSCH.ChartUIState {
+    optional bool upgraded_from_model = 10022;
+  }
 }
 
 message ChartFormatStructExtensions {
-extend .TSK.FormatStructArchive {
-  optional string prefix = 10000;
-  optional string suffix = 10001;
-}
+  extend .TSK.FormatStructArchive {
+    optional string prefix = 10000;
+    optional string suffix = 10001;
+  }
 }
 
 message ChartReferenceLineNonStyleItem {
@@ -277,24 +277,31 @@ extend .TSCH.ChartArchive {
   optional bool scene3d_settings_constant_depth = 10002;
   optional string last_applied_fill_set_lookup_string = 10004;
 }
+
 extend .TSCH.ChartSeriesStyleArchive {
   optional bool series_supports_donut = 10001;
 }
+
 extend .TSCH.ChartSeriesNonStyleArchive {
   optional bool series_supports_custom_number_format = 10001;
   optional bool series_supports_custom_date_format = 10002;
   optional bool series_supports_callout_lines = 10003;
 }
+
 extend .TSCH.ChartAxisNonStyleArchive {
   optional bool axis_supports_custom_number_format = 10001;
   optional bool axis_supports_custom_date_format = 10002;
 }
+
 extend .TSCH.ChartArchive {
   optional .TSCH.ChartReferenceLinesArchive reference_lines = 10005;
 }
+
 extend .TSCH.ChartStylePreset {
   optional .TSCH.ChartPresetReferenceLineStylesArchive preset_reference_line_styles = 10000;
 }
+
 extend .TSCH.PropertyValueStorageContainerArchive {
   optional .TSCH.PropertyValueStorageContainerReferenceLinesArchive property_value_storage_container_reference_lines = 10000;
 }
+

@@ -6,33 +6,33 @@ import "TSDArchives.proto";
 import "TSKArchives.proto";
 package TSWP;
 
-  enum SelectionType {
-    SelectionType_Normal = 0;
-    SelectionType_ListLabel = 1;
-    SelectionType_ListTopic = 2;
-    SelectionType_Replace = 3;
-    SelectionType_CopyPasteStyle = 4;
-    SelectionType_Replace2 = 5;
-    SelectionType_SmartField = 6;
-    SelectionType_Visual = 7;
-  }
+enum SelectionType {
+  SelectionType_Normal = 0;
+  SelectionType_ListLabel = 1;
+  SelectionType_ListTopic = 2;
+  SelectionType_Replace = 3;
+  SelectionType_CopyPasteStyle = 4;
+  SelectionType_Replace2 = 5;
+  SelectionType_SmartField = 6;
+  SelectionType_Visual = 7;
+}
 
-  enum StyleInsertionBehavior {
-    StyleInsertionBehavior_NoGrow = 0;
-    StyleInsertionBehavior_GrowLeft = 1;
-    StyleInsertionBehavior_GrowRight = 2;
-  }
+enum StyleInsertionBehavior {
+  StyleInsertionBehavior_NoGrow = 0;
+  StyleInsertionBehavior_GrowLeft = 1;
+  StyleInsertionBehavior_GrowRight = 2;
+}
 
-  enum CaretAffinity {
-    CaretAffinity_Start = 0;
-    CaretAffinity_End = 1;
-  }
+enum CaretAffinity {
+  CaretAffinity_Start = 0;
+  CaretAffinity_End = 1;
+}
 
-  enum WritingDirectionType {
-    kWritingDirectionNatural = -1;
-    kWritingDirectionLeftToRight = 0;
-    kWritingDirectionRightToLeft = 1;
-  }
+enum WritingDirectionType {
+  kWritingDirectionNatural = -1;
+  kWritingDirectionLeftToRight = 0;
+  kWritingDirectionRightToLeft = 1;
+}
 
 message SelectionArchive {
   required .TSWP.SelectionType type = 1;
@@ -89,8 +89,8 @@ message StorageArchive {
   optional .TSWP.StorageArchive.KindType kind = 1 [default = TEXTBOX];
   optional .TSP.Reference style_sheet = 2;
   repeated string text = 3;
-  optional bool has_itext = 4;
-  optional bool in_document = 10;
+  optional bool has_itext = 4 [default = false];
+  optional bool in_document = 10 [default = false];
   optional .TSWP.ObjectAttributeTable table_para_style = 5;
   optional .TSWP.ParaDataAttributeTable table_para_data = 6;
   optional .TSWP.ObjectAttributeTable table_list_style = 7;
@@ -193,7 +193,7 @@ message CharacterStylePropertiesArchive {
   optional bool word_underline = 32;
   optional bool font_features_null = 33;
   repeated .TSWP.FontFeatureArchive font_features = 34;
-  optional .TSWP.WritingDirectionType writing_direction = 35;
+  optional .TSWP.WritingDirectionType writing_direction = 35 [default = kWritingDirectionNatural];
   optional bool emphasis_marks_null = 36;
   optional string emphasis_marks = 37;
   optional bool compatibility_font_name_null = 38;
@@ -210,7 +210,7 @@ message CharacterStylePropertiesArchive {
 
 message CharacterStyleArchive {
   required .TSS.StyleArchive super = 1;
-  optional uint32 override_count = 10;
+  optional uint32 override_count = 10 [default = 0];
   optional .TSWP.CharacterStylePropertiesArchive char_properties = 11;
 }
 
@@ -296,7 +296,7 @@ message ParagraphStylePropertiesArchive {
   optional bool show_in_toc = 33;
   optional bool toc_style_id_null = 34;
   optional string toc_style_id = 35;
-  optional .TSWP.WritingDirectionType writing_direction = 38;
+  optional .TSWP.WritingDirectionType writing_direction = 38 [default = kWritingDirectionNatural];
   optional bool list_style_null = 39;
   optional .TSP.Reference list_style = 40;
   optional bool following_style_null = 41;
@@ -307,15 +307,15 @@ message ParagraphStylePropertiesArchive {
 
 message ParagraphStyleArchive {
   required .TSS.StyleArchive super = 1;
-  optional uint32 override_count = 10;
+  optional uint32 override_count = 10 [default = 0];
   optional .TSWP.CharacterStylePropertiesArchive char_properties = 11;
   optional .TSWP.ParagraphStylePropertiesArchive para_properties = 12;
 }
 
 message ListStyleArchive {
   message LabelGeometry {
-    optional float scale = 1 [default = 1.0];
-    optional float baseline_offset = 2;
+    optional float scale = 1 [default = 1];
+    optional float baseline_offset = 2 [default = 0];
     optional bool scale_with_text = 3 [default = true];
   }
   message LabelImage {
@@ -397,7 +397,7 @@ message ListStyleArchive {
     kHebrewBiblicalRightParenKind = 64;
   }
   required .TSS.StyleArchive super = 1;
-  optional uint32 override_count = 10;
+  optional uint32 override_count = 10 [default = 0];
   repeated .TSWP.ListStyleArchive.LabelType label_types = 11;
   repeated float text_indents = 12;
   repeated float indents = 13;
@@ -411,7 +411,7 @@ message ListStyleArchive {
   optional .TSP.Color font_color = 21;
   optional bool font_name_null = 22;
   optional string font_name = 23;
-  optional .TSWP.WritingDirectionType writing_direction = 24;
+  optional .TSWP.WritingDirectionType writing_direction = 24 [default = kWritingDirectionNatural];
   repeated bool tiered_numbers = 25;
 }
 
@@ -463,12 +463,12 @@ message ColumnStylePropertiesArchive {
   optional .TSWP.PaddingArchive margins = 9;
   optional bool padding_null = 10;
   optional .TSWP.PaddingArchive padding = 11;
-  optional .TSWP.WritingDirectionType writing_direction = 12;
+  optional .TSWP.WritingDirectionType writing_direction = 12 [default = kWritingDirectionNatural];
 }
 
 message ColumnStyleArchive {
   required .TSS.StyleArchive super = 1;
-  optional uint32 override_count = 10;
+  optional uint32 override_count = 10 [default = 0];
   optional .TSWP.ColumnStylePropertiesArchive column_properties = 11;
 }
 
@@ -494,7 +494,7 @@ message ShapeStylePropertiesArchive {
 
 message ShapeStyleArchive {
   required .TSD.ShapeStyleArchive super = 1;
-  optional uint32 override_count = 10;
+  optional uint32 override_count = 10 [default = 0];
   optional .TSWP.ShapeStylePropertiesArchive shape_properties = 11;
 }
 
@@ -507,9 +507,9 @@ message ThemePresetsArchive {
   repeated .TSP.Reference character_style_presets = 6;
   repeated .TSP.Reference paragraph_style_presets = 7;
   repeated .TSP.Reference dropcap_style_presets = 8;
-extend .TSS.ThemeArchive {
-  optional .TSWP.ThemePresetsArchive extension = 110;
-}
+  extend .TSS.ThemeArchive {
+    optional .TSWP.ThemePresetsArchive extension = 110;
+  }
 }
 
 message TextPresetDisplayItemArchive {
@@ -700,12 +700,12 @@ message TOCLayoutHintArchive {
 }
 
 message EquationInfoArchive {
-extend .TSD.ImageArchive {
-  optional string equation_source_old = 100;
-  optional .TSWP.CharacterStylePropertiesArchive equation_text_properties = 101;
-  optional float equation_depth = 102;
-  optional string equation_source_text = 103;
-}
+  extend .TSD.ImageArchive {
+    optional string equation_source_old = 100;
+    optional .TSWP.CharacterStylePropertiesArchive equation_text_properties = 101;
+    optional float equation_depth = 102;
+    optional string equation_source_text = 103;
+  }
 }
 
 message TextualAttachmentArchive {
@@ -916,19 +916,19 @@ message DropCapArchive {
     TSWPDropCapWrapTypeContour = 1;
     TSWPDropCapWrapTypeNone = 2;
   }
-  optional .TSWP.DropCapArchive.DropCapType type = 1;
+  optional .TSWP.DropCapArchive.DropCapType type = 1 [default = TSWPDropCapTypeText];
   optional uint32 number_of_lines = 2 [default = 3];
-  optional uint32 number_of_raised_lines = 3;
+  optional uint32 number_of_raised_lines = 3 [default = 0];
   optional float deprecated_outdent = 4;
-  optional double outdent = 11;
+  optional double outdent = 11 [default = 0];
   optional float deprecated_padding = 5;
-  optional double padding = 12;
-  optional .TSWP.DropCapArchive.DropCapWrapType wrap_type = 6;
-  optional bool shape_enabled = 7;
+  optional double padding = 12 [default = 0];
+  optional .TSWP.DropCapArchive.DropCapWrapType wrap_type = 6 [default = TSWPDropCapWrapTypeRectangular];
+  optional bool shape_enabled = 7 [default = false];
   optional float deprecated_corner_radius = 8;
-  optional double corner_radius = 13;
+  optional double corner_radius = 13 [default = 0];
   optional float deprecated_character_scale = 9;
-  optional double character_scale = 14 [default = 1.0];
+  optional double character_scale = 14 [default = 1];
   optional uint32 number_of_characters = 10 [default = 1];
 }
 
@@ -941,7 +941,7 @@ message DropCapStylePropertiesArchive {
 
 message DropCapStyleArchive {
   required .TSS.StyleArchive super = 1;
-  optional uint32 override_count = 10;
+  optional uint32 override_count = 10 [default = 0];
   optional .TSWP.CharacterStylePropertiesArchive char_properties = 11;
   optional .TSWP.DropCapStylePropertiesArchive drop_cap_properties = 12;
 }
@@ -949,3 +949,4 @@ message DropCapStyleArchive {
 extend .TSS.CommandPropertyEntryArchive {
   optional .TSWP.PaddingArchive padding = 100;
 }
+

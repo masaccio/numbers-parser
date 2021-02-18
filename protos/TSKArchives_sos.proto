@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "TSKArchives.proto";
+package TSK;
+
+message FixCorruptedDataCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated string corrupted_digest_list = 2;
+  optional bool corrupted_digest_list_undefined = 3;
+}
+

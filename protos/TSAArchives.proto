@@ -11,27 +11,27 @@ import "TSTArchives.proto";
 import "TSCEArchives.proto";
 package TSA;
 
-  enum GalleryInfoCaptionMode {
-    GalleryInfoCaptionModeNone = 0;
-    GalleryInfoCaptionModePerImage = 1;
-    GalleryInfoCaptionModeAllImages = 2;
-  }
+enum GalleryInfoCaptionMode {
+  GalleryInfoCaptionModeNone = 0;
+  GalleryInfoCaptionModePerImage = 1;
+  GalleryInfoCaptionModeAllImages = 2;
+}
 
-  enum GalleryInfoProperty {
-    GalleryInfoCaptionProperty = 0;
-  }
+enum GalleryInfoProperty {
+  GalleryInfoCaptionProperty = 0;
+}
 
-  enum GalleryCaptionMode {
-    GalleryCaptionModeNone = 0;
-    GalleryCaptionModePerImage = 1;
-    GalleryCaptionModeAllImages = 2;
-  }
+enum GalleryCaptionMode {
+  GalleryCaptionModeNone = 0;
+  GalleryCaptionModePerImage = 1;
+  GalleryCaptionModeAllImages = 2;
+}
 
-  enum GalleryItemProperty {
-    GalleryItemPropertyImageData = 0;
-    GalleryItemPropertyThumbnailImageData = 1;
-    GalleryItemPropertyAccessibilityDescription = 2;
-  }
+enum GalleryItemProperty {
+  GalleryItemPropertyImageData = 0;
+  GalleryItemPropertyThumbnailImageData = 1;
+  GalleryItemPropertyAccessibilityDescription = 2;
+}
 
 message DocumentArchive {
   required .TSK.DocumentArchive super = 1;
@@ -61,9 +61,9 @@ message FunctionBrowserStateArchive {
 
 message ThemePresetsArchive {
   repeated .TSP.Reference caption_style_presets = 1;
-extend .TSS.ThemeArchive {
-  optional .TSA.ThemePresetsArchive extension = 210;
-}
+  extend .TSS.ThemeArchive {
+    optional .TSA.ThemePresetsArchive extension = 210;
+  }
 }
 
 message ShortcutControllerArchive {
@@ -177,7 +177,7 @@ message GalleryItemSetGeometryCommand {
   required .TSK.CommandArchive super = 1;
   optional .TSP.UUIDPath item_id_path = 2;
   optional .TSP.Point offset = 3;
-  optional float scale = 4 [default = 1.0];
+  optional float scale = 4 [default = 1];
   optional .TSP.Point old_offset = 5;
   optional float old_scale = 6;
 }
@@ -198,9 +198,9 @@ message GalleryInfo {
   repeated .TSP.Reference items = 1;
   optional .TSA.GalleryCaptionMode caption_mode = 2;
   optional .TSP.Reference caption_storage = 3;
-extend .TSD.ImageArchive {
-  optional .TSA.GalleryInfo gallery_info = 200;
-}
+  extend .TSD.ImageArchive {
+    optional .TSA.GalleryInfo gallery_info = 200;
+  }
 }
 
 message GallerySelectionTransformer {
@@ -240,9 +240,9 @@ message WebVideoInfo {
   optional string url = 1;
   optional .TSP.DataReference poster_image_data = 2;
   optional .TSD.Attribution attribution = 3;
-extend .TSD.ImageArchive {
-  optional .TSA.WebVideoInfo web_video_info = 300;
-}
+  extend .TSD.ImageArchive {
+    optional .TSA.WebVideoInfo web_video_info = 300;
+  }
 }
 
 message CaptionPlacementArchive {
@@ -262,5 +262,4 @@ message TitlePlacementCommandArchive {
   optional .TSP.Reference placement = 3;
   optional .TSP.Reference old_placement = 4;
 }
-
 

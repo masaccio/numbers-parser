@@ -3,22 +3,15 @@ syntax = "proto2";
 import "TSACommandArchives_sos.proto";
 import "TSKArchives.proto";
 import "TSPMessages.proto";
-package KN;
+package TN;
 
 message InducedVerifyDocumentWithServerCommandArchive {
   required .TSK.CommandArchive super = 1;
-  repeated .TSP.UUID slide_node_id_list = 2;
-  optional bool slide_node_id_list_undefined = 3;
-  repeated .TSP.UUID master_slide_node_id_list = 4;
-  optional bool master_slide_node_id_list_undefined = 5;
+  repeated .TSP.UUID sheet_id_list = 2;
+  optional bool sheet_id_list_undefined = 3;
 }
 
 message InducedVerifyDrawableZOrdersWithServerCommandArchive {
   required .TSA.InducedVerifyDrawableZOrdersWithServerCommandArchive super = 1;
 }
-
-message CommandSlideReapplyMasterArchive {
-  required .TSA.CommandReapplyMasterArchive super = 1;
-}
-
 

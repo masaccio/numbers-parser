@@ -22,4 +22,3 @@ message ParagraphStyleChangePropertyCommand_GArchive {
   optional bool change_list_undefined = 5;
 }
 
-

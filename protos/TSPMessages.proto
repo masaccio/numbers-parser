@@ -59,7 +59,7 @@ message Color {
   optional float g = 4;
   optional float b = 5;
   optional .TSP.Color.RGBColorSpace rgbspace = 12;
-  optional float a = 6 [default = 1.0];
+  optional float a = 6 [default = 1];
   optional float c = 7;
   optional float m = 8;
   optional float y = 9;
@@ -156,8 +156,8 @@ message PasteboardObject {
   optional .TSP.Reference wp_storage = 5;
   optional .TSP.Reference guide_storage = 9;
   optional .TSP.Reference app_native_object = 6;
-  optional bool is_text_primary = 7;
-  optional bool is_smart = 8;
+  optional bool is_text_primary = 7 [default = false];
+  optional bool is_smart = 8 [default = false];
   repeated .TSP.Reference presets = 10;
   repeated .TSP.Reference top_level_objects = 11;
   optional .TSP.Reference native_content_description = 12;
@@ -240,6 +240,4 @@ message LargeObjectArray {
 message LargeUUIDArray {
   optional .TSP.LargeArray large_array = 1;
 }
-
-
 

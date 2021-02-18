@@ -443,4 +443,3 @@ message StyleDiffArchive {
   optional .TSWP.ShapeStylePropertyChangeSetArchive shape_change_set = 4;
 }
 
-

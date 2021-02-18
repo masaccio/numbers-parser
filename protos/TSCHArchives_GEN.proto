@@ -32,9 +32,9 @@ message ChartStyleArchive {
   optional bool tschchartinfodefaultshowborder = 18;
   optional .TSP.Color tschchartinfodefaulttitlecolor = 19;
   optional int32 tschchartinfodefaulttitleparagraphstyleindex = 20;
-extend .TSCH.ChartStyleArchive {
-  optional .TSCH.Generated.ChartStyleArchive current = 10000;
-}
+  extend .TSCH.ChartStyleArchive {
+    optional .TSCH.Generated.ChartStyleArchive current = 10000;
+  }
 }
 
 message ChartNonStyleArchive {
@@ -69,9 +69,9 @@ message ChartNonStyleArchive {
   optional bool tschchartinfodefaultshowtitle = 21;
   optional bool tschchartinfodefaultskiphiddendata = 22;
   optional string tschchartinfodefaulttitle = 23;
-extend .TSCH.ChartNonStyleArchive {
-  optional .TSCH.Generated.ChartNonStyleArchive current = 10000;
-}
+  extend .TSCH.ChartNonStyleArchive {
+    optional .TSCH.Generated.ChartNonStyleArchive current = 10000;
+  }
 }
 
 message LegendStyleArchive {
@@ -80,15 +80,15 @@ message LegendStyleArchive {
   optional float tschlegendmodeldefaultopacity = 3;
   optional .TSD.ShadowArchive tschlegendmodeldefaultshadow = 4;
   optional .TSD.StrokeArchive tschlegendmodeldefaultstroke = 5;
-extend .TSCH.LegendStyleArchive {
-  optional .TSCH.Generated.LegendStyleArchive current = 10000;
-}
+  extend .TSCH.LegendStyleArchive {
+    optional .TSCH.Generated.LegendStyleArchive current = 10000;
+  }
 }
 
 message LegendNonStyleArchive {
-extend .TSCH.LegendNonStyleArchive {
-  optional .TSCH.Generated.LegendNonStyleArchive current = 10000;
-}
+  extend .TSCH.LegendNonStyleArchive {
+    optional .TSCH.Generated.LegendNonStyleArchive current = 10000;
+  }
 }
 
 message ChartAxisStyleArchive {
@@ -133,9 +133,9 @@ message ChartAxisStyleArchive {
   optional int32 tschchartaxisdefaulttitleparagraphstyleindex = 39;
   optional int32 tschchartaxisvaluetitleparagraphstyleindex = 40;
   optional int32 tschchartaxiscategoryverticalspacing = 41;
-extend .TSCH.ChartAxisStyleArchive {
-  optional .TSCH.Generated.ChartAxisStyleArchive current = 10000;
-}
+  extend .TSCH.ChartAxisStyleArchive {
+    optional .TSCH.Generated.ChartAxisStyleArchive current = 10000;
+  }
 }
 
 message ChartAxisNonStyleArchive {
@@ -162,9 +162,9 @@ message ChartAxisNonStyleArchive {
   optional string tschchartaxisvaluetitle = 16;
   optional .TSCH.ChartsNSNumberDoubleArchive tschchartaxisdefaultusermax = 17;
   optional .TSCH.ChartsNSNumberDoubleArchive tschchartaxisdefaultusermin = 18;
-extend .TSCH.ChartAxisNonStyleArchive {
-  optional .TSCH.Generated.ChartAxisNonStyleArchive current = 10000;
-}
+  extend .TSCH.ChartAxisNonStyleArchive {
+    optional .TSCH.Generated.ChartAxisNonStyleArchive current = 10000;
+  }
 }
 
 message ChartSeriesStyleArchive {
@@ -273,9 +273,9 @@ message ChartSeriesStyleArchive {
   optional int32 tschchartseriesstackedareavaluelabelposition = 96;
   optional int32 tschchartseriesstackedbarvaluelabelposition = 97;
   optional int32 tschchartseriesdefaultvaluelabelspacing = 100;
-extend .TSCH.ChartSeriesStyleArchive {
-  optional .TSCH.Generated.ChartSeriesStyleArchive current = 10000;
-}
+  extend .TSCH.ChartSeriesStyleArchive {
+    optional .TSCH.Generated.ChartSeriesStyleArchive current = 10000;
+  }
 }
 
 message ChartSeriesNonStyleArchive {
@@ -373,9 +373,9 @@ message ChartSeriesNonStyleArchive {
   optional int32 tschchartseriesscattervaluelabelsaxis = 68;
   optional float tschchartseriespiewedgeexplosion = 63;
   optional int32 tschchartseriesdefaultyaxisordinal = 64;
-extend .TSCH.ChartSeriesNonStyleArchive {
-  optional .TSCH.Generated.ChartSeriesNonStyleArchive current = 10000;
-}
+  extend .TSCH.ChartSeriesNonStyleArchive {
+    optional .TSCH.Generated.ChartSeriesNonStyleArchive current = 10000;
+  }
 }
 
 message ReferenceLineStyleArchive {
@@ -383,9 +383,9 @@ message ReferenceLineStyleArchive {
   optional .TSD.ShadowArchive tschreferencelinedefaultshadow = 2;
   optional .TSD.StrokeArchive tschreferencelinedefaultstroke = 1;
   optional int32 tschreferencelinedefaultvaluelabelparagraphstyleindex = 4;
-extend .TSCH.ReferenceLineStyleArchive {
-  optional .TSCH.Generated.ReferenceLineStyleArchive current = 10000;
-}
+  extend .TSCH.ReferenceLineStyleArchive {
+    optional .TSCH.Generated.ReferenceLineStyleArchive current = 10000;
+  }
 }
 
 message ReferenceLineNonStyleArchive {
@@ -395,9 +395,9 @@ message ReferenceLineNonStyleArchive {
   optional bool tschreferencelinedefaultshowline = 2;
   optional bool tschreferencelinedefaultshowvaluelabel = 4;
   optional int32 tschreferencelinedefaulttype = 1;
-extend .TSCH.ReferenceLineNonStyleArchive {
-  optional .TSCH.Generated.ReferenceLineNonStyleArchive current = 10000;
-}
+  extend .TSCH.ReferenceLineNonStyleArchive {
+    optional .TSCH.Generated.ReferenceLineNonStyleArchive current = 10000;
+  }
 }
 
 message ChartGenericPropertyMapArchive {
@@ -586,5 +586,4 @@ message ReferenceLineGenericPropertyMapArchive {
   optional int32 tschreferencelinetype = 9;
   optional int32 tschreferencelinevaluelabelparagraphstyleindex = 10;
 }
-
 
