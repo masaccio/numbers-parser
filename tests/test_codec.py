@@ -5,9 +5,9 @@ except ImportError:
 
 import yaml
 import pytest
-from keynote_parser import codec
-from keynote_parser.unicode_utils import fix_unicode
-from keynote_parser.generated.TSCHArchives_GEN_pb2 import ChartSeriesStyleArchive as Archive
+from numbers_parser import codec
+from numbers_parser.unicode_utils import fix_unicode
+from numbers_parser.generated.TSCHArchives_GEN_pb2 import ChartSeriesStyleArchive as Archive
 
 from google.protobuf.json_format import MessageToDict, ParseDict
 

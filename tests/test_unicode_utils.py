@@ -1,4 +1,4 @@
-from keynote_parser.unicode_utils import fix_unicode, to_py3_compatible
+from numbers_parser.unicode_utils import fix_unicode, to_py3_compatible
 
 
 def test_non_surrogate_pair():

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from keynote_parser import codec, file_utils
+from numbers_parser import codec, file_utils
 
 SIMPLE_FILENAME = "./tests/data/simple-oneslide.key"
 PHOTO_FILENAME = "./tests/data/photo-oneslide.key"

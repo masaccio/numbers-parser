@@ -1,5 +1,5 @@
-from keynote_parser import codec
-from keynote_parser.replacement import Replacement
+from numbers_parser import codec
+from numbers_parser.replacement import Replacement
 
 
 MULTILINE_SURROGATE_FILENAME = './tests/data/multiline-surrogate.iwa'
