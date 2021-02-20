@@ -77,7 +77,7 @@ sizes of the target image.
 ## Updates
 
 As `numbers-parser` includes private Protobuf definitions extracted from a copy of Numbers,
-new versions of Numbers will inevitably create `.key` files that cannot be read by `numbers-parser`.
+new versions of Numbers will inevitably create `.numbers` files that cannot be read by `numbers-parser`.
 As new versions of Numbers are released, the following steps must be undertaken:
 
 * Run [proto-dump](https://github.com/masaccio/proto-dump) on the new copy of Numbers to dump
@@ -100,7 +100,7 @@ Assuming
 ## Credits
 
 `numbers-parser` was built by [Jon Connell](http://github.com/masaccio) but derived enormously
-from [prior work][https://github.com/psobot/keynote-parser] by [Peter Sobot](https://petersobot.com).
+from [prior work](https://github.com/psobot/keynote-parser) by [Peter Sobot](https://petersobot.com).
 Both modules are derived from [previous work](https://github.com/obriensp/iWorkFileFormat/blob/master/Docs/index.md)
 by [Sean Patrick O'Brien](http://www.obriensp.com). A copy of O'Brien's format documentation
 is included in the `docs` folder for posterity.
