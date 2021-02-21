@@ -12,7 +12,7 @@ for filename in os.listdir("numbers_parser/generated"):
     if "pb2" in filename:
         module = filename.replace("_pb2.py", "")
         modules.append(module)
-        print(f"from .generated import {module}_pb2 as {module}")
+        print(f"from number_parser.generated import {module}_pb2 as {module}")
 
 print("\n")
 print("PROTO_FILES = [")
@@ -56,21 +56,3 @@ for index, symbol in sorted(mappings.items()):
     print(f'    "{index}": "{symbol}",')
 
 print("}")
-print("\n")
-
-print("""def compute_maps():
-    name_class_map = {}
-    for file in PROTO_FILES:
-        for message_name in file.DESCRIPTOR.message_types_by_name:
-            message_type = getattr(file, message_name)
-            name_class_map[message_type.DESCRIPTOR.full_name] = message_type
-
-    id_name_map = {}
-    for k, v in list(TSPRegistryMapping.items()):
-        if v in name_class_map:
-            id_name_map[int(k)] = name_class_map[v]
-
-    return name_class_map, id_name_map
-
-
-NAME_CLASS_MAP, ID_NAME_MAP = compute_maps()""")

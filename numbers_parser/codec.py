@@ -1,9 +1,6 @@
-from __future__ import print_function
-from __future__ import absolute_import
 from builtins import zip
 from builtins import str
 from builtins import object
-from future.utils import raise_from
 
 import sys
 import yaml
@@ -12,14 +9,14 @@ import snappy
 import traceback
 from functools import partial
 
-from .mapping import NAME_CLASS_MAP, ID_NAME_MAP
+from numbers_parser.mapping import NAME_CLASS_MAP, ID_NAME_MAP
 
 from google.protobuf.internal.encoder import _VarintBytes
 from google.protobuf.internal.decoder import _DecodeVarint32
 from google.protobuf.json_format import MessageToDict, ParseDict
 from google.protobuf.message import EncodeError
 
-from .generated.TSPArchiveMessages_pb2 import ArchiveInfo
+from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
 
 
 MAX_FLOAT = 340282346638528859811704183484516925440.000000000000000000
@@ -32,7 +29,7 @@ class IWAFile(object):
 
     @classmethod
     def from_file(cls, filename):
-        with open(filename) as f:
+        with open(filename, 'rb') as f:
             return cls.from_buffer(f.read(), filename)
 
     @classmethod
@@ -46,7 +43,7 @@ class IWAFile(object):
             return cls(chunks, filename)
         except Exception as e:
             if filename:
-                raise_from(ValueError("Failed to deserialize " + filename), e)
+                raise ValueError("Failed to deserialize " + filename) from e
             else:
                 raise
 
@@ -126,40 +123,6 @@ class IWACompressedChunk(object):
         )
 
 
-class ProtobufPatch(object):
-    def __init__(self, data):
-        self.data = data
-
-    def __eq__(self, other):
-        return self.data == other.data
-
-    def __repr__(self):
-        return "<%s %s>" % (self.__class__.__name__, self.data)
-
-    def to_dict(self):
-        return message_to_dict(self.data)
-
-    @classmethod
-    def FromString(cls, message_info, proto_klass, data):
-        if len(message_info.diff_field_path.path) != 1:
-            raise NotImplementedError(
-                "Not sure how to deserialize ProtobufPatch without exactly one diff_field_path. "
-                "Message info was:\n%s\nObject was:\n%s" % (message_info, data)
-            )
-        if message_info.fields_to_remove:
-            raise NotImplementedError(
-                "Not sure how to deserialize ProtobufPatch with fields_to_remove. "
-                "Message info was:\n%s\nObject was:\n%s" % (message_info, data)
-            )
-        for diff_path in message_info.diff_field_path.path:
-            patched_field = proto_klass.DESCRIPTOR.fields_by_number[diff_path]
-            field_message_class = NAME_CLASS_MAP[patched_field.message_type.full_name]
-            return cls(field_message_class.FromString(data))
-
-    def SerializeToString(self):
-        return self.data.SerializePartialToString()
-
-
 class IWAArchiveSegment(object):
     def __init__(self, header, objects):
         self.header = header
@@ -185,18 +148,16 @@ class IWAArchiveSegment(object):
 
         n = 0
         for message_info in archive_info.message_infos:
-            try:
-                if message_info.type == 0 and archive_info.should_merge and payloads:
-                    base_message = archive_info.message_infos[message_info.base_message_index]
-                    klass = partial(
-                        ProtobufPatch.FromString, message_info, ID_NAME_MAP[base_message.type]
-                    )
-                else:
-                    klass = ID_NAME_MAP[message_info.type]
-            except KeyError:
+            if message_info.type == 0 and archive_info.should_merge and payloads:
+                base_message = archive_info.message_infos[message_info.base_message_index]
+                message_type = base_message.type
+            else:
+                message_type = message_info.type
+            if message_type not in ID_NAME_MAP:
                 raise NotImplementedError(
-                    "Don't know how to parse Protobuf message type " + str(message_info.type)
+                    "Don't know how to parse Protobuf message type " + str(message_type)
                 )
+            klass = ID_NAME_MAP[message_type]
             try:
                 message_payload = payload[n : n + message_info.length]
                 if hasattr(klass, 'FromString'):
