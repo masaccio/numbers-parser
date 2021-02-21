@@ -19,8 +19,8 @@ from glob import glob
 from tqdm import tqdm
 from zipfile import ZipFile
 
-from .codec import IWAFile
-from .unicode_utils import fix_unicode
+from numbers_parser.codec import IWAFile
+from numbers_parser.unicode_utils import fix_unicode
 
 
 def ensure_directory_exists(prefix, path):
@@ -32,42 +32,34 @@ def ensure_directory_exists(prefix, path):
         pass
 
 
-def file_reader(path, progress=True):
-    if path.endswith('.key'):
-        return zip_file_reader(path, progress)
+def file_reader(path):
+    if path.endswith(".numbers"):
+        return zip_file_reader(path)
     else:
-        return directory_reader(path, progress)
+        return directory_reader(path)
 
 
-def zip_file_reader(path, progress=True):
+def zip_file_reader(path):
     zipfile = ZipFile(path, "r")
     for _file in zipfile.filelist:
         _file.filename = _file.filename.encode("cp437").decode("utf-8")
     iterator = sorted(zipfile.filelist, key=lambda x: x.filename)
-    if progress:
-        iterator = tqdm(iterator)
     for zipinfo in iterator:
-        if zipinfo.filename.endswith('/'):
+        if zipinfo.filename.endswith("/"):
             continue
-        if progress:
-            iterator.set_description("Reading {}...".format(zipinfo.filename))
         with zipfile.open(zipinfo) as handle:
             yield (zipinfo.filename, handle)
 
 
-def directory_reader(path, progress=True):
+def directory_reader(path):
     # Python <3.5 doesn't support glob with recursive, so this will have to do.
-    iterator = set(sum([glob(path + ('/**' * i)) for i in range(10)], []))
+    iterator = set(sum([glob(path + ("/**" * i)) for i in range(10)], []))
     iterator = sorted(iterator)
-    if progress:
-        iterator = tqdm(iterator)
     for filename in iterator:
         if os.path.isdir(filename):
             continue
-        rel_filename = filename.replace(path + '/', '')
-        if progress:
-            iterator.set_description("Reading {}...".format(rel_filename))
-        with open(filename, 'rb') as handle:
+        rel_filename = filename.replace(path + "/", "")
+        with open(filename, "rb") as handle:
             yield (rel_filename, handle)
 
 
@@ -77,8 +69,9 @@ def file_sink(path, raw=False, subfile=None):
             return cat_sink(subfile, raw)
         else:
             return ls_sink()
-    if path.endswith('.key'):
+    if path.endswith(".numbers"):
         return zip_file_sink(path)
+
     return dir_file_sink(path, raw=raw)
 
 
@@ -89,7 +82,7 @@ def dir_file_sink(target_dir, raw=False):
         target_path = os.path.join(target_dir, filename)
         if isinstance(contents, IWAFile) and not raw:
             target_path += ".yaml"
-        with open(target_path, 'wb') as out:
+        with open(target_path, "wb") as out:
             if isinstance(contents, IWAFile):
                 if raw:
                     out.write(contents.to_buffer())
@@ -104,7 +97,6 @@ def dir_file_sink(target_dir, raw=False):
             else:
                 out.write(contents)
 
-    accept.uses_stdout = False
     yield accept
 
 
@@ -113,7 +105,6 @@ def ls_sink():
     def accept(filename, contents):
         print(filename)
 
-    accept.uses_stdout = True
     yield accept
 
 
@@ -131,12 +122,11 @@ def cat_sink(subfile, raw):
                             default_flow_style=False,
                             encoding="utf-8",
                             Dumper=Dumper,
-                        ).decode('ascii')
+                        ).decode("ascii")
                     )
             else:
                 sys.stdout.buffer.write(contents)
 
-    accept.uses_stdout = True
     yield accept
 
 
@@ -147,12 +137,10 @@ def zip_file_sink(output_path):
     def accept(filename, contents):
         files_to_write[filename] = contents
 
-    accept.uses_stdout = False
-
     yield accept
 
     print("Writing to %s..." % output_path)
-    with ZipFile(output_path, 'w') as zipfile:
+    with ZipFile(output_path, "w") as zipfile:
         for filename, contents in tqdm(
             iter(list(files_to_write.items())), total=len(files_to_write)
         ):
@@ -164,13 +152,13 @@ def zip_file_sink(output_path):
 
 def process_file(filename, handle, sink, replacements=[], raw=False, on_replace=None):
     contents = None
-    if '.iwa' in filename and not raw:
+    if ".iwa" in filename and not raw:
         contents = handle.read()
-        if filename.endswith('.yaml'):
+        if filename.endswith(".yaml"):
             file = IWAFile.from_dict(
-                yaml.load(fix_unicode(contents.decode('utf-8')), Loader=Loader)
+                yaml.load(fix_unicode(contents.decode("utf-8")), Loader=Loader)
             )
-            filename = filename.replace('.yaml', '')
+            filename = filename.replace(".yaml", "")
         else:
             file = IWAFile.from_buffer(contents, filename)
 
@@ -202,7 +190,7 @@ def process_file(filename, handle, sink, replacements=[], raw=False, on_replace=
             if data_filename.startswith(repl_filepart):
                 # Scale this file to the appropriate size
                 image = Image.open(handle)
-                with open(replacement.replace, 'rb') as f:
+                with open(replacement.replace, "rb") as f:
                     read_image = Image.open(f)
                     with BytesIO() as output:
                         read_image.thumbnail(image.size, Image.ANTIALIAS)
@@ -223,9 +211,7 @@ def process(input_path, output_path, replacements=[], subfile=None, raw=False):
         completed_replacements.append((old, new))
 
     with file_sink(output_path, subfile=subfile) as sink:
-        if not sink.uses_stdout:
-            print("Reading from %s..." % input_path)
-        for filename, handle in file_reader(input_path, not sink.uses_stdout):
+        for filename, handle in file_reader(input_path):
             try:
                 process_file(filename, handle, sink, replacements, raw, on_replace)
             except Exception as e:
