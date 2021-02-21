@@ -1,0 +1,21 @@
+#! /usr/bin/perl
+($op = shift) || die "Usage: replace perlexpr [filenames]\n";
+if (!@ARGV) {
+    @ARGV = <STDIN>;
+    chop(@ARGV);
+}
+
+
+foreach $f (@ARGV) {
+    do { warn "Skipping '$f': not a plain file\n"; next; } if (!-f $f);
+	open(F, $f) || die "$f: $!\n";
+	open(F2, ">$f.new.$$") || die "Can't create temporary file: $!\n";
+	while(<F>) {
+		eval $op;
+		do { close(F2); unlink("$f.new.$$"); die $@ } if $@;
+		print F2;
+	}
+	close(F);
+	close(F2);
+	rename("$f.new.$$", $f) || die "Can't rename temporary file: $!\n";
+}

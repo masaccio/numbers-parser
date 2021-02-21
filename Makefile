@@ -34,8 +34,7 @@ numbers_parser/generated/%_pb2.py: protos/%.proto numbers_parser/generated
 
 numbers_parser/generated/__init__.py: numbers_parser/generated $(PROTO_CLASSES)
 	touch $@
-	# Huge hack for py3 support, see https://github.com/protocolbuffers/protobuf/issues/1491
-	futurize --no-diffs --nobackups --both-stages --processes 4 -w numbers_parser/generated/
+	protos/replace 's/^import T/import numbers_parser.generated.T/' numbers_parser/generated/T*.py
 
 tmp/TSPRegistry.dump::
 	rm -rf tmp
