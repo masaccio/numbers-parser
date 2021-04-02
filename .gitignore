@@ -10,6 +10,9 @@ keynote_parser/generated/
 *.so
 
 # Distribution / packaging
+numbers_parser/generated
+numbers_parser.egg_info
+dist
 .Python
 build/
 develop-eggs/
