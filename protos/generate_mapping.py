@@ -55,4 +55,22 @@ print("TSPRegistryMapping = {")
 for index, symbol in sorted(mappings.items()):
     print(f'    "{index}": "{symbol}",')
 
-print("}")
+print("""}
+
+
+def compute_maps():
+     name_class_map = {}
+     for file in PROTO_FILES:
+         for message_name in file.DESCRIPTOR.message_types_by_name:
+             message_type = getattr(file, message_name)
+             name_class_map[message_type.DESCRIPTOR.full_name] = message_type
+
+     id_name_map = {}
+     for k, v in list(TSPRegistryMapping.items()):
+         if v in name_class_map:
+             id_name_map[int(k)] = name_class_map[v]
+
+     return name_class_map, id_name_map
+
+
+ NAME_CLASS_MAP, ID_NAME_MAP = compute_maps()""")

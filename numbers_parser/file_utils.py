@@ -3,12 +3,14 @@ from __future__ import absolute_import
 
 import os
 import sys
+import pprint
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
     from yaml import Loader, Dumper
 import yaml
+import json
 
 from contextlib import contextmanager
 
@@ -69,6 +71,7 @@ def file_sink(path, raw=False, subfile=None):
             return cat_sink(subfile, raw)
         else:
             return ls_sink()
+
     if path.endswith(".numbers"):
         return zip_file_sink(path)
 
@@ -81,21 +84,15 @@ def dir_file_sink(target_dir, raw=False):
         ensure_directory_exists(target_dir, filename)
         target_path = os.path.join(target_dir, filename)
         if isinstance(contents, IWAFile) and not raw:
-            target_path += ".yaml"
-        with open(target_path, "wb") as out:
-            if isinstance(contents, IWAFile):
-                if raw:
+            target_path += ".txt"
+            with open(target_path, "w") as out:
+                pprint.PrettyPrinter(indent=2, stream=out).pprint(contents.to_dict())
+        else:
+            with open(target_path, "wb") as out:
+                if isinstance(contents, IWAFile):
                     out.write(contents.to_buffer())
                 else:
-                    yaml.dump(
-                        contents.to_dict(),
-                        out,
-                        default_flow_style=False,
-                        encoding="utf-8",
-                        Dumper=Dumper,
-                    )
-            else:
-                out.write(contents)
+                    out.write(contents)
 
     yield accept
 
@@ -116,14 +113,12 @@ def cat_sink(subfile, raw):
                 if raw:
                     sys.stdout.buffer.write(contents.to_buffer())
                 else:
-                    print(
-                        yaml.dump(
-                            contents.to_dict(),
-                            default_flow_style=False,
-                            encoding="utf-8",
-                            Dumper=Dumper,
-                        ).decode("ascii")
-                    )
+                    yaml.dump(
+                        contents.to_dict(),
+                        default_flow_style=False,
+                        encoding="utf-8",
+                        Dumper=Dumper,
+                    ).decode("ascii")
             else:
                 sys.stdout.buffer.write(contents)
 

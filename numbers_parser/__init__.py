@@ -1,13 +1,12 @@
-# Copyright 2020 Peter Sobot
-"""Unpack and repack Apple Keyote files."""
-__author__ = "Peter Sobot"
+"""Unpack and repack Apple Numbers files."""
+__author__ = "Jon Connell"
 
 import numbers_parser.macos_app_version
 
 __major_version__ = 1
 __patch_version__ = 0
 __supported_numbers_version__ = numbers_parser.macos_app_version.MacOSAppVersion(
-    "10.2", "7028.0.88", "1A122"
+    "10.3.9", "7029.9.8", "1A22"
 )
 __version_tuple__ = (
     __major_version__,
@@ -17,8 +16,8 @@ __version_tuple__ = (
 )
 __version__ = ".".join([str(x) for x in __version_tuple__])
 
-__email__ = "github@petersobot.com"
-__description__ = 'A tool for manipulating Apple Keynote presentation files.'
-__url__ = "https://github.com/psobot/numbers-parser"
-__new_issue_url__ = "https://github.com/psobot/numbers-parser/issues/new"
+__email__ = "github@figsandfudge.com"
+__description__ = 'A tool for manipulating Apple Numbers presentation files.'
+__url__ = "https://github.com/masaccio/numbers-parser"
+__new_issue_url__ = "https://github.com/masaccio/numbers-parser/issues/new"
 __command_line_invocation__ = False
