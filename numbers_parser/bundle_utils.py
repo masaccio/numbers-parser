@@ -1,90 +1,47 @@
 import os
 import warnings
 import plistlib
-import urllib
-from colorama import init as colorama_init
-from colorama import Fore
 from numbers_parser import (
     __version__,
     __supported_numbers_version__,
-    __new_issue_url__,
     __command_line_invocation__,
 )
 from numbers_parser.macos_app_version import MacOSAppVersion
 
-DEFAULT_KEYNOTE_INSTALL_PATH = '/Applications/Numbers.app'
-VERSION_PLIST_PATH = 'Contents/version.plist'
-
-
-colorama_init()
+DEFAULT_NUMBERS_INSTALL_PATH = "/Applications/Numbers.app"
+VERSION_PLIST_PATH = "Contents/version.plist"
 
 
 def get_installed_numbers_version():
     try:
-        fp = open(os.path.join(DEFAULT_KEYNOTE_INSTALL_PATH, VERSION_PLIST_PATH), 'rb')
+        fp = open(os.path.join(DEFAULT_NUMBERS_INSTALL_PATH, VERSION_PLIST_PATH), "rb")
     except IOError:
         return None
     version_dict = plistlib.load(fp)
     return MacOSAppVersion(
-        version_dict['CFBundleShortVersionString'],
-        version_dict['CFBundleVersion'],
-        version_dict['ProductBuildVersion'],
+        version_dict["CFBundleShortVersionString"],
+        version_dict["CFBundleVersion"],
+        version_dict["ProductBuildVersion"],
     )
 
 
 class NumbersVersionWarning(UserWarning):
     def __init__(self, installed_numbers_version):
         issue_title = "Please add support for Numbers %s" % installed_numbers_version
-        new_issue_url = __new_issue_url__ + "?" + urllib.parse.urlencode({"title": issue_title})
         super(UserWarning, self).__init__(
             (
-                "NumbersVersionWarning: " + Fore.RESET
-                + "This version of numbers_parser (%s) was not built with support "
-                "for\nthe currently installed version of Numbers.\n"
+                "This numbers_parser (%s) was not built for the installed Numbers.app:\n"
                 "\tnumbers_parser version:    %s\n"
                 "\tsupported Numbers version: %s\n"
                 "\tinstalled Numbers version: %s\n"
-                "\n"
-                "Some presentation files may not be editable, or data corruption may occur.\n"
-                "To get rid of this warning:\n"
-                "\t- try %supgrading %snumbers-parser%s (pip install --upgrade numbers-parser)\n"
-                "\t- %ssubmit an issue%s if no new version is available:\n"
-                "\t\t%s\n"
-                "\t- use the %swarnings%s module to suppress %sNumbersVersionWarning%s:\n"
-                "\t\tPYTHONWARNINGS=ignore:NumbersVersionWarning ...\n"
             )
             % (
                 __version__,
                 __version__,
                 __supported_numbers_version__,
                 installed_numbers_version,
-                Fore.CYAN,
-                Fore.YELLOW,
-                Fore.RESET,
-                Fore.YELLOW,
-                Fore.RESET,
-                new_issue_url,
-                Fore.CYAN,
-                Fore.RESET,
-                Fore.CYAN,
-                Fore.RESET,
             )
         )
-
-
-class CleanWarning(object):
-    def custom_format_warning(self, message, *args):
-        # Nasty hack - by putting the initial colour in the formatter,
-        # the Warnings filter still lets users ignore this warning as
-        # the message itself doesn't start with an ANSI escape sequence.
-        return Fore.YELLOW + str(message) + "\n"
-
-    def __enter__(self):
-        self.old_formatwarning = warnings.formatwarning
-        warnings.formatwarning = self.custom_format_warning
-
-    def __exit__(self, *args, **kwargs):
-        warnings.formatwarning = self.old_formatwarning
 
 
 DID_WARN = False
@@ -100,8 +57,7 @@ def warn_once_on_newer_numbers():
         return False
 
     if __supported_numbers_version__ < installed_numbers_version:
-        with CleanWarning():
-            warnings.warn(NumbersVersionWarning(installed_numbers_version))
+        print(NumbersVersionWarning(installed_numbers_version))
         DID_WARN = True
 
     return DID_WARN
