@@ -4,7 +4,6 @@ import plistlib
 from numbers_parser import (
     __version__,
     __supported_numbers_version__,
-    __command_line_invocation__,
 )
 from numbers_parser.macos_app_version import MacOSAppVersion
 
@@ -62,6 +61,4 @@ def warn_once_on_newer_numbers():
 
     return DID_WARN
 
-
-if not __command_line_invocation__:
-    warn_once_on_newer_numbers()
+warn_once_on_newer_numbers()
