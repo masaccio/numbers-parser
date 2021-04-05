@@ -1,4 +1,9 @@
 .DS_Store
+.*.swp
+numbers_parser/.*.swp
+.*.icloud
+numbers_parser/.*.icloud
+test-*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
