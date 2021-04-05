@@ -56,6 +56,7 @@ def dir_file_sink(target_dir):
         ensure_directory_exists(target_dir, filename)
         target_path = os.path.join(target_dir, filename)
         if isinstance(contents, IWAFile):
+            target_path = target_path.replace(".iwa", "")
             target_path += ".txt"
             with open(target_path, "w") as out:
                 pprint.PrettyPrinter(indent=2, stream=out).pprint(contents.to_dict())
