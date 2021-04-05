@@ -1,4 +1,4 @@
-"""Unpack and repack Apple Numbers files."""
+"""Extract data from Apple Numbers spreadsheets."""
 __author__ = "Jon Connell"
 
 import numbers_parser.macos_app_version
@@ -17,7 +17,6 @@ __version_tuple__ = (
 __version__ = ".".join([str(x) for x in __version_tuple__])
 
 __email__ = "github@figsandfudge.com"
-__description__ = 'A tool for manipulating Apple Numbers presentation files.'
+__description__ = 'A tool for reading Apple Numbers spreadsheets.'
 __url__ = "https://github.com/masaccio/numbers-parser"
 __new_issue_url__ = "https://github.com/masaccio/numbers-parser/issues/new"
-__command_line_invocation__ = False
