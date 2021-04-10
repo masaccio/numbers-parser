@@ -32,10 +32,38 @@ class Document:
         self._objects = get_objects_from_file(filename)
 
     def sheets(self):
-        self._sheets = []
-        for obj in self._objects[1].sheets:
-            self._sheets.append(Sheet(self._objects, obj.identifier))
+        refs = [o.identifier for o in self._objects[1].sheets]
+        self._sheets = Sheets(self._objects, refs)
         return self._sheets
+
+
+class Container:
+    def __init__(self, objects, refs, class_name):
+        class_ = getattr(importlib.import_module(__name__), class_name)
+        self._item_name = class_name.lower()
+        self._items = [class_(objects, _) for _ in refs]
+
+    def __getitem__(self, key: int):
+        if type(key) == int:
+            if key < 0 or key >= len(self._items):
+                raise IndexError(f"index {key} out of range")
+            return self._items[key]
+        elif type(key) == str:
+            for item in self._items:
+                if item.name == key:
+                    return item
+            raise KeyError(f"no {self._item_name} named '{key}'")
+        else:
+            t = type(key).__name__
+            raise LookupError(f"invalid index type {t}")
+
+    def __len__(self):
+        return len(self._items)
+
+
+class Sheets(Container):
+    def __init__(self, objects, refs):
+        super(Sheets, self).__init__(objects, refs, "Sheet")
 
 
 class Sheet:
@@ -46,12 +74,20 @@ class Sheet:
         self.name = self._sheet.name
 
     def tables(self):
-        self._tables = find_tables(self._objects, self._sheet_id)
+        table_refs = find_tables(self._objects, self._sheet_id)
+        self._tables = Tables(self._objects, table_refs)
         return self._tables
+
 
 import binascii
 
 X_ROW = 0
+
+
+class Tables(Container):
+    def __init__(self, objects, refs):
+        super(Tables, self).__init__(objects, refs, "Table")
+
 
 class Table:
     def __init__(self, objects, table_id):
@@ -68,14 +104,21 @@ class Table:
         global X_ROW
         tile_id = self._table.base_data_store.tiles.tiles[0].tile.identifier
         cell_offsets = [o.cell_offsets for o in self._objects[tile_id].rowInfos]
-        x_cols = [[ 9, 2,  10, 3, 4,  11, 0, 5,  6, 1, 7,  8, 12 , 13], [ 10, 12, 3,  4, 14, 0, 5,  6, 7, 1, 8,  11, 12, 2, 9]]
+        x_cols = [
+            [9, 2, 10, 3, 4, 11, 0, 5, 6, 1, 7, 8, 12, 13],
+            [10, 12, 3, 4, 14, 0, 5, 6, 7, 1, 8, 11, 12, 2, 9],
+        ]
         for row_id in range(len(self._objects[tile_id].rowInfos)):
-            cell_storage_buffer = self._objects[tile_id].rowInfos[row_id].cell_storage_buffer
+            cell_storage_buffer = (
+                self._objects[tile_id].rowInfos[row_id].cell_storage_buffer
+            )
             for col_id in range(int(len(cell_storage_buffer) / 24)):
-                hex_str = binascii.hexlify(cell_storage_buffer[col_id*24:col_id*24+23], sep=":")
-                a = cell_storage_buffer[col_id*24 + 12]
+                hex_str = binascii.hexlify(
+                    cell_storage_buffer[col_id * 24 : col_id * 24 + 23], sep=":"
+                )
+                a = cell_storage_buffer[col_id * 24 + 12]
                 b = x_cols[X_ROW].pop(0)
-                print(f"({row_id},{col_id} = {hex_str}", a, b, "=", a-b)
+                print(f"({row_id},{col_id} = {hex_str}", a, b, "=", a - b)
             print("\n")
         print("\n")
         X_ROW += 1
@@ -86,21 +129,20 @@ class Table:
         ]
 
         #  0          1          2            3          4          5          6            7          8            9            10           11           12
-        # ['YYY_2_1', 'YYY_3_1', 'YYY_COL_2', 'YYY_1_1', 'YYY_1_2', 'YYY_2_2', 'YYY_ROW_3', 'YYY_3_2', 'YYY_ROW_4', 'YYY_COL_1', 'YYY_ROW_1', 'YYY_ROW_2', 'YYY_4_1', 'YYY_4_2'] 
-        # .      9        2
+        # ['YYY_2_1', 'YYY_3_1', 'YYY_COL_2', 'YYY_1_1', 'YYY_1_2', 'YYY_2_2', 'YYY_ROW_3', 'YYY_3_2', 'YYY_ROW_4', 'YYY_COL_1', 'YYY_ROW_1', 'YYY_ROW_2', 'YYY_4_1', 'YYY_4_2']
+        #  .      9        2
         # 10     3        4
-        # 11     0        5
+        #  11     0        5
         # 6      1        7
         # 8      12       13
 
         # 0            1          2         3            4            5         6             7          8          9           10           11          12         13           14
-        # ['ZZZ_1_2', 'ZZZ_2_2', 'ZZZ_3_2', 'ZZZ_COL_3', 'ZZZ_ROW_1', 'ZZZ_1_3', 'ZZZ_ROW_2', 'ZZZ_2_1', 'ZZZ_2_3', 'ZZZ_3_3', 'ZZZ_COL_1', 'ZZZ_ROW_3', 'ZZZ_3_1', 'ZZZ_COL_2', 'ZZZ_1_1'] 
+        # ['ZZZ_1_2', 'ZZZ_2_2', 'ZZZ_3_2', 'ZZZ_COL_3', 'ZZZ_ROW_1', 'ZZZ_1_3', 'ZZZ_ROW_2', 'ZZZ_2_1', 'ZZZ_2_3', 'ZZZ_3_3', 'ZZZ_COL_1', 'ZZZ_ROW_3', 'ZZZ_3_1', 'ZZZ_COL_2', 'ZZZ_1_1']
         #
         # .      10     13     3
         # 4      14     0      5
         # 6      7      1      8
         # 11     12     2      9
-
 
         # (0,0 = b'05:03:    00:00    :00:00:00:00:08:10:02:00:    0e:00:00:00:05:00:00:00:01:00:00'
         # (0,1 = b'05:03:    73:06    :00:00:00:00:08:10:02:00:    03:00:00:00:05:00:00:00:01:00:00'
@@ -135,6 +177,16 @@ class Table:
                     self.data[row_num].append(table_strings.pop(0))
         print([x.string for x in objects[strings_id].entries], "\n")
 
+    @property
+    def num_rows(self):
+        row_header_id = self._table.base_data_store.rowHeaders.buckets[0].identifier
+        return len(self._objects[row_header_id].headers)
+
+    @property
+    def num_cols(self):
+        column_header_id = self._table.base_data_store.columnHeaders.identifier
+        return len(self._objects[column_header_id].headers)
+
 
 def find_refs(objects, ref_name):
     refs = [k for k, v in objects.items() if type(v).__name__ == ref_name]
@@ -149,12 +201,12 @@ def find_objects(objects, ref_name, class_name):
 
 def find_tables(objects, parent_sheet_id):
     table_ids = find_refs(objects, "TableInfoArchive")
-    tables = [
-        Table(objects, objects[table_id].tableModel.identifier)
+    table_refs = [
+        objects[table_id].tableModel.identifier
         for table_id in table_ids
         if objects[table_id].super.parent.identifier == parent_sheet_id
     ]
-    return tables
+    return table_refs
 
 
 def get_objects_from_file(filename):
