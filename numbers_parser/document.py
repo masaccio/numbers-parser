@@ -7,6 +7,7 @@ import zipfile
 
 from zipfile import ZipFile
 from numbers_parser.codec import IWAFile
+from numbers_parser.items_list import ItemsList
 
 
 class NumbersError(Exception):
@@ -37,33 +38,9 @@ class Document:
         return self._sheets
 
 
-class Container:
-    def __init__(self, objects, refs, class_name):
-        class_ = getattr(importlib.import_module(__name__), class_name)
-        self._item_name = class_name.lower()
-        self._items = [class_(objects, _) for _ in refs]
-
-    def __getitem__(self, key: int):
-        if type(key) == int:
-            if key < 0 or key >= len(self._items):
-                raise IndexError(f"index {key} out of range")
-            return self._items[key]
-        elif type(key) == str:
-            for item in self._items:
-                if item.name == key:
-                    return item
-            raise KeyError(f"no {self._item_name} named '{key}'")
-        else:
-            t = type(key).__name__
-            raise LookupError(f"invalid index type {t}")
-
-    def __len__(self):
-        return len(self._items)
-
-
-class Sheets(Container):
+class Sheets(ItemsList):
     def __init__(self, objects, refs):
-        super(Sheets, self).__init__(objects, refs, "Sheet")
+        super(Sheets, self).__init__(objects, refs, Sheet)
 
 
 class Sheet:
@@ -84,9 +61,9 @@ import binascii
 X_ROW = 0
 
 
-class Tables(Container):
+class Tables(ItemsList):
     def __init__(self, objects, refs):
-        super(Tables, self).__init__(objects, refs, "Table")
+        super(Tables, self).__init__(objects, refs, Table)
 
 
 class Table:
@@ -96,6 +73,8 @@ class Table:
         self._table_id = table_id
         self.name = self._table.table_name
 
+    @property
+    def data(self):
         # styles = self._table.base_data_store.styleTable.identifier
         # row_headers = self._table.base_data_store.rowHeaders.buckets[0].identifier
         # column_headers = self._table.base_data_store.columnHeaders.identifier
@@ -163,19 +142,20 @@ class Table:
         # (4,1 = b'05:03:    40:30    :00:00:00:00:08:10:02:00:    11:00:00:00:05:00:00:00:01:00:00'
         # (4,2 = b'05:03:    10:03    :00:00:00:00:08:10:02:00:    12:00:00:00:05:00:00:00:01:00:00'
 
-        self.data = []
+        data = []
         strings_id = self._table.base_data_store.stringTable.identifier
-        table_strings = [x.string for x in objects[strings_id].entries]
+        table_strings = [x.string for x in self._objects[strings_id].entries]
         #  TODO: deal with formulas instead of strings
         for row_num in range(self._table.number_of_rows):
-            self.data.append([])
+            data.append([])
             offsets = array.array("h", cell_offsets[row_num]).tolist()
             for col_num in range(self._table.number_of_columns):
                 if offsets[col_num] < 0:
-                    self.data[row_num].append("")
+                    data[row_num].append("")
                 else:
-                    self.data[row_num].append(table_strings.pop(0))
-        print([x.string for x in objects[strings_id].entries], "\n")
+                    data[row_num].append(table_strings.pop(0))
+        print([x.string for x in self._objects[strings_id].entries], "\n")
+        return data
 
     @property
     def num_rows(self):
