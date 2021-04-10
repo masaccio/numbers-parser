@@ -17,6 +17,18 @@ XXX_TABLE_1_REF = [
     ["XXX_ROW_3", "XXX_3_1", "", "XXX_3_3", "XXX_3_4", "XXX_3_5"],
 ]
 
+def test_sheet_exceptions():
+    doc = Document("tests/data/test-1.numbers")
+    sheets = doc.sheets()
+    with pytest.raises(IndexError) as e:
+        _ = sheets[3]
+    assert "out of range" in str(e.value)
+    with pytest.raises(KeyError) as e:
+        _ = sheets["invalid"]
+    assert "no sheet named" in str(e.value)
+    with pytest.raises(LookupError) as e:
+        _ = sheets[float(1)]
+    assert "invalid index" in str(e.value)
 
 def test_simple_spreadsheet():
     doc = Document("tests/data/test-1.numbers")
@@ -29,6 +41,8 @@ def test_simple_spreadsheet():
     assert len(tables) == 2
     assert tables[0].name == "ZZZ_Table_1"
     assert tables[1].name == "ZZZ_Table_2"
+    assert tables[0].num_cols == 3
+    assert tables[0].num_rows == 5
     assert tables[0].data == ZZZ_TABLE_1_REF
 
 def test_empty_cells():
@@ -36,4 +50,7 @@ def test_empty_cells():
     sheets = doc.sheets()
     tables = sheets["ZZZ_Sheet_2"].tables()
     assert len(tables) == 1
-    assert tables["XXX_Table_1"].data == XXX_TABLE_1_REF
+    table = tables["XXX_Table_1"]
+    assert table.data == XXX_TABLE_1_REF
+    assert table.num_cols == 6
+    assert table.num_rows == 4
