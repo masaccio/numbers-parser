@@ -139,7 +139,8 @@ class ProtobufPatch(object):
     def FromString(cls, message_info, proto_klass, data):
         if len(message_info.diff_field_path.path) != 1:
             print(
-                str(proto_klass)
+                "warning: "
+                + proto_klass.__name__
                 + ": can't process diff_field_path = "
                 + str(len(message_info.diff_field_path.path)),
                 file=sys.stderr,
