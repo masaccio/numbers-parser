@@ -7,7 +7,7 @@ import zipfile
 
 from zipfile import ZipFile
 from numbers_parser.codec import IWAFile
-from numbers_parser.items_list import ItemsList, ObjectStore
+from numbers_parser.containers import ItemsList, ObjectStore
 
 
 class Document:
