@@ -76,9 +76,6 @@ class Table:
             h.numberOfCells for h in object_store[bds.columnHeaders.identifier].headers
         ]
         self._tile_id = bds.tiles.tiles[0].tile.identifier
-        # self._row_cell_counts = [
-        #     o.cell_count for o in object_store[self._tile_id].rowInfos
-        # ]
         self._cell_offsets = [
             array.array("h", o.cell_offsets).tolist()
             for o in object_store[self._tile_id].rowInfos
@@ -114,11 +111,6 @@ class Table:
 
                     cell_type = cell_storage_buffers[col_num][1]
                     cell_value = None
-                    # print(
-                    #     f"[{row_num},{col_num}]:", cell_type
-                    #     binascii.hexlify(cell_storage_buffers[col_num]),
-                    #     binascii.hexlify(cell_storage_buffers_pre_bnc[col_num]),
-                    # )
                     if cell_type == TSTArchives.numberCellType:
                         cell_value = struct.unpack("<d", cell_storage_buffers_pre_bnc[col_num][24:32])[0]
                     elif cell_type == TSTArchives.textCellType:
@@ -132,11 +124,6 @@ class Table:
                         cell_value = d > 0.0
                     elif cell_type == TSTArchives.durationCellType:
                         cell_value = struct.unpack("<d", cell_storage_buffers[col_num][12:20])[0]
-                    # elif cell_type == TSTArchives.formulaErrorCellType:
-                    # elif cell_type == TSTArchives.genericCellType:
-                    # elif cell_type == TSTArchives.spanCellType:
-                    # elif cell_type == TSTArchives.formulaCellType:
-                    # elif cell_type == TSTArchives.automaticCellType:
                     else:
                         raise UnsupportedError(f"Unsupport cell type {cell_type}")
 
