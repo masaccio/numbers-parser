@@ -3,12 +3,20 @@ import importlib
 import os
 import re
 import sys
+import struct
 import zipfile
 
-from zipfile import ZipFile
-from numbers_parser.codec import IWAFile
-from numbers_parser.containers import ItemsList, ObjectStore
+from enum import Enum
+from datetime import datetime, timedelta
 
+from numbers_parser.containers import ItemsList, ObjectStore, NumbersError
+from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+
+
+class UnsupportedError(NumbersError):
+    """Raised for unsupported file format features"""
+
+    pass
 
 class Document:
     def __init__(self, filename):
@@ -45,8 +53,6 @@ class Sheet:
 
 import binascii
 
-X_ROW = 0
-
 
 class Tables(ItemsList):
     def __init__(self, object_store, refs):
@@ -70,94 +76,73 @@ class Table:
             h.numberOfCells for h in object_store[bds.columnHeaders.identifier].headers
         ]
         self._tile_id = bds.tiles.tiles[0].tile.identifier
-        self._row_cell_counts = [o.cell_count for o in object_store[self._tile_id].rowInfos]
+        # self._row_cell_counts = [
+        #     o.cell_count for o in object_store[self._tile_id].rowInfos
+        # ]
         self._cell_offsets = [
+            array.array("h", o.cell_offsets).tolist()
+            for o in object_store[self._tile_id].rowInfos
+        ]
+        self._cell_offsets_pre_bnc = [
             array.array("h", o.cell_offsets).tolist()
             for o in object_store[self._tile_id].rowInfos
         ]
 
     @property
     def data(self):
-        global X_ROW
-        x_cols = [
-            [9, 2, 10, 3, 4, 11, 0, 5, 6, 1, 7, 8, 12, 13],
-            [10, 12, 3, 4, 14, 0, 5, 6, 7, 1, 8, 11, 12, 2, 9],
-        ]
-        for row_id in range(len(self._object_store[self._tile_id].rowInfos)):
-            cell_storage_buffer = (
-                self._object_store[self._tile_id].rowInfos[row_id].cell_storage_buffer
-            )
-            for col_id in range(int(len(cell_storage_buffer) / 24)):
-                hex_str = binascii.hexlify(
-                    cell_storage_buffer[col_id * 24 : col_id * 24 + 23], sep=":"
-                )
-                a = cell_storage_buffer[col_id * 24 + 12]
-                b = x_cols[X_ROW].pop(0)
-                print(f"({row_id},{col_id} = {hex_str}", a, b, "=", a - b)
-            print("\n")
-        print("\n")
-        X_ROW += 1
-
-        cell_storage_buffers = [
-            array.array("b", o.cell_storage_buffer).tolist()
-            for o in self._object_store[self._tile_id].rowInfos
-        ]
-
-        #  0          1          2            3          4          5          6            7          8            9            10           11           12
-        # ['YYY_2_1', 'YYY_3_1', 'YYY_COL_2', 'YYY_1_1', 'YYY_1_2', 'YYY_2_2', 'YYY_ROW_3', 'YYY_3_2', 'YYY_ROW_4', 'YYY_COL_1', 'YYY_ROW_1', 'YYY_ROW_2', 'YYY_4_1', 'YYY_4_2']
-        #  .     9        2
-        # 10     3        4
-        # 11     0        5
-        # 6      1        7
-        # 8      12       13
-        #
-        #              YYY_COL_1  YYY_COL_2
-        # YYY_ROW_1    YYY_1_1    YYY_1_2
-        # YYY_ROW_2    YYY_2_1    YYY_2_2
-        # YYY_ROW_3    YYY_3_1    YYY_3_2
-        # YYY_ROW_4    YYY_4_1    YYY_4_2
-
-        # 0            1          2         3            4            5         6             7          8          9           10           11          12         13           14
-        # ['ZZZ_1_2', 'ZZZ_2_2', 'ZZZ_3_2', 'ZZZ_COL_3', 'ZZZ_ROW_1', 'ZZZ_1_3', 'ZZZ_ROW_2', 'ZZZ_2_1', 'ZZZ_2_3', 'ZZZ_3_3', 'ZZZ_COL_1', 'ZZZ_ROW_3', 'ZZZ_3_1', 'ZZZ_COL_2', 'ZZZ_1_1']
-        #
-        # .      10     13     3
-        # 4      14     0      5
-        # 6      7      1      8
-        # 11     12     2      9
-
-        # (0,0 = b'05:03:    00:00    :00:00:00:00:08:10:02:00:    0e:00:00:00:05:00:00:00:01:00:00'
-        # (0,1 = b'05:03:    73:06    :00:00:00:00:08:10:02:00:    03:00:00:00:05:00:00:00:01:00:00'
-
-        # (1,0 = b'05:03:    00:00    :00:00:00:00:08:10:02:00:    0f:00:00:00:05:00:00:00:01:00:00'
-        # (1,1 = b'05:03:    44:04    :00:00:00:00:08:10:02:00:    04:00:00:00:05:00:00:00:01:00:00'
-        # (1,2 = b'05:03:    c7:03    :00:00:00:00:08:10:02:00:    05:00:00:00:05:00:00:00:01:00:00'
-
-        # (2,0 = b'05:03:    00:00    :00:00:00:00:08:10:02:00:    10:00:00:00:05:00:00:00:01:00:00'
-        # (2,1 = b'05:03:    73:06    :00:00:00:00:08:10:02:00:    01:00:00:00:05:00:00:00:01:00:00'
-        # (2,2 = b'05:03:    62:2b    :00:00:00:00:08:10:02:00:    07:00:00:00:05:00:00:00:01:00:00'
-
-        # (3,0 = b'05:03:    00:00    :00:00:00:00:08:10:02:00:    09:00:00:00:05:00:00:00:01:00:00'
-        # (3,1 = b'05:03:    40:30    :00:00:00:00:08:10:02:00:    02:00:00:00:05:00:00:00:01:00:00'
-        # (3,2 = b'05:03:    35:03    :00:00:00:00:08:10:02:00:    0a:00:00:00:05:00:00:00:01:00:00'
-
-        # (4,0 = b'05:03:    00:00    :00:00:00:00:08:10:02:00:    0c:00:00:00:05:00:00:00:01:00:00'
-        # (4,1 = b'05:03:    40:30    :00:00:00:00:08:10:02:00:    11:00:00:00:05:00:00:00:01:00:00'
-        # (4,2 = b'05:03:    10:03    :00:00:00:00:08:10:02:00:    12:00:00:00:05:00:00:00:01:00:00'
-
-        data = []
         strings_id = self._table.base_data_store.stringTable.identifier
-        table_strings = [x.string for x in self._object_store[strings_id].entries]
-        #  TODO: deal with formulas instead of strings
-        for row_num in range(self._table.number_of_rows):
-            data.append([])
-            offsets = self._cell_offsets[row_num]
-            print("@" + str(row_num), "offsets =", offsets[:10])
-            for col_num in range(self._table.number_of_columns):
-                if offsets[col_num] < 0:
-                    data[row_num].append("")
+        table_strings = {x.key: x.string for x in self._object_store[strings_id].entries}
+        data = []
+        for row_num in range(self.num_rows):
+            row = []
+            row_info = self._object_store[self._tile_id].rowInfos[row_num]
+            cell_storage_buffers = extract_cell_data(
+                row_info.cell_storage_buffer, row_info.cell_offsets, self.num_cols
+            )
+            cell_storage_buffers_pre_bnc = extract_cell_data(
+                row_info.cell_storage_buffer_pre_bnc,
+                row_info.cell_offsets_pre_bnc,
+                self.num_cols,
+            )
+
+            for col_num in range(self.num_cols):
+                if cell_storage_buffers[col_num] is None:
+                    row.append(None)
                 else:
-                    data[row_num].append(table_strings.pop(0))
-        print([x.string for x in self._object_store[strings_id].entries], "\n")
+                    if row_info.storage_version != 5:
+                        raise UnsupportedError(f"Unsupported row info version {row_info.storage_version}")
+
+                    cell_type = cell_storage_buffers[col_num][1]
+                    cell_value = None
+                    # print(
+                    #     f"[{row_num},{col_num}]:", cell_type
+                    #     binascii.hexlify(cell_storage_buffers[col_num]),
+                    #     binascii.hexlify(cell_storage_buffers_pre_bnc[col_num]),
+                    # )
+                    if cell_type == TSTArchives.numberCellType:
+                        cell_value = struct.unpack("<d", cell_storage_buffers_pre_bnc[col_num][24:32])[0]
+                    elif cell_type == TSTArchives.textCellType:
+                        key = struct.unpack("<i", cell_storage_buffers[col_num][12:16])[0]
+                        cell_value = table_strings[key]
+                    elif cell_type == TSTArchives.dateCellType:
+                        seconds = struct.unpack("<d", cell_storage_buffers_pre_bnc[col_num][24:32])[0]
+                        cell_value = datetime(2001,1,1) + timedelta(seconds=seconds)
+                    elif cell_type == TSTArchives.boolCellType:
+                        d = struct.unpack("<d", cell_storage_buffers[col_num][12:20])[0]
+                        cell_value = d > 0.0
+                    elif cell_type == TSTArchives.durationCellType:
+                        cell_value = struct.unpack("<d", cell_storage_buffers[col_num][12:20])[0]
+                    # elif cell_type == TSTArchives.formulaErrorCellType:
+                    # elif cell_type == TSTArchives.genericCellType:
+                    # elif cell_type == TSTArchives.spanCellType:
+                    # elif cell_type == TSTArchives.formulaCellType:
+                    # elif cell_type == TSTArchives.automaticCellType:
+                    else:
+                        raise UnsupportedError(f"Unsupport cell type {cell_type}")
+
+                    row.append(cell_value)
+            data.append(row)
+
         return data
 
     @property
@@ -169,3 +154,22 @@ class Table:
         return len(self._column_headers)
 
 
+def extract_cell_data(storage_buffer, offsets, num_cols):
+    offsets = array.array("h", offsets).tolist()
+    data = []
+    for col_num in range(num_cols):
+        start = offsets[col_num]
+        if start < 0:
+            data.append(None)
+            continue
+
+        # Get next offset past current one that is not -1
+        # https://stackoverflow.com/questions/19502378/
+        idx = next((i for i, x in enumerate(offsets[col_num + 1 :]) if x >= 0), None)
+        if idx is None:
+            end = len(storage_buffer) - 1
+        else:
+            end = offsets[col_num + idx + 1] - 1
+        data.append(storage_buffer[start:end])
+
+    return data
