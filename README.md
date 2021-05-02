@@ -51,6 +51,9 @@ from [prior work](https://github.com/psobot/keynote-parser) by [Peter Sobot](htt
 Both modules are derived from [previous work](https://github.com/obriensp/iWorkFileFormat/blob/master/Docs/index.md)
 by [Sean Patrick O'Brien](http://www.obriensp.com).
 
+Decoding the data structures inside Numbers files was helped greatly by
+[previous work](https://github.com/slott56/Stingray-Reader) by [Steven Lott](https://github.com/slott56).
+
 ## License
 
 All code in this repository is licensed under the MIT License.
