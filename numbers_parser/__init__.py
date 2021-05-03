@@ -1,23 +1,31 @@
-"""Extract data from Apple Numbers spreadsheets."""
-__author__ = "Jon Connell"
+import os
+import plistlib
+import warnings
 
-import numbers_parser.macos_app_version
 from numbers_parser.document import Document
 
-__major_version__ = 1
-__patch_version__ = 0
-__supported_numbers_version__ = numbers_parser.macos_app_version.MacOSAppVersion(
-    "10.3.9", "7029.9.8", "1A22"
-)
-__version_tuple__ = (
-    __major_version__,
-    __supported_numbers_version__.major,
-    __supported_numbers_version__.minor,
-    __patch_version__,
-)
-__version__ = ".".join([str(x) for x in __version_tuple__])
+DEFAULT_NUMBERS_INSTALL_PATH = "/Applications/Numbers.app"
+VERSION_PLIST_PATH = "Contents/version.plist"
+SUPPORTED_NUMBERS_VERSIONS = [
+    "10.3",
+    "11.0",
+]
 
-__email__ = "github@figsandfudge.com"
-__description__ = 'A tool for reading Apple Numbers spreadsheets.'
-__url__ = "https://github.com/masaccio/numbers-parser"
-__new_issue_url__ = "https://github.com/masaccio/numbers-parser/issues/new"
+# Don't print the source line
+formatwarning_old = warnings.formatwarning
+warnings.formatwarning = lambda message, category, filename, lineno, line=None: \
+    formatwarning_old(message, category, filename, lineno, line='')
+
+def check_installed_numbers_version():
+    try:
+        fp = open(os.path.join(DEFAULT_NUMBERS_INSTALL_PATH, VERSION_PLIST_PATH), "rb")
+    except IOError:
+        return None
+    version_dict = plistlib.load(fp)
+    installed_version = version_dict["CFBundleShortVersionString"]
+    if installed_version not in SUPPORTED_NUMBERS_VERSIONS:
+        warnings.warn(
+            f"Numbers version {installed_version} not tested with this version"
+        )
+
+check_installed_numbers_version()

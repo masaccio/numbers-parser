@@ -6,7 +6,6 @@ import sys
 from contextlib import contextmanager
 from glob import glob
 from numbers_parser.codec import IWAFile
-from numbers_parser.unicode_utils import fix_unicode
 from zipfile import ZipFile
 
 
@@ -74,13 +73,7 @@ def process_file(filename, handle, sink):
     contents = None
     if ".iwa" in filename:
         contents = handle.read()
-        if filename.endswith(".yaml"):
-            file = IWAFile.from_dict(
-                yaml.load(fix_unicode(contents.decode("utf-8")), Loader=Loader)
-            )
-            filename = filename.replace(".yaml", "")
-        else:
-            file = IWAFile.from_buffer(contents, filename)
+        file = IWAFile.from_buffer(contents, filename)
 
         file_has_changed = False
 
