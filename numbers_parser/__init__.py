@@ -2,6 +2,7 @@
 __author__ = "Jon Connell"
 
 import numbers_parser.macos_app_version
+from numbers_parser.document import Document
 
 __major_version__ = 1
 __patch_version__ = 0
