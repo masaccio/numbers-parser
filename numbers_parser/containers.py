@@ -72,7 +72,8 @@ class ObjectStore:
                 if len(archive.objects) == 1:
                     objects[identifier] = archive.objects[0]
                 else:
-                    print(f"warning: {iwa_filename}: found", len(archive.objects), "objects")
+                    # print(f"warning: {iwa_filename}: found", len(archive.objects), "objects")
+                    pass
 
         self._object_store = objects
 

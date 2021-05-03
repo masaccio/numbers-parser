@@ -138,13 +138,13 @@ class ProtobufPatch(object):
     @classmethod
     def FromString(cls, message_info, proto_klass, data):
         if len(message_info.diff_field_path.path) != 1:
-            print(
-                "warning: "
-                + proto_klass.__name__
-                + ": can't process diff_field_path = "
-                + str(len(message_info.diff_field_path.path)),
-                file=sys.stderr,
-            )
+            # print(
+            #     "warning: "
+            #     + proto_klass.__name__
+            #     + ": can't process diff_field_path = "
+            #     + str(len(message_info.diff_field_path.path)),
+            #     file=sys.stderr,
+            # )
             return cls(proto_klass.FromString(data))
 
         if message_info.fields_to_remove:
