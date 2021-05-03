@@ -50,11 +50,25 @@ class ObjectStore:
     def __init__(self, filename):
         objects = {}
         if os.path.isdir(filename):
-            iwa_files = list(Path(filename).rglob("*.iwa"))
-            for iwa_filename in iwa_files:
-                f = open(iwa_filename, "rb")
-                contents = f.read()
-                objects.update(extract_iwa_archives(contents, iwa_filename))
+            if os.path.isfile(os.path.join(filename, "Index.zip")):
+                try:
+                    zipf = ZipFile(os.path.join(filename, "Index.zip"))
+                except BadZipFile as e:
+                    raise FileError(f"{index_zip}: " + str(e))
+
+                iwa_files = filter(lambda x: x.endswith(".iwa"), zipf.namelist())
+                for iwa_filename in iwa_files:
+                    # TODO: LZFSE compressed according to /usr/bin/file
+                    if "OperationStorage" in iwa_filename:
+                        continue
+                    contents = zipf.read(iwa_filename)
+                    objects.update(extract_iwa_archives(contents, iwa_filename))
+            else:
+                iwa_files = list(Path(filename).rglob("*.iwa"))
+                for iwa_filename in iwa_files:
+                    f = open(iwa_filename, "rb")
+                    contents = f.read()
+                    objects.update(extract_iwa_archives(contents, iwa_filename))
         else:
             try:
                 zipf = ZipFile(filename)
@@ -91,17 +105,17 @@ def extract_iwa_archives(contents, iwa_filename):
     try:
         iwaf = IWAFile.from_buffer(contents, iwa_filename)
     except Exception as e:
-        raise FileFormatError(f"{filename}: invalid IWA file {iwa_filename}") from e
+        raise FileFormatError(f"{iwa_filename}: invalid IWA file {iwa_filename}") from e
 
     if len(iwaf.chunks) != 1:
-        raise FileFormatError(f"{filename}: chunk count != 1 in {iwa_filename}")
+        raise FileFormatError(f"{iwa_filename}: chunk count != 1 in {iwa_filename}")
     for archive in iwaf.chunks[0].archives:
         if len(archive.objects) == 0:
-            raise FileFormatError(f"{filename}: no objects in {iwa_filename}")
+            raise FileFormatError(f"{iwa_filename}: no objects in {iwa_filename}")
 
         identifier = archive.header.identifier
         if identifier in objects:
-            raise FileFormatError(f"{filename}: duplicate reference {identifier}")
+            raise FileFormatError(f"{iwa_filename}: duplicate reference {identifier}")
 
         if len(archive.objects) == 1:
             objects[identifier] = archive.objects[0]
