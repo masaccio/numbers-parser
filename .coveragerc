@@ -1,8 +1,6 @@
 [run]
-disable_warnings =
-  DeprecationWarning
+omit = numbers_parser/generated/*.py
+branch = True
 
-[report]
-
-omit =
-  keynote_parser/generated/*
+[html]
+directory = coverage_html_report

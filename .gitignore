@@ -4,6 +4,7 @@ numbers_parser/.*.swp
 .*.icloud
 numbers_parser/.*.icloud
 test-*
+coverage_html_report
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
