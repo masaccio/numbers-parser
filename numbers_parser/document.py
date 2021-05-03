@@ -157,6 +157,6 @@ def extract_cell_data(storage_buffer, offsets, num_cols):
             end = len(storage_buffer) - 1
         else:
             end = offsets[col_num + idx + 1] - 1
-        data.append(storage_buffer[start:end])
+        data.append(storage_buffer[start:end + 1])
 
     return data
