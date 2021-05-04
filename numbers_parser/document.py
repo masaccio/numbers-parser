@@ -111,21 +111,40 @@ class Table:
 
                     cell_type = cell_storage_buffers[col_num][1]
                     cell_value = None
-                    if cell_type == TSTArchives.numberCellType:
-                        cell_value = struct.unpack("<d", cell_storage_buffers_pre_bnc[col_num][24:32])[0]
+                    if cell_type == TSTArchives.genericCellType:
+                        # TODO: an empty cell?
+                        pass
+                    elif cell_type == TSTArchives.numberCellType:
+                        cell_value = struct.unpack("<d", cell_storage_buffers_pre_bnc[col_num][-12:-4])[0]
                     elif cell_type == TSTArchives.textCellType:
                         key = struct.unpack("<i", cell_storage_buffers[col_num][12:16])[0]
                         cell_value = table_strings[key]
                     elif cell_type == TSTArchives.dateCellType:
-                        seconds = struct.unpack("<d", cell_storage_buffers_pre_bnc[col_num][24:32])[0]
+                        seconds = struct.unpack("<d", cell_storage_buffers_pre_bnc[col_num][-12:-4])[0]
                         cell_value = datetime(2001,1,1) + timedelta(seconds=seconds)
                     elif cell_type == TSTArchives.boolCellType:
                         d = struct.unpack("<d", cell_storage_buffers[col_num][12:20])[0]
                         cell_value = d > 0.0
                     elif cell_type == TSTArchives.durationCellType:
                         cell_value = struct.unpack("<d", cell_storage_buffers[col_num][12:20])[0]
+                    elif cell_type == 9:
+                        print(
+                            f"[{row_num},{col_num}]: cell type {cell_type}, buffer:",
+                            binascii.hexlify(cell_storage_buffers[col_num], sep=":"),
+                            "bnc_buffer:", 
+                            binascii.hexlify(cell_storage_buffers_pre_bnc[col_num], sep=":"),
+                        )
+                        cell_value = "*FORMULA*"
+                    elif cell_type == 10:
+                        cell_value = struct.unpack("<d", cell_storage_buffers_pre_bnc[col_num][-12:-4])[0]
                     else:
-                        raise UnsupportedError(f"Unsupport cell type {cell_type}")
+                        print(
+                            f"[{row_num},{col_num}]: unknown cell type {cell_type}, buffer:",
+                            binascii.hexlify(cell_storage_buffers[col_num], sep=":"),
+                            "bnc_buffer:", 
+                            binascii.hexlify(cell_storage_buffers_pre_bnc[col_num], sep=":"),
+                        )
+                        raise UnsupportedError(f"Unsupport cell type {cell_type} @{self.name}:({row_num},{col_num})")
 
                     row.append(cell_value)
             data.append(row)
