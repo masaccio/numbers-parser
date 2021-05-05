@@ -346,8 +346,8 @@ message CommandStyleCellsArchive {
 message CommandStyleTableArchive {
   required .TST.TableCommandArchive super = 1;
   optional .TSP.ReferenceDictionary format_properties = 2;
-  optional .TST.TableStylePropertyChangeSetArchive old_style = 3;
-  optional .TST.TableStylePropertyChangeSetArchive new_style = 4;
+  optional .TSTSOS.TableStylePropertyChangeSetArchive old_style = 3;
+  optional .TSTSOS.TableStylePropertyChangeSetArchive new_style = 4;
 }
 
 message CommandSetRepeatingHeaderEnabledArchive {

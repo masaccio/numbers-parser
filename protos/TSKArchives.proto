@@ -460,6 +460,7 @@ message OutgoingCommandQueueItem {
   optional string serialized_json_without_data_base64_encoded_string = 2;
   optional .TSP.DataReference serialized_json_without_data_base64_encoded_data = 4;
   repeated .TSK.OutgoingCommandQueueItemUUIDToDataMapEntry uuid_to_data_map_entries = 3;
+  repeated .TSP.DataReference large_data_list = 5;
 }
 
 message OutgoingCommandQueueItemUUIDToDataMapEntry {
@@ -480,10 +481,10 @@ message CollaborationDocumentSessionState {
   repeated .TSK.CollaborationDocumentSessionState.AcknowledgementObserverEntry command_acknowledgement_observer_entries = 7;
   repeated .TSP.Reference transformer_from_unprocessed_command_operations_entries = 8;
   optional int32 mailbox_request_document_revision_sequence = 10;
-  optional string mailbox_request_document_revision_identifier = 11;
+  optional .TSP.UUID mailbox_request_document_revision_identifier = 11;
   optional bool last_send_pending_command_queue_item_was_moved_from_rsvp_command_queue = 12 [default = false];
   optional int32 last_command_send_marker_sequence = 13;
-  optional string last_command_send_marker_identifier = 14;
+  optional .TSP.UUID last_command_send_marker_identifier = 14;
   repeated .TSP.Reference skipped_acknowledged_commands_pending_resume_process_diffs = 15;
   optional .TSP.UUID last_too_old_command_identifier = 16;
   optional .TSP.Reference unprocessed_operation_entries_pending_resume_process_diffs = 17;
@@ -571,6 +572,29 @@ message DataReferenceRecord {
   repeated .TSK.DataReferenceRecord.ContainerUUIDToReferencedDataPair added_container_uuid_to_referenced_data_pairs = 1;
   repeated .TSK.DataReferenceRecord.ContainerUUIDToReferencedDataPair removed_container_uuid_to_referenced_data_pairs = 2;
   repeated .TSP.DataReference unbounded_referenced_datas = 3;
+}
+
+message CommandAssetChunkArchive {
+  required .TSK.CommandArchive super = 1;
+  optional string digest = 2;
+  optional string asset_chunk = 3;
+  required int64 asset_chunk_length = 4;
+  required int64 resume_position = 5;
+  required int64 materialized_length = 6;
+}
+
+message AssetUploadStatusCommandArchive {
+  message AssetUploadStatusInfo {
+    optional string digest = 1;
+    optional .TSP.DataUploadStatus upload_status = 2;
+  }
+  required .TSK.CommandArchive super = 1;
+  repeated .TSK.AssetUploadStatusCommandArchive.AssetUploadStatusInfo info_list = 2;
+}
+
+message AssetUnmaterializedOnServerCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated string digest_list = 2;
 }
 
 message PencilAnnotationUIState {

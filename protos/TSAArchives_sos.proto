@@ -1,7 +1,7 @@
 syntax = "proto2";
 
 import "TSPMessages.proto";
-package TSA;
+package TSASOS;
 
 message DrawableZOrderListArchive {
   optional .TSP.UUID container_id = 1;

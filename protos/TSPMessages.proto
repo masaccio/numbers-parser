@@ -2,6 +2,15 @@ syntax = "proto2";
 
 package TSP;
 
+enum DataUploadStatus {
+  DataUploadStatus_Pending = 0;
+  DataUploadStatus_Reserved = 1;
+  DataUploadStatus_UnableToReserve = 2;
+  DataUploadStatus_Corrupted = 3;
+  DataUploadStatus_DocumentMayExceedDocumentSizeLimit = 4;
+  DataUploadStatus_Expired = 5;
+}
+
 message Reference {
   required uint64 identifier = 1;
   optional int32 deprecated_type = 2;

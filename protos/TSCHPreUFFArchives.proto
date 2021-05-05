@@ -102,8 +102,8 @@ message ChartStyleArchive {
   optional .TSD.ShadowArchive tschchartinfodefaultbordershadow = 21;
   optional float tschchartinfodefaultborderopacity = 22;
   optional int32 tschchartinfodefaulttitleparagraphstyleindex = 23;
-  optional string tschchartinfodefaultdeprecatedmasterfontfamily = 24;
-  optional int32 tschchartinfodefaultdeprecatedmasterfontnamedsize = 25;
+  optional string tschchartinfodefaultdeprecatedmainfontfamily = 24;
+  optional int32 tschchartinfodefaultdeprecatedmainfontnamedsize = 25;
   optional int32 tschchartinfodefaultdeprecatedtrendlineequationparagraphstyleindex = 30;
   optional int32 tschchartinfodefaultdeprecatedtrendlinersquaredparagraphstyleindex = 31;
   optional .TSD.ShadowArchive tschchartinfodefaultdeprecatedtrendlineequationshadow = 32;
@@ -135,7 +135,7 @@ message ChartNonStyleArchive {
   optional bool tschchartinfodefaultshowlegend = 11;
   optional float tschchartinfodefaultpiestartangle = 12;
   optional bool tschchartinfodefaultshowtitle = 13;
-  optional int32 tschchartinfodefaultdeprecatedagainmasterfontnamedsize = 25;
+  optional int32 tschchartinfodefaultdeprecatedagainmainfontnamedsize = 25;
   optional .TSCH.Chart3DVectorArchive tschchartinfodefault3drotation = 300;
   optional .TSCH.Chart3DVectorArchive tschchartinfodefault3dscale = 301;
   optional .TSCH.Chart3DVectorArchive tschchartinfocolumn3dscale = 302;

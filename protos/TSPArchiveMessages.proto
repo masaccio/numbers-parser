@@ -84,7 +84,12 @@ message ComponentExternalReference {
 }
 
 message ComponentDataReference {
+  message ObjectReference {
+    required uint64 object_identifier = 1;
+    required uint32 count = 2;
+  }
   required uint64 data_identifier = 1;
+  repeated .TSP.ComponentDataReference.ObjectReference object_reference_list = 2;
 }
 
 message ObjectUUIDMapEntry {
@@ -149,6 +154,11 @@ message DataInfo {
   optional .TSP.DataAttributes attributes = 10;
   optional .TSP.EncryptionInfo encryption_info = 11;
   optional bytes last_mismatched_digest = 12;
+  optional .TSP.IndexSet unmaterialized_ranges = 13;
+  optional uint64 remote_data_length = 14;
+  optional bool remote_data_has_package_storage = 15 [default = false];
+  optional .TSP.DataUploadStatus upload_status = 16 [default = DataUploadStatus_Pending];
+  optional double remote_data_mtime = 17;
   optional string pasteboard_external_file_path = 99;
 }
 
@@ -221,7 +231,15 @@ message DocumentMetadata {
 }
 
 message SupportMetadata {
+  message DataCollaborationProperties {
+    required bytes digest = 1;
+    optional bool acknowledged_by_server = 2 [default = false];
+    optional bool materialized_on_server = 3 [default = false];
+    optional int32 revision_sequence_for_materialized_on_server = 5 [default = 0];
+    optional .TSP.DataUploadStatus upload_status = 4 [default = DataUploadStatus_Pending];
+    optional bool is_remote_data_ever = 6 [default = false];
+  }
   optional bool is_in_collaboration_mode = 1;
-  repeated .TSP.DataReference acknowledged_server_data = 2;
+  repeated .TSP.SupportMetadata.DataCollaborationProperties data_collaboration_properties = 2;
 }
 

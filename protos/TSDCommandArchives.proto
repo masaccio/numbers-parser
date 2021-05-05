@@ -121,15 +121,6 @@ message DrawableApplyThemeCommandArchive {
   optional .TSP.Reference style = 3;
 }
 
-message ShapePathSourceFlipCommandArchive {
-  required .TSK.CommandArchive super = 1;
-  optional .TSP.Reference info = 2;
-  optional bool newHorizontalFlip = 3;
-  optional bool newVerticalFlip = 4;
-  optional bool oldHorizontalFlip = 5;
-  optional bool oldVerticalFlip = 6;
-}
-
 message AbstractStyleCommandArchive {
   required .TSD.InfoCommandArchive super = 1;
 }
@@ -156,7 +147,7 @@ message MediaApplyPresetCommandArchive {
 
 message ShapeStyleSetValueCommandArchive {
   required .TSD.BaseStyleSetValueCommandArchive super = 1;
-  optional .TSD.BaseShapeStylePropertyChangeSetArchive change = 4;
+  optional .TSDSOS.BaseShapeStylePropertyChangeSetArchive change = 4;
 }
 
 message BaseStyleSetValueCommandArchive {
@@ -192,7 +183,7 @@ message MovieSetValueCommandArchive {
 
 message MediaStyleSetValueCommandArchive {
   required .TSD.BaseStyleSetValueCommandArchive super = 1;
-  optional .TSD.MediaStylePropertyChangeSetArchive change = 4;
+  optional .TSDSOS.MediaStylePropertyChangeSetArchive change = 4;
 }
 
 message ImageMediaCommandArchive {

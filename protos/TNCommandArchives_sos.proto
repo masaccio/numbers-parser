@@ -3,7 +3,7 @@ syntax = "proto2";
 import "TSACommandArchives_sos.proto";
 import "TSKArchives.proto";
 import "TSPMessages.proto";
-package TN;
+package TNSOS;
 
 message InducedVerifyDocumentWithServerCommandArchive {
   required .TSK.CommandArchive super = 1;
@@ -12,6 +12,6 @@ message InducedVerifyDocumentWithServerCommandArchive {
 }
 
 message InducedVerifyDrawableZOrdersWithServerCommandArchive {
-  required .TSA.InducedVerifyDrawableZOrdersWithServerCommandArchive super = 1;
+  required .TSASOS.InducedVerifyDrawableZOrdersWithServerCommandArchive super = 1;
 }
 

@@ -1,7 +1,7 @@
 syntax = "proto2";
 
 import "TSPMessages.proto";
-package TSS;
+package TSSSOS;
 
 message SpecSetBoolArchive {
   required bool value = 1;
@@ -29,22 +29,22 @@ message SpecSetStringArchive {
 }
 
 message SpecBoolArchive {
-  optional .TSS.SpecSetBoolArchive spec_set_bool = 1;
+  optional .TSSSOS.SpecSetBoolArchive spec_set_bool = 1;
 }
 
 message SpecColorArchive {
-  optional .TSS.SpecSetColorArchive spec_set_color = 1;
+  optional .TSSSOS.SpecSetColorArchive spec_set_color = 1;
 }
 
 message SpecDoubleArchive {
-  optional .TSS.SpecSetDoubleArchive spec_set_double = 1;
+  optional .TSSSOS.SpecSetDoubleArchive spec_set_double = 1;
 }
 
 message SpecIntegerArchive {
-  optional .TSS.SpecSetIntegerArchive spec_set_integer = 1;
+  optional .TSSSOS.SpecSetIntegerArchive spec_set_integer = 1;
 }
 
 message SpecStringArchive {
-  optional .TSS.SpecSetStringArchive spec_set_string = 1;
+  optional .TSSSOS.SpecSetStringArchive spec_set_string = 1;
 }
 

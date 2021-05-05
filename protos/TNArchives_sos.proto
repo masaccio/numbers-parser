@@ -1,10 +1,10 @@
 syntax = "proto2";
 
 import "TSDArchives_sos.proto";
-package TN;
+package TNSOS;
 
 message SheetStylePropertyChangeSetArchive {
-  optional .TSD.SpecFillArchive fill = 1;
+  optional .TSDSOS.SpecFillArchive fill = 1;
   optional bool fill_undefined = 2;
 }
 
