@@ -18,6 +18,7 @@ class UnsupportedError(NumbersError):
 
     pass
 
+
 class Document:
     def __init__(self, filename):
         self._object_store = ObjectStore(filename)
@@ -69,82 +70,88 @@ class Table:
 
         bds = self._table.base_data_store
         self._row_headers = [
-            h.numberOfCells
-            for h in object_store[bds.rowHeaders.buckets[0].identifier].headers
+            h.numberOfCells for h in object_store[bds.rowHeaders.buckets[0].identifier].headers
         ]
         self._column_headers = [
             h.numberOfCells for h in object_store[bds.columnHeaders.identifier].headers
         ]
-        self._tile_id = bds.tiles.tiles[0].tile.identifier
-        self._cell_offsets = [
-            array.array("h", o.cell_offsets).tolist()
-            for o in object_store[self._tile_id].rowInfos
-        ]
-        self._cell_offsets_pre_bnc = [
-            array.array("h", o.cell_offsets).tolist()
-            for o in object_store[self._tile_id].rowInfos
-        ]
+        self._tile_ids = [t.tile.identifier for t in bds.tiles.tiles]
 
     @property
     def data(self):
-        strings_id = self._table.base_data_store.stringTable.identifier
-        table_strings = {x.key: x.string for x in self._object_store[strings_id].entries}
+        row_infos = []
+        for tile_id in self._tile_ids:
+            row_infos += self._object_store[tile_id].rowInfos
+
+        if row_infos[0].storage_version != 5:
+            raise UnsupportedError(f"Unsupported row info version {row_infos[0].storage_version}")
+
+        storage_buffers = [
+            extract_cell_data(
+                r.cell_storage_buffer, r.cell_offsets, self.num_cols, r.has_wide_offsets
+            )
+            for r in row_infos
+        ]
+        storage_buffers_pre_bnc = [
+            extract_cell_data(
+                r.cell_storage_buffer_pre_bnc,
+                r.cell_offsets_pre_bnc,
+                self.num_cols,
+                r.has_wide_offsets,
+            )
+            for r in row_infos
+        ]
+
         data = []
         for row_num in range(self.num_rows):
             row = []
-            row_info = self._object_store[self._tile_id].rowInfos[row_num]
-            cell_storage_buffers = extract_cell_data(
-                row_info.cell_storage_buffer, row_info.cell_offsets, self.num_cols
-            )
-            cell_storage_buffers_pre_bnc = extract_cell_data(
-                row_info.cell_storage_buffer_pre_bnc,
-                row_info.cell_offsets_pre_bnc,
-                self.num_cols,
-            )
-
             for col_num in range(self.num_cols):
-                if cell_storage_buffers[col_num] is None:
+                storage_buffer = storage_buffers[row_num][col_num]
+                if col_num < len(storage_buffers_pre_bnc[row_num]):
+                    # TODO: why is this sometimes a different length to cell_storage_buffer?
+                    storage_buffer_pre_bnc = storage_buffers_pre_bnc[row_num][col_num]
+
+                if storage_buffer is None:
                     row.append(None)
                 else:
-                    if row_info.storage_version != 5:
-                        raise UnsupportedError(f"Unsupported row info version {row_info.storage_version}")
-
-                    cell_type = cell_storage_buffers[col_num][1]
-                    cell_value = None
-                    if cell_type == TSTArchives.genericCellType:
-                        # TODO: an empty cell?
-                        pass
+                    cell_type = storage_buffer[1]
+                    if cell_type == TSTArchives.emptyCellValueType:
+                        cell_value = None
                     elif cell_type == TSTArchives.numberCellType:
-                        cell_value = struct.unpack("<d", cell_storage_buffers_pre_bnc[col_num][-12:-4])[0]
+                        cell_value = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
                     elif cell_type == TSTArchives.textCellType:
-                        key = struct.unpack("<i", cell_storage_buffers[col_num][12:16])[0]
-                        cell_value = table_strings[key]
+                        key = struct.unpack("<i", storage_buffer[12:16])[0]
+                        cell_value = self._table_string(key)
                     elif cell_type == TSTArchives.dateCellType:
-                        seconds = struct.unpack("<d", cell_storage_buffers_pre_bnc[col_num][-12:-4])[0]
-                        cell_value = datetime(2001,1,1) + timedelta(seconds=seconds)
+                        seconds = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
+                        cell_value = datetime(2001, 1, 1) + timedelta(seconds=seconds)
                     elif cell_type == TSTArchives.boolCellType:
-                        d = struct.unpack("<d", cell_storage_buffers[col_num][12:20])[0]
+                        d = struct.unpack("<d", storage_buffer[12:20])[0]
                         cell_value = d > 0.0
                     elif cell_type == TSTArchives.durationCellType:
-                        cell_value = struct.unpack("<d", cell_storage_buffers[col_num][12:20])[0]
+                        cell_value = struct.unpack("<d", storage_buffer[12:20])[0]
+                    elif cell_type == TSTArchives.formulaErrorCellType:
+                        cell_value = "*ERROR*"
                     elif cell_type == 9:
                         print(
                             f"[{row_num},{col_num}]: cell type {cell_type}, buffer:",
-                            binascii.hexlify(cell_storage_buffers[col_num], sep=":"),
-                            "bnc_buffer:", 
-                            binascii.hexlify(cell_storage_buffers_pre_bnc[col_num], sep=":"),
+                            binascii.hexlify(storage_buffer, sep=":"),
+                            "bnc_buffer:",
+                            binascii.hexlify(storage_buffer_pre_bnc, sep=":"),
                         )
                         cell_value = "*FORMULA*"
                     elif cell_type == 10:
-                        cell_value = struct.unpack("<d", cell_storage_buffers_pre_bnc[col_num][-12:-4])[0]
+                        cell_value = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
                     else:
                         print(
                             f"[{row_num},{col_num}]: unknown cell type {cell_type}, buffer:",
-                            binascii.hexlify(cell_storage_buffers[col_num], sep=":"),
-                            "bnc_buffer:", 
-                            binascii.hexlify(cell_storage_buffers_pre_bnc[col_num], sep=":"),
+                            binascii.hexlify(storage_buffer, sep=":"),
+                            "bnc_buffer:",
+                            binascii.hexlify(storage_buffer_pre_bnc, sep=":"),
                         )
-                        raise UnsupportedError(f"Unsupport cell type {cell_type} @{self.name}:({row_num},{col_num})")
+                        raise UnsupportedError(
+                            f"Unsupport cell type {cell_type} @{self.name}:({row_num},{col_num})"
+                        )
 
                     row.append(cell_value)
             data.append(row)
@@ -159,23 +166,38 @@ class Table:
     def num_cols(self):
         return len(self._column_headers)
 
+    def _table_string(self, key):
+        if not hasattr(self, "_table_strings"):
+            strings_id = self._table.base_data_store.stringTable.identifier
+            self._table_strings = {x.key: x.string for x in self._object_store[strings_id].entries}
+        return self._table_strings[key]
 
-def extract_cell_data(storage_buffer, offsets, num_cols):
+
+def extract_cell_data(storage_buffer, offsets, num_cols, has_wide_offsets):
     offsets = array.array("h", offsets).tolist()
+    if has_wide_offsets:
+        offsets = [o * 4 for o in offsets]
+
     data = []
     for col_num in range(num_cols):
+        if col_num >= len(offsets):
+            break
+
         start = offsets[col_num]
         if start < 0:
             data.append(None)
             continue
 
-        # Get next offset past current one that is not -1
-        # https://stackoverflow.com/questions/19502378/
-        idx = next((i for i, x in enumerate(offsets[col_num + 1 :]) if x >= 0), None)
-        if idx is None:
-            end = len(storage_buffer) - 1
+        if col_num == (len(offsets) - 1):
+            end = len(storage_buffer)
         else:
-            end = offsets[col_num + idx + 1] - 1
-        data.append(storage_buffer[start:end + 1])
+            # Get next offset past current one that is not -1
+            #  https://stackoverflow.com/questions/19502378/
+            idx = next((i for i, x in enumerate(offsets[col_num + 1 :]) if x >= 0), None)
+            if idx is None:
+                end = len(storage_buffer)
+            else:
+                end = offsets[col_num + idx + 1]
+        data.append(storage_buffer[start:end])
 
     return data
