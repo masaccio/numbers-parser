@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="numbers-parser",
-    version="0.1",
+    version="1.0",
     author="Jon Connell",
     author_email="python@figsandfudge.com",
     description="Package to read data from Apple Numbers spreadsheets",
@@ -10,19 +10,13 @@ setup(
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/masaccio/numbers-parser",
-    packages=find_packages(include=["numbers-parser", "numbers-parser.*"]),
+    package_dir={'': 'src'},
+    packages=find_packages(where='src'),
     install_requires=[
-        "binascii",
-        "datetime",
-        "google.protobuf",
-        "plistlib",
-        "pprint",
+        "protobuf",
         "pytest",
-        "snappy",
-        "tqdm",
-        "traceback",
-        "yaml",
-        "zipfile",
+        "python-snappy",
+        "PyYAML",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
