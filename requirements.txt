@@ -2,3 +2,4 @@ protobuf
 pytest
 python-snappy
 PyYAML
+numbers_parser
