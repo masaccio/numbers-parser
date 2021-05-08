@@ -8,11 +8,11 @@ if len(sys.argv) != 2:
     sys.exit(1)
 
 modules = []
-for filename in os.listdir("numbers_parser/generated"):
+for filename in os.listdir("src/numbers_parser/generated"):
     if "pb2" in filename:
         module = filename.replace("_pb2.py", "")
         modules.append(module)
-        print(f"from number_parser.generated import {module}_pb2 as {module}")
+        print(f"from numbers_parser.generated import {module}_pb2 as {module}")
 
 print("\n")
 print("PROTO_FILES = [")
@@ -73,4 +73,4 @@ def compute_maps():
      return name_class_map, id_name_map
 
 
- NAME_CLASS_MAP, ID_NAME_MAP = compute_maps()""")
+NAME_CLASS_MAP, ID_NAME_MAP = compute_maps()""")

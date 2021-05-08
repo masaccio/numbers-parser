@@ -9,45 +9,51 @@ PROTO_DUMP=$(current_dir})../proto-dump/build/Release/proto-dump
 NUMBERS=/Applications/Numbers.app
 
 PROTO_SOURCES = $(wildcard protos/*.proto)
-PROTO_CLASSES = $(patsubst protos/%.proto,numbers_parser/generated/%_pb2.py,$(PROTO_SOURCES))
+PROTO_CLASSES = $(patsubst protos/%.proto,src/numbers_parser/generated/%_pb2.py,$(PROTO_SOURCES))
 
 .PHONY: all clean install test
 
-all: $(PROTO_CLASSES) numbers_parser/generated/__init__.py
+all: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py
 
-install: $(PROTO_CLASSES) numbers_parser/generated/__init__.py numbers_parser/*
+install: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py src/numbers_parser/*
 	python3 setup.py install
 
-upload: $(PROTO_CLASSES) numbers_parser/generated/__init__.py numbers_parser/*
+upload: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py src/numbers_parser/*
 	python3 setup.py upload
 
-numbers_parser/generated:
-	mkdir -p numbers_parser/generated
+src/numbers_parser/generated:
+	mkdir -p src/numbers_parser/generated
 	# Note that if any of the incoming Protobuf definitions contain periods,
 	# protoc will put them into their own Python packages. This is not desirable
 	# for import rules in Python, so we replace non-final period characters with
 	# underscores.
 	python3 protos/rename_proto_files.py protos
 
-numbers_parser/generated/%_pb2.py: protos/%.proto numbers_parser/generated
-	protoc -I=protos --proto_path protos --python_out=numbers_parser/generated $<
+src/numbers_parser/generated/%_pb2.py: protos/%.proto src/numbers_parser/generated
+	protoc -I=protos --proto_path protos --python_out=src/numbers_parser/generated $<
 
-numbers_parser/generated/__init__.py: numbers_parser/generated $(PROTO_CLASSES)
+src/numbers_parser/generated/__init__.py: src/numbers_parser/generated $(PROTO_CLASSES)
 	touch $@
-	protos/replace 's/^import T/import numbers_parser.generated.T/' numbers_parser/generated/T*.py
+	python3 protos/replace_paths.py src/numbers_parser/generated/T*.py
 
 tmp/TSPRegistry.dump::
 	rm -rf tmp
 	protos/dump_mappings.sh "$(NUMBERS)"
-	python3 protos/generate_mapping.py tmp/TSPRegistry.dump > numbers_parser/mapping.py
+
+src/numbers_parser/mapping.py: $(PROTO_CLASSES)
+	python3 protos/generate_mapping.py tmp/TSPRegistry.dump > src/numbers_parser/mapping.py
 
 bootstrap: $(PROTO_DUMP) tmp/TSPRegistry.dump
 	rm -f protos/*.proto
+	rm -f src/numbers_parser/mapping.py
 	PROTO_DUMP="$(PROTO_DUMP)" protos/extract_protos.sh "$(NUMBERS)"
+	$(MAKE) all src/numbers_parser/mapping.py
+	rm -rf tmp
 
 clean:
-	rm -rf numbers_parser/generated
-	rm -rf numbers_parser.egg_info
+	rm -rf src/numbers_parser/generated
+	rm -rf numbers_parser.egg-info
+	rm -rf coverage_html_report
 	rm -rf dist
 
 test: all
