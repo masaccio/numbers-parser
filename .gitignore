@@ -15,11 +15,12 @@ __pycache__/
 # Compiled python modules.
 *.pyc
 
-# Setuptools distribution folder.
-/dist/
+# Setuptools
+dist
 
 # Python egg metadata, regenerated from source files by setuptools.
 src/*.egg-info
 
 # tox
 .tox
+build
