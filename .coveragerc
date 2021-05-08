@@ -1,5 +1,5 @@
 [run]
-omit = numbers_parser/generated/*.py
+omit = src/numbers_parser/generated/*.py
 branch = True
 
 [html]
