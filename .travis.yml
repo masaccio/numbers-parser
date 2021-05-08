@@ -1,2 +1,6 @@
 language: python
-script: pytest
+ - "3.7"
+install:
+  - pip install -r requirements.txt
+script:
+  - pytest
