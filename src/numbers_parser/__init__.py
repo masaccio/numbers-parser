@@ -11,10 +11,12 @@ SUPPORTED_NUMBERS_VERSIONS = [
     "11.0",
 ]
 
-# Don't print the source line
+#  Don't print the source line
 formatwarning_old = warnings.formatwarning
-warnings.formatwarning = lambda message, category, filename, lineno, line=None: \
-    formatwarning_old(message, category, filename, lineno, line='')
+warnings.formatwarning = lambda message, category, filename, lineno, line=None: formatwarning_old(
+    message, category, filename, lineno, line=""
+)
+
 
 def check_installed_numbers_version():
     try:
@@ -24,8 +26,7 @@ def check_installed_numbers_version():
     version_dict = plistlib.load(fp)
     installed_version = version_dict["CFBundleShortVersionString"]
     if installed_version not in SUPPORTED_NUMBERS_VERSIONS:
-        warnings.warn(
-            f"Numbers version {installed_version} not tested with this version"
-        )
+        warnings.warn(f"Numbers version {installed_version} not tested with this version")
+
 
 check_installed_numbers_version()
