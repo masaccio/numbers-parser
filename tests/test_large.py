@@ -19,3 +19,20 @@ def test_many_columns():
     data = tables[0].data
     ref = [["COLUMN" + str(x) for x in range(1, 601)]]
     assert data == ref
+
+def ref_cell_text(row, col):
+    return "CELL [" + str(row + 1) + "," + str(col + 1) + "]"
+
+def test_large_table():
+    row = [None for i in range(0, 270)]
+    ref = [row.copy() for i in range(0, 90)]
+    for i in range(0, 90):
+        ref[i][i] = ref_cell_text(i, i)
+        ref[i][90 + i] = ref_cell_text(i, 90 + i)
+        ref[i][180 + i] = ref_cell_text(i, 180 + i)
+
+    doc = Document("tests/data/test-6.numbers")
+    sheets = doc.sheets()
+    tables = sheets["Sheet"].tables()
+    data = tables[0].data
+    assert data == ref

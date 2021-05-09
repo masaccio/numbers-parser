@@ -83,8 +83,9 @@ class Table:
         for tile_id in self._tile_ids:
             row_infos += self._object_store[tile_id].rowInfos
 
-        if row_infos[0].storage_version != 5:
-            raise UnsupportedError(f"Unsupported row info version {row_infos[0].storage_version}")
+        storage_version = self._object_store[tile_id].storage_version
+        if storage_version != 5:
+            raise UnsupportedError(f"Unsupported row info version {storage_version}")
 
         storage_buffers = [
             extract_cell_data(
@@ -103,13 +104,21 @@ class Table:
         ]
 
         data = []
-        for row_num in range(self.num_rows):
+        num_rows = sum([self._object_store[t].numrows for t in self._tile_ids])
+        for row_num in range(num_rows):
             row = []
             for col_num in range(self.num_cols):
-                storage_buffer = storage_buffers[row_num][col_num]
+                if col_num < len(storage_buffers[row_num]):
+                    storage_buffer = storage_buffers[row_num][col_num]
+                else:
+                    # Rest of row is empty cells
+                    row.append(None)
+                    continue
+
                 if col_num < len(storage_buffers_pre_bnc[row_num]):
-                    # TODO: why is this sometimes a different length to cell_storage_buffer?
                     storage_buffer_pre_bnc = storage_buffers_pre_bnc[row_num][col_num]
+                else:
+                    storage_buffer_pre_bnc = None
 
                 if storage_buffer is None:
                     row.append(None)
@@ -118,13 +127,19 @@ class Table:
                     if cell_type == TSTArchives.emptyCellValueType:
                         cell_value = None
                     elif cell_type == TSTArchives.numberCellType:
-                        cell_value = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
+                        if storage_buffer_pre_bnc is None:
+                            cell_value = None
+                        else:
+                            cell_value = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
                     elif cell_type == TSTArchives.textCellType:
                         key = struct.unpack("<i", storage_buffer[12:16])[0]
                         cell_value = self._table_string(key)
                     elif cell_type == TSTArchives.dateCellType:
-                        seconds = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
-                        cell_value = datetime(2001, 1, 1) + timedelta(seconds=seconds)
+                        if storage_buffer_pre_bnc is None:
+                            cell_value = None
+                        else:
+                            seconds = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
+                            cell_value = datetime(2001, 1, 1) + timedelta(seconds=seconds)
                     elif cell_type == TSTArchives.boolCellType:
                         d = struct.unpack("<d", storage_buffer[12:20])[0]
                         cell_value = d > 0.0
@@ -141,7 +156,10 @@ class Table:
                         )
                         cell_value = "*FORMULA*"
                     elif cell_type == 10:
-                        cell_value = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
+                        if storage_buffer_pre_bnc is None:
+                            cell_value = None
+                        else:
+                            cell_value = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
                     else:
                         print(
                             f"[{row_num},{col_num}]: unknown cell type {cell_type}, buffer:",
