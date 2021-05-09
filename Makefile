@@ -11,15 +11,23 @@ NUMBERS=/Applications/Numbers.app
 PROTO_SOURCES = $(wildcard protos/*.proto)
 PROTO_CLASSES = $(patsubst protos/%.proto,src/numbers_parser/generated/%_pb2.py,$(PROTO_SOURCES))
 
+SOURCE_FILES=src/numbers_parser/generated/__init__.py $(wildcard src/numbers_parser/*.py)
+RELEASE_TARBALL=dist/numbers-parser-$(shell python3 setup.py --version).tar.gz
+
 .PHONY: all clean install test
 
 all: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py
 
-install: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py src/numbers_parser/*
+install: $(PROTO_CLASSES) $(SOURCE_FILES)
 	python3 setup.py install
 
-upload: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py src/numbers_parser/*
-	python3 setup.py upload
+$(info SOURCE_FILES=$(SOURCE_FILES))
+$(RELEASE_TARBALL): $(SOURCE_FILES)
+	python3 setup.py sdist
+	tox
+
+upload: $(RELEASE_TARBALL)
+	twine upload $(RELEASE_TARBALL)
 
 src/numbers_parser/generated:
 	mkdir -p src/numbers_parser/generated
