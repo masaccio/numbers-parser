@@ -13,6 +13,7 @@ from numbers_parser.containers import ItemsList, ObjectStore, NumbersError
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
 
+
 class UnsupportedError(NumbersError):
     """Raised for unsupported file format features"""
 
@@ -76,9 +77,13 @@ class Table:
             h.numberOfCells for h in object_store[bds.columnHeaders.identifier].headers
         ]
         self._tile_ids = [t.tile.identifier for t in bds.tiles.tiles]
+        self._data = None
 
     @property
     def data(self):
+        if self._data is not None:
+            return self._data
+
         row_infos = []
         for tile_id in self._tile_ids:
             row_infos += self._object_store[tile_id].rowInfos
@@ -103,7 +108,7 @@ class Table:
             for r in row_infos
         ]
 
-        data = []
+        self._data = []
         num_rows = sum([self._object_store[t].numrows for t in self._tile_ids])
         for row_num in range(num_rows):
             row = []
@@ -172,9 +177,15 @@ class Table:
                         )
 
                     row.append(cell_value)
-            data.append(row)
+            self._data.append(row)
 
-        return data
+        return self._data
+
+    def _table_string(self, key):
+        if not hasattr(self, "_table_strings"):
+            strings_id = self._table.base_data_store.stringTable.identifier
+            self._table_strings = {x.key: x.string for x in self._object_store[strings_id].entries}
+        return self._table_strings[key]
 
     @property
     def num_rows(self):
@@ -184,11 +195,37 @@ class Table:
     def num_cols(self):
         return len(self._column_headers)
 
-    def _table_string(self, key):
-        if not hasattr(self, "_table_strings"):
-            strings_id = self._table.base_data_store.stringTable.identifier
-            self._table_strings = {x.key: x.string for x in self._object_store[strings_id].entries}
-        return self._table_strings[key]
+    def cell(self, *args):
+        if type(args[0]) == str:
+            (row_num, col_num) = xl_cell_to_rowcol(args[0])
+        elif len(args) != 2:
+            raise IndexError("invalid cell reference " + str(args))
+        else:
+            (row_num, col_num) = args
+        data = self.data
+        if row_num >= len(data):
+            raise IndexError(f"row {row_num} out of range")
+        if col_num >= len(data[row_num]):
+            raise IndexError(f"col {col_num} out of range")
+        return data[row_num][col_num]
+
+    def iterrows(self, min_row=None, max_row=None):
+        data = self.data
+        if min_row is None:
+            min_row = 0
+        if max_row is None:
+            max_row = self.num_rows
+        for row_num in range(min_row, max_row):
+            yield data[row_num]
+
+    def itercols(self, min_col=None, max_col=None):
+        data = self.data
+        if min_col is None:
+            min_col = 0
+        if max_col is None:
+            max_col = self.num_cols
+        for col_num in range(min_col, max_col):
+            yield [row[col_num] for row in data]
 
 
 def extract_cell_data(storage_buffer, offsets, num_cols, has_wide_offsets):
@@ -219,3 +256,38 @@ def extract_cell_data(storage_buffer, offsets, num_cols, has_wide_offsets):
         data.append(storage_buffer[start:end])
 
     return data
+
+# Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
+# Copyright (c) 2013-2021, John McNamara <jmcnamara@cpan.org>
+range_parts = re.compile(r'(\$?)([A-Z]{1,3})(\$?)(\d+)')
+
+def xl_cell_to_rowcol(cell_str):
+    """
+    Convert a cell reference in A1 notation to a zero indexed row and column.
+    Args:
+       cell_str:  A1 style string.
+    Returns:
+        row, col: Zero indexed cell row and column indices.
+    """
+    if not cell_str:
+        return 0, 0
+
+    match = range_parts.match(cell_str)
+    if not match:
+        raise IndexError(f"invalid cell reference {cell_str}")
+
+    col_str = match.group(2)
+    row_str = match.group(4)
+
+    # Convert base26 column string to number.
+    expn = 0
+    col = 0
+    for char in reversed(col_str):
+        col += (ord(char) - ord('A') + 1) * (26 ** expn)
+        expn += 1
+
+    # Convert 1-index to zero-index
+    row = int(row_str) - 1
+    col -= 1
+
+    return row, col
