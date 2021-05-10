@@ -21,7 +21,6 @@ all: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py
 install: $(PROTO_CLASSES) $(SOURCE_FILES)
 	python3 setup.py install
 
-$(info SOURCE_FILES=$(SOURCE_FILES))
 $(RELEASE_TARBALL): $(SOURCE_FILES)
 	python3 setup.py sdist
 	tox
@@ -65,4 +64,7 @@ clean:
 	rm -rf dist
 
 test: all
-	python3 -m pytest . --cov=numbers_parser -W ignore::DeprecationWarning
+	python3 -m pytest tests
+
+coverage: all
+	python3 -m pytest --cov=numbers_parser --cov-report=html
