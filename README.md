@@ -40,7 +40,7 @@ data = tables[0].data
 Both sheets and names can be accessed from lists of these objects using an integer index (`list` syntax) and using the name
 of the sheet/table (`dict` syntax):
 
-```
+``` python
 # list access method
 sheet_1 = doc.sheets()[0]
 print("Opened sheet", sheet_1.name)
@@ -55,7 +55,7 @@ print("Opened table", table_1.name)
 `Table` objects have a `data` property which contains a nested list with an entry for each row of the table. Each row is
 itself a list of the column values. Empty cells in Numbers are returned as `None` values.
 
-```
+``` python
 table_data = sheets["Table 1"].data
 print("Cell A1 contains", data[0][0])
 print("Cell C2 contains", data[2][1])
@@ -65,7 +65,7 @@ print("Cell C2 contains", data[2][1])
 
 In addition to extracting all data at once, individual cells can be referred to as methods 
 
-```
+``` python
 doc = Document("my-spreasdsheet.numbers")
 sheets = doc.sheets()
 tables = sheets["Sheet 1"].tables()
