@@ -61,6 +61,22 @@ print("Cell A1 contains", data[0][0])
 print("Cell C2 contains", data[2][1])
 ```
 
+### Cell references
+
+In addition to extracting all data at once, individual cells can be referred to as methods 
+
+```
+doc = Document("my-spreasdsheet.numbers")
+sheets = doc.sheets()
+tables = sheets["Sheet 1"].tables()
+table = tables["Table 1"]
+
+# row, column syntax
+print("Cell A1 contains", table.cell(0, 0))
+# Excel/Numbers-style cell references
+print("Cell C2 contains", table.cell("C2"))
+```
+
 
 ## Numbers File Formats
 
