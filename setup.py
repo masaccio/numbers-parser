@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="numbers-parser",
-    version="1.1",
+    version="1.2",
     author="Jon Connell",
     author_email="python@figsandfudge.com",
     description="Package to read data from Apple Numbers spreadsheets",
@@ -10,8 +10,9 @@ setup(
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/masaccio/numbers-parser",
-    package_dir={'': 'src'},
-    packages=find_packages(where='src'),
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
+    scripts=["scripts/cat-numbers", "scripts/unpack-numbers"],
     install_requires=[
         "protobuf",
         "pytest",
@@ -23,5 +24,5 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires=">=3.6",
 )
