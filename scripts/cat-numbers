@@ -1,3 +1,5 @@
+# vi: ft=python
+
 import argparse
 
 from numbers_parser import Document
@@ -27,12 +29,8 @@ def command_arguments():
         default=False,
         help="Don't prefix data rows with name of sheet/table (default: false)",
     )
-    parser.add_argument(
-        "-s", "--sheet", nargs="*", help="Names of sheet(s) to include in export"
-    )
-    parser.add_argument(
-        "-t", "--table", nargs="*", help="Names of table(s) to include in export"
-    )
+    parser.add_argument("-s", "--sheet", action="append", help="Names of sheet(s) to include in export")
+    parser.add_argument("-t", "--table", action="append", help="Names of table(s) to include in export")
     parser.add_argument("document", nargs="*", help="Document(s) to export")
     return parser.parse_args()
 
@@ -50,7 +48,11 @@ def print_table_names(filename):
 
 def print_table(filename):
     for sheet in Document(filename).sheets():
+        if args.sheet is not None and sheet.name not in args.sheet:
+            continue
         for table in sheet.tables():
+            if args.table is not None and table.name not in args.table:
+                continue
             for row in table.data:
                 cols = ",".join([str(s) if s is not None else "" for s in row])
                 if args.brief:
