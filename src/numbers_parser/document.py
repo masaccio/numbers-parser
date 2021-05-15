@@ -13,7 +13,6 @@ from numbers_parser.containers import ItemsList, ObjectStore, NumbersError
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
 
-
 class UnsupportedError(NumbersError):
     """Raised for unsupported file format features"""
 
@@ -90,7 +89,9 @@ class Table:
 
         storage_version = self._object_store[tile_id].storage_version
         if storage_version != 5:
-            raise UnsupportedError(f"Unsupported row info version {storage_version}")
+            raise UnsupportedError( # pragma: no cover
+                f"Unsupported row info version {storage_version}"
+            )
 
         storage_buffers = [
             extract_cell_data(
@@ -153,12 +154,6 @@ class Table:
                     elif cell_type == TSTArchives.formulaErrorCellType:
                         cell_value = "*ERROR*"
                     elif cell_type == 9:
-                        print(
-                            f"[{row_num},{col_num}]: cell type {cell_type}, buffer:",
-                            binascii.hexlify(storage_buffer, sep=":"),
-                            "bnc_buffer:",
-                            binascii.hexlify(storage_buffer_pre_bnc, sep=":"),
-                        )
                         cell_value = "*FORMULA*"
                     elif cell_type == 10:
                         if storage_buffer_pre_bnc is None:
@@ -166,13 +161,7 @@ class Table:
                         else:
                             cell_value = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
                     else:
-                        print(
-                            f"[{row_num},{col_num}]: unknown cell type {cell_type}, buffer:",
-                            binascii.hexlify(storage_buffer, sep=":"),
-                            "bnc_buffer:",
-                            binascii.hexlify(storage_buffer_pre_bnc, sep=":"),
-                        )
-                        raise UnsupportedError(
+                        raise UnsupportedError( # pragma: no cover
                             f"Unsupport cell type {cell_type} @{self.name}:({row_num},{col_num})"
                         )
 
@@ -257,9 +246,11 @@ def extract_cell_data(storage_buffer, offsets, num_cols, has_wide_offsets):
 
     return data
 
-# Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
+
+#  Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
 # Copyright (c) 2013-2021, John McNamara <jmcnamara@cpan.org>
-range_parts = re.compile(r'(\$?)([A-Z]{1,3})(\$?)(\d+)')
+range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
+
 
 def xl_cell_to_rowcol(cell_str):
     """
@@ -283,7 +274,7 @@ def xl_cell_to_rowcol(cell_str):
     expn = 0
     col = 0
     for char in reversed(col_str):
-        col += (ord(char) - ord('A') + 1) * (26 ** expn)
+        col += (ord(char) - ord("A") + 1) * (26 ** expn)
         expn += 1
 
     # Convert 1-index to zero-index

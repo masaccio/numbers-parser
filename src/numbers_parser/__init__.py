@@ -42,7 +42,7 @@ warnings.formatwarning = lambda message, category, filename, lineno, line=None: 
 def _check_installed_numbers_version():
     try:
         fp = open(os.path.join(_DEFAULT_NUMBERS_INSTALL_PATH, _VERSION_PLIST_PATH), "rb")
-    except IOError:
+    except IOError: # pragma: no cover
         return None
     version_dict = plistlib.load(fp)
     installed_version = version_dict["CFBundleShortVersionString"]

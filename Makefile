@@ -21,7 +21,7 @@ all: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py
 install: $(PROTO_CLASSES) $(SOURCE_FILES)
 	python3 setup.py install
 
-$(RELEASE_TARBALL): $(SOURCE_FILES)
+$(RELEASE_TARBALL):
 	python3 setup.py sdist
 	tox
 
