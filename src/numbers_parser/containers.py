@@ -1,6 +1,7 @@
 from zipfile import ZipFile, BadZipFile
 from numbers_parser.codec import IWAFile
 from pathlib import Path
+from io import BytesIO
 
 import os
 
@@ -47,40 +48,28 @@ class ItemsList:
 
 
 class ObjectStore:
-    def __init__(self, filename: str) -> int:
-        objects = {}
-        if os.path.isdir(filename):
-            if os.path.isfile(os.path.join(filename, "Index.zip")):
-                try:
-                    zipf = ZipFile(os.path.join(filename, "Index.zip"))
-                except BadZipFile as e:
-                    raise FileError(f"{index_zip}: " + str(e))
-
-                iwa_files = filter(lambda x: x.endswith(".iwa"), zipf.namelist())
-                for iwa_filename in iwa_files:
-                    # TODO: LZFSE compressed according to /usr/bin/file
-                    if "OperationStorage" in iwa_filename:
-                        continue
-                    contents = zipf.read(iwa_filename)
-                    objects.update(extract_iwa_archives(contents, iwa_filename))
+    def __init__(self, path: str) -> int:
+        self._object_store = {}
+        if os.path.isdir(path):
+            if os.path.isfile(os.path.join(path, "Index.zip")):
+                self._get_objects_from_zip_file(os.path.join(path, "Index.zip"))
             else:
-                iwa_files = list(Path(filename).rglob("*.iwa"))
+                iwa_files = list(Path(path).rglob("*.iwa"))
                 for iwa_filename in iwa_files:
                     f = open(iwa_filename, "rb")
                     contents = f.read()
-                    objects.update(extract_iwa_archives(contents, iwa_filename))
+                    self._extract_iwa_archives(contents, iwa_filename)
         else:
             try:
-                zipf = ZipFile(filename)
-            except BadZipFile as e:
-                raise FileError(f"{filename}: " + str(e))
+                zipf = ZipFile(path)
+            except BadZipFile as e: # pragma: no cover
+                raise FileError(f"{path}: " + str(e))
 
-            iwa_files = filter(lambda x: x.endswith(".iwa"), zipf.namelist())
-            for iwa_filename in iwa_files:
-                contents = zipf.read(iwa_filename)
-                objects.update(extract_iwa_archives(contents, iwa_filename))
-
-        self._object_store = objects
+            if "Index.zip" in zipf.namelist():
+                index_data = BytesIO(zipf.read("Index.zip"))
+                self._get_objects_from_zip_stream(ZipFile(index_data))
+            else:
+                self._get_objects_from_zip_stream(zipf)
 
     def __getitem__(self, key: str):
         return self._object_store[key]
@@ -88,34 +77,45 @@ class ObjectStore:
     def __len__(self) -> int:
         return len(self._object_store)
 
+    def _get_objects_from_zip_file(self, path):
+        try:
+            zipf = ZipFile(path)
+        except BadZipFile as e: # pragma: no cover
+            raise FileError(f"{path}: " + str(e))
+
+        self._get_objects_from_zip_stream(zipf)
+
+    def _get_objects_from_zip_stream(self, zipf):
+        iwa_files = filter(lambda x: x.endswith(".iwa"), zipf.namelist())
+        for iwa_filename in iwa_files:
+            # TODO: LZFSE compressed according to /usr/bin/file
+            if "OperationStorage" in iwa_filename:
+                continue
+            contents = zipf.read(iwa_filename)
+            self._extract_iwa_archives(contents, iwa_filename)
+
+
     def find_refs(self, ref_name) -> list:
-        refs = [
-            k for k, v in self._object_store.items() if type(v).__name__ == ref_name
-        ]
+        refs = [k for k, v in self._object_store.items() if type(v).__name__ == ref_name]
         return refs
 
 
-def extract_iwa_archives(contents, iwa_filename):
-    objects = {}
-    try:
-        iwaf = IWAFile.from_buffer(contents, iwa_filename)
-    except Exception as e:
-        raise FileFormatError(f"{iwa_filename}: invalid IWA file {iwa_filename}") from e
+    def _extract_iwa_archives(self, contents, iwa_filename):
+        objects = {}
+        try:
+            iwaf = IWAFile.from_buffer(contents, iwa_filename)
+        except Exception as e:  # pragma: no cover
+            raise FileFormatError(f"{iwa_filename}: invalid IWA file {iwa_filename}") from e
 
-    if len(iwaf.chunks) != 1:
-        raise FileFormatError(f"{iwa_filename}: chunk count != 1 in {iwa_filename}")
-    for archive in iwaf.chunks[0].archives:
-        if len(archive.objects) == 0:
-            raise FileFormatError(f"{iwa_filename}: no objects in {iwa_filename}")
+        if len(iwaf.chunks) != 1:
+            raise FileFormatError(f"{iwa_filename}: chunk count != 1 in {iwa_filename}") # pragma: no cover
+        for archive in iwaf.chunks[0].archives:
+            if len(archive.objects) == 0:
+                raise FileFormatError(f"{iwa_filename}: no objects in {iwa_filename}") # pragma: no cover
 
-        identifier = archive.header.identifier
-        if identifier in objects:
-            raise FileFormatError(f"{iwa_filename}: duplicate reference {identifier}")
+            identifier = archive.header.identifier
+            if identifier in objects:
+                raise FileFormatError(f"{iwa_filename}: duplicate reference {identifier}") # pragma: no cover
 
-        if len(archive.objects) == 1:
-            objects[identifier] = archive.objects[0]
-        else:
-            #  print(f"warning: {iwa_filename}: found", len(archive.objects), "objects")
-            pass
-
-    return objects
+            # TODO: what should we do for len(archive.objects) > 1?
+            self._object_store[identifier] = archive.objects[0]
