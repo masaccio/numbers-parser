@@ -42,12 +42,12 @@ class ItemsList:
             t = type(key).__name__
             raise LookupError(f"invalid index type {t}")
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._items)
 
 
 class ObjectStore:
-    def __init__(self, filename):
+    def __init__(self, filename: str) -> int:
         objects = {}
         if os.path.isdir(filename):
             if os.path.isfile(os.path.join(filename, "Index.zip")):
@@ -82,22 +82,17 @@ class ObjectStore:
 
         self._object_store = objects
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         return self._object_store[key]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._object_store)
 
-    def find_refs(self, ref_name):
+    def find_refs(self, ref_name) -> list:
         refs = [
             k for k, v in self._object_store.items() if type(v).__name__ == ref_name
         ]
         return refs
-
-    def find_objects(self, ref_name, class_name):
-        refs = self.find_refs(ref_name)
-        class_ = getattr(importlib.import_module(__name__), class_name)
-        return [class_(self, obj_id) for obj_id in refs]
 
 
 def extract_iwa_archives(contents, iwa_filename):
