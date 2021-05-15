@@ -67,4 +67,4 @@ test: all
 	python3 -m pytest tests
 
 coverage: all
-	python3 -m pytest --cov=numbers_parser --cov-report=html
+	PYTHONPATH=src python3 -m pytest --cov=numbers_parser --cov-report=html
