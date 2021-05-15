@@ -55,6 +55,7 @@ def test_cell_wide_ref():
     sheets = doc.sheets()
     tables = sheets["ZZZ_Sheet_2"].tables()
     table = tables["XXX_Table_1"]
+    assert table.cell("") == "excepteur" # defaults to [0, 0]
     assert table.cell("A1") == "excepteur"
     assert table.cell("Z1") == "ea"
     assert table.cell("BA1") == "veniam"
