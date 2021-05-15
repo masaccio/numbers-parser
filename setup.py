@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="numbers-parser",
-    version="1.2",
+    version="1.2.1",
     author="Jon Connell",
     author_email="python@figsandfudge.com",
     description="Package to read data from Apple Numbers spreadsheets",
