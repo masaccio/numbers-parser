@@ -12,7 +12,12 @@ setup(
     url="https://github.com/masaccio/numbers-parser",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
-    scripts=["scripts/cat-numbers", "scripts/unpack-numbers"],
+    entry_points = {
+        'console_scripts': [
+            'cat-numbers=numbers_parser._cat_numbers:main',
+            'unpack-numbers=numbers_parser._unpack_numbers:main'
+        ],
+    },
     install_requires=[
         "protobuf",
         "pytest",

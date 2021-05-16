@@ -61,19 +61,23 @@ def print_table(filename):
                 else:
                     print(f"{filename}: {sheet.name}: {table.name}:", cols)
 
+def main():
+    parser = command_line_parser()
+    args = parser.parse_args()
 
-parser = command_line_parser()
-args = parser.parse_args()
+    if args.version:
+        print(_get_version())
+    elif len(args.document) == 0:
+        parser.print_help()
+    else:
+        for filename in args.document:
+            if args.list_sheets:
+                print_sheet_names(filename)
+            elif args.list_tables:
+                print_table_names(filename)
+            else:
+                print_table(filename)
 
-if args.version:
-    print(_get_version())
-elif len(args.document) == 0:
-    parser.print_help()
-else:
-    for filename in args.document:
-        if args.list_sheets:
-            print_sheet_names(filename)
-        elif args.list_tables:
-            print_table_names(filename)
-        else:
-            print_table(filename)
+if __name__ == "__main__":
+    # execute only if run as a script
+    main()

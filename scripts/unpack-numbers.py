@@ -104,19 +104,24 @@ def process(input_path, output_path, subfile=None):
                 raise ValueError("Failed to process file %s due to: %s" % (filename, e))
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("document", help="Apple Numbers file(s)", nargs="*")
-parser.add_argument("-V", "--version", action="store_true")
-parser.add_argument("--output", "-o", help="directory name to unpack into")
-args = parser.parse_args()
-if args.version:
-    print(_get_version())
-elif args.output is not None and len(args.document) > 1:
-    print(
-        "unpack-numbers: error: output directory only valid with a single document",
-        file=sys.stderr,
-    )
-    sys.exit(1)
-else:
-    for document in args.document:
-        process(args.document, args.output or args.document.replace(".numbers", ""))
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("document", help="Apple Numbers file(s)", nargs="*")
+    parser.add_argument("-V", "--version", action="store_true")
+    parser.add_argument("--output", "-o", help="directory name to unpack into")
+    args = parser.parse_args()
+    if args.version:
+        print(_get_version())
+    elif args.output is not None and len(args.document) > 1:
+        print(
+            "unpack-numbers: error: output directory only valid with a single document",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    else:
+        for document in args.document:
+            process(args.document, args.output or args.document.replace(".numbers", ""))
+
+if __name__ == "__main__":
+    # execute only if run as a script
+    main()
