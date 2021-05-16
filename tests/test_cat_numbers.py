@@ -27,26 +27,15 @@ XXX_TABLE_1_REF = [
 DOCUMENT = "tests/data/test-1.numbers"
 
 
-def run_script(script_runner, *args):
-    import pdb
-    if script_runner.launch_mode == "inprocess":
-        command = "scripts/cat-numbers"
-    else:
-        command = "python3"
-        args = tuple(["scripts/cat-numbers"]) + args
-    ret = script_runner.run(command, *args, print_result=False)
-    return ret
-
-
 def test_version(script_runner):
-    ret = run_script(script_runner, "--version")
+    ret = script_runner.run("cat-numbers", "--version", print_result=False)
     assert ret.success
     assert ret.stdout == __version__ + "\n"
     assert ret.stderr == ""
 
 
 def test_help(script_runner):
-    ret = run_script(script_runner, "--help")
+    ret = script_runner.run("cat-numbers", "--help", print_result=False)
     assert ret.success
     assert "List the names of tables" in ret.stdout
     assert "Names of sheet" in ret.stdout
@@ -73,7 +62,7 @@ def test_full_contents(script_runner):
             + ",".join(["" if v is None else v for v in row])
             + "\n"
         )
-    ret = run_script(script_runner, DOCUMENT)
+    ret = script_runner.run("cat-numbers", DOCUMENT, print_result=False)
     assert ret.success
     assert ret.stdout == ref
     assert ret.stderr == ""
@@ -87,7 +76,7 @@ def test_brief_contents(script_runner):
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
     for row in XXX_TABLE_1_REF:
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
-    ret = run_script(script_runner, "--brief", DOCUMENT)
+    ret = script_runner.run("cat-numbers", "--brief", DOCUMENT)
     assert ret.success
     assert ret.stdout == ref
     assert ret.stderr == ""
@@ -99,12 +88,13 @@ def test_select_sheet(script_runner):
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
     for row in ZZZ_TABLE_2_REF:
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
-    ret = run_script(
-        script_runner,
+    ret = script_runner.run(
+        "cat-numbers",
         "--sheet",
         "ZZZ_Sheet_1",
         "--brief",
         DOCUMENT,
+        print_result=False,
     )
     assert ret.success
     assert ret.stdout == ref
@@ -115,12 +105,13 @@ def test_select_table(script_runner):
     ref = ""
     for row in XXX_TABLE_1_REF:
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
-    ret = run_script(
-        script_runner,
+    ret = script_runner.run(
+        "cat-numbers",
         "--table",
         "XXX_Table_1",
         "--brief",
         DOCUMENT,
+        print_result=False,
     )
     assert ret.success
     assert ret.stdout == ref
@@ -128,14 +119,14 @@ def test_select_table(script_runner):
 
 
 def test_list_sheets(script_runner):
-    ret = run_script(script_runner, "-S", DOCUMENT)
+    ret = script_runner.run("cat-numbers", "-S", DOCUMENT, print_result=False)
     assert ret.success
     assert ret.stdout == (f"{DOCUMENT}: ZZZ_Sheet_1\n" "tests/data/test-1.numbers: ZZZ_Sheet_2\n")
     assert ret.stderr == ""
 
 
 def test_list_tables(script_runner):
-    ret = run_script(script_runner, "-T", DOCUMENT)
+    ret = script_runner.run("cat-numbers", "-T", DOCUMENT, print_result=False)
     assert ret.success
     assert ret.stdout == (
         f"{DOCUMENT}: ZZZ_Sheet_1: ZZZ_Table_1\n"
