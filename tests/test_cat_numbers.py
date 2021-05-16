@@ -76,7 +76,7 @@ def test_brief_contents(script_runner):
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
     for row in XXX_TABLE_1_REF:
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
-    ret = script_runner.run("cat-numbers", "--brief", DOCUMENT)
+    ret = script_runner.run("cat-numbers", "--brief", DOCUMENT, print_result=False)
     assert ret.success
     assert ret.stdout == ref
     assert ret.stderr == ""
