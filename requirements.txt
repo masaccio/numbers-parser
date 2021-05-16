@@ -1,4 +1,5 @@
 protobuf
 pytest
+pytest-console-scripts
 python-snappy
 PyYAML
