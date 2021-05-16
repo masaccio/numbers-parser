@@ -129,8 +129,8 @@ class ProtobufPatch(object):
     def __eq__(self, other):
         return self.data == other.data
 
-#    def __repr__(self):
-#        return "<%s %s>" % (self.__class__.__name__, self.data)
+    def __repr__(self):
+        return "<%s %s>" % (self.__class__.__name__, self.data)
 
     def to_dict(self):
         return message_to_dict(self.data)
@@ -138,13 +138,6 @@ class ProtobufPatch(object):
     @classmethod
     def FromString(cls, message_info, proto_klass, data):
         if len(message_info.diff_field_path.path) != 1:
-            # print(
-            #     "warning: "
-            #     + proto_klass.__name__
-            #     + ": can't process diff_field_path = "
-            #     + str(len(message_info.diff_field_path.path)),
-            #     file=sys.stderr,
-            # )
             return cls(proto_klass.FromString(data))
 
         if message_info.fields_to_remove:
@@ -175,12 +168,12 @@ class IWAArchiveSegment(object):
     def __eq__(self, other):
         return self.header == other.header and self.objects == other.objects
 
-#    def __repr__(self):
-#        return "<%s identifier=%s objects=%s>" % (
-#            self.__class__.__name__,
-#            self.header.identifier,
-#            repr(self.objects).replace("\n", " ").replace("  ", " "),
-#        )
+    def __repr__(self):
+        return "<%s identifier=%s objects=%s>" % (
+            self.__class__.__name__,
+            self.header.identifier,
+            repr(self.objects).replace("\n", " ").replace("  ", " "),
+        )
 
     @classmethod
     def from_buffer(cls, buf, filename=None):
