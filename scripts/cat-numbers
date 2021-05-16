@@ -2,10 +2,10 @@
 
 import argparse
 
-from numbers_parser import Document
+from numbers_parser import Document, _get_version
 
 
-def command_arguments():
+def command_line_parser():
     parser = argparse.ArgumentParser(
         description="Export data from Apple Numbers spreadsheet tables"
     )
@@ -29,10 +29,11 @@ def command_arguments():
         default=False,
         help="Don't prefix data rows with name of sheet/table (default: false)",
     )
+    parser.add_argument("-V", "--version", action="store_true")
     parser.add_argument("-s", "--sheet", action="append", help="Names of sheet(s) to include in export")
     parser.add_argument("-t", "--table", action="append", help="Names of table(s) to include in export")
     parser.add_argument("document", nargs="*", help="Document(s) to export")
-    return parser.parse_args()
+    return parser
 
 
 def print_sheet_names(filename):
@@ -61,11 +62,18 @@ def print_table(filename):
                     print(f"{filename}: {sheet.name}: {table.name}:", cols)
 
 
-args = command_arguments()
-for filename in args.document:
-    if args.list_sheets:
-        print_sheet_names(filename)
-    elif args.list_tables:
-        print_table_names(filename)
-    else:
-        print_table(filename)
+parser = command_line_parser()
+args = parser.parse_args()
+
+if args.version:
+    print(_get_version())
+elif len(args.document) == 0:
+    parser.print_help()
+else:
+    for filename in args.document:
+        if args.list_sheets:
+            print_sheet_names(filename)
+        elif args.list_tables:
+            print_table_names(filename)
+        else:
+            print_table(filename)

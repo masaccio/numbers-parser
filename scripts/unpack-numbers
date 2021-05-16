@@ -1,3 +1,5 @@
+# vi: ft=python
+
 import argparse
 import os
 import pprint
@@ -6,6 +8,7 @@ import sys
 from contextlib import contextmanager
 from glob import glob
 from numbers_parser.codec import IWAFile
+from numbers_parser import _get_version
 from zipfile import ZipFile
 
 
@@ -101,13 +104,19 @@ def process(input_path, output_path, subfile=None):
                 raise ValueError("Failed to process file %s due to: %s" % (filename, e))
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input", help="a .numbers file")
-    parser.add_argument("--output", "-o", help="a directory name to unpack into")
-    args = parser.parse_args()
-    process(args.input, args.output or args.input.replace(".numbers", ""))
-
-
-if __name__ == "__main__":
-    main()
+parser = argparse.ArgumentParser()
+parser.add_argument("document", help="Apple Numbers file(s)", nargs="*")
+parser.add_argument("-V", "--version", action="store_true")
+parser.add_argument("--output", "-o", help="directory name to unpack into")
+args = parser.parse_args()
+if args.version:
+    print(_get_version())
+elif args.output is not None and len(args.document) > 1:
+    print(
+        "unpack-numbers: error: output directory only valid with a single document",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+else:
+    for document in args.document:
+        process(args.document, args.output or args.document.replace(".numbers", ""))
