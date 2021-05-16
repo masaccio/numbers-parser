@@ -2,7 +2,7 @@
 
 import argparse
 import os
-import pprint
+import json
 import sys
 
 from contextlib import contextmanager
@@ -61,7 +61,7 @@ def dir_file_sink(target_dir):
             target_path = target_path.replace(".iwa", "")
             target_path += ".txt"
             with open(target_path, "w") as out:
-                pprint.PrettyPrinter(indent=2, stream=out).pprint(contents.to_dict())
+                print(json.dumps(contents.to_dict(), sort_keys=True, indent=4), file=out)
         else:
             with open(target_path, "wb") as out:
                 if isinstance(contents, IWAFile):
@@ -120,7 +120,7 @@ def main():
         sys.exit(1)
     else:
         for document in args.document:
-            process(args.document, args.output or args.document.replace(".numbers", ""))
+            process(document, args.output or document.replace(".numbers", ""))
 
 if __name__ == "__main__":
     # execute only if run as a script
