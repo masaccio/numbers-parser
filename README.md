@@ -28,7 +28,8 @@ python3 -m pip install numbers-parser
 
 Reading documents:
 
-```
+``` python
+from numbers_parser import Document
 doc = Document("my-spreasdsheet.numbers")
 sheets = doc.sheets()
 tables = sheets[0].tables()
