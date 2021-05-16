@@ -11,60 +11,62 @@ NUMBERS=/Applications/Numbers.app
 PROTO_SOURCES = $(wildcard protos/*.proto)
 PROTO_CLASSES = $(patsubst protos/%.proto,src/numbers_parser/generated/%_pb2.py,$(PROTO_SOURCES))
 
-SOURCE_FILES=src/numbers_parser/generated/__init__.py $(wildcard src/numbers_parser/*.py)
+SOURCE_FILES=src/numbers_parser/generated/__init__.py $(wildcard src/numbers_parser/*.py) $(wildcard scripts/*)
 RELEASE_TARBALL=dist/numbers-parser-$(shell python3 setup.py --version).tar.gz
 
-.PHONY: all clean install test
+.PHONY: all clean veryclean install test coverage sdist upload
 
 all: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py
 
-install: $(PROTO_CLASSES) $(SOURCE_FILES)
+install: $(SOURCE_FILES)
 	python3 setup.py install
 
 $(RELEASE_TARBALL):
 	python3 setup.py sdist
-	tox
 
 upload: $(RELEASE_TARBALL)
+	tox
 	twine upload $(RELEASE_TARBALL)
 
-src/numbers_parser/generated:
-	mkdir -p src/numbers_parser/generated
-	# Note that if any of the incoming Protobuf definitions contain periods,
-	# protoc will put them into their own Python packages. This is not desirable
-	# for import rules in Python, so we replace non-final period characters with
-	# underscores.
-	python3 protos/rename_proto_files.py protos
+test: all
+	PYTHONPATH=src python3 -m pytest tests
 
-src/numbers_parser/generated/%_pb2.py: protos/%.proto src/numbers_parser/generated
+coverage: all
+	PYTHONPATH=src python3 -m pytest --cov=numbers_parser --cov-report=html
+
+src/numbers_parser/generated/%_pb2.py: protos/%.proto 
+	@mkdir -p src/numbers_parser/generated
 	protoc -I=protos --proto_path protos --python_out=src/numbers_parser/generated $<
 
-src/numbers_parser/generated/__init__.py: src/numbers_parser/generated $(PROTO_CLASSES)
+src/numbers_parser/generated/__init__.py: $(PROTO_SOURCES)
 	touch $@
 	python3 protos/replace_paths.py src/numbers_parser/generated/T*.py
 
-tmp/TSPRegistry.dump::
-	rm -rf tmp
+protos/TSPRegistry.dump:
 	protos/dump_mappings.sh "$(NUMBERS)"
 
 src/numbers_parser/mapping.py: $(PROTO_CLASSES)
-	python3 protos/generate_mapping.py tmp/TSPRegistry.dump > src/numbers_parser/mapping.py
+	python3 protos/generate_mapping.py protos/TSPRegistry.dump > src/numbers_parser/mapping.py
 
-bootstrap: $(PROTO_DUMP) tmp/TSPRegistry.dump
+bootstrap: $(PROTO_DUMP) protos/TSPRegistry.dump
 	rm -f protos/*.proto
 	rm -f src/numbers_parser/mapping.py
 	PROTO_DUMP="$(PROTO_DUMP)" protos/extract_protos.sh "$(NUMBERS)"
+	python3 protos/rename_proto_files.py protos
 	$(MAKE) all src/numbers_parser/mapping.py
 	rm -rf tmp
+
+# Deleting TSPRegistry.dump will require System Integrity Protection to
+# be disabled to then recreate using lldb
+veryclean:
+	$(MAKE) clean
+	rm -f protos/*.protos
+	rm -f protos/TSPRegistry.dump
 
 clean:
 	rm -rf src/numbers_parser/generated
 	rm -rf numbers_parser.egg-info
 	rm -rf coverage_html_report
 	rm -rf dist
-
-test: all
-	python3 -m pytest tests
-
-coverage: all
-	PYTHONPATH=src python3 -m pytest --cov=numbers_parser --cov-report=html
+	rm -rf build
+	rm -rf .tox
