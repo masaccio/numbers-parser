@@ -40,9 +40,8 @@ ok_echo "Waiting a while (5s)"
 sleep 5
 
 ok_echo "Dumping in lldb"
-mkdir -p tmp
-echo 'po [TSPRegistry sharedRegistry]' | /usr/bin/lldb -p $pid > tmp/TSPRegistry.dump
+echo 'po [TSPRegistry sharedRegistry]' | /usr/bin/lldb -p $pid > protos/TSPRegistry.dump
 
 kill -HUP $pid
 
-ok_echo "Dumped mapping to tmp/TSPRegistry.dump"
+ok_echo "Dumped mapping to protos/TSPRegistry.dump"

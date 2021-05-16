@@ -1,6 +1,6 @@
 #! /bin/bash
 
-echo $PROTO_DUMP
+mkdir -p tmp
 BINFILE="tmp/binfile"
 
 me="$(cd "$(dirname "$0")" >/dev/null 2>&1; pwd -P)"
