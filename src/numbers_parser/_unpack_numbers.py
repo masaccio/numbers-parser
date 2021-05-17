@@ -64,10 +64,7 @@ def dir_file_sink(target_dir):
                 print(json.dumps(contents.to_dict(), sort_keys=True, indent=4), file=out)
         else:
             with open(target_path, "wb") as out:
-                if isinstance(contents, IWAFile):
-                    out.write(contents.to_buffer())
-                else:
-                    out.write(contents)
+                out.write(contents)
 
     yield accept
 
@@ -77,21 +74,8 @@ def process_file(filename, handle, sink):
     if ".iwa" in filename:
         contents = handle.read()
         file = IWAFile.from_buffer(contents, filename)
+        sink(filename, file)
 
-        file_has_changed = False
-
-        if file_has_changed:
-            data = file.to_dict()
-            sink(filename, IWAFile.from_dict(data))
-        else:
-            sink(filename, file)
-        return
-
-    if filename.startswith("Data/"):
-        file_has_changed = False
-
-        if file_has_changed:
-            return
     sink(filename, contents or handle.read())
 
 
@@ -100,7 +84,7 @@ def process(input_path, output_path, subfile=None):
         for filename, handle in file_reader(input_path):
             try:
                 process_file(filename, handle, sink)
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 raise ValueError("Failed to process file %s due to: %s" % (filename, e))
 
 
@@ -121,6 +105,7 @@ def main():
     else:
         for document in args.document:
             process(document, args.output or document.replace(".numbers", ""))
+
 
 if __name__ == "__main__":
     # execute only if run as a script
