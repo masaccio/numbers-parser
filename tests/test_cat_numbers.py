@@ -27,6 +27,13 @@ XXX_TABLE_1_REF = [
 DOCUMENT = "tests/data/test-1.numbers"
 
 
+def test_no_documents(script_runner):
+    ret = script_runner.run("cat-numbers", "--brief", print_result=False)
+    assert ret.success
+    assert "usage: cat-numbers" in ret.stdout
+    assert ret.stderr == ""
+
+
 def test_version(script_runner):
     ret = script_runner.run("cat-numbers", "--version", print_result=False)
     assert ret.success
