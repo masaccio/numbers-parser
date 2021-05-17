@@ -135,7 +135,7 @@ class IWAArchiveSegment(object):
     def from_buffer(cls, buf, filename=None):
         archive_info, payload = get_archive_info_and_remainder(buf)
         if not repr(archive_info):
-            raise ValueError("Segment doesn't seem to start with an ArchiveInfo!")
+            raise ValueError("Segment doesn't seem to start with an ArchiveInfo!") # pragma: no cover
 
         payloads = []
 
