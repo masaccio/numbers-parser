@@ -1,8 +1,14 @@
 from setuptools import setup, find_packages
+from distutils.util import convert_path
+
+main_ns = {}
+ver_path = convert_path('src/numbers_parser/_version.py')
+with open(ver_path) as ver_file:
+    exec(ver_file.read(), main_ns)
 
 setup(
     name="numbers-parser",
-    version="1.2.1",
+    version=main_ns['__version__'],
     author="Jon Connell",
     author_email="python@figsandfudge.com",
     description="Package to read data from Apple Numbers spreadsheets",
