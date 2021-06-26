@@ -24,6 +24,7 @@ import plistlib
 import warnings
 
 from numbers_parser.document import Document
+from numbers_parser.cell import *
 from numbers_parser._version import __version__
 
 _DEFAULT_NUMBERS_INSTALL_PATH = "/Applications/Numbers.app"
@@ -31,6 +32,7 @@ _VERSION_PLIST_PATH = "Contents/version.plist"
 _SUPPORTED_NUMBERS_VERSIONS = [
     "10.3",
     "11.0",
+    "11.1",
 ]
 
 # Don't print the source line
