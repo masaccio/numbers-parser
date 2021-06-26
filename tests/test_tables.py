@@ -1,6 +1,6 @@
 import pytest
 
-from numbers_parser.document import Document
+from numbers_parser import Document
 
 ZZZ_TABLE_1_REF = [
     [None, "YYY_COL_1", "YYY_COL_2"],

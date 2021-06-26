@@ -1,7 +1,7 @@
 import pytest
 
 from datetime import datetime
-from numbers_parser.document import Document
+from numbers_parser import Document
 
 
 STATEMENT_REF = [

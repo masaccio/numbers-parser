@@ -1,6 +1,6 @@
 import pytest
 
-from numbers_parser.document import Document
+from numbers_parser import Document
 
 XXX_TABLE_1_REF = [
     [None, "XXX_COL_1", "XXX_COL_2", "XXX_COL_3", "XXX_COL_4", "XXX_COL_5" ],
