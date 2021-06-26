@@ -6,10 +6,12 @@ import sys
 import struct
 import zipfile
 
-from enum import Enum
+from typing import Union
+from typing import Generator
 from datetime import datetime, timedelta
 
 from numbers_parser.containers import ItemsList, ObjectStore, NumbersError
+from numbers_parser.cell import *
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
 
@@ -52,9 +54,6 @@ class Sheet:
         return self._tables
 
 
-import binascii
-
-
 class Tables(ItemsList):
     def __init__(self, object_store, refs):
         super(Tables, self).__init__(object_store, refs, Table)
@@ -76,20 +75,33 @@ class Table:
             h.numberOfCells for h in object_store[bds.columnHeaders.identifier].headers
         ]
         self._tile_ids = [t.tile.identifier for t in bds.tiles.tiles]
-        self._data = None
+        self._table_data = None
+        self._table_cells = None
 
     @property
     def data(self):
-        if self._data is not None:
-            return self._data
+        if self._table_data is None:
+            table_data = []
+            for row in self.cells:
+                table_data.append([cell.value for cell in row])
+            self._table_data = table_data
 
+        return self._table_data
+
+    @property
+    def cells(self) -> list:
+        if self._table_cells is None:
+            self._table_cells = self._extract_table_cells()
+        return self._table_cells
+
+    def _extract_table_cells(self):
         row_infos = []
         for tile_id in self._tile_ids:
             row_infos += self._object_store[tile_id].rowInfos
 
         storage_version = self._object_store[tile_id].storage_version
         if storage_version != 5:
-            raise UnsupportedError( # pragma: no cover
+            raise UnsupportedError(  # pragma: no cover
                 f"Unsupported row info version {storage_version}"
             )
 
@@ -109,7 +121,7 @@ class Table:
             for r in row_infos
         ]
 
-        self._data = []
+        table_cells = []
         num_rows = sum([self._object_store[t].numrows for t in self._tile_ids])
         for row_num in range(num_rows):
             row = []
@@ -118,7 +130,7 @@ class Table:
                     storage_buffer = storage_buffers[row_num][col_num]
                 else:
                     # Rest of row is empty cells
-                    row.append(None)
+                    row.append(EmptyCell(row_num, col_num))
                     continue
 
                 if col_num < len(storage_buffers_pre_bnc[row_num]):
@@ -127,48 +139,56 @@ class Table:
                     storage_buffer_pre_bnc = None
 
                 if storage_buffer is None:
-                    row.append(None)
+                    row.append(
+                        MergedCell(
+                            # TODO: include full range information
+                            row_start=row_num, row_end=row_num, col_start=col_num, col_end=col_num
+                        )
+                    )
                 else:
                     cell_type = storage_buffer[1]
                     if cell_type == TSTArchives.emptyCellValueType:
-                        cell_value = None
+                        row.append(EmptyCell(row_num, col_num))
                     elif cell_type == TSTArchives.numberCellType:
                         if storage_buffer_pre_bnc is None:
-                            cell_value = None
+                            cell_value = 0.0
                         else:
                             cell_value = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
+                        row.append(NumberCell(row_num, col_num, cell_value))
                     elif cell_type == TSTArchives.textCellType:
                         key = struct.unpack("<i", storage_buffer[12:16])[0]
-                        cell_value = self._table_string(key)
+                        row.append(TextCell(row_num, col_num, self._table_string(key)))
                     elif cell_type == TSTArchives.dateCellType:
                         if storage_buffer_pre_bnc is None:
-                            cell_value = None
+                            cell_value = datetime(2001, 1, 1)
                         else:
                             seconds = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
                             cell_value = datetime(2001, 1, 1) + timedelta(seconds=seconds)
+                        row.append(DateCell(row_num, col_num, cell_value))
                     elif cell_type == TSTArchives.boolCellType:
                         d = struct.unpack("<d", storage_buffer[12:20])[0]
-                        cell_value = d > 0.0
+                        row.append(BoolCell(row_num, col_num, d > 0.0))
                     elif cell_type == TSTArchives.durationCellType:
                         cell_value = struct.unpack("<d", storage_buffer[12:20])[0]
+                        row.append(DurationCell(row_num, col_num, timedelta(days = cell_value)))
                     elif cell_type == TSTArchives.formulaErrorCellType:
-                        cell_value = "*ERROR*"
+                        row.append(ErrorCell(row_num, col_num))
                     elif cell_type == 9:
-                        cell_value = "*FORMULA*"
+                        row.append(FormulaCell(row_num, col_num))
                     elif cell_type == 10:
+                        # TODO: Is this realy a number cell (experiments suggest so)
                         if storage_buffer_pre_bnc is None:
-                            cell_value = None
+                            cell_value = 0.0
                         else:
                             cell_value = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
+                        row.append(NumberCell(row_num, col_num, cell_value))
                     else:
-                        raise UnsupportedError( # pragma: no cover
+                        raise UnsupportedError(  # pragma: no cover
                             f"Unsupport cell type {cell_type} @{self.name}:({row_num},{col_num})"
                         )
+            table_cells.append(row)
 
-                    row.append(cell_value)
-            self._data.append(row)
-
-        return self._data
+        return table_cells
 
     def _table_string(self, key):
         if not hasattr(self, "_table_strings"):
@@ -177,44 +197,45 @@ class Table:
         return self._table_strings[key]
 
     @property
-    def num_rows(self):
+    def num_rows(self) -> int:
         return len(self._row_headers)
 
     @property
-    def num_cols(self):
+    def num_cols(self) -> int:
         return len(self._column_headers)
 
-    def cell(self, *args):
+    def cell(self, *args) -> Union[Cell, MergedCell]:
         if type(args[0]) == str:
             (row_num, col_num) = xl_cell_to_rowcol(args[0])
         elif len(args) != 2:
             raise IndexError("invalid cell reference " + str(args))
         else:
             (row_num, col_num) = args
-        data = self.data
-        if row_num >= len(data):
-            raise IndexError(f"row {row_num} out of range")
-        if col_num >= len(data[row_num]):
-            raise IndexError(f"col {col_num} out of range")
-        return data[row_num][col_num]
 
-    def iterrows(self, min_row=None, max_row=None):
-        data = self.data
+        cells = self.cells
+        if row_num >= len(cells):
+            raise IndexError(f"row {row_num} out of range")
+        if col_num >= len(cells[row_num]):
+            raise IndexError(f"col {col_num} out of range")
+        return cells[row_num][col_num]
+
+    def iterrows(self, min_row: int=None, max_row: int=None) -> Generator[list, None, None]:
+        cells = self.cells
         if min_row is None:
             min_row = 0
         if max_row is None:
             max_row = self.num_rows
         for row_num in range(min_row, max_row):
-            yield data[row_num]
+            yield cells[row_num]
 
-    def itercols(self, min_col=None, max_col=None):
-        data = self.data
+    def itercols(self, min_col: int=None, max_col: int=None) -> Generator[list, None, None]:
+        cells = self.cells
         if min_col is None:
             min_col = 0
         if max_col is None:
             max_col = self.num_cols
         for col_num in range(min_col, max_col):
-            yield [row[col_num] for row in data]
+            yield [row[col_num] for row in cells]
 
 
 def extract_cell_data(storage_buffer, offsets, num_cols, has_wide_offsets):
@@ -236,7 +257,7 @@ def extract_cell_data(storage_buffer, offsets, num_cols, has_wide_offsets):
             end = len(storage_buffer)
         else:
             # Get next offset past current one that is not -1
-            #  https://stackoverflow.com/questions/19502378/
+            # https://stackoverflow.com/questions/19502378/
             idx = next((i for i, x in enumerate(offsets[col_num + 1 :]) if x >= 0), None)
             if idx is None:
                 end = len(storage_buffer)
@@ -247,7 +268,7 @@ def extract_cell_data(storage_buffer, offsets, num_cols, has_wide_offsets):
     return data
 
 
-#  Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
+# Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
 # Copyright (c) 2013-2021, John McNamara <jmcnamara@cpan.org>
 range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
 
