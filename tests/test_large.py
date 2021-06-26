@@ -1,6 +1,6 @@
 import pytest
 
-from numbers_parser.document import Document
+from numbers_parser import Document
 
 def test_many_rows():
     doc = Document("tests/data/test-3.numbers")
