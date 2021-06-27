@@ -22,6 +22,44 @@ def test_exceptions():
     assert "invalid cell reference" in str(e.value)
 
 
+def test_iter_row_exceptions():
+    doc = Document("tests/data/test-7.numbers")
+    sheets = doc.sheets()
+    tables = sheets["ZZZ_Sheet_1"].tables()
+    table = tables["XXX_Table_1"]
+    with pytest.raises(IndexError) as e:
+        _ = [x for x in table.iter_rows(max_row=999)]
+    assert str(e.value) == "row 999 out of range"
+    with pytest.raises(IndexError) as e:
+        _ = [x for x in table.iter_rows(min_row=-1)]
+    assert str(e.value) == "row -1 out of range"
+    with pytest.raises(IndexError) as e:
+        _ = [x for x in table.iter_rows(max_col=999)]
+    assert str(e.value) == "column 999 out of range"
+    with pytest.raises(IndexError) as e:
+        _ = [x for x in table.iter_rows(min_col=-1)]
+    assert str(e.value) == "column -1 out of range"
+
+
+def test_iter_col_exceptions():
+    doc = Document("tests/data/test-7.numbers")
+    sheets = doc.sheets()
+    tables = sheets["ZZZ_Sheet_1"].tables()
+    table = tables["XXX_Table_1"]
+    with pytest.raises(IndexError) as e:
+        _ = [x for x in table.iter_cols(max_row=999)]
+    assert str(e.value) == "row 999 out of range"
+    with pytest.raises(IndexError) as e:
+        _ = [x for x in table.iter_cols(min_row=-1)]
+    assert str(e.value) == "row -1 out of range"
+    with pytest.raises(IndexError) as e:
+        _ = [x for x in table.iter_cols(max_col=999)]
+    assert str(e.value) == "column 999 out of range"
+    with pytest.raises(IndexError) as e:
+        _ = [x for x in table.iter_cols(min_col=-1)]
+    assert str(e.value) == "column -1 out of range"
+
+
 def test_cell_lookup():
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets()
@@ -55,7 +93,7 @@ def test_cell_wide_ref():
     sheets = doc.sheets()
     tables = sheets["ZZZ_Sheet_2"].tables()
     table = tables["XXX_Table_1"]
-    assert table.cell("").value == "excepteur" # defaults to [0, 0]
+    assert table.cell("").value == "excepteur"  #  defaults to [0, 0]
     assert table.cell("A1").value == "excepteur"
     assert table.cell("Z1").value == "ea"
     assert table.cell("BA1").value == "veniam"
@@ -68,14 +106,17 @@ def test_row_iterator():
     tables = sheets["ZZZ_Sheet_1"].tables()
     table = tables["XXX_Table_2"]
     val = 0
-    for row in table.iterrows():
+    for row in table.iter_rows():
         val += row[0].value if row[0] is not None else 0.0
     assert val == 252
     val = 0.0
-    for row in table.iterrows(min_row=2, max_row=7):
-        if isinstance(row[2], NumberCell):
-            val += row[2].value if row[2] is not None else 0.0
-    assert val == 672.0
+    for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
+        val += row[2] or 0.0
+    assert val == 978.0
+    val = 0.0
+    for row in table.iter_rows(min_row=5, max_row=6, min_col=1, max_col=2):
+        val += row[0].value + row[1].value
+    assert val == 522.108
 
 
 def test_col_iterator():
@@ -84,10 +125,14 @@ def test_col_iterator():
     tables = sheets["ZZZ_Sheet_1"].tables()
     table = tables["XXX_Table_2"]
     val = 0
-    for col in table.itercols():
+    for col in table.iter_cols():
         val += col[2].value if col[2] is not None else 0.0
     assert val == 164.224
     val = 0.0
-    for col in table.itercols(min_col=1, max_col=3):
-        val += col[8].value if col[8] is not None else 0.0
-    assert val == 336.072
+    for col in table.iter_cols(min_col=1, max_col=3, values_only=True):
+        val += col[8] or 0.0
+    assert val == 336.572
+    val = 0.0
+    for row in table.iter_cols(min_row=5, max_row=6, min_col=1, max_col=2):
+        val += row[0].value + row[1].value
+    assert val == 522.108

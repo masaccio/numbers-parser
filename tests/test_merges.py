@@ -37,6 +37,6 @@ def test_cell_classes():
     sheets = doc.sheets()
     tables = sheets[0].tables()
     data = []
-    for row in tables[0].iterrows():
+    for row in tables[0].iter_rows():
         data.append([type(c).__name__ for c in row])
     assert data == XXX_TABLE_1_CLASSES

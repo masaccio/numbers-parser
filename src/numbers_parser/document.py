@@ -106,13 +106,13 @@ class Table:
             )
 
         storage_buffers = [
-            extract_cell_data(
+            _extract_cell_data(
                 r.cell_storage_buffer, r.cell_offsets, self.num_cols, r.has_wide_offsets
             )
             for r in row_infos
         ]
         storage_buffers_pre_bnc = [
-            extract_cell_data(
+            _extract_cell_data(
                 r.cell_storage_buffer_pre_bnc,
                 r.cell_offsets_pre_bnc,
                 self.num_cols,
@@ -142,7 +142,10 @@ class Table:
                     row.append(
                         MergedCell(
                             # TODO: include full range information
-                            row_start=row_num, row_end=row_num, col_start=col_num, col_end=col_num
+                            row_start=row_num,
+                            row_end=row_num,
+                            col_start=col_num,
+                            col_end=col_num,
                         )
                     )
                 else:
@@ -170,7 +173,7 @@ class Table:
                         row.append(BoolCell(row_num, col_num, d > 0.0))
                     elif cell_type == TSTArchives.durationCellType:
                         cell_value = struct.unpack("<d", storage_buffer[12:20])[0]
-                        row.append(DurationCell(row_num, col_num, timedelta(days = cell_value)))
+                        row.append(DurationCell(row_num, col_num, timedelta(days=cell_value)))
                     elif cell_type == TSTArchives.formulaErrorCellType:
                         row.append(ErrorCell(row_num, col_num))
                     elif cell_type == 9:
@@ -216,29 +219,109 @@ class Table:
         if row_num >= len(cells):
             raise IndexError(f"row {row_num} out of range")
         if col_num >= len(cells[row_num]):
-            raise IndexError(f"col {col_num} out of range")
+            raise IndexError(f"coumn {col_num} out of range")
         return cells[row_num][col_num]
 
-    def iterrows(self, min_row: int=None, max_row: int=None) -> Generator[list, None, None]:
+    def iter_rows(
+        self,
+        min_row: int = None,
+        max_row: int = None,
+        min_col: int = None,
+        max_col: int = None,
+        values_only: bool = False,
+    ) -> Generator[tuple, None, None]:
+        """
+        Produces cells from a table, by row. Specify the iteration range using
+        the indexes of the rows and columns.
+        Args:
+            min_row: smallest row index (zero indexed)
+            max_row: largest row (zero indexed)
+            min_col: smallest row index (zero indexed)
+            max_col: largest row (zero indexed)
+            values_only: return cell values rather than Cell objects
+        Returns:
+            generator: tuple of cells
+        Raises:
+            IndexError: row or column values are out of range for the table
+        """
         cells = self.cells
-        if min_row is None:
-            min_row = 0
-        if max_row is None:
-            max_row = self.num_rows
-        for row_num in range(min_row, max_row):
-            yield cells[row_num]
+        min_row = min_row or 0
+        max_row = max_row or self.num_rows - 1
+        min_col = min_col or 0
+        max_col = max_col or self.num_cols - 1
 
-    def itercols(self, min_col: int=None, max_col: int=None) -> Generator[list, None, None]:
+        if min_row < 0:
+            raise IndexError(f"row {min_row} out of range")
+        if max_row > self.num_rows:
+            raise IndexError(f"row {max_row} out of range")
+        if min_col < 0:
+            raise IndexError(f"column {min_col} out of range")
+        if max_col > self.num_cols:
+            raise IndexError(f"column {max_col} out of range")
+
+        for row_num in range(min_row, max_row + 1):
+            if values_only:
+                yield tuple(cell.value or None for cell in cells[row_num][min_col : max_col + 1])
+            else:
+                yield tuple(cells[row_num][min_col : max_col + 1])
+
+    def iter_cols(
+        self,
+        min_col: int = None,
+        max_col: int = None,
+        min_row: int = None,
+        max_row: int = None,
+        values_only: bool = False,
+    ) -> Generator[tuple, None, None]:
+        """
+        Produces cells from a table, by column. Specify the iteration range using
+        the indexes of the rows and columns.
+        Args:
+            min_col: smallest row index (zero indexed)
+            max_col: largest row (zero indexed)
+            min_row: smallest row index (zero indexed)
+            max_row: largest row (zero indexed)
+            values_only: return cell values rather than Cell objects
+        Returns:
+            generator: tuple of cells
+        Raises:
+            IndexError: row or column values are out of range for the table
+        """
         cells = self.cells
-        if min_col is None:
-            min_col = 0
-        if max_col is None:
-            max_col = self.num_cols
-        for col_num in range(min_col, max_col):
-            yield [row[col_num] for row in cells]
+        min_row = min_row or 0
+        max_row = max_row or self.num_rows - 1
+        min_col = min_col or 0
+        max_col = max_col or self.num_cols - 1
+
+        if min_row < 0:
+            raise IndexError(f"row {min_row} out of range")
+        if max_row > self.num_rows:
+            raise IndexError(f"row {max_row} out of range")
+        if min_col < 0:
+            raise IndexError(f"column {min_col} out of range")
+        if max_col > self.num_cols:
+            raise IndexError(f"column {max_col} out of range")
+
+        for col_num in range(min_col, max_col + 1):
+            if values_only:
+                yield tuple(row[col_num].value for row in cells[min_row : max_row + 1])
+            else:
+                yield tuple(row[col_num] for row in cells[min_row : max_row + 1])
 
 
-def extract_cell_data(storage_buffer, offsets, num_cols, has_wide_offsets):
+def _extract_cell_data(
+    storage_buffer: bytes, offsets: list, num_cols: int, has_wide_offsets: bool
+) -> list[bytes]:
+    """
+    Extract storage buffers for each cell in a table row
+    Args:
+        storage_buffer:  cell_storage_buffer or cell_storage_buffer for a table row
+        offsets: 16-bit cell offsets for a table row
+        num_cols: number of columns in a table row
+        has_wide_offsets: use 4-byte offsets rather than 1-byte offset
+    Returns:
+         data: list of bytes for each cell in a row, or None if empty
+    """
     offsets = array.array("h", offsets).tolist()
     if has_wide_offsets:
         offsets = [o * 4 for o in offsets]
@@ -273,11 +356,11 @@ def extract_cell_data(storage_buffer, offsets, num_cols, has_wide_offsets):
 range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
 
 
-def xl_cell_to_rowcol(cell_str):
+def xl_cell_to_rowcol(cell_str: str) -> tuple:
     """
     Convert a cell reference in A1 notation to a zero indexed row and column.
     Args:
-       cell_str:  A1 style string.
+        cell_str:  A1 style string.
     Returns:
         row, col: Zero indexed cell row and column indices.
     """
