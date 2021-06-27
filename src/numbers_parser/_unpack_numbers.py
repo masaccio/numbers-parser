@@ -10,6 +10,7 @@ from glob import glob
 from numbers_parser.codec import IWAFile
 from numbers_parser import _get_version
 from zipfile import ZipFile
+from io import BytesIO
 
 
 def ensure_directory_exists(prefix, path):
@@ -71,12 +72,24 @@ def dir_file_sink(target_dir):
 
 def process_file(filename, handle, sink):
     contents = None
-    if ".iwa" in filename:
+    # TODO: LZFSE compressed according to /usr/bin/file
+    if ".iwa" in filename and "OperationStorage" not in filename:
         contents = handle.read()
         file = IWAFile.from_buffer(contents, filename)
         sink(filename, file)
-
-    sink(filename, contents or handle.read())
+    elif filename.endswith("Index.zip"):
+        index_contents = BytesIO(handle.read())
+        zipf = ZipFile(index_contents)
+        iwa_files = filter(lambda x: x.endswith(".iwa"), zipf.namelist())
+        for iwa_filename in iwa_files:
+            # TODO: LZFSE compressed according to /usr/bin/file
+            if "OperationStorage" in iwa_filename:
+                continue
+            contents = zipf.read(iwa_filename)
+            file = IWAFile.from_buffer(contents, iwa_filename)
+            sink(iwa_filename, file)
+    else:
+        sink(filename, contents or handle.read())
 
 
 def process(input_path, output_path, subfile=None):
