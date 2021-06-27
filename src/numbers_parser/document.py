@@ -6,8 +6,7 @@ import sys
 import struct
 import zipfile
 
-from typing import Union
-from typing import Generator
+from typing import Union, List, Generator
 from datetime import datetime, timedelta
 
 from numbers_parser.containers import ItemsList, ObjectStore, NumbersError
@@ -311,7 +310,7 @@ class Table:
 
 def _extract_cell_data(
     storage_buffer: bytes, offsets: list, num_cols: int, has_wide_offsets: bool
-) -> list[bytes]:
+) -> List[bytes]:
     """
     Extract storage buffers for each cell in a table row
     Args:
