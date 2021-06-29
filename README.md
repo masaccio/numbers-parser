@@ -82,7 +82,7 @@ print("Cell C2 contains", table.cell("C2"))
 
 When extracting data using ```data()``` merged cells are ignored since only text values
 are returned. The ```cell()``` method of ```Table``` objects returns a ```Cell``` type
-object which is typed by the type of cell in the Numbers table. ```MergeCell`` objects
+object which is typed by the type of cell in the Numbers table. ```MergeCell``` objects
 indicates cells removed in a merge.
 
 ``` python
