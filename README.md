@@ -78,6 +78,35 @@ print("Cell A1 contains", table.cell(0, 0))
 print("Cell C2 contains", table.cell("C2"))
 ```
 
+### Merged cells
+
+When extracting data using ```data()``` merged cells are ignored since only text values
+are returned. The ```cell()``` method of ```Table``` objects returns a ```Cell``` type
+object which is typed by the type of cell in the Numbers table. ```MergeCell`` objects
+indicates cells removed in a merge.
+
+``` python
+doc = Document("my-spreasdsheet.numbers")
+sheets = doc.sheets()
+tables = sheets["Sheet 1"].tables()
+table = tables["Table 1"]
+
+cell = table.cell("A1")
+print(cell.merge_range)
+print(f"Cell A1 merge size is {cell.size[0]},{cell.size[1]})
+```
+
+### Row and column iterators
+
+Tables have iterators for row-wise and column-wise iteration with each iterator
+returning a list of the cells in that row or column
+
+``` python
+for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
+   sum += row
+for col in table.iter_cole(min_row=2, max_row=7):
+   sum += col.value
+```
 
 ## Numbers File Formats
 
