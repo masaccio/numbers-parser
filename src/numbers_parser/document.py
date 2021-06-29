@@ -50,7 +50,16 @@ class Sheet:
             if self._object_store[table_id].super.parent.identifier == self._sheet_id
         ]
         self._tables = Tables(self._object_store, table_refs)
+
         return self._tables
+
+
+def _uuid(ref: dict) -> int:
+    try:
+        uuid = ref.upper << 64 | ref.lower
+    except AttributeError:
+        uuid = (ref.uuid_w3 << 96) | (ref.uuid_w2 << 64) | (ref.uuid_w1 << 32) | ref.uuid_w0
+    return uuid
 
 
 class Tables(ItemsList):
@@ -76,6 +85,7 @@ class Table:
         self._tile_ids = [t.tile.identifier for t in bds.tiles.tiles]
         self._table_data = None
         self._table_cells = None
+        self._merge_cells = None
 
     @property
     def data(self):
@@ -93,7 +103,18 @@ class Table:
             self._table_cells = self._extract_table_cells()
         return self._table_cells
 
+    @property
+    def merge_ranges(self) -> list:
+        self._merge_cells = self._extract_merge_cells()
+        ranges = []
+        for row_num, cols in self._merge_cells.items():
+            for col_num in cols:
+                ranges.append(xl_range(*self._merge_cells[row_num][col_num]["rect"]))
+        return sorted(set(list(ranges)))
+
     def _extract_table_cells(self):
+        self._merge_cells = self._extract_merge_cells()
+
         row_infos = []
         for tile_id in self._tile_ids:
             row_infos += self._object_store[tile_id].rowInfos
@@ -137,57 +158,64 @@ class Table:
                 else:
                     storage_buffer_pre_bnc = None
 
+                cell = None
                 if storage_buffer is None:
-                    row.append(
-                        MergedCell(
-                            # TODO: include full range information
-                            row_start=row_num,
-                            row_end=row_num,
-                            col_start=col_num,
-                            col_end=col_num,
-                        )
-                    )
+                    try:
+                        cell = MergedCell(*self._merge_cells[row_num][col_num]["rect"])
+                    except KeyError:
+                        cell = EmptyCell(row_num, col_num)
+                    cell.size = None
+                    row.append(cell)
                 else:
                     cell_type = storage_buffer[1]
                     if cell_type == TSTArchives.emptyCellValueType:
-                        row.append(EmptyCell(row_num, col_num))
+                        cell = EmptyCell(row_num, col_num)
                     elif cell_type == TSTArchives.numberCellType:
                         if storage_buffer_pre_bnc is None:
                             cell_value = 0.0
                         else:
                             cell_value = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
-                        row.append(NumberCell(row_num, col_num, cell_value))
+                        cell = NumberCell(row_num, col_num, cell_value)
                     elif cell_type == TSTArchives.textCellType:
                         key = struct.unpack("<i", storage_buffer[12:16])[0]
-                        row.append(TextCell(row_num, col_num, self._table_string(key)))
+                        cell = TextCell(row_num, col_num, self._table_string(key))
                     elif cell_type == TSTArchives.dateCellType:
                         if storage_buffer_pre_bnc is None:
                             cell_value = datetime(2001, 1, 1)
                         else:
                             seconds = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
                             cell_value = datetime(2001, 1, 1) + timedelta(seconds=seconds)
-                        row.append(DateCell(row_num, col_num, cell_value))
+                        cell = DateCell(row_num, col_num, cell_value)
                     elif cell_type == TSTArchives.boolCellType:
                         d = struct.unpack("<d", storage_buffer[12:20])[0]
-                        row.append(BoolCell(row_num, col_num, d > 0.0))
+                        cell = BoolCell(row_num, col_num, d > 0.0)
                     elif cell_type == TSTArchives.durationCellType:
                         cell_value = struct.unpack("<d", storage_buffer[12:20])[0]
-                        row.append(DurationCell(row_num, col_num, timedelta(days=cell_value)))
+                        cell = DurationCell(row_num, col_num, timedelta(days=cell_value))
                     elif cell_type == TSTArchives.formulaErrorCellType:
-                        row.append(ErrorCell(row_num, col_num))
+                        cell = ErrorCell(row_num, col_num)
                     elif cell_type == 9:
-                        row.append(FormulaCell(row_num, col_num))
+                        cell = FormulaCell(row_num, col_num)
                     elif cell_type == 10:
                         # TODO: Is this realy a number cell (experiments suggest so)
                         if storage_buffer_pre_bnc is None:
                             cell_value = 0.0
                         else:
                             cell_value = struct.unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
-                        row.append(NumberCell(row_num, col_num, cell_value))
+                        cell = NumberCell(row_num, col_num, cell_value)
                     else:
                         raise UnsupportedError(  # pragma: no cover
                             f"Unsupport cell type {cell_type} @{self.name}:({row_num},{col_num})"
                         )
+
+                    try:
+                        if self._merge_cells[row_num][col_num]["merge_type"] == "source":
+                            cell.is_merged = True
+                            cell.size = self._merge_cells[row_num][col_num]["size"]
+                    except:
+                        cell.is_merged = False
+                        cell.size = (1, 1)
+                    row.append(cell)
             table_cells.append(row)
 
         return table_cells
@@ -197,6 +225,51 @@ class Table:
             strings_id = self._table.base_data_store.stringTable.identifier
             self._table_strings = {x.key: x.string for x in self._object_store[strings_id].entries}
         return self._table_strings[key]
+
+    def _extract_merge_cells(self):
+        if self._merge_cells is not None:
+            return self._merge_cells
+
+        calculation_engine_id = self._object_store.find_refs("CalculationEngineArchive")[0]
+        owner_id_map = {}
+        for e in self._object_store[
+            calculation_engine_id
+        ].dependency_tracker.owner_id_map.map_entry:
+            owner_id_map[e.internal_owner_id] = _uuid(e.owner_id)
+
+        haunted_owner = _uuid(self._table.haunted_owner.owner_uid)
+        table_base_id = None
+        for dependency_id in self._object_store.find_refs("FormulaOwnerDependenciesArchive"):
+            obj = self._object_store[dependency_id]
+            if obj.HasField("base_owner_uid") and obj.HasField("formula_owner_uid"):
+                base_owner_uid = _uuid(obj.base_owner_uid)
+                formula_owner_uid = _uuid(obj.formula_owner_uid)
+                if formula_owner_uid == haunted_owner:
+                    table_base_id = base_owner_uid
+
+        merge_cells = {}
+        range_table_ids = self._object_store.find_refs("RangePrecedentsTileArchive")
+        for range_id in range_table_ids:
+            o = self._object_store[range_id]
+            to_owner_id = o.to_owner_id
+            if owner_id_map[to_owner_id] == table_base_id:
+                for from_to_range in o.from_to_range:
+                    rect = from_to_range.refers_to_rect
+                    row_start = rect.origin.row
+                    row_end = row_start + rect.size.num_rows - 1
+                    col_start = rect.origin.column
+                    col_end = col_start + rect.size.num_columns - 1
+                    for row_num in range(row_start, row_end + 1):
+                        if row_num not in merge_cells:
+                            merge_cells[row_num] = {}
+                        for col_num in range(col_start, col_end + 1):
+                            merge_cells[row_num][col_num] = {
+                                "merge_type": "ref",
+                                "rect": (row_start, col_start, row_end, col_end),
+                                "size": (rect.size.num_rows, rect.size.num_columns)
+                            }
+                    merge_cells[row_start][col_start]["merge_type"] = "source"
+        return merge_cells
 
     @property
     def num_rows(self) -> int:
@@ -243,7 +316,6 @@ class Table:
         Raises:
             IndexError: row or column values are out of range for the table
         """
-        cells = self.cells
         min_row = min_row or 0
         max_row = max_row or self.num_rows - 1
         min_col = min_col or 0
@@ -258,6 +330,7 @@ class Table:
         if max_col > self.num_cols:
             raise IndexError(f"column {max_col} out of range")
 
+        cells = self.cells
         for row_num in range(min_row, max_row + 1):
             if values_only:
                 yield tuple(cell.value or None for cell in cells[row_num][min_col : max_col + 1])
@@ -286,7 +359,6 @@ class Table:
         Raises:
             IndexError: row or column values are out of range for the table
         """
-        cells = self.cells
         min_row = min_row or 0
         max_row = max_row or self.num_rows - 1
         min_col = min_col or 0
@@ -301,6 +373,7 @@ class Table:
         if max_col > self.num_cols:
             raise IndexError(f"column {max_col} out of range")
 
+        cells = self.cells
         for col_num in range(min_col, max_col + 1):
             if values_only:
                 yield tuple(row[col_num].value for row in cells[min_row : max_row + 1])
@@ -348,40 +421,3 @@ def _extract_cell_data(
         data.append(storage_buffer[start:end])
 
     return data
-
-
-# Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
-# Copyright (c) 2013-2021, John McNamara <jmcnamara@cpan.org>
-range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
-
-
-def xl_cell_to_rowcol(cell_str: str) -> tuple:
-    """
-    Convert a cell reference in A1 notation to a zero indexed row and column.
-    Args:
-        cell_str:  A1 style string.
-    Returns:
-        row, col: Zero indexed cell row and column indices.
-    """
-    if not cell_str:
-        return 0, 0
-
-    match = range_parts.match(cell_str)
-    if not match:
-        raise IndexError(f"invalid cell reference {cell_str}")
-
-    col_str = match.group(2)
-    row_str = match.group(4)
-
-    # Convert base26 column string to number.
-    expn = 0
-    col = 0
-    for char in reversed(col_str):
-        col += (ord(char) - ord("A") + 1) * (26 ** expn)
-        expn += 1
-
-    # Convert 1-index to zero-index
-    row = int(row_str) - 1
-    col -= 1
-
-    return row, col
