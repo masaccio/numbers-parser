@@ -1,22 +1,16 @@
-from builtins import zip
 from builtins import str
 from builtins import object
 
-import sys
 import struct
 import snappy
-import traceback
 from functools import partial
 
-from numbers_parser.mapping import ID_NAME_MAP, NAME_CLASS_MAP
+from numbers_parser.mapping import ID_NAME_MAP
 
-from google.protobuf.internal.encoder import _VarintBytes
 from google.protobuf.internal.decoder import _DecodeVarint32
-from google.protobuf.json_format import MessageToDict, ParseDict
-from google.protobuf.message import EncodeError
+from google.protobuf.json_format import MessageToDict
 
 from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
-
 
 
 class IWAFile(object):
@@ -33,7 +27,7 @@ class IWAFile(object):
                 chunks.append(chunk)
 
             return cls(chunks, filename)
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             if filename:
                 raise ValueError("Failed to deserialize " + filename) from e
             else:
@@ -42,7 +36,7 @@ class IWAFile(object):
     def to_dict(self):
         try:
             return {"chunks": [chunk.to_dict() for chunk in self.chunks]}
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             if self.filename:
                 raise ValueError("Failed to serialize " + self.filename) from e
             else:
@@ -54,7 +48,7 @@ class IWACompressedChunk(object):
         self.archives = archives
 
     def __eq__(self, other):
-        return self.archives == other.archives # pragma: no cover
+        return self.archives == other.archives  # pragma: no cover
 
     @classmethod
     def _decompress_all(cls, data):
@@ -66,7 +60,7 @@ class IWACompressedChunk(object):
                 first_byte = ord(first_byte)
 
             if first_byte != 0x00:
-                raise ValueError( # pragma: no cover
+                raise ValueError(  # pragma: no cover
                     "IWA chunk does not start with 0x00! (found %x)" % first_byte
                 )
 
@@ -77,7 +71,7 @@ class IWACompressedChunk(object):
 
             try:
                 yield snappy.uncompress(chunk)
-            except Exception: # pragma: no cover
+            except Exception:  # pragma: no cover
                 # Try to see if this data isn't compressed in the first place.
                 # If this data is still compressed, parsing it as Protobuf
                 # will almost definitely fail anyways.
@@ -101,10 +95,10 @@ class ProtobufPatch(object):
         self.data = data
 
     def __eq__(self, other):
-        return self.data == other.data # pragma: no cover
+        return self.data == other.data  # pragma: no cover
 
     def __repr__(self):
-        return "<%s %s>" % (self.__class__.__name__, self.data) # pragma: no cover
+        return "<%s %s>" % (self.__class__.__name__, self.data)  # pragma: no cover
 
     def to_dict(self):
         return message_to_dict(self.data)
@@ -122,10 +116,10 @@ class IWAArchiveSegment(object):
         self.objects = objects
 
     def __eq__(self, other):
-        return self.header == other.header and self.objects == other.objects # pragma: no cover
+        return self.header == other.header and self.objects == other.objects  # pragma: no cover
 
     def __repr__(self):
-        return "<%s identifier=%s objects=%s>" % ( # pragma: no cover
+        return "<%s identifier=%s objects=%s>" % (  # pragma: no cover
             self.__class__.__name__,
             self.header.identifier,
             repr(self.objects).replace("\n", " ").replace("  ", " "),
@@ -135,7 +129,9 @@ class IWAArchiveSegment(object):
     def from_buffer(cls, buf, filename=None):
         archive_info, payload = get_archive_info_and_remainder(buf)
         if not repr(archive_info):
-            raise ValueError("Segment doesn't seem to start with an ArchiveInfo!") # pragma: no cover
+            raise ValueError(
+                "Segment doesn't seem to start with an ArchiveInfo!"
+            )  # pragma: no cover
 
         payloads = []
 
@@ -143,9 +139,7 @@ class IWAArchiveSegment(object):
         for message_info in archive_info.message_infos:
             try:
                 if message_info.type == 0 and archive_info.should_merge and payloads:
-                    base_message = archive_info.message_infos[
-                        message_info.base_message_index
-                    ]
+                    base_message = archive_info.message_infos[message_info.base_message_index]
                     klass = partial(
                         ProtobufPatch.FromString,
                         message_info,
@@ -153,10 +147,9 @@ class IWAArchiveSegment(object):
                     )
                 else:
                     klass = ID_NAME_MAP[message_info.type]
-            except KeyError: # pragma: no cover
+            except KeyError:  # pragma: no cover
                 raise NotImplementedError(
-                    "Don't know how to parse Protobuf message type "
-                    + str(message_info.type)
+                    "Don't know how to parse Protobuf message type " + str(message_info.type)
                 )
             try:
                 message_payload = payload[n : n + message_info.length]
@@ -164,7 +157,7 @@ class IWAArchiveSegment(object):
                     output = klass.FromString(message_payload)
                 else:
                     output = klass(message_payload)
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 raise ValueError(
                     "Failed to deserialize %s payload of length %d: %s"
                     % (klass, message_info.length, e)

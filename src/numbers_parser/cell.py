@@ -1,7 +1,6 @@
 import re
 
-from numbers_parser.containers import NumbersError
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 
 class Cell:
@@ -61,7 +60,7 @@ class ErrorCell(Cell):
 
 
 class MergedCell:
-    def __init__(self, row_start: int, col_start:int, row_end: int, col_end: int):
+    def __init__(self, row_start: int, col_start: int, row_end: int, col_end: int):
         self.value = None
         self.row_start = row_start
         self.row_end = row_end
@@ -151,6 +150,7 @@ def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
 
     return col_str + row_abs + str(row)
 
+
 def xl_col_to_name(col, col_abs=False):
     """
     Convert a zero indexed column cell reference to a string.
@@ -165,8 +165,8 @@ def xl_col_to_name(col, col_abs=False):
         raise IndexError(f"Column reference {col_num} below zero")
 
     col_num += 1  # Change to 1-index.
-    col_str = ''
-    col_abs = '$' if col_abs else ''
+    col_str = ""
+    col_abs = "$" if col_abs else ""
 
     while col_num:
         # Set remainder from 1 .. 26
@@ -176,7 +176,7 @@ def xl_col_to_name(col, col_abs=False):
             remainder = 26
 
         # Convert the remainder to a character.
-        col_letter = chr(ord('A') + remainder - 1)
+        col_letter = chr(ord("A") + remainder - 1)
 
         # Accumulate the column letters, right to left.
         col_str = col_letter + col_str

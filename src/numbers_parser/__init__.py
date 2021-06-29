@@ -23,9 +23,9 @@ import os
 import plistlib
 import warnings
 
-from numbers_parser.document import Document
-from numbers_parser.cell import *
-from numbers_parser._version import __version__
+from numbers_parser.document import Document  # NOQA
+from numbers_parser.cell import *  # NOQA
+from numbers_parser._version import __version__  # NOQA
 
 _DEFAULT_NUMBERS_INSTALL_PATH = "/Applications/Numbers.app"
 _VERSION_PLIST_PATH = "Contents/version.plist"
@@ -37,8 +37,10 @@ _SUPPORTED_NUMBERS_VERSIONS = [
 
 # Don't print the source line
 formatwarning_old = warnings.formatwarning
-warnings.formatwarning = lambda message, category, filename, lineno, line=None: formatwarning_old( # pragma: no cover
-    message, category, filename, lineno, line=""
+warnings.formatwarning = (
+    lambda message, category, filename, lineno, line=None: formatwarning_old(  # pragma: no cover
+        message, category, filename, lineno, line=""
+    )
 )
 
 

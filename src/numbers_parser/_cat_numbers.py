@@ -30,8 +30,12 @@ def command_line_parser():
         help="Don't prefix data rows with name of sheet/table (default: false)",
     )
     parser.add_argument("-V", "--version", action="store_true")
-    parser.add_argument("-s", "--sheet", action="append", help="Names of sheet(s) to include in export")
-    parser.add_argument("-t", "--table", action="append", help="Names of table(s) to include in export")
+    parser.add_argument(
+        "-s", "--sheet", action="append", help="Names of sheet(s) to include in export"
+    )
+    parser.add_argument(
+        "-t", "--table", action="append", help="Names of table(s) to include in export"
+    )
     parser.add_argument("document", nargs="*", help="Document(s) to export")
     return parser
 
@@ -61,6 +65,7 @@ def print_table(args, filename):
                 else:
                     print(f"{filename}: {sheet.name}: {table.name}:", cols)
 
+
 def main():
     parser = command_line_parser()
     args = parser.parse_args()
@@ -77,6 +82,7 @@ def main():
                 print_table_names(filename)
             else:
                 print_table(args, filename)
+
 
 if __name__ == "__main__":
     # execute only if run as a script

@@ -14,7 +14,7 @@ PROTO_CLASSES = $(patsubst protos/%.proto,src/numbers_parser/generated/%_pb2.py,
 SOURCE_FILES=src/numbers_parser/generated/__init__.py $(wildcard src/numbers_parser/*.py) $(wildcard scripts/*)
 RELEASE_TARBALL=dist/numbers-parser-$(shell python3 setup.py --version).tar.gz
 
-.PHONY: all clean veryclean install test coverage sdist upload
+.PHONY: all clean veryclean install test coverage lint sdist upload
 
 all: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py
 
@@ -30,6 +30,9 @@ upload: $(RELEASE_TARBALL)
 
 test: all
 	PYTHONPATH=src python3 -m pytest tests
+
+lint: all
+	pylama src/numbers_parser
 
 coverage: all
 	PYTHONPATH=src python3 -m pytest --cov=numbers_parser --cov-report=html

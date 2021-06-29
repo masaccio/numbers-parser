@@ -97,7 +97,7 @@ def process(input_path, output_path, subfile=None):
         for filename, handle in file_reader(input_path):
             try:
                 process_file(filename, handle, sink)
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 raise ValueError("Failed to process file %s due to: %s" % (filename, e))
 
 

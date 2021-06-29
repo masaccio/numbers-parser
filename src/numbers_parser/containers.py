@@ -62,7 +62,7 @@ class ObjectStore:
         else:
             try:
                 zipf = ZipFile(path)
-            except BadZipFile as e: # pragma: no cover
+            except BadZipFile as e:  # pragma: no cover
                 raise FileError(f"{path}: " + str(e))
 
             if "Index.zip" in zipf.namelist():
@@ -80,7 +80,7 @@ class ObjectStore:
     def _get_objects_from_zip_file(self, path):
         try:
             zipf = ZipFile(path)
-        except BadZipFile as e: # pragma: no cover
+        except BadZipFile as e:  # pragma: no cover
             raise FileError(f"{path}: " + str(e))
 
         self._get_objects_from_zip_stream(zipf)
@@ -94,11 +94,9 @@ class ObjectStore:
             contents = zipf.read(iwa_filename)
             self._extract_iwa_archives(contents, iwa_filename)
 
-
     def find_refs(self, ref_name) -> list:
         refs = [k for k, v in self._object_store.items() if type(v).__name__ == ref_name]
         return refs
-
 
     def _extract_iwa_archives(self, contents, iwa_filename):
         objects = {}
@@ -108,14 +106,20 @@ class ObjectStore:
             raise FileFormatError(f"{iwa_filename}: invalid IWA file {iwa_filename}") from e
 
         if len(iwaf.chunks) != 1:
-            raise FileFormatError(f"{iwa_filename}: chunk count != 1 in {iwa_filename}") # pragma: no cover
+            raise FileFormatError(
+                f"{iwa_filename}: chunk count != 1 in {iwa_filename}"
+            )  # pragma: no cover
         for archive in iwaf.chunks[0].archives:
             if len(archive.objects) == 0:
-                raise FileFormatError(f"{iwa_filename}: no objects in {iwa_filename}") # pragma: no cover
+                raise FileFormatError(
+                    f"{iwa_filename}: no objects in {iwa_filename}"
+                )  # pragma: no cover
 
             identifier = archive.header.identifier
             if identifier in objects:
-                raise FileFormatError(f"{iwa_filename}: duplicate reference {identifier}") # pragma: no cover
+                raise FileFormatError(
+                    f"{iwa_filename}: duplicate reference {identifier}"
+                )  # pragma: no cover
 
             # TODO: what should we do for len(archive.objects) > 1?
             self._object_store[identifier] = archive.objects[0]

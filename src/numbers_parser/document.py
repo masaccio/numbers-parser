@@ -1,16 +1,26 @@
 import array
-import importlib
-import os
-import re
-import sys
 import struct
-import zipfile
 
 from typing import Union, List, Generator
 from datetime import datetime, timedelta
 
 from numbers_parser.containers import ItemsList, ObjectStore, NumbersError
-from numbers_parser.cell import *
+from numbers_parser.cell import (
+    BoolCell,
+    Cell,
+    DateCell,
+    DurationCell,
+    EmptyCell,
+    ErrorCell,
+    FormulaCell,
+    MergedCell,
+    NumberCell,
+    TextCell,
+    xl_cell_to_rowcol,
+    xl_range,
+)
+
+
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
 
@@ -52,14 +62,6 @@ class Sheet:
         self._tables = Tables(self._object_store, table_refs)
 
         return self._tables
-
-
-def _uuid(ref: dict) -> int:
-    try:
-        uuid = ref.upper << 64 | ref.lower
-    except AttributeError:
-        uuid = (ref.uuid_w3 << 96) | (ref.uuid_w2 << 64) | (ref.uuid_w1 << 32) | ref.uuid_w0
-    return uuid
 
 
 class Tables(ItemsList):
@@ -212,7 +214,7 @@ class Table:
                         if self._merge_cells[row_num][col_num]["merge_type"] == "source":
                             cell.is_merged = True
                             cell.size = self._merge_cells[row_num][col_num]["size"]
-                    except:
+                    except KeyError:
                         cell.is_merged = False
                         cell.size = (1, 1)
                     row.append(cell)
@@ -266,17 +268,19 @@ class Table:
                             merge_cells[row_num][col_num] = {
                                 "merge_type": "ref",
                                 "rect": (row_start, col_start, row_end, col_end),
-                                "size": (rect.size.num_rows, rect.size.num_columns)
+                                "size": (rect.size.num_rows, rect.size.num_columns),
                             }
                     merge_cells[row_start][col_start]["merge_type"] = "source"
         return merge_cells
 
     @property
     def num_rows(self) -> int:
+        """Number of rows in the table"""
         return len(self._row_headers)
 
     @property
     def num_cols(self) -> int:
+        """Number of columns in the table"""
         return len(self._column_headers)
 
     def cell(self, *args) -> Union[Cell, MergedCell]:
@@ -421,3 +425,24 @@ def _extract_cell_data(
         data.append(storage_buffer[start:end])
 
     return data
+
+
+def _uuid(ref: dict) -> int:
+    """
+    Extract storage buffers for each cell in a table row
+    Args:
+        ref: Google protobuf containing either four 32-bit IDs or two 64-bit IDs
+    Returns:
+        uuid: 128-bit UUID
+    Raises:
+        UnsupportedError: object does not include expected UUID fields
+    """
+    try:
+        uuid = ref.upper << 64 | ref.lower
+    except AttributeError:
+        try:
+            uuid = (ref.uuid_w3 << 96) | (ref.uuid_w2 << 64) | (ref.uuid_w1 << 32) | ref.uuid_w0
+        except AttributeError:
+            raise UnsupportedError(f"Unsupported UUID structure: {ref}")  # pragma: no cover
+
+    return uuid
