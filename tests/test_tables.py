@@ -1,6 +1,6 @@
 import pytest
 
-from numbers_parser import Document
+from numbers_parser import Document, TextCell
 
 ZZZ_TABLE_1_REF = [
     [None, "YYY_COL_1", "YYY_COL_2"],
@@ -49,6 +49,13 @@ def test_table_contents():
     tables = sheets[0].tables()
     data = tables[0].data
     assert data == ZZZ_TABLE_1_REF
+
+def test_cell():
+    doc = Document("tests/data/test-1.numbers")
+    sheets = doc.sheets()
+    tables = sheets[0].tables()
+    assert isinstance(tables[0].cell("A2"), TextCell)
+    assert tables[0].cell("A2").value == "YYY_ROW_1"
 
 def test_empty_cells():
     doc = Document("tests/data/test-1.numbers")
