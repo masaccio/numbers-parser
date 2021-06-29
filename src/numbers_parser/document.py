@@ -107,7 +107,9 @@ class Table:
 
     @property
     def merge_ranges(self) -> list:
-        self._merge_cells = self._extract_merge_cells()
+        if self._merge_cells is None:
+            self._merge_cells = _extract_merge_cells(self._object_store, self._table)
+
         ranges = []
         for row_num, cols in self._merge_cells.items():
             for col_num in cols:
@@ -115,7 +117,8 @@ class Table:
         return sorted(set(list(ranges)))
 
     def _extract_table_cells(self):
-        self._merge_cells = self._extract_merge_cells()
+        if self._merge_cells is None:
+            self._merge_cells = _extract_merge_cells(self._object_store, self._table)
 
         row_infos = []
         for tile_id in self._tile_ids:
@@ -227,51 +230,6 @@ class Table:
             strings_id = self._table.base_data_store.stringTable.identifier
             self._table_strings = {x.key: x.string for x in self._object_store[strings_id].entries}
         return self._table_strings[key]
-
-    def _extract_merge_cells(self):
-        if self._merge_cells is not None:
-            return self._merge_cells
-
-        calculation_engine_id = self._object_store.find_refs("CalculationEngineArchive")[0]
-        owner_id_map = {}
-        for e in self._object_store[
-            calculation_engine_id
-        ].dependency_tracker.owner_id_map.map_entry:
-            owner_id_map[e.internal_owner_id] = _uuid(e.owner_id)
-
-        haunted_owner = _uuid(self._table.haunted_owner.owner_uid)
-        table_base_id = None
-        for dependency_id in self._object_store.find_refs("FormulaOwnerDependenciesArchive"):
-            obj = self._object_store[dependency_id]
-            if obj.HasField("base_owner_uid") and obj.HasField("formula_owner_uid"):
-                base_owner_uid = _uuid(obj.base_owner_uid)
-                formula_owner_uid = _uuid(obj.formula_owner_uid)
-                if formula_owner_uid == haunted_owner:
-                    table_base_id = base_owner_uid
-
-        merge_cells = {}
-        range_table_ids = self._object_store.find_refs("RangePrecedentsTileArchive")
-        for range_id in range_table_ids:
-            o = self._object_store[range_id]
-            to_owner_id = o.to_owner_id
-            if owner_id_map[to_owner_id] == table_base_id:
-                for from_to_range in o.from_to_range:
-                    rect = from_to_range.refers_to_rect
-                    row_start = rect.origin.row
-                    row_end = row_start + rect.size.num_rows - 1
-                    col_start = rect.origin.column
-                    col_end = col_start + rect.size.num_columns - 1
-                    for row_num in range(row_start, row_end + 1):
-                        if row_num not in merge_cells:
-                            merge_cells[row_num] = {}
-                        for col_num in range(col_start, col_end + 1):
-                            merge_cells[row_num][col_num] = {
-                                "merge_type": "ref",
-                                "rect": (row_start, col_start, row_end, col_end),
-                                "size": (rect.size.num_rows, rect.size.num_columns),
-                            }
-                    merge_cells[row_start][col_start]["merge_type"] = "source"
-        return merge_cells
 
     @property
     def num_rows(self) -> int:
@@ -446,3 +404,119 @@ def _uuid(ref: dict) -> int:
             raise UnsupportedError(f"Unsupported UUID structure: {ref}")  # pragma: no cover
 
     return uuid
+
+
+def _extract_merge_cells(object_store: ObjectStore, table: Table):
+    """Exract all the merge cell ranges for the the Table."""
+    # Merge ranges are stored in a number of structures, but the simplest is
+    # a TSCE.RangePrecedentsTileArchive which exists for each Table in the
+    # Document. These archives contain a fromToRange list which has the merge
+    # ranges associated with an Owner ID
+    #
+    # The Owner IDs need to be extracted from teh Calculation Engine using
+    # UUID matching (this seems fragile, but no other mechanism has been found)
+    #
+    # "fromToRange": [
+    #     {
+    #         "fromCoord": {
+    #         "column": 0,
+    #         "row": 0
+    #     },
+    #     "refersToRect": {
+    #         "origin": {
+    #             "column": 0,
+    #             "row": 0
+    #         },
+    #         "size": {
+    #             "numColumns": 2
+    #         }
+    #     }
+    # ],
+    # "toOwnerId": 1
+    #
+    owner_id_map = _extract_owner_id_map(object_store)
+    table_base_id = _extract_table_base_id(object_store, table)
+
+    merge_cells = {}
+    range_table_ids = object_store.find_refs("RangePrecedentsTileArchive")
+    for range_id in range_table_ids:
+        o = object_store[range_id]
+        to_owner_id = o.to_owner_id
+        if owner_id_map[to_owner_id] == table_base_id:
+            for from_to_range in o.from_to_range:
+                rect = from_to_range.refers_to_rect
+                row_start = rect.origin.row
+                row_end = row_start + rect.size.num_rows - 1
+                col_start = rect.origin.column
+                col_end = col_start + rect.size.num_columns - 1
+                for row_num in range(row_start, row_end + 1):
+                    if row_num not in merge_cells:
+                        merge_cells[row_num] = {}
+                    for col_num in range(col_start, col_end + 1):
+                        merge_cells[row_num][col_num] = {
+                            "merge_type": "ref",
+                            "rect": (row_start, col_start, row_end, col_end),
+                            "size": (rect.size.num_rows, rect.size.num_columns),
+                        }
+                merge_cells[row_start][col_start]["merge_type"] = "source"
+    return merge_cells
+
+
+def _extract_owner_id_map(object_store: ObjectStore):
+    """"
+    Extracts the mapping table from Owner IDs to UUIDs. Returns a
+    dictionary mapping the owner ID int to a 128-bit UUID.
+    """
+    # The TSCE.CalculationEngineArchive contains a list of mapping entries
+    # in odependencyTracker.formulaOwnerDependencies from the root level
+    # of the protobuf. Each mapping contains a 32-bit style UUID:
+    #
+    # "ownerIdMap": {
+    #     "mapEntry": [
+    #     {
+    #         "internalOwnerId": 33,
+    #         "ownerId": {
+    #             "uuidW0": 8750e563, "uuidW1": 1e4bfcc0,
+    #             "uuidW2": c26dda92, "uuidW3": 3cb03f23
+    #         }
+    #     },
+    #
+    #
+    calculation_engine_id = object_store.find_refs("CalculationEngineArchive")[0]
+    owner_id_map = {}
+    for e in object_store[calculation_engine_id].dependency_tracker.owner_id_map.map_entry:
+        owner_id_map[e.internal_owner_id] = _uuid(e.owner_id)
+    return owner_id_map
+
+
+def _extract_table_base_id(object_store: ObjectStore, table: Table):
+    """"Finds the UUID of a table"""
+    # Look for a TSCE.FormulaOwnerDependenciesArchive objects with the following at the
+    # root level of the protobuf:
+    #
+    #     "baseOwnerUid": {
+    #         "lower": 0c4ebfb1d9676393",
+    #         "upper": f9ad9f35d33aba96"
+    #     }
+    #     "formulaOwnerUid": {
+    #         "lower": 0c4ebfb1d96763b6",
+    #         "upper": f9ad9f35d33aba96"
+    #     },
+    #
+    # The Table UUID is the TSCE.FormulaOwnerDependenciesArchive whose formulaOwnerUid
+    # matches the UUID of the hauntedOwner of the Table:
+    #
+    #    "hauntedOwner": {
+    #        "ownerUid": {
+    #            "lower": 0c4ebfb1d96763b6",
+    #            "upper": f9ad9f35d33aba96"
+    #        }
+    #    }
+    haunted_owner = _uuid(table.haunted_owner.owner_uid)
+    for dependency_id in object_store.find_refs("FormulaOwnerDependenciesArchive"):
+        obj = object_store[dependency_id]
+        if obj.HasField("base_owner_uid") and obj.HasField("formula_owner_uid"):
+            base_owner_uid = _uuid(obj.base_owner_uid)
+            formula_owner_uid = _uuid(obj.formula_owner_uid)
+            if formula_owner_uid == haunted_owner:
+                return base_owner_uid
