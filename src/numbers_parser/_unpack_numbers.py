@@ -3,14 +3,12 @@
 import argparse
 import os
 import json
+import re
 import sys
 
-from contextlib import contextmanager
-from glob import glob
-from numbers_parser.codec import IWAFile
+from numbers_parser.unpack import read_numbers_file
 from numbers_parser import _get_version
-from zipfile import ZipFile
-from io import BytesIO
+from numbers_parser.iwafile import IWAFile
 
 
 def ensure_directory_exists(prefix, path):
@@ -22,83 +20,18 @@ def ensure_directory_exists(prefix, path):
         pass
 
 
-def file_reader(path):
-    if not os.path.isdir(path) and path.endswith(".numbers"):
-        return zip_file_reader(path)
+def process_file(contents, filename, output_dir):
+    filename = re.sub(".*\.numbers/", "", filename)
+    ensure_directory_exists(output_dir, filename)
+    target_path = os.path.join(output_dir, filename)
+    if isinstance(contents, IWAFile):
+        target_path = target_path.replace(".iwa", "")
+        target_path += ".txt"
+        with open(target_path, "w") as out:
+            print(json.dumps(contents.to_dict(), sort_keys=True, indent=4), file=out)
     else:
-        return directory_reader(path)
-
-
-def zip_file_reader(path):
-    zipfile = ZipFile(path, "r")
-    for _file in zipfile.filelist:
-        _file.filename = _file.filename.encode("cp437").decode("utf-8")
-    iterator = sorted(zipfile.filelist, key=lambda x: x.filename)
-    for zipinfo in iterator:
-        if zipinfo.filename.endswith("/"):
-            continue
-        with zipfile.open(zipinfo) as handle:
-            yield (zipinfo.filename, handle)
-
-
-def directory_reader(path):
-    # Python <3.5 doesn't support glob with recursive, so this will have to do.
-    iterator = set(sum([glob(path + ("/**" * i)) for i in range(10)], []))
-    iterator = sorted(iterator)
-    for filename in iterator:
-        if os.path.isdir(filename):
-            continue
-        rel_filename = filename.replace(path + "/", "")
-        with open(filename, "rb") as handle:
-            yield (rel_filename, handle)
-
-
-@contextmanager
-def dir_file_sink(target_dir):
-    def accept(filename, contents):
-        ensure_directory_exists(target_dir, filename)
-        target_path = os.path.join(target_dir, filename)
-        if isinstance(contents, IWAFile):
-            target_path = target_path.replace(".iwa", "")
-            target_path += ".txt"
-            with open(target_path, "w") as out:
-                print(json.dumps(contents.to_dict(), sort_keys=True, indent=4), file=out)
-        else:
-            with open(target_path, "wb") as out:
-                out.write(contents)
-
-    yield accept
-
-
-def process_file(filename, handle, sink):
-    contents = None
-    # TODO: LZFSE compressed according to /usr/bin/file
-    if ".iwa" in filename and "OperationStorage" not in filename:
-        contents = handle.read()
-        file = IWAFile.from_buffer(contents, filename)
-        sink(filename, file)
-    elif filename.endswith("Index.zip"):
-        index_contents = BytesIO(handle.read())
-        zipf = ZipFile(index_contents)
-        iwa_files = filter(lambda x: x.endswith(".iwa"), zipf.namelist())
-        for iwa_filename in iwa_files:
-            # TODO: LZFSE compressed according to /usr/bin/file
-            if "OperationStorage" in iwa_filename:
-                continue
-            contents = zipf.read(iwa_filename)
-            file = IWAFile.from_buffer(contents, iwa_filename)
-            sink(iwa_filename, file)
-    else:
-        sink(filename, contents or handle.read())
-
-
-def process(input_path, output_path, subfile=None):
-    with dir_file_sink(output_path) as sink:
-        for filename, handle in file_reader(input_path):
-            try:
-                process_file(filename, handle, sink)
-            except Exception as e:  # pragma: no cover
-                raise ValueError("Failed to process file %s due to: %s" % (filename, e))
+        with open(target_path, "wb") as out:
+            out.write(contents)
 
 
 def main():
@@ -117,7 +50,12 @@ def main():
         sys.exit(1)
     else:
         for document in args.document:
-            process(document, args.output or document.replace(".numbers", ""))
+            output_dir = args.output or document.replace(".numbers", "")
+            read_numbers_file(
+                document,
+                handler=lambda contents, filename: process_file(contents, filename, output_dir),
+                store_objects=False,
+            )
 
 
 if __name__ == "__main__":
