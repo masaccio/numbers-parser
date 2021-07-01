@@ -108,6 +108,12 @@ for col in table.iter_cole(min_row=2, max_row=7):
    sum += col.value
 ```
 
+### TODO
+
+There's probably more to say here, but certainly:
+* Formulas: these seem to be stored as a linked list AST rather than text which might make for
+easier evaluation, but does mean that they are more complex to extract.
+
 ## Numbers File Formats
 
 Numbers uses a proprietary, compressed binary format to store its tables.
