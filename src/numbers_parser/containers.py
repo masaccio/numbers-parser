@@ -1,5 +1,5 @@
 from zipfile import ZipFile, BadZipFile
-from numbers_parser.codec import IWAFile
+from numbers_parser.iwafile import IWAFile
 from pathlib import Path
 from io import BytesIO
 
