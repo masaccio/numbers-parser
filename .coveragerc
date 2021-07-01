@@ -1,6 +1,0 @@
-[run]
-omit = src/numbers_parser/generated/*.py
-branch = True
-
-[html]
-directory = coverage_html_report
