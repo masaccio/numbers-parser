@@ -35,7 +35,7 @@ def read_numbers_file(path, handler, store_objects=True):
             _get_objects_from_zip_stream(zipf, handler, store_objects)
 
 
-def _get_objects_from_zip_file(self, path):
+def _get_objects_from_zip_file(path, handler, store_objects=True):
     try:
         zipf = ZipFile(path)
     except BadZipFile as e:  # pragma: no cover
