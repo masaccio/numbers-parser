@@ -73,3 +73,28 @@ def test_unpack_dir(script_runner, tmp_path):
     assert len(strings) == 21
     assert "XXX_3_3" in strings
     assert "XXX_COL_3" in strings
+
+
+def test_unpack_hex(script_runner, tmp_path):
+    output_dir = tmp_path / "test"
+    ret = script_runner.run(
+        "unpack-numbers",
+        "--hex-uuids",
+        "--output",
+        str(output_dir),
+        "tests/data/test-5.numbers",
+        print_result=False,
+    )
+    assert ret.success
+    assert ret.stdout == ""
+    with open(str(output_dir / "Index/CalculationEngine.txt")) as f:
+        data = json.load(f)
+    objects = data["chunks"][0]["archives"][0]["objects"]
+    assert (
+        data["chunks"][0]["archives"][1]["objects"][0]["baseOwnerUid"]["lower"]
+        == "0xB749DBDDB35F99D7"
+    )
+    assert (
+        objects[0]["dependencyTracker"]["formulaOwnerInfo"][0]["formulaOwnerId"]["uuidW0"]
+        == "0xB35F99D7"
+    )
