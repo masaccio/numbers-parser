@@ -47,8 +47,17 @@ def test_table_contents():
     doc = Document("tests/data/test-1.numbers")
     sheets = doc.sheets()
     tables = sheets[0].tables()
-    data = tables[0].data
+    data = tables[0].rows(values_only=True)
     assert data == ZZZ_TABLE_1_REF
+
+def test_table_contents_as_cells():
+    doc = Document("tests/data/test-1.numbers")
+    sheets = doc.sheets()
+    tables = sheets[0].tables()
+    rows = tables[0].rows()
+    for index in range(len(rows)):
+        data = [cell.value or None for cell in rows[index]]
+        assert data == ZZZ_TABLE_1_REF[index]
 
 def test_cell():
     doc = Document("tests/data/test-1.numbers")
