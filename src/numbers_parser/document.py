@@ -17,11 +17,13 @@ from numbers_parser.cell import (
     NumberCell,
     TextCell,
     xl_cell_to_rowcol,
+    xl_rowcol_to_cell,
     xl_range,
 )
 
 
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 
 
 class UnsupportedError(NumbersError):
@@ -74,7 +76,6 @@ class Table:
         super(Table, self).__init__()
         self._object_store = object_store
         self._table = object_store[table_id]
-        self._table_id = table_id
         self.name = self._table.table_name
 
         bds = self._table.base_data_store
@@ -84,26 +85,131 @@ class Table:
         self._column_headers = [
             h.numberOfCells for h in object_store[bds.columnHeaders.identifier].headers
         ]
-        self._tile_ids = [t.tile.identifier for t in bds.tiles.tiles]
+        self._tiles = [object_store[t.tile.identifier] for t in bds.tiles.tiles]
         self._table_data = None
         self._table_cells = None
         self._merge_cells = None
 
     @property
-    def data(self):
-        if self._table_data is None:
-            table_data = []
-            for row in self.cells:
-                table_data.append([cell.value for cell in row])
-            self._table_data = table_data
+    def formulas(self):
+        formula_type_lookup = {
+            k: v.name
+            for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
+        }
+        cell_records = _extract_cell_records(self._object_store, self._table)
+        formula_table_id = self._table.base_data_store.formula_table.identifier
+        formula_table = self._object_store[formula_table_id]
+        self._formulas = []
+        for index in range(len(formula_table.entries)):
+            formula = formula_table.entries[index]
+            row_base = cell_records[index][0]
+            col_base = cell_records[index][1]
+            ast_tree = []
+            for node in formula.formula.AST_node_array.AST_node:
+                node_type = formula_type_lookup[node.AST_node_type]
+                if node_type == "FUNCTION_NODE":
+                    ast_tree.append(
+                        {
+                            "type": node_type,
+                            "node_index": node.AST_function_node_index,
+                            "num_args": node.AST_function_node_numArgs,
+                        }
+                    )
+                elif node_type == "NUMBER_NODE":
+                    ast_tree.append(
+                        {
+                            "type": node_type,
+                            "decimal_high": node.AST_number_node_decimal_high,
+                            "decimal_low": node.AST_number_node_decimal_low,
+                            "number": node.AST_number_node_number,
+                        }
+                    )
+                elif node_type == "CELL_REFERENCE_NODE":
+                    if node.AST_row.absolute:
+                        row_num = node.AST_row.row
+                    else:
+                        row_num = row_base - node.AST_row.row
+                    if node.AST_column.absolute:
+                        col_num = node.AST_column.column
+                    else:
+                        col_num = col_base - node.AST_column.column
+                    try:
+                        ref = (xl_rowcol_to_cell(row_num, col_num),)
+                    except IndexError:
+                        ref = "*EXception"
 
-        return self._table_data
+                    ast_tree.append(
+                        {"type": node_type, "row": row_num, "column": col_num, "ref": ref}
+                    )
+                elif node_type == "STRING_NODE":
+                    ast_tree.append(
+                        {
+                            "type": node_type,
+                            "string": node.AST_string_node_string,
+                        }
+                    )
+                elif node_type == "PREPEND_WHITESPACE_NODE":
+                    ast_tree.append(
+                        {
+                            "type": node_type,
+                            "whitespace": node.AST_whitespace,
+                        }
+                    )
+                elif any(
+                    [
+                        node_type == "ADDITION_NODE",
+                        node_type == "BEGIN_EMBEDDED_NODE_ARRAY",
+                        node_type == "BOOLEAN_NODE",
+                        node_type == "COLON_NODE",
+                        node_type == "CONCATENATION_NODE",
+                        node_type == "DIVISION_NODE",
+                        node_type == "END_THUNK_NODE",
+                        node_type == "EQUAL_TO_NODE",
+                        node_type == "GREATER_THAN_NODE",
+                        node_type == "MULTIPLICATION_NODE",
+                        node_type == "NOT_EQUAL_TO_NODE",
+                        node_type == "SUBTRACTION_NODE",
+                    ]
+                ):
+                    ast_tree.append({"type": node_type})
+                else:
+                    raise UnsupportedError(
+                        f"Unsupported formula type {node_type}"
+                    )  # pragma: no cover
+
+                #  TODO: deal with error cells
+
+            self._formulas.append({"tree": ast_tree})
+
+    @property
+    def data(self):
+        """The data property is deprecated: use rows(values_only=True) instead"""
+        return self.rows(values_only=True)
 
     @property
     def cells(self) -> list:
+        """The cells property is deprecated: use rows(values_only=False) instead"""
+        return self.rows(values_only=False)
+
+    def rows(self, values_only: bool = False) -> list:
+        """
+        Return all rows of cells for the Table.
+
+        Args:
+            values_only: if True, return cell values instead of Cell objects
+
+        Returns:
+            rows: list of rows; each row is a list of Cell objects
+        """
         if self._table_cells is None:
             self._table_cells = self._extract_table_cells()
-        return self._table_cells
+        if values_only:
+            row_values = []
+            for row_cells in self._table_cells:
+                row_values.append([cell.value for cell in row_cells])
+            return row_values
+        else:
+            return self._table_cells
 
     @property
     def merge_ranges(self) -> list:
@@ -121,10 +227,11 @@ class Table:
             self._merge_cells = _extract_merge_cells(self._object_store, self._table)
 
         row_infos = []
-        for tile_id in self._tile_ids:
-            row_infos += self._object_store[tile_id].rowInfos
+        for tile in self._tiles:
+            row_infos += tile.rowInfos
 
-        storage_version = self._object_store[tile_id].storage_version
+        storage_version = self._tiles[0].storage_version
+
         if storage_version != 5:
             raise UnsupportedError(  # pragma: no cover
                 f"Unsupported row info version {storage_version}"
@@ -147,7 +254,7 @@ class Table:
         ]
 
         table_cells = []
-        num_rows = sum([self._object_store[t].numrows for t in self._tile_ids])
+        num_rows = sum([t.numrows for t in self._tiles])
         for row_num in range(num_rows):
             row = []
             for col_num in range(self.num_cols):
@@ -267,14 +374,17 @@ class Table:
         """
         Produces cells from a table, by row. Specify the iteration range using
         the indexes of the rows and columns.
+
         Args:
             min_row: smallest row index (zero indexed)
             max_row: largest row (zero indexed)
             min_col: smallest row index (zero indexed)
             max_col: largest row (zero indexed)
             values_only: return cell values rather than Cell objects
+
         Returns:
             generator: tuple of cells
+
         Raises:
             IndexError: row or column values are out of range for the table
         """
@@ -310,14 +420,17 @@ class Table:
         """
         Produces cells from a table, by column. Specify the iteration range using
         the indexes of the rows and columns.
+
         Args:
             min_col: smallest row index (zero indexed)
             max_col: largest row (zero indexed)
             min_row: smallest row index (zero indexed)
             max_row: largest row (zero indexed)
             values_only: return cell values rather than Cell objects
+
         Returns:
             generator: tuple of cells
+
         Raises:
             IndexError: row or column values are out of range for the table
         """
@@ -348,11 +461,13 @@ def _extract_cell_data(
 ) -> List[bytes]:
     """
     Extract storage buffers for each cell in a table row
+
     Args:
         storage_buffer:  cell_storage_buffer or cell_storage_buffer for a table row
         offsets: 16-bit cell offsets for a table row
         num_cols: number of columns in a table row
         has_wide_offsets: use 4-byte offsets rather than 1-byte offset
+
     Returns:
          data: list of bytes for each cell in a row, or None if empty
     """
@@ -388,10 +503,13 @@ def _extract_cell_data(
 def _uuid(ref: dict) -> int:
     """
     Extract storage buffers for each cell in a table row
+
     Args:
         ref: Google protobuf containing either four 32-bit IDs or two 64-bit IDs
+
     Returns:
         uuid: 128-bit UUID
+
     Raises:
         UnsupportedError: object does not include expected UUID fields
     """
@@ -407,7 +525,7 @@ def _uuid(ref: dict) -> int:
 
 
 def _extract_merge_cells(object_store: ObjectStore, table: Table):
-    """Exract all the merge cell ranges for the the Table."""
+    """Exract all the merge cell ranges for the Table."""
     # Merge ranges are stored in a number of structures, but the simplest is
     # a TSCE.RangePrecedentsTileArchive which exists for each Table in the
     # Document. These archives contain a fromToRange list which has the merge
@@ -416,23 +534,23 @@ def _extract_merge_cells(object_store: ObjectStore, table: Table):
     # The Owner IDs need to be extracted from teh Calculation Engine using
     # UUID matching (this seems fragile, but no other mechanism has been found)
     #
-    # "fromToRange": [
-    #     {
-    #         "fromCoord": {
-    #         "column": 0,
-    #         "row": 0
-    #     },
-    #     "refersToRect": {
-    #         "origin": {
-    #             "column": 0,
-    #             "row": 0
-    #         },
-    #         "size": {
-    #             "numColumns": 2
-    #         }
-    #     }
-    # ],
-    # "toOwnerId": 1
+    #  "fromToRange": [
+    #      {
+    #          "fromCoord": {
+    #          "column": 0,
+    #          "row": 0
+    #      },
+    #      "refersToRect": {
+    #          "origin": {
+    #              "column": 0,
+    #              "row": 0
+    #          },
+    #          "size": {
+    #              "numColumns": 2
+    #          }
+    #      }
+    #  ],
+    #  "toOwnerId": 1
     #
     owner_id_map = _extract_owner_id_map(object_store)
     table_base_id = _extract_table_base_id(object_store, table)
@@ -463,12 +581,12 @@ def _extract_merge_cells(object_store: ObjectStore, table: Table):
 
 
 def _extract_owner_id_map(object_store: ObjectStore):
-    """"
+    """ "
     Extracts the mapping table from Owner IDs to UUIDs. Returns a
     dictionary mapping the owner ID int to a 128-bit UUID.
     """
     # The TSCE.CalculationEngineArchive contains a list of mapping entries
-    # in odependencyTracker.formulaOwnerDependencies from the root level
+    # in dependencyTracker.formulaOwnerDependencies from the root level
     # of the protobuf. Each mapping contains a 32-bit style UUID:
     #
     # "ownerIdMap": {
@@ -476,8 +594,8 @@ def _extract_owner_id_map(object_store: ObjectStore):
     #     {
     #         "internalOwnerId": 33,
     #         "ownerId": {
-    #             "uuidW0": 8750e563, "uuidW1": 1e4bfcc0,
-    #             "uuidW2": c26dda92, "uuidW3": 3cb03f23
+    #             "uuidW0": "0x8750e563, "uuidW1": "0x1e4bfcc0,
+    #             "uuidW2": "0xc26dda92, "uuidW3": "0x3cb03f23
     #         }
     #     },
     #
@@ -495,12 +613,12 @@ def _extract_table_base_id(object_store: ObjectStore, table: Table):
     # root level of the protobuf:
     #
     #     "baseOwnerUid": {
-    #         "lower": 0c4ebfb1d9676393",
-    #         "upper": f9ad9f35d33aba96"
+    #         "lower": "0x0c4ebfb1d9676393",
+    #         "upper": "0xf9ad9f35d33aba96"
     #     }
-    #     "formulaOwnerUid": {
-    #         "lower": 0c4ebfb1d96763b6",
-    #         "upper": f9ad9f35d33aba96"
+    #      "formulaOwnerUid": {
+    #         "lower": "0x0c4ebfb1d96763b6",
+    #         "upper": "0xf9ad9f35d33aba96"
     #     },
     #
     # The Table UUID is the TSCE.FormulaOwnerDependenciesArchive whose formulaOwnerUid
@@ -508,8 +626,8 @@ def _extract_table_base_id(object_store: ObjectStore, table: Table):
     #
     #    "hauntedOwner": {
     #        "ownerUid": {
-    #            "lower": 0c4ebfb1d96763b6",
-    #            "upper": f9ad9f35d33aba96"
+    #            "lower": "0x0c4ebfb1d96763b6",
+    #            "upper": "0xf9ad9f35d33aba96"
     #        }
     #    }
     haunted_owner = _uuid(table.haunted_owner.owner_uid)
@@ -520,3 +638,37 @@ def _extract_table_base_id(object_store: ObjectStore, table: Table):
             formula_owner_uid = _uuid(obj.formula_owner_uid)
             if formula_owner_uid == haunted_owner:
                 return base_owner_uid
+
+
+def _extract_cell_records(object_store: ObjectStore, table: Table):
+    """Exract all the formula cell ranges for the Table."""
+    # The TSCE.CalculationEngineArchive contains formulaOwnerInfo records
+    # inside the dependencyTracker. Each of these has a cellDependencies
+    # dictionary and some contain cellRecords that contain formula references:
+    #
+    # "cellDependencies": {
+    #     "cellRecord": [
+    #         {
+    #             "column": 0,
+    #             "containsAFormula": true,
+    #             "edges": { "packedEdgeWithoutOwner": [ 16777216 ] },
+    #             "row": 1
+    #         },
+    #         {
+    #             "column": 1,
+    #             "containsAFormula": true,
+    #             "edges": { "packedEdgeWithoutOwner": [16777216 ] },
+    #             "row": 1
+    #         }
+    #     ]
+    # }
+    cell_records = []
+    calculation_engine_id = object_store.find_refs("CalculationEngineArchive")[0]
+    formula_owner_info = object_store[calculation_engine_id].dependency_tracker.formula_owner_info
+    for finfo in object_store[calculation_engine_id].dependency_tracker.formula_owner_info:
+        if finfo.HasField("cell_dependencies"):
+            for cell_record in finfo.cell_dependencies.cell_record:
+                if cell_record.contains_a_formula:
+                    cell_records.append((cell_record.row, cell_record.column))
+                # isInACycle indicates CIRCULAR_REF_ERROR
+    return cell_records
