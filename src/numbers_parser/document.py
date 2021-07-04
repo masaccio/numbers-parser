@@ -104,11 +104,11 @@ class Table:
             formula = formula_table.entries[index]
             row_base = cell_records[index][0]
             col_base = cell_records[index][1]
-            ast_tree = []
+            ast_nodes = []
             for node in formula.formula.AST_node_array.AST_node:
                 node_type = formula_type_lookup[node.AST_node_type]
                 if node_type == "FUNCTION_NODE":
-                    ast_tree.append(
+                    ast_nodes.append(
                         {
                             "type": node_type,
                             "node_index": node.AST_function_node_index,
@@ -116,7 +116,7 @@ class Table:
                         }
                     )
                 elif node_type == "NUMBER_NODE":
-                    ast_tree.append(
+                    ast_nodes.append(
                         {
                             "type": node_type,
                             "decimal_high": node.AST_number_node_decimal_high,
@@ -128,28 +128,28 @@ class Table:
                     if node.AST_row.absolute:
                         row_num = node.AST_row.row
                     else:
-                        row_num = row_base - node.AST_row.row
+                        row_num = row_base + node.AST_row.row
                     if node.AST_column.absolute:
                         col_num = node.AST_column.column
                     else:
-                        col_num = col_base - node.AST_column.column
+                        col_num = col_base + node.AST_column.column
                     try:
-                        ref = (xl_rowcol_to_cell(row_num, col_num),)
+                        ref = xl_rowcol_to_cell(row_num, col_num)
                     except IndexError:
-                        ref = "*EXception"
+                        ref = "*Exception"
 
-                    ast_tree.append(
+                    ast_nodes.append(
                         {"type": node_type, "row": row_num, "column": col_num, "ref": ref}
                     )
                 elif node_type == "STRING_NODE":
-                    ast_tree.append(
+                    ast_nodes.append(
                         {
                             "type": node_type,
                             "string": node.AST_string_node_string,
                         }
                     )
                 elif node_type == "PREPEND_WHITESPACE_NODE":
-                    ast_tree.append(
+                    ast_nodes.append(
                         {
                             "type": node_type,
                             "whitespace": node.AST_whitespace,
@@ -171,7 +171,7 @@ class Table:
                         node_type == "SUBTRACTION_NODE",
                     ]
                 ):
-                    ast_tree.append({"type": node_type})
+                    ast_nodes.append({"type": node_type})
                 else:
                     raise UnsupportedError(
                         f"Unsupported formula type {node_type}"
@@ -179,10 +179,11 @@ class Table:
 
                 #  TODO: deal with error cells
 
-            self._formulas.append({"tree": ast_tree})
+            self._formulas.append({"ast": ast_nodes, "row": row_base, "column": col_base})
+        return self._formulas
 
     @property
-    def data(self):
+    def data(self) -> list:
         """The data property is deprecated: use rows(values_only=True) instead"""
         return self.rows(values_only=True)
 
@@ -663,12 +664,14 @@ def _extract_cell_records(object_store: ObjectStore, table: Table):
     #     ]
     # }
     cell_records = []
+    table_base_id = _extract_table_base_id(object_store, table)
     calculation_engine_id = object_store.find_refs("CalculationEngineArchive")[0]
     formula_owner_info = object_store[calculation_engine_id].dependency_tracker.formula_owner_info
     for finfo in object_store[calculation_engine_id].dependency_tracker.formula_owner_info:
         if finfo.HasField("cell_dependencies"):
-            for cell_record in finfo.cell_dependencies.cell_record:
-                if cell_record.contains_a_formula:
-                    cell_records.append((cell_record.row, cell_record.column))
-                # isInACycle indicates CIRCULAR_REF_ERROR
+            formula_owner_id = _uuid(finfo.formula_owner_id)
+            if formula_owner_id == table_base_id:
+                for cell_record in finfo.cell_dependencies.cell_record:
+                    if cell_record.contains_a_formula:
+                        cell_records.append((cell_record.row, cell_record.column))
     return cell_records
