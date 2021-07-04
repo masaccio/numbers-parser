@@ -64,6 +64,9 @@ class ObjectStore:
     def __len__(self) -> int:
         return len(self._object_store)
 
+    def __getitem__(self, identifier: int):
+        return self._object_store[identifier]
+
     def find_refs(self, ref_name) -> list:
         refs = [k for k, v in self._object_store.items() if type(v).__name__ == ref_name]
         return refs
