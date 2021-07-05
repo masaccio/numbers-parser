@@ -8,7 +8,13 @@ class Cell:
         self._value = value
         self.row = row
         self.col = col
-        pass
+
+    def add_formula(self, formula):
+        self._formula = formula
+
+    @property
+    def has_formula(self) -> bool:
+        return hasattr(self, "_formula")
 
 
 class NumberCell(Cell):
