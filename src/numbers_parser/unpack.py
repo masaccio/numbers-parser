@@ -1,6 +1,5 @@
 from zipfile import ZipFile, BadZipFile
 from numbers_parser.iwafile import IWAFile
-from numbers_parser.containers import FileFormatError, FileError
 from io import BytesIO
 
 import os
