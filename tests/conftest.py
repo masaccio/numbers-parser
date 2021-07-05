@@ -1,8 +1,6 @@
 import pytest
 
 
-print("IN conftest.py")
-
 def pytest_addoption(parser):
     parser.addoption(
         "--experimental", action="store_true", default=False, help="run experimental tests"
