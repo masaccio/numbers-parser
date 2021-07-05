@@ -56,7 +56,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("document", help="Apple Numbers file(s)", nargs="*")
     parser.add_argument("-V", "--version", action="store_true")
-    parser.add_argument("--hex-uuids", action="store_true")
+    parser.add_argument("--hex-uuids", action="store_true", help="print UUIDs as hex")
     parser.add_argument("--output", "-o", help="directory name to unpack into")
     args = parser.parse_args()
     if args.version:
