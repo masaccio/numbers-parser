@@ -1,10 +1,4 @@
-from zipfile import ZipFile, BadZipFile
-from numbers_parser.iwafile import IWAFile
 from numbers_parser.unpack import read_numbers_file
-from pathlib import Path
-from io import BytesIO
-
-import os
 
 
 class NumbersError(Exception):
@@ -51,9 +45,11 @@ class ItemsList:
 class ObjectStore:
     def __init__(self, path: str) -> int:
         self._object_store = {}
-        read_numbers_file(path,
-                          handler=lambda identifier, obj: self._store_object(identifier, obj),
-                          store_objects=True)
+        read_numbers_file(
+            path,
+            handler=lambda identifier, obj: self._store_object(identifier, obj),
+            store_objects=True,
+        )
 
     def _store_object(self, identifier, obj):
         self._object_store[identifier] = obj
@@ -63,9 +59,6 @@ class ObjectStore:
 
     def __len__(self) -> int:
         return len(self._object_store)
-
-    def __getitem__(self, identifier: int):
-        return self._object_store[identifier]
 
     def find_refs(self, ref_name) -> list:
         refs = [k for k, v in self._object_store.items() if type(v).__name__ == ref_name]

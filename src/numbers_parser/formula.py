@@ -1,11 +1,8 @@
-import struct
-
-from numbers_parser.containers import ItemsList, ObjectStore, NumbersError
+from numbers_parser.containers import ObjectStore, NumbersError
 
 # from numbers_parser.document import Table
-from numbers_parser.cell import ErrorCell, FormulaCell
+from numbers_parser.cell import FormulaCell
 
-from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 
 
@@ -197,7 +194,6 @@ def get_formula_cell_ranges(object_store: ObjectStore, table):
     cell_records = []
     table_base_id = get_table_base_id(object_store, table)
     calculation_engine_id = object_store.find_refs("CalculationEngineArchive")[0]
-    formula_owner_info = object_store[calculation_engine_id].dependency_tracker.formula_owner_info
     for finfo in object_store[calculation_engine_id].dependency_tracker.formula_owner_info:
         if finfo.HasField("cell_dependencies"):
             formula_owner_id = get_uuid(finfo.formula_owner_id)
@@ -213,13 +209,14 @@ def get_error_cell_ranges(object_store: ObjectStore, table):
     cell_errors = {}
     table_base_id = get_table_base_id(object_store, table)
     calculation_engine_id = object_store.find_refs("CalculationEngineArchive")[0]
-    formula_owner_info = object_store[calculation_engine_id].dependency_tracker.formula_owner_info
     for finfo in object_store[calculation_engine_id].dependency_tracker.formula_owner_info:
         if finfo.HasField("cell_dependencies"):
             formula_owner_id = get_uuid(finfo.formula_owner_id)
             if formula_owner_id == table_base_id:
                 for cell_error in finfo.cell_errors.errors:
-                    cell_errors[(cell_error.coordinate.row, cell_error.coordinate.column)] = cell_error.error_flavor
+                    cell_errors[
+                        (cell_error.coordinate.row, cell_error.coordinate.column)
+                    ] = cell_error.error_flavor
     return cell_errors
 
 

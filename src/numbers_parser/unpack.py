@@ -1,5 +1,6 @@
 from zipfile import ZipFile, BadZipFile
 from numbers_parser.iwafile import IWAFile
+from numbers_parser.containers import FileFormatError, FileError
 from io import BytesIO
 
 import os
@@ -19,7 +20,7 @@ def read_numbers_file(path, handler, store_objects=True):
                     if filename.endswith(".iwa"):
                         contents = f.read()
                         _extract_iwa_archives(contents, filepath, handler, store_objects)
-                    elif store_objects == False:
+                    elif not store_objects:
                         contents = f.read()
                         handler(contents, os.path.join(path, filename))
     else:
@@ -49,7 +50,7 @@ def _get_objects_from_zip_stream(zipf, handler, store_objects):
         if filename.endswith(".iwa"):
             contents = zipf.read(filename)
             _extract_iwa_archives(contents, filename, handler, store_objects)
-        elif store_objects == False:
+        elif not store_objects:
             handler(zipf.read(filename), filename)
 
 

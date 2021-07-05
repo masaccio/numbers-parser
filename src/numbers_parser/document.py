@@ -20,13 +20,11 @@ from numbers_parser.cell import (
     NumberCell,
     TextCell,
     xl_cell_to_rowcol,
-    xl_rowcol_to_cell,
     xl_range,
 )
 
 
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 
 
 class UnsupportedError(NumbersError):
