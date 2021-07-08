@@ -1,24 +1,6 @@
 from numbers_parser.unpack import read_numbers_file
 
 
-class NumbersError(Exception):
-    """Base class for other exceptions"""
-
-    pass
-
-
-class FileError(NumbersError):
-    """Raised for IO and other OS errors"""
-
-    pass
-
-
-class FileFormatError(NumbersError):
-    """Raised for parsing errors during file load"""
-
-    pass
-
-
 class ItemsList:
     def __init__(self, objects, refs, item_class):
         self._item_name = item_class.__name__.lower()
