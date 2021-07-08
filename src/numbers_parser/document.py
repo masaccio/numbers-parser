@@ -207,7 +207,8 @@ class Table:
                         row_num,
                         col_num,
                         cell_type,
-                        str(binascii.hexlify(storage_buffer, ":")),
+                        # binascii.hexlify does not have sep=':' before 3.7
+                        ":".join(["{0:02x}".format(b) for b in storage_buffer]),
                     )
 
                     if cell_type == TSTArchives.emptyCellValueType:
@@ -296,7 +297,8 @@ class Table:
                                 row_num,
                                 col_num,
                                 formula_key,
-                                str(binascii.hexlify(storage_buffer, ":")),
+                                # binascii.hexlify does not have sep=':' before 3.7
+                                ":".join(["{0:02x}".format(b) for b in storage_buffer]),
                             )
 
                             ast = table_formulas.ast(formula_key)
