@@ -1,6 +1,5 @@
 import array
 import struct
-import binascii
 import logging
 import warnings
 
