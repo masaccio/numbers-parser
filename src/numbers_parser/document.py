@@ -1,11 +1,14 @@
 import array
 import struct
 import binascii
+import logging
+import warnings
 
 from typing import Union, List, Generator
 from datetime import datetime, timedelta
 
-from numbers_parser.containers import ItemsList, ObjectStore, NumbersError
+from numbers_parser.containers import ItemsList, ObjectStore
+from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.formula import TableFormulas, get_merge_cell_ranges
 
 from numbers_parser.cell import (
@@ -25,12 +28,6 @@ from numbers_parser.cell import (
 
 
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-
-
-class UnsupportedError(NumbersError):
-    """Raised for unsupported file format features"""
-
-    pass
 
 
 class Document:
@@ -77,7 +74,6 @@ class Table:
         super(Table, self).__init__()
         self._object_store = object_store
         self._table = object_store[table_id]
-        self.name = self._table.table_name
 
         bds = self._table.base_data_store
         self._row_headers = [
@@ -92,13 +88,24 @@ class Table:
         self._merge_cells = None
 
     @property
+    def name(self):
+        return self._table.table_name
+
+    @property
     def data(self) -> list:
-        """The data property is deprecated: use rows(values_only=True) instead"""
+        """The data property will be deprecated; use rows instead"""
+        warnings.warn(
+            "data property will be deprecated in 3.0; use rows(values_only=True) instead",
+            PendingDeprecationWarning,
+        )
         return self.rows(values_only=True)
 
     @property
     def cells(self) -> list:
-        """The cells property is deprecated: use rows(values_only=False) instead"""
+        """The cells property will be deprecated: use rows instead"""
+        warnings.warn(
+            "cells property will be deprecated in 3.0; use rows instead", PendingDeprecationWarning
+        )
         return self.rows(values_only=False)
 
     def rows(self, values_only: bool = False) -> list:
@@ -126,10 +133,7 @@ class Table:
         if self._merge_cells is None:
             self._merge_cells = get_merge_cell_ranges(self._object_store, self._table)
 
-        ranges = []
-        for row_num, cols in self._merge_cells.items():
-            for col_num in cols:
-                ranges.append(xl_range(*self._merge_cells[row_num][col_num]["rect"]))
+        ranges = [xl_range(*r["rect"]) for r in self._merge_cells.values()]
         return sorted(set(list(ranges)))
 
     def _extract_table_cells(self):
@@ -184,14 +188,27 @@ class Table:
 
                 cell = None
                 if storage_buffer is None:
-                    try:
-                        cell = MergedCell(*self._merge_cells[row_num][col_num]["rect"])
-                    except KeyError:
+                    row_col = (row_num, col_num)
+                    if (
+                        row_col in self._merge_cells
+                        and self._merge_cells[row_col]["merge_type"] == "ref"
+                    ):
+                        cell = MergedCell(*self._merge_cells[row_col]["rect"])
+                    else:
                         cell = EmptyCell(row_num, col_num)
                     cell.size = None
                     row.append(cell)
                 else:
                     cell_type = storage_buffer[1]
+
+                    logging.debug(
+                        "%s@[%d,%d]: cell_type=%d, storage_buffer=%s",
+                        self._table.table_name,
+                        row_num,
+                        col_num,
+                        cell_type,
+                        str(binascii.hexlify(storage_buffer, sep=":")),
+                    )
 
                     if cell_type == TSTArchives.emptyCellValueType:
                         cell = EmptyCell(row_num, col_num)
@@ -234,11 +251,14 @@ class Table:
                             f"Unsupport cell type {cell_type} @{self.name}:({row_num},{col_num})"
                         )
 
-                    try:
-                        if self._merge_cells[row_num][col_num]["merge_type"] == "source":
-                            cell.is_merged = True
-                            cell.size = self._merge_cells[row_num][col_num]["size"]
-                    except KeyError:
+                    row_col = (row_num, col_num)
+                    if (
+                        row_col in self._merge_cells
+                        and self._merge_cells[row_col]["merge_type"] == "source"
+                    ):
+                        cell.is_merged = True
+                        cell.size = self._merge_cells[row_col]["size"]
+                    else:
                         cell.is_merged = False
                         cell.size = (1, 1)
 
@@ -271,8 +291,14 @@ class Table:
                                     f"Unsupported formula cell type '{cell_type}' @{self.name}:({row_num},{col_num})"
                                 )
 
-                            # print(f"@{row_num},{col_num}: type={cell_type}, key={formula_key}")
-                            # print("\tstorage_buffer =", binascii.hexlify(storage_buffer, sep=":"))
+                            logging.debug(
+                                "@[%d,%d]: formula_key=%d, storage_buffer=%s",
+                                row_num,
+                                col_num,
+                                formula_key,
+                                str(binascii.hexlify(storage_buffer, sep=":")),
+                            )
+
                             ast = table_formulas.ast(formula_key)
                             ast["row"] = row_num
                             ast["column"] = col_num
@@ -315,12 +341,12 @@ class Table:
         else:
             (row_num, col_num) = args
 
-        cells = self.cells
-        if row_num >= len(cells):
+        rows = self.rows()
+        if row_num >= len(rows):
             raise IndexError(f"row {row_num} out of range")
-        if col_num >= len(cells[row_num]):
+        if col_num >= len(rows[row_num]):
             raise IndexError(f"coumn {col_num} out of range")
-        return cells[row_num][col_num]
+        return rows[row_num][col_num]
 
     def iter_rows(
         self,
@@ -361,12 +387,12 @@ class Table:
         if max_col > self.num_cols:
             raise IndexError(f"column {max_col} out of range")
 
-        cells = self.cells
+        rows = self.rows()
         for row_num in range(min_row, max_row + 1):
             if values_only:
-                yield tuple(cell.value or None for cell in cells[row_num][min_col : max_col + 1])
+                yield tuple(cell.value or None for cell in rows[row_num][min_col : max_col + 1])
             else:
-                yield tuple(cells[row_num][min_col : max_col + 1])
+                yield tuple(rows[row_num][min_col : max_col + 1])
 
     def iter_cols(
         self,
@@ -407,12 +433,12 @@ class Table:
         if max_col > self.num_cols:
             raise IndexError(f"column {max_col} out of range")
 
-        cells = self.cells
+        rows = self.rows()
         for col_num in range(min_col, max_col + 1):
             if values_only:
-                yield tuple(row[col_num].value for row in cells[min_row : max_row + 1])
+                yield tuple(row[col_num].value for row in rows[min_row : max_row + 1])
             else:
-                yield tuple(row[col_num] for row in cells[min_row : max_row + 1])
+                yield tuple(row[col_num] for row in rows[min_row : max_row + 1])
 
 
 def _extract_cell_data(
