@@ -1,4 +1,5 @@
-from numbers_parser.containers import ObjectStore, NumbersError
+from numbers_parser.containers import ObjectStore
+from numbers_parser.exceptions import UnsupportedError
 
 # from numbers_parser.document import Table
 from numbers_parser.cell import FormulaCell
@@ -37,8 +38,7 @@ def get_formula_ast(object_store, table):
     formula_table_id = table.base_data_store.formula_table.identifier
     formula_table = object_store[formula_table_id]
     formulas = {}
-    for index in range(len(formula_table.entries)):
-        formula = formula_table.entries[index]
+    for formula in formula_table.entries:
         ast_nodes = []
         for node in formula.formula.AST_node_array.AST_node:
             node_type = formula_type_lookup[node.AST_node_type]
@@ -264,15 +264,13 @@ def get_merge_cell_ranges(object_store: ObjectStore, table):
                 col_start = rect.origin.column
                 col_end = col_start + rect.size.num_columns - 1
                 for row_num in range(row_start, row_end + 1):
-                    if row_num not in merge_cells:
-                        merge_cells[row_num] = {}
                     for col_num in range(col_start, col_end + 1):
-                        merge_cells[row_num][col_num] = {
+                        merge_cells[(row_num, col_num)] = {
                             "merge_type": "ref",
                             "rect": (row_start, col_start, row_end, col_end),
                             "size": (rect.size.num_rows, rect.size.num_columns),
                         }
-                merge_cells[row_start][col_start]["merge_type"] = "source"
+                merge_cells[(row_start, col_start)]["merge_type"] = "source"
     return merge_cells
 
 
