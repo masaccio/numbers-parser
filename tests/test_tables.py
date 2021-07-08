@@ -74,4 +74,4 @@ def test_empty_cells():
     table = tables["XXX_Table_1"]
     assert table.num_cols == 6
     assert table.num_rows == 4
-    assert table.data == XXX_TABLE_1_REF
+    assert table.rows(values_only=True) == XXX_TABLE_1_REF

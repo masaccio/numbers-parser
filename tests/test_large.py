@@ -6,7 +6,7 @@ def test_many_rows():
     doc = Document("tests/data/test-3.numbers")
     sheets = doc.sheets()
     tables = sheets["Sheet_1"].tables()
-    data = tables[0].data
+    data = tables[0].rows(values_only=True)
     ref = []
     _ = [ref.append(["ROW" + str(x)]) for x in range(1, 601)]
     assert data == ref
@@ -16,7 +16,7 @@ def test_many_columns():
     doc = Document("tests/data/test-3.numbers")
     sheets = doc.sheets()
     tables = sheets["Sheet_2"].tables()
-    data = tables[0].data
+    data = tables[0].rows(values_only=True)
     ref = [["COLUMN" + str(x) for x in range(1, 601)]]
     assert data == ref
 
@@ -34,5 +34,5 @@ def test_large_table():
     doc = Document("tests/data/test-6.numbers")
     sheets = doc.sheets()
     tables = sheets["Sheet"].tables()
-    data = tables[0].data
+    data = tables[0].rows(values_only=True)
     assert data == ref

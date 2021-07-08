@@ -41,9 +41,11 @@ def test_table_functions():
         assert table.cell(row_num, 1).has_formula
         # assert table.cell(row_num, 1).formula == TABLE_2_FORMULAS[row_num][1]
 
+    import pprint
+    pp = pprint.PrettyPrinter(indent=4)
     for sheet in doc.sheets():
         print("==== TABLE:", sheet.tables()[0].name)
         for row in sheet.tables()[0].rows():
             for cell in row:
                 if cell.has_formula:
-                    print(f"@{cell.row},{cell.col}:", cell._formula["ast"])
+                    print(f"@{cell.row},{cell.col}:\n", pp.pformat(cell._formula["ast"]))

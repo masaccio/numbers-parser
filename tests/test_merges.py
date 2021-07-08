@@ -30,7 +30,7 @@ def test_table_contents():
     doc = Document("tests/data/test-9.numbers")
     sheets = doc.sheets()
     tables = sheets[0].tables()
-    data = tables[0].data
+    data = tables[0].rows(values_only=True)
     assert data == XXX_TABLE_1_REF
 
 

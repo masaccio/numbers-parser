@@ -15,5 +15,5 @@ def test_read_folder():
     doc = Document("tests/data/test-2.numbers")
     sheets = doc.sheets()
     tables = sheets["Account"].tables()
-    data = tables["Statement"].data
+    data = tables["Statement"].rows(values_only=True)
     assert data == STATEMENT_REF
