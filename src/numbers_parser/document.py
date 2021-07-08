@@ -207,7 +207,7 @@ class Table:
                         row_num,
                         col_num,
                         cell_type,
-                        str(binascii.hexlify(storage_buffer, sep=":")),
+                        str(binascii.hexlify(storage_buffer, ":")),
                     )
 
                     if cell_type == TSTArchives.emptyCellValueType:
@@ -296,7 +296,7 @@ class Table:
                                 row_num,
                                 col_num,
                                 formula_key,
-                                str(binascii.hexlify(storage_buffer, sep=":")),
+                                str(binascii.hexlify(storage_buffer, ":")),
                             )
 
                             ast = table_formulas.ast(formula_key)
