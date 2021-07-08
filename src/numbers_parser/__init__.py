@@ -57,6 +57,7 @@ def _check_installed_numbers_version():
     installed_version = version_dict["CFBundleShortVersionString"]
     if installed_version not in _SUPPORTED_NUMBERS_VERSIONS:
         warnings.warn(f"Numbers version {installed_version} not tested with this version")
+    fp.close()
 
 
 _check_installed_numbers_version()
