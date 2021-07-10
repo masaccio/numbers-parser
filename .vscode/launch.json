@@ -1,0 +1,25 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run experimental tests",
+            "type": "python",
+            "request": "launch",
+            "program": "/opt/homebrew/bin/pytest",
+            "args": [
+                "--experimental"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run tox",
+            "type": "python",
+            "request": "launch",
+            "program": "/opt/homebrew/bin/tox",
+            "console": "integratedTerminal"
+        }
+    ]
+}
