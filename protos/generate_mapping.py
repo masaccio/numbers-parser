@@ -1,5 +1,4 @@
 import os
-import subprocess
 import sys
 
 
@@ -55,7 +54,8 @@ print("TSPRegistryMapping = {")
 for index, symbol in sorted(mappings.items()):
     print(f'    "{index}": "{symbol}",')
 
-print("""}
+print(
+    """}
 
 
 def compute_maps():
@@ -73,4 +73,5 @@ def compute_maps():
      return name_class_map, id_name_map
 
 
-NAME_CLASS_MAP, ID_NAME_MAP = compute_maps()""")
+NAME_CLASS_MAP, ID_NAME_MAP = compute_maps()"""
+)
