@@ -36,7 +36,7 @@ def convert_uuids_to_hex(obj):
 
 
 def process_file(contents, filename, output_dir, hex_uuids):
-    filename = re.sub(".*\.numbers/", "", filename)
+    filename = re.sub(r".*\.numbers/", "", filename)
     ensure_directory_exists(output_dir, filename)
     target_path = os.path.join(output_dir, filename)
     if isinstance(contents, IWAFile):

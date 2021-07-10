@@ -20,9 +20,3 @@ class FileFormatError(NumbersError):
     """Raised for parsing errors during file load"""
 
     pass
-
-
-class UnsupportedError(NumbersError):
-    """Raised for unsupported file format features"""
-
-    pass
