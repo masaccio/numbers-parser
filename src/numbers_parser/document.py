@@ -183,7 +183,7 @@ class Table:
         return self.__merge_cells
 
     @property
-    def _table_cells(self):
+    def _table_cells(self):  # noqa: C901
         if hasattr(self, "__table_cells"):
             return self.__table_cells
 
@@ -346,10 +346,12 @@ class Table:
                                 ":".join(["{0:02x}".format(b) for b in storage_buffer]),
                             )
 
-                            ast = table_formulas.ast(formula_key)
-                            ast["row"] = row_num
-                            ast["column"] = col_num
-                            cell.add_formula(ast)
+                            formula = table_formulas.formula(
+                                formula_key, row_num, col_num
+                            )
+                            # ast["row"] = row_num
+                            # ast["column"] = col_num
+                            cell.add_formula(formula)
                         except KeyError:
                             raise UnsupportedError(  # pragma: no cover
                                 f"Formula not found @{self.name}:({row_num},{col_num})"
@@ -358,6 +360,8 @@ class Table:
                             raise UnsupportedError(  # pragma: no cover
                                 f"Unsupported formula ref @{self.name}:({row_num},{col_num})"
                             )
+                        except IndexError:
+                            cell.add_formula("*FORMULA ERROR*")
 
                     row.append(cell)
             self.__table_cells.append(row)
