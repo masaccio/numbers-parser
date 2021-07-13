@@ -20,3 +20,9 @@ class FileFormatError(NumbersError):
     """Raised for parsing errors during file load"""
 
     pass
+
+
+class FormulaError(NumbersError):
+    """ "Raise for formula evaluation errors"""
+
+    pass
