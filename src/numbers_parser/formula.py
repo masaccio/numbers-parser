@@ -1,10 +1,105 @@
+import logging
+
 from numbers_parser.containers import ObjectStore
 from numbers_parser.exceptions import UnsupportedError
 
 # from numbers_parser.document import Table
-from numbers_parser.cell import FormulaCell
+from numbers_parser.cell import xl_rowcol_to_cell
+from numbers_parser.exceptions import FormulaError
 
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
+
+
+class Formula(list):
+    def __init__(self):
+        self._stack = []
+
+    def pop(self) -> str:
+        return self._stack.pop()
+
+    def popn(self, num_args: int) -> tuple:
+        values = ()
+        for i in range(num_args):
+            values += (self._stack.pop(),)
+        return values
+
+    def push(self, val: str):
+        self._stack.append(val)
+
+    def __str__(self):
+        return "//".join(self._stack)
+
+    def function(self, num_args: int, node_index: int):  # noqa: C901
+        if node_index == 15:
+            return "AVERAGE(" + self.pop() + ")"
+        elif node_index == 22:
+            return "COLUMN()"
+        elif node_index == 62:
+            arg3, arg2, arg1 = self.popn(3)
+            return f"IF({arg1},{arg2},{arg3})"
+        elif node_index == 53:
+            arg2, arg1 = self.popn(2)
+            return f"FIND({arg1},{arg2})"
+        elif node_index == 86:
+            return "MEDIAN(" + self.pop() + ")"
+        elif node_index == 76:
+            return "LEFT(" + self.pop() + ")"
+        elif node_index == 77:
+            return "LEN(" + self.pop() + ")"
+        elif node_index == 87:
+            return "MID(" + self.pop() + ")"
+        elif node_index == 97:
+            return "NOW()"
+        elif node_index == 124:
+            return "RIGHT()"
+        elif node_index == 168:
+            return "SUM(" + self.pop() + ")"
+        else:
+            raise FormulaError("Unsupported formula ID " + str(node_index))
+
+    def equals(self):
+        arg1, arg2 = self.popn(2)
+        # TODO: arguments reversed?
+        self.push(f"{arg1}={arg2}")
+
+    def not_equals(self):
+        arg2, arg1 = self.popn(2)
+        self.push(f"{arg1}≠{arg2}")
+
+    def greater_than(self):
+        arg2, arg1 = self.popn(2)
+        self.push(f"{arg1}>{arg2}")
+
+    def range(self):
+        arg2, arg1 = self.popn(2)
+        self.push(f"{arg1}:{arg2}")
+
+    def concat(self):
+        arg2, arg1 = self.popn(2)
+        self.push(f"{arg1}&{arg2}")
+
+    def add(self):
+        arg2, arg1 = self.popn(2)
+        self.push(f"{arg1}+{arg2}")
+
+    def sub(self):
+        arg2, arg1 = self.popn(2)
+        self.push(f"{arg1}-{arg2}")
+
+    def div(self):
+        arg2, arg1 = self.popn(2)
+        self.push(f"{arg1}/{arg2}")
+
+    def mul(self):
+        arg2, arg1 = self.popn(2)
+        self.push(f"{arg1}*{arg2}")
+
+
+class FormulaNode:
+    def __init__(self, node_type, **kwargs):
+        self.type = node_type
+        for arg, val in kwargs.items():
+            setattr(self, arg, val)
 
 
 class TableFormulas:
@@ -13,10 +108,16 @@ class TableFormulas:
         self._table = table
         self._formulas = get_formula_ast(object_store, table)
         self._error_cells = get_error_cell_ranges(object_store, table)
+        self._formula_type_lookup = {
+            k: v.name
+            for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
+        }
 
     def is_formula(self, row, col):
         if not (hasattr(self, "_formula_cells")):
-            self._formula_cells = get_formula_cell_ranges(self._object_store, self._table)
+            self._formula_cells = get_formula_cell_ranges(
+                self._object_store, self._table
+            )
         return (row, col) in self._formula_cells
 
     def is_error(self, row, col):
@@ -24,88 +125,101 @@ class TableFormulas:
             self._error_cells = get_error_cell_ranges(self._object_store, self._table)
         return (row, col) in self._error_cells
 
-    def ast(self, formula_key):
-        if not (hasattr(self, "_ast")):
-            self._formula_asts = get_formula_ast(self._object_store, self._table)
-        return self._formula_asts[formula_key]
+    def formula(self, formula_key, row_num, col_num):  # noqa: C901
+        if not (hasattr(self, "__ast")):
+            self.__ast = get_formula_ast(self._object_store, self._table)
+        ast = self.__ast[formula_key]
+        formula = Formula()
+        for node in ast:
+            node_type = self._formula_type_lookup[node.AST_node_type]
+            if node_type == "CELL_REFERENCE_NODE":
+                formula.push(node_to_cell_ref(row_num, col_num, node))
+            elif node_type == "NUMBER_NODE":
+                # node.AST_number_node_decimal_high
+                # node.AST_number_node_decimal_low
+                formula.push(str(node.AST_number_node_number))
+            elif node_type == "FUNCTION_NODE":
+                # if node.AST_function_node_numArgs != len(formula):
+                #     raise FormulaError(
+                #         "Insufficient arguments available for function [@{row_num},{@col_num}]"
+                #     )
+                formula.function(
+                    node.AST_function_node_numArgs, node.AST_function_node_index
+                )
+            elif node_type == "STRING_NODE":
+                formula.push(node.AST_string_node_string)
+            elif node_type == "PREPEND_WHITESPACE_NODE":
+                # TODO: something with node.AST_whitespace
+                pass
+            elif node_type == "EQUAL_TO_NODE":
+                formula.equals()
+            elif node_type == "ADDITION_NODE":
+                formula.add()
+            elif node_type == "BEGIN_EMBEDDED_NODE_ARRAY":
+                formula.push("(")
+            elif node_type == "BOOLEAN_NODE":
+                pass
+            elif node_type == "COLON_NODE":
+                formula.range()
+            elif node_type == "CONCATENATION_NODE":
+                formula.concat()
+            elif node_type == "DIVISION_NODE":
+                formula.div()
+            elif node_type == "END_THUNK_NODE":
+                pass
+            elif node_type == "EQUAL_TO_NODE":
+                formula.equals()
+            elif node_type == "GREATER_THAN_NODE":
+                formula.greater_than()
+            elif node_type == "MULTIPLICATION_NODE":
+                formula.mul()
+            elif node_type == "NOT_EQUAL_TO_NODE":
+                formula.not_equals()
+            elif node_type == "SUBTRACTION_NODE":
+                formula.sub()
+            else:
+                return "FUNCTION_UNSUPPORTED:" + str(node_type)
+
+        logging.debug(
+            "%s@[%d,%d]: formula_key=%d, formula=%s",
+            self._table.table_name,
+            row_num,
+            col_num,
+            formula_key,
+            formula,
+        )
+
+        return str(formula)
+
+
+def node_to_cell_ref(row_num: int, col_num: int, node):
+    if node.AST_column.absolute:
+        row = node.AST_row.row
+    else:
+        row = row_num + node.AST_row.row
+    if node.AST_column.absolute:
+        col = node.AST_column.column
+    else:
+        col = col_num + node.AST_column.column
+    return xl_rowcol_to_cell(
+        row,
+        col,
+        row_abs=node.AST_column.absolute,
+        col_abs=node.AST_column.absolute,
+    )
+
+
+def function_with_args(function_id: int, eval_tree: list) -> str:
+    if function_id == 1:
+        return "FOO"
 
 
 def get_formula_ast(object_store, table):
-    formula_type_lookup = {
-        k: v.name
-        for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
-    }
     formula_table_id = table.base_data_store.formula_table.identifier
     formula_table = object_store[formula_table_id]
     formulas = {}
     for formula in formula_table.entries:
-        ast_nodes = []
-        for node in formula.formula.AST_node_array.AST_node:
-            node_type = formula_type_lookup[node.AST_node_type]
-            if node_type == "FUNCTION_NODE":
-                ast_nodes.append(
-                    {
-                        "type": node_type,
-                        "node_index": node.AST_function_node_index,
-                        "num_args": node.AST_function_node_numArgs,
-                    }
-                )
-            elif node_type == "NUMBER_NODE":
-                ast_nodes.append(
-                    {
-                        "type": node_type,
-                        "decimal_high": node.AST_number_node_decimal_high,
-                        "decimal_low": node.AST_number_node_decimal_low,
-                        "number": node.AST_number_node_number,
-                    }
-                )
-            elif node_type == "CELL_REFERENCE_NODE":
-                ast_nodes.append(
-                    {
-                        "type": node_type,
-                        "row": node.AST_row.row,
-                        "column": node.AST_column.column,
-                        "row_is_abs": node.AST_column.absolute,
-                        "col_is_abs": node.AST_column.absolute,
-                    }
-                )
-            elif node_type == "STRING_NODE":
-                ast_nodes.append(
-                    {
-                        "type": node_type,
-                        "string": node.AST_string_node_string,
-                    }
-                )
-            elif node_type == "PREPEND_WHITESPACE_NODE":
-                ast_nodes.append(
-                    {
-                        "type": node_type,
-                        "whitespace": node.AST_whitespace,
-                    }
-                )
-            elif any(
-                [
-                    node_type == "ADDITION_NODE",
-                    node_type == "BEGIN_EMBEDDED_NODE_ARRAY",
-                    node_type == "BOOLEAN_NODE",
-                    node_type == "COLON_NODE",
-                    node_type == "CONCATENATION_NODE",
-                    node_type == "DIVISION_NODE",
-                    node_type == "END_THUNK_NODE",
-                    node_type == "EQUAL_TO_NODE",
-                    node_type == "GREATER_THAN_NODE",
-                    node_type == "MULTIPLICATION_NODE",
-                    node_type == "NOT_EQUAL_TO_NODE",
-                    node_type == "SUBTRACTION_NODE",
-                ]
-            ):
-                ast_nodes.append({"type": node_type})
-            else:
-                raise UnsupportedError(f"Unsupported formula type {node_type}")  # pragma: no cover
-
-            #  TODO: deal with error cells
-
-        formulas[formula.key] = {"ast": ast_nodes}
+        formulas[formula.key] = formula.formula.AST_node_array.AST_node
     return formulas
 
 
@@ -131,13 +245,15 @@ def get_owner_id_map(object_store: ObjectStore):
     #
     calculation_engine_id = object_store.find_refs("CalculationEngineArchive")[0]
     owner_id_map = {}
-    for e in object_store[calculation_engine_id].dependency_tracker.owner_id_map.map_entry:
+    for e in object_store[
+        calculation_engine_id
+    ].dependency_tracker.owner_id_map.map_entry:
         owner_id_map[e.internal_owner_id] = get_uuid(e.owner_id)
     return owner_id_map
 
 
 def get_table_base_id(object_store: ObjectStore, table):
-    """"Finds the UUID of a table"""
+    """ "Finds the UUID of a table"""
     # Look for a TSCE.FormulaOwnerDependenciesArchive objects with the following at the
     # root level of the protobuf:
     #
@@ -194,7 +310,9 @@ def get_formula_cell_ranges(object_store: ObjectStore, table):
     cell_records = []
     table_base_id = get_table_base_id(object_store, table)
     calculation_engine_id = object_store.find_refs("CalculationEngineArchive")[0]
-    for finfo in object_store[calculation_engine_id].dependency_tracker.formula_owner_info:
+    for finfo in object_store[
+        calculation_engine_id
+    ].dependency_tracker.formula_owner_info:
         if finfo.HasField("cell_dependencies"):
             formula_owner_id = get_uuid(finfo.formula_owner_id)
             if formula_owner_id == table_base_id:
@@ -209,7 +327,9 @@ def get_error_cell_ranges(object_store: ObjectStore, table):
     cell_errors = {}
     table_base_id = get_table_base_id(object_store, table)
     calculation_engine_id = object_store.find_refs("CalculationEngineArchive")[0]
-    for finfo in object_store[calculation_engine_id].dependency_tracker.formula_owner_info:
+    for finfo in object_store[
+        calculation_engine_id
+    ].dependency_tracker.formula_owner_info:
         if finfo.HasField("cell_dependencies"):
             formula_owner_id = get_uuid(finfo.formula_owner_id)
             if formula_owner_id == table_base_id:
@@ -291,8 +411,15 @@ def get_uuid(ref: dict) -> int:
         uuid = ref.upper << 64 | ref.lower
     except AttributeError:
         try:
-            uuid = (ref.uuid_w3 << 96) | (ref.uuid_w2 << 64) | (ref.uuid_w1 << 32) | ref.uuid_w0
+            uuid = (
+                (ref.uuid_w3 << 96)
+                | (ref.uuid_w2 << 64)
+                | (ref.uuid_w1 << 32)
+                | ref.uuid_w0
+            )
         except AttributeError:
-            raise UnsupportedError(f"Unsupported UUID structure: {ref}")  # pragma: no cover
+            raise UnsupportedError(
+                f"Unsupported UUID structure: {ref}"
+            )  # pragma: no cover
 
     return uuid
