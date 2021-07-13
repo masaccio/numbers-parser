@@ -9,12 +9,16 @@ class Cell:
         self.row = row
         self.col = col
 
-    def add_formula(self, formula):
+    def add_formula(self, formula: str):
         self._formula = formula
 
     @property
     def has_formula(self) -> bool:
         return hasattr(self, "_formula")
+
+    @property
+    def formula(self):
+        return self._formula
 
 
 class NumberCell(Cell):
