@@ -1,17 +1,19 @@
 {
-    "python.testing.pytestArgs": [
-        "-rs"
-    ],
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "--experimental",
+        "-o",
+        "log_cli=True",
+        "--log-cli-level=ERROR",
+        "--rootdir",
+        "${workspaceFolder}/tests",
+    ],
     "python.linting.enabled": true,
     "python.linting.pylamaEnabled": true,
     "python.linting.lintOnSave": true,
-    "terminal.integrated.env.osx": {
-        "PYTHONPATH": "${workspaceFolder}/src",
-    },
-    "python.envFile": "${workspaceFolder}/.env",
+    "python.envFile": "${workspaceFolder}/.vscode/.env",
     "python.linting.ignorePatterns": [
         ".vscode/*.py",
         "**/site-packages/**/*.py",
@@ -21,5 +23,8 @@
     ],
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 100,
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "terminal.integrated.env.osx": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+    },
 }

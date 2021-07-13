@@ -10,7 +10,11 @@
             "request": "launch",
             "program": "/opt/homebrew/bin/pytest",
             "args": [
-                "--experimental"
+                "--experimental",
+                "tests/test_formulas.py",
+                "-o",
+                "log_cli=True",
+                "--log-cli-level=DEBUG"
             ],
             "console": "integratedTerminal"
         },
