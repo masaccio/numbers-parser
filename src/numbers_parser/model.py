@@ -1,4 +1,4 @@
-from functools import cache, lru_cache
+from functools import lru_cache
 
 from numbers_parser.containers import ObjectStore
 from numbers_parser.cell import xl_rowcol_to_cell
@@ -238,7 +238,7 @@ class NumbersModel:
                     merge_cells[(row_start, col_start)]["merge_type"] = "source"
         return merge_cells
 
-    @cache
+    @lru_cache(maxsize=None)
     def table_uuids_to_table_id(self, table_uuid):
         table_ids = self.find_refs("TableInfoArchive")
         tables_uuids = {
