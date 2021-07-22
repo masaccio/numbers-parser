@@ -1,3 +1,6 @@
+import warnings
+
+
 class NumbersError(Exception):
     """Base class for other exceptions"""
 
@@ -24,5 +27,11 @@ class FileFormatError(NumbersError):
 
 class FormulaError(NumbersError):
     """ "Raise for formula evaluation errors"""
+
+    pass
+
+
+class UnsupportedWarning(Warning):
+    """Raised for unsupported file format features"""
 
     pass

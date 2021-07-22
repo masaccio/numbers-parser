@@ -2,9 +2,9 @@ from numbers_parser.unpack import read_numbers_file
 
 
 class ItemsList:
-    def __init__(self, objects, refs, item_class):
+    def __init__(self, model, refs, item_class):
         self._item_name = item_class.__name__.lower()
-        self._items = [item_class(objects, _) for _ in refs]
+        self._items = [item_class(model, _) for _ in refs]
 
     def __getitem__(self, key: int):
         if type(key) == int:
@@ -26,7 +26,7 @@ class ItemsList:
 
 class ObjectStore:
     def __init__(self, path: str) -> int:
-        self._object_store = {}
+        self._objects = {}
         read_numbers_file(
             path,
             handler=lambda identifier, obj: self._store_object(identifier, obj),
@@ -34,14 +34,14 @@ class ObjectStore:
         )
 
     def _store_object(self, identifier, obj):
-        self._object_store[identifier] = obj
+        self._objects[identifier] = obj
 
     def __getitem__(self, key: str):
-        return self._object_store[key]
+        return self._objects[key]
 
     def __len__(self) -> int:
-        return len(self._object_store)
+        return len(self._objects)
 
     def find_refs(self, ref_name) -> list:
-        refs = [k for k, v in self._object_store.items() if type(v).__name__ == ref_name]
+        refs = [k for k, v in self._objects.items() if type(v).__name__ == ref_name]
         return refs
