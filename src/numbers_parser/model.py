@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from numbers_parser.containers import ObjectStore
 from numbers_parser.cell import xl_rowcol_to_cell
 from numbers_parser.exceptions import UnsupportedError
@@ -19,58 +21,55 @@ class NumbersModel:
         self._table_strings = {}
         self._table_tiles = {}
         self._tables_in_sheet = {}
+        self._table_base_ids = {}
+
+    def find_refs(self, ref: str) -> list:
+        return self.objects.find_refs(ref)
 
     def sheet_ids(self):
         return [o.identifier for o in self.objects[1].sheets]
 
+    @lru_cache(maxsize=None)
     def table_ids(self, sheet_id):
-        if sheet_id not in self._tables_in_sheet:
-            table_info_ids = self.objects.find_refs("TableInfoArchive")
-            self._tables_in_sheet[sheet_id] = [
-                self.objects[t_id].tableModel.identifier
-                for t_id in table_info_ids
-                if self.objects[t_id].super.parent.identifier == sheet_id
-            ]
-        return self._tables_in_sheet[sheet_id]
+        table_info_ids = self.find_refs("TableInfoArchive")
+        return [
+            self.objects[t_id].tableModel.identifier
+            for t_id in table_info_ids
+            if self.objects[t_id].super.parent.identifier == sheet_id
+        ]
 
+    @lru_cache(maxsize=None)
     def table_row_headers(self, table_id):
-        if table_id not in self._row_headers:
-            bds = self.objects[table_id].base_data_store
-            self._row_headers[table_id] = [
-                h.numberOfCells
-                for h in self.objects[bds.rowHeaders.buckets[0].identifier].headers
-            ]
-        return self._row_headers[table_id]
+        bds = self.objects[table_id].base_data_store
+        return [
+            h.numberOfCells
+            for h in self.objects[bds.rowHeaders.buckets[0].identifier].headers
+        ]
 
+    @lru_cache(maxsize=None)
     def table_row_columns(self, table_id):
-        if table_id not in self._row_columns:
-            bds = self.objects[table_id].base_data_store
-            self._row_columns[table_id] = [
-                h.numberOfCells
-                for h in self.objects[bds.columnHeaders.identifier].headers
-            ]
-        return self._row_columns[table_id]
+        bds = self.objects[table_id].base_data_store
+        return [
+            h.numberOfCells for h in self.objects[bds.columnHeaders.identifier].headers
+        ]
 
     def table_name(self, table_id):
         return self.objects[table_id].table_name
 
+    @lru_cache(maxsize=None)
     def table_tiles(self, table_id):
-        if table_id not in self._table_tiles:
-            bds = self.objects[table_id].base_data_store
-            self._table_tiles[table_id] = [
-                self.objects[t.tile.identifier] for t in bds.tiles.tiles
-            ]
-        return self._table_tiles[table_id]
+        bds = self.objects[table_id].base_data_store
+        return [self.objects[t.tile.identifier] for t in bds.tiles.tiles]
 
+    @lru_cache(maxsize=None)
     def table_string(self, table_id, key):
-        if key not in self._table_strings:
-            bds = self.objects[table_id].base_data_store
-            strings_id = bds.stringTable.identifier
-            self._table_strings[table_id] = {
-                x.key: x.string for x in self.objects[strings_id].entries
-            }
-        return self._table_strings[table_id][key]
+        bds = self.objects[table_id].base_data_store
+        strings_id = bds.stringTable.identifier
+        for x in self.objects[strings_id].entries:
+            if x.key == key:
+                return x.string
 
+    @lru_cache(maxsize=None)
     def owner_id_map(self):
         """ "
         Extracts the mapping table from Owner IDs to UUIDs. Returns a
@@ -91,15 +90,15 @@ class NumbersModel:
         #     },
         #
         #
-        calculation_engine_id = self.objects.find_refs("CalculationEngineArchive")[0]
+        ce_id = self.find_refs("CalculationEngineArchive")[0]
+        calc_engine = self.objects[ce_id]
         owner_id_map = {}
-        for e in self.objects[
-            calculation_engine_id
-        ].dependency_tracker.owner_id_map.map_entry:
+        for e in calc_engine.dependency_tracker.owner_id_map.map_entry:
             owner_id_map[e.internal_owner_id] = uuid(e.owner_id)
         return owner_id_map
 
-    def table_base_id(self, table_id: int):
+    @lru_cache(maxsize=None)
+    def table_base_id(self, table_id: int) -> int:
         """ "Finds the UUID of a table"""
         # Look for a TSCE.FormulaOwnerDependenciesArchive objects with the following at the
         # root level of the protobuf:
@@ -123,7 +122,7 @@ class NumbersModel:
         #        }
         #    }
         haunted_owner = uuid(self.objects[table_id].haunted_owner.owner_uid)
-        for dependency_id in self.objects.find_refs("FormulaOwnerDependenciesArchive"):
+        for dependency_id in self.find_refs("FormulaOwnerDependenciesArchive"):
             obj = self.objects[dependency_id]
             if obj.HasField("base_owner_uid") and obj.HasField("formula_owner_uid"):
                 base_owner_uid = uuid(obj.base_owner_uid)
@@ -131,6 +130,7 @@ class NumbersModel:
                 if formula_owner_uid == haunted_owner:
                     return base_owner_uid
 
+    @lru_cache(maxsize=None)
     def formula_cell_ranges(self, table_id: int) -> list:
         """Exract all the formula cell ranges for the Table."""
         # The TSCE.CalculationEngineArchive contains formulaOwnerInfo records
@@ -155,10 +155,8 @@ class NumbersModel:
         # }
         cell_records = []
         table_base_id = self.table_base_id(table_id)
-        calculation_engine_id = self.objects.find_refs("CalculationEngineArchive")[0]
-        for finfo in self.objects[
-            calculation_engine_id
-        ].dependency_tracker.formula_owner_info:
+        ce_id = self.find_refs("CalculationEngineArchive")[0]
+        for finfo in self.objects[ce_id].dependency_tracker.formula_owner_info:
             if finfo.HasField("cell_dependencies"):
                 formula_owner_id = uuid(finfo.formula_owner_id)
                 if formula_owner_id == table_base_id:
@@ -167,14 +165,13 @@ class NumbersModel:
                             cell_records.append((cell_record.row, cell_record.column))
         return cell_records
 
+    @lru_cache(maxsize=None)
     def error_cell_ranges(self, table_id: int) -> list:
         """Exract all the formula error cell ranges for the Table."""
         cell_errors = {}
         table_base_id = self.table_base_id(table_id)
-        calculation_engine_id = self.objects.find_refs("CalculationEngineArchive")[0]
-        for finfo in self.objects[
-            calculation_engine_id
-        ].dependency_tracker.formula_owner_info:
+        ce_id = self.find_refs("CalculationEngineArchive")[0]
+        for finfo in self.objects[ce_id].dependency_tracker.formula_owner_info:
             if finfo.HasField("cell_dependencies"):
                 formula_owner_id = uuid(finfo.formula_owner_id)
                 if formula_owner_id == table_base_id:
@@ -184,6 +181,7 @@ class NumbersModel:
                         ] = cell_error.error_flavor
         return cell_errors
 
+    @lru_cache(maxsize=None)
     def merge_cell_ranges(self, table_id):
         """Exract all the merge cell ranges for the Table."""
         # Merge ranges are stored in a number of structures, but the simplest is
@@ -191,7 +189,7 @@ class NumbersModel:
         # Document. These archives contain a fromToRange list which has the merge
         # ranges associated with an Owner ID
         #
-        # The Owner IDs need to be extracted from teh Calculation Engine using
+        # The Owner IDs need to be extracted from the Calculation Engine using
         # UUID matching (this seems fragile, but no other mechanism has been found)
         #
         #  "fromToRange": [
@@ -216,7 +214,7 @@ class NumbersModel:
         table_base_id = self.table_base_id(table_id)
 
         merge_cells = {}
-        range_table_ids = self.objects.find_refs("RangePrecedentsTileArchive")
+        range_table_ids = self.find_refs("RangePrecedentsTileArchive")
         for range_id in range_table_ids:
             o = self.objects[range_id]
             to_owner_id = o.to_owner_id
@@ -240,7 +238,7 @@ class NumbersModel:
     def node_to_cell_ref(self, row_num: int, col_num: int, node):
         table_name = None
         if node.HasField("AST_cross_table_reference_extra_info"):
-            table_ids = self.objects.find_refs("TableInfoArchive")
+            table_ids = self.find_refs("TableInfoArchive")
             tables = [
                 self.objects[self.objects[table_id].tableModel.identifier]
                 for table_id in table_ids
@@ -272,6 +270,7 @@ class NumbersModel:
         except IndexError:
             return f"INVALID[{row_num},{col_num}]"
 
+    @lru_cache(maxsize=None)
     def formula_ast(self, table_id: int):
         bds = self.objects[table_id].base_data_store
         formula_table_id = bds.formula_table.identifier

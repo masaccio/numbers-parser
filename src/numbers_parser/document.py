@@ -104,7 +104,7 @@ class Table:
     @property
     def merge_ranges(self) -> list:
         if not hasattr(self, "_merge_cells"):
-            self._merge_cells = self._model.get_merge_cell_ranges(self._table_id)
+            self._merge_cells = self._model.merge_cell_ranges(self._table_id)
 
         ranges = [xl_range(*r["rect"]) for r in self._merge_cells.values()]
         return sorted(set(list(ranges)))
