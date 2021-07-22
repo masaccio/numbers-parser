@@ -29,6 +29,9 @@ class NumbersModel:
     def sheet_ids(self):
         return [o.identifier for o in self.objects[1].sheets]
 
+    def sheet_name(self, sheet_id):
+        return self.objects[sheet_id].name
+
     @lru_cache(maxsize=None)
     def table_ids(self, sheet_id):
         table_info_ids = self.find_refs("TableInfoArchive")

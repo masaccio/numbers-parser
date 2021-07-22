@@ -45,14 +45,16 @@ class Sheet:
     def __init__(self, model, sheet_id):
         self._sheet_id = sheet_id
         self._model = model
-        self._sheet = model.objects[sheet_id]
-        self.name = self._sheet.name
 
     def tables(self):
         if not hasattr(self, "_tables"):
             refs = self._model.table_ids(self._sheet_id)
             self._tables = ItemsList(self._model, refs, Table)
         return self._tables
+
+    @property
+    def name(self):
+        return self._model.sheet_name(self._sheet_id)
 
 
 class Table:
