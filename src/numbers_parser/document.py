@@ -6,9 +6,10 @@ import warnings
 from typing import Union, List, Generator
 from datetime import datetime, timedelta
 
-from numbers_parser.containers import ItemsList, ObjectStore
+from numbers_parser.containers import ItemsList
+from numbers_parser.model import NumbersModel
 from numbers_parser.exceptions import UnsupportedError
-from numbers_parser.formula import TableFormulas, get_merge_cell_ranges
+from numbers_parser.formula import TableFormulas
 
 from numbers_parser.cell import (
     BoolCell,
@@ -31,62 +32,38 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
 class Document:
     def __init__(self, filename):
-        self._object_store = ObjectStore(filename)
+        self._model = NumbersModel(filename)
 
     def sheets(self):
-        refs = [o.identifier for o in self._object_store[1].sheets]
-        self._sheets = Sheets(self._object_store, refs)
+        if not hasattr(self, "_sheets"):
+            refs = self._model.sheet_ids()
+            self._sheets = ItemsList(self._model, refs, Sheet)
         return self._sheets
 
 
-class Sheets(ItemsList):
-    def __init__(self, object_store, refs):
-        super(Sheets, self).__init__(object_store, refs, Sheet)
-
-
 class Sheet:
-    def __init__(self, object_store, sheet_id):
+    def __init__(self, model, sheet_id):
         self._sheet_id = sheet_id
-        self._object_store = object_store
-        self._sheet = object_store[sheet_id]
+        self._model = model
+        self._sheet = model.objects[sheet_id]
         self.name = self._sheet.name
 
     def tables(self):
-        table_ids = self._object_store.find_refs("TableInfoArchive")
-        table_refs = [
-            self._object_store[table_id].tableModel.identifier
-            for table_id in table_ids
-            if self._object_store[table_id].super.parent.identifier == self._sheet_id
-        ]
-        self._tables = Tables(self._object_store, table_refs)
-
+        if not hasattr(self, "_tables"):
+            refs = self._model.table_ids(self._sheet_id)
+            self._tables = ItemsList(self._model, refs, Table)
         return self._tables
 
 
-class Tables(ItemsList):
-    def __init__(self, object_store, refs):
-        super(Tables, self).__init__(object_store, refs, Table)
-
-
 class Table:
-    def __init__(self, object_store, table_id):
+    def __init__(self, model, table_id):
         super(Table, self).__init__()
-        self._object_store = object_store
-        self._table = object_store[table_id]
-
-        bds = self._table.base_data_store
-        self._row_headers = [
-            h.numberOfCells
-            for h in object_store[bds.rowHeaders.buckets[0].identifier].headers
-        ]
-        self._column_headers = [
-            h.numberOfCells for h in object_store[bds.columnHeaders.identifier].headers
-        ]
-        self._tiles = [object_store[t.tile.identifier] for t in bds.tiles.tiles]
+        self._model = model
+        self._table_id = table_id
 
     @property
     def name(self):
-        return self._table.table_name
+        return self._model.table_name(self._table_id)
 
     @property
     def data(self) -> list:
@@ -127,7 +104,7 @@ class Table:
     @property
     def merge_ranges(self) -> list:
         if not hasattr(self, "_merge_cells"):
-            self._merge_cells = get_merge_cell_ranges(self._object_store, self._table)
+            self._merge_cells = self._model.get_merge_cell_ranges(self._table_id)
 
         ranges = [xl_range(*r["rect"]) for r in self._merge_cells.values()]
         return sorted(set(list(ranges)))
@@ -137,10 +114,11 @@ class Table:
             self, "_storage_buffers_pre_bnc"
         ):
             row_infos = []
-            for tile in self._tiles:
+            tiles = self._model.table_tiles(self._table_id)
+            for tile in tiles:
                 row_infos += tile.rowInfos
 
-            storage_version = self._tiles[0].storage_version
+            storage_version = tiles[0].storage_version
             if storage_version != 5:
                 raise UnsupportedError(  # pragma: no cover
                     f"Unsupported row info version {storage_version}"
@@ -179,7 +157,7 @@ class Table:
     @property
     def _merge_cells(self):
         if not hasattr(self, "__merge_cells"):
-            self.__merge_cells = get_merge_cell_ranges(self._object_store, self._table)
+            self.__merge_cells = self._model.merge_cell_ranges(self._table_id)
         return self.__merge_cells
 
     @property
@@ -187,10 +165,10 @@ class Table:
         if hasattr(self, "__table_cells"):
             return self.__table_cells
 
-        table_formulas = TableFormulas(self._object_store, self._table)
+        table_formulas = TableFormulas(self._model, self._table_id)
 
         self.__table_cells = []
-        num_rows = sum([t.numrows for t in self._tiles])
+        num_rows = sum([t.numrows for t in self._model.table_tiles(self._table_id)])
         for row_num in range(num_rows):
             row = []
             for col_num in range(self.num_cols):
@@ -199,6 +177,8 @@ class Table:
                     row_num, col_num, bnc=True
                 )
 
+                # TODO: make cell extraction a separate method for tidiness
+                # TODO: move cell/formula unpacking into init method of Cell objects
                 cell = None
                 if storage_buffer is None:
                     row_col = (row_num, col_num)
@@ -236,7 +216,9 @@ class Table:
                     elif cell_type == TSTArchives.textCellType:
                         string_key = struct.unpack("<i", storage_buffer[12:16])[0]
                         cell = TextCell(
-                            row_num, col_num, self._table_strings[string_key]
+                            row_num,
+                            col_num,
+                            self._model.table_string(self._table_id, string_key),
                         )
                     elif cell_type == TSTArchives.dateCellType:
                         if storage_buffer_pre_bnc is None:
@@ -349,8 +331,6 @@ class Table:
                             formula = table_formulas.formula(
                                 formula_key, row_num, col_num
                             )
-                            # ast["row"] = row_num
-                            # ast["column"] = col_num
                             cell.add_formula(formula)
                         except KeyError:
                             raise UnsupportedError(  # pragma: no cover
@@ -369,23 +349,14 @@ class Table:
         return self.__table_cells
 
     @property
-    def _table_strings(self):
-        if not hasattr(self, "__table_strings"):
-            strings_id = self._table.base_data_store.stringTable.identifier
-            self.__table_strings = {
-                x.key: x.string for x in self._object_store[strings_id].entries
-            }
-        return self.__table_strings
-
-    @property
     def num_rows(self) -> int:
         """Number of rows in the table"""
-        return len(self._row_headers)
+        return len(self._model.table_row_headers(self._table_id))
 
     @property
     def num_cols(self) -> int:
         """Number of columns in the table"""
-        return len(self._column_headers)
+        return len(self._model.table_row_columns(self._table_id))
 
     def cell(self, *args) -> Union[Cell, MergedCell]:
         if type(args[0]) == str:
