@@ -1,4 +1,4 @@
-from functools import lru_cache
+from functools import cache, lru_cache
 
 from numbers_parser.containers import ObjectStore
 from numbers_parser.cell import xl_rowcol_to_cell
@@ -238,17 +238,23 @@ class NumbersModel:
                     merge_cells[(row_start, col_start)]["merge_type"] = "source"
         return merge_cells
 
+    @cache
+    def table_uuids_to_table_id(self, table_uuid):
+        table_ids = self.find_refs("TableInfoArchive")
+        tables_uuids = {
+            self.table_base_id(self.objects[t_id].tableModel.identifier): self.objects[
+                t_id
+            ].tableModel.identifier
+            for t_id in table_ids
+        }
+        return tables_uuids[table_uuid]
+
     def node_to_cell_ref(self, row_num: int, col_num: int, node):
         table_name = None
         if node.HasField("AST_cross_table_reference_extra_info"):
-            table_ids = self.find_refs("TableInfoArchive")
-            tables = [
-                self.objects[self.objects[table_id].tableModel.identifier]
-                for table_id in table_ids
-            ]
-            tables_uuids = [self.table_base_id(t) for t in tables]
             table_uuid = uuid(node.AST_cross_table_reference_extra_info.table_id)
-            table_name = tables[tables_uuids.index(table_uuid)].table_name
+            table_id = self.table_uuids_to_table_id(table_uuid)
+            table_name = self.table_name(table_id)
         else:
             pass
         if node.AST_column.absolute:
