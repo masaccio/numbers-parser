@@ -86,7 +86,7 @@ class Formula(list):
             args = ",".join(reversed(args))
             self.push(f"{f_func}({args})")
         elif f_nargs == 0:
-            self.push("{f_func}()")
+            self.push(f"{f_func}()")
         elif f_nargs != num_args:
             warnings.warn(
                 f"@[{self.row},{self.col}: arg count mismatch {f_func}: {num_args} vs {f_nargs}",
@@ -175,7 +175,10 @@ class TableFormulas:
             elif node_type == "NUMBER_NODE":
                 # node.AST_number_node_decimal_high
                 # node.AST_number_node_decimal_low
-                formula.push(str(node.AST_number_node_number))
+                if node.AST_number_node_decimal_high == 0x3040000000000000:
+                    formula.push(str(node.AST_number_node_decimal_low))
+                else:
+                    formula.push(str(node.AST_number_node_number))
             elif node_type == "FUNCTION_NODE":
                 formula.function(
                     node.AST_function_node_numArgs, node.AST_function_node_index
