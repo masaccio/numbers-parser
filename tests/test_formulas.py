@@ -16,8 +16,8 @@ TABLE_1_FORMULAS = [
 
 TABLE_2_FORMULAS = [
     [None, "A1&A2&A3"],
-    [None, "LEN(A2)"],
-    [None, "LEFT(A3,2)"],
+    [None, "LEN(A2)+LEN(A3)"],
+    [None, "LEFT(A3,1)"],
     [None, "MID(A4,2,2)"],
     [None, "RIGHT(A5,2)"],
     [None, 'FIND("_",A6)'],
@@ -33,15 +33,13 @@ def compare_tables(table, ref):
                 # assert not table.cell(row_num, col_num).has_formula
                 if table.cell(row_num, col_num).has_formula:
                     print(f"[{row_num},{col_num}]: has_formula FAILED")
-                else:
-                    print(f"[{row_num},{col_num}]: has_formula OK")
             else:
                 # assert table.cell(row_num, col_num).formula == ref[row_num][col_num]
+                if not table.cell(row_num, col_num).has_formula:
+                    print(f"[{row_num},{col_num}]: has_formula FAILED")
                 if table.cell(row_num, col_num).formula != ref[row_num][col_num]:
                     val = table.cell(row_num, col_num).formula
                     print(f"[{row_num},{col_num}]: {val}≠{ref[row_num][col_num]}")
-                else:
-                    print(f"[{row_num},{col_num}]: contents OK")
 
 
 @pytest.mark.experimental
