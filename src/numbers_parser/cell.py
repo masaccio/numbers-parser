@@ -1,13 +1,40 @@
 import re
 
+from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.exceptions import UnsupportedError
+
 from datetime import timedelta
 
 
 class Cell:
-    def __init__(self, row: int, col: int, value=None):
+    @staticmethod
+    def factory(row_num: int, col_num: int, data: dict):
+        cell_type = data["type"]
+        if cell_type == TSTArchives.emptyCellValueType:
+            return EmptyCell(row_num, col_num, None)
+        elif cell_type == TSTArchives.numberCellType:
+            return NumberCell(row_num, col_num, data["value"])
+        elif cell_type == TSTArchives.textCellType:
+            return TextCell(row_num, col_num, data["value"])
+        elif cell_type == TSTArchives.dateCellType:
+            return DateCell(row_num, col_num, data["value"])
+        elif cell_type == TSTArchives.boolCellType:
+            return BoolCell(row_num, col_num, data["value"])
+        elif cell_type == TSTArchives.durationCellType:
+            return DurationCell(row_num, col_num, timedelta(days=data["value"]))
+        elif cell_type == TSTArchives.formulaErrorCellType:
+            return ErrorCell(row_num, col_num, None)
+        elif cell_type == TSTArchives.currencyCellValueType:
+            return FormulaCell(row_num, col_num, data["value"])
+        else:
+            raise UnsupportedError(  # pragma: no cover
+                f"Unsupport cell type {cell_type} @:({row_num},{col_num})"
+            )
+
+    def __init__(self, row_num: int, col_num: int, value):
         self._value = value
-        self.row = row
-        self.col = col
+        self.row = row_num
+        self.col = col_num
 
     def add_formula(self, formula: str):
         self._formula = formula

@@ -1,8 +1,14 @@
+from array import array
+from struct import unpack
 from functools import lru_cache
+from typing import Dict, List
+from datetime import datetime, timedelta
 
 from numbers_parser.containers import ObjectStore
 from numbers_parser.cell import xl_rowcol_to_cell
 from numbers_parser.exceptions import UnsupportedError
+from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.formula import TableFormulas
 
 
 class NumbersModel:
@@ -239,7 +245,7 @@ class NumbersModel:
         return merge_cells
 
     @lru_cache(maxsize=None)
-    def table_uuids_to_table_id(self, table_uuid):
+    def table_uuids_map(self, table_uuid):
         table_ids = self.find_refs("TableInfoArchive")
         tables_uuids = {
             self.table_base_id(self.objects[t_id].tableModel.identifier): self.objects[
@@ -253,7 +259,7 @@ class NumbersModel:
         table_name = None
         if node.HasField("AST_cross_table_reference_extra_info"):
             table_uuid = uuid(node.AST_cross_table_reference_extra_info.table_id)
-            table_id = self.table_uuids_to_table_id(table_uuid)
+            table_id = self.table_uuids_map(table_uuid)
             table_name = self.table_name(table_id)
         else:
             pass
@@ -289,6 +295,149 @@ class NumbersModel:
             formulas[formula.key] = formula.formula.AST_node_array.AST_node
         return formulas
 
+    @lru_cache(maxsize=None)
+    def storage_buffers_pre_bnc(self, table_id: int) -> List:
+        row_infos = []
+        for tile in self.table_tiles(table_id):
+            row_infos += tile.rowInfos
+
+        return [
+            get_storage_buffers_for_row(
+                r.cell_storage_buffer_pre_bnc,
+                r.cell_offsets_pre_bnc,
+                len(self.table_row_columns(table_id)),
+                r.has_wide_offsets,
+            )
+            for r in row_infos
+        ]
+
+    @lru_cache(maxsize=None)
+    def storage_buffers(self, table_id: int) -> List:
+        row_infos = []
+        for tile in self.table_tiles(table_id):
+            row_infos += tile.rowInfos
+
+        return [
+            get_storage_buffers_for_row(
+                r.cell_storage_buffer,
+                r.cell_offsets,
+                len(self.table_row_columns(table_id)),
+                r.has_wide_offsets,
+            )
+            for r in row_infos
+        ]
+
+    @lru_cache(maxsize=None)
+    def storage_buffer(self, table_id: int, row_num: int, col_num: int) -> bytes:
+        try:
+            storage_buffers = self.storage_buffers(table_id)
+            return storage_buffers[row_num][col_num]
+        except IndexError:
+            return None
+
+    @lru_cache(maxsize=None)
+    def storage_buffer_pre_bnc(
+        self, table_id: int, row_num: int, col_num: int
+    ) -> bytes:
+        try:
+            storage_buffers_pre_bnc = self.storage_buffers_pre_bnc(table_id)
+            return storage_buffers_pre_bnc[row_num][col_num]
+        except IndexError:
+            return None
+
+    @lru_cache(maxsize=None)
+    def table_formulas(self, table_id: int):
+        return TableFormulas(self, table_id)
+
+    @lru_cache(maxsize=None)
+    def table_cell_decode(self, table_id: int, row_num: int, col_num: int) -> Dict:
+        storage_buffer = self.storage_buffer(table_id, row_num, col_num)
+        storage_buffer_pre_bnc = self.storage_buffer_pre_bnc(table_id, row_num, col_num)
+
+        if storage_buffer is None:
+            return None
+
+        cell_type = storage_buffer[1]
+        cell_value = None
+
+        if cell_type == TSTArchives.numberCellType or cell_type == 10:
+            if storage_buffer_pre_bnc is None:
+                cell_value = 0.0
+            else:
+                cell_value = unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
+            cell_type = TSTArchives.numberCellType
+        elif cell_type == TSTArchives.textCellType:
+            string_key = unpack("<i", storage_buffer[12:16])[0]
+            cell_value = self.table_string(table_id, string_key)
+        elif cell_type == TSTArchives.dateCellType:
+            if storage_buffer_pre_bnc is None:
+                cell_value = datetime(2001, 1, 1)
+            else:
+                seconds = unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
+                cell_value = datetime(2001, 1, 1) + timedelta(seconds=seconds)
+        elif cell_type == TSTArchives.boolCellType:
+            cell_value = unpack("<d", storage_buffer[12:20])[0] > 0.0
+        elif cell_type == TSTArchives.durationCellType:
+            cell_value = unpack("<d", storage_buffer[12:20])[0]
+        elif cell_type == TSTArchives.currencyCellValueType:
+            cell_value = unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
+
+        return {"type": cell_type, "value": cell_value}
+
+    @lru_cache(maxsize=None)
+    def table_cell_formula_decode(
+        self, table_id: int, row_num: int, col_num: int, cell_type: int
+    ):
+        storage_buffer = self.storage_buffer(table_id, row_num, col_num)
+        if not self.table_formulas(table_id).is_formula(row_num, col_num):
+            return None
+
+        try:
+            if self.table_formulas(table_id).is_error(row_num, col_num):
+                formula_key = unpack("<h", storage_buffer[12:14])[0]
+            if cell_type == TSTArchives.numberCellType:  # 2
+                formula_key = unpack("<h", storage_buffer[28:30])[0]
+            elif cell_type == TSTArchives.textCellType:  # 3
+                if len(storage_buffer) > 28:
+                    formula_key = unpack("<h", storage_buffer[20:22])[0]
+                else:
+                    formula_key = unpack("<h", storage_buffer[24:26])[0]
+            elif cell_type == TSTArchives.dateCellType:  # 5
+                formula_key = unpack("<h", storage_buffer[24:26])[0]
+            elif cell_type == TSTArchives.boolCellType:  # 6
+                formula_key = unpack("<h", storage_buffer[24:26])[0]
+            elif cell_type == TSTArchives.durationCellType:  # 7
+                formula_key = unpack("<h", storage_buffer[24:26])[0]
+            elif cell_type == TSTArchives.formulaErrorCellType:  # 8
+                formula_key = unpack("<h", storage_buffer[12:14])[0]
+            elif cell_type == TSTArchives.currencyCellValueType:  # 9
+                formula_key = unpack("<h", storage_buffer[32:34])[0]
+            elif cell_type == 10:
+                # Might be [36:38]
+                formula_key = unpack("<h", storage_buffer[32:34])[0]
+            else:
+                raise UnsupportedError(  # pragma: no cover
+                    f"Unsupported formula cell type '{cell_type}' :({row_num},{col_num})"
+                )
+
+        except KeyError:
+            raise UnsupportedError(  # pragma: no cover
+                f"Formula not found ({row_num},{col_num})"
+            )
+        # except struct.error:
+        #     raise UnsupportedError(  # pragma: no cover
+        #         f"Unsupported formula ref ({row_num},{col_num})"
+        # )
+        except IndexError:
+            raise UnsupportedError(  # pragma: no cover
+                f"Unsupported formula buffer ({row_num},{col_num})"
+            )
+            # cell.add_formula("*FORMULA ERROR*")
+        else:
+            formula_key = None
+
+        return formula_key
+
 
 def uuid(ref: dict) -> int:
     """
@@ -317,3 +466,49 @@ def uuid(ref: dict) -> int:
         raise UnsupportedError(f"Unsupported UUID structure: {ref}")  # pragma: no cover
 
     return uuid
+
+
+def get_storage_buffers_for_row(
+    storage_buffer: bytes, offsets: list, num_cols: int, has_wide_offsets: bool
+) -> List[bytes]:
+    """
+    Extract storage buffers for each cell in a table row
+
+    Args:
+        storage_buffer:  cell_storage_buffer or cell_storage_buffer for a table row
+        offsets: 16-bit cell offsets for a table row
+        num_cols: number of columns in a table row
+        has_wide_offsets: use 4-byte offsets rather than 1-byte offset
+
+    Returns:
+         data: list of bytes for each cell in a row, or None if empty
+    """
+    offsets = array("h", offsets).tolist()
+    if has_wide_offsets:
+        offsets = [o * 4 for o in offsets]
+
+    data = []
+    for col_num in range(num_cols):
+        if col_num >= len(offsets):
+            break
+
+        start = offsets[col_num]
+        if start < 0:
+            data.append(None)
+            continue
+
+        if col_num == (len(offsets) - 1):
+            end = len(storage_buffer)
+        else:
+            # Get next offset past current one that is not -1
+            # https://stackoverflow.com/questions/19502378/
+            idx = next(
+                (i for i, x in enumerate(offsets[col_num + 1 :]) if x >= 0), None
+            )
+            if idx is None:
+                end = len(storage_buffer)
+            else:
+                end = offsets[col_num + idx + 1]
+        data.append(storage_buffer[start:end])
+
+    return data
