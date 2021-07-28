@@ -396,7 +396,10 @@ class NumbersModel:
             if self.table_formulas(table_id).is_error(row_num, col_num):
                 formula_key = unpack("<h", storage_buffer[12:14])[0]
             if cell_type == TSTArchives.numberCellType:  # 2
-                formula_key = unpack("<h", storage_buffer[28:30])[0]
+                if len(storage_buffer) > 40:
+                    formula_key = unpack("<h", storage_buffer[36:38])[0]
+                else:
+                    formula_key = unpack("<h", storage_buffer[28:30])[0]
             elif cell_type == TSTArchives.textCellType:  # 3
                 if len(storage_buffer) > 28:
                     formula_key = unpack("<h", storage_buffer[20:22])[0]
