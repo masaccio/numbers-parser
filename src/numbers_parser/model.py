@@ -263,7 +263,7 @@ class NumbersModel:
             table_name = self.table_name(table_id)
         else:
             pass
-        if node.AST_column.absolute:
+        if node.AST_row.absolute:
             row = node.AST_row.row
         else:
             row = row_num + node.AST_row.row
@@ -275,7 +275,7 @@ class NumbersModel:
             ref = xl_rowcol_to_cell(
                 row,
                 col,
-                row_abs=node.AST_column.absolute,
+                row_abs=node.AST_row.absolute,
                 col_abs=node.AST_column.absolute,
             )
             if table_name is not None:
@@ -433,8 +433,6 @@ class NumbersModel:
                 f"Unsupported formula buffer ({row_num},{col_num})"
             )
             # cell.add_formula("*FORMULA ERROR*")
-        else:
-            formula_key = None
 
         return formula_key
 
