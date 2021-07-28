@@ -58,7 +58,7 @@ def print_table(args, filename):
         for table in sheet.tables():
             if args.table is not None and table.name not in args.table:
                 continue
-            for row in table.data:
+            for row in table.rows(values_only=True):
                 cols = ",".join([str(s) if s is not None else "" for s in row])
                 if args.brief:
                     print(cols)
