@@ -45,7 +45,8 @@ class Cell:
 
     @property
     def formula(self):
-        return self._formula
+        if self.has_formula:
+            return self._formula
 
 
 class NumberCell(Cell):

@@ -1,4 +1,5 @@
 from functools import lru_cache
+from logging import debug
 from typing import Union, Generator
 
 from numbers_parser.containers import ItemsList
@@ -142,6 +143,18 @@ class Table:
                 cell_struct["formula_key"], row_num, col_num
             )
             cell.add_formula(formula)
+
+            debug(
+                "%s@[%d,%d]: %d:%s",
+                self.name,
+                row_num,
+                col_num,
+                cell_struct["formula_key"],
+                formula,
+            )
+        else:
+            debug("%s@[%d,%d]: no formula", self.name, row_num, col_num)
+
         return cell
 
     def iter_rows(
