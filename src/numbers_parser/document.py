@@ -138,6 +138,7 @@ class Table:
         cell_struct["formula_key"] = self._model.table_cell_formula_decode(
             self._table_id, row_num, col_num, cell_struct["type"]
         )
+
         if cell_struct["formula_key"] is not None:
             formula = self._model.table_formulas(self._table_id).formula(
                 cell_struct["formula_key"], row_num, col_num
@@ -145,15 +146,24 @@ class Table:
             cell.add_formula(formula)
 
             debug(
-                "%s@[%d,%d]: %d:%s",
+                "%s@[%d,%d]: key=%d:%s: type=%d, value=%s",
                 self.name,
                 row_num,
                 col_num,
                 cell_struct["formula_key"],
                 formula,
+                cell_struct["type"],
+                str(cell_struct["value"]),
             )
         else:
-            debug("%s@[%d,%d]: no formula", self.name, row_num, col_num)
+            debug(
+                "%s@[%d,%d]: no formula: type=%d, value=%s",
+                self.name,
+                row_num,
+                col_num,
+                cell_struct["type"],
+                str(cell_struct["value"]),
+            )
 
         return cell
 

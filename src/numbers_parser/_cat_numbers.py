@@ -1,6 +1,7 @@
 # vi: ft=python
 
 import argparse
+import logging
 
 from numbers_parser import Document, _get_version
 
@@ -30,6 +31,7 @@ def command_line_parser():
         help="Don't prefix data rows with name of sheet/table (default: false)",
     )
     parser.add_argument("-V", "--version", action="store_true")
+    parser.add_argument("--debug", action="store_true")
     parser.add_argument(
         "-s", "--sheet", action="append", help="Names of sheet(s) to include in export"
     )
@@ -69,6 +71,9 @@ def print_table(args, filename):
 def main():
     parser = command_line_parser()
     args = parser.parse_args()
+
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
 
     if args.version:
         print(_get_version())
