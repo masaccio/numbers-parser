@@ -1,5 +1,7 @@
-from array import array
+import struct
 from struct import unpack
+
+from array import array
 from functools import lru_cache
 from typing import Dict, List
 from datetime import datetime, timedelta
@@ -245,21 +247,17 @@ class NumbersModel:
         return merge_cells
 
     @lru_cache(maxsize=None)
-    def table_uuids_map(self, table_uuid):
-        table_ids = self.find_refs("TableInfoArchive")
-        tables_uuids = {
-            self.table_base_id(self.objects[t_id].tableModel.identifier): self.objects[
-                t_id
-            ].tableModel.identifier
-            for t_id in table_ids
-        }
-        return tables_uuids[table_uuid]
+    def table_uuids_to_id(self, table_uuid):
+        for t_id in self.find_refs("TableInfoArchive"):
+            table_model_id = self.objects[t_id].tableModel.identifier
+            if table_uuid == self.table_base_id(table_model_id):
+                return table_model_id
 
     def node_to_cell_ref(self, row_num: int, col_num: int, node):
         table_name = None
         if node.HasField("AST_cross_table_reference_extra_info"):
             table_uuid = uuid(node.AST_cross_table_reference_extra_info.table_id)
-            table_id = self.table_uuids_map(table_uuid)
+            table_id = self.table_uuids_to_id(table_uuid)
             table_name = self.table_name(table_id)
         else:
             pass
@@ -393,44 +391,18 @@ class NumbersModel:
             return None
 
         try:
-            if self.table_formulas(table_id).is_error(row_num, col_num):
-                formula_key = unpack("<h", storage_buffer[12:14])[0]
-            if cell_type == TSTArchives.numberCellType:  # 2
-                if len(storage_buffer) > 40:
-                    formula_key = unpack("<h", storage_buffer[36:38])[0]
-                else:
-                    formula_key = unpack("<h", storage_buffer[28:30])[0]
-            elif cell_type == TSTArchives.textCellType:  # 3
-                if len(storage_buffer) > 28:
-                    formula_key = unpack("<h", storage_buffer[20:22])[0]
-                else:
-                    formula_key = unpack("<h", storage_buffer[24:26])[0]
-            elif cell_type == TSTArchives.dateCellType:  # 5
-                formula_key = unpack("<h", storage_buffer[24:26])[0]
-            elif cell_type == TSTArchives.boolCellType:  # 6
-                formula_key = unpack("<h", storage_buffer[24:26])[0]
-            elif cell_type == TSTArchives.durationCellType:  # 7
-                formula_key = unpack("<h", storage_buffer[24:26])[0]
-            elif cell_type == TSTArchives.formulaErrorCellType:  # 8
-                formula_key = unpack("<h", storage_buffer[12:14])[0]
-            elif cell_type == TSTArchives.currencyCellValueType:  # 9
-                formula_key = unpack("<h", storage_buffer[32:34])[0]
-            elif cell_type == 10:
-                # Might be [36:38]
-                formula_key = unpack("<h", storage_buffer[32:34])[0]
+            if cell_type == TSTArchives.formulaErrorCellType:
+                formula_key = unpack("<h", storage_buffer[-4:-2])[0]
             else:
-                raise UnsupportedError(  # pragma: no cover
-                    f"Unsupported formula cell type '{cell_type}' :({row_num},{col_num})"
-                )
-
+                formula_key = unpack("<h", storage_buffer[-12:-10])[0]
         except KeyError:
             raise UnsupportedError(  # pragma: no cover
                 f"Formula not found ({row_num},{col_num})"
             )
-        # except struct.error:
-        #     raise UnsupportedError(  # pragma: no cover
-        #         f"Unsupported formula ref ({row_num},{col_num})"
-        # )
+        except struct.error:
+            raise UnsupportedError(  # pragma: no cover
+                f"Unsupported formula ref ({row_num},{col_num})"
+            )
         except IndexError:
             raise UnsupportedError(  # pragma: no cover
                 f"Unsupported formula buffer ({row_num},{col_num})"
