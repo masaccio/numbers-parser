@@ -8,37 +8,71 @@ from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 
 _FUNCTIONS = {
+    1: {"func": "ABS", "nargs": 1},
     15: {"func": "AVERAGE", "nargs": 1},
+    17: {"func": "CEILING", "nargs": [1, 2]},
     18: {"func": "CHAR", "nargs": 1},
-    22: {"func": "COLUMN", "nargs": 0},
     20: {"func": "CLEAN", "nargs": 1},
-    25: {"func": "CODE", "nargs": 1},
+    21: {"func": "CODE", "nargs": 1},
+    22: {"func": "COLUMN", "nargs": 0},
+    24: {"func": "COMBIN", "nargs": 2},
     25: {"func": "CONCATENATE", "nargs": "*"},
     46: {"func": "DOLLAR", "nargs": 1},
+    48: {"func": "EVEN", "nargs": 1},
     49: {"func": "EXACT", "nargs": 2},
-    # 22: {"func": "FIXED", "nargs": 1},
-    # 22: {"func": "LOWER", "nargs": 1},
-    # 22: {"func": "PROPER", "nargs": 1},
-    # 22: {"func": "REPLACE", "nargs": 1},
+    50: {"func": "EXP", "nargs": 1},
+    51: {"func": "FACT", "nargs": 1},
     53: {"func": "FIND", "nargs": 2},
     54: {"func": "FIXED", "nargs": [1, 2, 3]},
+    55: {"func": "FLOOR", "nargs": 2},
+    58: {"func": "GCD", "nargs": 2},
     62: {"func": "IF", "nargs": 3},
+    65: {"func": "INT", "nargs": 1},
     69: {"func": "ISBLANK", "nargs": 1},
     70: {"func": "ISERROR", "nargs": 1},
     71: {"func": "ISEVEN", "nargs": 1},
+    75: {"func": "LCM", "nargs": 2},
     76: {"func": "LEFT", "nargs": [1, 2]},
     77: {"func": "LEN", "nargs": [1, 2]},
+    78: {"func": "LN", "nargs": 1},
+    79: {"func": "LOG", "nargs": [1, 2]},
+    80: {"func": "LOG10", "nargs": 1},
     82: {"func": "LOWER", "nargs": 1},
     86: {"func": "MEDIAN", "nargs": 1},
     87: {"func": "MID", "nargs": [2, 3]},
+    92: {"func": "MOD", "nargs": 2},
+    95: {"func": "MROUND", "nargs": 2},
     97: {"func": "NOW", "nargs": 0},
+    100: {"func": "ODD", "nargs": 1},
+    104: {"func": "PI", "nargs": 0},
+    107: {"func": "POWER", "nargs": 2},
+    113: {"func": "PRODUCT", "nargs": "*"},
     114: {"func": "PROPER", "nargs": 0},
+    116: {"func": "QUOTIENT", "nargs": 2},
+    117: {"func": "RADIANS", "nargs": 1},
+    118: {"func": "RAND", "nargs": 0},
     122: {"func": "REPLACE", "nargs": 2},
     123: {"func": "REPT", "nargs": 2},
     124: {"func": "RIGHT", "nargs": 2},
+    125: {"func": "ROMAN", "nargs": 2},
+    127: {"func": "ROUNDDOWN", "nargs": 2},
+    128: {"func": "ROUNDUP", "nargs": 2},
+    131: {"func": "SEARCH", "nargs": [2, 3]},
+    133: {"func": "SIGN", "nargs": 1},
+    139: {"func": "SQRT", "nargs": 1},
+    145: {"func": "SUMIF", "nargs": 3},
+    147: {"func": "SUMSQ", "nargs": [2, 4]},
     149: {"func": "T", "nargs": 1},
     155: {"func": "TRIM", "nargs": 1},
+    157: {"func": "TRUNC", "nargs": 1},
     168: {"func": "SUM", "nargs": 1},
+    216: {"func": "SUMX2MY2", "nargs": 2},
+    217: {"func": "SUMX2PY2", "nargs": 2},
+    218: {"func": "SUMXMY2", "nargs": 2},
+    219: {"func": "SQRTPI", "nargs": 1},
+    219: {"func": "SQRTPI", "nargs": 2},
+    224: {"func": "FACTDOUBLE", "nargs": 1},
+    250: {"func": "MULTINOMIAL", "nargs": [2, 3, 4]},
     304: {"func": "ISNUMBER", "nargs": 1},
     305: {"func": "ISTEXT", "nargs": 1},
 }
@@ -135,6 +169,10 @@ class Formula(list):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}*{arg2}")
 
+    def negate(self):
+        arg1 = self.pop()
+        self.push(f"-{arg1}")
+
 
 class FormulaNode:
     def __init__(self, node_type, **kwargs):
@@ -166,6 +204,8 @@ class TableFormulas:
     def formula(self, formula_key, row_num, col_num):  # noqa: C901
         if not (hasattr(self, "_ast")):
             self._ast = self._model.formula_ast(self._table_id)
+        if formula_key not in self._ast:
+            return "*INVALID KEY*"
         ast = self._ast[formula_key]
         formula = Formula(row_num, col_num)
         for node in ast:
@@ -173,8 +213,6 @@ class TableFormulas:
             if node_type == "CELL_REFERENCE_NODE":
                 formula.push(self._model.node_to_cell_ref(row_num, col_num, node))
             elif node_type == "NUMBER_NODE":
-                # node.AST_number_node_decimal_high
-                # node.AST_number_node_decimal_low
                 if node.AST_number_node_decimal_high == 0x3040000000000000:
                     formula.push(str(node.AST_number_node_decimal_low))
                 else:
@@ -195,7 +233,7 @@ class TableFormulas:
             elif node_type == "BEGIN_EMBEDDED_NODE_ARRAY":
                 formula.push("(")
             elif node_type == "BOOLEAN_NODE":
-                pass
+                formula.push(str(node.AST_boolean_node_boolean).upper())
             elif node_type == "COLON_NODE":
                 formula.range()
             elif node_type == "CONCATENATION_NODE":
@@ -214,16 +252,9 @@ class TableFormulas:
                 formula.not_equals()
             elif node_type == "SUBTRACTION_NODE":
                 formula.sub()
+            elif node_type == "NEGATION_NODE":
+                formula.negate()
             else:
                 return "FUNCTION_UNSUPPORTED:" + str(node_type)
-
-        logging.debug(
-            "%s@[%d,%d]: formula_key=%d, formula=%s",
-            self._table_id,
-            row_num,
-            col_num,
-            formula_key,
-            formula,
-        )
 
         return str(formula)
