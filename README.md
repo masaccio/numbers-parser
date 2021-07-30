@@ -111,8 +111,10 @@ for col in table.iter_cole(min_row=2, max_row=7):
 ### TODO
 
 There's probably more to say here, but certainly:
-* Formulas: these seem to be stored as a linked list AST rather than text which might make for
-easier evaluation, but does mean that they are more complex to extract.
+* Formulas: a small number of formulas are currently supported and the formula implementation
+is a work-in-progress with tests that are excluded from normal releases. Anyone using HEAD of
+this repo should not expect formulas to work.
+* Formats: no formats are extracted; just the raw data
 
 ## Numbers File Formats
 
@@ -157,6 +159,9 @@ by [Sean Patrick O'Brien](http://www.obriensp.com).
 
 Decoding the data structures inside Numbers files was helped greatly by
 [previous work](https://github.com/slott56/Stingray-Reader) by [Steven Lott](https://github.com/slott56).
+
+Formula tests were adapted from JavaScript tests used in
+[fast-formula-parser][https://github.com/LesterLyu/fast-formula-parser]
 
 ## License
 
