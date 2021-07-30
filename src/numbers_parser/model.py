@@ -1,10 +1,8 @@
-import struct
-from struct import unpack
-
 from array import array
-from functools import lru_cache
-from typing import Dict, List
 from datetime import datetime, timedelta
+from functools import lru_cache
+from struct import unpack
+from typing import Dict, List
 
 from numbers_parser.containers import ObjectStore
 from numbers_parser.cell import xl_rowcol_to_cell

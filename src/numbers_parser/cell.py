@@ -35,7 +35,7 @@ class Cell:
         self._value = value
         self.row = row_num
         self.col = col_num
-        self.size = (1,1)
+        self.size = (1, 1)
         self.is_merged = False
 
     def add_formula(self, formula: str):

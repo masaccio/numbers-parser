@@ -103,7 +103,7 @@ class Table:
         """Number of columns in the table"""
         return len(self._model.table_row_columns(self._table_id))
 
-    def cell(self, *args) -> Union[Cell, MergedCell]:
+    def cell(self, *args) -> Union[Cell, MergedCell]:  # NOQA: C901
         if type(args[0]) == str:
             (row_num, col_num) = xl_cell_to_rowcol(args[0])
         elif len(args) != 2:
@@ -139,7 +139,8 @@ class Table:
 
         if cell_struct["formula_key"] is not None:
             try:
-                formula = self._model.table_formulas(self._table_id).formula(
+                table_formulas = self._model.table_formulas(self._table_id)
+                formula = table_formulas.formula(
                     cell_struct["formula_key"], row_num, col_num
                 )
             except KeyError:
