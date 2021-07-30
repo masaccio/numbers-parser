@@ -1,4 +1,5 @@
 import pytest
+import pytest_check as check
 
 from numbers_parser import Document, FormulaCell, ErrorCell
 
@@ -30,16 +31,10 @@ def compare_tables(table, ref):
     for row_num in range(table.num_rows):
         for col_num in range(table.num_cols):
             if ref[row_num][col_num] is None:
-                # assert not table.cell(row_num, col_num).has_formula
-                if table.cell(row_num, col_num).has_formula:
-                    print(f"[{row_num},{col_num}]: has_formula FAILED")
+                check.is_false(table.cell(row_num, col_num).has_formula)
             else:
-                # assert table.cell(row_num, col_num).formula == ref[row_num][col_num]
-                if not table.cell(row_num, col_num).has_formula:
-                    print(f"[{row_num},{col_num}]: has_formula FAILED")
-                if table.cell(row_num, col_num).formula != ref[row_num][col_num]:
-                    val = table.cell(row_num, col_num).formula
-                    print(f"[{row_num},{col_num}]: {val}≠{ref[row_num][col_num]}")
+                check.is_true(table.cell(row_num, col_num).has_formula)
+                check.equal(table.cell(row_num, col_num).formula, ref[row_num][col_num])
 
 
 @pytest.mark.experimental
@@ -51,10 +46,3 @@ def test_table_functions():
 
     table = sheets[1].tables()[0]
     compare_tables(table, TABLE_2_FORMULAS)
-
-    # for sheet in doc.sheets():
-    #     print("==== TABLE:", sheet.tables()[0].name)
-    #     for row in sheet.tables()[0].rows():
-    #         for cell in row:
-    #             if cell.has_formula:
-    #                 print(f'@{cell.row},{cell.col}, "{cell.formula}"')
