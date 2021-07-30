@@ -121,13 +121,12 @@ class Formula(list):
             self.push(f"{f_func}({args})")
         elif f_nargs == 0:
             self.push(f"{f_func}()")
-        elif f_nargs != num_args:
-            warnings.warn(
-                f"@[{self.row},{self.col}: arg count mismatch {f_func}: {num_args} vs {f_nargs}",
-                UnsupportedWarning,
-            )
-            self.push(f"*ARG-ERROR:{f_func}:{num_args}:{f_nargs}*")
         else:
+            if f_nargs != num_args:
+                warnings.warn(
+                    f"@[{self.row},{self.col}: arg count mismatch {f_func}: {num_args} vs {f_nargs}",
+                    UnsupportedWarning,
+                )
             args = self.popn(num_args)
             args = ",".join(reversed(args))
             self.push(f"{f_func}({args})")
