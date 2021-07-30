@@ -25,5 +25,3 @@ def test_table_functions():
                     )
                 elif row[1].value != formula_value:
                     print(f"#{i}: incorrect value ({row[1].value} vs {formula_value}")
-                else:
-                    print(f"#{i}: PASSED")
