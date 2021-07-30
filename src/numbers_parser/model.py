@@ -390,24 +390,10 @@ class NumbersModel:
         if not self.table_formulas(table_id).is_formula(row_num, col_num):
             return None
 
-        try:
-            if cell_type == TSTArchives.formulaErrorCellType:
-                formula_key = unpack("<h", storage_buffer[-4:-2])[0]
-            else:
-                formula_key = unpack("<h", storage_buffer[-12:-10])[0]
-        except KeyError:
-            raise UnsupportedError(  # pragma: no cover
-                f"Formula not found ({row_num},{col_num})"
-            )
-        except struct.error:
-            raise UnsupportedError(  # pragma: no cover
-                f"Unsupported formula ref ({row_num},{col_num})"
-            )
-        except IndexError:
-            raise UnsupportedError(  # pragma: no cover
-                f"Unsupported formula buffer ({row_num},{col_num})"
-            )
-            # cell.add_formula("*FORMULA ERROR*")
+        if cell_type == TSTArchives.formulaErrorCellType:
+            formula_key = unpack("<h", storage_buffer[-4:-2])[0]
+        else:
+            formula_key = unpack("<h", storage_buffer[-12:-10])[0]
 
         return formula_key
 

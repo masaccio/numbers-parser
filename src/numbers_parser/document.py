@@ -4,6 +4,7 @@ from typing import Union, Generator
 
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import NumbersModel
+from numbers_parser.exceptions import UnsupportedError
 
 from numbers_parser.cell import (
     Cell,
@@ -131,18 +132,24 @@ class Table:
         if is_merged and self._merge_cells[row_col]["merge_type"] == "source":
             cell.is_merged = True
             cell.size = self._merge_cells[row_col]["size"]
-        else:
-            cell.is_merged = False
-            cell.size = (1, 1)
 
         cell_struct["formula_key"] = self._model.table_cell_formula_decode(
             self._table_id, row_num, col_num, cell_struct["type"]
         )
 
         if cell_struct["formula_key"] is not None:
-            formula = self._model.table_formulas(self._table_id).formula(
-                cell_struct["formula_key"], row_num, col_num
-            )
+            try:
+                formula = self._model.table_formulas(self._table_id).formula(
+                    cell_struct["formula_key"], row_num, col_num
+                )
+            except KeyError:
+                raise UnsupportedError(  # pragma: no cover
+                    f"Formula not found ({row_num},{col_num})"
+                )
+            except IndexError:
+                raise UnsupportedError(  # pragma: no cover
+                    f"Unsupported formula buffer ({row_num},{col_num})"
+                )
             cell.add_formula(formula)
 
             debug(
