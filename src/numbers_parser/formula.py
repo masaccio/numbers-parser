@@ -1,3 +1,4 @@
+import re
 import warnings
 
 from numbers_parser.exceptions import UnsupportedWarning
@@ -132,6 +133,9 @@ class Formula(list):
             self.push(f"{f_func}({args})")
 
     def array(self, num_rows: int, num_cols: int):
+        # Excel array format:
+        #     1-dimentional: {a,b,c,d}
+        #     2-dimentional: {a,b;c,d}
         if num_rows == 1:
             args = self.popn(num_cols)
             args = ",".join(reversed(args))
@@ -194,6 +198,7 @@ class Formula(list):
     def range(self):
         arg2, arg1 = self.popn(2)
         if "::" in arg1:
+            # Assumes references are not cross-table
             arg1_parts = arg1.split("::")
             arg2_parts = arg2.split("::")
             self.push(f"{arg1_parts[0]}::{arg1_parts[1]}:{arg2_parts[1]}")
@@ -283,9 +288,11 @@ class TableFormulas:
                 formula.not_equals()
             elif node_type == "NUMBER_NODE":
                 if node.AST_number_node_decimal_high == 0x3040000000000000:
+                    # Integer: don't use decimals
                     formula.push(str(node.AST_number_node_decimal_low))
                 else:
-                    formula.push(str(node.AST_number_node_number))
+                    # TODO: detect when scientific notation is present
+                    formula.push(number_to_str(node.AST_number_node_number))
             elif node_type == "POWER_NODE":
                 formula.power()
             elif node_type == "PREPEND_WHITESPACE_NODE":
@@ -303,3 +310,21 @@ class TableFormulas:
                 return str(node_type)
 
         return str(formula)
+
+
+def number_to_str(v: int) -> str:
+    v_str = repr(v)
+    if "e" in v_str:
+        number, exp = v_str.split("e")
+        number = re.sub(r"[,-.]", "", number)
+        zeroes = "0" * (abs(int(exp)) - 1)
+        if v < 0:
+            sign = "-"
+        else:
+            sign = ""
+        if int(exp) > 0:
+            return f"{sign}{number}{zeroes}"
+        else:
+            return f"{sign}0.{zeroes}{number}"
+    else:
+        return v_str
