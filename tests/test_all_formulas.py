@@ -1,5 +1,4 @@
 import pytest
-import pytest_check as check
 
 from numbers_parser import Document
 from numbers_parser.cell import ErrorCell, TextCell
@@ -8,6 +7,8 @@ DOCUMENT = "tests/data/test-all-forumulas.numbers"
 
 
 def compare_table_functions(sheet_name):
+    import pytest_check as check
+
     doc = Document(DOCUMENT)
     sheet = doc.sheets()[sheet_name]
     table = sheet.tables()["Tests"]
@@ -29,7 +30,7 @@ def compare_table_functions(sheet_name):
             check.equal(formula_result, formula_ref_value)
 
 
-# @pytest.mark.experimental
+@pytest.mark.experimental
 def test_information_functions():
     compare_table_functions("Information")
 
@@ -39,6 +40,11 @@ def test_text_functions():
     compare_table_functions("Text")
 
 
-# @pytest.mark.experimental
+@pytest.mark.experimental
 def test_math_functions():
     compare_table_functions("Math")
+
+
+@pytest.mark.experimental
+def test_reference_functions():
+    compare_table_functions("Reference")

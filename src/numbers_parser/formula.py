@@ -6,12 +6,15 @@ from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 
 _FUNCTIONS = {
     1: {"func": "ABS", "nargs": 1},
+    6: {"func": "ADDRESS", "nargs": [2, 3, 4, 5]},
+    8: {"func": "AREAS", "nargs": 1},
     15: {"func": "AVERAGE", "nargs": 1},
     17: {"func": "CEILING", "nargs": [1, 2]},
     18: {"func": "CHAR", "nargs": 1},
     20: {"func": "CLEAN", "nargs": 1},
     21: {"func": "CODE", "nargs": 1},
-    22: {"func": "COLUMN", "nargs": 0},
+    22: {"func": "COLUMN", "nargs": [0, 1]},
+    23: {"func": "COLUMNS", "nargs": 1},
     24: {"func": "COMBIN", "nargs": 2},
     25: {"func": "CONCATENATE", "nargs": "*"},
     46: {"func": "DOLLAR", "nargs": 1},
@@ -23,7 +26,9 @@ _FUNCTIONS = {
     54: {"func": "FIXED", "nargs": [1, 2, 3]},
     55: {"func": "FLOOR", "nargs": 2},
     58: {"func": "GCD", "nargs": "*"},
+    59: {"func": "HLOOKUP", "nargs": [3, 4]},
     62: {"func": "IF", "nargs": 3},
+    63: {"func": "INDEX", "nargs": [2, 3, 4]},
     65: {"func": "INT", "nargs": 1},
     69: {"func": "ISBLANK", "nargs": 1},
     70: {"func": "ISERROR", "nargs": 1},
@@ -44,7 +49,7 @@ _FUNCTIONS = {
     104: {"func": "PI", "nargs": 0},
     107: {"func": "POWER", "nargs": 2},
     113: {"func": "PRODUCT", "nargs": "*"},
-    114: {"func": "PROPER", "nargs": 0},
+    114: {"func": "PROPER", "nargs": 1},
     116: {"func": "QUOTIENT", "nargs": 2},
     117: {"func": "RADIANS", "nargs": 1},
     118: {"func": "RAND", "nargs": 0},
@@ -56,6 +61,8 @@ _FUNCTIONS = {
     126: {"func": "ROUND", "nargs": 2},
     127: {"func": "ROUNDDOWN", "nargs": 2},
     128: {"func": "ROUNDUP", "nargs": 2},
+    129: {"func": "ROW", "nargs": [0, 1]},
+    130: {"func": "ROWS", "nargs": 1},
     131: {"func": "SEARCH", "nargs": [2, 3]},
     133: {"func": "SIGN", "nargs": 1},
     139: {"func": "SQRT", "nargs": 1},
@@ -65,13 +72,16 @@ _FUNCTIONS = {
     149: {"func": "T", "nargs": 1},
     155: {"func": "TRIM", "nargs": 1},
     157: {"func": "TRUNC", "nargs": 1},
-    168: {"func": "SUM", "nargs": "*"},
+    165: {"func": "VLOOKUP", "nargs": [3, 4]},
+    168: {"func": "SUM", "nargs1": "*"},
     216: {"func": "SUMX2MY2", "nargs": 2},
     217: {"func": "SUMX2PY2", "nargs": 2},
     218: {"func": "SUMXMY2", "nargs": 2},
     219: {"func": "SQRTPI", "nargs": 1},
+    220: {"func": "TRANSPOSE", "nargs": 1},
     224: {"func": "FACTDOUBLE", "nargs": 1},
     250: {"func": "MULTINOMIAL", "nargs": [2, 3, 4]},
+    280: {"func": "INTERSECT.RANGES", "nargs": 2},
     286: {"func": "SERIESSUM", "nargs": 4},
     304: {"func": "ISNUMBER", "nargs": 1},
     305: {"func": "ISTEXT", "nargs": 1},
@@ -301,9 +311,14 @@ class TableFormulas:
                 formula.push('"' + node.AST_string_node_string + '"')
             elif node_type == "SUBTRACTION_NODE":
                 formula.sub()
+            elif node_type == "TOKEN_NODE":
+                if node.AST_token_node_boolean:
+                    formula.push("TRUE")
+                else:
+                    formula.push("FALSE")
             else:
                 warnings.warn(
-                    f"@[{self.row},{self.col}: function node type {node_type} is unsupported",
+                    f"@[{row_num},{col_num}: function node type {node_type} is unsupported",
                     UnsupportedWarning,
                 )
                 return str(node_type)
