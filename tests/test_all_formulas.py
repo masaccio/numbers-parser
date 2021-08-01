@@ -1,4 +1,5 @@
 import pytest
+import pytest_check as check
 
 from numbers_parser import Document
 from numbers_parser.cell import ErrorCell, TextCell
@@ -7,8 +8,6 @@ DOCUMENT = "tests/data/test-all-forumulas.numbers"
 
 
 def compare_table_functions(sheet_name):
-    import pytest_check as check
-
     doc = Document(DOCUMENT)
     sheet = doc.sheets()[sheet_name]
     table = sheet.tables()["Tests"]
