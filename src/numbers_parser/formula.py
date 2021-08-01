@@ -73,7 +73,7 @@ _FUNCTIONS = {
     155: {"func": "TRIM", "nargs": 1},
     157: {"func": "TRUNC", "nargs": 1},
     165: {"func": "VLOOKUP", "nargs": [3, 4]},
-    168: {"func": "SUM", "nargs1": "*"},
+    168: {"func": "SUM", "nargs": "*"},
     216: {"func": "SUMX2MY2", "nargs": 2},
     217: {"func": "SUMX2PY2", "nargs": 2},
     218: {"func": "SUMXMY2", "nargs": 2},
@@ -178,7 +178,7 @@ class Formula(list):
     def equals(self):
         arg1, arg2 = self.popn(2)
         # TODO: arguments reversed?
-        self.push(f"{arg1}={arg2}")
+        self.push(f"{arg2}={arg1}")
 
     def greater_than(self):
         arg2, arg1 = self.popn(2)
@@ -206,7 +206,8 @@ class Formula(list):
 
     def range(self):
         arg2, arg1 = self.popn(2)
-        if "::" in arg1:
+        func_range = "(" in arg1 or "(" in arg2
+        if "::" in arg1 and not func_range:
             # Assumes references are not cross-table
             arg1_parts = arg1.split("::")
             arg2_parts = arg2.split("::")
@@ -260,7 +261,7 @@ class TableFormulas:
             elif node_type == "ARRAY_NODE":
                 formula.array(node.AST_array_node_numRow, node.AST_array_node_numCol)
             elif node_type == "BEGIN_EMBEDDED_NODE_ARRAY":
-                formula.push("(")
+                pass
             elif node_type == "BOOLEAN_NODE":
                 formula.push(str(node.AST_boolean_node_boolean).upper())
             elif node_type == "CELL_REFERENCE_NODE":

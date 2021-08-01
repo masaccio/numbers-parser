@@ -23,7 +23,7 @@ TABLE_2_FORMULAS = [
     [None, "RIGHT(A5,2)"],
     [None, 'FIND("_",A6)'],
     [None, 'FIND("YYY",A7)'],
-    [None, 'IF(FIND("_", A8)>2,A1,A2)'],
+    [None, 'IF(FIND("_",A8)>2,A1,A2)'],
 ]
 
 
