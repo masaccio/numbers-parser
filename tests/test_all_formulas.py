@@ -19,7 +19,7 @@ def compare_table_functions(sheet_name):
         formula_text = row[0].value
         formula_result = row[1].value
         formula_ref_value = row[2].value
-        check.is_true(row[1].has_formula)
+        check.is_not_none(row[1].formula)
         check.equal(row[1].formula, formula_text)
         if isinstance(row[1], ErrorCell):
             pass
@@ -29,21 +29,26 @@ def compare_table_functions(sheet_name):
             check.equal(formula_result, formula_ref_value)
 
 
-@pytest.mark.experimental
 def test_information_functions():
     compare_table_functions("Information")
 
 
-@pytest.mark.experimental
 def test_text_functions():
     compare_table_functions("Text")
 
 
-@pytest.mark.experimental
 def test_math_functions():
     compare_table_functions("Math")
 
 
-@pytest.mark.experimental
 def test_reference_functions():
     compare_table_functions("Reference")
+
+
+@pytest.mark.experimental
+def test_date_functions():
+    compare_table_functions("Date")
+
+
+def test_statistical_functions():
+    compare_table_functions("Statistical")
