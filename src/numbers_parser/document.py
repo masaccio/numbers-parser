@@ -6,7 +6,6 @@ from numbers_parser.model import NumbersModel
 
 from numbers_parser.cell import (
     Cell,
-    EmptyCell,
     MergedCell,
     xl_cell_to_rowcol,
     xl_range,
@@ -78,18 +77,11 @@ class Table:
         return row_cells
 
     @property
+    @lru_cache(maxsize=None)
     def merge_ranges(self) -> list:
-        if not hasattr(self, "_merge_cells"):
-            self._merge_cells = self._model.merge_cell_ranges(self._table_id)
-
-        ranges = [xl_range(*r["rect"]) for r in self._merge_cells.values()]
+        merge_cells = self._model.merge_cell_ranges(self._table_id)
+        ranges = [xl_range(*r["rect"]) for r in merge_cells.values()]
         return sorted(set(list(ranges)))
-
-    @property
-    def _merge_cells(self):
-        if not hasattr(self, "__merge_cells"):
-            self.__merge_cells = self._model.merge_cell_ranges(self._table_id)
-        return self.__merge_cells
 
     @property
     def num_rows(self) -> int:
@@ -101,7 +93,7 @@ class Table:
         """Number of columns in the table"""
         return len(self._model.table_row_columns(self._table_id))
 
-    def cell(self, *args) -> Union[Cell, MergedCell]:  # NOQA: C901
+    def cell(self, *args) -> Union[Cell, MergedCell]:
         if type(args[0]) == str:
             (row_num, col_num) = xl_cell_to_rowcol(args[0])
         elif len(args) != 2:
@@ -114,27 +106,7 @@ class Table:
         if col_num >= self.num_cols or col_num < 0:
             raise IndexError(f"coumn {col_num} out of range")
 
-        cell_struct = self._model.table_cell_decode(self._table_id, row_num, col_num)
-
-        row_col = (row_num, col_num)
-        is_merged = row_col in self._merge_cells
-        if cell_struct is None:
-            if is_merged and self._merge_cells[row_col]["merge_type"] == "ref":
-                cell = MergedCell(self._model, *self._merge_cells[row_col]["rect"])
-            else:
-                cell = EmptyCell(self._model, row_num, col_num, None)
-            cell.size = None
-            cell._table_id = self._table_id
-            return cell
-
-        # TODO: Move merge logic to Cell
-        cell = Cell.factory(self._model, row_num, col_num, cell_struct)
-        if is_merged and self._merge_cells[row_col]["merge_type"] == "source":
-            cell.is_merged = True
-            cell.size = self._merge_cells[row_col]["size"]
-        cell._table_id = self._table_id
-
-        return cell
+        return Cell.factory(self._model, self._table_id, row_num, col_num)
 
     def iter_rows(
         self,

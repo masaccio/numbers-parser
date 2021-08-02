@@ -9,32 +9,56 @@ from logging import debug
 
 class Cell:
     @staticmethod
-    def factory(model: object, row_num: int, col_num: int, data: dict):
+    def factory(model: object, table_id: int, row_num: int, col_num: int):  # NOQA: C901
+        data = model.table_cell_decode(table_id, row_num, col_num)
+
+        row_col = (row_num, col_num)
+        merge_cells = model.merge_cell_ranges(table_id)
+        is_merged = row_col in merge_cells
+
+        if data is None:
+            if is_merged and merge_cells[row_col]["merge_type"] == "ref":
+                cell = MergedCell(*merge_cells[row_col]["rect"])
+            else:
+                cell = EmptyCell(row_num, col_num, None)
+            cell.size = None
+            cell._model = model
+            cell._table_id = table_id
+            return cell
+
         cell_type = data["type"]
         if cell_type == TSTArchives.emptyCellValueType:
-            return EmptyCell(model, row_num, col_num, None)
+            cell = EmptyCell(row_num, col_num, None)
         elif cell_type == TSTArchives.numberCellType:
-            return NumberCell(model, row_num, col_num, data["value"])
+            cell = NumberCell(row_num, col_num, data["value"])
         elif cell_type == TSTArchives.textCellType:
-            return TextCell(model, row_num, col_num, data["value"])
+            cell = TextCell(row_num, col_num, data["value"])
         elif cell_type == TSTArchives.dateCellType:
-            return DateCell(model, row_num, col_num, data["value"])
+            cell = DateCell(row_num, col_num, data["value"])
         elif cell_type == TSTArchives.boolCellType:
-            return BoolCell(model, row_num, col_num, data["value"])
+            cell = BoolCell(row_num, col_num, data["value"])
         elif cell_type == TSTArchives.durationCellType:
-            return DurationCell(model, row_num, col_num, timedelta(days=data["value"]))
+            cell = DurationCell(row_num, col_num, timedelta(days=data["value"]))
         elif cell_type == TSTArchives.formulaErrorCellType:
-            return ErrorCell(model, row_num, col_num, None)
+            cell = ErrorCell(row_num, col_num, None)
         elif cell_type == TSTArchives.currencyCellValueType:
-            return FormulaCell(model, row_num, col_num, data["value"])
+            cell = FormulaCell(row_num, col_num, data["value"])
         else:
             raise UnsupportedError(  # pragma: no cover
                 f"Unsupport cell type {cell_type} @:({row_num},{col_num})"
             )
 
-    def __init__(self, model: object, row_num: int, col_num: int, value):
+        cell._table_id = table_id
+        cell._model = model
+
+        if is_merged and merge_cells[row_col]["merge_type"] == "source":
+            cell.is_merged = True
+            cell.size = merge_cells[row_col]["size"]
+
+        return cell
+
+    def __init__(self, row_num: int, col_num: int, value):
         self._value = value
-        self._model = model
         self.row = row_num
         self.col = col_num
         self.size = (1, 1)
@@ -82,9 +106,9 @@ class Cell:
 
 
 class NumberCell(Cell):
-    def __init__(self, model: object, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value):
         self._type = TSTArchives.numberCellType
-        super().__init__(model, row_num, col_num, value)
+        super().__init__(row_num, col_num, value)
 
     @property
     def value(self) -> int:
@@ -92,9 +116,9 @@ class NumberCell(Cell):
 
 
 class TextCell(Cell):
-    def __init__(self, model: object, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value):
         self._type = TSTArchives.textCellType
-        super().__init__(model, row_num, col_num, value)
+        super().__init__(row_num, col_num, value)
 
     @property
     def value(self) -> str:
@@ -102,9 +126,9 @@ class TextCell(Cell):
 
 
 class EmptyCell(Cell):
-    def __init__(self, model: object, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value):
         self._type = None
-        super().__init__(model, row_num, col_num, value)
+        super().__init__(row_num, col_num, value)
 
     @property
     def value(self):
@@ -112,9 +136,9 @@ class EmptyCell(Cell):
 
 
 class BoolCell(Cell):
-    def __init__(self, model: object, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value):
         self._type = TSTArchives.boolCellType
-        super().__init__(model, row_num, col_num, value)
+        super().__init__(row_num, col_num, value)
 
     @property
     def value(self) -> bool:
@@ -122,9 +146,9 @@ class BoolCell(Cell):
 
 
 class DateCell(Cell):
-    def __init__(self, model: object, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value):
         self._type = TSTArchives.dateCellType
-        super().__init__(model, row_num, col_num, value)
+        super().__init__(row_num, col_num, value)
 
     @property
     def value(self) -> timedelta:
@@ -132,9 +156,9 @@ class DateCell(Cell):
 
 
 class DurationCell(Cell):
-    def __init__(self, model: object, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value):
         self._type = TSTArchives.durationCellType
-        super().__init__(model, row_num, col_num, value)
+        super().__init__(row_num, col_num, value)
 
     @property
     def value(self) -> timedelta:
@@ -142,9 +166,9 @@ class DurationCell(Cell):
 
 
 class FormulaCell(Cell):
-    def __init__(self, model: object, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value):
         self._type = TSTArchives.formulaCellType
-        super().__init__(model, row_num, col_num, value)
+        super().__init__(row_num, col_num, value)
 
     @property
     def value(self):
@@ -152,9 +176,9 @@ class FormulaCell(Cell):
 
 
 class ErrorCell(Cell):
-    def __init__(self, model: object, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value):
         self._type = TSTArchives.formulaErrorCellType
-        super().__init__(model, row_num, col_num, value)
+        super().__init__(row_num, col_num, value)
 
     @property
     def value(self):
@@ -162,11 +186,8 @@ class ErrorCell(Cell):
 
 
 class MergedCell:
-    def __init__(
-        self, model: object, row_start: int, col_start: int, row_end: int, col_end: int
-    ):
+    def __init__(self, row_start: int, col_start: int, row_end: int, col_end: int):
         self.value = None
-        self._model = model
         self.row_start = row_start
         self.row_end = row_end
         self.col_start = col_start
