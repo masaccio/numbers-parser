@@ -388,8 +388,6 @@ class NumbersModel:
         if not self.table_formulas(table_id).is_formula(row_num, col_num):
             return None
 
-        import binascii
-
         # TODO: why is this required?
         mod_offset = unpack("<h", storage_buffer[6:8])[0] == 1
 

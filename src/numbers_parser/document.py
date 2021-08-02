@@ -1,10 +1,8 @@
 from functools import lru_cache
-from logging import debug
 from typing import Union, Generator
 
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import NumbersModel
-from numbers_parser.exceptions import UnsupportedError
 
 from numbers_parser.cell import (
     Cell,
@@ -122,56 +120,19 @@ class Table:
         is_merged = row_col in self._merge_cells
         if cell_struct is None:
             if is_merged and self._merge_cells[row_col]["merge_type"] == "ref":
-                cell = MergedCell(*self._merge_cells[row_col]["rect"])
+                cell = MergedCell(self._model, *self._merge_cells[row_col]["rect"])
             else:
-                cell = EmptyCell(row_num, col_num, None)
+                cell = EmptyCell(self._model, row_num, col_num, None)
             cell.size = None
+            cell._table_id = self._table_id
             return cell
 
-        cell = Cell.factory(row_num, col_num, cell_struct)
+        # TODO: Move merge logic to Cell
+        cell = Cell.factory(self._model, row_num, col_num, cell_struct)
         if is_merged and self._merge_cells[row_col]["merge_type"] == "source":
             cell.is_merged = True
             cell.size = self._merge_cells[row_col]["size"]
-
-        cell_struct["formula_key"] = self._model.table_cell_formula_decode(
-            self._table_id, row_num, col_num, cell_struct["type"]
-        )
-
-        if cell_struct["formula_key"] is not None:
-            try:
-                table_formulas = self._model.table_formulas(self._table_id)
-                formula = table_formulas.formula(
-                    cell_struct["formula_key"], row_num, col_num
-                )
-            except KeyError:
-                raise UnsupportedError(  # pragma: no cover
-                    f"Formula not found ({row_num},{col_num})"
-                )
-            except IndexError:
-                raise UnsupportedError(  # pragma: no cover
-                    f"Unsupported formula buffer ({row_num},{col_num})"
-                )
-            cell.add_formula(formula)
-
-            debug(
-                "%s@[%d,%d]: key=%d:%s: type=%d, value=%s",
-                self.name,
-                row_num,
-                col_num,
-                cell_struct["formula_key"],
-                formula,
-                cell_struct["type"],
-                str(cell_struct["value"]),
-            )
-        else:
-            debug(
-                "%s@[%d,%d]: no formula: type=%d, value=%s",
-                self.name,
-                row_num,
-                col_num,
-                cell_struct["type"],
-                str(cell_struct["value"]),
-            )
+        cell._table_id = self._table_id
 
         return cell
 

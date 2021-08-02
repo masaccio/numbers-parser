@@ -4,104 +4,169 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.exceptions import UnsupportedError
 
 from datetime import timedelta
+from logging import debug
 
 
 class Cell:
     @staticmethod
-    def factory(row_num: int, col_num: int, data: dict):
+    def factory(model: object, row_num: int, col_num: int, data: dict):
         cell_type = data["type"]
         if cell_type == TSTArchives.emptyCellValueType:
-            return EmptyCell(row_num, col_num, None)
+            return EmptyCell(model, row_num, col_num, None)
         elif cell_type == TSTArchives.numberCellType:
-            return NumberCell(row_num, col_num, data["value"])
+            return NumberCell(model, row_num, col_num, data["value"])
         elif cell_type == TSTArchives.textCellType:
-            return TextCell(row_num, col_num, data["value"])
+            return TextCell(model, row_num, col_num, data["value"])
         elif cell_type == TSTArchives.dateCellType:
-            return DateCell(row_num, col_num, data["value"])
+            return DateCell(model, row_num, col_num, data["value"])
         elif cell_type == TSTArchives.boolCellType:
-            return BoolCell(row_num, col_num, data["value"])
+            return BoolCell(model, row_num, col_num, data["value"])
         elif cell_type == TSTArchives.durationCellType:
-            return DurationCell(row_num, col_num, timedelta(days=data["value"]))
+            return DurationCell(model, row_num, col_num, timedelta(days=data["value"]))
         elif cell_type == TSTArchives.formulaErrorCellType:
-            return ErrorCell(row_num, col_num, None)
+            return ErrorCell(model, row_num, col_num, None)
         elif cell_type == TSTArchives.currencyCellValueType:
-            return FormulaCell(row_num, col_num, data["value"])
+            return FormulaCell(model, row_num, col_num, data["value"])
         else:
             raise UnsupportedError(  # pragma: no cover
                 f"Unsupport cell type {cell_type} @:({row_num},{col_num})"
             )
 
-    def __init__(self, row_num: int, col_num: int, value):
+    def __init__(self, model: object, row_num: int, col_num: int, value):
         self._value = value
+        self._model = model
         self.row = row_num
         self.col = col_num
         self.size = (1, 1)
         self.is_merged = False
 
-    def add_formula(self, formula: str):
-        self._formula = formula
-
-    @property
-    def has_formula(self) -> bool:
-        return hasattr(self, "_formula")
-
     @property
     def formula(self):
-        if self.has_formula:
+        if hasattr(self, "_formula"):
             return self._formula
+
+        formula_key = self._model.table_cell_formula_decode(
+            self._table_id,
+            self.row,
+            self.col,
+            self._type,
+        )
+        if formula_key is not None:
+            try:
+                table_formulas = self._model.table_formulas(self._table_id)
+                formula = table_formulas.formula(formula_key, self.row, self.col)
+            except KeyError:
+                raise UnsupportedError(  # pragma: no cover
+                    f"Formula not found ({self.row},{self.col})"
+                )
+            except IndexError:
+                raise UnsupportedError(  # pragma: no cover
+                    f"Unsupported formula buffer ({self.row},{self.col})"
+                )
+            self._formula = formula
+
+            debug(
+                "%s@[%d,%d]: key=%d:%s: type=%d, value=%s",
+                self._model.table_name(self._table_id),
+                self.row,
+                self.col,
+                formula_key,
+                formula,
+                self._type,
+                str(self.value),
+            )
+        else:
+            self._formula = None
+
+        return self._formula
 
 
 class NumberCell(Cell):
+    def __init__(self, model: object, row_num: int, col_num: int, value):
+        self._type = TSTArchives.numberCellType
+        super().__init__(model, row_num, col_num, value)
+
     @property
     def value(self) -> int:
         return self._value
 
 
 class TextCell(Cell):
+    def __init__(self, model: object, row_num: int, col_num: int, value):
+        self._type = TSTArchives.textCellType
+        super().__init__(model, row_num, col_num, value)
+
     @property
     def value(self) -> str:
         return self._value
 
 
 class EmptyCell(Cell):
+    def __init__(self, model: object, row_num: int, col_num: int, value):
+        self._type = None
+        super().__init__(model, row_num, col_num, value)
+
     @property
     def value(self):
         return None
 
 
 class BoolCell(Cell):
+    def __init__(self, model: object, row_num: int, col_num: int, value):
+        self._type = TSTArchives.boolCellType
+        super().__init__(model, row_num, col_num, value)
+
     @property
     def value(self) -> bool:
         return self._value
 
 
 class DateCell(Cell):
+    def __init__(self, model: object, row_num: int, col_num: int, value):
+        self._type = TSTArchives.dateCellType
+        super().__init__(model, row_num, col_num, value)
+
     @property
     def value(self) -> timedelta:
         return self._value
 
 
 class DurationCell(Cell):
+    def __init__(self, model: object, row_num: int, col_num: int, value):
+        self._type = TSTArchives.durationCellType
+        super().__init__(model, row_num, col_num, value)
+
     @property
     def value(self) -> timedelta:
         return self._value
 
 
 class FormulaCell(Cell):
+    def __init__(self, model: object, row_num: int, col_num: int, value):
+        self._type = TSTArchives.formulaCellType
+        super().__init__(model, row_num, col_num, value)
+
     @property
     def value(self):
         return None
 
 
 class ErrorCell(Cell):
+    def __init__(self, model: object, row_num: int, col_num: int, value):
+        self._type = TSTArchives.formulaErrorCellType
+        super().__init__(model, row_num, col_num, value)
+
     @property
     def value(self):
         return None
 
 
 class MergedCell:
-    def __init__(self, row_start: int, col_start: int, row_end: int, col_end: int):
+    def __init__(
+        self, model: object, row_start: int, col_start: int, row_end: int, col_end: int
+    ):
         self.value = None
+        self._model = model
         self.row_start = row_start
         self.row_end = row_end
         self.col_start = col_start

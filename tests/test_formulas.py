@@ -31,13 +31,12 @@ def compare_tables(table, ref):
     for row_num in range(table.num_rows):
         for col_num in range(table.num_cols):
             if ref[row_num][col_num] is None:
-                check.is_false(table.cell(row_num, col_num).has_formula)
+                check.is_none(table.cell(row_num, col_num).formula)
             else:
-                check.is_true(table.cell(row_num, col_num).has_formula)
+                check.is_not_none(table.cell(row_num, col_num).formula)
                 check.equal(table.cell(row_num, col_num).formula, ref[row_num][col_num])
 
 
-@pytest.mark.experimental
 def test_table_functions():
     doc = Document("tests/data/test-10.numbers")
     sheets = doc.sheets()
