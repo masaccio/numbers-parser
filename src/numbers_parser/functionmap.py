@@ -39,6 +39,7 @@ FUNCTION_MAP = {
     37: "COUPNUM",
     38: "COVAR",
     39: "DATE",
+    40: "DATEDIF",
     41: "DAY",
     42: "DB",
     43: "DDB",

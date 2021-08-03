@@ -5,6 +5,8 @@ from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.functionmap import FUNCTION_MAP
 
+from datetime import datetime, timedelta
+
 
 class Formula(list):
     def __init__(self, row_num, col_num):
@@ -179,6 +181,11 @@ class TableFormulas:
                 formula.range()
             elif node_type == "CONCATENATION_NODE":
                 formula.concat()
+            elif node_type == "DATE_NODE":
+                dt = datetime(2001, 1, 1) + timedelta(
+                    seconds=node.AST_date_node_dateNum
+                )
+                formula.push(f"DATE({dt.year},{dt.month},{dt.day})")
             elif node_type == "DIVISION_NODE":
                 formula.div()
             elif node_type == "END_THUNK_NODE":

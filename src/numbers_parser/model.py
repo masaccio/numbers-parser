@@ -373,12 +373,15 @@ class NumbersModel:
         if not self.table_formulas(table_id).is_formula(row_num, col_num):
             return None
 
-        # TODO: why is this required?
+        # TODO: Why is this required? Which cell types are affected?
         mod_offset = unpack("<h", storage_buffer[6:8])[0] == 1
 
         if cell_type == TSTArchives.formulaErrorCellType:
             formula_key = unpack("<h", storage_buffer[-4:-2])[0]
-        elif cell_type == TSTArchives.textCellType and mod_offset:
+        elif (
+            cell_type == TSTArchives.textCellType
+            or cell_type == TSTArchives.durationCellType
+        ) and mod_offset:
             formula_key = unpack("<h", storage_buffer[-16:-14])[0]
         else:
             formula_key = unpack("<h", storage_buffer[-12:-10])[0]

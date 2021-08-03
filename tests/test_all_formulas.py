@@ -2,7 +2,7 @@ import pytest
 import pytest_check as check
 
 from numbers_parser import Document
-from numbers_parser.cell import ErrorCell, TextCell, BoolCell
+from numbers_parser.cell import ErrorCell, TextCell, BoolCell, DurationCell
 
 DOCUMENT = "tests/data/test-all-forumulas.numbers"
 
@@ -17,19 +17,20 @@ def compare_table_functions(sheet_name, filename=DOCUMENT):
             continue
 
         if isinstance(row[0], BoolCell):
+            # Test value is true/false
             formula_text = str(row[0].value).upper()
         else:
             formula_text = row[0].value
         formula_result = row[1].value
         formula_ref_value = row[2].value
-        check.is_not_none(row[1].formula)
-        check.equal(row[1].formula, formula_text)
+        check.is_not_none(row[1].formula, f"exists@{i}")
+        check.equal(row[1].formula, formula_text, f"formula@{i}")
         if isinstance(row[1], ErrorCell):
             pass
         elif isinstance(row[1], TextCell) and formula_ref_value is None:
             pass
         else:
-            check.equal(formula_result, formula_ref_value)
+            check.equal(formula_result, formula_ref_value, f"value@{i}")
 
 
 def test_information_functions():
@@ -48,7 +49,6 @@ def test_reference_functions():
     compare_table_functions("Reference")
 
 
-@pytest.mark.experimental
 def test_date_functions():
     compare_table_functions("Date")
 

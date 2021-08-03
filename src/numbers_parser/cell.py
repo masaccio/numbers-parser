@@ -55,6 +55,13 @@ class Cell:
             cell.is_merged = True
             cell.size = merge_cells[row_col]["size"]
 
+        debug(
+            "%s@[%d,%d]: value=%s",
+            model.table_name(table_id),
+            row_num,
+            col_num,
+            str(cell.value),
+        )
         return cell
 
     def __init__(self, row_num: int, col_num: int, value):

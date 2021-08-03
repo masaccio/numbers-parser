@@ -7,16 +7,26 @@
         {
             "name": "Run experimental tests",
             "type": "python",
-            "request": "launch",
+            "request": "test",
             "program": "/opt/homebrew/bin/pytest",
             "args": [
                 "--experimental",
-                "tests/test_formulas.py",
+                "tests/test_all_formulas.py",
                 "-o",
                 "log_cli=True",
-                "--log-cli-level=DEBUG"
+                "--log-cli-level=ERROR"
             ],
-            "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug Unit Test incl. library code",
+            "type": "python",
+            "request": "test",
+            "justMyCode": false,
+        },
+        {
+            "name": "Debug Unit Test",
+            "type": "python",
+            "request": "test",
         },
         {
             "name": "Run tox",
