@@ -2,13 +2,13 @@ import pytest
 import pytest_check as check
 
 from numbers_parser import Document
-from numbers_parser.cell import ErrorCell, TextCell
+from numbers_parser.cell import ErrorCell, TextCell, BoolCell
 
 DOCUMENT = "tests/data/test-all-forumulas.numbers"
 
 
-def compare_table_functions(sheet_name):
-    doc = Document(DOCUMENT)
+def compare_table_functions(sheet_name, filename=DOCUMENT):
+    doc = Document(filename)
     sheet = doc.sheets()[sheet_name]
     table = sheet.tables()["Tests"]
     for i, row in enumerate(table.rows()):
@@ -16,7 +16,10 @@ def compare_table_functions(sheet_name):
             # Skip header and invalid test rows
             continue
 
-        formula_text = row[0].value
+        if isinstance(row[0], BoolCell):
+            formula_text = str(row[0].value).upper()
+        else:
+            formula_text = row[0].value
         formula_result = row[1].value
         formula_ref_value = row[2].value
         check.is_not_none(row[1].formula)
@@ -52,3 +55,8 @@ def test_date_functions():
 
 def test_statistical_functions():
     compare_table_functions("Statistical")
+
+
+@pytest.mark.experimental
+def test_extra_functions():
+    compare_table_functions("Formulas", "tests/data/test-extra-formulas.numbers")
