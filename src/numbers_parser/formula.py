@@ -3,118 +3,7 @@ import warnings
 
 from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
-
-_FUNCTIONS = {
-    1: "ABS",
-    6: "ADDRESS",
-    8: "AREAS",
-    14: "AVEDEV",
-    15: "AVERAGE",
-    16: "AVERAGEA",
-    17: "CEILING",
-    18: "CHAR",
-    20: "CLEAN",
-    21: "CODE",
-    22: "COLUMN",
-    23: "COLUMNS",
-    24: "COMBIN",
-    25: "CONCATENATE",
-    26: "CONFIDENCE",
-    27: "CORREL",
-    30: "COUNT",
-    33: "COUNTIF",
-    38: "COVAR",
-    46: "DOLLAR",
-    48: "EVEN",
-    49: "EXACT",
-    50: "EXP",
-    51: "FACT",
-    53: "FIND",
-    54: "FIXED",
-    55: "FLOOR",
-    56: "FORECAST",
-    58: "GCD",
-    59: "HLOOKUP",
-    62: "IF",
-    63: "INDEX",
-    65: "INT",
-    66: "INTERCEPT",
-    69: "ISBLANK",
-    70: "ISERROR",
-    71: "ISEVEN",
-    75: "LCM",
-    76: "LEFT",
-    77: "LEN",
-    78: "LN",
-    79: "LOG",
-    80: "LOG10",
-    82: "LOWER",
-    86: "MEDIAN",
-    87: "MID",
-    92: "MOD",
-    95: "MROUND",
-    97: "NOW",
-    100: "ODD",
-    104: "PI",
-    106: "POISSONDIST",
-    107: "POWER",
-    113: "PRODUCT",
-    114: "PROPER",
-    116: "QUOTIENT",
-    117: "RADIANS",
-    118: "RAND",
-    119: "RANDBETWEEN",
-    122: "REPLACE",
-    123: "REPT",
-    124: "RIGHT",
-    125: "ROMAN",
-    126: "ROUND",
-    127: "ROUNDDOWN",
-    128: "ROUNDUP",
-    129: "ROW",
-    130: "ROWS",
-    131: "SEARCH",
-    133: "SIGN",
-    139: "SQRT",
-    145: "SUMIF",
-    146: "SUMPRODUCT",
-    147: "SUMSQ",
-    149: "T",
-    155: "TRIM",
-    157: "TRUNC",
-    165: "VLOOKUP",
-    168: "SUM",
-    198: "STANDARDIZE",
-    213: "EXPONDIST",
-    216: "SUMX2MY2",
-    217: "SUMX2PY2",
-    218: "SUMXMY2",
-    219: "SQRTPI",
-    220: "TRANSPOSE",
-    221: "DEVSQ",
-    222: "FREQUENCY",
-    224: "FACTDOUBLE",
-    227: "GAMMALN",
-    229: "GAMMADIST",
-    230: "GAMMAINV",
-    234: "AVERAGEIF",
-    240: "LOGNORMINV",
-    242: "BINOMDIST",
-    244: "FDIST",
-    246: "CHIDIST",
-    247: "CHITEST",
-    250: "MULTINOMIAL",
-    251: "CRITBINOM",
-    256: "CHINV",
-    257: "FINV",
-    259: "BETAINV",
-    262: "HARMEAN",
-    263: "GEOMEAN",
-    280: "INTERSECT.RANGES",
-    286: "SERIESSUM",
-    304: "ISNUMBER",
-    305: "ISTEXT",
-}
+from numbers_parser.functionmap import FUNCTION_MAP
 
 
 class Formula(list):
@@ -139,7 +28,7 @@ class Formula(list):
         self._stack.append(val)
 
     def function(self, num_args: int, node_index: int):
-        if node_index not in _FUNCTIONS:
+        if node_index not in FUNCTION_MAP:
             _ = self.popn(num_args)
             warnings.warn(
                 f"@[{self.row},{self.col}: function ID {node_index} is unsupported",
@@ -148,7 +37,7 @@ class Formula(list):
             self.push(f"*UNSUPPORTED:{node_index}*")
             return
         else:
-            func_name = _FUNCTIONS[node_index]
+            func_name = FUNCTION_MAP[node_index]
             if len(self._stack) < num_args:
                 warnings.warn(
                     f"@[{self.row},{self.col}: stack to small for {func_name}",
@@ -276,6 +165,8 @@ class TableFormulas:
             node_type = self._formula_type_lookup[node.AST_node_type]
             if node_type == "ADDITION_NODE":
                 formula.add()
+            elif node_type == "APPEND_WHITESPACE_NODE":
+                pass
             elif node_type == "ARRAY_NODE":
                 formula.array(node.AST_array_node_numRow, node.AST_array_node_numCol)
             elif node_type == "BEGIN_EMBEDDED_NODE_ARRAY":
@@ -324,7 +215,6 @@ class TableFormulas:
             elif node_type == "POWER_NODE":
                 formula.power()
             elif node_type == "PREPEND_WHITESPACE_NODE":
-                # TODO: something with node.AST_whitespace
                 pass
             elif node_type == "STRING_NODE":
                 formula.push('"' + node.AST_string_node_string + '"')
@@ -340,7 +230,7 @@ class TableFormulas:
                     f"@[{row_num},{col_num}: function node type {node_type} is unsupported",
                     UnsupportedWarning,
                 )
-                return str(node_type)
+                pass
 
         return str(formula)
 
