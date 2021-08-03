@@ -79,12 +79,10 @@ class Cell:
             try:
                 table_formulas = self._model.table_formulas(self._table_id)
                 formula = table_formulas.formula(formula_key, self.row, self.col)
-            except KeyError:
-                raise UnsupportedError(  # pragma: no cover
-                    f"Formula not found ({self.row},{self.col})"
-                )
-            except IndexError:
-                raise UnsupportedError(  # pragma: no cover
+            except KeyError:  # pragma: no cover
+                raise UnsupportedError(f"Formula not found ({self.row},{self.col})")
+            except IndexError:  # pragma: no cover
+                raise UnsupportedError(
                     f"Unsupported formula buffer ({self.row},{self.col})"
                 )
             self._formula = formula

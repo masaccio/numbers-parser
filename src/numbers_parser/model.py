@@ -74,7 +74,7 @@ class NumbersModel:
     def table_string(self, table_id, key):
         bds = self.objects[table_id].base_data_store
         strings_id = bds.stringTable.identifier
-        for x in self.objects[strings_id].entries:
+        for x in self.objects[strings_id].entries:  # pragma: no branch
             if x.key == key:
                 return x.string
 
@@ -131,9 +131,12 @@ class NumbersModel:
         #        }
         #    }
         haunted_owner = uuid(self.objects[table_id].haunted_owner.owner_uid)
-        for dependency_id in self.find_refs("FormulaOwnerDependenciesArchive"):
+        formula_owner_ids = self.find_refs("FormulaOwnerDependenciesArchive")
+        for dependency_id in formula_owner_ids:  # pragma: no branch
             obj = self.objects[dependency_id]
-            if obj.HasField("base_owner_uid") and obj.HasField("formula_owner_uid"):
+            if obj.HasField("base_owner_uid") and obj.HasField(
+                "formula_owner_uid"
+            ):  # pragma: no branch
                 base_owner_uid = uuid(obj.base_owner_uid)
                 formula_owner_uid = uuid(obj.formula_owner_uid)
                 if formula_owner_uid == haunted_owner:
@@ -246,7 +249,7 @@ class NumbersModel:
 
     @lru_cache(maxsize=None)
     def table_uuids_to_id(self, table_uuid):
-        for t_id in self.find_refs("TableInfoArchive"):
+        for t_id in self.find_refs("TableInfoArchive"):  # pragma: no branch
             table_model_id = self.objects[t_id].tableModel.identifier
             if table_uuid == self.table_base_id(table_model_id):
                 return table_model_id
@@ -267,19 +270,18 @@ class NumbersModel:
             col = node.AST_column.column
         else:
             col = col_num + node.AST_column.column
-        try:
-            ref = xl_rowcol_to_cell(
-                row,
-                col,
-                row_abs=node.AST_row.absolute,
-                col_abs=node.AST_column.absolute,
-            )
-            if table_name is not None:
-                return f"{table_name}::{ref}"
-            else:
-                return ref
-        except IndexError:
-            return f"INVALID[{row_num},{col_num}]"
+
+        # TODO: deal with potential mis-referenced formulass that throw IndexError
+        ref = xl_rowcol_to_cell(
+            row,
+            col,
+            row_abs=node.AST_row.absolute,
+            col_abs=node.AST_column.absolute,
+        )
+        if table_name is not None:
+            return f"{table_name}::{ref}"
+        else:
+            return ref
 
     @lru_cache(maxsize=None)
     def formula_ast(self, table_id: int):
