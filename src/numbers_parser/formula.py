@@ -174,7 +174,7 @@ class TableFormulas:
             elif node_type == "BOOLEAN_NODE":
                 formula.push(str(node.AST_boolean_node_boolean).upper())
             elif node_type == "CELL_REFERENCE_NODE":
-                formula.push(self._model.node_to_cell_ref(row_num, col_num, node))
+                formula.push(self._model.node_to_ref(row_num, col_num, node))
             elif node_type == "COLON_NODE":
                 formula.range()
             elif node_type == "CONCATENATION_NODE":

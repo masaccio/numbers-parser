@@ -57,6 +57,5 @@ def test_statistical_functions():
     compare_table_functions("Statistical")
 
 
-@pytest.mark.experimental
 def test_extra_functions():
     compare_table_functions("Formulas", "tests/data/test-extra-formulas.numbers")

@@ -5,7 +5,7 @@ from struct import unpack
 from typing import Dict, List
 
 from numbers_parser.containers import ObjectStore
-from numbers_parser.cell import xl_rowcol_to_cell
+from numbers_parser.cell import xl_rowcol_to_cell, xl_col_to_name
 from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.formula import TableFormulas
@@ -254,34 +254,17 @@ class NumbersModel:
             if table_uuid == self.table_base_id(table_model_id):
                 return table_model_id
 
-    def node_to_cell_ref(self, row_num: int, col_num: int, node):
+    def node_to_ref(self, row_num: int, col_num: int, node):
         table_name = None
         if node.HasField("AST_cross_table_reference_extra_info"):
             table_uuid = uuid(node.AST_cross_table_reference_extra_info.table_id)
             table_id = self.table_uuids_to_id(table_uuid)
             table_name = self.table_name(table_id)
-        else:
-            pass
-        if node.AST_row.absolute:
-            row = node.AST_row.row
-        else:
-            row = row_num + node.AST_row.row
-        if node.AST_column.absolute:
-            col = node.AST_column.column
-        else:
-            col = col_num + node.AST_column.column
 
-        # TODO: deal with potential mis-referenced formulass that throw IndexError
-        ref = xl_rowcol_to_cell(
-            row,
-            col,
-            row_abs=node.AST_row.absolute,
-            col_abs=node.AST_column.absolute,
-        )
-        if table_name is not None:
-            return f"{table_name}::{ref}"
+        if node.HasField("AST_column") and not node.HasField("AST_row"):
+            return node_to_col_ref(node, table_name, col_num)
         else:
-            return ref
+            return node_to_row_col_ref(node, table_name, row_num, col_num)
 
     @lru_cache(maxsize=None)
     def formula_ast(self, table_id: int):
@@ -401,6 +384,43 @@ class NumbersModel:
             formula_key = unpack("<h", storage_buffer[-12:-10])[0]
 
         return formula_key
+
+
+def node_to_col_ref(node: object, table_name: str, col_num: int) -> str:
+    if node.AST_column.absolute:
+        col = node.AST_column.column
+    else:
+        col = col_num + node.AST_column.column
+
+    col_name = xl_col_to_name(col, node.AST_column.absolute)
+    if table_name is not None:
+        return f"{table_name}::{col_name}"
+    else:
+        return col_name
+
+
+def node_to_row_col_ref(
+    node: object, table_name: str, row_num: int, col_num: int
+) -> str:
+    if node.AST_row.absolute:
+        row = node.AST_row.row
+    else:
+        row = row_num + node.AST_row.row
+    if node.AST_column.absolute:
+        col = node.AST_column.column
+    else:
+        col = col_num + node.AST_column.column
+
+    ref = xl_rowcol_to_cell(
+        row,
+        col,
+        row_abs=node.AST_row.absolute,
+        col_abs=node.AST_column.absolute,
+    )
+    if table_name is not None:
+        return f"{table_name}::{ref}"
+    else:
+        return ref
 
 
 def uuid(ref: dict) -> int:
