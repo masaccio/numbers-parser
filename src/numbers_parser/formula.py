@@ -9,8 +9,9 @@ from datetime import datetime, timedelta
 
 
 class Formula(list):
-    def __init__(self, row_num, col_num):
+    def __init__(self, model, row_num, col_num):
         self._stack = []
+        self._model = model
         self.row = row_num
         self.col = col_num
 
@@ -29,36 +30,22 @@ class Formula(list):
     def push(self, val: str):
         self._stack.append(val)
 
-    def function(self, num_args: int, node_index: int):
-        if node_index not in FUNCTION_MAP:
-            _ = self.popn(num_args)
-            warnings.warn(
-                f"@[{self.row},{self.col}: function ID {node_index} is unsupported",
-                UnsupportedWarning,
-            )
-            self.push(f"*UNSUPPORTED:{node_index}*")
-            return
-        else:
-            func_name = FUNCTION_MAP[node_index]
-            if len(self._stack) < num_args:
-                warnings.warn(
-                    f"@[{self.row},{self.col}: stack to small for {func_name}",
-                    UnsupportedWarning,
-                )
-                num_args = len(self._stack)
-            args = self.popn(num_args)
-            args = ",".join(reversed(args))
-            self.push(f"{func_name}({args})")
+    # def array(self, num_rows: int, num_cols: int):
+    def add(self, *args):
+        arg2, arg1 = self.popn(2)
+        self.push(f"{arg1}+{arg2}")
 
-    def array(self, num_rows: int, num_cols: int):
-        # Excel array format:
-        #     1-dimentional: {a,b,c,d}
-        #     2-dimentional: {a,b;c,d}
+    def array(self, *args):
+        node = args[2]
+        num_rows = node.AST_array_node_numRow
+        num_cols = node.AST_array_node_numCol
         if num_rows == 1:
+            # 1-dimentional array: {a,b,c,d}
             args = self.popn(num_cols)
             args = ",".join(reversed(args))
             self.push(f"{{{args}}}")
         else:
+            # 2-dimentional array: {a,b;c,d}
             rows = []
             for row_num in range(num_rows):
                 args = self.popn(num_cols)
@@ -67,53 +54,101 @@ class Formula(list):
             args = ";".join(reversed(rows))
             self.push(f"{{{args}}}")
 
-    def list(self, num_args: int):
-        args = self.popn(num_args)
-        args = ",".join(reversed(args))
-        self.push(f"({args})")
+    def boolean(self, *args):
+        node = args[2]
+        if node.HasField("AST_token_node_boolean"):
+            if node.AST_token_node_boolean:
+                self.push("TRUE")
+            else:
+                self.push("FALSE")
+        else:
+            self.push(str(node.AST_boolean_node_boolean).upper())
 
-    def add(self):
-        arg2, arg1 = self.popn(2)
-        self.push(f"{arg1}+{arg2}")
-
-    def concat(self):
+    def concat(self, *args):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}&{arg2}")
 
-    def div(self):
+    def date(self, *args):
+        node = args[2]
+        dt = datetime(2001, 1, 1) + timedelta(seconds=node.AST_date_node_dateNum)
+        self.push(f"DATE({dt.year},{dt.month},{dt.day})")
+
+    def div(self, *args):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}/{arg2}")
 
-    def equals(self):
+    def empty(self, *args):
+        self.push("")
+
+    def equals(self, *args):
         arg1, arg2 = self.popn(2)
         # TODO: arguments reversed?
         self.push(f"{arg2}={arg1}")
 
-    def greater_than(self):
+    def function(self, *args):
+        node = args[2]
+        num_args = node.AST_function_node_numArgs
+        node_index = node.AST_function_node_index
+        if node_index not in FUNCTION_MAP:
+            warnings.warn(
+                f"@[{self.row},{self.col}]: function ID {node_index} is unsupported",
+                UnsupportedWarning,
+            )
+            func_name = "UNDEFINED!"
+        else:
+            func_name = FUNCTION_MAP[node_index]
+
+        if len(self._stack) < num_args:
+            warnings.warn(
+                f"@[{self.row},{self.col}]: stack to small for {func_name}",
+                UnsupportedWarning,
+            )
+            num_args = len(self._stack)
+
+        args = self.popn(num_args)
+        args = ",".join(reversed(args))
+        self.push(f"{func_name}({args})")
+
+    def greater_than(self, *args):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}>{arg2}")
 
-    def greater_than_or_equal(self):
+    def greater_than_or_equal(self, *args):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}>={arg2}")
 
-    def mul(self):
+    def list(self, *args):
+        node = args[2]
+        args = self.popn(node.AST_list_node_numArgs)
+        args = ",".join(reversed(args))
+        self.push(f"({args})")
+
+    def mul(self, *args):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}*{arg2}")
 
-    def negate(self):
+    def negate(self, *args):
         arg1 = self.pop()
         self.push(f"-{arg1}")
 
-    def not_equals(self):
+    def not_equals(self, *args):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}≠{arg2}")
 
-    def power(self):
+    def number(self, *args):
+        node = args[2]
+        if node.AST_number_node_decimal_high == 0x3040000000000000:
+            # Integer: don't use decimals
+            self.push(str(node.AST_number_node_decimal_low))
+        else:
+            # TODO: detect when scientific notation is present
+            self.push(number_to_str(node.AST_number_node_number))
+
+    def power(self, *args):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}^{arg2}")
 
-    def range(self):
+    def range(self, *args):
         arg2, arg1 = self.popn(2)
         func_range = "(" in arg1 or "(" in arg2
         if "::" in arg1 and not func_range:
@@ -124,16 +159,48 @@ class Formula(list):
         else:
             self.push(f"{arg1}:{arg2}")
 
-    def sub(self):
+    def string(self, *args):
+        node = args[2]
+        self.push('"' + node.AST_string_node_string + '"')
+
+    def sub(self, *args):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}-{arg2}")
 
+    def xref(self, *args):
+        (row_num, col_num, node) = args
+        self.push(self._model.node_to_ref(row_num, col_num, node))
 
-class FormulaNode:
-    def __init__(self, node_type, **kwargs):
-        self.type = node_type
-        for arg, val in kwargs.items():
-            setattr(self, arg, val)
+
+NODE_FUNCTION_MAP = {
+    "ADDITION_NODE": "add",
+    "APPEND_WHITESPACE_NODE": None,
+    "ARRAY_NODE": "array",
+    "BEGIN_EMBEDDED_NODE_ARRAY": None,
+    "BOOLEAN_NODE": "boolean",
+    "CELL_REFERENCE_NODE": "xref",
+    "COLON_NODE": "range",
+    "CONCATENATION_NODE": "concat",
+    "DATE_NODE": "date",
+    "DIVISION_NODE": "div",
+    "END_THUNK_NODE": None,
+    "EMPTY_ARGUMENT_NODE": "empty",
+    "EQUAL_TO_NODE": "equals",
+    "EQUAL_TO_NODE": "equals",
+    "FUNCTION_NODE": "function",
+    "GREATER_THAN_NODE": "greater_than",
+    "GREATER_THAN_OR_EQUAL_TO_NODE": "greater_than_or_equal",
+    "LIST_NODE": "list",
+    "MULTIPLICATION_NODE": "mul",
+    "NEGATION_NODE": "negate",
+    "NOT_EQUAL_TO_NODE": "not_equals",
+    "NUMBER_NODE": "number",
+    "POWER_NODE": "power",
+    "PREPEND_WHITESPACE_NODE": None,
+    "STRING_NODE": "string",
+    "SUBTRACTION_NODE": "sub",
+    "TOKEN_NODE": "boolean",
+}
 
 
 class TableFormulas:
@@ -156,88 +223,28 @@ class TableFormulas:
             self._error_cells = self._model.error_cell_ranges(self._table_id)
         return (row, col) in self._error_cells
 
-    def formula(self, formula_key, row_num, col_num):  # noqa: C901
+    def formula(self, formula_key, row_num, col_num):
         if not (hasattr(self, "_ast")):
             self._ast = self._model.formula_ast(self._table_id)
         if formula_key not in self._ast:
-            return "*INVALID KEY*"
+            return "INVALID KEY!(formula_key)"
+
         ast = self._ast[formula_key]
-        formula = Formula(row_num, col_num)
+        formula = Formula(self._model, row_num, col_num)
         for node in ast:
             node_type = self._formula_type_lookup[node.AST_node_type]
-            if node_type == "ADDITION_NODE":
-                formula.add()
-            elif node_type == "APPEND_WHITESPACE_NODE":
-                pass
-            elif node_type == "ARRAY_NODE":
-                formula.array(node.AST_array_node_numRow, node.AST_array_node_numCol)
-            elif node_type == "BEGIN_EMBEDDED_NODE_ARRAY":
-                pass
-            elif node_type == "BOOLEAN_NODE":
-                formula.push(str(node.AST_boolean_node_boolean).upper())
-            elif node_type == "CELL_REFERENCE_NODE":
-                formula.push(self._model.node_to_ref(row_num, col_num, node))
-            elif node_type == "COLON_NODE":
-                formula.range()
-            elif node_type == "CONCATENATION_NODE":
-                formula.concat()
-            elif node_type == "DATE_NODE":
-                dt = datetime(2001, 1, 1) + timedelta(
-                    seconds=node.AST_date_node_dateNum
-                )
-                formula.push(f"DATE({dt.year},{dt.month},{dt.day})")
-            elif node_type == "DIVISION_NODE":
-                formula.div()
-            elif node_type == "END_THUNK_NODE":
-                pass
-            elif node_type == "EMPTY_ARGUMENT_NODE":
-                formula.push("")
-            elif node_type == "EQUAL_TO_NODE":
-                formula.equals()
-            elif node_type == "EQUAL_TO_NODE":
-                formula.equals()
-            elif node_type == "FUNCTION_NODE":
-                formula.function(
-                    node.AST_function_node_numArgs, node.AST_function_node_index
-                )
-            elif node_type == "GREATER_THAN_NODE":
-                formula.greater_than()
-            elif node_type == "GREATER_THAN_OR_EQUAL_TO_NODE":
-                formula.greater_than_or_equal()
-            elif node_type == "LIST_NODE":
-                formula.list(node.AST_list_node_numArgs)
-            elif node_type == "MULTIPLICATION_NODE":
-                formula.mul()
-            elif node_type == "NEGATION_NODE":
-                formula.negate()
-            elif node_type == "NOT_EQUAL_TO_NODE":
-                formula.not_equals()
-            elif node_type == "NUMBER_NODE":
-                if node.AST_number_node_decimal_high == 0x3040000000000000:
-                    # Integer: don't use decimals
-                    formula.push(str(node.AST_number_node_decimal_low))
-                else:
-                    # TODO: detect when scientific notation is present
-                    formula.push(number_to_str(node.AST_number_node_number))
-            elif node_type == "POWER_NODE":
-                formula.power()
-            elif node_type == "PREPEND_WHITESPACE_NODE":
-                pass
-            elif node_type == "STRING_NODE":
-                formula.push('"' + node.AST_string_node_string + '"')
-            elif node_type == "SUBTRACTION_NODE":
-                formula.sub()
-            elif node_type == "TOKEN_NODE":
-                if node.AST_token_node_boolean:
-                    formula.push("TRUE")
-                else:
-                    formula.push("FALSE")
-            else:
+            if node_type not in NODE_FUNCTION_MAP:
                 warnings.warn(
-                    f"@[{row_num},{col_num}: function node type {node_type} is unsupported",
+                    f"@[{row_num},{col_num}]: function node type {node_type} is unsupported",
                     UnsupportedWarning,
                 )
                 pass
+            elif NODE_FUNCTION_MAP[node_type] is None:
+                pass
+            else:
+                func = getattr(formula, NODE_FUNCTION_MAP[node_type])
+                func(row_num, col_num, node)
+            continue
 
         return str(formula)
 
