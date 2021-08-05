@@ -215,9 +215,6 @@ class TableFormulas:
     def is_formula(self, row, col):
         return (row, col) in self._model.formula_cell_ranges(self._table_id)
 
-    def is_error(self, row, col):
-        return (row, col) in self._model.error_cell_ranges(self._table_id)
-
     def formula(self, formula_key, row_num, col_num):
         all_formulas = self._model.formula_ast(self._table_id)
         if formula_key not in all_formulas:
