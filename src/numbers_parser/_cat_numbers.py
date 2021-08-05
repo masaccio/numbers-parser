@@ -32,7 +32,11 @@ def command_line_parser():
     )
     parser.add_argument("-V", "--version", action="store_true")
     parser.add_argument("--debug", action="store_true", help="Enable debug output")
-    parser.add_argument("--formulas", action="store_true", help="Dump formulas instead of formula results")
+    parser.add_argument(
+        "--formulas",
+        action="store_true",
+        help="Dump formulas instead of formula results",
+    )
     parser.add_argument(
         "-s", "--sheet", action="append", help="Names of sheet(s) to include in export"
     )
@@ -68,6 +72,8 @@ def print_table(args, filename):
                         cells.append("")
                     elif args.formulas and cell.formula is not None:
                         cells.append(cell.formula)
+                    elif cell.value is None:
+                        cells.append("")
                     else:
                         cells.append(str(cell.value))
                     cols = ",".join(cells)

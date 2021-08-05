@@ -128,7 +128,9 @@ def test_select_table(script_runner):
 def test_list_sheets(script_runner):
     ret = script_runner.run("cat-numbers", "-S", DOCUMENT, print_result=False)
     assert ret.success
-    assert ret.stdout == (f"{DOCUMENT}: ZZZ_Sheet_1\n" "tests/data/test-1.numbers: ZZZ_Sheet_2\n")
+    assert ret.stdout == (
+        f"{DOCUMENT}: ZZZ_Sheet_1\n" "tests/data/test-1.numbers: ZZZ_Sheet_2\n"
+    )
     assert ret.stderr == ""
 
 
@@ -141,3 +143,52 @@ def test_list_tables(script_runner):
         f"{DOCUMENT}: ZZZ_Sheet_2: XXX_Table_1\n"
     )
     assert ret.stderr == ""
+
+
+def test_without_formulas(script_runner):
+    ret = script_runner.run(
+        "cat-numbers",
+        "-b",
+        "-t",
+        "Table 2",
+        "tests/data/test-10.numbers",
+        print_result=False,
+    )
+    assert ret.success
+    rows = ret.stdout.strip().split("\n")
+    assert rows == [
+        "XXX_1,XXX_1XXX_2XXX_3",
+        "XXX_2,10.0",
+        "XXX_3,X",
+        "XXX_4,XX",
+        "XXX_5,_5",
+        "XXX_6,4.0",
+        "XXX_7,",
+        "XXX_8,XXX_1",
+    ]
+
+    assert ret.stderr == ""
+
+
+def test_with_formulas(script_runner):
+    ret = script_runner.run(
+        "cat-numbers",
+        "-b",
+        "-t",
+        "Table 2",
+        "--formulas",
+        "tests/data/test-10.numbers",
+        print_result=False,
+    )
+    assert ret.success
+    rows = ret.stdout.strip().split("\n")
+    assert rows == [
+        "XXX_1,A1&A2&A3",
+        "XXX_2,LEN(A2)+LEN(A3)",
+        "XXX_3,LEFT(A3,1)",
+        "XXX_4,MID(A4,2,2)",
+        "XXX_5,RIGHT(A5,2)",
+        'XXX_6,FIND("_",A6)',
+        'XXX_7,FIND("YYY",A7)',
+        'XXX_8,IF(FIND("_",A8)>2,A1,A2)',
+    ]
