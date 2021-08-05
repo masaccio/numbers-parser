@@ -31,7 +31,8 @@ def command_line_parser():
         help="Don't prefix data rows with name of sheet/table (default: false)",
     )
     parser.add_argument("-V", "--version", action="store_true")
-    parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--debug", action="store_true", help="Enable debug output")
+    parser.add_argument("--formulas", action="store_true", help="Dump formulas instead of formula results")
     parser.add_argument(
         "-s", "--sheet", action="append", help="Names of sheet(s) to include in export"
     )
@@ -60,8 +61,16 @@ def print_table(args, filename):
         for table in sheet.tables():
             if args.table is not None and table.name not in args.table:
                 continue
-            for row in table.rows(values_only=True):
-                cols = ",".join([str(s) if s is not None else "" for s in row])
+            for row in table.rows():
+                cells = []
+                for cell in row:
+                    if cell is None:
+                        cells.append("")
+                    elif args.formulas and cell.formula is not None:
+                        cells.append(cell.formula)
+                    else:
+                        cells.append(str(cell.value))
+                    cols = ",".join(cells)
                 if args.brief:
                     print(cols)
                 else:
