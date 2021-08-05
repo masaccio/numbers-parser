@@ -193,6 +193,7 @@ class ErrorCell(Cell):
 class MergedCell:
     def __init__(self, row_start: int, col_start: int, row_end: int, col_end: int):
         self.value = None
+        self.formula = None
         self.row_start = row_start
         self.row_end = row_end
         self.col_start = col_start
