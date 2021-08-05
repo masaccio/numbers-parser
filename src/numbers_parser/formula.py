@@ -213,25 +213,18 @@ class TableFormulas:
         }
 
     def is_formula(self, row, col):
-        if not (hasattr(self, "_formula_cells")):
-            self._formula_cells = self._model.formula_cell_ranges(self._table_id)
-
-        return (row, col) in self._formula_cells
+        return (row, col) in self._model.formula_cell_ranges(self._table_id)
 
     def is_error(self, row, col):
-        if not (hasattr(self, "_error_cells")):
-            self._error_cells = self._model.error_cell_ranges(self._table_id)
-        return (row, col) in self._error_cells
+        return (row, col) in self._model.error_cell_ranges(self._table_id)
 
     def formula(self, formula_key, row_num, col_num):
-        if not (hasattr(self, "_ast")):
-            self._ast = self._model.formula_ast(self._table_id)
-        if formula_key not in self._ast:
-            return "INVALID KEY!(formula_key)"
+        all_formulas = self._model.formula_ast(self._table_id)
+        if formula_key not in all_formulas:
+            return "INVALID_KEY!(" + str(formula_key) + ")"
 
-        ast = self._ast[formula_key]
         formula = Formula(self._model, row_num, col_num)
-        for node in ast:
+        for node in all_formulas[formula_key]:
             node_type = self._formula_type_lookup[node.AST_node_type]
             if node_type not in NODE_FUNCTION_MAP:
                 warnings.warn(
@@ -239,12 +232,9 @@ class TableFormulas:
                     UnsupportedWarning,
                 )
                 pass
-            elif NODE_FUNCTION_MAP[node_type] is None:
-                pass
-            else:
+            elif NODE_FUNCTION_MAP[node_type] is not None:
                 func = getattr(formula, NODE_FUNCTION_MAP[node_type])
                 func(row_num, col_num, node)
-            continue
 
         return str(formula)
 
