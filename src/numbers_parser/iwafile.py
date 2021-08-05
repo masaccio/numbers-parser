@@ -115,7 +115,9 @@ class IWAArchiveSegment(object):
         self.objects = objects
 
     def __eq__(self, other):
-        return self.header == other.header and self.objects == other.objects  # pragma: no cover
+        return (
+            self.header == other.header and self.objects == other.objects
+        )  # pragma: no cover
 
     def __repr__(self):
         return "<%s identifier=%s objects=%s>" % (  # pragma: no cover
@@ -138,7 +140,9 @@ class IWAArchiveSegment(object):
         for message_info in archive_info.message_infos:
             try:
                 if message_info.type == 0 and archive_info.should_merge and payloads:
-                    base_message = archive_info.message_infos[message_info.base_message_index]
+                    base_message = archive_info.message_infos[
+                        message_info.base_message_index
+                    ]
                     klass = partial(
                         ProtobufPatch.FromString,
                         message_info,
@@ -148,7 +152,8 @@ class IWAArchiveSegment(object):
                     klass = ID_NAME_MAP[message_info.type]
             except KeyError:  # pragma: no cover
                 raise NotImplementedError(
-                    "Don't know how to parse Protobuf message type " + str(message_info.type)
+                    "Don't know how to parse Protobuf message type "
+                    + str(message_info.type)
                 )
             try:
                 message_payload = payload[n : n + message_info.length]
