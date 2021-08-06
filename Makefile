@@ -21,12 +21,17 @@ all: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py
 install: $(SOURCE_FILES)
 	python3 setup.py install
 
-$(RELEASE_TARBALL):
+$(RELEASE_TARBALL): sdist
+
+sdist:
 	python3 setup.py sdist
 
 upload: $(RELEASE_TARBALL)
 	tox
 	twine upload $(RELEASE_TARBALL)
+
+docs:
+	python3 setup.py build_sphinx
 
 test: all
 	PYTHONPATH=src python3 -m pytest tests
