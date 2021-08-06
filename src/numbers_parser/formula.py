@@ -30,7 +30,6 @@ class Formula(list):
     def push(self, val: str):
         self._stack.append(val)
 
-    # def array(self, num_rows: int, num_cols: int):
     def add(self, *args):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}+{arg2}")
@@ -57,10 +56,7 @@ class Formula(list):
     def boolean(self, *args):
         node = args[2]
         if node.HasField("AST_token_node_boolean"):
-            if node.AST_token_node_boolean:
-                self.push("TRUE")
-            else:
-                self.push("FALSE")
+            self.push(str(node.AST_token_node_boolean).upper())
         else:
             self.push(str(node.AST_boolean_node_boolean).upper())
 
@@ -69,6 +65,7 @@ class Formula(list):
         self.push(f"{arg1}&{arg2}")
 
     def date(self, *args):
+        # Date literals exported as DATE()
         node = args[2]
         dt = datetime(2001, 1, 1) + timedelta(seconds=node.AST_date_node_dateNum)
         self.push(f"DATE({dt.year},{dt.month},{dt.day})")
@@ -81,8 +78,8 @@ class Formula(list):
         self.push("")
 
     def equals(self, *args):
+        # Arguments appear to be reversed
         arg1, arg2 = self.popn(2)
-        # TODO: arguments reversed?
         self.push(f"{arg2}={arg1}")
 
     def function(self, *args):

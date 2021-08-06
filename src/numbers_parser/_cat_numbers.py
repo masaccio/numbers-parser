@@ -58,6 +58,17 @@ def print_table_names(filename):
             print(f"{filename}: {sheet.name}: {table.name}")
 
 
+def cell_as_string(args, cell):
+    if cell is None:
+        return ""
+    elif args.formulas and cell.formula is not None:
+        return cell.formula
+    elif cell.value is None:
+        return ""
+    else:
+        return str(cell.value)
+
+
 def print_table(args, filename):
     for sheet in Document(filename).sheets():
         if args.sheet is not None and sheet.name not in args.sheet:
@@ -66,21 +77,12 @@ def print_table(args, filename):
             if args.table is not None and table.name not in args.table:
                 continue
             for row in table.rows():
-                cells = []
-                for cell in row:
-                    if cell is None:
-                        cells.append("")
-                    elif args.formulas and cell.formula is not None:
-                        cells.append(cell.formula)
-                    elif cell.value is None:
-                        cells.append("")
-                    else:
-                        cells.append(str(cell.value))
-                    cols = ",".join(cells)
+                cells = [cell_as_string(args, cell) for cell in row]
+                cells_str = ",".join(cells)
                 if args.brief:
-                    print(cols)
+                    print(cells_str)
                 else:
-                    print(f"{filename}: {sheet.name}: {table.name}:", cols)
+                    print(f"{filename}: {sheet.name}: {table.name}:", cells_str)
 
 
 def main():
