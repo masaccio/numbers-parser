@@ -27,4 +27,5 @@
     "terminal.integrated.env.osx": {
         "PYTHONPATH": "${workspaceFolder}/src",
     },
+    "restructuredtext.confPath": "${workspaceFolder}/doc",
 }
