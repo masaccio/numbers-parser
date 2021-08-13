@@ -165,6 +165,9 @@ def test_without_formulas(script_runner):
         "XXX_6,4.0",
         "XXX_7,",
         "XXX_8,XXX_1",
+        "0.25,0.5",
+        "2.0,smaller",
+        "10.0,larger",
     ]
 
     assert ret.stderr == ""
@@ -191,4 +194,7 @@ def test_with_formulas(script_runner):
         'XXX_6,FIND("_",A6)',
         'XXX_7,FIND("YYY",A7)',
         'XXX_8,IF(FIND("_",A8)>2,A1,A2)',
+        "0.25,100×(A9×2)%",
+        '2.0,IF(A10<5,"smaller","larger")',
+        '10.0,IF(A11≤5,"smaller","larger")',
     ]

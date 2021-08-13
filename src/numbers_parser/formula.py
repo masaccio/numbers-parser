@@ -72,7 +72,7 @@ class Formula(list):
 
     def div(self, *args):
         arg2, arg1 = self.popn(2)
-        self.push(f"{arg1}/{arg2}")
+        self.push(f"{arg1}÷{arg2}")
 
     def empty(self, *args):
         self.push("")
@@ -112,7 +112,15 @@ class Formula(list):
 
     def greater_than_or_equal(self, *args):
         arg2, arg1 = self.popn(2)
-        self.push(f"{arg1}>={arg2}")
+        self.push(f"{arg1}≥{arg2}")
+
+    def less_than(self, *args):
+        arg2, arg1 = self.popn(2)
+        self.push(f"{arg1}<{arg2}")
+
+    def less_than_or_equal(self, *args):
+        arg2, arg1 = self.popn(2)
+        self.push(f"{arg1}≤{arg2}")
 
     def list(self, *args):
         node = args[2]
@@ -122,7 +130,7 @@ class Formula(list):
 
     def mul(self, *args):
         arg2, arg1 = self.popn(2)
-        self.push(f"{arg1}*{arg2}")
+        self.push(f"{arg1}×{arg2}")
 
     def negate(self, *args):
         arg1 = self.pop()
@@ -140,6 +148,10 @@ class Formula(list):
         else:
             # TODO: detect when scientific notation is present
             self.push(number_to_str(node.AST_number_node_number))
+
+    def percent(self, *args):
+        arg1 = self.pop()
+        self.push(f"{arg1}%")
 
     def power(self, *args):
         arg2, arg1 = self.popn(2)
@@ -164,6 +176,9 @@ class Formula(list):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}-{arg2}")
 
+    def unsupported(self, *args):
+        pass
+
     def xref(self, *args):
         (row_num, col_num, node) = args
         self.push(self._model.node_to_ref(row_num, col_num, node))
@@ -177,6 +192,7 @@ NODE_FUNCTION_MAP = {
     "BOOLEAN_NODE": "boolean",
     "CELL_REFERENCE_NODE": "xref",
     "COLON_NODE": "range",
+    # "COLON_NODE_WITH_UIDS": "unsupported",
     "CONCATENATION_NODE": "concat",
     "DATE_NODE": "date",
     "DIVISION_NODE": "div",
@@ -187,11 +203,14 @@ NODE_FUNCTION_MAP = {
     "FUNCTION_NODE": "function",
     "GREATER_THAN_NODE": "greater_than",
     "GREATER_THAN_OR_EQUAL_TO_NODE": "greater_than_or_equal",
+    "LESS_THAN_NODE": "less_than",
+    "LESS_THAN_OR_EQUAL_TO_NODE": "less_than_or_equal",
     "LIST_NODE": "list",
     "MULTIPLICATION_NODE": "mul",
     "NEGATION_NODE": "negate",
     "NOT_EQUAL_TO_NODE": "not_equals",
     "NUMBER_NODE": "number",
+    "PERCENT_NODE": "percent",
     "POWER_NODE": "power",
     "PREPEND_WHITESPACE_NODE": None,
     "STRING_NODE": "string",
