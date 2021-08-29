@@ -24,6 +24,19 @@ XXX_TABLE_1_REF = [
     ["XXX_ROW_3", "XXX_3_1", None, "XXX_3_3", "XXX_3_4", "XXX_3_5"],
 ]
 
+EMPTY_ROWS_REF = [
+    ["A", "B", "C", None, None, None],
+    ["A_1", "B_1", "C_1", None, None, None],
+    ["A_2", "B_2", "C_2", None, None, None],
+    [None, None, None, None, None, None],
+    [None, None, None, None, None, None],
+    ["A_5", "B_5", "C_5", None, None, None],
+    ["A_6", "B_6", "C_6", None, None, None],
+    [None, None, None, None, None, None],
+    ["A_8", None, "C_8", None, None, "F_8"],
+    ["A_9", None, "C_9", None, None, None],
+]
+
 
 def test_sheet_exceptions():
     doc = Document("tests/data/test-1.numbers")
@@ -90,3 +103,11 @@ def test_empty_cells():
     assert table.num_cols == 6
     assert table.num_rows == 4
     assert table.rows(values_only=True) == XXX_TABLE_1_REF
+
+
+def test_empty_rows():
+    doc = Document("tests/data/test-empty-rows.numbers")
+    sheets = doc.sheets()
+    tables = sheets[0].tables()
+    table = tables[0]
+    assert table.rows(values_only=True) == EMPTY_ROWS_REF
