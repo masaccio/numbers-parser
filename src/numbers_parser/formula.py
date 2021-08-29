@@ -87,8 +87,9 @@ class Formula(list):
         num_args = node.AST_function_node_numArgs
         node_index = node.AST_function_node_index
         if node_index not in FUNCTION_MAP:
+            table_name = self._model.table_name(self._table_id)
             warnings.warn(
-                f"@[{self.row},{self.col}]: function ID {node_index} is unsupported",
+                f"{table_name}@[{self.row},{self.col}]: function ID {node_index} is unsupported",
                 UnsupportedWarning,
             )
             func_name = "UNDEFINED!"
@@ -96,8 +97,9 @@ class Formula(list):
             func_name = FUNCTION_MAP[node_index]
 
         if len(self._stack) < num_args:
+            table_name = self._model.table_name(self._table_id)
             warnings.warn(
-                f"@[{self.row},{self.col}]: stack to small for {func_name}",
+                f"{table_name}@[{self.row},{self.col}]: stack to small for {func_name}",
                 UnsupportedWarning,
             )
             num_args = len(self._stack)
@@ -199,7 +201,6 @@ NODE_FUNCTION_MAP = {
     "END_THUNK_NODE": None,
     "EMPTY_ARGUMENT_NODE": "empty",
     "EQUAL_TO_NODE": "equals",
-    "EQUAL_TO_NODE": "equals",
     "FUNCTION_NODE": "function",
     "GREATER_THAN_NODE": "greater_than",
     "GREATER_THAN_OR_EQUAL_TO_NODE": "greater_than_or_equal",
@@ -234,14 +235,20 @@ class TableFormulas:
     def formula(self, formula_key, row_num, col_num):
         all_formulas = self._model.formula_ast(self._table_id)
         if formula_key not in all_formulas:
+            table_name = self._model.table_name(self._table_id)
+            warnings.warn(
+                f"{table_name}@[{row_num},{col_num}]: key #{formula_key} not found",
+                UnsupportedWarning,
+            )
             return "INVALID_KEY!(" + str(formula_key) + ")"
 
         formula = Formula(self._model, row_num, col_num)
         for node in all_formulas[formula_key]:
             node_type = self._formula_type_lookup[node.AST_node_type]
             if node_type not in NODE_FUNCTION_MAP:
+                table_name = self._model.table_name(self._table_id)
                 warnings.warn(
-                    f"@[{row_num},{col_num}]: function node type {node_type} is unsupported",
+                    f"{table_name}@[{row_num},{col_num}]: node type {node_type} is unsupported",
                     UnsupportedWarning,
                 )
                 pass
