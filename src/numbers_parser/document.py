@@ -86,12 +86,12 @@ class Table:
     @property
     def num_rows(self) -> int:
         """Number of rows in the table"""
-        return len(self._model.table_row_headers(self._table_id))
+        return self._model.number_of_rows(self._table_id)
 
     @property
     def num_cols(self) -> int:
         """Number of columns in the table"""
-        return len(self._model.table_row_columns(self._table_id))
+        return self._model.number_of_columns(self._table_id)
 
     def cell(self, *args) -> Union[Cell, MergedCell]:
         if type(args[0]) == str:

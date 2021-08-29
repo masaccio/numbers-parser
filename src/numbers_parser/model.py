@@ -48,19 +48,30 @@ class NumbersModel:
         ]
 
     @lru_cache(maxsize=None)
-    def table_row_headers(self, table_id):
+    def row_storage_map(self, table_id):
+        # The base data store contains a reference to rowHeaders.buckets
+        # which is an ordered list that matches the storage buffers, but
+        # identifies which row a storage buffer belongs to (empty rows have
+        # no storage buffers). Each bucket is:
+        #
+        #  {
+        #      "hidingState": 0,
+        #      "index": 0,
+        #      "numberOfCells": 3,
+        #      "size": 0.0
+        #  },
+        row_bucket_map = {i: None for i in range(self.objects[table_id].number_of_rows)}
         bds = self.objects[table_id].base_data_store
-        return [
-            h.numberOfCells
-            for h in self.objects[bds.rowHeaders.buckets[0].identifier].headers
-        ]
+        buckets = self.objects[bds.rowHeaders.buckets[0].identifier].headers
+        for i, bucket in enumerate(buckets):
+            row_bucket_map[bucket.index] = i
+        return row_bucket_map
 
-    @lru_cache(maxsize=None)
-    def table_row_columns(self, table_id):
-        bds = self.objects[table_id].base_data_store
-        return [
-            h.numberOfCells for h in self.objects[bds.columnHeaders.identifier].headers
-        ]
+    def number_of_rows(self, table_id):
+        return self.objects[table_id].number_of_rows
+
+    def number_of_columns(self, table_id):
+        return self.objects[table_id].number_of_columns
 
     def table_name(self, table_id):
         return self.objects[table_id].table_name
@@ -178,22 +189,6 @@ class NumbersModel:
         return cell_records
 
     @lru_cache(maxsize=None)
-    def error_cell_ranges(self, table_id: int) -> list:
-        """Exract all the formula error cell ranges for the Table."""
-        cell_errors = {}
-        table_base_id = self.table_base_id(table_id)
-        ce_id = self.find_refs("CalculationEngineArchive")[0]
-        for finfo in self.objects[ce_id].dependency_tracker.formula_owner_info:
-            if finfo.HasField("cell_dependencies"):
-                formula_owner_id = uuid(finfo.formula_owner_id)
-                if formula_owner_id == table_base_id:
-                    for cell_error in finfo.cell_errors.errors:
-                        cell_errors[
-                            (cell_error.coordinate.row, cell_error.coordinate.column)
-                        ] = cell_error.error_flavor
-        return cell_errors
-
-    @lru_cache(maxsize=None)
     def merge_cell_ranges(self, table_id):
         """Exract all the merge cell ranges for the Table."""
         # Merge ranges are stored in a number of structures, but the simplest is
@@ -286,7 +281,7 @@ class NumbersModel:
             get_storage_buffers_for_row(
                 r.cell_storage_buffer_pre_bnc,
                 r.cell_offsets_pre_bnc,
-                len(self.table_row_columns(table_id)),
+                self.number_of_columns(table_id),
                 r.has_wide_offsets,
             )
             for r in row_infos
@@ -302,7 +297,7 @@ class NumbersModel:
             get_storage_buffers_for_row(
                 r.cell_storage_buffer,
                 r.cell_offsets,
-                len(self.table_row_columns(table_id)),
+                self.number_of_columns(table_id),
                 r.has_wide_offsets,
             )
             for r in row_infos
@@ -310,9 +305,12 @@ class NumbersModel:
 
     @lru_cache(maxsize=None)
     def storage_buffer(self, table_id: int, row_num: int, col_num: int) -> bytes:
+        row_offset = self.row_storage_map(table_id)[row_num]
+        if row_offset is None:
+            return None
         try:
             storage_buffers = self.storage_buffers(table_id)
-            return storage_buffers[row_num][col_num]
+            return storage_buffers[row_offset][col_num]
         except IndexError:
             return None
 
@@ -320,9 +318,12 @@ class NumbersModel:
     def storage_buffer_pre_bnc(
         self, table_id: int, row_num: int, col_num: int
     ) -> bytes:
+        row_offset = self.row_storage_map(table_id)[row_num]
+        if row_offset is None:
+            return None
         try:
             storage_buffers_pre_bnc = self.storage_buffers_pre_bnc(table_id)
-            return storage_buffers_pre_bnc[row_num][col_num]
+            return storage_buffers_pre_bnc[row_offset][col_num]
         except IndexError:
             return None
 
