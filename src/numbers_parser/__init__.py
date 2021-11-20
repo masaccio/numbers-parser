@@ -33,14 +33,13 @@ _SUPPORTED_NUMBERS_VERSIONS = [
     "10.3",
     "11.0",
     "11.1",
+    "11.2",
 ]
 
 # Don't print the source line
 formatwarning_old = warnings.formatwarning
-warnings.formatwarning = (
-    lambda message, category, filename, lineno, line=None: formatwarning_old(  # pragma: no cover
-        message, category, filename, lineno, line=""
-    )
+warnings.formatwarning = lambda message, category, filename, lineno, line=None: formatwarning_old(  # pragma: no cover
+    message, category, filename, lineno, line=""
 )
 
 
@@ -50,13 +49,17 @@ def _get_version():
 
 def _check_installed_numbers_version():
     try:
-        fp = open(os.path.join(_DEFAULT_NUMBERS_INSTALL_PATH, _VERSION_PLIST_PATH), "rb")
+        fp = open(
+            os.path.join(_DEFAULT_NUMBERS_INSTALL_PATH, _VERSION_PLIST_PATH), "rb"
+        )
     except IOError:  # pragma: no cover
         return None
     version_dict = plistlib.load(fp)
     installed_version = version_dict["CFBundleShortVersionString"]
     if installed_version not in _SUPPORTED_NUMBERS_VERSIONS:
-        warnings.warn(f"Numbers version {installed_version} not tested with this version")
+        warnings.warn(
+            f"Numbers version {installed_version} not tested with this version"
+        )
     fp.close()
 
 
