@@ -5,6 +5,7 @@ import snappy
 from functools import partial
 
 from numbers_parser.mapping import ID_NAME_MAP
+from numbers_parser.exceptions import NotImplementedError
 
 from google.protobuf.internal.decoder import _DecodeVarint32
 from google.protobuf.json_format import MessageToDict

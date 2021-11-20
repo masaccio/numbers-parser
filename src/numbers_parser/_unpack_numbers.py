@@ -9,6 +9,7 @@ import sys
 from numbers_parser.unpack import read_numbers_file
 from numbers_parser import _get_version
 from numbers_parser.iwafile import IWAFile
+from numbers_parser.exceptions import FileFormatError
 
 
 def ensure_directory_exists(prefix, path):
@@ -72,13 +73,17 @@ def main():
     else:
         for document in args.document:
             output_dir = args.output or document.replace(".numbers", "")
-            read_numbers_file(
-                document,
-                handler=lambda contents, filename: process_file(
-                    contents, filename, output_dir, args.hex_uuids
-                ),
-                store_objects=False,
-            )
+            try:
+                read_numbers_file(
+                    document,
+                    handler=lambda contents, filename: process_file(
+                        contents, filename, output_dir, args.hex_uuids
+                    ),
+                    store_objects=False,
+                )
+            except FileFormatError as e:
+                print(f"{document}:", str(e), file=sys.stderr)
+                sys.exit(1)
 
 
 if __name__ == "__main__":

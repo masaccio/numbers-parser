@@ -10,6 +10,12 @@ class UnsupportedError(NumbersError):
     pass
 
 
+class NotImplementedError(NumbersError):
+    """Raised for missing Protobufs"""
+
+    pass
+
+
 class FileError(NumbersError):
     """Raised for IO and other OS errors"""
 
