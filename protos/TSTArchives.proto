@@ -36,6 +36,7 @@ enum CellValueType {
 }
 
 enum TableDimensionArchive {
+  dimensionNeither = -1;
   dimensionRow = 0;
   dimensionColumn = 1;
 }
@@ -68,29 +69,6 @@ enum MergeActionArchive {
 enum HideShowActionArchive {
   hideShowActionHide = 0;
   hideShowActionShow = 1;
-}
-
-enum GroupingType {
-  UNIQUE = 0;
-  YEAR = 1;
-  MONTH = 2;
-  DAYOFWEEK = 3;
-  DAY = 4;
-  YEARWEEK = 5;
-  YEARQUARTER = 6;
-  ROUND_0 = 10;
-}
-
-enum AggregateType {
-  NONE = 0;
-  COUNT = 1;
-  TOTAL = 2;
-  AVERAGE = 3;
-  MIN = 4;
-  MAX = 5;
-  GROUPVALUE = 9;
-  BODYROWS = 10;
-  INDIRECT = 11;
 }
 
 message CellID {
@@ -348,6 +326,9 @@ message TableInfoArchive {
   optional uint32 formula_coord_space = 10;
   optional .TSCE.CoordMapperArchive pasteboard_coord_mapper = 13;
   optional .TST.LayoutEngineArchive layout_engine = 14;
+  optional .TSP.Reference pivot_data_model = 15;
+  optional bool is_a_pivot_table = 16;
+  optional .TSP.Reference pivot_order = 17;
 }
 
 message CategoryInfoArchive {
@@ -361,38 +342,54 @@ message WPTableInfoArchive {
 }
 
 message TableStyleNetworkArchive {
-  required .TSP.Reference table_style = 9;
   required .TSP.Reference body_text_style = 1;
   required .TSP.Reference header_row_text_style = 2;
   required .TSP.Reference header_column_text_style = 3;
   required .TSP.Reference footer_row_text_style = 4;
+  required .TSP.Reference body_cell_style = 5;
+  required .TSP.Reference header_row_style = 6;
+  required .TSP.Reference header_column_style = 7;
+  required .TSP.Reference footer_row_style = 8;
+  required .TSP.Reference table_style = 9;
+  optional .TSP.Reference table_name_style = 10;
+  optional .TSP.Reference table_name_shape_style = 11;
+  optional uint32 preset_id = 12;
   optional .TSP.Reference category_level_1_text_style = 13;
   optional .TSP.Reference category_level_2_text_style = 14;
   optional .TSP.Reference category_level_3_text_style = 15;
   optional .TSP.Reference category_level_4_text_style = 16;
   optional .TSP.Reference category_level_5_text_style = 17;
-  optional .TSP.Reference label_level_1_text_style = 23;
-  optional .TSP.Reference label_level_2_text_style = 24;
-  optional .TSP.Reference label_level_3_text_style = 25;
-  optional .TSP.Reference label_level_4_text_style = 26;
-  optional .TSP.Reference label_level_5_text_style = 27;
-  required .TSP.Reference body_cell_style = 5;
-  required .TSP.Reference header_row_style = 6;
-  required .TSP.Reference header_column_style = 7;
-  required .TSP.Reference footer_row_style = 8;
   optional .TSP.Reference category_level_1_style = 18;
   optional .TSP.Reference category_level_2_style = 19;
   optional .TSP.Reference category_level_3_style = 20;
   optional .TSP.Reference category_level_4_style = 21;
   optional .TSP.Reference category_level_5_style = 22;
+  optional .TSP.Reference label_level_1_text_style = 23;
+  optional .TSP.Reference label_level_2_text_style = 24;
+  optional .TSP.Reference label_level_3_text_style = 25;
+  optional .TSP.Reference label_level_4_text_style = 26;
+  optional .TSP.Reference label_level_5_text_style = 27;
   optional .TSP.Reference label_level_1_style = 28;
   optional .TSP.Reference label_level_2_style = 29;
   optional .TSP.Reference label_level_3_style = 30;
   optional .TSP.Reference label_level_4_style = 31;
   optional .TSP.Reference label_level_5_style = 32;
-  optional .TSP.Reference table_name_style = 10;
-  optional .TSP.Reference table_name_shape_style = 11;
-  optional uint32 preset_id = 12;
+  optional .TSP.Reference pivot_body_summary_row_style = 33;
+  optional .TSP.Reference pivot_body_summary_column_style = 34;
+  optional .TSP.Reference pivot_header_column_summary_style = 35;
+}
+
+message TableGroupSortOrderUIDArchive {
+  message GroupSortRuleUIDArchive {
+    enum Direction {
+      ascending = 0;
+      descending = 1;
+    }
+    optional .TSP.UUID grouping_column_uid = 1;
+    optional .TSP.UUID column_uid = 2;
+    optional .TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive.Direction direction = 3;
+  }
+  repeated .TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive group_sort_rules = 1;
 }
 
 message TableSortOrderArchive {
@@ -401,7 +398,7 @@ message TableSortOrderArchive {
       ascending = 0;
       descending = 1;
     }
-    required uint32 column = 1;
+    required uint32 index = 1;
     required .TST.TableSortOrderArchive.SortRuleArchive.Direction direction = 2;
   }
   enum SortType {
@@ -492,11 +489,11 @@ message TableModelArchive {
   required double default_column_width = 17;
   optional .TST.CellID origin_offset = 23 [deprecated = true];
   optional bool repeating_header_rows_enabled = 29;
-  optional bool repeating_header_columns_enabled = 32;
   optional bool style_apply_clears_all = 31;
+  optional bool repeating_header_columns_enabled = 32;
   optional .TSP.Reference hidden_state_formula_owner_for_columns = 34;
   optional .TSP.Reference hidden_state_formula_owner_for_rows = 35;
-  optional .TSP.Reference filter_set = 38;
+  optional .TSP.Reference row_filter_set_pre_pivot = 38;
   optional .TSP.CFUUIDArchive conditional_style_formula_owner_id = 39;
   optional .TST.TableSortOrderArchive sort_order = 44;
   optional .TST.SortRuleReferenceTrackerArchive sort_rule_reference_tracker = 45;
@@ -510,26 +507,34 @@ message TableModelArchive {
   optional .TSP.Reference category_level_3_style = 62;
   optional .TSP.Reference category_level_4_style = 63;
   optional .TSP.Reference category_level_5_style = 64;
-  optional .TSP.Reference label_level_1_style = 71;
-  optional .TSP.Reference label_level_2_style = 72;
-  optional .TSP.Reference label_level_3_style = 73;
-  optional .TSP.Reference label_level_4_style = 74;
-  optional .TSP.Reference label_level_5_style = 75;
   optional .TSP.Reference category_level_1_text_style = 65;
   optional .TSP.Reference category_level_2_text_style = 66;
   optional .TSP.Reference category_level_3_text_style = 67;
   optional .TSP.Reference category_level_4_text_style = 68;
   optional .TSP.Reference category_level_5_text_style = 69;
+  optional .TST.HiddenStatesOwnerArchive hidden_states_owner = 70;
+  optional .TSP.Reference label_level_1_style = 71;
+  optional .TSP.Reference label_level_2_style = 72;
+  optional .TSP.Reference label_level_3_style = 73;
+  optional .TSP.Reference label_level_4_style = 74;
+  optional .TSP.Reference label_level_5_style = 75;
   optional .TSP.Reference label_level_1_text_style = 76;
   optional .TSP.Reference label_level_2_text_style = 77;
   optional .TSP.Reference label_level_3_text_style = 78;
   optional .TSP.Reference label_level_4_text_style = 79;
   optional .TSP.Reference label_level_5_text_style = 80;
-  optional .TST.HiddenStatesOwnerArchive hidden_states_owner = 70;
-  optional .TST.CategoryOwnerArchive category_owner = 81;
+  optional .TST.CategoryOwnerArchive category_owner_deprecated = 81;
   optional .TST.PencilAnnotationOwnerArchive pencil_annotation_owner = 82;
   optional string from_group_by_uid = 83;
   optional .TSCE.HauntedOwnerArchive haunted_owner = 84;
+  optional .TSP.Reference pivot_owner = 85;
+  optional .TSP.Reference category_owner = 86;
+  optional .TSP.Reference pivot_body_summary_row_style = 87;
+  optional .TSP.Reference pivot_body_summary_column_style = 88;
+  optional .TSP.Reference pivot_header_column_summary_style = 89;
+  repeated uint32 pivot_value_types_by_col = 90;
+  repeated uint32 pivot_date_grouping_columns = 91;
+  repeated uint32 pivot_date_grouping_types = 92;
 }
 
 message SummaryModelArchive {
@@ -557,6 +562,7 @@ message SummaryModelArchive {
   repeated double summary_row_height_list = 26;
   repeated double label_row_height_list = 27;
   repeated uint32 label_row_visibility_list = 28;
+  optional .TST.TableGroupSortOrderUIDArchive group_sort_order = 29;
 }
 
 message SummaryModelGroupByChangeStateArchive {
@@ -692,6 +698,7 @@ message CellFormatAndValueArchive {
   required bool spare_format_type = 19;
   optional uint64 decimal_low = 20;
   optional uint64 decimal_high = 21;
+  optional bool suppress_apply_value = 22;
 }
 
 message CellSpecArchive {
@@ -728,6 +735,26 @@ message CellDiffMapArchive {
   repeated .TSCE.CellCoordinateArchive expanded_cell_ids = 2;
   required .TST.CellUIDListArchive cell_uids = 3;
   optional .TSP.Reference cell_diff_array = 4;
+}
+
+message HierarchicalCellDiffMapArchive {
+  message BoxedRow {
+    required .TSP.IndexSet column_index_set = 1;
+    repeated .TST.CellDiffArchive cell_diff_list = 2;
+  }
+  required int32 num_row_rules = 1;
+  required int32 num_column_rules = 2;
+  repeated .TSP.UUID row_header_uids = 3;
+  repeated .TSP.UUID column_header_uids = 4;
+  repeated .TSP.UUID aggregate_rule_uids = 5;
+  required .TST.TableDimensionArchive active_flattening_dimension = 6;
+  repeated .TSP.UUID row_value_uids = 7;
+  repeated uint32 row_level_preorder = 8;
+  repeated .TSP.UUID column_value_uids = 9;
+  repeated uint32 column_level_preorder = 10;
+  repeated .TST.HierarchicalCellDiffMapArchive.BoxedRow cell_diff_storage = 11;
+  repeated double row_sizes = 12;
+  repeated double column_sizes = 13;
 }
 
 message DoubleStyleMapArchive {
@@ -793,9 +820,13 @@ message AutofillSelectionArchive {
   optional .TST.CellRange target_cell_range = 2;
 }
 
+message FilterRulePrePivotArchive {
+  required .TST.FormulaPredicatePrePivotArchive predicate = 1;
+  optional bool disabled = 2;
+}
+
 message FilterRuleArchive {
   required .TST.FormulaPredicateArchive predicate = 1;
-  optional bool disabled = 2;
 }
 
 message TableStyleArchive {
@@ -810,88 +841,72 @@ message CellStyleArchive {
   optional .TST.CellStylePropertiesArchive cell_properties = 11;
 }
 
-message FormulaPredicateArchive {
-  enum FormulaPredicateType {
-    PredNone = 0;
-    TextStartsWith = 1;
-    TextEndsWith = 2;
-    TextContains = 3;
-    TextDoesNotContain = 4;
-    ValueEqual = 5;
-    ValueNotEqual = 6;
-    ValueGreaterThan = 7;
-    ValueGreaterThanOrEqual = 8;
-    ValueLessThan = 9;
-    ValueLessThanOrEqual = 10;
-    ValueAboveAverage = 11;
-    ValueBelowAverage = 12;
-    ValueBetween = 13;
-    Formula = 14;
-    Duplicates = 15;
-    Uniques = 16;
-    DateIsToday = 17;
-    DateIsYesterday = 18;
-    DateIsTomorrow = 19;
-    DateIsTheDate = 20;
-    DateBeforeTheDate = 21;
-    DateAfterTheDate = 22;
-    DateIsInTheRange = 23;
-    DateInTheNext = 24;
-    DateInTheLast = 25;
-    DateIsExactly = 26;
-    DateBeforeRelative = 27;
-    DateAfterRelative = 28;
-    DateBetweenRelative = 29;
-    ValueTop = 30;
-    ValueBottom = 31;
-    ValueNotBetween = 32;
-    DateInThis = 33;
-    IsBlank = 34;
-    IsNotBlank = 35;
-    TextIs = 36;
-    TextIsNot = 37;
-    DurationEqual = 38;
-    DurationNotEqual = 39;
-    DurationGreaterThan = 40;
-    DurationGreaterThanOrEqual = 41;
-    DurationLessThan = 42;
-    DurationLessThanOrEqual = 43;
-    DurationBetween = 44;
-    DurationNotBetween = 45;
-    DurationAboveAverage = 46;
-    DurationBelowAverage = 47;
-    DurationTop = 48;
-    DurationBottom = 49;
-  }
-  enum QualifierType {
-    QualNone = 0;
-    Days = 2;
-    Weeks = 3;
-    Months = 4;
-    Years = 5;
-    Ago = 6;
-    FromNow = 7;
-    Quarters = 8;
-    Percent = 9;
-    Values = 10;
-  }
+message FormulaPredArgDataArchive {
+  optional double double_value = 1;
+  optional uint64 decimal_low = 2;
+  optional uint64 decimal_high = 3;
+  optional string string_value = 4;
+  optional double date_value = 5;
+  optional double duration_timeinterval = 6;
+  optional int32 duration_units = 7;
+  optional bool boolean_value = 8;
+}
+
+message FormulaPredArgArchive {
+  required int32 arg_type = 1;
+  optional .TST.FormulaPredArgDataArchive arg_value = 2;
+  optional .TSCE.CellReferenceArchive base_cell_ref = 3;
+  optional .TSCE.RelativeCellRefArchive relative_cell_ref = 4;
+  optional .TSCE.CategoryReferenceArchive category_ref = 5;
+  optional .TSCE.ASTNodeArrayArchive.ASTUidTractList uid_tract_list = 6;
+  optional .TSCE.CellCoordinateArchive host_cell_coord = 7;
+  optional bool preserve_row = 8;
+  optional bool preserve_column = 9;
+  repeated .TST.FormulaPredArgDataArchive list_entries = 10;
+  optional .TSCE.ViewTractRefArchive view_tract_ref = 11;
+}
+
+message FormulaPredicatePrePivotArchive {
   required .TSCE.FormulaArchive formula = 1;
-  required .TST.FormulaPredicateArchive.FormulaPredicateType predicate_type = 2;
-  required .TST.FormulaPredicateArchive.QualifierType qualifier1 = 3;
-  required .TST.FormulaPredicateArchive.QualifierType qualifier2 = 4;
+  required int32 predicate_type = 2;
+  required int32 qualifier1 = 3;
+  required int32 qualifier2 = 4;
   required int32 param_index1 = 5;
   required int32 param_index2 = 6;
   required int32 param_index0 = 7;
 }
 
+message FormulaPredicateArchive {
+  required int32 predicate_type = 1;
+  required int32 qualifier1 = 2;
+  required int32 qualifier2 = 3;
+  optional .TST.FormulaPredArgArchive param_value0 = 4;
+  optional .TST.FormulaPredArgArchive param_value1 = 5;
+  optional .TST.FormulaPredArgArchive param_value2 = 6;
+  optional .TSCE.FormulaArchive formula = 7;
+  optional bool for_conditional_style = 8;
+  optional .TSP.UUID host_table_uid = 9;
+  optional .TSP.UUID host_column_uid = 10;
+  optional .TSP.UUID host_row_uid = 11;
+}
+
 message ConditionalStyleSetArchive {
-  message ConditionalStyleRule {
-    required .TST.FormulaPredicateArchive predicate = 1;
+  message ConditionalStyleRulePrePivot {
+    required .TST.FormulaPredicatePrePivotArchive predicate = 1;
     required .TSP.Reference cell_style = 2;
     required .TSP.Reference text_style = 3;
   }
+  message ConditionalStyleRule {
+    optional .TST.FormulaPredicateArchive predicate = 1;
+    required .TSP.Reference cell_style = 2;
+    required .TSP.Reference text_style = 3;
+  }
+  message ConditionalStyleRules {
+    repeated .TST.ConditionalStyleSetArchive.ConditionalStyleRule rule = 1;
+  }
   required uint32 ruleCount = 1;
-  repeated .TST.ConditionalStyleSetArchive.ConditionalStyleRule rules = 2;
+  repeated .TST.ConditionalStyleSetArchive.ConditionalStyleRulePrePivot rules_prepivot = 2;
+  optional .TST.ConditionalStyleSetArchive.ConditionalStyleRules rules = 3;
 }
 
 message FilterSetArchive {
@@ -901,10 +916,20 @@ message FilterSetArchive {
   }
   optional .TST.FilterSetArchive.FilterSetType type = 1 [default = FilterSetArchiveTypeAll];
   optional bool is_enabled = 2 [default = true];
-  repeated .TST.FilterRuleArchive filter_rules = 3;
+  repeated .TST.FilterRulePrePivotArchive filter_rules_prepivot = 3;
   optional bool needs_formula_rewrite_for_import = 4 [default = false];
   repeated uint32 filter_offsets = 5;
   repeated bool filter_enabled = 6;
+  repeated .TST.FilterRuleArchive filter_rules = 7;
+}
+
+message UniqueIndexArchive {
+  message UniqueIndexEntryArchive {
+    required string string_value = 1;
+    repeated .TSP.UUID row_uids = 2;
+  }
+  required .TSP.UUID column_uid = 1;
+  repeated .TST.UniqueIndexArchive.UniqueIndexEntryArchive unique_entries = 2;
 }
 
 message HiddenStateExtentArchive {
@@ -923,6 +948,10 @@ message HiddenStateExtentArchive {
   repeated .TSCE.CellValueArchive threshold_value = 5;
   optional bool needs_to_update_filter_set_for_import = 6 [default = false];
   repeated .TSP.UUID collapsed_group_uids = 7;
+  optional .TSP.Reference filter_set = 8;
+  optional .TSCE.IndexSetArchive view_pivot_hidden_indexes = 9;
+  optional .TSCE.IndexSetArchive view_only_filtered_indexes = 10;
+  repeated .TST.UniqueIndexArchive unique_indexes = 11;
 }
 
 message HiddenStatesArchive {
@@ -939,6 +968,7 @@ message HiddenStatesOwnerArchive {
 message ExpandCollapseStateArchive {
   repeated .TSP.UUID uids_collapsed = 1;
   repeated .TSP.UUID uids_expanded = 2;
+  optional .TST.TableDimensionArchive dimension = 3;
 }
 
 message TokenAttachmentArchive {
@@ -1126,24 +1156,26 @@ message PencilAnnotationOwnerArchive {
 
 message AccumulatorArchive {
   optional uint32 bool_count = 1;
-  optional uint32 bool_true_count = 12;
   optional uint32 number_count = 2;
   optional uint32 date_count = 3;
   optional uint32 duration_count = 4;
   optional uint32 string_count = 5;
-  optional uint32 error_count = 13;
-  optional bool is_circular_ref = 14;
   required .TSCE.CellValueArchive min_value = 6;
   required .TSCE.CellValueArchive max_value = 7;
   required .TSCE.CellValueArchive number_total_value = 8;
   optional .TSCE.CellValueArchive first_date_seen = 9;
   optional double total_secs_since_ref_date = 10;
   optional double secs_to_add = 11;
+  optional uint32 bool_true_count = 12;
+  optional uint32 error_count = 13;
+  optional bool is_circular_ref = 14;
+  optional .TSCE.CellValueArchive product_value = 15;
+  optional uint32 no_content_count = 16;
 }
 
 message GroupColumnArchive {
   required .TSP.UUID column_uid = 1;
-  required .TST.GroupingType grouping_type = 2;
+  required uint32 grouping_type = 2;
   optional .TSCE.FunctorArchive grouping_functor = 3;
   optional .TSP.UUID grouping_column_uid = 4;
 }
@@ -1155,60 +1187,95 @@ message GroupColumnListArchive {
 message ColumnAggregateArchive {
   required .TSP.UUID column_uid = 1;
   required uint32 level = 2;
-  required .TST.AggregateType agg_type = 3;
+  required uint32 agg_type = 3;
+  optional uint32 show_as_type = 4;
+  optional .TSP.UUID column_aggregate_uid = 5;
+  optional .TSP.UUID running_total_group_column_uid = 6;
 }
 
 message ColumnAggregateListArchive {
   repeated .TST.ColumnAggregateArchive aggregates = 1;
 }
 
-message CategoryOwnerArchive {
-  message GroupByArchive {
-    message AggNodeArchive {
-      required .TSCE.CellCoordinateArchive formula_coord = 1;
-      optional .TST.AccumulatorArchive accum = 2;
-      repeated .TST.CategoryOwnerArchive.GroupByArchive.AggNodeArchive child = 3;
-    }
-    message GroupNodeArchive {
-      message GroupValueTupleArchive {
-        repeated .TSCE.CellValueArchive value = 1;
-      }
-      message FormatManagerArchive {
-        message RowSetArchive {
-          repeated .TSP.UUID row_uids = 1;
-        }
-        optional .TSCE.CellValueArchive cell_value = 1;
-        repeated .TSK.FormatStructArchive formats = 2;
-        repeated .TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive row_sets = 3;
-      }
-      required .TSP.UUID group_uid = 1;
-      optional .TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.GroupValueTupleArchive group_value_tuple = 2;
-      optional .TSCE.CellValueArchive group_cell_value = 7;
-      repeated .TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive child = 3;
-      repeated .TSP.UUID row_uid = 4;
-      repeated .TSCE.CellCoordinateArchive agg_formula_coords = 5;
-      optional .TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive format_manager = 6;
-    }
-    message AggregatorArchive {
-      required .TSP.UUID column_uid = 1;
-      optional .TST.CategoryOwnerArchive.GroupByArchive.AggNodeArchive agg_node = 2;
-    }
-    required .TSP.UUID group_by_uid = 1;
-    repeated .TST.GroupColumnArchive group_column = 2;
-    required .TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive group_node_root = 3;
-    repeated .TST.CategoryOwnerArchive.GroupByArchive.AggregatorArchive aggregator = 4;
-    repeated .TST.ColumnAggregateArchive column_agg_type = 5;
-    required bool is_enabled = 6;
-    optional .TSCE.CellCoordinateArchive indirect_agg_type_change_formula = 7;
-    optional .TSCE.CellCoordinateArchive grouping_columns_formula = 8;
-    optional .TSCE.CellCoordinateArchive grouping_column_headers_formula = 10;
-    optional .TSCE.CellCoordinateArchive aggs_in_group_root_formula = 9;
-    optional .TSCE.CellCoordinateArchive column_order_changed_formula = 11;
-    optional .TSCE.CellCoordinateArchive row_order_changed_formula = 12;
-    optional .TSCE.CellCoordinateArchive row_order_changed_ignoring_recalc_formula = 13;
+message GroupByArchive {
+  message AggNodeArchive {
+    required .TSCE.CellCoordinateArchive formula_coord = 1;
+    optional .TST.AccumulatorArchive accum = 2;
+    repeated .TST.GroupByArchive.AggNodeArchive child = 3;
   }
+  message GroupNodeArchive {
+    message FormatManagerArchive {
+      message RowSetArchive {
+        repeated .TSP.UUID row_uids = 1;
+      }
+      optional .TSCE.CellValueArchive cell_value = 1;
+      repeated .TSK.FormatStructArchive formats = 2;
+      repeated .TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive row_sets = 3;
+      repeated .TSCE.IndexSetArchive row_uid_lookup_sets = 4;
+    }
+    required .TSP.UUID group_uid = 1;
+    repeated .TST.GroupByArchive.GroupNodeArchive child = 3;
+    repeated .TSP.UUID row_uid = 4;
+    repeated .TSCE.CellCoordinateArchive agg_formula_coords = 5;
+    optional .TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive format_manager = 6;
+    optional .TSCE.CellValueArchive group_cell_value = 7;
+    optional .TSCE.IndexSetArchive row_indexes = 8;
+    optional .TSCE.IndexSetArchive row_lookup_uids = 9;
+  }
+  message AggregatorArchive {
+    required .TSP.UUID column_uid = 1;
+    optional .TST.GroupByArchive.AggNodeArchive agg_node = 2;
+  }
+  required .TSP.UUID group_by_uid = 1;
+  repeated .TST.GroupColumnArchive group_column = 2;
+  required .TST.GroupByArchive.GroupNodeArchive group_node_root = 3;
+  repeated .TST.GroupByArchive.AggregatorArchive aggregator = 4;
+  repeated .TST.ColumnAggregateArchive column_agg_type = 5;
+  required bool is_enabled = 6;
+  optional .TSCE.CellCoordinateArchive indirect_agg_type_change_formula = 7;
+  optional .TSCE.CellCoordinateArchive grouping_columns_formula = 8;
+  optional .TSCE.CellCoordinateArchive aggs_in_group_root_formula = 9;
+  optional .TSCE.CellCoordinateArchive grouping_column_headers_formula = 10;
+  optional .TSCE.CellCoordinateArchive column_order_changed_formula = 11;
+  optional .TSCE.CellCoordinateArchive row_order_changed_formula = 12;
+  optional .TSCE.CellCoordinateArchive row_order_changed_ignoring_recalc_formula = 13;
+  optional int32 owner_index = 14 [default = 8];
+  optional .TSCE.UidLookupListArchive row_uid_lookup = 15;
+  optional .TSCE.CellCoordinateArchive hidden_states_changed_formula = 16;
+}
+
+message CategoryOwnerArchive {
   required .TSP.UUID owner_uid = 1;
-  repeated .TST.CategoryOwnerArchive.GroupByArchive group_by = 2;
+  repeated .TST.GroupByArchive group_by = 2;
+}
+
+message CategoryOwnerRefArchive {
+  repeated .TSP.Reference group_by = 1;
+}
+
+message PivotGroupingColumnOptionsMapArchive {
+  repeated .TSP.UUID uids = 1;
+  repeated uint32 flags = 2;
+  repeated .TSP.UUID aggregate_rule_uids = 4;
+}
+
+message PivotOwnerArchive {
+  optional .TSP.UUID pivot_owner_uid = 2;
+  optional .TST.GroupColumnListArchive grouping_columns_for_rows = 3;
+  optional .TST.GroupColumnListArchive grouping_columns_for_columns = 4;
+  optional .TST.ColumnAggregateListArchive aggregate_columns = 5;
+  optional int32 flattening_dimension = 6;
+  optional bool is_empty_pivot = 7;
+  optional .TSP.UUID source_table_uid = 8;
+  optional double refresh_timestamp = 9;
+  optional .TSP.Reference grpg_col_options_map = 10;
+  optional bool hide_grand_total_rows = 11;
+  optional string source_table_name = 12;
+  optional bool hide_grand_total_columns = 13;
+  optional .TST.FormulaStoreArchive formula_store = 17;
+  optional .TSP.UUID refresh_uid = 18;
+  optional .TSP.UUID row_column_rule_change_uid = 19;
+  optional .TSP.UUID aggregate_rule_change_uid = 20;
 }
 
 message RichTextPayloadArchive {
@@ -1262,9 +1329,11 @@ message CellBorderArchive {
 
 message DefaultCellStylesContainerArchive {
   required .TSP.Reference table_style_network = 1;
-  repeated .TSP.UUID header_row_uids = 2;
-  repeated .TSP.UUID footer_row_uids = 3;
-  repeated .TSP.UUID header_column_uids = 4;
+  repeated .TSP.UUID row_uids = 2;
+  repeated .TSP.UUID column_uids = 3;
+  repeated uint32 row_types = 4;
+  repeated uint32 column_types = 5;
+  optional bool is_a_pivot_table = 6;
 }
 
 message MultiTableRemapperArchive {
@@ -1310,6 +1379,10 @@ message SummaryCellVendorArchive {
 message CategoryOrderArchive {
   required .TSP.Reference table_info = 1;
   required .TSP.Reference uid_map = 2;
+}
+
+message PivotOrderArchive {
+  optional .TSP.Reference uid_map = 1;
 }
 
 message HeaderNameMgrTileArchive {

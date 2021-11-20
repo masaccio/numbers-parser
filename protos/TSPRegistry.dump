@@ -1,1194 +1,1249 @@
-(lldb) process attach --pid 5966
-Process 5966 stopped
+(lldb) process attach --pid 54787
+Process 54787 stopped
 * thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP
-    frame #0: 0x0000000180950e54 libsystem_kernel.dylib`mach_msg_trap + 8
+    frame #0: 0x00000001a1dfd954 libsystem_kernel.dylib`mach_msg_trap + 8
 libsystem_kernel.dylib`mach_msg_trap:
-->  0x180950e54 <+8>: ret    
+->  0x1a1dfd954 <+8>: ret    
 
 libsystem_kernel.dylib`mach_msg_overwrite_trap:
-    0x180950e58 <+0>: mov    x16, #-0x20
-    0x180950e5c <+4>: svc    #0x80
-    0x180950e60 <+8>: ret    
+    0x1a1dfd958 <+0>: mov    x16, #-0x20
+    0x1a1dfd95c <+4>: svc    #0x80
+    0x1a1dfd960 <+8>: ret    
 Target 0: (Numbers) stopped.
 
 Executable module set to "/Applications/Numbers.app/Contents/MacOS/Numbers".
 Architecture set to: arm64e-apple-macosx-.
 (lldb) po [TSPRegistry sharedRegistry]
-<TSPRegistry 0x600001068000 
+<TSPRegistry 0x6000036d6150 
  _messageTypeToPrototypeMap = {
-	7 -> 0x105c40198 TN.PlaceholderArchive
-	601 -> 0x10866fab8 TSA.FunctionBrowserStateArchive
-	10024 -> 0x10b6e87f0 TSWP.DropCapStyleArchive
-	2405 -> 0x10b6e8e58 TSWP.StyleReorderCommandArchive
-	2404 -> 0x10b6e8e30 TSWP.StyleDeleteCommandArchive
-	2402 -> 0x10b6e8dd0 TSWP.StyleRenameCommandArchive
-	2401 -> 0x10b6e8da8 TSWP.StyleCreateCommandArchive
-	2400 -> 0x10b6e8d78 TSWP.StyleBaseCommandArchive
-	2107 -> 0x10b6e8ad0 TSWP.ApplyPlaceholderTextCommandArchive
+	7 -> 0x105af44b0 TN.PlaceholderArchive
+	601 -> 0x107e3c718 TSA.FunctionBrowserStateArchive
+	10024 -> 0x10a61ba00 TSWP.DropCapStyleArchive
+	2412 -> 0x10a61c118 TSWP.PencilAnnotationSelectionTransformerArchive
+	2408 -> 0x10a61c0c0 TSWP.ShapeStyleSetValueCommandArchive
+	2405 -> 0x10a61c078 TSWP.StyleReorderCommandArchive
+	2404 -> 0x10a61c050 TSWP.StyleDeleteCommandArchive
+	2403 -> 0x0 null
+	2402 -> 0x10a61bff0 TSWP.StyleRenameCommandArchive
+	2401 -> 0x10a61bfc8 TSWP.StyleCreateCommandArchive
+	2400 -> 0x10a61bf98 TSWP.StyleBaseCommandArchive
+	2114 -> 0x0 null
+	2113 -> 0x0 null
+	2112 -> 0x0 null
+	2111 -> 0x0 null
+	2110 -> 0x0 null
+	2109 -> 0x0 null
+	2108 -> 0x0 null
+	2107 -> 0x10a61bcf0 TSWP.ApplyPlaceholderTextCommandArchive
+	2106 -> 0x0 null
+	2105 -> 0x0 null
 	2104 -> 0x0 null
-	2101 -> 0x10b6e88a0 TSWP.TextCommandArchive
-	2062 -> 0x10b6e8678 TSWP.ChangeSessionArchive
-	2061 -> 0x10ab9cf50 TSK.DeprecatedChangeAuthorArchive
-	2060 -> 0x10b6e8640 TSWP.ChangeArchive
-	10023 -> 0x10b6e8620 TSWP.TateChuYokoFieldArchive
-	2053 -> 0x10b6e7278 TSWPSOS.StyleDiffArchive
-	10022 -> 0x10b6e8f48 TSWP.ShapeContentDescription
-	2052 -> 0x10b6e7d18 TSWP.TOCEntryInstanceArchive
-	10021 -> 0x10b6e8ec8 TSWP.SelectionTransformerArchive
-	2051 -> 0x10b6e7cd8 TSWP.TOCSettingsArchive
-	10020 -> 0x10b6e8f20 TSWP.ShapeSelectionTransformerArchive
-	2050 -> 0x10b6e7978 TSWP.TextStylePresetArchive
-	2043 -> 0x10b6e82c8 TSWP.NumberAttachmentArchive
-	2042 -> 0x10b6e85f8 TSWP.RubyFieldArchive
-	10011 -> 0x10b6e86a8 TSWP.SectionPlaceholderArchive
-	2041 -> 0x10b6e85c0 TSWP.TOCSmartFieldArchive
-	2040 -> 0x10b6e83a8 TSWP.BibliographySmartFieldArchive
-	2039 -> 0x10b6e8378 TSWP.UnsupportedHyperlinkFieldArchive
-	2038 -> 0x10b6e8450 TSWP.CitationSmartFieldArchive
-	2037 -> 0x10b6e83f0 TSWP.CitationRecordArchive
-	2036 -> 0x10b6e8538 TSWP.MergeSmartFieldArchive
-	2035 -> 0x10b6e84e0 TSWP.BookmarkFieldArchive
-	2034 -> 0x10b6e8498 TSWP.DateTimeSmartFieldArchive
-	2033 -> 0x10b6e8510 TSWP.FilenameSmartFieldArchive
-	2032 -> 0x10b6e8320 TSWP.HyperlinkFieldArchive
-	2031 -> 0x10b6e8348 TSWP.PlaceholderSmartFieldArchive
-	2014 -> 0x10b6e8118 TSWP.CommentInfoArchive
+	2102 -> 0x0 null
+	2101 -> 0x10a61bac0 TSWP.TextCommandArchive
+	2062 -> 0x10a61b888 TSWP.ChangeSessionArchive
+	2061 -> 0x10b17f360 TSK.DeprecatedChangeAuthorArchive
+	2060 -> 0x10a61b850 TSWP.ChangeArchive
+	10023 -> 0x10a61b830 TSWP.TateChuYokoFieldArchive
+	2053 -> 0x10a61a488 TSWPSOS.StyleDiffArchive
+	10022 -> 0x10a61c168 TSWP.ShapeContentDescription
+	2052 -> 0x10a61af28 TSWP.TOCEntryInstanceArchive
+	10021 -> 0x10a61c0e8 TSWP.SelectionTransformerArchive
+	2051 -> 0x10a61aee8 TSWP.TOCSettingsArchive
+	10020 -> 0x10a61c140 TSWP.ShapeSelectionTransformerArchive
+	2050 -> 0x10a61ab88 TSWP.TextStylePresetArchive
+	2043 -> 0x10a61b4d8 TSWP.NumberAttachmentArchive
+	2042 -> 0x10a61b808 TSWP.RubyFieldArchive
+	10011 -> 0x10a61b8b8 TSWP.SectionPlaceholderArchive
+	2041 -> 0x10a61b7d0 TSWP.TOCSmartFieldArchive
+	2040 -> 0x10a61b5b8 TSWP.BibliographySmartFieldArchive
+	2039 -> 0x10a61b588 TSWP.UnsupportedHyperlinkFieldArchive
+	2038 -> 0x10a61b660 TSWP.CitationSmartFieldArchive
+	2037 -> 0x10a61b600 TSWP.CitationRecordArchive
+	2036 -> 0x10a61b748 TSWP.MergeSmartFieldArchive
+	2035 -> 0x10a61b6f0 TSWP.BookmarkFieldArchive
+	2034 -> 0x10a61b6a8 TSWP.DateTimeSmartFieldArchive
+	2033 -> 0x10a61b720 TSWP.FilenameSmartFieldArchive
+	2032 -> 0x10a61b530 TSWP.HyperlinkFieldArchive
+	2031 -> 0x10a61b558 TSWP.PlaceholderSmartFieldArchive
+	2014 -> 0x10a61b328 TSWP.CommentInfoArchive
 	2012 -> 0x0 null
-	2005 -> 0x10b6e7458 TSWP.StorageArchive
-	2004 -> 0x10b6e81d8 TSWP.TextualAttachmentArchive
-	2003 -> 0x10b6e8248 TSWP.DrawableAttachmentArchive
-	2002 -> 0x10b6e72c0 TSWP.SelectionArchive
-	2001 -> 0x10b6e7458 TSWP.StorageArchive
-	5156 -> 0x10a38e670 TSCH.CommandReplaceImageDataArchive
-	5155 -> 0x10a38e6a8 TSCH.CommandInducedReplaceChartGrid
-	5154 -> 0x10a38e618 TSCH.CommandPasteStyleArchive
-	5152 -> 0x10a38e780 TSCH.ChartSubselectionIdentityTransformerHelperArchive
-	5151 -> 0x10a38e7c8 TSCH.CDESelectionTransformerArchive
-	5150 -> 0x10a38e748 TSCH.ChartRefLineSubselectionTransformerHelperArchive
-	5149 -> 0x10a38e728 TSCH.ChartSubselectionTransformerHelperArchive
-	5148 -> 0x10a38e708 TSCH.ChartDrawableSelectionTransformerArchive
-	5147 -> 0x10a38e7a0 TSCH.ChartSubselectionTransformerArchive
-	5146 -> 0x10a38e6e8 TSCH.ChartTextSelectionTransformerArchive
-	5145 -> 0x10a38c180 TSCH.ChartSelectionArchive
-	5143 -> 0x10a38dea0 TSCH.CommandDeleteGridRowsArchive
-	5142 -> 0x10a38df60 TSCH.CommandDeleteGridColumnsArchive
-	5141 -> 0x10a38e5b8 TSCH.CommandDeleteReferenceLineArchive
-	5140 -> 0x10a38e548 TSCH.CommandAddReferenceLineArchive
-	5139 -> 0x10a38e4e0 TSCH.CommandReplaceCustomFormatArchive
-	5138 -> 0x10a38dc98 TSCH.CommandApplyFillSetArchive
-	5137 -> 0x10a38dc40 TSCH.CommandSetFontFamilyArchive
-	5136 -> 0x10a38db90 TSCH.CommandScaleAllTextArchive
-	5135 -> 0x10a38db30 TSCH.CommandMutatePropertiesArchive
-	5132 -> 0x10a38e490 TSCH.CommandInvalidateWPCaches
-	5131 -> 0x10a38e438 TSCH.CommandReplaceThemePresetArchive
-	5130 -> 0x10a38e0d8 TSCH.CommandSetMultiDataSetIndexArchive
-	5129 -> 0x10a38c0a0 TSCH.StylePasteboardDataArchive
-	5127 -> 0x10a38e2c8 TSCH.CommandReplaceGridValuesArchive
-	5126 -> 0x10a38e290 TSCH.ChartCommandArchive
-	5125 -> 0x10a38e1d0 TSCH.CommandChartApplyPreset
-	5123 -> 0x10a38da28 TSCH.CommandStyleSwapArchive
-	5122 -> 0x10a38e130 TSCH.CommandSetPieWedgeExplosion
-	5119 -> 0x10a38de60 TSCH.CommandMoveGridColumnsArchive
-	5118 -> 0x10a38de20 TSCH.CommandMoveGridRowsArchive
-	5116 -> 0x10a38ddb8 TSCH.CommandAddGridColumnsArchive
-	5115 -> 0x10a38dd50 TSCH.CommandAddGridRowsArchive
+	2005 -> 0x10a61a668 TSWP.StorageArchive
+	2004 -> 0x10a61b3e8 TSWP.TextualAttachmentArchive
+	2003 -> 0x10a61b458 TSWP.DrawableAttachmentArchive
+	2002 -> 0x10a61a4d0 TSWP.SelectionArchive
+	2001 -> 0x10a61a668 TSWP.StorageArchive
+	5157 -> 0x10cc852c8 TSCH.CommandInduced3DChartGeometry
+	5156 -> 0x10cc85270 TSCH.CommandReplaceImageDataArchive
+	5155 -> 0x10cc852a8 TSCH.CommandInducedReplaceChartGrid
+	5154 -> 0x10cc85218 TSCH.CommandPasteStyleArchive
+	5152 -> 0x10cc85380 TSCH.ChartSubselectionIdentityTransformerHelperArchive
+	5151 -> 0x10cc853c8 TSCH.CDESelectionTransformerArchive
+	5150 -> 0x10cc85348 TSCH.ChartRefLineSubselectionTransformerHelperArchive
+	5149 -> 0x10cc85328 TSCH.ChartSubselectionTransformerHelperArchive
+	5148 -> 0x10cc85308 TSCH.ChartDrawableSelectionTransformerArchive
+	5147 -> 0x10cc853a0 TSCH.ChartSubselectionTransformerArchive
+	5146 -> 0x10cc852e8 TSCH.ChartTextSelectionTransformerArchive
+	5145 -> 0x10cc82cf8 TSCH.ChartSelectionArchive
+	5143 -> 0x10cc84aa0 TSCH.CommandDeleteGridRowsArchive
+	5142 -> 0x10cc84b60 TSCH.CommandDeleteGridColumnsArchive
+	5141 -> 0x10cc851b8 TSCH.CommandDeleteReferenceLineArchive
+	5140 -> 0x10cc85148 TSCH.CommandAddReferenceLineArchive
+	5139 -> 0x10cc850e0 TSCH.CommandReplaceCustomFormatArchive
+	5138 -> 0x10cc84898 TSCH.CommandApplyFillSetArchive
+	5137 -> 0x10cc84840 TSCH.CommandSetFontFamilyArchive
+	5136 -> 0x10cc84790 TSCH.CommandScaleAllTextArchive
+	5135 -> 0x10cc84730 TSCH.CommandMutatePropertiesArchive
+	5132 -> 0x10cc85090 TSCH.CommandInvalidateWPCaches
+	5131 -> 0x10cc85038 TSCH.CommandReplaceThemePresetArchive
+	5130 -> 0x10cc84cd8 TSCH.CommandSetMultiDataSetIndexArchive
+	5129 -> 0x10cc82c18 TSCH.StylePasteboardDataArchive
+	5127 -> 0x10cc84ec8 TSCH.CommandReplaceGridValuesArchive
+	5126 -> 0x10cc84e90 TSCH.ChartCommandArchive
+	5125 -> 0x10cc84dd0 TSCH.CommandChartApplyPreset
+	5123 -> 0x10cc84628 TSCH.CommandStyleSwapArchive
+	5122 -> 0x10cc84d30 TSCH.CommandSetPieWedgeExplosion
+	5119 -> 0x10cc84a60 TSCH.CommandMoveGridColumnsArchive
+	5118 -> 0x10cc84a20 TSCH.CommandMoveGridRowsArchive
+	5116 -> 0x10cc849b8 TSCH.CommandAddGridColumnsArchive
+	5115 -> 0x10cc84950 TSCH.CommandAddGridRowsArchive
 	5114 -> 0x0 null
-	5110 -> 0x10a38e058 TSCH.CommandSetGridDirectionArchive
-	5109 -> 0x10a38e020 TSCH.CommandSetGridValueArchive
-	5108 -> 0x10a38e100 TSCH.CommandSetLegendFrameArchive
-	5107 -> 0x10a38e0b0 TSCH.CommandSetScatterFormatArchive
-	5105 -> 0x10a38dd18 TSCH.CommandSetCategoryNameArchive
-	5104 -> 0x10a38dce0 TSCH.CommandSetSeriesNameArchive
-	5103 -> 0x10a38d8f8 TSCH.CommandSetChartTypeArchive
-	5026 -> 0x10a38c6d0 TSCH.ChartAxisStyleArchive
-	5025 -> 0x10a38c698 TSCH.LegendNonStyleArchive
-	5021 -> 0x10a38bb68 TSCH.ChartDrawableArchive
-	4011 -> 0x108dcb448 TSCE.ReferencesToDirtyArchive
-	4010 -> 0x108dcbaa8 TSCE.RangePrecedentsTileArchive
-	4009 -> 0x108dcb710 TSCE.CellRecordTileArchive
-	4008 -> 0x108dcbe60 TSCE.FormulaOwnerDependenciesArchive
-	4007 -> 0x108dcc188 TSCE.RemoteDataStoreArchive
-	2412 -> 0x10b6e8ef8 TSWP.PencilAnnotationSelectionTransformerArchive
-	4006 -> 0x108dcd090 TSCE.ExtendTableIDHistoryCommandArchive
-	2411 -> 0x10b6e8720 TSWP.FlowInfoContainerArchive
-	4005 -> 0x108dcd150 TSCE.TrackedReferenceArchive
-	2410 -> 0x10b6e86e0 TSWP.FlowInfoArchive
-	4004 -> 0x108dcd1a0 TSCE.ReferenceTrackerArchive
-	2409 -> 0x10b6e86c8 TSWP.HyperlinkSelectionArchive
-	4003 -> 0x108dcc228 TSCE.NamedReferenceManagerArchive
-	2408 -> 0x10b6e8ea0 TSWP.ShapeStyleSetValueCommandArchive
-	4002 -> 0x108dcd118 TSCE.TrackedReferencesRewriteCommandArchive
-	2407 -> 0x10b6e88e8 TSWP.StorageActionCommandArchive
-	4001 -> 0x108dcd068 TSCE.FormulaRewriteCommandArchive
-	2406 -> 0x10b6e8e80 TSWP.StyleUpdatePropertyMapCommandArchive
-	4000 -> 0x108dcc3c8 TSCE.CalculationEngineArchive
-	6368 -> 0x107168d10 TST.CellDiffArraySegment
-	6367 -> 0x107168cf0 TST.CellDiffArray
-	6360 -> 0x10716af80 TST.CommandSetRangeControlMinMaxIncArchive
-	6364 -> 0x10716ba18 TST.StrokeSelectionTransformerArchive
-	6359 -> 0x10716b9a0 TST.StockCellSelectionTransformerArchive
-	6355 -> 0x10716b968 TST.ControlCellSelectionTransformerArchive
-	6354 -> 0x10716ba40 TST.RowColumnSelectionTransformerArchive
-	6353 -> 0x10716b9d8 TST.RegionSelectionTransformerArchive
-	6352 -> 0x10716b948 TST.TableNameSelectionTransformerArchive
-	6351 -> 0x10716b928 TST.TableSubSelectionTransformerBaseArchive
-	6358 -> 0x10716b8f8 TST.WPSelectionTransformerArchive
-	6350 -> 0x10716b8d8 TST.IdempotentSelectionTransformerArchive
-	6366 -> 0x10716a048 TST.HeaderNameMgrArchive
-	6365 -> 0x107169f78 TST.HeaderNameMgrTileArchive
-	6363 -> 0x107169820 TST.PencilAnnotationArchive
-	6306 -> 0x107168838 TST.StrokeLayerArchive
-	6305 -> 0x107168870 TST.StrokeSidecarArchive
-	6312 -> 0x107168f70 TST.StockCellSelectionArchive
-	6302 -> 0x107169d28 TST.DefaultCellStylesContainerArchive
-	6301 -> 0x10716a4c8 TST.CommandMoveCellsArchive
-	6265 -> 0x10716a1c8 TST.CommandApplyCellContentsArchive
-	6318 -> 0x107169f20 TST.CategoryOrderArchive
-	6317 -> 0x107169ee8 TST.SummaryCellVendorArchive
-	6316 -> 0x107168650 TST.SummaryModelArchive
-	6267 -> 0x107168780 TST.ColumnRowUIDMapArchive
+	5110 -> 0x10cc84c58 TSCH.CommandSetGridDirectionArchive
+	5109 -> 0x10cc84c20 TSCH.CommandSetGridValueArchive
+	5108 -> 0x10cc84d00 TSCH.CommandSetLegendFrameArchive
+	5107 -> 0x10cc84cb0 TSCH.CommandSetScatterFormatArchive
+	5105 -> 0x10cc84918 TSCH.CommandSetCategoryNameArchive
+	5104 -> 0x10cc848e0 TSCH.CommandSetSeriesNameArchive
+	5103 -> 0x10cc844f8 TSCH.CommandSetChartTypeArchive
+	5026 -> 0x10cc83258 TSCH.ChartAxisStyleArchive
+	5025 -> 0x10cc83220 TSCH.LegendNonStyleArchive
+	5021 -> 0x10cc826e0 TSCH.ChartDrawableArchive
+	4011 -> 0x106581978 TSCE.ReferencesToDirtyArchive
+	4010 -> 0x106582050 TSCE.RangePrecedentsTileArchive
+	4009 -> 0x106581cb8 TSCE.CellRecordTileArchive
+	4008 -> 0x106582408 TSCE.FormulaOwnerDependenciesArchive
+	4007 -> 0x106582728 TSCE.RemoteDataStoreArchive
+	2411 -> 0x10a61b930 TSWP.FlowInfoContainerArchive
+	4005 -> 0x1065835c8 TSCE.TrackedReferenceArchive
+	2410 -> 0x10a61b8f0 TSWP.FlowInfoArchive
+	4004 -> 0x106583618 TSCE.TrackedReferenceStoreArchive
+	2409 -> 0x10a61b8d8 TSWP.HyperlinkSelectionArchive
+	4003 -> 0x1065827c8 TSCE.NamedReferenceManagerArchive
+	2407 -> 0x10a61bb08 TSWP.StorageActionCommandArchive
+	4001 -> 0x1065835a0 TSCE.FormulaRewriteCommandArchive
+	2406 -> 0x10a61c0a0 TSWP.StyleUpdatePropertyMapCommandArchive
+	4000 -> 0x106582968 TSCE.CalculationEngineArchive
+	6368 -> 0x109845bc8 TST.CellDiffArraySegment
+	6367 -> 0x109845ba8 TST.CellDiffArray
+	6360 -> 0x109848338 TST.CommandSetRangeControlMinMaxIncArchive
+	6364 -> 0x109848ec0 TST.StrokeSelectionTransformerArchive
+	6359 -> 0x109848e48 TST.StockCellSelectionTransformerArchive
+	6355 -> 0x109848e10 TST.ControlCellSelectionTransformerArchive
+	6354 -> 0x109848ee8 TST.RowColumnSelectionTransformerArchive
+	6353 -> 0x109848e80 TST.RegionSelectionTransformerArchive
+	6352 -> 0x109848df0 TST.TableNameSelectionTransformerArchive
+	6351 -> 0x109848dd0 TST.TableSubSelectionTransformerBaseArchive
+	6358 -> 0x109848da0 TST.WPSelectionTransformerArchive
+	6350 -> 0x109848d80 TST.IdempotentSelectionTransformerArchive
+	6373 -> 0x109846db0 TST.GroupByArchive
+	6372 -> 0x109846ea8 TST.CategoryOwnerRefArchive
+	6369 -> 0x1098472d8 TST.PivotOrderArchive
+	6374 -> 0x109846ed8 TST.PivotGroupingColumnOptionsMapArchive
+	6370 -> 0x109846f30 TST.PivotOwnerArchive
+	6366 -> 0x1098473f8 TST.HeaderNameMgrArchive
+	6365 -> 0x109847328 TST.HeaderNameMgrTileArchive
+	6363 -> 0x109846a70 TST.PencilAnnotationArchive
+	6306 -> 0x1098456e8 TST.StrokeLayerArchive
+	6305 -> 0x109845720 TST.StrokeSidecarArchive
+	6312 -> 0x109845f58 TST.StockCellSelectionArchive
+	6302 -> 0x1098470a8 TST.DefaultCellStylesContainerArchive
+	6301 -> 0x109847878 TST.CommandMoveCellsArchive
+	6265 -> 0x109847578 TST.CommandApplyCellContentsArchive
+	6318 -> 0x1098472b0 TST.CategoryOrderArchive
+	6317 -> 0x109847278 TST.SummaryCellVendorArchive
+	6316 -> 0x1098454f8 TST.SummaryModelArchive
+	6267 -> 0x109845630 TST.ColumnRowUIDMapArchive
 	6248 -> 0x0 null
-	627 -> 0x10866fe30 TSA.GalleryInfoSetValueCommandArchive
-	6206 -> 0x107167d10 TST.PopUpMenuModel
-	6201 -> 0x107167e80 TST.TableDataList
-	6199 -> 0x1071696c8 TST.CompletionTokenAttachmentArchive
-	6144 -> 0x1071689f8 TST.MergeRegionMapArchive
-	615 -> 0x108670200 TSASOS.InducedVerifyDrawableZOrdersWithServerCommandArchive
-	3006 -> 0x10c2d4bf8 TSD.MaskArchive
-	6194 -> 0x107169440 TST.PostfixOperatorNodeArchive
-	6299 -> 0x107169630 TST.InNodeArchive
-	6298 -> 0x107169650 TST.VariableNodeArchive
-	6297 -> 0x1071695f0 TST.LetNodeArchive
-	6362 -> 0x10716bb48 TST.CommandRewritePencilAnnotationFormulasArchive
-	6153 -> 0x10716ba80 TST.CommandCategoryMoveRowsArchive
-	6152 -> 0x10716a7d0 TST.CommandCategoryResizeColumnOrRowArchive
-	6361 -> 0x10716b860 TST.CommandCategorySetLabelRowVisibility
-	6150 -> 0x10716b828 TST.CommandCategoryChangeSummaryAggregateType
-	6314 -> 0x10716b7b8 TST.CommandSetStructuredTextImportRecordArchive
-	6313 -> 0x10716ab68 TST.CommandSetNowArchive
-	6310 -> 0x10716ab88 TST.CommandSetWasCutArchive
-	6304 -> 0x10716a920 TST.CommandChangeTableAreaForColumnOrRowArchive
-	6287 -> 0x10716b720 TST.CommandTransposeTableArchive
-	3094 -> 0x10c2d6408 TSD.FreehandDrawingAnimationCommandArchive
-	6282 -> 0x10716a268 TST.CommandApplyCellMapArchive
-	6281 -> 0x10716b248 TST.CommandUnmergeArchive
-	6300 -> 0x10716b220 TST.CommandInverseMergeArchive
-	3092 -> 0x10c2d63b8 TSD.PencilAnnotationSelectionTransformerArchive
-	6280 -> 0x10716b1d8 TST.CommandMergeArchive
-	3091 -> 0x10c2d4d78 TSD.FreehandDrawingToolkitUIState
+	627 -> 0x107e3ca90 TSA.GalleryInfoSetValueCommandArchive
+	6206 -> 0x109844ac8 TST.PopUpMenuModel
+	6201 -> 0x109844c38 TST.TableDataList
+	6199 -> 0x109846918 TST.CompletionTokenAttachmentArchive
+	619 -> 0x107e3ca28 TSA.RemoteDataChangeCommandArchive
+	6198 -> 0x1098468d0 TST.LayoutHintArchive
+	6144 -> 0x1098458a8 TST.MergeRegionMapArchive
+	610 -> 0x0 null
+	2204 -> 0x0 null
+	6189 -> 0x1098466d0 TST.FunctionNodeArchive
+	615 -> 0x107e3ce60 TSASOS.InducedVerifyDrawableZOrdersWithServerCommandArchive
+	2209 -> 0x0 null
+	3006 -> 0x10f0c9998 TSD.MaskArchive
+	6194 -> 0x109846690 TST.PostfixOperatorNodeArchive
+	6299 -> 0x109846880 TST.InNodeArchive
+	6298 -> 0x1098468a0 TST.VariableNodeArchive
+	6297 -> 0x109846840 TST.LetNodeArchive
+	3 -> 0x105af45d0 TN.FormBasedSheetArchive
+	6379 -> 0x109848618 TST.CommandRewritePivotOwnerFormulasArchive
+	1 -> 0x105af4430 TN.DocumentArchive
+	6377 -> 0x109849248 TST.CommandPivotSortArchive
+	6375 -> 0x1098491f0 TST.CommandPivotSetGroupingColumnOptionsArchive
+	6376 -> 0x109849220 TST.CommandPivotHideShowGrandTotalsArchive
+	6362 -> 0x109848ff0 TST.CommandRewritePencilAnnotationFormulasArchive
+	6153 -> 0x109848f28 TST.CommandCategoryMoveRowsArchive
+	6152 -> 0x109847b88 TST.CommandCategoryResizeColumnOrRowArchive
+	6361 -> 0x109848d08 TST.CommandCategorySetLabelRowVisibility
+	6150 -> 0x109848cd0 TST.CommandCategoryChangeSummaryAggregateType
+	6314 -> 0x109848c60 TST.CommandSetStructuredTextImportRecordArchive
+	6313 -> 0x109847f20 TST.CommandSetNowArchive
+	6310 -> 0x109847f40 TST.CommandSetWasCutArchive
+	6304 -> 0x109847cd8 TST.CommandChangeTableAreaForColumnOrRowArchive
+	6287 -> 0x109848bc8 TST.CommandTransposeTableArchive
+	3094 -> 0x10f0cb1d8 TSD.FreehandDrawingAnimationCommandArchive
+	6282 -> 0x109847618 TST.CommandApplyCellMapArchive
+	6281 -> 0x1098486b8 TST.CommandUnmergeArchive
+	6300 -> 0x109848690 TST.CommandInverseMergeArchive
+	3092 -> 0x10f0cb188 TSD.PencilAnnotationSelectionTransformerArchive
+	6280 -> 0x109848648 TST.CommandMergeArchive
+	3091 -> 0x10f0c9b30 TSD.FreehandDrawingToolkitUIState
 	6279 -> 0x0 null
-	3090 -> 0x10c2d4d50 TSD.FreehandDrawingContentDescription
-	6278 -> 0x10716b5b8 TST.CommandSetStorageLanguageArchive
-	3088 -> 0x10c2d6110 TSD.DrawablePencilAnnotationCommandArchive
-	6276 -> 0x10716b690 TST.CommandSetFilterSetArchive
-	6269 -> 0x10716a498 TST.CommandReplaceCustomFormatArchive
-	6294 -> 0x10716b658 TST.CommandRewriteSortOrderForRewriteSpecArchive
+	3090 -> 0x10f0c9b08 TSD.FreehandDrawingContentDescription
+	6278 -> 0x109848a30 TST.CommandSetStorageLanguageArchive
+	3088 -> 0x10f0caec8 TSD.DrawablePencilAnnotationCommandArchive
+	6276 -> 0x109848b38 TST.CommandSetFilterSetArchive
+	6269 -> 0x109847848 TST.CommandReplaceCustomFormatArchive
+	6294 -> 0x109848b00 TST.CommandRewriteSortOrderForRewriteSpecArchive
 	6288 -> 0x0 null
-	3034 -> 0x10c2d5c70 TSD.MovieSetValueCommandArchive
+	3034 -> 0x10f0caa28 TSD.MovieSetValueCommandArchive
 	6222 -> 0x0 null
-	6292 -> 0x10716b1a0 TST.CommandRewriteConditionalStylesForRewriteSpecArchive
-	6293 -> 0x10716b170 TST.CommandRewriteFilterFormulasForRewriteSpecArchive
-	6148 -> 0x10716ae38 TST.CommandSetBaseUseMinusSignArchive
-	6147 -> 0x10716ae10 TST.CommandSetBasePlacesArchive
-	6146 -> 0x10716ade8 TST.CommandSetBaseArchive
-	6145 -> 0x10716a840 TST.CommandHideShowArchive
+	6292 -> 0x1098485e0 TST.CommandRewriteConditionalStylesForRewriteSpecArchive
+	6293 -> 0x1098485b0 TST.CommandRewriteFilterFormulasForRewriteSpecArchive
+	6148 -> 0x1098481f0 TST.CommandSetBaseUseMinusSignArchive
+	6147 -> 0x1098481c8 TST.CommandSetBasePlacesArchive
+	6146 -> 0x1098481a0 TST.CommandSetBaseArchive
+	6145 -> 0x109847bf8 TST.CommandHideShowArchive
 	6141 -> 0x0 null
 	6140 -> 0x0 null
 	6139 -> 0x0 null
 	6138 -> 0x0 null
-	6137 -> 0x10716aa78 TST.CommandSetTableFontSizeArchive
-	6136 -> 0x10716aad0 TST.CommandSetTableFontNameArchive
-	6307 -> 0x10716b290 TST.CommandChooseTableIdRemapperArchive
-	6321 -> 0x10716b2c8 TST.CommandCategorySetGroupingColumnsArchive
-	6320 -> 0x10716b7e8 TST.CommandCategoryCollapseExpandGroupArchive
-	6323 -> 0x10716baf0 TST.CommandRewriteHiddenStatesForGroupByChangeArchive
-	6315 -> 0x10716b120 TST.CommandRewriteCategoryFormulasArchive
-	6303 -> 0x10716b0f0 TST.CommandRewriteMergeFormulasArchive
-	6291 -> 0x10716b0c0 TST.CommandRewriteTableFormulasForRewriteSpecArchive
-	3098 -> 0x10c2d64c0 TSD.SetCaptionOrTitleVisibilityCommandArchive
+	6137 -> 0x109847e30 TST.CommandSetTableFontSizeArchive
+	6136 -> 0x109847e88 TST.CommandSetTableFontNameArchive
+	6307 -> 0x109848700 TST.CommandChooseTableIdRemapperArchive
+	6321 -> 0x109848738 TST.CommandCategorySetGroupingColumnsArchive
+	6320 -> 0x109848c90 TST.CommandCategoryCollapseExpandGroupArchive
+	6381 -> 0x109849330 TST.CommandExtendTableIDHistoryArchive
+	6380 -> 0x109849308 TST.CommandRewriteTrackedReferencesArchive
+	6323 -> 0x109848f98 TST.CommandRewriteHiddenStatesForGroupByChangeArchive
+	6315 -> 0x109848560 TST.CommandRewriteCategoryFormulasArchive
+	6303 -> 0x109848530 TST.CommandRewriteMergeFormulasArchive
+	6291 -> 0x109848500 TST.CommandRewriteTableFormulasForRewriteSpecArchive
+	3098 -> 0x10f0cb290 TSD.SetCaptionOrTitleVisibilityCommandArchive
 	6286 -> 0x0 null
-	3097 -> 0x10c2d4de0 TSD.StandinCaptionArchive
-	6285 -> 0x10716b088 TST.CommandRewriteFormulasForTransposeArchive
-	6290 -> 0x10716a470 TST.CommandSetDurationUnitSmallestLargestArchive
-	6289 -> 0x10716a448 TST.CommandSetDurationStyleArchive
-	3089 -> 0x10c2d5000 TSD.PencilAnnotationSelectionArchive
-	6277 -> 0x10716a3e0 TST.CommandMutateCellFormatArchive
+	2300 -> 0x0 null
+	3097 -> 0x10f0c9b98 TSD.StandinCaptionArchive
+	6285 -> 0x1098484c8 TST.CommandRewriteFormulasForTransposeArchive
+	6290 -> 0x109847820 TST.CommandSetDurationUnitSmallestLargestArchive
+	6289 -> 0x1098477f8 TST.CommandSetDurationStyleArchive
+	3089 -> 0x10f0c9db8 TSD.PencilAnnotationSelectionArchive
+	6277 -> 0x109847790 TST.CommandMutateCellFormatArchive
 	6135 -> 0x0 null
 	6134 -> 0x0 null
 	6133 -> 0x0 null
-	6132 -> 0x10716af58 TST.CommandSetUseAccountingStyleArchive
-	6131 -> 0x10716ae60 TST.CommandSetCurrencyCodeArchive
+	6132 -> 0x109848310 TST.CommandSetUseAccountingStyleArchive
+	6131 -> 0x109848218 TST.CommandSetCurrencyCodeArchive
 	6130 -> 0x0 null
-	6129 -> 0x10716ae88 TST.CommandSetFractionAccuracyArchive
-	6128 -> 0x10716aeb0 TST.CommandSetNegativeNumberStyleArchive
+	6129 -> 0x109848240 TST.CommandSetFractionAccuracyArchive
+	6128 -> 0x109848268 TST.CommandSetNegativeNumberStyleArchive
 	6124 -> 0x0 null
-	6123 -> 0x10716b030 TST.CommandSortArchive
+	6123 -> 0x1098483e8 TST.CommandSortArchive
 	6122 -> 0x0 null
 	6121 -> 0x0 null
-	6120 -> 0x10716ac50 TST.CommandSetRepeatingHeaderEnabledArchive
+	6120 -> 0x109848008 TST.CommandSetRepeatingHeaderEnabledArchive
 	6119 -> 0x0 null
-	6117 -> 0x10716ad58 TST.CommandApplyTableStylePresetArchive
-	6149 -> 0x10716b550 TST.CommandSetTextStylePropertiesArchive
+	6117 -> 0x109848110 TST.CommandApplyTableStylePresetArchive
+	6149 -> 0x1098489c8 TST.CommandSetTextStylePropertiesArchive
 	6143 -> 0x0 null
-	6142 -> 0x10716ab38 TST.CommandSetTableNameHeightArchive
-	6114 -> 0x10716aa50 TST.CommandSetTableNameEnabledArchive
-	2124 -> 0x10b6e9028 TSWP.UpdateFlowInfoCommandArchive
+	6142 -> 0x109847ef0 TST.CommandSetTableNameHeightArchive
+	6114 -> 0x109847e08 TST.CommandSetTableNameEnabledArchive
+	2124 -> 0x10a61c248 TSWP.UpdateFlowInfoCommandArchive
 	6109 -> 0x0 null
-	2123 -> 0x10b6e8fc8 TSWP.SetObjectPropertiesCommandArchive
+	2123 -> 0x10a61c1e8 TSWP.SetObjectPropertiesCommandArchive
 	6108 -> 0x0 null
-	2122 -> 0x10b6e8c20 TSWP.ModifyTOCSettingsPresetForThemeCommandArchive
-	6107 -> 0x10716a9f8 TST.CommandSetTableNameArchive
-	6127 -> 0x10716af30 TST.CommandSetShowThousandsSeparatorArchive
-	2121 -> 0x10b6e8bf8 TSWP.ModifyTOCSettingsForTOCInfoCommandArchive
+	2122 -> 0x10a61be40 TSWP.ModifyTOCSettingsPresetForThemeCommandArchive
+	6107 -> 0x109847db0 TST.CommandSetTableNameArchive
+	6127 -> 0x1098482e8 TST.CommandSetShowThousandsSeparatorArchive
+	2121 -> 0x10a61be18 TSWP.ModifyTOCSettingsForTOCInfoCommandArchive
 	6106 -> 0x0 null
-	6126 -> 0x10716aed8 TST.CommandSetNumberOfDecimalPlacesArchive
-	2120 -> 0x10b6e8bc8 TSWP.ModifyTOCSettingsBaseCommandArchive
+	6126 -> 0x109848290 TST.CommandSetNumberOfDecimalPlacesArchive
+	2120 -> 0x10a61bde8 TSWP.ModifyTOCSettingsBaseCommandArchive
 	6105 -> 0x0 null
-	2119 -> 0x10b6e8b10 TSWP.UpdateDateTimeFieldCommandArchive
-	6104 -> 0x10716a790 TST.CommandResizeColumnOrRowArchive
-	2118 -> 0x10b6e8b88 TSWP.ModifyRubyTextCommandArchive
-	6103 -> 0x10716a6e0 TST.CommandRemoveColumnsOrRowsArchive
-	2127 -> 0x10b6e9208 TSWP.ContainedObjectsCommandArchive
+	2119 -> 0x10a61bd30 TSWP.UpdateDateTimeFieldCommandArchive
+	6104 -> 0x109847b48 TST.CommandResizeColumnOrRowArchive
+	2127 -> 0x10a61c428 TSWP.ContainedObjectsCommandArchive
 	6112 -> 0x0 null
-	2125 -> 0x10b6e90b8 TSWP.AddFlowInfoCommandArchive
+	2125 -> 0x10a61c2d8 TSWP.AddFlowInfoCommandArchive
 	6110 -> 0x0 null
-	2128 -> 0x10b6e9268 TSWP.EquationInfoGeometryCommandArchive
+	2128 -> 0x10a61c488 TSWP.EquationInfoGeometryCommandArchive
 	6113 -> 0x0 null
-	2117 -> 0x0 null
-	6102 -> 0x10716a5b0 TST.CommandInsertColumnsOrRowsArchive
-	6125 -> 0x10716ac18 TST.CommandStyleTableArchive
-	2116 -> 0x10b6e8b48 TSWP.ApplyRubyTextCommandArchive
-	6101 -> 0x10716a370 TST.CommandDeleteCellsArchive
-	2126 -> 0x10b6e90f8 TSWP.RemoveFlowInfoCommandArchive
-	6111 -> 0x10716a348 TST.CommandChangeFreezeHeaderStateArchive
-	6100 -> 0x10716a168 TST.TableCommandArchive
-	6034 -> 0x107168b90 TST.ConcurrentCellListArchive
-	6033 -> 0x107168b20 TST.ConcurrentCellMapArchive
-	6031 -> 0x107168a28 TST.CellMapArchive
-	6311 -> 0x107168fa0 TST.AutofillSelectionArchive
-	6295 -> 0x107168f38 TST.StrokeSelectionArchive
-	6032 -> 0x107168ef0 TST.DeathhawkRdar39989167CellSelectionArchive
-	6030 -> 0x107168e60 TST.SelectionArchive
-	2023 -> 0x10b6e7898 TSWP.ListStyleArchive
-	6008 -> 0x107167990 TST.TableStylePresetArchive
-	2024 -> 0x10b6e7ab8 TSWP.ColumnStyleArchive
-	6009 -> 0x1071679c0 TST.TableStrokePresetArchive
-	2022 -> 0x10b6e7808 TSWP.ParagraphStyleArchive
-	6007 -> 0x107168160 TST.WPTableInfoArchive
-	2021 -> 0x10b6e76a0 TSWP.CharacterStyleArchive
-	6006 -> 0x107167f98 TST.HeaderStorageBucket
-	2026 -> 0x10b6e7c80 TSWP.TOCEntryStyleArchive
-	6011 -> 0x107167ed0 TST.TableDataListSegment
-	6005 -> 0x107167e80 TST.TableDataList
-	6002 -> 0x107167c28 TST.Tile
-	2025 -> 0x10b6e7b28 TSWP.ShapeStyleArchive
-	6010 -> 0x1071690b8 TST.ConditionalStyleSetArchive
-	6004 -> 0x107169020 TST.CellStyleArchive
-	6003 -> 0x107168ff0 TST.TableStyleArchive
-	2016 -> 0x10b6e7570 TSWP.PencilAnnotationArchive
-	6001 -> 0x107168438 TST.TableModelArchive
-	2015 -> 0x10b6e81c0 TSWP.EquationInfoArchive
-	6000 -> 0x1071680c8 TST.TableInfoArchive
-	3085 -> 0x10c2d5908 TSD.ContainerInsertDrawablesCommandArchive
-	6273 -> 0x107168ae8 TST.CellListArchive
-	6284 -> 0x107168f88 TST.TableNameSelectionArchive
-	3096 -> 0x10c2d6480 TSD.RemoveCaptionOrTitleCommandArchive
-	6283 -> 0x107168f58 TST.ControlCellSelectionArchive
-	3095 -> 0x10c2d6438 TSD.InsertCaptionOrTitleCommandArchive
-	3082 -> 0x10c2d5980 TSD.GroupUngroupInformativeCommandArchive
-	6270 -> 0x10716ad20 TST.CommandReplaceTableStylePresetArchive
-	6266 -> 0x10716ace8 TST.CommandRemoveTableStylePresetArchive
-	6264 -> 0x107168d48 TST.CellDiffMapArchive
-	3043 -> 0x10c2d60b0 TSD.DrawableLockCommandArchive
-	6231 -> 0x0 null
-	11013 -> 0x1093e7838 TSP.ObjectSerializationMetadata
-	6261 -> 0x0 null
-	3073 -> 0x10c2d6378 TSD.ShapeSelectionTransformerArchive
-	3042 -> 0x10c2d5aa8 TSD.InstantAlphaCommandArchive
-	6230 -> 0x0 null
-	11012 -> 0x1093e7a08 TSP.SupportMetadata
-	6260 -> 0x0 null
-	3072 -> 0x10c2d6398 TSD.GroupSelectionTransformerArchive
-	3041 -> 0x10c2d5a00 TSD.ConnectionLineConnectCommandArchive
-	6229 -> 0x10716a8d0 TST.CommandPostflightSetCellArchive
-	11011 -> 0x1093e79b0 TSP.DocumentMetadata
-	6259 -> 0x0 null
-	3071 -> 0x10c2d6318 TSD.DrawableSelectionTransformerArchive
-	3058 -> 0x10c2d61e0 TSD.DrawableAccessibilityDescriptionCommandArchive
-	6246 -> 0x10716b4b8 TST.CommandSetFormulaTokenizationArchive
-	3040 -> 0x10c2d5f70 TSD.DrawableHyperlinkCommandArchive
-	6228 -> 0x10716a3b0 TST.CommandDeleteCellContentsArchive
-	11010 -> 0x1093e7fc0 TSP.ObjectCollection
-	6258 -> 0x10716b5f8 TST.CommandSetSortOrderArchive
-	3070 -> 0x10c2d4fb0 TSD.ReplaceAnnotationAuthorCommandArchive
-	11026 -> 0x1093e8178 TSP.LargeObjectArraySegment
-	3056 -> 0x10c2d4f68 TSD.CommentStorageArchive
-	6244 -> 0x10716b478 TST.CommandApplyCellCommentArchive
-	2241 -> 0x10b6e8278 TSWP.TOCAttachmentArchive
-	6226 -> 0x10716a878 TST.CommandTextPreflightInsertCellArchive
-	11008 -> 0x1093e7ff0 TSP.ObjectContainer
-	6256 -> 0x10716b590 TST.CommandJustForNotifyingArchive
-	3068 -> 0x10c2d5738 TSD.UndoObjectArchive
-	2240 -> 0x10b6e8140 TSWP.TOCInfoArchive
-	3037 -> 0x10c2d5ec0 TSD.MediaFlagsCommandArchive
+	6125 -> 0x109847fd0 TST.CommandStyleTableArchive
+	2126 -> 0x10a61c318 TSWP.RemoveFlowInfoCommandArchive
+	6111 -> 0x1098476f8 TST.CommandChangeFreezeHeaderStateArchive
+	6034 -> 0x109845a40 TST.ConcurrentCellListArchive
+	6033 -> 0x1098459d0 TST.ConcurrentCellMapArchive
+	6031 -> 0x1098458d8 TST.CellMapArchive
+	6311 -> 0x109845f88 TST.AutofillSelectionArchive
+	6295 -> 0x109845f20 TST.StrokeSelectionArchive
+	6032 -> 0x109845ed8 TST.DeathhawkRdar39989167CellSelectionArchive
+	6030 -> 0x109845e48 TST.SelectionArchive
+	2023 -> 0x10a61aaa8 TSWP.ListStyleArchive
+	6008 -> 0x109844748 TST.TableStylePresetArchive
+	2024 -> 0x10a61acc8 TSWP.ColumnStyleArchive
+	6009 -> 0x109844778 TST.TableStrokePresetArchive
+	2022 -> 0x10a61aa18 TSWP.ParagraphStyleArchive
+	6007 -> 0x109844f30 TST.WPTableInfoArchive
+	2021 -> 0x10a61a8b0 TSWP.CharacterStyleArchive
+	6006 -> 0x109844d50 TST.HeaderStorageBucket
+	2026 -> 0x10a61ae90 TSWP.TOCEntryStyleArchive
+	6011 -> 0x109844c88 TST.TableDataListSegment
+	6005 -> 0x109844c38 TST.TableDataList
+	6002 -> 0x1098449e0 TST.Tile
+	2025 -> 0x10a61ad38 TSWP.ShapeStyleArchive
+	6010 -> 0x109846240 TST.ConditionalStyleSetArchive
+	6004 -> 0x109846028 TST.CellStyleArchive
+	6003 -> 0x109845ff8 TST.TableStyleArchive
+	2016 -> 0x10a61a780 TSWP.PencilAnnotationArchive
+	6001 -> 0x109845288 TST.TableModelArchive
+	2015 -> 0x10a61b3d0 TSWP.EquationInfoArchive
+	6000 -> 0x109844e80 TST.TableInfoArchive
+	3085 -> 0x10f0ca6c0 TSD.ContainerInsertDrawablesCommandArchive
+	6273 -> 0x109845998 TST.CellListArchive
+	6284 -> 0x109845f70 TST.TableNameSelectionArchive
+	3096 -> 0x10f0cb250 TSD.RemoveCaptionOrTitleCommandArchive
+	6283 -> 0x109845f40 TST.ControlCellSelectionArchive
+	3095 -> 0x10f0cb208 TSD.InsertCaptionOrTitleCommandArchive
+	3082 -> 0x10f0ca738 TSD.GroupUngroupInformativeCommandArchive
+	6270 -> 0x1098480d8 TST.CommandReplaceTableStylePresetArchive
+	6266 -> 0x1098480a0 TST.CommandRemoveTableStylePresetArchive
+	6264 -> 0x109845c00 TST.CellDiffMapArchive
+	11026 -> 0x1084a0e38 TSP.LargeObjectArraySegment
+	3056 -> 0x10f0c9d20 TSD.CommentStorageArchive
+	6244 -> 0x1098488f0 TST.CommandApplyCellCommentArchive
+	2241 -> 0x10a61b488 TSWP.TOCAttachmentArchive
+	6226 -> 0x109847c30 TST.CommandTextPreflightInsertCellArchive
+	11008 -> 0x1084a0cb0 TSP.ObjectContainer
+	6256 -> 0x109848a08 TST.CommandJustForNotifyingArchive
+	3068 -> 0x10f0ca4f0 TSD.UndoObjectArchive
+	2240 -> 0x10a61b350 TSWP.TOCInfoArchive
+	3037 -> 0x10f0cac78 TSD.MediaFlagsCommandArchive
 	6225 -> 0x0 null
-	11007 -> 0x1093e75d8 TSP.PasteboardMetadata
-	6255 -> 0x10716b520 TST.CommandSetTextStyleArchive
-	3067 -> 0x10c2d62c8 TSD.ImageInfoMaskGeometryCommandArchive
-	11024 -> 0x1093e8108 TSP.LargeUUIDArraySegment
-	3054 -> 0x10c2d5940 TSD.ContainerReorderChildrenCommandArchive
+	11007 -> 0x1084a0298 TSP.PasteboardMetadata
+	6255 -> 0x109848998 TST.CommandSetTextStyleArchive
+	3067 -> 0x10f0cb080 TSD.ImageInfoMaskGeometryCommandArchive
+	11024 -> 0x1084a0dc8 TSP.LargeUUIDArraySegment
+	3054 -> 0x10f0ca6f8 TSD.ContainerReorderChildrenCommandArchive
 	6242 -> 0x0 null
-	3036 -> 0x10c2d5f30 TSD.ExteriorTextWrapCommandArchive
-	6224 -> 0x10716b150 TST.CommandRewriteFilterFormulasForTableResizeArchive
-	11006 -> 0x1093e74d8 TSP.PackageMetadata
+	3036 -> 0x10f0cace8 TSD.ExteriorTextWrapCommandArchive
+	6224 -> 0x109848590 TST.CommandRewriteFilterFormulasForTableResizeArchive
+	11006 -> 0x1084a0198 TSP.PackageMetadata
 	6254 -> 0x0 null
-	3066 -> 0x10c2d62a8 TSD.ImageInfoGeometryCommandArchive
+	3066 -> 0x10f0cb060 TSD.ImageInfoGeometryCommandArchive
 	11023 -> 0x0 null
-	3053 -> 0x10c2d5890 TSD.ContainerInsertChildrenCommandArchive
+	3053 -> 0x10f0ca648 TSD.ContainerInsertChildrenCommandArchive
 	6241 -> 0x0 null
 	6223 -> 0x0 null
 	11005 -> 0x0 null
 	6253 -> 0x0 null
-	3065 -> 0x10c2d6248 TSD.ImageInfoAbstractGeometryCommandArchive
+	3065 -> 0x10f0cb000 TSD.ImageInfoAbstractGeometryCommandArchive
 	11022 -> 0x0 null
-	3052 -> 0x10c2d5818 TSD.ContainerRemoveChildrenCommandArchive
+	3052 -> 0x10f0ca5d0 TSD.ContainerRemoveChildrenCommandArchive
 	6240 -> 0x0 null
 	6252 -> 0x0 null
-	3064 -> 0x10c2d5fa0 TSD.CommentInvalidatingCommandSelectionBehaviorArchive
-	11021 -> 0x1093e8258 TSP.LargeLazyObjectArray
-	3051 -> 0x10c2d61b8 TSD.DrawableAspectRatioLockedCommandArchive
-	6239 -> 0x10716b440 TST.TableCommandSelectionBehaviorArchive
+	3064 -> 0x10f0cad58 TSD.CommentInvalidatingCommandSelectionBehaviorArchive
+	11021 -> 0x1084a0f18 TSP.LargeLazyObjectArray
+	3051 -> 0x10f0caf70 TSD.DrawableAspectRatioLockedCommandArchive
+	6239 -> 0x1098488b8 TST.TableCommandSelectionBehaviorArchive
 	6251 -> 0x0 null
-	3063 -> 0x10c2d4f38 TSD.PathSelectionArchive
-	11020 -> 0x1093e8238 TSP.LargeStringArray
-	3050 -> 0x10c2d6190 TSD.GuideCommandArchive
-	6238 -> 0x10716af00 TST.CommandSetDateTimeFormatArchive
-	6220 -> 0x1071690f0 TST.FilterSetArchive
-	3032 -> 0x10c2d5ba8 TSD.MediaApplyPresetCommandArchive
+	3063 -> 0x10f0c9cf0 TSD.PathSelectionArchive
+	11020 -> 0x1084a0ef8 TSP.LargeStringArray
+	3050 -> 0x10f0caf48 TSD.GuideCommandArchive
+	6238 -> 0x1098482b8 TST.CommandSetDateTimeFormatArchive
+	6220 -> 0x109846280 TST.FilterSetArchive
+	3032 -> 0x10f0ca960 TSD.MediaApplyPresetCommandArchive
 	11002 -> 0x0 null
-	6250 -> 0x10716b4e0 TST.CommandSetFilterSetTypeArchive
-	3062 -> 0x10c2d4f10 TSD.GroupSelectionArchive
-	11019 -> 0x1093e8218 TSP.LargeNumberArray
-	3049 -> 0x10c2d60d8 TSD.DrawableInfoCommentCommandArchive
+	6250 -> 0x109848958 TST.CommandSetFilterSetTypeArchive
+	3062 -> 0x10f0c9cc8 TSD.GroupSelectionArchive
+	11019 -> 0x1084a0ed8 TSP.LargeNumberArray
+	3049 -> 0x10f0cae90 TSD.DrawableInfoCommentCommandArchive
 	6237 -> 0x0 null
 	6219 -> 0x0 null
-	3031 -> 0x10c2d5b88 TSD.ShapeApplyPresetCommandArchive
+	3031 -> 0x10f0ca940 TSD.ShapeApplyPresetCommandArchive
 	11001 -> 0x0 null
 	6249 -> 0x0 null
-	3061 -> 0x10c2d4ec8 TSD.DrawableSelectionArchive
-	11017 -> 0x1093e80d0 TSP.LargeStringArraySegment
-	3047 -> 0x10c2d4e48 TSD.GuideStorageArchive
-	6235 -> 0x1071693a0 TST.IdentifierNodeArchive
-	6247 -> 0x107168188 TST.TableStyleNetworkArchive
-	3059 -> 0x10c2d6210 TSD.PasteStyleCommandArchive
+	3061 -> 0x10f0c9c80 TSD.DrawableSelectionArchive
+	6247 -> 0x109844f58 TST.TableStyleNetworkArchive
+	3059 -> 0x10f0cafc8 TSD.PasteStyleCommandArchive
+	6246 -> 0x109848930 TST.CommandSetFormulaTokenizationArchive
+	3058 -> 0x10f0caf98 TSD.DrawableAccessibilityDescriptionCommandArchive
 	6245 -> 0x0 null
-	11027 -> 0x1093e8278 TSP.LargeObjectArray
-	3057 -> 0x10c2d4900 TSD.ThemeReplaceFillPresetCommandArchive
-	11014 -> 0x1093e7740 TSP.DataMetadata
-	3044 -> 0x10c2d5e00 TSD.ImageNaturalSizeCommandArchive
+	11027 -> 0x1084a0f38 TSP.LargeObjectArray
+	3057 -> 0x10f0c9698 TSD.ThemeReplaceFillPresetCommandArchive
+	11014 -> 0x1084a0400 TSP.DataMetadata
+	3044 -> 0x10f0cabb8 TSD.ImageNaturalSizeCommandArchive
 	6232 -> 0x0 null
-	11025 -> 0x1093e8298 TSP.LargeUUIDArray
-	3055 -> 0x10c2d5e60 TSD.ImageAdjustmentsCommandArchive
-	2242 -> 0x10b6e81a0 TSWP.TOCLayoutHintArchive
-	11009 -> 0x1093e77c8 TSP.ViewStateMetadata
+	11013 -> 0x1084a04f8 TSP.ObjectSerializationMetadata
+	3043 -> 0x10f0cae68 TSD.DrawableLockCommandArchive
+	6231 -> 0x0 null
+	11025 -> 0x1084a0f58 TSP.LargeUUIDArray
+	3055 -> 0x10f0cac18 TSD.ImageAdjustmentsCommandArchive
+	11012 -> 0x1084a06c8 TSP.SupportMetadata
+	3042 -> 0x10f0ca860 TSD.InstantAlphaCommandArchive
+	6230 -> 0x0 null
+	11011 -> 0x1084a0670 TSP.DocumentMetadata
+	3041 -> 0x10f0ca7b8 TSD.ConnectionLineConnectCommandArchive
+	6229 -> 0x109847c88 TST.CommandPostflightSetCellArchive
+	11010 -> 0x1084a0c80 TSP.ObjectCollection
+	3040 -> 0x10f0cad28 TSD.DrawableHyperlinkCommandArchive
+	6228 -> 0x109847760 TST.CommandDeleteCellContentsArchive
+	2242 -> 0x10a61b3b0 TSWP.TOCLayoutHintArchive
+	11009 -> 0x1084a0488 TSP.ViewStateMetadata
 	6227 -> 0x0 null
 	6236 -> 0x0 null
-	11018 -> 0x1093e8140 TSP.LargeLazyObjectArraySegment
-	3048 -> 0x10c2d5b28 TSD.StyledInfoSetStyleCommandArchive
-	6221 -> 0x10716ac78 TST.CommandSetFiltersEnabledArchive
-	11015 -> 0x1093e7710 TSP.DataMetadataMap
-	3045 -> 0x10c2d4e78 TSD.CanvasSelectionArchive
+	11018 -> 0x1084a0e00 TSP.LargeLazyObjectArraySegment
+	3048 -> 0x10f0ca8e0 TSD.StyledInfoSetStyleCommandArchive
+	6235 -> 0x1098465f0 TST.IdentifierNodeArchive
+	11017 -> 0x1084a0d90 TSP.LargeStringArraySegment
+	3047 -> 0x10f0c9c00 TSD.GuideStorageArchive
+	6221 -> 0x109848030 TST.CommandSetFiltersEnabledArchive
+	11015 -> 0x1084a03d0 TSP.DataMetadataMap
+	3045 -> 0x10f0c9c30 TSD.CanvasSelectionArchive
+	2232 -> 0x0 null
 	6217 -> 0x0 null
-	262 -> 0x10ab9d988 TSK.AssetUnmaterializedOnServerCommandArchive
-	637 -> 0x10866fea8 TSA.GalleryInfoRemoveItemsCommandArchive
-	2231 -> 0x10b6e8d50 TSWP.ShapeApplyPresetCommandArchive
-	3028 -> 0x10c2d5bc8 TSD.ShapeStyleSetValueCommandArchive
+	262 -> 0x10b17fd98 TSK.AssetUnmaterializedOnServerCommandArchive
+	637 -> 0x107e3cb08 TSA.GalleryInfoRemoveItemsCommandArchive
+	2231 -> 0x10a61bf70 TSWP.ShapeApplyPresetCommandArchive
+	3028 -> 0x10f0ca980 TSD.ShapeStyleSetValueCommandArchive
 	6216 -> 0x0 null
-	261 -> 0x10ab9d950 TSK.AssetUploadStatusCommandArchive
-	634 -> 0x108670108 TSA.CaptionPlacementArchive
-	3025 -> 0x10c2d5ce0 TSD.ImageMediaCommandArchive
+	261 -> 0x10b17fd60 TSK.AssetUploadStatusCommandArchive
+	634 -> 0x107e3cd68 TSA.CaptionPlacementArchive
+	3025 -> 0x10f0caa98 TSD.ImageMediaCommandArchive
 	6213 -> 0x0 null
-	258 -> 0x10ab9d9c0 TSK.PencilAnnotationUIState
-	633 -> 0x108670128 TSA.CaptionInfoArchive
-	3024 -> 0x10c2d5e30 TSD.ImageMaskCommandArchive
+	258 -> 0x10b17fdd0 TSK.PencilAnnotationUIState
+	633 -> 0x107e3cd88 TSA.CaptionInfoArchive
+	3024 -> 0x10f0cabe8 TSD.ImageMaskCommandArchive
 	6212 -> 0x0 null
-	257 -> 0x10ab9c5e8 TSK.CollaborationCommandHistoryArraySegment
-	631 -> 0x108670280 TSASOS.CommandReapplyMasterArchive
-	3022 -> 0x10c2d5a78 TSD.DrawablePathSourceCommandArchive
+	257 -> 0x10b17ea68 TSK.CollaborationCommandHistoryArraySegment
+	631 -> 0x107e3cee0 TSASOS.CommandReapplyMasterArchive
+	3022 -> 0x10f0ca830 TSD.DrawablePathSourceCommandArchive
 	6210 -> 0x0 null
-	255 -> 0x10ab9c670 TSK.CollaborationCommandHistoryItem
-	629 -> 0x108670098 TSA.GalleryItemSetValueCommand
+	255 -> 0x10b17eaf0 TSK.CollaborationCommandHistoryItem
+	629 -> 0x107e3ccf8 TSA.GalleryItemSetValueCommand
 	6208 -> 0x0 null
-	253 -> 0x10ab9c560 TSK.LocalCommandHistoryArray
-	628 -> 0x10866fec8 TSA.GalleryItemSetGeometryCommand
+	253 -> 0x10b17e9e0 TSK.LocalCommandHistoryArray
+	628 -> 0x107e3cb28 TSA.GalleryItemSetGeometryCommand
 	6207 -> 0x0 null
-	252 -> 0x10ab9c538 TSK.LocalCommandHistoryItem
-	251 -> 0x10ab9cc10 TSK.PropagatedCommandCollectionArchive
-	6218 -> 0x107169c30 TST.RichTextPayloadArchive
-	11000 -> 0x1093e7f18 TSP.PasteboardObject
-	3030 -> 0x10c2d5cb8 TSD.MediaStyleSetValueCommandArchive
-	5031 -> 0x10a38c850 TSCH.ReferenceLineNonStyleArchive
-	249 -> 0x10ab9d810 TSK.OutgoingCommandQueue
-	624 -> 0x10866ffa8 TSA.GallerySelectionTransformer
-	3015 -> 0x10c2d4778 TSD.ShapeStyleArchive
+	252 -> 0x10b17e9b8 TSK.LocalCommandHistoryItem
+	251 -> 0x10b17f090 TSK.PropagatedCommandCollectionArchive
+	6218 -> 0x109846fb0 TST.RichTextPayloadArchive
+	11000 -> 0x1084a0bd8 TSP.PasteboardObject
+	3030 -> 0x10f0caa70 TSD.MediaStyleSetValueCommandArchive
+	5031 -> 0x10cc833d8 TSCH.ReferenceLineNonStyleArchive
+	249 -> 0x10b17fc20 TSK.OutgoingCommandQueue
+	624 -> 0x107e3cc08 TSA.GallerySelectionTransformer
+	3015 -> 0x10f0c9510 TSD.ShapeStyleArchive
 	6203 -> 0x0 null
-	5030 -> 0x10a38c818 TSCH.ReferenceLineStyleArchive
-	248 -> 0x10ab9d280 TSK.BlockDiffsAtCurrentRevisionCommand
-	636 -> 0x10866fe70 TSA.GalleryInfoInsertItemsCommandArchive
+	5030 -> 0x10cc833a0 TSCH.ReferenceLineStyleArchive
+	248 -> 0x10b17f690 TSK.BlockDiffsAtCurrentRevisionCommand
+	636 -> 0x107e3cad0 TSA.GalleryInfoInsertItemsCommandArchive
 	6215 -> 0x0 null
-	3027 -> 0x10c2d5d98 TSD.MediaOriginalSizeCommandArchive
-	623 -> 0x10866ff08 TSA.GalleryItem
-	2217 -> 0x10b6e9130 TSWP.TextCommentReplyCommandArchive
+	3027 -> 0x10f0cab50 TSD.MediaOriginalSizeCommandArchive
+	623 -> 0x107e3cb68 TSA.GalleryItem
+	2217 -> 0x10a61c350 TSWP.TextCommentReplyCommandArchive
 	6202 -> 0x0 null
-	5029 -> 0x10a38c778 TSCH.ChartSeriesNonStyleArchive
-	247 -> 0x10ab9d740 TSK.OperationStorageEntryArraySegment
-	635 -> 0x108670158 TSA.TitlePlacementCommandArchive
+	5029 -> 0x10cc83300 TSCH.ChartSeriesNonStyleArchive
+	247 -> 0x10b17fb50 TSK.OperationStorageEntryArraySegment
+	635 -> 0x107e3cdb8 TSA.TitlePlacementCommandArchive
 	6214 -> 0x0 null
-	3026 -> 0x10c2d5fd0 TSD.ImageReplaceCommandArchive
-	5028 -> 0x10a38c740 TSCH.ChartSeriesStyleArchive
-	246 -> 0x10ab9d720 TSK.OperationStorageEntryArray
+	3026 -> 0x10f0cad88 TSD.ImageReplaceCommandArchive
+	5028 -> 0x10cc832c8 TSCH.ChartSeriesStyleArchive
+	246 -> 0x10b17fb30 TSK.OperationStorageEntryArray
 	6200 -> 0x0 null
-	5027 -> 0x10a38c708 TSCH.ChartAxisNonStyleArchive
-	245 -> 0x10ab9d788 TSK.OperationStorage
-	632 -> 0x108670240 TSASOS.PropagateMasterChangeCommandArchive
+	5027 -> 0x10cc83290 TSCH.ChartAxisNonStyleArchive
+	245 -> 0x10b17fb98 TSK.OperationStorage
+	632 -> 0x107e3cea0 TSASOS.PropagateMasterChangeCommandArchive
 	6211 -> 0x0 null
 	3023 -> 0x0 null
-	619 -> 0x10866fdc8 TSA.RemoteDataChangeCommandArchive
-	6198 -> 0x107169680 TST.LayoutHintArchive
-	618 -> 0x10866fda8 TSA.StyleUpdatePropertyMapCommandArchive
-	3009 -> 0x10c2d4af0 TSD.ConnectionLineArchive
-	6197 -> 0x1071695d0 TST.EmptyExpressionNodeArchive
-	5024 -> 0x10a38c660 TSCH.LegendStyleArchive
-	242 -> 0x10c2d5020 TSD.PencilAnnotationStorageArchive
-	630 -> 0x10866fd68 TSA.InducedVerifyTransformHistoryWithServerCommandArchive
+	5024 -> 0x10cc831e8 TSCH.LegendStyleArchive
+	242 -> 0x10f0c9dd8 TSD.PencilAnnotationStorageArchive
+	630 -> 0x107e3c9c8 TSA.InducedVerifyTransformHistoryWithServerCommandArchive
 	6209 -> 0x0 null
-	3021 -> 0x10c2d5a40 TSD.InfoGeometryCommandArchive
-	223 -> 0x10ab9d1b0 TSK.GroupCommitCommandArchive
-	611 -> 0x108670320 TSASOS.VerifyObjectsWithServerCommandArchive
-	6190 -> 0x1071694d0 TST.DateNodeArchive
-	3002 -> 0x10c2d4940 TSD.DrawableArchive
-	260 -> 0x10ab9d8e0 TSK.CommandAssetChunkArchive
-	259 -> 0x10ab9c4b8 TSKSOS.FixCorruptedDataCommandArchive
-	613 -> 0x1086702c0 TSASOS.VerifyDocumentWithServerCommandArchive
-	3004 -> 0x10c2d4aa8 TSD.ShapeArchive
-	6192 -> 0x107169568 TST.DurationNodeArchive
-	625 -> 0x10866ffd8 TSA.GalleryItemSelection
-	6204 -> 0x1071696f8 TST.HiddenStateFormulaOwnerArchive
-	3016 -> 0x10c2d47e0 TSD.MediaStyleArchive
-	612 -> 0x10866fd08 TSA.InducedVerifyObjectsWithServerCommandArchive
-	2206 -> 0x10b6e8c50 TSWP.AnchorAttachmentCommandArchive
-	3003 -> 0x10c2d49b8 TSD.ContainerArchive
-	6191 -> 0x107169500 TST.ReferenceNodeArchive
-	256 -> 0x10ab9c5c8 TSK.CollaborationCommandHistoryArray
-	254 -> 0x10ab9c580 TSK.LocalCommandHistoryArraySegment
-	606 -> 0x10866fc30 TSA.UpdateCustomFormatCommandArchive
-	6185 -> 0x107169378 TST.StringNodeArchive
-	5012 -> 0x10a38fb78 TSCH.PreUFF.ChartAxisStyleArchive
-	230 -> 0x10ab9ca80 TSK.DocumentSupportCollaborationState
-	605 -> 0x10866fc00 TSA.AddCustomFormatCommandArchive
-	6184 -> 0x107169340 TST.NumberNodeArchive
-	5011 -> 0x10a38fcb0 TSCH.PreUFF.ChartSeriesStyleArchive
-	229 -> 0x10ab9c708 TSK.CollaborationCommandHistoryOriginatingCommandAcknowledgementObserver
-	617 -> 0x10866fcc8 TSA.ChangeDocumentLocaleCommandArchive
-	6196 -> 0x1071694b0 TST.FunctionEndNodeArchive
-	3008 -> 0x10c2d49f8 TSD.GroupArchive
-	626 -> 0x108670010 TSA.GalleryItemSelectionTransformer
-	6205 -> 0x10716a420 TST.CommandSetAutomaticDurationUnitsArchive
-	250 -> 0x10ab9d830 TSK.OutgoingCommandQueueSegment
-	604 -> 0x10866fbc0 TSA.ShortcutCommandArchive
-	6183 -> 0x107169318 TST.BooleanNodeArchive
-	5010 -> 0x10a38f968 TSCH.PreUFF.ChartStyleArchive
-	228 -> 0x10ab9c6e8 TSK.CollaborationCommandHistoryCoalescingGroupNode
-	616 -> 0x10866fca0 TSA.NeedsMediaCompatibilityUpgradeCommandArchive
-	6195 -> 0x107169460 TST.PrefixOperatorNodeArchive
-	3007 -> 0x10c2d4c48 TSD.MovieArchive
-	603 -> 0x10866fb60 TSA.ShortcutControllerArchive
-	6182 -> 0x1071692d8 TST.ExpressionNodeArchive
-	227 -> 0x10ab9c6b0 TSK.CollaborationCommandHistoryCoalescingGroup
-	602 -> 0x10866fb90 TSA.PropagatePresetCommandArchive
-	6181 -> 0x107169290 TST.TokenAttachmentArchive
-	226 -> 0x10ab9d470 TSK.CollaborationDocumentSessionState
-	614 -> 0x1086702e0 TSASOS.VerifyDrawableZOrdersWithServerCommandArchive
-	6193 -> 0x1071695a0 TST.ArgumentPlaceholderNodeArchive
-	3005 -> 0x10c2d4b30 TSD.ImageArchive
-	225 -> 0x10ab9d1f0 TSK.InducedCommandCollectionCommitCommandArchive
-	600 -> 0x10866fa28 TSA.DocumentArchive
-	6179 -> 0x107169c60 TST.FormulaEqualsTokenAttachmentArchive
-	224 -> 0x10ab9cbc8 TSK.InducedCommandCollectionArchive
-	5023 -> 0x10a38c628 TSCH.ChartNonStyleArchive
-	241 -> 0x10ab9d590 TSK.NativeContentDescription
-	5022 -> 0x10a38c5f0 TSCH.ChartStyleArchive
-	240 -> 0x10ab9d050 TSK.SelectionPathTransformerArchive
-	5020 -> 0x10a38bf38 TSCH.ChartStylePreset
-	238 -> 0x10ab9d258 TSK.CreateLocalStorageSnapshotCommandArchive
-	5017 -> 0x10a38fb58 TSCH.PreUFF.LegendNonStyleArchive
-	235 -> 0x10ab9d380 TSK.TransformerEntry
-	2013 -> 0x10b6e7548 TSWP.HighlightArchive
-	419 -> 0x105ed3650 TSS.ThemeReplaceStylePresetAndDisconnectStylesCommandArchive
-	12042 -> 0x105c40d70 TN.SheetSelectionTransformerArchive
-	5004 -> 0x10a38beb0 TSCH.ChartMediatorArchive
-	222 -> 0x10ab9ced0 TSK.CustomFormatListArchive
-	2011 -> 0x10b6e80d8 TSWP.ShapeInfoArchive
-	417 -> 0x105ed3618 TSS.ThemeMovePresetCommandArchive
-	12040 -> 0x105c400a0 TN.FormSelectionArchive
-	5002 -> 0x10a38f860 TSCH.PreUFF.ChartGridArchive
-	220 -> 0x10ab9cfe0 TSK.CommandSelectionBehaviorArchive
-	610 -> 0x0 null
-	6189 -> 0x107169480 TST.FunctionNodeArchive
-	5016 -> 0x10a38fc48 TSCH.PreUFF.ChartAxisNonStyleArchive
-	234 -> 0x10ab9d3b0 TSK.OutgoingCommandQueueItem
-	12054 -> 0x105c400e0 TN.FormTableChooserSelectionArchive
-	2010 -> 0x10b6e8200 TSWP.TSWPTOCPageNumberAttachmentArchive
-	416 -> 0x105ed3540 TSS.ThemeReplaceColorPresetCommandArchive
-	12039 -> 0x105c40c08 TN.CommandChartMediatorSetSeriesOrder
-	219 -> 0x10ab9d0b0 TSK.DocumentSelectionArchive
+	3021 -> 0x10f0ca7f8 TSD.InfoGeometryCommandArchive
+	223 -> 0x10b17f5c0 TSK.GroupCommitCommandArchive
+	611 -> 0x107e3cf80 TSASOS.VerifyObjectsWithServerCommandArchive
+	2205 -> 0x0 null
+	6190 -> 0x109846720 TST.DateNodeArchive
+	3002 -> 0x10f0c96d8 TSD.DrawableArchive
+	260 -> 0x10b17fcf0 TSK.CommandAssetChunkArchive
+	259 -> 0x10b17e938 TSKSOS.FixCorruptedDataCommandArchive
+	625 -> 0x107e3cc38 TSA.GalleryItemSelection
+	6204 -> 0x109846948 TST.HiddenStateFormulaOwnerArchive
+	3016 -> 0x10f0c9578 TSD.MediaStyleArchive
+	256 -> 0x10b17ea48 TSK.CollaborationCommandHistoryArray
+	254 -> 0x10b17ea00 TSK.LocalCommandHistoryArraySegment
+	606 -> 0x107e3c890 TSA.UpdateCustomFormatCommandArchive
+	6185 -> 0x1098465c8 TST.StringNodeArchive
+	5012 -> 0x10cc86858 TSCH.PreUFF.ChartAxisStyleArchive
+	230 -> 0x10b17ef00 TSK.DocumentSupportCollaborationState
+	618 -> 0x107e3ca08 TSA.StyleUpdatePropertyMapCommandArchive
+	6197 -> 0x109846820 TST.EmptyExpressionNodeArchive
+	3009 -> 0x10f0c9890 TSD.ConnectionLineArchive
+	605 -> 0x107e3c860 TSA.AddCustomFormatCommandArchive
+	6184 -> 0x109846590 TST.NumberNodeArchive
+	5011 -> 0x10cc86990 TSCH.PreUFF.ChartSeriesStyleArchive
+	229 -> 0x10b17eb88 TSK.CollaborationCommandHistoryOriginatingCommandAcknowledgementObserver
+	617 -> 0x107e3c928 TSA.ChangeDocumentLocaleCommandArchive
+	6196 -> 0x109846700 TST.FunctionEndNodeArchive
+	3008 -> 0x10f0c9790 TSD.GroupArchive
+	626 -> 0x107e3cc70 TSA.GalleryItemSelectionTransformer
+	6205 -> 0x1098477d0 TST.CommandSetAutomaticDurationUnitsArchive
+	250 -> 0x10b17fc40 TSK.OutgoingCommandQueueSegment
+	604 -> 0x107e3c820 TSA.ShortcutCommandArchive
+	6183 -> 0x109846568 TST.BooleanNodeArchive
+	5010 -> 0x10cc86648 TSCH.PreUFF.ChartStyleArchive
+	228 -> 0x10b17eb68 TSK.CollaborationCommandHistoryCoalescingGroupNode
+	616 -> 0x107e3c900 TSA.NeedsMediaCompatibilityUpgradeCommandArchive
+	2210 -> 0x0 null
+	6195 -> 0x1098466b0 TST.PrefixOperatorNodeArchive
+	3007 -> 0x10f0c99e8 TSD.MovieArchive
+	603 -> 0x107e3c7c0 TSA.ShortcutControllerArchive
+	6182 -> 0x109846528 TST.ExpressionNodeArchive
+	227 -> 0x10b17eb30 TSK.CollaborationCommandHistoryCoalescingGroup
+	602 -> 0x107e3c7f0 TSA.PropagatePresetCommandArchive
+	6181 -> 0x1098464e0 TST.TokenAttachmentArchive
+	226 -> 0x10b17f880 TSK.CollaborationDocumentSessionState
+	614 -> 0x107e3cf40 TSASOS.VerifyDrawableZOrdersWithServerCommandArchive
+	2208 -> 0x0 null
+	6193 -> 0x1098467f0 TST.ArgumentPlaceholderNodeArchive
+	3005 -> 0x10f0c98d0 TSD.ImageArchive
+	225 -> 0x10b17f600 TSK.InducedCommandCollectionCommitCommandArchive
+	613 -> 0x107e3cf20 TSASOS.VerifyDocumentWithServerCommandArchive
+	2207 -> 0x0 null
+	6192 -> 0x1098467b8 TST.DurationNodeArchive
+	3004 -> 0x10f0c9848 TSD.ShapeArchive
+	600 -> 0x107e3c688 TSA.DocumentArchive
+	6179 -> 0x109846fe0 TST.FormulaEqualsTokenAttachmentArchive
+	224 -> 0x10b17f048 TSK.InducedCommandCollectionArchive
+	612 -> 0x107e3c968 TSA.InducedVerifyObjectsWithServerCommandArchive
+	2206 -> 0x10a61be70 TSWP.AnchorAttachmentCommandArchive
+	6191 -> 0x109846750 TST.ReferenceNodeArchive
+	3003 -> 0x10f0c9750 TSD.ContainerArchive
+	5023 -> 0x10cc831b0 TSCH.ChartNonStyleArchive
+	241 -> 0x10b17f9a0 TSK.NativeContentDescription
+	5022 -> 0x10cc83178 TSCH.ChartStyleArchive
+	240 -> 0x10b17f460 TSK.SelectionPathTransformerArchive
+	5020 -> 0x10cc82ab0 TSCH.ChartStylePreset
+	238 -> 0x10b17f668 TSK.CreateLocalStorageSnapshotCommandArchive
+	2118 -> 0x10a61bda8 TSWP.ModifyRubyTextCommandArchive
+	6103 -> 0x109847a98 TST.CommandRemoveColumnsOrRowsArchive
+	12058 -> 0x105af50a0 TN.FormSheetSelectionTransformerArchive
+	2117 -> 0x0 null
+	6102 -> 0x109847960 TST.CommandInsertColumnsOrRowsArchive
+	12057 -> 0x105af5138 TN.FormViewerSelectionTransformerArchive
+	2116 -> 0x10a61bd68 TSWP.ApplyRubyTextCommandArchive
+	6101 -> 0x109847720 TST.CommandDeleteCellsArchive
+	12056 -> 0x105af5108 TN.FormBuilderSelectionTransformerArchive
+	5017 -> 0x10cc86838 TSCH.PreUFF.LegendNonStyleArchive
+	235 -> 0x10b17f790 TSK.TransformerEntry
+	2115 -> 0x0 null
+	6100 -> 0x109847518 TST.TableCommandArchive
+	12055 -> 0x105af50f0 TN.FormTableChooserSelectionTransformerArchive
+	5016 -> 0x10cc86928 TSCH.PreUFF.ChartAxisNonStyleArchive
+	234 -> 0x10b17f7c0 TSK.OutgoingCommandQueueItem
+	12054 -> 0x105af43f8 TN.FormTableChooserSelectionArchive
 	609 -> 0x0 null
-	6188 -> 0x107169418 TST.OperatorNodeArchive
-	5015 -> 0x10a38ff58 TSCH.PreUFF.ChartSeriesNonStyleArchive
-	233 -> 0x10ab9cc48 TSK.FinalCommandPairArchive
-	12053 -> 0x105c400c0 TN.FormBuilderSelectionArchive
-	12050 -> 0x105c40288 TN.SheetStyleArchive
-	2006 -> 0x10b6e8230 TSWP.UIGraphicalAttachment
-	412 -> 0x105ed34c0 TSS.StyleUpdatePropertyMapCommandArchive
-	12035 -> 0x105c40b08 TN.CommandSetStartPageNumberArchive
-	215 -> 0x10ab9cfa8 TSK.SetAnnotationAuthorColorCommandArchive
-	12049 -> 0x105c40870 TN.CommandSetSheetShouldPrintCommentsArchive
-	12033 -> 0x105c40aa8 TN.CommandSetPageOrderArchive
-	213 -> 0x10ab9cf78 TSK.AnnotationAuthorStorageArchive
-	12047 -> 0x105c40d98 TN.CanvasSelectionTransformerArchive
-	12048 -> 0x105c408a0 TN.CommandSetSheetDirectionArchive
-	12032 -> 0x105c40a70 TN.CommandSetHeaderFooterInsetsArchive
-	212 -> 0x10ab9cf18 TSK.AnnotationAuthorArchive
-	12046 -> 0x105c40318 TN.PasteboardNativeStorageArchive
-	12031 -> 0x105c40a08 TN.CommandSetPrinterMarginsArchive
-	211 -> 0x10ab9caa8 TSK.DocumentSupportArchive
-	12045 -> 0x105c404c0 TNSOS.InducedVerifyDrawableZOrdersWithServerCommandArchive
-	12030 -> 0x105c40998 TN.CommandSetDocumentPaperSize
-	210 -> 0x10ab9cb20 TSK.ViewStateArchive
-	12044 -> 0x105c40480 TNSOS.InducedVerifyDocumentWithServerCommandArchive
-	12043 -> 0x105c40e08 TN.CommandInducedSheetChangeArchive
-	221 -> 0x10ab9d190 TSK.NullCommandArchive
-	12041 -> 0x105c40d50 TN.DocumentSelectionTransformerArchive
-	401 -> 0x105ed3330 TSS.StylesheetArchive
+	2203 -> 0x0 null
+	6188 -> 0x109846668 TST.OperatorNodeArchive
+	5015 -> 0x10cc86c38 TSCH.PreUFF.ChartSeriesNonStyleArchive
+	233 -> 0x10b17f0c8 TSK.FinalCommandPairArchive
+	12053 -> 0x105af43d8 TN.FormBuilderSelectionArchive
+	12050 -> 0x105af45a0 TN.SheetStyleArchive
+	2006 -> 0x10a61b440 TSWP.UIGraphicalAttachment
+	412 -> 0x109b38630 TSS.StyleUpdatePropertyMapCommandArchive
+	12035 -> 0x105af4e10 TN.CommandSetStartPageNumberArchive
+	215 -> 0x10b17f3b8 TSK.SetAnnotationAuthorColorCommandArchive
+	12049 -> 0x105af4b68 TN.CommandSetSheetShouldPrintCommentsArchive
+	12033 -> 0x105af4db0 TN.CommandSetPageOrderArchive
+	213 -> 0x10b17f388 TSK.AnnotationAuthorStorageArchive
+	12047 -> 0x105af50c8 TN.CanvasSelectionTransformerArchive
+	12048 -> 0x105af4b98 TN.CommandSetSheetDirectionArchive
+	12032 -> 0x105af4d78 TN.CommandSetHeaderFooterInsetsArchive
+	212 -> 0x10b17f328 TSK.AnnotationAuthorArchive
+	12046 -> 0x105af4630 TN.PasteboardNativeStorageArchive
+	12031 -> 0x105af4d10 TN.CommandSetPrinterMarginsArchive
+	211 -> 0x10b17ef28 TSK.DocumentSupportArchive
+	12045 -> 0x105af47d0 TNSOS.InducedVerifyDrawableZOrdersWithServerCommandArchive
+	12030 -> 0x105af4c90 TN.CommandSetDocumentPaperSize
+	210 -> 0x10b17efa0 TSK.ViewStateArchive
+	12044 -> 0x105af4790 TNSOS.InducedVerifyDocumentWithServerCommandArchive
+	12043 -> 0x105af51b0 TN.CommandInducedSheetChangeArchive
+	2013 -> 0x10a61a758 TSWP.HighlightArchive
+	419 -> 0x109b387c0 TSS.ThemeReplaceStylePresetAndDisconnectStylesCommandArchive
+	5004 -> 0x10cc82a28 TSCH.ChartMediatorArchive
+	222 -> 0x10b17f2e0 TSK.CustomFormatListArchive
+	12042 -> 0x105af5078 TN.SheetSelectionTransformerArchive
+	221 -> 0x10b17f5a0 TSK.NullCommandArchive
+	12041 -> 0x105af5058 TN.DocumentSelectionTransformerArchive
+	2011 -> 0x10a61b2e8 TSWP.ShapeInfoArchive
+	417 -> 0x109b38788 TSS.ThemeMovePresetCommandArchive
+	5002 -> 0x10cc86540 TSCH.PreUFF.ChartGridArchive
+	220 -> 0x10b17f3f0 TSK.CommandSelectionBehaviorArchive
+	12040 -> 0x105af43b8 TN.FormSelectionArchive
+	401 -> 0x109b38490 TSS.StylesheetArchive
 	12024 -> 0x0 null
+	6159 -> 0x109848aa0 TST.CommandSetGroupSortOrderArchive
 	204 -> 0x0 null
-	2009 -> 0x10b6e81d8 TSWP.TextualAttachmentArchive
-	415 -> 0x105ed35c8 TSS.ThemeRemoveStylePresetCommandArchive
-	12038 -> 0x105c40c80 TN.CommandChartMediatorSetFormula
-	5000 -> 0x10a38f6a0 TSCH.PreUFF.ChartInfoArchive
-	218 -> 0x10ab9c640 TSK.CollaborationCommandHistory
+	2009 -> 0x10a61b3e8 TSWP.TextualAttachmentArchive
+	415 -> 0x109b38738 TSS.ThemeRemoveStylePresetCommandArchive
+	5000 -> 0x10cc86380 TSCH.PreUFF.ChartInfoArchive
+	218 -> 0x10b17eac0 TSK.CollaborationCommandHistory
+	12038 -> 0x105af4f88 TN.CommandChartMediatorSetFormula
 	608 -> 0x0 null
-	6187 -> 0x1071693f8 TST.ListNodeArchive
-	5014 -> 0x10a38fa68 TSCH.PreUFF.ChartNonStyleArchive
-	232 -> 0x10ab9d1d0 TSK.UpgradeDocPostProcessingCommandArchive
-	12052 -> 0x105c40a40 TN.CommandSetPrintBackgroundsArchive
-	6357 -> 0x107169dd0 TST.ChangePropagationMapWrapper
-	402 -> 0x105ed33c0 TSS.ThemeArchive
+	2202 -> 0x0 null
+	6187 -> 0x109846648 TST.ListNodeArchive
+	5014 -> 0x10cc86748 TSCH.PreUFF.ChartNonStyleArchive
+	232 -> 0x10b17f5e0 TSK.UpgradeDocPostProcessingCommandArchive
+	12052 -> 0x105af4d48 TN.CommandSetPrintBackgroundsArchive
+	6357 -> 0x109847160 TST.ChangePropagationMapWrapper
+	402 -> 0x109b38530 TSS.ThemeArchive
 	12025 -> 0x0 null
-	205 -> 0x10ab9c4f8 TSK.TreeNode
-	3 -> 0x105c402b8 TN.FormBasedSheetArchive
-	400 -> 0x105ed3230 TSS.StyleArchive
+	205 -> 0x10b17e978 TSK.TreeNode
+	6371 -> 0x109849038 TST.CommandPivotSetPivotRulesArchive
+	2010 -> 0x10a61b410 TSWP.TSWPTOCPageNumberAttachmentArchive
+	416 -> 0x109b386b0 TSS.ThemeReplaceColorPresetCommandArchive
+	219 -> 0x10b17f4c0 TSK.DocumentSelectionArchive
+	12039 -> 0x105af4f10 TN.CommandChartMediatorSetSeriesOrder
+	400 -> 0x109b38390 TSS.StyleArchive
 	12023 -> 0x0 null
-	6158 -> 0x10716a2d8 TST.CommandApplyConcurrentCellMapArchive
-	203 -> 0x10ab9cc80 TSK.CommandContainerArchive
-	2008 -> 0x10b6e8298 TSWP.FootnoteReferenceAttachmentArchive
-	414 -> 0x105ed3580 TSS.ThemeAddStylePresetCommandArchive
-	12037 -> 0x105c40bd8 TN.CommandChartMediatorSetGridDirection
+	6158 -> 0x109847688 TST.CommandApplyConcurrentCellMapArchive
+	203 -> 0x10b17f100 TSK.CommandContainerArchive
+	2008 -> 0x10a61b4a8 TSWP.FootnoteReferenceAttachmentArchive
+	414 -> 0x109b386f0 TSS.ThemeAddStylePresetCommandArchive
+	12037 -> 0x105af4ee0 TN.CommandChartMediatorSetGridDirection
 	12022 -> 0x0 null
-	6157 -> 0x10716b890 TST.CommandCategoryWillChangeGroupValue
-	202 -> 0x10ab9cb80 TSK.CommandGroupArchive
-	2007 -> 0x10b6e81d8 TSWP.TextualAttachmentArchive
-	413 -> 0x105ed3508 TSS.ThemeReplacePresetCommandArchive
-	12036 -> 0x105c40440 TN.ChartSelectionArchive
+	6157 -> 0x109848d38 TST.CommandCategoryWillChangeGroupValue
+	202 -> 0x10b17f000 TSK.CommandGroupArchive
+	2007 -> 0x10a61b3e8 TSWP.TextualAttachmentArchive
+	413 -> 0x109b38678 TSS.ThemeReplacePresetCommandArchive
+	12036 -> 0x105af4758 TN.ChartSelectionArchive
 	12021 -> 0x0 null
-	6156 -> 0x10716a968 TST.CommandSetPencilAnnotationsArchive
-	201 -> 0x10ab9c5a0 TSK.LocalCommandHistory
+	6156 -> 0x109847d20 TST.CommandSetPencilAnnotationsArchive
+	201 -> 0x10b17ea20 TSK.LocalCommandHistory
 	12020 -> 0x0 null
-	200 -> 0x10ab9c730 TSK.DocumentArchive
-	12034 -> 0x105c40ad8 TN.CommandSetUsingStartPageNumberArchive
-	12028 -> 0x105c40078 TN.SheetSelectionArchive
+	200 -> 0x10b17ebb0 TSK.DocumentArchive
+	12034 -> 0x105af4de0 TN.CommandSetUsingStartPageNumberArchive
+	12028 -> 0x105af4390 TN.SheetSelectionArchive
 	12027 -> 0x0 null
-	12026 -> 0x105c3ff68 TN.UIStateArchive
-	2 -> 0x105c401b8 TN.SheetArchive
+	12026 -> 0x105af4280 TN.UIStateArchive
+	2 -> 0x105af44d0 TN.SheetArchive
 	12019 -> 0x0 null
-	1 -> 0x105c40118 TN.DocumentArchive
-	12018 -> 0x105c40960 TN.CommandSetContentScaleArchive
-	12017 -> 0x105c408d0 TN.CommandSetPageOrientationArchive
+	12018 -> 0x105af4c58 TN.CommandSetContentScaleArchive
+	12017 -> 0x105af4bc8 TN.CommandSetPageOrientationArchive
 	12016 -> 0x0 null
-	12015 -> 0x105c40518 TN.CommandFormChooseTargetTableArchive
+	12015 -> 0x105af4828 TN.CommandFormChooseTargetTableArchive
 	12029 -> 0x0 null
 	11199 -> 0x0 null
-	12014 -> 0x105c40b90 TN.CommandChartMediatorSetEditingState
-	12012 -> 0x105c40618 TN.CommandSheetRemoveDrawablesArchive
+	12014 -> 0x105af4e98 TN.CommandChartMediatorSetEditingState
+	12012 -> 0x105af4928 TN.CommandSheetRemoveDrawablesArchive
 	6263 -> 0x0 null
-	6275 -> 0x10716a218 TST.CommandApplyCellDiffMapArchive
-	3087 -> 0x10c2d63d8 TSD.FreehandDrawingOpacityCommandArchive
-	12013 -> 0x105c406b8 TN.CommandSheetMoveDrawableZOrderArchive
+	6275 -> 0x1098475c8 TST.CommandApplyCellDiffMapArchive
+	3087 -> 0x10f0cb1a8 TSD.FreehandDrawingOpacityCommandArchive
+	12013 -> 0x105af49b0 TN.CommandSheetMoveDrawableZOrderArchive
 	12011 -> 0x0 null
-	3074 -> 0x10c2d6360 TSD.PathSelectionTransformerArchive
-	6262 -> 0x10716acb8 TST.CommandAddTableStylePresetArchive
+	3074 -> 0x10f0cb130 TSD.PathSelectionTransformerArchive
+	6262 -> 0x109848070 TST.CommandAddTableStylePresetArchive
 	6274 -> 0x0 null
-	3086 -> 0x10c2d4fe0 TSD.PencilAnnotationArchive
+	3086 -> 0x10f0c9d98 TSD.PencilAnnotationArchive
 	12010 -> 0x0 null
+	3073 -> 0x10f0cb148 TSD.ShapeSelectionTransformerArchive
+	6261 -> 0x0 null
+	3072 -> 0x10f0cb168 TSD.GroupSelectionTransformerArchive
+	6260 -> 0x0 null
 	6272 -> 0x0 null
-	3084 -> 0x10c2d5870 TSD.ContainerRemoveDrawablesCommandArchive
-	12009 -> 0x105c402e0 TN.ThemeArchive
-	6271 -> 0x107169cb8 TST.FormulaSelectionArchive
-	3083 -> 0x10c2d4d30 TSD.DrawableContentDescription
-	12008 -> 0x105c40800 TN.CommandDocumentReorderSheetArchive
-	12006 -> 0x105c40408 TN.ChartMediatorArchive
+	3084 -> 0x10f0ca628 TSD.ContainerRemoveDrawablesCommandArchive
+	12009 -> 0x105af45f8 TN.ThemeArchive
+	3070 -> 0x10f0c9d68 TSD.ReplaceAnnotationAuthorCommandArchive
+	6258 -> 0x109848a70 TST.CommandSetSortOrderArchive
+	3071 -> 0x10f0cb0d0 TSD.DrawableSelectionTransformerArchive
+	6259 -> 0x0 null
+	6271 -> 0x109847038 TST.FormulaSelectionArchive
+	3083 -> 0x10f0c9ae8 TSD.DrawableContentDescription
+	12008 -> 0x105af4af8 TN.CommandDocumentReorderSheetArchive
+	12006 -> 0x105af4720 TN.ChartMediatorArchive
 	6257 -> 0x0 null
-	12005 -> 0x105c40838 TN.CommandSetSheetNameArchive
-	6268 -> 0x10716afd8 TST.CommandMoveColumnsOrRowsArchive
-	3080 -> 0x10c2d5dd0 TSD.MediaInfoGeometryCommandArchive
-	12004 -> 0x105c40788 TN.CommandDocumentRemoveSheetArchive
-	12003 -> 0x105c406f8 TN.CommandDocumentInsertSheetArchive
-	607 -> 0x10866fc68 TSA.ReplaceCustomFormatCommandArchive
-	6186 -> 0x1071693d0 TST.ArrayNodeArchive
-	5013 -> 0x10a38fb18 TSCH.PreUFF.LegendStyleArchive
-	231 -> 0x10ab9d230 TSK.ChangeDocumentPackageTypeCommandArchive
-	12051 -> 0x105c40ce0 TN.CommandSheetSetBackgroundFillArchive
-	12002 -> 0x105c40560 TN.CommandSheetInsertDrawablesArchive
-	11016 -> 0x1093e8080 TSP.LargeNumberArraySegment
+	12005 -> 0x105af4b30 TN.CommandSetSheetNameArchive
+	6268 -> 0x109848390 TST.CommandMoveColumnsOrRowsArchive
+	3080 -> 0x10f0cab88 TSD.MediaInfoGeometryCommandArchive
+	12004 -> 0x105af4a80 TN.CommandDocumentRemoveSheetArchive
+	12003 -> 0x105af49f0 TN.CommandDocumentInsertSheetArchive
+	607 -> 0x107e3c8c8 TSA.ReplaceCustomFormatCommandArchive
+	2201 -> 0x0 null
+	6186 -> 0x109846620 TST.ArrayNodeArchive
+	5013 -> 0x10cc867f8 TSCH.PreUFF.LegendStyleArchive
+	231 -> 0x10b17f640 TSK.ChangeDocumentPackageTypeCommandArchive
+	12051 -> 0x105af4fe8 TN.CommandSheetSetBackgroundFillArchive
+	12002 -> 0x105af4870 TN.CommandSheetInsertDrawablesArchive
+	11016 -> 0x1084a0d40 TSP.LargeNumberArraySegment
  }
  _descriptorToMessageTypeMap = {
-	0x13c03f9f0 TSASOS.PropagateMasterChangeCommandArchive -> 632
-	0x13c03fa80 TSASOS.CommandReapplyMasterArchive -> 631
-	0x13bba2a70 TSA.GalleryInfoSetValueCommandArchive -> 627
-	0x13bba29e0 TSA.RemoteDataChangeCommandArchive -> 619
-	0x13bba27a0 TSA.ChangeDocumentLocaleCommandArchive -> 617
-	0x13bba2710 TSA.NeedsMediaCompatibilityUpgradeCommandArchive -> 616
-	0x13c03f960 TSASOS.InducedVerifyDrawableZOrdersWithServerCommandArchive -> 615
-	0x13c03fba0 TSASOS.VerifyDrawableZOrdersWithServerCommandArchive -> 614
-	0x13c03fb10 TSASOS.VerifyDocumentWithServerCommandArchive -> 613
-	0x13c03fc30 TSASOS.VerifyObjectsWithServerCommandArchive -> 611
-	0x13bba2680 TSA.ReplaceCustomFormatCommandArchive -> 607
-	0x13bba25f0 TSA.UpdateCustomFormatCommandArchive -> 606
-	0x13bba24d0 TSA.ShortcutCommandArchive -> 604
-	0x13bba2440 TSA.PropagatePresetCommandArchive -> 602
-	0x13bb7ef20 TSWP.DropCapStyleArchive -> 10024
-	0x13bb7ea10 TSWP.TateChuYokoFieldArchive -> 10023
-	0x13bb9f890 TSWP.ShapeContentDescription -> 10022
-	0x13bb9f6e0 TSWP.SelectionTransformerArchive -> 10021
-	0x13bb9f800 TSWP.ShapeSelectionTransformerArchive -> 10020
-	0x13bb7ebc0 TSWP.SectionPlaceholderArchive -> 10011
-	0x13bb9f770 TSWP.PencilAnnotationSelectionTransformerArchive -> 2412
-	0x13bb7ed70 TSWP.FlowInfoContainerArchive -> 2411
-	0x13bb7ece0 TSWP.FlowInfoArchive -> 2410
-	0x13bb7ec50 TSWP.HyperlinkSelectionArchive -> 2409
-	0x13bb9f650 TSWP.ShapeStyleSetValueCommandArchive -> 2408
-	0x13bb9e720 TSWP.StorageActionCommandArchive -> 2407
-	0x13bb9f5c0 TSWP.StyleUpdatePropertyMapCommandArchive -> 2406
-	0x13bb9f530 TSWP.StyleReorderCommandArchive -> 2405
-	0x13bb9f4a0 TSWP.StyleDeleteCommandArchive -> 2404
-	0x13bb9f380 TSWP.StyleRenameCommandArchive -> 2402
-	0x13bb9f2f0 TSWP.StyleCreateCommandArchive -> 2401
-	0x13bb9f260 TSWP.StyleBaseCommandArchive -> 2400
-	0x13bb7e110 TSWP.TOCAttachmentArchive -> 2241
-	0x13bb7dd20 TSWP.TOCInfoArchive -> 2240
-	0x13bb9f1d0 TSWP.ShapeApplyPresetCommandArchive -> 2231
-	0x13bb9ef90 TSWP.AnchorAttachmentCommandArchive -> 2206
-	0x13bb9fbf0 TSWP.TextCommentReplyCommandArchive -> 2217
-	0x13bb9fd10 TSWP.EquationInfoGeometryCommandArchive -> 2128
-	0x13bb9fc80 TSWP.ContainedObjectsCommandArchive -> 2127
-	0x13bb9fb60 TSWP.RemoveFlowInfoCommandArchive -> 2126
-	0x13bb9fad0 TSWP.AddFlowInfoCommandArchive -> 2125
-	0x13bb9fa40 TSWP.UpdateFlowInfoCommandArchive -> 2124
-	0x13bb9f9b0 TSWP.SetObjectPropertiesCommandArchive -> 2123
-	0x13bb9ef00 TSWP.ModifyTOCSettingsPresetForThemeCommandArchive -> 2122
-	0x13bb9ee70 TSWP.ModifyTOCSettingsForTOCInfoCommandArchive -> 2121
-	0x13bb9ede0 TSWP.ModifyTOCSettingsBaseCommandArchive -> 2120
-	0x13bb9ec30 TSWP.UpdateDateTimeFieldCommandArchive -> 2119
-	0x13bb9ed50 TSWP.ModifyRubyTextCommandArchive -> 2118
-	0x13bb9ecc0 TSWP.ApplyRubyTextCommandArchive -> 2116
-	0x13bb9eba0 TSWP.ApplyPlaceholderTextCommandArchive -> 2107
-	0x13bb9e690 TSWP.TextCommandArchive -> 2101
-	0x13bb7eb30 TSWP.ChangeSessionArchive -> 2062
-	0x13bb7eaa0 TSWP.ChangeArchive -> 2060
-	0x13bb8f230 TSWPSOS.StyleDiffArchive -> 2053
-	0x13bba3010 TSA.GalleryItemSetValueCommand -> 629
-	0x13bb7da50 TSWP.TOCEntryInstanceArchive -> 2052
-	0x13bb7d9c0 TSWP.TOCSettingsArchive -> 2051
-	0x13bba2950 TSA.StyleUpdatePropertyMapCommandArchive -> 618
-	0x13bb7d390 TSWP.TextStylePresetArchive -> 2050
-	0x13bb7e980 TSWP.RubyFieldArchive -> 2042
-	0x13bb7e8f0 TSWP.TOCSmartFieldArchive -> 2041
-	0x13bb7e500 TSWP.BibliographySmartFieldArchive -> 2040
-	0x13bb7e860 TSWP.MergeSmartFieldArchive -> 2036
-	0x13bba2cb0 TSA.GalleryItem -> 623
-	0x13bb7d6f0 TSWP.ShapeStyleArchive -> 2025
-	0x13bba2b90 TSA.GalleryInfoRemoveItemsCommandArchive -> 637
-	0x13bb7d5d0 TSWP.ColumnStyleArchive -> 2024
-	0x13bba28c0 TSA.InducedVerifyTransformHistoryWithServerCommandArchive -> 630
-	0x13bb7d300 TSWP.ListStyleArchive -> 2023
-	0x13bba2830 TSA.InducedVerifyObjectsWithServerCommandArchive -> 612
-	0x13bb7d270 TSWP.ParagraphStyleArchive -> 2022
-	0x13bba2560 TSA.AddCustomFormatCommandArchive -> 605
-	0x13bb7cfa0 TSWP.CharacterStyleArchive -> 2021
-	0x13bb7de40 TSWP.EquationInfoArchive -> 2015
-	0x13bb7e1a0 TSWP.FootnoteReferenceAttachmentArchive -> 2008
-	0x13bb715b0 TSCH.CommandReplaceImageDataArchive -> 5156
-	0x13bb71640 TSCH.CommandInducedReplaceChartGrid -> 5155
-	0x13bb71520 TSCH.CommandPasteStyleArchive -> 5154
-	0x13bb71ac0 TSCH.CDESelectionTransformerArchive -> 5151
-	0x13bb71910 TSCH.ChartRefLineSubselectionTransformerHelperArchive -> 5150
-	0x13bb71880 TSCH.ChartSubselectionTransformerHelperArchive -> 5149
-	0x13bb717f0 TSCH.ChartDrawableSelectionTransformerArchive -> 5148
-	0x13bb71a30 TSCH.ChartSubselectionTransformerArchive -> 5147
-	0x13bb71760 TSCH.ChartTextSelectionTransformerArchive -> 5146
-	0x13bb70a70 TSCH.CommandDeleteGridRowsArchive -> 5143
-	0x13bb70b00 TSCH.CommandDeleteGridColumnsArchive -> 5142
-	0x13bb71490 TSCH.CommandDeleteReferenceLineArchive -> 5141
-	0x13bb69f00 TSCH.StylePasteboardDataArchive -> 5129
-	0x13bb71130 TSCH.ChartCommandArchive -> 5126
-	0x13bb71010 TSCH.CommandChartApplyPreset -> 5125
-	0x13bb70ef0 TSCH.CommandSetPieWedgeExplosion -> 5122
-	0x13bb709e0 TSCH.CommandMoveGridColumnsArchive -> 5119
-	0x13bb708c0 TSCH.CommandAddGridColumnsArchive -> 5116
-	0x13bb70830 TSCH.CommandAddGridRowsArchive -> 5115
-	0x13c84ae60 TST.DurationNodeArchive -> 6192
-	0x13bb70290 TSCH.CommandSetChartTypeArchive -> 5103
-	0x13bb473a0 TSCH.PreUFF.ChartAxisNonStyleArchive -> 5016
-	0x13bb474c0 TSCH.PreUFF.ChartSeriesNonStyleArchive -> 5015
-	0x13bb47430 TSCH.PreUFF.ChartSeriesStyleArchive -> 5011
-	0x13b0f8a00 TSCE.RangePrecedentsTileArchive -> 4010
-	0x13b0f8e80 TSCE.FormulaOwnerDependenciesArchive -> 4008
-	0x13b0f9390 TSCE.RemoteDataStoreArchive -> 4007
-	0x11b03c9b0 TST.CommandApplyCellMapArchive -> 6282
-	0x13b0fac50 TSCE.ReferenceTrackerArchive -> 4004
-	0x13b0f9540 TSCE.NamedReferenceManagerArchive -> 4003
-	0x11b03c800 TST.TableCommandArchive -> 6100
-	0x13b0faaa0 TSCE.TrackedReferencesRewriteCommandArchive -> 4002
-	0x13b0f9780 TSCE.CalculationEngineArchive -> 4000
-	0x13c849900 TST.CellDiffArray -> 6367
-	0x11b03e4b0 TST.CommandSetRangeControlMinMaxIncArchive -> 6360
-	0x11b03fce0 TST.StrokeSelectionTransformerArchive -> 6364
-	0x11b03fbc0 TST.StockCellSelectionTransformerArchive -> 6359
-	0x13b0f8460 TSCE.CellRecordTileArchive -> 4009
-	0x13bb7ca00 TSWP.SelectionArchive -> 2002
-	0x11b03fb30 TST.ControlCellSelectionTransformerArchive -> 6355
-	0x13bba2200 TSA.DocumentArchive -> 600
-	0x11b03fd70 TST.RowColumnSelectionTransformerArchive -> 6354
-	0x11b03fc50 TST.RegionSelectionTransformerArchive -> 6353
-	0x11b03faa0 TST.TableNameSelectionTransformerArchive -> 6352
-	0x11b03fa10 TST.TableSubSelectionTransformerBaseArchive -> 6351
-	0x11b03f980 TST.WPSelectionTransformerArchive -> 6358
-	0x11b03f8f0 TST.IdempotentSelectionTransformerArchive -> 6350
-	0x13bb70950 TSCH.CommandMoveGridRowsArchive -> 5118
-	0x13c84b520 TST.PencilAnnotationArchive -> 6363
-	0x13c84bb50 TST.FormulaSelectionArchive -> 6271
-	0x13b0fab30 TSCE.TrackedReferenceArchive -> 4005
-	0x11b03c890 TST.CommandApplyCellContentsArchive -> 6265
-	0x11b03eff0 TST.CommandSetFilterSetTypeArchive -> 6250
-	0x13bb712e0 TSCH.CommandInvalidateWPCaches -> 5132
-	0x13c84beb0 TST.CategoryOrderArchive -> 6318
-	0x13bb71250 TSCH.CommandReplaceThemePresetArchive -> 5131
-	0x13c84be20 TST.SummaryCellVendorArchive -> 6317
-	0x13c849120 TST.ColumnRowUIDMapArchive -> 6267
-	0x13c84a290 TST.FilterSetArchive -> 6220
-	0x13bb70dd0 TSCH.CommandSetMultiDataSetIndexArchive -> 5130
-	0x13c84b9a0 TST.RichTextPayloadArchive -> 6218
-	0x13bb70710 TSCH.CommandSetSeriesNameArchive -> 5104
-	0x13c84b2e0 TST.HiddenStateFormulaOwnerArchive -> 6204
-	0x13bb70680 TSCH.CommandApplyFillSetArchive -> 5138
-	0x13c84b250 TST.CompletionTokenAttachmentArchive -> 6199
-	0x13bb705f0 TSCH.CommandSetFontFamilyArchive -> 5137
-	0x13c84b1c0 TST.LayoutHintArchive -> 6198
-	0x13c84af80 TST.EmptyExpressionNodeArchive -> 6197
-	0x13c8493f0 TST.MergeRegionMapArchive -> 6144
-	0x13c84a8c0 TST.IdentifierNodeArchive -> 6235
-	0x13c84aef0 TST.ArgumentPlaceholderNodeArchive -> 6193
-	0x13c84add0 TST.ReferenceNodeArchive -> 6191
-	0x13c84ad40 TST.DateNodeArchive -> 6190
-	0x13c82ec70 TSK.CreateLocalStorageSnapshotCommandArchive -> 238
-	0x13bb69d50 TSCH.ChartStylePreset -> 5020
-	0x13c84acb0 TST.FunctionEndNodeArchive -> 6196
-	0x13c84ac20 TST.FunctionNodeArchive -> 6189
-	0x13bb69c30 TSCH.ChartMediatorArchive -> 5004
-	0x13c84ab90 TST.PrefixOperatorNodeArchive -> 6195
-	0x13c84ab00 TST.PostfixOperatorNodeArchive -> 6194
-	0x13c84aa70 TST.OperatorNodeArchive -> 6188
-	0x13bb704d0 TSCH.CommandMutatePropertiesArchive -> 5135
-	0x13c84b0a0 TST.InNodeArchive -> 6299
-	0x13bb70560 TSCH.CommandScaleAllTextArchive -> 5136
-	0x13c84b130 TST.VariableNodeArchive -> 6298
-	0x13bb70440 TSCH.CommandStyleSwapArchive -> 5123
-	0x13c84b010 TST.LetNodeArchive -> 6297
-	0x13c84a9e0 TST.ListNodeArchive -> 6187
-	0x13c84a950 TST.ArrayNodeArchive -> 6186
-	0x13c84a830 TST.StringNodeArchive -> 6185
-	0x13c84a7a0 TST.NumberNodeArchive -> 6184
-	0x13c84a710 TST.BooleanNodeArchive -> 6183
-	0x13c84a680 TST.ExpressionNodeArchive -> 6182
-	0x13bb69600 TSCH.ChartDrawableArchive -> 5021
-	0x13c84a560 TST.TokenAttachmentArchive -> 6181
-	0x11b03ca40 TST.CommandApplyConcurrentCellMapArchive -> 6158
-	0x11b03f860 TST.CommandCategoryWillChangeGroupValue -> 6157
-	0x13bba23b0 TSA.ShortcutControllerArchive -> 603
-	0x13bb7cdf0 TSWP.PencilAnnotationArchive -> 2016
-	0x11b03ff20 TST.CommandRewritePencilAnnotationFormulasArchive -> 6362
-	0x13bba2290 TSA.FunctionBrowserStateArchive -> 601
-	0x13bb7ccd0 TSWP.StorageArchive -> 2001
-	0x11b03fe00 TST.CommandCategoryMoveRowsArchive -> 6153
-	0x11b03f7d0 TST.CommandCategorySetLabelRowVisibility -> 6361
-	0x11b03f740 TST.CommandCategoryChangeSummaryAggregateType -> 6150
-	0x11b03f620 TST.CommandSetStructuredTextImportRecordArchive -> 6314
-	0x13bb711c0 TSCH.CommandReplaceGridValuesArchive -> 5127
-	0x13c84bd90 TST.ChangePropagationMapWrapper -> 6357
-	0x13c844f80 TSD.InsertCaptionOrTitleCommandArchive -> 3095
-	0x13b0f7ec0 TSCE.ReferencesToDirtyArchive -> 4011
-	0x11b03f590 TST.CommandTransposeTableArchive -> 6287
-	0x11b03eb70 TST.CommandUnmergeArchive -> 6281
-	0x11b03eae0 TST.CommandInverseMergeArchive -> 6300
-	0x11b03ea50 TST.CommandMergeArchive -> 6280
-	0x11b03f230 TST.CommandSetStorageLanguageArchive -> 6278
-	0x11b03f470 TST.CommandSetFilterSetArchive -> 6276
-	0x11b03f3e0 TST.CommandRewriteSortOrderForRewriteSpecArchive -> 6294
-	0x11b03f2c0 TST.CommandSetSortOrderArchive -> 6258
-	0x11b03f1a0 TST.CommandJustForNotifyingArchive -> 6256
-	0x11b03f080 TST.CommandSetTextStyleArchive -> 6255
-	0x11b03ef60 TST.CommandSetFormulaTokenizationArchive -> 6246
-	0x11b03eed0 TST.CommandApplyCellCommentArchive -> 6244
-	0x11b03ee40 TST.TableCommandSelectionBehaviorArchive -> 6239
-	0x11b03df10 TST.CommandSetBaseArchive -> 6146
-	0x11b03ec00 TST.CommandChooseTableIdRemapperArchive -> 6307
-	0x11b03ec90 TST.CommandCategorySetGroupingColumnsArchive -> 6321
-	0x11b03f6b0 TST.CommandCategoryCollapseExpandGroupArchive -> 6320
-	0x13bb7cd60 TSWP.HighlightArchive -> 2013
-	0x11b03fe90 TST.CommandRewriteHiddenStatesForGroupByChangeArchive -> 6323
-	0x11b03ce30 TST.CommandSetDurationUnitSmallestLargestArchive -> 6290
-	0x11b03f110 TST.CommandSetTextStylePropertiesArchive -> 6149
-	0x11b03e390 TST.CommandSetShowThousandsSeparatorArchive -> 6127
-	0x11b03d2b0 TST.CommandResizeColumnOrRowArchive -> 6104
-	0x13c849630 TST.ConcurrentCellListArchive -> 6034
-	0x13c849480 TST.CellMapArchive -> 6031
-	0x13c849f30 TST.AutofillSelectionArchive -> 6311
-	0x13c849c60 TST.DeathhawkRdar39989167CellSelectionArchive -> 6032
-	0x13bb47280 TSCH.PreUFF.LegendNonStyleArchive -> 5017
-	0x13c848af0 TST.WPTableInfoArchive -> 6007
-	0x13bb46fb0 TSCH.PreUFF.ChartGridArchive -> 5002
-	0x13c848820 TST.HeaderStorageBucket -> 6006
-	0x13bb46e00 TSCH.PreUFF.ChartInfoArchive -> 5000
-	0x13c848670 TST.TableDataList -> 6005
-	0x13c84a200 TST.ConditionalStyleSetArchive -> 6010
-	0x13c84a0e0 TST.CellStyleArchive -> 6004
-	0x13c84a050 TST.TableStyleArchive -> 6003
-	0x11b02e3e0 TN.CommandSetDocumentPaperSize -> 12030
-	0x13bb6e480 TSCH.ChartAxisStyleArchive -> 5026
-	0x13c82d200 TSK.TreeNode -> 205
-	0x13c82d320 TSK.LocalCommandHistoryArray -> 253
-	0x11b0318d0 TSS.StyleUpdatePropertyMapCommandArchive -> 412
-	0x13bb7e080 TSWP.DrawableAttachmentArchive -> 2003
-	0x11b034a70 TSD.StandinCaptionArchive -> 3097
-	0x11b02e350 TN.CommandSetContentScaleArchive -> 12018
-	0x13bb6e3f0 TSCH.LegendNonStyleArchive -> 5025
-	0x13bb7dff0 TSWP.UIGraphicalAttachment -> 2006
-	0x11b0349e0 TSD.FreehandDrawingToolkitUIState -> 3091
-	0x13bb6e360 TSCH.LegendStyleArchive -> 5024
-	0x13bb7df60 TSWP.TSWPTOCPageNumberAttachmentArchive -> 2010
-	0x11b034950 TSD.FreehandDrawingContentDescription -> 3090
-	0x11b03de80 TST.CommandApplyTableStylePresetArchive -> 6117
-	0x13c844560 TSD.DrawablePencilAnnotationCommandArchive -> 3088
-	0x11b03cc80 TST.CommandMutateCellFormatArchive -> 6277
-	0x13c843360 TSD.ContainerInsertDrawablesCommandArchive -> 3085
-	0x11b03cb60 TST.CommandDeleteCellsArchive -> 6101
-	0x13c843240 TSD.ContainerRemoveDrawablesCommandArchive -> 3084
-	0x13bb6e2d0 TSCH.ChartNonStyleArchive -> 5023
-	0x11b031720 TSS.ThemeArchive -> 402
-	0x13bb7ded0 TSWP.TextualAttachmentArchive -> 2004
-	0x11b0348c0 TSD.DrawableContentDescription -> 3083
-	0x11b03cda0 TST.CommandSetDurationStyleArchive -> 6289
-	0x13c843480 TSD.GroupUngroupInformativeCommandArchive -> 3082
-	0x11b03d7c0 TST.CommandSetTableFontSizeArchive -> 6137
-	0x13c843ea0 TSD.MediaInfoGeometryCommandArchive -> 3080
-	0x11b03e420 TST.CommandSetUseAccountingStyleArchive -> 6132
-	0x13c844b00 TSD.DrawableSelectionTransformerArchive -> 3071
-	0x11b03e300 TST.CommandSetDateTimeFormatArchive -> 6238
-	0x13c8449e0 TSD.ImageInfoMaskGeometryCommandArchive -> 3067
-	0x11b03e270 TST.CommandSetNumberOfDecimalPlacesArchive -> 6126
-	0x13c844950 TSD.ImageInfoGeometryCommandArchive -> 3066
-	0x11b03e1e0 TST.CommandSetNegativeNumberStyleArchive -> 6128
-	0x13c8448c0 TSD.ImageInfoAbstractGeometryCommandArchive -> 3065
-	0x11b03dc40 TST.CommandSetFiltersEnabledArchive -> 6221
-	0x13c844320 TSD.CommentInvalidatingCommandSelectionBehaviorArchive -> 3064
-	0x11b02e7d0 TN.CommandSetUsingStartPageNumberArchive -> 12034
-	0x13bb6e870 TSCH.ReferenceLineNonStyleArchive -> 5031
-	0x11b031ba0 TSS.ThemeMovePresetCommandArchive -> 417
-	0x13c82d5f0 TSK.CollaborationCommandHistory -> 218
-	0x13bb7e470 TSWP.UnsupportedHyperlinkFieldArchive -> 2039
-	0x11b034e60 TSD.PathSelectionArchive -> 3063
-	0x11b02e740 TN.CommandSetPageOrderArchive -> 12033
-	0x13bb6e7e0 TSCH.ReferenceLineStyleArchive -> 5030
-	0x13c82d680 TSK.CollaborationCommandHistoryItem -> 255
-	0x11b031c30 TSS.ThemeReplaceStylePresetAndDisconnectStylesCommandArchive -> 419
-	0x11b031b10 TSS.ThemeRemoveStylePresetCommandArchive -> 415
-	0x13c82d560 TSK.CollaborationCommandHistoryArraySegment -> 257
-	0x13bb7e3e0 TSWP.PlaceholderSmartFieldArchive -> 2031
-	0x11b034dd0 TSD.GroupSelectionArchive -> 3062
-	0x11b031a80 TSS.ThemeAddStylePresetCommandArchive -> 414
-	0x13c82d4d0 TSK.CollaborationCommandHistoryArray -> 256
-	0x13bb7e350 TSWP.HyperlinkFieldArchive -> 2032
-	0x11b034d40 TSD.DrawableSelectionArchive -> 3061
-	0x11b03e150 TST.CommandSetFractionAccuracyArchive -> 6129
-	0x13c844830 TSD.PasteStyleCommandArchive -> 3059
-	0x11b03e0c0 TST.CommandSetCurrencyCodeArchive -> 6131
-	0x13c8447a0 TSD.DrawableAccessibilityDescriptionCommandArchive -> 3058
-	0x11b034170 TSD.ThemeReplaceFillPresetCommandArchive -> 3057
-	0x11b03d970 TST.CommandSetNowArchive -> 6313
-	0x11b01fe70 TN.ThemeArchive -> 12009
-	0x13c844050 TSD.ImageAdjustmentsCommandArchive -> 3055
-	0x11b03cd10 TST.CommandSetAutomaticDurationUnitsArchive -> 6205
-	0x13c8433f0 TSD.ContainerReorderChildrenCommandArchive -> 3054
-	0x11b03cbf0 TST.CommandDeleteCellContentsArchive -> 6228
-	0x13c8432d0 TSD.ContainerInsertChildrenCommandArchive -> 3053
-	0x11b03cad0 TST.CommandChangeFreezeHeaderStateArchive -> 6111
-	0x13c8431b0 TSD.ContainerRemoveChildrenCommandArchive -> 3052
-	0x11b03e030 TST.CommandSetBaseUseMinusSignArchive -> 6148
-	0x13c844710 TSD.DrawableAspectRatioLockedCommandArchive -> 3051
-	0x11b03dfa0 TST.CommandSetBasePlacesArchive -> 6147
-	0x13c844680 TSD.GuideCommandArchive -> 3050
-	0x13b0da7f0 TST.TableStrokePresetArchive -> 6009
-	0x13c843900 TSD.StyledInfoSetStyleCommandArchive -> 3048
-	0x11b02e590 TN.CommandSetPrinterMarginsArchive -> 12031
-	0x13bb6e630 TSCH.ChartSeriesNonStyleArchive -> 5029
-	0x11b031960 TSS.ThemeReplacePresetCommandArchive -> 413
-	0x13c82d3b0 TSK.LocalCommandHistoryArraySegment -> 254
-	0x13bb7e230 TSWP.NumberAttachmentArchive -> 2043
-	0x11b034c20 TSD.GuideStorageArchive -> 3047
-	0x11b0319f0 TSS.ThemeReplaceColorPresetCommandArchive -> 416
-	0x13c82d440 TSK.LocalCommandHistory -> 201
-	0x11b034cb0 TSD.CanvasSelectionArchive -> 3045
-	0x11b03d070 TST.CommandInsertColumnsOrRowsArchive -> 6102
-	0x13c843750 TSD.InstantAlphaCommandArchive -> 3042
-	0x11b03cec0 TST.CommandReplaceCustomFormatArchive -> 6269
-	0x13c8435a0 TSD.ConnectionLineConnectCommandArchive -> 3041
-	0x11b03dbb0 TST.CommandSetRepeatingHeaderEnabledArchive -> 6120
-	0x11b0200b0 TN.ChartSelectionArchive -> 12036
-	0x13c844290 TSD.DrawableHyperlinkCommandArchive -> 3040
-	0x11b03da00 TST.CommandSetWasCutArchive -> 6310
-	0x11b01ff00 TN.PasteboardNativeStorageArchive -> 12046
-	0x13c8440e0 TSD.MediaFlagsCommandArchive -> 3037
-	0x11b03d580 TST.CommandChangeTableAreaForColumnOrRowArchive -> 6304
-	0x13c843c60 TSD.MovieSetValueCommandArchive -> 3034
-	0x11b03d3d0 TST.CommandHideShowArchive -> 6145
-	0x11b01f8d0 TN.FormSelectionArchive -> 12040
-	0x13c843ab0 TSD.MediaApplyPresetCommandArchive -> 3032
-	0x11b03d340 TST.CommandCategoryResizeColumnOrRowArchive -> 6152
-	0x11b01f840 TN.SheetSelectionArchive -> 12028
-	0x13c843a20 TSD.ShapeApplyPresetCommandArchive -> 3031
-	0x11b03d460 TST.CommandTextPreflightInsertCellArchive -> 6226
-	0x13c02ef60 TNSOS.InducedVerifyDocumentWithServerCommandArchive -> 12044
-	0x11b01f960 TN.FormBuilderSelectionArchive -> 12053
-	0x13c843b40 TSD.ShapeStyleSetValueCommandArchive -> 3028
-	0x11b03d6a0 TST.CommandSetTableNameArchive -> 6107
-	0x13c843d80 TSD.ImageMediaCommandArchive -> 3025
-	0x13c8436c0 TSD.DrawablePathSourceCommandArchive -> 3022
-	0x11b03cf50 TST.CommandMoveCellsArchive -> 6301
-	0x13c843630 TSD.InfoGeometryCommandArchive -> 3021
-	0x13bba2c20 TSA.GalleryItemSetGeometryCommand -> 628
-	0x11b034050 TSD.MediaStyleArchive -> 3016
-	0x13bb47160 TSCH.PreUFF.ChartNonStyleArchive -> 5014
-	0x13c82e400 TSK.CommandSelectionBehaviorArchive -> 220
-	0x13c8489d0 TST.TableInfoArchive -> 6000
-	0x13bba2b00 TSA.GalleryInfoInsertItemsCommandArchive -> 636
-	0x11b033f30 TSD.ShapeStyleArchive -> 3015
-	0x13bba3130 TSA.CaptionPlacementArchive -> 634
-	0x11b034560 TSD.ConnectionLineArchive -> 3009
-	0x13bba2ef0 TSA.GalleryItemSelectionTransformer -> 626
-	0x13bb7d930 TSWP.TOCEntryStyleArchive -> 2026
-	0x11b034320 TSD.GroupArchive -> 3008
-	0x11b031600 TSS.StyleArchive -> 400
-	0x13bb7ddb0 TSWP.TOCLayoutHintArchive -> 2242
-	0x11b0347a0 TSD.MovieArchive -> 3007
-	0x13bba3250 TSA.TitlePlacementCommandArchive -> 635
-	0x13bb7dc90 TSWP.CommentInfoArchive -> 2014
-	0x11b034680 TSD.MaskArchive -> 3006
-	0x13bba31c0 TSA.CaptionInfoArchive -> 633
-	0x13bb7dc00 TSWP.ShapeInfoArchive -> 2011
-	0x11b0345f0 TSD.ImageArchive -> 3005
-	0x11b0344d0 TSD.ShapeArchive -> 3004
-	0x13bba2e60 TSA.GalleryItemSelection -> 625
-	0x11b034290 TSD.ContainerArchive -> 3003
-	0x13bba2dd0 TSA.GallerySelectionTransformer -> 624
-	0x11b034200 TSD.DrawableArchive -> 3002
-	0x13bb6e5a0 TSCH.ChartSeriesStyleArchive -> 5028
-	0x13bb6e510 TSCH.ChartAxisNonStyleArchive -> 5027
-	0x13c82d290 TSK.LocalCommandHistoryItem -> 252
-	0x13bb7e7d0 TSWP.FilenameSmartFieldArchive -> 2033
-	0x11b0351c0 TSD.PencilAnnotationStorageArchive -> 242
-	0x13c82d830 TSK.CollaborationCommandHistoryOriginatingCommandAcknowledgementObserver -> 229
-	0x13c82db00 TSK.ViewStateArchive -> 210
-	0x11b016060 TSP.ObjectCollection -> 11010
-	0x13bb7e6b0 TSWP.DateTimeSmartFieldArchive -> 2034
-	0x11b0350a0 TSD.PencilAnnotationArchive -> 3086
-	0x13c82da70 TSK.DocumentSupportArchive -> 211
-	0x11b015fd0 TSP.PasteboardObject -> 11000
-	0x13c82d7a0 TSK.CollaborationCommandHistoryCoalescingGroupNode -> 228
-	0x13bb7e620 TSWP.CitationSmartFieldArchive -> 2038
-	0x11b035010 TSD.ReplaceAnnotationAuthorCommandArchive -> 3070
-	0x13c82d710 TSK.CollaborationCommandHistoryCoalescingGroup -> 227
-	0x13bb7e590 TSWP.CitationRecordArchive -> 2037
-	0x11b034f80 TSD.CommentStorageArchive -> 3056
-	0x13c848310 TST.Tile -> 6002
-	0x11b0162a0 TSP.LargeNumberArraySegment -> 11016
-	0x13c82dd40 TSK.PropagatedCommandCollectionArchive -> 251
-	0x13c849bd0 TST.SelectionArchive -> 6030
-	0x13c82f600 TSK.OutgoingCommandQueueSegment -> 250
-	0x13c82ed00 TSK.BlockDiffsAtCurrentRevisionCommand -> 248
-	0x13c849990 TST.CellDiffArraySegment -> 6368
-	0x13c82f3c0 TSK.OperationStorageEntryArray -> 246
-	0x13c82f4e0 TSK.OperationStorage -> 245
-	0x13bb471f0 TSCH.PreUFF.LegendStyleArchive -> 5013
-	0x13c82e490 TSK.SelectionPathTransformerArchive -> 240
-	0x13c849240 TST.StrokeSidecarArchive -> 6305
-	0x13c849510 TST.CellListArchive -> 6273
-	0x13c82ef40 TSK.TransformerEntry -> 235
-	0x13c82d9e0 TSK.DocumentSupportCollaborationState -> 230
-	0x13c82eac0 TSK.InducedCommandCollectionCommitCommandArchive -> 225
-	0x11b016720 TSP.LargeLazyObjectArray -> 11021
-	0x13c82e1c0 TSK.AnnotationAuthorArchive -> 212
-	0x13c82ddd0 TSK.FinalCommandPairArchive -> 233
-	0x11b016330 TSP.LargeStringArraySegment -> 11017
-	0x11b0160f0 TSP.ObjectContainer -> 11008
-	0x13bb7e740 TSWP.BookmarkFieldArchive -> 2035
-	0x11b035130 TSD.PencilAnnotationSelectionArchive -> 3089
-	0x13c82d8c0 TSK.DocumentArchive -> 200
-	0x11b01f9f0 TN.FormTableChooserSelectionArchive -> 12054
-	0x13c82f180 TSK.NativeContentDescription -> 241
-	0x13bb707a0 TSCH.CommandSetCategoryNameArchive -> 5105
-	0x13bb70b90 TSCH.CommandSetGridValueArchive -> 5109
-	0x13b0fa860 TSCE.FormulaRewriteCommandArchive -> 4001
-	0x13c843f30 TSD.ImageNaturalSizeCommandArchive -> 3044
-	0x11b01fd50 TN.SheetStyleArchive -> 12050
-	0x11b03e930 TST.CommandRewriteFilterFormulasForRewriteSpecArchive -> 6293
-	0x13c845010 TSD.RemoveCaptionOrTitleCommandArchive -> 3096
-	0x11b02e080 TN.CommandSetSheetShouldPrintCommentsArchive -> 12049
-	0x11b02ee90 TN.CanvasSelectionTransformerArchive -> 12047
-	0x11b03e9c0 TST.CommandRewriteConditionalStylesForRewriteSpecArchive -> 6292
-	0x13c8450a0 TSD.SetCaptionOrTitleVisibilityCommandArchive -> 3098
-	0x11b02e110 TN.CommandSetSheetDirectionArchive -> 12048
-	0x13bb70d40 TSCH.CommandSetScatterFormatArchive -> 5107
-	0x11b03dd60 TST.CommandRemoveTableStylePresetArchive -> 6266
-	0x13c844440 TSD.DrawableLockCommandArchive -> 3043
-	0x13bb71370 TSCH.CommandReplaceCustomFormatArchive -> 5139
-	0x13c84bf40 TST.HeaderNameMgrTileArchive -> 6365
-	0x11b013e60 TSP.DocumentMetadata -> 11011
-	0x11b03d4f0 TST.CommandPostflightSetCellArchive -> 6229
-	0x13c02eff0 TNSOS.InducedVerifyDrawableZOrdersWithServerCommandArchive -> 12045
-	0x11b03dcd0 TST.CommandAddTableStylePresetArchive -> 6262
-	0x13b0da760 TST.TableStylePresetArchive -> 6008
-	0x13c8443b0 TSD.ImageReplaceCommandArchive -> 3026
-	0x11b02ee00 TN.SheetSelectionTransformerArchive -> 12042
-	0x11b02ed70 TN.DocumentSelectionTransformerArchive -> 12041
-	0x13bb6a1d0 TSCH.ChartSelectionArchive -> 5145
-	0x13c82f0f0 TSK.CollaborationDocumentSessionState -> 226
-	0x11b02ebc0 TN.CommandChartMediatorSetFormula -> 12038
-	0x13bb47310 TSCH.PreUFF.ChartAxisStyleArchive -> 5012
-	0x13c848b80 TST.TableStyleNetworkArchive -> 6247
-	0x13c82e5b0 TSK.DocumentSelectionArchive -> 219
-	0x13c843e10 TSD.MediaOriginalSizeCommandArchive -> 3027
-	0x11b01fc30 TN.SheetArchive -> 2
-	0x11b02e620 TN.CommandSetPrintBackgroundsArchive -> 12052
-	0x13c849000 TST.SummaryModelArchive -> 6316
-	0x13c82ea30 TSK.UpgradeDocPostProcessingCommandArchive -> 232
-	0x11b02eaa0 TN.CommandChartMediatorSetSeriesOrder -> 12039
-	0x13c848f70 TST.TableModelArchive -> 6001
-	0x13c82e9a0 TSK.GroupCommitCommandArchive -> 223
-	0x13c84ba30 TST.FormulaEqualsTokenAttachmentArchive -> 6179
-	0x13bb70e60 TSCH.CommandSetLegendFrameArchive -> 5108
-	0x13c844200 TSD.ExteriorTextWrapCommandArchive -> 3036
-	0x11b020020 TN.ChartMediatorArchive -> 12006
-	0x11b02ea10 TN.CommandChartMediatorSetGridDirection -> 12037
-	0x11b02e860 TN.CommandSetStartPageNumberArchive -> 12035
-	0x13bb70c20 TSCH.CommandSetGridDirectionArchive -> 5110
-	0x13b0fa8f0 TSCE.ExtendTableIDHistoryCommandArchive -> 4006
-	0x13c843fc0 TSD.ImageMaskCommandArchive -> 3024
-	0x11b01fde0 TN.FormBasedSheetArchive -> 3
-	0x11b02e6b0 TN.CommandSetHeaderFooterInsetsArchive -> 12032
-	0x11b02e1a0 TN.CommandSetPageOrientationArchive -> 12017
-	0x13bb6e240 TSCH.ChartStyleArchive -> 5022
-	0x11b031690 TSS.StylesheetArchive -> 401
-	0x13c8495a0 TST.ConcurrentCellMapArchive -> 6033
-	0x13c82efd0 TSK.OutgoingCommandQueueItem -> 234
-	0x11b02f040 TN.CommandInducedSheetChangeArchive -> 12043
-	0x11b01f7b0 TN.UIStateArchive -> 12026
-	0x11b016840 TSP.LargeUUIDArray -> 11025
-	0x13c82e2e0 TSK.AnnotationAuthorStorageArchive -> 213
-	0x11b02dc00 TN.CommandFormChooseTargetTableArchive -> 12015
-	0x13c82e910 TSK.NullCommandArchive -> 221
-	0x11b02e980 TN.CommandChartMediatorSetEditingState -> 12014
-	0x13c8491b0 TST.StrokeLayerArchive -> 6306
-	0x13c82ebe0 TSK.ChangeDocumentPackageTypeCommandArchive -> 231
-	0x11b02ec50 TN.CommandSheetSetBackgroundFillArchive -> 12051
-	0x11b03e8a0 TST.CommandRewriteFilterFormulasForTableResizeArchive -> 6224
-	0x11b02dff0 TN.CommandSetSheetNameArchive -> 12005
-	0x11b03e810 TST.CommandRewriteCategoryFormulasArchive -> 6315
-	0x13c844ef0 TSD.FreehandDrawingAnimationCommandArchive -> 3094
-	0x11b02df60 TN.CommandDocumentReorderSheetArchive -> 12008
-	0x11b03c920 TST.CommandApplyCellDiffMapArchive -> 6275
-	0x13bb719a0 TSCH.ChartSubselectionIdentityTransformerHelperArchive -> 5152
-	0x13c843000 TSD.UndoObjectArchive -> 3068
-	0x11b0167b0 TSP.LargeObjectArray -> 11027
-	0x13c82dcb0 TSK.InducedCommandCollectionArchive -> 224
-	0x11b0164e0 TSP.LargeObjectArraySegment -> 11026
-	0x11b03db20 TST.CommandStyleTableArchive -> 6125
-	0x11b013c20 TSP.ObjectSerializationMetadata -> 11013
-	0x13c848430 TST.PopUpMenuModel -> 6206
-	0x11b0163c0 TSP.LargeUUIDArraySegment -> 11024
-	0x13c82de60 TSK.CommandContainerArchive -> 203
-	0x13c82e130 TSK.CustomFormatListArchive -> 222
-	0x11b016690 TSP.LargeStringArray -> 11020
-	0x13bb470d0 TSCH.PreUFF.ChartStyleArchive -> 5010
-	0x13c82e370 TSK.SetAnnotationAuthorColorCommandArchive -> 215
-	0x13c84bc70 TST.DefaultCellStylesContainerArchive -> 6302
-	0x11b013b90 TSP.ViewStateMetadata -> 11009
-	0x11b016600 TSP.LargeNumberArray -> 11019
-	0x13c849d80 TST.ControlCellSelectionArchive -> 6283
-	0x13c82f7b0 TSK.AssetUploadStatusCommandArchive -> 261
-	0x11b03d730 TST.CommandSetTableNameEnabledArchive -> 6114
-	0x11b013830 TSP.PasteboardMetadata -> 11007
-	0x13c849cf0 TST.StrokeSelectionArchive -> 6295
-	0x13c82f720 TSK.CommandAssetChunkArchive -> 260
-	0x13c843cf0 TSD.MediaStyleSetValueCommandArchive -> 3030
-	0x11b01fb10 TN.DocumentArchive -> 1
-	0x11b03d8e0 TST.CommandSetTableNameHeightArchive -> 6142
-	0x11b0139e0 TSP.DataMetadata -> 11014
-	0x13c849ea0 TST.TableNameSelectionArchive -> 6284
-	0x13c82f8d0 TSK.PencilAnnotationUIState -> 258
-	0x13c82dc20 TSK.CommandGroupArchive -> 202
-	0x11b016450 TSP.LargeLazyObjectArraySegment -> 11018
-	0x11b03e5d0 TST.CommandSortArchive -> 6123
-	0x13c844cb0 TSD.ShapeSelectionTransformerArchive -> 3073
-	0x11b02dd20 TN.CommandSheetRemoveDrawablesArchive -> 12012
-	0x11b03ddf0 TST.CommandReplaceTableStylePresetArchive -> 6270
-	0x13c8444d0 TSD.DrawableInfoCommentCommandArchive -> 3049
-	0x13bb71400 TSCH.CommandAddReferenceLineArchive -> 5140
-	0x13c84bfd0 TST.HeaderNameMgrArchive -> 6366
-	0x11b013ef0 TSP.SupportMetadata -> 11012
-	0x11b03e6f0 TST.CommandRewriteTableFormulasForRewriteSpecArchive -> 6291
-	0x13c844dd0 TSD.PencilAnnotationSelectionTransformerArchive -> 3092
-	0x11b02de40 TN.CommandDocumentInsertSheetArchive -> 12003
-	0x13c848700 TST.TableDataListSegment -> 6011
-	0x11b03d850 TST.CommandSetTableFontNameArchive -> 6136
-	0x11b013950 TSP.DataMetadataMap -> 11015
-	0x13c849e10 TST.StockCellSelectionArchive -> 6312
-	0x13c82f840 TSK.AssetUnmaterializedOnServerCommandArchive -> 262
-	0x11b03e540 TST.CommandMoveColumnsOrRowsArchive -> 6268
-	0x13c844c20 TSD.PathSelectionTransformerArchive -> 3074
-	0x11b02dc90 TN.CommandSheetInsertDrawablesArchive -> 12002
-	0x11b03e780 TST.CommandRewriteMergeFormulasArchive -> 6303
-	0x13c844e60 TSD.FreehandDrawingOpacityCommandArchive -> 3087
-	0x11b02ded0 TN.CommandDocumentRemoveSheetArchive -> 12004
-	0x13c82f570 TSK.OutgoingCommandQueue -> 249
-	0x11b03d610 TST.CommandSetPencilAnnotationsArchive -> 6156
-	0x11b013710 TSP.PackageMetadata -> 11006
-	0x11b03e660 TST.CommandRewriteFormulasForTransposeArchive -> 6285
-	0x13c844d40 TSD.GroupSelectionTransformerArchive -> 3072
-	0x11b03d190 TST.CommandRemoveColumnsOrRowsArchive -> 6103
-	0x60000195ce10 TSKSOS.FixCorruptedDataCommandArchive -> 259
-	0x11b02ddb0 TN.CommandSheetMoveDrawableZOrderArchive -> 12013
-	0x13c849a20 TST.CellDiffMapArchive -> 6264
-	0x13c82f450 TSK.OperationStorageEntryArraySegment -> 247
+	0x140920c50 TSA.TitlePlacementCommandArchive -> 635
+	0x140920bc0 TSA.CaptionInfoArchive -> 633
+	0x1409202c0 TSA.InducedVerifyTransformHistoryWithServerCommandArchive -> 630
+	0x140920a10 TSA.GalleryItemSetValueCommand -> 629
+	0x1409208f0 TSA.GalleryItemSelectionTransformer -> 626
+	0x1409207d0 TSA.GallerySelectionTransformer -> 624
+	0x14091fdb0 TSA.ShortcutControllerArchive -> 603
+	0x140920230 TSA.InducedVerifyObjectsWithServerCommandArchive -> 612
+	0x140919e90 TSWP.ShapeContentDescription -> 10022
+	0x140920080 TSA.ReplaceCustomFormatCommandArchive -> 607
+	0x140919ce0 TSWP.SelectionTransformerArchive -> 10021
+	0x1409201a0 TSA.ChangeDocumentLocaleCommandArchive -> 617
+	0x140919e00 TSWP.ShapeSelectionTransformerArchive -> 10020
+	0x140920110 TSA.NeedsMediaCompatibilityUpgradeCommandArchive -> 616
+	0x140919d70 TSWP.PencilAnnotationSelectionTransformerArchive -> 2412
+	0x14091fff0 TSA.UpdateCustomFormatCommandArchive -> 606
+	0x140919c50 TSWP.ShapeStyleSetValueCommandArchive -> 2408
+	0x140918d20 TSWP.StorageActionCommandArchive -> 2407
+	0x14091ff60 TSA.AddCustomFormatCommandArchive -> 605
+	0x140919bc0 TSWP.StyleUpdatePropertyMapCommandArchive -> 2406
+	0x14091fed0 TSA.ShortcutCommandArchive -> 604
+	0x140919b30 TSWP.StyleReorderCommandArchive -> 2405
+	0x14091fe40 TSA.PropagatePresetCommandArchive -> 602
+	0x140919aa0 TSWP.StyleDeleteCommandArchive -> 2404
+	0x140919980 TSWP.StyleRenameCommandArchive -> 2402
+	0x14091fc90 TSA.FunctionBrowserStateArchive -> 601
+	0x1409198f0 TSWP.StyleCreateCommandArchive -> 2401
+	0x14091fc00 TSA.DocumentArchive -> 600
+	0x140919860 TSWP.StyleBaseCommandArchive -> 2400
+	0x1408fc120 TSWP.TOCInfoArchive -> 2240
+	0x1409197d0 TSWP.ShapeApplyPresetCommandArchive -> 2231
+	0x140919590 TSWP.AnchorAttachmentCommandArchive -> 2206
+	0x140920590 TSA.GalleryInfoRemoveItemsCommandArchive -> 637
+	0x14091a1f0 TSWP.TextCommentReplyCommandArchive -> 2217
+	0x1409206b0 TSA.GalleryItem -> 623
+	0x14091a310 TSWP.EquationInfoGeometryCommandArchive -> 2128
+	0x140920620 TSA.GalleryItemSetGeometryCommand -> 628
+	0x14091a280 TSWP.ContainedObjectsCommandArchive -> 2127
+	0x140920500 TSA.GalleryInfoInsertItemsCommandArchive -> 636
+	0x14091a160 TSWP.RemoveFlowInfoCommandArchive -> 2126
+	0x140920470 TSA.GalleryInfoSetValueCommandArchive -> 627
+	0x14091a0d0 TSWP.AddFlowInfoCommandArchive -> 2125
+	0x1409203e0 TSA.RemoteDataChangeCommandArchive -> 619
+	0x14091a040 TSWP.UpdateFlowInfoCommandArchive -> 2124
+	0x140920350 TSA.StyleUpdatePropertyMapCommandArchive -> 618
+	0x140919fb0 TSWP.SetObjectPropertiesCommandArchive -> 2123
+	0x140919500 TSWP.ModifyTOCSettingsPresetForThemeCommandArchive -> 2122
+	0x140919470 TSWP.ModifyTOCSettingsForTOCInfoCommandArchive -> 2121
+	0x1409193e0 TSWP.ModifyTOCSettingsBaseCommandArchive -> 2120
+	0x140919230 TSWP.UpdateDateTimeFieldCommandArchive -> 2119
+	0x140919350 TSWP.ModifyRubyTextCommandArchive -> 2118
+	0x1409192c0 TSWP.ApplyRubyTextCommandArchive -> 2116
+	0x1409191a0 TSWP.ApplyPlaceholderTextCommandArchive -> 2107
+	0x140918c90 TSWP.TextCommandArchive -> 2101
+	0x1408fc900 TSWP.BibliographySmartFieldArchive -> 2040
+	0x1408fcb40 TSWP.BookmarkFieldArchive -> 2035
+	0x1408fb3a0 TSWP.CharacterStyleArchive -> 2021
+	0x1408fb1f0 TSWP.PencilAnnotationArchive -> 2016
+	0x1408fc090 TSWP.CommentInfoArchive -> 2014
+	0x1408fc000 TSWP.ShapeInfoArchive -> 2011
+	0x1408fb0d0 TSWP.StorageArchive -> 2001
+	0x1408f3080 TSCH.ChartSubselectionTransformerHelperArchive -> 5149
+	0x1408e5bd0 TSCH.ChartSelectionArchive -> 5145
+	0x1408f2270 TSCH.CommandDeleteGridRowsArchive -> 5143
+	0x1408f2300 TSCH.CommandDeleteGridColumnsArchive -> 5142
+	0x1408f1d60 TSCH.CommandScaleAllTextArchive -> 5136
+	0x1408f25d0 TSCH.CommandSetMultiDataSetIndexArchive -> 5130
+	0x1408e5900 TSCH.StylePasteboardDataArchive -> 5129
+	0x1408f1c40 TSCH.CommandStyleSwapArchive -> 5123
+	0x1408f21e0 TSCH.CommandMoveGridColumnsArchive -> 5119
+	0x1408f2150 TSCH.CommandMoveGridRowsArchive -> 5118
+	0x1408f20c0 TSCH.CommandAddGridColumnsArchive -> 5116
+	0x1408f2420 TSCH.CommandSetGridDirectionArchive -> 5110
+	0x1408f1f10 TSCH.CommandSetSeriesNameArchive -> 5104
+	0x1408f1a90 TSCH.CommandSetChartTypeArchive -> 5103
+	0x1408eb270 TSCH.ReferenceLineNonStyleArchive -> 5031
+	0x1408eb1e0 TSCH.ReferenceLineStyleArchive -> 5030
+	0x1408eb030 TSCH.ChartSeriesNonStyleArchive -> 5029
+	0x1408eafa0 TSCH.ChartSeriesStyleArchive -> 5028
+	0x140682830 TSASOS.VerifyObjectsWithServerCommandArchive -> 611
+	0x1408eaf10 TSCH.ChartAxisNonStyleArchive -> 5027
+	0x1406827a0 TSASOS.VerifyDrawableZOrdersWithServerCommandArchive -> 614
+	0x1408eae80 TSCH.ChartAxisStyleArchive -> 5026
+	0x140682710 TSASOS.VerifyDocumentWithServerCommandArchive -> 613
+	0x1408eadf0 TSCH.LegendNonStyleArchive -> 5025
+	0x140682680 TSASOS.CommandReapplyMasterArchive -> 631
+	0x1408ead60 TSCH.LegendStyleArchive -> 5024
+	0x1408f2d20 TSCH.CommandPasteStyleArchive -> 5154
+	0x1408c1020 TSCE.RemoteDataStoreArchive -> 4007
+	0x1408c41f0 TSCH.PreUFF.LegendStyleArchive -> 5013
+	0x1408f2c00 TSCH.CommandAddReferenceLineArchive -> 5140
+	0x1408c40d0 TSCH.PreUFF.ChartStyleArchive -> 5010
+	0x1408e5630 TSCH.ChartMediatorArchive -> 5004
+	0x1408f2ae0 TSCH.CommandInvalidateWPCaches -> 5132
+	0x142353630 TST.ConcurrentCellMapArchive -> 6033
+	0x1408c3fb0 TSCH.PreUFF.ChartGridArchive -> 5002
+	0x1408f2930 TSCH.ChartCommandArchive -> 5126
+	0x142353480 TST.MergeRegionMapArchive -> 6144
+	0x1408c3e00 TSCH.PreUFF.ChartInfoArchive -> 5000
+	0x1408f2390 TSCH.CommandSetGridValueArchive -> 5109
+	0x1408c0690 TSCE.RangePrecedentsTileArchive -> 4010
+	0x1408f2810 TSCH.CommandChartApplyPreset -> 5125
+	0x1408c0b10 TSCE.FormulaOwnerDependenciesArchive -> 4008
+	0x142354e60 TST.OperatorNodeArchive -> 6188
+	0x1408c2610 TSCE.TrackedReferenceStoreArchive -> 4004
+	0x1408f2ed0 TSCH.CommandInduced3DChartGeometry -> 5157
+	0x1408c43a0 TSCH.PreUFF.ChartAxisNonStyleArchive -> 5016
+	0x1408c11d0 TSCE.NamedReferenceManagerArchive -> 4003
+	0x142353a20 TST.CellDiffArraySegment -> 6368
+	0x1423465e0 TSD.ImageInfoMaskGeometryCommandArchive -> 3067
+	0x14237b4b0 TST.CommandSetRangeControlMinMaxIncArchive -> 6360
+	0x14090ca30 TSWPSOS.StyleDiffArchive -> 2053
+	0x142322a00 TSS.StyleArchive -> 400
+	0x14237ce90 TST.StrokeSelectionTransformerArchive -> 6364
+	0x14237cd70 TST.StockCellSelectionTransformerArchive -> 6359
+	0x14237cce0 TST.ControlCellSelectionTransformerArchive -> 6355
+	0x142322a90 TSS.StylesheetArchive -> 401
+	0x14237cf20 TST.RowColumnSelectionTransformerArchive -> 6354
+	0x14237ce00 TST.RegionSelectionTransformerArchive -> 6353
+	0x14237cc50 TST.TableNameSelectionTransformerArchive -> 6352
+	0x14237cbc0 TST.TableSubSelectionTransformerBaseArchive -> 6351
+	0x14237cb30 TST.WPSelectionTransformerArchive -> 6358
+	0x14237caa0 TST.IdempotentSelectionTransformerArchive -> 6350
+	0x1408f2c90 TSCH.CommandDeleteReferenceLineArchive -> 5141
+	0x1408c4160 TSCH.PreUFF.ChartNonStyleArchive -> 5014
+	0x142355d00 TST.GroupByArchive -> 6373
+	0x1408f2db0 TSCH.CommandReplaceImageDataArchive -> 5156
+	0x1408c4280 TSCH.PreUFF.LegendNonStyleArchive -> 5017
+	0x1408fb670 TSWP.ParagraphStyleArchive -> 2022
+	0x142355e20 TST.CategoryOwnerRefArchive -> 6372
+	0x1408fbdc0 TSWP.TOCSettingsArchive -> 2051
+	0x142356570 TST.PivotOrderArchive -> 6369
+	0x1408f2e40 TSCH.CommandInducedReplaceChartGrid -> 5155
+	0x142353990 TST.CellDiffArray -> 6367
+	0x1408c4310 TSCH.PreUFF.ChartAxisStyleArchive -> 5012
+	0x1408fb700 TSWP.ListStyleArchive -> 2023
+	0x142355eb0 TST.PivotGroupingColumnOptionsMapArchive -> 6374
+	0x1408fb790 TSWP.TextStylePresetArchive -> 2050
+	0x142355f40 TST.PivotOwnerArchive -> 6370
+	0x142356690 TST.HeaderNameMgrArchive -> 6366
+	0x1408fbe50 TSWP.TOCEntryInstanceArchive -> 2052
+	0x142356600 TST.HeaderNameMgrTileArchive -> 6365
+	0x1408fb160 TSWP.HighlightArchive -> 2013
+	0x142355910 TST.PencilAnnotationArchive -> 6363
+	0x1408fb9d0 TSWP.ColumnStyleArchive -> 2024
+	0x142356180 TST.FormulaSelectionArchive -> 6271
+	0x1408fbaf0 TSWP.ShapeStyleArchive -> 2025
+	0x1423562a0 TST.DefaultCellStylesContainerArchive -> 6302
+	0x142306c40 TN.SheetSelectionArchive -> 12028
+	0x142345080 TSD.GroupUngroupInformativeCommandArchive -> 3082
+	0x14232c200 TSK.SelectionPathTransformerArchive -> 240
+	0x142379f50 TST.CommandMoveCellsArchive -> 6301
+	0x1408fccf0 TSWP.TOCSmartFieldArchive -> 2041
+	0x14232bb40 TSK.PropagatedCommandCollectionArchive -> 251
+	0x142379890 TST.CommandApplyCellContentsArchive -> 6265
+	0x1408fcd80 TSWP.RubyFieldArchive -> 2042
+	0x14232bbd0 TSK.FinalCommandPairArchive -> 233
+	0x142379920 TST.CommandApplyCellDiffMapArchive -> 6275
+	0x14237b540 TST.CommandMoveColumnsOrRowsArchive -> 6268
+	0x14237c110 TST.CommandSetFilterSetTypeArchive -> 6250
+	0x1408fbd30 TSWP.TOCEntryStyleArchive -> 2026
+	0x1423564e0 TST.CategoryOrderArchive -> 6318
+	0x142356450 TST.SummaryCellVendorArchive -> 6317
+	0x1408f2540 TSCH.CommandSetScatterFormatArchive -> 5107
+	0x142353090 TST.SummaryModelArchive -> 6316
+	0x1423545f0 TST.FilterSetArchive -> 6220
+	0x1408f2f60 TSCH.ChartTextSelectionTransformerArchive -> 5146
+	0x142353ab0 TST.CellDiffMapArchive -> 6264
+	0x1408c4430 TSCH.PreUFF.ChartSeriesStyleArchive -> 5011
+	0x142355fd0 TST.RichTextPayloadArchive -> 6218
+	0x1423556d0 TST.HiddenStateFormulaOwnerArchive -> 6204
+	0x142355640 TST.CompletionTokenAttachmentArchive -> 6199
+	0x1408fae00 TSWP.SelectionArchive -> 2002
+	0x1423555b0 TST.LayoutHintArchive -> 6198
+	0x142355370 TST.EmptyExpressionNodeArchive -> 6197
+	0x1408c2460 TSCE.FormulaRewriteCommandArchive -> 4001
+	0x142354cb0 TST.IdentifierNodeArchive -> 6235
+	0x1423552e0 TST.ArgumentPlaceholderNodeArchive -> 6193
+	0x142355250 TST.DurationNodeArchive -> 6192
+	0x1423551c0 TST.ReferenceNodeArchive -> 6191
+	0x142355130 TST.DateNodeArchive -> 6190
+	0x1423550a0 TST.FunctionEndNodeArchive -> 6196
+	0x142355010 TST.FunctionNodeArchive -> 6189
+	0x142354f80 TST.PrefixOperatorNodeArchive -> 6195
+	0x142354ef0 TST.PostfixOperatorNodeArchive -> 6194
+	0x142355490 TST.InNodeArchive -> 6299
+	0x142355520 TST.VariableNodeArchive -> 6298
+	0x142355400 TST.LetNodeArchive -> 6297
+	0x142354dd0 TST.ListNodeArchive -> 6187
+	0x1408c24f0 TSCE.TrackedReferenceArchive -> 4005
+	0x142354d40 TST.ArrayNodeArchive -> 6186
+	0x142354c20 TST.StringNodeArchive -> 6185
+	0x142354b90 TST.NumberNodeArchive -> 6184
+	0x142354b00 TST.BooleanNodeArchive -> 6183
+	0x142354a70 TST.ExpressionNodeArchive -> 6182
+	0x142354950 TST.TokenAttachmentArchive -> 6181
+	0x1408f2ff0 TSCH.ChartDrawableSelectionTransformerArchive -> 5148
+	0x1408c44c0 TSCH.PreUFF.ChartSeriesNonStyleArchive -> 5015
+	0x142356060 TST.FormulaEqualsTokenAttachmentArchive -> 6179
+	0x142346c10 TSD.InsertCaptionOrTitleCommandArchive -> 3095
+	0x14237bae0 TST.CommandRewritePivotOwnerFormulasArchive -> 6379
+	0x142322d60 TSS.ThemeReplacePresetCommandArchive -> 413
+	0x14237d1f0 TST.CommandPivotSetGroupingColumnOptionsArchive -> 6375
+	0x142322df0 TSS.ThemeReplaceColorPresetCommandArchive -> 416
+	0x14237d280 TST.CommandPivotHideShowGrandTotalsArchive -> 6376
+	0x14237c470 TST.CommandSetGroupSortOrderArchive -> 6159
+	0x1408fcea0 TSWP.ChangeArchive -> 2060
+	0x142379a40 TST.CommandApplyConcurrentCellMapArchive -> 6158
+	0x14237ca10 TST.CommandCategoryWillChangeGroupValue -> 6157
+	0x14237d0d0 TST.CommandRewritePencilAnnotationFormulasArchive -> 6362
+	0x142307300 TN.PasteboardNativeStorageArchive -> 12046
+	0x142345740 TSD.ShapeStyleSetValueCommandArchive -> 3028
+	0x14237a610 TST.CommandSetPencilAnnotationsArchive -> 6156
+	0x142322b20 TSS.ThemeArchive -> 402
+	0x14237cfb0 TST.CommandCategoryMoveRowsArchive -> 6153
+	0x142307030 TN.SheetArchive -> 2
+	0x14237a340 TST.CommandCategoryResizeColumnOrRowArchive -> 6152
+	0x14237c980 TST.CommandCategorySetLabelRowVisibility -> 6361
+	0x14237c8f0 TST.CommandCategoryChangeSummaryAggregateType -> 6150
+	0x14237c7d0 TST.CommandSetStructuredTextImportRecordArchive -> 6314
+	0x142345aa0 TSD.MediaInfoGeometryCommandArchive -> 3080
+	0x14237a970 TST.CommandSetNowArchive -> 6313
+	0x14232ccb0 TSK.TransformerEntry -> 235
+	0x142345b30 TSD.ImageNaturalSizeCommandArchive -> 3044
+	0x14237aa00 TST.CommandSetWasCutArchive -> 6310
+	0x1423563c0 TST.ChangePropagationMapWrapper -> 6357
+	0x14232c830 TSK.InducedCommandCollectionCommitCommandArchive -> 225
+	0x1423456b0 TSD.MediaApplyPresetCommandArchive -> 3032
+	0x142307270 TN.ThemeArchive -> 12009
+	0x14237a580 TST.CommandChangeTableAreaForColumnOrRowArchive -> 6304
+	0x14237c740 TST.CommandTransposeTableArchive -> 6287
+	0x1408fce10 TSWP.TateChuYokoFieldArchive -> 10023
+	0x14232bc60 TSK.CommandContainerArchive -> 203
+	0x1423799b0 TST.CommandApplyCellMapArchive -> 6282
+	0x14237bc90 TST.CommandUnmergeArchive -> 6281
+	0x142346d30 TSD.SetCaptionOrTitleVisibilityCommandArchive -> 3098
+	0x14237bc00 TST.CommandInverseMergeArchive -> 6300
+	0x142346ca0 TSD.RemoveCaptionOrTitleCommandArchive -> 3096
+	0x14237bb70 TST.CommandMergeArchive -> 6280
+	0x14237c350 TST.CommandSetStorageLanguageArchive -> 6278
+	0x14237c620 TST.CommandSetFilterSetArchive -> 6276
+	0x1408fd320 TSWP.DropCapStyleArchive -> 10024
+	0x142306bb0 TN.UIStateArchive -> 12026
+	0x14232c170 TSK.CommandSelectionBehaviorArchive -> 220
+	0x142344ff0 TSD.ContainerReorderChildrenCommandArchive -> 3054
+	0x142379ec0 TST.CommandReplaceCustomFormatArchive -> 6269
+	0x14237c590 TST.CommandRewriteSortOrderForRewriteSpecArchive -> 6294
+	0x14237c3e0 TST.CommandSetSortOrderArchive -> 6258
+	0x14237c2c0 TST.CommandJustForNotifyingArchive -> 6256
+	0x14237c1a0 TST.CommandSetTextStyleArchive -> 6255
+	0x14237c080 TST.CommandSetFormulaTokenizationArchive -> 6246
+	0x14237bff0 TST.CommandApplyCellCommentArchive -> 6244
+	0x14232c710 TSK.GroupCommitCommandArchive -> 223
+	0x142307150 TN.SheetStyleArchive -> 12050
+	0x14237a460 TST.CommandTextPreflightInsertCellArchive -> 6226
+	0x14237bf60 TST.TableCommandSelectionBehaviorArchive -> 6239
+	0x142346430 TSD.PasteStyleCommandArchive -> 3059
+	0x14232d5b0 TSK.AssetUnmaterializedOnServerCommandArchive -> 262
+	0x14237b300 TST.CommandSetDateTimeFormatArchive -> 6238
+	0x1423071e0 TN.FormBasedSheetArchive -> 3
+	0x14232c7a0 TSK.UpgradeDocPostProcessingCommandArchive -> 232
+	0x142345620 TSD.ShapeApplyPresetCommandArchive -> 3031
+	0x14237a4f0 TST.CommandPostflightSetCellArchive -> 6229
+	0x1408fd050 TSWP.HyperlinkSelectionArchive -> 2409
+	0x14232bea0 TSK.CustomFormatListArchive -> 222
+	0x142379bf0 TST.CommandDeleteCellContentsArchive -> 6228
+	0x14232cef0 TSK.NativeContentDescription -> 241
+	0x14237ac40 TST.CommandSetFiltersEnabledArchive -> 6221
+	0x142346b80 TSD.FreehandDrawingAnimationCommandArchive -> 3094
+	0x14237ba50 TST.CommandRewriteConditionalStylesForRewriteSpecArchive -> 6292
+	0x142346af0 TSD.FreehandDrawingOpacityCommandArchive -> 3087
+	0x14237b9c0 TST.CommandRewriteFilterFormulasForRewriteSpecArchive -> 6293
+	0x142346a60 TSD.PencilAnnotationSelectionTransformerArchive -> 3092
+	0x14237b930 TST.CommandRewriteFilterFormulasForTableResizeArchive -> 6224
+	0x14232d2e0 TSK.OutgoingCommandQueue -> 249
+	0x142346160 TSD.DrawablePencilAnnotationCommandArchive -> 3088
+	0x14237b030 TST.CommandSetBaseUseMinusSignArchive -> 6148
+	0x1406825f0 TSASOS.PropagateMasterChangeCommandArchive -> 632
+	0x1408eacd0 TSCH.ChartNonStyleArchive -> 5023
+	0x1423460d0 TSD.DrawableInfoCommentCommandArchive -> 3049
+	0x14232d250 TSK.OperationStorage -> 245
+	0x14237afa0 TST.CommandSetBasePlacesArchive -> 6147
+	0x140682560 TSASOS.InducedVerifyDrawableZOrdersWithServerCommandArchive -> 615
+	0x1408eac40 TSCH.ChartStyleArchive -> 5022
+	0x14232d1c0 TSK.OperationStorageEntryArraySegment -> 247
+	0x142346040 TSD.DrawableLockCommandArchive -> 3043
+	0x600003fd9560 TSKSOS.FixCorruptedDataCommandArchive -> 259
+	0x14237af10 TST.CommandSetBaseArchive -> 6146
+	0x14232c680 TSK.NullCommandArchive -> 221
+	0x142345500 TSD.StyledInfoSetStyleCommandArchive -> 3048
+	0x14237a3d0 TST.CommandHideShowArchive -> 6145
+	0x1423074b0 TN.ChartSelectionArchive -> 12036
+	0x1423458f0 TSD.MediaStyleSetValueCommandArchive -> 3030
+	0x14232ca70 TSK.BlockDiffsAtCurrentRevisionCommand -> 248
+	0x14237a7c0 TST.CommandSetTableFontSizeArchive -> 6137
+	0x142345980 TSD.ImageMediaCommandArchive -> 3025
+	0x14237a850 TST.CommandSetTableFontNameArchive -> 6136
+	0x14237bd20 TST.CommandChooseTableIdRemapperArchive -> 6307
+	0x14237bdb0 TST.CommandCategorySetGroupingColumnsArchive -> 6321
+	0x14237c860 TST.CommandCategoryCollapseExpandGroupArchive -> 6320
+	0x14237d040 TST.CommandRewriteHiddenStatesForGroupByChangeArchive -> 6323
+	0x1423469d0 TSD.GroupSelectionTransformerArchive -> 3072
+	0x14237b8a0 TST.CommandRewriteCategoryFormulasArchive -> 6315
+	0x142346940 TSD.ShapeSelectionTransformerArchive -> 3073
+	0x14237b810 TST.CommandRewriteMergeFormulasArchive -> 6303
+	0x1423468b0 TSD.PathSelectionTransformerArchive -> 3074
+	0x14237b780 TST.CommandRewriteTableFormulasForRewriteSpecArchive -> 6291
+	0x14237b6f0 TST.CommandRewriteFormulasForTransposeArchive -> 6285
+	0x14232c0e0 TSK.SetAnnotationAuthorColorCommandArchive -> 215
+	0x142344f60 TSD.ContainerInsertDrawablesCommandArchive -> 3085
+	0x142379e30 TST.CommandSetDurationUnitSmallestLargestArchive -> 6290
+	0x14232c050 TSK.AnnotationAuthorStorageArchive -> 213
+	0x142344ed0 TSD.ContainerInsertChildrenCommandArchive -> 3053
+	0x142379da0 TST.CommandSetDurationStyleArchive -> 6289
+	0x1408fd170 TSWP.FlowInfoContainerArchive -> 2411
+	0x142344e40 TSD.ContainerRemoveDrawablesCommandArchive -> 3084
+	0x142379d10 TST.CommandSetAutomaticDurationUnitsArchive -> 6205
+	0x1408fd0e0 TSWP.FlowInfoArchive -> 2410
+	0x142344db0 TSD.ContainerRemoveChildrenCommandArchive -> 3052
+	0x14232bf30 TSK.AnnotationAuthorArchive -> 212
+	0x142379c80 TST.CommandMutateCellFormatArchive -> 6277
+	0x142346550 TSD.ImageInfoGeometryCommandArchive -> 3066
+	0x14237b420 TST.CommandSetUseAccountingStyleArchive -> 6132
+	0x14232d370 TSK.OutgoingCommandQueueSegment -> 250
+	0x14237b0c0 TST.CommandSetCurrencyCodeArchive -> 6131
+	0x142346280 TSD.GuideCommandArchive -> 3050
+	0x14237b150 TST.CommandSetFractionAccuracyArchive -> 6129
+	0x14232d490 TSK.CommandAssetChunkArchive -> 260
+	0x142346310 TSD.DrawableAspectRatioLockedCommandArchive -> 3051
+	0x14237b1e0 TST.CommandSetNegativeNumberStyleArchive -> 6128
+	0x142346700 TSD.DrawableSelectionTransformerArchive -> 3071
+	0x14237b5d0 TST.CommandSortArchive -> 6123
+	0x14232ce60 TSK.CollaborationDocumentSessionState -> 226
+	0x142345ce0 TSD.MediaFlagsCommandArchive -> 3037
+	0x14237abb0 TST.CommandSetRepeatingHeaderEnabledArchive -> 6120
+	0x142345f20 TSD.CommentInvalidatingCommandSelectionBehaviorArchive -> 3064
+	0x14237adf0 TST.CommandReplaceTableStylePresetArchive -> 6270
+	0x142345e90 TSD.DrawableHyperlinkCommandArchive -> 3040
+	0x14237ad60 TST.CommandRemoveTableStylePresetArchive -> 6266
+	0x142345fb0 TSD.ImageReplaceCommandArchive -> 3026
+	0x14232d130 TSK.OperationStorageEntryArray -> 246
+	0x14237ae80 TST.CommandApplyTableStylePresetArchive -> 6117
+	0x142345e00 TSD.ExteriorTextWrapCommandArchive -> 3036
+	0x14237acd0 TST.CommandAddTableStylePresetArchive -> 6262
+	0x14237c230 TST.CommandSetTextStylePropertiesArchive -> 6149
+	0x142345a10 TSD.MediaOriginalSizeCommandArchive -> 3027
+	0x14237a8e0 TST.CommandSetTableNameHeightArchive -> 6142
+	0x142345860 TSD.MovieSetValueCommandArchive -> 3034
+	0x142307420 TN.ChartMediatorArchive -> 12006
+	0x14232c9e0 TSK.CreateLocalStorageSnapshotCommandArchive -> 238
+	0x14237a730 TST.CommandSetTableNameEnabledArchive -> 6114
+	0x14232c950 TSK.ChangeDocumentPackageTypeCommandArchive -> 231
+	0x14237a6a0 TST.CommandSetTableNameArchive -> 6107
+	0x1423464c0 TSD.ImageInfoAbstractGeometryCommandArchive -> 3065
+	0x14232d640 TSK.PencilAnnotationUIState -> 258
+	0x14237b390 TST.CommandSetShowThousandsSeparatorArchive -> 6127
+	0x14232d520 TSK.AssetUploadStatusCommandArchive -> 261
+	0x1423463a0 TSD.DrawableAccessibilityDescriptionCommandArchive -> 3058
+	0x14237b270 TST.CommandSetNumberOfDecimalPlacesArchive -> 6126
+	0x14237a2b0 TST.CommandResizeColumnOrRowArchive -> 6104
+	0x1423452c0 TSD.DrawablePathSourceCommandArchive -> 3022
+	0x14237a190 TST.CommandRemoveColumnsOrRowsArchive -> 6103
+	0x142306d60 TN.FormBuilderSelectionArchive -> 12053
+	0x14232c320 TSK.DocumentSelectionArchive -> 219
+	0x1423451a0 TSD.ConnectionLineConnectCommandArchive -> 3041
+	0x14237a070 TST.CommandInsertColumnsOrRowsArchive -> 6102
+	0x142345c50 TSD.ImageAdjustmentsCommandArchive -> 3055
+	0x14237ab20 TST.CommandStyleTableArchive -> 6125
+	0x1408fcfc0 TSWP.SectionPlaceholderArchive -> 10011
+	0x142379b60 TST.CommandDeleteCellsArchive -> 6101
+	0x1408fcf30 TSWP.ChangeSessionArchive -> 2062
+	0x142344c00 TSD.UndoObjectArchive -> 3068
+	0x142379ad0 TST.CommandChangeFreezeHeaderStateArchive -> 6111
+	0x1408f29c0 TSCH.CommandReplaceGridValuesArchive -> 5127
+	0x142353510 TST.CellMapArchive -> 6031
+	0x1408f31a0 TSCH.ChartSubselectionIdentityTransformerHelperArchive -> 5152
+	0x142353cf0 TST.SelectionArchive -> 6030
+	0x142367760 TST.TableStylePresetArchive -> 6008
+	0x1408f1df0 TSCH.CommandSetFontFamilyArchive -> 5137
+	0x1408c00f0 TSCE.CellRecordTileArchive -> 4009
+	0x1423677f0 TST.TableStrokePresetArchive -> 6009
+	0x142354560 TST.ConditionalStyleSetArchive -> 6010
+	0x1408f1e80 TSCH.CommandApplyFillSetArchive -> 5138
+	0x1423529d0 TST.TableInfoArchive -> 6000
+	0x14230f7f0 TN.CommandSetSheetNameArchive -> 12005
+	0x142328670 TSD.StandinCaptionArchive -> 3097
+	0x14230feb0 TN.CommandSetHeaderFooterInsetsArchive -> 12032
+	0x142328d30 TSD.PencilAnnotationSelectionArchive -> 3089
+	0x14109a460 TSP.ObjectCollection -> 11010
+	0x1423103c0 TN.CommandChartMediatorSetFormula -> 12038
+	0x1423102a0 TN.CommandChartMediatorSetSeriesOrder -> 12039
+	0x14230f640 TN.CommandDocumentInsertSheetArchive -> 12003
+	0x1423284c0 TSD.DrawableContentDescription -> 3083
+	0x1408bfb50 TSCE.ReferencesToDirtyArchive -> 4011
+	0x142327d70 TSD.ThemeReplaceFillPresetCommandArchive -> 3057
+	0x14109ab20 TSP.LargeLazyObjectArray -> 11021
+	0x142310a80 TN.CommandInducedSheetChangeArchive -> 12043
+	0x14181d0e0 TNSOS.InducedVerifyDrawableZOrdersWithServerCommandArchive -> 12045
+	0x14109a7c0 TSP.LargeUUIDArraySegment -> 11024
+	0x142310720 TN.CanvasSelectionTransformerArchive -> 12047
+	0x142327c50 TSD.MediaStyleArchive -> 3016
+	0x142327b30 TSD.ShapeStyleArchive -> 3015
+	0x142323030 TSS.ThemeReplaceStylePresetAndDisconnectStylesCommandArchive -> 419
+	0x14237d430 TST.CommandExtendTableIDHistoryArchive -> 6381
+	0x142322fa0 TSS.ThemeMovePresetCommandArchive -> 417
+	0x14237d3a0 TST.CommandRewriteTrackedReferencesArchive -> 6380
+	0x142322f10 TSS.ThemeRemoveStylePresetCommandArchive -> 415
+	0x1408f3110 TSCH.ChartRefLineSubselectionTransformerHelperArchive -> 5150
+	0x1408c1410 TSCE.CalculationEngineArchive -> 4000
+	0x14237d310 TST.CommandPivotSortArchive -> 6377
+	0x142322e80 TSS.ThemeAddStylePresetCommandArchive -> 414
+	0x14237d160 TST.CommandPivotSetPivotRulesArchive -> 6371
+	0x142322cd0 TSS.StyleUpdatePropertyMapCommandArchive -> 412
+	0x14109aa00 TSP.LargeNumberArray -> 11019
+	0x14109a4f0 TSP.ObjectContainer -> 11008
+	0x142310450 TN.CommandSheetSetBackgroundFillArchive -> 12051
+	0x142354290 TST.CellStyleArchive -> 6004
+	0x1408fc510 TSWP.TOCAttachmentArchive -> 2241
+	0x14232b360 TSK.CollaborationCommandHistoryArraySegment -> 257
+	0x1408fc480 TSWP.DrawableAttachmentArchive -> 2003
+	0x14232b2d0 TSK.CollaborationCommandHistoryArray -> 256
+	0x1408fc630 TSWP.NumberAttachmentArchive -> 2043
+	0x14232b480 TSK.CollaborationCommandHistoryItem -> 255
+	0x1408fc360 TSWP.TSWPTOCPageNumberAttachmentArchive -> 2010
+	0x14232b1b0 TSK.LocalCommandHistoryArraySegment -> 254
+	0x1408fc2d0 TSWP.TextualAttachmentArchive -> 2004
+	0x14232b120 TSK.LocalCommandHistoryArray -> 253
+	0x1408fc240 TSWP.EquationInfoArchive -> 2015
+	0x14232b090 TSK.LocalCommandHistoryItem -> 252
+	0x142353fc0 TST.TableNameSelectionArchive -> 6284
+	0x1423107b0 TN.FormTableChooserSelectionTransformerArchive -> 12055
+	0x14109a850 TSP.LargeLazyObjectArraySegment -> 11018
+	0x142353f30 TST.StockCellSelectionArchive -> 6312
+	0x1408f2b70 TSCH.CommandReplaceCustomFormatArchive -> 5139
+	0x1423536c0 TST.ConcurrentCellListArchive -> 6034
+	0x14109b820 TSP.ObjectSerializationMetadata -> 11013
+	0x14232cd40 TSK.OutgoingCommandQueueItem -> 234
+	0x142345bc0 TSD.ImageMaskCommandArchive -> 3024
+	0x1408f32c0 TSCH.CDESelectionTransformerArchive -> 5151
+	0x142353e10 TST.StrokeSelectionArchive -> 6295
+	0x142310600 TN.SheetSelectionTransformerArchive -> 12042
+	0x14109a6a0 TSP.LargeNumberArraySegment -> 11016
+	0x1408f3230 TSCH.ChartSubselectionTransformerArchive -> 5147
+	0x142353d80 TST.DeathhawkRdar39989167CellSelectionArchive -> 6032
+	0x142353ea0 TST.ControlCellSelectionArchive -> 6283
+	0x142310690 TN.FormSheetSelectionTransformerArchive -> 12058
+	0x14109a730 TSP.LargeStringArraySegment -> 11017
+	0x1408e5750 TSCH.ChartStylePreset -> 5020
+	0x14181d050 TNSOS.InducedVerifyDocumentWithServerCommandArchive -> 12044
+	0x14109a3d0 TSP.PasteboardObject -> 11000
+	0x14109b790 TSP.ViewStateMetadata -> 11009
+	0x1408e5000 TSCH.ChartDrawableArchive -> 5021
+	0x14109b550 TSP.DataMetadataMap -> 11015
+	0x1408f26f0 TSCH.CommandSetPieWedgeExplosion -> 5122
+	0x142353240 TST.StrokeLayerArchive -> 6306
+	0x142345230 TSD.InfoGeometryCommandArchive -> 3021
+	0x142306df0 TN.FormTableChooserSelectionArchive -> 12054
+	0x142354200 TST.TableStyleArchive -> 6003
+	0x14109aa90 TSP.LargeStringArray -> 11020
+	0x1408f2660 TSCH.CommandSetLegendFrameArchive -> 5108
+	0x1423531b0 TST.ColumnRowUIDMapArchive -> 6267
+	0x140920860 TSA.GalleryItemSelection -> 625
+	0x14109b310 TSP.PackageMetadata -> 11006
+	0x1408fc1b0 TSWP.TOCLayoutHintArchive -> 2242
+	0x14232b000 TSK.TreeNode -> 205
+	0x142352310 TST.Tile -> 6002
+	0x1408fc870 TSWP.UnsupportedHyperlinkFieldArchive -> 2039
+	0x14232b6c0 TSK.DocumentArchive -> 200
+	0x14109baf0 TSP.SupportMetadata -> 11012
+	0x1423108d0 TN.FormViewerSelectionTransformerArchive -> 12057
+	0x14109a8e0 TSP.LargeObjectArraySegment -> 11026
+	0x142310840 TN.FormBuilderSelectionTransformerArchive -> 12056
+	0x142306f10 TN.DocumentArchive -> 1
+	0x142345350 TSD.InstantAlphaCommandArchive -> 3042
+	0x142306cd0 TN.FormSelectionArchive -> 12040
+	0x142353000 TST.TableModelArchive -> 6001
+	0x142354050 TST.AutofillSelectionArchive -> 6311
+	0x1408f2030 TSCH.CommandAddGridRowsArchive -> 5115
+	0x142352b80 TST.TableStyleNetworkArchive -> 6247
+	0x14230f400 TN.CommandFormChooseTargetTableArchive -> 12015
+	0x142328280 TSD.MaskArchive -> 3006
+	0x14230f880 TN.CommandSetSheetShouldPrintCommentsArchive -> 12049
+	0x14230f910 TN.CommandSetSheetDirectionArchive -> 12048
+	0x1408fcab0 TSWP.DateTimeSmartFieldArchive -> 2034
+	0x14232b900 TSK.ViewStateArchive -> 210
+	0x142310060 TN.CommandSetStartPageNumberArchive -> 12035
+	0x14109abb0 TSP.LargeObjectArray -> 11027
+	0x1423532d0 TST.StrokeSidecarArchive -> 6305
+	0x14109b430 TSP.PasteboardMetadata -> 11007
+	0x14109ba60 TSP.DocumentMetadata -> 11011
+	0x142310570 TN.DocumentSelectionTransformerArchive -> 12041
+	0x1408fcc60 TSWP.MergeSmartFieldArchive -> 2036
+	0x14232bab0 TSK.InducedCommandCollectionArchive -> 224
+	0x142379800 TST.TableCommandArchive -> 6100
+	0x14230ff40 TN.CommandSetPageOrderArchive -> 12033
+	0x142328dc0 TSD.PencilAnnotationStorageArchive -> 242
+	0x14230f9a0 TN.CommandSetPageOrientationArchive -> 12017
+	0x142328820 TSD.GuideStorageArchive -> 3047
+	0x142328ca0 TSD.PencilAnnotationArchive -> 3086
+	0x14230fe20 TN.CommandSetPrintBackgroundsArchive -> 12052
+	0x1408f2a50 TSCH.CommandReplaceThemePresetArchive -> 5131
+	0x1423535a0 TST.CellListArchive -> 6273
+	0x14230fd90 TN.CommandSetPrinterMarginsArchive -> 12031
+	0x142328c10 TSD.ReplaceAnnotationAuthorCommandArchive -> 3070
+	0x142310210 TN.CommandChartMediatorSetGridDirection -> 12037
+	0x142352700 TST.TableDataListSegment -> 6011
+	0x142327e00 TSD.DrawableArchive -> 3002
+	0x140920b30 TSA.CaptionPlacementArchive -> 634
+	0x14109b5e0 TSP.DataMetadata -> 11014
+	0x14230fbe0 TN.CommandSetDocumentPaperSize -> 12030
+	0x142328a60 TSD.PathSelectionArchive -> 3063
+	0x14230fb50 TN.CommandSetContentScaleArchive -> 12018
+	0x1423289d0 TSD.GroupSelectionArchive -> 3062
+	0x14230ffd0 TN.CommandSetUsingStartPageNumberArchive -> 12034
+	0x142328940 TSD.DrawableSelectionArchive -> 3061
+	0x1408fc3f0 TSWP.UIGraphicalAttachment -> 2006
+	0x14232b240 TSK.LocalCommandHistory -> 201
+	0x1408f1fa0 TSCH.CommandSetCategoryNameArchive -> 5105
+	0x142352af0 TST.WPTableInfoArchive -> 6007
+	0x14109ac40 TSP.LargeUUIDArray -> 11025
+	0x142328b80 TSD.CommentStorageArchive -> 3056
+	0x142310180 TN.CommandChartMediatorSetEditingState -> 12014
+	0x14230f5b0 TN.CommandSheetMoveDrawableZOrderArchive -> 12013
+	0x1408f1cd0 TSCH.CommandMutatePropertiesArchive -> 5135
+	0x142352820 TST.HeaderStorageBucket -> 6006
+	0x142327f20 TSD.GroupArchive -> 3008
+	0x1423283a0 TSD.MovieArchive -> 3007
+	0x14230f520 TN.CommandSheetRemoveDrawablesArchive -> 12012
+	0x142327e90 TSD.ContainerArchive -> 3003
+	0x14230f490 TN.CommandSheetInsertDrawablesArchive -> 12002
+	0x1408fca20 TSWP.CitationSmartFieldArchive -> 2038
+	0x14232b870 TSK.DocumentSupportArchive -> 211
+	0x142352670 TST.TableDataList -> 6005
+	0x1408fcbd0 TSWP.FilenameSmartFieldArchive -> 2033
+	0x14232ba20 TSK.CommandGroupArchive -> 202
+	0x142352430 TST.PopUpMenuModel -> 6206
+	0x1408fc990 TSWP.CitationRecordArchive -> 2037
+	0x14232b7e0 TSK.DocumentSupportCollaborationState -> 230
+	0x1408fc750 TSWP.HyperlinkFieldArchive -> 2032
+	0x14232b5a0 TSK.CollaborationCommandHistoryCoalescingGroupNode -> 228
+	0x14230f6d0 TN.CommandDocumentRemoveSheetArchive -> 12004
+	0x142328550 TSD.FreehandDrawingContentDescription -> 3090
+	0x1423288b0 TSD.CanvasSelectionArchive -> 3045
+	0x1408fc7e0 TSWP.PlaceholderSmartFieldArchive -> 2031
+	0x14232b630 TSK.CollaborationCommandHistoryOriginatingCommandAcknowledgementObserver -> 229
+	0x1408fc5a0 TSWP.FootnoteReferenceAttachmentArchive -> 2008
+	0x14232b3f0 TSK.CollaborationCommandHistory -> 218
+	0x14232b510 TSK.CollaborationCommandHistoryCoalescingGroup -> 227
+	0x14230f760 TN.CommandDocumentReorderSheetArchive -> 12008
+	0x1423285e0 TSD.FreehandDrawingToolkitUIState -> 3091
+	0x142328160 TSD.ConnectionLineArchive -> 3009
+	0x1423280d0 TSD.ShapeArchive -> 3004
+	0x1423281f0 TSD.ImageArchive -> 3005
  }
  _messageTypeToClassnameMap = {
 	7 -> TNPlaceholderInfo
@@ -1197,6 +1252,8 @@ Architecture set to: arm64e-apple-macosx-.
 	628 -> TSAGalleryItemSetGeometryCommand
 	601 -> TSAFunctionBrowserState
 	10024 -> TSWPDropCapStyle
+	2412 -> TSWPPencilAnnotationSelectionTransformer
+	2408 -> TSWPShapeStyleSetValueCommand
 	2405 -> TSWPStyleReorderCommand
 	2404 -> TSWPStyleDeleteCommand
 	2402 -> TSWPStyleRenameCommand
@@ -1244,6 +1301,7 @@ Architecture set to: arm64e-apple-macosx-.
 	2003 -> TSWPDrawableAttachment
 	2002 -> TSWPArchivedSelection
 	2001 -> TSWPStorage
+	5157 -> TSCHCommandInduced3DChartGeometry
 	5156 -> TSCHCommandReplaceImageData
 	5155 -> TSCHCommandInducedReplaceChartGrid
 	5154 -> TSCHCommandPasteStyle
@@ -1278,24 +1336,25 @@ Architecture set to: arm64e-apple-macosx-.
 	5116 -> TSCHCommandAddColumns
 	5115 -> TSCHCommandAddRows
 	5110 -> TSCHCommandSetGridDirection
+	5109 -> TSCHCommandSetGridValue
+	5108 -> TSCHCommandSetLegendFrame
+	5107 -> TSCHCommandSetScatterFormat
 	5105 -> TSCHCommandSetCategoryName
-	249 -> TSKOutgoingCommandQueue
-	5031 -> TSCHReferenceLineNonStyle
+	5104 -> TSCHCommandSetSeriesName
+	5103 -> TSCHCommandSetChartType
+	5026 -> TSCHChartAxisStyle
+	5025 -> TSCHLegendNonStyle
 	4011 -> TSCEReferencesToDirty
 	4010 -> TSCERangePrecedentsTile
 	4009 -> TSCECellRecordTileWrapper
 	4008 -> TSCEFormulaOwnerDependencies
 	4007 -> TSCERemoteDataStore
-	2412 -> TSWPPencilAnnotationSelectionTransformer
-	4006 -> TSCEExtendTableIDHistoryCommand
 	2411 -> TSWPFlowInfoContainer
 	4005 -> TSCETrackedReferenceTSPObjectDeprecated
 	2410 -> TSWPFlowInfo
-	4004 -> TSCEReferenceTracker
+	4004 -> TSCETrackedReferenceStore
 	2409 -> TSWPArchivedHyperlinkSelection
 	4003 -> TSCENamedReferenceManager
-	2408 -> TSWPShapeStyleSetValueCommand
-	4002 -> TSCETrackedReferencesRewriteCommand
 	2407 -> TSWPStorageActionCommand
 	4001 -> TSCEFormulaRewriteCommand
 	2406 -> TSWPStyleUpdatePropertyMapCommand
@@ -1307,6 +1366,7 @@ Architecture set to: arm64e-apple-macosx-.
 	6351 -> TSTTableSubSelectionTransformerBase
 	6358 -> TSTWPSelectionTransformer
 	6350 -> TSTIdempotentSelectionTransformer
+	6373 -> TSTGroupBy
 	6366 -> TSTHeaderNameMgr
 	6365 -> TSTHeaderNameMgrTile
 	6363 -> TSTPencilAnnotation
@@ -1329,11 +1389,16 @@ Architecture set to: arm64e-apple-macosx-.
 	615 -> TSAInducedVerifyDrawableZOrdersWithServerCommand
 	3006 -> TSDMaskInfo
 	6194 -> TSTPostfixOperatorNode
-	5108 -> TSCHCommandSetLegendFrame
 	6299 -> TSTInNode
-	5107 -> TSCHCommandSetScatterFormat
 	6298 -> TSTVariableNode
 	6297 -> TSTLetNode
+	3 -> TNFormBasedSheet
+	6379 -> TSTCommandRewritePivotOwnerFormulas
+	1 -> TNDocumentRoot
+	6377 -> TSTCommandPivotSort
+	6375 -> TSTCommandPivotSetGroupingColumnOptions
+	6376 -> TSTCommandPivotHideShowGrandTotals
+	6159 -> TSTCommandSetGroupSortOrder
 	6362 -> TSTCommandRewritePencilAnnotationFormulas
 	6153 -> TSTCommandCategoryMoveRows
 	6152 -> TSTCommandCategoryResizeColumnOrRow
@@ -1347,7 +1412,6 @@ Architecture set to: arm64e-apple-macosx-.
 	3094 -> TSDFreehandDrawingAnimationCommand
 	6282 -> TSTCommandApplyCellMap
 	6281 -> TSTCommandUnmergeCells
-	5109 -> TSCHCommandSetGridValue
 	6300 -> TSTCommandInverseMergeCells
 	3092 -> TSDPencilAnnotationSelectionTransformer
 	6280 -> TSTCommandMergeCells
@@ -1356,7 +1420,6 @@ Architecture set to: arm64e-apple-macosx-.
 	3088 -> TSDPencilAnnotationCommand
 	6276 -> TSTCommandSetFilterSet
 	6269 -> TSTCommandReplaceCustomFormat
-	5103 -> TSCHCommandSetChartType
 	6294 -> TSTCommandRewriteSortOrderForRewriteSpec
 	6292 -> TSTCommandRewriteConditionalStylesForRewriteSpec
 	6293 -> TSTCommandRewriteFilterFormulasForRewriteSpec
@@ -1369,6 +1432,8 @@ Architecture set to: arm64e-apple-macosx-.
 	6307 -> TSTCommandChooseTableIdRemapper
 	6321 -> TSTCommandCategorySetGroupingColumns
 	6320 -> TSTCommandCategoryCollapseExpandGroup
+	6381 -> TSTCommandExtendTableIDHistory
+	6380 -> TSTCommandRewriteTrackedReferences
 	6323 -> TSTCommandRewriteHiddenStatesForGroupByChange
 	6315 -> TSTCommandRewriteCategoryFormulas
 	6303 -> TSTCommandRewriteMergeFormulas
@@ -1395,20 +1460,13 @@ Architecture set to: arm64e-apple-macosx-.
 	6126 -> TSTCommandSetNumberOfDecimalPlaces
 	2119 -> TSWPUpdateDateTimeFieldCommand
 	6104 -> TSTCommandResizeColumnOrRow
-	2118 -> TSWPModifyRubyTextCommand
-	6103 -> TSTCommandRemoveColumnsOrRows
-	6102 -> TSTCommandInsertColumnsOrRows
 	6125 -> TSTCommandStyleTable
-	2116 -> TSWPApplyRubyTextCommand
-	6101 -> TSTCommandDeleteCells
 	2126 -> TSWPRemoveFlowInfoCommand
 	6111 -> TSTCommandChangeFreezeHeaderState
-	6100 -> TSTTableCommand
 	6034 -> TSTConcurrentCellList
 	6033 -> TSTConcurrentCellMap
 	6031 -> TSTCellMap
 	6311 -> TSTArchivedAutofillSelection
-	5104 -> TSCHCommandSetSeriesName
 	6295 -> TSTArchivedStrokeSelection
 	6032 -> TSTArchivedRdar39989167CellSelection
 	6030 -> TSTArchivedCellSelection
@@ -1430,6 +1488,8 @@ Architecture set to: arm64e-apple-macosx-.
 	6003 -> TSTTableStyle
 	2016 -> TSWPPencilAnnotation
 	6001 -> TSTTableModel
+	2015 -> TSWPEquationInfo
+	6000 -> TSTTableInfo
 	3098 -> TSDSetCaptionOrTitleVisibilityCommand
 	3085 -> TSDContainerInsertDrawablesCommand
 	6273 -> TSTCellList
@@ -1520,27 +1580,15 @@ Architecture set to: arm64e-apple-macosx-.
 	3049 -> TSDDrawableInfoCommentCommand
 	11018 -> TSPMutableLargeLazyReferenceArraySegment
 	3048 -> TSDStyledInfoSetStyleCommand
-	2015 -> TSWPEquationInfo
-	6000 -> TSTTableInfo
-	248 -> TSKBlockDiffsAtCurrentRevisionCommand
-	5030 -> TSCHReferenceLineStyle
 	6221 -> TSTCommandSetFiltersEnabled
 	11015 -> TSPDataMetadataMap
 	3045 -> TSDArchivedCanvasSelection
-	247 -> TSKOperationStorageEntryArraySegment
-	5029 -> TSCHChartSeriesNonStyle
 	3032 -> TSDMediaApplyPresetCommand
 	6220 -> TSTTableFilterSet
-	246 -> TSKOperationStorageEntryArray
-	5028 -> TSCHChartSeriesStyle
-	245 -> TSKOperationStorage
-	5027 -> TSCHChartAxisNonStyle
 	11000 -> TSPPasteboardObject
 	3030 -> TSDMediaStyleSetValueCommand
 	6218 -> TSTRichTextPayload
-	5026 -> TSCHChartAxisStyle
 	262 -> TSKAssetUnmaterializedOnServerCommand
-	5025 -> TSCHLegendNonStyle
 	261 -> TSKAssetUploadStatusCommand
 	240 -> TSKSelectionPathTransformer
 	5022 -> TSCHChartStyle
@@ -1566,22 +1614,32 @@ Architecture set to: arm64e-apple-macosx-.
 	625 -> TSAArchivedGalleryItemSelection
 	3016 -> TSDMediaStyle
 	6204 -> TSTHiddenStateFormulaOwner
+	5031 -> TSCHReferenceLineNonStyle
+	249 -> TSKOutgoingCommandQueue
 	637 -> TSAGalleryInfoRemoveItemsCommand
 	2231 -> TSWPShapeApplyPresetCommand
 	3028 -> TSDShapeStyleSetValueCommand
 	230 -> TSKDocumentSupportCollaborationState
 	5012 -> TSCHChartAxisStyle
+	5030 -> TSCHReferenceLineStyle
+	248 -> TSKBlockDiffsAtCurrentRevisionCommand
 	636 -> TSAGalleryInfoInsertItemsCommand
 	3027 -> TSDMediaOriginalSizeCommand
 	229 -> TSKCollaborationCommandHistoryOriginatingCommandAcknowledgementObserver
 	5011 -> TSCHChartSeriesStyle
+	5029 -> TSCHChartSeriesNonStyle
+	247 -> TSKOperationStorageEntryArraySegment
 	635 -> TSATitlePlacementCommand
 	3026 -> TSDImageReplaceCommand
 	228 -> TSKCollaborationCommandHistoryCoalescingGroupNode
 	5010 -> TSCHChartStyle
 	6201 -> TSTTableDataList
+	5028 -> TSCHChartSeriesStyle
+	246 -> TSKOperationStorageEntryArray
 	634 -> TSACaptionPlacement
 	3025 -> TSDImageMediaCommand
+	5027 -> TSCHChartAxisNonStyle
+	245 -> TSKOperationStorage
 	633 -> TSACaptionInfo
 	3024 -> TSDImageMaskCommand
 	619 -> TSACommandRemoteDataChange
@@ -1594,8 +1652,6 @@ Architecture set to: arm64e-apple-macosx-.
 	3002 -> TSDDrawableInfo
 	401 -> TSSStylesheet
 	260 -> TSKAssetChunkCommand
-	241 -> TSKNativeContentDescription
-	5023 -> TSCHChartNonStyle
 	259 -> TSKFixCorruptedDataCommand
 	613 -> TSAVerifyDocumentWithServerCommand
 	3004 -> TSDShapeInfo
@@ -1638,11 +1694,24 @@ Architecture set to: arm64e-apple-macosx-.
 	614 -> TSAVerifyDrawableZOrdersWithServerCommand
 	6193 -> TSTArgumentPlaceholderNode
 	3005 -> TSDImageInfo
+	225 -> TSKInducedCommandCollectionCommitCommand
+	600 -> TSADocumentRoot
+	6179 -> TSTFormulaEqualsTokenAttachment
+	224 -> TSKInducedCommandCollection
+	5023 -> TSCHChartNonStyle
+	241 -> TSKNativeContentDescription
+	222 -> TSKCustomFormatList
+	5004 -> TSCHPersistentChartMediator
 	12051 -> TNCommandSheetSetBackgroundFill
 	607 -> TSACommandReplaceCustomFormat
 	6186 -> TSTArrayNode
+	2118 -> TSWPModifyRubyTextCommand
+	6103 -> TSTCommandRemoveColumnsOrRows
+	12058 -> TNFormSheetSelectionTransformer
 	220 -> TSKCommandSelectionBehavior
 	5002 -> TSCHDeprecatedChartGridForUpgrade
+	6100 -> TSTTableCommand
+	12055 -> TNFormTableChooserSelectionTransformer
 	12054 -> TNArchivedFormTableChooserSelection
 	6189 -> TSTFunctionNode
 	12052 -> TNCommandSetPrintBackgrounds
@@ -1653,22 +1722,24 @@ Architecture set to: arm64e-apple-macosx-.
 	12047 -> TNCanvasSelectionTransformer
 	12046 -> TNPasteboardNativeStorage
 	12045 -> TNCommandInducedVerifyDrawableZOrdersWithServer
-	225 -> TSKInducedCommandCollectionCommitCommand
 	12044 -> TNCommandInducedVerifyDocumentWithServer
-	600 -> TSADocumentRoot
-	6179 -> TSTFormulaEqualsTokenAttachment
-	224 -> TSKInducedCommandCollection
 	12043 -> TNCommandInducedSheetChange
-	12041 -> TNDocumentSelectionTransformer
-	221 -> TSKNullCommand
+	6102 -> TSTCommandInsertColumnsOrRows
+	12057 -> TNFormViewerSelectionTransformer
+	6374 -> TSTPivotGroupingColumnOptionsMap
 	2013 -> TSWPHighlight
 	419 -> TSSThemeReplaceStylePresetAndDisconnectStylesCommand
 	12042 -> TNSheetSelectionTransformer
-	5004 -> TSCHPersistentChartMediator
-	222 -> TSKCustomFormatList
+	2116 -> TSWPApplyRubyTextCommand
+	6101 -> TSTCommandDeleteCells
+	12056 -> TNFormBuilderSelectionTransformer
+	12041 -> TNDocumentSelectionTransformer
+	221 -> TSKNullCommand
+	6372 -> TSTCategoryOwner
 	2011 -> TSWPShapeInfo
 	417 -> TSSThemeMovePresetCommand
 	12040 -> TNArchivedFormSelection
+	6371 -> TSTCommandPivotSetPivotRules
 	2010 -> TSWPTOCPageNumberAttachment
 	416 -> TSSThemeReplaceColorPresetCommand
 	12039 -> TNCommandChartMediatorSetSeriesOrder
@@ -1688,17 +1759,18 @@ Architecture set to: arm64e-apple-macosx-.
 	211 -> TSKDocumentSupport
 	12030 -> TNCommandSetDocumentPaperSize
 	210 -> TSKViewState
+	6370 -> TSTPivotOwner
 	2009 -> TSWPTextualAttachment
 	415 -> TSSThemeRemoveStylePresetCommand
 	12038 -> TNCommandChartMediatorSetFormula
 	6357 -> TSTChangePropagationMapWrapper
 	402 -> TSSTheme
-	205 -> TSKTreeNode
+	205 -> TSKTreeNodeDeprecated
 	6355 -> TSTTableControlCellSelectionTransformer
-	3 -> TNFormBasedSheet
 	400 -> TSSStyle
 	6158 -> TSTCommandApplyConcurrentCellMap
 	203 -> TSKCommandContainer
+	6369 -> TSTPivotRowColumnOrder
 	2008 -> TSWPFootnoteReferenceAttachment
 	414 -> TSSThemeAddStylePresetCommand
 	12037 -> TNCommandChartMediatorSetGridDirection
@@ -1714,7 +1786,6 @@ Architecture set to: arm64e-apple-macosx-.
 	12028 -> TNArchivedSheetSelection
 	12026 -> TNArchivedUIState
 	6353 -> TSTRegionSelectionTransformer
-	1 -> TNDocumentRoot
 	12018 -> TNCommandSetContentScale
 	12017 -> TNCommandSetPageOrientation
 	12015 -> TNCommandFormChooseTargetTable
@@ -1739,13 +1810,26 @@ Architecture set to: arm64e-apple-macosx-.
 	7 -> null
 	601 -> TSAFunctionBrowserState
 	10024 -> TSWPDropCapStyle
+	2412 -> null
+	2408 -> null
 	2405 -> null
 	2404 -> null
+	2403 -> TSPUnknownObject
 	2402 -> null
 	2401 -> null
 	2400 -> null
+	2114 -> TSPUnknownObject
+	2113 -> TSPUnknownObject
+	2112 -> TSPUnknownObject
+	2111 -> TSPUnknownObject
+	2110 -> TSPUnknownObject
+	2109 -> TSPUnknownObject
+	2108 -> TSPUnknownObject
 	2107 -> null
+	2106 -> TSPUnknownObject
+	2105 -> TSPUnknownObject
 	2104 -> TSPUnknownObject
+	2102 -> TSPUnknownObject
 	2101 -> null
 	2062 -> null
 	2061 -> null
@@ -1770,7 +1854,7 @@ Architecture set to: arm64e-apple-macosx-.
 	2035 -> null
 	2034 -> null
 	2033 -> null
-	2032 -> null
+	2032 -> TSWPHyperlinkField
 	2031 -> null
 	2014 -> null
 	2012 -> TSPUnknownObject
@@ -1779,6 +1863,7 @@ Architecture set to: arm64e-apple-macosx-.
 	2003 -> null
 	2002 -> null
 	2001 -> TSWPStorage
+	5157 -> null
 	5156 -> null
 	5155 -> null
 	5154 -> null
@@ -1824,20 +1909,16 @@ Architecture set to: arm64e-apple-macosx-.
 	5025 -> null
 	5021 -> null
 	4011 -> null
-	4010 -> null
+	4010 -> TSCERangePrecedentsTile
 	4009 -> TSCECellRecordTileWrapper
 	4008 -> TSCEFormulaOwnerDependencies
-	4007 -> null
-	2412 -> null
-	4006 -> null
+	4007 -> TSCERemoteDataStore
 	2411 -> null
 	4005 -> null
 	2410 -> null
-	4004 -> TSCEReferenceTracker
+	4004 -> TSCETrackedReferenceStore
 	2409 -> null
 	4003 -> TSCENamedReferenceManager
-	2408 -> null
-	4002 -> null
 	2407 -> null
 	4001 -> null
 	2406 -> null
@@ -1854,6 +1935,11 @@ Architecture set to: arm64e-apple-macosx-.
 	6351 -> null
 	6358 -> null
 	6350 -> null
+	6373 -> TSTGroupBy
+	6372 -> TSTCategoryOwner
+	6369 -> null
+	6374 -> null
+	6370 -> null
 	6366 -> TSTHeaderNameMgr
 	6365 -> TSTHeaderNameMgrTile
 	6363 -> null
@@ -1872,13 +1958,25 @@ Architecture set to: arm64e-apple-macosx-.
 	6206 -> null
 	6201 -> null
 	6199 -> null
+	619 -> null
+	6198 -> null
 	6144 -> null
+	610 -> TSPUnknownObject
+	2204 -> TSPUnknownObject
+	6189 -> null
 	615 -> null
+	2209 -> TSPUnknownObject
 	3006 -> null
 	6194 -> null
 	6299 -> null
 	6298 -> null
 	6297 -> null
+	3 -> null
+	6379 -> null
+	1 -> TNDocumentRoot
+	6377 -> null
+	6375 -> null
+	6376 -> null
 	6362 -> null
 	6153 -> null
 	6152 -> null
@@ -1921,12 +2019,15 @@ Architecture set to: arm64e-apple-macosx-.
 	6307 -> null
 	6321 -> null
 	6320 -> null
+	6381 -> null
+	6380 -> null
 	6323 -> null
 	6315 -> null
 	6303 -> null
 	6291 -> null
 	3098 -> null
 	6286 -> TSPUnknownObject
+	2300 -> TSPUnknownObject
 	3097 -> TSDStandinCaptionInfo
 	6285 -> null
 	6290 -> null
@@ -1966,22 +2067,15 @@ Architecture set to: arm64e-apple-macosx-.
 	6105 -> TSPUnknownObject
 	2119 -> null
 	6104 -> null
-	2118 -> null
-	6103 -> null
 	2127 -> null
 	6112 -> TSPUnknownObject
 	2125 -> null
 	6110 -> TSPUnknownObject
 	2128 -> null
 	6113 -> TSPUnknownObject
-	2117 -> TSPUnknownObject
-	6102 -> null
 	6125 -> null
-	2116 -> null
-	6101 -> null
 	2126 -> null
 	6111 -> null
-	6100 -> null
 	6034 -> null
 	6033 -> null
 	6031 -> null
@@ -2002,7 +2096,7 @@ Architecture set to: arm64e-apple-macosx-.
 	6005 -> TSTTableDataList
 	6002 -> TSTTableTile
 	2025 -> TSWPShapeStyle
-	6010 -> null
+	6010 -> TSTConditionalStyleSet
 	6004 -> TSTCellStyle
 	6003 -> TSTTableStyle
 	2016 -> null
@@ -2019,34 +2113,12 @@ Architecture set to: arm64e-apple-macosx-.
 	6270 -> null
 	6266 -> null
 	6264 -> null
-	3043 -> null
-	6231 -> TSPUnknownObject
-	11013 -> null
-	6261 -> TSPUnknownObject
-	3073 -> null
-	3042 -> null
-	6230 -> TSPUnknownObject
-	11012 -> null
-	6260 -> TSPUnknownObject
-	3072 -> null
-	3041 -> null
-	6229 -> null
-	11011 -> TSPDocumentMetadata
-	6259 -> TSPUnknownObject
-	3071 -> null
-	3058 -> null
-	6246 -> null
-	3040 -> null
-	6228 -> null
-	11010 -> null
-	6258 -> null
-	3070 -> null
 	11026 -> null
 	3056 -> null
 	6244 -> null
 	2241 -> null
 	6226 -> null
-	11008 -> null
+	11008 -> TSPObjectContainer
 	6256 -> null
 	3068 -> null
 	2240 -> null
@@ -2096,28 +2168,43 @@ Architecture set to: arm64e-apple-macosx-.
 	11001 -> TSPDatabaseDataObject
 	6249 -> TSPUnknownObject
 	3061 -> TSDArchivedDrawableSelection
-	11017 -> null
-	3047 -> TSDGuideStorage
-	6235 -> null
 	6247 -> TSTTableStyleNetwork
 	3059 -> null
+	6246 -> null
+	3058 -> null
 	6245 -> TSPUnknownObject
 	11027 -> null
 	3057 -> null
 	11014 -> TSPDataMetadata
 	3044 -> null
 	6232 -> TSPUnknownObject
+	11013 -> null
+	3043 -> null
+	6231 -> TSPUnknownObject
 	11025 -> null
 	3055 -> null
+	11012 -> null
+	3042 -> null
+	6230 -> TSPUnknownObject
+	11011 -> TSPDocumentMetadata
+	3041 -> null
+	6229 -> null
+	11010 -> null
+	3040 -> null
+	6228 -> null
 	2242 -> null
 	11009 -> TSPViewStateMetadata
 	6227 -> TSPUnknownObject
 	6236 -> TSPUnknownObject
 	11018 -> null
 	3048 -> null
+	6235 -> null
+	11017 -> null
+	3047 -> TSDGuideStorage
 	6221 -> null
 	11015 -> TSPDataMetadataMap
 	3045 -> TSDArchivedCanvasSelection
+	2232 -> TSPUnknownObject
 	6217 -> TSPUnknownObject
 	262 -> null
 	637 -> null
@@ -2173,11 +2260,6 @@ Architecture set to: arm64e-apple-macosx-.
 	632 -> null
 	6211 -> TSPUnknownObject
 	3023 -> TSPUnknownObject
-	619 -> null
-	6198 -> null
-	618 -> null
-	3009 -> null
-	6197 -> null
 	5024 -> TSCHLegendStyle
 	242 -> null
 	630 -> null
@@ -2185,26 +2267,23 @@ Architecture set to: arm64e-apple-macosx-.
 	3021 -> null
 	223 -> null
 	611 -> null
+	2205 -> TSPUnknownObject
 	6190 -> null
 	3002 -> null
 	260 -> null
 	259 -> null
-	613 -> null
-	3004 -> null
-	6192 -> null
 	625 -> null
 	6204 -> TSTHiddenStateFormulaOwner
 	3016 -> TSDMediaStyle
-	612 -> null
-	2206 -> null
-	3003 -> null
-	6191 -> null
 	256 -> null
 	254 -> null
 	606 -> null
 	6185 -> null
 	5012 -> null
 	230 -> null
+	618 -> null
+	6197 -> null
+	3009 -> null
 	605 -> null
 	6184 -> null
 	5011 -> null
@@ -2220,6 +2299,7 @@ Architecture set to: arm64e-apple-macosx-.
 	5010 -> null
 	228 -> null
 	616 -> null
+	2210 -> TSPUnknownObject
 	6195 -> null
 	3007 -> null
 	603 -> null
@@ -2229,40 +2309,46 @@ Architecture set to: arm64e-apple-macosx-.
 	6181 -> null
 	226 -> null
 	614 -> null
+	2208 -> TSPUnknownObject
 	6193 -> null
 	3005 -> null
 	225 -> null
+	613 -> null
+	2207 -> TSPUnknownObject
+	6192 -> null
+	3004 -> null
 	600 -> null
 	6179 -> null
 	224 -> null
+	612 -> null
+	2206 -> null
+	6191 -> null
+	3003 -> null
 	5023 -> null
 	241 -> null
 	5022 -> TSCHChartStyle
 	240 -> null
 	5020 -> TSCHChartStylePreset
 	238 -> null
+	2118 -> null
+	6103 -> null
+	12058 -> null
+	2117 -> TSPUnknownObject
+	6102 -> null
+	12057 -> null
+	2116 -> null
+	6101 -> null
+	12056 -> null
 	5017 -> null
 	235 -> null
-	2013 -> null
-	419 -> null
-	12042 -> null
-	5004 -> null
-	222 -> TSKCustomFormatList
-	2011 -> null
-	417 -> null
-	12040 -> null
-	5002 -> null
-	220 -> null
-	610 -> TSPUnknownObject
-	6189 -> null
+	2115 -> TSPUnknownObject
+	6100 -> null
+	12055 -> null
 	5016 -> null
 	234 -> null
 	12054 -> null
-	2010 -> null
-	416 -> null
-	12039 -> null
-	219 -> TSKArchivedDocumentSelection
 	609 -> TSPUnknownObject
+	2203 -> TSPUnknownObject
 	6188 -> null
 	5015 -> null
 	233 -> null
@@ -2287,17 +2373,29 @@ Architecture set to: arm64e-apple-macosx-.
 	210 -> TSKViewState
 	12044 -> null
 	12043 -> null
+	2013 -> null
+	419 -> null
+	5004 -> null
+	222 -> TSKCustomFormatList
+	12042 -> null
 	221 -> null
 	12041 -> null
+	2011 -> null
+	417 -> null
+	5002 -> null
+	220 -> null
+	12040 -> null
 	401 -> TSSStylesheet
 	12024 -> TSPUnknownObject
+	6159 -> null
 	204 -> TSPUnknownObject
 	2009 -> null
 	415 -> null
-	12038 -> null
 	5000 -> null
 	218 -> null
+	12038 -> null
 	608 -> TSPUnknownObject
+	2202 -> TSPUnknownObject
 	6187 -> null
 	5014 -> null
 	232 -> null
@@ -2305,8 +2403,12 @@ Architecture set to: arm64e-apple-macosx-.
 	6357 -> null
 	402 -> null
 	12025 -> TSPUnknownObject
-	205 -> TSKTreeNode
-	3 -> null
+	205 -> TSKTreeNodeDeprecated
+	6371 -> null
+	2010 -> null
+	416 -> null
+	219 -> TSKArchivedDocumentSelection
+	12039 -> null
 	400 -> null
 	12023 -> TSPUnknownObject
 	6158 -> null
@@ -2331,7 +2433,6 @@ Architecture set to: arm64e-apple-macosx-.
 	12026 -> TNArchivedUIState
 	2 -> TNSheet
 	12019 -> TSPUnknownObject
-	1 -> TNDocumentRoot
 	12018 -> null
 	12017 -> null
 	12016 -> TSPUnknownObject
@@ -2350,9 +2451,17 @@ Architecture set to: arm64e-apple-macosx-.
 	6274 -> TSPUnknownObject
 	3086 -> null
 	12010 -> TSPUnknownObject
+	3073 -> null
+	6261 -> TSPUnknownObject
+	3072 -> null
+	6260 -> TSPUnknownObject
 	6272 -> TSPUnknownObject
 	3084 -> null
 	12009 -> TNTheme
+	3070 -> null
+	6258 -> null
+	3071 -> null
+	6259 -> TSPUnknownObject
 	6271 -> null
 	3083 -> null
 	12008 -> null
@@ -2364,6 +2473,7 @@ Architecture set to: arm64e-apple-macosx-.
 	12004 -> null
 	12003 -> null
 	607 -> null
+	2201 -> TSPUnknownObject
 	6186 -> null
 	5013 -> null
 	231 -> null

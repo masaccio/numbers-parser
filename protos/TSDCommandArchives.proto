@@ -402,6 +402,9 @@ message DrawableSelectionTransformerArchive {
   required .TSP.Reference untransformed_drawable_selection = 2;
 }
 
+message InfoHyperlinkSelectionTransformerArchive {
+}
+
 message CanvasSelectionTransformerArchive {
   required .TSD.InfoCollectionSelectionTransformerHelperArchive transformer_helper = 1;
 }

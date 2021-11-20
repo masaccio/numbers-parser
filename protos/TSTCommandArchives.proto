@@ -27,7 +27,7 @@ enum TableAreaTransition {
   TableAreaTransitionBodyToHeaderColumn = 6;
 }
 
-enum ColumnRowTypeEnum {
+enum ColumnRowBundleItemTypeEnum {
   ColumnRowTypeAnchor = 0;
   ColumnRowTypeHeaderRow = 1;
   ColumnRowTypeBodyRow = 2;
@@ -179,16 +179,17 @@ message CommandInsertColumnsOrRowsArchive {
   repeated .TSP.UUID undo_order = 10;
   required .TSP.UUID src_row_column_uid = 11;
   required .TSP.UUID opp_row_column_uid = 12;
+  optional .TST.ColumnRowBundleArchive undo_bundle = 13;
 }
 
 message ColumnRowBundleArchive {
   required bool is_row = 1;
   repeated .TSP.UUID view_uid_list = 2;
-  repeated .TST.ColumnRowTypeEnum view_type_list = 3;
+  repeated .TST.ColumnRowBundleItemTypeEnum view_type_list = 3;
   repeated .TSP.UUID base_uid_list = 4;
-  repeated .TST.ColumnRowTypeEnum base_type_list = 5;
+  repeated .TST.ColumnRowBundleItemTypeEnum base_type_list = 5;
   repeated .TSP.UUID category_order_uid_list = 6;
-  repeated .TST.ColumnRowTypeEnum category_order_type_list = 7;
+  repeated .TST.ColumnRowBundleItemTypeEnum category_order_type_list = 7;
   repeated .TST.ColumnRowMetadataArchive metadata_list = 8;
 }
 
@@ -482,28 +483,46 @@ message CommandSortArchive {
   optional .TSP.Reference formula_rewrite_command = 4;
 }
 
+message FormulaRewriteSpecArchive {
+  required uint32 rewrite_type = 1;
+  optional .TSP.UUID table_uid = 2;
+  optional .TSP.UUID cond_style_owner_uid = 3;
+  optional .TSP.UUID group_by_uid = 4;
+  optional bool is_inverse = 5;
+  optional .TSCE.ColumnOrRowUuidsInfoArchive column_or_row_uuids_info = 6;
+  optional .TSCE.ColumnOrRowUuidsInfoArchive aux_column_or_row_uuids_info = 7;
+  optional .TSCE.RegionMovedInfoArchive region_moved_info = 8;
+  optional .TSCE.RegionInfoArchive region_info = 9;
+  optional .TSCE.RewriteTableUIDInfoArchive rewrite_table_id_info = 10;
+  optional .TSCE.TableTransposeInfoArchive transposed_table_info = 11;
+  optional .TSCE.MergeOriginMovedArchive merge_origin_moved_info = 12;
+  optional .TSCE.MergeSourceArchive merge_source = 13;
+  optional .TSCE.RewriteGroupNodeUIDInfoArchive group_node_info = 14;
+  optional .TSCE.GroupByChangeArchive groupby_change = 15;
+}
+
 message CommandRewriteFormulasForTransposeArchive {
   required .TST.TableCommandArchive super = 1;
-  required .TSCE.FormulaRewriteSpecArchive rewrite_spec = 2;
+  required .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
   required .TSCE.FormulasForUndoArchive formulas_to_rewrite = 3;
   optional .TST.ImportWarningSetByCellRefArchive warningset_map = 4;
 }
 
 message CommandRewriteTableFormulasForRewriteSpecArchive {
   required .TST.TableCommandArchive super = 1;
-  required .TSCE.FormulaRewriteSpecArchive rewrite_spec = 2;
+  required .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
   required .TSCE.FormulasForUndoArchive formulas_to_rewrite = 3;
 }
 
 message CommandRewriteMergeFormulasArchive {
   required .TST.TableCommandArchive super = 1;
-  required .TSCE.FormulaRewriteSpecArchive rewrite_spec = 2;
+  required .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
   required .TSCE.FormulasForUndoArchive formulas_to_rewrite = 3;
 }
 
 message CommandRewriteCategoryFormulasArchive {
   required .TST.TableCommandArchive super = 1;
-  required .TSCE.FormulaRewriteSpecArchive rewrite_spec = 2;
+  required .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
   required .TSCE.FormulasForUndoArchive formulas_to_rewrite = 3;
 }
 
@@ -514,14 +533,20 @@ message CommandRewriteFilterFormulasForTableResizeArchive {
 message CommandRewriteFilterFormulasForRewriteSpecArchive {
   required .TST.TableCommandArchive super = 1;
   required .TSP.Reference filter_set = 2;
-  required .TSCE.FormulaRewriteSpecArchive rewrite_spec = 3;
+  required .TST.FormulaRewriteSpecArchive rewrite_spec = 3;
 }
 
 message CommandRewriteConditionalStylesForRewriteSpecArchive {
   required .TST.TableCommandArchive super = 1;
-  required .TSCE.FormulaRewriteSpecArchive rewrite_spec = 2;
+  required .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
   optional .TSCE.FormulasForUndoArchive formulas_to_rewrite = 3;
   optional .TSCE.ExpandedCellRefObjectMapArchive conditional_style_sets = 4;
+}
+
+message CommandRewritePivotOwnerFormulasArchive {
+  required .TST.TableCommandArchive super = 1;
+  required .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
+  required .TSCE.FormulasForUndoArchive formulas_to_rewrite = 3;
 }
 
 message CommandMergeArchive {
@@ -577,6 +602,7 @@ message CommandCategorySetGroupingColumnsArchive {
   required bool force_restore_all_states = 22;
   optional .TSP.Reference cell_diff_map = 23;
   optional .TSP.Reference undo_cell_diff_map = 24;
+  optional .TSP.Reference undo_set_group_sort_order_command = 25;
 }
 
 message FormulaEditingCommandGroupArchive {
@@ -658,6 +684,12 @@ message CommandSetSortOrderArchive {
   optional .TST.TableSortOrderArchive new_sort_order = 3;
 }
 
+message CommandSetGroupSortOrderArchive {
+  required .TST.TableCommandArchive super = 1;
+  optional .TST.TableGroupSortOrderUIDArchive old_group_sort_order = 2;
+  optional .TST.TableGroupSortOrderUIDArchive new_group_sort_order = 3;
+}
+
 message CommandRewriteSortOrderForTableResizeArchive {
   required .TST.TableCommandArchive super = 1;
   optional .TST.TableSortOrderArchive old_sort_order = 2;
@@ -666,7 +698,7 @@ message CommandRewriteSortOrderForTableResizeArchive {
 
 message CommandRewriteSortOrderForRewriteSpecArchive {
   required .TST.TableCommandArchive super = 1;
-  required .TSCE.FormulaRewriteSpecArchive rewrite_spec = 2;
+  required .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
   optional .TST.TableSortOrderArchive old_sort_order = 3;
   optional .TST.TableSortOrderArchive new_sort_order = 4;
 }
@@ -809,8 +841,93 @@ message CommandRewritePencilAnnotationFormulasArchive {
     required .TSP.Reference annotation = 2;
   }
   required .TST.TableCommandArchive super = 1;
-  required .TSCE.FormulaRewriteSpecArchive rewrite_spec = 2;
+  required .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
   required .TSCE.FormulasForUndoArchive formulas_to_rewrite = 3;
   repeated .TST.CommandRewritePencilAnnotationFormulasArchive.AnnotationPair annotations_for_undo = 4;
+}
+
+message CommandPivotSetPivotRulesArchive {
+  required .TST.TableCommandArchive super = 1;
+  optional .TSP.UUID new_target_pivot_refresh_uid = 2;
+  optional .TST.GroupColumnListArchive new_row_groupings = 3;
+  optional .TST.GroupColumnListArchive old_row_groupings = 4;
+  optional .TST.GroupColumnListArchive new_column_groupings = 5;
+  optional .TST.GroupColumnListArchive old_column_groupings = 6;
+  optional .TST.ColumnAggregateListArchive new_aggregates = 7;
+  optional .TST.ColumnAggregateListArchive old_aggregates = 8;
+  optional .TST.TableDimensionArchive new_flattening_dimension = 9;
+  optional .TST.TableDimensionArchive old_flattening_dimension = 10;
+  optional .TSP.Reference new_pivot_data_model = 11;
+  optional .TSP.Reference old_pivot_data_model = 12;
+  optional .TSP.UUID new_pivot_refresh_uid = 13;
+  optional .TSP.UUID old_pivot_refresh_uid = 14;
+  optional double new_pivot_refresh_timestamp = 15;
+  optional double old_pivot_refresh_timestamp = 16;
+  optional .TSP.Reference new_options_map = 17;
+  optional .TSP.Reference old_options_map = 18;
+  repeated .TSP.UUID new_view_row_order = 19;
+  repeated .TSP.UUID old_view_row_order = 20;
+  repeated .TSP.UUID new_view_column_order = 21;
+  repeated .TSP.UUID old_view_column_order = 22;
+  repeated .TSP.UUID new_collapsed_row_groups = 23;
+  repeated .TSP.UUID old_collapsed_row_groups = 24;
+  repeated .TSP.UUID new_collapsed_column_groups = 25;
+  repeated .TSP.UUID old_collapsed_column_groups = 26;
+  optional .TST.HierarchicalCellDiffMapArchive new_hierarchical_cell_diff_map = 27;
+  optional .TST.HierarchicalCellDiffMapArchive old_hierarchical_cell_diff_map = 28;
+  optional .TSP.Reference formula_rewrite_command_for_undo = 29;
+  optional .TSP.UUIDRectArchive new_body_uid_tract = 30;
+  optional .TSP.UUIDRectArchive old_body_uid_tract = 31;
+  optional .TSP.UUID old_target_pivot_refresh_uid = 32;
+  optional .TSP.UUID new_pivot_row_column_rule_change_uid = 33;
+  optional .TSP.UUID old_pivot_row_column_rule_change_uid = 34;
+  optional .TSP.UUID new_pivot_aggregate_rule_change_uid = 35;
+  optional .TSP.UUID old_pivot_aggregate_rule_change_uid = 36;
+  optional bool is_order_finalized = 37;
+  optional bool undo_filter_enabled = 38;
+}
+
+message CommandPivotSetGroupingColumnOptionsArchive {
+  required .TST.TableCommandArchive super = 1;
+  optional .TSP.UUID grouping_column_uid = 2;
+  optional uint32 non_sorting_flag = 3;
+  optional bool bool_value = 4;
+  optional bool undo_bool_value = 5;
+}
+
+message CommandPivotHideShowGrandTotalsArchive {
+  required .TST.TableCommandArchive super = 1;
+  optional .TST.TableDimensionArchive dimension = 2;
+  optional bool is_hiding = 3;
+  optional bool undo_is_hiding = 4;
+}
+
+message CommandPivotSortArchive {
+  required .TST.TableCommandArchive super = 1;
+  optional .TST.TableDimensionArchive dimension = 2;
+  repeated .TSP.UUID column_order = 3;
+  repeated .TSP.UUID undo_column_order = 4;
+  repeated .TSP.UUID row_order = 5;
+  repeated .TSP.UUID undo_row_order = 6;
+  required .TSP.UUID target_pivot_row_column_rule_change_uid = 7;
+  required .TSP.UUID target_pivot_aggregate_rule_change_uid = 8;
+  required .TSP.UUID target_pivot_data_refresh_uid = 9;
+  optional .TSP.UUID grouping_column_uid = 10;
+  optional uint32 sorting_flags = 11;
+  optional uint32 undo_sorting_flags = 12;
+  optional .TSP.UUID sorting_aggregate_rule_uid = 13;
+  optional .TSP.UUID undo_sorting_aggregate_rule_uid = 14;
+  required bool is_order_finalized = 15;
+}
+
+message CommandRewriteTrackedReferencesArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
+}
+
+message CommandExtendTableIDHistoryArchive {
+  required .TSK.CommandArchive super = 1;
+  required .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
+  optional .TSCE.RewriteTableUIDInfoArchive table_uid_history_rollback = 3;
 }
 

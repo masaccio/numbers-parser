@@ -183,6 +183,7 @@ message ChartMediatorFormulaStorage {
   repeated .TSCE.FormulaArchive error_custom_neg_formulae = 7;
   repeated .TSCE.FormulaArchive error_custom_pos_scatterX_formulae = 8;
   repeated .TSCE.FormulaArchive error_custom_neg_scatterX_formulae = 9;
+  optional int32 scheme = 10;
 }
 
 message ChartMediatorArchive {

@@ -16,11 +16,11 @@ package TN;
 
 message CommandFormChooseTargetTableArchive {
   required .TSK.CommandArchive super = 1;
-  optional .TSP.CFUUIDArchive table_id = 2;
-  optional .TSP.CFUUIDArchive previous_table_id = 3;
-  optional string sheet_name = 4;
+  required .TSP.UUID table_id = 2;
+  optional .TSP.UUID previous_table_id = 3;
+  required string sheet_name = 4;
   optional string previous_sheet_name = 5;
-  required .TSP.Reference sheet = 6;
+  required .TSP.UUID sheet_id = 6;
 }
 
 message CommandSheetInsertDrawablesArchive {
@@ -42,7 +42,6 @@ message CommandSheetRemoveDrawablesArchive {
   required .TSP.UUID sheet_id = 2;
   repeated .TSK.RemoveIdOperationArgs args_list = 3;
   repeated .TSP.Reference drawables = 4;
-  repeated .TSP.Reference old_sheet_sidebar_order = 5;
   repeated .TSP.UUID chart_entity_uid_for_backing_tables = 6;
   repeated .TSP.UUID backing_table_uids = 7;
 }
@@ -130,6 +129,8 @@ message CommandSetDocumentPaperSize {
   required string paper_id = 1;
   required .TSP.Size page_size = 2;
   required .TSK.CommandArchive super = 3;
+  required string old_paper_id = 4;
+  required .TSP.Size old_page_size = 5;
 }
 
 message CommandEnterPrintPreviewModeArchive {
@@ -257,9 +258,29 @@ message SheetSelectionTransformerArchive {
   required bool paginated = 2;
 }
 
+message FormSheetSelectionTransformerArchive {
+  required .TN.SheetSelectionTransformerArchive super = 1;
+  optional .TSP.UUID table_uuid = 2;
+}
+
 message CanvasSelectionTransformerArchive {
   required .TSD.InfoCollectionSelectionTransformerHelperArchive transformer_helper = 1;
   optional .TSP.UUIDPath header_storage_uuid_path = 2;
+}
+
+message FormTableChooserSelectionTransformerArchive {
+}
+
+message FormBuilderSelectionTransformerArchive {
+  required .TSP.UUID table_uuid = 1;
+  required .TSP.UUID viewing_record_uuid = 2;
+  required .TSP.UUID editing_field_uuid = 3;
+}
+
+message FormViewerSelectionTransformerArchive {
+  required .TSP.UUID table_uuid = 1;
+  required .TSP.UUID record_uuid = 2;
+  required .TSP.UUID field_uuid = 3;
 }
 
 message SheetChangeBaseArchive {

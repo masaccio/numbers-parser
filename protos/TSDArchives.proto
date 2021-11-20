@@ -356,6 +356,7 @@ message FreehandDrawingArchive {
   optional .TSP.Reference spacer_shape = 1;
   optional double opacity = 2;
   optional .TSD.FreehandDrawingAnimationArchive animation = 3;
+  optional double last_clamped_scale = 4;
   extend .TSD.GroupArchive {
     optional .TSD.FreehandDrawingArchive freehand_drawing_archive = 100;
   }
@@ -452,6 +453,8 @@ message MovieArchive {
   optional .TSP.Size naturalSize = 21;
   optional .TSD.Attribution attribution = 26;
   optional .TSD.MovieFingerprint fingerprint = 29;
+  optional bool is_live_video = 30 [default = false];
+  extensions 100 to 999;
 }
 
 message ExteriorTextWrapArchive {

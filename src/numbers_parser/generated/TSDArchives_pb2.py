@@ -23,7 +23,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x11TSDArchives.proto\x12\x03TSD\x1a\x11TSPMessages.proto\x1a\x11TSKArchives.proto\x1a\x11TSSArchives.proto\"M\n\x11\x45\x64geInsetsArchive\x12\x0b\n\x03top\x18\x01 \x02(\x02\x12\x0c\n\x04left\x18\x02 \x02(\x02\x12\x0e\n\x06\x62ottom\x18\x03 \x02(\x02\x12\r\n\x05right\x18\x04 \x02(\x02\"f\n\x0fGeometryArchive\x12\x1c\n\x08position\x18\x01 \x01(\x0b\x32\n.TSP.Point\x12\x17\n\x04size\x18\x02 \x01(\x0b\x32\t.TSP.Size\x12\r\n\x05\x66lags\x18\x03 \x01(\r\x12\r\n\x05\x61ngle\x18\x04 \x01(\x02\"\x8e\x02\n\x16PointPathSourceArchive\x12=\n\x04type\x18\x01 \x01(\x0e\x32/.TSD.PointPathSourceArchive.PointPathSourceType\x12\x19\n\x05point\x18\x02 \x01(\x0b\x32\n.TSP.Point\x12\x1e\n\x0bnaturalSize\x18\x03 \x01(\x0b\x32\t.TSP.Size\"z\n\x13PointPathSourceType\x12\x17\n\x13kTSDLeftSingleArrow\x10\x00\x12\x18\n\x14kTSDRightSingleArrow\x10\x01\x12\x13\n\x0fkTSDDoubleArrow\x10\n\x12\x0c\n\x08kTSDStar\x10\x64\x12\r\n\x08kTSDPlus\x10\xc8\x01\"\x82\x02\n\x17ScalarPathSourceArchive\x12?\n\x04type\x18\x01 \x01(\x0e\x32\x31.TSD.ScalarPathSourceArchive.ScalarPathSourceType\x12\x0e\n\x06scalar\x18\x02 \x01(\x02\x12\x1e\n\x0bnaturalSize\x18\x03 \x01(\x0b\x32\t.TSP.Size\x12\x1b\n\x13is_curve_continuous\x18\x04 \x01(\x08\"Y\n\x14ScalarPathSourceType\x12\x18\n\x14kTSDRoundedRectangle\x10\x00\x12\x16\n\x12kTSDRegularPolygon\x10\x01\x12\x0f\n\x0bkTSDChevron\x10\x02\"k\n\x17\x42\x65zierPathSourceArchive\x12\x17\n\x0bpath_string\x18\x01 \x01(\tB\x02\x18\x01\x12\x1e\n\x0bnaturalSize\x18\x02 \x01(\x0b\x32\t.TSP.Size\x12\x17\n\x04path\x18\x03 \x01(\x0b\x32\t.TSP.Path\"\x9d\x01\n\x18\x43\x61lloutPathSourceArchive\x12\x1f\n\x0cnatural_size\x18\x01 \x01(\x0b\x32\t.TSP.Size\x12!\n\rtail_position\x18\x02 \x01(\x0b\x32\n.TSP.Point\x12\x11\n\ttail_size\x18\x03 \x01(\x02\x12\x15\n\rcorner_radius\x18\x04 \x01(\x02\x12\x13\n\x0b\x63\x65nter_tail\x18\x05 \x01(\x08\"\xb2\x02\n\x1f\x43onnectionLinePathSourceArchive\x12+\n\x05super\x18\x01 \x02(\x0b\x32\x1c.TSD.BezierPathSourceArchive\x12O\n\x04type\x18\x02 \x01(\x0e\x32\x41.TSD.ConnectionLinePathSourceArchive.ConnectionLinePathSourceType\x12\x13\n\x0boutset_from\x18\x03 \x01(\x02\x12\x11\n\toutset_to\x18\x04 \x01(\x02\"i\n\x1c\x43onnectionLinePathSourceType\x12#\n\x1fkTSDConnectionLineTypeQuadratic\x10\x00\x12$\n kTSDConnectionLineTypeOrthogonal\x10\x01\"\xb3\x03\n\x1f\x45\x64itableBezierPathSourceArchive\x12>\n\x08subpaths\x18\x01 \x03(\x0b\x32,.TSD.EditableBezierPathSourceArchive.Subpath\x12\x1e\n\x0bnaturalSize\x18\x02 \x01(\x0b\x32\t.TSP.Size\x1a\xab\x01\n\x04Node\x12\"\n\x0einControlPoint\x18\x01 \x02(\x0b\x32\n.TSP.Point\x12\x1d\n\tnodePoint\x18\x02 \x02(\x0b\x32\n.TSP.Point\x12#\n\x0foutControlPoint\x18\x03 \x02(\x0b\x32\n.TSP.Point\x12;\n\x04type\x18\x04 \x02(\x0e\x32-.TSD.EditableBezierPathSourceArchive.NodeType\x1aS\n\x07Subpath\x12\x38\n\x05nodes\x18\x01 \x03(\x0b\x32).TSD.EditableBezierPathSourceArchive.Node\x12\x0e\n\x06\x63losed\x18\x02 \x02(\x08\"-\n\x08NodeType\x12\t\n\x05sharp\x10\x01\x12\n\n\x06\x62\x65zier\x10\x02\x12\n\n\x06smooth\x10\x03\"\xf1\x03\n\x11PathSourceArchive\x12\x16\n\x0ehorizontalFlip\x18\x01 \x01(\x08\x12\x14\n\x0cverticalFlip\x18\x02 \x01(\x08\x12\x36\n\x11point_path_source\x18\x03 \x01(\x0b\x32\x1b.TSD.PointPathSourceArchive\x12\x38\n\x12scalar_path_source\x18\x04 \x01(\x0b\x32\x1c.TSD.ScalarPathSourceArchive\x12\x38\n\x12\x62\x65zier_path_source\x18\x05 \x01(\x0b\x32\x1c.TSD.BezierPathSourceArchive\x12:\n\x13\x63\x61llout_path_source\x18\x06 \x01(\x0b\x32\x1d.TSD.CalloutPathSourceArchive\x12I\n\x1b\x63onnection_line_path_source\x18\x07 \x01(\x0b\x32$.TSD.ConnectionLinePathSourceArchive\x12I\n\x1b\x65\x64itable_bezier_path_source\x18\x08 \x01(\x0b\x32$.TSD.EditableBezierPathSourceArchive\x12\x17\n\x0flocalizationKey\x18\t \x01(\t\x12\x17\n\x0fuserDefinedName\x18\n \x01(\t\"-\n\x14\x41ngleGradientArchive\x12\x15\n\rgradientangle\x18\x02 \x01(\x02\"r\n\x18TransformGradientArchive\x12\x19\n\x05start\x18\x01 \x01(\x0b\x32\n.TSP.Point\x12\x17\n\x03\x65nd\x18\x02 \x01(\x0b\x32\n.TSP.Point\x12\"\n\x0f\x62\x61seNaturalSize\x18\x03 \x01(\x0b\x32\t.TSP.Size\"\x84\x03\n\x0fGradientArchive\x12/\n\x04type\x18\x01 \x01(\x0e\x32!.TSD.GradientArchive.GradientType\x12\x30\n\x05stops\x18\x02 \x03(\x0b\x32!.TSD.GradientArchive.GradientStop\x12\x0f\n\x07opacity\x18\x03 \x01(\x02\x12\x18\n\x10\x61\x64vancedGradient\x18\x04 \x01(\x08\x12\x30\n\ranglegradient\x18\x05 \x01(\x0b\x32\x19.TSD.AngleGradientArchive\x12\x38\n\x11transformgradient\x18\x06 \x01(\x0b\x32\x1d.TSD.TransformGradientArchive\x1aO\n\x0cGradientStop\x12\x19\n\x05\x63olor\x18\x01 \x01(\x0b\x32\n.TSP.Color\x12\x10\n\x08\x66raction\x18\x02 \x01(\x02\x12\x12\n\ninflection\x18\x03 \x01(\x02\"&\n\x0cGradientType\x12\n\n\x06Linear\x10\x00\x12\n\n\x06Radial\x10\x01\"\xfe\x03\n\x10ImageFillArchive\x12%\n\timagedata\x18\x06 \x01(\x0b\x32\x12.TSP.DataReference\x12H\n\ttechnique\x18\x02 \x01(\x0e\x32(.TSD.ImageFillArchive.ImageFillTechnique:\x0bNaturalSize\x12\x18\n\x04tint\x18\x03 \x01(\x0b\x32\n.TSP.Color\x12\x1b\n\x08\x66illsize\x18\x04 \x01(\x0b\x32\t.TSP.Size\x12\x31\n\x11originalimagedata\x18\x07 \x01(\x0b\x32\x12.TSP.DataReferenceB\x02\x18\x01\x12,\n$interpretsUntaggedImageDataAsGeneric\x18\x08 \x01(\x08\x12\"\n\x0ereferencecolor\x18\t \x01(\x0b\x32\n.TSP.Color\x12*\n\x12\x64\x61tabase_imagedata\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1a\x64\x61tabase_originalimagedata\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\"]\n\x12ImageFillTechnique\x12\x0f\n\x0bNaturalSize\x10\x00\x12\x0b\n\x07Stretch\x10\x01\x12\x08\n\x04Tile\x10\x02\x12\x0f\n\x0bScaleToFill\x10\x03\x12\x0e\n\nScaleToFit\x10\x04\"\x80\x01\n\x0b\x46illArchive\x12\x19\n\x05\x63olor\x18\x01 \x01(\x0b\x32\n.TSP.Color\x12&\n\x08gradient\x18\x02 \x01(\x0b\x32\x14.TSD.GradientArchive\x12$\n\x05image\x18\x03 \x01(\x0b\x32\x15.TSD.ImageFillArchive*\x08\x08\x64\x10\x80\x80\x80\x80\x02\"\xcf\x01\n\x14StrokePatternArchive\x12\x39\n\x04type\x18\x01 \x01(\x0e\x32+.TSD.StrokePatternArchive.StrokePatternType\x12\r\n\x05phase\x18\x02 \x01(\x02\x12\r\n\x05\x63ount\x18\x03 \x01(\r\x12\x0f\n\x07pattern\x18\x04 \x03(\x02\"M\n\x11StrokePatternType\x12\x0e\n\nTSDPattern\x10\x00\x12\x13\n\x0fTSDSolidPattern\x10\x01\x12\x13\n\x0fTSDEmptyPattern\x10\x02\"\xfd\x02\n\rStrokeArchive\x12\x19\n\x05\x63olor\x18\x01 \x01(\x0b\x32\n.TSP.Color\x12\r\n\x05width\x18\x02 \x01(\x02\x12\'\n\x03\x63\x61p\x18\x03 \x01(\x0e\x32\x1a.TSD.StrokeArchive.LineCap\x12\x1b\n\x04join\x18\x04 \x01(\x0e\x32\r.TSD.LineJoin\x12\x13\n\x0bmiter_limit\x18\x05 \x01(\x02\x12*\n\x07pattern\x18\x06 \x01(\x0b\x32\x19.TSD.StrokePatternArchive\x12-\n\x0csmart_stroke\x18\x07 \x01(\x0b\x32\x17.TSD.SmartStrokeArchive\x12 \n\x05\x66rame\x18\x08 \x01(\x0b\x32\x11.TSD.FrameArchive\x12\x35\n\x10patterned_stroke\x18\t \x01(\x0b\x32\x1b.TSD.PatternedStrokeArchive\"3\n\x07LineCap\x12\x0b\n\x07\x42uttCap\x10\x00\x12\x0c\n\x08RoundCap\x10\x01\x12\r\n\tSquareCap\x10\x02\"\x92\x01\n\x12SmartStrokeArchive\x12\x13\n\x0bstroke_name\x18\x02 \x01(\t\x12\x13\n\x0brandom_seed\x18\x03 \x01(\r\x12\x31\n\x0fparameterValues\x18\x04 \x01(\x0b\x32\x18.TSP.ReferenceDictionary\x12\x1f\n\x17pattern_offset_distance\x18\x05 \x01(\x01\"5\n\x0c\x46rameArchive\x12\x11\n\tframeName\x18\x02 \x01(\t\x12\x12\n\nassetScale\x18\x03 \x01(\x02\".\n\x16PatternedStrokeArchive\x12\x14\n\x0cpattern_name\x18\x02 \x01(\t\"\x9c\x01\n\x0eLineEndArchive\x12\x17\n\x04path\x18\x01 \x01(\x0b\x32\t.TSP.Path\x12+\n\tline_join\x18\x02 \x01(\x0e\x32\r.TSD.LineJoin:\tMiterJoin\x12\x1d\n\tend_point\x18\x03 \x01(\x0b\x32\n.TSP.Point\x12\x11\n\tis_filled\x18\x04 \x01(\x08\x12\x12\n\nidentifier\x18\x05 \x01(\t\"\xa8\x03\n\rShadowArchive\x12\x19\n\x05\x63olor\x18\x01 \x01(\x0b\x32\n.TSP.Color\x12\x12\n\x05\x61ngle\x18\x02 \x01(\x02:\x03\x33\x31\x35\x12\x11\n\x06offset\x18\x03 \x01(\x02:\x01\x35\x12\x11\n\x06radius\x18\x04 \x01(\x05:\x01\x31\x12\x12\n\x07opacity\x18\x05 \x01(\x02:\x01\x31\x12\x18\n\nis_enabled\x18\x06 \x01(\x08:\x04true\x12:\n\x04type\x18\x07 \x01(\x0e\x32\x1d.TSD.ShadowArchive.ShadowType:\rTSDDropShadow\x12*\n\ndropShadow\x18\x08 \x01(\x0b\x32\x16.TSD.DropShadowArchive\x12\x30\n\rcontactShadow\x18\t \x01(\x0b\x32\x19.TSD.ContactShadowArchive\x12.\n\x0c\x63urvedShadow\x18\n \x01(\x0b\x32\x18.TSD.CurvedShadowArchive\"J\n\nShadowType\x12\x11\n\rTSDDropShadow\x10\x00\x12\x14\n\x10TSDContactShadow\x10\x01\x12\x13\n\x0fTSDCurvedShadow\x10\x02\"\x13\n\x11\x44ropShadowArchive\">\n\x14\x43ontactShadowArchive\x12\x13\n\x06height\x18\x02 \x01(\x02:\x03\x30.2\x12\x11\n\x06offset\x18\x04 \x01(\x02:\x01\x30\")\n\x13\x43urvedShadowArchive\x12\x12\n\x05\x63urve\x18\x01 \x01(\x02:\x03\x30.6\")\n\x11ReflectionArchive\x12\x14\n\x07opacity\x18\x01 \x01(\x02:\x03\x30.5\"\xbc\x02\n\x17ImageAdjustmentsArchive\x12\x10\n\x08\x65xposure\x18\x01 \x01(\x02\x12\x12\n\nsaturation\x18\x02 \x01(\x02\x12\x10\n\x08\x63ontrast\x18\x03 \x01(\x02\x12\x12\n\nhighlights\x18\x04 \x01(\x02\x12\x0f\n\x07shadows\x18\x05 \x01(\x02\x12\x11\n\tsharpness\x18\x06 \x01(\x02\x12\x0f\n\x07\x64\x65noise\x18\x07 \x01(\x02\x12\x13\n\x0btemperature\x18\x08 \x01(\x02\x12\x0c\n\x04tint\x18\t \x01(\x02\x12\x14\n\x0c\x62ottom_level\x18\n \x01(\x02\x12\x14\n\ttop_level\x18\x0b \x01(\x02:\x01\x31\x12\r\n\x05gamma\x18\x0c \x01(\x02\x12\x16\n\x07\x65nhance\x18\r \x01(\x08:\x05\x66\x61lse\x12*\n\x1brepresents_sage_adjustments\x18\x0e \x01(\x08:\x05\x66\x61lse\"\x9a\x02\n\x1bShapeStylePropertiesArchive\x12\x1e\n\x04\x66ill\x18\x01 \x01(\x0b\x32\x10.TSD.FillArchive\x12\"\n\x06stroke\x18\x02 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x0f\n\x07opacity\x18\x03 \x01(\x02\x12\"\n\x06shadow\x18\x04 \x01(\x0b\x32\x12.TSD.ShadowArchive\x12*\n\nreflection\x18\x05 \x01(\x0b\x32\x16.TSD.ReflectionArchive\x12*\n\rhead_line_end\x18\x06 \x01(\x0b\x32\x13.TSD.LineEndArchive\x12*\n\rtail_line_end\x18\x07 \x01(\x0b\x32\x13.TSD.LineEndArchive\"\x8c\x01\n\x11ShapeStyleArchive\x12 \n\x05super\x18\x01 \x02(\x0b\x32\x11.TSS.StyleArchive\x12\x19\n\x0eoverride_count\x18\n \x01(\r:\x01\x30\x12:\n\x10shape_properties\x18\x0b \x01(\x0b\x32 .TSD.ShapeStylePropertiesArchive\"\xa2\x01\n\x1bMediaStylePropertiesArchive\x12\"\n\x06stroke\x18\x01 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x0f\n\x07opacity\x18\x02 \x01(\x02\x12\"\n\x06shadow\x18\x03 \x01(\x0b\x32\x12.TSD.ShadowArchive\x12*\n\nreflection\x18\x04 \x01(\x0b\x32\x16.TSD.ReflectionArchive\"\x8c\x01\n\x11MediaStyleArchive\x12 \n\x05super\x18\x01 \x02(\x0b\x32\x11.TSS.StyleArchive\x12\x19\n\x0eoverride_count\x18\n \x01(\r:\x01\x30\x12:\n\x10media_properties\x18\x0b \x01(\x0b\x32 .TSD.MediaStylePropertiesArchive\"\xf6\x03\n\x13ThemePresetsArchive\x12/\n\x15gradient_fill_presets\x18\x01 \x03(\x0b\x32\x10.TSD.FillArchive\x12,\n\x12image_fill_presets\x18\x02 \x03(\x0b\x32\x10.TSD.FillArchive\x12*\n\x0eshadow_presets\x18\x03 \x03(\x0b\x32\x12.TSD.ShadowArchive\x12*\n\x12line_style_presets\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x12+\n\x13shape_style_presets\x18\x05 \x03(\x0b\x32\x0e.TSP.Reference\x12-\n\x15textbox_style_presets\x18\x06 \x03(\x0b\x32\x0e.TSP.Reference\x12+\n\x13image_style_presets\x18\x07 \x03(\x0b\x32\x0e.TSP.Reference\x12+\n\x13movie_style_presets\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1a\x64rawing_line_style_presets\x18\t \x03(\x0b\x32\x0e.TSP.Reference2>\n\textension\x12\x11.TSS.ThemeArchive\x18\x64 \x01(\x0b\x32\x18.TSD.ThemePresetsArchive\"\xbc\x01\n$ThemeReplaceFillPresetCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1d\n\x05theme\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x04\x66ill\x18\x03 \x02(\x0b\x32\x10.TSD.FillArchive\x12\"\n\x08old_fill\x18\x04 \x02(\x0b\x32\x10.TSD.FillArchive\x12\r\n\x05index\x18\x05 \x02(\r\"\xb5\x03\n\x0f\x44rawableArchive\x12&\n\x08geometry\x18\x01 \x01(\x0b\x32\x14.TSD.GeometryArchive\x12\x1e\n\x06parent\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n\x12\x65xterior_text_wrap\x18\x03 \x01(\x0b\x32\x1c.TSD.ExteriorTextWrapArchive\x12\x15\n\rhyperlink_url\x18\x04 \x01(\t\x12\x0e\n\x06locked\x18\x05 \x01(\x08\x12\x1f\n\x07\x63omment\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1b\n\x13\x61spect_ratio_locked\x18\x07 \x01(\x08\x12!\n\x19\x61\x63\x63\x65ssibility_description\x18\x08 \x01(\t\x12*\n\x12pencil_annotations\x18\t \x03(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x05title\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x07\x63\x61ption\x18\x0b \x01(\x0b\x32\x0e.TSP.Reference\x12\x14\n\x0ctitle_hidden\x18\x0c \x01(\x08\x12\x16\n\x0e\x63\x61ption_hidden\x18\r \x01(\x08\"|\n\x10\x43ontainerArchive\x12&\n\x08geometry\x18\x01 \x01(\x0b\x32\x14.TSD.GeometryArchive\x12\x1e\n\x06parent\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12 \n\x08\x63hildren\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\"\x93\x01\n\x0cGroupArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12 \n\x08\x63hildren\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1a\x66\x61ke_shape_for_empty_group\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference*\x08\x08\x64\x10\x80\x80\x80\x80\x02\"H\n\x1f\x46reehandDrawingAnimationArchive\x12\x10\n\x08\x64uration\x18\x01 \x01(\x01\x12\x13\n\x0bshould_loop\x18\x02 \x01(\x08\"\xda\x01\n\x16\x46reehandDrawingArchive\x12$\n\x0cspacer_shape\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x0f\n\x07opacity\x18\x02 \x01(\x01\x12\x37\n\tanimation\x18\x03 \x01(\x0b\x32$.TSD.FreehandDrawingAnimationArchive2P\n\x18\x66reehand_drawing_archive\x12\x11.TSD.GroupArchive\x18\x64 \x01(\x0b\x32\x1b.TSD.FreehandDrawingArchive\"\x83\x02\n\x0cShapeArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12\x1d\n\x05style\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\npathsource\x18\x03 \x01(\x0b\x32\x16.TSD.PathSourceArchive\x12.\n\rhead_line_end\x18\x04 \x01(\x0b\x32\x13.TSD.LineEndArchiveB\x02\x18\x01\x12.\n\rtail_line_end\x18\x05 \x01(\x0b\x32\x13.TSD.LineEndArchiveB\x02\x18\x01\x12#\n\x1bstrokePatternOffsetDistance\x18\x06 \x01(\x02\"\xd5\x01\n\x15\x43onnectionLineArchive\x12 \n\x05super\x18\x01 \x02(\x0b\x32\x11.TSD.ShapeArchive\x12&\n\x0e\x63onnected_from\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12$\n\x0c\x63onnected_to\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12$\n\x11\x63onnected_to_uuid\x18\x04 \x01(\x0b\x32\t.TSP.UUID\x12&\n\x13\x63onnected_from_uuid\x18\x05 \x01(\x0b\x32\t.TSP.UUID\"\xce\x06\n\x0cImageArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12 \n\x04\x64\x61ta\x18\x0b \x01(\x0b\x32\x12.TSP.DataReference\x12\x1d\n\x05style\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x0coriginalSize\x18\x04 \x01(\x0b\x32\t.TSP.Size\x12\x1c\n\x04mask\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\rthumbnailData\x18\x0c \x01(\x0b\x32\x12.TSP.DataReference\x12\r\n\x05\x66lags\x18\x07 \x01(\r\x12(\n\x0coriginalData\x18\r \x01(\x0b\x32\x12.TSP.DataReference\x12\x1e\n\x0bnaturalSize\x18\t \x01(\x0b\x32\t.TSP.Size\x12#\n\x10instantAlphaPath\x18\n \x01(\x0b\x32\t.TSP.Path\x12\x36\n\x10imageAdjustments\x18\x0e \x01(\x0b\x32\x1c.TSD.ImageAdjustmentsArchive\x12-\n\x11\x65nhancedImageData\x18\x11 \x01(\x0b\x32\x12.TSP.DataReference\x12-\n\x11\x61\x64justedImageData\x18\x0f \x01(\x0b\x32\x12.TSP.DataReference\x12\x36\n\x1athumbnailAdjustedImageData\x18\x10 \x01(\x0b\x32\x12.TSP.DataReference\x12,\n$interpretsUntaggedImageDataAsGeneric\x18\x12 \x01(\x08\x12%\n\rdatabase_data\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x64\x61tabase_thumbnailData\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15\x64\x61tabase_originalData\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x0btraced_path\x18\x13 \x01(\x0b\x32\t.TSP.Path\x12%\n\x0b\x61ttribution\x18\x14 \x01(\x0b\x32\x10.TSD.Attribution\x12 \n\x18should_trace_pdf_content\x18\x15 \x01(\x08*\x05\x08\x64\x10\xe8\x07\"^\n\x0bMaskArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12*\n\npathsource\x18\x02 \x01(\x0b\x32\x16.TSD.PathSourceArchive\"\xcf\x01\n\x13ImageDataAttributes\x12\x1d\n\npixel_size\x18\x01 \x01(\x0b\x32\t.TSP.Size\x12\x15\n\rimage_is_srgb\x18\x02 \x01(\x08\x12\x34\n,should_be_interpreted_as_generic_if_untagged\x18\x03 \x01(\x08\x32L\n\x15image_data_attributes\x12\x13.TSP.DataAttributes\x18\x64 \x01(\x0b\x32\x18.TSD.ImageDataAttributes\"\xb6\x08\n\x0cMovieArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12%\n\tmovieData\x18\x0e \x01(\x0b\x32\x12.TSP.DataReference\x12\x36\n\x1aimportedAuxiliaryMovieData\x18\x16 \x01(\x0b\x32\x12.TSP.DataReference\x12\x37\n/imported_auxiliary_movie_data_original_filename\x18\x19 \x01(\t\x12\x16\n\x0emovieRemoteURL\x18\x11 \x01(\t\x12\x11\n\tstartTime\x18\x03 \x01(\x02\x12\x0f\n\x07\x65ndTime\x18\x04 \x01(\x02\x12\x12\n\nposterTime\x18\x05 \x01(\x02\x12\x1f\n\x13loopOptionAsInteger\x18\x06 \x01(\rB\x02\x18\x01\x12<\n\x0bloop_option\x18\x18 \x01(\x0e\x32!.TSD.MovieArchive.MovieLoopOption:\x04None\x12\x0e\n\x06volume\x18\x07 \x01(\x02\x12\x14\n\x08\x61utoPlay\x18\x08 \x01(\x08\x42\x02\x18\x01\x12\x11\n\taudioOnly\x18\t \x01(\x08\x12\x11\n\tstreaming\x18\x12 \x01(\x08\x12\x1c\n\x14nativeAudioRecording\x18\x1b \x01(\x08\x12\x19\n\x11playsAcrossSlides\x18\x1c \x01(\x08\x12+\n\x0fposterImageData\x18\x0f \x01(\x0b\x32\x12.TSP.DataReference\x12.\n\x12\x61udioOnlyImageData\x18\x10 \x01(\x0b\x32\x12.TSP.DataReference\x12\x31\n)poster_image_generated_with_alpha_support\x18\x17 \x01(\x08\x12\x15\n\rplayableState\x18\x0c \x01(\r\x12\r\n\x05\x66lags\x18\r \x01(\r\x12*\n\x12\x64\x61tabase_movieData\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18\x64\x61tabase_posterImageData\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x64\x61tabase_audioOnlyImageData\x18\x0b \x01(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x05style\x18\x13 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x0coriginalSize\x18\x14 \x01(\x0b\x32\t.TSP.Size\x12\x1e\n\x0bnaturalSize\x18\x15 \x01(\x0b\x32\t.TSP.Size\x12%\n\x0b\x61ttribution\x18\x1a \x01(\x0b\x32\x10.TSD.Attribution\x12*\n\x0b\x66ingerprint\x18\x1d \x01(\x0b\x32\x15.TSD.MovieFingerprint\"9\n\x0fMovieLoopOption\x12\x08\n\x04None\x10\x00\x12\n\n\x06Repeat\x10\x01\x12\x10\n\x0c\x42\x61\x63kAndForth\x10\x02\"\x8b\x01\n\x17\x45xteriorTextWrapArchive\x12\x0c\n\x04type\x18\x01 \x01(\r\x12\x11\n\tdirection\x18\x02 \x01(\r\x12\x10\n\x08\x66it_type\x18\x03 \x01(\r\x12\x0e\n\x06margin\x18\x04 \x01(\x02\x12\x17\n\x0f\x61lpha_threshold\x18\x05 \x01(\x02\x12\x14\n\x0cis_html_wrap\x18\x06 \x01(\x08\"\x8c\x01\n\x1a\x44rawableContentDescription\x12\x14\n\x0c\x65lement_kind\x18\x01 \x01(\r\x12\x1b\n\x13is_anchored_to_text\x18\x02 \x01(\x08\x12\x1e\n\x16is_floating_above_text\x18\x03 \x01(\x08\x12\x1b\n\x13is_inline_with_text\x18\x04 \x01(\x08\"{\n!FreehandDrawingContentDescription\x12.\n\x05super\x18\x01 \x02(\x0b\x32\x1f.TSD.DrawableContentDescription\x12&\n\x1esource_doc_wanted_spacer_shape\x18\x02 \x01(\x08\"\xd1\x05\n\x1d\x46reehandDrawingToolkitUIState\x12%\n\rcurrent_color\x18\x01 \x01(\x0b\x32\n.TSP.ColorB\x02\x18\x01\x12i\n most_recent_restorable_tool_type\x18\x02 \x01(\x0e\x32:.TSD.FreehandDrawingToolkitUIState.FreehandDrawingToolType:\x03Pen\x12\x18\n\x10pen_tool_opacity\x18\x03 \x01(\x02\x12\x1f\n\x17pen_tool_unscaled_width\x18\x04 \x01(\x02\x12\x1b\n\x13pencil_tool_opacity\x18\x05 \x01(\x02\x12\"\n\x1apencil_tool_unscaled_width\x18\x06 \x01(\x02\x12\x1b\n\x13\x63rayon_tool_opacity\x18\x07 \x01(\x02\x12\"\n\x1a\x63rayon_tool_unscaled_width\x18\x08 \x01(\x02\x12\x19\n\x11\x66ill_tool_opacity\x18\t \x01(\x02\x12 \n\x18\x65raser_tool_scaled_width\x18\n \x01(\x02\x12(\n eraser_tool_erases_whole_objects\x18\x0b \x01(\x08\x12\"\n\x0epen_tool_color\x18\x0c \x01(\x0b\x32\n.TSP.Color\x12%\n\x11pencil_tool_color\x18\r \x01(\x0b\x32\n.TSP.Color\x12%\n\x11\x63rayon_tool_color\x18\x0e \x01(\x0b\x32\n.TSP.Color\x12#\n\x0f\x66ill_tool_color\x18\x0f \x01(\x0b\x32\n.TSP.Color\"c\n\x17\x46reehandDrawingToolType\x12\x07\n\x03Pen\x10\x00\x12\n\n\x06Pencil\x10\x01\x12\n\n\x06\x43rayon\x10\x02\x12\x08\n\x04\x46ill\x10\x03\x12\n\n\x06\x45raser\x10\x04\x12\x11\n\rMarqueeSelect\x10\x05\"\x17\n\x15StandinCaptionArchive\"\xb3\x01\n\x0cGuideArchive\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.TSD.GuideArchive.GuideType\x12\x0e\n\x06offset\x18\x02 \x01(\x02\x12\r\n\x05start\x18\x03 \x01(\x02\x12\x0b\n\x03\x65nd\x18\x04 \x01(\x02\x12\x0f\n\x07\x64ynamic\x18\x05 \x01(\x08\x12\x10\n\x08infinite\x18\x06 \x01(\x08\")\n\tGuideType\x12\x0e\n\nHorizontal\x10\x00\x12\x0c\n\x08Vertical\x10\x01\"\x8c\x01\n\x17UserDefinedGuideArchive\x12\x34\n\x04type\x18\x01 \x01(\x0e\x32&.TSD.UserDefinedGuideArchive.GuideType\x12\x10\n\x08position\x18\x02 \x01(\x02\")\n\tGuideType\x12\x0e\n\nHorizontal\x10\x00\x12\x0c\n\x08Vertical\x10\x01\"N\n\x13GuideStorageArchive\x12\x37\n\x11userDefinedGuides\x18\x01 \x03(\x0b\x32\x1c.TSD.UserDefinedGuideArchive\"\x8d\x01\n\x16\x43\x61nvasSelectionArchive\x12\x1d\n\x05infos\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12-\n\x15non_interactive_infos\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12%\n\tcontainer\x18\x02 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\"h\n\x18\x44rawableSelectionArchive\x12\x1d\n\x05infos\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12-\n\x15non_interactive_infos\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\"x\n\x15GroupSelectionArchive\x12,\n\x05super\x18\x01 \x02(\x0b\x32\x1d.TSD.DrawableSelectionArchive\x12\x31\n)has_selected_infos_in_non_group_container\x18\x02 \x01(\x08\"\x16\n\x14PathSelectionArchive\"\x1f\n\x1dInfoHyperlinkSelectionArchive\"\x88\x01\n\x15\x43ommentStorageArchive\x12\x0c\n\x04text\x18\x01 \x01(\t\x12 \n\rcreation_date\x18\x02 \x01(\x0b\x32\t.TSP.Date\x12\x1e\n\x06\x61uthor\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x07replies\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\"\xa9\x01\n%ReplaceAnnotationAuthorCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12-\n\x15old_annotation_author\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15new_annotation_author\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\"L\n\x17PencilAnnotationArchive\x12\x31\n\x19pencil_annotation_storage\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"M\n PencilAnnotationSelectionArchive\x12)\n\x11pencil_annotation\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"\xc6\x07\n\x1ePencilAnnotationStorageArchive\x12\x19\n\x11\x61ttached_location\x18\x01 \x01(\x05\x12!\n\rmarkup_offset\x18\x02 \x01(\x0b\x32\n.TSP.Point\x12,\n\x10rasterized_image\x18\x03 \x01(\x0b\x32\x12.TSP.DataReference\x12\x32\n\x16legacy_encoded_drawing\x18\x04 \x01(\x0b\x32\x12.TSP.DataReference\x12\x1f\n\x0c\x64rawing_path\x18\x05 \x01(\x0b\x32\t.TSP.Path\x12/\n\x1bstrokes_bounding_box_origin\x18\x06 \x01(\x0b\x32\n.TSP.Point\x12,\n\x19strokes_bounding_box_size\x18\x07 \x01(\x0b\x32\t.TSP.Size\x12\x15\n\rattached_type\x18\x08 \x01(\x05\x12)\n\x16original_attached_size\x18\t \x01(\x0b\x32\t.TSP.Size\x12-\n%percent_of_pa_contained_in_parent_rep\x18\n \x01(\x01\x12$\n\x1ctext_baselines_touched_count\x18\x0b \x01(\x04\x12\x1d\n\x15visible_strokes_count\x18\x0c \x01(\x04\x12\x1d\n\tpen_color\x18\r \x01(\x0b\x32\n.TSP.Color\x12\x11\n\ttool_type\x18\x0e \x01(\x05\x12,\n\x14\x63\x61llout_sub_storages\x18\x0f \x03(\x0b\x32\x0e.TSP.Reference\x12 \n\rcreation_date\x18\x10 \x01(\x0b\x32\t.TSP.Date\x12\'\n\x1fpencil_annotation_drawing_scale\x18\x11 \x01(\x01\x12 \n\x18\x63ompound_annotation_type\x18\x12 \x01(\x05\x12$\n\x0csub_storages\x18\x13 \x03(\x0b\x32\x0e.TSP.Reference\x12+\n\x0f\x65ncoded_drawing\x18\x14 \x01(\x0b\x32\x12.TSP.DataReference\x12.\n\x1astroke_points_frame_origin\x18\x15 \x01(\x0b\x32\n.TSP.Point\x12+\n\x18stroke_points_frame_size\x18\x16 \x01(\x0b\x32\t.TSP.Size\x12)\n\x15rendered_frame_origin\x18\x17 \x01(\x0b\x32\n.TSP.Point\x12&\n\x13rendered_frame_size\x18\x18 \x01(\x0b\x32\t.TSP.Size\"9\n\x1cSpecColorFillSetColorArchive\x12\x19\n\x05\x63olor\x18\x01 \x02(\x0b\x32\n.TSP.Color\"4\n\x1dSpecFrameSetAssetScaleArchive\x12\x13\n\x0b\x61sset_scale\x18\x01 \x02(\x01\"0\n\x1fSpecGradientFillSetAngleArchive\x12\r\n\x05\x61ngle\x18\x01 \x02(\x01\"5\n SpecImageFillSetTechniqueArchive\x12\x11\n\ttechnique\x18\x01 \x02(\x05\"2\n\x1fSpecReflectionSetOpacityArchive\x12\x0f\n\x07opacity\x18\x01 \x02(\x01\"*\n\x19SpecShadowSetAngleArchive\x12\r\n\x05\x61ngle\x18\x01 \x02(\x01\"6\n\x19SpecShadowSetColorArchive\x12\x19\n\x05\x63olor\x18\x01 \x02(\x0b\x32\n.TSP.Color\",\n\x1aSpecShadowSetOffsetArchive\x12\x0e\n\x06offset\x18\x01 \x02(\x01\".\n\x1bSpecShadowSetOpacityArchive\x12\x0f\n\x07opacity\x18\x01 \x02(\x01\",\n\x1aSpecShadowSetRadiusArchive\x12\x0e\n\x06radius\x18\x01 \x02(\x05\"6\n\x19SpecStrokeSetColorArchive\x12\x19\n\x05\x63olor\x18\x01 \x02(\x0b\x32\n.TSP.Color\"\xad\x01\n\x1bSpecStrokeSetPatternArchive\x12\x10\n\x08line_cap\x18\x01 \x01(\x05\x12\x11\n\tline_join\x18\x02 \x01(\x05\x12\x13\n\x0bmiter_limit\x18\x03 \x01(\x01\x12\r\n\x05width\x18\x04 \x01(\x01\x12\x19\n\x05\x63olor\x18\x05 \x01(\x0b\x32\n.TSP.Color\x12*\n\x07pattern\x18\x06 \x02(\x0b\x32\x19.TSD.StrokePatternArchive\"*\n\x19SpecStrokeSetWidthArchive\x12\r\n\x05width\x18\x01 \x02(\x01\"u\n\x0b\x41ttribution\x12\r\n\x05title\x18\x01 \x01(\t\x12\x18\n\x10\x64\x65scription_text\x18\x02 \x01(\t\x12\x14\n\x0c\x65xternal_url\x18\x03 \x01(\t\x12\x13\n\x0b\x61uthor_name\x18\x04 \x01(\t\x12\x12\n\nauthor_url\x18\x05 \x01(\t\"S\n\x10MovieFingerprint\x12*\n\x06tracks\x18\x01 \x03(\x0b\x32\x1a.TSD.MovieFingerprintTrack\x12\x13\n\x07version\x18\x02 \x03(\rB\x02\x10\x01\"\x85\x05\n\x15MovieFingerprintTrack\x12\x12\n\nmedia_type\x18\x01 \x01(\t\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12 \n\x18total_sample_data_length\x18\x03 \x01(\x03\x12!\n\x19sample_data_digest_string\x18\x04 \x01(\t\x12\x1e\n\x16time_range_start_value\x18\x05 \x01(\x03\x12\"\n\x1atime_range_start_timescale\x18\x06 \x01(\x05\x12!\n\x19time_range_start_is_valid\x18\x07 \x01(\x08\x12!\n\x19time_range_duration_value\x18\x08 \x01(\x03\x12%\n\x1dtime_range_duration_timescale\x18\t \x01(\x05\x12$\n\x1ctime_range_duration_is_valid\x18\n \x01(\x08\x12\x1f\n\x0cnatural_size\x18\x0b \x01(\x0b\x32\t.TSP.Size\x12\x1d\n\x15preferred_transform_a\x18\x0c \x01(\x01\x12\x1d\n\x15preferred_transform_b\x18\r \x01(\x01\x12\x1d\n\x15preferred_transform_c\x18\x0e \x01(\x01\x12\x1d\n\x15preferred_transform_d\x18\x0f \x01(\x01\x12\x1e\n\x16preferred_transform_tx\x18\x10 \x01(\x01\x12\x1e\n\x16preferred_transform_ty\x18\x11 \x01(\x01\x12\x18\n\x10preferred_volume\x18\x12 \x01(\x01\x12\x15\n\rlanguage_code\x18\x13 \x01(\t\x12\x1d\n\x15\x65xtended_language_tag\x18\x14 \x01(\t*7\n\x08LineJoin\x12\r\n\tMiterJoin\x10\x00\x12\r\n\tRoundJoin\x10\x01\x12\r\n\tBevelJoin\x10\x02:A\n\x04\x66ill\x12 .TSS.CommandPropertyEntryArchive\x18\xc8\x01 \x01(\x0b\x32\x10.TSD.FillArchive:E\n\x06stroke\x12 .TSS.CommandPropertyEntryArchive\x18\xc9\x01 \x01(\x0b\x32\x12.TSD.StrokeArchive'
+  serialized_pb=b'\n\x11TSDArchives.proto\x12\x03TSD\x1a\x11TSPMessages.proto\x1a\x11TSKArchives.proto\x1a\x11TSSArchives.proto\"M\n\x11\x45\x64geInsetsArchive\x12\x0b\n\x03top\x18\x01 \x02(\x02\x12\x0c\n\x04left\x18\x02 \x02(\x02\x12\x0e\n\x06\x62ottom\x18\x03 \x02(\x02\x12\r\n\x05right\x18\x04 \x02(\x02\"f\n\x0fGeometryArchive\x12\x1c\n\x08position\x18\x01 \x01(\x0b\x32\n.TSP.Point\x12\x17\n\x04size\x18\x02 \x01(\x0b\x32\t.TSP.Size\x12\r\n\x05\x66lags\x18\x03 \x01(\r\x12\r\n\x05\x61ngle\x18\x04 \x01(\x02\"\x8e\x02\n\x16PointPathSourceArchive\x12=\n\x04type\x18\x01 \x01(\x0e\x32/.TSD.PointPathSourceArchive.PointPathSourceType\x12\x19\n\x05point\x18\x02 \x01(\x0b\x32\n.TSP.Point\x12\x1e\n\x0bnaturalSize\x18\x03 \x01(\x0b\x32\t.TSP.Size\"z\n\x13PointPathSourceType\x12\x17\n\x13kTSDLeftSingleArrow\x10\x00\x12\x18\n\x14kTSDRightSingleArrow\x10\x01\x12\x13\n\x0fkTSDDoubleArrow\x10\n\x12\x0c\n\x08kTSDStar\x10\x64\x12\r\n\x08kTSDPlus\x10\xc8\x01\"\x82\x02\n\x17ScalarPathSourceArchive\x12?\n\x04type\x18\x01 \x01(\x0e\x32\x31.TSD.ScalarPathSourceArchive.ScalarPathSourceType\x12\x0e\n\x06scalar\x18\x02 \x01(\x02\x12\x1e\n\x0bnaturalSize\x18\x03 \x01(\x0b\x32\t.TSP.Size\x12\x1b\n\x13is_curve_continuous\x18\x04 \x01(\x08\"Y\n\x14ScalarPathSourceType\x12\x18\n\x14kTSDRoundedRectangle\x10\x00\x12\x16\n\x12kTSDRegularPolygon\x10\x01\x12\x0f\n\x0bkTSDChevron\x10\x02\"k\n\x17\x42\x65zierPathSourceArchive\x12\x17\n\x0bpath_string\x18\x01 \x01(\tB\x02\x18\x01\x12\x1e\n\x0bnaturalSize\x18\x02 \x01(\x0b\x32\t.TSP.Size\x12\x17\n\x04path\x18\x03 \x01(\x0b\x32\t.TSP.Path\"\x9d\x01\n\x18\x43\x61lloutPathSourceArchive\x12\x1f\n\x0cnatural_size\x18\x01 \x01(\x0b\x32\t.TSP.Size\x12!\n\rtail_position\x18\x02 \x01(\x0b\x32\n.TSP.Point\x12\x11\n\ttail_size\x18\x03 \x01(\x02\x12\x15\n\rcorner_radius\x18\x04 \x01(\x02\x12\x13\n\x0b\x63\x65nter_tail\x18\x05 \x01(\x08\"\xb2\x02\n\x1f\x43onnectionLinePathSourceArchive\x12+\n\x05super\x18\x01 \x02(\x0b\x32\x1c.TSD.BezierPathSourceArchive\x12O\n\x04type\x18\x02 \x01(\x0e\x32\x41.TSD.ConnectionLinePathSourceArchive.ConnectionLinePathSourceType\x12\x13\n\x0boutset_from\x18\x03 \x01(\x02\x12\x11\n\toutset_to\x18\x04 \x01(\x02\"i\n\x1c\x43onnectionLinePathSourceType\x12#\n\x1fkTSDConnectionLineTypeQuadratic\x10\x00\x12$\n kTSDConnectionLineTypeOrthogonal\x10\x01\"\xb3\x03\n\x1f\x45\x64itableBezierPathSourceArchive\x12>\n\x08subpaths\x18\x01 \x03(\x0b\x32,.TSD.EditableBezierPathSourceArchive.Subpath\x12\x1e\n\x0bnaturalSize\x18\x02 \x01(\x0b\x32\t.TSP.Size\x1a\xab\x01\n\x04Node\x12\"\n\x0einControlPoint\x18\x01 \x02(\x0b\x32\n.TSP.Point\x12\x1d\n\tnodePoint\x18\x02 \x02(\x0b\x32\n.TSP.Point\x12#\n\x0foutControlPoint\x18\x03 \x02(\x0b\x32\n.TSP.Point\x12;\n\x04type\x18\x04 \x02(\x0e\x32-.TSD.EditableBezierPathSourceArchive.NodeType\x1aS\n\x07Subpath\x12\x38\n\x05nodes\x18\x01 \x03(\x0b\x32).TSD.EditableBezierPathSourceArchive.Node\x12\x0e\n\x06\x63losed\x18\x02 \x02(\x08\"-\n\x08NodeType\x12\t\n\x05sharp\x10\x01\x12\n\n\x06\x62\x65zier\x10\x02\x12\n\n\x06smooth\x10\x03\"\xf1\x03\n\x11PathSourceArchive\x12\x16\n\x0ehorizontalFlip\x18\x01 \x01(\x08\x12\x14\n\x0cverticalFlip\x18\x02 \x01(\x08\x12\x36\n\x11point_path_source\x18\x03 \x01(\x0b\x32\x1b.TSD.PointPathSourceArchive\x12\x38\n\x12scalar_path_source\x18\x04 \x01(\x0b\x32\x1c.TSD.ScalarPathSourceArchive\x12\x38\n\x12\x62\x65zier_path_source\x18\x05 \x01(\x0b\x32\x1c.TSD.BezierPathSourceArchive\x12:\n\x13\x63\x61llout_path_source\x18\x06 \x01(\x0b\x32\x1d.TSD.CalloutPathSourceArchive\x12I\n\x1b\x63onnection_line_path_source\x18\x07 \x01(\x0b\x32$.TSD.ConnectionLinePathSourceArchive\x12I\n\x1b\x65\x64itable_bezier_path_source\x18\x08 \x01(\x0b\x32$.TSD.EditableBezierPathSourceArchive\x12\x17\n\x0flocalizationKey\x18\t \x01(\t\x12\x17\n\x0fuserDefinedName\x18\n \x01(\t\"-\n\x14\x41ngleGradientArchive\x12\x15\n\rgradientangle\x18\x02 \x01(\x02\"r\n\x18TransformGradientArchive\x12\x19\n\x05start\x18\x01 \x01(\x0b\x32\n.TSP.Point\x12\x17\n\x03\x65nd\x18\x02 \x01(\x0b\x32\n.TSP.Point\x12\"\n\x0f\x62\x61seNaturalSize\x18\x03 \x01(\x0b\x32\t.TSP.Size\"\x84\x03\n\x0fGradientArchive\x12/\n\x04type\x18\x01 \x01(\x0e\x32!.TSD.GradientArchive.GradientType\x12\x30\n\x05stops\x18\x02 \x03(\x0b\x32!.TSD.GradientArchive.GradientStop\x12\x0f\n\x07opacity\x18\x03 \x01(\x02\x12\x18\n\x10\x61\x64vancedGradient\x18\x04 \x01(\x08\x12\x30\n\ranglegradient\x18\x05 \x01(\x0b\x32\x19.TSD.AngleGradientArchive\x12\x38\n\x11transformgradient\x18\x06 \x01(\x0b\x32\x1d.TSD.TransformGradientArchive\x1aO\n\x0cGradientStop\x12\x19\n\x05\x63olor\x18\x01 \x01(\x0b\x32\n.TSP.Color\x12\x10\n\x08\x66raction\x18\x02 \x01(\x02\x12\x12\n\ninflection\x18\x03 \x01(\x02\"&\n\x0cGradientType\x12\n\n\x06Linear\x10\x00\x12\n\n\x06Radial\x10\x01\"\xfe\x03\n\x10ImageFillArchive\x12%\n\timagedata\x18\x06 \x01(\x0b\x32\x12.TSP.DataReference\x12H\n\ttechnique\x18\x02 \x01(\x0e\x32(.TSD.ImageFillArchive.ImageFillTechnique:\x0bNaturalSize\x12\x18\n\x04tint\x18\x03 \x01(\x0b\x32\n.TSP.Color\x12\x1b\n\x08\x66illsize\x18\x04 \x01(\x0b\x32\t.TSP.Size\x12\x31\n\x11originalimagedata\x18\x07 \x01(\x0b\x32\x12.TSP.DataReferenceB\x02\x18\x01\x12,\n$interpretsUntaggedImageDataAsGeneric\x18\x08 \x01(\x08\x12\"\n\x0ereferencecolor\x18\t \x01(\x0b\x32\n.TSP.Color\x12*\n\x12\x64\x61tabase_imagedata\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1a\x64\x61tabase_originalimagedata\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\"]\n\x12ImageFillTechnique\x12\x0f\n\x0bNaturalSize\x10\x00\x12\x0b\n\x07Stretch\x10\x01\x12\x08\n\x04Tile\x10\x02\x12\x0f\n\x0bScaleToFill\x10\x03\x12\x0e\n\nScaleToFit\x10\x04\"\x80\x01\n\x0b\x46illArchive\x12\x19\n\x05\x63olor\x18\x01 \x01(\x0b\x32\n.TSP.Color\x12&\n\x08gradient\x18\x02 \x01(\x0b\x32\x14.TSD.GradientArchive\x12$\n\x05image\x18\x03 \x01(\x0b\x32\x15.TSD.ImageFillArchive*\x08\x08\x64\x10\x80\x80\x80\x80\x02\"\xcf\x01\n\x14StrokePatternArchive\x12\x39\n\x04type\x18\x01 \x01(\x0e\x32+.TSD.StrokePatternArchive.StrokePatternType\x12\r\n\x05phase\x18\x02 \x01(\x02\x12\r\n\x05\x63ount\x18\x03 \x01(\r\x12\x0f\n\x07pattern\x18\x04 \x03(\x02\"M\n\x11StrokePatternType\x12\x0e\n\nTSDPattern\x10\x00\x12\x13\n\x0fTSDSolidPattern\x10\x01\x12\x13\n\x0fTSDEmptyPattern\x10\x02\"\xfd\x02\n\rStrokeArchive\x12\x19\n\x05\x63olor\x18\x01 \x01(\x0b\x32\n.TSP.Color\x12\r\n\x05width\x18\x02 \x01(\x02\x12\'\n\x03\x63\x61p\x18\x03 \x01(\x0e\x32\x1a.TSD.StrokeArchive.LineCap\x12\x1b\n\x04join\x18\x04 \x01(\x0e\x32\r.TSD.LineJoin\x12\x13\n\x0bmiter_limit\x18\x05 \x01(\x02\x12*\n\x07pattern\x18\x06 \x01(\x0b\x32\x19.TSD.StrokePatternArchive\x12-\n\x0csmart_stroke\x18\x07 \x01(\x0b\x32\x17.TSD.SmartStrokeArchive\x12 \n\x05\x66rame\x18\x08 \x01(\x0b\x32\x11.TSD.FrameArchive\x12\x35\n\x10patterned_stroke\x18\t \x01(\x0b\x32\x1b.TSD.PatternedStrokeArchive\"3\n\x07LineCap\x12\x0b\n\x07\x42uttCap\x10\x00\x12\x0c\n\x08RoundCap\x10\x01\x12\r\n\tSquareCap\x10\x02\"\x92\x01\n\x12SmartStrokeArchive\x12\x13\n\x0bstroke_name\x18\x02 \x01(\t\x12\x13\n\x0brandom_seed\x18\x03 \x01(\r\x12\x31\n\x0fparameterValues\x18\x04 \x01(\x0b\x32\x18.TSP.ReferenceDictionary\x12\x1f\n\x17pattern_offset_distance\x18\x05 \x01(\x01\"5\n\x0c\x46rameArchive\x12\x11\n\tframeName\x18\x02 \x01(\t\x12\x12\n\nassetScale\x18\x03 \x01(\x02\".\n\x16PatternedStrokeArchive\x12\x14\n\x0cpattern_name\x18\x02 \x01(\t\"\x9c\x01\n\x0eLineEndArchive\x12\x17\n\x04path\x18\x01 \x01(\x0b\x32\t.TSP.Path\x12+\n\tline_join\x18\x02 \x01(\x0e\x32\r.TSD.LineJoin:\tMiterJoin\x12\x1d\n\tend_point\x18\x03 \x01(\x0b\x32\n.TSP.Point\x12\x11\n\tis_filled\x18\x04 \x01(\x08\x12\x12\n\nidentifier\x18\x05 \x01(\t\"\xa8\x03\n\rShadowArchive\x12\x19\n\x05\x63olor\x18\x01 \x01(\x0b\x32\n.TSP.Color\x12\x12\n\x05\x61ngle\x18\x02 \x01(\x02:\x03\x33\x31\x35\x12\x11\n\x06offset\x18\x03 \x01(\x02:\x01\x35\x12\x11\n\x06radius\x18\x04 \x01(\x05:\x01\x31\x12\x12\n\x07opacity\x18\x05 \x01(\x02:\x01\x31\x12\x18\n\nis_enabled\x18\x06 \x01(\x08:\x04true\x12:\n\x04type\x18\x07 \x01(\x0e\x32\x1d.TSD.ShadowArchive.ShadowType:\rTSDDropShadow\x12*\n\ndropShadow\x18\x08 \x01(\x0b\x32\x16.TSD.DropShadowArchive\x12\x30\n\rcontactShadow\x18\t \x01(\x0b\x32\x19.TSD.ContactShadowArchive\x12.\n\x0c\x63urvedShadow\x18\n \x01(\x0b\x32\x18.TSD.CurvedShadowArchive\"J\n\nShadowType\x12\x11\n\rTSDDropShadow\x10\x00\x12\x14\n\x10TSDContactShadow\x10\x01\x12\x13\n\x0fTSDCurvedShadow\x10\x02\"\x13\n\x11\x44ropShadowArchive\">\n\x14\x43ontactShadowArchive\x12\x13\n\x06height\x18\x02 \x01(\x02:\x03\x30.2\x12\x11\n\x06offset\x18\x04 \x01(\x02:\x01\x30\")\n\x13\x43urvedShadowArchive\x12\x12\n\x05\x63urve\x18\x01 \x01(\x02:\x03\x30.6\")\n\x11ReflectionArchive\x12\x14\n\x07opacity\x18\x01 \x01(\x02:\x03\x30.5\"\xbc\x02\n\x17ImageAdjustmentsArchive\x12\x10\n\x08\x65xposure\x18\x01 \x01(\x02\x12\x12\n\nsaturation\x18\x02 \x01(\x02\x12\x10\n\x08\x63ontrast\x18\x03 \x01(\x02\x12\x12\n\nhighlights\x18\x04 \x01(\x02\x12\x0f\n\x07shadows\x18\x05 \x01(\x02\x12\x11\n\tsharpness\x18\x06 \x01(\x02\x12\x0f\n\x07\x64\x65noise\x18\x07 \x01(\x02\x12\x13\n\x0btemperature\x18\x08 \x01(\x02\x12\x0c\n\x04tint\x18\t \x01(\x02\x12\x14\n\x0c\x62ottom_level\x18\n \x01(\x02\x12\x14\n\ttop_level\x18\x0b \x01(\x02:\x01\x31\x12\r\n\x05gamma\x18\x0c \x01(\x02\x12\x16\n\x07\x65nhance\x18\r \x01(\x08:\x05\x66\x61lse\x12*\n\x1brepresents_sage_adjustments\x18\x0e \x01(\x08:\x05\x66\x61lse\"\x9a\x02\n\x1bShapeStylePropertiesArchive\x12\x1e\n\x04\x66ill\x18\x01 \x01(\x0b\x32\x10.TSD.FillArchive\x12\"\n\x06stroke\x18\x02 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x0f\n\x07opacity\x18\x03 \x01(\x02\x12\"\n\x06shadow\x18\x04 \x01(\x0b\x32\x12.TSD.ShadowArchive\x12*\n\nreflection\x18\x05 \x01(\x0b\x32\x16.TSD.ReflectionArchive\x12*\n\rhead_line_end\x18\x06 \x01(\x0b\x32\x13.TSD.LineEndArchive\x12*\n\rtail_line_end\x18\x07 \x01(\x0b\x32\x13.TSD.LineEndArchive\"\x8c\x01\n\x11ShapeStyleArchive\x12 \n\x05super\x18\x01 \x02(\x0b\x32\x11.TSS.StyleArchive\x12\x19\n\x0eoverride_count\x18\n \x01(\r:\x01\x30\x12:\n\x10shape_properties\x18\x0b \x01(\x0b\x32 .TSD.ShapeStylePropertiesArchive\"\xa2\x01\n\x1bMediaStylePropertiesArchive\x12\"\n\x06stroke\x18\x01 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x0f\n\x07opacity\x18\x02 \x01(\x02\x12\"\n\x06shadow\x18\x03 \x01(\x0b\x32\x12.TSD.ShadowArchive\x12*\n\nreflection\x18\x04 \x01(\x0b\x32\x16.TSD.ReflectionArchive\"\x8c\x01\n\x11MediaStyleArchive\x12 \n\x05super\x18\x01 \x02(\x0b\x32\x11.TSS.StyleArchive\x12\x19\n\x0eoverride_count\x18\n \x01(\r:\x01\x30\x12:\n\x10media_properties\x18\x0b \x01(\x0b\x32 .TSD.MediaStylePropertiesArchive\"\xf6\x03\n\x13ThemePresetsArchive\x12/\n\x15gradient_fill_presets\x18\x01 \x03(\x0b\x32\x10.TSD.FillArchive\x12,\n\x12image_fill_presets\x18\x02 \x03(\x0b\x32\x10.TSD.FillArchive\x12*\n\x0eshadow_presets\x18\x03 \x03(\x0b\x32\x12.TSD.ShadowArchive\x12*\n\x12line_style_presets\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x12+\n\x13shape_style_presets\x18\x05 \x03(\x0b\x32\x0e.TSP.Reference\x12-\n\x15textbox_style_presets\x18\x06 \x03(\x0b\x32\x0e.TSP.Reference\x12+\n\x13image_style_presets\x18\x07 \x03(\x0b\x32\x0e.TSP.Reference\x12+\n\x13movie_style_presets\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1a\x64rawing_line_style_presets\x18\t \x03(\x0b\x32\x0e.TSP.Reference2>\n\textension\x12\x11.TSS.ThemeArchive\x18\x64 \x01(\x0b\x32\x18.TSD.ThemePresetsArchive\"\xbc\x01\n$ThemeReplaceFillPresetCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1d\n\x05theme\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x04\x66ill\x18\x03 \x02(\x0b\x32\x10.TSD.FillArchive\x12\"\n\x08old_fill\x18\x04 \x02(\x0b\x32\x10.TSD.FillArchive\x12\r\n\x05index\x18\x05 \x02(\r\"\xb5\x03\n\x0f\x44rawableArchive\x12&\n\x08geometry\x18\x01 \x01(\x0b\x32\x14.TSD.GeometryArchive\x12\x1e\n\x06parent\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n\x12\x65xterior_text_wrap\x18\x03 \x01(\x0b\x32\x1c.TSD.ExteriorTextWrapArchive\x12\x15\n\rhyperlink_url\x18\x04 \x01(\t\x12\x0e\n\x06locked\x18\x05 \x01(\x08\x12\x1f\n\x07\x63omment\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1b\n\x13\x61spect_ratio_locked\x18\x07 \x01(\x08\x12!\n\x19\x61\x63\x63\x65ssibility_description\x18\x08 \x01(\t\x12*\n\x12pencil_annotations\x18\t \x03(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x05title\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x07\x63\x61ption\x18\x0b \x01(\x0b\x32\x0e.TSP.Reference\x12\x14\n\x0ctitle_hidden\x18\x0c \x01(\x08\x12\x16\n\x0e\x63\x61ption_hidden\x18\r \x01(\x08\"|\n\x10\x43ontainerArchive\x12&\n\x08geometry\x18\x01 \x01(\x0b\x32\x14.TSD.GeometryArchive\x12\x1e\n\x06parent\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12 \n\x08\x63hildren\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\"\x93\x01\n\x0cGroupArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12 \n\x08\x63hildren\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1a\x66\x61ke_shape_for_empty_group\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference*\x08\x08\x64\x10\x80\x80\x80\x80\x02\"H\n\x1f\x46reehandDrawingAnimationArchive\x12\x10\n\x08\x64uration\x18\x01 \x01(\x01\x12\x13\n\x0bshould_loop\x18\x02 \x01(\x08\"\xf6\x01\n\x16\x46reehandDrawingArchive\x12$\n\x0cspacer_shape\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x0f\n\x07opacity\x18\x02 \x01(\x01\x12\x37\n\tanimation\x18\x03 \x01(\x0b\x32$.TSD.FreehandDrawingAnimationArchive\x12\x1a\n\x12last_clamped_scale\x18\x04 \x01(\x01\x32P\n\x18\x66reehand_drawing_archive\x12\x11.TSD.GroupArchive\x18\x64 \x01(\x0b\x32\x1b.TSD.FreehandDrawingArchive\"\x83\x02\n\x0cShapeArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12\x1d\n\x05style\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\npathsource\x18\x03 \x01(\x0b\x32\x16.TSD.PathSourceArchive\x12.\n\rhead_line_end\x18\x04 \x01(\x0b\x32\x13.TSD.LineEndArchiveB\x02\x18\x01\x12.\n\rtail_line_end\x18\x05 \x01(\x0b\x32\x13.TSD.LineEndArchiveB\x02\x18\x01\x12#\n\x1bstrokePatternOffsetDistance\x18\x06 \x01(\x02\"\xd5\x01\n\x15\x43onnectionLineArchive\x12 \n\x05super\x18\x01 \x02(\x0b\x32\x11.TSD.ShapeArchive\x12&\n\x0e\x63onnected_from\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12$\n\x0c\x63onnected_to\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12$\n\x11\x63onnected_to_uuid\x18\x04 \x01(\x0b\x32\t.TSP.UUID\x12&\n\x13\x63onnected_from_uuid\x18\x05 \x01(\x0b\x32\t.TSP.UUID\"\xce\x06\n\x0cImageArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12 \n\x04\x64\x61ta\x18\x0b \x01(\x0b\x32\x12.TSP.DataReference\x12\x1d\n\x05style\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x0coriginalSize\x18\x04 \x01(\x0b\x32\t.TSP.Size\x12\x1c\n\x04mask\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\rthumbnailData\x18\x0c \x01(\x0b\x32\x12.TSP.DataReference\x12\r\n\x05\x66lags\x18\x07 \x01(\r\x12(\n\x0coriginalData\x18\r \x01(\x0b\x32\x12.TSP.DataReference\x12\x1e\n\x0bnaturalSize\x18\t \x01(\x0b\x32\t.TSP.Size\x12#\n\x10instantAlphaPath\x18\n \x01(\x0b\x32\t.TSP.Path\x12\x36\n\x10imageAdjustments\x18\x0e \x01(\x0b\x32\x1c.TSD.ImageAdjustmentsArchive\x12-\n\x11\x65nhancedImageData\x18\x11 \x01(\x0b\x32\x12.TSP.DataReference\x12-\n\x11\x61\x64justedImageData\x18\x0f \x01(\x0b\x32\x12.TSP.DataReference\x12\x36\n\x1athumbnailAdjustedImageData\x18\x10 \x01(\x0b\x32\x12.TSP.DataReference\x12,\n$interpretsUntaggedImageDataAsGeneric\x18\x12 \x01(\x08\x12%\n\rdatabase_data\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x64\x61tabase_thumbnailData\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15\x64\x61tabase_originalData\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x0btraced_path\x18\x13 \x01(\x0b\x32\t.TSP.Path\x12%\n\x0b\x61ttribution\x18\x14 \x01(\x0b\x32\x10.TSD.Attribution\x12 \n\x18should_trace_pdf_content\x18\x15 \x01(\x08*\x05\x08\x64\x10\xe8\x07\"^\n\x0bMaskArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12*\n\npathsource\x18\x02 \x01(\x0b\x32\x16.TSD.PathSourceArchive\"\xcf\x01\n\x13ImageDataAttributes\x12\x1d\n\npixel_size\x18\x01 \x01(\x0b\x32\t.TSP.Size\x12\x15\n\rimage_is_srgb\x18\x02 \x01(\x08\x12\x34\n,should_be_interpreted_as_generic_if_untagged\x18\x03 \x01(\x08\x32L\n\x15image_data_attributes\x12\x13.TSP.DataAttributes\x18\x64 \x01(\x0b\x32\x18.TSD.ImageDataAttributes\"\xdb\x08\n\x0cMovieArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12%\n\tmovieData\x18\x0e \x01(\x0b\x32\x12.TSP.DataReference\x12\x36\n\x1aimportedAuxiliaryMovieData\x18\x16 \x01(\x0b\x32\x12.TSP.DataReference\x12\x37\n/imported_auxiliary_movie_data_original_filename\x18\x19 \x01(\t\x12\x16\n\x0emovieRemoteURL\x18\x11 \x01(\t\x12\x11\n\tstartTime\x18\x03 \x01(\x02\x12\x0f\n\x07\x65ndTime\x18\x04 \x01(\x02\x12\x12\n\nposterTime\x18\x05 \x01(\x02\x12\x1f\n\x13loopOptionAsInteger\x18\x06 \x01(\rB\x02\x18\x01\x12<\n\x0bloop_option\x18\x18 \x01(\x0e\x32!.TSD.MovieArchive.MovieLoopOption:\x04None\x12\x0e\n\x06volume\x18\x07 \x01(\x02\x12\x14\n\x08\x61utoPlay\x18\x08 \x01(\x08\x42\x02\x18\x01\x12\x11\n\taudioOnly\x18\t \x01(\x08\x12\x11\n\tstreaming\x18\x12 \x01(\x08\x12\x1c\n\x14nativeAudioRecording\x18\x1b \x01(\x08\x12\x19\n\x11playsAcrossSlides\x18\x1c \x01(\x08\x12+\n\x0fposterImageData\x18\x0f \x01(\x0b\x32\x12.TSP.DataReference\x12.\n\x12\x61udioOnlyImageData\x18\x10 \x01(\x0b\x32\x12.TSP.DataReference\x12\x31\n)poster_image_generated_with_alpha_support\x18\x17 \x01(\x08\x12\x15\n\rplayableState\x18\x0c \x01(\r\x12\r\n\x05\x66lags\x18\r \x01(\r\x12*\n\x12\x64\x61tabase_movieData\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18\x64\x61tabase_posterImageData\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x64\x61tabase_audioOnlyImageData\x18\x0b \x01(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x05style\x18\x13 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x0coriginalSize\x18\x14 \x01(\x0b\x32\t.TSP.Size\x12\x1e\n\x0bnaturalSize\x18\x15 \x01(\x0b\x32\t.TSP.Size\x12%\n\x0b\x61ttribution\x18\x1a \x01(\x0b\x32\x10.TSD.Attribution\x12*\n\x0b\x66ingerprint\x18\x1d \x01(\x0b\x32\x15.TSD.MovieFingerprint\x12\x1c\n\ris_live_video\x18\x1e \x01(\x08:\x05\x66\x61lse\"9\n\x0fMovieLoopOption\x12\x08\n\x04None\x10\x00\x12\n\n\x06Repeat\x10\x01\x12\x10\n\x0c\x42\x61\x63kAndForth\x10\x02*\x05\x08\x64\x10\xe8\x07\"\x8b\x01\n\x17\x45xteriorTextWrapArchive\x12\x0c\n\x04type\x18\x01 \x01(\r\x12\x11\n\tdirection\x18\x02 \x01(\r\x12\x10\n\x08\x66it_type\x18\x03 \x01(\r\x12\x0e\n\x06margin\x18\x04 \x01(\x02\x12\x17\n\x0f\x61lpha_threshold\x18\x05 \x01(\x02\x12\x14\n\x0cis_html_wrap\x18\x06 \x01(\x08\"\x8c\x01\n\x1a\x44rawableContentDescription\x12\x14\n\x0c\x65lement_kind\x18\x01 \x01(\r\x12\x1b\n\x13is_anchored_to_text\x18\x02 \x01(\x08\x12\x1e\n\x16is_floating_above_text\x18\x03 \x01(\x08\x12\x1b\n\x13is_inline_with_text\x18\x04 \x01(\x08\"{\n!FreehandDrawingContentDescription\x12.\n\x05super\x18\x01 \x02(\x0b\x32\x1f.TSD.DrawableContentDescription\x12&\n\x1esource_doc_wanted_spacer_shape\x18\x02 \x01(\x08\"\xd1\x05\n\x1d\x46reehandDrawingToolkitUIState\x12%\n\rcurrent_color\x18\x01 \x01(\x0b\x32\n.TSP.ColorB\x02\x18\x01\x12i\n most_recent_restorable_tool_type\x18\x02 \x01(\x0e\x32:.TSD.FreehandDrawingToolkitUIState.FreehandDrawingToolType:\x03Pen\x12\x18\n\x10pen_tool_opacity\x18\x03 \x01(\x02\x12\x1f\n\x17pen_tool_unscaled_width\x18\x04 \x01(\x02\x12\x1b\n\x13pencil_tool_opacity\x18\x05 \x01(\x02\x12\"\n\x1apencil_tool_unscaled_width\x18\x06 \x01(\x02\x12\x1b\n\x13\x63rayon_tool_opacity\x18\x07 \x01(\x02\x12\"\n\x1a\x63rayon_tool_unscaled_width\x18\x08 \x01(\x02\x12\x19\n\x11\x66ill_tool_opacity\x18\t \x01(\x02\x12 \n\x18\x65raser_tool_scaled_width\x18\n \x01(\x02\x12(\n eraser_tool_erases_whole_objects\x18\x0b \x01(\x08\x12\"\n\x0epen_tool_color\x18\x0c \x01(\x0b\x32\n.TSP.Color\x12%\n\x11pencil_tool_color\x18\r \x01(\x0b\x32\n.TSP.Color\x12%\n\x11\x63rayon_tool_color\x18\x0e \x01(\x0b\x32\n.TSP.Color\x12#\n\x0f\x66ill_tool_color\x18\x0f \x01(\x0b\x32\n.TSP.Color\"c\n\x17\x46reehandDrawingToolType\x12\x07\n\x03Pen\x10\x00\x12\n\n\x06Pencil\x10\x01\x12\n\n\x06\x43rayon\x10\x02\x12\x08\n\x04\x46ill\x10\x03\x12\n\n\x06\x45raser\x10\x04\x12\x11\n\rMarqueeSelect\x10\x05\"\x17\n\x15StandinCaptionArchive\"\xb3\x01\n\x0cGuideArchive\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.TSD.GuideArchive.GuideType\x12\x0e\n\x06offset\x18\x02 \x01(\x02\x12\r\n\x05start\x18\x03 \x01(\x02\x12\x0b\n\x03\x65nd\x18\x04 \x01(\x02\x12\x0f\n\x07\x64ynamic\x18\x05 \x01(\x08\x12\x10\n\x08infinite\x18\x06 \x01(\x08\")\n\tGuideType\x12\x0e\n\nHorizontal\x10\x00\x12\x0c\n\x08Vertical\x10\x01\"\x8c\x01\n\x17UserDefinedGuideArchive\x12\x34\n\x04type\x18\x01 \x01(\x0e\x32&.TSD.UserDefinedGuideArchive.GuideType\x12\x10\n\x08position\x18\x02 \x01(\x02\")\n\tGuideType\x12\x0e\n\nHorizontal\x10\x00\x12\x0c\n\x08Vertical\x10\x01\"N\n\x13GuideStorageArchive\x12\x37\n\x11userDefinedGuides\x18\x01 \x03(\x0b\x32\x1c.TSD.UserDefinedGuideArchive\"\x8d\x01\n\x16\x43\x61nvasSelectionArchive\x12\x1d\n\x05infos\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12-\n\x15non_interactive_infos\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12%\n\tcontainer\x18\x02 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\"h\n\x18\x44rawableSelectionArchive\x12\x1d\n\x05infos\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12-\n\x15non_interactive_infos\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\"x\n\x15GroupSelectionArchive\x12,\n\x05super\x18\x01 \x02(\x0b\x32\x1d.TSD.DrawableSelectionArchive\x12\x31\n)has_selected_infos_in_non_group_container\x18\x02 \x01(\x08\"\x16\n\x14PathSelectionArchive\"\x1f\n\x1dInfoHyperlinkSelectionArchive\"\x88\x01\n\x15\x43ommentStorageArchive\x12\x0c\n\x04text\x18\x01 \x01(\t\x12 \n\rcreation_date\x18\x02 \x01(\x0b\x32\t.TSP.Date\x12\x1e\n\x06\x61uthor\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x07replies\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\"\xa9\x01\n%ReplaceAnnotationAuthorCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12-\n\x15old_annotation_author\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15new_annotation_author\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\"L\n\x17PencilAnnotationArchive\x12\x31\n\x19pencil_annotation_storage\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"M\n PencilAnnotationSelectionArchive\x12)\n\x11pencil_annotation\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"\xc6\x07\n\x1ePencilAnnotationStorageArchive\x12\x19\n\x11\x61ttached_location\x18\x01 \x01(\x05\x12!\n\rmarkup_offset\x18\x02 \x01(\x0b\x32\n.TSP.Point\x12,\n\x10rasterized_image\x18\x03 \x01(\x0b\x32\x12.TSP.DataReference\x12\x32\n\x16legacy_encoded_drawing\x18\x04 \x01(\x0b\x32\x12.TSP.DataReference\x12\x1f\n\x0c\x64rawing_path\x18\x05 \x01(\x0b\x32\t.TSP.Path\x12/\n\x1bstrokes_bounding_box_origin\x18\x06 \x01(\x0b\x32\n.TSP.Point\x12,\n\x19strokes_bounding_box_size\x18\x07 \x01(\x0b\x32\t.TSP.Size\x12\x15\n\rattached_type\x18\x08 \x01(\x05\x12)\n\x16original_attached_size\x18\t \x01(\x0b\x32\t.TSP.Size\x12-\n%percent_of_pa_contained_in_parent_rep\x18\n \x01(\x01\x12$\n\x1ctext_baselines_touched_count\x18\x0b \x01(\x04\x12\x1d\n\x15visible_strokes_count\x18\x0c \x01(\x04\x12\x1d\n\tpen_color\x18\r \x01(\x0b\x32\n.TSP.Color\x12\x11\n\ttool_type\x18\x0e \x01(\x05\x12,\n\x14\x63\x61llout_sub_storages\x18\x0f \x03(\x0b\x32\x0e.TSP.Reference\x12 \n\rcreation_date\x18\x10 \x01(\x0b\x32\t.TSP.Date\x12\'\n\x1fpencil_annotation_drawing_scale\x18\x11 \x01(\x01\x12 \n\x18\x63ompound_annotation_type\x18\x12 \x01(\x05\x12$\n\x0csub_storages\x18\x13 \x03(\x0b\x32\x0e.TSP.Reference\x12+\n\x0f\x65ncoded_drawing\x18\x14 \x01(\x0b\x32\x12.TSP.DataReference\x12.\n\x1astroke_points_frame_origin\x18\x15 \x01(\x0b\x32\n.TSP.Point\x12+\n\x18stroke_points_frame_size\x18\x16 \x01(\x0b\x32\t.TSP.Size\x12)\n\x15rendered_frame_origin\x18\x17 \x01(\x0b\x32\n.TSP.Point\x12&\n\x13rendered_frame_size\x18\x18 \x01(\x0b\x32\t.TSP.Size\"9\n\x1cSpecColorFillSetColorArchive\x12\x19\n\x05\x63olor\x18\x01 \x02(\x0b\x32\n.TSP.Color\"4\n\x1dSpecFrameSetAssetScaleArchive\x12\x13\n\x0b\x61sset_scale\x18\x01 \x02(\x01\"0\n\x1fSpecGradientFillSetAngleArchive\x12\r\n\x05\x61ngle\x18\x01 \x02(\x01\"5\n SpecImageFillSetTechniqueArchive\x12\x11\n\ttechnique\x18\x01 \x02(\x05\"2\n\x1fSpecReflectionSetOpacityArchive\x12\x0f\n\x07opacity\x18\x01 \x02(\x01\"*\n\x19SpecShadowSetAngleArchive\x12\r\n\x05\x61ngle\x18\x01 \x02(\x01\"6\n\x19SpecShadowSetColorArchive\x12\x19\n\x05\x63olor\x18\x01 \x02(\x0b\x32\n.TSP.Color\",\n\x1aSpecShadowSetOffsetArchive\x12\x0e\n\x06offset\x18\x01 \x02(\x01\".\n\x1bSpecShadowSetOpacityArchive\x12\x0f\n\x07opacity\x18\x01 \x02(\x01\",\n\x1aSpecShadowSetRadiusArchive\x12\x0e\n\x06radius\x18\x01 \x02(\x05\"6\n\x19SpecStrokeSetColorArchive\x12\x19\n\x05\x63olor\x18\x01 \x02(\x0b\x32\n.TSP.Color\"\xad\x01\n\x1bSpecStrokeSetPatternArchive\x12\x10\n\x08line_cap\x18\x01 \x01(\x05\x12\x11\n\tline_join\x18\x02 \x01(\x05\x12\x13\n\x0bmiter_limit\x18\x03 \x01(\x01\x12\r\n\x05width\x18\x04 \x01(\x01\x12\x19\n\x05\x63olor\x18\x05 \x01(\x0b\x32\n.TSP.Color\x12*\n\x07pattern\x18\x06 \x02(\x0b\x32\x19.TSD.StrokePatternArchive\"*\n\x19SpecStrokeSetWidthArchive\x12\r\n\x05width\x18\x01 \x02(\x01\"u\n\x0b\x41ttribution\x12\r\n\x05title\x18\x01 \x01(\t\x12\x18\n\x10\x64\x65scription_text\x18\x02 \x01(\t\x12\x14\n\x0c\x65xternal_url\x18\x03 \x01(\t\x12\x13\n\x0b\x61uthor_name\x18\x04 \x01(\t\x12\x12\n\nauthor_url\x18\x05 \x01(\t\"S\n\x10MovieFingerprint\x12*\n\x06tracks\x18\x01 \x03(\x0b\x32\x1a.TSD.MovieFingerprintTrack\x12\x13\n\x07version\x18\x02 \x03(\rB\x02\x10\x01\"\x85\x05\n\x15MovieFingerprintTrack\x12\x12\n\nmedia_type\x18\x01 \x01(\t\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12 \n\x18total_sample_data_length\x18\x03 \x01(\x03\x12!\n\x19sample_data_digest_string\x18\x04 \x01(\t\x12\x1e\n\x16time_range_start_value\x18\x05 \x01(\x03\x12\"\n\x1atime_range_start_timescale\x18\x06 \x01(\x05\x12!\n\x19time_range_start_is_valid\x18\x07 \x01(\x08\x12!\n\x19time_range_duration_value\x18\x08 \x01(\x03\x12%\n\x1dtime_range_duration_timescale\x18\t \x01(\x05\x12$\n\x1ctime_range_duration_is_valid\x18\n \x01(\x08\x12\x1f\n\x0cnatural_size\x18\x0b \x01(\x0b\x32\t.TSP.Size\x12\x1d\n\x15preferred_transform_a\x18\x0c \x01(\x01\x12\x1d\n\x15preferred_transform_b\x18\r \x01(\x01\x12\x1d\n\x15preferred_transform_c\x18\x0e \x01(\x01\x12\x1d\n\x15preferred_transform_d\x18\x0f \x01(\x01\x12\x1e\n\x16preferred_transform_tx\x18\x10 \x01(\x01\x12\x1e\n\x16preferred_transform_ty\x18\x11 \x01(\x01\x12\x18\n\x10preferred_volume\x18\x12 \x01(\x01\x12\x15\n\rlanguage_code\x18\x13 \x01(\t\x12\x1d\n\x15\x65xtended_language_tag\x18\x14 \x01(\t*7\n\x08LineJoin\x12\r\n\tMiterJoin\x10\x00\x12\r\n\tRoundJoin\x10\x01\x12\r\n\tBevelJoin\x10\x02:A\n\x04\x66ill\x12 .TSS.CommandPropertyEntryArchive\x18\xc8\x01 \x01(\x0b\x32\x10.TSD.FillArchive:E\n\x06stroke\x12 .TSS.CommandPropertyEntryArchive\x18\xc9\x01 \x01(\x0b\x32\x12.TSD.StrokeArchive'
   ,
   dependencies=[TSPMessages__pb2.DESCRIPTOR,TSKArchives__pb2.DESCRIPTOR,TSSArchives__pb2.DESCRIPTOR,])
 
@@ -52,8 +52,8 @@ _LINEJOIN = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=15661,
-  serialized_end=15716,
+  serialized_start=15726,
+  serialized_end=15781,
 )
 _sym_db.RegisterEnumDescriptor(_LINEJOIN)
 
@@ -384,8 +384,8 @@ _MOVIEARCHIVE_MOVIELOOPOPTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=10534,
-  serialized_end=10591,
+  serialized_start=10592,
+  serialized_end=10649,
 )
 _sym_db.RegisterEnumDescriptor(_MOVIEARCHIVE_MOVIELOOPOPTION)
 
@@ -429,8 +429,8 @@ _FREEHANDDRAWINGTOOLKITUISTATE_FREEHANDDRAWINGTOOLTYPE = _descriptor.EnumDescrip
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=11626,
-  serialized_end=11725,
+  serialized_start=11691,
+  serialized_end=11790,
 )
 _sym_db.RegisterEnumDescriptor(_FREEHANDDRAWINGTOOLKITUISTATE_FREEHANDDRAWINGTOOLTYPE)
 
@@ -454,8 +454,8 @@ _GUIDEARCHIVE_GUIDETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=11891,
-  serialized_end=11932,
+  serialized_start=11956,
+  serialized_end=11997,
 )
 _sym_db.RegisterEnumDescriptor(_GUIDEARCHIVE_GUIDETYPE)
 
@@ -479,8 +479,8 @@ _USERDEFINEDGUIDEARCHIVE_GUIDETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=11891,
-  serialized_end=11932,
+  serialized_start=11956,
+  serialized_end=11997,
 )
 _sym_db.RegisterEnumDescriptor(_USERDEFINEDGUIDEARCHIVE_GUIDETYPE)
 
@@ -2727,6 +2727,13 @@ _FREEHANDDRAWINGARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='last_clamped_scale', full_name='TSD.FreehandDrawingArchive.last_clamped_scale', index=3,
+      number=4, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
     _descriptor.FieldDescriptor(
@@ -2747,7 +2754,7 @@ _FREEHANDDRAWINGARCHIVE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=7659,
-  serialized_end=7877,
+  serialized_end=7905,
 )
 
 
@@ -2813,8 +2820,8 @@ _SHAPEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7880,
-  serialized_end=8139,
+  serialized_start=7908,
+  serialized_end=8167,
 )
 
 
@@ -2873,8 +2880,8 @@ _CONNECTIONLINEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8142,
-  serialized_end=8355,
+  serialized_start=8170,
+  serialized_end=8383,
 )
 
 
@@ -3045,8 +3052,8 @@ _IMAGEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[(100, 1000), ],
   oneofs=[
   ],
-  serialized_start=8358,
-  serialized_end=9204,
+  serialized_start=8386,
+  serialized_end=9232,
 )
 
 
@@ -3084,8 +3091,8 @@ _MASKARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9206,
-  serialized_end=9300,
+  serialized_start=9234,
+  serialized_end=9328,
 )
 
 
@@ -3137,8 +3144,8 @@ _IMAGEDATAATTRIBUTES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9303,
-  serialized_end=9510,
+  serialized_start=9331,
+  serialized_end=9538,
 )
 
 
@@ -3353,6 +3360,13 @@ _MOVIEARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='is_live_video', full_name='TSD.MovieArchive.is_live_video', index=29,
+      number=30, type=8, cpp_type=7, label=1,
+      has_default_value=True, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -3361,13 +3375,13 @@ _MOVIEARCHIVE = _descriptor.Descriptor(
     _MOVIEARCHIVE_MOVIELOOPOPTION,
   ],
   serialized_options=None,
-  is_extendable=False,
+  is_extendable=True,
   syntax='proto2',
-  extension_ranges=[],
+  extension_ranges=[(100, 1000), ],
   oneofs=[
   ],
-  serialized_start=9513,
-  serialized_end=10591,
+  serialized_start=9541,
+  serialized_end=10656,
 )
 
 
@@ -3433,8 +3447,8 @@ _EXTERIORTEXTWRAPARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10594,
-  serialized_end=10733,
+  serialized_start=10659,
+  serialized_end=10798,
 )
 
 
@@ -3486,8 +3500,8 @@ _DRAWABLECONTENTDESCRIPTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10736,
-  serialized_end=10876,
+  serialized_start=10801,
+  serialized_end=10941,
 )
 
 
@@ -3525,8 +3539,8 @@ _FREEHANDDRAWINGCONTENTDESCRIPTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10878,
-  serialized_end=11001,
+  serialized_start=10943,
+  serialized_end=11066,
 )
 
 
@@ -3656,8 +3670,8 @@ _FREEHANDDRAWINGTOOLKITUISTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11004,
-  serialized_end=11725,
+  serialized_start=11069,
+  serialized_end=11790,
 )
 
 
@@ -3681,8 +3695,8 @@ _STANDINCAPTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11727,
-  serialized_end=11750,
+  serialized_start=11792,
+  serialized_end=11815,
 )
 
 
@@ -3749,8 +3763,8 @@ _GUIDEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11753,
-  serialized_end=11932,
+  serialized_start=11818,
+  serialized_end=11997,
 )
 
 
@@ -3789,8 +3803,8 @@ _USERDEFINEDGUIDEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11935,
-  serialized_end=12075,
+  serialized_start=12000,
+  serialized_end=12140,
 )
 
 
@@ -3821,8 +3835,8 @@ _GUIDESTORAGEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12077,
-  serialized_end=12155,
+  serialized_start=12142,
+  serialized_end=12220,
 )
 
 
@@ -3867,8 +3881,8 @@ _CANVASSELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12158,
-  serialized_end=12299,
+  serialized_start=12223,
+  serialized_end=12364,
 )
 
 
@@ -3906,8 +3920,8 @@ _DRAWABLESELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12301,
-  serialized_end=12405,
+  serialized_start=12366,
+  serialized_end=12470,
 )
 
 
@@ -3945,8 +3959,8 @@ _GROUPSELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12407,
-  serialized_end=12527,
+  serialized_start=12472,
+  serialized_end=12592,
 )
 
 
@@ -3970,8 +3984,8 @@ _PATHSELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12529,
-  serialized_end=12551,
+  serialized_start=12594,
+  serialized_end=12616,
 )
 
 
@@ -3995,8 +4009,8 @@ _INFOHYPERLINKSELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12553,
-  serialized_end=12584,
+  serialized_start=12618,
+  serialized_end=12649,
 )
 
 
@@ -4048,8 +4062,8 @@ _COMMENTSTORAGEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12587,
-  serialized_end=12723,
+  serialized_start=12652,
+  serialized_end=12788,
 )
 
 
@@ -4094,8 +4108,8 @@ _REPLACEANNOTATIONAUTHORCOMMANDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12726,
-  serialized_end=12895,
+  serialized_start=12791,
+  serialized_end=12960,
 )
 
 
@@ -4126,8 +4140,8 @@ _PENCILANNOTATIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12897,
-  serialized_end=12973,
+  serialized_start=12962,
+  serialized_end=13038,
 )
 
 
@@ -4158,8 +4172,8 @@ _PENCILANNOTATIONSELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12975,
-  serialized_end=13052,
+  serialized_start=13040,
+  serialized_end=13117,
 )
 
 
@@ -4351,8 +4365,8 @@ _PENCILANNOTATIONSTORAGEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13055,
-  serialized_end=14021,
+  serialized_start=13120,
+  serialized_end=14086,
 )
 
 
@@ -4383,8 +4397,8 @@ _SPECCOLORFILLSETCOLORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14023,
-  serialized_end=14080,
+  serialized_start=14088,
+  serialized_end=14145,
 )
 
 
@@ -4415,8 +4429,8 @@ _SPECFRAMESETASSETSCALEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14082,
-  serialized_end=14134,
+  serialized_start=14147,
+  serialized_end=14199,
 )
 
 
@@ -4447,8 +4461,8 @@ _SPECGRADIENTFILLSETANGLEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14136,
-  serialized_end=14184,
+  serialized_start=14201,
+  serialized_end=14249,
 )
 
 
@@ -4479,8 +4493,8 @@ _SPECIMAGEFILLSETTECHNIQUEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14186,
-  serialized_end=14239,
+  serialized_start=14251,
+  serialized_end=14304,
 )
 
 
@@ -4511,8 +4525,8 @@ _SPECREFLECTIONSETOPACITYARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14241,
-  serialized_end=14291,
+  serialized_start=14306,
+  serialized_end=14356,
 )
 
 
@@ -4543,8 +4557,8 @@ _SPECSHADOWSETANGLEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14293,
-  serialized_end=14335,
+  serialized_start=14358,
+  serialized_end=14400,
 )
 
 
@@ -4575,8 +4589,8 @@ _SPECSHADOWSETCOLORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14337,
-  serialized_end=14391,
+  serialized_start=14402,
+  serialized_end=14456,
 )
 
 
@@ -4607,8 +4621,8 @@ _SPECSHADOWSETOFFSETARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14393,
-  serialized_end=14437,
+  serialized_start=14458,
+  serialized_end=14502,
 )
 
 
@@ -4639,8 +4653,8 @@ _SPECSHADOWSETOPACITYARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14439,
-  serialized_end=14485,
+  serialized_start=14504,
+  serialized_end=14550,
 )
 
 
@@ -4671,8 +4685,8 @@ _SPECSHADOWSETRADIUSARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14487,
-  serialized_end=14531,
+  serialized_start=14552,
+  serialized_end=14596,
 )
 
 
@@ -4703,8 +4717,8 @@ _SPECSTROKESETCOLORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14533,
-  serialized_end=14587,
+  serialized_start=14598,
+  serialized_end=14652,
 )
 
 
@@ -4770,8 +4784,8 @@ _SPECSTROKESETPATTERNARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14590,
-  serialized_end=14763,
+  serialized_start=14655,
+  serialized_end=14828,
 )
 
 
@@ -4802,8 +4816,8 @@ _SPECSTROKESETWIDTHARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14765,
-  serialized_end=14807,
+  serialized_start=14830,
+  serialized_end=14872,
 )
 
 
@@ -4862,8 +4876,8 @@ _ATTRIBUTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14809,
-  serialized_end=14926,
+  serialized_start=14874,
+  serialized_end=14991,
 )
 
 
@@ -4901,8 +4915,8 @@ _MOVIEFINGERPRINT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14928,
-  serialized_end=15011,
+  serialized_start=14993,
+  serialized_end=15076,
 )
 
 
@@ -5066,8 +5080,8 @@ _MOVIEFINGERPRINTTRACK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15014,
-  serialized_end=15659,
+  serialized_start=15079,
+  serialized_end=15724,
 )
 
 _GEOMETRYARCHIVE.fields_by_name['position'].message_type = TSPMessages__pb2._POINT

@@ -35,6 +35,7 @@ enum ChartType {
   multiDataBubbleChartType2D = 24;
   donutChartType2D = 25;
   donutChartType3D = 26;
+  radarChartType2D = 27;
 }
 
 enum AxisType {
@@ -43,6 +44,8 @@ enum AxisType {
   axis_type_y = 2;
   axis_type_pie = 3;
   axis_type_size = 4;
+  axis_type_polar_radius = 5;
+  axis_type_polar_angle = 6;
 }
 
 enum ScatterFormat {

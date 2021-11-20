@@ -280,12 +280,17 @@ extend .TSCH.ChartArchive {
 
 extend .TSCH.ChartSeriesStyleArchive {
   optional bool series_supports_donut = 10001;
+  optional bool series_supports_radar = 10002;
 }
 
 extend .TSCH.ChartSeriesNonStyleArchive {
   optional bool series_supports_custom_number_format = 10001;
   optional bool series_supports_custom_date_format = 10002;
   optional bool series_supports_callout_lines = 10003;
+}
+
+extend .TSCH.ChartAxisStyleArchive {
+  optional bool axis_supports_radar = 10001;
 }
 
 extend .TSCH.ChartAxisNonStyleArchive {

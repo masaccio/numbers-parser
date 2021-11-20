@@ -53,6 +53,8 @@ message StylesheetArchive {
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_10_1 = 8;
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_10_2 = 9;
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_11_0 = 10;
+  optional .TSS.StylesheetArchive.VersionedStyles styles_for_11_1 = 11;
+  optional .TSS.StylesheetArchive.VersionedStyles styles_for_11_2 = 12;
 }
 
 message ThemeArchive {

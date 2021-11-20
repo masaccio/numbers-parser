@@ -27,7 +27,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x11TSTArchives.proto\x12\x03TST\x1a\x11TSPMessages.proto\x1a\x11TSDArchives.proto\x1a\x11TSKArchives.proto\x1a\x11TSSArchives.proto\x1a\x12TSCEArchives.proto\x1a\x12TSWPArchives.proto\x1a\x1fTSTStylePropertyArchiving.proto\"Q\n\x06\x43\x65llID\x12\x12\n\npackedData\x18\x01 \x02(\x07\x12\x33\n\x0e\x65xpanded_coord\x18\x02 \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\"\xa6\x01\n\x18\x43\x65llUIDLookupListArchive\x12/\n\x0b\x63olumn_uids\x18\x01 \x01(\x0b\x32\x1a.TSCE.UidLookupListArchive\x12,\n\x08row_uids\x18\x02 \x01(\x0b\x32\x1a.TSCE.UidLookupListArchive\x12\x16\n\x0e\x63olumn_indexes\x18\x03 \x03(\x05\x12\x13\n\x0brow_indexes\x18\x04 \x03(\x05\"\xd5\x01\n\x12\x43\x65llUIDListArchive\x12\x1b\n\x08row_uids\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x12\x1e\n\x0b\x63olumn_uids\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x1e\n\x16\x63ompressed_row_indexes\x18\x03 \x03(\x05\x12!\n\x19\x63ompressed_column_indexes\x18\x04 \x03(\x05\x12?\n\x18uncompressed_lookup_list\x18\x05 \x01(\x0b\x32\x1d.TST.CellUIDLookupListArchive\"F\n\tTableSize\x12\x12\n\npackedData\x18\x01 \x02(\x07\x12\x13\n\x0bnum_columns\x18\x02 \x01(\r\x12\x10\n\x08num_rows\x18\x03 \x01(\r\":\n\x11\x45xpandedTableSize\x12\x13\n\x0bnum_columns\x18\x01 \x02(\r\x12\x10\n\x08num_rows\x18\x02 \x02(\r\"F\n\tCellRange\x12\x1b\n\x06origin\x18\x01 \x02(\x0b\x32\x0b.TST.CellID\x12\x1c\n\x04size\x18\x02 \x02(\x0b\x32\x0e.TST.TableSize\"f\n\x11\x45xpandedCellRange\x12+\n\x06origin\x18\x01 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12$\n\x04size\x18\x02 \x02(\x0b\x32\x16.TST.ExpandedTableSize\"\xb1\x01\n\x0eTableSelection\x12!\n\tcellRange\x18\x01 \x02(\x0b\x32\x0e.TST.CellRange\x12)\n\x11\x65xtendedCellRange\x18\x02 \x02(\x0b\x32\x0e.TST.CellRange\x12\x1e\n\x16\x65xtendedCellRangeValid\x18\x03 \x02(\x08\x12\x31\n\x0eselection_type\x18\x04 \x02(\x0e\x32\x19.TST.SelectionTypeArchive\"\xe2\x01\n\x0bTileRowInfo\x12\x16\n\x0etile_row_index\x18\x01 \x02(\r\x12\x12\n\ncell_count\x18\x02 \x02(\r\x12#\n\x1b\x63\x65ll_storage_buffer_pre_bnc\x18\x03 \x02(\x0c\x12\x1c\n\x14\x63\x65ll_offsets_pre_bnc\x18\x04 \x02(\x0c\x12\x17\n\x0fstorage_version\x18\x05 \x01(\r\x12\x1b\n\x13\x63\x65ll_storage_buffer\x18\x06 \x01(\x0c\x12\x14\n\x0c\x63\x65ll_offsets\x18\x07 \x01(\x0c\x12\x18\n\x10has_wide_offsets\x18\x08 \x01(\x08\"\xc2\x01\n\x04Tile\x12\x11\n\tmaxColumn\x18\x01 \x02(\r\x12\x0e\n\x06maxRow\x18\x02 \x02(\r\x12\x10\n\x08numCells\x18\x03 \x02(\r\x12\x0f\n\x07numrows\x18\x04 \x02(\r\x12\"\n\x08rowInfos\x18\x05 \x03(\x0b\x32\x10.TST.TileRowInfo\x12\x17\n\x0fstorage_version\x18\x06 \x01(\r\x12\x19\n\x11last_saved_in_BNC\x18\x07 \x01(\x08\x12\x1c\n\x14should_use_wide_rows\x18\x08 \x01(\x08\"\x9a\x01\n\x0bTileStorage\x12$\n\x05tiles\x18\x01 \x03(\x0b\x32\x15.TST.TileStorage.Tile\x12\x11\n\ttile_size\x18\x02 \x01(\r\x12\x1c\n\x14should_use_wide_rows\x18\x03 \x01(\x08\x1a\x34\n\x04Tile\x12\x0e\n\x06tileid\x18\x01 \x02(\r\x12\x1c\n\x04tile\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\"\xe6\x03\n\x0ePopUpMenuModel\x12/\n\x04item\x18\x01 \x03(\x0b\x32\x1d.TST.PopUpMenuModel.CellValueB\x02\x18\x01\x12)\n\ttsce_item\x18\x02 \x03(\x0b\x32\x16.TSCE.CellValueArchive\x1a\x95\x02\n\tCellValue\x12:\n\x0f\x63\x65ll_value_type\x18\x01 \x02(\x0e\x32!.TST.PopUpMenuModel.CellValueType\x12\x34\n\rboolean_value\x18\x02 \x01(\x0b\x32\x1d.TSCE.BooleanCellValueArchive\x12.\n\ndate_value\x18\x03 \x01(\x0b\x32\x1a.TSCE.DateCellValueArchive\x12\x32\n\x0cnumber_value\x18\x04 \x01(\x0b\x32\x1c.TSCE.NumberCellValueArchive\x12\x32\n\x0cstring_value\x18\x05 \x01(\x0b\x32\x1c.TSCE.StringCellValueArchive\"`\n\rCellValueType\x12\x0c\n\x08NIL_TYPE\x10\x01\x12\x10\n\x0c\x42OOLEAN_TYPE\x10\x02\x12\r\n\tDATE_TYPE\x10\x03\x12\x0f\n\x0bNUMBER_TYPE\x10\x04\x12\x0f\n\x0bSTRING_TYPE\x10\x05\"\xb2\x0b\n\x17ImportWarningSetArchive\x12Q\n\x16\x66ormula_import_warning\x18\x01 \x01(\x0b\x32\x31.TST.ImportWarningSetArchive.FormulaImportWarning\x12.\n\x1f\x63ond_format_above_avg_equal_avg\x18\x02 \x01(\x08:\x05\x66\x61lse\x12,\n\x1d\x63ond_format_above_avg_std_dev\x18\x03 \x01(\x08:\x05\x66\x61lse\x12*\n\x1b\x63ond_format_complex_formula\x18\x04 \x01(\x08:\x05\x66\x61lse\x12*\n\x1b\x63ond_format_contains_errors\x18\x05 \x01(\x08:\x05\x66\x61lse\x12\x1f\n\x10\x63ond_format_expr\x18\x06 \x01(\x08:\x05\x66\x61lse\x12.\n\x1f\x63ond_format_not_contains_errors\x18\x07 \x01(\x08:\x05\x66\x61lse\x12\x37\n(cond_format_parameters_not_all_same_type\x18\x08 \x01(\x08:\x05\x66\x61lse\x12\'\n\x18\x63ond_format_stop_if_true\x18\t \x01(\x08:\x05\x66\x61lse\x12/\n cond_format_unsupported_operator\x18\n \x01(\x08:\x05\x66\x61lse\x12.\n\x1f\x63ond_format_unsupported_styling\x18\x0b \x01(\x08:\x05\x66\x61lse\x12\x32\n#cond_format_unsupported_time_period\x18\x0c \x01(\x08:\x05\x66\x61lse\x12)\n\x1a\x65rror_cell_with_no_formula\x18\r \x01(\x08:\x05\x66\x61lse\x12&\n\x17unsupported_cond_format\x18\x0e \x01(\x08:\x05\x66\x61lse\x12\x1c\n\x14original_data_format\x18\x0f \x01(\t\x12\x41\n2formula_warning_filtered_column_formula_not_copied\x18\x10 \x01(\x08:\x05\x66\x61lse\x12,\n\x1d\x64uration_format_range_changed\x18\x11 \x01(\x08:\x05\x66\x61lse\x1a\xbd\x01\n\x14\x46ormulaImportWarning\x12M\n\x14\x66ormula_warning_type\x18\x01 \x02(\x0e\x32/.TST.ImportWarningSetArchive.FormulaWarningType\x12\x18\n\x10original_formula\x18\x02 \x01(\t\x12\x1a\n\x12supplementary_text\x18\x03 \x01(\t\x12 \n\x18\x66ormula_warning_type_int\x18\x04 \x01(\x05\"\xa3\x03\n\x12\x46ormulaWarningType\x12\x15\n\x11THREE_D_REFERENCE\x10\x01\x12\x13\n\x0f\x41RRAYED_FORMULA\x10\x02\x12#\n\x1f\x44IFFERENT_BEHAVIOR_FOR_FUNCTION\x10\x03\x12\x0f\n\x0b\x45RROR_TOKEN\x10\x04\x12\x16\n\x12\x45XTERNAL_REFERENCE\x10\x05\x12\x1c\n\x18NATURAL_LANGUAGE_FORMULA\x10\x06\x12\x1b\n\x17REFERENCE_OUT_OF_BOUNDS\x10\x07\x12!\n\x1dSHARED_FORMULA_BASE_NOT_FOUND\x10\x08\x12\x10\n\x0cUNKNOWN_NAME\x10\t\x12\x17\n\x13UNSUPPORTED_FORMULA\x10\n\x12\x18\n\x14UNSUPPORTED_FUNCTION\x10\x0b\x12\x14\n\x10UNSUPPORTED_NAME\x10\x0c\x12\x18\n\x14TRANSPOSED_NO_ISSUES\x10\r\x12\x1a\n\x16TRANSPOSED_WITH_ISSUES\x10\x0e\x12$\n TRANSPOSED_WITH_ISSUES_UNCHANGED\x10\x0f\"\x85\x01\n\"CellRefImportWarningSetPairArchive\x12,\n\x08\x63\x65ll_ref\x18\x01 \x02(\x0b\x32\x1a.TSCE.CellReferenceArchive\x12\x31\n\x0bwarning_set\x18\x03 \x01(\x0b\x32\x1c.TST.ImportWarningSetArchive\"m\n ImportWarningSetByCellRefArchive\x12I\n\x18\x63\x65llref_warning_set_pair\x18\x01 \x03(\x0b\x32\'.TST.CellRefImportWarningSetPairArchive\"\xae\x06\n\rTableDataList\x12-\n\x08listType\x18\x01 \x02(\x0e\x32\x1b.TST.TableDataList.ListType\x12\x12\n\nnextListID\x18\x02 \x02(\r\x12-\n\x07\x65ntries\x18\x03 \x03(\x0b\x32\x1c.TST.TableDataList.ListEntry\x12 \n\x08segments\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x1a\x96\x03\n\tListEntry\x12\x0b\n\x03key\x18\x01 \x02(\r\x12\x10\n\x08refcount\x18\x02 \x02(\r\x12\x0e\n\x06string\x18\x03 \x01(\t\x12!\n\treference\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x07\x66ormula\x18\x05 \x01(\x0b\x32\x14.TSCE.FormulaArchive\x12(\n\x06\x66ormat\x18\x06 \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12/\n\rcustom_format\x18\x08 \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12)\n\x11rich_text_payload\x18\t \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x63omment_storage\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n\x12import_warning_set\x18\x0b \x01(\x0b\x32\x1c.TST.ImportWarningSetArchive\x12\'\n\tcell_spec\x18\x0c \x01(\x0b\x32\x14.TST.CellSpecArchive\"\xef\x01\n\x08ListType\x12\n\n\x06STRING\x10\x01\x12\n\n\x06\x46ORMAT\x10\x02\x12\x0b\n\x07\x46ORMULA\x10\x03\x12\t\n\x05STYLE\x10\x04\x12\x11\n\rFORMULA_ERROR\x10\x05\x12\x11\n\rCUSTOM_FORMAT\x10\x06\x12\x1f\n\x1bMULTIPLE_CHOICE_LIST_FORMAT\x10\x07\x12\x15\n\x11RICH_TEXT_PAYLOAD\x10\x08\x12\x15\n\x11\x43ONDITIONAL_STYLE\x10\t\x12\x13\n\x0f\x43OMMENT_STORAGE\x10\n\x12\x12\n\x0eIMPORT_WARNING\x10\x0b\x12\x15\n\x11\x43ONTROL_CELL_SPEC\x10\x0c\"\x94\x01\n\x14TableDataListSegment\x12.\n\tlist_type\x18\x01 \x02(\x0e\x32\x1b.TST.TableDataList.ListType\x12\x1d\n\tkey_range\x18\x02 \x02(\x0b\x32\n.TSP.Range\x12-\n\x07\x65ntries\x18\x03 \x03(\x0b\x32\x1c.TST.TableDataList.ListEntry\"W\n\x0bTableRBTree\x12$\n\x05nodes\x18\x01 \x03(\x0b\x32\x15.TST.TableRBTree.Node\x1a\"\n\x04Node\x12\x0b\n\x03key\x18\x01 \x02(\r\x12\r\n\x05value\x18\x02 \x02(\r\"\xff\x01\n\x13HeaderStorageBucket\x12\x1a\n\x12\x62ucketHashFunction\x18\x01 \x02(\r\x12\x30\n\x07headers\x18\x02 \x03(\x0b\x32\x1f.TST.HeaderStorageBucket.Header\x1a\x99\x01\n\x06Header\x12\r\n\x05index\x18\x01 \x02(\r\x12\x0c\n\x04size\x18\x02 \x02(\x02\x12\x13\n\x0bhidingState\x18\x03 \x02(\r\x12\x15\n\rnumberOfCells\x18\x04 \x02(\r\x12\"\n\ncell_style\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\"\n\ntext_style\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\"L\n\rHeaderStorage\x12\x1a\n\x12\x62ucketHashFunction\x18\x01 \x02(\r\x12\x1f\n\x07\x62uckets\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\"\x80\x07\n\tDataStore\x12&\n\nrowHeaders\x18\x01 \x02(\x0b\x32\x12.TST.HeaderStorage\x12%\n\rcolumnHeaders\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x05tiles\x18\x03 \x02(\x0b\x32\x10.TST.TileStorage\x12#\n\x0bstringTable\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\nstyleTable\x18\x05 \x02(\x0b\x32\x0e.TSP.Reference\x12%\n\rformula_table\x18\x06 \x02(\x0b\x32\x0e.TSP.Reference\x12)\n\x11\x66ormulaErrorTable\x18\x0c \x01(\x0b\x32\x0e.TSP.Reference\x12,\n\x14\x66ormat_table_pre_bnc\x18\x0b \x02(\x0b\x32\x0e.TSP.Reference\x12\x35\n\x1dmultipleChoiceListFormatTable\x18\x10 \x01(\x0b\x32\x0e.TSP.Reference\x12(\n\x10merge_region_map\x18\r \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\x11\x63ustomFormatTable\x18\x0f \x01(\x0b\x32\x0e.TSP.Reference\x12\x16\n\x0enextRowStripID\x18\x07 \x02(\r\x12\x19\n\x11nextColumnStripID\x18\x08 \x02(\r\x12%\n\x0browTileTree\x18\t \x02(\x0b\x32\x10.TST.TableRBTree\x12(\n\x0e\x63olumnTileTree\x18\n \x02(\x0b\x32\x10.TST.TableRBTree\x12\x1f\n\x17storage_version_pre_bnc\x18\x0e \x01(\r\x12\'\n\x0frich_text_table\x18\x11 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15\x63onditionalstyletable\x18\x12 \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13\x63ommentStorageTable\x18\x13 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15importWarningSetTable\x18\x14 \x01(\x0b\x32\x0e.TSP.Reference\x12/\n\x17\x63ontrol_cell_spec_table\x18\x15 \x01(\x0b\x32\x0e.TSP.Reference\x12$\n\x0c\x66ormat_table\x18\x16 \x01(\x0b\x32\x0e.TSP.Reference\"\xff\x03\n\x10TableInfoArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12\"\n\ntableModel\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12)\n\rediting_state\x18\x03 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12%\n\rsummary_model\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12&\n\x0e\x63\x61tegory_order\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12,\n\x14view_column_row_uids\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12 \n\rgroup_by_uuid\x18\x07 \x01(\x0b\x32\t.TSP.UUID\x12%\n\x12hidden_states_uuid\x18\x08 \x01(\x0b\x32\t.TSP.UUID\x12(\n\x1c\x66ormula_coord_space_in_pre40\x18\t \x01(\rB\x02\x18\x01\x12\x1b\n\x13\x66ormula_coord_space\x18\n \x01(\r\x12\x39\n\x17pasteboard_coord_mapper\x18\r \x01(\x0b\x32\x18.TSCE.CoordMapperArchive\x12/\n\rlayout_engine\x18\x0e \x01(\x0b\x32\x18.TST.LayoutEngineArchive\"^\n\x13\x43\x61tegoryInfoArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12\"\n\ntableModel\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\"[\n\x12WPTableInfoArchive\x12$\n\x05super\x18\x01 \x02(\x0b\x32\x15.TST.TableInfoArchive\x12\x1f\n\x07storage\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"\xe3\x0b\n\x18TableStyleNetworkArchive\x12#\n\x0btable_style\x18\t \x02(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x62ody_text_style\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15header_row_text_style\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18header_column_text_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15\x66ooter_row_text_style\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_1_text_style\x18\r \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_2_text_style\x18\x0e \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_3_text_style\x18\x0f \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_4_text_style\x18\x10 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_5_text_style\x18\x11 \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_1_text_style\x18\x17 \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_2_text_style\x18\x18 \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_3_text_style\x18\x19 \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_4_text_style\x18\x1a \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_5_text_style\x18\x1b \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x62ody_cell_style\x18\x05 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10header_row_style\x18\x06 \x02(\x0b\x32\x0e.TSP.Reference\x12+\n\x13header_column_style\x18\x07 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10\x66ooter_row_style\x18\x08 \x02(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_1_style\x18\x12 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_2_style\x18\x13 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_3_style\x18\x14 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_4_style\x18\x15 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_5_style\x18\x16 \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_1_style\x18\x1c \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_2_style\x18\x1d \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_3_style\x18\x1e \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_4_style\x18\x1f \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_5_style\x18  \x01(\x0b\x32\x0e.TSP.Reference\x12(\n\x10table_name_style\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16table_name_shape_style\x18\x0b \x01(\x0b\x32\x0e.TSP.Reference\x12\x11\n\tpreset_id\x18\x0c \x01(\r\"\xcb\x02\n\x15TableSortOrderArchive\x12\x31\n\x04type\x18\x01 \x02(\x0e\x32#.TST.TableSortOrderArchive.SortType\x12\x39\n\x05rules\x18\x02 \x03(\x0b\x32*.TST.TableSortOrderArchive.SortRuleArchive\x1a\x96\x01\n\x0fSortRuleArchive\x12\x0e\n\x06\x63olumn\x18\x01 \x02(\r\x12G\n\tdirection\x18\x02 \x02(\x0e\x32\x34.TST.TableSortOrderArchive.SortRuleArchive.Direction\"*\n\tDirection\x12\r\n\tascending\x10\x00\x12\x0e\n\ndescending\x10\x01\"+\n\x08SortType\x12\x10\n\x0c\x65ntire_table\x10\x00\x12\r\n\trow_range\x10\x01\"\xe6\x02\n\x18TableSortOrderUIDArchive\x12\x34\n\x04type\x18\x01 \x02(\x0e\x32&.TST.TableSortOrderUIDArchive.SortType\x12<\n\x05rules\x18\x02 \x03(\x0b\x32-.TST.TableSortOrderUIDArchive.SortRuleArchive\x1a\xa8\x01\n\x0fSortRuleArchive\x12\x1d\n\ncolumn_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12J\n\tdirection\x18\x02 \x02(\x0e\x32\x37.TST.TableSortOrderUIDArchive.SortRuleArchive.Direction\"*\n\tDirection\x12\r\n\tascending\x10\x00\x12\x0e\n\ndescending\x10\x01\"+\n\x08SortType\x12\x10\n\x0c\x65ntire_table\x10\x00\x12\r\n\trow_range\x10\x01\"L\n\x1fSortRuleReferenceTrackerArchive\x12)\n\x11reference_tracker\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\"1\n\nCellRegion\x12#\n\x0b\x63\x65ll_ranges\x18\x01 \x03(\x0b\x32\x0e.TST.CellRange\"E\n\x14\x43\x65llUIDRegionArchive\x12-\n\x0f\x63\x65ll_uid_ranges\x18\x01 \x03(\x0b\x32\x14.TSP.UUIDRectArchive\"\xa7\x02\n\x1aStructuredTextImportRecord\x12:\n\x0fimport_settings\x18\x01 \x02(\x0b\x32!.TSK.StructuredTextImportSettings\x12\x15\n\rimport_source\x18\x02 \x01(\t\x12\x13\n\x0bimport_date\x18\x03 \x01(\x01\x12\x13\n\x0bsource_data\x18\x04 \x01(\x0c\x12\x17\n\x0fsource_encoding\x18\x05 \x01(\x04\x12\x12\n\nconfidence\x18\x06 \x01(\x02\x12(\n\x0fimported_region\x18\x07 \x01(\x0b\x32\x0f.TST.CellRegion\x12\x18\n\x10source_row_count\x18\x08 \x01(\x04\x12\x1b\n\x13source_column_count\x18\t \x01(\x04\"\x8f\x19\n\x11TableModelArchive\x12\x10\n\x08table_id\x18\x01 \x02(\t\x12\x15\n\rfrom_table_id\x18+ \x01(\t\x12\x0f\n\x07was_cut\x18\x32 \x01(\x08\x12#\n\x0btable_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x62ody_text_style\x18\x18 \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15header_row_text_style\x18\x19 \x02(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18header_column_text_style\x18\x1a \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15\x66ooter_row_text_style\x18\x1b \x02(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x62ody_cell_style\x18\x12 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10header_row_style\x18\x13 \x02(\x0b\x32\x0e.TSP.Reference\x12+\n\x13header_column_style\x18\x14 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10\x66ooter_row_style\x18\x15 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10table_name_style\x18\x1e \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16table_name_shape_style\x18$ \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12table_style_preset\x18\x30 \x01(\x0b\x32\x0e.TSP.Reference\x12\x14\n\x0cpreset_index\x18\x1c \x01(\r\x12\'\n\x0f\x62\x61se_data_store\x18\x04 \x02(\x0b\x32\x0e.TST.DataStore\x12 \n\x08provider\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x16\n\x0enumber_of_rows\x18\x06 \x02(\r\x12\x19\n\x11number_of_columns\x18\x07 \x02(\r\x12\x12\n\ntable_name\x18\x08 \x02(\t\x12\x1a\n\x12table_name_enabled\x18\x16 \x01(\x08\x12\x19\n\x11table_name_height\x18! \x01(\x01\x12!\n\x19table_name_border_enabled\x18% \x01(\x08\x12\x1d\n\x15number_of_header_rows\x18\t \x01(\r\x12 \n\x18number_of_header_columns\x18\n \x01(\r\x12\x1d\n\x15number_of_footer_rows\x18\x0b \x01(\r\x12\x1a\n\x12header_rows_frozen\x18\x0c \x01(\x08\x12\x1d\n\x15header_columns_frozen\x18\r \x01(\x08\x12\x1d\n\x15number_of_hidden_rows\x18\x0e \x01(\r\x12 \n\x18number_of_hidden_columns\x18\x0f \x01(\r\x12\"\n\x1anumber_of_user_hidden_rows\x18) \x01(\r\x12%\n\x1dnumber_of_user_hidden_columns\x18* \x01(\r\x12\x1f\n\x17number_of_filtered_rows\x18( \x01(\r\x12\x1a\n\x12\x64\x65\x66\x61ult_row_height\x18\x10 \x02(\x01\x12\x1c\n\x14\x64\x65\x66\x61ult_column_width\x18\x11 \x02(\x01\x12&\n\rorigin_offset\x18\x17 \x01(\x0b\x32\x0b.TST.CellIDB\x02\x18\x01\x12%\n\x1drepeating_header_rows_enabled\x18\x1d \x01(\x08\x12(\n repeating_header_columns_enabled\x18  \x01(\x08\x12\x1e\n\x16style_apply_clears_all\x18\x1f \x01(\x08\x12>\n&hidden_state_formula_owner_for_columns\x18\" \x01(\x0b\x32\x0e.TSP.Reference\x12;\n#hidden_state_formula_owner_for_rows\x18# \x01(\x0b\x32\x0e.TSP.Reference\x12\"\n\nfilter_set\x18& \x01(\x0b\x32\x0e.TSP.Reference\x12>\n\"conditional_style_formula_owner_id\x18\' \x01(\x0b\x32\x12.TSP.CFUUIDArchive\x12.\n\nsort_order\x18, \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\x12I\n\x1bsort_rule_reference_tracker\x18- \x01(\x0b\x32$.TST.SortRuleReferenceTrackerArchive\x12,\n\x14\x62\x61se_column_row_uids\x18. \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x0bmerge_owner\x18/ \x01(\x0b\x32\x16.TST.MergeOwnerArchive\x12&\n\x0estroke_sidecar\x18\x31 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x1dpreset_needs_strong_ownership\x18\x33 \x01(\x08\x12;\n\x12text_import_record\x18\x34 \x01(\x0b\x32\x1f.TST.StructuredTextImportRecord\x12.\n\x16\x63\x61tegory_level_1_style\x18< \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_2_style\x18= \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_3_style\x18> \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_4_style\x18? \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_5_style\x18@ \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_1_style\x18G \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_2_style\x18H \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_3_style\x18I \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_4_style\x18J \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_5_style\x18K \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_1_text_style\x18\x41 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_2_text_style\x18\x42 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_3_text_style\x18\x43 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_4_text_style\x18\x44 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_5_text_style\x18\x45 \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_1_text_style\x18L \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_2_text_style\x18M \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_3_text_style\x18N \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_4_text_style\x18O \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_5_text_style\x18P \x01(\x0b\x32\x0e.TSP.Reference\x12:\n\x13hidden_states_owner\x18\x46 \x01(\x0b\x32\x1d.TST.HiddenStatesOwnerArchive\x12\x31\n\x0e\x63\x61tegory_owner\x18Q \x01(\x0b\x32\x19.TST.CategoryOwnerArchive\x12\x42\n\x17pencil_annotation_owner\x18R \x01(\x0b\x32!.TST.PencilAnnotationOwnerArchive\x12\x19\n\x11\x66rom_group_by_uid\x18S \x01(\t\x12\x30\n\rhaunted_owner\x18T \x01(\x0b\x32\x19.TSCE.HauntedOwnerArchive\"\xc8\x07\n\x13SummaryModelArchive\x12\"\n\ntable_info\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\ndata_store\x18\x02 \x01(\x0b\x32\x0e.TST.DataStore\x12\'\n\x0f\x63olumn_row_uids\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12/\n\x1c\x61ggregate_formula_owner_uuid\x18\x04 \x01(\x0b\x32\t.TSP.UUID\x12+\n\x13summary_cell_vendor\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x15\x63\x61tegory_column_width\x18\n \x01(\x01\x12&\n\x1asummary_row_level_1_height\x18\x0b \x01(\x01\x42\x02\x18\x01\x12&\n\x1asummary_row_level_2_height\x18\x0c \x01(\x01\x42\x02\x18\x01\x12&\n\x1asummary_row_level_3_height\x18\r \x01(\x01\x42\x02\x18\x01\x12&\n\x1asummary_row_level_4_height\x18\x0e \x01(\x01\x42\x02\x18\x01\x12&\n\x1asummary_row_level_5_height\x18\x0f \x01(\x01\x42\x02\x18\x01\x12,\n summary_label_row_level_1_height\x18\x10 \x01(\x01\x42\x02\x18\x01\x12,\n summary_label_row_level_2_height\x18\x11 \x01(\x01\x42\x02\x18\x01\x12,\n summary_label_row_level_3_height\x18\x12 \x01(\x01\x42\x02\x18\x01\x12,\n summary_label_row_level_4_height\x18\x13 \x01(\x01\x42\x02\x18\x01\x12,\n summary_label_row_level_5_height\x18\x14 \x01(\x01\x42\x02\x18\x01\x12\"\n\x16label_row_visibility_1\x18\x15 \x01(\rB\x02\x18\x01\x12\"\n\x16label_row_visibility_2\x18\x16 \x01(\rB\x02\x18\x01\x12\"\n\x16label_row_visibility_3\x18\x17 \x01(\rB\x02\x18\x01\x12\"\n\x16label_row_visibility_4\x18\x18 \x01(\rB\x02\x18\x01\x12\"\n\x16label_row_visibility_5\x18\x19 \x01(\rB\x02\x18\x01\x12\x1f\n\x17summary_row_height_list\x18\x1a \x03(\x01\x12\x1d\n\x15label_row_height_list\x18\x1b \x03(\x01\x12!\n\x19label_row_visibility_list\x18\x1c \x03(\r\"\xac\x01\n%SummaryModelGroupByChangeStateArchive\x12 \n\x08\x63\x65ll_map\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x17summary_row_height_list\x18\x02 \x03(\x01\x12\x1d\n\x15label_row_height_list\x18\x03 \x03(\x01\x12!\n\x19label_row_visibility_list\x18\x04 \x03(\r\"\xd5\x01\n\x16\x43olumnRowUIDMapArchive\x12%\n\x12sorted_column_uids\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x12\x1c\n\x14\x63olumn_index_for_uid\x18\x02 \x03(\r\x12\x1c\n\x14\x63olumn_uid_for_index\x18\x03 \x03(\r\x12\"\n\x0fsorted_row_uids\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12\x19\n\x11row_index_for_uid\x18\x05 \x03(\r\x12\x19\n\x11row_uid_for_index\x18\x06 \x03(\r\"\xd4\x01\n\x12StrokeLayerArchive\x12\x18\n\x10row_column_index\x18\x01 \x01(\r\x12=\n\x0bstroke_runs\x18\x02 \x03(\x0b\x32(.TST.StrokeLayerArchive.StrokeRunArchive\x1a\x65\n\x10StrokeRunArchive\x12\x0e\n\x06origin\x18\x01 \x01(\x05\x12\x0e\n\x06length\x18\x02 \x01(\r\x12\"\n\x06stroke\x18\x03 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\r\n\x05order\x18\x04 \x01(\r\"\x9a\x02\n\x14StrokeSidecarArchive\x12\x11\n\tmax_order\x18\x01 \x01(\r\x12\x14\n\x0c\x63olumn_count\x18\x02 \x01(\r\x12\x11\n\trow_count\x18\x03 \x01(\r\x12\x31\n\x19left_column_stroke_layers\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1aright_column_stroke_layers\x18\x05 \x03(\x0b\x32\x0e.TSP.Reference\x12-\n\x15top_row_stroke_layers\x18\x06 \x03(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18\x62ottom_row_stroke_layers\x18\x07 \x03(\x0b\x32\x0e.TSP.Reference\"\x18\n\x16\x44urationWrapperArchive\"\xe7\x08\n\x04\x43\x65ll\x12%\n\tvalueType\x18\x02 \x02(\x0e\x32\x12.TST.CellValueType\x12\"\n\ncell_style\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\"\n\ntext_style\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x13\n\x0bnumberValue\x18\x05 \x01(\x01\x12\x13\n\x0bstringValue\x18\x06 \x01(\t\x12\x11\n\tboolValue\x18\x07 \x01(\x08\x12\x30\n\x0e\x63urrent_format\x18\t \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12$\n\x0c\x66ormulaError\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12/\n\rnumber_format\x18\x0b \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x31\n\x0f\x63urrency_format\x18\x0c \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x31\n\x0f\x64uration_format\x18\r \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12-\n\x0b\x64\x61te_format\x18\x0e \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12/\n\rcustom_format\x18\x10 \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12-\n\x0b\x62\x61se_format\x18\x11 \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x1d\n\x15\x65xplicit_format_flags\x18\x13 \x01(\r\x12 \n\x08richText\x18\x14 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\x11\x63onditional_style\x18\x15 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x63omment_storage\x18\x17 \x01(\x0b\x32\x0e.TSP.Reference\x12&\n\x1e\x63onditional_style_applied_rule\x18\x18 \x01(\r\x12\x38\n\x12import_warning_set\x18\x19 \x01(\x0b\x32\x1c.TST.ImportWarningSetArchive\x12\x36\n\x14\x63ustom_format_object\x18\x1a \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12+\n\x0b\x63\x65ll_border\x18\x1b \x01(\x0b\x32\x16.TST.CellBorderArchive\x12\'\n\tcell_spec\x18\x1c \x01(\x0b\x32\x14.TST.CellSpecArchive\x12\x18\n\x10\x63\x65ll_format_kind\x18\x1d \x01(\r\x12-\n\x0btext_format\x18\x1e \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x30\n\x0e\x62oolean_format\x18\x1f \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x19\n\x11\x64\x65\x63imal_value_low\x18  \x01(\x04\x12\x1a\n\x12\x64\x65\x63imal_value_high\x18! \x01(\x04\";\n\x15MergeRegionMapArchive\x12\"\n\ncell_range\x18\x01 \x03(\x0b\x32\x0e.TST.CellRange\"\xa8\x03\n\x0e\x43\x65llMapArchive\x12\"\n\ncell_tiles\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12\x11\n\tuid_based\x18\x03 \x02(\x08\x12\x36\n\x11\x65xpanded_cell_ids\x18\x0e \x03(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12.\n\rcell_uid_list\x18\x05 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12.\n\x10merge_uid_ranges\x18\x07 \x03(\x0b\x32\x14.TSP.UUIDRectArchive\x12\x30\n\x12unmerge_uid_ranges\x18\t \x03(\x0b\x32\x14.TSP.UUIDRectArchive\x12\x31\n\rmerge_actions\x18\r \x03(\x0b\x32\x1a.TST.MergeOperationArchive\x12*\n\x1cmay_modify_formulas_in_cells\x18\n \x01(\x08:\x04true\x12\x36\n(may_modify_values_referenced_by_formulas\x18\x0b \x01(\x08:\x04true\"\x8f\x01\n\x0f\x43\x65llListArchive\x12\x30\n\x05\x63\x65lls\x18\x01 \x03(\x0b\x32!.TST.CellListArchive.OptionalCell\x12!\n\x19trailing_empty_cell_count\x18\x02 \x01(\r\x1a\'\n\x0cOptionalCell\x12\x17\n\x04\x63\x65ll\x18\x01 \x01(\x0b\x32\t.TST.Cell\"\xe8\x01\n\x18\x43oncurrentCellMapArchive\x12\"\n\ncell_lists\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12\x11\n\tuid_based\x18\x02 \x02(\x08\x12\x31\n\rmerge_actions\x18\x03 \x03(\x0b\x32\x1a.TST.MergeOperationArchive\x12*\n\x1cmay_modify_formulas_in_cells\x18\x04 \x01(\x08:\x04true\x12\x36\n(may_modify_values_referenced_by_formulas\x18\x05 \x01(\x08:\x04true\"\xd2\x01\n\x19\x43oncurrentCellListArchive\x12:\n\x05\x63\x65lls\x18\x01 \x03(\x0b\x32+.TST.ConcurrentCellListArchive.OptionalCell\x12,\n\x0e\x63\x65ll_uid_range\x18\x02 \x01(\x0b\x32\x14.TSP.UUIDRectArchive\x12\"\n\ncell_range\x18\x03 \x01(\x0b\x32\x0e.TST.CellRange\x1a\'\n\x0cOptionalCell\x12\x17\n\x04\x63\x65ll\x18\x01 \x01(\x0b\x32\t.TST.Cell\"\xd3\x05\n\x19\x43\x65llFormatAndValueArchive\x12%\n\tvalueType\x18\x01 \x02(\x0e\x32\x12.TST.CellValueType\x12\x13\n\x0bnumberValue\x18\x02 \x01(\x01\x12\x13\n\x0bstringValue\x18\x03 \x01(\t\x12\x11\n\tboolValue\x18\x04 \x01(\x08\x12\'\n\x0frichTextStorage\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x15use_all_spare_formats\x18\x06 \x02(\x08\x12\x16\n\x0e\x65xplicit_flags\x18\x07 \x02(\r\x12\x18\n\x10\x63\x65ll_format_kind\x18\x08 \x02(\r\x12/\n\rnumber_format\x18\n \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x31\n\x0f\x63urrency_format\x18\x0b \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12-\n\x0b\x64\x61te_format\x18\x0c \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x31\n\x0f\x64uration_format\x18\r \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12-\n\x0btext_format\x18\x0e \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x30\n\x0e\x62oolean_format\x18\x0f \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x17\n\x0f\x66ormatted_value\x18\x10 \x01(\t\x12\x31\n\x19\x66ormatted_rich_text_value\x18\x11 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x17\x61pply_spare_format_only\x18\x12 \x02(\x08\x12\x19\n\x11spare_format_type\x18\x13 \x02(\x08\x12\x13\n\x0b\x64\x65\x63imal_low\x18\x14 \x01(\x04\x12\x14\n\x0c\x64\x65\x63imal_high\x18\x15 \x01(\x04\"\xb2\x02\n\x0f\x43\x65llSpecArchive\x12\x18\n\x10interaction_type\x18\x01 \x02(\r\x12%\n\x07\x66ormula\x18\x02 \x01(\x0b\x32\x14.TSCE.FormulaArchive\x12\x19\n\x11range_control_min\x18\x03 \x01(\x01\x12\x19\n\x11range_control_max\x18\x04 \x01(\x01\x12\x19\n\x11range_control_inc\x18\x05 \x01(\x01\x12\x33\n\x1b\x63hooser_control_popup_model\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x1d\x63hooser_control_start_w_first\x18\x07 \x01(\x08\x12\x31\n%category_summary_should_display_label\x18\x08 \x01(\x08\x42\x02\x18\x01\"G\n\x1c\x43ommentStorageWrapperArchive\x12\'\n\x0f\x63omment_storage\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"\x8d\x01\n\x0f\x43\x65llDiffArchive\x12;\n\x13property_map_to_set\x18\x01 \x02(\x0b\x32\x1e.TSS.CommandPropertyMapArchive\x12=\n\x15property_map_to_reset\x18\x02 \x02(\x0b\x32\x1e.TSS.CommandPropertyMapArchive\"5\n\rCellDiffArray\x12$\n\x0blarge_array\x18\x01 \x01(\x0b\x32\x0f.TSP.LargeArray\"s\n\x14\x43\x65llDiffArraySegment\x12\x33\n\x13large_array_segment\x18\x01 \x01(\x0b\x32\x16.TSP.LargeArraySegment\x12&\n\x08\x65lements\x18\x02 \x03(\x0b\x32\x14.TST.CellDiffArchive\"\xb4\x01\n\x12\x43\x65llDiffMapArchive\x12\x11\n\tuid_based\x18\x01 \x02(\x08\x12\x36\n\x11\x65xpanded_cell_ids\x18\x02 \x03(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12*\n\tcell_uids\x18\x03 \x02(\x0b\x32\x17.TST.CellUIDListArchive\x12\'\n\x0f\x63\x65ll_diff_array\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\"\x8a\x02\n\x15\x44oubleStyleMapArchive\x12\x10\n\x08\x63\x61pacity\x18\x01 \x02(\r\x12\r\n\x05\x63ount\x18\x02 \x02(\r\x12M\n\x0e\x63\x65ll_map_entry\x18\x03 \x03(\x0b\x32\x35.TST.DoubleStyleMapArchive.DoubleStyleMapEntryArchive\x1a\x80\x01\n\x1a\x44oubleStyleMapEntryArchive\x12\x1c\n\x07\x63\x65ll_id\x18\x01 \x02(\x0b\x32\x0b.TST.CellID\x12!\n\told_style\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12!\n\tnew_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\"\xef\x01\n\x14StyleTableMapArchive\x12\x10\n\x08\x63\x61pacity\x18\x01 \x02(\r\x12\r\n\x05\x63ount\x18\x02 \x02(\r\x12\x46\n\tmap_entry\x18\x03 \x03(\x0b\x32\x33.TST.StyleTableMapArchive.StyleTableMapEntryArchive\x1an\n\x19StyleTableMapEntryArchive\x12\x0b\n\x03key\x18\x01 \x02(\r\x12!\n\told_style\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12!\n\tnew_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\"\xe7\x03\n\x10SelectionArchive\x12&\n\ntableModel\x18\x01 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12\x31\n\x0eselection_type\x18\x04 \x02(\x0e\x32\x19.TST.SelectionTypeArchive\x12 \n\x0b\x61nchor_cell\x18\x05 \x01(\x0b\x32\x0b.TST.CellID\x12#\n\x0b\x63\x65ll_ranges\x18\x06 \x03(\x0b\x32\x0e.TST.CellRange\x12#\n\x0b\x62\x61se_ranges\x18\x07 \x03(\x0b\x32\x0e.TST.CellRange\x12 \n\x0b\x63ursor_cell\x18\x08 \x01(\x0b\x32\x0b.TST.CellID\x12\"\n\ntable_info\x18\t \x01(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x0f\x63\x65ll_uid_region\x18\n \x01(\x0b\x32\x19.TST.CellUIDRegionArchive\x12\x32\n\x0f\x62\x61se_uid_region\x18\x0b \x01(\x0b\x32\x19.TST.CellUIDRegionArchive\x12.\n\x0f\x61nchor_cell_uid\x18\x0c \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12.\n\x0f\x63ursor_cell_uid\x18\r \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\"\xca\x02\n)DeathhawkRdar39989167CellSelectionArchive\x12\"\n\ntable_info\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n\x0eselection_type\x18\x02 \x01(\x0e\x32\x19.TST.SelectionTypeArchive\x12\x32\n\x0f\x63\x65ll_uid_region\x18\x03 \x01(\x0b\x32\x19.TST.CellUIDRegionArchive\x12\x32\n\x0f\x62\x61se_uid_region\x18\x04 \x01(\x0b\x32\x19.TST.CellUIDRegionArchive\x12.\n\x0f\x61nchor_cell_uid\x18\x05 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12.\n\x0f\x63ursor_cell_uid\x18\x06 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\"&\n\x16StrokeSelectionArchive\x12\x0c\n\x04mask\x18\x01 \x01(\x05\"\x1d\n\x1b\x43ontrolCellSelectionArchive\"\x1b\n\x19StockCellSelectionArchive\"\x1b\n\x19TableNameSelectionArchive\"p\n\x18\x41utofillSelectionArchive\x12)\n\x11source_cell_range\x18\x01 \x01(\x0b\x32\x0e.TST.CellRange\x12)\n\x11target_cell_range\x18\x02 \x01(\x0b\x32\x0e.TST.CellRange\"V\n\x11\x46ilterRuleArchive\x12/\n\tpredicate\x18\x01 \x02(\x0b\x32\x1c.TST.FormulaPredicateArchive\x12\x10\n\x08\x64isabled\x18\x02 \x01(\x08\"\x8c\x01\n\x11TableStyleArchive\x12 \n\x05super\x18\x01 \x02(\x0b\x32\x11.TSS.StyleArchive\x12\x19\n\x0eoverride_count\x18\n \x01(\r:\x01\x30\x12:\n\x10table_properties\x18\x0b \x01(\x0b\x32 .TST.TableStylePropertiesArchive\"\x89\x01\n\x10\x43\x65llStyleArchive\x12 \n\x05super\x18\x01 \x02(\x0b\x32\x11.TSS.StyleArchive\x12\x19\n\x0eoverride_count\x18\n \x01(\r:\x01\x30\x12\x38\n\x0f\x63\x65ll_properties\x18\x0b \x01(\x0b\x32\x1f.TST.CellStylePropertiesArchive\"\xe2\x0b\n\x17\x46ormulaPredicateArchive\x12%\n\x07\x66ormula\x18\x01 \x02(\x0b\x32\x14.TSCE.FormulaArchive\x12I\n\x0epredicate_type\x18\x02 \x02(\x0e\x32\x31.TST.FormulaPredicateArchive.FormulaPredicateType\x12>\n\nqualifier1\x18\x03 \x02(\x0e\x32*.TST.FormulaPredicateArchive.QualifierType\x12>\n\nqualifier2\x18\x04 \x02(\x0e\x32*.TST.FormulaPredicateArchive.QualifierType\x12\x14\n\x0cparam_index1\x18\x05 \x02(\x05\x12\x14\n\x0cparam_index2\x18\x06 \x02(\x05\x12\x14\n\x0cparam_index0\x18\x07 \x02(\x05\"\x89\x08\n\x14\x46ormulaPredicateType\x12\x0c\n\x08PredNone\x10\x00\x12\x12\n\x0eTextStartsWith\x10\x01\x12\x10\n\x0cTextEndsWith\x10\x02\x12\x10\n\x0cTextContains\x10\x03\x12\x16\n\x12TextDoesNotContain\x10\x04\x12\x0e\n\nValueEqual\x10\x05\x12\x11\n\rValueNotEqual\x10\x06\x12\x14\n\x10ValueGreaterThan\x10\x07\x12\x1b\n\x17ValueGreaterThanOrEqual\x10\x08\x12\x11\n\rValueLessThan\x10\t\x12\x18\n\x14ValueLessThanOrEqual\x10\n\x12\x15\n\x11ValueAboveAverage\x10\x0b\x12\x15\n\x11ValueBelowAverage\x10\x0c\x12\x10\n\x0cValueBetween\x10\r\x12\x0b\n\x07\x46ormula\x10\x0e\x12\x0e\n\nDuplicates\x10\x0f\x12\x0b\n\x07Uniques\x10\x10\x12\x0f\n\x0b\x44\x61teIsToday\x10\x11\x12\x13\n\x0f\x44\x61teIsYesterday\x10\x12\x12\x12\n\x0e\x44\x61teIsTomorrow\x10\x13\x12\x11\n\rDateIsTheDate\x10\x14\x12\x15\n\x11\x44\x61teBeforeTheDate\x10\x15\x12\x14\n\x10\x44\x61teAfterTheDate\x10\x16\x12\x14\n\x10\x44\x61teIsInTheRange\x10\x17\x12\x11\n\rDateInTheNext\x10\x18\x12\x11\n\rDateInTheLast\x10\x19\x12\x11\n\rDateIsExactly\x10\x1a\x12\x16\n\x12\x44\x61teBeforeRelative\x10\x1b\x12\x15\n\x11\x44\x61teAfterRelative\x10\x1c\x12\x17\n\x13\x44\x61teBetweenRelative\x10\x1d\x12\x0c\n\x08ValueTop\x10\x1e\x12\x0f\n\x0bValueBottom\x10\x1f\x12\x13\n\x0fValueNotBetween\x10 \x12\x0e\n\nDateInThis\x10!\x12\x0b\n\x07IsBlank\x10\"\x12\x0e\n\nIsNotBlank\x10#\x12\n\n\x06TextIs\x10$\x12\r\n\tTextIsNot\x10%\x12\x11\n\rDurationEqual\x10&\x12\x14\n\x10\x44urationNotEqual\x10\'\x12\x17\n\x13\x44urationGreaterThan\x10(\x12\x1e\n\x1a\x44urationGreaterThanOrEqual\x10)\x12\x14\n\x10\x44urationLessThan\x10*\x12\x1b\n\x17\x44urationLessThanOrEqual\x10+\x12\x13\n\x0f\x44urationBetween\x10,\x12\x16\n\x12\x44urationNotBetween\x10-\x12\x18\n\x14\x44urationAboveAverage\x10.\x12\x18\n\x14\x44urationBelowAverage\x10/\x12\x0f\n\x0b\x44urationTop\x10\x30\x12\x12\n\x0e\x44urationBottom\x10\x31\"\x86\x01\n\rQualifierType\x12\x0c\n\x08QualNone\x10\x00\x12\x08\n\x04\x44\x61ys\x10\x02\x12\t\n\x05Weeks\x10\x03\x12\n\n\x06Months\x10\x04\x12\t\n\x05Years\x10\x05\x12\x07\n\x03\x41go\x10\x06\x12\x0b\n\x07\x46romNow\x10\x07\x12\x0c\n\x08Quarters\x10\x08\x12\x0b\n\x07Percent\x10\t\x12\n\n\x06Values\x10\n\"\x86\x02\n\x1a\x43onditionalStyleSetArchive\x12\x11\n\truleCount\x18\x01 \x02(\r\x12\x43\n\x05rules\x18\x02 \x03(\x0b\x32\x34.TST.ConditionalStyleSetArchive.ConditionalStyleRule\x1a\x8f\x01\n\x14\x43onditionalStyleRule\x12/\n\tpredicate\x18\x01 \x02(\x0b\x32\x1c.TST.FormulaPredicateArchive\x12\"\n\ncell_style\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\ntext_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\"\xd2\x02\n\x10\x46ilterSetArchive\x12J\n\x04type\x18\x01 \x01(\x0e\x32#.TST.FilterSetArchive.FilterSetType:\x17\x46ilterSetArchiveTypeAll\x12\x18\n\nis_enabled\x18\x02 \x01(\x08:\x04true\x12,\n\x0c\x66ilter_rules\x18\x03 \x03(\x0b\x32\x16.TST.FilterRuleArchive\x12/\n needs_formula_rewrite_for_import\x18\x04 \x01(\x08:\x05\x66\x61lse\x12\x16\n\x0e\x66ilter_offsets\x18\x05 \x03(\r\x12\x16\n\x0e\x66ilter_enabled\x18\x06 \x03(\x08\"I\n\rFilterSetType\x12\x1b\n\x17\x46ilterSetArchiveTypeAll\x10\x00\x12\x1b\n\x17\x46ilterSetArchiveTypeAny\x10\x01\"\x92\x04\n\x18HiddenStateExtentArchive\x12*\n\x17hidden_state_extent_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x45\n\rhidden_states\x18\x02 \x03(\x0b\x32..TST.HiddenStateExtentArchive.RowOrColumnState\x12S\n\x17row_or_column_direction\x18\x03 \x02(\x0e\x32\x32.TST.HiddenStateExtentArchive.RowOrColumnDirection\x12/\n\x0fthreshold_value\x18\x05 \x03(\x0b\x32\x16.TSCE.CellValueArchive\x12\x34\n%needs_to_update_filter_set_for_import\x18\x06 \x01(\x08:\x05\x66\x61lse\x12\'\n\x14\x63ollapsed_group_uids\x18\x07 \x03(\x0b\x32\t.TSP.UUID\x1a_\n\x10RowOrColumnState\x12$\n\x11row_or_column_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x13\n\x0buser_hidden\x18\x02 \x01(\x08\x12\x10\n\x08\x66iltered\x18\x03 \x01(\x08\"=\n\x14RowOrColumnDirection\x12\x13\n\x0f\x43olumnDirection\x10\x00\x12\x10\n\x0cRowDirection\x10\x01\"\xbe\x01\n\x13HiddenStatesArchive\x12$\n\x11hidden_states_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x41\n\x1a\x63olumn_hidden_state_extent\x18\x02 \x02(\x0b\x32\x1d.TST.HiddenStateExtentArchive\x12>\n\x17row_hidden_state_extent\x18\x03 \x02(\x0b\x32\x1d.TST.HiddenStateExtentArchive\"i\n\x18HiddenStatesOwnerArchive\x12\x1c\n\towner_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12/\n\rhidden_states\x18\x02 \x03(\x0b\x32\x18.TST.HiddenStatesArchive\"a\n\x1a\x45xpandCollapseStateArchive\x12!\n\x0euids_collapsed\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x12 \n\ruids_expanded\x18\x02 \x03(\x0b\x32\t.TSP.UUID\"l\n\x16TokenAttachmentArchive\x12*\n\x05super\x18\x01 \x02(\x0b\x32\x1b.TSWP.UIGraphicalAttachment\x12&\n\x0e\x65xpressionNode\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"8\n\x0e\x46ormulaArchive\x12&\n\x0e\x65xpressionTree\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"h\n\x15\x45xpressionNodeArchive\x12 \n\x08\x63hildren\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12\x16\n\x0b\x66irst_index\x18\x02 \x01(\x04:\x01\x30\x12\x15\n\nlast_index\x18\x03 \x01(\x04:\x01\x30\"N\n\x12\x42ooleanNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\r\n\x05value\x18\x02 \x02(\x08\"y\n\x11NumberNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x0e\n\x06number\x18\x02 \x01(\x01\x12\x13\n\x0b\x64\x65\x63imal_low\x18\x03 \x01(\x04\x12\x14\n\x0c\x64\x65\x63imal_high\x18\x04 \x01(\x04\"M\n\x11StringNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\r\n\x05value\x18\x02 \x02(\t\"f\n\x15IdentifierNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x12\n\nidentifier\x18\x02 \x01(\t\x12\x0e\n\x06symbol\x18\x03 \x01(\r\"\\\n\x10\x41rrayNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x0f\n\x07\x63olumns\x18\x02 \x01(\r\x12\x0c\n\x04rows\x18\x03 \x01(\r\"<\n\x0fListNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\"V\n\x13OperatorNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x14\n\x0coperatorChar\x18\x02 \x02(\r\"E\n\x1aPostfixOperatorNodeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.OperatorNodeArchive\"D\n\x19PrefixOperatorNodeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.OperatorNodeArchive\"t\n\x13\x46unctionNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x15\n\rfunctionIndex\x18\x02 \x02(\r\x12\x1b\n\x13invalidFunctionName\x18\x03 \x01(\t\"C\n\x16\x46unctionEndNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\"[\n\x0f\x44\x61teNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\r\n\x05value\x18\x02 \x02(\t\x12\x0e\n\x06\x66ormat\x18\x03 \x01(\t\"\xba\x03\n\x14ReferenceNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x33\n\x0erangeReference\x18\x02 \x01(\x0b\x32\x1b.TSCE.RangeReferenceArchive\x12\x16\n\x0epreserve_flags\x18\x03 \x02(\r\x12\x13\n\x0bhostTableID\x18\x04 \x01(\t\x12\x31\n\rhost_cell_ref\x18\n \x01(\x0b\x32\x1a.TSCE.CellReferenceArchive\x12\x1c\n\ttable_uid\x18\x05 \x01(\x0b\x32\t.TSP.UUID\x12-\n\x0erange_top_left\x18\x06 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12\x31\n\x12range_bottom_right\x18\x07 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12\x34\n\x0c\x63\x61tegory_ref\x18\x08 \x01(\x0b\x32\x1e.TSCE.CategoryReferenceArchive\x12,\n\x0euid_range_rect\x18\t \x01(\x0b\x32\x14.TSP.UUIDRectArchive\"\x88\x01\n\x13\x44urationNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x14\n\x0ctimeinterval\x18\x02 \x02(\x01\x12\x10\n\x08smallest\x18\x03 \x02(\r\x12\x0f\n\x07largest\x18\x04 \x02(\r\x12\r\n\x05style\x18\x05 \x02(\r\"\x87\x01\n\x1e\x41rgumentPlaceholderNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x15\n\rfunctionIndex\x18\x02 \x01(\r\x12\x15\n\rargumentIndex\x18\x03 \x01(\r\x12\x0c\n\x04mode\x18\x04 \x01(\r\"G\n\x1a\x45mptyExpressionNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\"\xc3\x01\n\x0eLetNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x1c\n\x14whitespace_after_let\x18\x02 \x01(\t\x12#\n\x1bwhitespace_after_identifier\x18\x03 \x01(\t\x12\x1f\n\x17whitespace_after_equals\x18\x04 \x01(\t\x12\"\n\x1awhitespace_after_delimiter\x18\x05 \x01(\t\":\n\rInNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\"d\n\x13VariableNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x12\n\nidentifier\x18\x02 \x02(\t\x12\x0e\n\x06symbol\x18\x03 \x02(\r\"\xef\x01\n\x11LayoutHintArchive\x12\x0f\n\x07isValid\x18\x01 \x02(\x08\x12!\n\tcellRange\x18\x02 \x01(\x0b\x32\x0e.TST.CellRange\x12\x1b\n\x06hintID\x18\x03 \x01(\x0b\x32\x0b.TST.CellID\x12\x1e\n\x0bmaximumSize\x18\x04 \x02(\x0b\x32\t.TSP.Size\x12\x19\n\x11partitionPosition\x18\x05 \x02(\r\x12\x12\n\nhorizontal\x18\x06 \x02(\x08\x12 \n\reffectiveSize\x18\x07 \x01(\x0b\x32\t.TSP.Size\x12\x18\n\x10partitioningPass\x18\x08 \x01(\r\"\x92\x01\n CompletionTokenAttachmentArchive\x12*\n\x05super\x18\x01 \x02(\x0b\x32\x1b.TST.TokenAttachmentArchive\x12\x16\n\x0e\x63ompletionText\x18\x02 \x01(\t\x12\x15\n\rcaretPosition\x18\x03 \x01(\r\x12\x13\n\x0bprefixStart\x18\x04 \x01(\r\"\xad\x01\n\x1eHiddenStateFormulaOwnerArchive\x12$\n\x08owner_id\x18\x01 \x01(\x0b\x32\x12.TSP.CFUUIDArchive\x12/\n\x0fthreshold_value\x18\x02 \x03(\x0b\x32\x16.TSCE.CellValueArchive\x12\x34\n%needs_to_update_filter_set_for_import\x18\x03 \x01(\x08:\x05\x66\x61lse\"\xc0\x01\n\x13\x46ormulaStoreArchive\x12\x1a\n\x12next_formula_index\x18\x02 \x02(\r\x12;\n\x08\x66ormulas\x18\x03 \x03(\x0b\x32).TST.FormulaStoreArchive.FormulaStorePair\x1aP\n\x10\x46ormulaStorePair\x12\x15\n\rformula_index\x18\x01 \x02(\r\x12%\n\x07\x66ormula\x18\x02 \x02(\x0b\x32\x14.TSCE.FormulaArchive\"\xbd\x01\n\x15MergeOperationArchive\x12+\n\nmerge_type\x18\x01 \x02(\x0e\x32\x17.TST.MergeActionArchive\x12*\n\x0cmerge_ranges\x18\x02 \x03(\x0b\x32\x14.TSP.UUIDRectArchive\x12,\n\x0emerge_formulas\x18\x03 \x03(\x0b\x32\x14.TSCE.FormulaArchive\x12\x1d\n\x15merge_formula_indexes\x18\x04 \x03(\r\"j\n\x11MergeOwnerArchive\x12$\n\x08owner_id\x18\x01 \x02(\x0b\x32\x12.TSP.CFUUIDArchive\x12/\n\rformula_store\x18\x02 \x01(\x0b\x32\x18.TST.FormulaStoreArchive\"p\n\x17PencilAnnotationArchive\x12\"\n\ntable_info\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n\x19pencil_annotation_storage\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"\x9a\x01\n\x1cPencilAnnotationOwnerArchive\x12$\n\x08owner_id\x18\x01 \x02(\x0b\x32\x12.TSP.CFUUIDArchive\x12/\n\rformula_store\x18\x02 \x01(\x0b\x32\x18.TST.FormulaStoreArchive\x12#\n\x0b\x61nnotations\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\"\xba\x03\n\x12\x41\x63\x63umulatorArchive\x12\x12\n\nbool_count\x18\x01 \x01(\r\x12\x17\n\x0f\x62ool_true_count\x18\x0c \x01(\r\x12\x14\n\x0cnumber_count\x18\x02 \x01(\r\x12\x12\n\ndate_count\x18\x03 \x01(\r\x12\x16\n\x0e\x64uration_count\x18\x04 \x01(\r\x12\x14\n\x0cstring_count\x18\x05 \x01(\r\x12\x13\n\x0b\x65rror_count\x18\r \x01(\r\x12\x17\n\x0fis_circular_ref\x18\x0e \x01(\x08\x12)\n\tmin_value\x18\x06 \x02(\x0b\x32\x16.TSCE.CellValueArchive\x12)\n\tmax_value\x18\x07 \x02(\x0b\x32\x16.TSCE.CellValueArchive\x12\x32\n\x12number_total_value\x18\x08 \x02(\x0b\x32\x16.TSCE.CellValueArchive\x12/\n\x0f\x66irst_date_seen\x18\t \x01(\x0b\x32\x16.TSCE.CellValueArchive\x12!\n\x19total_secs_since_ref_date\x18\n \x01(\x01\x12\x13\n\x0bsecs_to_add\x18\x0b \x01(\x01\"\xb5\x01\n\x12GroupColumnArchive\x12\x1d\n\ncolumn_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12(\n\rgrouping_type\x18\x02 \x02(\x0e\x32\x11.TST.GroupingType\x12.\n\x10grouping_functor\x18\x03 \x01(\x0b\x32\x14.TSCE.FunctorArchive\x12&\n\x13grouping_column_uid\x18\x04 \x01(\x0b\x32\t.TSP.UUID\"G\n\x16GroupColumnListArchive\x12-\n\x0cgroup_column\x18\x01 \x03(\x0b\x32\x17.TST.GroupColumnArchive\"l\n\x16\x43olumnAggregateArchive\x12\x1d\n\ncolumn_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\r\n\x05level\x18\x02 \x02(\r\x12$\n\x08\x61gg_type\x18\x03 \x02(\x0e\x32\x12.TST.AggregateType\"M\n\x1a\x43olumnAggregateListArchive\x12/\n\naggregates\x18\x01 \x03(\x0b\x32\x1b.TST.ColumnAggregateArchive\"\xff\x0f\n\x14\x43\x61tegoryOwnerArchive\x12\x1c\n\towner_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12:\n\x08group_by\x18\x02 \x03(\x0b\x32(.TST.CategoryOwnerArchive.GroupByArchive\x1a\x8c\x0f\n\x0eGroupByArchive\x12\x1f\n\x0cgroup_by_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12-\n\x0cgroup_column\x18\x02 \x03(\x0b\x32\x17.TST.GroupColumnArchive\x12R\n\x0fgroup_node_root\x18\x03 \x02(\x0b\x32\x39.TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive\x12N\n\naggregator\x18\x04 \x03(\x0b\x32:.TST.CategoryOwnerArchive.GroupByArchive.AggregatorArchive\x12\x34\n\x0f\x63olumn_agg_type\x18\x05 \x03(\x0b\x32\x1b.TST.ColumnAggregateArchive\x12\x12\n\nis_enabled\x18\x06 \x02(\x08\x12\x45\n indirect_agg_type_change_formula\x18\x07 \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12=\n\x18grouping_columns_formula\x18\x08 \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12\x44\n\x1fgrouping_column_headers_formula\x18\n \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12?\n\x1a\x61ggs_in_group_root_formula\x18\t \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12\x41\n\x1c\x63olumn_order_changed_formula\x18\x0b \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12>\n\x19row_order_changed_formula\x18\x0c \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12N\n)row_order_changed_ignoring_recalc_formula\x18\r \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x1a\xb4\x01\n\x0e\x41ggNodeArchive\x12\x32\n\rformula_coord\x18\x01 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12&\n\x05\x61\x63\x63um\x18\x02 \x01(\x0b\x32\x17.TST.AccumulatorArchive\x12\x46\n\x05\x63hild\x18\x03 \x03(\x0b\x32\x37.TST.CategoryOwnerArchive.GroupByArchive.AggNodeArchive\x1a\xa5\x06\n\x10GroupNodeArchive\x12\x1c\n\tgroup_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12k\n\x11group_value_tuple\x18\x02 \x01(\x0b\x32P.TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.GroupValueTupleArchive\x12\x30\n\x10group_cell_value\x18\x07 \x01(\x0b\x32\x16.TSCE.CellValueArchive\x12H\n\x05\x63hild\x18\x03 \x03(\x0b\x32\x39.TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive\x12\x1a\n\x07row_uid\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12\x37\n\x12\x61gg_formula_coords\x18\x05 \x03(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12\x66\n\x0e\x66ormat_manager\x18\x06 \x01(\x0b\x32N.TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive\x1a?\n\x16GroupValueTupleArchive\x12%\n\x05value\x18\x01 \x03(\x0b\x32\x16.TSCE.CellValueArchive\x1a\x8b\x02\n\x14\x46ormatManagerArchive\x12*\n\ncell_value\x18\x01 \x01(\x0b\x32\x16.TSCE.CellValueArchive\x12)\n\x07\x66ormats\x18\x02 \x03(\x0b\x32\x18.TSK.FormatStructArchive\x12n\n\x08row_sets\x18\x03 \x03(\x0b\x32\\.TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive\x1a,\n\rRowSetArchive\x12\x1b\n\x08row_uids\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x1a}\n\x11\x41ggregatorArchive\x12\x1d\n\ncolumn_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12I\n\x08\x61gg_node\x18\x02 \x01(\x0b\x32\x37.TST.CategoryOwnerArchive.GroupByArchive.AggNodeArchive\"q\n\x16RichTextPayloadArchive\x12\x1f\n\x07storage\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\x19\n\x05range\x18\x02 \x01(\x0b\x32\n.TSP.Range\x12\x1b\n\x06\x63\x65llid\x18\x03 \x02(\x0b\x32\x0b.TST.CellID\"Q\n#FormulaEqualsTokenAttachmentArchive\x12*\n\x05super\x18\x01 \x02(\x0b\x32\x1b.TSWP.UIGraphicalAttachment\"\x9d\x05\n\x0f\x43\x65llFillStandIn\x12\x1e\n\x04\x66ill\x18\x01 \x02(\x0b\x32\x10.TSD.FillArchive\x12\x15\n\rtype_is_mixed\x18\x02 \x01(\x08\x12\x1f\n\x17\x63olor_has_been_modified\x18\x03 \x01(\x08\x12\x16\n\x0e\x63olor_is_mixed\x18\x04 \x01(\x08\x12%\n\x1d\x66irst_color_has_been_modified\x18\x05 \x01(\x08\x12\x1c\n\x14\x66irst_color_is_mixed\x18\x06 \x01(\x08\x12$\n\x1clast_color_has_been_modified\x18\x07 \x01(\x08\x12\x1b\n\x13last_color_is_mixed\x18\x08 \x01(\x08\x12\'\n\x1fgradient_type_has_been_modified\x18\t \x01(\x08\x12\x1e\n\x16gradient_type_is_mixed\x18\n \x01(\x08\x12(\n gradient_angle_has_been_modified\x18\x0b \x01(\x08\x12\x1f\n\x17gradient_angle_is_mixed\x18\x0c \x01(\x08\x12$\n\x1cimage_data_has_been_modified\x18\r \x01(\x08\x12\x1b\n\x13image_data_is_mixed\x18\x0e \x01(\x08\x12$\n\x1ctint_color_has_been_modified\x18\x0f \x01(\x08\x12\x1b\n\x13tint_color_is_mixed\x18\x10 \x01(\x08\x12\x1f\n\x17scale_has_been_modified\x18\x11 \x01(\x08\x12\x16\n\x0escale_is_mixed\x18\x12 \x01(\x08\x12#\n\x1btechnique_has_been_modified\x18\x13 \x01(\x08\x12\x1a\n\x12technique_is_mixed\x18\x14 \x01(\x08\"^\n\x17\x46ormulaSelectionArchive\x12%\n\x05super\x18\x01 \x02(\x0b\x32\x16.TSWP.SelectionArchive\x12\x1c\n\x14\x61\x63tiveTokenCharIndex\x18\x02 \x01(\r\"\xa7\x02\n\x11\x43\x65llBorderArchive\x12&\n\ntop_stroke\x18\x01 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x18\n\x10top_stroke_order\x18\x02 \x01(\x05\x12(\n\x0cright_stroke\x18\x03 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x1a\n\x12right_stroke_order\x18\x04 \x01(\x05\x12)\n\rbottom_stroke\x18\x05 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x1b\n\x13\x62ottom_stroke_order\x18\x06 \x01(\x05\x12\'\n\x0bleft_stroke\x18\x07 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x19\n\x11left_stroke_order\x18\x08 \x01(\x05\"\xbf\x01\n!DefaultCellStylesContainerArchive\x12+\n\x13table_style_network\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\x0fheader_row_uids\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\x0f\x66ooter_row_uids\x18\x03 \x03(\x0b\x32\t.TSP.UUID\x12%\n\x12header_column_uids\x18\x04 \x03(\x0b\x32\t.TSP.UUID\"\x95\x03\n\x19MultiTableRemapperArchive\x12?\n\x0fmapping_purpose\x18\x01 \x02(\x0e\x32&.TST.MultiTableRemapperArchive.Purpose\x12\x1f\n\x17should_steal_references\x18\x02 \x02(\x08\x12\x1d\n\x15\x63\x61n_reuse_table_names\x18\x03 \x02(\x08\x12\x35\n\x10owner_uid_mapper\x18\x04 \x03(\x0b\x32\x1b.TSCE.OwnerUIDMapperArchive\x12\x36\n\x19\x62\x61\x63king_tables_for_charts\x18\x05 \x02(\x0b\x32\x13.TSP.UUIDMapArchive\x12\x1c\n\x14\x63ross_document_paste\x18\x06 \x02(\x08\x12\x1b\n\x13nested_inner_mapper\x18\x07 \x02(\x08\"M\n\x07Purpose\x12\x0b\n\x07\x44\x45\x46\x41ULT\x10\x00\x12\x0c\n\x08GROUPING\x10\x01\x12\'\n#PAGES_SECTION_DUPLICATION_NONCOLLAB\x10\x02\"\xfc\x04\n\x1b\x43hangePropagationMapWrapper\x12\x1c\n\x14replacement_behavior\x18\x01 \x02(\x05\x12\x30\n\x18style_replace_prototypes\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1astyle_replace_replacements\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12+\n\x13style_modify_styles\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1astyle_modify_old_prop_maps\x18\x05 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1astyle_modify_new_prop_maps\x18\x06 \x03(\x0b\x32\x0e.TSP.Reference\x12/\n\x17style_delete_prototypes\x18\x07 \x03(\x0b\x32\x0e.TSP.Reference\x12\x31\n\x19style_delete_replacements\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\x12\x36\n\x1etable_preset_replace_prototype\x18\t \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n table_preset_replace_replacement\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12\x35\n\x1dtable_preset_delete_prototype\x18\x0b \x01(\x0b\x32\x0e.TSP.Reference\x12\x37\n\x1ftable_preset_delete_replacement\x18\x0c \x01(\x0b\x32\x0e.TSP.Reference\"\xea\x01\n\x18SummaryCellVendorArchive\x12\"\n\ntable_info\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12?\n\x07\x65ntries\x18\x02 \x03(\x0b\x32..TST.SummaryCellVendorArchive.SummaryCellEntry\x1ai\n\x10SummaryCellEntry\x12\x1e\n\x0bwildcardUID\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x1c\n\tcolumnUID\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12\x17\n\x04\x63\x65ll\x18\x03 \x02(\x0b\x32\t.TST.Cell\"[\n\x14\x43\x61tegoryOrderArchive\x12\"\n\ntable_info\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x07uid_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\"\xb6\x02\n\x18HeaderNameMgrTileArchive\x12\x16\n\x0e\x66irst_fragment\x18\x01 \x02(\t\x12\x15\n\rlast_fragment\x18\x02 \x02(\t\x12L\n\x11name_frag_entries\x18\x03 \x03(\x0b\x32\x31.TST.HeaderNameMgrTileArchive.NameFragmentArchive\x1a\x9c\x01\n\x13NameFragmentArchive\x12\x15\n\rname_fragment\x18\x01 \x02(\t\x12\x33\n\x0ename_precedent\x18\x02 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12\x39\n\x15uses_of_name_fragment\x18\x03 \x01(\x0b\x32\x1a.TSCE.UidCellRefSetArchive\"\xe2\x03\n\x14HeaderNameMgrArchive\x12\x1c\n\towner_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12 \n\rnrm_owner_uid\x18\x02 \x01(\x0b\x32\t.TSP.UUID\x12=\n\nper_tables\x18\x03 \x03(\x0b\x32).TST.HeaderNameMgrArchive.PerTableArchive\x12\'\n\x0fname_frag_tiles\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x1a\xa1\x02\n\x0fPerTableArchive\x12\x1c\n\ttable_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x38\n\x13per_table_precedent\x18\x02 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12\x12\n\nis_deleted\x18\x03 \x01(\x08\x12\"\n\x0fheader_row_uids\x18\x05 \x03(\x0b\x32\t.TSP.UUID\x12%\n\x12header_column_uids\x18\x06 \x03(\x0b\x32\t.TSP.UUID\x12)\n\x16update_header_row_uids\x18\x07 \x03(\x0b\x32\t.TSP.UUID\x12,\n\x19update_header_column_uids\x18\x08 \x03(\x0b\x32\t.TSP.UUID\"K\n\x1cWidthHeightCacheFittingEntry\x12\x15\n\rfitting_index\x18\x01 \x01(\r\x12\x14\n\x0c\x66itting_size\x18\x02 \x01(\x02\"j\n\x10WidthHeightCache\x12?\n\x14rows_fitting_entries\x18\x01 \x03(\x0b\x32!.TST.WidthHeightCacheFittingEntry\x12\x15\n\rcolumns_count\x18\x03 \x01(\r\"H\n\x13LayoutEngineArchive\x12\x31\n\x12width_height_cache\x18\x01 \x01(\x0b\x32\x15.TST.WidthHeightCache*\xd7\x01\n\x08\x43\x65llType\x12\x13\n\x0fgenericCellType\x10\x00\x12\x10\n\x0cspanCellType\x10\x01\x12\x12\n\x0enumberCellType\x10\x02\x12\x10\n\x0ctextCellType\x10\x03\x12\x13\n\x0f\x66ormulaCellType\x10\x04\x12\x10\n\x0c\x64\x61teCellType\x10\x05\x12\x10\n\x0c\x62oolCellType\x10\x06\x12\x14\n\x10\x64urationCellType\x10\x07\x12\x18\n\x14\x66ormulaErrorCellType\x10\x08\x12\x15\n\x11\x61utomaticCellType\x10\t*\x86\x02\n\rCellValueType\x12\x16\n\x12\x65mptyCellValueType\x10\x00\x12\x17\n\x13numberCellValueType\x10\x01\x12\x17\n\x13stringCellValueType\x10\x02\x12\x19\n\x15providedCellValueType\x10\x03\x12\x15\n\x11\x64\x61teCellValueType\x10\x04\x12\x15\n\x11\x62oolCellValueType\x10\x05\x12\x19\n\x15\x64urationCellValueType\x10\x06\x12\x16\n\x12\x65rrorCellValueType\x10\x07\x12\x14\n\x10richTextCellType\x10\x08\x12\x19\n\x15\x63urrencyCellValueType\x10\t*>\n\x15TableDimensionArchive\x12\x10\n\x0c\x64imensionRow\x10\x00\x12\x13\n\x0f\x64imensionColumn\x10\x01*\x84\x02\n\x14SelectionTypeArchive\x12\x1f\n\x1b\x64\x65precatedCellSelectionType\x10\x00\x12\x14\n\x10rowSelectionType\x10\x01\x12\x17\n\x13\x63olumnSelectionType\x10\x02\x12&\n\"deprecatedCellEditingSelectionType\x10\x03\x12$\n deprecatedTableNameSelectionType\x10\x04\x12 \n\x1c\x64\x65precatedTableSelectionType\x10\x05\x12\x17\n\x13regionSelectionType\x10\x06\x12\x13\n\x0fnoSelectionType\x10\x07*y\n\x14\x46illDirectionArchive\x12\x17\n\x13kTSTFillDownArchive\x10\x01\x12\x15\n\x11kTSTFillUpArchive\x10\x02\x12\x18\n\x14kTSTFillRightArchive\x10\x03\x12\x17\n\x13kTSTFillLeftArchive\x10\x04*n\n\x12MergeActionArchive\x12\x15\n\x11mergeActionInsert\x10\x01\x12\x15\n\x11mergeActionRemove\x10\x02\x12\x15\n\x11mergeActionShrink\x10\x03\x12\x13\n\x0fmergeActionGrow\x10\x04*G\n\x15HideShowActionArchive\x12\x16\n\x12hideShowActionHide\x10\x00\x12\x16\n\x12hideShowActionShow\x10\x01*s\n\x0cGroupingType\x12\n\n\x06UNIQUE\x10\x00\x12\x08\n\x04YEAR\x10\x01\x12\t\n\x05MONTH\x10\x02\x12\r\n\tDAYOFWEEK\x10\x03\x12\x07\n\x03\x44\x41Y\x10\x04\x12\x0c\n\x08YEARWEEK\x10\x05\x12\x0f\n\x0bYEARQUARTER\x10\x06\x12\x0b\n\x07ROUND_0\x10\n*z\n\rAggregateType\x12\x08\n\x04NONE\x10\x00\x12\t\n\x05\x43OUNT\x10\x01\x12\t\n\x05TOTAL\x10\x02\x12\x0b\n\x07\x41VERAGE\x10\x03\x12\x07\n\x03MIN\x10\x04\x12\x07\n\x03MAX\x10\x05\x12\x0e\n\nGROUPVALUE\x10\t\x12\x0c\n\x08\x42ODYROWS\x10\n\x12\x0c\n\x08INDIRECT\x10\x0b:[\n\x12import_warning_set\x12 .TSS.CommandPropertyEntryArchive\x18\xf4\x03 \x01(\x0b\x32\x1c.TST.ImportWarningSetArchive:[\n\x10\x66ormat_and_value\x12 .TSS.CommandPropertyEntryArchive\x18\xf5\x03 \x01(\x0b\x32\x1e.TST.CellFormatAndValueArchive:N\n\x0b\x63\x65ll_border\x12 .TSS.CommandPropertyEntryArchive\x18\xf7\x03 \x01(\x0b\x32\x16.TST.CellBorderArchive:]\n\x0f\x63omment_storage\x12 .TSS.CommandPropertyEntryArchive\x18\xf8\x03 \x01(\x0b\x32!.TST.CommentStorageWrapperArchive:J\n\tcell_spec\x12 .TSS.CommandPropertyEntryArchive\x18\xf9\x03 \x01(\x0b\x32\x14.TST.CellSpecArchive'
+  serialized_pb=b'\n\x11TSTArchives.proto\x12\x03TST\x1a\x11TSPMessages.proto\x1a\x11TSDArchives.proto\x1a\x11TSKArchives.proto\x1a\x11TSSArchives.proto\x1a\x12TSCEArchives.proto\x1a\x12TSWPArchives.proto\x1a\x1fTSTStylePropertyArchiving.proto\"Q\n\x06\x43\x65llID\x12\x12\n\npackedData\x18\x01 \x02(\x07\x12\x33\n\x0e\x65xpanded_coord\x18\x02 \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\"\xa6\x01\n\x18\x43\x65llUIDLookupListArchive\x12/\n\x0b\x63olumn_uids\x18\x01 \x01(\x0b\x32\x1a.TSCE.UidLookupListArchive\x12,\n\x08row_uids\x18\x02 \x01(\x0b\x32\x1a.TSCE.UidLookupListArchive\x12\x16\n\x0e\x63olumn_indexes\x18\x03 \x03(\x05\x12\x13\n\x0brow_indexes\x18\x04 \x03(\x05\"\xd5\x01\n\x12\x43\x65llUIDListArchive\x12\x1b\n\x08row_uids\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x12\x1e\n\x0b\x63olumn_uids\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x1e\n\x16\x63ompressed_row_indexes\x18\x03 \x03(\x05\x12!\n\x19\x63ompressed_column_indexes\x18\x04 \x03(\x05\x12?\n\x18uncompressed_lookup_list\x18\x05 \x01(\x0b\x32\x1d.TST.CellUIDLookupListArchive\"F\n\tTableSize\x12\x12\n\npackedData\x18\x01 \x02(\x07\x12\x13\n\x0bnum_columns\x18\x02 \x01(\r\x12\x10\n\x08num_rows\x18\x03 \x01(\r\":\n\x11\x45xpandedTableSize\x12\x13\n\x0bnum_columns\x18\x01 \x02(\r\x12\x10\n\x08num_rows\x18\x02 \x02(\r\"F\n\tCellRange\x12\x1b\n\x06origin\x18\x01 \x02(\x0b\x32\x0b.TST.CellID\x12\x1c\n\x04size\x18\x02 \x02(\x0b\x32\x0e.TST.TableSize\"f\n\x11\x45xpandedCellRange\x12+\n\x06origin\x18\x01 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12$\n\x04size\x18\x02 \x02(\x0b\x32\x16.TST.ExpandedTableSize\"\xb1\x01\n\x0eTableSelection\x12!\n\tcellRange\x18\x01 \x02(\x0b\x32\x0e.TST.CellRange\x12)\n\x11\x65xtendedCellRange\x18\x02 \x02(\x0b\x32\x0e.TST.CellRange\x12\x1e\n\x16\x65xtendedCellRangeValid\x18\x03 \x02(\x08\x12\x31\n\x0eselection_type\x18\x04 \x02(\x0e\x32\x19.TST.SelectionTypeArchive\"\xe2\x01\n\x0bTileRowInfo\x12\x16\n\x0etile_row_index\x18\x01 \x02(\r\x12\x12\n\ncell_count\x18\x02 \x02(\r\x12#\n\x1b\x63\x65ll_storage_buffer_pre_bnc\x18\x03 \x02(\x0c\x12\x1c\n\x14\x63\x65ll_offsets_pre_bnc\x18\x04 \x02(\x0c\x12\x17\n\x0fstorage_version\x18\x05 \x01(\r\x12\x1b\n\x13\x63\x65ll_storage_buffer\x18\x06 \x01(\x0c\x12\x14\n\x0c\x63\x65ll_offsets\x18\x07 \x01(\x0c\x12\x18\n\x10has_wide_offsets\x18\x08 \x01(\x08\"\xc2\x01\n\x04Tile\x12\x11\n\tmaxColumn\x18\x01 \x02(\r\x12\x0e\n\x06maxRow\x18\x02 \x02(\r\x12\x10\n\x08numCells\x18\x03 \x02(\r\x12\x0f\n\x07numrows\x18\x04 \x02(\r\x12\"\n\x08rowInfos\x18\x05 \x03(\x0b\x32\x10.TST.TileRowInfo\x12\x17\n\x0fstorage_version\x18\x06 \x01(\r\x12\x19\n\x11last_saved_in_BNC\x18\x07 \x01(\x08\x12\x1c\n\x14should_use_wide_rows\x18\x08 \x01(\x08\"\x9a\x01\n\x0bTileStorage\x12$\n\x05tiles\x18\x01 \x03(\x0b\x32\x15.TST.TileStorage.Tile\x12\x11\n\ttile_size\x18\x02 \x01(\r\x12\x1c\n\x14should_use_wide_rows\x18\x03 \x01(\x08\x1a\x34\n\x04Tile\x12\x0e\n\x06tileid\x18\x01 \x02(\r\x12\x1c\n\x04tile\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\"\xe6\x03\n\x0ePopUpMenuModel\x12/\n\x04item\x18\x01 \x03(\x0b\x32\x1d.TST.PopUpMenuModel.CellValueB\x02\x18\x01\x12)\n\ttsce_item\x18\x02 \x03(\x0b\x32\x16.TSCE.CellValueArchive\x1a\x95\x02\n\tCellValue\x12:\n\x0f\x63\x65ll_value_type\x18\x01 \x02(\x0e\x32!.TST.PopUpMenuModel.CellValueType\x12\x34\n\rboolean_value\x18\x02 \x01(\x0b\x32\x1d.TSCE.BooleanCellValueArchive\x12.\n\ndate_value\x18\x03 \x01(\x0b\x32\x1a.TSCE.DateCellValueArchive\x12\x32\n\x0cnumber_value\x18\x04 \x01(\x0b\x32\x1c.TSCE.NumberCellValueArchive\x12\x32\n\x0cstring_value\x18\x05 \x01(\x0b\x32\x1c.TSCE.StringCellValueArchive\"`\n\rCellValueType\x12\x0c\n\x08NIL_TYPE\x10\x01\x12\x10\n\x0c\x42OOLEAN_TYPE\x10\x02\x12\r\n\tDATE_TYPE\x10\x03\x12\x0f\n\x0bNUMBER_TYPE\x10\x04\x12\x0f\n\x0bSTRING_TYPE\x10\x05\"\xb2\x0b\n\x17ImportWarningSetArchive\x12Q\n\x16\x66ormula_import_warning\x18\x01 \x01(\x0b\x32\x31.TST.ImportWarningSetArchive.FormulaImportWarning\x12.\n\x1f\x63ond_format_above_avg_equal_avg\x18\x02 \x01(\x08:\x05\x66\x61lse\x12,\n\x1d\x63ond_format_above_avg_std_dev\x18\x03 \x01(\x08:\x05\x66\x61lse\x12*\n\x1b\x63ond_format_complex_formula\x18\x04 \x01(\x08:\x05\x66\x61lse\x12*\n\x1b\x63ond_format_contains_errors\x18\x05 \x01(\x08:\x05\x66\x61lse\x12\x1f\n\x10\x63ond_format_expr\x18\x06 \x01(\x08:\x05\x66\x61lse\x12.\n\x1f\x63ond_format_not_contains_errors\x18\x07 \x01(\x08:\x05\x66\x61lse\x12\x37\n(cond_format_parameters_not_all_same_type\x18\x08 \x01(\x08:\x05\x66\x61lse\x12\'\n\x18\x63ond_format_stop_if_true\x18\t \x01(\x08:\x05\x66\x61lse\x12/\n cond_format_unsupported_operator\x18\n \x01(\x08:\x05\x66\x61lse\x12.\n\x1f\x63ond_format_unsupported_styling\x18\x0b \x01(\x08:\x05\x66\x61lse\x12\x32\n#cond_format_unsupported_time_period\x18\x0c \x01(\x08:\x05\x66\x61lse\x12)\n\x1a\x65rror_cell_with_no_formula\x18\r \x01(\x08:\x05\x66\x61lse\x12&\n\x17unsupported_cond_format\x18\x0e \x01(\x08:\x05\x66\x61lse\x12\x1c\n\x14original_data_format\x18\x0f \x01(\t\x12\x41\n2formula_warning_filtered_column_formula_not_copied\x18\x10 \x01(\x08:\x05\x66\x61lse\x12,\n\x1d\x64uration_format_range_changed\x18\x11 \x01(\x08:\x05\x66\x61lse\x1a\xbd\x01\n\x14\x46ormulaImportWarning\x12M\n\x14\x66ormula_warning_type\x18\x01 \x02(\x0e\x32/.TST.ImportWarningSetArchive.FormulaWarningType\x12\x18\n\x10original_formula\x18\x02 \x01(\t\x12\x1a\n\x12supplementary_text\x18\x03 \x01(\t\x12 \n\x18\x66ormula_warning_type_int\x18\x04 \x01(\x05\"\xa3\x03\n\x12\x46ormulaWarningType\x12\x15\n\x11THREE_D_REFERENCE\x10\x01\x12\x13\n\x0f\x41RRAYED_FORMULA\x10\x02\x12#\n\x1f\x44IFFERENT_BEHAVIOR_FOR_FUNCTION\x10\x03\x12\x0f\n\x0b\x45RROR_TOKEN\x10\x04\x12\x16\n\x12\x45XTERNAL_REFERENCE\x10\x05\x12\x1c\n\x18NATURAL_LANGUAGE_FORMULA\x10\x06\x12\x1b\n\x17REFERENCE_OUT_OF_BOUNDS\x10\x07\x12!\n\x1dSHARED_FORMULA_BASE_NOT_FOUND\x10\x08\x12\x10\n\x0cUNKNOWN_NAME\x10\t\x12\x17\n\x13UNSUPPORTED_FORMULA\x10\n\x12\x18\n\x14UNSUPPORTED_FUNCTION\x10\x0b\x12\x14\n\x10UNSUPPORTED_NAME\x10\x0c\x12\x18\n\x14TRANSPOSED_NO_ISSUES\x10\r\x12\x1a\n\x16TRANSPOSED_WITH_ISSUES\x10\x0e\x12$\n TRANSPOSED_WITH_ISSUES_UNCHANGED\x10\x0f\"\x85\x01\n\"CellRefImportWarningSetPairArchive\x12,\n\x08\x63\x65ll_ref\x18\x01 \x02(\x0b\x32\x1a.TSCE.CellReferenceArchive\x12\x31\n\x0bwarning_set\x18\x03 \x01(\x0b\x32\x1c.TST.ImportWarningSetArchive\"m\n ImportWarningSetByCellRefArchive\x12I\n\x18\x63\x65llref_warning_set_pair\x18\x01 \x03(\x0b\x32\'.TST.CellRefImportWarningSetPairArchive\"\xae\x06\n\rTableDataList\x12-\n\x08listType\x18\x01 \x02(\x0e\x32\x1b.TST.TableDataList.ListType\x12\x12\n\nnextListID\x18\x02 \x02(\r\x12-\n\x07\x65ntries\x18\x03 \x03(\x0b\x32\x1c.TST.TableDataList.ListEntry\x12 \n\x08segments\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x1a\x96\x03\n\tListEntry\x12\x0b\n\x03key\x18\x01 \x02(\r\x12\x10\n\x08refcount\x18\x02 \x02(\r\x12\x0e\n\x06string\x18\x03 \x01(\t\x12!\n\treference\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x07\x66ormula\x18\x05 \x01(\x0b\x32\x14.TSCE.FormulaArchive\x12(\n\x06\x66ormat\x18\x06 \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12/\n\rcustom_format\x18\x08 \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12)\n\x11rich_text_payload\x18\t \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x63omment_storage\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n\x12import_warning_set\x18\x0b \x01(\x0b\x32\x1c.TST.ImportWarningSetArchive\x12\'\n\tcell_spec\x18\x0c \x01(\x0b\x32\x14.TST.CellSpecArchive\"\xef\x01\n\x08ListType\x12\n\n\x06STRING\x10\x01\x12\n\n\x06\x46ORMAT\x10\x02\x12\x0b\n\x07\x46ORMULA\x10\x03\x12\t\n\x05STYLE\x10\x04\x12\x11\n\rFORMULA_ERROR\x10\x05\x12\x11\n\rCUSTOM_FORMAT\x10\x06\x12\x1f\n\x1bMULTIPLE_CHOICE_LIST_FORMAT\x10\x07\x12\x15\n\x11RICH_TEXT_PAYLOAD\x10\x08\x12\x15\n\x11\x43ONDITIONAL_STYLE\x10\t\x12\x13\n\x0f\x43OMMENT_STORAGE\x10\n\x12\x12\n\x0eIMPORT_WARNING\x10\x0b\x12\x15\n\x11\x43ONTROL_CELL_SPEC\x10\x0c\"\x94\x01\n\x14TableDataListSegment\x12.\n\tlist_type\x18\x01 \x02(\x0e\x32\x1b.TST.TableDataList.ListType\x12\x1d\n\tkey_range\x18\x02 \x02(\x0b\x32\n.TSP.Range\x12-\n\x07\x65ntries\x18\x03 \x03(\x0b\x32\x1c.TST.TableDataList.ListEntry\"W\n\x0bTableRBTree\x12$\n\x05nodes\x18\x01 \x03(\x0b\x32\x15.TST.TableRBTree.Node\x1a\"\n\x04Node\x12\x0b\n\x03key\x18\x01 \x02(\r\x12\r\n\x05value\x18\x02 \x02(\r\"\xff\x01\n\x13HeaderStorageBucket\x12\x1a\n\x12\x62ucketHashFunction\x18\x01 \x02(\r\x12\x30\n\x07headers\x18\x02 \x03(\x0b\x32\x1f.TST.HeaderStorageBucket.Header\x1a\x99\x01\n\x06Header\x12\r\n\x05index\x18\x01 \x02(\r\x12\x0c\n\x04size\x18\x02 \x02(\x02\x12\x13\n\x0bhidingState\x18\x03 \x02(\r\x12\x15\n\rnumberOfCells\x18\x04 \x02(\r\x12\"\n\ncell_style\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\"\n\ntext_style\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\"L\n\rHeaderStorage\x12\x1a\n\x12\x62ucketHashFunction\x18\x01 \x02(\r\x12\x1f\n\x07\x62uckets\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\"\x80\x07\n\tDataStore\x12&\n\nrowHeaders\x18\x01 \x02(\x0b\x32\x12.TST.HeaderStorage\x12%\n\rcolumnHeaders\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x05tiles\x18\x03 \x02(\x0b\x32\x10.TST.TileStorage\x12#\n\x0bstringTable\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\nstyleTable\x18\x05 \x02(\x0b\x32\x0e.TSP.Reference\x12%\n\rformula_table\x18\x06 \x02(\x0b\x32\x0e.TSP.Reference\x12)\n\x11\x66ormulaErrorTable\x18\x0c \x01(\x0b\x32\x0e.TSP.Reference\x12,\n\x14\x66ormat_table_pre_bnc\x18\x0b \x02(\x0b\x32\x0e.TSP.Reference\x12\x35\n\x1dmultipleChoiceListFormatTable\x18\x10 \x01(\x0b\x32\x0e.TSP.Reference\x12(\n\x10merge_region_map\x18\r \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\x11\x63ustomFormatTable\x18\x0f \x01(\x0b\x32\x0e.TSP.Reference\x12\x16\n\x0enextRowStripID\x18\x07 \x02(\r\x12\x19\n\x11nextColumnStripID\x18\x08 \x02(\r\x12%\n\x0browTileTree\x18\t \x02(\x0b\x32\x10.TST.TableRBTree\x12(\n\x0e\x63olumnTileTree\x18\n \x02(\x0b\x32\x10.TST.TableRBTree\x12\x1f\n\x17storage_version_pre_bnc\x18\x0e \x01(\r\x12\'\n\x0frich_text_table\x18\x11 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15\x63onditionalstyletable\x18\x12 \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13\x63ommentStorageTable\x18\x13 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15importWarningSetTable\x18\x14 \x01(\x0b\x32\x0e.TSP.Reference\x12/\n\x17\x63ontrol_cell_spec_table\x18\x15 \x01(\x0b\x32\x0e.TSP.Reference\x12$\n\x0c\x66ormat_table\x18\x16 \x01(\x0b\x32\x0e.TSP.Reference\"\xe8\x04\n\x10TableInfoArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12\"\n\ntableModel\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12)\n\rediting_state\x18\x03 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12%\n\rsummary_model\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12&\n\x0e\x63\x61tegory_order\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12,\n\x14view_column_row_uids\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12 \n\rgroup_by_uuid\x18\x07 \x01(\x0b\x32\t.TSP.UUID\x12%\n\x12hidden_states_uuid\x18\x08 \x01(\x0b\x32\t.TSP.UUID\x12(\n\x1c\x66ormula_coord_space_in_pre40\x18\t \x01(\rB\x02\x18\x01\x12\x1b\n\x13\x66ormula_coord_space\x18\n \x01(\r\x12\x39\n\x17pasteboard_coord_mapper\x18\r \x01(\x0b\x32\x18.TSCE.CoordMapperArchive\x12/\n\rlayout_engine\x18\x0e \x01(\x0b\x32\x18.TST.LayoutEngineArchive\x12(\n\x10pivot_data_model\x18\x0f \x01(\x0b\x32\x0e.TSP.Reference\x12\x18\n\x10is_a_pivot_table\x18\x10 \x01(\x08\x12#\n\x0bpivot_order\x18\x11 \x01(\x0b\x32\x0e.TSP.Reference\"^\n\x13\x43\x61tegoryInfoArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSD.DrawableArchive\x12\"\n\ntableModel\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\"[\n\x12WPTableInfoArchive\x12$\n\x05super\x18\x01 \x02(\x0b\x32\x15.TST.TableInfoArchive\x12\x1f\n\x07storage\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"\x8d\r\n\x18TableStyleNetworkArchive\x12\'\n\x0f\x62ody_text_style\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15header_row_text_style\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18header_column_text_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15\x66ooter_row_text_style\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x62ody_cell_style\x18\x05 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10header_row_style\x18\x06 \x02(\x0b\x32\x0e.TSP.Reference\x12+\n\x13header_column_style\x18\x07 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10\x66ooter_row_style\x18\x08 \x02(\x0b\x32\x0e.TSP.Reference\x12#\n\x0btable_style\x18\t \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10table_name_style\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16table_name_shape_style\x18\x0b \x01(\x0b\x32\x0e.TSP.Reference\x12\x11\n\tpreset_id\x18\x0c \x01(\r\x12\x33\n\x1b\x63\x61tegory_level_1_text_style\x18\r \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_2_text_style\x18\x0e \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_3_text_style\x18\x0f \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_4_text_style\x18\x10 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_5_text_style\x18\x11 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_1_style\x18\x12 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_2_style\x18\x13 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_3_style\x18\x14 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_4_style\x18\x15 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_5_style\x18\x16 \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_1_text_style\x18\x17 \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_2_text_style\x18\x18 \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_3_text_style\x18\x19 \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_4_text_style\x18\x1a \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_5_text_style\x18\x1b \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_1_style\x18\x1c \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_2_style\x18\x1d \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_3_style\x18\x1e \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_4_style\x18\x1f \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_5_style\x18  \x01(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cpivot_body_summary_row_style\x18! \x01(\x0b\x32\x0e.TSP.Reference\x12\x37\n\x1fpivot_body_summary_column_style\x18\" \x01(\x0b\x32\x0e.TSP.Reference\x12\x39\n!pivot_header_column_summary_style\x18# \x01(\x0b\x32\x0e.TSP.Reference\"\xdd\x02\n\x1dTableGroupSortOrderUIDArchive\x12T\n\x10group_sort_rules\x18\x01 \x03(\x0b\x32:.TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive\x1a\xe5\x01\n\x17GroupSortRuleUIDArchive\x12&\n\x13grouping_column_uid\x18\x01 \x01(\x0b\x32\t.TSP.UUID\x12\x1d\n\ncolumn_uid\x18\x02 \x01(\x0b\x32\t.TSP.UUID\x12W\n\tdirection\x18\x03 \x01(\x0e\x32\x44.TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive.Direction\"*\n\tDirection\x12\r\n\tascending\x10\x00\x12\x0e\n\ndescending\x10\x01\"\xca\x02\n\x15TableSortOrderArchive\x12\x31\n\x04type\x18\x01 \x02(\x0e\x32#.TST.TableSortOrderArchive.SortType\x12\x39\n\x05rules\x18\x02 \x03(\x0b\x32*.TST.TableSortOrderArchive.SortRuleArchive\x1a\x95\x01\n\x0fSortRuleArchive\x12\r\n\x05index\x18\x01 \x02(\r\x12G\n\tdirection\x18\x02 \x02(\x0e\x32\x34.TST.TableSortOrderArchive.SortRuleArchive.Direction\"*\n\tDirection\x12\r\n\tascending\x10\x00\x12\x0e\n\ndescending\x10\x01\"+\n\x08SortType\x12\x10\n\x0c\x65ntire_table\x10\x00\x12\r\n\trow_range\x10\x01\"\xe6\x02\n\x18TableSortOrderUIDArchive\x12\x34\n\x04type\x18\x01 \x02(\x0e\x32&.TST.TableSortOrderUIDArchive.SortType\x12<\n\x05rules\x18\x02 \x03(\x0b\x32-.TST.TableSortOrderUIDArchive.SortRuleArchive\x1a\xa8\x01\n\x0fSortRuleArchive\x12\x1d\n\ncolumn_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12J\n\tdirection\x18\x02 \x02(\x0e\x32\x37.TST.TableSortOrderUIDArchive.SortRuleArchive.Direction\"*\n\tDirection\x12\r\n\tascending\x10\x00\x12\x0e\n\ndescending\x10\x01\"+\n\x08SortType\x12\x10\n\x0c\x65ntire_table\x10\x00\x12\r\n\trow_range\x10\x01\"L\n\x1fSortRuleReferenceTrackerArchive\x12)\n\x11reference_tracker\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\"1\n\nCellRegion\x12#\n\x0b\x63\x65ll_ranges\x18\x01 \x03(\x0b\x32\x0e.TST.CellRange\"E\n\x14\x43\x65llUIDRegionArchive\x12-\n\x0f\x63\x65ll_uid_ranges\x18\x01 \x03(\x0b\x32\x14.TSP.UUIDRectArchive\"\xa7\x02\n\x1aStructuredTextImportRecord\x12:\n\x0fimport_settings\x18\x01 \x02(\x0b\x32!.TSK.StructuredTextImportSettings\x12\x15\n\rimport_source\x18\x02 \x01(\t\x12\x13\n\x0bimport_date\x18\x03 \x01(\x01\x12\x13\n\x0bsource_data\x18\x04 \x01(\x0c\x12\x17\n\x0fsource_encoding\x18\x05 \x01(\x04\x12\x12\n\nconfidence\x18\x06 \x01(\x02\x12(\n\x0fimported_region\x18\x07 \x01(\x0b\x32\x0f.TST.CellRegion\x12\x18\n\x10source_row_count\x18\x08 \x01(\x04\x12\x1b\n\x13source_column_count\x18\t \x01(\x04\"\x89\x1c\n\x11TableModelArchive\x12\x10\n\x08table_id\x18\x01 \x02(\t\x12\x15\n\rfrom_table_id\x18+ \x01(\t\x12\x0f\n\x07was_cut\x18\x32 \x01(\x08\x12#\n\x0btable_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x62ody_text_style\x18\x18 \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15header_row_text_style\x18\x19 \x02(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18header_column_text_style\x18\x1a \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15\x66ooter_row_text_style\x18\x1b \x02(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x62ody_cell_style\x18\x12 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10header_row_style\x18\x13 \x02(\x0b\x32\x0e.TSP.Reference\x12+\n\x13header_column_style\x18\x14 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10\x66ooter_row_style\x18\x15 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10table_name_style\x18\x1e \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16table_name_shape_style\x18$ \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12table_style_preset\x18\x30 \x01(\x0b\x32\x0e.TSP.Reference\x12\x14\n\x0cpreset_index\x18\x1c \x01(\r\x12\'\n\x0f\x62\x61se_data_store\x18\x04 \x02(\x0b\x32\x0e.TST.DataStore\x12 \n\x08provider\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x16\n\x0enumber_of_rows\x18\x06 \x02(\r\x12\x19\n\x11number_of_columns\x18\x07 \x02(\r\x12\x12\n\ntable_name\x18\x08 \x02(\t\x12\x1a\n\x12table_name_enabled\x18\x16 \x01(\x08\x12\x19\n\x11table_name_height\x18! \x01(\x01\x12!\n\x19table_name_border_enabled\x18% \x01(\x08\x12\x1d\n\x15number_of_header_rows\x18\t \x01(\r\x12 \n\x18number_of_header_columns\x18\n \x01(\r\x12\x1d\n\x15number_of_footer_rows\x18\x0b \x01(\r\x12\x1a\n\x12header_rows_frozen\x18\x0c \x01(\x08\x12\x1d\n\x15header_columns_frozen\x18\r \x01(\x08\x12\x1d\n\x15number_of_hidden_rows\x18\x0e \x01(\r\x12 \n\x18number_of_hidden_columns\x18\x0f \x01(\r\x12\"\n\x1anumber_of_user_hidden_rows\x18) \x01(\r\x12%\n\x1dnumber_of_user_hidden_columns\x18* \x01(\r\x12\x1f\n\x17number_of_filtered_rows\x18( \x01(\r\x12\x1a\n\x12\x64\x65\x66\x61ult_row_height\x18\x10 \x02(\x01\x12\x1c\n\x14\x64\x65\x66\x61ult_column_width\x18\x11 \x02(\x01\x12&\n\rorigin_offset\x18\x17 \x01(\x0b\x32\x0b.TST.CellIDB\x02\x18\x01\x12%\n\x1drepeating_header_rows_enabled\x18\x1d \x01(\x08\x12\x1e\n\x16style_apply_clears_all\x18\x1f \x01(\x08\x12(\n repeating_header_columns_enabled\x18  \x01(\x08\x12>\n&hidden_state_formula_owner_for_columns\x18\" \x01(\x0b\x32\x0e.TSP.Reference\x12;\n#hidden_state_formula_owner_for_rows\x18# \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18row_filter_set_pre_pivot\x18& \x01(\x0b\x32\x0e.TSP.Reference\x12>\n\"conditional_style_formula_owner_id\x18\' \x01(\x0b\x32\x12.TSP.CFUUIDArchive\x12.\n\nsort_order\x18, \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\x12I\n\x1bsort_rule_reference_tracker\x18- \x01(\x0b\x32$.TST.SortRuleReferenceTrackerArchive\x12,\n\x14\x62\x61se_column_row_uids\x18. \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x0bmerge_owner\x18/ \x01(\x0b\x32\x16.TST.MergeOwnerArchive\x12&\n\x0estroke_sidecar\x18\x31 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x1dpreset_needs_strong_ownership\x18\x33 \x01(\x08\x12;\n\x12text_import_record\x18\x34 \x01(\x0b\x32\x1f.TST.StructuredTextImportRecord\x12.\n\x16\x63\x61tegory_level_1_style\x18< \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_2_style\x18= \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_3_style\x18> \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_4_style\x18? \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x63\x61tegory_level_5_style\x18@ \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_1_text_style\x18\x41 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_2_text_style\x18\x42 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_3_text_style\x18\x43 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_4_text_style\x18\x44 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63\x61tegory_level_5_text_style\x18\x45 \x01(\x0b\x32\x0e.TSP.Reference\x12:\n\x13hidden_states_owner\x18\x46 \x01(\x0b\x32\x1d.TST.HiddenStatesOwnerArchive\x12+\n\x13label_level_1_style\x18G \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_2_style\x18H \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_3_style\x18I \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_4_style\x18J \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13label_level_5_style\x18K \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_1_text_style\x18L \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_2_text_style\x18M \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_3_text_style\x18N \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_4_text_style\x18O \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18label_level_5_text_style\x18P \x01(\x0b\x32\x0e.TSP.Reference\x12<\n\x19\x63\x61tegory_owner_deprecated\x18Q \x01(\x0b\x32\x19.TST.CategoryOwnerArchive\x12\x42\n\x17pencil_annotation_owner\x18R \x01(\x0b\x32!.TST.PencilAnnotationOwnerArchive\x12\x19\n\x11\x66rom_group_by_uid\x18S \x01(\t\x12\x30\n\rhaunted_owner\x18T \x01(\x0b\x32\x19.TSCE.HauntedOwnerArchive\x12#\n\x0bpivot_owner\x18U \x01(\x0b\x32\x0e.TSP.Reference\x12&\n\x0e\x63\x61tegory_owner\x18V \x01(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cpivot_body_summary_row_style\x18W \x01(\x0b\x32\x0e.TSP.Reference\x12\x37\n\x1fpivot_body_summary_column_style\x18X \x01(\x0b\x32\x0e.TSP.Reference\x12\x39\n!pivot_header_column_summary_style\x18Y \x01(\x0b\x32\x0e.TSP.Reference\x12 \n\x18pivot_value_types_by_col\x18Z \x03(\r\x12#\n\x1bpivot_date_grouping_columns\x18[ \x03(\r\x12!\n\x19pivot_date_grouping_types\x18\\ \x03(\r\"\x86\x08\n\x13SummaryModelArchive\x12\"\n\ntable_info\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\ndata_store\x18\x02 \x01(\x0b\x32\x0e.TST.DataStore\x12\'\n\x0f\x63olumn_row_uids\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12/\n\x1c\x61ggregate_formula_owner_uuid\x18\x04 \x01(\x0b\x32\t.TSP.UUID\x12+\n\x13summary_cell_vendor\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x15\x63\x61tegory_column_width\x18\n \x01(\x01\x12&\n\x1asummary_row_level_1_height\x18\x0b \x01(\x01\x42\x02\x18\x01\x12&\n\x1asummary_row_level_2_height\x18\x0c \x01(\x01\x42\x02\x18\x01\x12&\n\x1asummary_row_level_3_height\x18\r \x01(\x01\x42\x02\x18\x01\x12&\n\x1asummary_row_level_4_height\x18\x0e \x01(\x01\x42\x02\x18\x01\x12&\n\x1asummary_row_level_5_height\x18\x0f \x01(\x01\x42\x02\x18\x01\x12,\n summary_label_row_level_1_height\x18\x10 \x01(\x01\x42\x02\x18\x01\x12,\n summary_label_row_level_2_height\x18\x11 \x01(\x01\x42\x02\x18\x01\x12,\n summary_label_row_level_3_height\x18\x12 \x01(\x01\x42\x02\x18\x01\x12,\n summary_label_row_level_4_height\x18\x13 \x01(\x01\x42\x02\x18\x01\x12,\n summary_label_row_level_5_height\x18\x14 \x01(\x01\x42\x02\x18\x01\x12\"\n\x16label_row_visibility_1\x18\x15 \x01(\rB\x02\x18\x01\x12\"\n\x16label_row_visibility_2\x18\x16 \x01(\rB\x02\x18\x01\x12\"\n\x16label_row_visibility_3\x18\x17 \x01(\rB\x02\x18\x01\x12\"\n\x16label_row_visibility_4\x18\x18 \x01(\rB\x02\x18\x01\x12\"\n\x16label_row_visibility_5\x18\x19 \x01(\rB\x02\x18\x01\x12\x1f\n\x17summary_row_height_list\x18\x1a \x03(\x01\x12\x1d\n\x15label_row_height_list\x18\x1b \x03(\x01\x12!\n\x19label_row_visibility_list\x18\x1c \x03(\r\x12<\n\x10group_sort_order\x18\x1d \x01(\x0b\x32\".TST.TableGroupSortOrderUIDArchive\"\xac\x01\n%SummaryModelGroupByChangeStateArchive\x12 \n\x08\x63\x65ll_map\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x17summary_row_height_list\x18\x02 \x03(\x01\x12\x1d\n\x15label_row_height_list\x18\x03 \x03(\x01\x12!\n\x19label_row_visibility_list\x18\x04 \x03(\r\"\xd5\x01\n\x16\x43olumnRowUIDMapArchive\x12%\n\x12sorted_column_uids\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x12\x1c\n\x14\x63olumn_index_for_uid\x18\x02 \x03(\r\x12\x1c\n\x14\x63olumn_uid_for_index\x18\x03 \x03(\r\x12\"\n\x0fsorted_row_uids\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12\x19\n\x11row_index_for_uid\x18\x05 \x03(\r\x12\x19\n\x11row_uid_for_index\x18\x06 \x03(\r\"\xd4\x01\n\x12StrokeLayerArchive\x12\x18\n\x10row_column_index\x18\x01 \x01(\r\x12=\n\x0bstroke_runs\x18\x02 \x03(\x0b\x32(.TST.StrokeLayerArchive.StrokeRunArchive\x1a\x65\n\x10StrokeRunArchive\x12\x0e\n\x06origin\x18\x01 \x01(\x05\x12\x0e\n\x06length\x18\x02 \x01(\r\x12\"\n\x06stroke\x18\x03 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\r\n\x05order\x18\x04 \x01(\r\"\x9a\x02\n\x14StrokeSidecarArchive\x12\x11\n\tmax_order\x18\x01 \x01(\r\x12\x14\n\x0c\x63olumn_count\x18\x02 \x01(\r\x12\x11\n\trow_count\x18\x03 \x01(\r\x12\x31\n\x19left_column_stroke_layers\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1aright_column_stroke_layers\x18\x05 \x03(\x0b\x32\x0e.TSP.Reference\x12-\n\x15top_row_stroke_layers\x18\x06 \x03(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18\x62ottom_row_stroke_layers\x18\x07 \x03(\x0b\x32\x0e.TSP.Reference\"\x18\n\x16\x44urationWrapperArchive\"\xe7\x08\n\x04\x43\x65ll\x12%\n\tvalueType\x18\x02 \x02(\x0e\x32\x12.TST.CellValueType\x12\"\n\ncell_style\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\"\n\ntext_style\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x13\n\x0bnumberValue\x18\x05 \x01(\x01\x12\x13\n\x0bstringValue\x18\x06 \x01(\t\x12\x11\n\tboolValue\x18\x07 \x01(\x08\x12\x30\n\x0e\x63urrent_format\x18\t \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12$\n\x0c\x66ormulaError\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12/\n\rnumber_format\x18\x0b \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x31\n\x0f\x63urrency_format\x18\x0c \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x31\n\x0f\x64uration_format\x18\r \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12-\n\x0b\x64\x61te_format\x18\x0e \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12/\n\rcustom_format\x18\x10 \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12-\n\x0b\x62\x61se_format\x18\x11 \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x1d\n\x15\x65xplicit_format_flags\x18\x13 \x01(\r\x12 \n\x08richText\x18\x14 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\x11\x63onditional_style\x18\x15 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x63omment_storage\x18\x17 \x01(\x0b\x32\x0e.TSP.Reference\x12&\n\x1e\x63onditional_style_applied_rule\x18\x18 \x01(\r\x12\x38\n\x12import_warning_set\x18\x19 \x01(\x0b\x32\x1c.TST.ImportWarningSetArchive\x12\x36\n\x14\x63ustom_format_object\x18\x1a \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12+\n\x0b\x63\x65ll_border\x18\x1b \x01(\x0b\x32\x16.TST.CellBorderArchive\x12\'\n\tcell_spec\x18\x1c \x01(\x0b\x32\x14.TST.CellSpecArchive\x12\x18\n\x10\x63\x65ll_format_kind\x18\x1d \x01(\r\x12-\n\x0btext_format\x18\x1e \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x30\n\x0e\x62oolean_format\x18\x1f \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x19\n\x11\x64\x65\x63imal_value_low\x18  \x01(\x04\x12\x1a\n\x12\x64\x65\x63imal_value_high\x18! \x01(\x04\";\n\x15MergeRegionMapArchive\x12\"\n\ncell_range\x18\x01 \x03(\x0b\x32\x0e.TST.CellRange\"\xa8\x03\n\x0e\x43\x65llMapArchive\x12\"\n\ncell_tiles\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12\x11\n\tuid_based\x18\x03 \x02(\x08\x12\x36\n\x11\x65xpanded_cell_ids\x18\x0e \x03(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12.\n\rcell_uid_list\x18\x05 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12.\n\x10merge_uid_ranges\x18\x07 \x03(\x0b\x32\x14.TSP.UUIDRectArchive\x12\x30\n\x12unmerge_uid_ranges\x18\t \x03(\x0b\x32\x14.TSP.UUIDRectArchive\x12\x31\n\rmerge_actions\x18\r \x03(\x0b\x32\x1a.TST.MergeOperationArchive\x12*\n\x1cmay_modify_formulas_in_cells\x18\n \x01(\x08:\x04true\x12\x36\n(may_modify_values_referenced_by_formulas\x18\x0b \x01(\x08:\x04true\"\x8f\x01\n\x0f\x43\x65llListArchive\x12\x30\n\x05\x63\x65lls\x18\x01 \x03(\x0b\x32!.TST.CellListArchive.OptionalCell\x12!\n\x19trailing_empty_cell_count\x18\x02 \x01(\r\x1a\'\n\x0cOptionalCell\x12\x17\n\x04\x63\x65ll\x18\x01 \x01(\x0b\x32\t.TST.Cell\"\xe8\x01\n\x18\x43oncurrentCellMapArchive\x12\"\n\ncell_lists\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12\x11\n\tuid_based\x18\x02 \x02(\x08\x12\x31\n\rmerge_actions\x18\x03 \x03(\x0b\x32\x1a.TST.MergeOperationArchive\x12*\n\x1cmay_modify_formulas_in_cells\x18\x04 \x01(\x08:\x04true\x12\x36\n(may_modify_values_referenced_by_formulas\x18\x05 \x01(\x08:\x04true\"\xd2\x01\n\x19\x43oncurrentCellListArchive\x12:\n\x05\x63\x65lls\x18\x01 \x03(\x0b\x32+.TST.ConcurrentCellListArchive.OptionalCell\x12,\n\x0e\x63\x65ll_uid_range\x18\x02 \x01(\x0b\x32\x14.TSP.UUIDRectArchive\x12\"\n\ncell_range\x18\x03 \x01(\x0b\x32\x0e.TST.CellRange\x1a\'\n\x0cOptionalCell\x12\x17\n\x04\x63\x65ll\x18\x01 \x01(\x0b\x32\t.TST.Cell\"\xf1\x05\n\x19\x43\x65llFormatAndValueArchive\x12%\n\tvalueType\x18\x01 \x02(\x0e\x32\x12.TST.CellValueType\x12\x13\n\x0bnumberValue\x18\x02 \x01(\x01\x12\x13\n\x0bstringValue\x18\x03 \x01(\t\x12\x11\n\tboolValue\x18\x04 \x01(\x08\x12\'\n\x0frichTextStorage\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x15use_all_spare_formats\x18\x06 \x02(\x08\x12\x16\n\x0e\x65xplicit_flags\x18\x07 \x02(\r\x12\x18\n\x10\x63\x65ll_format_kind\x18\x08 \x02(\r\x12/\n\rnumber_format\x18\n \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x31\n\x0f\x63urrency_format\x18\x0b \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12-\n\x0b\x64\x61te_format\x18\x0c \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x31\n\x0f\x64uration_format\x18\r \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12-\n\x0btext_format\x18\x0e \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x30\n\x0e\x62oolean_format\x18\x0f \x01(\x0b\x32\x18.TSK.FormatStructArchive\x12\x17\n\x0f\x66ormatted_value\x18\x10 \x01(\t\x12\x31\n\x19\x66ormatted_rich_text_value\x18\x11 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x17\x61pply_spare_format_only\x18\x12 \x02(\x08\x12\x19\n\x11spare_format_type\x18\x13 \x02(\x08\x12\x13\n\x0b\x64\x65\x63imal_low\x18\x14 \x01(\x04\x12\x14\n\x0c\x64\x65\x63imal_high\x18\x15 \x01(\x04\x12\x1c\n\x14suppress_apply_value\x18\x16 \x01(\x08\"\xb2\x02\n\x0f\x43\x65llSpecArchive\x12\x18\n\x10interaction_type\x18\x01 \x02(\r\x12%\n\x07\x66ormula\x18\x02 \x01(\x0b\x32\x14.TSCE.FormulaArchive\x12\x19\n\x11range_control_min\x18\x03 \x01(\x01\x12\x19\n\x11range_control_max\x18\x04 \x01(\x01\x12\x19\n\x11range_control_inc\x18\x05 \x01(\x01\x12\x33\n\x1b\x63hooser_control_popup_model\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x1d\x63hooser_control_start_w_first\x18\x07 \x01(\x08\x12\x31\n%category_summary_should_display_label\x18\x08 \x01(\x08\x42\x02\x18\x01\"G\n\x1c\x43ommentStorageWrapperArchive\x12\'\n\x0f\x63omment_storage\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"\x8d\x01\n\x0f\x43\x65llDiffArchive\x12;\n\x13property_map_to_set\x18\x01 \x02(\x0b\x32\x1e.TSS.CommandPropertyMapArchive\x12=\n\x15property_map_to_reset\x18\x02 \x02(\x0b\x32\x1e.TSS.CommandPropertyMapArchive\"5\n\rCellDiffArray\x12$\n\x0blarge_array\x18\x01 \x01(\x0b\x32\x0f.TSP.LargeArray\"s\n\x14\x43\x65llDiffArraySegment\x12\x33\n\x13large_array_segment\x18\x01 \x01(\x0b\x32\x16.TSP.LargeArraySegment\x12&\n\x08\x65lements\x18\x02 \x03(\x0b\x32\x14.TST.CellDiffArchive\"\xb4\x01\n\x12\x43\x65llDiffMapArchive\x12\x11\n\tuid_based\x18\x01 \x02(\x08\x12\x36\n\x11\x65xpanded_cell_ids\x18\x02 \x03(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12*\n\tcell_uids\x18\x03 \x02(\x0b\x32\x17.TST.CellUIDListArchive\x12\'\n\x0f\x63\x65ll_diff_array\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\"\xde\x04\n\x1eHierarchicalCellDiffMapArchive\x12\x15\n\rnum_row_rules\x18\x01 \x02(\x05\x12\x18\n\x10num_column_rules\x18\x02 \x02(\x05\x12\"\n\x0frow_header_uids\x18\x03 \x03(\x0b\x32\t.TSP.UUID\x12%\n\x12\x63olumn_header_uids\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12&\n\x13\x61ggregate_rule_uids\x18\x05 \x03(\x0b\x32\t.TSP.UUID\x12?\n\x1b\x61\x63tive_flattening_dimension\x18\x06 \x02(\x0e\x32\x1a.TST.TableDimensionArchive\x12!\n\x0erow_value_uids\x18\x07 \x03(\x0b\x32\t.TSP.UUID\x12\x1a\n\x12row_level_preorder\x18\x08 \x03(\r\x12$\n\x11\x63olumn_value_uids\x18\t \x03(\x0b\x32\t.TSP.UUID\x12\x1d\n\x15\x63olumn_level_preorder\x18\n \x03(\r\x12G\n\x11\x63\x65ll_diff_storage\x18\x0b \x03(\x0b\x32,.TST.HierarchicalCellDiffMapArchive.BoxedRow\x12\x11\n\trow_sizes\x18\x0c \x03(\x01\x12\x14\n\x0c\x63olumn_sizes\x18\r \x03(\x01\x1a\x61\n\x08\x42oxedRow\x12\'\n\x10\x63olumn_index_set\x18\x01 \x02(\x0b\x32\r.TSP.IndexSet\x12,\n\x0e\x63\x65ll_diff_list\x18\x02 \x03(\x0b\x32\x14.TST.CellDiffArchive\"\x8a\x02\n\x15\x44oubleStyleMapArchive\x12\x10\n\x08\x63\x61pacity\x18\x01 \x02(\r\x12\r\n\x05\x63ount\x18\x02 \x02(\r\x12M\n\x0e\x63\x65ll_map_entry\x18\x03 \x03(\x0b\x32\x35.TST.DoubleStyleMapArchive.DoubleStyleMapEntryArchive\x1a\x80\x01\n\x1a\x44oubleStyleMapEntryArchive\x12\x1c\n\x07\x63\x65ll_id\x18\x01 \x02(\x0b\x32\x0b.TST.CellID\x12!\n\told_style\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12!\n\tnew_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\"\xef\x01\n\x14StyleTableMapArchive\x12\x10\n\x08\x63\x61pacity\x18\x01 \x02(\r\x12\r\n\x05\x63ount\x18\x02 \x02(\r\x12\x46\n\tmap_entry\x18\x03 \x03(\x0b\x32\x33.TST.StyleTableMapArchive.StyleTableMapEntryArchive\x1an\n\x19StyleTableMapEntryArchive\x12\x0b\n\x03key\x18\x01 \x02(\r\x12!\n\told_style\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12!\n\tnew_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\"\xe7\x03\n\x10SelectionArchive\x12&\n\ntableModel\x18\x01 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12\x31\n\x0eselection_type\x18\x04 \x02(\x0e\x32\x19.TST.SelectionTypeArchive\x12 \n\x0b\x61nchor_cell\x18\x05 \x01(\x0b\x32\x0b.TST.CellID\x12#\n\x0b\x63\x65ll_ranges\x18\x06 \x03(\x0b\x32\x0e.TST.CellRange\x12#\n\x0b\x62\x61se_ranges\x18\x07 \x03(\x0b\x32\x0e.TST.CellRange\x12 \n\x0b\x63ursor_cell\x18\x08 \x01(\x0b\x32\x0b.TST.CellID\x12\"\n\ntable_info\x18\t \x01(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x0f\x63\x65ll_uid_region\x18\n \x01(\x0b\x32\x19.TST.CellUIDRegionArchive\x12\x32\n\x0f\x62\x61se_uid_region\x18\x0b \x01(\x0b\x32\x19.TST.CellUIDRegionArchive\x12.\n\x0f\x61nchor_cell_uid\x18\x0c \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12.\n\x0f\x63ursor_cell_uid\x18\r \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\"\xca\x02\n)DeathhawkRdar39989167CellSelectionArchive\x12\"\n\ntable_info\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n\x0eselection_type\x18\x02 \x01(\x0e\x32\x19.TST.SelectionTypeArchive\x12\x32\n\x0f\x63\x65ll_uid_region\x18\x03 \x01(\x0b\x32\x19.TST.CellUIDRegionArchive\x12\x32\n\x0f\x62\x61se_uid_region\x18\x04 \x01(\x0b\x32\x19.TST.CellUIDRegionArchive\x12.\n\x0f\x61nchor_cell_uid\x18\x05 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12.\n\x0f\x63ursor_cell_uid\x18\x06 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\"&\n\x16StrokeSelectionArchive\x12\x0c\n\x04mask\x18\x01 \x01(\x05\"\x1d\n\x1b\x43ontrolCellSelectionArchive\"\x1b\n\x19StockCellSelectionArchive\"\x1b\n\x19TableNameSelectionArchive\"p\n\x18\x41utofillSelectionArchive\x12)\n\x11source_cell_range\x18\x01 \x01(\x0b\x32\x0e.TST.CellRange\x12)\n\x11target_cell_range\x18\x02 \x01(\x0b\x32\x0e.TST.CellRange\"f\n\x19\x46ilterRulePrePivotArchive\x12\x37\n\tpredicate\x18\x01 \x02(\x0b\x32$.TST.FormulaPredicatePrePivotArchive\x12\x10\n\x08\x64isabled\x18\x02 \x01(\x08\"D\n\x11\x46ilterRuleArchive\x12/\n\tpredicate\x18\x01 \x02(\x0b\x32\x1c.TST.FormulaPredicateArchive\"\x8c\x01\n\x11TableStyleArchive\x12 \n\x05super\x18\x01 \x02(\x0b\x32\x11.TSS.StyleArchive\x12\x19\n\x0eoverride_count\x18\n \x01(\r:\x01\x30\x12:\n\x10table_properties\x18\x0b \x01(\x0b\x32 .TST.TableStylePropertiesArchive\"\x89\x01\n\x10\x43\x65llStyleArchive\x12 \n\x05super\x18\x01 \x02(\x0b\x32\x11.TSS.StyleArchive\x12\x19\n\x0eoverride_count\x18\n \x01(\r:\x01\x30\x12\x38\n\x0f\x63\x65ll_properties\x18\x0b \x01(\x0b\x32\x1f.TST.CellStylePropertiesArchive\"\xd4\x01\n\x19\x46ormulaPredArgDataArchive\x12\x14\n\x0c\x64ouble_value\x18\x01 \x01(\x01\x12\x13\n\x0b\x64\x65\x63imal_low\x18\x02 \x01(\x04\x12\x14\n\x0c\x64\x65\x63imal_high\x18\x03 \x01(\x04\x12\x14\n\x0cstring_value\x18\x04 \x01(\t\x12\x12\n\ndate_value\x18\x05 \x01(\x01\x12\x1d\n\x15\x64uration_timeinterval\x18\x06 \x01(\x01\x12\x16\n\x0e\x64uration_units\x18\x07 \x01(\x05\x12\x15\n\rboolean_value\x18\x08 \x01(\x08\"\x8f\x04\n\x15\x46ormulaPredArgArchive\x12\x10\n\x08\x61rg_type\x18\x01 \x02(\x05\x12\x31\n\targ_value\x18\x02 \x01(\x0b\x32\x1e.TST.FormulaPredArgDataArchive\x12\x31\n\rbase_cell_ref\x18\x03 \x01(\x0b\x32\x1a.TSCE.CellReferenceArchive\x12\x37\n\x11relative_cell_ref\x18\x04 \x01(\x0b\x32\x1c.TSCE.RelativeCellRefArchive\x12\x34\n\x0c\x63\x61tegory_ref\x18\x05 \x01(\x0b\x32\x1e.TSCE.CategoryReferenceArchive\x12\x41\n\x0euid_tract_list\x18\x06 \x01(\x0b\x32).TSCE.ASTNodeArrayArchive.ASTUidTractList\x12\x34\n\x0fhost_cell_coord\x18\x07 \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12\x14\n\x0cpreserve_row\x18\x08 \x01(\x08\x12\x17\n\x0fpreserve_column\x18\t \x01(\x08\x12\x34\n\x0clist_entries\x18\n \x03(\x0b\x32\x1e.TST.FormulaPredArgDataArchive\x12\x31\n\x0eview_tract_ref\x18\x0b \x01(\x0b\x32\x19.TSCE.ViewTractRefArchive\"\xca\x01\n\x1f\x46ormulaPredicatePrePivotArchive\x12%\n\x07\x66ormula\x18\x01 \x02(\x0b\x32\x14.TSCE.FormulaArchive\x12\x16\n\x0epredicate_type\x18\x02 \x02(\x05\x12\x12\n\nqualifier1\x18\x03 \x02(\x05\x12\x12\n\nqualifier2\x18\x04 \x02(\x05\x12\x14\n\x0cparam_index1\x18\x05 \x02(\x05\x12\x14\n\x0cparam_index2\x18\x06 \x02(\x05\x12\x14\n\x0cparam_index0\x18\x07 \x02(\x05\"\x9d\x03\n\x17\x46ormulaPredicateArchive\x12\x16\n\x0epredicate_type\x18\x01 \x02(\x05\x12\x12\n\nqualifier1\x18\x02 \x02(\x05\x12\x12\n\nqualifier2\x18\x03 \x02(\x05\x12\x30\n\x0cparam_value0\x18\x04 \x01(\x0b\x32\x1a.TST.FormulaPredArgArchive\x12\x30\n\x0cparam_value1\x18\x05 \x01(\x0b\x32\x1a.TST.FormulaPredArgArchive\x12\x30\n\x0cparam_value2\x18\x06 \x01(\x0b\x32\x1a.TST.FormulaPredArgArchive\x12%\n\x07\x66ormula\x18\x07 \x01(\x0b\x32\x14.TSCE.FormulaArchive\x12\x1d\n\x15\x66or_conditional_style\x18\x08 \x01(\x08\x12!\n\x0ehost_table_uid\x18\t \x01(\x0b\x32\t.TSP.UUID\x12\"\n\x0fhost_column_uid\x18\n \x01(\x0b\x32\t.TSP.UUID\x12\x1f\n\x0chost_row_uid\x18\x0b \x01(\x0b\x32\t.TSP.UUID\"\xdc\x04\n\x1a\x43onditionalStyleSetArchive\x12\x11\n\truleCount\x18\x01 \x02(\r\x12T\n\x0erules_prepivot\x18\x02 \x03(\x0b\x32<.TST.ConditionalStyleSetArchive.ConditionalStyleRulePrePivot\x12\x44\n\x05rules\x18\x03 \x01(\x0b\x32\x35.TST.ConditionalStyleSetArchive.ConditionalStyleRules\x1a\x9f\x01\n\x1c\x43onditionalStyleRulePrePivot\x12\x37\n\tpredicate\x18\x01 \x02(\x0b\x32$.TST.FormulaPredicatePrePivotArchive\x12\"\n\ncell_style\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\ntext_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x1a\x8f\x01\n\x14\x43onditionalStyleRule\x12/\n\tpredicate\x18\x01 \x01(\x0b\x32\x1c.TST.FormulaPredicateArchive\x12\"\n\ncell_style\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\ntext_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x1a[\n\x15\x43onditionalStyleRules\x12\x42\n\x04rule\x18\x01 \x03(\x0b\x32\x34.TST.ConditionalStyleSetArchive.ConditionalStyleRule\"\x91\x03\n\x10\x46ilterSetArchive\x12J\n\x04type\x18\x01 \x01(\x0e\x32#.TST.FilterSetArchive.FilterSetType:\x17\x46ilterSetArchiveTypeAll\x12\x18\n\nis_enabled\x18\x02 \x01(\x08:\x04true\x12=\n\x15\x66ilter_rules_prepivot\x18\x03 \x03(\x0b\x32\x1e.TST.FilterRulePrePivotArchive\x12/\n needs_formula_rewrite_for_import\x18\x04 \x01(\x08:\x05\x66\x61lse\x12\x16\n\x0e\x66ilter_offsets\x18\x05 \x03(\r\x12\x16\n\x0e\x66ilter_enabled\x18\x06 \x03(\x08\x12,\n\x0c\x66ilter_rules\x18\x07 \x03(\x0b\x32\x16.TST.FilterRuleArchive\"I\n\rFilterSetType\x12\x1b\n\x17\x46ilterSetArchiveTypeAll\x10\x00\x12\x1b\n\x17\x46ilterSetArchiveTypeAny\x10\x01\"\xca\x01\n\x12UniqueIndexArchive\x12\x1d\n\ncolumn_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12G\n\x0eunique_entries\x18\x02 \x03(\x0b\x32/.TST.UniqueIndexArchive.UniqueIndexEntryArchive\x1aL\n\x17UniqueIndexEntryArchive\x12\x14\n\x0cstring_value\x18\x01 \x02(\t\x12\x1b\n\x08row_uids\x18\x02 \x03(\x0b\x32\t.TSP.UUID\"\xdc\x05\n\x18HiddenStateExtentArchive\x12*\n\x17hidden_state_extent_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x45\n\rhidden_states\x18\x02 \x03(\x0b\x32..TST.HiddenStateExtentArchive.RowOrColumnState\x12S\n\x17row_or_column_direction\x18\x03 \x02(\x0e\x32\x32.TST.HiddenStateExtentArchive.RowOrColumnDirection\x12/\n\x0fthreshold_value\x18\x05 \x03(\x0b\x32\x16.TSCE.CellValueArchive\x12\x34\n%needs_to_update_filter_set_for_import\x18\x06 \x01(\x08:\x05\x66\x61lse\x12\'\n\x14\x63ollapsed_group_uids\x18\x07 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\nfilter_set\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n\x19view_pivot_hidden_indexes\x18\t \x01(\x0b\x32\x15.TSCE.IndexSetArchive\x12\x39\n\x1aview_only_filtered_indexes\x18\n \x01(\x0b\x32\x15.TSCE.IndexSetArchive\x12/\n\x0eunique_indexes\x18\x0b \x03(\x0b\x32\x17.TST.UniqueIndexArchive\x1a_\n\x10RowOrColumnState\x12$\n\x11row_or_column_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x13\n\x0buser_hidden\x18\x02 \x01(\x08\x12\x10\n\x08\x66iltered\x18\x03 \x01(\x08\"=\n\x14RowOrColumnDirection\x12\x13\n\x0f\x43olumnDirection\x10\x00\x12\x10\n\x0cRowDirection\x10\x01\"\xbe\x01\n\x13HiddenStatesArchive\x12$\n\x11hidden_states_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x41\n\x1a\x63olumn_hidden_state_extent\x18\x02 \x02(\x0b\x32\x1d.TST.HiddenStateExtentArchive\x12>\n\x17row_hidden_state_extent\x18\x03 \x02(\x0b\x32\x1d.TST.HiddenStateExtentArchive\"i\n\x18HiddenStatesOwnerArchive\x12\x1c\n\towner_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12/\n\rhidden_states\x18\x02 \x03(\x0b\x32\x18.TST.HiddenStatesArchive\"\x90\x01\n\x1a\x45xpandCollapseStateArchive\x12!\n\x0euids_collapsed\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x12 \n\ruids_expanded\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12-\n\tdimension\x18\x03 \x01(\x0e\x32\x1a.TST.TableDimensionArchive\"l\n\x16TokenAttachmentArchive\x12*\n\x05super\x18\x01 \x02(\x0b\x32\x1b.TSWP.UIGraphicalAttachment\x12&\n\x0e\x65xpressionNode\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"8\n\x0e\x46ormulaArchive\x12&\n\x0e\x65xpressionTree\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"h\n\x15\x45xpressionNodeArchive\x12 \n\x08\x63hildren\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12\x16\n\x0b\x66irst_index\x18\x02 \x01(\x04:\x01\x30\x12\x15\n\nlast_index\x18\x03 \x01(\x04:\x01\x30\"N\n\x12\x42ooleanNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\r\n\x05value\x18\x02 \x02(\x08\"y\n\x11NumberNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x0e\n\x06number\x18\x02 \x01(\x01\x12\x13\n\x0b\x64\x65\x63imal_low\x18\x03 \x01(\x04\x12\x14\n\x0c\x64\x65\x63imal_high\x18\x04 \x01(\x04\"M\n\x11StringNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\r\n\x05value\x18\x02 \x02(\t\"f\n\x15IdentifierNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x12\n\nidentifier\x18\x02 \x01(\t\x12\x0e\n\x06symbol\x18\x03 \x01(\r\"\\\n\x10\x41rrayNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x0f\n\x07\x63olumns\x18\x02 \x01(\r\x12\x0c\n\x04rows\x18\x03 \x01(\r\"<\n\x0fListNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\"V\n\x13OperatorNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x14\n\x0coperatorChar\x18\x02 \x02(\r\"E\n\x1aPostfixOperatorNodeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.OperatorNodeArchive\"D\n\x19PrefixOperatorNodeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.OperatorNodeArchive\"t\n\x13\x46unctionNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x15\n\rfunctionIndex\x18\x02 \x02(\r\x12\x1b\n\x13invalidFunctionName\x18\x03 \x01(\t\"C\n\x16\x46unctionEndNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\"[\n\x0f\x44\x61teNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\r\n\x05value\x18\x02 \x02(\t\x12\x0e\n\x06\x66ormat\x18\x03 \x01(\t\"\xba\x03\n\x14ReferenceNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x33\n\x0erangeReference\x18\x02 \x01(\x0b\x32\x1b.TSCE.RangeReferenceArchive\x12\x16\n\x0epreserve_flags\x18\x03 \x02(\r\x12\x13\n\x0bhostTableID\x18\x04 \x01(\t\x12\x31\n\rhost_cell_ref\x18\n \x01(\x0b\x32\x1a.TSCE.CellReferenceArchive\x12\x1c\n\ttable_uid\x18\x05 \x01(\x0b\x32\t.TSP.UUID\x12-\n\x0erange_top_left\x18\x06 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12\x31\n\x12range_bottom_right\x18\x07 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12\x34\n\x0c\x63\x61tegory_ref\x18\x08 \x01(\x0b\x32\x1e.TSCE.CategoryReferenceArchive\x12,\n\x0euid_range_rect\x18\t \x01(\x0b\x32\x14.TSP.UUIDRectArchive\"\x88\x01\n\x13\x44urationNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x14\n\x0ctimeinterval\x18\x02 \x02(\x01\x12\x10\n\x08smallest\x18\x03 \x02(\r\x12\x0f\n\x07largest\x18\x04 \x02(\r\x12\r\n\x05style\x18\x05 \x02(\r\"\x87\x01\n\x1e\x41rgumentPlaceholderNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x15\n\rfunctionIndex\x18\x02 \x01(\r\x12\x15\n\rargumentIndex\x18\x03 \x01(\r\x12\x0c\n\x04mode\x18\x04 \x01(\r\"G\n\x1a\x45mptyExpressionNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\"\xc3\x01\n\x0eLetNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x1c\n\x14whitespace_after_let\x18\x02 \x01(\t\x12#\n\x1bwhitespace_after_identifier\x18\x03 \x01(\t\x12\x1f\n\x17whitespace_after_equals\x18\x04 \x01(\t\x12\"\n\x1awhitespace_after_delimiter\x18\x05 \x01(\t\":\n\rInNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\"d\n\x13VariableNodeArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TST.ExpressionNodeArchive\x12\x12\n\nidentifier\x18\x02 \x02(\t\x12\x0e\n\x06symbol\x18\x03 \x02(\r\"\xef\x01\n\x11LayoutHintArchive\x12\x0f\n\x07isValid\x18\x01 \x02(\x08\x12!\n\tcellRange\x18\x02 \x01(\x0b\x32\x0e.TST.CellRange\x12\x1b\n\x06hintID\x18\x03 \x01(\x0b\x32\x0b.TST.CellID\x12\x1e\n\x0bmaximumSize\x18\x04 \x02(\x0b\x32\t.TSP.Size\x12\x19\n\x11partitionPosition\x18\x05 \x02(\r\x12\x12\n\nhorizontal\x18\x06 \x02(\x08\x12 \n\reffectiveSize\x18\x07 \x01(\x0b\x32\t.TSP.Size\x12\x18\n\x10partitioningPass\x18\x08 \x01(\r\"\x92\x01\n CompletionTokenAttachmentArchive\x12*\n\x05super\x18\x01 \x02(\x0b\x32\x1b.TST.TokenAttachmentArchive\x12\x16\n\x0e\x63ompletionText\x18\x02 \x01(\t\x12\x15\n\rcaretPosition\x18\x03 \x01(\r\x12\x13\n\x0bprefixStart\x18\x04 \x01(\r\"\xad\x01\n\x1eHiddenStateFormulaOwnerArchive\x12$\n\x08owner_id\x18\x01 \x01(\x0b\x32\x12.TSP.CFUUIDArchive\x12/\n\x0fthreshold_value\x18\x02 \x03(\x0b\x32\x16.TSCE.CellValueArchive\x12\x34\n%needs_to_update_filter_set_for_import\x18\x03 \x01(\x08:\x05\x66\x61lse\"\xc0\x01\n\x13\x46ormulaStoreArchive\x12\x1a\n\x12next_formula_index\x18\x02 \x02(\r\x12;\n\x08\x66ormulas\x18\x03 \x03(\x0b\x32).TST.FormulaStoreArchive.FormulaStorePair\x1aP\n\x10\x46ormulaStorePair\x12\x15\n\rformula_index\x18\x01 \x02(\r\x12%\n\x07\x66ormula\x18\x02 \x02(\x0b\x32\x14.TSCE.FormulaArchive\"\xbd\x01\n\x15MergeOperationArchive\x12+\n\nmerge_type\x18\x01 \x02(\x0e\x32\x17.TST.MergeActionArchive\x12*\n\x0cmerge_ranges\x18\x02 \x03(\x0b\x32\x14.TSP.UUIDRectArchive\x12,\n\x0emerge_formulas\x18\x03 \x03(\x0b\x32\x14.TSCE.FormulaArchive\x12\x1d\n\x15merge_formula_indexes\x18\x04 \x03(\r\"j\n\x11MergeOwnerArchive\x12$\n\x08owner_id\x18\x01 \x02(\x0b\x32\x12.TSP.CFUUIDArchive\x12/\n\rformula_store\x18\x02 \x01(\x0b\x32\x18.TST.FormulaStoreArchive\"p\n\x17PencilAnnotationArchive\x12\"\n\ntable_info\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n\x19pencil_annotation_storage\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"\x9a\x01\n\x1cPencilAnnotationOwnerArchive\x12$\n\x08owner_id\x18\x01 \x02(\x0b\x32\x12.TSP.CFUUIDArchive\x12/\n\rformula_store\x18\x02 \x01(\x0b\x32\x18.TST.FormulaStoreArchive\x12#\n\x0b\x61nnotations\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\"\x83\x04\n\x12\x41\x63\x63umulatorArchive\x12\x12\n\nbool_count\x18\x01 \x01(\r\x12\x14\n\x0cnumber_count\x18\x02 \x01(\r\x12\x12\n\ndate_count\x18\x03 \x01(\r\x12\x16\n\x0e\x64uration_count\x18\x04 \x01(\r\x12\x14\n\x0cstring_count\x18\x05 \x01(\r\x12)\n\tmin_value\x18\x06 \x02(\x0b\x32\x16.TSCE.CellValueArchive\x12)\n\tmax_value\x18\x07 \x02(\x0b\x32\x16.TSCE.CellValueArchive\x12\x32\n\x12number_total_value\x18\x08 \x02(\x0b\x32\x16.TSCE.CellValueArchive\x12/\n\x0f\x66irst_date_seen\x18\t \x01(\x0b\x32\x16.TSCE.CellValueArchive\x12!\n\x19total_secs_since_ref_date\x18\n \x01(\x01\x12\x13\n\x0bsecs_to_add\x18\x0b \x01(\x01\x12\x17\n\x0f\x62ool_true_count\x18\x0c \x01(\r\x12\x13\n\x0b\x65rror_count\x18\r \x01(\r\x12\x17\n\x0fis_circular_ref\x18\x0e \x01(\x08\x12-\n\rproduct_value\x18\x0f \x01(\x0b\x32\x16.TSCE.CellValueArchive\x12\x18\n\x10no_content_count\x18\x10 \x01(\r\"\xa2\x01\n\x12GroupColumnArchive\x12\x1d\n\ncolumn_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x15\n\rgrouping_type\x18\x02 \x02(\r\x12.\n\x10grouping_functor\x18\x03 \x01(\x0b\x32\x14.TSCE.FunctorArchive\x12&\n\x13grouping_column_uid\x18\x04 \x01(\x0b\x32\t.TSP.UUID\"G\n\x16GroupColumnListArchive\x12-\n\x0cgroup_column\x18\x01 \x03(\x0b\x32\x17.TST.GroupColumnArchive\"\xca\x01\n\x16\x43olumnAggregateArchive\x12\x1d\n\ncolumn_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\r\n\x05level\x18\x02 \x02(\r\x12\x10\n\x08\x61gg_type\x18\x03 \x02(\r\x12\x14\n\x0cshow_as_type\x18\x04 \x01(\r\x12\'\n\x14\x63olumn_aggregate_uid\x18\x05 \x01(\x0b\x32\t.TSP.UUID\x12\x31\n\x1erunning_total_group_column_uid\x18\x06 \x01(\x0b\x32\t.TSP.UUID\"M\n\x1a\x43olumnAggregateListArchive\x12/\n\naggregates\x18\x01 \x03(\x0b\x32\x1b.TST.ColumnAggregateArchive\"\xeb\x0e\n\x0eGroupByArchive\x12\x1f\n\x0cgroup_by_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12-\n\x0cgroup_column\x18\x02 \x03(\x0b\x32\x17.TST.GroupColumnArchive\x12=\n\x0fgroup_node_root\x18\x03 \x02(\x0b\x32$.TST.GroupByArchive.GroupNodeArchive\x12\x39\n\naggregator\x18\x04 \x03(\x0b\x32%.TST.GroupByArchive.AggregatorArchive\x12\x34\n\x0f\x63olumn_agg_type\x18\x05 \x03(\x0b\x32\x1b.TST.ColumnAggregateArchive\x12\x12\n\nis_enabled\x18\x06 \x02(\x08\x12\x45\n indirect_agg_type_change_formula\x18\x07 \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12=\n\x18grouping_columns_formula\x18\x08 \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12?\n\x1a\x61ggs_in_group_root_formula\x18\t \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12\x44\n\x1fgrouping_column_headers_formula\x18\n \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12\x41\n\x1c\x63olumn_order_changed_formula\x18\x0b \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12>\n\x19row_order_changed_formula\x18\x0c \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12N\n)row_order_changed_ignoring_recalc_formula\x18\r \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12\x16\n\x0bowner_index\x18\x0e \x01(\x05:\x01\x38\x12\x32\n\x0erow_uid_lookup\x18\x0f \x01(\x0b\x32\x1a.TSCE.UidLookupListArchive\x12\x42\n\x1dhidden_states_changed_formula\x18\x10 \x01(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x1a\x9f\x01\n\x0e\x41ggNodeArchive\x12\x32\n\rformula_coord\x18\x01 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12&\n\x05\x61\x63\x63um\x18\x02 \x01(\x0b\x32\x17.TST.AccumulatorArchive\x12\x31\n\x05\x63hild\x18\x03 \x03(\x0b\x32\".TST.GroupByArchive.AggNodeArchive\x1a\xc8\x05\n\x10GroupNodeArchive\x12\x1c\n\tgroup_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x33\n\x05\x63hild\x18\x03 \x03(\x0b\x32$.TST.GroupByArchive.GroupNodeArchive\x12\x1a\n\x07row_uid\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12\x37\n\x12\x61gg_formula_coords\x18\x05 \x03(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12Q\n\x0e\x66ormat_manager\x18\x06 \x01(\x0b\x32\x39.TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive\x12\x30\n\x10group_cell_value\x18\x07 \x01(\x0b\x32\x16.TSCE.CellValueArchive\x12*\n\x0brow_indexes\x18\x08 \x01(\x0b\x32\x15.TSCE.IndexSetArchive\x12.\n\x0frow_lookup_uids\x18\t \x01(\x0b\x32\x15.TSCE.IndexSetArchive\x1a\xaa\x02\n\x14\x46ormatManagerArchive\x12*\n\ncell_value\x18\x01 \x01(\x0b\x32\x16.TSCE.CellValueArchive\x12)\n\x07\x66ormats\x18\x02 \x03(\x0b\x32\x18.TSK.FormatStructArchive\x12Y\n\x08row_sets\x18\x03 \x03(\x0b\x32G.TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive\x12\x32\n\x13row_uid_lookup_sets\x18\x04 \x03(\x0b\x32\x15.TSCE.IndexSetArchive\x1a,\n\rRowSetArchive\x12\x1b\n\x08row_uids\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x1ah\n\x11\x41ggregatorArchive\x12\x1d\n\ncolumn_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x34\n\x08\x61gg_node\x18\x02 \x01(\x0b\x32\".TST.GroupByArchive.AggNodeArchive\"[\n\x14\x43\x61tegoryOwnerArchive\x12\x1c\n\towner_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12%\n\x08group_by\x18\x02 \x03(\x0b\x32\x13.TST.GroupByArchive\";\n\x17\x43\x61tegoryOwnerRefArchive\x12 \n\x08group_by\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\"v\n$PivotGroupingColumnOptionsMapArchive\x12\x17\n\x04uids\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x12\r\n\x05\x66lags\x18\x02 \x03(\r\x12&\n\x13\x61ggregate_rule_uids\x18\x04 \x03(\x0b\x32\t.TSP.UUID\"\xa4\x05\n\x11PivotOwnerArchive\x12\"\n\x0fpivot_owner_uid\x18\x02 \x01(\x0b\x32\t.TSP.UUID\x12>\n\x19grouping_columns_for_rows\x18\x03 \x01(\x0b\x32\x1b.TST.GroupColumnListArchive\x12\x41\n\x1cgrouping_columns_for_columns\x18\x04 \x01(\x0b\x32\x1b.TST.GroupColumnListArchive\x12:\n\x11\x61ggregate_columns\x18\x05 \x01(\x0b\x32\x1f.TST.ColumnAggregateListArchive\x12\x1c\n\x14\x66lattening_dimension\x18\x06 \x01(\x05\x12\x16\n\x0eis_empty_pivot\x18\x07 \x01(\x08\x12#\n\x10source_table_uid\x18\x08 \x01(\x0b\x32\t.TSP.UUID\x12\x19\n\x11refresh_timestamp\x18\t \x01(\x01\x12,\n\x14grpg_col_options_map\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x15hide_grand_total_rows\x18\x0b \x01(\x08\x12\x19\n\x11source_table_name\x18\x0c \x01(\t\x12 \n\x18hide_grand_total_columns\x18\r \x01(\x08\x12/\n\rformula_store\x18\x11 \x01(\x0b\x32\x18.TST.FormulaStoreArchive\x12\x1e\n\x0brefresh_uid\x18\x12 \x01(\x0b\x32\t.TSP.UUID\x12-\n\x1arow_column_rule_change_uid\x18\x13 \x01(\x0b\x32\t.TSP.UUID\x12,\n\x19\x61ggregate_rule_change_uid\x18\x14 \x01(\x0b\x32\t.TSP.UUID\"q\n\x16RichTextPayloadArchive\x12\x1f\n\x07storage\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\x19\n\x05range\x18\x02 \x01(\x0b\x32\n.TSP.Range\x12\x1b\n\x06\x63\x65llid\x18\x03 \x02(\x0b\x32\x0b.TST.CellID\"Q\n#FormulaEqualsTokenAttachmentArchive\x12*\n\x05super\x18\x01 \x02(\x0b\x32\x1b.TSWP.UIGraphicalAttachment\"\x9d\x05\n\x0f\x43\x65llFillStandIn\x12\x1e\n\x04\x66ill\x18\x01 \x02(\x0b\x32\x10.TSD.FillArchive\x12\x15\n\rtype_is_mixed\x18\x02 \x01(\x08\x12\x1f\n\x17\x63olor_has_been_modified\x18\x03 \x01(\x08\x12\x16\n\x0e\x63olor_is_mixed\x18\x04 \x01(\x08\x12%\n\x1d\x66irst_color_has_been_modified\x18\x05 \x01(\x08\x12\x1c\n\x14\x66irst_color_is_mixed\x18\x06 \x01(\x08\x12$\n\x1clast_color_has_been_modified\x18\x07 \x01(\x08\x12\x1b\n\x13last_color_is_mixed\x18\x08 \x01(\x08\x12\'\n\x1fgradient_type_has_been_modified\x18\t \x01(\x08\x12\x1e\n\x16gradient_type_is_mixed\x18\n \x01(\x08\x12(\n gradient_angle_has_been_modified\x18\x0b \x01(\x08\x12\x1f\n\x17gradient_angle_is_mixed\x18\x0c \x01(\x08\x12$\n\x1cimage_data_has_been_modified\x18\r \x01(\x08\x12\x1b\n\x13image_data_is_mixed\x18\x0e \x01(\x08\x12$\n\x1ctint_color_has_been_modified\x18\x0f \x01(\x08\x12\x1b\n\x13tint_color_is_mixed\x18\x10 \x01(\x08\x12\x1f\n\x17scale_has_been_modified\x18\x11 \x01(\x08\x12\x16\n\x0escale_is_mixed\x18\x12 \x01(\x08\x12#\n\x1btechnique_has_been_modified\x18\x13 \x01(\x08\x12\x1a\n\x12technique_is_mixed\x18\x14 \x01(\x08\"^\n\x17\x46ormulaSelectionArchive\x12%\n\x05super\x18\x01 \x02(\x0b\x32\x16.TSWP.SelectionArchive\x12\x1c\n\x14\x61\x63tiveTokenCharIndex\x18\x02 \x01(\r\"\xa7\x02\n\x11\x43\x65llBorderArchive\x12&\n\ntop_stroke\x18\x01 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x18\n\x10top_stroke_order\x18\x02 \x01(\x05\x12(\n\x0cright_stroke\x18\x03 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x1a\n\x12right_stroke_order\x18\x04 \x01(\x05\x12)\n\rbottom_stroke\x18\x05 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x1b\n\x13\x62ottom_stroke_order\x18\x06 \x01(\x05\x12\'\n\x0bleft_stroke\x18\x07 \x01(\x0b\x32\x12.TSD.StrokeArchive\x12\x19\n\x11left_stroke_order\x18\x08 \x01(\x05\"\xd0\x01\n!DefaultCellStylesContainerArchive\x12+\n\x13table_style_network\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\x1b\n\x08row_uids\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x1e\n\x0b\x63olumn_uids\x18\x03 \x03(\x0b\x32\t.TSP.UUID\x12\x11\n\trow_types\x18\x04 \x03(\r\x12\x14\n\x0c\x63olumn_types\x18\x05 \x03(\r\x12\x18\n\x10is_a_pivot_table\x18\x06 \x01(\x08\"\x95\x03\n\x19MultiTableRemapperArchive\x12?\n\x0fmapping_purpose\x18\x01 \x02(\x0e\x32&.TST.MultiTableRemapperArchive.Purpose\x12\x1f\n\x17should_steal_references\x18\x02 \x02(\x08\x12\x1d\n\x15\x63\x61n_reuse_table_names\x18\x03 \x02(\x08\x12\x35\n\x10owner_uid_mapper\x18\x04 \x03(\x0b\x32\x1b.TSCE.OwnerUIDMapperArchive\x12\x36\n\x19\x62\x61\x63king_tables_for_charts\x18\x05 \x02(\x0b\x32\x13.TSP.UUIDMapArchive\x12\x1c\n\x14\x63ross_document_paste\x18\x06 \x02(\x08\x12\x1b\n\x13nested_inner_mapper\x18\x07 \x02(\x08\"M\n\x07Purpose\x12\x0b\n\x07\x44\x45\x46\x41ULT\x10\x00\x12\x0c\n\x08GROUPING\x10\x01\x12\'\n#PAGES_SECTION_DUPLICATION_NONCOLLAB\x10\x02\"\xfc\x04\n\x1b\x43hangePropagationMapWrapper\x12\x1c\n\x14replacement_behavior\x18\x01 \x02(\x05\x12\x30\n\x18style_replace_prototypes\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1astyle_replace_replacements\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12+\n\x13style_modify_styles\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1astyle_modify_old_prop_maps\x18\x05 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1astyle_modify_new_prop_maps\x18\x06 \x03(\x0b\x32\x0e.TSP.Reference\x12/\n\x17style_delete_prototypes\x18\x07 \x03(\x0b\x32\x0e.TSP.Reference\x12\x31\n\x19style_delete_replacements\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\x12\x36\n\x1etable_preset_replace_prototype\x18\t \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n table_preset_replace_replacement\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12\x35\n\x1dtable_preset_delete_prototype\x18\x0b \x01(\x0b\x32\x0e.TSP.Reference\x12\x37\n\x1ftable_preset_delete_replacement\x18\x0c \x01(\x0b\x32\x0e.TSP.Reference\"\xea\x01\n\x18SummaryCellVendorArchive\x12\"\n\ntable_info\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12?\n\x07\x65ntries\x18\x02 \x03(\x0b\x32..TST.SummaryCellVendorArchive.SummaryCellEntry\x1ai\n\x10SummaryCellEntry\x12\x1e\n\x0bwildcardUID\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x1c\n\tcolumnUID\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12\x17\n\x04\x63\x65ll\x18\x03 \x02(\x0b\x32\t.TST.Cell\"[\n\x14\x43\x61tegoryOrderArchive\x12\"\n\ntable_info\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x07uid_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\"4\n\x11PivotOrderArchive\x12\x1f\n\x07uid_map\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"\xb6\x02\n\x18HeaderNameMgrTileArchive\x12\x16\n\x0e\x66irst_fragment\x18\x01 \x02(\t\x12\x15\n\rlast_fragment\x18\x02 \x02(\t\x12L\n\x11name_frag_entries\x18\x03 \x03(\x0b\x32\x31.TST.HeaderNameMgrTileArchive.NameFragmentArchive\x1a\x9c\x01\n\x13NameFragmentArchive\x12\x15\n\rname_fragment\x18\x01 \x02(\t\x12\x33\n\x0ename_precedent\x18\x02 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12\x39\n\x15uses_of_name_fragment\x18\x03 \x01(\x0b\x32\x1a.TSCE.UidCellRefSetArchive\"\xe2\x03\n\x14HeaderNameMgrArchive\x12\x1c\n\towner_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12 \n\rnrm_owner_uid\x18\x02 \x01(\x0b\x32\t.TSP.UUID\x12=\n\nper_tables\x18\x03 \x03(\x0b\x32).TST.HeaderNameMgrArchive.PerTableArchive\x12\'\n\x0fname_frag_tiles\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x1a\xa1\x02\n\x0fPerTableArchive\x12\x1c\n\ttable_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x38\n\x13per_table_precedent\x18\x02 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\x12\x12\n\nis_deleted\x18\x03 \x01(\x08\x12\"\n\x0fheader_row_uids\x18\x05 \x03(\x0b\x32\t.TSP.UUID\x12%\n\x12header_column_uids\x18\x06 \x03(\x0b\x32\t.TSP.UUID\x12)\n\x16update_header_row_uids\x18\x07 \x03(\x0b\x32\t.TSP.UUID\x12,\n\x19update_header_column_uids\x18\x08 \x03(\x0b\x32\t.TSP.UUID\"K\n\x1cWidthHeightCacheFittingEntry\x12\x15\n\rfitting_index\x18\x01 \x01(\r\x12\x14\n\x0c\x66itting_size\x18\x02 \x01(\x02\"j\n\x10WidthHeightCache\x12?\n\x14rows_fitting_entries\x18\x01 \x03(\x0b\x32!.TST.WidthHeightCacheFittingEntry\x12\x15\n\rcolumns_count\x18\x03 \x01(\r\"H\n\x13LayoutEngineArchive\x12\x31\n\x12width_height_cache\x18\x01 \x01(\x0b\x32\x15.TST.WidthHeightCache*\xd7\x01\n\x08\x43\x65llType\x12\x13\n\x0fgenericCellType\x10\x00\x12\x10\n\x0cspanCellType\x10\x01\x12\x12\n\x0enumberCellType\x10\x02\x12\x10\n\x0ctextCellType\x10\x03\x12\x13\n\x0f\x66ormulaCellType\x10\x04\x12\x10\n\x0c\x64\x61teCellType\x10\x05\x12\x10\n\x0c\x62oolCellType\x10\x06\x12\x14\n\x10\x64urationCellType\x10\x07\x12\x18\n\x14\x66ormulaErrorCellType\x10\x08\x12\x15\n\x11\x61utomaticCellType\x10\t*\x86\x02\n\rCellValueType\x12\x16\n\x12\x65mptyCellValueType\x10\x00\x12\x17\n\x13numberCellValueType\x10\x01\x12\x17\n\x13stringCellValueType\x10\x02\x12\x19\n\x15providedCellValueType\x10\x03\x12\x15\n\x11\x64\x61teCellValueType\x10\x04\x12\x15\n\x11\x62oolCellValueType\x10\x05\x12\x19\n\x15\x64urationCellValueType\x10\x06\x12\x16\n\x12\x65rrorCellValueType\x10\x07\x12\x14\n\x10richTextCellType\x10\x08\x12\x19\n\x15\x63urrencyCellValueType\x10\t*]\n\x15TableDimensionArchive\x12\x1d\n\x10\x64imensionNeither\x10\xff\xff\xff\xff\xff\xff\xff\xff\xff\x01\x12\x10\n\x0c\x64imensionRow\x10\x00\x12\x13\n\x0f\x64imensionColumn\x10\x01*\x84\x02\n\x14SelectionTypeArchive\x12\x1f\n\x1b\x64\x65precatedCellSelectionType\x10\x00\x12\x14\n\x10rowSelectionType\x10\x01\x12\x17\n\x13\x63olumnSelectionType\x10\x02\x12&\n\"deprecatedCellEditingSelectionType\x10\x03\x12$\n deprecatedTableNameSelectionType\x10\x04\x12 \n\x1c\x64\x65precatedTableSelectionType\x10\x05\x12\x17\n\x13regionSelectionType\x10\x06\x12\x13\n\x0fnoSelectionType\x10\x07*y\n\x14\x46illDirectionArchive\x12\x17\n\x13kTSTFillDownArchive\x10\x01\x12\x15\n\x11kTSTFillUpArchive\x10\x02\x12\x18\n\x14kTSTFillRightArchive\x10\x03\x12\x17\n\x13kTSTFillLeftArchive\x10\x04*n\n\x12MergeActionArchive\x12\x15\n\x11mergeActionInsert\x10\x01\x12\x15\n\x11mergeActionRemove\x10\x02\x12\x15\n\x11mergeActionShrink\x10\x03\x12\x13\n\x0fmergeActionGrow\x10\x04*G\n\x15HideShowActionArchive\x12\x16\n\x12hideShowActionHide\x10\x00\x12\x16\n\x12hideShowActionShow\x10\x01:[\n\x12import_warning_set\x12 .TSS.CommandPropertyEntryArchive\x18\xf4\x03 \x01(\x0b\x32\x1c.TST.ImportWarningSetArchive:[\n\x10\x66ormat_and_value\x12 .TSS.CommandPropertyEntryArchive\x18\xf5\x03 \x01(\x0b\x32\x1e.TST.CellFormatAndValueArchive:N\n\x0b\x63\x65ll_border\x12 .TSS.CommandPropertyEntryArchive\x18\xf7\x03 \x01(\x0b\x32\x16.TST.CellBorderArchive:]\n\x0f\x63omment_storage\x12 .TSS.CommandPropertyEntryArchive\x18\xf8\x03 \x01(\x0b\x32!.TST.CommentStorageWrapperArchive:J\n\tcell_spec\x12 .TSS.CommandPropertyEntryArchive\x18\xf9\x03 \x01(\x0b\x32\x14.TST.CellSpecArchive'
   ,
   dependencies=[TSPMessages__pb2.DESCRIPTOR,TSDArchives__pb2.DESCRIPTOR,TSKArchives__pb2.DESCRIPTOR,TSSArchives__pb2.DESCRIPTOR,TSCEArchives__pb2.DESCRIPTOR,TSWPArchives__pb2.DESCRIPTOR,TSTStylePropertyArchiving__pb2.DESCRIPTOR,])
 
@@ -91,8 +91,8 @@ _CELLTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=34176,
-  serialized_end=34391,
+  serialized_start=37709,
+  serialized_end=37924,
 )
 _sym_db.RegisterEnumDescriptor(_CELLTYPE)
 
@@ -157,8 +157,8 @@ _CELLVALUETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=34394,
-  serialized_end=34656,
+  serialized_start=37927,
+  serialized_end=38189,
 )
 _sym_db.RegisterEnumDescriptor(_CELLVALUETYPE)
 
@@ -171,20 +171,25 @@ _TABLEDIMENSIONARCHIVE = _descriptor.EnumDescriptor(
   create_key=_descriptor._internal_create_key,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='dimensionRow', index=0, number=0,
+      name='dimensionNeither', index=0, number=-1,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
     _descriptor.EnumValueDescriptor(
-      name='dimensionColumn', index=1, number=1,
+      name='dimensionRow', index=1, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='dimensionColumn', index=2, number=1,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=34658,
-  serialized_end=34720,
+  serialized_start=38191,
+  serialized_end=38284,
 )
 _sym_db.RegisterEnumDescriptor(_TABLEDIMENSIONARCHIVE)
 
@@ -239,8 +244,8 @@ _SELECTIONTYPEARCHIVE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=34723,
-  serialized_end=34983,
+  serialized_start=38287,
+  serialized_end=38547,
 )
 _sym_db.RegisterEnumDescriptor(_SELECTIONTYPEARCHIVE)
 
@@ -275,8 +280,8 @@ _FILLDIRECTIONARCHIVE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=34985,
-  serialized_end=35106,
+  serialized_start=38549,
+  serialized_end=38670,
 )
 _sym_db.RegisterEnumDescriptor(_FILLDIRECTIONARCHIVE)
 
@@ -311,8 +316,8 @@ _MERGEACTIONARCHIVE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=35108,
-  serialized_end=35218,
+  serialized_start=38672,
+  serialized_end=38782,
 )
 _sym_db.RegisterEnumDescriptor(_MERGEACTIONARCHIVE)
 
@@ -337,129 +342,12 @@ _HIDESHOWACTIONARCHIVE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=35220,
-  serialized_end=35291,
+  serialized_start=38784,
+  serialized_end=38855,
 )
 _sym_db.RegisterEnumDescriptor(_HIDESHOWACTIONARCHIVE)
 
 HideShowActionArchive = enum_type_wrapper.EnumTypeWrapper(_HIDESHOWACTIONARCHIVE)
-_GROUPINGTYPE = _descriptor.EnumDescriptor(
-  name='GroupingType',
-  full_name='TST.GroupingType',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='UNIQUE', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='YEAR', index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='MONTH', index=2, number=2,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DAYOFWEEK', index=3, number=3,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DAY', index=4, number=4,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='YEARWEEK', index=5, number=5,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='YEARQUARTER', index=6, number=6,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ROUND_0', index=7, number=10,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=35293,
-  serialized_end=35408,
-)
-_sym_db.RegisterEnumDescriptor(_GROUPINGTYPE)
-
-GroupingType = enum_type_wrapper.EnumTypeWrapper(_GROUPINGTYPE)
-_AGGREGATETYPE = _descriptor.EnumDescriptor(
-  name='AggregateType',
-  full_name='TST.AggregateType',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='NONE', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='COUNT', index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='TOTAL', index=2, number=2,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='AVERAGE', index=3, number=3,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='MIN', index=4, number=4,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='MAX', index=5, number=5,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='GROUPVALUE', index=6, number=9,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='BODYROWS', index=7, number=10,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='INDIRECT', index=8, number=11,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=35410,
-  serialized_end=35532,
-)
-_sym_db.RegisterEnumDescriptor(_AGGREGATETYPE)
-
-AggregateType = enum_type_wrapper.EnumTypeWrapper(_AGGREGATETYPE)
 genericCellType = 0
 spanCellType = 1
 numberCellType = 2
@@ -480,6 +368,7 @@ durationCellValueType = 6
 errorCellValueType = 7
 richTextCellType = 8
 currencyCellValueType = 9
+dimensionNeither = -1
 dimensionRow = 0
 dimensionColumn = 1
 deprecatedCellSelectionType = 0
@@ -500,23 +389,6 @@ mergeActionShrink = 3
 mergeActionGrow = 4
 hideShowActionHide = 0
 hideShowActionShow = 1
-UNIQUE = 0
-YEAR = 1
-MONTH = 2
-DAYOFWEEK = 3
-DAY = 4
-YEARWEEK = 5
-YEARQUARTER = 6
-ROUND_0 = 10
-NONE = 0
-COUNT = 1
-TOTAL = 2
-AVERAGE = 3
-MIN = 4
-MAX = 5
-GROUPVALUE = 9
-BODYROWS = 10
-INDIRECT = 11
 
 IMPORT_WARNING_SET_FIELD_NUMBER = 500
 import_warning_set = _descriptor.FieldDescriptor(
@@ -764,6 +636,31 @@ _TABLEDATALIST_LISTTYPE = _descriptor.EnumDescriptor(
 )
 _sym_db.RegisterEnumDescriptor(_TABLEDATALIST_LISTTYPE)
 
+_TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE_DIRECTION = _descriptor.EnumDescriptor(
+  name='Direction',
+  full_name='TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive.Direction',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='ascending', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='descending', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=8999,
+  serialized_end=9041,
+)
+_sym_db.RegisterEnumDescriptor(_TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE_DIRECTION)
+
 _TABLESORTORDERARCHIVE_SORTRULEARCHIVE_DIRECTION = _descriptor.EnumDescriptor(
   name='Direction',
   full_name='TST.TableSortOrderArchive.SortRuleArchive.Direction',
@@ -784,8 +681,8 @@ _TABLESORTORDERARCHIVE_SORTRULEARCHIVE_DIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=8661,
-  serialized_end=8703,
+  serialized_start=8999,
+  serialized_end=9041,
 )
 _sym_db.RegisterEnumDescriptor(_TABLESORTORDERARCHIVE_SORTRULEARCHIVE_DIRECTION)
 
@@ -809,8 +706,8 @@ _TABLESORTORDERARCHIVE_SORTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=8705,
-  serialized_end=8748,
+  serialized_start=9331,
+  serialized_end=9374,
 )
 _sym_db.RegisterEnumDescriptor(_TABLESORTORDERARCHIVE_SORTTYPE)
 
@@ -834,8 +731,8 @@ _TABLESORTORDERUIDARCHIVE_SORTRULEARCHIVE_DIRECTION = _descriptor.EnumDescriptor
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=8661,
-  serialized_end=8703,
+  serialized_start=8999,
+  serialized_end=9041,
 )
 _sym_db.RegisterEnumDescriptor(_TABLESORTORDERUIDARCHIVE_SORTRULEARCHIVE_DIRECTION)
 
@@ -859,340 +756,10 @@ _TABLESORTORDERUIDARCHIVE_SORTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=8705,
-  serialized_end=8748,
+  serialized_start=9331,
+  serialized_end=9374,
 )
 _sym_db.RegisterEnumDescriptor(_TABLESORTORDERUIDARCHIVE_SORTTYPE)
-
-_FORMULAPREDICATEARCHIVE_FORMULAPREDICATETYPE = _descriptor.EnumDescriptor(
-  name='FormulaPredicateType',
-  full_name='TST.FormulaPredicateArchive.FormulaPredicateType',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='PredNone', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='TextStartsWith', index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='TextEndsWith', index=2, number=2,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='TextContains', index=3, number=3,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='TextDoesNotContain', index=4, number=4,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueEqual', index=5, number=5,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueNotEqual', index=6, number=6,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueGreaterThan', index=7, number=7,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueGreaterThanOrEqual', index=8, number=8,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueLessThan', index=9, number=9,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueLessThanOrEqual', index=10, number=10,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueAboveAverage', index=11, number=11,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueBelowAverage', index=12, number=12,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueBetween', index=13, number=13,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Formula', index=14, number=14,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Duplicates', index=15, number=15,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Uniques', index=16, number=16,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateIsToday', index=17, number=17,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateIsYesterday', index=18, number=18,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateIsTomorrow', index=19, number=19,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateIsTheDate', index=20, number=20,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateBeforeTheDate', index=21, number=21,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateAfterTheDate', index=22, number=22,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateIsInTheRange', index=23, number=23,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateInTheNext', index=24, number=24,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateInTheLast', index=25, number=25,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateIsExactly', index=26, number=26,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateBeforeRelative', index=27, number=27,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateAfterRelative', index=28, number=28,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateBetweenRelative', index=29, number=29,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueTop', index=30, number=30,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueBottom', index=31, number=31,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ValueNotBetween', index=32, number=32,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DateInThis', index=33, number=33,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='IsBlank', index=34, number=34,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='IsNotBlank', index=35, number=35,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='TextIs', index=36, number=36,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='TextIsNot', index=37, number=37,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationEqual', index=38, number=38,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationNotEqual', index=39, number=39,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationGreaterThan', index=40, number=40,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationGreaterThanOrEqual', index=41, number=41,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationLessThan', index=42, number=42,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationLessThanOrEqual', index=43, number=43,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationBetween', index=44, number=44,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationNotBetween', index=45, number=45,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationAboveAverage', index=46, number=46,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationBelowAverage', index=47, number=47,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationTop', index=48, number=48,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='DurationBottom', index=49, number=49,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=20819,
-  serialized_end=21852,
-)
-_sym_db.RegisterEnumDescriptor(_FORMULAPREDICATEARCHIVE_FORMULAPREDICATETYPE)
-
-_FORMULAPREDICATEARCHIVE_QUALIFIERTYPE = _descriptor.EnumDescriptor(
-  name='QualifierType',
-  full_name='TST.FormulaPredicateArchive.QualifierType',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='QualNone', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Days', index=1, number=2,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Weeks', index=2, number=3,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Months', index=3, number=4,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Years', index=4, number=5,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Ago', index=5, number=6,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='FromNow', index=6, number=7,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Quarters', index=7, number=8,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Percent', index=8, number=9,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Values', index=9, number=10,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=21855,
-  serialized_end=21989,
-)
-_sym_db.RegisterEnumDescriptor(_FORMULAPREDICATEARCHIVE_QUALIFIERTYPE)
 
 _FILTERSETARCHIVE_FILTERSETTYPE = _descriptor.EnumDescriptor(
   name='FilterSetType',
@@ -1214,8 +781,8 @@ _FILTERSETARCHIVE_FILTERSETTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=22522,
-  serialized_end=22595,
+  serialized_start=24575,
+  serialized_end=24648,
 )
 _sym_db.RegisterEnumDescriptor(_FILTERSETARCHIVE_FILTERSETTYPE)
 
@@ -1239,8 +806,8 @@ _HIDDENSTATEEXTENTARCHIVE_ROWORCOLUMNDIRECTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=23067,
-  serialized_end=23128,
+  serialized_start=25527,
+  serialized_end=25588,
 )
 _sym_db.RegisterEnumDescriptor(_HIDDENSTATEEXTENTARCHIVE_ROWORCOLUMNDIRECTION)
 
@@ -1269,8 +836,8 @@ _MULTITABLEREMAPPERARCHIVE_PURPOSE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=32070,
-  serialized_end=32147,
+  serialized_start=35549,
+  serialized_end=35626,
 )
 _sym_db.RegisterEnumDescriptor(_MULTITABLEREMAPPERARCHIVE_PURPOSE)
 
@@ -2942,6 +2509,27 @@ _TABLEINFOARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_data_model', full_name='TST.TableInfoArchive.pivot_data_model', index=12,
+      number=15, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='is_a_pivot_table', full_name='TST.TableInfoArchive.is_a_pivot_table', index=13,
+      number=16, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_order', full_name='TST.TableInfoArchive.pivot_order', index=14,
+      number=17, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -2955,7 +2543,7 @@ _TABLEINFOARCHIVE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=6204,
-  serialized_end=6715,
+  serialized_end=6820,
 )
 
 
@@ -2993,8 +2581,8 @@ _CATEGORYINFOARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6717,
-  serialized_end=6811,
+  serialized_start=6822,
+  serialized_end=6916,
 )
 
 
@@ -3032,8 +2620,8 @@ _WPTABLEINFOARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6813,
-  serialized_end=6904,
+  serialized_start=6918,
+  serialized_end=7009,
 )
 
 
@@ -3046,226 +2634,247 @@ _TABLESTYLENETWORKARCHIVE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='table_style', full_name='TST.TableStyleNetworkArchive.table_style', index=0,
-      number=9, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='body_text_style', full_name='TST.TableStyleNetworkArchive.body_text_style', index=1,
+      name='body_text_style', full_name='TST.TableStyleNetworkArchive.body_text_style', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='header_row_text_style', full_name='TST.TableStyleNetworkArchive.header_row_text_style', index=2,
+      name='header_row_text_style', full_name='TST.TableStyleNetworkArchive.header_row_text_style', index=1,
       number=2, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='header_column_text_style', full_name='TST.TableStyleNetworkArchive.header_column_text_style', index=3,
+      name='header_column_text_style', full_name='TST.TableStyleNetworkArchive.header_column_text_style', index=2,
       number=3, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='footer_row_text_style', full_name='TST.TableStyleNetworkArchive.footer_row_text_style', index=4,
+      name='footer_row_text_style', full_name='TST.TableStyleNetworkArchive.footer_row_text_style', index=3,
       number=4, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='category_level_1_text_style', full_name='TST.TableStyleNetworkArchive.category_level_1_text_style', index=5,
-      number=13, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='category_level_2_text_style', full_name='TST.TableStyleNetworkArchive.category_level_2_text_style', index=6,
-      number=14, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='category_level_3_text_style', full_name='TST.TableStyleNetworkArchive.category_level_3_text_style', index=7,
-      number=15, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='category_level_4_text_style', full_name='TST.TableStyleNetworkArchive.category_level_4_text_style', index=8,
-      number=16, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='category_level_5_text_style', full_name='TST.TableStyleNetworkArchive.category_level_5_text_style', index=9,
-      number=17, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_1_text_style', full_name='TST.TableStyleNetworkArchive.label_level_1_text_style', index=10,
-      number=23, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_2_text_style', full_name='TST.TableStyleNetworkArchive.label_level_2_text_style', index=11,
-      number=24, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_3_text_style', full_name='TST.TableStyleNetworkArchive.label_level_3_text_style', index=12,
-      number=25, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_4_text_style', full_name='TST.TableStyleNetworkArchive.label_level_4_text_style', index=13,
-      number=26, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_5_text_style', full_name='TST.TableStyleNetworkArchive.label_level_5_text_style', index=14,
-      number=27, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='body_cell_style', full_name='TST.TableStyleNetworkArchive.body_cell_style', index=15,
+      name='body_cell_style', full_name='TST.TableStyleNetworkArchive.body_cell_style', index=4,
       number=5, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='header_row_style', full_name='TST.TableStyleNetworkArchive.header_row_style', index=16,
+      name='header_row_style', full_name='TST.TableStyleNetworkArchive.header_row_style', index=5,
       number=6, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='header_column_style', full_name='TST.TableStyleNetworkArchive.header_column_style', index=17,
+      name='header_column_style', full_name='TST.TableStyleNetworkArchive.header_column_style', index=6,
       number=7, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='footer_row_style', full_name='TST.TableStyleNetworkArchive.footer_row_style', index=18,
+      name='footer_row_style', full_name='TST.TableStyleNetworkArchive.footer_row_style', index=7,
       number=8, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='category_level_1_style', full_name='TST.TableStyleNetworkArchive.category_level_1_style', index=19,
-      number=18, type=11, cpp_type=10, label=1,
+      name='table_style', full_name='TST.TableStyleNetworkArchive.table_style', index=8,
+      number=9, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='category_level_2_style', full_name='TST.TableStyleNetworkArchive.category_level_2_style', index=20,
-      number=19, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='category_level_3_style', full_name='TST.TableStyleNetworkArchive.category_level_3_style', index=21,
-      number=20, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='category_level_4_style', full_name='TST.TableStyleNetworkArchive.category_level_4_style', index=22,
-      number=21, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='category_level_5_style', full_name='TST.TableStyleNetworkArchive.category_level_5_style', index=23,
-      number=22, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_1_style', full_name='TST.TableStyleNetworkArchive.label_level_1_style', index=24,
-      number=28, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_2_style', full_name='TST.TableStyleNetworkArchive.label_level_2_style', index=25,
-      number=29, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_3_style', full_name='TST.TableStyleNetworkArchive.label_level_3_style', index=26,
-      number=30, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_4_style', full_name='TST.TableStyleNetworkArchive.label_level_4_style', index=27,
-      number=31, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_5_style', full_name='TST.TableStyleNetworkArchive.label_level_5_style', index=28,
-      number=32, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='table_name_style', full_name='TST.TableStyleNetworkArchive.table_name_style', index=29,
+      name='table_name_style', full_name='TST.TableStyleNetworkArchive.table_name_style', index=9,
       number=10, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='table_name_shape_style', full_name='TST.TableStyleNetworkArchive.table_name_shape_style', index=30,
+      name='table_name_shape_style', full_name='TST.TableStyleNetworkArchive.table_name_shape_style', index=10,
       number=11, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='preset_id', full_name='TST.TableStyleNetworkArchive.preset_id', index=31,
+      name='preset_id', full_name='TST.TableStyleNetworkArchive.preset_id', index=11,
       number=12, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_level_1_text_style', full_name='TST.TableStyleNetworkArchive.category_level_1_text_style', index=12,
+      number=13, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_level_2_text_style', full_name='TST.TableStyleNetworkArchive.category_level_2_text_style', index=13,
+      number=14, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_level_3_text_style', full_name='TST.TableStyleNetworkArchive.category_level_3_text_style', index=14,
+      number=15, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_level_4_text_style', full_name='TST.TableStyleNetworkArchive.category_level_4_text_style', index=15,
+      number=16, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_level_5_text_style', full_name='TST.TableStyleNetworkArchive.category_level_5_text_style', index=16,
+      number=17, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_level_1_style', full_name='TST.TableStyleNetworkArchive.category_level_1_style', index=17,
+      number=18, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_level_2_style', full_name='TST.TableStyleNetworkArchive.category_level_2_style', index=18,
+      number=19, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_level_3_style', full_name='TST.TableStyleNetworkArchive.category_level_3_style', index=19,
+      number=20, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_level_4_style', full_name='TST.TableStyleNetworkArchive.category_level_4_style', index=20,
+      number=21, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_level_5_style', full_name='TST.TableStyleNetworkArchive.category_level_5_style', index=21,
+      number=22, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_1_text_style', full_name='TST.TableStyleNetworkArchive.label_level_1_text_style', index=22,
+      number=23, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_2_text_style', full_name='TST.TableStyleNetworkArchive.label_level_2_text_style', index=23,
+      number=24, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_3_text_style', full_name='TST.TableStyleNetworkArchive.label_level_3_text_style', index=24,
+      number=25, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_4_text_style', full_name='TST.TableStyleNetworkArchive.label_level_4_text_style', index=25,
+      number=26, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_5_text_style', full_name='TST.TableStyleNetworkArchive.label_level_5_text_style', index=26,
+      number=27, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_1_style', full_name='TST.TableStyleNetworkArchive.label_level_1_style', index=27,
+      number=28, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_2_style', full_name='TST.TableStyleNetworkArchive.label_level_2_style', index=28,
+      number=29, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_3_style', full_name='TST.TableStyleNetworkArchive.label_level_3_style', index=29,
+      number=30, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_4_style', full_name='TST.TableStyleNetworkArchive.label_level_4_style', index=30,
+      number=31, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_5_style', full_name='TST.TableStyleNetworkArchive.label_level_5_style', index=31,
+      number=32, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_body_summary_row_style', full_name='TST.TableStyleNetworkArchive.pivot_body_summary_row_style', index=32,
+      number=33, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_body_summary_column_style', full_name='TST.TableStyleNetworkArchive.pivot_body_summary_column_style', index=33,
+      number=34, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_header_column_summary_style', full_name='TST.TableStyleNetworkArchive.pivot_header_column_summary_style', index=34,
+      number=35, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -3281,8 +2890,86 @@ _TABLESTYLENETWORKARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6907,
-  serialized_end=8414,
+  serialized_start=7012,
+  serialized_end=8689,
+)
+
+
+_TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE = _descriptor.Descriptor(
+  name='GroupSortRuleUIDArchive',
+  full_name='TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='grouping_column_uid', full_name='TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive.grouping_column_uid', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='column_uid', full_name='TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive.column_uid', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='direction', full_name='TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive.direction', index=2,
+      number=3, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE_DIRECTION,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8812,
+  serialized_end=9041,
+)
+
+_TABLEGROUPSORTORDERUIDARCHIVE = _descriptor.Descriptor(
+  name='TableGroupSortOrderUIDArchive',
+  full_name='TST.TableGroupSortOrderUIDArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='group_sort_rules', full_name='TST.TableGroupSortOrderUIDArchive.group_sort_rules', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[_TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE, ],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=8692,
+  serialized_end=9041,
 )
 
 
@@ -3295,7 +2982,7 @@ _TABLESORTORDERARCHIVE_SORTRULEARCHIVE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='column', full_name='TST.TableSortOrderArchive.SortRuleArchive.column', index=0,
+      name='index', full_name='TST.TableSortOrderArchive.SortRuleArchive.index', index=0,
       number=1, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -3321,8 +3008,8 @@ _TABLESORTORDERARCHIVE_SORTRULEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8553,
-  serialized_end=8703,
+  serialized_start=9180,
+  serialized_end=9329,
 )
 
 _TABLESORTORDERARCHIVE = _descriptor.Descriptor(
@@ -3360,8 +3047,8 @@ _TABLESORTORDERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8417,
-  serialized_end=8748,
+  serialized_start=9044,
+  serialized_end=9374,
 )
 
 
@@ -3400,8 +3087,8 @@ _TABLESORTORDERUIDARCHIVE_SORTRULEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8896,
-  serialized_end=9064,
+  serialized_start=9522,
+  serialized_end=9690,
 )
 
 _TABLESORTORDERUIDARCHIVE = _descriptor.Descriptor(
@@ -3439,8 +3126,8 @@ _TABLESORTORDERUIDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8751,
-  serialized_end=9109,
+  serialized_start=9377,
+  serialized_end=9735,
 )
 
 
@@ -3471,8 +3158,8 @@ _SORTRULEREFERENCETRACKERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9111,
-  serialized_end=9187,
+  serialized_start=9737,
+  serialized_end=9813,
 )
 
 
@@ -3503,8 +3190,8 @@ _CELLREGION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9189,
-  serialized_end=9238,
+  serialized_start=9815,
+  serialized_end=9864,
 )
 
 
@@ -3535,8 +3222,8 @@ _CELLUIDREGIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9240,
-  serialized_end=9309,
+  serialized_start=9866,
+  serialized_end=9935,
 )
 
 
@@ -3623,8 +3310,8 @@ _STRUCTUREDTEXTIMPORTRECORD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9312,
-  serialized_end=9607,
+  serialized_start=9938,
+  serialized_end=10233,
 )
 
 
@@ -3903,15 +3590,15 @@ _TABLEMODELARCHIVE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='repeating_header_columns_enabled', full_name='TST.TableModelArchive.repeating_header_columns_enabled', index=38,
-      number=32, type=8, cpp_type=7, label=1,
+      name='style_apply_clears_all', full_name='TST.TableModelArchive.style_apply_clears_all', index=38,
+      number=31, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='style_apply_clears_all', full_name='TST.TableModelArchive.style_apply_clears_all', index=39,
-      number=31, type=8, cpp_type=7, label=1,
+      name='repeating_header_columns_enabled', full_name='TST.TableModelArchive.repeating_header_columns_enabled', index=39,
+      number=32, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -3931,7 +3618,7 @@ _TABLEMODELARCHIVE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='filter_set', full_name='TST.TableModelArchive.filter_set', index=42,
+      name='row_filter_set_pre_pivot', full_name='TST.TableModelArchive.row_filter_set_pre_pivot', index=42,
       number=38, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -4029,119 +3716,119 @@ _TABLEMODELARCHIVE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='label_level_1_style', full_name='TST.TableModelArchive.label_level_1_style', index=56,
-      number=71, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_2_style', full_name='TST.TableModelArchive.label_level_2_style', index=57,
-      number=72, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_3_style', full_name='TST.TableModelArchive.label_level_3_style', index=58,
-      number=73, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_4_style', full_name='TST.TableModelArchive.label_level_4_style', index=59,
-      number=74, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_5_style', full_name='TST.TableModelArchive.label_level_5_style', index=60,
-      number=75, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='category_level_1_text_style', full_name='TST.TableModelArchive.category_level_1_text_style', index=61,
+      name='category_level_1_text_style', full_name='TST.TableModelArchive.category_level_1_text_style', index=56,
       number=65, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='category_level_2_text_style', full_name='TST.TableModelArchive.category_level_2_text_style', index=62,
+      name='category_level_2_text_style', full_name='TST.TableModelArchive.category_level_2_text_style', index=57,
       number=66, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='category_level_3_text_style', full_name='TST.TableModelArchive.category_level_3_text_style', index=63,
+      name='category_level_3_text_style', full_name='TST.TableModelArchive.category_level_3_text_style', index=58,
       number=67, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='category_level_4_text_style', full_name='TST.TableModelArchive.category_level_4_text_style', index=64,
+      name='category_level_4_text_style', full_name='TST.TableModelArchive.category_level_4_text_style', index=59,
       number=68, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='category_level_5_text_style', full_name='TST.TableModelArchive.category_level_5_text_style', index=65,
+      name='category_level_5_text_style', full_name='TST.TableModelArchive.category_level_5_text_style', index=60,
       number=69, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='label_level_1_text_style', full_name='TST.TableModelArchive.label_level_1_text_style', index=66,
-      number=76, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_2_text_style', full_name='TST.TableModelArchive.label_level_2_text_style', index=67,
-      number=77, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_3_text_style', full_name='TST.TableModelArchive.label_level_3_text_style', index=68,
-      number=78, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_4_text_style', full_name='TST.TableModelArchive.label_level_4_text_style', index=69,
-      number=79, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='label_level_5_text_style', full_name='TST.TableModelArchive.label_level_5_text_style', index=70,
-      number=80, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hidden_states_owner', full_name='TST.TableModelArchive.hidden_states_owner', index=71,
+      name='hidden_states_owner', full_name='TST.TableModelArchive.hidden_states_owner', index=61,
       number=70, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='category_owner', full_name='TST.TableModelArchive.category_owner', index=72,
+      name='label_level_1_style', full_name='TST.TableModelArchive.label_level_1_style', index=62,
+      number=71, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_2_style', full_name='TST.TableModelArchive.label_level_2_style', index=63,
+      number=72, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_3_style', full_name='TST.TableModelArchive.label_level_3_style', index=64,
+      number=73, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_4_style', full_name='TST.TableModelArchive.label_level_4_style', index=65,
+      number=74, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_5_style', full_name='TST.TableModelArchive.label_level_5_style', index=66,
+      number=75, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_1_text_style', full_name='TST.TableModelArchive.label_level_1_text_style', index=67,
+      number=76, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_2_text_style', full_name='TST.TableModelArchive.label_level_2_text_style', index=68,
+      number=77, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_3_text_style', full_name='TST.TableModelArchive.label_level_3_text_style', index=69,
+      number=78, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_4_text_style', full_name='TST.TableModelArchive.label_level_4_text_style', index=70,
+      number=79, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label_level_5_text_style', full_name='TST.TableModelArchive.label_level_5_text_style', index=71,
+      number=80, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_owner_deprecated', full_name='TST.TableModelArchive.category_owner_deprecated', index=72,
       number=81, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -4168,6 +3855,62 @@ _TABLEMODELARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_owner', full_name='TST.TableModelArchive.pivot_owner', index=76,
+      number=85, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_owner', full_name='TST.TableModelArchive.category_owner', index=77,
+      number=86, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_body_summary_row_style', full_name='TST.TableModelArchive.pivot_body_summary_row_style', index=78,
+      number=87, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_body_summary_column_style', full_name='TST.TableModelArchive.pivot_body_summary_column_style', index=79,
+      number=88, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_header_column_summary_style', full_name='TST.TableModelArchive.pivot_header_column_summary_style', index=80,
+      number=89, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_value_types_by_col', full_name='TST.TableModelArchive.pivot_value_types_by_col', index=81,
+      number=90, type=13, cpp_type=3, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_date_grouping_columns', full_name='TST.TableModelArchive.pivot_date_grouping_columns', index=82,
+      number=91, type=13, cpp_type=3, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pivot_date_grouping_types', full_name='TST.TableModelArchive.pivot_date_grouping_types', index=83,
+      number=92, type=13, cpp_type=3, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -4180,8 +3923,8 @@ _TABLEMODELARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9610,
-  serialized_end=12825,
+  serialized_start=10236,
+  serialized_end=13829,
 )
 
 
@@ -4361,6 +4104,13 @@ _SUMMARYMODELARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='group_sort_order', full_name='TST.SummaryModelArchive.group_sort_order', index=24,
+      number=29, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -4373,8 +4123,8 @@ _SUMMARYMODELARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12828,
-  serialized_end=13796,
+  serialized_start=13832,
+  serialized_end=14862,
 )
 
 
@@ -4426,8 +4176,8 @@ _SUMMARYMODELGROUPBYCHANGESTATEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13799,
-  serialized_end=13971,
+  serialized_start=14865,
+  serialized_end=15037,
 )
 
 
@@ -4493,8 +4243,8 @@ _COLUMNROWUIDMAPARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13974,
-  serialized_end=14187,
+  serialized_start=15040,
+  serialized_end=15253,
 )
 
 
@@ -4546,8 +4296,8 @@ _STROKELAYERARCHIVE_STROKERUNARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14301,
-  serialized_end=14402,
+  serialized_start=15367,
+  serialized_end=15468,
 )
 
 _STROKELAYERARCHIVE = _descriptor.Descriptor(
@@ -4584,8 +4334,8 @@ _STROKELAYERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14190,
-  serialized_end=14402,
+  serialized_start=15256,
+  serialized_end=15468,
 )
 
 
@@ -4658,8 +4408,8 @@ _STROKESIDECARARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14405,
-  serialized_end=14687,
+  serialized_start=15471,
+  serialized_end=15753,
 )
 
 
@@ -4683,8 +4433,8 @@ _DURATIONWRAPPERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14689,
-  serialized_end=14713,
+  serialized_start=15755,
+  serialized_end=15779,
 )
 
 
@@ -4904,8 +4654,8 @@ _CELL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14716,
-  serialized_end=15843,
+  serialized_start=15782,
+  serialized_end=16909,
 )
 
 
@@ -4936,8 +4686,8 @@ _MERGEREGIONMAPARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15845,
-  serialized_end=15904,
+  serialized_start=16911,
+  serialized_end=16970,
 )
 
 
@@ -5024,8 +4774,8 @@ _CELLMAPARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15907,
-  serialized_end=16331,
+  serialized_start=16973,
+  serialized_end=17397,
 )
 
 
@@ -5056,8 +4806,8 @@ _CELLLISTARCHIVE_OPTIONALCELL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16438,
-  serialized_end=16477,
+  serialized_start=17504,
+  serialized_end=17543,
 )
 
 _CELLLISTARCHIVE = _descriptor.Descriptor(
@@ -5094,8 +4844,8 @@ _CELLLISTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16334,
-  serialized_end=16477,
+  serialized_start=17400,
+  serialized_end=17543,
 )
 
 
@@ -5154,8 +4904,8 @@ _CONCURRENTCELLMAPARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16480,
-  serialized_end=16712,
+  serialized_start=17546,
+  serialized_end=17778,
 )
 
 
@@ -5186,8 +4936,8 @@ _CONCURRENTCELLLISTARCHIVE_OPTIONALCELL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16438,
-  serialized_end=16477,
+  serialized_start=17504,
+  serialized_end=17543,
 )
 
 _CONCURRENTCELLLISTARCHIVE = _descriptor.Descriptor(
@@ -5231,8 +4981,8 @@ _CONCURRENTCELLLISTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16715,
-  serialized_end=16925,
+  serialized_start=17781,
+  serialized_end=17991,
 )
 
 
@@ -5384,6 +5134,13 @@ _CELLFORMATANDVALUEARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='suppress_apply_value', full_name='TST.CellFormatAndValueArchive.suppress_apply_value', index=20,
+      number=22, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -5396,8 +5153,8 @@ _CELLFORMATANDVALUEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16928,
-  serialized_end=17651,
+  serialized_start=17994,
+  serialized_end=18747,
 )
 
 
@@ -5477,8 +5234,8 @@ _CELLSPECARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17654,
-  serialized_end=17960,
+  serialized_start=18750,
+  serialized_end=19056,
 )
 
 
@@ -5509,8 +5266,8 @@ _COMMENTSTORAGEWRAPPERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17962,
-  serialized_end=18033,
+  serialized_start=19058,
+  serialized_end=19129,
 )
 
 
@@ -5548,8 +5305,8 @@ _CELLDIFFARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18036,
-  serialized_end=18177,
+  serialized_start=19132,
+  serialized_end=19273,
 )
 
 
@@ -5580,8 +5337,8 @@ _CELLDIFFARRAY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18179,
-  serialized_end=18232,
+  serialized_start=19275,
+  serialized_end=19328,
 )
 
 
@@ -5619,8 +5376,8 @@ _CELLDIFFARRAYSEGMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18234,
-  serialized_end=18349,
+  serialized_start=19330,
+  serialized_end=19445,
 )
 
 
@@ -5672,8 +5429,162 @@ _CELLDIFFMAPARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18352,
-  serialized_end=18532,
+  serialized_start=19448,
+  serialized_end=19628,
+)
+
+
+_HIERARCHICALCELLDIFFMAPARCHIVE_BOXEDROW = _descriptor.Descriptor(
+  name='BoxedRow',
+  full_name='TST.HierarchicalCellDiffMapArchive.BoxedRow',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='column_index_set', full_name='TST.HierarchicalCellDiffMapArchive.BoxedRow.column_index_set', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='cell_diff_list', full_name='TST.HierarchicalCellDiffMapArchive.BoxedRow.cell_diff_list', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=20140,
+  serialized_end=20237,
+)
+
+_HIERARCHICALCELLDIFFMAPARCHIVE = _descriptor.Descriptor(
+  name='HierarchicalCellDiffMapArchive',
+  full_name='TST.HierarchicalCellDiffMapArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='num_row_rules', full_name='TST.HierarchicalCellDiffMapArchive.num_row_rules', index=0,
+      number=1, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='num_column_rules', full_name='TST.HierarchicalCellDiffMapArchive.num_column_rules', index=1,
+      number=2, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='row_header_uids', full_name='TST.HierarchicalCellDiffMapArchive.row_header_uids', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='column_header_uids', full_name='TST.HierarchicalCellDiffMapArchive.column_header_uids', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='aggregate_rule_uids', full_name='TST.HierarchicalCellDiffMapArchive.aggregate_rule_uids', index=4,
+      number=5, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='active_flattening_dimension', full_name='TST.HierarchicalCellDiffMapArchive.active_flattening_dimension', index=5,
+      number=6, type=14, cpp_type=8, label=2,
+      has_default_value=False, default_value=-1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='row_value_uids', full_name='TST.HierarchicalCellDiffMapArchive.row_value_uids', index=6,
+      number=7, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='row_level_preorder', full_name='TST.HierarchicalCellDiffMapArchive.row_level_preorder', index=7,
+      number=8, type=13, cpp_type=3, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='column_value_uids', full_name='TST.HierarchicalCellDiffMapArchive.column_value_uids', index=8,
+      number=9, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='column_level_preorder', full_name='TST.HierarchicalCellDiffMapArchive.column_level_preorder', index=9,
+      number=10, type=13, cpp_type=3, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='cell_diff_storage', full_name='TST.HierarchicalCellDiffMapArchive.cell_diff_storage', index=10,
+      number=11, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='row_sizes', full_name='TST.HierarchicalCellDiffMapArchive.row_sizes', index=11,
+      number=12, type=1, cpp_type=5, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='column_sizes', full_name='TST.HierarchicalCellDiffMapArchive.column_sizes', index=12,
+      number=13, type=1, cpp_type=5, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[_HIERARCHICALCELLDIFFMAPARCHIVE_BOXEDROW, ],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=19631,
+  serialized_end=20237,
 )
 
 
@@ -5718,8 +5629,8 @@ _DOUBLESTYLEMAPARCHIVE_DOUBLESTYLEMAPENTRYARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18673,
-  serialized_end=18801,
+  serialized_start=20378,
+  serialized_end=20506,
 )
 
 _DOUBLESTYLEMAPARCHIVE = _descriptor.Descriptor(
@@ -5763,8 +5674,8 @@ _DOUBLESTYLEMAPARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18535,
-  serialized_end=18801,
+  serialized_start=20240,
+  serialized_end=20506,
 )
 
 
@@ -5809,8 +5720,8 @@ _STYLETABLEMAPARCHIVE_STYLETABLEMAPENTRYARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18933,
-  serialized_end=19043,
+  serialized_start=20638,
+  serialized_end=20748,
 )
 
 _STYLETABLEMAPARCHIVE = _descriptor.Descriptor(
@@ -5854,8 +5765,8 @@ _STYLETABLEMAPARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18804,
-  serialized_end=19043,
+  serialized_start=20509,
+  serialized_end=20748,
 )
 
 
@@ -5956,8 +5867,8 @@ _SELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19046,
-  serialized_end=19533,
+  serialized_start=20751,
+  serialized_end=21238,
 )
 
 
@@ -6023,8 +5934,8 @@ _DEATHHAWKRDAR39989167CELLSELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19536,
-  serialized_end=19866,
+  serialized_start=21241,
+  serialized_end=21571,
 )
 
 
@@ -6055,8 +5966,8 @@ _STROKESELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19868,
-  serialized_end=19906,
+  serialized_start=21573,
+  serialized_end=21611,
 )
 
 
@@ -6080,8 +5991,8 @@ _CONTROLCELLSELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19908,
-  serialized_end=19937,
+  serialized_start=21613,
+  serialized_end=21642,
 )
 
 
@@ -6105,8 +6016,8 @@ _STOCKCELLSELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19939,
-  serialized_end=19966,
+  serialized_start=21644,
+  serialized_end=21671,
 )
 
 
@@ -6130,8 +6041,8 @@ _TABLENAMESELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19968,
-  serialized_end=19995,
+  serialized_start=21673,
+  serialized_end=21700,
 )
 
 
@@ -6169,8 +6080,47 @@ _AUTOFILLSELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19997,
-  serialized_end=20109,
+  serialized_start=21702,
+  serialized_end=21814,
+)
+
+
+_FILTERRULEPREPIVOTARCHIVE = _descriptor.Descriptor(
+  name='FilterRulePrePivotArchive',
+  full_name='TST.FilterRulePrePivotArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='predicate', full_name='TST.FilterRulePrePivotArchive.predicate', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='disabled', full_name='TST.FilterRulePrePivotArchive.disabled', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=21816,
+  serialized_end=21918,
 )
 
 
@@ -6189,13 +6139,6 @@ _FILTERRULEARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='disabled', full_name='TST.FilterRuleArchive.disabled', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -6208,8 +6151,8 @@ _FILTERRULEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=20111,
-  serialized_end=20197,
+  serialized_start=21920,
+  serialized_end=21988,
 )
 
 
@@ -6254,8 +6197,8 @@ _TABLESTYLEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=20200,
-  serialized_end=20340,
+  serialized_start=21991,
+  serialized_end=22131,
 )
 
 
@@ -6300,8 +6243,265 @@ _CELLSTYLEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=20343,
-  serialized_end=20480,
+  serialized_start=22134,
+  serialized_end=22271,
+)
+
+
+_FORMULAPREDARGDATAARCHIVE = _descriptor.Descriptor(
+  name='FormulaPredArgDataArchive',
+  full_name='TST.FormulaPredArgDataArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='double_value', full_name='TST.FormulaPredArgDataArchive.double_value', index=0,
+      number=1, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='decimal_low', full_name='TST.FormulaPredArgDataArchive.decimal_low', index=1,
+      number=2, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='decimal_high', full_name='TST.FormulaPredArgDataArchive.decimal_high', index=2,
+      number=3, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='string_value', full_name='TST.FormulaPredArgDataArchive.string_value', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='date_value', full_name='TST.FormulaPredArgDataArchive.date_value', index=4,
+      number=5, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='duration_timeinterval', full_name='TST.FormulaPredArgDataArchive.duration_timeinterval', index=5,
+      number=6, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='duration_units', full_name='TST.FormulaPredArgDataArchive.duration_units', index=6,
+      number=7, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='boolean_value', full_name='TST.FormulaPredArgDataArchive.boolean_value', index=7,
+      number=8, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=22274,
+  serialized_end=22486,
+)
+
+
+_FORMULAPREDARGARCHIVE = _descriptor.Descriptor(
+  name='FormulaPredArgArchive',
+  full_name='TST.FormulaPredArgArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='arg_type', full_name='TST.FormulaPredArgArchive.arg_type', index=0,
+      number=1, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='arg_value', full_name='TST.FormulaPredArgArchive.arg_value', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='base_cell_ref', full_name='TST.FormulaPredArgArchive.base_cell_ref', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='relative_cell_ref', full_name='TST.FormulaPredArgArchive.relative_cell_ref', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='category_ref', full_name='TST.FormulaPredArgArchive.category_ref', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='uid_tract_list', full_name='TST.FormulaPredArgArchive.uid_tract_list', index=5,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='host_cell_coord', full_name='TST.FormulaPredArgArchive.host_cell_coord', index=6,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='preserve_row', full_name='TST.FormulaPredArgArchive.preserve_row', index=7,
+      number=8, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='preserve_column', full_name='TST.FormulaPredArgArchive.preserve_column', index=8,
+      number=9, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='list_entries', full_name='TST.FormulaPredArgArchive.list_entries', index=9,
+      number=10, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='view_tract_ref', full_name='TST.FormulaPredArgArchive.view_tract_ref', index=10,
+      number=11, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=22489,
+  serialized_end=23016,
+)
+
+
+_FORMULAPREDICATEPREPIVOTARCHIVE = _descriptor.Descriptor(
+  name='FormulaPredicatePrePivotArchive',
+  full_name='TST.FormulaPredicatePrePivotArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='formula', full_name='TST.FormulaPredicatePrePivotArchive.formula', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='predicate_type', full_name='TST.FormulaPredicatePrePivotArchive.predicate_type', index=1,
+      number=2, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='qualifier1', full_name='TST.FormulaPredicatePrePivotArchive.qualifier1', index=2,
+      number=3, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='qualifier2', full_name='TST.FormulaPredicatePrePivotArchive.qualifier2', index=3,
+      number=4, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='param_index1', full_name='TST.FormulaPredicatePrePivotArchive.param_index1', index=4,
+      number=5, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='param_index2', full_name='TST.FormulaPredicatePrePivotArchive.param_index2', index=5,
+      number=6, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='param_index0', full_name='TST.FormulaPredicatePrePivotArchive.param_index0', index=6,
+      number=7, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=23019,
+  serialized_end=23221,
 )
 
 
@@ -6314,51 +6514,79 @@ _FORMULAPREDICATEARCHIVE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='formula', full_name='TST.FormulaPredicateArchive.formula', index=0,
-      number=1, type=11, cpp_type=10, label=2,
+      name='predicate_type', full_name='TST.FormulaPredicateArchive.predicate_type', index=0,
+      number=1, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='qualifier1', full_name='TST.FormulaPredicateArchive.qualifier1', index=1,
+      number=2, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='qualifier2', full_name='TST.FormulaPredicateArchive.qualifier2', index=2,
+      number=3, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='param_value0', full_name='TST.FormulaPredicateArchive.param_value0', index=3,
+      number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='predicate_type', full_name='TST.FormulaPredicateArchive.predicate_type', index=1,
-      number=2, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=0,
+      name='param_value1', full_name='TST.FormulaPredicateArchive.param_value1', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='qualifier1', full_name='TST.FormulaPredicateArchive.qualifier1', index=2,
-      number=3, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=0,
+      name='param_value2', full_name='TST.FormulaPredicateArchive.param_value2', index=5,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='qualifier2', full_name='TST.FormulaPredicateArchive.qualifier2', index=3,
-      number=4, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=0,
+      name='formula', full_name='TST.FormulaPredicateArchive.formula', index=6,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='param_index1', full_name='TST.FormulaPredicateArchive.param_index1', index=4,
-      number=5, type=5, cpp_type=1, label=2,
-      has_default_value=False, default_value=0,
+      name='for_conditional_style', full_name='TST.FormulaPredicateArchive.for_conditional_style', index=7,
+      number=8, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='param_index2', full_name='TST.FormulaPredicateArchive.param_index2', index=5,
-      number=6, type=5, cpp_type=1, label=2,
-      has_default_value=False, default_value=0,
+      name='host_table_uid', full_name='TST.FormulaPredicateArchive.host_table_uid', index=8,
+      number=9, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='param_index0', full_name='TST.FormulaPredicateArchive.param_index0', index=6,
-      number=7, type=5, cpp_type=1, label=2,
-      has_default_value=False, default_value=0,
+      name='host_column_uid', full_name='TST.FormulaPredicateArchive.host_column_uid', index=9,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='host_row_uid', full_name='TST.FormulaPredicateArchive.host_row_uid', index=10,
+      number=11, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -6367,8 +6595,6 @@ _FORMULAPREDICATEARCHIVE = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
-    _FORMULAPREDICATEARCHIVE_FORMULAPREDICATETYPE,
-    _FORMULAPREDICATEARCHIVE_QUALIFIERTYPE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -6376,10 +6602,55 @@ _FORMULAPREDICATEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=20483,
-  serialized_end=21989,
+  serialized_start=23224,
+  serialized_end=23637,
 )
 
+
+_CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULEPREPIVOT = _descriptor.Descriptor(
+  name='ConditionalStyleRulePrePivot',
+  full_name='TST.ConditionalStyleSetArchive.ConditionalStyleRulePrePivot',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='predicate', full_name='TST.ConditionalStyleSetArchive.ConditionalStyleRulePrePivot.predicate', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='cell_style', full_name='TST.ConditionalStyleSetArchive.ConditionalStyleRulePrePivot.cell_style', index=1,
+      number=2, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='text_style', full_name='TST.ConditionalStyleSetArchive.ConditionalStyleRulePrePivot.text_style', index=2,
+      number=3, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=23846,
+  serialized_end=24005,
+)
 
 _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE = _descriptor.Descriptor(
   name='ConditionalStyleRule',
@@ -6391,7 +6662,7 @@ _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='predicate', full_name='TST.ConditionalStyleSetArchive.ConditionalStyleRule.predicate', index=0,
-      number=1, type=11, cpp_type=10, label=2,
+      number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -6422,8 +6693,39 @@ _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=22111,
-  serialized_end=22254,
+  serialized_start=24008,
+  serialized_end=24151,
+)
+
+_CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULES = _descriptor.Descriptor(
+  name='ConditionalStyleRules',
+  full_name='TST.ConditionalStyleSetArchive.ConditionalStyleRules',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='rule', full_name='TST.ConditionalStyleSetArchive.ConditionalStyleRules.rule', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=24153,
+  serialized_end=24244,
 )
 
 _CONDITIONALSTYLESETARCHIVE = _descriptor.Descriptor(
@@ -6442,16 +6744,23 @@ _CONDITIONALSTYLESETARCHIVE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='rules', full_name='TST.ConditionalStyleSetArchive.rules', index=1,
+      name='rules_prepivot', full_name='TST.ConditionalStyleSetArchive.rules_prepivot', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='rules', full_name='TST.ConditionalStyleSetArchive.rules', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
-  nested_types=[_CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE, ],
+  nested_types=[_CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULEPREPIVOT, _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE, _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULES, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -6460,8 +6769,8 @@ _CONDITIONALSTYLESETARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=21992,
-  serialized_end=22254,
+  serialized_start=23640,
+  serialized_end=24244,
 )
 
 
@@ -6488,7 +6797,7 @@ _FILTERSETARCHIVE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='filter_rules', full_name='TST.FilterSetArchive.filter_rules', index=2,
+      name='filter_rules_prepivot', full_name='TST.FilterSetArchive.filter_rules_prepivot', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -6515,6 +6824,13 @@ _FILTERSETARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='filter_rules', full_name='TST.FilterSetArchive.filter_rules', index=6,
+      number=7, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -6528,8 +6844,85 @@ _FILTERSETARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=22257,
-  serialized_end=22595,
+  serialized_start=24247,
+  serialized_end=24648,
+)
+
+
+_UNIQUEINDEXARCHIVE_UNIQUEINDEXENTRYARCHIVE = _descriptor.Descriptor(
+  name='UniqueIndexEntryArchive',
+  full_name='TST.UniqueIndexArchive.UniqueIndexEntryArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='string_value', full_name='TST.UniqueIndexArchive.UniqueIndexEntryArchive.string_value', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='row_uids', full_name='TST.UniqueIndexArchive.UniqueIndexEntryArchive.row_uids', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=24777,
+  serialized_end=24853,
+)
+
+_UNIQUEINDEXARCHIVE = _descriptor.Descriptor(
+  name='UniqueIndexArchive',
+  full_name='TST.UniqueIndexArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='column_uid', full_name='TST.UniqueIndexArchive.column_uid', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='unique_entries', full_name='TST.UniqueIndexArchive.unique_entries', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[_UNIQUEINDEXARCHIVE_UNIQUEINDEXENTRYARCHIVE, ],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=24651,
+  serialized_end=24853,
 )
 
 
@@ -6574,8 +6967,8 @@ _HIDDENSTATEEXTENTARCHIVE_ROWORCOLUMNSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=22970,
-  serialized_end=23065,
+  serialized_start=25430,
+  serialized_end=25525,
 )
 
 _HIDDENSTATEEXTENTARCHIVE = _descriptor.Descriptor(
@@ -6628,6 +7021,34 @@ _HIDDENSTATEEXTENTARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='filter_set', full_name='TST.HiddenStateExtentArchive.filter_set', index=6,
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='view_pivot_hidden_indexes', full_name='TST.HiddenStateExtentArchive.view_pivot_hidden_indexes', index=7,
+      number=9, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='view_only_filtered_indexes', full_name='TST.HiddenStateExtentArchive.view_only_filtered_indexes', index=8,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='unique_indexes', full_name='TST.HiddenStateExtentArchive.unique_indexes', index=9,
+      number=11, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -6641,8 +7062,8 @@ _HIDDENSTATEEXTENTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=22598,
-  serialized_end=23128,
+  serialized_start=24856,
+  serialized_end=25588,
 )
 
 
@@ -6687,8 +7108,8 @@ _HIDDENSTATESARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=23131,
-  serialized_end=23321,
+  serialized_start=25591,
+  serialized_end=25781,
 )
 
 
@@ -6726,8 +7147,8 @@ _HIDDENSTATESOWNERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=23323,
-  serialized_end=23428,
+  serialized_start=25783,
+  serialized_end=25888,
 )
 
 
@@ -6753,6 +7174,13 @@ _EXPANDCOLLAPSESTATEARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='dimension', full_name='TST.ExpandCollapseStateArchive.dimension', index=2,
+      number=3, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=-1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -6765,8 +7193,8 @@ _EXPANDCOLLAPSESTATEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=23430,
-  serialized_end=23527,
+  serialized_start=25891,
+  serialized_end=26035,
 )
 
 
@@ -6804,8 +7232,8 @@ _TOKENATTACHMENTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=23529,
-  serialized_end=23637,
+  serialized_start=26037,
+  serialized_end=26145,
 )
 
 
@@ -6836,8 +7264,8 @@ _FORMULAARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=23639,
-  serialized_end=23695,
+  serialized_start=26147,
+  serialized_end=26203,
 )
 
 
@@ -6882,8 +7310,8 @@ _EXPRESSIONNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=23697,
-  serialized_end=23801,
+  serialized_start=26205,
+  serialized_end=26309,
 )
 
 
@@ -6921,8 +7349,8 @@ _BOOLEANNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=23803,
-  serialized_end=23881,
+  serialized_start=26311,
+  serialized_end=26389,
 )
 
 
@@ -6974,8 +7402,8 @@ _NUMBERNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=23883,
-  serialized_end=24004,
+  serialized_start=26391,
+  serialized_end=26512,
 )
 
 
@@ -7013,8 +7441,8 @@ _STRINGNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24006,
-  serialized_end=24083,
+  serialized_start=26514,
+  serialized_end=26591,
 )
 
 
@@ -7059,8 +7487,8 @@ _IDENTIFIERNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24085,
-  serialized_end=24187,
+  serialized_start=26593,
+  serialized_end=26695,
 )
 
 
@@ -7105,8 +7533,8 @@ _ARRAYNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24189,
-  serialized_end=24281,
+  serialized_start=26697,
+  serialized_end=26789,
 )
 
 
@@ -7137,8 +7565,8 @@ _LISTNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24283,
-  serialized_end=24343,
+  serialized_start=26791,
+  serialized_end=26851,
 )
 
 
@@ -7176,8 +7604,8 @@ _OPERATORNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24345,
-  serialized_end=24431,
+  serialized_start=26853,
+  serialized_end=26939,
 )
 
 
@@ -7208,8 +7636,8 @@ _POSTFIXOPERATORNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24433,
-  serialized_end=24502,
+  serialized_start=26941,
+  serialized_end=27010,
 )
 
 
@@ -7240,8 +7668,8 @@ _PREFIXOPERATORNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24504,
-  serialized_end=24572,
+  serialized_start=27012,
+  serialized_end=27080,
 )
 
 
@@ -7286,8 +7714,8 @@ _FUNCTIONNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24574,
-  serialized_end=24690,
+  serialized_start=27082,
+  serialized_end=27198,
 )
 
 
@@ -7318,8 +7746,8 @@ _FUNCTIONENDNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24692,
-  serialized_end=24759,
+  serialized_start=27200,
+  serialized_end=27267,
 )
 
 
@@ -7364,8 +7792,8 @@ _DATENODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24761,
-  serialized_end=24852,
+  serialized_start=27269,
+  serialized_end=27360,
 )
 
 
@@ -7459,8 +7887,8 @@ _REFERENCENODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24855,
-  serialized_end=25297,
+  serialized_start=27363,
+  serialized_end=27805,
 )
 
 
@@ -7519,8 +7947,8 @@ _DURATIONNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=25300,
-  serialized_end=25436,
+  serialized_start=27808,
+  serialized_end=27944,
 )
 
 
@@ -7572,8 +8000,8 @@ _ARGUMENTPLACEHOLDERNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=25439,
-  serialized_end=25574,
+  serialized_start=27947,
+  serialized_end=28082,
 )
 
 
@@ -7604,8 +8032,8 @@ _EMPTYEXPRESSIONNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=25576,
-  serialized_end=25647,
+  serialized_start=28084,
+  serialized_end=28155,
 )
 
 
@@ -7664,8 +8092,8 @@ _LETNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=25650,
-  serialized_end=25845,
+  serialized_start=28158,
+  serialized_end=28353,
 )
 
 
@@ -7696,8 +8124,8 @@ _INNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=25847,
-  serialized_end=25905,
+  serialized_start=28355,
+  serialized_end=28413,
 )
 
 
@@ -7742,8 +8170,8 @@ _VARIABLENODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=25907,
-  serialized_end=26007,
+  serialized_start=28415,
+  serialized_end=28515,
 )
 
 
@@ -7823,8 +8251,8 @@ _LAYOUTHINTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=26010,
-  serialized_end=26249,
+  serialized_start=28518,
+  serialized_end=28757,
 )
 
 
@@ -7876,8 +8304,8 @@ _COMPLETIONTOKENATTACHMENTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=26252,
-  serialized_end=26398,
+  serialized_start=28760,
+  serialized_end=28906,
 )
 
 
@@ -7922,8 +8350,8 @@ _HIDDENSTATEFORMULAOWNERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=26401,
-  serialized_end=26574,
+  serialized_start=28909,
+  serialized_end=29082,
 )
 
 
@@ -7961,8 +8389,8 @@ _FORMULASTOREARCHIVE_FORMULASTOREPAIR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=26689,
-  serialized_end=26769,
+  serialized_start=29197,
+  serialized_end=29277,
 )
 
 _FORMULASTOREARCHIVE = _descriptor.Descriptor(
@@ -7999,8 +8427,8 @@ _FORMULASTOREARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=26577,
-  serialized_end=26769,
+  serialized_start=29085,
+  serialized_end=29277,
 )
 
 
@@ -8052,8 +8480,8 @@ _MERGEOPERATIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=26772,
-  serialized_end=26961,
+  serialized_start=29280,
+  serialized_end=29469,
 )
 
 
@@ -8091,8 +8519,8 @@ _MERGEOWNERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=26963,
-  serialized_end=27069,
+  serialized_start=29471,
+  serialized_end=29577,
 )
 
 
@@ -8130,8 +8558,8 @@ _PENCILANNOTATIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=27071,
-  serialized_end=27183,
+  serialized_start=29579,
+  serialized_end=29691,
 )
 
 
@@ -8176,8 +8604,8 @@ _PENCILANNOTATIONOWNERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=27186,
-  serialized_end=27340,
+  serialized_start=29694,
+  serialized_end=29848,
 )
 
 
@@ -8197,93 +8625,107 @@ _ACCUMULATORARCHIVE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='bool_true_count', full_name='TST.AccumulatorArchive.bool_true_count', index=1,
-      number=12, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='number_count', full_name='TST.AccumulatorArchive.number_count', index=2,
+      name='number_count', full_name='TST.AccumulatorArchive.number_count', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='date_count', full_name='TST.AccumulatorArchive.date_count', index=3,
+      name='date_count', full_name='TST.AccumulatorArchive.date_count', index=2,
       number=3, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='duration_count', full_name='TST.AccumulatorArchive.duration_count', index=4,
+      name='duration_count', full_name='TST.AccumulatorArchive.duration_count', index=3,
       number=4, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='string_count', full_name='TST.AccumulatorArchive.string_count', index=5,
+      name='string_count', full_name='TST.AccumulatorArchive.string_count', index=4,
       number=5, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='error_count', full_name='TST.AccumulatorArchive.error_count', index=6,
-      number=13, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='is_circular_ref', full_name='TST.AccumulatorArchive.is_circular_ref', index=7,
-      number=14, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='min_value', full_name='TST.AccumulatorArchive.min_value', index=8,
+      name='min_value', full_name='TST.AccumulatorArchive.min_value', index=5,
       number=6, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='max_value', full_name='TST.AccumulatorArchive.max_value', index=9,
+      name='max_value', full_name='TST.AccumulatorArchive.max_value', index=6,
       number=7, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='number_total_value', full_name='TST.AccumulatorArchive.number_total_value', index=10,
+      name='number_total_value', full_name='TST.AccumulatorArchive.number_total_value', index=7,
       number=8, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='first_date_seen', full_name='TST.AccumulatorArchive.first_date_seen', index=11,
+      name='first_date_seen', full_name='TST.AccumulatorArchive.first_date_seen', index=8,
       number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='total_secs_since_ref_date', full_name='TST.AccumulatorArchive.total_secs_since_ref_date', index=12,
+      name='total_secs_since_ref_date', full_name='TST.AccumulatorArchive.total_secs_since_ref_date', index=9,
       number=10, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='secs_to_add', full_name='TST.AccumulatorArchive.secs_to_add', index=13,
+      name='secs_to_add', full_name='TST.AccumulatorArchive.secs_to_add', index=10,
       number=11, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='bool_true_count', full_name='TST.AccumulatorArchive.bool_true_count', index=11,
+      number=12, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='error_count', full_name='TST.AccumulatorArchive.error_count', index=12,
+      number=13, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='is_circular_ref', full_name='TST.AccumulatorArchive.is_circular_ref', index=13,
+      number=14, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='product_value', full_name='TST.AccumulatorArchive.product_value', index=14,
+      number=15, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='no_content_count', full_name='TST.AccumulatorArchive.no_content_count', index=15,
+      number=16, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -8299,8 +8741,8 @@ _ACCUMULATORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=27343,
-  serialized_end=27785,
+  serialized_start=29851,
+  serialized_end=30366,
 )
 
 
@@ -8321,7 +8763,7 @@ _GROUPCOLUMNARCHIVE = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='grouping_type', full_name='TST.GroupColumnArchive.grouping_type', index=1,
-      number=2, type=14, cpp_type=8, label=2,
+      number=2, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -8352,8 +8794,8 @@ _GROUPCOLUMNARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=27788,
-  serialized_end=27969,
+  serialized_start=30369,
+  serialized_end=30531,
 )
 
 
@@ -8384,8 +8826,8 @@ _GROUPCOLUMNLISTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=27971,
-  serialized_end=28042,
+  serialized_start=30533,
+  serialized_end=30604,
 )
 
 
@@ -8413,8 +8855,29 @@ _COLUMNAGGREGATEARCHIVE = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='agg_type', full_name='TST.ColumnAggregateArchive.agg_type', index=2,
-      number=3, type=14, cpp_type=8, label=2,
+      number=3, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='show_as_type', full_name='TST.ColumnAggregateArchive.show_as_type', index=3,
+      number=4, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='column_aggregate_uid', full_name='TST.ColumnAggregateArchive.column_aggregate_uid', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='running_total_group_column_uid', full_name='TST.ColumnAggregateArchive.running_total_group_column_uid', index=5,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -8430,8 +8893,8 @@ _COLUMNAGGREGATEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=28044,
-  serialized_end=28152,
+  serialized_start=30607,
+  serialized_end=30809,
 )
 
 
@@ -8462,35 +8925,35 @@ _COLUMNAGGREGATELISTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=28154,
-  serialized_end=28231,
+  serialized_start=30811,
+  serialized_end=30888,
 )
 
 
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGNODEARCHIVE = _descriptor.Descriptor(
+_GROUPBYARCHIVE_AGGNODEARCHIVE = _descriptor.Descriptor(
   name='AggNodeArchive',
-  full_name='TST.CategoryOwnerArchive.GroupByArchive.AggNodeArchive',
+  full_name='TST.GroupByArchive.AggNodeArchive',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='formula_coord', full_name='TST.CategoryOwnerArchive.GroupByArchive.AggNodeArchive.formula_coord', index=0,
+      name='formula_coord', full_name='TST.GroupByArchive.AggNodeArchive.formula_coord', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='accum', full_name='TST.CategoryOwnerArchive.GroupByArchive.AggNodeArchive.accum', index=1,
+      name='accum', full_name='TST.GroupByArchive.AggNodeArchive.accum', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='child', full_name='TST.CategoryOwnerArchive.GroupByArchive.AggNodeArchive.child', index=2,
+      name='child', full_name='TST.GroupByArchive.AggNodeArchive.child', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -8508,51 +8971,20 @@ _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=29166,
-  serialized_end=29346,
+  serialized_start=31810,
+  serialized_end=31969,
 )
 
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_GROUPVALUETUPLEARCHIVE = _descriptor.Descriptor(
-  name='GroupValueTupleArchive',
-  full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.GroupValueTupleArchive',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='value', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.GroupValueTupleArchive.value', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=29821,
-  serialized_end=29884,
-)
-
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE = _descriptor.Descriptor(
+_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE = _descriptor.Descriptor(
   name='RowSetArchive',
-  full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive',
+  full_name='TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='row_uids', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive.row_uids', index=0,
+      name='row_uids', full_name='TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive.row_uids', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -8570,35 +9002,42 @@ _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSE
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=30110,
-  serialized_end=30154,
+  serialized_start=32640,
+  serialized_end=32684,
 )
 
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE = _descriptor.Descriptor(
+_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE = _descriptor.Descriptor(
   name='FormatManagerArchive',
-  full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive',
+  full_name='TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='cell_value', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive.cell_value', index=0,
+      name='cell_value', full_name='TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive.cell_value', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='formats', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive.formats', index=1,
+      name='formats', full_name='TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive.formats', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='row_sets', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive.row_sets', index=2,
+      name='row_sets', full_name='TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive.row_sets', index=2,
       number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='row_uid_lookup_sets', full_name='TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive.row_uid_lookup_sets', index=3,
+      number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -8606,7 +9045,7 @@ _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE = _de
   ],
   extensions=[
   ],
-  nested_types=[_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE, ],
+  nested_types=[_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -8615,63 +9054,70 @@ _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE = _de
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=29887,
-  serialized_end=30154,
+  serialized_start=32386,
+  serialized_end=32684,
 )
 
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE = _descriptor.Descriptor(
+_GROUPBYARCHIVE_GROUPNODEARCHIVE = _descriptor.Descriptor(
   name='GroupNodeArchive',
-  full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive',
+  full_name='TST.GroupByArchive.GroupNodeArchive',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='group_uid', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.group_uid', index=0,
+      name='group_uid', full_name='TST.GroupByArchive.GroupNodeArchive.group_uid', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='group_value_tuple', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.group_value_tuple', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='group_cell_value', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.group_cell_value', index=2,
-      number=7, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='child', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.child', index=3,
+      name='child', full_name='TST.GroupByArchive.GroupNodeArchive.child', index=1,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='row_uid', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.row_uid', index=4,
+      name='row_uid', full_name='TST.GroupByArchive.GroupNodeArchive.row_uid', index=2,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='agg_formula_coords', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.agg_formula_coords', index=5,
+      name='agg_formula_coords', full_name='TST.GroupByArchive.GroupNodeArchive.agg_formula_coords', index=3,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='format_manager', full_name='TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.format_manager', index=6,
+      name='format_manager', full_name='TST.GroupByArchive.GroupNodeArchive.format_manager', index=4,
       number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='group_cell_value', full_name='TST.GroupByArchive.GroupNodeArchive.group_cell_value', index=5,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='row_indexes', full_name='TST.GroupByArchive.GroupNodeArchive.row_indexes', index=6,
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='row_lookup_uids', full_name='TST.GroupByArchive.GroupNodeArchive.row_lookup_uids', index=7,
+      number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -8679,7 +9125,7 @@ _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_GROUPVALUETUPLEARCHIVE, _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE, ],
+  nested_types=[_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -8688,27 +9134,27 @@ _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=29349,
-  serialized_end=30154,
+  serialized_start=31972,
+  serialized_end=32684,
 )
 
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGREGATORARCHIVE = _descriptor.Descriptor(
+_GROUPBYARCHIVE_AGGREGATORARCHIVE = _descriptor.Descriptor(
   name='AggregatorArchive',
-  full_name='TST.CategoryOwnerArchive.GroupByArchive.AggregatorArchive',
+  full_name='TST.GroupByArchive.AggregatorArchive',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='column_uid', full_name='TST.CategoryOwnerArchive.GroupByArchive.AggregatorArchive.column_uid', index=0,
+      name='column_uid', full_name='TST.GroupByArchive.AggregatorArchive.column_uid', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='agg_node', full_name='TST.CategoryOwnerArchive.GroupByArchive.AggregatorArchive.agg_node', index=1,
+      name='agg_node', full_name='TST.GroupByArchive.AggregatorArchive.agg_node', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -8726,105 +9172,126 @@ _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGREGATORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=30156,
-  serialized_end=30281,
+  serialized_start=32686,
+  serialized_end=32790,
 )
 
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE = _descriptor.Descriptor(
+_GROUPBYARCHIVE = _descriptor.Descriptor(
   name='GroupByArchive',
-  full_name='TST.CategoryOwnerArchive.GroupByArchive',
+  full_name='TST.GroupByArchive',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='group_by_uid', full_name='TST.CategoryOwnerArchive.GroupByArchive.group_by_uid', index=0,
+      name='group_by_uid', full_name='TST.GroupByArchive.group_by_uid', index=0,
       number=1, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='group_column', full_name='TST.CategoryOwnerArchive.GroupByArchive.group_column', index=1,
+      name='group_column', full_name='TST.GroupByArchive.group_column', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='group_node_root', full_name='TST.CategoryOwnerArchive.GroupByArchive.group_node_root', index=2,
+      name='group_node_root', full_name='TST.GroupByArchive.group_node_root', index=2,
       number=3, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='aggregator', full_name='TST.CategoryOwnerArchive.GroupByArchive.aggregator', index=3,
+      name='aggregator', full_name='TST.GroupByArchive.aggregator', index=3,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='column_agg_type', full_name='TST.CategoryOwnerArchive.GroupByArchive.column_agg_type', index=4,
+      name='column_agg_type', full_name='TST.GroupByArchive.column_agg_type', index=4,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='is_enabled', full_name='TST.CategoryOwnerArchive.GroupByArchive.is_enabled', index=5,
+      name='is_enabled', full_name='TST.GroupByArchive.is_enabled', index=5,
       number=6, type=8, cpp_type=7, label=2,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='indirect_agg_type_change_formula', full_name='TST.CategoryOwnerArchive.GroupByArchive.indirect_agg_type_change_formula', index=6,
+      name='indirect_agg_type_change_formula', full_name='TST.GroupByArchive.indirect_agg_type_change_formula', index=6,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='grouping_columns_formula', full_name='TST.CategoryOwnerArchive.GroupByArchive.grouping_columns_formula', index=7,
+      name='grouping_columns_formula', full_name='TST.GroupByArchive.grouping_columns_formula', index=7,
       number=8, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='grouping_column_headers_formula', full_name='TST.CategoryOwnerArchive.GroupByArchive.grouping_column_headers_formula', index=8,
-      number=10, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='aggs_in_group_root_formula', full_name='TST.CategoryOwnerArchive.GroupByArchive.aggs_in_group_root_formula', index=9,
+      name='aggs_in_group_root_formula', full_name='TST.GroupByArchive.aggs_in_group_root_formula', index=8,
       number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='column_order_changed_formula', full_name='TST.CategoryOwnerArchive.GroupByArchive.column_order_changed_formula', index=10,
+      name='grouping_column_headers_formula', full_name='TST.GroupByArchive.grouping_column_headers_formula', index=9,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='column_order_changed_formula', full_name='TST.GroupByArchive.column_order_changed_formula', index=10,
       number=11, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='row_order_changed_formula', full_name='TST.CategoryOwnerArchive.GroupByArchive.row_order_changed_formula', index=11,
+      name='row_order_changed_formula', full_name='TST.GroupByArchive.row_order_changed_formula', index=11,
       number=12, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='row_order_changed_ignoring_recalc_formula', full_name='TST.CategoryOwnerArchive.GroupByArchive.row_order_changed_ignoring_recalc_formula', index=12,
+      name='row_order_changed_ignoring_recalc_formula', full_name='TST.GroupByArchive.row_order_changed_ignoring_recalc_formula', index=12,
       number=13, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='owner_index', full_name='TST.GroupByArchive.owner_index', index=13,
+      number=14, type=5, cpp_type=1, label=1,
+      has_default_value=True, default_value=8,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='row_uid_lookup', full_name='TST.GroupByArchive.row_uid_lookup', index=14,
+      number=15, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='hidden_states_changed_formula', full_name='TST.GroupByArchive.hidden_states_changed_formula', index=15,
+      number=16, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -8832,7 +9299,7 @@ _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGNODEARCHIVE, _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE, _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGREGATORARCHIVE, ],
+  nested_types=[_GROUPBYARCHIVE_AGGNODEARCHIVE, _GROUPBYARCHIVE_GROUPNODEARCHIVE, _GROUPBYARCHIVE_AGGREGATORARCHIVE, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -8841,9 +9308,10 @@ _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=28349,
-  serialized_end=30281,
+  serialized_start=30891,
+  serialized_end=32790,
 )
+
 
 _CATEGORYOWNERARCHIVE = _descriptor.Descriptor(
   name='CategoryOwnerArchive',
@@ -8870,7 +9338,7 @@ _CATEGORYOWNERARCHIVE = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE, ],
+  nested_types=[],
   enum_types=[
   ],
   serialized_options=None,
@@ -8879,8 +9347,223 @@ _CATEGORYOWNERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=28234,
-  serialized_end=30281,
+  serialized_start=32792,
+  serialized_end=32883,
+)
+
+
+_CATEGORYOWNERREFARCHIVE = _descriptor.Descriptor(
+  name='CategoryOwnerRefArchive',
+  full_name='TST.CategoryOwnerRefArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='group_by', full_name='TST.CategoryOwnerRefArchive.group_by', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=32885,
+  serialized_end=32944,
+)
+
+
+_PIVOTGROUPINGCOLUMNOPTIONSMAPARCHIVE = _descriptor.Descriptor(
+  name='PivotGroupingColumnOptionsMapArchive',
+  full_name='TST.PivotGroupingColumnOptionsMapArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='uids', full_name='TST.PivotGroupingColumnOptionsMapArchive.uids', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='flags', full_name='TST.PivotGroupingColumnOptionsMapArchive.flags', index=1,
+      number=2, type=13, cpp_type=3, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='aggregate_rule_uids', full_name='TST.PivotGroupingColumnOptionsMapArchive.aggregate_rule_uids', index=2,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=32946,
+  serialized_end=33064,
+)
+
+
+_PIVOTOWNERARCHIVE = _descriptor.Descriptor(
+  name='PivotOwnerArchive',
+  full_name='TST.PivotOwnerArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='pivot_owner_uid', full_name='TST.PivotOwnerArchive.pivot_owner_uid', index=0,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='grouping_columns_for_rows', full_name='TST.PivotOwnerArchive.grouping_columns_for_rows', index=1,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='grouping_columns_for_columns', full_name='TST.PivotOwnerArchive.grouping_columns_for_columns', index=2,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='aggregate_columns', full_name='TST.PivotOwnerArchive.aggregate_columns', index=3,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='flattening_dimension', full_name='TST.PivotOwnerArchive.flattening_dimension', index=4,
+      number=6, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='is_empty_pivot', full_name='TST.PivotOwnerArchive.is_empty_pivot', index=5,
+      number=7, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='source_table_uid', full_name='TST.PivotOwnerArchive.source_table_uid', index=6,
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='refresh_timestamp', full_name='TST.PivotOwnerArchive.refresh_timestamp', index=7,
+      number=9, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='grpg_col_options_map', full_name='TST.PivotOwnerArchive.grpg_col_options_map', index=8,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='hide_grand_total_rows', full_name='TST.PivotOwnerArchive.hide_grand_total_rows', index=9,
+      number=11, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='source_table_name', full_name='TST.PivotOwnerArchive.source_table_name', index=10,
+      number=12, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='hide_grand_total_columns', full_name='TST.PivotOwnerArchive.hide_grand_total_columns', index=11,
+      number=13, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='formula_store', full_name='TST.PivotOwnerArchive.formula_store', index=12,
+      number=17, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='refresh_uid', full_name='TST.PivotOwnerArchive.refresh_uid', index=13,
+      number=18, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='row_column_rule_change_uid', full_name='TST.PivotOwnerArchive.row_column_rule_change_uid', index=14,
+      number=19, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='aggregate_rule_change_uid', full_name='TST.PivotOwnerArchive.aggregate_rule_change_uid', index=15,
+      number=20, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=33067,
+  serialized_end=33743,
 )
 
 
@@ -8925,8 +9608,8 @@ _RICHTEXTPAYLOADARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=30283,
-  serialized_end=30396,
+  serialized_start=33745,
+  serialized_end=33858,
 )
 
 
@@ -8957,8 +9640,8 @@ _FORMULAEQUALSTOKENATTACHMENTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=30398,
-  serialized_end=30479,
+  serialized_start=33860,
+  serialized_end=33941,
 )
 
 
@@ -9122,8 +9805,8 @@ _CELLFILLSTANDIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=30482,
-  serialized_end=31151,
+  serialized_start=33944,
+  serialized_end=34613,
 )
 
 
@@ -9161,8 +9844,8 @@ _FORMULASELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=31153,
-  serialized_end=31247,
+  serialized_start=34615,
+  serialized_end=34709,
 )
 
 
@@ -9242,8 +9925,8 @@ _CELLBORDERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=31250,
-  serialized_end=31545,
+  serialized_start=34712,
+  serialized_end=35007,
 )
 
 
@@ -9263,23 +9946,37 @@ _DEFAULTCELLSTYLESCONTAINERARCHIVE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='header_row_uids', full_name='TST.DefaultCellStylesContainerArchive.header_row_uids', index=1,
+      name='row_uids', full_name='TST.DefaultCellStylesContainerArchive.row_uids', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='footer_row_uids', full_name='TST.DefaultCellStylesContainerArchive.footer_row_uids', index=2,
+      name='column_uids', full_name='TST.DefaultCellStylesContainerArchive.column_uids', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='header_column_uids', full_name='TST.DefaultCellStylesContainerArchive.header_column_uids', index=3,
-      number=4, type=11, cpp_type=10, label=3,
+      name='row_types', full_name='TST.DefaultCellStylesContainerArchive.row_types', index=3,
+      number=4, type=13, cpp_type=3, label=3,
       has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='column_types', full_name='TST.DefaultCellStylesContainerArchive.column_types', index=4,
+      number=5, type=13, cpp_type=3, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='is_a_pivot_table', full_name='TST.DefaultCellStylesContainerArchive.is_a_pivot_table', index=5,
+      number=6, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -9295,8 +9992,8 @@ _DEFAULTCELLSTYLESCONTAINERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=31548,
-  serialized_end=31739,
+  serialized_start=35010,
+  serialized_end=35218,
 )
 
 
@@ -9370,8 +10067,8 @@ _MULTITABLEREMAPPERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=31742,
-  serialized_end=32147,
+  serialized_start=35221,
+  serialized_end=35626,
 )
 
 
@@ -9479,8 +10176,8 @@ _CHANGEPROPAGATIONMAPWRAPPER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=32150,
-  serialized_end=32786,
+  serialized_start=35629,
+  serialized_end=36265,
 )
 
 
@@ -9525,8 +10222,8 @@ _SUMMARYCELLVENDORARCHIVE_SUMMARYCELLENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=32918,
-  serialized_end=33023,
+  serialized_start=36397,
+  serialized_end=36502,
 )
 
 _SUMMARYCELLVENDORARCHIVE = _descriptor.Descriptor(
@@ -9563,8 +10260,8 @@ _SUMMARYCELLVENDORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=32789,
-  serialized_end=33023,
+  serialized_start=36268,
+  serialized_end=36502,
 )
 
 
@@ -9602,8 +10299,40 @@ _CATEGORYORDERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=33025,
-  serialized_end=33116,
+  serialized_start=36504,
+  serialized_end=36595,
+)
+
+
+_PIVOTORDERARCHIVE = _descriptor.Descriptor(
+  name='PivotOrderArchive',
+  full_name='TST.PivotOrderArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='uid_map', full_name='TST.PivotOrderArchive.uid_map', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=36597,
+  serialized_end=36649,
 )
 
 
@@ -9648,8 +10377,8 @@ _HEADERNAMEMGRTILEARCHIVE_NAMEFRAGMENTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=33273,
-  serialized_end=33429,
+  serialized_start=36806,
+  serialized_end=36962,
 )
 
 _HEADERNAMEMGRTILEARCHIVE = _descriptor.Descriptor(
@@ -9693,8 +10422,8 @@ _HEADERNAMEMGRTILEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=33119,
-  serialized_end=33429,
+  serialized_start=36652,
+  serialized_end=36962,
 )
 
 
@@ -9767,8 +10496,8 @@ _HEADERNAMEMGRARCHIVE_PERTABLEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=33625,
-  serialized_end=33914,
+  serialized_start=37158,
+  serialized_end=37447,
 )
 
 _HEADERNAMEMGRARCHIVE = _descriptor.Descriptor(
@@ -9819,8 +10548,8 @@ _HEADERNAMEMGRARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=33432,
-  serialized_end=33914,
+  serialized_start=36965,
+  serialized_end=37447,
 )
 
 
@@ -9858,8 +10587,8 @@ _WIDTHHEIGHTCACHEFITTINGENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=33916,
-  serialized_end=33991,
+  serialized_start=37449,
+  serialized_end=37524,
 )
 
 
@@ -9897,8 +10626,8 @@ _WIDTHHEIGHTCACHE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=33993,
-  serialized_end=34099,
+  serialized_start=37526,
+  serialized_end=37632,
 )
 
 
@@ -9929,8 +10658,8 @@ _LAYOUTENGINEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=34101,
-  serialized_end=34173,
+  serialized_start=37634,
+  serialized_end=37706,
 )
 
 _CELLID.fields_by_name['expanded_coord'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
@@ -10018,41 +10747,52 @@ _TABLEINFOARCHIVE.fields_by_name['group_by_uuid'].message_type = TSPMessages__pb
 _TABLEINFOARCHIVE.fields_by_name['hidden_states_uuid'].message_type = TSPMessages__pb2._UUID
 _TABLEINFOARCHIVE.fields_by_name['pasteboard_coord_mapper'].message_type = TSCEArchives__pb2._COORDMAPPERARCHIVE
 _TABLEINFOARCHIVE.fields_by_name['layout_engine'].message_type = _LAYOUTENGINEARCHIVE
+_TABLEINFOARCHIVE.fields_by_name['pivot_data_model'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEINFOARCHIVE.fields_by_name['pivot_order'].message_type = TSPMessages__pb2._REFERENCE
 _CATEGORYINFOARCHIVE.fields_by_name['super'].message_type = TSDArchives__pb2._DRAWABLEARCHIVE
 _CATEGORYINFOARCHIVE.fields_by_name['tableModel'].message_type = TSPMessages__pb2._REFERENCE
 _WPTABLEINFOARCHIVE.fields_by_name['super'].message_type = _TABLEINFOARCHIVE
 _WPTABLEINFOARCHIVE.fields_by_name['storage'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['table_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['body_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['header_row_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['header_column_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['footer_row_text_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['body_cell_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['header_row_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['header_column_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['footer_row_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['table_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['table_name_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['table_name_shape_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['category_level_1_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['category_level_2_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['category_level_3_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['category_level_4_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['category_level_5_text_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_1_text_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_2_text_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_3_text_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_4_text_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_5_text_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['body_cell_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['header_row_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['header_column_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['footer_row_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['category_level_1_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['category_level_2_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['category_level_3_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['category_level_4_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['category_level_5_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_1_text_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_2_text_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_3_text_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_4_text_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_5_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_1_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_2_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_3_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_4_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLESTYLENETWORKARCHIVE.fields_by_name['label_level_5_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['table_name_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLESTYLENETWORKARCHIVE.fields_by_name['table_name_shape_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['pivot_body_summary_row_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['pivot_body_summary_column_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLESTYLENETWORKARCHIVE.fields_by_name['pivot_header_column_summary_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE.fields_by_name['grouping_column_uid'].message_type = TSPMessages__pb2._UUID
+_TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE.fields_by_name['column_uid'].message_type = TSPMessages__pb2._UUID
+_TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE.fields_by_name['direction'].enum_type = _TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE_DIRECTION
+_TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE.containing_type = _TABLEGROUPSORTORDERUIDARCHIVE
+_TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE_DIRECTION.containing_type = _TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE
+_TABLEGROUPSORTORDERUIDARCHIVE.fields_by_name['group_sort_rules'].message_type = _TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE
 _TABLESORTORDERARCHIVE_SORTRULEARCHIVE.fields_by_name['direction'].enum_type = _TABLESORTORDERARCHIVE_SORTRULEARCHIVE_DIRECTION
 _TABLESORTORDERARCHIVE_SORTRULEARCHIVE.containing_type = _TABLESORTORDERARCHIVE
 _TABLESORTORDERARCHIVE_SORTRULEARCHIVE_DIRECTION.containing_type = _TABLESORTORDERARCHIVE_SORTRULEARCHIVE
@@ -10088,7 +10828,7 @@ _TABLEMODELARCHIVE.fields_by_name['provider'].message_type = TSPMessages__pb2._R
 _TABLEMODELARCHIVE.fields_by_name['origin_offset'].message_type = _CELLID
 _TABLEMODELARCHIVE.fields_by_name['hidden_state_formula_owner_for_columns'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['hidden_state_formula_owner_for_rows'].message_type = TSPMessages__pb2._REFERENCE
-_TABLEMODELARCHIVE.fields_by_name['filter_set'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEMODELARCHIVE.fields_by_name['row_filter_set_pre_pivot'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['conditional_style_formula_owner_id'].message_type = TSPMessages__pb2._CFUUIDARCHIVE
 _TABLEMODELARCHIVE.fields_by_name['sort_order'].message_type = _TABLESORTORDERARCHIVE
 _TABLEMODELARCHIVE.fields_by_name['sort_rule_reference_tracker'].message_type = _SORTRULEREFERENCETRACKERARCHIVE
@@ -10101,30 +10841,36 @@ _TABLEMODELARCHIVE.fields_by_name['category_level_2_style'].message_type = TSPMe
 _TABLEMODELARCHIVE.fields_by_name['category_level_3_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['category_level_4_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['category_level_5_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLEMODELARCHIVE.fields_by_name['label_level_1_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLEMODELARCHIVE.fields_by_name['label_level_2_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLEMODELARCHIVE.fields_by_name['label_level_3_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLEMODELARCHIVE.fields_by_name['label_level_4_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLEMODELARCHIVE.fields_by_name['label_level_5_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['category_level_1_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['category_level_2_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['category_level_3_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['category_level_4_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['category_level_5_text_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEMODELARCHIVE.fields_by_name['hidden_states_owner'].message_type = _HIDDENSTATESOWNERARCHIVE
+_TABLEMODELARCHIVE.fields_by_name['label_level_1_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEMODELARCHIVE.fields_by_name['label_level_2_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEMODELARCHIVE.fields_by_name['label_level_3_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEMODELARCHIVE.fields_by_name['label_level_4_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEMODELARCHIVE.fields_by_name['label_level_5_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['label_level_1_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['label_level_2_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['label_level_3_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['label_level_4_text_style'].message_type = TSPMessages__pb2._REFERENCE
 _TABLEMODELARCHIVE.fields_by_name['label_level_5_text_style'].message_type = TSPMessages__pb2._REFERENCE
-_TABLEMODELARCHIVE.fields_by_name['hidden_states_owner'].message_type = _HIDDENSTATESOWNERARCHIVE
-_TABLEMODELARCHIVE.fields_by_name['category_owner'].message_type = _CATEGORYOWNERARCHIVE
+_TABLEMODELARCHIVE.fields_by_name['category_owner_deprecated'].message_type = _CATEGORYOWNERARCHIVE
 _TABLEMODELARCHIVE.fields_by_name['pencil_annotation_owner'].message_type = _PENCILANNOTATIONOWNERARCHIVE
 _TABLEMODELARCHIVE.fields_by_name['haunted_owner'].message_type = TSCEArchives__pb2._HAUNTEDOWNERARCHIVE
+_TABLEMODELARCHIVE.fields_by_name['pivot_owner'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEMODELARCHIVE.fields_by_name['category_owner'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEMODELARCHIVE.fields_by_name['pivot_body_summary_row_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEMODELARCHIVE.fields_by_name['pivot_body_summary_column_style'].message_type = TSPMessages__pb2._REFERENCE
+_TABLEMODELARCHIVE.fields_by_name['pivot_header_column_summary_style'].message_type = TSPMessages__pb2._REFERENCE
 _SUMMARYMODELARCHIVE.fields_by_name['table_info'].message_type = TSPMessages__pb2._REFERENCE
 _SUMMARYMODELARCHIVE.fields_by_name['data_store'].message_type = _DATASTORE
 _SUMMARYMODELARCHIVE.fields_by_name['column_row_uids'].message_type = TSPMessages__pb2._REFERENCE
 _SUMMARYMODELARCHIVE.fields_by_name['aggregate_formula_owner_uuid'].message_type = TSPMessages__pb2._UUID
 _SUMMARYMODELARCHIVE.fields_by_name['summary_cell_vendor'].message_type = TSPMessages__pb2._REFERENCE
+_SUMMARYMODELARCHIVE.fields_by_name['group_sort_order'].message_type = _TABLEGROUPSORTORDERUIDARCHIVE
 _SUMMARYMODELGROUPBYCHANGESTATEARCHIVE.fields_by_name['cell_map'].message_type = TSPMessages__pb2._REFERENCE
 _COLUMNROWUIDMAPARCHIVE.fields_by_name['sorted_column_uids'].message_type = TSPMessages__pb2._UUID
 _COLUMNROWUIDMAPARCHIVE.fields_by_name['sorted_row_uids'].message_type = TSPMessages__pb2._UUID
@@ -10192,6 +10938,16 @@ _CELLDIFFARRAYSEGMENT.fields_by_name['elements'].message_type = _CELLDIFFARCHIVE
 _CELLDIFFMAPARCHIVE.fields_by_name['expanded_cell_ids'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
 _CELLDIFFMAPARCHIVE.fields_by_name['cell_uids'].message_type = _CELLUIDLISTARCHIVE
 _CELLDIFFMAPARCHIVE.fields_by_name['cell_diff_array'].message_type = TSPMessages__pb2._REFERENCE
+_HIERARCHICALCELLDIFFMAPARCHIVE_BOXEDROW.fields_by_name['column_index_set'].message_type = TSPMessages__pb2._INDEXSET
+_HIERARCHICALCELLDIFFMAPARCHIVE_BOXEDROW.fields_by_name['cell_diff_list'].message_type = _CELLDIFFARCHIVE
+_HIERARCHICALCELLDIFFMAPARCHIVE_BOXEDROW.containing_type = _HIERARCHICALCELLDIFFMAPARCHIVE
+_HIERARCHICALCELLDIFFMAPARCHIVE.fields_by_name['row_header_uids'].message_type = TSPMessages__pb2._UUID
+_HIERARCHICALCELLDIFFMAPARCHIVE.fields_by_name['column_header_uids'].message_type = TSPMessages__pb2._UUID
+_HIERARCHICALCELLDIFFMAPARCHIVE.fields_by_name['aggregate_rule_uids'].message_type = TSPMessages__pb2._UUID
+_HIERARCHICALCELLDIFFMAPARCHIVE.fields_by_name['active_flattening_dimension'].enum_type = _TABLEDIMENSIONARCHIVE
+_HIERARCHICALCELLDIFFMAPARCHIVE.fields_by_name['row_value_uids'].message_type = TSPMessages__pb2._UUID
+_HIERARCHICALCELLDIFFMAPARCHIVE.fields_by_name['column_value_uids'].message_type = TSPMessages__pb2._UUID
+_HIERARCHICALCELLDIFFMAPARCHIVE.fields_by_name['cell_diff_storage'].message_type = _HIERARCHICALCELLDIFFMAPARCHIVE_BOXEDROW
 _DOUBLESTYLEMAPARCHIVE_DOUBLESTYLEMAPENTRYARCHIVE.fields_by_name['cell_id'].message_type = _CELLID
 _DOUBLESTYLEMAPARCHIVE_DOUBLESTYLEMAPENTRYARCHIVE.fields_by_name['old_style'].message_type = TSPMessages__pb2._REFERENCE
 _DOUBLESTYLEMAPARCHIVE_DOUBLESTYLEMAPENTRYARCHIVE.fields_by_name['new_style'].message_type = TSPMessages__pb2._REFERENCE
@@ -10220,25 +10976,48 @@ _DEATHHAWKRDAR39989167CELLSELECTIONARCHIVE.fields_by_name['anchor_cell_uid'].mes
 _DEATHHAWKRDAR39989167CELLSELECTIONARCHIVE.fields_by_name['cursor_cell_uid'].message_type = TSPMessages__pb2._UUIDCOORDARCHIVE
 _AUTOFILLSELECTIONARCHIVE.fields_by_name['source_cell_range'].message_type = _CELLRANGE
 _AUTOFILLSELECTIONARCHIVE.fields_by_name['target_cell_range'].message_type = _CELLRANGE
+_FILTERRULEPREPIVOTARCHIVE.fields_by_name['predicate'].message_type = _FORMULAPREDICATEPREPIVOTARCHIVE
 _FILTERRULEARCHIVE.fields_by_name['predicate'].message_type = _FORMULAPREDICATEARCHIVE
 _TABLESTYLEARCHIVE.fields_by_name['super'].message_type = TSSArchives__pb2._STYLEARCHIVE
 _TABLESTYLEARCHIVE.fields_by_name['table_properties'].message_type = TSTStylePropertyArchiving__pb2._TABLESTYLEPROPERTIESARCHIVE
 _CELLSTYLEARCHIVE.fields_by_name['super'].message_type = TSSArchives__pb2._STYLEARCHIVE
 _CELLSTYLEARCHIVE.fields_by_name['cell_properties'].message_type = TSTStylePropertyArchiving__pb2._CELLSTYLEPROPERTIESARCHIVE
+_FORMULAPREDARGARCHIVE.fields_by_name['arg_value'].message_type = _FORMULAPREDARGDATAARCHIVE
+_FORMULAPREDARGARCHIVE.fields_by_name['base_cell_ref'].message_type = TSCEArchives__pb2._CELLREFERENCEARCHIVE
+_FORMULAPREDARGARCHIVE.fields_by_name['relative_cell_ref'].message_type = TSCEArchives__pb2._RELATIVECELLREFARCHIVE
+_FORMULAPREDARGARCHIVE.fields_by_name['category_ref'].message_type = TSCEArchives__pb2._CATEGORYREFERENCEARCHIVE
+_FORMULAPREDARGARCHIVE.fields_by_name['uid_tract_list'].message_type = TSCEArchives__pb2._ASTNODEARRAYARCHIVE_ASTUIDTRACTLIST
+_FORMULAPREDARGARCHIVE.fields_by_name['host_cell_coord'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
+_FORMULAPREDARGARCHIVE.fields_by_name['list_entries'].message_type = _FORMULAPREDARGDATAARCHIVE
+_FORMULAPREDARGARCHIVE.fields_by_name['view_tract_ref'].message_type = TSCEArchives__pb2._VIEWTRACTREFARCHIVE
+_FORMULAPREDICATEPREPIVOTARCHIVE.fields_by_name['formula'].message_type = TSCEArchives__pb2._FORMULAARCHIVE
+_FORMULAPREDICATEARCHIVE.fields_by_name['param_value0'].message_type = _FORMULAPREDARGARCHIVE
+_FORMULAPREDICATEARCHIVE.fields_by_name['param_value1'].message_type = _FORMULAPREDARGARCHIVE
+_FORMULAPREDICATEARCHIVE.fields_by_name['param_value2'].message_type = _FORMULAPREDARGARCHIVE
 _FORMULAPREDICATEARCHIVE.fields_by_name['formula'].message_type = TSCEArchives__pb2._FORMULAARCHIVE
-_FORMULAPREDICATEARCHIVE.fields_by_name['predicate_type'].enum_type = _FORMULAPREDICATEARCHIVE_FORMULAPREDICATETYPE
-_FORMULAPREDICATEARCHIVE.fields_by_name['qualifier1'].enum_type = _FORMULAPREDICATEARCHIVE_QUALIFIERTYPE
-_FORMULAPREDICATEARCHIVE.fields_by_name['qualifier2'].enum_type = _FORMULAPREDICATEARCHIVE_QUALIFIERTYPE
-_FORMULAPREDICATEARCHIVE_FORMULAPREDICATETYPE.containing_type = _FORMULAPREDICATEARCHIVE
-_FORMULAPREDICATEARCHIVE_QUALIFIERTYPE.containing_type = _FORMULAPREDICATEARCHIVE
+_FORMULAPREDICATEARCHIVE.fields_by_name['host_table_uid'].message_type = TSPMessages__pb2._UUID
+_FORMULAPREDICATEARCHIVE.fields_by_name['host_column_uid'].message_type = TSPMessages__pb2._UUID
+_FORMULAPREDICATEARCHIVE.fields_by_name['host_row_uid'].message_type = TSPMessages__pb2._UUID
+_CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULEPREPIVOT.fields_by_name['predicate'].message_type = _FORMULAPREDICATEPREPIVOTARCHIVE
+_CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULEPREPIVOT.fields_by_name['cell_style'].message_type = TSPMessages__pb2._REFERENCE
+_CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULEPREPIVOT.fields_by_name['text_style'].message_type = TSPMessages__pb2._REFERENCE
+_CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULEPREPIVOT.containing_type = _CONDITIONALSTYLESETARCHIVE
 _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE.fields_by_name['predicate'].message_type = _FORMULAPREDICATEARCHIVE
 _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE.fields_by_name['cell_style'].message_type = TSPMessages__pb2._REFERENCE
 _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE.fields_by_name['text_style'].message_type = TSPMessages__pb2._REFERENCE
 _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE.containing_type = _CONDITIONALSTYLESETARCHIVE
-_CONDITIONALSTYLESETARCHIVE.fields_by_name['rules'].message_type = _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE
+_CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULES.fields_by_name['rule'].message_type = _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE
+_CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULES.containing_type = _CONDITIONALSTYLESETARCHIVE
+_CONDITIONALSTYLESETARCHIVE.fields_by_name['rules_prepivot'].message_type = _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULEPREPIVOT
+_CONDITIONALSTYLESETARCHIVE.fields_by_name['rules'].message_type = _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULES
 _FILTERSETARCHIVE.fields_by_name['type'].enum_type = _FILTERSETARCHIVE_FILTERSETTYPE
+_FILTERSETARCHIVE.fields_by_name['filter_rules_prepivot'].message_type = _FILTERRULEPREPIVOTARCHIVE
 _FILTERSETARCHIVE.fields_by_name['filter_rules'].message_type = _FILTERRULEARCHIVE
 _FILTERSETARCHIVE_FILTERSETTYPE.containing_type = _FILTERSETARCHIVE
+_UNIQUEINDEXARCHIVE_UNIQUEINDEXENTRYARCHIVE.fields_by_name['row_uids'].message_type = TSPMessages__pb2._UUID
+_UNIQUEINDEXARCHIVE_UNIQUEINDEXENTRYARCHIVE.containing_type = _UNIQUEINDEXARCHIVE
+_UNIQUEINDEXARCHIVE.fields_by_name['column_uid'].message_type = TSPMessages__pb2._UUID
+_UNIQUEINDEXARCHIVE.fields_by_name['unique_entries'].message_type = _UNIQUEINDEXARCHIVE_UNIQUEINDEXENTRYARCHIVE
 _HIDDENSTATEEXTENTARCHIVE_ROWORCOLUMNSTATE.fields_by_name['row_or_column_uid'].message_type = TSPMessages__pb2._UUID
 _HIDDENSTATEEXTENTARCHIVE_ROWORCOLUMNSTATE.containing_type = _HIDDENSTATEEXTENTARCHIVE
 _HIDDENSTATEEXTENTARCHIVE.fields_by_name['hidden_state_extent_uid'].message_type = TSPMessages__pb2._UUID
@@ -10246,6 +11025,10 @@ _HIDDENSTATEEXTENTARCHIVE.fields_by_name['hidden_states'].message_type = _HIDDEN
 _HIDDENSTATEEXTENTARCHIVE.fields_by_name['row_or_column_direction'].enum_type = _HIDDENSTATEEXTENTARCHIVE_ROWORCOLUMNDIRECTION
 _HIDDENSTATEEXTENTARCHIVE.fields_by_name['threshold_value'].message_type = TSCEArchives__pb2._CELLVALUEARCHIVE
 _HIDDENSTATEEXTENTARCHIVE.fields_by_name['collapsed_group_uids'].message_type = TSPMessages__pb2._UUID
+_HIDDENSTATEEXTENTARCHIVE.fields_by_name['filter_set'].message_type = TSPMessages__pb2._REFERENCE
+_HIDDENSTATEEXTENTARCHIVE.fields_by_name['view_pivot_hidden_indexes'].message_type = TSCEArchives__pb2._INDEXSETARCHIVE
+_HIDDENSTATEEXTENTARCHIVE.fields_by_name['view_only_filtered_indexes'].message_type = TSCEArchives__pb2._INDEXSETARCHIVE
+_HIDDENSTATEEXTENTARCHIVE.fields_by_name['unique_indexes'].message_type = _UNIQUEINDEXARCHIVE
 _HIDDENSTATEEXTENTARCHIVE_ROWORCOLUMNDIRECTION.containing_type = _HIDDENSTATEEXTENTARCHIVE
 _HIDDENSTATESARCHIVE.fields_by_name['hidden_states_uid'].message_type = TSPMessages__pb2._UUID
 _HIDDENSTATESARCHIVE.fields_by_name['column_hidden_state_extent'].message_type = _HIDDENSTATEEXTENTARCHIVE
@@ -10254,6 +11037,7 @@ _HIDDENSTATESOWNERARCHIVE.fields_by_name['owner_uid'].message_type = TSPMessages
 _HIDDENSTATESOWNERARCHIVE.fields_by_name['hidden_states'].message_type = _HIDDENSTATESARCHIVE
 _EXPANDCOLLAPSESTATEARCHIVE.fields_by_name['uids_collapsed'].message_type = TSPMessages__pb2._UUID
 _EXPANDCOLLAPSESTATEARCHIVE.fields_by_name['uids_expanded'].message_type = TSPMessages__pb2._UUID
+_EXPANDCOLLAPSESTATEARCHIVE.fields_by_name['dimension'].enum_type = _TABLEDIMENSIONARCHIVE
 _TOKENATTACHMENTARCHIVE.fields_by_name['super'].message_type = TSWPArchives__pb2._UIGRAPHICALATTACHMENT
 _TOKENATTACHMENTARCHIVE.fields_by_name['expressionNode'].message_type = TSPMessages__pb2._REFERENCE
 _FORMULAARCHIVE.fields_by_name['expressionTree'].message_type = TSPMessages__pb2._REFERENCE
@@ -10308,52 +11092,67 @@ _ACCUMULATORARCHIVE.fields_by_name['min_value'].message_type = TSCEArchives__pb2
 _ACCUMULATORARCHIVE.fields_by_name['max_value'].message_type = TSCEArchives__pb2._CELLVALUEARCHIVE
 _ACCUMULATORARCHIVE.fields_by_name['number_total_value'].message_type = TSCEArchives__pb2._CELLVALUEARCHIVE
 _ACCUMULATORARCHIVE.fields_by_name['first_date_seen'].message_type = TSCEArchives__pb2._CELLVALUEARCHIVE
+_ACCUMULATORARCHIVE.fields_by_name['product_value'].message_type = TSCEArchives__pb2._CELLVALUEARCHIVE
 _GROUPCOLUMNARCHIVE.fields_by_name['column_uid'].message_type = TSPMessages__pb2._UUID
-_GROUPCOLUMNARCHIVE.fields_by_name['grouping_type'].enum_type = _GROUPINGTYPE
 _GROUPCOLUMNARCHIVE.fields_by_name['grouping_functor'].message_type = TSCEArchives__pb2._FUNCTORARCHIVE
 _GROUPCOLUMNARCHIVE.fields_by_name['grouping_column_uid'].message_type = TSPMessages__pb2._UUID
 _GROUPCOLUMNLISTARCHIVE.fields_by_name['group_column'].message_type = _GROUPCOLUMNARCHIVE
 _COLUMNAGGREGATEARCHIVE.fields_by_name['column_uid'].message_type = TSPMessages__pb2._UUID
-_COLUMNAGGREGATEARCHIVE.fields_by_name['agg_type'].enum_type = _AGGREGATETYPE
+_COLUMNAGGREGATEARCHIVE.fields_by_name['column_aggregate_uid'].message_type = TSPMessages__pb2._UUID
+_COLUMNAGGREGATEARCHIVE.fields_by_name['running_total_group_column_uid'].message_type = TSPMessages__pb2._UUID
 _COLUMNAGGREGATELISTARCHIVE.fields_by_name['aggregates'].message_type = _COLUMNAGGREGATEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGNODEARCHIVE.fields_by_name['formula_coord'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGNODEARCHIVE.fields_by_name['accum'].message_type = _ACCUMULATORARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGNODEARCHIVE.fields_by_name['child'].message_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGNODEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGNODEARCHIVE.containing_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_GROUPVALUETUPLEARCHIVE.fields_by_name['value'].message_type = TSCEArchives__pb2._CELLVALUEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_GROUPVALUETUPLEARCHIVE.containing_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE.fields_by_name['row_uids'].message_type = TSPMessages__pb2._UUID
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE.containing_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE.fields_by_name['cell_value'].message_type = TSCEArchives__pb2._CELLVALUEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE.fields_by_name['formats'].message_type = TSKArchives__pb2._FORMATSTRUCTARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE.fields_by_name['row_sets'].message_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE.containing_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['group_uid'].message_type = TSPMessages__pb2._UUID
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['group_value_tuple'].message_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_GROUPVALUETUPLEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['group_cell_value'].message_type = TSCEArchives__pb2._CELLVALUEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['child'].message_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['row_uid'].message_type = TSPMessages__pb2._UUID
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['agg_formula_coords'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['format_manager'].message_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE.containing_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGREGATORARCHIVE.fields_by_name['column_uid'].message_type = TSPMessages__pb2._UUID
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGREGATORARCHIVE.fields_by_name['agg_node'].message_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGNODEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGREGATORARCHIVE.containing_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['group_by_uid'].message_type = TSPMessages__pb2._UUID
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['group_column'].message_type = _GROUPCOLUMNARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['group_node_root'].message_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['aggregator'].message_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGREGATORARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['column_agg_type'].message_type = _COLUMNAGGREGATEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['indirect_agg_type_change_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['grouping_columns_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['grouping_column_headers_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['aggs_in_group_root_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['column_order_changed_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['row_order_changed_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.fields_by_name['row_order_changed_ignoring_recalc_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
-_CATEGORYOWNERARCHIVE_GROUPBYARCHIVE.containing_type = _CATEGORYOWNERARCHIVE
+_GROUPBYARCHIVE_AGGNODEARCHIVE.fields_by_name['formula_coord'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
+_GROUPBYARCHIVE_AGGNODEARCHIVE.fields_by_name['accum'].message_type = _ACCUMULATORARCHIVE
+_GROUPBYARCHIVE_AGGNODEARCHIVE.fields_by_name['child'].message_type = _GROUPBYARCHIVE_AGGNODEARCHIVE
+_GROUPBYARCHIVE_AGGNODEARCHIVE.containing_type = _GROUPBYARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE.fields_by_name['row_uids'].message_type = TSPMessages__pb2._UUID
+_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE.containing_type = _GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE.fields_by_name['cell_value'].message_type = TSCEArchives__pb2._CELLVALUEARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE.fields_by_name['formats'].message_type = TSKArchives__pb2._FORMATSTRUCTARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE.fields_by_name['row_sets'].message_type = _GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE.fields_by_name['row_uid_lookup_sets'].message_type = TSCEArchives__pb2._INDEXSETARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE.containing_type = _GROUPBYARCHIVE_GROUPNODEARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['group_uid'].message_type = TSPMessages__pb2._UUID
+_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['child'].message_type = _GROUPBYARCHIVE_GROUPNODEARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['row_uid'].message_type = TSPMessages__pb2._UUID
+_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['agg_formula_coords'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['format_manager'].message_type = _GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['group_cell_value'].message_type = TSCEArchives__pb2._CELLVALUEARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['row_indexes'].message_type = TSCEArchives__pb2._INDEXSETARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE.fields_by_name['row_lookup_uids'].message_type = TSCEArchives__pb2._INDEXSETARCHIVE
+_GROUPBYARCHIVE_GROUPNODEARCHIVE.containing_type = _GROUPBYARCHIVE
+_GROUPBYARCHIVE_AGGREGATORARCHIVE.fields_by_name['column_uid'].message_type = TSPMessages__pb2._UUID
+_GROUPBYARCHIVE_AGGREGATORARCHIVE.fields_by_name['agg_node'].message_type = _GROUPBYARCHIVE_AGGNODEARCHIVE
+_GROUPBYARCHIVE_AGGREGATORARCHIVE.containing_type = _GROUPBYARCHIVE
+_GROUPBYARCHIVE.fields_by_name['group_by_uid'].message_type = TSPMessages__pb2._UUID
+_GROUPBYARCHIVE.fields_by_name['group_column'].message_type = _GROUPCOLUMNARCHIVE
+_GROUPBYARCHIVE.fields_by_name['group_node_root'].message_type = _GROUPBYARCHIVE_GROUPNODEARCHIVE
+_GROUPBYARCHIVE.fields_by_name['aggregator'].message_type = _GROUPBYARCHIVE_AGGREGATORARCHIVE
+_GROUPBYARCHIVE.fields_by_name['column_agg_type'].message_type = _COLUMNAGGREGATEARCHIVE
+_GROUPBYARCHIVE.fields_by_name['indirect_agg_type_change_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
+_GROUPBYARCHIVE.fields_by_name['grouping_columns_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
+_GROUPBYARCHIVE.fields_by_name['aggs_in_group_root_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
+_GROUPBYARCHIVE.fields_by_name['grouping_column_headers_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
+_GROUPBYARCHIVE.fields_by_name['column_order_changed_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
+_GROUPBYARCHIVE.fields_by_name['row_order_changed_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
+_GROUPBYARCHIVE.fields_by_name['row_order_changed_ignoring_recalc_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
+_GROUPBYARCHIVE.fields_by_name['row_uid_lookup'].message_type = TSCEArchives__pb2._UIDLOOKUPLISTARCHIVE
+_GROUPBYARCHIVE.fields_by_name['hidden_states_changed_formula'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
 _CATEGORYOWNERARCHIVE.fields_by_name['owner_uid'].message_type = TSPMessages__pb2._UUID
-_CATEGORYOWNERARCHIVE.fields_by_name['group_by'].message_type = _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE
+_CATEGORYOWNERARCHIVE.fields_by_name['group_by'].message_type = _GROUPBYARCHIVE
+_CATEGORYOWNERREFARCHIVE.fields_by_name['group_by'].message_type = TSPMessages__pb2._REFERENCE
+_PIVOTGROUPINGCOLUMNOPTIONSMAPARCHIVE.fields_by_name['uids'].message_type = TSPMessages__pb2._UUID
+_PIVOTGROUPINGCOLUMNOPTIONSMAPARCHIVE.fields_by_name['aggregate_rule_uids'].message_type = TSPMessages__pb2._UUID
+_PIVOTOWNERARCHIVE.fields_by_name['pivot_owner_uid'].message_type = TSPMessages__pb2._UUID
+_PIVOTOWNERARCHIVE.fields_by_name['grouping_columns_for_rows'].message_type = _GROUPCOLUMNLISTARCHIVE
+_PIVOTOWNERARCHIVE.fields_by_name['grouping_columns_for_columns'].message_type = _GROUPCOLUMNLISTARCHIVE
+_PIVOTOWNERARCHIVE.fields_by_name['aggregate_columns'].message_type = _COLUMNAGGREGATELISTARCHIVE
+_PIVOTOWNERARCHIVE.fields_by_name['source_table_uid'].message_type = TSPMessages__pb2._UUID
+_PIVOTOWNERARCHIVE.fields_by_name['grpg_col_options_map'].message_type = TSPMessages__pb2._REFERENCE
+_PIVOTOWNERARCHIVE.fields_by_name['formula_store'].message_type = _FORMULASTOREARCHIVE
+_PIVOTOWNERARCHIVE.fields_by_name['refresh_uid'].message_type = TSPMessages__pb2._UUID
+_PIVOTOWNERARCHIVE.fields_by_name['row_column_rule_change_uid'].message_type = TSPMessages__pb2._UUID
+_PIVOTOWNERARCHIVE.fields_by_name['aggregate_rule_change_uid'].message_type = TSPMessages__pb2._UUID
 _RICHTEXTPAYLOADARCHIVE.fields_by_name['storage'].message_type = TSPMessages__pb2._REFERENCE
 _RICHTEXTPAYLOADARCHIVE.fields_by_name['range'].message_type = TSPMessages__pb2._RANGE
 _RICHTEXTPAYLOADARCHIVE.fields_by_name['cellid'].message_type = _CELLID
@@ -10365,9 +11164,8 @@ _CELLBORDERARCHIVE.fields_by_name['right_stroke'].message_type = TSDArchives__pb
 _CELLBORDERARCHIVE.fields_by_name['bottom_stroke'].message_type = TSDArchives__pb2._STROKEARCHIVE
 _CELLBORDERARCHIVE.fields_by_name['left_stroke'].message_type = TSDArchives__pb2._STROKEARCHIVE
 _DEFAULTCELLSTYLESCONTAINERARCHIVE.fields_by_name['table_style_network'].message_type = TSPMessages__pb2._REFERENCE
-_DEFAULTCELLSTYLESCONTAINERARCHIVE.fields_by_name['header_row_uids'].message_type = TSPMessages__pb2._UUID
-_DEFAULTCELLSTYLESCONTAINERARCHIVE.fields_by_name['footer_row_uids'].message_type = TSPMessages__pb2._UUID
-_DEFAULTCELLSTYLESCONTAINERARCHIVE.fields_by_name['header_column_uids'].message_type = TSPMessages__pb2._UUID
+_DEFAULTCELLSTYLESCONTAINERARCHIVE.fields_by_name['row_uids'].message_type = TSPMessages__pb2._UUID
+_DEFAULTCELLSTYLESCONTAINERARCHIVE.fields_by_name['column_uids'].message_type = TSPMessages__pb2._UUID
 _MULTITABLEREMAPPERARCHIVE.fields_by_name['mapping_purpose'].enum_type = _MULTITABLEREMAPPERARCHIVE_PURPOSE
 _MULTITABLEREMAPPERARCHIVE.fields_by_name['owner_uid_mapper'].message_type = TSCEArchives__pb2._OWNERUIDMAPPERARCHIVE
 _MULTITABLEREMAPPERARCHIVE.fields_by_name['backing_tables_for_charts'].message_type = TSPMessages__pb2._UUIDMAPARCHIVE
@@ -10391,6 +11189,7 @@ _SUMMARYCELLVENDORARCHIVE.fields_by_name['table_info'].message_type = TSPMessage
 _SUMMARYCELLVENDORARCHIVE.fields_by_name['entries'].message_type = _SUMMARYCELLVENDORARCHIVE_SUMMARYCELLENTRY
 _CATEGORYORDERARCHIVE.fields_by_name['table_info'].message_type = TSPMessages__pb2._REFERENCE
 _CATEGORYORDERARCHIVE.fields_by_name['uid_map'].message_type = TSPMessages__pb2._REFERENCE
+_PIVOTORDERARCHIVE.fields_by_name['uid_map'].message_type = TSPMessages__pb2._REFERENCE
 _HEADERNAMEMGRTILEARCHIVE_NAMEFRAGMENTARCHIVE.fields_by_name['name_precedent'].message_type = TSCEArchives__pb2._CELLCOORDINATEARCHIVE
 _HEADERNAMEMGRTILEARCHIVE_NAMEFRAGMENTARCHIVE.fields_by_name['uses_of_name_fragment'].message_type = TSCEArchives__pb2._UIDCELLREFSETARCHIVE
 _HEADERNAMEMGRTILEARCHIVE_NAMEFRAGMENTARCHIVE.containing_type = _HEADERNAMEMGRTILEARCHIVE
@@ -10433,6 +11232,7 @@ DESCRIPTOR.message_types_by_name['TableInfoArchive'] = _TABLEINFOARCHIVE
 DESCRIPTOR.message_types_by_name['CategoryInfoArchive'] = _CATEGORYINFOARCHIVE
 DESCRIPTOR.message_types_by_name['WPTableInfoArchive'] = _WPTABLEINFOARCHIVE
 DESCRIPTOR.message_types_by_name['TableStyleNetworkArchive'] = _TABLESTYLENETWORKARCHIVE
+DESCRIPTOR.message_types_by_name['TableGroupSortOrderUIDArchive'] = _TABLEGROUPSORTORDERUIDARCHIVE
 DESCRIPTOR.message_types_by_name['TableSortOrderArchive'] = _TABLESORTORDERARCHIVE
 DESCRIPTOR.message_types_by_name['TableSortOrderUIDArchive'] = _TABLESORTORDERUIDARCHIVE
 DESCRIPTOR.message_types_by_name['SortRuleReferenceTrackerArchive'] = _SORTRULEREFERENCETRACKERARCHIVE
@@ -10459,6 +11259,7 @@ DESCRIPTOR.message_types_by_name['CellDiffArchive'] = _CELLDIFFARCHIVE
 DESCRIPTOR.message_types_by_name['CellDiffArray'] = _CELLDIFFARRAY
 DESCRIPTOR.message_types_by_name['CellDiffArraySegment'] = _CELLDIFFARRAYSEGMENT
 DESCRIPTOR.message_types_by_name['CellDiffMapArchive'] = _CELLDIFFMAPARCHIVE
+DESCRIPTOR.message_types_by_name['HierarchicalCellDiffMapArchive'] = _HIERARCHICALCELLDIFFMAPARCHIVE
 DESCRIPTOR.message_types_by_name['DoubleStyleMapArchive'] = _DOUBLESTYLEMAPARCHIVE
 DESCRIPTOR.message_types_by_name['StyleTableMapArchive'] = _STYLETABLEMAPARCHIVE
 DESCRIPTOR.message_types_by_name['SelectionArchive'] = _SELECTIONARCHIVE
@@ -10468,12 +11269,17 @@ DESCRIPTOR.message_types_by_name['ControlCellSelectionArchive'] = _CONTROLCELLSE
 DESCRIPTOR.message_types_by_name['StockCellSelectionArchive'] = _STOCKCELLSELECTIONARCHIVE
 DESCRIPTOR.message_types_by_name['TableNameSelectionArchive'] = _TABLENAMESELECTIONARCHIVE
 DESCRIPTOR.message_types_by_name['AutofillSelectionArchive'] = _AUTOFILLSELECTIONARCHIVE
+DESCRIPTOR.message_types_by_name['FilterRulePrePivotArchive'] = _FILTERRULEPREPIVOTARCHIVE
 DESCRIPTOR.message_types_by_name['FilterRuleArchive'] = _FILTERRULEARCHIVE
 DESCRIPTOR.message_types_by_name['TableStyleArchive'] = _TABLESTYLEARCHIVE
 DESCRIPTOR.message_types_by_name['CellStyleArchive'] = _CELLSTYLEARCHIVE
+DESCRIPTOR.message_types_by_name['FormulaPredArgDataArchive'] = _FORMULAPREDARGDATAARCHIVE
+DESCRIPTOR.message_types_by_name['FormulaPredArgArchive'] = _FORMULAPREDARGARCHIVE
+DESCRIPTOR.message_types_by_name['FormulaPredicatePrePivotArchive'] = _FORMULAPREDICATEPREPIVOTARCHIVE
 DESCRIPTOR.message_types_by_name['FormulaPredicateArchive'] = _FORMULAPREDICATEARCHIVE
 DESCRIPTOR.message_types_by_name['ConditionalStyleSetArchive'] = _CONDITIONALSTYLESETARCHIVE
 DESCRIPTOR.message_types_by_name['FilterSetArchive'] = _FILTERSETARCHIVE
+DESCRIPTOR.message_types_by_name['UniqueIndexArchive'] = _UNIQUEINDEXARCHIVE
 DESCRIPTOR.message_types_by_name['HiddenStateExtentArchive'] = _HIDDENSTATEEXTENTARCHIVE
 DESCRIPTOR.message_types_by_name['HiddenStatesArchive'] = _HIDDENSTATESARCHIVE
 DESCRIPTOR.message_types_by_name['HiddenStatesOwnerArchive'] = _HIDDENSTATESOWNERARCHIVE
@@ -10513,7 +11319,11 @@ DESCRIPTOR.message_types_by_name['GroupColumnArchive'] = _GROUPCOLUMNARCHIVE
 DESCRIPTOR.message_types_by_name['GroupColumnListArchive'] = _GROUPCOLUMNLISTARCHIVE
 DESCRIPTOR.message_types_by_name['ColumnAggregateArchive'] = _COLUMNAGGREGATEARCHIVE
 DESCRIPTOR.message_types_by_name['ColumnAggregateListArchive'] = _COLUMNAGGREGATELISTARCHIVE
+DESCRIPTOR.message_types_by_name['GroupByArchive'] = _GROUPBYARCHIVE
 DESCRIPTOR.message_types_by_name['CategoryOwnerArchive'] = _CATEGORYOWNERARCHIVE
+DESCRIPTOR.message_types_by_name['CategoryOwnerRefArchive'] = _CATEGORYOWNERREFARCHIVE
+DESCRIPTOR.message_types_by_name['PivotGroupingColumnOptionsMapArchive'] = _PIVOTGROUPINGCOLUMNOPTIONSMAPARCHIVE
+DESCRIPTOR.message_types_by_name['PivotOwnerArchive'] = _PIVOTOWNERARCHIVE
 DESCRIPTOR.message_types_by_name['RichTextPayloadArchive'] = _RICHTEXTPAYLOADARCHIVE
 DESCRIPTOR.message_types_by_name['FormulaEqualsTokenAttachmentArchive'] = _FORMULAEQUALSTOKENATTACHMENTARCHIVE
 DESCRIPTOR.message_types_by_name['CellFillStandIn'] = _CELLFILLSTANDIN
@@ -10524,6 +11334,7 @@ DESCRIPTOR.message_types_by_name['MultiTableRemapperArchive'] = _MULTITABLEREMAP
 DESCRIPTOR.message_types_by_name['ChangePropagationMapWrapper'] = _CHANGEPROPAGATIONMAPWRAPPER
 DESCRIPTOR.message_types_by_name['SummaryCellVendorArchive'] = _SUMMARYCELLVENDORARCHIVE
 DESCRIPTOR.message_types_by_name['CategoryOrderArchive'] = _CATEGORYORDERARCHIVE
+DESCRIPTOR.message_types_by_name['PivotOrderArchive'] = _PIVOTORDERARCHIVE
 DESCRIPTOR.message_types_by_name['HeaderNameMgrTileArchive'] = _HEADERNAMEMGRTILEARCHIVE
 DESCRIPTOR.message_types_by_name['HeaderNameMgrArchive'] = _HEADERNAMEMGRARCHIVE
 DESCRIPTOR.message_types_by_name['WidthHeightCacheFittingEntry'] = _WIDTHHEIGHTCACHEFITTINGENTRY
@@ -10536,8 +11347,6 @@ DESCRIPTOR.enum_types_by_name['SelectionTypeArchive'] = _SELECTIONTYPEARCHIVE
 DESCRIPTOR.enum_types_by_name['FillDirectionArchive'] = _FILLDIRECTIONARCHIVE
 DESCRIPTOR.enum_types_by_name['MergeActionArchive'] = _MERGEACTIONARCHIVE
 DESCRIPTOR.enum_types_by_name['HideShowActionArchive'] = _HIDESHOWACTIONARCHIVE
-DESCRIPTOR.enum_types_by_name['GroupingType'] = _GROUPINGTYPE
-DESCRIPTOR.enum_types_by_name['AggregateType'] = _AGGREGATETYPE
 DESCRIPTOR.extensions_by_name['import_warning_set'] = import_warning_set
 DESCRIPTOR.extensions_by_name['format_and_value'] = format_and_value
 DESCRIPTOR.extensions_by_name['cell_border'] = cell_border
@@ -10768,6 +11577,21 @@ TableStyleNetworkArchive = _reflection.GeneratedProtocolMessageType('TableStyleN
   })
 _sym_db.RegisterMessage(TableStyleNetworkArchive)
 
+TableGroupSortOrderUIDArchive = _reflection.GeneratedProtocolMessageType('TableGroupSortOrderUIDArchive', (_message.Message,), {
+
+  'GroupSortRuleUIDArchive' : _reflection.GeneratedProtocolMessageType('GroupSortRuleUIDArchive', (_message.Message,), {
+    'DESCRIPTOR' : _TABLEGROUPSORTORDERUIDARCHIVE_GROUPSORTRULEUIDARCHIVE,
+    '__module__' : 'TSTArchives_pb2'
+    # @@protoc_insertion_point(class_scope:TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive)
+    })
+  ,
+  'DESCRIPTOR' : _TABLEGROUPSORTORDERUIDARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.TableGroupSortOrderUIDArchive)
+  })
+_sym_db.RegisterMessage(TableGroupSortOrderUIDArchive)
+_sym_db.RegisterMessage(TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive)
+
 TableSortOrderArchive = _reflection.GeneratedProtocolMessageType('TableSortOrderArchive', (_message.Message,), {
 
   'SortRuleArchive' : _reflection.GeneratedProtocolMessageType('SortRuleArchive', (_message.Message,), {
@@ -10990,6 +11814,21 @@ CellDiffMapArchive = _reflection.GeneratedProtocolMessageType('CellDiffMapArchiv
   })
 _sym_db.RegisterMessage(CellDiffMapArchive)
 
+HierarchicalCellDiffMapArchive = _reflection.GeneratedProtocolMessageType('HierarchicalCellDiffMapArchive', (_message.Message,), {
+
+  'BoxedRow' : _reflection.GeneratedProtocolMessageType('BoxedRow', (_message.Message,), {
+    'DESCRIPTOR' : _HIERARCHICALCELLDIFFMAPARCHIVE_BOXEDROW,
+    '__module__' : 'TSTArchives_pb2'
+    # @@protoc_insertion_point(class_scope:TST.HierarchicalCellDiffMapArchive.BoxedRow)
+    })
+  ,
+  'DESCRIPTOR' : _HIERARCHICALCELLDIFFMAPARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.HierarchicalCellDiffMapArchive)
+  })
+_sym_db.RegisterMessage(HierarchicalCellDiffMapArchive)
+_sym_db.RegisterMessage(HierarchicalCellDiffMapArchive.BoxedRow)
+
 DoubleStyleMapArchive = _reflection.GeneratedProtocolMessageType('DoubleStyleMapArchive', (_message.Message,), {
 
   'DoubleStyleMapEntryArchive' : _reflection.GeneratedProtocolMessageType('DoubleStyleMapEntryArchive', (_message.Message,), {
@@ -11069,6 +11908,13 @@ AutofillSelectionArchive = _reflection.GeneratedProtocolMessageType('AutofillSel
   })
 _sym_db.RegisterMessage(AutofillSelectionArchive)
 
+FilterRulePrePivotArchive = _reflection.GeneratedProtocolMessageType('FilterRulePrePivotArchive', (_message.Message,), {
+  'DESCRIPTOR' : _FILTERRULEPREPIVOTARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.FilterRulePrePivotArchive)
+  })
+_sym_db.RegisterMessage(FilterRulePrePivotArchive)
+
 FilterRuleArchive = _reflection.GeneratedProtocolMessageType('FilterRuleArchive', (_message.Message,), {
   'DESCRIPTOR' : _FILTERRULEARCHIVE,
   '__module__' : 'TSTArchives_pb2'
@@ -11090,6 +11936,27 @@ CellStyleArchive = _reflection.GeneratedProtocolMessageType('CellStyleArchive', 
   })
 _sym_db.RegisterMessage(CellStyleArchive)
 
+FormulaPredArgDataArchive = _reflection.GeneratedProtocolMessageType('FormulaPredArgDataArchive', (_message.Message,), {
+  'DESCRIPTOR' : _FORMULAPREDARGDATAARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.FormulaPredArgDataArchive)
+  })
+_sym_db.RegisterMessage(FormulaPredArgDataArchive)
+
+FormulaPredArgArchive = _reflection.GeneratedProtocolMessageType('FormulaPredArgArchive', (_message.Message,), {
+  'DESCRIPTOR' : _FORMULAPREDARGARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.FormulaPredArgArchive)
+  })
+_sym_db.RegisterMessage(FormulaPredArgArchive)
+
+FormulaPredicatePrePivotArchive = _reflection.GeneratedProtocolMessageType('FormulaPredicatePrePivotArchive', (_message.Message,), {
+  'DESCRIPTOR' : _FORMULAPREDICATEPREPIVOTARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.FormulaPredicatePrePivotArchive)
+  })
+_sym_db.RegisterMessage(FormulaPredicatePrePivotArchive)
+
 FormulaPredicateArchive = _reflection.GeneratedProtocolMessageType('FormulaPredicateArchive', (_message.Message,), {
   'DESCRIPTOR' : _FORMULAPREDICATEARCHIVE,
   '__module__' : 'TSTArchives_pb2'
@@ -11099,10 +11966,24 @@ _sym_db.RegisterMessage(FormulaPredicateArchive)
 
 ConditionalStyleSetArchive = _reflection.GeneratedProtocolMessageType('ConditionalStyleSetArchive', (_message.Message,), {
 
+  'ConditionalStyleRulePrePivot' : _reflection.GeneratedProtocolMessageType('ConditionalStyleRulePrePivot', (_message.Message,), {
+    'DESCRIPTOR' : _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULEPREPIVOT,
+    '__module__' : 'TSTArchives_pb2'
+    # @@protoc_insertion_point(class_scope:TST.ConditionalStyleSetArchive.ConditionalStyleRulePrePivot)
+    })
+  ,
+
   'ConditionalStyleRule' : _reflection.GeneratedProtocolMessageType('ConditionalStyleRule', (_message.Message,), {
     'DESCRIPTOR' : _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULE,
     '__module__' : 'TSTArchives_pb2'
     # @@protoc_insertion_point(class_scope:TST.ConditionalStyleSetArchive.ConditionalStyleRule)
+    })
+  ,
+
+  'ConditionalStyleRules' : _reflection.GeneratedProtocolMessageType('ConditionalStyleRules', (_message.Message,), {
+    'DESCRIPTOR' : _CONDITIONALSTYLESETARCHIVE_CONDITIONALSTYLERULES,
+    '__module__' : 'TSTArchives_pb2'
+    # @@protoc_insertion_point(class_scope:TST.ConditionalStyleSetArchive.ConditionalStyleRules)
     })
   ,
   'DESCRIPTOR' : _CONDITIONALSTYLESETARCHIVE,
@@ -11110,7 +11991,9 @@ ConditionalStyleSetArchive = _reflection.GeneratedProtocolMessageType('Condition
   # @@protoc_insertion_point(class_scope:TST.ConditionalStyleSetArchive)
   })
 _sym_db.RegisterMessage(ConditionalStyleSetArchive)
+_sym_db.RegisterMessage(ConditionalStyleSetArchive.ConditionalStyleRulePrePivot)
 _sym_db.RegisterMessage(ConditionalStyleSetArchive.ConditionalStyleRule)
+_sym_db.RegisterMessage(ConditionalStyleSetArchive.ConditionalStyleRules)
 
 FilterSetArchive = _reflection.GeneratedProtocolMessageType('FilterSetArchive', (_message.Message,), {
   'DESCRIPTOR' : _FILTERSETARCHIVE,
@@ -11118,6 +12001,21 @@ FilterSetArchive = _reflection.GeneratedProtocolMessageType('FilterSetArchive', 
   # @@protoc_insertion_point(class_scope:TST.FilterSetArchive)
   })
 _sym_db.RegisterMessage(FilterSetArchive)
+
+UniqueIndexArchive = _reflection.GeneratedProtocolMessageType('UniqueIndexArchive', (_message.Message,), {
+
+  'UniqueIndexEntryArchive' : _reflection.GeneratedProtocolMessageType('UniqueIndexEntryArchive', (_message.Message,), {
+    'DESCRIPTOR' : _UNIQUEINDEXARCHIVE_UNIQUEINDEXENTRYARCHIVE,
+    '__module__' : 'TSTArchives_pb2'
+    # @@protoc_insertion_point(class_scope:TST.UniqueIndexArchive.UniqueIndexEntryArchive)
+    })
+  ,
+  'DESCRIPTOR' : _UNIQUEINDEXARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.UniqueIndexArchive)
+  })
+_sym_db.RegisterMessage(UniqueIndexArchive)
+_sym_db.RegisterMessage(UniqueIndexArchive.UniqueIndexEntryArchive)
 
 HiddenStateExtentArchive = _reflection.GeneratedProtocolMessageType('HiddenStateExtentArchive', (_message.Message,), {
 
@@ -11408,68 +12306,80 @@ ColumnAggregateListArchive = _reflection.GeneratedProtocolMessageType('ColumnAgg
   })
 _sym_db.RegisterMessage(ColumnAggregateListArchive)
 
-CategoryOwnerArchive = _reflection.GeneratedProtocolMessageType('CategoryOwnerArchive', (_message.Message,), {
+GroupByArchive = _reflection.GeneratedProtocolMessageType('GroupByArchive', (_message.Message,), {
 
-  'GroupByArchive' : _reflection.GeneratedProtocolMessageType('GroupByArchive', (_message.Message,), {
-
-    'AggNodeArchive' : _reflection.GeneratedProtocolMessageType('AggNodeArchive', (_message.Message,), {
-      'DESCRIPTOR' : _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGNODEARCHIVE,
-      '__module__' : 'TSTArchives_pb2'
-      # @@protoc_insertion_point(class_scope:TST.CategoryOwnerArchive.GroupByArchive.AggNodeArchive)
-      })
-    ,
-
-    'GroupNodeArchive' : _reflection.GeneratedProtocolMessageType('GroupNodeArchive', (_message.Message,), {
-
-      'GroupValueTupleArchive' : _reflection.GeneratedProtocolMessageType('GroupValueTupleArchive', (_message.Message,), {
-        'DESCRIPTOR' : _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_GROUPVALUETUPLEARCHIVE,
-        '__module__' : 'TSTArchives_pb2'
-        # @@protoc_insertion_point(class_scope:TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.GroupValueTupleArchive)
-        })
-      ,
-
-      'FormatManagerArchive' : _reflection.GeneratedProtocolMessageType('FormatManagerArchive', (_message.Message,), {
-
-        'RowSetArchive' : _reflection.GeneratedProtocolMessageType('RowSetArchive', (_message.Message,), {
-          'DESCRIPTOR' : _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE,
-          '__module__' : 'TSTArchives_pb2'
-          # @@protoc_insertion_point(class_scope:TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive)
-          })
-        ,
-        'DESCRIPTOR' : _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE,
-        '__module__' : 'TSTArchives_pb2'
-        # @@protoc_insertion_point(class_scope:TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive)
-        })
-      ,
-      'DESCRIPTOR' : _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_GROUPNODEARCHIVE,
-      '__module__' : 'TSTArchives_pb2'
-      # @@protoc_insertion_point(class_scope:TST.CategoryOwnerArchive.GroupByArchive.GroupNodeArchive)
-      })
-    ,
-
-    'AggregatorArchive' : _reflection.GeneratedProtocolMessageType('AggregatorArchive', (_message.Message,), {
-      'DESCRIPTOR' : _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE_AGGREGATORARCHIVE,
-      '__module__' : 'TSTArchives_pb2'
-      # @@protoc_insertion_point(class_scope:TST.CategoryOwnerArchive.GroupByArchive.AggregatorArchive)
-      })
-    ,
-    'DESCRIPTOR' : _CATEGORYOWNERARCHIVE_GROUPBYARCHIVE,
+  'AggNodeArchive' : _reflection.GeneratedProtocolMessageType('AggNodeArchive', (_message.Message,), {
+    'DESCRIPTOR' : _GROUPBYARCHIVE_AGGNODEARCHIVE,
     '__module__' : 'TSTArchives_pb2'
-    # @@protoc_insertion_point(class_scope:TST.CategoryOwnerArchive.GroupByArchive)
+    # @@protoc_insertion_point(class_scope:TST.GroupByArchive.AggNodeArchive)
     })
   ,
+
+  'GroupNodeArchive' : _reflection.GeneratedProtocolMessageType('GroupNodeArchive', (_message.Message,), {
+
+    'FormatManagerArchive' : _reflection.GeneratedProtocolMessageType('FormatManagerArchive', (_message.Message,), {
+
+      'RowSetArchive' : _reflection.GeneratedProtocolMessageType('RowSetArchive', (_message.Message,), {
+        'DESCRIPTOR' : _GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE_ROWSETARCHIVE,
+        '__module__' : 'TSTArchives_pb2'
+        # @@protoc_insertion_point(class_scope:TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive)
+        })
+      ,
+      'DESCRIPTOR' : _GROUPBYARCHIVE_GROUPNODEARCHIVE_FORMATMANAGERARCHIVE,
+      '__module__' : 'TSTArchives_pb2'
+      # @@protoc_insertion_point(class_scope:TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive)
+      })
+    ,
+    'DESCRIPTOR' : _GROUPBYARCHIVE_GROUPNODEARCHIVE,
+    '__module__' : 'TSTArchives_pb2'
+    # @@protoc_insertion_point(class_scope:TST.GroupByArchive.GroupNodeArchive)
+    })
+  ,
+
+  'AggregatorArchive' : _reflection.GeneratedProtocolMessageType('AggregatorArchive', (_message.Message,), {
+    'DESCRIPTOR' : _GROUPBYARCHIVE_AGGREGATORARCHIVE,
+    '__module__' : 'TSTArchives_pb2'
+    # @@protoc_insertion_point(class_scope:TST.GroupByArchive.AggregatorArchive)
+    })
+  ,
+  'DESCRIPTOR' : _GROUPBYARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.GroupByArchive)
+  })
+_sym_db.RegisterMessage(GroupByArchive)
+_sym_db.RegisterMessage(GroupByArchive.AggNodeArchive)
+_sym_db.RegisterMessage(GroupByArchive.GroupNodeArchive)
+_sym_db.RegisterMessage(GroupByArchive.GroupNodeArchive.FormatManagerArchive)
+_sym_db.RegisterMessage(GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive)
+_sym_db.RegisterMessage(GroupByArchive.AggregatorArchive)
+
+CategoryOwnerArchive = _reflection.GeneratedProtocolMessageType('CategoryOwnerArchive', (_message.Message,), {
   'DESCRIPTOR' : _CATEGORYOWNERARCHIVE,
   '__module__' : 'TSTArchives_pb2'
   # @@protoc_insertion_point(class_scope:TST.CategoryOwnerArchive)
   })
 _sym_db.RegisterMessage(CategoryOwnerArchive)
-_sym_db.RegisterMessage(CategoryOwnerArchive.GroupByArchive)
-_sym_db.RegisterMessage(CategoryOwnerArchive.GroupByArchive.AggNodeArchive)
-_sym_db.RegisterMessage(CategoryOwnerArchive.GroupByArchive.GroupNodeArchive)
-_sym_db.RegisterMessage(CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.GroupValueTupleArchive)
-_sym_db.RegisterMessage(CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive)
-_sym_db.RegisterMessage(CategoryOwnerArchive.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive)
-_sym_db.RegisterMessage(CategoryOwnerArchive.GroupByArchive.AggregatorArchive)
+
+CategoryOwnerRefArchive = _reflection.GeneratedProtocolMessageType('CategoryOwnerRefArchive', (_message.Message,), {
+  'DESCRIPTOR' : _CATEGORYOWNERREFARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.CategoryOwnerRefArchive)
+  })
+_sym_db.RegisterMessage(CategoryOwnerRefArchive)
+
+PivotGroupingColumnOptionsMapArchive = _reflection.GeneratedProtocolMessageType('PivotGroupingColumnOptionsMapArchive', (_message.Message,), {
+  'DESCRIPTOR' : _PIVOTGROUPINGCOLUMNOPTIONSMAPARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.PivotGroupingColumnOptionsMapArchive)
+  })
+_sym_db.RegisterMessage(PivotGroupingColumnOptionsMapArchive)
+
+PivotOwnerArchive = _reflection.GeneratedProtocolMessageType('PivotOwnerArchive', (_message.Message,), {
+  'DESCRIPTOR' : _PIVOTOWNERARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.PivotOwnerArchive)
+  })
+_sym_db.RegisterMessage(PivotOwnerArchive)
 
 RichTextPayloadArchive = _reflection.GeneratedProtocolMessageType('RichTextPayloadArchive', (_message.Message,), {
   'DESCRIPTOR' : _RICHTEXTPAYLOADARCHIVE,
@@ -11548,6 +12458,13 @@ CategoryOrderArchive = _reflection.GeneratedProtocolMessageType('CategoryOrderAr
   # @@protoc_insertion_point(class_scope:TST.CategoryOrderArchive)
   })
 _sym_db.RegisterMessage(CategoryOrderArchive)
+
+PivotOrderArchive = _reflection.GeneratedProtocolMessageType('PivotOrderArchive', (_message.Message,), {
+  'DESCRIPTOR' : _PIVOTORDERARCHIVE,
+  '__module__' : 'TSTArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.PivotOrderArchive)
+  })
+_sym_db.RegisterMessage(PivotOrderArchive)
 
 HeaderNameMgrTileArchive = _reflection.GeneratedProtocolMessageType('HeaderNameMgrTileArchive', (_message.Message,), {
 

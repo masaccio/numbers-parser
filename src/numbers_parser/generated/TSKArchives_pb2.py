@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x11TSKArchives.proto\x12\x03TSK\x1a\x11TSPMessages.proto\"Z\n\x08TreeNode\x12\x0c\n\x04name\x18\x01 \x01(\t\x12 \n\x08\x63hildren\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x06object\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\"f\n\x17LocalCommandHistoryItem\x12\x1f\n\x07\x63ommand\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12selection_behavior\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"@\n\x18LocalCommandHistoryArray\x12$\n\x0blarge_array\x18\x01 \x02(\x0b\x32\x0f.TSP.LargeArray\"c\n\x1fLocalCommandHistoryArraySegment\x12@\n\x1alarge_object_array_segment\x18\x01 \x02(\x0b\x32\x1c.TSP.LargeObjectArraySegment\"l\n\x13LocalCommandHistory\x12\x12\n\nundo_count\x18\x01 \x02(\r\x12#\n\x0bitems_array\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1c\n\x14\x66ixed_radar_13365177\x18\n \x01(\x08\"H\n CollaborationCommandHistoryArray\x12$\n\x0blarge_array\x18\x01 \x02(\x0b\x32\x0f.TSP.LargeArray\"k\n\'CollaborationCommandHistoryArraySegment\x12@\n\x1alarge_object_array_segment\x18\x01 \x02(\x0b\x32\x1c.TSP.LargeObjectArraySegment\"\x9e\x02\n\x1b\x43ollaborationCommandHistory\x12#\n\x10local_identifier\x18\x01 \x01(\x0b\x32\t.TSP.UUID\x12=\n\nundo_items\x18\x02 \x01(\x0b\x32).TSK.CollaborationCommandHistory.ItemList\x12=\n\nredo_items\x18\x03 \x01(\x0b\x32).TSK.CollaborationCommandHistory.ItemList\x1a\\\n\x08ItemList\x12#\n\x0bitems_array\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13transformer_entries\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\"\xca\x01\n\x1f\x43ollaborationCommandHistoryItem\x12\x1f\n\x07\x63ommand\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x15\n\raction_string\x18\x02 \x01(\t\x12*\n\x12selection_behavior\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12(\n\x10\x63oalescing_group\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x19\n\x11revision_sequence\x18\x05 \x01(\x04\"u\n*CollaborationCommandHistoryCoalescingGroup\x12\x1d\n\x05nodes\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12(\n\x19\x64id_coalesce_all_commands\x18\x02 \x01(\x08:\x05\x66\x61lse\"Q\n.CollaborationCommandHistoryCoalescingGroupNode\x12\x1f\n\x07\x63ommand\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"\x8e\x01\nDCollaborationCommandHistoryOriginatingCommandAcknowledgementObserver\x12(\n\x10\x63oalescing_group\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1c\n\x04node\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"\xf6\x03\n\x0f\x44ocumentArchive\x12\x19\n\x11locale_identifier\x18\x04 \x01(\t\x12\x31\n\x19\x61nnotation_author_storage\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12,\n\x14\x61\x63tivity_log_entries\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\x12\"\n\x1a\x63reation_locale_identifier\x18\t \x01(\t\x12(\n prevent_image_conversion_on_open\x18\n \x01(\x08\x12\x1b\n\x13has_floating_locale\x18\x0b \x01(\x08\x12\x1f\n\x17has_user_defined_locale\x18\x0c \x01(\x08\x12\x37\n\x1f\x63ollaboration_operation_history\x18\x0e \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n0should_measure_negatively_tracked_text_correctly\x18\x0f \x01(\x08\x12-\n%use_optimized_text_vertical_alignment\x18\x10 \x01(\x08\x12\x39\n\x12\x66ormatting_symbols\x18\x11 \x01(\x0b\x32\x1d.TSK.FormattingSymbolsArchive\"\xb9\n\n\x18\x46ormattingSymbolsArchive\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61lendar\x18\x02 \x01(\t\x12\x18\n\x10numbering_system\x18\x03 \x01(\t\x12\x0e\n\x06months\x18\x04 \x03(\t\x12\x19\n\x11standalone_months\x18\x05 \x03(\t\x12\x14\n\x0cshort_months\x18\x06 \x03(\t\x12\x1f\n\x17standalone_short_months\x18\x07 \x03(\t\x12\x10\n\x08weekdays\x18\x08 \x03(\t\x12\x1b\n\x13standalone_weekdays\x18\t \x03(\t\x12\x16\n\x0eshort_weekdays\x18\n \x03(\t\x12!\n\x19standalone_short_weekdays\x18\x0b \x03(\t\x12\x11\n\tam_symbol\x18\x0c \x01(\t\x12\x11\n\tpm_symbol\x18\r \x01(\t\x12\x13\n\x0btiny_months\x18\x0e \x03(\t\x12\x1e\n\x16standalone_tiny_months\x18\x0f \x03(\t\x12\x15\n\rtiny_weekdays\x18\x10 \x03(\t\x12 \n\x18standalone_tiny_weekdays\x18\x11 \x03(\t\x12\x10\n\x08quarters\x18\x12 \x03(\t\x12\x1b\n\x13standalone_quarters\x18\x13 \x03(\t\x12\x16\n\x0eshort_quarters\x18\x14 \x03(\t\x12!\n\x19standalone_short_quarters\x18\x15 \x03(\t\x12\x0c\n\x04\x65ras\x18\x16 \x03(\t\x12\x11\n\tlong_eras\x18\x17 \x03(\t\x12\x1a\n\x12short_date_pattern\x18\x18 \x01(\t\x12\x1b\n\x13medium_date_pattern\x18\x19 \x01(\t\x12\x19\n\x11long_date_pattern\x18\x1a \x01(\t\x12\x19\n\x11\x66ull_date_pattern\x18\x1b \x01(\t\x12\x1a\n\x12short_time_pattern\x18\x1c \x01(\t\x12\x1b\n\x13medium_time_pattern\x18\x1d \x01(\t\x12\x19\n\x11long_time_pattern\x18\x1e \x01(\t\x12\x19\n\x11\x66ull_time_pattern\x18\x1f \x01(\t\x12\x19\n\x11\x64\x65\x63imal_separator\x18  \x01(\t\x12\x1a\n\x12grouping_separator\x18! \x01(\t\x12\"\n\x1a\x63urrency_decimal_separator\x18\" \x01(\t\x12#\n\x1b\x63urrency_grouping_separator\x18# \x01(\t\x12\x11\n\tplus_sign\x18$ \x01(\t\x12\x12\n\nminus_sign\x18% \x01(\t\x12\x1a\n\x12\x65xponential_symbol\x18& \x01(\t\x12\x16\n\x0epercent_symbol\x18\' \x01(\t\x12\x18\n\x10per_mille_symbol\x18( \x01(\t\x12\x17\n\x0finfinity_symbol\x18) \x01(\t\x12\x12\n\nnan_symbol\x18* \x01(\t\x12\x17\n\x0f\x64\x65\x63imal_pattern\x18+ \x01(\t\x12\x1a\n\x12scientific_pattern\x18, \x01(\t\x12\x17\n\x0fpercent_pattern\x18- \x01(\t\x12\x18\n\x10\x63urrency_pattern\x18. \x01(\t\x12\x15\n\rcurrency_code\x18/ \x01(\t\x12\x46\n\x10\x63urrency_symbols\x18\x30 \x03(\x0b\x32,.TSK.FormattingSymbolsArchive.CurrencySymbol\x1a.\n\x0e\x43urrencySymbol\x12\x0c\n\x04\x63ode\x18\x01 \x02(\t\x12\x0e\n\x06symbol\x18\x02 \x02(\t\"\x8f\x01\n!DocumentSupportCollaborationState\x12\x35\n\x1d\x63ollaboration_command_history\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63ollaboration_session_state\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"\x9a\x04\n\x16\x44ocumentSupportArchive\x12\'\n\x0f\x63ommand_history\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x12\n\nundo_count\x18\x04 \x01(\r\x12\x12\n\nredo_count\x18\x05 \x01(\r\x12\x1a\n\x12undo_action_string\x18\x06 \x01(\t\x12\x1a\n\x12redo_action_string\x18\x07 \x01(\t\x12!\n\tweb_state\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x18is_in_collaboration_mode\x18\t \x01(\x08:\x05\x66\x61lse\x12\"\n\x1a\x61\x63tion_string_localization\x18\x0c \x01(\t\x12+\n\x13\x63ollaboration_state\x18\r \x01(\x0b\x32\x0e.TSP.Reference\x12>\n\"command_selection_behavior_history\x18\x02 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12&\n\nview_state\x18\x03 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12\x39\n\x1d\x63ollaboration_command_history\x18\n \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12\x37\n\x1b\x63ollaboration_session_state\x18\x0b \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\"\x85\x01\n\x10ViewStateArchive\x12\'\n\x0fview_state_root\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\x1a\x64ocument_revision_sequence\x18\x02 \x01(\x05\x12$\n\x1c\x64ocument_revision_identifier\x18\x03 \x01(\t\"\xf1\x01\n\x0e\x43ommandArchive\x12)\n\rundoRedoState\x18\x01 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12&\n\x0eundoCollection\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x15shadowed_by_transform\x18\x03 \x01(\x08\x12\x1a\n\x12shadowed_by_commit\x18\x04 \x01(\x08\x12\x0e\n\x06remote\x18\x05 \x01(\x08\x12&\n\x1eshould_hold_until_group_commit\x18\x06 \x01(\x08\x12\x19\n\x11server_originated\x18\x07 \x01(\x08\"\x9a\x01\n\x13\x43ommandGroupArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12 \n\x08\x63ommands\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12&\n\x0fprocess_results\x18\x03 \x01(\x0b\x32\r.TSP.IndexSet\x12\x15\n\raction_string\x18\x04 \x01(\t\"\xd7\x01\n\x1fInducedCommandCollectionArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12(\n\x10inducing_command\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12(\n\x10induced_commands\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12<\n%indexes_of_processed_induced_commands\x18\x04 \x01(\x0b\x32\r.TSP.IndexSet\"\x8a\x02\n\"PropagatedCommandCollectionArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12,\n\x14propagatable_command\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x32\n#propagatable_command_process_result\x18\x03 \x01(\x08:\x05\x66\x61lse\x12+\n\x13propagating_command\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\x12\x31\n\"propagating_command_process_result\x18\x05 \x01(\x08:\x05\x66\x61lse\"\xd9\x01\n\x17\x46inalCommandPairArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1f\n\x07\x63ommand\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12%\n\x16\x63ommand_process_result\x18\x03 \x01(\x08:\x05\x66\x61lse\x12%\n\rfinal_command\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\x12+\n\x1c\x66inal_command_process_result\x18\x05 \x01(\x08:\x05\x66\x61lse\";\n\x17\x43ommandContainerArchive\x12 \n\x08\x63ommands\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\"\xbb\x02\n\x15ShuffleMappingArchive\x12\x13\n\x0bstart_index\x18\x01 \x02(\r\x12\x11\n\tend_index\x18\x02 \x02(\r\x12\x31\n\x07\x65ntries\x18\x03 \x03(\x0b\x32 .TSK.ShuffleMappingArchive.Entry\x12\x19\n\x0bis_vertical\x18\x04 \x01(\x08:\x04true\x12 \n\x11is_move_operation\x18\x05 \x01(\x08:\x05\x66\x61lse\x12\x1c\n\x11\x66irst_moved_index\x18\x06 \x01(\r:\x01\x30\x12%\n\x1a\x64\x65stination_index_for_move\x18\x07 \x01(\r:\x01\x30\x12\"\n\x17number_of_indexes_moved\x18\x08 \x01(\r:\x01\x30\x1a!\n\x05\x45ntry\x12\x0c\n\x04\x66rom\x18\x01 \x02(\r\x12\n\n\x02to\x18\x02 \x02(\r\"I\n\x1eProgressiveCommandGroupArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TSK.CommandGroupArchive\"\xcc\n\n\x13\x46ormatStructArchive\x12\x13\n\x0b\x66ormat_type\x18\x01 \x02(\r\x12\x16\n\x0e\x64\x65\x63imal_places\x18\x02 \x01(\r\x12\x15\n\rcurrency_code\x18\x03 \x01(\t\x12\x16\n\x0enegative_style\x18\x04 \x01(\r\x12 \n\x18show_thousands_separator\x18\x05 \x01(\x08\x12\x1c\n\x14use_accounting_style\x18\x06 \x01(\x08\x12\x16\n\x0e\x64uration_style\x18\x07 \x01(\r\x12\x0c\n\x04\x62\x61se\x18\x08 \x01(\r\x12\x13\n\x0b\x62\x61se_places\x18\t \x01(\r\x12\x1b\n\x13\x62\x61se_use_minus_sign\x18\n \x01(\x08\x12\x19\n\x11\x66raction_accuracy\x18\x0b \x01(\r\x12\x1c\n\x14suppress_date_format\x18\x0c \x01(\x08\x12\x1c\n\x14suppress_time_format\x18\r \x01(\x08\x12\x18\n\x10\x64\x61te_time_format\x18\x0e \x01(\t\x12\x1d\n\x15\x64uration_unit_largest\x18\x0f \x01(\r\x12\x1e\n\x16\x64uration_unit_smallest\x18\x10 \x01(\r\x12\x11\n\tcustom_id\x18\x11 \x01(\r\x12\x1c\n\x14\x63ustom_format_string\x18\x12 \x01(\t\x12\x14\n\x0cscale_factor\x18\x13 \x01(\x01\x12%\n\x1drequires_fraction_replacement\x18\x14 \x01(\x08\x12\x17\n\x0f\x63ontrol_minimum\x18\x15 \x01(\x01\x12\x17\n\x0f\x63ontrol_maximum\x18\x16 \x01(\x01\x12\x19\n\x11\x63ontrol_increment\x18\x17 \x01(\x01\x12\x1b\n\x13\x63ontrol_format_type\x18\x18 \x01(\r\x12\x1a\n\x12slider_orientation\x18\x19 \x01(\r\x12\x17\n\x0fslider_position\x18\x1a \x01(\r\x12\x15\n\rdecimal_width\x18\x1b \x01(\r\x12\x19\n\x11min_integer_width\x18\x1c \x01(\r\x12#\n\x1bnum_nonspace_integer_digits\x18\x1d \x01(\r\x12#\n\x1bnum_nonspace_decimal_digits\x18\x1e \x01(\r\x12%\n\x1dindex_from_right_last_integer\x18\x1f \x01(\r\x12\x1c\n\x14interstitial_strings\x18  \x03(\t\x12\x33\n\x1cinters_str_insertion_indexes\x18! \x01(\x0b\x32\r.TSP.IndexSet\x12\x1f\n\x17num_hash_decimal_digits\x18\" \x01(\r\x12 \n\x18total_num_decimal_digits\x18# \x01(\r\x12\x12\n\nis_complex\x18$ \x01(\x08\x12\x1e\n\x16\x63ontains_integer_token\x18% \x01(\x08\x12*\n\"multiple_choice_list_initial_value\x18& \x01(\r\x12\x1f\n\x17multiple_choice_list_id\x18\' \x01(\r\x12$\n\x1cuse_automatic_duration_units\x18( \x01(\x08\x12\x1d\n\ncustom_uid\x18) \x01(\x0b\x32\t.TSP.UUID\x12/\n\rcustom_format\x18* \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12\x16\n\x0euses_plus_sign\x18+ \x01(\x08\x12\x18\n\x10\x62ool_true_string\x18, \x01(\t\x12\x19\n\x11\x62ool_false_string\x18- \x01(\t*\x07\x08\x90N\x10\xa0\x9c\x01\"\xcf\x02\n\x13\x43ustomFormatArchive\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x1b\n\x13\x66ormat_type_pre_bnc\x18\x02 \x02(\r\x12\x30\n\x0e\x64\x65\x66\x61ult_format\x18\x03 \x02(\x0b\x32\x18.TSK.FormatStructArchive\x12\x36\n\nconditions\x18\x04 \x03(\x0b\x32\".TSK.CustomFormatArchive.Condition\x12\x13\n\x0b\x66ormat_type\x18\x05 \x01(\r\x1a\x8d\x01\n\tCondition\x12\x16\n\x0e\x63ondition_type\x18\x01 \x02(\r\x12\x17\n\x0f\x63ondition_value\x18\x02 \x01(\x02\x12\x32\n\x10\x63ondition_format\x18\x03 \x02(\x0b\x32\x18.TSK.FormatStructArchive\x12\x1b\n\x13\x63ondition_value_dbl\x18\x04 \x01(\x01\"e\n\x17\x43ustomFormatListArchive\x12\x18\n\x05uuids\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x12\x30\n\x0e\x63ustom_formats\x18\x02 \x03(\x0b\x32\x18.TSK.CustomFormatArchive\"o\n\x17\x41nnotationAuthorArchive\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x19\n\x05\x63olor\x18\x02 \x01(\x0b\x32\n.TSP.Color\x12\x11\n\tpublic_id\x18\x03 \x01(\t\x12\x18\n\x10is_public_author\x18\x04 \x01(\x08\"O\n\x1d\x44\x65precatedChangeAuthorArchive\x12\x0c\n\x04name\x18\x01 \x01(\t\x12 \n\x0c\x63hange_color\x18\x02 \x01(\x0b\x32\n.TSP.Color\"K\n\x1e\x41nnotationAuthorStorageArchive\x12)\n\x11\x61nnotation_author\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\"\xb1\x01\n&SetAnnotationAuthorColorCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12)\n\x11\x61nnotation_author\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x19\n\x05\x63olor\x18\x03 \x01(\x0b\x32\n.TSP.Color\x12\x1d\n\told_color\x18\x04 \x01(\x0b\x32\n.TSP.Color\"\xef\x03\n\x1f\x43ommandSelectionBehaviorArchive\x12\x35\n\x12\x61rchived_selection\x18\x08 \x01(\x0b\x32\x19.TSK.SelectionPathArchive\x12\x39\n\x16\x61rchived_old_selection\x18\x01 \x01(\x0b\x32\x19.TSK.SelectionPathArchive\x12\x39\n\x16\x61rchived_new_selection\x18\x02 \x01(\x0b\x32\x19.TSK.SelectionPathArchive\x12\x17\n\x0fselection_flags\x18\x03 \x01(\x04\x12*\n\"additional_forward_selection_flags\x18\x04 \x01(\x04\x12*\n\"additional_reverse_selection_flags\x18\x05 \x01(\x04\x12:\n\"forward_selection_path_transformer\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12:\n\"reverse_selection_path_transformer\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12\x36\n\x1e\x61\x64\x64itional_selection_behaviors\x18\t \x03(\x0b\x32\x0e.TSP.Reference\"Q\n\x1fSelectionPathTransformerArchive\x12.\n\x16selection_transformers\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\"B\n\x14SelectionPathArchive\x12*\n\x12ordered_selections\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\"A\n\x18\x44ocumentSelectionArchive\x12%\n\rdocument_root\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"1\n\x0fIdOperationArgs\x12\x1e\n\x07id_path\x18\x01 \x02(\x0b\x32\r.TSP.UUIDPath\"H\n\x12\x41\x64\x64IdOperationArgs\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSK.IdOperationArgs\x12\r\n\x05index\x18\x02 \x02(\x05\"K\n\x15RemoveIdOperationArgs\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSK.IdOperationArgs\x12\r\n\x05index\x18\x02 \x02(\x05\"e\n\x18RearrangeIdOperationArgs\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSK.IdOperationArgs\x12\x12\n\nfrom_index\x18\x02 \x02(\x05\x12\x10\n\x08to_index\x18\x03 \x02(\x05\"e\n\x18IdPlacementOperationArgs\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSK.IdOperationArgs\x12\x12\n\nfrom_index\x18\x02 \x02(\x05\x12\x10\n\x08to_index\x18\x03 \x02(\x05\"8\n\x12NullCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"?\n\x19GroupCommitCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"L\n&UpgradeDocPostProcessingCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"R\n,InducedCommandCollectionCommitCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"X\n2ExecuteTestBetweenRollbackAndReapplyCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"\xb0\x02\n\'ChangeDocumentPackageTypeCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12R\n\x10new_package_type\x18\x02 \x02(\x0e\x32\x38.TSK.ChangeDocumentPackageTypeCommandArchive.PackageType\x12R\n\x10old_package_type\x18\x03 \x02(\x0e\x32\x38.TSK.ChangeDocumentPackageTypeCommandArchive.PackageType\"9\n\x0bPackageType\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\r\n\tDirectory\x10\x01\x12\x0e\n\nSingleFile\x10\x02\"c\n(CreateLocalStorageSnapshotCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x13\n\x0bsnapshot_id\x18\x02 \x01(\t\"H\n\"BlockDiffsAtCurrentRevisionCommand\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\">\n\x0cRangeAddress\x12\x1a\n\x12\x61\x64\x64ress_identifier\x18\x01 \x03(\x04\x12\x12\n\nrange_list\x18\x02 \x03(\r\"\x8a\x04\n\tOperation\x12\x38\n\x04type\x18\x01 \x01(\x0e\x32\x1c.TSK.Operation.OperationType:\x0cReplaceRange\x12\x13\n\x04noop\x18\x02 \x01(\x08:\x05\x66\x61lse\x12\x1e\n\x12\x61\x64\x64ress_identifier\x18\x03 \x03(\x06\x42\x02\x10\x01\x12\x18\n\rinsert_length\x18\x04 \x01(\x04:\x01\x31\x12/\n preserve_lower_priority_location\x18\x05 \x01(\x08:\x05\x66\x61lse\x12\x16\n\nrange_list\x18\x06 \x03(\rB\x02\x10\x01\x12\x1d\n\x12transform_behavior\x18\x07 \x01(\r:\x01\x37\x12\x13\n\x0bproperty_id\x18\x08 \x01(\r\x12\x16\n\nfrom_index\x18\t \x01(\x05:\x02-1\x12\x14\n\x08to_index\x18\n \x01(\x05:\x02-1\x12\x19\n\ndominating\x18\x0b \x01(\x08:\x05\x66\x61lse\x12\x18\n\x0cobject_count\x18\x0c \x01(\x05:\x02-1\x12\x1f\n\x14object_counter_space\x18\r \x01(\x05:\x01\x30\"s\n\rOperationType\x12\x07\n\x03\x41\x64\x64\x10\x00\x12\n\n\x06Remove\x10\x01\x12\r\n\tPlacement\x10\x02\x12\r\n\tRearrange\x10\x03\x12\x0c\n\x08UpdateId\x10\x04\x12\x0f\n\x0bUpdateRange\x10\x05\x12\x10\n\x0cReplaceRange\x10\x06\"S\n\x14OperationTransformer\x12\x17\n\x0fhigher_priority\x18\x01 \x02(\x08\x12\"\n\noperations\x18\x02 \x03(\x0b\x32\x0e.TSK.Operation\"k\n\x10TransformerEntry\x12\x10\n\x08sequence\x18\x01 \x02(\x04\x12\x15\n\rcreation_time\x18\x02 \x02(\x01\x12.\n\x0btransformer\x18\x03 \x02(\x0b\x32\x19.TSK.OperationTransformer\"\xc5\x02\n\x18OutgoingCommandQueueItem\x12\x1f\n\x07\x63ommand\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12:\n2serialized_json_without_data_base64_encoded_string\x18\x02 \x01(\t\x12L\n0serialized_json_without_data_base64_encoded_data\x18\x04 \x01(\x0b\x32\x12.TSP.DataReference\x12Q\n\x18uuid_to_data_map_entries\x18\x03 \x03(\x0b\x32/.TSK.OutgoingCommandQueueItemUUIDToDataMapEntry\x12+\n\x0flarge_data_list\x18\x05 \x03(\x0b\x32\x12.TSP.DataReference\"g\n*OutgoingCommandQueueItemUUIDToDataMapEntry\x12\x17\n\x04uuid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12 \n\x04\x64\x61ta\x18\x02 \x02(\x0b\x32\x12.TSP.DataReference\"\xd7\n\n!CollaborationDocumentSessionState\x12\x18\n\x10\x63ollaborator_ids\x18\x01 \x03(\t\x12\x30\n\x18rsvp_command_queue_items\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12?\n\'collaborator_cursor_transformer_entries\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x12J\n2acknowledged_commands_pending_resume_process_diffs\x18\x05 \x03(\x0b\x32\x0e.TSP.Reference\x12I\n1unprocessed_commands_pending_resume_process_diffs\x18\x06 \x03(\x0b\x32\x0e.TSP.Reference\x12u\n(command_acknowledgement_observer_entries\x18\x07 \x03(\x0b\x32\x43.TSK.CollaborationDocumentSessionState.AcknowledgementObserverEntry\x12O\n7transformer_from_unprocessed_command_operations_entries\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n*mailbox_request_document_revision_sequence\x18\n \x01(\x05\x12?\n,mailbox_request_document_revision_identifier\x18\x0b \x01(\x0b\x32\t.TSP.UUID\x12U\nFlast_send_pending_command_queue_item_was_moved_from_rsvp_command_queue\x18\x0c \x01(\x08:\x05\x66\x61lse\x12)\n!last_command_send_marker_sequence\x18\r \x01(\x05\x12\x36\n#last_command_send_marker_identifier\x18\x0e \x01(\x0b\x32\t.TSP.UUID\x12R\n:skipped_acknowledged_commands_pending_resume_process_diffs\x18\x0f \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1flast_too_old_command_identifier\x18\x10 \x01(\x0b\x32\t.TSP.UUID\x12R\n:unprocessed_operation_entries_pending_resume_process_diffs\x18\x11 \x01(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1asend_pending_command_queue\x18\x12 \x01(\x0b\x32\x0e.TSP.Reference\x12J\n?count_of_send_pending_command_queue_items_moved_from_rsvp_queue\x18\x13 \x01(\x04:\x01\x30\x12\x41\n.last_enqueued_document_load_command_identifier\x18\x14 \x01(\x0b\x32\t.TSP.UUID\x1ax\n\x1c\x41\x63knowledgementObserverEntry\x12%\n\x12\x63ommand_identifier\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x31\n\x19\x61\x63knowledgement_observers\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\"\x85\x01\n\x18NativeContentDescription\x12\x10\n\x08\x61pp_name\x18\x01 \x01(\t\x12\x13\n\x0b\x61pp_version\x18\x02 \x01(\t\x12\x13\n\x0b\x64ocument_id\x18\x03 \x01(\t\x12-\n\x15\x64rawable_descriptions\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\"\x83\x03\n\x1cStructuredTextImportSettings\x12+\n\x04type\x18\x01 \x02(\x0e\x32\x1d.TSK.StructuredTextImportType\x12\x14\n\x0cstarting_row\x18\x02 \x02(\x05\x12\x1a\n\x12\x64\x65\x63imal_separators\x18\x03 \x03(\t\x12\x1c\n\x14thousands_separators\x18\x04 \x03(\t\x12\"\n\x1atranspose_rows_and_columns\x18\x05 \x01(\x08\x12\x12\n\ndelimiters\x18\x06 \x03(\t\x12\x17\n\x0ftext_qualifiers\x18\x07 \x03(\t\x12\x1c\n\x14\x63ollapse_consecutive\x18\x08 \x01(\x08\x12%\n\x0e\x63olumn_offsets\x18\t \x01(\x0b\x32\r.TSP.IndexSet\x12\x1c\n\x14\x61utomatic_delimiters\x18\n \x01(\x08\x12\x19\n\x11\x61utomatic_offsets\x18\x0b \x01(\x08\x12\x17\n\x0fsource_encoding\x18\x0c \x01(\x04\"\xe6\x01\n&OperationStorageCommandOperationsEntry\x12\x36\n.command_identifier_same_as_revision_identifier\x18\x01 \x01(\x08\x12\x1e\n\x12\x63ommand_identifier\x18\x02 \x03(\x06\x42\x02\x10\x01\x12\"\n\noperations\x18\x03 \x03(\x0b\x32\x0e.TSK.Operation\x12\x19\n\x11server_originated\x18\x04 \x01(\x08\x12%\n\x1d\x63oalesced_command_entry_count\x18\x05 \x01(\x04\"\x81\x02\n\x15OperationStorageEntry\x12(\n\x1c\x64ocument_revision_identifier\x18\x01 \x03(\x06\x42\x02\x10\x01\x12(\n document_revision_sequence_delta\x18\x02 \x01(\x05\x12N\n\x19\x63ommand_operation_entries\x18\x03 \x03(\x0b\x32+.TSK.OperationStorageCommandOperationsEntry\x12!\n\x19\x66irst_entry_creation_time\x18\x04 \x01(\x01\x12!\n\x19\x63reation_time_diff_bucket\x18\x05 \x01(\x05\"B\n\x1aOperationStorageEntryArray\x12$\n\x0blarge_array\x18\x01 \x01(\x0b\x32\x0f.TSP.LargeArray\"\x92\x02\n!OperationStorageEntryArraySegment\x12\x33\n\x13large_array_segment\x18\x01 \x01(\x0b\x32\x16.TSP.LargeArraySegment\x12,\n\x08\x65lements\x18\x02 \x03(\x0b\x32\x1a.TSK.OperationStorageEntry\x12\x36\n.last_document_revision_sequence_before_segment\x18\x03 \x01(\x05\x12\'\n\x1flast_document_revision_sequence\x18\x04 \x01(\x05\x12)\n!segment_first_entry_creation_time\x18\x05 \x01(\x01\"\xe3\x03\n\x10OperationStorage\x12\x1f\n\x07\x65ntries\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\x17\n\x0foperation_count\x18\x02 \x02(\x04\x12\'\n\x1flast_document_revision_sequence\x18\x03 \x01(\x05\x12-\n!last_document_revision_identifier\x18\x04 \x03(\x06\x42\x02\x10\x01\x12\x42\n:last_unskippable_document_revision_before_entries_sequence\x18\x05 \x01(\x05\x12H\n<last_unskippable_document_revision_before_entries_identifier\x18\x06 \x03(\x06\x42\x02\x10\x01\x12>\n6last_unskippable_document_revision_in_entries_sequence\x18\x07 \x01(\x05\x12\x44\n8last_unskippable_document_revision_in_entries_identifier\x18\x08 \x03(\x06\x42\x02\x10\x01\x12)\n\x12\x64\x61ys_with_an_entry\x18\t \x01(\x0b\x32\r.TSP.IndexSet\"I\n\x14OutgoingCommandQueue\x12\x31\n\x12large_object_array\x18\x01 \x01(\x0b\x32\x15.TSP.LargeObjectArray\"_\n\x1bOutgoingCommandQueueSegment\x12@\n\x1alarge_object_array_segment\x18\x01 \x01(\x0b\x32\x1c.TSP.LargeObjectArraySegment\"\xc4\x03\n\x13\x44\x61taReferenceRecord\x12q\n-added_container_uuid_to_referenced_data_pairs\x18\x01 \x03(\x0b\x32:.TSK.DataReferenceRecord.ContainerUUIDToReferencedDataPair\x12s\n/removed_container_uuid_to_referenced_data_pairs\x18\x02 \x03(\x0b\x32:.TSK.DataReferenceRecord.ContainerUUIDToReferencedDataPair\x12\x36\n\x1aunbounded_referenced_datas\x18\x03 \x03(\x0b\x32\x12.TSP.DataReference\x1a\x8c\x01\n!ContainerUUIDToReferencedDataPair\x12!\n\x0e\x63ontainer_uuid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12+\n\x0freferenced_data\x18\x02 \x02(\x0b\x32\x12.TSP.DataReference\x12\x17\n\x0freference_count\x18\x03 \x02(\r\"\xb5\x01\n\x18\x43ommandAssetChunkArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x0e\n\x06\x64igest\x18\x02 \x01(\t\x12\x13\n\x0b\x61sset_chunk\x18\x03 \x01(\t\x12\x1a\n\x12\x61sset_chunk_length\x18\x04 \x02(\x03\x12\x17\n\x0fresume_position\x18\x05 \x02(\x03\x12\x1b\n\x13materialized_length\x18\x06 \x02(\x03\"\xeb\x01\n\x1f\x41ssetUploadStatusCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12M\n\tinfo_list\x18\x02 \x03(\x0b\x32:.TSK.AssetUploadStatusCommandArchive.AssetUploadStatusInfo\x1aU\n\x15\x41ssetUploadStatusInfo\x12\x0e\n\x06\x64igest\x18\x01 \x01(\t\x12,\n\rupload_status\x18\x02 \x01(\x0e\x32\x15.TSP.DataUploadStatus\"d\n)AssetUnmaterializedOnServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x13\n\x0b\x64igest_list\x18\x02 \x03(\t\"\xea\x02\n\x17PencilAnnotationUIState\x12U\n\x11\x63urrent_tool_type\x18\x01 \x01(\x0e\x32\x35.TSK.PencilAnnotationUIState.PencilAnnotationToolType:\x03Pen\x12\"\n\x0epen_tool_color\x18\x02 \x01(\x0b\x32\n.TSP.Color\x12\x18\n\x10pen_tool_opacity\x18\x03 \x01(\x02\x12\x16\n\x0epen_tool_width\x18\x04 \x01(\x02\x12*\n\x16highlighter_tool_color\x18\x05 \x01(\x0b\x32\n.TSP.Color\x12 \n\x18highlighter_tool_opacity\x18\x06 \x01(\x02\x12\x1e\n\x16highlighter_tool_width\x18\x07 \x01(\x02\"4\n\x18PencilAnnotationToolType\x12\x07\n\x03Pen\x10\x00\x12\x0f\n\x0bHighlighter\x10\x01*g\n\x18StructuredTextImportType\x12\x16\n\x12ImportType_UNKNOWN\x10\x00\x12\x18\n\x14ImportType_DELIMITED\x10\x01\x12\x19\n\x15ImportType_FIXEDWIDTH\x10\x02'
+  serialized_pb=b'\n\x11TSKArchives.proto\x12\x03TSK\x1a\x11TSPMessages.proto\"Z\n\x08TreeNode\x12\x0c\n\x04name\x18\x01 \x01(\t\x12 \n\x08\x63hildren\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x06object\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\"f\n\x17LocalCommandHistoryItem\x12\x1f\n\x07\x63ommand\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12selection_behavior\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"@\n\x18LocalCommandHistoryArray\x12$\n\x0blarge_array\x18\x01 \x02(\x0b\x32\x0f.TSP.LargeArray\"c\n\x1fLocalCommandHistoryArraySegment\x12@\n\x1alarge_object_array_segment\x18\x01 \x02(\x0b\x32\x1c.TSP.LargeObjectArraySegment\"l\n\x13LocalCommandHistory\x12\x12\n\nundo_count\x18\x01 \x02(\r\x12#\n\x0bitems_array\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1c\n\x14\x66ixed_radar_13365177\x18\n \x01(\x08\"H\n CollaborationCommandHistoryArray\x12$\n\x0blarge_array\x18\x01 \x02(\x0b\x32\x0f.TSP.LargeArray\"k\n\'CollaborationCommandHistoryArraySegment\x12@\n\x1alarge_object_array_segment\x18\x01 \x02(\x0b\x32\x1c.TSP.LargeObjectArraySegment\"\x9e\x02\n\x1b\x43ollaborationCommandHistory\x12#\n\x10local_identifier\x18\x01 \x01(\x0b\x32\t.TSP.UUID\x12=\n\nundo_items\x18\x02 \x01(\x0b\x32).TSK.CollaborationCommandHistory.ItemList\x12=\n\nredo_items\x18\x03 \x01(\x0b\x32).TSK.CollaborationCommandHistory.ItemList\x1a\\\n\x08ItemList\x12#\n\x0bitems_array\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13transformer_entries\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\"\xca\x01\n\x1f\x43ollaborationCommandHistoryItem\x12\x1f\n\x07\x63ommand\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x15\n\raction_string\x18\x02 \x01(\t\x12*\n\x12selection_behavior\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12(\n\x10\x63oalescing_group\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x19\n\x11revision_sequence\x18\x05 \x01(\x04\"u\n*CollaborationCommandHistoryCoalescingGroup\x12\x1d\n\x05nodes\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12(\n\x19\x64id_coalesce_all_commands\x18\x02 \x01(\x08:\x05\x66\x61lse\"Q\n.CollaborationCommandHistoryCoalescingGroupNode\x12\x1f\n\x07\x63ommand\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"\x8e\x01\nDCollaborationCommandHistoryOriginatingCommandAcknowledgementObserver\x12(\n\x10\x63oalescing_group\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1c\n\x04node\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"\xf6\x03\n\x0f\x44ocumentArchive\x12\x19\n\x11locale_identifier\x18\x04 \x01(\t\x12\x31\n\x19\x61nnotation_author_storage\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12,\n\x14\x61\x63tivity_log_entries\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\x12\"\n\x1a\x63reation_locale_identifier\x18\t \x01(\t\x12(\n prevent_image_conversion_on_open\x18\n \x01(\x08\x12\x1b\n\x13has_floating_locale\x18\x0b \x01(\x08\x12\x1f\n\x17has_user_defined_locale\x18\x0c \x01(\x08\x12\x37\n\x1f\x63ollaboration_operation_history\x18\x0e \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n0should_measure_negatively_tracked_text_correctly\x18\x0f \x01(\x08\x12-\n%use_optimized_text_vertical_alignment\x18\x10 \x01(\x08\x12\x39\n\x12\x66ormatting_symbols\x18\x11 \x01(\x0b\x32\x1d.TSK.FormattingSymbolsArchive\"\xb9\n\n\x18\x46ormattingSymbolsArchive\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61lendar\x18\x02 \x01(\t\x12\x18\n\x10numbering_system\x18\x03 \x01(\t\x12\x0e\n\x06months\x18\x04 \x03(\t\x12\x19\n\x11standalone_months\x18\x05 \x03(\t\x12\x14\n\x0cshort_months\x18\x06 \x03(\t\x12\x1f\n\x17standalone_short_months\x18\x07 \x03(\t\x12\x10\n\x08weekdays\x18\x08 \x03(\t\x12\x1b\n\x13standalone_weekdays\x18\t \x03(\t\x12\x16\n\x0eshort_weekdays\x18\n \x03(\t\x12!\n\x19standalone_short_weekdays\x18\x0b \x03(\t\x12\x11\n\tam_symbol\x18\x0c \x01(\t\x12\x11\n\tpm_symbol\x18\r \x01(\t\x12\x13\n\x0btiny_months\x18\x0e \x03(\t\x12\x1e\n\x16standalone_tiny_months\x18\x0f \x03(\t\x12\x15\n\rtiny_weekdays\x18\x10 \x03(\t\x12 \n\x18standalone_tiny_weekdays\x18\x11 \x03(\t\x12\x10\n\x08quarters\x18\x12 \x03(\t\x12\x1b\n\x13standalone_quarters\x18\x13 \x03(\t\x12\x16\n\x0eshort_quarters\x18\x14 \x03(\t\x12!\n\x19standalone_short_quarters\x18\x15 \x03(\t\x12\x0c\n\x04\x65ras\x18\x16 \x03(\t\x12\x11\n\tlong_eras\x18\x17 \x03(\t\x12\x1a\n\x12short_date_pattern\x18\x18 \x01(\t\x12\x1b\n\x13medium_date_pattern\x18\x19 \x01(\t\x12\x19\n\x11long_date_pattern\x18\x1a \x01(\t\x12\x19\n\x11\x66ull_date_pattern\x18\x1b \x01(\t\x12\x1a\n\x12short_time_pattern\x18\x1c \x01(\t\x12\x1b\n\x13medium_time_pattern\x18\x1d \x01(\t\x12\x19\n\x11long_time_pattern\x18\x1e \x01(\t\x12\x19\n\x11\x66ull_time_pattern\x18\x1f \x01(\t\x12\x19\n\x11\x64\x65\x63imal_separator\x18  \x01(\t\x12\x1a\n\x12grouping_separator\x18! \x01(\t\x12\"\n\x1a\x63urrency_decimal_separator\x18\" \x01(\t\x12#\n\x1b\x63urrency_grouping_separator\x18# \x01(\t\x12\x11\n\tplus_sign\x18$ \x01(\t\x12\x12\n\nminus_sign\x18% \x01(\t\x12\x1a\n\x12\x65xponential_symbol\x18& \x01(\t\x12\x16\n\x0epercent_symbol\x18\' \x01(\t\x12\x18\n\x10per_mille_symbol\x18( \x01(\t\x12\x17\n\x0finfinity_symbol\x18) \x01(\t\x12\x12\n\nnan_symbol\x18* \x01(\t\x12\x17\n\x0f\x64\x65\x63imal_pattern\x18+ \x01(\t\x12\x1a\n\x12scientific_pattern\x18, \x01(\t\x12\x17\n\x0fpercent_pattern\x18- \x01(\t\x12\x18\n\x10\x63urrency_pattern\x18. \x01(\t\x12\x15\n\rcurrency_code\x18/ \x01(\t\x12\x46\n\x10\x63urrency_symbols\x18\x30 \x03(\x0b\x32,.TSK.FormattingSymbolsArchive.CurrencySymbol\x1a.\n\x0e\x43urrencySymbol\x12\x0c\n\x04\x63ode\x18\x01 \x02(\t\x12\x0e\n\x06symbol\x18\x02 \x02(\t\"\x8f\x01\n!DocumentSupportCollaborationState\x12\x35\n\x1d\x63ollaboration_command_history\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x63ollaboration_session_state\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\"\x9a\x04\n\x16\x44ocumentSupportArchive\x12\'\n\x0f\x63ommand_history\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x12\n\nundo_count\x18\x04 \x01(\r\x12\x12\n\nredo_count\x18\x05 \x01(\r\x12\x1a\n\x12undo_action_string\x18\x06 \x01(\t\x12\x1a\n\x12redo_action_string\x18\x07 \x01(\t\x12!\n\tweb_state\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x18is_in_collaboration_mode\x18\t \x01(\x08:\x05\x66\x61lse\x12\"\n\x1a\x61\x63tion_string_localization\x18\x0c \x01(\t\x12+\n\x13\x63ollaboration_state\x18\r \x01(\x0b\x32\x0e.TSP.Reference\x12>\n\"command_selection_behavior_history\x18\x02 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12&\n\nview_state\x18\x03 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12\x39\n\x1d\x63ollaboration_command_history\x18\n \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12\x37\n\x1b\x63ollaboration_session_state\x18\x0b \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\"\x85\x01\n\x10ViewStateArchive\x12\'\n\x0fview_state_root\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\x1a\x64ocument_revision_sequence\x18\x02 \x01(\x05\x12$\n\x1c\x64ocument_revision_identifier\x18\x03 \x01(\t\"\xf1\x01\n\x0e\x43ommandArchive\x12)\n\rundoRedoState\x18\x01 \x01(\x0b\x32\x0e.TSP.ReferenceB\x02\x18\x01\x12&\n\x0eundoCollection\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x15shadowed_by_transform\x18\x03 \x01(\x08\x12\x1a\n\x12shadowed_by_commit\x18\x04 \x01(\x08\x12\x0e\n\x06remote\x18\x05 \x01(\x08\x12&\n\x1eshould_hold_until_group_commit\x18\x06 \x01(\x08\x12\x19\n\x11server_originated\x18\x07 \x01(\x08\"\x9a\x01\n\x13\x43ommandGroupArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12 \n\x08\x63ommands\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12&\n\x0fprocess_results\x18\x03 \x01(\x0b\x32\r.TSP.IndexSet\x12\x15\n\raction_string\x18\x04 \x01(\t\"\xd7\x01\n\x1fInducedCommandCollectionArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12(\n\x10inducing_command\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12(\n\x10induced_commands\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12<\n%indexes_of_processed_induced_commands\x18\x04 \x01(\x0b\x32\r.TSP.IndexSet\"\x8a\x02\n\"PropagatedCommandCollectionArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12,\n\x14propagatable_command\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x32\n#propagatable_command_process_result\x18\x03 \x01(\x08:\x05\x66\x61lse\x12+\n\x13propagating_command\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\x12\x31\n\"propagating_command_process_result\x18\x05 \x01(\x08:\x05\x66\x61lse\"\xd9\x01\n\x17\x46inalCommandPairArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1f\n\x07\x63ommand\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12%\n\x16\x63ommand_process_result\x18\x03 \x01(\x08:\x05\x66\x61lse\x12%\n\rfinal_command\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\x12+\n\x1c\x66inal_command_process_result\x18\x05 \x01(\x08:\x05\x66\x61lse\";\n\x17\x43ommandContainerArchive\x12 \n\x08\x63ommands\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\"I\n\x1eProgressiveCommandGroupArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TSK.CommandGroupArchive\"\xcc\n\n\x13\x46ormatStructArchive\x12\x13\n\x0b\x66ormat_type\x18\x01 \x01(\r\x12\x16\n\x0e\x64\x65\x63imal_places\x18\x02 \x01(\r\x12\x15\n\rcurrency_code\x18\x03 \x01(\t\x12\x16\n\x0enegative_style\x18\x04 \x01(\r\x12 \n\x18show_thousands_separator\x18\x05 \x01(\x08\x12\x1c\n\x14use_accounting_style\x18\x06 \x01(\x08\x12\x16\n\x0e\x64uration_style\x18\x07 \x01(\r\x12\x0c\n\x04\x62\x61se\x18\x08 \x01(\r\x12\x13\n\x0b\x62\x61se_places\x18\t \x01(\r\x12\x1b\n\x13\x62\x61se_use_minus_sign\x18\n \x01(\x08\x12\x19\n\x11\x66raction_accuracy\x18\x0b \x01(\r\x12\x1c\n\x14suppress_date_format\x18\x0c \x01(\x08\x12\x1c\n\x14suppress_time_format\x18\r \x01(\x08\x12\x18\n\x10\x64\x61te_time_format\x18\x0e \x01(\t\x12\x1d\n\x15\x64uration_unit_largest\x18\x0f \x01(\r\x12\x1e\n\x16\x64uration_unit_smallest\x18\x10 \x01(\r\x12\x11\n\tcustom_id\x18\x11 \x01(\r\x12\x1c\n\x14\x63ustom_format_string\x18\x12 \x01(\t\x12\x14\n\x0cscale_factor\x18\x13 \x01(\x01\x12%\n\x1drequires_fraction_replacement\x18\x14 \x01(\x08\x12\x17\n\x0f\x63ontrol_minimum\x18\x15 \x01(\x01\x12\x17\n\x0f\x63ontrol_maximum\x18\x16 \x01(\x01\x12\x19\n\x11\x63ontrol_increment\x18\x17 \x01(\x01\x12\x1b\n\x13\x63ontrol_format_type\x18\x18 \x01(\r\x12\x1a\n\x12slider_orientation\x18\x19 \x01(\r\x12\x17\n\x0fslider_position\x18\x1a \x01(\r\x12\x15\n\rdecimal_width\x18\x1b \x01(\r\x12\x19\n\x11min_integer_width\x18\x1c \x01(\r\x12#\n\x1bnum_nonspace_integer_digits\x18\x1d \x01(\r\x12#\n\x1bnum_nonspace_decimal_digits\x18\x1e \x01(\r\x12%\n\x1dindex_from_right_last_integer\x18\x1f \x01(\r\x12\x1c\n\x14interstitial_strings\x18  \x03(\t\x12\x33\n\x1cinters_str_insertion_indexes\x18! \x01(\x0b\x32\r.TSP.IndexSet\x12\x1f\n\x17num_hash_decimal_digits\x18\" \x01(\r\x12 \n\x18total_num_decimal_digits\x18# \x01(\r\x12\x12\n\nis_complex\x18$ \x01(\x08\x12\x1e\n\x16\x63ontains_integer_token\x18% \x01(\x08\x12*\n\"multiple_choice_list_initial_value\x18& \x01(\r\x12\x1f\n\x17multiple_choice_list_id\x18\' \x01(\r\x12$\n\x1cuse_automatic_duration_units\x18( \x01(\x08\x12\x1d\n\ncustom_uid\x18) \x01(\x0b\x32\t.TSP.UUID\x12/\n\rcustom_format\x18* \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12\x16\n\x0euses_plus_sign\x18+ \x01(\x08\x12\x18\n\x10\x62ool_true_string\x18, \x01(\t\x12\x19\n\x11\x62ool_false_string\x18- \x01(\t*\x07\x08\x90N\x10\xa0\x9c\x01\"\xcf\x02\n\x13\x43ustomFormatArchive\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x1b\n\x13\x66ormat_type_pre_bnc\x18\x02 \x02(\r\x12\x30\n\x0e\x64\x65\x66\x61ult_format\x18\x03 \x02(\x0b\x32\x18.TSK.FormatStructArchive\x12\x36\n\nconditions\x18\x04 \x03(\x0b\x32\".TSK.CustomFormatArchive.Condition\x12\x13\n\x0b\x66ormat_type\x18\x05 \x01(\r\x1a\x8d\x01\n\tCondition\x12\x16\n\x0e\x63ondition_type\x18\x01 \x02(\r\x12\x17\n\x0f\x63ondition_value\x18\x02 \x01(\x02\x12\x32\n\x10\x63ondition_format\x18\x03 \x02(\x0b\x32\x18.TSK.FormatStructArchive\x12\x1b\n\x13\x63ondition_value_dbl\x18\x04 \x01(\x01\"e\n\x17\x43ustomFormatListArchive\x12\x18\n\x05uuids\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x12\x30\n\x0e\x63ustom_formats\x18\x02 \x03(\x0b\x32\x18.TSK.CustomFormatArchive\"o\n\x17\x41nnotationAuthorArchive\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x19\n\x05\x63olor\x18\x02 \x01(\x0b\x32\n.TSP.Color\x12\x11\n\tpublic_id\x18\x03 \x01(\t\x12\x18\n\x10is_public_author\x18\x04 \x01(\x08\"O\n\x1d\x44\x65precatedChangeAuthorArchive\x12\x0c\n\x04name\x18\x01 \x01(\t\x12 \n\x0c\x63hange_color\x18\x02 \x01(\x0b\x32\n.TSP.Color\"K\n\x1e\x41nnotationAuthorStorageArchive\x12)\n\x11\x61nnotation_author\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\"\xb1\x01\n&SetAnnotationAuthorColorCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12)\n\x11\x61nnotation_author\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x19\n\x05\x63olor\x18\x03 \x01(\x0b\x32\n.TSP.Color\x12\x1d\n\told_color\x18\x04 \x01(\x0b\x32\n.TSP.Color\"\xef\x03\n\x1f\x43ommandSelectionBehaviorArchive\x12\x35\n\x12\x61rchived_selection\x18\x08 \x01(\x0b\x32\x19.TSK.SelectionPathArchive\x12\x39\n\x16\x61rchived_old_selection\x18\x01 \x01(\x0b\x32\x19.TSK.SelectionPathArchive\x12\x39\n\x16\x61rchived_new_selection\x18\x02 \x01(\x0b\x32\x19.TSK.SelectionPathArchive\x12\x17\n\x0fselection_flags\x18\x03 \x01(\x04\x12*\n\"additional_forward_selection_flags\x18\x04 \x01(\x04\x12*\n\"additional_reverse_selection_flags\x18\x05 \x01(\x04\x12:\n\"forward_selection_path_transformer\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12:\n\"reverse_selection_path_transformer\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12\x36\n\x1e\x61\x64\x64itional_selection_behaviors\x18\t \x03(\x0b\x32\x0e.TSP.Reference\"Q\n\x1fSelectionPathTransformerArchive\x12.\n\x16selection_transformers\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\"B\n\x14SelectionPathArchive\x12*\n\x12ordered_selections\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\"A\n\x18\x44ocumentSelectionArchive\x12%\n\rdocument_root\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"1\n\x0fIdOperationArgs\x12\x1e\n\x07id_path\x18\x01 \x02(\x0b\x32\r.TSP.UUIDPath\"H\n\x12\x41\x64\x64IdOperationArgs\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSK.IdOperationArgs\x12\r\n\x05index\x18\x02 \x02(\x05\"K\n\x15RemoveIdOperationArgs\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSK.IdOperationArgs\x12\r\n\x05index\x18\x02 \x02(\x05\"e\n\x18RearrangeIdOperationArgs\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSK.IdOperationArgs\x12\x12\n\nfrom_index\x18\x02 \x02(\x05\x12\x10\n\x08to_index\x18\x03 \x02(\x05\"e\n\x18IdPlacementOperationArgs\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSK.IdOperationArgs\x12\x12\n\nfrom_index\x18\x02 \x02(\x05\x12\x10\n\x08to_index\x18\x03 \x02(\x05\"8\n\x12NullCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"?\n\x19GroupCommitCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"L\n&UpgradeDocPostProcessingCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"R\n,InducedCommandCollectionCommitCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"X\n2ExecuteTestBetweenRollbackAndReapplyCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"\xb0\x02\n\'ChangeDocumentPackageTypeCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12R\n\x10new_package_type\x18\x02 \x02(\x0e\x32\x38.TSK.ChangeDocumentPackageTypeCommandArchive.PackageType\x12R\n\x10old_package_type\x18\x03 \x02(\x0e\x32\x38.TSK.ChangeDocumentPackageTypeCommandArchive.PackageType\"9\n\x0bPackageType\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\r\n\tDirectory\x10\x01\x12\x0e\n\nSingleFile\x10\x02\"c\n(CreateLocalStorageSnapshotCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x13\n\x0bsnapshot_id\x18\x02 \x01(\t\"H\n\"BlockDiffsAtCurrentRevisionCommand\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\">\n\x0cRangeAddress\x12\x1a\n\x12\x61\x64\x64ress_identifier\x18\x01 \x03(\x04\x12\x12\n\nrange_list\x18\x02 \x03(\r\"\x8a\x04\n\tOperation\x12\x38\n\x04type\x18\x01 \x01(\x0e\x32\x1c.TSK.Operation.OperationType:\x0cReplaceRange\x12\x13\n\x04noop\x18\x02 \x01(\x08:\x05\x66\x61lse\x12\x1e\n\x12\x61\x64\x64ress_identifier\x18\x03 \x03(\x06\x42\x02\x10\x01\x12\x18\n\rinsert_length\x18\x04 \x01(\x04:\x01\x31\x12/\n preserve_lower_priority_location\x18\x05 \x01(\x08:\x05\x66\x61lse\x12\x16\n\nrange_list\x18\x06 \x03(\rB\x02\x10\x01\x12\x1d\n\x12transform_behavior\x18\x07 \x01(\r:\x01\x37\x12\x13\n\x0bproperty_id\x18\x08 \x01(\r\x12\x16\n\nfrom_index\x18\t \x01(\x05:\x02-1\x12\x14\n\x08to_index\x18\n \x01(\x05:\x02-1\x12\x19\n\ndominating\x18\x0b \x01(\x08:\x05\x66\x61lse\x12\x18\n\x0cobject_count\x18\x0c \x01(\x05:\x02-1\x12\x1f\n\x14object_counter_space\x18\r \x01(\x05:\x01\x30\"s\n\rOperationType\x12\x07\n\x03\x41\x64\x64\x10\x00\x12\n\n\x06Remove\x10\x01\x12\r\n\tPlacement\x10\x02\x12\r\n\tRearrange\x10\x03\x12\x0c\n\x08UpdateId\x10\x04\x12\x0f\n\x0bUpdateRange\x10\x05\x12\x10\n\x0cReplaceRange\x10\x06\"S\n\x14OperationTransformer\x12\x17\n\x0fhigher_priority\x18\x01 \x02(\x08\x12\"\n\noperations\x18\x02 \x03(\x0b\x32\x0e.TSK.Operation\"k\n\x10TransformerEntry\x12\x10\n\x08sequence\x18\x01 \x02(\x04\x12\x15\n\rcreation_time\x18\x02 \x02(\x01\x12.\n\x0btransformer\x18\x03 \x02(\x0b\x32\x19.TSK.OperationTransformer\"\xc5\x02\n\x18OutgoingCommandQueueItem\x12\x1f\n\x07\x63ommand\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12:\n2serialized_json_without_data_base64_encoded_string\x18\x02 \x01(\t\x12L\n0serialized_json_without_data_base64_encoded_data\x18\x04 \x01(\x0b\x32\x12.TSP.DataReference\x12Q\n\x18uuid_to_data_map_entries\x18\x03 \x03(\x0b\x32/.TSK.OutgoingCommandQueueItemUUIDToDataMapEntry\x12+\n\x0flarge_data_list\x18\x05 \x03(\x0b\x32\x12.TSP.DataReference\"g\n*OutgoingCommandQueueItemUUIDToDataMapEntry\x12\x17\n\x04uuid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12 \n\x04\x64\x61ta\x18\x02 \x02(\x0b\x32\x12.TSP.DataReference\"\xd7\n\n!CollaborationDocumentSessionState\x12\x18\n\x10\x63ollaborator_ids\x18\x01 \x03(\t\x12\x30\n\x18rsvp_command_queue_items\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12?\n\'collaborator_cursor_transformer_entries\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x12J\n2acknowledged_commands_pending_resume_process_diffs\x18\x05 \x03(\x0b\x32\x0e.TSP.Reference\x12I\n1unprocessed_commands_pending_resume_process_diffs\x18\x06 \x03(\x0b\x32\x0e.TSP.Reference\x12u\n(command_acknowledgement_observer_entries\x18\x07 \x03(\x0b\x32\x43.TSK.CollaborationDocumentSessionState.AcknowledgementObserverEntry\x12O\n7transformer_from_unprocessed_command_operations_entries\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n*mailbox_request_document_revision_sequence\x18\n \x01(\x05\x12?\n,mailbox_request_document_revision_identifier\x18\x0b \x01(\x0b\x32\t.TSP.UUID\x12U\nFlast_send_pending_command_queue_item_was_moved_from_rsvp_command_queue\x18\x0c \x01(\x08:\x05\x66\x61lse\x12)\n!last_command_send_marker_sequence\x18\r \x01(\x05\x12\x36\n#last_command_send_marker_identifier\x18\x0e \x01(\x0b\x32\t.TSP.UUID\x12R\n:skipped_acknowledged_commands_pending_resume_process_diffs\x18\x0f \x03(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1flast_too_old_command_identifier\x18\x10 \x01(\x0b\x32\t.TSP.UUID\x12R\n:unprocessed_operation_entries_pending_resume_process_diffs\x18\x11 \x01(\x0b\x32\x0e.TSP.Reference\x12\x32\n\x1asend_pending_command_queue\x18\x12 \x01(\x0b\x32\x0e.TSP.Reference\x12J\n?count_of_send_pending_command_queue_items_moved_from_rsvp_queue\x18\x13 \x01(\x04:\x01\x30\x12\x41\n.last_enqueued_document_load_command_identifier\x18\x14 \x01(\x0b\x32\t.TSP.UUID\x1ax\n\x1c\x41\x63knowledgementObserverEntry\x12%\n\x12\x63ommand_identifier\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x31\n\x19\x61\x63knowledgement_observers\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\"\x85\x01\n\x18NativeContentDescription\x12\x10\n\x08\x61pp_name\x18\x01 \x01(\t\x12\x13\n\x0b\x61pp_version\x18\x02 \x01(\t\x12\x13\n\x0b\x64ocument_id\x18\x03 \x01(\t\x12-\n\x15\x64rawable_descriptions\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\"\x83\x03\n\x1cStructuredTextImportSettings\x12+\n\x04type\x18\x01 \x02(\x0e\x32\x1d.TSK.StructuredTextImportType\x12\x14\n\x0cstarting_row\x18\x02 \x02(\x05\x12\x1a\n\x12\x64\x65\x63imal_separators\x18\x03 \x03(\t\x12\x1c\n\x14thousands_separators\x18\x04 \x03(\t\x12\"\n\x1atranspose_rows_and_columns\x18\x05 \x01(\x08\x12\x12\n\ndelimiters\x18\x06 \x03(\t\x12\x17\n\x0ftext_qualifiers\x18\x07 \x03(\t\x12\x1c\n\x14\x63ollapse_consecutive\x18\x08 \x01(\x08\x12%\n\x0e\x63olumn_offsets\x18\t \x01(\x0b\x32\r.TSP.IndexSet\x12\x1c\n\x14\x61utomatic_delimiters\x18\n \x01(\x08\x12\x19\n\x11\x61utomatic_offsets\x18\x0b \x01(\x08\x12\x17\n\x0fsource_encoding\x18\x0c \x01(\x04\"\xe6\x01\n&OperationStorageCommandOperationsEntry\x12\x36\n.command_identifier_same_as_revision_identifier\x18\x01 \x01(\x08\x12\x1e\n\x12\x63ommand_identifier\x18\x02 \x03(\x06\x42\x02\x10\x01\x12\"\n\noperations\x18\x03 \x03(\x0b\x32\x0e.TSK.Operation\x12\x19\n\x11server_originated\x18\x04 \x01(\x08\x12%\n\x1d\x63oalesced_command_entry_count\x18\x05 \x01(\x04\"\x81\x02\n\x15OperationStorageEntry\x12(\n\x1c\x64ocument_revision_identifier\x18\x01 \x03(\x06\x42\x02\x10\x01\x12(\n document_revision_sequence_delta\x18\x02 \x01(\x05\x12N\n\x19\x63ommand_operation_entries\x18\x03 \x03(\x0b\x32+.TSK.OperationStorageCommandOperationsEntry\x12!\n\x19\x66irst_entry_creation_time\x18\x04 \x01(\x01\x12!\n\x19\x63reation_time_diff_bucket\x18\x05 \x01(\x05\"B\n\x1aOperationStorageEntryArray\x12$\n\x0blarge_array\x18\x01 \x01(\x0b\x32\x0f.TSP.LargeArray\"\x92\x02\n!OperationStorageEntryArraySegment\x12\x33\n\x13large_array_segment\x18\x01 \x01(\x0b\x32\x16.TSP.LargeArraySegment\x12,\n\x08\x65lements\x18\x02 \x03(\x0b\x32\x1a.TSK.OperationStorageEntry\x12\x36\n.last_document_revision_sequence_before_segment\x18\x03 \x01(\x05\x12\'\n\x1flast_document_revision_sequence\x18\x04 \x01(\x05\x12)\n!segment_first_entry_creation_time\x18\x05 \x01(\x01\"\xe3\x03\n\x10OperationStorage\x12\x1f\n\x07\x65ntries\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\x12\x17\n\x0foperation_count\x18\x02 \x02(\x04\x12\'\n\x1flast_document_revision_sequence\x18\x03 \x01(\x05\x12-\n!last_document_revision_identifier\x18\x04 \x03(\x06\x42\x02\x10\x01\x12\x42\n:last_unskippable_document_revision_before_entries_sequence\x18\x05 \x01(\x05\x12H\n<last_unskippable_document_revision_before_entries_identifier\x18\x06 \x03(\x06\x42\x02\x10\x01\x12>\n6last_unskippable_document_revision_in_entries_sequence\x18\x07 \x01(\x05\x12\x44\n8last_unskippable_document_revision_in_entries_identifier\x18\x08 \x03(\x06\x42\x02\x10\x01\x12)\n\x12\x64\x61ys_with_an_entry\x18\t \x01(\x0b\x32\r.TSP.IndexSet\"I\n\x14OutgoingCommandQueue\x12\x31\n\x12large_object_array\x18\x01 \x01(\x0b\x32\x15.TSP.LargeObjectArray\"_\n\x1bOutgoingCommandQueueSegment\x12@\n\x1alarge_object_array_segment\x18\x01 \x01(\x0b\x32\x1c.TSP.LargeObjectArraySegment\"\xc4\x03\n\x13\x44\x61taReferenceRecord\x12q\n-added_container_uuid_to_referenced_data_pairs\x18\x01 \x03(\x0b\x32:.TSK.DataReferenceRecord.ContainerUUIDToReferencedDataPair\x12s\n/removed_container_uuid_to_referenced_data_pairs\x18\x02 \x03(\x0b\x32:.TSK.DataReferenceRecord.ContainerUUIDToReferencedDataPair\x12\x36\n\x1aunbounded_referenced_datas\x18\x03 \x03(\x0b\x32\x12.TSP.DataReference\x1a\x8c\x01\n!ContainerUUIDToReferencedDataPair\x12!\n\x0e\x63ontainer_uuid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12+\n\x0freferenced_data\x18\x02 \x02(\x0b\x32\x12.TSP.DataReference\x12\x17\n\x0freference_count\x18\x03 \x02(\r\"\xb5\x01\n\x18\x43ommandAssetChunkArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x0e\n\x06\x64igest\x18\x02 \x01(\t\x12\x13\n\x0b\x61sset_chunk\x18\x03 \x01(\t\x12\x1a\n\x12\x61sset_chunk_length\x18\x04 \x02(\x03\x12\x17\n\x0fresume_position\x18\x05 \x02(\x03\x12\x1b\n\x13materialized_length\x18\x06 \x02(\x03\"\xeb\x01\n\x1f\x41ssetUploadStatusCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12M\n\tinfo_list\x18\x02 \x03(\x0b\x32:.TSK.AssetUploadStatusCommandArchive.AssetUploadStatusInfo\x1aU\n\x15\x41ssetUploadStatusInfo\x12\x0e\n\x06\x64igest\x18\x01 \x01(\t\x12,\n\rupload_status\x18\x02 \x01(\x0e\x32\x15.TSP.DataUploadStatus\"d\n)AssetUnmaterializedOnServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x13\n\x0b\x64igest_list\x18\x02 \x03(\t\"\xea\x02\n\x17PencilAnnotationUIState\x12U\n\x11\x63urrent_tool_type\x18\x01 \x01(\x0e\x32\x35.TSK.PencilAnnotationUIState.PencilAnnotationToolType:\x03Pen\x12\"\n\x0epen_tool_color\x18\x02 \x01(\x0b\x32\n.TSP.Color\x12\x18\n\x10pen_tool_opacity\x18\x03 \x01(\x02\x12\x16\n\x0epen_tool_width\x18\x04 \x01(\x02\x12*\n\x16highlighter_tool_color\x18\x05 \x01(\x0b\x32\n.TSP.Color\x12 \n\x18highlighter_tool_opacity\x18\x06 \x01(\x02\x12\x1e\n\x16highlighter_tool_width\x18\x07 \x01(\x02\"4\n\x18PencilAnnotationToolType\x12\x07\n\x03Pen\x10\x00\x12\x0f\n\x0bHighlighter\x10\x01*g\n\x18StructuredTextImportType\x12\x16\n\x12ImportType_UNKNOWN\x10\x00\x12\x18\n\x14ImportType_DELIMITED\x10\x01\x12\x19\n\x15ImportType_FIXEDWIDTH\x10\x02'
   ,
   dependencies=[TSPMessages__pb2.DESCRIPTOR,])
 
@@ -50,8 +50,8 @@ _STRUCTUREDTEXTIMPORTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=15956,
-  serialized_end=16059,
+  serialized_start=15638,
+  serialized_end=15741,
 )
 _sym_db.RegisterEnumDescriptor(_STRUCTUREDTEXTIMPORTTYPE)
 
@@ -86,8 +86,8 @@ _CHANGEDOCUMENTPACKAGETYPECOMMANDARCHIVE_PACKAGETYPE = _descriptor.EnumDescripto
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=9770,
-  serialized_end=9827,
+  serialized_start=9452,
+  serialized_end=9509,
 )
 _sym_db.RegisterEnumDescriptor(_CHANGEDOCUMENTPACKAGETYPECOMMANDARCHIVE_PACKAGETYPE)
 
@@ -136,8 +136,8 @@ _OPERATION_OPERATIONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=10476,
-  serialized_end=10591,
+  serialized_start=10158,
+  serialized_end=10273,
 )
 _sym_db.RegisterEnumDescriptor(_OPERATION_OPERATIONTYPE)
 
@@ -161,8 +161,8 @@ _PENCILANNOTATIONUISTATE_PENCILANNOTATIONTOOLTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=15902,
-  serialized_end=15954,
+  serialized_start=15584,
+  serialized_end=15636,
 )
 _sym_db.RegisterEnumDescriptor(_PENCILANNOTATIONUISTATE_PENCILANNOTATIONTOOLTYPE)
 
@@ -1714,125 +1714,6 @@ _COMMANDCONTAINERARCHIVE = _descriptor.Descriptor(
 )
 
 
-_SHUFFLEMAPPINGARCHIVE_ENTRY = _descriptor.Descriptor(
-  name='Entry',
-  full_name='TSK.ShuffleMappingArchive.Entry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='from', full_name='TSK.ShuffleMappingArchive.Entry.from', index=0,
-      number=1, type=13, cpp_type=3, label=2,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='to', full_name='TSK.ShuffleMappingArchive.Entry.to', index=1,
-      number=2, type=13, cpp_type=3, label=2,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5662,
-  serialized_end=5695,
-)
-
-_SHUFFLEMAPPINGARCHIVE = _descriptor.Descriptor(
-  name='ShuffleMappingArchive',
-  full_name='TSK.ShuffleMappingArchive',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='start_index', full_name='TSK.ShuffleMappingArchive.start_index', index=0,
-      number=1, type=13, cpp_type=3, label=2,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='end_index', full_name='TSK.ShuffleMappingArchive.end_index', index=1,
-      number=2, type=13, cpp_type=3, label=2,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='entries', full_name='TSK.ShuffleMappingArchive.entries', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='is_vertical', full_name='TSK.ShuffleMappingArchive.is_vertical', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=True, default_value=True,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='is_move_operation', full_name='TSK.ShuffleMappingArchive.is_move_operation', index=4,
-      number=5, type=8, cpp_type=7, label=1,
-      has_default_value=True, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='first_moved_index', full_name='TSK.ShuffleMappingArchive.first_moved_index', index=5,
-      number=6, type=13, cpp_type=3, label=1,
-      has_default_value=True, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='destination_index_for_move', full_name='TSK.ShuffleMappingArchive.destination_index_for_move', index=6,
-      number=7, type=13, cpp_type=3, label=1,
-      has_default_value=True, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='number_of_indexes_moved', full_name='TSK.ShuffleMappingArchive.number_of_indexes_moved', index=7,
-      number=8, type=13, cpp_type=3, label=1,
-      has_default_value=True, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_SHUFFLEMAPPINGARCHIVE_ENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5380,
-  serialized_end=5695,
-)
-
-
 _PROGRESSIVECOMMANDGROUPARCHIVE = _descriptor.Descriptor(
   name='ProgressiveCommandGroupArchive',
   full_name='TSK.ProgressiveCommandGroupArchive',
@@ -1860,8 +1741,8 @@ _PROGRESSIVECOMMANDGROUPARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5697,
-  serialized_end=5770,
+  serialized_start=5379,
+  serialized_end=5452,
 )
 
 
@@ -1875,7 +1756,7 @@ _FORMATSTRUCTARCHIVE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='format_type', full_name='TSK.FormatStructArchive.format_type', index=0,
-      number=1, type=13, cpp_type=3, label=2,
+      number=1, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -2200,8 +2081,8 @@ _FORMATSTRUCTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[(10000, 20000), ],
   oneofs=[
   ],
-  serialized_start=5773,
-  serialized_end=7129,
+  serialized_start=5455,
+  serialized_end=6811,
 )
 
 
@@ -2253,8 +2134,8 @@ _CUSTOMFORMATARCHIVE_CONDITION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7326,
-  serialized_end=7467,
+  serialized_start=7008,
+  serialized_end=7149,
 )
 
 _CUSTOMFORMATARCHIVE = _descriptor.Descriptor(
@@ -2312,8 +2193,8 @@ _CUSTOMFORMATARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7132,
-  serialized_end=7467,
+  serialized_start=6814,
+  serialized_end=7149,
 )
 
 
@@ -2351,8 +2232,8 @@ _CUSTOMFORMATLISTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7469,
-  serialized_end=7570,
+  serialized_start=7151,
+  serialized_end=7252,
 )
 
 
@@ -2404,8 +2285,8 @@ _ANNOTATIONAUTHORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7572,
-  serialized_end=7683,
+  serialized_start=7254,
+  serialized_end=7365,
 )
 
 
@@ -2443,8 +2324,8 @@ _DEPRECATEDCHANGEAUTHORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7685,
-  serialized_end=7764,
+  serialized_start=7367,
+  serialized_end=7446,
 )
 
 
@@ -2475,8 +2356,8 @@ _ANNOTATIONAUTHORSTORAGEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7766,
-  serialized_end=7841,
+  serialized_start=7448,
+  serialized_end=7523,
 )
 
 
@@ -2528,8 +2409,8 @@ _SETANNOTATIONAUTHORCOLORCOMMANDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7844,
-  serialized_end=8021,
+  serialized_start=7526,
+  serialized_end=7703,
 )
 
 
@@ -2616,8 +2497,8 @@ _COMMANDSELECTIONBEHAVIORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8024,
-  serialized_end=8519,
+  serialized_start=7706,
+  serialized_end=8201,
 )
 
 
@@ -2648,8 +2529,8 @@ _SELECTIONPATHTRANSFORMERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8521,
-  serialized_end=8602,
+  serialized_start=8203,
+  serialized_end=8284,
 )
 
 
@@ -2680,8 +2561,8 @@ _SELECTIONPATHARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8604,
-  serialized_end=8670,
+  serialized_start=8286,
+  serialized_end=8352,
 )
 
 
@@ -2712,8 +2593,8 @@ _DOCUMENTSELECTIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8672,
-  serialized_end=8737,
+  serialized_start=8354,
+  serialized_end=8419,
 )
 
 
@@ -2744,8 +2625,8 @@ _IDOPERATIONARGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8739,
-  serialized_end=8788,
+  serialized_start=8421,
+  serialized_end=8470,
 )
 
 
@@ -2783,8 +2664,8 @@ _ADDIDOPERATIONARGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8790,
-  serialized_end=8862,
+  serialized_start=8472,
+  serialized_end=8544,
 )
 
 
@@ -2822,8 +2703,8 @@ _REMOVEIDOPERATIONARGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8864,
-  serialized_end=8939,
+  serialized_start=8546,
+  serialized_end=8621,
 )
 
 
@@ -2868,8 +2749,8 @@ _REARRANGEIDOPERATIONARGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8941,
-  serialized_end=9042,
+  serialized_start=8623,
+  serialized_end=8724,
 )
 
 
@@ -2914,8 +2795,8 @@ _IDPLACEMENTOPERATIONARGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9044,
-  serialized_end=9145,
+  serialized_start=8726,
+  serialized_end=8827,
 )
 
 
@@ -2946,8 +2827,8 @@ _NULLCOMMANDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9147,
-  serialized_end=9203,
+  serialized_start=8829,
+  serialized_end=8885,
 )
 
 
@@ -2978,8 +2859,8 @@ _GROUPCOMMITCOMMANDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9205,
-  serialized_end=9268,
+  serialized_start=8887,
+  serialized_end=8950,
 )
 
 
@@ -3010,8 +2891,8 @@ _UPGRADEDOCPOSTPROCESSINGCOMMANDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9270,
-  serialized_end=9346,
+  serialized_start=8952,
+  serialized_end=9028,
 )
 
 
@@ -3042,8 +2923,8 @@ _INDUCEDCOMMANDCOLLECTIONCOMMITCOMMANDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9348,
-  serialized_end=9430,
+  serialized_start=9030,
+  serialized_end=9112,
 )
 
 
@@ -3074,8 +2955,8 @@ _EXECUTETESTBETWEENROLLBACKANDREAPPLYCOMMANDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9432,
-  serialized_end=9520,
+  serialized_start=9114,
+  serialized_end=9202,
 )
 
 
@@ -3121,8 +3002,8 @@ _CHANGEDOCUMENTPACKAGETYPECOMMANDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9523,
-  serialized_end=9827,
+  serialized_start=9205,
+  serialized_end=9509,
 )
 
 
@@ -3160,8 +3041,8 @@ _CREATELOCALSTORAGESNAPSHOTCOMMANDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9829,
-  serialized_end=9928,
+  serialized_start=9511,
+  serialized_end=9610,
 )
 
 
@@ -3192,8 +3073,8 @@ _BLOCKDIFFSATCURRENTREVISIONCOMMAND = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9930,
-  serialized_end=10002,
+  serialized_start=9612,
+  serialized_end=9684,
 )
 
 
@@ -3231,8 +3112,8 @@ _RANGEADDRESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10004,
-  serialized_end=10066,
+  serialized_start=9686,
+  serialized_end=9748,
 )
 
 
@@ -3348,8 +3229,8 @@ _OPERATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10069,
-  serialized_end=10591,
+  serialized_start=9751,
+  serialized_end=10273,
 )
 
 
@@ -3387,8 +3268,8 @@ _OPERATIONTRANSFORMER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10593,
-  serialized_end=10676,
+  serialized_start=10275,
+  serialized_end=10358,
 )
 
 
@@ -3433,8 +3314,8 @@ _TRANSFORMERENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10678,
-  serialized_end=10785,
+  serialized_start=10360,
+  serialized_end=10467,
 )
 
 
@@ -3493,8 +3374,8 @@ _OUTGOINGCOMMANDQUEUEITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10788,
-  serialized_end=11113,
+  serialized_start=10470,
+  serialized_end=10795,
 )
 
 
@@ -3532,8 +3413,8 @@ _OUTGOINGCOMMANDQUEUEITEMUUIDTODATAMAPENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11115,
-  serialized_end=11218,
+  serialized_start=10797,
+  serialized_end=10900,
 )
 
 
@@ -3571,8 +3452,8 @@ _COLLABORATIONDOCUMENTSESSIONSTATE_ACKNOWLEDGEMENTOBSERVERENTRY = _descriptor.De
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12468,
-  serialized_end=12588,
+  serialized_start=12150,
+  serialized_end=12270,
 )
 
 _COLLABORATIONDOCUMENTSESSIONSTATE = _descriptor.Descriptor(
@@ -3721,8 +3602,8 @@ _COLLABORATIONDOCUMENTSESSIONSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11221,
-  serialized_end=12588,
+  serialized_start=10903,
+  serialized_end=12270,
 )
 
 
@@ -3774,8 +3655,8 @@ _NATIVECONTENTDESCRIPTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12591,
-  serialized_end=12724,
+  serialized_start=12273,
+  serialized_end=12406,
 )
 
 
@@ -3883,8 +3764,8 @@ _STRUCTUREDTEXTIMPORTSETTINGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12727,
-  serialized_end=13114,
+  serialized_start=12409,
+  serialized_end=12796,
 )
 
 
@@ -3943,8 +3824,8 @@ _OPERATIONSTORAGECOMMANDOPERATIONSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13117,
-  serialized_end=13347,
+  serialized_start=12799,
+  serialized_end=13029,
 )
 
 
@@ -4003,8 +3884,8 @@ _OPERATIONSTORAGEENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13350,
-  serialized_end=13607,
+  serialized_start=13032,
+  serialized_end=13289,
 )
 
 
@@ -4035,8 +3916,8 @@ _OPERATIONSTORAGEENTRYARRAY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13609,
-  serialized_end=13675,
+  serialized_start=13291,
+  serialized_end=13357,
 )
 
 
@@ -4095,8 +3976,8 @@ _OPERATIONSTORAGEENTRYARRAYSEGMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13678,
-  serialized_end=13952,
+  serialized_start=13360,
+  serialized_end=13634,
 )
 
 
@@ -4183,8 +4064,8 @@ _OPERATIONSTORAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13955,
-  serialized_end=14438,
+  serialized_start=13637,
+  serialized_end=14120,
 )
 
 
@@ -4215,8 +4096,8 @@ _OUTGOINGCOMMANDQUEUE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14440,
-  serialized_end=14513,
+  serialized_start=14122,
+  serialized_end=14195,
 )
 
 
@@ -4247,8 +4128,8 @@ _OUTGOINGCOMMANDQUEUESEGMENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14515,
-  serialized_end=14610,
+  serialized_start=14197,
+  serialized_end=14292,
 )
 
 
@@ -4293,8 +4174,8 @@ _DATAREFERENCERECORD_CONTAINERUUIDTOREFERENCEDDATAPAIR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14925,
-  serialized_end=15065,
+  serialized_start=14607,
+  serialized_end=14747,
 )
 
 _DATAREFERENCERECORD = _descriptor.Descriptor(
@@ -4338,8 +4219,8 @@ _DATAREFERENCERECORD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14613,
-  serialized_end=15065,
+  serialized_start=14295,
+  serialized_end=14747,
 )
 
 
@@ -4405,8 +4286,8 @@ _COMMANDASSETCHUNKARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15068,
-  serialized_end=15249,
+  serialized_start=14750,
+  serialized_end=14931,
 )
 
 
@@ -4444,8 +4325,8 @@ _ASSETUPLOADSTATUSCOMMANDARCHIVE_ASSETUPLOADSTATUSINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15402,
-  serialized_end=15487,
+  serialized_start=15084,
+  serialized_end=15169,
 )
 
 _ASSETUPLOADSTATUSCOMMANDARCHIVE = _descriptor.Descriptor(
@@ -4482,8 +4363,8 @@ _ASSETUPLOADSTATUSCOMMANDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15252,
-  serialized_end=15487,
+  serialized_start=14934,
+  serialized_end=15169,
 )
 
 
@@ -4521,8 +4402,8 @@ _ASSETUNMATERIALIZEDONSERVERCOMMANDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15489,
-  serialized_end=15589,
+  serialized_start=15171,
+  serialized_end=15271,
 )
 
 
@@ -4596,8 +4477,8 @@ _PENCILANNOTATIONUISTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15592,
-  serialized_end=15954,
+  serialized_start=15274,
+  serialized_end=15636,
 )
 
 _TREENODE.fields_by_name['children'].message_type = TSPMessages__pb2._REFERENCE
@@ -4654,8 +4535,6 @@ _FINALCOMMANDPAIRARCHIVE.fields_by_name['super'].message_type = _COMMANDARCHIVE
 _FINALCOMMANDPAIRARCHIVE.fields_by_name['command'].message_type = TSPMessages__pb2._REFERENCE
 _FINALCOMMANDPAIRARCHIVE.fields_by_name['final_command'].message_type = TSPMessages__pb2._REFERENCE
 _COMMANDCONTAINERARCHIVE.fields_by_name['commands'].message_type = TSPMessages__pb2._REFERENCE
-_SHUFFLEMAPPINGARCHIVE_ENTRY.containing_type = _SHUFFLEMAPPINGARCHIVE
-_SHUFFLEMAPPINGARCHIVE.fields_by_name['entries'].message_type = _SHUFFLEMAPPINGARCHIVE_ENTRY
 _PROGRESSIVECOMMANDGROUPARCHIVE.fields_by_name['super'].message_type = _COMMANDGROUPARCHIVE
 _FORMATSTRUCTARCHIVE.fields_by_name['inters_str_insertion_indexes'].message_type = TSPMessages__pb2._INDEXSET
 _FORMATSTRUCTARCHIVE.fields_by_name['custom_uid'].message_type = TSPMessages__pb2._UUID
@@ -4775,7 +4654,6 @@ DESCRIPTOR.message_types_by_name['InducedCommandCollectionArchive'] = _INDUCEDCO
 DESCRIPTOR.message_types_by_name['PropagatedCommandCollectionArchive'] = _PROPAGATEDCOMMANDCOLLECTIONARCHIVE
 DESCRIPTOR.message_types_by_name['FinalCommandPairArchive'] = _FINALCOMMANDPAIRARCHIVE
 DESCRIPTOR.message_types_by_name['CommandContainerArchive'] = _COMMANDCONTAINERARCHIVE
-DESCRIPTOR.message_types_by_name['ShuffleMappingArchive'] = _SHUFFLEMAPPINGARCHIVE
 DESCRIPTOR.message_types_by_name['ProgressiveCommandGroupArchive'] = _PROGRESSIVECOMMANDGROUPARCHIVE
 DESCRIPTOR.message_types_by_name['FormatStructArchive'] = _FORMATSTRUCTARCHIVE
 DESCRIPTOR.message_types_by_name['CustomFormatArchive'] = _CUSTOMFORMATARCHIVE
@@ -5001,21 +4879,6 @@ CommandContainerArchive = _reflection.GeneratedProtocolMessageType('CommandConta
   # @@protoc_insertion_point(class_scope:TSK.CommandContainerArchive)
   })
 _sym_db.RegisterMessage(CommandContainerArchive)
-
-ShuffleMappingArchive = _reflection.GeneratedProtocolMessageType('ShuffleMappingArchive', (_message.Message,), {
-
-  'Entry' : _reflection.GeneratedProtocolMessageType('Entry', (_message.Message,), {
-    'DESCRIPTOR' : _SHUFFLEMAPPINGARCHIVE_ENTRY,
-    '__module__' : 'TSKArchives_pb2'
-    # @@protoc_insertion_point(class_scope:TSK.ShuffleMappingArchive.Entry)
-    })
-  ,
-  'DESCRIPTOR' : _SHUFFLEMAPPINGARCHIVE,
-  '__module__' : 'TSKArchives_pb2'
-  # @@protoc_insertion_point(class_scope:TSK.ShuffleMappingArchive)
-  })
-_sym_db.RegisterMessage(ShuffleMappingArchive)
-_sym_db.RegisterMessage(ShuffleMappingArchive.Entry)
 
 ProgressiveCommandGroupArchive = _reflection.GeneratedProtocolMessageType('ProgressiveCommandGroupArchive', (_message.Message,), {
   'DESCRIPTOR' : _PROGRESSIVECOMMANDGROUPARCHIVE,

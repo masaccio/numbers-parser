@@ -23,7 +23,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15TSTArchives_sos.proto\x12\x06TSTSOS\x1a\x15TSDArchives_sos.proto\x1a\x15TSSArchives_sos.proto\x1a\x1fTSTStylePropertyArchiving.proto\x1a\x16TSWPArchives_sos.proto\"t\n#SpecSetTableStrokePresetListArchive\x12>\n\x18table_stroke_preset_list\x18\x01 \x01(\x0b\x32\x1c.TST.StrokePresetListArchive\x12\r\n\x05unset\x18\x02 \x02(\x08\"z\n SpecTableStrokePresetListArchive\x12V\n!spec_set_table_stroke_preset_list\x18\x01 \x01(\x0b\x32+.TSTSOS.SpecSetTableStrokePresetListArchive\"\x99\x03\n&TableCellStylePropertyChangeSetArchive\x12*\n\ttext_wrap\x18\x01 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12\x1b\n\x13text_wrap_undefined\x18\x02 \x01(\x08\x12(\n\x04type\x18\x03 \x01(\x0b\x32\x1a.TSSSOS.SpecIntegerArchive\x12\x16\n\x0etype_undefined\x18\x04 \x01(\x08\x12%\n\x04\x66ill\x18\x05 \x01(\x0b\x32\x17.TSDSOS.SpecFillArchive\x12\x16\n\x0e\x66ill_undefined\x18\x06 \x01(\x08\x12\x36\n\x12vertical_alignment\x18\x07 \x01(\x0b\x32\x1a.TSSSOS.SpecIntegerArchive\x12$\n\x1cvertical_alignment_undefined\x18\x08 \x01(\x08\x12,\n\x07padding\x18\t \x01(\x0b\x32\x1b.TSWPSOS.SpecPaddingArchive\x12\x19\n\x11padding_undefined\x18\n \x01(\x08\"\xfc,\n\"TableStylePropertyChangeSetArchive\x12,\n\x0b\x61uto_resize\x18\x01 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12\x1d\n\x15\x61uto_resize_undefined\x18\x02 \x01(\x08\x12,\n\x0b\x62\x61nded_rows\x18\x03 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12\x1d\n\x15\x62\x61nded_rows_undefined\x18\x04 \x01(\x08\x12\x31\n\x10\x62\x61nded_cell_fill\x18\x05 \x01(\x0b\x32\x17.TSDSOS.SpecFillArchive\x12\"\n\x1a\x62\x61nded_cell_fill_undefined\x18\x06 \x01(\x08\x12\x39\n\x18\x62\x65haves_like_spreadsheet\x18\x07 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12*\n\"behaves_like_spreadsheet_undefined\x18\x08 \x01(\x08\x12@\n\x1d\x62ody_horizontal_border_stroke\x18\t \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'body_horizontal_border_stroke_undefined\x18\n \x01(\x08\x12>\n\x1b\x62ody_vertical_border_stroke\x18\x0b \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12-\n%body_vertical_border_stroke_undefined\x18\x0c \x01(\x08\x12\x39\n\x16\x62ody_horizontal_stroke\x18\r \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12(\n body_horizontal_stroke_undefined\x18\x0e \x01(\x08\x12\x37\n\x14\x62ody_vertical_stroke\x18\x0f \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12&\n\x1e\x62ody_vertical_stroke_undefined\x18\x10 \x01(\x08\x12>\n\x1bheader_column_border_stroke\x18\x11 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12-\n%header_column_border_stroke_undefined\x18\x12 \x01(\x08\x12@\n\x1dheader_column_vertical_stroke\x18\x13 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'header_column_vertical_stroke_undefined\x18\x14 \x01(\x08\x12\x42\n\x1fheader_column_horizontal_stroke\x18\x15 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)header_column_horizontal_stroke_undefined\x18\x16 \x01(\x08\x12\x41\n\x1eheader_column_separator_stroke\x18\x17 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x30\n(header_column_separator_stroke_undefined\x18\x18 \x01(\x08\x12;\n\x18header_row_border_stroke\x18\x19 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12*\n\"header_row_border_stroke_undefined\x18\x1a \x01(\x08\x12?\n\x1cheader_row_horizontal_stroke\x18\x1b \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12.\n&header_row_horizontal_stroke_undefined\x18\x1c \x01(\x08\x12=\n\x1aheader_row_vertical_stroke\x18\x1d \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$header_row_vertical_stroke_undefined\x18\x1e \x01(\x08\x12>\n\x1bheader_row_separator_stroke\x18\x1f \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12-\n%header_row_separator_stroke_undefined\x18  \x01(\x08\x12;\n\x18\x66ooter_row_border_stroke\x18! \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12*\n\"footer_row_border_stroke_undefined\x18\" \x01(\x08\x12?\n\x1c\x66ooter_row_horizontal_stroke\x18# \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12.\n&footer_row_horizontal_stroke_undefined\x18$ \x01(\x08\x12=\n\x1a\x66ooter_row_vertical_stroke\x18% \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$footer_row_vertical_stroke_undefined\x18& \x01(\x08\x12>\n\x1b\x66ooter_row_separator_stroke\x18\' \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12-\n%footer_row_separator_stroke_undefined\x18( \x01(\x08\x12K\n\x19stroke_preset_list_object\x18) \x01(\x0b\x32(.TSTSOS.SpecTableStrokePresetListArchive\x12+\n#stroke_preset_list_object_undefined\x18* \x01(\x08\x12\x39\n\x18vertical_strokes_visible\x18+ \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12*\n\"vertical_strokes_visible_undefined\x18, \x01(\x08\x12;\n\x1ahorizontal_strokes_visible\x18- \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12,\n$horizontal_strokes_visible_undefined\x18. \x01(\x08\x12\x37\n\x16header_row_sep_visible\x18/ \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12(\n header_row_sep_visible_undefined\x18\x30 \x01(\x08\x12=\n\x1cheader_row_verticals_visible\x18\x31 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12.\n&header_row_verticals_visible_undefined\x18\x32 \x01(\x08\x12\x37\n\x16header_col_sep_visible\x18\x33 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12(\n header_col_sep_visible_undefined\x18\x34 \x01(\x08\x12?\n\x1eheader_col_horizontals_visible\x18\x35 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12\x30\n(header_col_horizontals_visible_undefined\x18\x36 \x01(\x08\x12\x33\n\x12\x66ooter_sep_visible\x18\x37 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12$\n\x1c\x66ooter_sep_visible_undefined\x18\x38 \x01(\x08\x12\x39\n\x18\x66ooter_verticals_visible\x18\x39 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12*\n\"footer_verticals_visible_undefined\x18: \x01(\x08\x12\x37\n\x16\x62order_strokes_visible\x18; \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12(\n border_strokes_visible_undefined\x18< \x01(\x08\x12\x35\n\x12master_font_family\x18= \x01(\x0b\x32\x19.TSSSOS.SpecStringArchive\x12$\n\x1cmaster_font_family_undefined\x18> \x01(\x08\x12\x35\n\x11writing_direction\x18? \x01(\x0b\x32\x1a.TSSSOS.SpecIntegerArchive\x12#\n\x1bwriting_direction_undefined\x18@ \x01(\x08\x12=\n\x1a\x63\x61tegory_level1_top_stroke\x18\x41 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$category_level1_top_stroke_undefined\x18\x42 \x01(\x08\x12=\n\x1a\x63\x61tegory_level2_top_stroke\x18\x43 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$category_level2_top_stroke_undefined\x18\x44 \x01(\x08\x12=\n\x1a\x63\x61tegory_level3_top_stroke\x18\x45 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$category_level3_top_stroke_undefined\x18\x46 \x01(\x08\x12=\n\x1a\x63\x61tegory_level4_top_stroke\x18G \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$category_level4_top_stroke_undefined\x18H \x01(\x08\x12=\n\x1a\x63\x61tegory_level5_top_stroke\x18I \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$category_level5_top_stroke_undefined\x18J \x01(\x08\x12I\n&category_level1_label_separator_stroke\x18K \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0category_level1_label_separator_stroke_undefined\x18L \x01(\x08\x12I\n&category_level2_label_separator_stroke\x18M \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0category_level2_label_separator_stroke_undefined\x18N \x01(\x08\x12I\n&category_level3_label_separator_stroke\x18O \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0category_level3_label_separator_stroke_undefined\x18P \x01(\x08\x12I\n&category_level4_label_separator_stroke\x18Q \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0category_level4_label_separator_stroke_undefined\x18R \x01(\x08\x12I\n&category_level5_label_separator_stroke\x18S \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0category_level5_label_separator_stroke_undefined\x18T \x01(\x08\x12@\n\x1d\x63\x61tegory_level1_bottom_stroke\x18U \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'category_level1_bottom_stroke_undefined\x18V \x01(\x08\x12@\n\x1d\x63\x61tegory_level2_bottom_stroke\x18W \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'category_level2_bottom_stroke_undefined\x18X \x01(\x08\x12@\n\x1d\x63\x61tegory_level3_bottom_stroke\x18Y \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'category_level3_bottom_stroke_undefined\x18Z \x01(\x08\x12@\n\x1d\x63\x61tegory_level4_bottom_stroke\x18[ \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'category_level4_bottom_stroke_undefined\x18\\ \x01(\x08\x12@\n\x1d\x63\x61tegory_level5_bottom_stroke\x18] \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'category_level5_bottom_stroke_undefined\x18^ \x01(\x08\x12\x42\n\x1f\x63\x61tegory_level1_interior_stroke\x18_ \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)category_level1_interior_stroke_undefined\x18` \x01(\x08\x12\x42\n\x1f\x63\x61tegory_level2_interior_stroke\x18\x61 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)category_level2_interior_stroke_undefined\x18\x62 \x01(\x08\x12\x42\n\x1f\x63\x61tegory_level3_interior_stroke\x18\x63 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)category_level3_interior_stroke_undefined\x18\x64 \x01(\x08\x12\x42\n\x1f\x63\x61tegory_level4_interior_stroke\x18\x65 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)category_level4_interior_stroke_undefined\x18\x66 \x01(\x08\x12\x42\n\x1f\x63\x61tegory_level5_interior_stroke\x18g \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)category_level5_interior_stroke_undefined\x18h \x01(\x08'
+  serialized_pb=b'\n\x15TSTArchives_sos.proto\x12\x06TSTSOS\x1a\x15TSDArchives_sos.proto\x1a\x15TSSArchives_sos.proto\x1a\x1fTSTStylePropertyArchiving.proto\x1a\x16TSWPArchives_sos.proto\"t\n#SpecSetTableStrokePresetListArchive\x12>\n\x18table_stroke_preset_list\x18\x01 \x01(\x0b\x32\x1c.TST.StrokePresetListArchive\x12\r\n\x05unset\x18\x02 \x02(\x08\"z\n SpecTableStrokePresetListArchive\x12V\n!spec_set_table_stroke_preset_list\x18\x01 \x01(\x0b\x32+.TSTSOS.SpecSetTableStrokePresetListArchive\"\x99\x03\n&TableCellStylePropertyChangeSetArchive\x12*\n\ttext_wrap\x18\x01 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12\x1b\n\x13text_wrap_undefined\x18\x02 \x01(\x08\x12(\n\x04type\x18\x03 \x01(\x0b\x32\x1a.TSSSOS.SpecIntegerArchive\x12\x16\n\x0etype_undefined\x18\x04 \x01(\x08\x12%\n\x04\x66ill\x18\x05 \x01(\x0b\x32\x17.TSDSOS.SpecFillArchive\x12\x16\n\x0e\x66ill_undefined\x18\x06 \x01(\x08\x12\x36\n\x12vertical_alignment\x18\x07 \x01(\x0b\x32\x1a.TSSSOS.SpecIntegerArchive\x12$\n\x1cvertical_alignment_undefined\x18\x08 \x01(\x08\x12,\n\x07padding\x18\t \x01(\x0b\x32\x1b.TSWPSOS.SpecPaddingArchive\x12\x19\n\x11padding_undefined\x18\n \x01(\x08\"\xa3\x38\n\"TableStylePropertyChangeSetArchive\x12,\n\x0b\x61uto_resize\x18\x01 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12\x1d\n\x15\x61uto_resize_undefined\x18\x02 \x01(\x08\x12,\n\x0b\x62\x61nded_rows\x18\x03 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12\x1d\n\x15\x62\x61nded_rows_undefined\x18\x04 \x01(\x08\x12\x31\n\x10\x62\x61nded_cell_fill\x18\x05 \x01(\x0b\x32\x17.TSDSOS.SpecFillArchive\x12\"\n\x1a\x62\x61nded_cell_fill_undefined\x18\x06 \x01(\x08\x12\x39\n\x18\x62\x65haves_like_spreadsheet\x18\x07 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12*\n\"behaves_like_spreadsheet_undefined\x18\x08 \x01(\x08\x12@\n\x1d\x62ody_horizontal_border_stroke\x18\t \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'body_horizontal_border_stroke_undefined\x18\n \x01(\x08\x12>\n\x1b\x62ody_vertical_border_stroke\x18\x0b \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12-\n%body_vertical_border_stroke_undefined\x18\x0c \x01(\x08\x12\x39\n\x16\x62ody_horizontal_stroke\x18\r \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12(\n body_horizontal_stroke_undefined\x18\x0e \x01(\x08\x12\x37\n\x14\x62ody_vertical_stroke\x18\x0f \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12&\n\x1e\x62ody_vertical_stroke_undefined\x18\x10 \x01(\x08\x12>\n\x1bheader_column_border_stroke\x18\x11 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12-\n%header_column_border_stroke_undefined\x18\x12 \x01(\x08\x12@\n\x1dheader_column_vertical_stroke\x18\x13 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'header_column_vertical_stroke_undefined\x18\x14 \x01(\x08\x12\x42\n\x1fheader_column_horizontal_stroke\x18\x15 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)header_column_horizontal_stroke_undefined\x18\x16 \x01(\x08\x12\x41\n\x1eheader_column_separator_stroke\x18\x17 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x30\n(header_column_separator_stroke_undefined\x18\x18 \x01(\x08\x12;\n\x18header_row_border_stroke\x18\x19 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12*\n\"header_row_border_stroke_undefined\x18\x1a \x01(\x08\x12?\n\x1cheader_row_horizontal_stroke\x18\x1b \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12.\n&header_row_horizontal_stroke_undefined\x18\x1c \x01(\x08\x12=\n\x1aheader_row_vertical_stroke\x18\x1d \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$header_row_vertical_stroke_undefined\x18\x1e \x01(\x08\x12>\n\x1bheader_row_separator_stroke\x18\x1f \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12-\n%header_row_separator_stroke_undefined\x18  \x01(\x08\x12;\n\x18\x66ooter_row_border_stroke\x18! \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12*\n\"footer_row_border_stroke_undefined\x18\" \x01(\x08\x12?\n\x1c\x66ooter_row_horizontal_stroke\x18# \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12.\n&footer_row_horizontal_stroke_undefined\x18$ \x01(\x08\x12=\n\x1a\x66ooter_row_vertical_stroke\x18% \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$footer_row_vertical_stroke_undefined\x18& \x01(\x08\x12>\n\x1b\x66ooter_row_separator_stroke\x18\' \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12-\n%footer_row_separator_stroke_undefined\x18( \x01(\x08\x12K\n\x19stroke_preset_list_object\x18) \x01(\x0b\x32(.TSTSOS.SpecTableStrokePresetListArchive\x12+\n#stroke_preset_list_object_undefined\x18* \x01(\x08\x12\x39\n\x18vertical_strokes_visible\x18+ \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12*\n\"vertical_strokes_visible_undefined\x18, \x01(\x08\x12;\n\x1ahorizontal_strokes_visible\x18- \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12,\n$horizontal_strokes_visible_undefined\x18. \x01(\x08\x12\x37\n\x16header_row_sep_visible\x18/ \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12(\n header_row_sep_visible_undefined\x18\x30 \x01(\x08\x12=\n\x1cheader_row_verticals_visible\x18\x31 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12.\n&header_row_verticals_visible_undefined\x18\x32 \x01(\x08\x12\x37\n\x16header_col_sep_visible\x18\x33 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12(\n header_col_sep_visible_undefined\x18\x34 \x01(\x08\x12?\n\x1eheader_col_horizontals_visible\x18\x35 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12\x30\n(header_col_horizontals_visible_undefined\x18\x36 \x01(\x08\x12\x33\n\x12\x66ooter_sep_visible\x18\x37 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12$\n\x1c\x66ooter_sep_visible_undefined\x18\x38 \x01(\x08\x12\x39\n\x18\x66ooter_verticals_visible\x18\x39 \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12*\n\"footer_verticals_visible_undefined\x18: \x01(\x08\x12\x37\n\x16\x62order_strokes_visible\x18; \x01(\x0b\x32\x17.TSSSOS.SpecBoolArchive\x12(\n border_strokes_visible_undefined\x18< \x01(\x08\x12\x35\n\x12master_font_family\x18= \x01(\x0b\x32\x19.TSSSOS.SpecStringArchive\x12$\n\x1cmaster_font_family_undefined\x18> \x01(\x08\x12\x35\n\x11writing_direction\x18? \x01(\x0b\x32\x1a.TSSSOS.SpecIntegerArchive\x12#\n\x1bwriting_direction_undefined\x18@ \x01(\x08\x12=\n\x1a\x63\x61tegory_level1_top_stroke\x18\x41 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$category_level1_top_stroke_undefined\x18\x42 \x01(\x08\x12=\n\x1a\x63\x61tegory_level2_top_stroke\x18\x43 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$category_level2_top_stroke_undefined\x18\x44 \x01(\x08\x12=\n\x1a\x63\x61tegory_level3_top_stroke\x18\x45 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$category_level3_top_stroke_undefined\x18\x46 \x01(\x08\x12=\n\x1a\x63\x61tegory_level4_top_stroke\x18G \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$category_level4_top_stroke_undefined\x18H \x01(\x08\x12=\n\x1a\x63\x61tegory_level5_top_stroke\x18I \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12,\n$category_level5_top_stroke_undefined\x18J \x01(\x08\x12I\n&category_level1_label_separator_stroke\x18K \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0category_level1_label_separator_stroke_undefined\x18L \x01(\x08\x12I\n&category_level2_label_separator_stroke\x18M \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0category_level2_label_separator_stroke_undefined\x18N \x01(\x08\x12I\n&category_level3_label_separator_stroke\x18O \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0category_level3_label_separator_stroke_undefined\x18P \x01(\x08\x12I\n&category_level4_label_separator_stroke\x18Q \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0category_level4_label_separator_stroke_undefined\x18R \x01(\x08\x12I\n&category_level5_label_separator_stroke\x18S \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0category_level5_label_separator_stroke_undefined\x18T \x01(\x08\x12@\n\x1d\x63\x61tegory_level1_bottom_stroke\x18U \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'category_level1_bottom_stroke_undefined\x18V \x01(\x08\x12@\n\x1d\x63\x61tegory_level2_bottom_stroke\x18W \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'category_level2_bottom_stroke_undefined\x18X \x01(\x08\x12@\n\x1d\x63\x61tegory_level3_bottom_stroke\x18Y \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'category_level3_bottom_stroke_undefined\x18Z \x01(\x08\x12@\n\x1d\x63\x61tegory_level4_bottom_stroke\x18[ \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'category_level4_bottom_stroke_undefined\x18\\ \x01(\x08\x12@\n\x1d\x63\x61tegory_level5_bottom_stroke\x18] \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'category_level5_bottom_stroke_undefined\x18^ \x01(\x08\x12\x42\n\x1f\x63\x61tegory_level1_interior_stroke\x18_ \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)category_level1_interior_stroke_undefined\x18` \x01(\x08\x12\x42\n\x1f\x63\x61tegory_level2_interior_stroke\x18\x61 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)category_level2_interior_stroke_undefined\x18\x62 \x01(\x08\x12\x42\n\x1f\x63\x61tegory_level3_interior_stroke\x18\x63 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)category_level3_interior_stroke_undefined\x18\x64 \x01(\x08\x12\x42\n\x1f\x63\x61tegory_level4_interior_stroke\x18\x65 \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)category_level4_interior_stroke_undefined\x18\x66 \x01(\x08\x12\x42\n\x1f\x63\x61tegory_level5_interior_stroke\x18g \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x31\n)category_level5_interior_stroke_undefined\x18h \x01(\x08\x12\x45\n\"body_pivot_group_horizontal_stroke\x18i \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x34\n,body_pivot_group_horizontal_stroke_undefined\x18j \x01(\x08\x12\x43\n body_pivot_group_vertical_stroke\x18k \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x32\n*body_pivot_group_vertical_stroke_undefined\x18l \x01(\x08\x12K\n(body_pivot_de_emphasis_horizontal_stroke\x18m \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12:\n2body_pivot_de_emphasis_horizontal_stroke_undefined\x18n \x01(\x08\x12\x46\n#body_pivot_emphasis_vertical_stroke\x18o \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x35\n-body_pivot_emphasis_vertical_stroke_undefined\x18p \x01(\x08\x12N\n+header_column_pivot_group_horizontal_stroke\x18q \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12=\n5header_column_pivot_group_horizontal_stroke_undefined\x18r \x01(\x08\x12O\n,header_column_pivot_group_de_emphasis_stroke\x18s \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12>\n6header_column_pivot_group_de_emphasis_stroke_undefined\x18t \x01(\x08\x12G\n$header_column_pivot_separator_stroke\x18u \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x36\n.header_column_pivot_separator_stroke_undefined\x18v \x01(\x08\x12I\n&header_row_pivot_group_vertical_stroke\x18w \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0header_row_pivot_group_vertical_stroke_undefined\x18x \x01(\x08\x12L\n)header_row_pivot_group_de_emphasis_stroke\x18y \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12;\n3header_row_pivot_group_de_emphasis_stroke_undefined\x18z \x01(\x08\x12@\n\x1dheader_row_pivot_title_stroke\x18{ \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12/\n\'header_row_pivot_title_stroke_undefined\x18| \x01(\x08\x12I\n&footer_row_pivot_group_vertical_stroke\x18} \x01(\x0b\x32\x19.TSDSOS.SpecStrokeArchive\x12\x38\n0footer_row_pivot_group_vertical_stroke_undefined\x18~ \x01(\x08'
   ,
   dependencies=[TSDArchives__sos__pb2.DESCRIPTOR,TSSArchives__sos__pb2.DESCRIPTOR,TSTStylePropertyArchiving__pb2.DESCRIPTOR,TSWPArchives__sos__pb2.DESCRIPTOR,])
 
@@ -932,6 +932,160 @@ _TABLESTYLEPROPERTYCHANGESETARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='body_pivot_group_horizontal_stroke', full_name='TSTSOS.TableStylePropertyChangeSetArchive.body_pivot_group_horizontal_stroke', index=104,
+      number=105, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='body_pivot_group_horizontal_stroke_undefined', full_name='TSTSOS.TableStylePropertyChangeSetArchive.body_pivot_group_horizontal_stroke_undefined', index=105,
+      number=106, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='body_pivot_group_vertical_stroke', full_name='TSTSOS.TableStylePropertyChangeSetArchive.body_pivot_group_vertical_stroke', index=106,
+      number=107, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='body_pivot_group_vertical_stroke_undefined', full_name='TSTSOS.TableStylePropertyChangeSetArchive.body_pivot_group_vertical_stroke_undefined', index=107,
+      number=108, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='body_pivot_de_emphasis_horizontal_stroke', full_name='TSTSOS.TableStylePropertyChangeSetArchive.body_pivot_de_emphasis_horizontal_stroke', index=108,
+      number=109, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='body_pivot_de_emphasis_horizontal_stroke_undefined', full_name='TSTSOS.TableStylePropertyChangeSetArchive.body_pivot_de_emphasis_horizontal_stroke_undefined', index=109,
+      number=110, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='body_pivot_emphasis_vertical_stroke', full_name='TSTSOS.TableStylePropertyChangeSetArchive.body_pivot_emphasis_vertical_stroke', index=110,
+      number=111, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='body_pivot_emphasis_vertical_stroke_undefined', full_name='TSTSOS.TableStylePropertyChangeSetArchive.body_pivot_emphasis_vertical_stroke_undefined', index=111,
+      number=112, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_column_pivot_group_horizontal_stroke', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_column_pivot_group_horizontal_stroke', index=112,
+      number=113, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_column_pivot_group_horizontal_stroke_undefined', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_column_pivot_group_horizontal_stroke_undefined', index=113,
+      number=114, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_column_pivot_group_de_emphasis_stroke', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_column_pivot_group_de_emphasis_stroke', index=114,
+      number=115, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_column_pivot_group_de_emphasis_stroke_undefined', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_column_pivot_group_de_emphasis_stroke_undefined', index=115,
+      number=116, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_column_pivot_separator_stroke', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_column_pivot_separator_stroke', index=116,
+      number=117, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_column_pivot_separator_stroke_undefined', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_column_pivot_separator_stroke_undefined', index=117,
+      number=118, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_row_pivot_group_vertical_stroke', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_row_pivot_group_vertical_stroke', index=118,
+      number=119, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_row_pivot_group_vertical_stroke_undefined', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_row_pivot_group_vertical_stroke_undefined', index=119,
+      number=120, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_row_pivot_group_de_emphasis_stroke', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_row_pivot_group_de_emphasis_stroke', index=120,
+      number=121, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_row_pivot_group_de_emphasis_stroke_undefined', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_row_pivot_group_de_emphasis_stroke_undefined', index=121,
+      number=122, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_row_pivot_title_stroke', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_row_pivot_title_stroke', index=122,
+      number=123, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='header_row_pivot_title_stroke_undefined', full_name='TSTSOS.TableStylePropertyChangeSetArchive.header_row_pivot_title_stroke_undefined', index=123,
+      number=124, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='footer_row_pivot_group_vertical_stroke', full_name='TSTSOS.TableStylePropertyChangeSetArchive.footer_row_pivot_group_vertical_stroke', index=124,
+      number=125, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='footer_row_pivot_group_vertical_stroke_undefined', full_name='TSTSOS.TableStylePropertyChangeSetArchive.footer_row_pivot_group_vertical_stroke_undefined', index=125,
+      number=126, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -945,7 +1099,7 @@ _TABLESTYLEPROPERTYCHANGESETARCHIVE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=791,
-  serialized_end=6547,
+  serialized_end=7994,
 )
 
 _SPECSETTABLESTROKEPRESETLISTARCHIVE.fields_by_name['table_stroke_preset_list'].message_type = TSTStylePropertyArchiving__pb2._STROKEPRESETLISTARCHIVE
@@ -1007,6 +1161,17 @@ _TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['category_level2_interior_str
 _TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['category_level3_interior_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
 _TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['category_level4_interior_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
 _TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['category_level5_interior_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
+_TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['body_pivot_group_horizontal_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
+_TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['body_pivot_group_vertical_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
+_TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['body_pivot_de_emphasis_horizontal_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
+_TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['body_pivot_emphasis_vertical_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
+_TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['header_column_pivot_group_horizontal_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
+_TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['header_column_pivot_group_de_emphasis_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
+_TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['header_column_pivot_separator_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
+_TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['header_row_pivot_group_vertical_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
+_TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['header_row_pivot_group_de_emphasis_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
+_TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['header_row_pivot_title_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
+_TABLESTYLEPROPERTYCHANGESETARCHIVE.fields_by_name['footer_row_pivot_group_vertical_stroke'].message_type = TSDArchives__sos__pb2._SPECSTROKEARCHIVE
 DESCRIPTOR.message_types_by_name['SpecSetTableStrokePresetListArchive'] = _SPECSETTABLESTROKEPRESETLISTARCHIVE
 DESCRIPTOR.message_types_by_name['SpecTableStrokePresetListArchive'] = _SPECTABLESTROKEPRESETLISTARCHIVE
 DESCRIPTOR.message_types_by_name['TableCellStylePropertyChangeSetArchive'] = _TABLECELLSTYLEPROPERTYCHANGESETARCHIVE

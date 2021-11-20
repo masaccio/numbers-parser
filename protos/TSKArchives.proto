@@ -214,27 +214,12 @@ message CommandContainerArchive {
   repeated .TSP.Reference commands = 1;
 }
 
-message ShuffleMappingArchive {
-  message Entry {
-    required uint32 from = 1;
-    required uint32 to = 2;
-  }
-  required uint32 start_index = 1;
-  required uint32 end_index = 2;
-  repeated .TSK.ShuffleMappingArchive.Entry entries = 3;
-  optional bool is_vertical = 4 [default = true];
-  optional bool is_move_operation = 5 [default = false];
-  optional uint32 first_moved_index = 6 [default = 0];
-  optional uint32 destination_index_for_move = 7 [default = 0];
-  optional uint32 number_of_indexes_moved = 8 [default = 0];
-}
-
 message ProgressiveCommandGroupArchive {
   required .TSK.CommandGroupArchive super = 1;
 }
 
 message FormatStructArchive {
-  required uint32 format_type = 1;
+  optional uint32 format_type = 1;
   optional uint32 decimal_places = 2;
   optional string currency_code = 3;
   optional uint32 negative_style = 4;

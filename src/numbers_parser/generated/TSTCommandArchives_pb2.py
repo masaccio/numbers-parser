@@ -29,7 +29,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x18TSTCommandArchives.proto\x12\x03TST\x1a\x11TSPMessages.proto\x1a\x11TSDArchives.proto\x1a\x18TSDCommandArchives.proto\x1a\x11TSKArchives.proto\x1a\x11TSSArchives.proto\x1a\x12TSCEArchives.proto\x1a\x12TSWPArchives.proto\x1a\x11TSTArchives.proto\x1a\x15TSTArchives_sos.proto\"\xb7\x02\n\x13TableCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12)\n\x12table_info_id_path\x18\x02 \x02(\x0b\x32\r.TSP.UUIDPath\x12\x13\n\x0b\x63ommandname\x18\x03 \x01(\t\x12\x35\n\x1d\x64\x65\x66\x61ult_cell_styles_container\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x11\n\ttimestamp\x18\x05 \x01(\x01\x12\x16\n\x0erandom_seed_lo\x18\x06 \x01(\r\x12\x16\n\x0erandom_seed_hi\x18\x07 \x01(\r\x12\x12\n\nis_inverse\x18\x08 \x01(\x08\x12\x15\n\rold_timestamp\x18\t \x01(\x01\x12\x17\n\x0fold_random_seed\x18\n \x01(\x04\"\xdf\x01\n\x1f\x43ommandApplyCellContentsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\rcell_diff_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12.\n\x16rollback_cell_diff_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x12\x63ustom_format_keys\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12\x15\n\raction_string\x18\x05 \x01(\t\"\xec\x01\n\x1e\x43ommandApplyCellDiffMapArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\rcell_diff_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12$\n\x1cshould_allow_merge_fragments\x18\x03 \x02(\x08\x12-\n\x15inverse_cell_diff_map\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x12\x63ustom_format_keys\x18\x05 \x03(\x0b\x32\t.TSP.UUID\"\xdd\x02\n\x1a\x43ommandApplyCellMapArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\rredo_cell_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12%\n\rundo_cell_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cundo_formula_rewrite_command\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x12\x63ustom_format_keys\x18\x05 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\x1amerge_owner_rollback_index\x18\x06 \x01(\r\x12\x15\n\ris_from_paste\x18\x07 \x02(\x08\x12\x30\n\x18\x66ormula_rewrite_commands\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\"\xfd\x02\n$CommandApplyConcurrentCellMapArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x30\n\x18redo_concurrent_cell_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18undo_concurrent_cell_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cundo_formula_rewrite_command\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x12\x63ustom_format_keys\x18\x05 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\x1amerge_owner_rollback_index\x18\x06 \x01(\r\x12\x15\n\ris_from_paste\x18\x07 \x02(\x08\x12\x30\n\x18\x66ormula_rewrite_commands\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\"\xb4\x01\n%CommandChangeFreezeHeaderStateArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12-\n\tdirection\x18\x02 \x02(\x0e\x32\x1a.TST.TableDimensionArchive\x12\x18\n\x10new_freeze_state\x18\x03 \x02(\x08\x12\x19\n\x11prev_freeze_state\x18\x04 \x02(\x08\"\xc7\x02\n\x19\x43ommandDeleteCellsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12 \n\x18update_border_visibility\x18\x04 \x01(\x08\x12\x1b\n\x13invalidate_comments\x18\x05 \x01(\x08\x12!\n\x19invalidate_comments_valid\x18\x06 \x01(\x08\x12\x32\n\x0f\x63\x65ll_uid_region\x18\x07 \x01(\x0b\x32\x19.TST.CellUIDRegionArchive\x12\x36\n\x15summary_cell_uid_list\x18\x08 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12\x33\n\x1binverse_concurrent_cell_map\x18\t \x01(\x0b\x32\x0e.TSP.Reference\"\xaa\x01\n CommandDeleteCellContentsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12.\n\rcell_uid_list\x18\x02 \x02(\x0b\x32\x17.TST.CellUIDListArchive\x12-\n\x15inverse_cell_diff_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\"\xf5\x01\n\x1e\x43ommandMutateCellFormatArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12.\n\rcell_uid_list\x18\x02 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12-\n\x15inverse_cell_diff_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15whole_format_diff_map\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1c\n\x14intended_format_type\x18\x05 \x02(\r\"v\n\'CommandSetAutomaticDurationUnitsArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x17\n\x0f\x61utomatic_units\x18\x04 \x01(\x08\"l\n\x1e\x43ommandSetDurationStyleArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x16\n\x0e\x64uration_style\x18\x02 \x01(\r\"\x8f\x01\n,CommandSetDurationUnitSmallestLargestArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x15\n\rsmallest_unit\x18\x02 \x01(\r\x12\x14\n\x0clargest_unit\x18\x03 \x01(\r\"\x9c\x01\n!CommandReplaceCustomFormatArchive\x12%\n\rundo_diff_map\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x63ommit_diff_map\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x05super\x18\x06 \x02(\x0b\x32\x18.TST.TableCommandArchive\"\xe0\x05\n\x17\x43ommandMoveCellsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12-\n\x16\x64st_table_info_id_path\x18\x02 \x02(\x0b\x32\r.TSP.UUIDPath\x12+\n\rsrc_uid_range\x18\x03 \x02(\x0b\x32\x14.TSP.UUIDRectArchive\x12+\n\rdst_uid_range\x18\x04 \x02(\x0b\x32\x14.TSP.UUIDRectArchive\x12\x33\n\x0ftable_dimension\x18\x05 \x01(\x0e\x32\x1a.TST.TableDimensionArchive\x12$\n\x0csrc_cell_map\x18\x06 \x02(\x0b\x32\x0e.TSP.Reference\x12$\n\x0c\x64st_cell_map\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n\x19\x64st_cell_styles_container\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\x11src_undo_cell_map\x18\t \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\x11\x64st_undo_cell_map\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12&\n\x1e\x64st_merge_owner_rollback_index\x18\x0b \x02(\r\x12\x30\n\x18\x66ormula_rewrite_commands\x18\x0c \x03(\x0b\x32\x0e.TSP.Reference\x12;\n\x17merge_action_to_restore\x18\r \x01(\x0b\x32\x1a.TST.MergeOperationArchive\x12=\n\x1c\x63omment_cell_uids_to_restore\x18\x0e \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12\x33\n\x1b\x63omment_storages_to_restore\x18\x0f \x03(\x0b\x32\x0e.TSP.Reference\"\xa0\x01\n\x18\x43olumnRowMetadataArchive\x12\x0c\n\x04size\x18\x01 \x02(\x01\x12\x15\n\rhiding_action\x18\x02 \x02(\r\x12\"\n\ncell_style\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\"\n\ntext_style\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x17\n\x04uuid\x18\x05 \x01(\x0b\x32\t.TSP.UUID\"\xf1\x03\n!CommandInsertColumnsOrRowsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12+\n\x06\x62undle\x18\x02 \x02(\x0b\x32\x1b.TST.ColumnRowBundleArchive\x12 \n\x08\x63\x65ll_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rundo_commands\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rundo_cell_map\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n\nsort_order\x18\x06 \x01(\x0b\x32\x1d.TST.TableSortOrderUIDArchive\x12\"\n\nfilter_set\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n!should_edge_expand_formula_ranges\x18\x08 \x01(\x08\x12\x17\n\x0fwas_categorized\x18\t \x01(\x08\x12\x1d\n\nundo_order\x18\n \x03(\x0b\x32\t.TSP.UUID\x12%\n\x12src_row_column_uid\x18\x0b \x02(\x0b\x32\t.TSP.UUID\x12%\n\x12opp_row_column_uid\x18\x0c \x02(\x0b\x32\t.TSP.UUID\"\xe8\x02\n\x16\x43olumnRowBundleArchive\x12\x0e\n\x06is_row\x18\x01 \x02(\x08\x12 \n\rview_uid_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12.\n\x0eview_type_list\x18\x03 \x03(\x0e\x32\x16.TST.ColumnRowTypeEnum\x12 \n\rbase_uid_list\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12.\n\x0e\x62\x61se_type_list\x18\x05 \x03(\x0e\x32\x16.TST.ColumnRowTypeEnum\x12*\n\x17\x63\x61tegory_order_uid_list\x18\x06 \x03(\x0b\x32\t.TSP.UUID\x12\x38\n\x18\x63\x61tegory_order_type_list\x18\x07 \x03(\x0e\x32\x16.TST.ColumnRowTypeEnum\x12\x34\n\rmetadata_list\x18\x08 \x03(\x0b\x32\x1d.TST.ColumnRowMetadataArchive\"\xaf\x03\n!CommandRemoveColumnsOrRowsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12+\n\x06\x62undle\x18\x02 \x02(\x0b\x32\x1b.TST.ColumnRowBundleArchive\x12 \n\x08\x63\x65ll_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rundo_cell_map\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0fundo_filter_set\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x36\n\x0fundo_sort_order\x18\x06 \x01(\x0b\x32\x1d.TST.TableSortOrderUIDArchive\x12\x38\n formula_rewrite_command_for_undo\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n)inverse_should_edge_expand_formula_ranges\x18\x08 \x01(\x08\x12\x1d\n\nundo_order\x18\t \x03(\x0b\x32\t.TSP.UUID\"p\n\x1c\x43ommandRowColumnRangeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x17\n\x04uids\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x0e\n\x06is_row\x18\x03 \x02(\x08\"z\n\x1f\x43ommandResizeColumnOrRowArchive\x12\x30\n\x05super\x18\x01 \x02(\x0b\x32!.TST.CommandRowColumnRangeArchive\x12\r\n\x05sizes\x18\x02 \x03(\x02\x12\x16\n\x0esizes_for_undo\x18\x03 \x03(\x02\"\xa5\x02\n\'CommandCategoryResizeColumnOrRowArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1a\n\x12\x63\x61tegory_row_sizes\x18\x02 \x03(\x02\x12#\n\x1b\x63\x61tegory_row_sizes_for_undo\x18\x03 \x03(\x02\x12 \n\x18\x63\x61tegory_label_row_sizes\x18\x04 \x03(\x02\x12)\n!category_label_row_sizes_for_undo\x18\x05 \x03(\x02\x12\x1c\n\x14\x63\x61tegory_column_size\x18\x06 \x01(\x01\x12%\n\x1d\x63\x61tegory_column_size_for_undo\x18\x07 \x01(\x01\"\xd6\x01\n\x16\x43ommandHideShowArchive\x12\x30\n\x05super\x18\x01 \x02(\x0b\x32!.TST.CommandRowColumnRangeArchive\x12\x34\n\x10hide_show_action\x18\x02 \x02(\x0e\x32\x1a.TST.HideShowActionArchive\x12\x15\n\rhiding_action\x18\x03 \x02(\r\x12=\n\x19hide_show_action_for_undo\x18\x04 \x03(\x0e\x32\x1a.TST.HideShowActionArchive\"\xa2\x03\n%CommandTextPreflightInsertCellArchive\x12\'\n\x05super\x18\x03 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12-\n\x15\x63oalesced_textcommand\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\x11postflightcommand\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x17grouped_with_postflight\x18\t \x01(\x08\x12\x1f\n\x0c\x65\x64iting_cell\x18\n \x02(\x0b\x32\t.TST.Cell\x12\'\n\x0f\x65\x64iting_storage\x18\x0b \x02(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x16last_column_hit_by_tap\x18\x0c \x01(\r\x12\'\n\x08\x63\x65ll_uid\x18\r \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\x12\x42\n\x1f\x61rchived_initial_selection_path\x18\x0e \x01(\x0b\x32\x19.TSK.SelectionPathArchive\"\xa4\x02\n\x1f\x43ommandPostflightSetCellArchive\x12\'\n\x05super\x18\x03 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12(\n\x10\x63hildcommandundo\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x0c\x65\x64iting_cell\x18\x06 \x02(\x0b\x32\t.TST.Cell\x12\x1b\n\x08new_cell\x18\x07 \x02(\x0b\x32\t.TST.Cell\x12\'\n\x0f\x65\x64iting_storage\x18\x08 \x02(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x16last_column_hit_by_tap\x18\t \x01(\r\x12\'\n\x08\x63\x65ll_uid\x18\n \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\"\xa9\x02\n+CommandChangeTableAreaForColumnOrRowArchive\x12\x30\n\x05super\x18\x01 \x02(\x0b\x32!.TST.CommandRowColumnRangeArchive\x12\x37\n\x15table_area_transition\x18\x02 \x02(\x0e\x32\x18.TST.TableAreaTransition\x12%\n\rcell_diff_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12undo_cell_diff_map\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rundo_commands\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x15\n\raction_string\x18\x06 \x01(\t\"\x9c\x02\n\"CommandSetPencilAnnotationsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12#\n\x0b\x61nnotations\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12&\n\x08\x66ormulas\x18\x03 \x03(\x0b\x32\x14.TSCE.FormulaArchive\x12\x17\n\x0f\x66ormula_indexes\x18\x04 \x03(\x04\x12.\n\x10inverse_formulas\x18\x05 \x03(\x0b\x32\x14.TSCE.FormulaArchive\x12\x1f\n\x17inverse_formula_indexes\x18\x06 \x03(\x04\x12\x16\n\x0erollback_index\x18\x07 \x01(\x04\"\xd5\x02\n\x1a\x43ommandSetTableNameArchive\x12\x14\n\x0cnewtablename\x18\x01 \x02(\t\x12\x14\n\x0coldtablename\x18\x02 \x01(\t\x12 \n\x08newstyle\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12 \n\x08oldstyle\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x05super\x18\x05 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\'\n\x0fold_shape_style\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0fnew_shape_style\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x1dold_table_name_border_enabled\x18\x08 \x01(\x08\x12%\n\x1dnew_table_name_border_enabled\x18\t \x01(\x08\"\x89\x01\n!CommandSetTableNameEnabledArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1a\n\x12table_name_enabled\x18\x02 \x02(\x08\x12\x1f\n\x17prev_table_name_enabled\x18\x03 \x01(\x08\"\xab\x02\n\x1e\x43ommandSetTableFontSizeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x13\n\x0bis_increase\x18\x02 \x02(\x08\x12\x16\n\x0e\x66ont_size_diff\x18\x03 \x02(\x05\x12\x16\n\x0e\x66ont_size_list\x18\x04 \x03(\x01\x12\x1e\n\x16inverse_font_size_list\x18\x05 \x03(\x01\x12%\n\rcell_diff_map\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15inverse_cell_diff_map\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x1dstyles_container_refresh_done\x18\x08 \x02(\x08\"\xc1\x02\n\x1e\x43ommandSetTableFontNameArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x11\n\tfont_name\x18\x02 \x02(\t\x12\x15\n\rpreserve_face\x18\x03 \x02(\x08\x12\x1a\n\x12previous_font_name\x18\x04 \x01(\t\x12,\n\x14previous_table_style\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12,\n\x14previous_text_styles\x18\x06 \x03(\x0b\x32\x0e.TSP.Reference\x12%\n\rcell_diff_map\x18\x07 \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15inverse_cell_diff_map\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\"\x89\x01\n CommandSetTableNameHeightArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1d\n\x15old_table_name_height\x18\x02 \x02(\x01\x12\x1d\n\x15new_table_name_height\x18\x03 \x02(\x01\"?\n\x14\x43ommandSetNowArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\"\x85\x02\n\x17\x43ommandSetWasCutArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12!\n\x0e\x66rom_table_uid\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12&\n\x13prev_from_table_uid\x18\x03 \x02(\x0b\x32\t.TSP.UUID\x12\x0f\n\x07was_cut\x18\x04 \x02(\x08\x12\x14\n\x0cprev_was_cut\x18\x05 \x02(\x08\x12$\n\x11\x66rom_group_by_uid\x18\x06 \x02(\x0b\x32\t.TSP.UUID\x12)\n\x16prev_from_group_by_uid\x18\x07 \x02(\x0b\x32\t.TSP.UUID\"\x93\x02\n\x18\x43ommandStyleCellsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x33\n\x11\x66ormat_properties\x18\x02 \x01(\x0b\x32\x18.TSP.ReferenceDictionary\x12(\n\tselection\x18\x03 \x02(\x0b\x32\x15.TST.SelectionArchive\x12%\n\rundo_cell_map\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\x12%\n\rredo_cell_map\x18\x05 \x02(\x0b\x32\x0e.TSP.Reference\x12!\n\ttext_undo\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\"\xf6\x01\n\x18\x43ommandStyleTableArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x33\n\x11\x66ormat_properties\x18\x02 \x01(\x0b\x32\x18.TSP.ReferenceDictionary\x12=\n\told_style\x18\x03 \x01(\x0b\x32*.TSTSOS.TableStylePropertyChangeSetArchive\x12=\n\tnew_style\x18\x04 \x01(\x0b\x32*.TSTSOS.TableStylePropertyChangeSetArchive\"\xca\x01\n\'CommandSetRepeatingHeaderEnabledArchive\x12 \n\x18repeating_header_enabled\x18\x01 \x02(\x08\x12-\n\tdirection\x18\x02 \x02(\x0e\x32\x1a.TST.TableDimensionArchive\x12\'\n\x05super\x18\x03 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\x1dprev_repeating_header_enabled\x18\x04 \x01(\x08\"\xaa\x01\n\x1f\x43ommandSetFiltersEnabledArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1b\n\x13new_filters_enabled\x18\x02 \x02(\x08\x12\x1b\n\x13old_filters_enabled\x18\x03 \x01(\x08\x12$\n\x11rollback_uid_list\x18\x04 \x03(\x0b\x32\t.TSP.UUID\"\xa3\x01\n!CommandAddTableStylePresetArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x14\n\x0cpreset_index\x18\x02 \x02(\x05\x12$\n\x0ctable_styles\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12\x19\n\x11send_notification\x18\x04 \x02(\x08\"\xc9\x01\n$CommandRemoveTableStylePresetArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1d\n\x05theme\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12,\n\x14removed_table_styles\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12\x11\n\tpreset_id\x18\x04 \x02(\x05\x12\x1d\n\x15preset_index_in_theme\x18\x05 \x02(\x05\"\xbe\x01\n%CommandReplaceTableStylePresetArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1d\n\x05theme\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10old_table_styles\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10new_table_styles\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\"\xaf\x04\n#CommandApplyTableStylePresetArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1e\n\x06preset\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x06styles\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12#\n\x0bundo_preset\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12#\n\x0bundo_styles\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rcell_diff_map\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12undo_cell_diff_map\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1b\n\x13\x61pply_preset_option\x18\x08 \x02(\x05\x12\x1d\n\x15table_clears_all_flag\x18\x0b \x02(\x08\x12\"\n\x1aundo_table_clears_all_flag\x18\x0c \x02(\x08\x12\x35\n\x0erow_col_styles\x18\r \x03(\x0b\x32\x1d.TST.ColumnRowMetadataArchive\x12:\n\x13undo_row_col_styles\x18\x0e \x03(\x0b\x32\x1d.TST.ColumnRowMetadataArchive\x12/\n\x17\x63hange_prop_map_wrapper\x18\x0f \x01(\x0b\x32\x0e.TSP.Reference\"Y\n\x15\x43ommandSetBaseArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x0c\n\x04\x62\x61se\x18\x02 \x02(\r\"f\n\x1b\x43ommandSetBasePlacesArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x13\n\x0b\x62\x61se_places\x18\x02 \x02(\r\"t\n!CommandSetBaseUseMinusSignArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x1b\n\x13\x62\x61se_use_minus_sign\x18\x02 \x02(\x08\"j\n\x1d\x43ommandSetCurrencyCodeArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x15\n\rcurrency_code\x18\x02 \x02(\t\"r\n!CommandSetFractionAccuracyArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x19\n\x11\x66raction_accuracy\x18\x02 \x02(\r\"y\n$CommandSetNegativeNumberStyleArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x1d\n\x15negative_number_style\x18\x02 \x02(\r\"t\n&CommandSetNumberOfDecimalPlacesArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x16\n\x0e\x64\x65\x63imal_places\x18\x02 \x02(\r\"\x8d\x01\n\x1f\x43ommandSetDateTimeFormatArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x1a\n\x12\x64\x61te_format_string\x18\x02 \x01(\t\x12\x1a\n\x12time_format_string\x18\x03 \x01(\t\"\x7f\n\'CommandSetShowThousandsSeparatorArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12 \n\x18show_thousands_separator\x18\x02 \x02(\x08\"w\n#CommandSetUseAccountingStyleArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x1c\n\x14use_accounting_style\x18\x02 \x02(\x08\"\xa5\x02\n&CommandSetRangeControlMinMaxIncArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x0f\n\x07minimum\x18\x02 \x01(\x01\x12\x0f\n\x07maximum\x18\x03 \x01(\x01\x12\x11\n\tincrement\x18\x04 \x01(\x01\x12%\n\rcell_diff_map\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\rcell_uid_list\x18\x06 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12-\n\x15inverse_cell_diff_map\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12\x17\n\x0fis_first_commit\x18\x08 \x02(\x08\"\xa7\x02\n\x1f\x43ommandMoveColumnsOrRowsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1b\n\x08\x64\x65st_uid\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12\x0e\n\x06\x62\x65\x66ore\x18\x03 \x02(\x08\x12 \n\rundo_dest_uid\x18\x04 \x02(\x0b\x32\t.TSP.UUID\x12\x13\n\x0bundo_before\x18\x05 \x02(\x08\x12\x17\n\x04uids\x18\x06 \x03(\x0b\x32\t.TSP.UUID\x12-\n\tdirection\x18\x07 \x02(\x0e\x32\x1a.TST.TableDimensionArchive\x12/\n\x17\x66ormula_rewrite_command\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\"\xb0\x01\n\x12\x43ommandSortArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12 \n\rfrom_row_uids\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x1e\n\x0bto_row_uids\x18\x03 \x03(\x0b\x32\t.TSP.UUID\x12/\n\x17\x66ormula_rewrite_command\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\"\x85\x02\n)CommandRewriteFormulasForTransposeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x35\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1f.TSCE.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x02(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\x12=\n\x0ewarningset_map\x18\x04 \x01(\x0b\x32%.TST.ImportWarningSetByCellRefArchive\"\xcd\x01\n0CommandRewriteTableFormulasForRewriteSpecArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x35\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1f.TSCE.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x02(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\"\xbf\x01\n\"CommandRewriteMergeFormulasArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x35\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1f.TSCE.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x02(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\"\xc2\x01\n%CommandRewriteCategoryFormulasArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x35\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1f.TSCE.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x02(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\"\\\n1CommandRewriteFilterFormulasForTableResizeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\"\xb7\x01\n1CommandRewriteFilterFormulasForRewriteSpecArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\"\n\nfilter_set\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x35\n\x0crewrite_spec\x18\x03 \x02(\x0b\x32\x1f.TSCE.FormulaRewriteSpecArchive\"\x98\x02\n4CommandRewriteConditionalStylesForRewriteSpecArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x35\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1f.TSCE.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x01(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\x12\x45\n\x16\x63onditional_style_sets\x18\x04 \x01(\x0b\x32%.TSCE.ExpandedCellRefObjectMapArchive\"\x92\x02\n\x13\x43ommandMergeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12.\n\rcell_uid_list\x18\x02 \x02(\x0b\x32\x17.TST.CellUIDListArchive\x12%\n\rundo_cell_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cundo_formula_rewrite_command\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1c\n\x14merge_owner_rollback\x18\x05 \x01(\r\x12\'\n\x0f\x63ommit_cell_map\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\"\x82\x01\n\x1a\x43ommandInverseMergeArchive\x12.\n\x05super\x18\x01 \x02(\x0b\x32\x1f.TST.CommandApplyCellMapArchive\x12\x34\n\x15merge_source_cell_uid\x18\x02 \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\"\xcf\x01\n\x15\x43ommandUnmergeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x30\n\x12unmerge_uid_ranges\x18\x02 \x03(\x0b\x32\x14.TSP.UUIDRectArchive\x12%\n\rundo_cell_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cundo_formula_rewrite_command\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\"\xd5\x01\n#CommandChooseTableIdRemapperArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x37\n\x0ftable_id_mapper\x18\x02 \x02(\x0b\x32\x1e.TST.MultiTableRemapperArchive\x12\x38\n formula_rewrite_command_for_undo\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x17\n\x0f\x61pply_and_clear\x18\x04 \x02(\x08\"\xe2\x08\n(CommandCategorySetGroupingColumnsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1c\n\x14new_enabled_changing\x18\x02 \x02(\x05\x12\x1c\n\x14old_enabled_changing\x18\x03 \x02(\x05\x12\x39\n\x14new_grouping_columns\x18\x04 \x02(\x0b\x32\x1b.TST.GroupColumnListArchive\x12\x39\n\x14old_grouping_columns\x18\x05 \x01(\x0b\x32\x1b.TST.GroupColumnListArchive\x12\x1a\n\x12restore_base_order\x18\x06 \x02(\x08\x12!\n\x0e\x62\x61se_row_order\x18\x07 \x03(\x0b\x32\t.TSP.UUID\x12\x1f\n\x17undo_restore_base_order\x18\x08 \x02(\x08\x12&\n\x13undo_base_row_order\x18\t \x03(\x0b\x32\t.TSP.UUID\x12\x1a\n\x12restore_view_order\x18\n \x02(\x08\x12!\n\x0eview_row_order\x18\x0b \x03(\x0b\x32\t.TSP.UUID\x12\x1f\n\x17undo_restore_view_order\x18\x0c \x02(\x08\x12&\n\x13undo_view_row_order\x18\r \x03(\x0b\x32\t.TSP.UUID\x12!\n\x0e\x63ollapse_state\x18\x0e \x03(\x0b\x32\t.TSP.UUID\x12&\n\x13undo_collapse_state\x18\x0f \x03(\x0b\x32\t.TSP.UUID\x12H\n\x14summary_change_state\x18\x10 \x01(\x0b\x32*.TST.SummaryModelGroupByChangeStateArchive\x12M\n\x19undo_summary_change_state\x18\x11 \x01(\x0b\x32*.TST.SummaryModelGroupByChangeStateArchive\x12>\n\x15new_column_aggregates\x18\x12 \x01(\x0b\x32\x1f.TST.ColumnAggregateListArchive\x12>\n\x15old_column_aggregates\x18\x13 \x01(\x0b\x32\x1f.TST.ColumnAggregateListArchive\x12\x38\n undo_set_enabled_rewrite_command\x18\x14 \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n undo_set_columns_rewrite_command\x18\x15 \x01(\x0b\x32\x0e.TSP.Reference\x12 \n\x18\x66orce_restore_all_states\x18\x16 \x02(\x08\x12%\n\rcell_diff_map\x18\x17 \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12undo_cell_diff_map\x18\x18 \x01(\x0b\x32\x0e.TSP.Reference\"\xb3\x02\n!FormulaEditingCommandGroupArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TSK.ProgressiveCommandGroupArchive\x12\x1a\n\x12undoSelectionValid\x18\x02 \x02(\x08\x12\x1a\n\x12undoSelectionStart\x18\x03 \x02(\r\x12\x1b\n\x13undoSelectionLength\x18\x04 \x02(\r\x12\x17\n\x0fundoActiveToken\x18\x05 \x02(\r\x12\x1a\n\x12redoSelectionValid\x18\x06 \x02(\x08\x12\x1a\n\x12redoSelectionStart\x18\x07 \x02(\r\x12\x1b\n\x13redoSelectionLength\x18\x08 \x02(\r\x12\x17\n\x0fredoActiveToken\x18\t \x02(\r\"\x96\x01\n-FormulaEditingCommandSelectionBehaviorArchive\x12\x33\n\x05super\x18\x01 \x02(\x0b\x32$.TSK.CommandSelectionBehaviorArchive\x12\x17\n\x0fundoActiveToken\x18\x02 \x01(\r\x12\x17\n\x0fredoActiveToken\x18\x03 \x01(\r\"\xcb\x01\n$TableCommandSelectionBehaviorArchive\x12\x33\n\x05super\x18\x01 \x02(\x0b\x32$.TSK.CommandSelectionBehaviorArchive\x12\"\n\ntable_info\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x1alast_column_uid_hit_by_tap\x18\x03 \x01(\x0b\x32\t.TSP.UUID\x12\x1b\n\x13invalidate_comments\x18\x04 \x01(\r\"\xb6\x02\n\x1e\x43ommandApplyCellCommentArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\'\n\x08\x63\x65ll_uid\x18\x02 \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\x12+\n\x13old_comment_storage\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13new_comment_storage\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x0f\x66orward_variant\x18\x05 \x01(\x0e\x32\x1a.TSD.CommentCommandVariant\x12\x33\n\x0finverse_variant\x18\x06 \x01(\x0e\x32\x1a.TSD.CommentCommandVariant\"`\n$CommandSetFormulaTokenizationArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x14\n\x0ctokenization\x18\x02 \x02(\x08\"\xf3\x01\n\x1e\x43ommandSetFilterSetTypeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12@\n\x13old_filter_set_type\x18\x02 \x01(\x0e\x32#.TST.FilterSetArchive.FilterSetType\x12@\n\x13new_filter_set_type\x18\x03 \x02(\x0e\x32#.TST.FilterSetArchive.FilterSetType\x12$\n\x11rollback_uid_list\x18\x04 \x03(\x0b\x32\t.TSP.UUID\"\x9b\x01\n\x1a\x43ommandSetTextStyleArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\rcell_diff_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15inverse_cell_diff_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\"\xc1\x01\n$CommandSetTextStylePropertiesArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\rcell_diff_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x1a\n\x12\x63\x65ll_was_rich_text\x18\x03 \x03(\x08\x12-\n\x15inverse_cell_diff_map\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\"i\n\x1e\x43ommandJustForNotifyingArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1e\n\x16\x63hange_descriptor_type\x18\x02 \x02(\r\"\xd8\x01\n CommandSetStorageLanguageArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1f\n\x07storage\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x10\n\x08language\x18\x03 \x02(\t\x12\x16\n\x0erange_location\x18\x04 \x02(\r\x12\x14\n\x0crange_length\x18\x05 \x02(\r\x12/\n\x10undo_transaction\x18\x06 \x01(\x0b\x32\x15.TSWP.UndoTransaction\"\xad\x01\n\x1a\x43ommandSetSortOrderArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x32\n\x0eold_sort_order\x18\x02 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\x12\x32\n\x0enew_sort_order\x18\x03 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\"\xbf\x01\n,CommandRewriteSortOrderForTableResizeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x32\n\x0eold_sort_order\x18\x02 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\x12\x32\n\x0enew_sort_order\x18\x03 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\"\xf6\x01\n,CommandRewriteSortOrderForRewriteSpecArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x35\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1f.TSCE.FormulaRewriteSpecArchive\x12\x32\n\x0eold_sort_order\x18\x03 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\x12\x32\n\x0enew_sort_order\x18\x04 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\"\xbb\x01\n\x1a\x43ommandSetFilterSetArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12&\n\x0enew_filter_set\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12&\n\x0eold_filter_set\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12$\n\x11rollback_uid_list\x18\x04 \x03(\x0b\x32\t.TSP.UUID\"l\n\x1b\x43olumnRowRestoreDataArchive\x12\x1b\n\x08uid_list\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x12\x30\n\tmetadatas\x18\x02 \x03(\x0b\x32\x1d.TST.ColumnRowMetadataArchive\"\xc5\x04\n\x1c\x43ommandTransposeTableArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x34\n\x14original_table_range\x18\x02 \x02(\x0b\x32\x16.TST.ExpandedCellRange\x12)\n\x11original_cell_map\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12!\n\x19original_footer_row_count\x18\x04 \x02(\r\x12\x1e\n\x16original_column_widths\x18\x05 \x03(\x02\x12\x1c\n\x14original_row_heights\x18\x06 \x03(\x02\x12-\n\x15ineligible_merge_list\x18\x07 \x03(\x0b\x32\x0e.TST.CellRange\x12+\n\x13transposed_cell_map\x18\x08 \x02(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cundo_formula_rewrite_command\x18\t \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15rich_text_subcommands\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12=\n\x13\x63olumn_restore_data\x18\x0b \x01(\x0b\x32 .TST.ColumnRowRestoreDataArchive\x12:\n\x10row_restore_data\x18\x0c \x01(\x0b\x32 .TST.ColumnRowRestoreDataArchive\"\xce\x01\n+CommandSetStructuredTextImportRecordArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12:\n\x11new_import_record\x18\x02 \x01(\x0b\x32\x1f.TST.StructuredTextImportRecord\x12:\n\x11old_import_record\x18\x03 \x01(\x0b\x32\x1f.TST.StructuredTextImportRecord\"\x99\x02\n)CommandCategoryCollapseExpandGroupArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x15\n\ris_collapsing\x18\x02 \x02(\x08\x12\x35\n\x10grouping_columns\x18\x03 \x02(\x0b\x32\x1b.TST.GroupColumnListArchive\x12\x37\n\x0e\x63ollapse_state\x18\x04 \x02(\x0b\x32\x1f.TST.ExpandCollapseStateArchive\x12<\n\x13undo_collapse_state\x18\x05 \x01(\x0b\x32\x1f.TST.ExpandCollapseStateArchive\"\xbd\x01\n)CommandCategoryChangeSummaryAggregateType\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x16\n\x0e\x61ggregate_type\x18\x02 \x02(\r\x12\x1b\n\x13undo_aggregate_type\x18\x03 \x02(\r\x12\x1d\n\ncolumn_uid\x18\x04 \x02(\x0b\x32\t.TSP.UUID\x12\x13\n\x0bgroup_level\x18\x05 \x02(\x11\"\xa5\x01\n$CommandCategorySetLabelRowVisibility\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x13\n\x0bgroup_level\x18\x02 \x02(\r\x12\x1c\n\x14label_row_visibility\x18\x03 \x02(\r\x12!\n\x19undo_label_row_visibility\x18\x04 \x02(\r\"\xaa\x02\n#CommandCategoryWillChangeGroupValue\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12!\n\x0egroup_node_uid\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12&\n\x13undo_group_node_uid\x18\x03 \x01(\x0b\x32\t.TSP.UUID\x12+\n\x0bgroup_value\x18\x04 \x01(\x0b\x32\x16.TSCE.CellValueArchive\x12\x30\n\x10undo_group_value\x18\x05 \x01(\x0b\x32\x16.TSCE.CellValueArchive\x12\x30\n\x18rewrite_command_for_undo\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\"S\n%IdempotentSelectionTransformerArchive\x12*\n\x12\x61rchived_selection\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\"\xb8\x01\n\x1dWPSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12*\n\x12\x61rchived_selection\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12.\n\x0forigin_cell_uid\x18\x03 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\"T\n\'TableSubSelectionTransformerBaseArchive\x12)\n\x12table_info_id_path\x18\x01 \x02(\x0b\x32\r.TSP.UUIDPath\"c\n$TableNameSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\"\xf6\x01\n&ControlCellSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12*\n\tcell_uids\x18\x02 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12.\n\x0forigin_cell_uid\x18\x03 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12\x33\n\x0eorigin_cell_id\x18\x04 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\"\xf4\x01\n$StockCellSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12*\n\tcell_uids\x18\x02 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12.\n\x0forigin_cell_uid\x18\x03 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12\x33\n\x0eorigin_cell_id\x18\x04 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\"\x9c\x02\n!RegionSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12*\n\tcell_uids\x18\x02 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12.\n\x0forigin_cell_uid\x18\x03 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12.\n\x0f\x61nchor_cell_uid\x18\x04 \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\x12.\n\x0f\x63ursor_cell_uid\x18\x05 \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\"\x8c\x01\n!StrokeSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12*\n\x12\x61rchived_selection\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\"\xb7\x01\n$RowColumnSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12\x31\n\x0eselection_type\x18\x02 \x02(\x0e\x32\x19.TST.SelectionTypeArchive\x12\x1f\n\x0crow_col_uids\x18\x03 \x03(\x0b\x32\t.TSP.UUID\"\xbb\x02\n\x1e\x43ommandCategoryMoveRowsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x13\n\x0b\x61\x63tion_type\x18\x02 \x02(\r\x12%\n\x12\x63\x61tegory_row_order\x18\x03 \x03(\x0b\x32\t.TSP.UUID\x12*\n\x17undo_category_row_order\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12%\n\rcell_diff_map\x18\x05 \x02(\x0b\x32\x0e.TSP.Reference\x12*\n\x12undo_cell_diff_map\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12\x35\n\x10grouping_columns\x18\x07 \x01(\x0b\x32\x1b.TST.GroupColumnListArchive\"\xcb\x01\n1CommandRewriteHiddenStatesForGroupByChangeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x33\n\x0fgroup_by_change\x18\x02 \x02(\x0b\x32\x1a.TSCE.GroupByChangeArchive\x12\x38\n\x0f\x63ollapsed_state\x18\x03 \x01(\x0b\x32\x1f.TST.ExpandCollapseStateArchive\"\xf0\x02\n-CommandRewritePencilAnnotationFormulasArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x35\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1f.TSCE.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x02(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\x12_\n\x14\x61nnotations_for_undo\x18\x04 \x03(\x0b\x32\x41.TST.CommandRewritePencilAnnotationFormulasArchive.AnnotationPair\x1a\x43\n\x0e\x41nnotationPair\x12\r\n\x05index\x18\x01 \x02(\x04\x12\"\n\nannotation\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference*i\n\tTableArea\x12\x11\n\rTableAreaBody\x10\x01\x12\x16\n\x12TableAreaHeaderRow\x10\x02\x12\x19\n\x15TableAreaHeaderColumn\x10\x03\x12\x16\n\x12TableAreaFooterRow\x10\x04*\x8b\x02\n\x13TableAreaTransition\x12&\n\"TableAreaTransitionHeaderRowToBody\x10\x01\x12&\n\"TableAreaTransitionBodyToHeaderRow\x10\x02\x12&\n\"TableAreaTransitionFooterRowToBody\x10\x03\x12&\n\"TableAreaTransitionBodyToFooterRow\x10\x04\x12)\n%TableAreaTransitionHeaderColumnToBody\x10\x05\x12)\n%TableAreaTransitionBodyToHeaderColumn\x10\x06*\xba\x01\n\x11\x43olumnRowTypeEnum\x12\x17\n\x13\x43olumnRowTypeAnchor\x10\x00\x12\x1a\n\x16\x43olumnRowTypeHeaderRow\x10\x01\x12\x18\n\x14\x43olumnRowTypeBodyRow\x10\x02\x12\x1a\n\x16\x43olumnRowTypeFooterRow\x10\x03\x12\x1d\n\x19\x43olumnRowTypeHeaderColumn\x10\x04\x12\x1b\n\x17\x43olumnRowTypeBodyColumn\x10\x05'
+  serialized_pb=b'\n\x18TSTCommandArchives.proto\x12\x03TST\x1a\x11TSPMessages.proto\x1a\x11TSDArchives.proto\x1a\x18TSDCommandArchives.proto\x1a\x11TSKArchives.proto\x1a\x11TSSArchives.proto\x1a\x12TSCEArchives.proto\x1a\x12TSWPArchives.proto\x1a\x11TSTArchives.proto\x1a\x15TSTArchives_sos.proto\"\xb7\x02\n\x13TableCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12)\n\x12table_info_id_path\x18\x02 \x02(\x0b\x32\r.TSP.UUIDPath\x12\x13\n\x0b\x63ommandname\x18\x03 \x01(\t\x12\x35\n\x1d\x64\x65\x66\x61ult_cell_styles_container\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x11\n\ttimestamp\x18\x05 \x01(\x01\x12\x16\n\x0erandom_seed_lo\x18\x06 \x01(\r\x12\x16\n\x0erandom_seed_hi\x18\x07 \x01(\r\x12\x12\n\nis_inverse\x18\x08 \x01(\x08\x12\x15\n\rold_timestamp\x18\t \x01(\x01\x12\x17\n\x0fold_random_seed\x18\n \x01(\x04\"\xdf\x01\n\x1f\x43ommandApplyCellContentsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\rcell_diff_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12.\n\x16rollback_cell_diff_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x12\x63ustom_format_keys\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12\x15\n\raction_string\x18\x05 \x01(\t\"\xec\x01\n\x1e\x43ommandApplyCellDiffMapArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\rcell_diff_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12$\n\x1cshould_allow_merge_fragments\x18\x03 \x02(\x08\x12-\n\x15inverse_cell_diff_map\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x12\x63ustom_format_keys\x18\x05 \x03(\x0b\x32\t.TSP.UUID\"\xdd\x02\n\x1a\x43ommandApplyCellMapArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\rredo_cell_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12%\n\rundo_cell_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cundo_formula_rewrite_command\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x12\x63ustom_format_keys\x18\x05 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\x1amerge_owner_rollback_index\x18\x06 \x01(\r\x12\x15\n\ris_from_paste\x18\x07 \x02(\x08\x12\x30\n\x18\x66ormula_rewrite_commands\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\"\xfd\x02\n$CommandApplyConcurrentCellMapArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x30\n\x18redo_concurrent_cell_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18undo_concurrent_cell_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cundo_formula_rewrite_command\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x12\x63ustom_format_keys\x18\x05 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\x1amerge_owner_rollback_index\x18\x06 \x01(\r\x12\x15\n\ris_from_paste\x18\x07 \x02(\x08\x12\x30\n\x18\x66ormula_rewrite_commands\x18\x08 \x03(\x0b\x32\x0e.TSP.Reference\"\xb4\x01\n%CommandChangeFreezeHeaderStateArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12-\n\tdirection\x18\x02 \x02(\x0e\x32\x1a.TST.TableDimensionArchive\x12\x18\n\x10new_freeze_state\x18\x03 \x02(\x08\x12\x19\n\x11prev_freeze_state\x18\x04 \x02(\x08\"\xc7\x02\n\x19\x43ommandDeleteCellsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12 \n\x18update_border_visibility\x18\x04 \x01(\x08\x12\x1b\n\x13invalidate_comments\x18\x05 \x01(\x08\x12!\n\x19invalidate_comments_valid\x18\x06 \x01(\x08\x12\x32\n\x0f\x63\x65ll_uid_region\x18\x07 \x01(\x0b\x32\x19.TST.CellUIDRegionArchive\x12\x36\n\x15summary_cell_uid_list\x18\x08 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12\x33\n\x1binverse_concurrent_cell_map\x18\t \x01(\x0b\x32\x0e.TSP.Reference\"\xaa\x01\n CommandDeleteCellContentsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12.\n\rcell_uid_list\x18\x02 \x02(\x0b\x32\x17.TST.CellUIDListArchive\x12-\n\x15inverse_cell_diff_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\"\xf5\x01\n\x1e\x43ommandMutateCellFormatArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12.\n\rcell_uid_list\x18\x02 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12-\n\x15inverse_cell_diff_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15whole_format_diff_map\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1c\n\x14intended_format_type\x18\x05 \x02(\r\"v\n\'CommandSetAutomaticDurationUnitsArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x17\n\x0f\x61utomatic_units\x18\x04 \x01(\x08\"l\n\x1e\x43ommandSetDurationStyleArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x16\n\x0e\x64uration_style\x18\x02 \x01(\r\"\x8f\x01\n,CommandSetDurationUnitSmallestLargestArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x15\n\rsmallest_unit\x18\x02 \x01(\r\x12\x14\n\x0clargest_unit\x18\x03 \x01(\r\"\x9c\x01\n!CommandReplaceCustomFormatArchive\x12%\n\rundo_diff_map\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0f\x63ommit_diff_map\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x05super\x18\x06 \x02(\x0b\x32\x18.TST.TableCommandArchive\"\xe0\x05\n\x17\x43ommandMoveCellsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12-\n\x16\x64st_table_info_id_path\x18\x02 \x02(\x0b\x32\r.TSP.UUIDPath\x12+\n\rsrc_uid_range\x18\x03 \x02(\x0b\x32\x14.TSP.UUIDRectArchive\x12+\n\rdst_uid_range\x18\x04 \x02(\x0b\x32\x14.TSP.UUIDRectArchive\x12\x33\n\x0ftable_dimension\x18\x05 \x01(\x0e\x32\x1a.TST.TableDimensionArchive\x12$\n\x0csrc_cell_map\x18\x06 \x02(\x0b\x32\x0e.TSP.Reference\x12$\n\x0c\x64st_cell_map\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n\x19\x64st_cell_styles_container\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\x11src_undo_cell_map\x18\t \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\x11\x64st_undo_cell_map\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12&\n\x1e\x64st_merge_owner_rollback_index\x18\x0b \x02(\r\x12\x30\n\x18\x66ormula_rewrite_commands\x18\x0c \x03(\x0b\x32\x0e.TSP.Reference\x12;\n\x17merge_action_to_restore\x18\r \x01(\x0b\x32\x1a.TST.MergeOperationArchive\x12=\n\x1c\x63omment_cell_uids_to_restore\x18\x0e \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12\x33\n\x1b\x63omment_storages_to_restore\x18\x0f \x03(\x0b\x32\x0e.TSP.Reference\"\xa0\x01\n\x18\x43olumnRowMetadataArchive\x12\x0c\n\x04size\x18\x01 \x02(\x01\x12\x15\n\rhiding_action\x18\x02 \x02(\r\x12\"\n\ncell_style\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\"\n\ntext_style\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x17\n\x04uuid\x18\x05 \x01(\x0b\x32\t.TSP.UUID\"\xa3\x04\n!CommandInsertColumnsOrRowsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12+\n\x06\x62undle\x18\x02 \x02(\x0b\x32\x1b.TST.ColumnRowBundleArchive\x12 \n\x08\x63\x65ll_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rundo_commands\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rundo_cell_map\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n\nsort_order\x18\x06 \x01(\x0b\x32\x1d.TST.TableSortOrderUIDArchive\x12\"\n\nfilter_set\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n!should_edge_expand_formula_ranges\x18\x08 \x01(\x08\x12\x17\n\x0fwas_categorized\x18\t \x01(\x08\x12\x1d\n\nundo_order\x18\n \x03(\x0b\x32\t.TSP.UUID\x12%\n\x12src_row_column_uid\x18\x0b \x02(\x0b\x32\t.TSP.UUID\x12%\n\x12opp_row_column_uid\x18\x0c \x02(\x0b\x32\t.TSP.UUID\x12\x30\n\x0bundo_bundle\x18\r \x01(\x0b\x32\x1b.TST.ColumnRowBundleArchive\"\x86\x03\n\x16\x43olumnRowBundleArchive\x12\x0e\n\x06is_row\x18\x01 \x02(\x08\x12 \n\rview_uid_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x38\n\x0eview_type_list\x18\x03 \x03(\x0e\x32 .TST.ColumnRowBundleItemTypeEnum\x12 \n\rbase_uid_list\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12\x38\n\x0e\x62\x61se_type_list\x18\x05 \x03(\x0e\x32 .TST.ColumnRowBundleItemTypeEnum\x12*\n\x17\x63\x61tegory_order_uid_list\x18\x06 \x03(\x0b\x32\t.TSP.UUID\x12\x42\n\x18\x63\x61tegory_order_type_list\x18\x07 \x03(\x0e\x32 .TST.ColumnRowBundleItemTypeEnum\x12\x34\n\rmetadata_list\x18\x08 \x03(\x0b\x32\x1d.TST.ColumnRowMetadataArchive\"\xaf\x03\n!CommandRemoveColumnsOrRowsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12+\n\x06\x62undle\x18\x02 \x02(\x0b\x32\x1b.TST.ColumnRowBundleArchive\x12 \n\x08\x63\x65ll_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rundo_cell_map\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0fundo_filter_set\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x36\n\x0fundo_sort_order\x18\x06 \x01(\x0b\x32\x1d.TST.TableSortOrderUIDArchive\x12\x38\n formula_rewrite_command_for_undo\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n)inverse_should_edge_expand_formula_ranges\x18\x08 \x01(\x08\x12\x1d\n\nundo_order\x18\t \x03(\x0b\x32\t.TSP.UUID\"p\n\x1c\x43ommandRowColumnRangeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x17\n\x04uids\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x0e\n\x06is_row\x18\x03 \x02(\x08\"z\n\x1f\x43ommandResizeColumnOrRowArchive\x12\x30\n\x05super\x18\x01 \x02(\x0b\x32!.TST.CommandRowColumnRangeArchive\x12\r\n\x05sizes\x18\x02 \x03(\x02\x12\x16\n\x0esizes_for_undo\x18\x03 \x03(\x02\"\xa5\x02\n\'CommandCategoryResizeColumnOrRowArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1a\n\x12\x63\x61tegory_row_sizes\x18\x02 \x03(\x02\x12#\n\x1b\x63\x61tegory_row_sizes_for_undo\x18\x03 \x03(\x02\x12 \n\x18\x63\x61tegory_label_row_sizes\x18\x04 \x03(\x02\x12)\n!category_label_row_sizes_for_undo\x18\x05 \x03(\x02\x12\x1c\n\x14\x63\x61tegory_column_size\x18\x06 \x01(\x01\x12%\n\x1d\x63\x61tegory_column_size_for_undo\x18\x07 \x01(\x01\"\xd6\x01\n\x16\x43ommandHideShowArchive\x12\x30\n\x05super\x18\x01 \x02(\x0b\x32!.TST.CommandRowColumnRangeArchive\x12\x34\n\x10hide_show_action\x18\x02 \x02(\x0e\x32\x1a.TST.HideShowActionArchive\x12\x15\n\rhiding_action\x18\x03 \x02(\r\x12=\n\x19hide_show_action_for_undo\x18\x04 \x03(\x0e\x32\x1a.TST.HideShowActionArchive\"\xa2\x03\n%CommandTextPreflightInsertCellArchive\x12\'\n\x05super\x18\x03 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12-\n\x15\x63oalesced_textcommand\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n\x11postflightcommand\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x17grouped_with_postflight\x18\t \x01(\x08\x12\x1f\n\x0c\x65\x64iting_cell\x18\n \x02(\x0b\x32\t.TST.Cell\x12\'\n\x0f\x65\x64iting_storage\x18\x0b \x02(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x16last_column_hit_by_tap\x18\x0c \x01(\r\x12\'\n\x08\x63\x65ll_uid\x18\r \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\x12\x42\n\x1f\x61rchived_initial_selection_path\x18\x0e \x01(\x0b\x32\x19.TSK.SelectionPathArchive\"\xa4\x02\n\x1f\x43ommandPostflightSetCellArchive\x12\'\n\x05super\x18\x03 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12(\n\x10\x63hildcommandundo\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1f\n\x0c\x65\x64iting_cell\x18\x06 \x02(\x0b\x32\t.TST.Cell\x12\x1b\n\x08new_cell\x18\x07 \x02(\x0b\x32\t.TST.Cell\x12\'\n\x0f\x65\x64iting_storage\x18\x08 \x02(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x16last_column_hit_by_tap\x18\t \x01(\r\x12\'\n\x08\x63\x65ll_uid\x18\n \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\"\xa9\x02\n+CommandChangeTableAreaForColumnOrRowArchive\x12\x30\n\x05super\x18\x01 \x02(\x0b\x32!.TST.CommandRowColumnRangeArchive\x12\x37\n\x15table_area_transition\x18\x02 \x02(\x0e\x32\x18.TST.TableAreaTransition\x12%\n\rcell_diff_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12undo_cell_diff_map\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rundo_commands\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12\x15\n\raction_string\x18\x06 \x01(\t\"\x9c\x02\n\"CommandSetPencilAnnotationsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12#\n\x0b\x61nnotations\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12&\n\x08\x66ormulas\x18\x03 \x03(\x0b\x32\x14.TSCE.FormulaArchive\x12\x17\n\x0f\x66ormula_indexes\x18\x04 \x03(\x04\x12.\n\x10inverse_formulas\x18\x05 \x03(\x0b\x32\x14.TSCE.FormulaArchive\x12\x1f\n\x17inverse_formula_indexes\x18\x06 \x03(\x04\x12\x16\n\x0erollback_index\x18\x07 \x01(\x04\"\xd5\x02\n\x1a\x43ommandSetTableNameArchive\x12\x14\n\x0cnewtablename\x18\x01 \x02(\t\x12\x14\n\x0coldtablename\x18\x02 \x01(\t\x12 \n\x08newstyle\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12 \n\x08oldstyle\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x05super\x18\x05 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\'\n\x0fold_shape_style\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0fnew_shape_style\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x1dold_table_name_border_enabled\x18\x08 \x01(\x08\x12%\n\x1dnew_table_name_border_enabled\x18\t \x01(\x08\"\x89\x01\n!CommandSetTableNameEnabledArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1a\n\x12table_name_enabled\x18\x02 \x02(\x08\x12\x1f\n\x17prev_table_name_enabled\x18\x03 \x01(\x08\"\xab\x02\n\x1e\x43ommandSetTableFontSizeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x13\n\x0bis_increase\x18\x02 \x02(\x08\x12\x16\n\x0e\x66ont_size_diff\x18\x03 \x02(\x05\x12\x16\n\x0e\x66ont_size_list\x18\x04 \x03(\x01\x12\x1e\n\x16inverse_font_size_list\x18\x05 \x03(\x01\x12%\n\rcell_diff_map\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15inverse_cell_diff_map\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x1dstyles_container_refresh_done\x18\x08 \x02(\x08\"\xc1\x02\n\x1e\x43ommandSetTableFontNameArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x11\n\tfont_name\x18\x02 \x02(\t\x12\x15\n\rpreserve_face\x18\x03 \x02(\x08\x12\x1a\n\x12previous_font_name\x18\x04 \x01(\t\x12,\n\x14previous_table_style\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12,\n\x14previous_text_styles\x18\x06 \x03(\x0b\x32\x0e.TSP.Reference\x12%\n\rcell_diff_map\x18\x07 \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15inverse_cell_diff_map\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\"\x89\x01\n CommandSetTableNameHeightArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1d\n\x15old_table_name_height\x18\x02 \x02(\x01\x12\x1d\n\x15new_table_name_height\x18\x03 \x02(\x01\"?\n\x14\x43ommandSetNowArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\"\x85\x02\n\x17\x43ommandSetWasCutArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12!\n\x0e\x66rom_table_uid\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12&\n\x13prev_from_table_uid\x18\x03 \x02(\x0b\x32\t.TSP.UUID\x12\x0f\n\x07was_cut\x18\x04 \x02(\x08\x12\x14\n\x0cprev_was_cut\x18\x05 \x02(\x08\x12$\n\x11\x66rom_group_by_uid\x18\x06 \x02(\x0b\x32\t.TSP.UUID\x12)\n\x16prev_from_group_by_uid\x18\x07 \x02(\x0b\x32\t.TSP.UUID\"\x93\x02\n\x18\x43ommandStyleCellsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x33\n\x11\x66ormat_properties\x18\x02 \x01(\x0b\x32\x18.TSP.ReferenceDictionary\x12(\n\tselection\x18\x03 \x02(\x0b\x32\x15.TST.SelectionArchive\x12%\n\rundo_cell_map\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\x12%\n\rredo_cell_map\x18\x05 \x02(\x0b\x32\x0e.TSP.Reference\x12!\n\ttext_undo\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\"\xf6\x01\n\x18\x43ommandStyleTableArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x33\n\x11\x66ormat_properties\x18\x02 \x01(\x0b\x32\x18.TSP.ReferenceDictionary\x12=\n\told_style\x18\x03 \x01(\x0b\x32*.TSTSOS.TableStylePropertyChangeSetArchive\x12=\n\tnew_style\x18\x04 \x01(\x0b\x32*.TSTSOS.TableStylePropertyChangeSetArchive\"\xca\x01\n\'CommandSetRepeatingHeaderEnabledArchive\x12 \n\x18repeating_header_enabled\x18\x01 \x02(\x08\x12-\n\tdirection\x18\x02 \x02(\x0e\x32\x1a.TST.TableDimensionArchive\x12\'\n\x05super\x18\x03 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\x1dprev_repeating_header_enabled\x18\x04 \x01(\x08\"\xaa\x01\n\x1f\x43ommandSetFiltersEnabledArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1b\n\x13new_filters_enabled\x18\x02 \x02(\x08\x12\x1b\n\x13old_filters_enabled\x18\x03 \x01(\x08\x12$\n\x11rollback_uid_list\x18\x04 \x03(\x0b\x32\t.TSP.UUID\"\xa3\x01\n!CommandAddTableStylePresetArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x14\n\x0cpreset_index\x18\x02 \x02(\x05\x12$\n\x0ctable_styles\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12\x19\n\x11send_notification\x18\x04 \x02(\x08\"\xc9\x01\n$CommandRemoveTableStylePresetArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1d\n\x05theme\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12,\n\x14removed_table_styles\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12\x11\n\tpreset_id\x18\x04 \x02(\x05\x12\x1d\n\x15preset_index_in_theme\x18\x05 \x02(\x05\"\xbe\x01\n%CommandReplaceTableStylePresetArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1d\n\x05theme\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10old_table_styles\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12(\n\x10new_table_styles\x18\x04 \x02(\x0b\x32\x0e.TSP.Reference\"\xaf\x04\n#CommandApplyTableStylePresetArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1e\n\x06preset\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1e\n\x06styles\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12#\n\x0bundo_preset\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12#\n\x0bundo_styles\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rcell_diff_map\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12undo_cell_diff_map\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1b\n\x13\x61pply_preset_option\x18\x08 \x02(\x05\x12\x1d\n\x15table_clears_all_flag\x18\x0b \x02(\x08\x12\"\n\x1aundo_table_clears_all_flag\x18\x0c \x02(\x08\x12\x35\n\x0erow_col_styles\x18\r \x03(\x0b\x32\x1d.TST.ColumnRowMetadataArchive\x12:\n\x13undo_row_col_styles\x18\x0e \x03(\x0b\x32\x1d.TST.ColumnRowMetadataArchive\x12/\n\x17\x63hange_prop_map_wrapper\x18\x0f \x01(\x0b\x32\x0e.TSP.Reference\"Y\n\x15\x43ommandSetBaseArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x0c\n\x04\x62\x61se\x18\x02 \x02(\r\"f\n\x1b\x43ommandSetBasePlacesArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x13\n\x0b\x62\x61se_places\x18\x02 \x02(\r\"t\n!CommandSetBaseUseMinusSignArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x1b\n\x13\x62\x61se_use_minus_sign\x18\x02 \x02(\x08\"j\n\x1d\x43ommandSetCurrencyCodeArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x15\n\rcurrency_code\x18\x02 \x02(\t\"r\n!CommandSetFractionAccuracyArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x19\n\x11\x66raction_accuracy\x18\x02 \x02(\r\"y\n$CommandSetNegativeNumberStyleArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x1d\n\x15negative_number_style\x18\x02 \x02(\r\"t\n&CommandSetNumberOfDecimalPlacesArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x16\n\x0e\x64\x65\x63imal_places\x18\x02 \x02(\r\"\x8d\x01\n\x1f\x43ommandSetDateTimeFormatArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x1a\n\x12\x64\x61te_format_string\x18\x02 \x01(\t\x12\x1a\n\x12time_format_string\x18\x03 \x01(\t\"\x7f\n\'CommandSetShowThousandsSeparatorArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12 \n\x18show_thousands_separator\x18\x02 \x02(\x08\"w\n#CommandSetUseAccountingStyleArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TST.CommandMutateCellFormatArchive\x12\x1c\n\x14use_accounting_style\x18\x02 \x02(\x08\"\xa5\x02\n&CommandSetRangeControlMinMaxIncArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x0f\n\x07minimum\x18\x02 \x01(\x01\x12\x0f\n\x07maximum\x18\x03 \x01(\x01\x12\x11\n\tincrement\x18\x04 \x01(\x01\x12%\n\rcell_diff_map\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\rcell_uid_list\x18\x06 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12-\n\x15inverse_cell_diff_map\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12\x17\n\x0fis_first_commit\x18\x08 \x02(\x08\"\xa7\x02\n\x1f\x43ommandMoveColumnsOrRowsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1b\n\x08\x64\x65st_uid\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12\x0e\n\x06\x62\x65\x66ore\x18\x03 \x02(\x08\x12 \n\rundo_dest_uid\x18\x04 \x02(\x0b\x32\t.TSP.UUID\x12\x13\n\x0bundo_before\x18\x05 \x02(\x08\x12\x17\n\x04uids\x18\x06 \x03(\x0b\x32\t.TSP.UUID\x12-\n\tdirection\x18\x07 \x02(\x0e\x32\x1a.TST.TableDimensionArchive\x12/\n\x17\x66ormula_rewrite_command\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\"\xb0\x01\n\x12\x43ommandSortArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12 \n\rfrom_row_uids\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x1e\n\x0bto_row_uids\x18\x03 \x03(\x0b\x32\t.TSP.UUID\x12/\n\x17\x66ormula_rewrite_command\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\"\x86\x06\n\x19\x46ormulaRewriteSpecArchive\x12\x14\n\x0crewrite_type\x18\x01 \x02(\r\x12\x1c\n\ttable_uid\x18\x02 \x01(\x0b\x32\t.TSP.UUID\x12\'\n\x14\x63ond_style_owner_uid\x18\x03 \x01(\x0b\x32\t.TSP.UUID\x12\x1f\n\x0cgroup_by_uid\x18\x04 \x01(\x0b\x32\t.TSP.UUID\x12\x12\n\nis_inverse\x18\x05 \x01(\x08\x12\x43\n\x18\x63olumn_or_row_uuids_info\x18\x06 \x01(\x0b\x32!.TSCE.ColumnOrRowUuidsInfoArchive\x12G\n\x1c\x61ux_column_or_row_uuids_info\x18\x07 \x01(\x0b\x32!.TSCE.ColumnOrRowUuidsInfoArchive\x12\x37\n\x11region_moved_info\x18\x08 \x01(\x0b\x32\x1c.TSCE.RegionMovedInfoArchive\x12,\n\x0bregion_info\x18\t \x01(\x0b\x32\x17.TSCE.RegionInfoArchive\x12?\n\x15rewrite_table_id_info\x18\n \x01(\x0b\x32 .TSCE.RewriteTableUIDInfoArchive\x12>\n\x15transposed_table_info\x18\x0b \x01(\x0b\x32\x1f.TSCE.TableTransposeInfoArchive\x12>\n\x17merge_origin_moved_info\x18\x0c \x01(\x0b\x32\x1d.TSCE.MergeOriginMovedArchive\x12.\n\x0cmerge_source\x18\r \x01(\x0b\x32\x18.TSCE.MergeSourceArchive\x12=\n\x0fgroup_node_info\x18\x0e \x01(\x0b\x32$.TSCE.RewriteGroupNodeUIDInfoArchive\x12\x32\n\x0egroupby_change\x18\x0f \x01(\x0b\x32\x1a.TSCE.GroupByChangeArchive\"\x84\x02\n)CommandRewriteFormulasForTransposeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x34\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1e.TST.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x02(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\x12=\n\x0ewarningset_map\x18\x04 \x01(\x0b\x32%.TST.ImportWarningSetByCellRefArchive\"\xcc\x01\n0CommandRewriteTableFormulasForRewriteSpecArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x34\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1e.TST.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x02(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\"\xbe\x01\n\"CommandRewriteMergeFormulasArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x34\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1e.TST.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x02(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\"\xc1\x01\n%CommandRewriteCategoryFormulasArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x34\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1e.TST.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x02(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\"\\\n1CommandRewriteFilterFormulasForTableResizeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\"\xb6\x01\n1CommandRewriteFilterFormulasForRewriteSpecArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\"\n\nfilter_set\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x0crewrite_spec\x18\x03 \x02(\x0b\x32\x1e.TST.FormulaRewriteSpecArchive\"\x97\x02\n4CommandRewriteConditionalStylesForRewriteSpecArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x34\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1e.TST.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x01(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\x12\x45\n\x16\x63onditional_style_sets\x18\x04 \x01(\x0b\x32%.TSCE.ExpandedCellRefObjectMapArchive\"\xc3\x01\n\'CommandRewritePivotOwnerFormulasArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x34\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1e.TST.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x02(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\"\x92\x02\n\x13\x43ommandMergeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12.\n\rcell_uid_list\x18\x02 \x02(\x0b\x32\x17.TST.CellUIDListArchive\x12%\n\rundo_cell_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cundo_formula_rewrite_command\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1c\n\x14merge_owner_rollback\x18\x05 \x01(\r\x12\'\n\x0f\x63ommit_cell_map\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\"\x82\x01\n\x1a\x43ommandInverseMergeArchive\x12.\n\x05super\x18\x01 \x02(\x0b\x32\x1f.TST.CommandApplyCellMapArchive\x12\x34\n\x15merge_source_cell_uid\x18\x02 \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\"\xcf\x01\n\x15\x43ommandUnmergeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x30\n\x12unmerge_uid_ranges\x18\x02 \x03(\x0b\x32\x14.TSP.UUIDRectArchive\x12%\n\rundo_cell_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cundo_formula_rewrite_command\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\"\xd5\x01\n#CommandChooseTableIdRemapperArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x37\n\x0ftable_id_mapper\x18\x02 \x02(\x0b\x32\x1e.TST.MultiTableRemapperArchive\x12\x38\n formula_rewrite_command_for_undo\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x17\n\x0f\x61pply_and_clear\x18\x04 \x02(\x08\"\x9d\t\n(CommandCategorySetGroupingColumnsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1c\n\x14new_enabled_changing\x18\x02 \x02(\x05\x12\x1c\n\x14old_enabled_changing\x18\x03 \x02(\x05\x12\x39\n\x14new_grouping_columns\x18\x04 \x02(\x0b\x32\x1b.TST.GroupColumnListArchive\x12\x39\n\x14old_grouping_columns\x18\x05 \x01(\x0b\x32\x1b.TST.GroupColumnListArchive\x12\x1a\n\x12restore_base_order\x18\x06 \x02(\x08\x12!\n\x0e\x62\x61se_row_order\x18\x07 \x03(\x0b\x32\t.TSP.UUID\x12\x1f\n\x17undo_restore_base_order\x18\x08 \x02(\x08\x12&\n\x13undo_base_row_order\x18\t \x03(\x0b\x32\t.TSP.UUID\x12\x1a\n\x12restore_view_order\x18\n \x02(\x08\x12!\n\x0eview_row_order\x18\x0b \x03(\x0b\x32\t.TSP.UUID\x12\x1f\n\x17undo_restore_view_order\x18\x0c \x02(\x08\x12&\n\x13undo_view_row_order\x18\r \x03(\x0b\x32\t.TSP.UUID\x12!\n\x0e\x63ollapse_state\x18\x0e \x03(\x0b\x32\t.TSP.UUID\x12&\n\x13undo_collapse_state\x18\x0f \x03(\x0b\x32\t.TSP.UUID\x12H\n\x14summary_change_state\x18\x10 \x01(\x0b\x32*.TST.SummaryModelGroupByChangeStateArchive\x12M\n\x19undo_summary_change_state\x18\x11 \x01(\x0b\x32*.TST.SummaryModelGroupByChangeStateArchive\x12>\n\x15new_column_aggregates\x18\x12 \x01(\x0b\x32\x1f.TST.ColumnAggregateListArchive\x12>\n\x15old_column_aggregates\x18\x13 \x01(\x0b\x32\x1f.TST.ColumnAggregateListArchive\x12\x38\n undo_set_enabled_rewrite_command\x18\x14 \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n undo_set_columns_rewrite_command\x18\x15 \x01(\x0b\x32\x0e.TSP.Reference\x12 \n\x18\x66orce_restore_all_states\x18\x16 \x02(\x08\x12%\n\rcell_diff_map\x18\x17 \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12undo_cell_diff_map\x18\x18 \x01(\x0b\x32\x0e.TSP.Reference\x12\x39\n!undo_set_group_sort_order_command\x18\x19 \x01(\x0b\x32\x0e.TSP.Reference\"\xb3\x02\n!FormulaEditingCommandGroupArchive\x12\x32\n\x05super\x18\x01 \x02(\x0b\x32#.TSK.ProgressiveCommandGroupArchive\x12\x1a\n\x12undoSelectionValid\x18\x02 \x02(\x08\x12\x1a\n\x12undoSelectionStart\x18\x03 \x02(\r\x12\x1b\n\x13undoSelectionLength\x18\x04 \x02(\r\x12\x17\n\x0fundoActiveToken\x18\x05 \x02(\r\x12\x1a\n\x12redoSelectionValid\x18\x06 \x02(\x08\x12\x1a\n\x12redoSelectionStart\x18\x07 \x02(\r\x12\x1b\n\x13redoSelectionLength\x18\x08 \x02(\r\x12\x17\n\x0fredoActiveToken\x18\t \x02(\r\"\x96\x01\n-FormulaEditingCommandSelectionBehaviorArchive\x12\x33\n\x05super\x18\x01 \x02(\x0b\x32$.TSK.CommandSelectionBehaviorArchive\x12\x17\n\x0fundoActiveToken\x18\x02 \x01(\r\x12\x17\n\x0fredoActiveToken\x18\x03 \x01(\r\"\xcb\x01\n$TableCommandSelectionBehaviorArchive\x12\x33\n\x05super\x18\x01 \x02(\x0b\x32$.TSK.CommandSelectionBehaviorArchive\x12\"\n\ntable_info\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x1alast_column_uid_hit_by_tap\x18\x03 \x01(\x0b\x32\t.TSP.UUID\x12\x1b\n\x13invalidate_comments\x18\x04 \x01(\r\"\xb6\x02\n\x1e\x43ommandApplyCellCommentArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\'\n\x08\x63\x65ll_uid\x18\x02 \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\x12+\n\x13old_comment_storage\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12+\n\x13new_comment_storage\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x0f\x66orward_variant\x18\x05 \x01(\x0e\x32\x1a.TSD.CommentCommandVariant\x12\x33\n\x0finverse_variant\x18\x06 \x01(\x0e\x32\x1a.TSD.CommentCommandVariant\"`\n$CommandSetFormulaTokenizationArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x14\n\x0ctokenization\x18\x02 \x02(\x08\"\xf3\x01\n\x1e\x43ommandSetFilterSetTypeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12@\n\x13old_filter_set_type\x18\x02 \x01(\x0e\x32#.TST.FilterSetArchive.FilterSetType\x12@\n\x13new_filter_set_type\x18\x03 \x02(\x0e\x32#.TST.FilterSetArchive.FilterSetType\x12$\n\x11rollback_uid_list\x18\x04 \x03(\x0b\x32\t.TSP.UUID\"\x9b\x01\n\x1a\x43ommandSetTextStyleArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\rcell_diff_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12-\n\x15inverse_cell_diff_map\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\"\xc1\x01\n$CommandSetTextStylePropertiesArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12%\n\rcell_diff_map\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x1a\n\x12\x63\x65ll_was_rich_text\x18\x03 \x03(\x08\x12-\n\x15inverse_cell_diff_map\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\"i\n\x1e\x43ommandJustForNotifyingArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x1e\n\x16\x63hange_descriptor_type\x18\x02 \x02(\r\"\xd8\x01\n CommandSetStorageLanguageArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1f\n\x07storage\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\x10\n\x08language\x18\x03 \x02(\t\x12\x16\n\x0erange_location\x18\x04 \x02(\r\x12\x14\n\x0crange_length\x18\x05 \x02(\r\x12/\n\x10undo_transaction\x18\x06 \x01(\x0b\x32\x15.TSWP.UndoTransaction\"\xad\x01\n\x1a\x43ommandSetSortOrderArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x32\n\x0eold_sort_order\x18\x02 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\x12\x32\n\x0enew_sort_order\x18\x03 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\"\xce\x01\n\x1f\x43ommandSetGroupSortOrderArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12@\n\x14old_group_sort_order\x18\x02 \x01(\x0b\x32\".TST.TableGroupSortOrderUIDArchive\x12@\n\x14new_group_sort_order\x18\x03 \x01(\x0b\x32\".TST.TableGroupSortOrderUIDArchive\"\xbf\x01\n,CommandRewriteSortOrderForTableResizeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x32\n\x0eold_sort_order\x18\x02 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\x12\x32\n\x0enew_sort_order\x18\x03 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\"\xf5\x01\n,CommandRewriteSortOrderForRewriteSpecArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x34\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1e.TST.FormulaRewriteSpecArchive\x12\x32\n\x0eold_sort_order\x18\x03 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\x12\x32\n\x0enew_sort_order\x18\x04 \x01(\x0b\x32\x1a.TST.TableSortOrderArchive\"\xbb\x01\n\x1a\x43ommandSetFilterSetArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12&\n\x0enew_filter_set\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12&\n\x0eold_filter_set\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12$\n\x11rollback_uid_list\x18\x04 \x03(\x0b\x32\t.TSP.UUID\"l\n\x1b\x43olumnRowRestoreDataArchive\x12\x1b\n\x08uid_list\x18\x01 \x03(\x0b\x32\t.TSP.UUID\x12\x30\n\tmetadatas\x18\x02 \x03(\x0b\x32\x1d.TST.ColumnRowMetadataArchive\"\xc5\x04\n\x1c\x43ommandTransposeTableArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x34\n\x14original_table_range\x18\x02 \x02(\x0b\x32\x16.TST.ExpandedCellRange\x12)\n\x11original_cell_map\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12!\n\x19original_footer_row_count\x18\x04 \x02(\r\x12\x1e\n\x16original_column_widths\x18\x05 \x03(\x02\x12\x1c\n\x14original_row_heights\x18\x06 \x03(\x02\x12-\n\x15ineligible_merge_list\x18\x07 \x03(\x0b\x32\x0e.TST.CellRange\x12+\n\x13transposed_cell_map\x18\x08 \x02(\x0b\x32\x0e.TSP.Reference\x12\x34\n\x1cundo_formula_rewrite_command\x18\t \x01(\x0b\x32\x0e.TSP.Reference\x12-\n\x15rich_text_subcommands\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12=\n\x13\x63olumn_restore_data\x18\x0b \x01(\x0b\x32 .TST.ColumnRowRestoreDataArchive\x12:\n\x10row_restore_data\x18\x0c \x01(\x0b\x32 .TST.ColumnRowRestoreDataArchive\"\xce\x01\n+CommandSetStructuredTextImportRecordArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12:\n\x11new_import_record\x18\x02 \x01(\x0b\x32\x1f.TST.StructuredTextImportRecord\x12:\n\x11old_import_record\x18\x03 \x01(\x0b\x32\x1f.TST.StructuredTextImportRecord\"\x99\x02\n)CommandCategoryCollapseExpandGroupArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x15\n\ris_collapsing\x18\x02 \x02(\x08\x12\x35\n\x10grouping_columns\x18\x03 \x02(\x0b\x32\x1b.TST.GroupColumnListArchive\x12\x37\n\x0e\x63ollapse_state\x18\x04 \x02(\x0b\x32\x1f.TST.ExpandCollapseStateArchive\x12<\n\x13undo_collapse_state\x18\x05 \x01(\x0b\x32\x1f.TST.ExpandCollapseStateArchive\"\xbd\x01\n)CommandCategoryChangeSummaryAggregateType\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x16\n\x0e\x61ggregate_type\x18\x02 \x02(\r\x12\x1b\n\x13undo_aggregate_type\x18\x03 \x02(\r\x12\x1d\n\ncolumn_uid\x18\x04 \x02(\x0b\x32\t.TSP.UUID\x12\x13\n\x0bgroup_level\x18\x05 \x02(\x11\"\xa5\x01\n$CommandCategorySetLabelRowVisibility\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x13\n\x0bgroup_level\x18\x02 \x02(\r\x12\x1c\n\x14label_row_visibility\x18\x03 \x02(\r\x12!\n\x19undo_label_row_visibility\x18\x04 \x02(\r\"\xaa\x02\n#CommandCategoryWillChangeGroupValue\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12!\n\x0egroup_node_uid\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12&\n\x13undo_group_node_uid\x18\x03 \x01(\x0b\x32\t.TSP.UUID\x12+\n\x0bgroup_value\x18\x04 \x01(\x0b\x32\x16.TSCE.CellValueArchive\x12\x30\n\x10undo_group_value\x18\x05 \x01(\x0b\x32\x16.TSCE.CellValueArchive\x12\x30\n\x18rewrite_command_for_undo\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\"S\n%IdempotentSelectionTransformerArchive\x12*\n\x12\x61rchived_selection\x18\x01 \x02(\x0b\x32\x0e.TSP.Reference\"\xb8\x01\n\x1dWPSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12*\n\x12\x61rchived_selection\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12.\n\x0forigin_cell_uid\x18\x03 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\"T\n\'TableSubSelectionTransformerBaseArchive\x12)\n\x12table_info_id_path\x18\x01 \x02(\x0b\x32\r.TSP.UUIDPath\"c\n$TableNameSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\"\xf6\x01\n&ControlCellSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12*\n\tcell_uids\x18\x02 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12.\n\x0forigin_cell_uid\x18\x03 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12\x33\n\x0eorigin_cell_id\x18\x04 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\"\xf4\x01\n$StockCellSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12*\n\tcell_uids\x18\x02 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12.\n\x0forigin_cell_uid\x18\x03 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12\x33\n\x0eorigin_cell_id\x18\x04 \x02(\x0b\x32\x1b.TSCE.CellCoordinateArchive\"\x9c\x02\n!RegionSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12*\n\tcell_uids\x18\x02 \x01(\x0b\x32\x17.TST.CellUIDListArchive\x12.\n\x0forigin_cell_uid\x18\x03 \x01(\x0b\x32\x15.TSP.UUIDCoordArchive\x12.\n\x0f\x61nchor_cell_uid\x18\x04 \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\x12.\n\x0f\x63ursor_cell_uid\x18\x05 \x02(\x0b\x32\x15.TSP.UUIDCoordArchive\"\x8c\x01\n!StrokeSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12*\n\x12\x61rchived_selection\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\"\xb7\x01\n$RowColumnSelectionTransformerArchive\x12;\n\x05super\x18\x01 \x02(\x0b\x32,.TST.TableSubSelectionTransformerBaseArchive\x12\x31\n\x0eselection_type\x18\x02 \x02(\x0e\x32\x19.TST.SelectionTypeArchive\x12\x1f\n\x0crow_col_uids\x18\x03 \x03(\x0b\x32\t.TSP.UUID\"\xbb\x02\n\x1e\x43ommandCategoryMoveRowsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x13\n\x0b\x61\x63tion_type\x18\x02 \x02(\r\x12%\n\x12\x63\x61tegory_row_order\x18\x03 \x03(\x0b\x32\t.TSP.UUID\x12*\n\x17undo_category_row_order\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12%\n\rcell_diff_map\x18\x05 \x02(\x0b\x32\x0e.TSP.Reference\x12*\n\x12undo_cell_diff_map\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12\x35\n\x10grouping_columns\x18\x07 \x01(\x0b\x32\x1b.TST.GroupColumnListArchive\"\xcb\x01\n1CommandRewriteHiddenStatesForGroupByChangeArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x33\n\x0fgroup_by_change\x18\x02 \x02(\x0b\x32\x1a.TSCE.GroupByChangeArchive\x12\x38\n\x0f\x63ollapsed_state\x18\x03 \x01(\x0b\x32\x1f.TST.ExpandCollapseStateArchive\"\xef\x02\n-CommandRewritePencilAnnotationFormulasArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12\x34\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1e.TST.FormulaRewriteSpecArchive\x12\x39\n\x13\x66ormulas_to_rewrite\x18\x03 \x02(\x0b\x32\x1c.TSCE.FormulasForUndoArchive\x12_\n\x14\x61nnotations_for_undo\x18\x04 \x03(\x0b\x32\x41.TST.CommandRewritePencilAnnotationFormulasArchive.AnnotationPair\x1a\x43\n\x0e\x41nnotationPair\x12\r\n\x05index\x18\x01 \x02(\x04\x12\"\n\nannotation\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\"\xfc\x0e\n CommandPivotSetPivotRulesArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12/\n\x1cnew_target_pivot_refresh_uid\x18\x02 \x01(\x0b\x32\t.TSP.UUID\x12\x36\n\x11new_row_groupings\x18\x03 \x01(\x0b\x32\x1b.TST.GroupColumnListArchive\x12\x36\n\x11old_row_groupings\x18\x04 \x01(\x0b\x32\x1b.TST.GroupColumnListArchive\x12\x39\n\x14new_column_groupings\x18\x05 \x01(\x0b\x32\x1b.TST.GroupColumnListArchive\x12\x39\n\x14old_column_groupings\x18\x06 \x01(\x0b\x32\x1b.TST.GroupColumnListArchive\x12\x37\n\x0enew_aggregates\x18\x07 \x01(\x0b\x32\x1f.TST.ColumnAggregateListArchive\x12\x37\n\x0eold_aggregates\x18\x08 \x01(\x0b\x32\x1f.TST.ColumnAggregateListArchive\x12<\n\x18new_flattening_dimension\x18\t \x01(\x0e\x32\x1a.TST.TableDimensionArchive\x12<\n\x18old_flattening_dimension\x18\n \x01(\x0e\x32\x1a.TST.TableDimensionArchive\x12,\n\x14new_pivot_data_model\x18\x0b \x01(\x0b\x32\x0e.TSP.Reference\x12,\n\x14old_pivot_data_model\x18\x0c \x01(\x0b\x32\x0e.TSP.Reference\x12(\n\x15new_pivot_refresh_uid\x18\r \x01(\x0b\x32\t.TSP.UUID\x12(\n\x15old_pivot_refresh_uid\x18\x0e \x01(\x0b\x32\t.TSP.UUID\x12#\n\x1bnew_pivot_refresh_timestamp\x18\x0f \x01(\x01\x12#\n\x1bold_pivot_refresh_timestamp\x18\x10 \x01(\x01\x12\'\n\x0fnew_options_map\x18\x11 \x01(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0fold_options_map\x18\x12 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\x12new_view_row_order\x18\x13 \x03(\x0b\x32\t.TSP.UUID\x12%\n\x12old_view_row_order\x18\x14 \x03(\x0b\x32\t.TSP.UUID\x12(\n\x15new_view_column_order\x18\x15 \x03(\x0b\x32\t.TSP.UUID\x12(\n\x15old_view_column_order\x18\x16 \x03(\x0b\x32\t.TSP.UUID\x12+\n\x18new_collapsed_row_groups\x18\x17 \x03(\x0b\x32\t.TSP.UUID\x12+\n\x18old_collapsed_row_groups\x18\x18 \x03(\x0b\x32\t.TSP.UUID\x12.\n\x1bnew_collapsed_column_groups\x18\x19 \x03(\x0b\x32\t.TSP.UUID\x12.\n\x1bold_collapsed_column_groups\x18\x1a \x03(\x0b\x32\t.TSP.UUID\x12K\n\x1enew_hierarchical_cell_diff_map\x18\x1b \x01(\x0b\x32#.TST.HierarchicalCellDiffMapArchive\x12K\n\x1eold_hierarchical_cell_diff_map\x18\x1c \x01(\x0b\x32#.TST.HierarchicalCellDiffMapArchive\x12\x38\n formula_rewrite_command_for_undo\x18\x1d \x01(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x12new_body_uid_tract\x18\x1e \x01(\x0b\x32\x14.TSP.UUIDRectArchive\x12\x30\n\x12old_body_uid_tract\x18\x1f \x01(\x0b\x32\x14.TSP.UUIDRectArchive\x12/\n\x1cold_target_pivot_refresh_uid\x18  \x01(\x0b\x32\t.TSP.UUID\x12\x37\n$new_pivot_row_column_rule_change_uid\x18! \x01(\x0b\x32\t.TSP.UUID\x12\x37\n$old_pivot_row_column_rule_change_uid\x18\" \x01(\x0b\x32\t.TSP.UUID\x12\x36\n#new_pivot_aggregate_rule_change_uid\x18# \x01(\x0b\x32\t.TSP.UUID\x12\x36\n#old_pivot_aggregate_rule_change_uid\x18$ \x01(\x0b\x32\t.TSP.UUID\x12\x1a\n\x12is_order_finalized\x18% \x01(\x08\x12\x1b\n\x13undo_filter_enabled\x18& \x01(\x08\"\xc5\x01\n+CommandPivotSetGroupingColumnOptionsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12&\n\x13grouping_column_uid\x18\x02 \x01(\x0b\x32\t.TSP.UUID\x12\x18\n\x10non_sorting_flag\x18\x03 \x01(\r\x12\x12\n\nbool_value\x18\x04 \x01(\x08\x12\x17\n\x0fundo_bool_value\x18\x05 \x01(\x08\"\xab\x01\n&CommandPivotHideShowGrandTotalsArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12-\n\tdimension\x18\x02 \x01(\x0e\x32\x1a.TST.TableDimensionArchive\x12\x11\n\tis_hiding\x18\x03 \x01(\x08\x12\x16\n\x0eundo_is_hiding\x18\x04 \x01(\x08\"\xfc\x04\n\x17\x43ommandPivotSortArchive\x12\'\n\x05super\x18\x01 \x02(\x0b\x32\x18.TST.TableCommandArchive\x12-\n\tdimension\x18\x02 \x01(\x0e\x32\x1a.TST.TableDimensionArchive\x12\x1f\n\x0c\x63olumn_order\x18\x03 \x03(\x0b\x32\t.TSP.UUID\x12$\n\x11undo_column_order\x18\x04 \x03(\x0b\x32\t.TSP.UUID\x12\x1c\n\trow_order\x18\x05 \x03(\x0b\x32\t.TSP.UUID\x12!\n\x0eundo_row_order\x18\x06 \x03(\x0b\x32\t.TSP.UUID\x12:\n\'target_pivot_row_column_rule_change_uid\x18\x07 \x02(\x0b\x32\t.TSP.UUID\x12\x39\n&target_pivot_aggregate_rule_change_uid\x18\x08 \x02(\x0b\x32\t.TSP.UUID\x12\x30\n\x1dtarget_pivot_data_refresh_uid\x18\t \x02(\x0b\x32\t.TSP.UUID\x12&\n\x13grouping_column_uid\x18\n \x01(\x0b\x32\t.TSP.UUID\x12\x15\n\rsorting_flags\x18\x0b \x01(\r\x12\x1a\n\x12undo_sorting_flags\x18\x0c \x01(\r\x12-\n\x1asorting_aggregate_rule_uid\x18\r \x01(\x0b\x32\t.TSP.UUID\x12\x32\n\x1fundo_sorting_aggregate_rule_uid\x18\x0e \x01(\x0b\x32\t.TSP.UUID\x12\x1a\n\x12is_order_finalized\x18\x0f \x02(\x08\"\x82\x01\n&CommandRewriteTrackedReferencesArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x34\n\x0crewrite_spec\x18\x02 \x01(\x0b\x32\x1e.TST.FormulaRewriteSpecArchive\"\xc4\x01\n\"CommandExtendTableIDHistoryArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x34\n\x0crewrite_spec\x18\x02 \x02(\x0b\x32\x1e.TST.FormulaRewriteSpecArchive\x12\x44\n\x1atable_uid_history_rollback\x18\x03 \x01(\x0b\x32 .TSCE.RewriteTableUIDInfoArchive*i\n\tTableArea\x12\x11\n\rTableAreaBody\x10\x01\x12\x16\n\x12TableAreaHeaderRow\x10\x02\x12\x19\n\x15TableAreaHeaderColumn\x10\x03\x12\x16\n\x12TableAreaFooterRow\x10\x04*\x8b\x02\n\x13TableAreaTransition\x12&\n\"TableAreaTransitionHeaderRowToBody\x10\x01\x12&\n\"TableAreaTransitionBodyToHeaderRow\x10\x02\x12&\n\"TableAreaTransitionFooterRowToBody\x10\x03\x12&\n\"TableAreaTransitionBodyToFooterRow\x10\x04\x12)\n%TableAreaTransitionHeaderColumnToBody\x10\x05\x12)\n%TableAreaTransitionBodyToHeaderColumn\x10\x06*\xc4\x01\n\x1b\x43olumnRowBundleItemTypeEnum\x12\x17\n\x13\x43olumnRowTypeAnchor\x10\x00\x12\x1a\n\x16\x43olumnRowTypeHeaderRow\x10\x01\x12\x18\n\x14\x43olumnRowTypeBodyRow\x10\x02\x12\x1a\n\x16\x43olumnRowTypeFooterRow\x10\x03\x12\x1d\n\x19\x43olumnRowTypeHeaderColumn\x10\x04\x12\x1b\n\x17\x43olumnRowTypeBodyColumn\x10\x05'
   ,
   dependencies=[TSPMessages__pb2.DESCRIPTOR,TSDArchives__pb2.DESCRIPTOR,TSDCommandArchives__pb2.DESCRIPTOR,TSKArchives__pb2.DESCRIPTOR,TSSArchives__pb2.DESCRIPTOR,TSCEArchives__pb2.DESCRIPTOR,TSWPArchives__pb2.DESCRIPTOR,TSTArchives__pb2.DESCRIPTOR,TSTArchives__sos__pb2.DESCRIPTOR,])
 
@@ -63,8 +63,8 @@ _TABLEAREA = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=23524,
-  serialized_end=23629,
+  serialized_start=28103,
+  serialized_end=28208,
 )
 _sym_db.RegisterEnumDescriptor(_TABLEAREA)
 
@@ -109,15 +109,15 @@ _TABLEAREATRANSITION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=23632,
-  serialized_end=23899,
+  serialized_start=28211,
+  serialized_end=28478,
 )
 _sym_db.RegisterEnumDescriptor(_TABLEAREATRANSITION)
 
 TableAreaTransition = enum_type_wrapper.EnumTypeWrapper(_TABLEAREATRANSITION)
-_COLUMNROWTYPEENUM = _descriptor.EnumDescriptor(
-  name='ColumnRowTypeEnum',
-  full_name='TST.ColumnRowTypeEnum',
+_COLUMNROWBUNDLEITEMTYPEENUM = _descriptor.EnumDescriptor(
+  name='ColumnRowBundleItemTypeEnum',
+  full_name='TST.ColumnRowBundleItemTypeEnum',
   filename=None,
   file=DESCRIPTOR,
   create_key=_descriptor._internal_create_key,
@@ -155,12 +155,12 @@ _COLUMNROWTYPEENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=23902,
-  serialized_end=24088,
+  serialized_start=28481,
+  serialized_end=28677,
 )
-_sym_db.RegisterEnumDescriptor(_COLUMNROWTYPEENUM)
+_sym_db.RegisterEnumDescriptor(_COLUMNROWBUNDLEITEMTYPEENUM)
 
-ColumnRowTypeEnum = enum_type_wrapper.EnumTypeWrapper(_COLUMNROWTYPEENUM)
+ColumnRowBundleItemTypeEnum = enum_type_wrapper.EnumTypeWrapper(_COLUMNROWBUNDLEITEMTYPEENUM)
 TableAreaBody = 1
 TableAreaHeaderRow = 2
 TableAreaHeaderColumn = 3
@@ -575,7 +575,7 @@ _COMMANDCHANGEFREEZEHEADERSTATEARCHIVE = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='direction', full_name='TST.CommandChangeFreezeHeaderStateArchive.direction', index=1,
       number=2, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=-1,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -999,7 +999,7 @@ _COMMANDMOVECELLSARCHIVE = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='table_dimension', full_name='TST.CommandMoveCellsArchive.table_dimension', index=4,
       number=5, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=-1,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -1242,6 +1242,13 @@ _COMMANDINSERTCOLUMNSORROWSARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='undo_bundle', full_name='TST.CommandInsertColumnsOrRowsArchive.undo_bundle', index=12,
+      number=13, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -1255,7 +1262,7 @@ _COMMANDINSERTCOLUMNSORROWSARCHIVE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=4104,
-  serialized_end=4601,
+  serialized_end=4651,
 )
 
 
@@ -1335,8 +1342,8 @@ _COLUMNROWBUNDLEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4604,
-  serialized_end=4964,
+  serialized_start=4654,
+  serialized_end=5044,
 )
 
 
@@ -1423,8 +1430,8 @@ _COMMANDREMOVECOLUMNSORROWSARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4967,
-  serialized_end=5398,
+  serialized_start=5047,
+  serialized_end=5478,
 )
 
 
@@ -1469,8 +1476,8 @@ _COMMANDROWCOLUMNRANGEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5400,
-  serialized_end=5512,
+  serialized_start=5480,
+  serialized_end=5592,
 )
 
 
@@ -1515,8 +1522,8 @@ _COMMANDRESIZECOLUMNORROWARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5514,
-  serialized_end=5636,
+  serialized_start=5594,
+  serialized_end=5716,
 )
 
 
@@ -1589,8 +1596,8 @@ _COMMANDCATEGORYRESIZECOLUMNORROWARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5639,
-  serialized_end=5932,
+  serialized_start=5719,
+  serialized_end=6012,
 )
 
 
@@ -1642,8 +1649,8 @@ _COMMANDHIDESHOWARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5935,
-  serialized_end=6149,
+  serialized_start=6015,
+  serialized_end=6229,
 )
 
 
@@ -1730,8 +1737,8 @@ _COMMANDTEXTPREFLIGHTINSERTCELLARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6152,
-  serialized_end=6570,
+  serialized_start=6232,
+  serialized_end=6650,
 )
 
 
@@ -1804,8 +1811,8 @@ _COMMANDPOSTFLIGHTSETCELLARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6573,
-  serialized_end=6865,
+  serialized_start=6653,
+  serialized_end=6945,
 )
 
 
@@ -1871,8 +1878,8 @@ _COMMANDCHANGETABLEAREAFORCOLUMNORROWARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6868,
-  serialized_end=7165,
+  serialized_start=6948,
+  serialized_end=7245,
 )
 
 
@@ -1945,8 +1952,8 @@ _COMMANDSETPENCILANNOTATIONSARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7168,
-  serialized_end=7452,
+  serialized_start=7248,
+  serialized_end=7532,
 )
 
 
@@ -2033,8 +2040,8 @@ _COMMANDSETTABLENAMEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7455,
-  serialized_end=7796,
+  serialized_start=7535,
+  serialized_end=7876,
 )
 
 
@@ -2079,8 +2086,8 @@ _COMMANDSETTABLENAMEENABLEDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7799,
-  serialized_end=7936,
+  serialized_start=7879,
+  serialized_end=8016,
 )
 
 
@@ -2160,8 +2167,8 @@ _COMMANDSETTABLEFONTSIZEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7939,
-  serialized_end=8238,
+  serialized_start=8019,
+  serialized_end=8318,
 )
 
 
@@ -2241,8 +2248,8 @@ _COMMANDSETTABLEFONTNAMEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8241,
-  serialized_end=8562,
+  serialized_start=8321,
+  serialized_end=8642,
 )
 
 
@@ -2287,8 +2294,8 @@ _COMMANDSETTABLENAMEHEIGHTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8565,
-  serialized_end=8702,
+  serialized_start=8645,
+  serialized_end=8782,
 )
 
 
@@ -2319,8 +2326,8 @@ _COMMANDSETNOWARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8704,
-  serialized_end=8767,
+  serialized_start=8784,
+  serialized_end=8847,
 )
 
 
@@ -2393,8 +2400,8 @@ _COMMANDSETWASCUTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8770,
-  serialized_end=9031,
+  serialized_start=8850,
+  serialized_end=9111,
 )
 
 
@@ -2460,8 +2467,8 @@ _COMMANDSTYLECELLSARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9034,
-  serialized_end=9309,
+  serialized_start=9114,
+  serialized_end=9389,
 )
 
 
@@ -2513,8 +2520,8 @@ _COMMANDSTYLETABLEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9312,
-  serialized_end=9558,
+  serialized_start=9392,
+  serialized_end=9638,
 )
 
 
@@ -2536,7 +2543,7 @@ _COMMANDSETREPEATINGHEADERENABLEDARCHIVE = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='direction', full_name='TST.CommandSetRepeatingHeaderEnabledArchive.direction', index=1,
       number=2, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=-1,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -2566,8 +2573,8 @@ _COMMANDSETREPEATINGHEADERENABLEDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9561,
-  serialized_end=9763,
+  serialized_start=9641,
+  serialized_end=9843,
 )
 
 
@@ -2619,8 +2626,8 @@ _COMMANDSETFILTERSENABLEDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9766,
-  serialized_end=9936,
+  serialized_start=9846,
+  serialized_end=10016,
 )
 
 
@@ -2672,8 +2679,8 @@ _COMMANDADDTABLESTYLEPRESETARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9939,
-  serialized_end=10102,
+  serialized_start=10019,
+  serialized_end=10182,
 )
 
 
@@ -2732,8 +2739,8 @@ _COMMANDREMOVETABLESTYLEPRESETARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10105,
-  serialized_end=10306,
+  serialized_start=10185,
+  serialized_end=10386,
 )
 
 
@@ -2785,8 +2792,8 @@ _COMMANDREPLACETABLESTYLEPRESETARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10309,
-  serialized_end=10499,
+  serialized_start=10389,
+  serialized_end=10579,
 )
 
 
@@ -2901,8 +2908,8 @@ _COMMANDAPPLYTABLESTYLEPRESETARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10502,
-  serialized_end=11061,
+  serialized_start=10582,
+  serialized_end=11141,
 )
 
 
@@ -2940,8 +2947,8 @@ _COMMANDSETBASEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11063,
-  serialized_end=11152,
+  serialized_start=11143,
+  serialized_end=11232,
 )
 
 
@@ -2979,8 +2986,8 @@ _COMMANDSETBASEPLACESARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11154,
-  serialized_end=11256,
+  serialized_start=11234,
+  serialized_end=11336,
 )
 
 
@@ -3018,8 +3025,8 @@ _COMMANDSETBASEUSEMINUSSIGNARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11258,
-  serialized_end=11374,
+  serialized_start=11338,
+  serialized_end=11454,
 )
 
 
@@ -3057,8 +3064,8 @@ _COMMANDSETCURRENCYCODEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11376,
-  serialized_end=11482,
+  serialized_start=11456,
+  serialized_end=11562,
 )
 
 
@@ -3096,8 +3103,8 @@ _COMMANDSETFRACTIONACCURACYARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11484,
-  serialized_end=11598,
+  serialized_start=11564,
+  serialized_end=11678,
 )
 
 
@@ -3135,8 +3142,8 @@ _COMMANDSETNEGATIVENUMBERSTYLEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11600,
-  serialized_end=11721,
+  serialized_start=11680,
+  serialized_end=11801,
 )
 
 
@@ -3174,8 +3181,8 @@ _COMMANDSETNUMBEROFDECIMALPLACESARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11723,
-  serialized_end=11839,
+  serialized_start=11803,
+  serialized_end=11919,
 )
 
 
@@ -3220,8 +3227,8 @@ _COMMANDSETDATETIMEFORMATARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11842,
-  serialized_end=11983,
+  serialized_start=11922,
+  serialized_end=12063,
 )
 
 
@@ -3259,8 +3266,8 @@ _COMMANDSETSHOWTHOUSANDSSEPARATORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11985,
-  serialized_end=12112,
+  serialized_start=12065,
+  serialized_end=12192,
 )
 
 
@@ -3298,8 +3305,8 @@ _COMMANDSETUSEACCOUNTINGSTYLEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12114,
-  serialized_end=12233,
+  serialized_start=12194,
+  serialized_end=12313,
 )
 
 
@@ -3379,8 +3386,8 @@ _COMMANDSETRANGECONTROLMINMAXINCARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12236,
-  serialized_end=12529,
+  serialized_start=12316,
+  serialized_end=12609,
 )
 
 
@@ -3437,7 +3444,7 @@ _COMMANDMOVECOLUMNSORROWSARCHIVE = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='direction', full_name='TST.CommandMoveColumnsOrRowsArchive.direction', index=6,
       number=7, type=14, cpp_type=8, label=2,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=-1,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -3460,8 +3467,8 @@ _COMMANDMOVECOLUMNSORROWSARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12532,
-  serialized_end=12827,
+  serialized_start=12612,
+  serialized_end=12907,
 )
 
 
@@ -3513,8 +3520,138 @@ _COMMANDSORTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12830,
-  serialized_end=13006,
+  serialized_start=12910,
+  serialized_end=13086,
+)
+
+
+_FORMULAREWRITESPECARCHIVE = _descriptor.Descriptor(
+  name='FormulaRewriteSpecArchive',
+  full_name='TST.FormulaRewriteSpecArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='rewrite_type', full_name='TST.FormulaRewriteSpecArchive.rewrite_type', index=0,
+      number=1, type=13, cpp_type=3, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='table_uid', full_name='TST.FormulaRewriteSpecArchive.table_uid', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='cond_style_owner_uid', full_name='TST.FormulaRewriteSpecArchive.cond_style_owner_uid', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='group_by_uid', full_name='TST.FormulaRewriteSpecArchive.group_by_uid', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='is_inverse', full_name='TST.FormulaRewriteSpecArchive.is_inverse', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='column_or_row_uuids_info', full_name='TST.FormulaRewriteSpecArchive.column_or_row_uuids_info', index=5,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='aux_column_or_row_uuids_info', full_name='TST.FormulaRewriteSpecArchive.aux_column_or_row_uuids_info', index=6,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='region_moved_info', full_name='TST.FormulaRewriteSpecArchive.region_moved_info', index=7,
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='region_info', full_name='TST.FormulaRewriteSpecArchive.region_info', index=8,
+      number=9, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='rewrite_table_id_info', full_name='TST.FormulaRewriteSpecArchive.rewrite_table_id_info', index=9,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='transposed_table_info', full_name='TST.FormulaRewriteSpecArchive.transposed_table_info', index=10,
+      number=11, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='merge_origin_moved_info', full_name='TST.FormulaRewriteSpecArchive.merge_origin_moved_info', index=11,
+      number=12, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='merge_source', full_name='TST.FormulaRewriteSpecArchive.merge_source', index=12,
+      number=13, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='group_node_info', full_name='TST.FormulaRewriteSpecArchive.group_node_info', index=13,
+      number=14, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='groupby_change', full_name='TST.FormulaRewriteSpecArchive.groupby_change', index=14,
+      number=15, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=13089,
+  serialized_end=13863,
 )
 
 
@@ -3566,8 +3703,8 @@ _COMMANDREWRITEFORMULASFORTRANSPOSEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13009,
-  serialized_end=13270,
+  serialized_start=13866,
+  serialized_end=14126,
 )
 
 
@@ -3612,8 +3749,8 @@ _COMMANDREWRITETABLEFORMULASFORREWRITESPECARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13273,
-  serialized_end=13478,
+  serialized_start=14129,
+  serialized_end=14333,
 )
 
 
@@ -3658,8 +3795,8 @@ _COMMANDREWRITEMERGEFORMULASARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13481,
-  serialized_end=13672,
+  serialized_start=14336,
+  serialized_end=14526,
 )
 
 
@@ -3704,8 +3841,8 @@ _COMMANDREWRITECATEGORYFORMULASARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13675,
-  serialized_end=13869,
+  serialized_start=14529,
+  serialized_end=14722,
 )
 
 
@@ -3736,8 +3873,8 @@ _COMMANDREWRITEFILTERFORMULASFORTABLERESIZEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13871,
-  serialized_end=13963,
+  serialized_start=14724,
+  serialized_end=14816,
 )
 
 
@@ -3782,8 +3919,8 @@ _COMMANDREWRITEFILTERFORMULASFORREWRITESPECARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13966,
-  serialized_end=14149,
+  serialized_start=14819,
+  serialized_end=15001,
 )
 
 
@@ -3835,8 +3972,54 @@ _COMMANDREWRITECONDITIONALSTYLESFORREWRITESPECARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14152,
-  serialized_end=14432,
+  serialized_start=15004,
+  serialized_end=15283,
+)
+
+
+_COMMANDREWRITEPIVOTOWNERFORMULASARCHIVE = _descriptor.Descriptor(
+  name='CommandRewritePivotOwnerFormulasArchive',
+  full_name='TST.CommandRewritePivotOwnerFormulasArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='super', full_name='TST.CommandRewritePivotOwnerFormulasArchive.super', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='rewrite_spec', full_name='TST.CommandRewritePivotOwnerFormulasArchive.rewrite_spec', index=1,
+      number=2, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='formulas_to_rewrite', full_name='TST.CommandRewritePivotOwnerFormulasArchive.formulas_to_rewrite', index=2,
+      number=3, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=15286,
+  serialized_end=15481,
 )
 
 
@@ -3902,8 +4085,8 @@ _COMMANDMERGEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14435,
-  serialized_end=14709,
+  serialized_start=15484,
+  serialized_end=15758,
 )
 
 
@@ -3941,8 +4124,8 @@ _COMMANDINVERSEMERGEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14712,
-  serialized_end=14842,
+  serialized_start=15761,
+  serialized_end=15891,
 )
 
 
@@ -3994,8 +4177,8 @@ _COMMANDUNMERGEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14845,
-  serialized_end=15052,
+  serialized_start=15894,
+  serialized_end=16101,
 )
 
 
@@ -4047,8 +4230,8 @@ _COMMANDCHOOSETABLEIDREMAPPERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15055,
-  serialized_end=15268,
+  serialized_start=16104,
+  serialized_end=16317,
 )
 
 
@@ -4228,6 +4411,13 @@ _COMMANDCATEGORYSETGROUPINGCOLUMNSARCHIVE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='undo_set_group_sort_order_command', full_name='TST.CommandCategorySetGroupingColumnsArchive.undo_set_group_sort_order_command', index=24,
+      number=25, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -4240,8 +4430,8 @@ _COMMANDCATEGORYSETGROUPINGCOLUMNSARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15271,
-  serialized_end=16393,
+  serialized_start=16320,
+  serialized_end=17501,
 )
 
 
@@ -4328,8 +4518,8 @@ _FORMULAEDITINGCOMMANDGROUPARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16396,
-  serialized_end=16703,
+  serialized_start=17504,
+  serialized_end=17811,
 )
 
 
@@ -4374,8 +4564,8 @@ _FORMULAEDITINGCOMMANDSELECTIONBEHAVIORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16706,
-  serialized_end=16856,
+  serialized_start=17814,
+  serialized_end=17964,
 )
 
 
@@ -4427,8 +4617,8 @@ _TABLECOMMANDSELECTIONBEHAVIORARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16859,
-  serialized_end=17062,
+  serialized_start=17967,
+  serialized_end=18170,
 )
 
 
@@ -4494,8 +4684,8 @@ _COMMANDAPPLYCELLCOMMENTARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17065,
-  serialized_end=17375,
+  serialized_start=18173,
+  serialized_end=18483,
 )
 
 
@@ -4533,8 +4723,8 @@ _COMMANDSETFORMULATOKENIZATIONARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17377,
-  serialized_end=17473,
+  serialized_start=18485,
+  serialized_end=18581,
 )
 
 
@@ -4586,8 +4776,8 @@ _COMMANDSETFILTERSETTYPEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17476,
-  serialized_end=17719,
+  serialized_start=18584,
+  serialized_end=18827,
 )
 
 
@@ -4632,8 +4822,8 @@ _COMMANDSETTEXTSTYLEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17722,
-  serialized_end=17877,
+  serialized_start=18830,
+  serialized_end=18985,
 )
 
 
@@ -4685,8 +4875,8 @@ _COMMANDSETTEXTSTYLEPROPERTIESARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17880,
-  serialized_end=18073,
+  serialized_start=18988,
+  serialized_end=19181,
 )
 
 
@@ -4724,8 +4914,8 @@ _COMMANDJUSTFORNOTIFYINGARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18075,
-  serialized_end=18180,
+  serialized_start=19183,
+  serialized_end=19288,
 )
 
 
@@ -4791,8 +4981,8 @@ _COMMANDSETSTORAGELANGUAGEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18183,
-  serialized_end=18399,
+  serialized_start=19291,
+  serialized_end=19507,
 )
 
 
@@ -4837,8 +5027,54 @@ _COMMANDSETSORTORDERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18402,
-  serialized_end=18575,
+  serialized_start=19510,
+  serialized_end=19683,
+)
+
+
+_COMMANDSETGROUPSORTORDERARCHIVE = _descriptor.Descriptor(
+  name='CommandSetGroupSortOrderArchive',
+  full_name='TST.CommandSetGroupSortOrderArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='super', full_name='TST.CommandSetGroupSortOrderArchive.super', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_group_sort_order', full_name='TST.CommandSetGroupSortOrderArchive.old_group_sort_order', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_group_sort_order', full_name='TST.CommandSetGroupSortOrderArchive.new_group_sort_order', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=19686,
+  serialized_end=19892,
 )
 
 
@@ -4883,8 +5119,8 @@ _COMMANDREWRITESORTORDERFORTABLERESIZEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18578,
-  serialized_end=18769,
+  serialized_start=19895,
+  serialized_end=20086,
 )
 
 
@@ -4936,8 +5172,8 @@ _COMMANDREWRITESORTORDERFORREWRITESPECARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18772,
-  serialized_end=19018,
+  serialized_start=20089,
+  serialized_end=20334,
 )
 
 
@@ -4989,8 +5225,8 @@ _COMMANDSETFILTERSETARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19021,
-  serialized_end=19208,
+  serialized_start=20337,
+  serialized_end=20524,
 )
 
 
@@ -5028,8 +5264,8 @@ _COLUMNROWRESTOREDATAARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19210,
-  serialized_end=19318,
+  serialized_start=20526,
+  serialized_end=20634,
 )
 
 
@@ -5137,8 +5373,8 @@ _COMMANDTRANSPOSETABLEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19321,
-  serialized_end=19902,
+  serialized_start=20637,
+  serialized_end=21218,
 )
 
 
@@ -5183,8 +5419,8 @@ _COMMANDSETSTRUCTUREDTEXTIMPORTRECORDARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=19905,
-  serialized_end=20111,
+  serialized_start=21221,
+  serialized_end=21427,
 )
 
 
@@ -5243,8 +5479,8 @@ _COMMANDCATEGORYCOLLAPSEEXPANDGROUPARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=20114,
-  serialized_end=20395,
+  serialized_start=21430,
+  serialized_end=21711,
 )
 
 
@@ -5303,8 +5539,8 @@ _COMMANDCATEGORYCHANGESUMMARYAGGREGATETYPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=20398,
-  serialized_end=20587,
+  serialized_start=21714,
+  serialized_end=21903,
 )
 
 
@@ -5356,8 +5592,8 @@ _COMMANDCATEGORYSETLABELROWVISIBILITY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=20590,
-  serialized_end=20755,
+  serialized_start=21906,
+  serialized_end=22071,
 )
 
 
@@ -5423,8 +5659,8 @@ _COMMANDCATEGORYWILLCHANGEGROUPVALUE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=20758,
-  serialized_end=21056,
+  serialized_start=22074,
+  serialized_end=22372,
 )
 
 
@@ -5455,8 +5691,8 @@ _IDEMPOTENTSELECTIONTRANSFORMERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=21058,
-  serialized_end=21141,
+  serialized_start=22374,
+  serialized_end=22457,
 )
 
 
@@ -5501,8 +5737,8 @@ _WPSELECTIONTRANSFORMERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=21144,
-  serialized_end=21328,
+  serialized_start=22460,
+  serialized_end=22644,
 )
 
 
@@ -5533,8 +5769,8 @@ _TABLESUBSELECTIONTRANSFORMERBASEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=21330,
-  serialized_end=21414,
+  serialized_start=22646,
+  serialized_end=22730,
 )
 
 
@@ -5565,8 +5801,8 @@ _TABLENAMESELECTIONTRANSFORMERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=21416,
-  serialized_end=21515,
+  serialized_start=22732,
+  serialized_end=22831,
 )
 
 
@@ -5618,8 +5854,8 @@ _CONTROLCELLSELECTIONTRANSFORMERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=21518,
-  serialized_end=21764,
+  serialized_start=22834,
+  serialized_end=23080,
 )
 
 
@@ -5671,8 +5907,8 @@ _STOCKCELLSELECTIONTRANSFORMERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=21767,
-  serialized_end=22011,
+  serialized_start=23083,
+  serialized_end=23327,
 )
 
 
@@ -5731,8 +5967,8 @@ _REGIONSELECTIONTRANSFORMERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=22014,
-  serialized_end=22298,
+  serialized_start=23330,
+  serialized_end=23614,
 )
 
 
@@ -5770,8 +6006,8 @@ _STROKESELECTIONTRANSFORMERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=22301,
-  serialized_end=22441,
+  serialized_start=23617,
+  serialized_end=23757,
 )
 
 
@@ -5816,8 +6052,8 @@ _ROWCOLUMNSELECTIONTRANSFORMERARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=22444,
-  serialized_end=22627,
+  serialized_start=23760,
+  serialized_end=23943,
 )
 
 
@@ -5890,8 +6126,8 @@ _COMMANDCATEGORYMOVEROWSARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=22630,
-  serialized_end=22945,
+  serialized_start=23946,
+  serialized_end=24261,
 )
 
 
@@ -5936,8 +6172,8 @@ _COMMANDREWRITEHIDDENSTATESFORGROUPBYCHANGEARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=22948,
-  serialized_end=23151,
+  serialized_start=24264,
+  serialized_end=24467,
 )
 
 
@@ -5975,8 +6211,8 @@ _COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE_ANNOTATIONPAIR = _descriptor.Desc
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=23455,
-  serialized_end=23522,
+  serialized_start=24770,
+  serialized_end=24837,
 )
 
 _COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE = _descriptor.Descriptor(
@@ -6027,8 +6263,627 @@ _COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=23154,
-  serialized_end=23522,
+  serialized_start=24470,
+  serialized_end=24837,
+)
+
+
+_COMMANDPIVOTSETPIVOTRULESARCHIVE = _descriptor.Descriptor(
+  name='CommandPivotSetPivotRulesArchive',
+  full_name='TST.CommandPivotSetPivotRulesArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='super', full_name='TST.CommandPivotSetPivotRulesArchive.super', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_target_pivot_refresh_uid', full_name='TST.CommandPivotSetPivotRulesArchive.new_target_pivot_refresh_uid', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_row_groupings', full_name='TST.CommandPivotSetPivotRulesArchive.new_row_groupings', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_row_groupings', full_name='TST.CommandPivotSetPivotRulesArchive.old_row_groupings', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_column_groupings', full_name='TST.CommandPivotSetPivotRulesArchive.new_column_groupings', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_column_groupings', full_name='TST.CommandPivotSetPivotRulesArchive.old_column_groupings', index=5,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_aggregates', full_name='TST.CommandPivotSetPivotRulesArchive.new_aggregates', index=6,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_aggregates', full_name='TST.CommandPivotSetPivotRulesArchive.old_aggregates', index=7,
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_flattening_dimension', full_name='TST.CommandPivotSetPivotRulesArchive.new_flattening_dimension', index=8,
+      number=9, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=-1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_flattening_dimension', full_name='TST.CommandPivotSetPivotRulesArchive.old_flattening_dimension', index=9,
+      number=10, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=-1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_pivot_data_model', full_name='TST.CommandPivotSetPivotRulesArchive.new_pivot_data_model', index=10,
+      number=11, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_pivot_data_model', full_name='TST.CommandPivotSetPivotRulesArchive.old_pivot_data_model', index=11,
+      number=12, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_pivot_refresh_uid', full_name='TST.CommandPivotSetPivotRulesArchive.new_pivot_refresh_uid', index=12,
+      number=13, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_pivot_refresh_uid', full_name='TST.CommandPivotSetPivotRulesArchive.old_pivot_refresh_uid', index=13,
+      number=14, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_pivot_refresh_timestamp', full_name='TST.CommandPivotSetPivotRulesArchive.new_pivot_refresh_timestamp', index=14,
+      number=15, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_pivot_refresh_timestamp', full_name='TST.CommandPivotSetPivotRulesArchive.old_pivot_refresh_timestamp', index=15,
+      number=16, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_options_map', full_name='TST.CommandPivotSetPivotRulesArchive.new_options_map', index=16,
+      number=17, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_options_map', full_name='TST.CommandPivotSetPivotRulesArchive.old_options_map', index=17,
+      number=18, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_view_row_order', full_name='TST.CommandPivotSetPivotRulesArchive.new_view_row_order', index=18,
+      number=19, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_view_row_order', full_name='TST.CommandPivotSetPivotRulesArchive.old_view_row_order', index=19,
+      number=20, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_view_column_order', full_name='TST.CommandPivotSetPivotRulesArchive.new_view_column_order', index=20,
+      number=21, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_view_column_order', full_name='TST.CommandPivotSetPivotRulesArchive.old_view_column_order', index=21,
+      number=22, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_collapsed_row_groups', full_name='TST.CommandPivotSetPivotRulesArchive.new_collapsed_row_groups', index=22,
+      number=23, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_collapsed_row_groups', full_name='TST.CommandPivotSetPivotRulesArchive.old_collapsed_row_groups', index=23,
+      number=24, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_collapsed_column_groups', full_name='TST.CommandPivotSetPivotRulesArchive.new_collapsed_column_groups', index=24,
+      number=25, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_collapsed_column_groups', full_name='TST.CommandPivotSetPivotRulesArchive.old_collapsed_column_groups', index=25,
+      number=26, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_hierarchical_cell_diff_map', full_name='TST.CommandPivotSetPivotRulesArchive.new_hierarchical_cell_diff_map', index=26,
+      number=27, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_hierarchical_cell_diff_map', full_name='TST.CommandPivotSetPivotRulesArchive.old_hierarchical_cell_diff_map', index=27,
+      number=28, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='formula_rewrite_command_for_undo', full_name='TST.CommandPivotSetPivotRulesArchive.formula_rewrite_command_for_undo', index=28,
+      number=29, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_body_uid_tract', full_name='TST.CommandPivotSetPivotRulesArchive.new_body_uid_tract', index=29,
+      number=30, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_body_uid_tract', full_name='TST.CommandPivotSetPivotRulesArchive.old_body_uid_tract', index=30,
+      number=31, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_target_pivot_refresh_uid', full_name='TST.CommandPivotSetPivotRulesArchive.old_target_pivot_refresh_uid', index=31,
+      number=32, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_pivot_row_column_rule_change_uid', full_name='TST.CommandPivotSetPivotRulesArchive.new_pivot_row_column_rule_change_uid', index=32,
+      number=33, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_pivot_row_column_rule_change_uid', full_name='TST.CommandPivotSetPivotRulesArchive.old_pivot_row_column_rule_change_uid', index=33,
+      number=34, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='new_pivot_aggregate_rule_change_uid', full_name='TST.CommandPivotSetPivotRulesArchive.new_pivot_aggregate_rule_change_uid', index=34,
+      number=35, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='old_pivot_aggregate_rule_change_uid', full_name='TST.CommandPivotSetPivotRulesArchive.old_pivot_aggregate_rule_change_uid', index=35,
+      number=36, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='is_order_finalized', full_name='TST.CommandPivotSetPivotRulesArchive.is_order_finalized', index=36,
+      number=37, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='undo_filter_enabled', full_name='TST.CommandPivotSetPivotRulesArchive.undo_filter_enabled', index=37,
+      number=38, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=24840,
+  serialized_end=26756,
+)
+
+
+_COMMANDPIVOTSETGROUPINGCOLUMNOPTIONSARCHIVE = _descriptor.Descriptor(
+  name='CommandPivotSetGroupingColumnOptionsArchive',
+  full_name='TST.CommandPivotSetGroupingColumnOptionsArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='super', full_name='TST.CommandPivotSetGroupingColumnOptionsArchive.super', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='grouping_column_uid', full_name='TST.CommandPivotSetGroupingColumnOptionsArchive.grouping_column_uid', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='non_sorting_flag', full_name='TST.CommandPivotSetGroupingColumnOptionsArchive.non_sorting_flag', index=2,
+      number=3, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='bool_value', full_name='TST.CommandPivotSetGroupingColumnOptionsArchive.bool_value', index=3,
+      number=4, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='undo_bool_value', full_name='TST.CommandPivotSetGroupingColumnOptionsArchive.undo_bool_value', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=26759,
+  serialized_end=26956,
+)
+
+
+_COMMANDPIVOTHIDESHOWGRANDTOTALSARCHIVE = _descriptor.Descriptor(
+  name='CommandPivotHideShowGrandTotalsArchive',
+  full_name='TST.CommandPivotHideShowGrandTotalsArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='super', full_name='TST.CommandPivotHideShowGrandTotalsArchive.super', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='dimension', full_name='TST.CommandPivotHideShowGrandTotalsArchive.dimension', index=1,
+      number=2, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=-1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='is_hiding', full_name='TST.CommandPivotHideShowGrandTotalsArchive.is_hiding', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='undo_is_hiding', full_name='TST.CommandPivotHideShowGrandTotalsArchive.undo_is_hiding', index=3,
+      number=4, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=26959,
+  serialized_end=27130,
+)
+
+
+_COMMANDPIVOTSORTARCHIVE = _descriptor.Descriptor(
+  name='CommandPivotSortArchive',
+  full_name='TST.CommandPivotSortArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='super', full_name='TST.CommandPivotSortArchive.super', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='dimension', full_name='TST.CommandPivotSortArchive.dimension', index=1,
+      number=2, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=-1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='column_order', full_name='TST.CommandPivotSortArchive.column_order', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='undo_column_order', full_name='TST.CommandPivotSortArchive.undo_column_order', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='row_order', full_name='TST.CommandPivotSortArchive.row_order', index=4,
+      number=5, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='undo_row_order', full_name='TST.CommandPivotSortArchive.undo_row_order', index=5,
+      number=6, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='target_pivot_row_column_rule_change_uid', full_name='TST.CommandPivotSortArchive.target_pivot_row_column_rule_change_uid', index=6,
+      number=7, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='target_pivot_aggregate_rule_change_uid', full_name='TST.CommandPivotSortArchive.target_pivot_aggregate_rule_change_uid', index=7,
+      number=8, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='target_pivot_data_refresh_uid', full_name='TST.CommandPivotSortArchive.target_pivot_data_refresh_uid', index=8,
+      number=9, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='grouping_column_uid', full_name='TST.CommandPivotSortArchive.grouping_column_uid', index=9,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sorting_flags', full_name='TST.CommandPivotSortArchive.sorting_flags', index=10,
+      number=11, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='undo_sorting_flags', full_name='TST.CommandPivotSortArchive.undo_sorting_flags', index=11,
+      number=12, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sorting_aggregate_rule_uid', full_name='TST.CommandPivotSortArchive.sorting_aggregate_rule_uid', index=12,
+      number=13, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='undo_sorting_aggregate_rule_uid', full_name='TST.CommandPivotSortArchive.undo_sorting_aggregate_rule_uid', index=13,
+      number=14, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='is_order_finalized', full_name='TST.CommandPivotSortArchive.is_order_finalized', index=14,
+      number=15, type=8, cpp_type=7, label=2,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=27133,
+  serialized_end=27769,
+)
+
+
+_COMMANDREWRITETRACKEDREFERENCESARCHIVE = _descriptor.Descriptor(
+  name='CommandRewriteTrackedReferencesArchive',
+  full_name='TST.CommandRewriteTrackedReferencesArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='super', full_name='TST.CommandRewriteTrackedReferencesArchive.super', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='rewrite_spec', full_name='TST.CommandRewriteTrackedReferencesArchive.rewrite_spec', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=27772,
+  serialized_end=27902,
+)
+
+
+_COMMANDEXTENDTABLEIDHISTORYARCHIVE = _descriptor.Descriptor(
+  name='CommandExtendTableIDHistoryArchive',
+  full_name='TST.CommandExtendTableIDHistoryArchive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='super', full_name='TST.CommandExtendTableIDHistoryArchive.super', index=0,
+      number=1, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='rewrite_spec', full_name='TST.CommandExtendTableIDHistoryArchive.rewrite_spec', index=1,
+      number=2, type=11, cpp_type=10, label=2,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='table_uid_history_rollback', full_name='TST.CommandExtendTableIDHistoryArchive.table_uid_history_rollback', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=27905,
+  serialized_end=28101,
 )
 
 _TABLECOMMANDARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDARCHIVE
@@ -6100,12 +6955,13 @@ _COMMANDINSERTCOLUMNSORROWSARCHIVE.fields_by_name['filter_set'].message_type = T
 _COMMANDINSERTCOLUMNSORROWSARCHIVE.fields_by_name['undo_order'].message_type = TSPMessages__pb2._UUID
 _COMMANDINSERTCOLUMNSORROWSARCHIVE.fields_by_name['src_row_column_uid'].message_type = TSPMessages__pb2._UUID
 _COMMANDINSERTCOLUMNSORROWSARCHIVE.fields_by_name['opp_row_column_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDINSERTCOLUMNSORROWSARCHIVE.fields_by_name['undo_bundle'].message_type = _COLUMNROWBUNDLEARCHIVE
 _COLUMNROWBUNDLEARCHIVE.fields_by_name['view_uid_list'].message_type = TSPMessages__pb2._UUID
-_COLUMNROWBUNDLEARCHIVE.fields_by_name['view_type_list'].enum_type = _COLUMNROWTYPEENUM
+_COLUMNROWBUNDLEARCHIVE.fields_by_name['view_type_list'].enum_type = _COLUMNROWBUNDLEITEMTYPEENUM
 _COLUMNROWBUNDLEARCHIVE.fields_by_name['base_uid_list'].message_type = TSPMessages__pb2._UUID
-_COLUMNROWBUNDLEARCHIVE.fields_by_name['base_type_list'].enum_type = _COLUMNROWTYPEENUM
+_COLUMNROWBUNDLEARCHIVE.fields_by_name['base_type_list'].enum_type = _COLUMNROWBUNDLEITEMTYPEENUM
 _COLUMNROWBUNDLEARCHIVE.fields_by_name['category_order_uid_list'].message_type = TSPMessages__pb2._UUID
-_COLUMNROWBUNDLEARCHIVE.fields_by_name['category_order_type_list'].enum_type = _COLUMNROWTYPEENUM
+_COLUMNROWBUNDLEARCHIVE.fields_by_name['category_order_type_list'].enum_type = _COLUMNROWBUNDLEITEMTYPEENUM
 _COLUMNROWBUNDLEARCHIVE.fields_by_name['metadata_list'].message_type = _COLUMNROWMETADATAARCHIVE
 _COMMANDREMOVECOLUMNSORROWSARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
 _COMMANDREMOVECOLUMNSORROWSARCHIVE.fields_by_name['bundle'].message_type = _COLUMNROWBUNDLEARCHIVE
@@ -6222,27 +7078,43 @@ _COMMANDSORTARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
 _COMMANDSORTARCHIVE.fields_by_name['from_row_uids'].message_type = TSPMessages__pb2._UUID
 _COMMANDSORTARCHIVE.fields_by_name['to_row_uids'].message_type = TSPMessages__pb2._UUID
 _COMMANDSORTARCHIVE.fields_by_name['formula_rewrite_command'].message_type = TSPMessages__pb2._REFERENCE
+_FORMULAREWRITESPECARCHIVE.fields_by_name['table_uid'].message_type = TSPMessages__pb2._UUID
+_FORMULAREWRITESPECARCHIVE.fields_by_name['cond_style_owner_uid'].message_type = TSPMessages__pb2._UUID
+_FORMULAREWRITESPECARCHIVE.fields_by_name['group_by_uid'].message_type = TSPMessages__pb2._UUID
+_FORMULAREWRITESPECARCHIVE.fields_by_name['column_or_row_uuids_info'].message_type = TSCEArchives__pb2._COLUMNORROWUUIDSINFOARCHIVE
+_FORMULAREWRITESPECARCHIVE.fields_by_name['aux_column_or_row_uuids_info'].message_type = TSCEArchives__pb2._COLUMNORROWUUIDSINFOARCHIVE
+_FORMULAREWRITESPECARCHIVE.fields_by_name['region_moved_info'].message_type = TSCEArchives__pb2._REGIONMOVEDINFOARCHIVE
+_FORMULAREWRITESPECARCHIVE.fields_by_name['region_info'].message_type = TSCEArchives__pb2._REGIONINFOARCHIVE
+_FORMULAREWRITESPECARCHIVE.fields_by_name['rewrite_table_id_info'].message_type = TSCEArchives__pb2._REWRITETABLEUIDINFOARCHIVE
+_FORMULAREWRITESPECARCHIVE.fields_by_name['transposed_table_info'].message_type = TSCEArchives__pb2._TABLETRANSPOSEINFOARCHIVE
+_FORMULAREWRITESPECARCHIVE.fields_by_name['merge_origin_moved_info'].message_type = TSCEArchives__pb2._MERGEORIGINMOVEDARCHIVE
+_FORMULAREWRITESPECARCHIVE.fields_by_name['merge_source'].message_type = TSCEArchives__pb2._MERGESOURCEARCHIVE
+_FORMULAREWRITESPECARCHIVE.fields_by_name['group_node_info'].message_type = TSCEArchives__pb2._REWRITEGROUPNODEUIDINFOARCHIVE
+_FORMULAREWRITESPECARCHIVE.fields_by_name['groupby_change'].message_type = TSCEArchives__pb2._GROUPBYCHANGEARCHIVE
 _COMMANDREWRITEFORMULASFORTRANSPOSEARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
-_COMMANDREWRITEFORMULASFORTRANSPOSEARCHIVE.fields_by_name['rewrite_spec'].message_type = TSCEArchives__pb2._FORMULAREWRITESPECARCHIVE
+_COMMANDREWRITEFORMULASFORTRANSPOSEARCHIVE.fields_by_name['rewrite_spec'].message_type = _FORMULAREWRITESPECARCHIVE
 _COMMANDREWRITEFORMULASFORTRANSPOSEARCHIVE.fields_by_name['formulas_to_rewrite'].message_type = TSCEArchives__pb2._FORMULASFORUNDOARCHIVE
 _COMMANDREWRITEFORMULASFORTRANSPOSEARCHIVE.fields_by_name['warningset_map'].message_type = TSTArchives__pb2._IMPORTWARNINGSETBYCELLREFARCHIVE
 _COMMANDREWRITETABLEFORMULASFORREWRITESPECARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
-_COMMANDREWRITETABLEFORMULASFORREWRITESPECARCHIVE.fields_by_name['rewrite_spec'].message_type = TSCEArchives__pb2._FORMULAREWRITESPECARCHIVE
+_COMMANDREWRITETABLEFORMULASFORREWRITESPECARCHIVE.fields_by_name['rewrite_spec'].message_type = _FORMULAREWRITESPECARCHIVE
 _COMMANDREWRITETABLEFORMULASFORREWRITESPECARCHIVE.fields_by_name['formulas_to_rewrite'].message_type = TSCEArchives__pb2._FORMULASFORUNDOARCHIVE
 _COMMANDREWRITEMERGEFORMULASARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
-_COMMANDREWRITEMERGEFORMULASARCHIVE.fields_by_name['rewrite_spec'].message_type = TSCEArchives__pb2._FORMULAREWRITESPECARCHIVE
+_COMMANDREWRITEMERGEFORMULASARCHIVE.fields_by_name['rewrite_spec'].message_type = _FORMULAREWRITESPECARCHIVE
 _COMMANDREWRITEMERGEFORMULASARCHIVE.fields_by_name['formulas_to_rewrite'].message_type = TSCEArchives__pb2._FORMULASFORUNDOARCHIVE
 _COMMANDREWRITECATEGORYFORMULASARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
-_COMMANDREWRITECATEGORYFORMULASARCHIVE.fields_by_name['rewrite_spec'].message_type = TSCEArchives__pb2._FORMULAREWRITESPECARCHIVE
+_COMMANDREWRITECATEGORYFORMULASARCHIVE.fields_by_name['rewrite_spec'].message_type = _FORMULAREWRITESPECARCHIVE
 _COMMANDREWRITECATEGORYFORMULASARCHIVE.fields_by_name['formulas_to_rewrite'].message_type = TSCEArchives__pb2._FORMULASFORUNDOARCHIVE
 _COMMANDREWRITEFILTERFORMULASFORTABLERESIZEARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
 _COMMANDREWRITEFILTERFORMULASFORREWRITESPECARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
 _COMMANDREWRITEFILTERFORMULASFORREWRITESPECARCHIVE.fields_by_name['filter_set'].message_type = TSPMessages__pb2._REFERENCE
-_COMMANDREWRITEFILTERFORMULASFORREWRITESPECARCHIVE.fields_by_name['rewrite_spec'].message_type = TSCEArchives__pb2._FORMULAREWRITESPECARCHIVE
+_COMMANDREWRITEFILTERFORMULASFORREWRITESPECARCHIVE.fields_by_name['rewrite_spec'].message_type = _FORMULAREWRITESPECARCHIVE
 _COMMANDREWRITECONDITIONALSTYLESFORREWRITESPECARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
-_COMMANDREWRITECONDITIONALSTYLESFORREWRITESPECARCHIVE.fields_by_name['rewrite_spec'].message_type = TSCEArchives__pb2._FORMULAREWRITESPECARCHIVE
+_COMMANDREWRITECONDITIONALSTYLESFORREWRITESPECARCHIVE.fields_by_name['rewrite_spec'].message_type = _FORMULAREWRITESPECARCHIVE
 _COMMANDREWRITECONDITIONALSTYLESFORREWRITESPECARCHIVE.fields_by_name['formulas_to_rewrite'].message_type = TSCEArchives__pb2._FORMULASFORUNDOARCHIVE
 _COMMANDREWRITECONDITIONALSTYLESFORREWRITESPECARCHIVE.fields_by_name['conditional_style_sets'].message_type = TSCEArchives__pb2._EXPANDEDCELLREFOBJECTMAPARCHIVE
+_COMMANDREWRITEPIVOTOWNERFORMULASARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
+_COMMANDREWRITEPIVOTOWNERFORMULASARCHIVE.fields_by_name['rewrite_spec'].message_type = _FORMULAREWRITESPECARCHIVE
+_COMMANDREWRITEPIVOTOWNERFORMULASARCHIVE.fields_by_name['formulas_to_rewrite'].message_type = TSCEArchives__pb2._FORMULASFORUNDOARCHIVE
 _COMMANDMERGEARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
 _COMMANDMERGEARCHIVE.fields_by_name['cell_uid_list'].message_type = TSTArchives__pb2._CELLUIDLISTARCHIVE
 _COMMANDMERGEARCHIVE.fields_by_name['undo_cell_map'].message_type = TSPMessages__pb2._REFERENCE
@@ -6274,6 +7146,7 @@ _COMMANDCATEGORYSETGROUPINGCOLUMNSARCHIVE.fields_by_name['undo_set_enabled_rewri
 _COMMANDCATEGORYSETGROUPINGCOLUMNSARCHIVE.fields_by_name['undo_set_columns_rewrite_command'].message_type = TSPMessages__pb2._REFERENCE
 _COMMANDCATEGORYSETGROUPINGCOLUMNSARCHIVE.fields_by_name['cell_diff_map'].message_type = TSPMessages__pb2._REFERENCE
 _COMMANDCATEGORYSETGROUPINGCOLUMNSARCHIVE.fields_by_name['undo_cell_diff_map'].message_type = TSPMessages__pb2._REFERENCE
+_COMMANDCATEGORYSETGROUPINGCOLUMNSARCHIVE.fields_by_name['undo_set_group_sort_order_command'].message_type = TSPMessages__pb2._REFERENCE
 _FORMULAEDITINGCOMMANDGROUPARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._PROGRESSIVECOMMANDGROUPARCHIVE
 _FORMULAEDITINGCOMMANDSELECTIONBEHAVIORARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDSELECTIONBEHAVIORARCHIVE
 _TABLECOMMANDSELECTIONBEHAVIORARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDSELECTIONBEHAVIORARCHIVE
@@ -6303,11 +7176,14 @@ _COMMANDSETSTORAGELANGUAGEARCHIVE.fields_by_name['undo_transaction'].message_typ
 _COMMANDSETSORTORDERARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
 _COMMANDSETSORTORDERARCHIVE.fields_by_name['old_sort_order'].message_type = TSTArchives__pb2._TABLESORTORDERARCHIVE
 _COMMANDSETSORTORDERARCHIVE.fields_by_name['new_sort_order'].message_type = TSTArchives__pb2._TABLESORTORDERARCHIVE
+_COMMANDSETGROUPSORTORDERARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
+_COMMANDSETGROUPSORTORDERARCHIVE.fields_by_name['old_group_sort_order'].message_type = TSTArchives__pb2._TABLEGROUPSORTORDERUIDARCHIVE
+_COMMANDSETGROUPSORTORDERARCHIVE.fields_by_name['new_group_sort_order'].message_type = TSTArchives__pb2._TABLEGROUPSORTORDERUIDARCHIVE
 _COMMANDREWRITESORTORDERFORTABLERESIZEARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
 _COMMANDREWRITESORTORDERFORTABLERESIZEARCHIVE.fields_by_name['old_sort_order'].message_type = TSTArchives__pb2._TABLESORTORDERARCHIVE
 _COMMANDREWRITESORTORDERFORTABLERESIZEARCHIVE.fields_by_name['new_sort_order'].message_type = TSTArchives__pb2._TABLESORTORDERARCHIVE
 _COMMANDREWRITESORTORDERFORREWRITESPECARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
-_COMMANDREWRITESORTORDERFORREWRITESPECARCHIVE.fields_by_name['rewrite_spec'].message_type = TSCEArchives__pb2._FORMULAREWRITESPECARCHIVE
+_COMMANDREWRITESORTORDERFORREWRITESPECARCHIVE.fields_by_name['rewrite_spec'].message_type = _FORMULAREWRITESPECARCHIVE
 _COMMANDREWRITESORTORDERFORREWRITESPECARCHIVE.fields_by_name['old_sort_order'].message_type = TSTArchives__pb2._TABLESORTORDERARCHIVE
 _COMMANDREWRITESORTORDERFORREWRITESPECARCHIVE.fields_by_name['new_sort_order'].message_type = TSTArchives__pb2._TABLESORTORDERARCHIVE
 _COMMANDSETFILTERSETARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
@@ -6377,9 +7253,64 @@ _COMMANDREWRITEHIDDENSTATESFORGROUPBYCHANGEARCHIVE.fields_by_name['collapsed_sta
 _COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE_ANNOTATIONPAIR.fields_by_name['annotation'].message_type = TSPMessages__pb2._REFERENCE
 _COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE_ANNOTATIONPAIR.containing_type = _COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE
 _COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
-_COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE.fields_by_name['rewrite_spec'].message_type = TSCEArchives__pb2._FORMULAREWRITESPECARCHIVE
+_COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE.fields_by_name['rewrite_spec'].message_type = _FORMULAREWRITESPECARCHIVE
 _COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE.fields_by_name['formulas_to_rewrite'].message_type = TSCEArchives__pb2._FORMULASFORUNDOARCHIVE
 _COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE.fields_by_name['annotations_for_undo'].message_type = _COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE_ANNOTATIONPAIR
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_target_pivot_refresh_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_row_groupings'].message_type = TSTArchives__pb2._GROUPCOLUMNLISTARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_row_groupings'].message_type = TSTArchives__pb2._GROUPCOLUMNLISTARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_column_groupings'].message_type = TSTArchives__pb2._GROUPCOLUMNLISTARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_column_groupings'].message_type = TSTArchives__pb2._GROUPCOLUMNLISTARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_aggregates'].message_type = TSTArchives__pb2._COLUMNAGGREGATELISTARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_aggregates'].message_type = TSTArchives__pb2._COLUMNAGGREGATELISTARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_flattening_dimension'].enum_type = TSTArchives__pb2._TABLEDIMENSIONARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_flattening_dimension'].enum_type = TSTArchives__pb2._TABLEDIMENSIONARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_pivot_data_model'].message_type = TSPMessages__pb2._REFERENCE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_pivot_data_model'].message_type = TSPMessages__pb2._REFERENCE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_pivot_refresh_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_pivot_refresh_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_options_map'].message_type = TSPMessages__pb2._REFERENCE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_options_map'].message_type = TSPMessages__pb2._REFERENCE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_view_row_order'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_view_row_order'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_view_column_order'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_view_column_order'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_collapsed_row_groups'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_collapsed_row_groups'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_collapsed_column_groups'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_collapsed_column_groups'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_hierarchical_cell_diff_map'].message_type = TSTArchives__pb2._HIERARCHICALCELLDIFFMAPARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_hierarchical_cell_diff_map'].message_type = TSTArchives__pb2._HIERARCHICALCELLDIFFMAPARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['formula_rewrite_command_for_undo'].message_type = TSPMessages__pb2._REFERENCE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_body_uid_tract'].message_type = TSPMessages__pb2._UUIDRECTARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_body_uid_tract'].message_type = TSPMessages__pb2._UUIDRECTARCHIVE
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_target_pivot_refresh_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_pivot_row_column_rule_change_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_pivot_row_column_rule_change_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['new_pivot_aggregate_rule_change_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETPIVOTRULESARCHIVE.fields_by_name['old_pivot_aggregate_rule_change_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSETGROUPINGCOLUMNOPTIONSARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
+_COMMANDPIVOTSETGROUPINGCOLUMNOPTIONSARCHIVE.fields_by_name['grouping_column_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTHIDESHOWGRANDTOTALSARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
+_COMMANDPIVOTHIDESHOWGRANDTOTALSARCHIVE.fields_by_name['dimension'].enum_type = TSTArchives__pb2._TABLEDIMENSIONARCHIVE
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['super'].message_type = _TABLECOMMANDARCHIVE
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['dimension'].enum_type = TSTArchives__pb2._TABLEDIMENSIONARCHIVE
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['column_order'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['undo_column_order'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['row_order'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['undo_row_order'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['target_pivot_row_column_rule_change_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['target_pivot_aggregate_rule_change_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['target_pivot_data_refresh_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['grouping_column_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['sorting_aggregate_rule_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDPIVOTSORTARCHIVE.fields_by_name['undo_sorting_aggregate_rule_uid'].message_type = TSPMessages__pb2._UUID
+_COMMANDREWRITETRACKEDREFERENCESARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDARCHIVE
+_COMMANDREWRITETRACKEDREFERENCESARCHIVE.fields_by_name['rewrite_spec'].message_type = _FORMULAREWRITESPECARCHIVE
+_COMMANDEXTENDTABLEIDHISTORYARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDARCHIVE
+_COMMANDEXTENDTABLEIDHISTORYARCHIVE.fields_by_name['rewrite_spec'].message_type = _FORMULAREWRITESPECARCHIVE
+_COMMANDEXTENDTABLEIDHISTORYARCHIVE.fields_by_name['table_uid_history_rollback'].message_type = TSCEArchives__pb2._REWRITETABLEUIDINFOARCHIVE
 DESCRIPTOR.message_types_by_name['TableCommandArchive'] = _TABLECOMMANDARCHIVE
 DESCRIPTOR.message_types_by_name['CommandApplyCellContentsArchive'] = _COMMANDAPPLYCELLCONTENTSARCHIVE
 DESCRIPTOR.message_types_by_name['CommandApplyCellDiffMapArchive'] = _COMMANDAPPLYCELLDIFFMAPARCHIVE
@@ -6434,6 +7365,7 @@ DESCRIPTOR.message_types_by_name['CommandSetUseAccountingStyleArchive'] = _COMMA
 DESCRIPTOR.message_types_by_name['CommandSetRangeControlMinMaxIncArchive'] = _COMMANDSETRANGECONTROLMINMAXINCARCHIVE
 DESCRIPTOR.message_types_by_name['CommandMoveColumnsOrRowsArchive'] = _COMMANDMOVECOLUMNSORROWSARCHIVE
 DESCRIPTOR.message_types_by_name['CommandSortArchive'] = _COMMANDSORTARCHIVE
+DESCRIPTOR.message_types_by_name['FormulaRewriteSpecArchive'] = _FORMULAREWRITESPECARCHIVE
 DESCRIPTOR.message_types_by_name['CommandRewriteFormulasForTransposeArchive'] = _COMMANDREWRITEFORMULASFORTRANSPOSEARCHIVE
 DESCRIPTOR.message_types_by_name['CommandRewriteTableFormulasForRewriteSpecArchive'] = _COMMANDREWRITETABLEFORMULASFORREWRITESPECARCHIVE
 DESCRIPTOR.message_types_by_name['CommandRewriteMergeFormulasArchive'] = _COMMANDREWRITEMERGEFORMULASARCHIVE
@@ -6441,6 +7373,7 @@ DESCRIPTOR.message_types_by_name['CommandRewriteCategoryFormulasArchive'] = _COM
 DESCRIPTOR.message_types_by_name['CommandRewriteFilterFormulasForTableResizeArchive'] = _COMMANDREWRITEFILTERFORMULASFORTABLERESIZEARCHIVE
 DESCRIPTOR.message_types_by_name['CommandRewriteFilterFormulasForRewriteSpecArchive'] = _COMMANDREWRITEFILTERFORMULASFORREWRITESPECARCHIVE
 DESCRIPTOR.message_types_by_name['CommandRewriteConditionalStylesForRewriteSpecArchive'] = _COMMANDREWRITECONDITIONALSTYLESFORREWRITESPECARCHIVE
+DESCRIPTOR.message_types_by_name['CommandRewritePivotOwnerFormulasArchive'] = _COMMANDREWRITEPIVOTOWNERFORMULASARCHIVE
 DESCRIPTOR.message_types_by_name['CommandMergeArchive'] = _COMMANDMERGEARCHIVE
 DESCRIPTOR.message_types_by_name['CommandInverseMergeArchive'] = _COMMANDINVERSEMERGEARCHIVE
 DESCRIPTOR.message_types_by_name['CommandUnmergeArchive'] = _COMMANDUNMERGEARCHIVE
@@ -6457,6 +7390,7 @@ DESCRIPTOR.message_types_by_name['CommandSetTextStylePropertiesArchive'] = _COMM
 DESCRIPTOR.message_types_by_name['CommandJustForNotifyingArchive'] = _COMMANDJUSTFORNOTIFYINGARCHIVE
 DESCRIPTOR.message_types_by_name['CommandSetStorageLanguageArchive'] = _COMMANDSETSTORAGELANGUAGEARCHIVE
 DESCRIPTOR.message_types_by_name['CommandSetSortOrderArchive'] = _COMMANDSETSORTORDERARCHIVE
+DESCRIPTOR.message_types_by_name['CommandSetGroupSortOrderArchive'] = _COMMANDSETGROUPSORTORDERARCHIVE
 DESCRIPTOR.message_types_by_name['CommandRewriteSortOrderForTableResizeArchive'] = _COMMANDREWRITESORTORDERFORTABLERESIZEARCHIVE
 DESCRIPTOR.message_types_by_name['CommandRewriteSortOrderForRewriteSpecArchive'] = _COMMANDREWRITESORTORDERFORREWRITESPECARCHIVE
 DESCRIPTOR.message_types_by_name['CommandSetFilterSetArchive'] = _COMMANDSETFILTERSETARCHIVE
@@ -6479,9 +7413,15 @@ DESCRIPTOR.message_types_by_name['RowColumnSelectionTransformerArchive'] = _ROWC
 DESCRIPTOR.message_types_by_name['CommandCategoryMoveRowsArchive'] = _COMMANDCATEGORYMOVEROWSARCHIVE
 DESCRIPTOR.message_types_by_name['CommandRewriteHiddenStatesForGroupByChangeArchive'] = _COMMANDREWRITEHIDDENSTATESFORGROUPBYCHANGEARCHIVE
 DESCRIPTOR.message_types_by_name['CommandRewritePencilAnnotationFormulasArchive'] = _COMMANDREWRITEPENCILANNOTATIONFORMULASARCHIVE
+DESCRIPTOR.message_types_by_name['CommandPivotSetPivotRulesArchive'] = _COMMANDPIVOTSETPIVOTRULESARCHIVE
+DESCRIPTOR.message_types_by_name['CommandPivotSetGroupingColumnOptionsArchive'] = _COMMANDPIVOTSETGROUPINGCOLUMNOPTIONSARCHIVE
+DESCRIPTOR.message_types_by_name['CommandPivotHideShowGrandTotalsArchive'] = _COMMANDPIVOTHIDESHOWGRANDTOTALSARCHIVE
+DESCRIPTOR.message_types_by_name['CommandPivotSortArchive'] = _COMMANDPIVOTSORTARCHIVE
+DESCRIPTOR.message_types_by_name['CommandRewriteTrackedReferencesArchive'] = _COMMANDREWRITETRACKEDREFERENCESARCHIVE
+DESCRIPTOR.message_types_by_name['CommandExtendTableIDHistoryArchive'] = _COMMANDEXTENDTABLEIDHISTORYARCHIVE
 DESCRIPTOR.enum_types_by_name['TableArea'] = _TABLEAREA
 DESCRIPTOR.enum_types_by_name['TableAreaTransition'] = _TABLEAREATRANSITION
-DESCRIPTOR.enum_types_by_name['ColumnRowTypeEnum'] = _COLUMNROWTYPEENUM
+DESCRIPTOR.enum_types_by_name['ColumnRowBundleItemTypeEnum'] = _COLUMNROWBUNDLEITEMTYPEENUM
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 TableCommandArchive = _reflection.GeneratedProtocolMessageType('TableCommandArchive', (_message.Message,), {
@@ -6862,6 +7802,13 @@ CommandSortArchive = _reflection.GeneratedProtocolMessageType('CommandSortArchiv
   })
 _sym_db.RegisterMessage(CommandSortArchive)
 
+FormulaRewriteSpecArchive = _reflection.GeneratedProtocolMessageType('FormulaRewriteSpecArchive', (_message.Message,), {
+  'DESCRIPTOR' : _FORMULAREWRITESPECARCHIVE,
+  '__module__' : 'TSTCommandArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.FormulaRewriteSpecArchive)
+  })
+_sym_db.RegisterMessage(FormulaRewriteSpecArchive)
+
 CommandRewriteFormulasForTransposeArchive = _reflection.GeneratedProtocolMessageType('CommandRewriteFormulasForTransposeArchive', (_message.Message,), {
   'DESCRIPTOR' : _COMMANDREWRITEFORMULASFORTRANSPOSEARCHIVE,
   '__module__' : 'TSTCommandArchives_pb2'
@@ -6910,6 +7857,13 @@ CommandRewriteConditionalStylesForRewriteSpecArchive = _reflection.GeneratedProt
   # @@protoc_insertion_point(class_scope:TST.CommandRewriteConditionalStylesForRewriteSpecArchive)
   })
 _sym_db.RegisterMessage(CommandRewriteConditionalStylesForRewriteSpecArchive)
+
+CommandRewritePivotOwnerFormulasArchive = _reflection.GeneratedProtocolMessageType('CommandRewritePivotOwnerFormulasArchive', (_message.Message,), {
+  'DESCRIPTOR' : _COMMANDREWRITEPIVOTOWNERFORMULASARCHIVE,
+  '__module__' : 'TSTCommandArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.CommandRewritePivotOwnerFormulasArchive)
+  })
+_sym_db.RegisterMessage(CommandRewritePivotOwnerFormulasArchive)
 
 CommandMergeArchive = _reflection.GeneratedProtocolMessageType('CommandMergeArchive', (_message.Message,), {
   'DESCRIPTOR' : _COMMANDMERGEARCHIVE,
@@ -7022,6 +7976,13 @@ CommandSetSortOrderArchive = _reflection.GeneratedProtocolMessageType('CommandSe
   # @@protoc_insertion_point(class_scope:TST.CommandSetSortOrderArchive)
   })
 _sym_db.RegisterMessage(CommandSetSortOrderArchive)
+
+CommandSetGroupSortOrderArchive = _reflection.GeneratedProtocolMessageType('CommandSetGroupSortOrderArchive', (_message.Message,), {
+  'DESCRIPTOR' : _COMMANDSETGROUPSORTORDERARCHIVE,
+  '__module__' : 'TSTCommandArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.CommandSetGroupSortOrderArchive)
+  })
+_sym_db.RegisterMessage(CommandSetGroupSortOrderArchive)
 
 CommandRewriteSortOrderForTableResizeArchive = _reflection.GeneratedProtocolMessageType('CommandRewriteSortOrderForTableResizeArchive', (_message.Message,), {
   'DESCRIPTOR' : _COMMANDREWRITESORTORDERFORTABLERESIZEARCHIVE,
@@ -7184,6 +8145,48 @@ CommandRewritePencilAnnotationFormulasArchive = _reflection.GeneratedProtocolMes
   })
 _sym_db.RegisterMessage(CommandRewritePencilAnnotationFormulasArchive)
 _sym_db.RegisterMessage(CommandRewritePencilAnnotationFormulasArchive.AnnotationPair)
+
+CommandPivotSetPivotRulesArchive = _reflection.GeneratedProtocolMessageType('CommandPivotSetPivotRulesArchive', (_message.Message,), {
+  'DESCRIPTOR' : _COMMANDPIVOTSETPIVOTRULESARCHIVE,
+  '__module__' : 'TSTCommandArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.CommandPivotSetPivotRulesArchive)
+  })
+_sym_db.RegisterMessage(CommandPivotSetPivotRulesArchive)
+
+CommandPivotSetGroupingColumnOptionsArchive = _reflection.GeneratedProtocolMessageType('CommandPivotSetGroupingColumnOptionsArchive', (_message.Message,), {
+  'DESCRIPTOR' : _COMMANDPIVOTSETGROUPINGCOLUMNOPTIONSARCHIVE,
+  '__module__' : 'TSTCommandArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.CommandPivotSetGroupingColumnOptionsArchive)
+  })
+_sym_db.RegisterMessage(CommandPivotSetGroupingColumnOptionsArchive)
+
+CommandPivotHideShowGrandTotalsArchive = _reflection.GeneratedProtocolMessageType('CommandPivotHideShowGrandTotalsArchive', (_message.Message,), {
+  'DESCRIPTOR' : _COMMANDPIVOTHIDESHOWGRANDTOTALSARCHIVE,
+  '__module__' : 'TSTCommandArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.CommandPivotHideShowGrandTotalsArchive)
+  })
+_sym_db.RegisterMessage(CommandPivotHideShowGrandTotalsArchive)
+
+CommandPivotSortArchive = _reflection.GeneratedProtocolMessageType('CommandPivotSortArchive', (_message.Message,), {
+  'DESCRIPTOR' : _COMMANDPIVOTSORTARCHIVE,
+  '__module__' : 'TSTCommandArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.CommandPivotSortArchive)
+  })
+_sym_db.RegisterMessage(CommandPivotSortArchive)
+
+CommandRewriteTrackedReferencesArchive = _reflection.GeneratedProtocolMessageType('CommandRewriteTrackedReferencesArchive', (_message.Message,), {
+  'DESCRIPTOR' : _COMMANDREWRITETRACKEDREFERENCESARCHIVE,
+  '__module__' : 'TSTCommandArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.CommandRewriteTrackedReferencesArchive)
+  })
+_sym_db.RegisterMessage(CommandRewriteTrackedReferencesArchive)
+
+CommandExtendTableIDHistoryArchive = _reflection.GeneratedProtocolMessageType('CommandExtendTableIDHistoryArchive', (_message.Message,), {
+  'DESCRIPTOR' : _COMMANDEXTENDTABLEIDHISTORYARCHIVE,
+  '__module__' : 'TSTCommandArchives_pb2'
+  # @@protoc_insertion_point(class_scope:TST.CommandExtendTableIDHistoryArchive)
+  })
+_sym_db.RegisterMessage(CommandExtendTableIDHistoryArchive)
 
 
 # @@protoc_insertion_point(module_scope)
