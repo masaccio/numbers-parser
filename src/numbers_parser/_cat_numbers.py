@@ -2,8 +2,10 @@
 
 import argparse
 import logging
+import sys
 
 from numbers_parser import Document, _get_version
+from numbers_parser.exceptions import FileFormatError
 
 
 def command_line_parser():
@@ -98,12 +100,16 @@ def main():
         parser.print_help()
     else:
         for filename in args.document:
-            if args.list_sheets:
-                print_sheet_names(filename)
-            elif args.list_tables:
-                print_table_names(filename)
-            else:
-                print_table(args, filename)
+            try:
+                if args.list_sheets:
+                    print_sheet_names(filename)
+                elif args.list_tables:
+                    print_table_names(filename)
+                else:
+                    print_table(args, filename)
+            except FileFormatError as e:
+                print(f"{filename}:", str(e), file=sys.stderr)
+                sys.exit(1)
 
 
 if __name__ == "__main__":
