@@ -68,6 +68,7 @@ bootstrap: $(PROTO_DUMP) protos/TSPRegistry.dump
 # be disabled to then recreate using lldb
 veryclean:
 	$(MAKE) clean
+	rm -rf tmp
 	rm -f protos/*.protos
 	rm -f protos/TSPRegistry.dump
 
