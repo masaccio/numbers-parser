@@ -1,11 +1,12 @@
 language: python
-dist: bionic
+dist: focal
 python:
  - "3.6"
  - "3.7"
  - "3.8"
  - "3.9"
  - "3.10"
+i- "3.10-dev"
 install:
   - pip install -U -r requirements.txt
   - python3 setup.py install
