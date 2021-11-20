@@ -70,7 +70,7 @@ def compute_maps():
         if v in name_class_map:
             id_name_map[int(k)] = name_class_map[v]
 
-     return name_class_map, id_name_map
+    return name_class_map, id_name_map
 
 
 NAME_CLASS_MAP, ID_NAME_MAP = compute_maps()"""
