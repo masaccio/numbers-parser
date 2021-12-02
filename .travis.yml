@@ -5,7 +5,7 @@ python:
  - "3.7"
  - "3.8"
  - "3.9"
-# - "3.10"
+ - "3.10.0"
 install:
   - pip install -U -r requirements.txt
   - python3 setup.py install
