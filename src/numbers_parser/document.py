@@ -150,9 +150,7 @@ class Table:
         rows = self.rows()
         for row_num in range(min_row, max_row + 1):
             if values_only:
-                yield tuple(
-                    cell.value or None for cell in rows[row_num][min_col : max_col + 1]
-                )
+                yield tuple(cell.value for cell in rows[row_num][min_col : max_col + 1])
             else:
                 yield tuple(rows[row_num][min_col : max_col + 1])
 
