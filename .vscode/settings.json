@@ -8,8 +8,6 @@
         "-o",
         "log_cli=True",
         "--log-cli-level=ERROR",
-        "--rootdir",
-        "${workspaceFolder}/tests",
     ],
     "python.linting.enabled": true,
     "python.linting.pylamaEnabled": true,
