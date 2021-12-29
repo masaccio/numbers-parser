@@ -33,7 +33,7 @@ from numbers_parser import Document
 doc = Document("my-spreasdsheet.numbers")
 sheets = doc.sheets()
 tables = sheets[0].tables()
-data = tables[0].data
+rows = tables[0].rows()
 ```
 
 ### Referring to sheets and tables
@@ -53,11 +53,11 @@ print("Opened table", table_1.name)
 
 ### Accessing data
 
-`Table` objects have a `data` property which contains a nested list with an entry for each row of the table. Each row is
+`Table` objects have a `rows` method which contains a nested list with an entry for each row of the table. Each row is
 itself a list of the column values. Empty cells in Numbers are returned as `None` values.
 
 ``` python
-table_data = sheets["Table 1"].data
+data = sheets["Table 1"].rows()
 print("Cell A1 contains", data[0][0])
 print("Cell C2 contains", data[2][1])
 ```
