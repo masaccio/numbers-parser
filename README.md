@@ -168,4 +168,4 @@ Formula tests were adapted from JavaScript tests used in
 
 ## License
 
-All code in this repository is licensed under the [MIT License][https://github.com/masaccio/numbers-parser/blob/master/LICENSE.rst]
+All code in this repository is licensed under the [MIT License](https://github.com/masaccio/numbers-parser/blob/master/LICENSE.rst)
