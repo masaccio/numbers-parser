@@ -159,7 +159,7 @@ Decoding the data structures inside Numbers files was helped greatly by
 [previous work](https://github.com/slott56/Stingray-Reader) by [Steven Lott](https://github.com/slott56).
 
 Formula tests were adapted from JavaScript tests used in
-[fast-formula-parser][https://github.com/LesterLyu/fast-formula-parser]
+[fast-formula-parser](https://github.com/LesterLyu/fast-formula-parser).
 
 ## License
 
