@@ -108,14 +108,19 @@ for col in table.iter_cole(min_row=2, max_row=7):
    sum += col.value
 ```
 
-### TODO
+### Pandas
 
-There's probably more to say here, but certainly:
+Since the return value of `data()` is a list of lists, you should be able to pass it straight to pandas like this
 
-* Formulas: a small number of formulas are currently supported and the formula implementation
-is a work-in-progress with tests that are excluded from normal releases. Anyone using HEAD of
-this repo should not expect formulas to work.
-* Formats: no formats are extracted; just the raw data
+``` python
+import pandas as pd
+
+doc = Document("simple.numbers")
+sheets = doc.sheets()
+tables = sheets[0].tables()
+data = tables[0].rows(values_only=True)
+df = pd.DataFrame(data, columns=["A", "B", "C"])
+```
 
 ## Numbers File Formats
 
