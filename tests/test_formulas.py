@@ -1,7 +1,7 @@
 import pytest
 import pytest_check as check
 
-from numbers_parser import Document, FormulaCell, ErrorCell
+from numbers_parser import Document, ErrorCell
 
 TABLE_1_FORMULAS = [
     [None, "A1", "$B$1=1"],

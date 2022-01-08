@@ -340,6 +340,7 @@ class NumbersModel:
             return None
 
         cell_type = storage_buffer[1]
+        paragraphs = None
         cell_value = None
 
         if cell_type == TSTArchives.numberCellType or cell_type == 10:
@@ -361,10 +362,60 @@ class NumbersModel:
             cell_value = unpack("<d", storage_buffer[12:20])[0] > 0.0
         elif cell_type == TSTArchives.durationCellType:
             cell_value = unpack("<d", storage_buffer[12:20])[0]
-        elif cell_type == TSTArchives.currencyCellValueType:
-            cell_value = unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
+        elif cell_type == TSTArchives.automaticCellType:
+            string_key = unpack("<i", storage_buffer[12:16])[0]
+            paragraphs = self.table_paragraphs(table_id, string_key)
+            # cell_value = unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
 
-        return {"type": cell_type, "value": cell_value}
+        return {"type": cell_type, "value": cell_value, "paragraphs": paragraphs}
+
+    @lru_cache(maxsize=None)
+    def table_paragraphs(self, table_id: int, string_key: int) -> Dict:
+        """
+        Extract paragraphs from a rich text data cell.
+        Returns None if the cell is not rich text
+        """
+        # The table model base data store contains a richTextTable field
+        # which is a reference to a TST.TableDataList. The TableDataList
+        # has a list of payloads in a field called entries. This will be
+        # empty if there is no rich text, i.e. text contents are plaintext.
+        #
+        # "entries": [
+        #     { "key": 1,
+        #       "refcount": 1,
+        #       "richTextPayload": { "identifier": "2035264" }
+        #     },
+        #     ...
+        #
+        # entries[n].richTextPayload.identifier is a reference to a
+        # TST.RichTextPayloadArchive that contains a field called storage
+        # that itself is a reference to a TSWP.StorageArchive that contains
+        # the actual paragraph data:
+        #
+        # "tableParaStyle": {
+        #     "entries": [
+        #         { "characterIndex": 0, "object": { "identifier": "1566948" } },
+        #         { "characterIndex": 6 },
+        #         { "characterIndex": 12 }
+        #     ]
+        # },
+        # "text": [ "Lorem\nipsum\ndolum" ]
+        bds = self.objects[table_id].base_data_store
+        rich_text_table = self.objects[bds.rich_text_table.identifier]
+        for entry in rich_text_table.entries:
+            if string_key == entry.key:
+                payload = self.objects[entry.rich_text_payload.identifier]
+                payload_storage = self.objects[payload.storage.identifier]
+                payload_entries = payload_storage.table_para_style.entries
+                offsets = [e.character_index for e in payload_entries]
+                cell_text = payload_storage.text[0]
+                paragraphs = []
+                for i, offset in enumerate(offsets):
+                    if i == len(offsets) - 1:
+                        paragraphs.append(cell_text[offset:])
+                    else:
+                        paragraphs.append(cell_text[offset : offsets[i + 1]])
+                return {"text": cell_text, "paragraphs": paragraphs}
 
     @lru_cache(maxsize=None)
     def table_cell_formula_decode(

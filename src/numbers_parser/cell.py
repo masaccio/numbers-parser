@@ -41,8 +41,8 @@ class Cell:
             cell = DurationCell(row_num, col_num, timedelta(days=data["value"]))
         elif cell_type == TSTArchives.formulaErrorCellType:
             cell = ErrorCell(row_num, col_num, None)
-        elif cell_type == TSTArchives.currencyCellValueType:
-            cell = FormulaCell(row_num, col_num, data["value"])
+        elif cell_type == TSTArchives.automaticCellType:
+            cell = ParagraphTextCell(row_num, col_num, data["paragraphs"])
         else:
             raise UnsupportedError(  # pragma: no cover
                 f"Unsupport cell type {cell_type} @:({row_num},{col_num})"
@@ -56,10 +56,11 @@ class Cell:
             cell.size = merge_cells[row_col]["size"]
 
         debug(
-            "%s@[%d,%d]: value=%s",
+            "%s@[%d,%d]: type=%d, value=%s",
             model.table_name(table_id),
             row_num,
             col_num,
+            cell_type,
             str(cell.value),
         )
         return cell
@@ -130,6 +131,21 @@ class TextCell(Cell):
         return self._value
 
 
+class ParagraphTextCell(Cell):
+    def __init__(self, row_num: int, col_num: int, value):
+        self._type = TSTArchives.automaticCellType
+        super().__init__(row_num, col_num, value["text"])
+        self._paragraphs = value["paragraphs"]
+
+    @property
+    def value(self) -> str:
+        return self._value
+
+    @property
+    def paragraphs(self) -> str:
+        return self._paragraphs
+
+
 class EmptyCell(Cell):
     def __init__(self, row_num: int, col_num: int, value):
         self._type = None
@@ -170,14 +186,14 @@ class DurationCell(Cell):
         return self._value
 
 
-class FormulaCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value):
-        self._type = TSTArchives.formulaCellType
-        super().__init__(row_num, col_num, value)
+# class FormulaCell(Cell):
+#     def __init__(self, row_num: int, col_num: int, value):
+#         self._type = TSTArchives.formulaCellType
+#         super().__init__(row_num, col_num, value)
 
-    @property
-    def value(self):
-        return None
+#     @property
+#     def value(self):
+#         return None
 
 
 class ErrorCell(Cell):
