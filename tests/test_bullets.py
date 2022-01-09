@@ -21,3 +21,4 @@ def test_bullets():
     assert table.cell(2, 0).value == "t"
     assert table.cell(0, 0).is_bulleted == False
     assert table.cell(1, 1).is_bulleted == True
+    assert table.cell(0, 0).bullets is None

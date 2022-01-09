@@ -111,6 +111,10 @@ class Cell:
 
         return self._formula
 
+    @property
+    def bullets(self) -> str:
+        return None
+
 
 class NumberCell(Cell):
     def __init__(self, row_num: int, col_num: int, value):
