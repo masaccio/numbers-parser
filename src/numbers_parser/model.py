@@ -340,7 +340,7 @@ class NumbersModel:
             return None
 
         cell_type = storage_buffer[1]
-        paragraphs = None
+        bullets = None
         cell_value = None
 
         if cell_type == TSTArchives.numberCellType or cell_type == 10:
@@ -364,15 +364,14 @@ class NumbersModel:
             cell_value = unpack("<d", storage_buffer[12:20])[0]
         elif cell_type == TSTArchives.automaticCellType:
             string_key = unpack("<i", storage_buffer[12:16])[0]
-            paragraphs = self.table_paragraphs(table_id, string_key)
-            # cell_value = unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
+            bullets = self.table_bullets(table_id, string_key)
 
-        return {"type": cell_type, "value": cell_value, "paragraphs": paragraphs}
+        return {"type": cell_type, "value": cell_value, "bullets": bullets}
 
     @lru_cache(maxsize=None)
-    def table_paragraphs(self, table_id: int, string_key: int) -> Dict:
+    def table_bullets(self, table_id: int, string_key: int) -> Dict:
         """
-        Extract paragraphs from a rich text data cell.
+        Extract bullets from a rich text data cell.
         Returns None if the cell is not rich text
         """
         # The table model base data store contains a richTextTable field
@@ -409,13 +408,14 @@ class NumbersModel:
                 payload_entries = payload_storage.table_para_style.entries
                 offsets = [e.character_index for e in payload_entries]
                 cell_text = payload_storage.text[0]
-                paragraphs = []
+                bullets = []
                 for i, offset in enumerate(offsets):
                     if i == len(offsets) - 1:
-                        paragraphs.append(cell_text[offset:])
+                        bullets.append(cell_text[offset:])
                     else:
-                        paragraphs.append(cell_text[offset : offsets[i + 1]])
-                return {"text": cell_text, "paragraphs": paragraphs}
+                        bullets.append(cell_text[offset : offsets[i + 1]])
+                return {"text": cell_text, "bullets": bullets}
+        return None
 
     @lru_cache(maxsize=None)
     def table_cell_formula_decode(

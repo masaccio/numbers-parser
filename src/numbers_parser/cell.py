@@ -42,7 +42,7 @@ class Cell:
         elif cell_type == TSTArchives.formulaErrorCellType:
             cell = ErrorCell(row_num, col_num, None)
         elif cell_type == TSTArchives.automaticCellType:
-            cell = ParagraphTextCell(row_num, col_num, data["paragraphs"])
+            cell = BulletedTextCell(row_num, col_num, data["bullets"])
         else:
             raise UnsupportedError(  # pragma: no cover
                 f"Unsupport cell type {cell_type} @:({row_num},{col_num})"
@@ -71,6 +71,7 @@ class Cell:
         self.col = col_num
         self.size = (1, 1)
         self.is_merged = False
+        self.is_bulleted = False
 
     @property
     def formula(self):
@@ -131,19 +132,20 @@ class TextCell(Cell):
         return self._value
 
 
-class ParagraphTextCell(Cell):
+class BulletedTextCell(Cell):
     def __init__(self, row_num: int, col_num: int, value):
         self._type = TSTArchives.automaticCellType
         super().__init__(row_num, col_num, value["text"])
-        self._paragraphs = value["paragraphs"]
+        self._bullets = value["bullets"]
+        self.is_bulleted = True
 
     @property
     def value(self) -> str:
         return self._value
 
     @property
-    def paragraphs(self) -> str:
-        return self._paragraphs
+    def bullets(self) -> str:
+        return self._bullets
 
 
 class EmptyCell(Cell):
