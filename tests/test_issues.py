@@ -50,5 +50,5 @@ def test_issue_7():
     table = tables[0]
     assert table.cell(1, 1).value == ISSUE_7_REF_1
     assert table.cell(2, 1).value == ISSUE_7_REF_2
-    table.cell(1, 1).paragraphs[0] == ISSUE_7_REF_1.split("\n")[0] + "\n"
-    table.cell(2, 1).paragraphs[2] == ISSUE_7_REF_2.split("\n")[2] + "\n"
+    table.cell(1, 1).bullets[0] == ISSUE_7_REF_1.split("\n")[0] + "\n"
+    table.cell(2, 1).bullets[2] == ISSUE_7_REF_2.split("\n")[2] + "\n"
