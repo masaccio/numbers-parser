@@ -103,9 +103,9 @@ returning a list of the cells in that row or column
 
 ``` python
 for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
-   sum += row
+    sum += row
 for col in table.iter_cole(min_row=2, max_row=7):
-   sum += col.value
+    sum += col.value
 ```
 
 ### Pandas
@@ -120,6 +120,22 @@ sheets = doc.sheets()
 tables = sheets[0].tables()
 data = tables[0].rows(values_only=True)
 df = pd.DataFrame(data, columns=["A", "B", "C"])
+```
+
+### Bullets and lists
+
+Cells that contain bulleted or numbered lists can be identified by the `is_bulleted` property. Data from such cells is returned using the `value` property as with other cells, but can additionally extracted using the `bullets` property. `bullets` returns a list of the paragraphs in the cell without the bullet or numbering character. It is not possible to distingush between bulleted and numbered lists; each is handled identically. Each bullet in th elist retains its newline character.
+
+``` python
+doc = Document("bullets.numbers")
+sheets = doc.sheets()
+tables = sheets[0].tables()
+table = tables[0]
+if not table.cell(0, 1).is_bulleted:
+    print(table.cell(0, 1).value)
+else:
+    bullets = ["* " + s for s in table.cell(0, 1).bullets]
+    print("".join(bullets))
 ```
 
 ## Numbers File Formats
