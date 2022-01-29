@@ -141,6 +141,12 @@ class BulletedTextCell(Cell):
         self._type = TSTArchives.automaticCellType
         super().__init__(row_num, col_num, value["text"])
         self._bullets = value["bullets"]
+        self._formatted_bullets = [
+            value["bullet_chars"][i] + " " + value["bullets"][i]
+            if value["bullet_chars"][i] is not None
+            else value["bullets"][i]
+            for i in range(len(self._bullets))
+        ]
         self.is_bulleted = True
 
     @property
@@ -150,6 +156,10 @@ class BulletedTextCell(Cell):
     @property
     def bullets(self) -> str:
         return self._bullets
+
+    @property
+    def formatted_bullets(self) -> str:
+        return self._formatted_bullets
 
 
 class EmptyCell(Cell):
@@ -190,16 +200,6 @@ class DurationCell(Cell):
     @property
     def value(self) -> timedelta:
         return self._value
-
-
-# class FormulaCell(Cell):
-#     def __init__(self, row_num: int, col_num: int, value):
-#         self._type = TSTArchives.formulaCellType
-#         super().__init__(row_num, col_num, value)
-
-#     @property
-#     def value(self):
-#         return None
 
 
 class ErrorCell(Cell):

@@ -15,8 +15,8 @@ def test_bullets():
     assert table.cell(0, 1).value == TEST_REF_1
     assert table.cell(1, 1).value == TEST_REF_2
     assert table.cell(2, 1).value == TEST_REF_3
-    assert table.cell(0, 1).bullets[0] == TEST_REF_1.split("\n")[0] + "\n"
-    assert table.cell(0, 1).bullets[2] == TEST_REF_1.split("\n")[2] + "\n"
+    assert table.cell(0, 1).bullets[0] == TEST_REF_1.split("\n")[0]
+    assert table.cell(0, 1).bullets[2] == TEST_REF_1.split("\n")[2]
     assert table.cell(0, 1).bullets[3] == TEST_REF_1.split("\n")[3]
     assert table.cell(2, 0).value == "t"
     assert table.cell(0, 0).is_bulleted == False

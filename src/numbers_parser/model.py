@@ -398,7 +398,13 @@ class NumbersModel:
         #         { "characterIndex": 12 }
         #     ]
         # },
-        # "text": [ "Lorem\nipsum\ndolum" ]
+        # "text": [ "Lorem\nipsum\ndolor" ]
+        #
+        # The bullet character is stored in a TSWP.ListStyleArchive. Each bullet
+        # paragraph can have its own reference to a list style or, if none is
+        # defined, the previous bullet character is used. All StorageArchives
+        # reference a ListStyleArchive but not all those ListStyleArchives have
+        # a string with a new bullet character
         bds = self.objects[table_id].base_data_store
         rich_text_table = self.objects[bds.rich_text_table.identifier]
         for entry in rich_text_table.entries:
@@ -406,15 +412,34 @@ class NumbersModel:
                 payload = self.objects[entry.rich_text_payload.identifier]
                 payload_storage = self.objects[payload.storage.identifier]
                 payload_entries = payload_storage.table_para_style.entries
+                table_list_styles = payload_storage.table_list_style.entries
                 offsets = [e.character_index for e in payload_entries]
+
                 cell_text = payload_storage.text[0]
                 bullets = []
+                bullet_chars = []
+                current_bullet_char = None
                 for i, offset in enumerate(offsets):
                     if i == len(offsets) - 1:
                         bullets.append(cell_text[offset:])
                     else:
-                        bullets.append(cell_text[offset : offsets[i + 1]])
-                return {"text": cell_text, "bullets": bullets}
+                        # Remove the last character (always newline)
+                        bullets.append(cell_text[offset : offsets[i + 1] - 1])
+
+                    # Re-use last style if there is none defined for this bullet
+                    if i < len(table_list_styles):
+                        table_list_style = table_list_styles[i]
+                        bullet_style = self.objects[table_list_style.object.identifier]
+                        if len(bullet_style.strings) > 0:
+                            current_bullet_char = bullet_style.strings[0]
+
+                    bullet_chars.append(current_bullet_char)
+
+                return {
+                    "text": cell_text,
+                    "bullets": bullets,
+                    "bullet_chars": bullet_chars,
+                }
         return None
 
     @lru_cache(maxsize=None)
