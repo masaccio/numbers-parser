@@ -124,7 +124,7 @@ df = pd.DataFrame(data, columns=["A", "B", "C"])
 
 ### Bullets and lists
 
-Cells that contain bulleted or numbered lists can be identified by the `is_bulleted` property. Data from such cells is returned using the `value` property as with other cells, but can additionally extracted using the `bullets` property. `bullets` returns a list of the paragraphs in the cell without the bullet or numbering character. It is not possible to distingush between bulleted and numbered lists; each is handled identically. Each bullet in th elist retains its newline character.
+Cells that contain bulleted or numbered lists can be identified by the `is_bulleted` property. Data from such cells is returned using the `value` property as with other cells, but can additionally extracted using the `bullets` property. `bullets` returns a list of the paragraphs in the cell without the bullet or numbering character. Newlines are not included when bullet lists are extracted using `bullets`.
 
 ``` python
 doc = Document("bullets.numbers")
@@ -135,8 +135,10 @@ if not table.cell(0, 1).is_bulleted:
     print(table.cell(0, 1).value)
 else:
     bullets = ["* " + s for s in table.cell(0, 1).bullets]
-    print("".join(bullets))
+    print("\n".join(bullets))
 ```
+
+Bulleted and numbered data can also be extracted with the bullet or number characters present in the text for each line in the cell in the same way as above but using the `formatted_bullets` property. A single space is inserted between the bullet character and the text string and in the case of bullets, this will be the Unicode character seen in Numbers, for example `"• some text"`.
 
 ## Numbers File Formats
 

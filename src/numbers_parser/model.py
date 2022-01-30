@@ -1,6 +1,7 @@
 from array import array
 from datetime import datetime, timedelta
 from functools import lru_cache
+from roman import toRoman
 from struct import unpack
 from typing import Dict, List
 
@@ -8,6 +9,7 @@ from numbers_parser.containers import ObjectStore
 from numbers_parser.cell import xl_rowcol_to_cell, xl_col_to_name
 from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
 from numbers_parser.formula import TableFormulas
 
 
@@ -418,7 +420,6 @@ class NumbersModel:
                 cell_text = payload_storage.text[0]
                 bullets = []
                 bullet_chars = []
-                current_bullet_char = None
                 for i, offset in enumerate(offsets):
                     if i == len(offsets) - 1:
                         bullets.append(cell_text[offset:])
@@ -429,11 +430,17 @@ class NumbersModel:
                     # Re-use last style if there is none defined for this bullet
                     if i < len(table_list_styles):
                         table_list_style = table_list_styles[i]
-                        bullet_style = self.objects[table_list_style.object.identifier]
-                        if len(bullet_style.strings) > 0:
-                            current_bullet_char = bullet_style.strings[0]
 
-                    bullet_chars.append(current_bullet_char)
+                    bullet_style = self.objects[table_list_style.object.identifier]
+                    if len(bullet_style.strings) > 0:
+                        bullet_char = bullet_style.strings[0]
+                    elif len(bullet_style.number_types) > 0:
+                        number_type = bullet_style.number_types[0]
+                        bullet_char = formatted_number(number_type, i)
+                    else:
+                        bullet_char = ""
+
+                    bullet_chars.append(bullet_char)
 
                 return {
                     "text": cell_text,
@@ -464,6 +471,42 @@ class NumbersModel:
             formula_key = unpack("<h", storage_buffer[-12:-10])[0]
 
         return formula_key
+
+
+def formatted_number(number_type, index):
+    if number_type == TSWPArchives.ListStyleArchive.kNumericDecimal:
+        bullet_char = str(index + 1) + "."
+    elif number_type == TSWPArchives.ListStyleArchive.kNumericDoubleParen:
+        bullet_char = "(" + str(index + 1) + ")"
+    elif number_type == TSWPArchives.ListStyleArchive.kNumericRightParen:
+        bullet_char = str(index + 1) + ")"
+    elif number_type == TSWPArchives.ListStyleArchive.kRomanUpperDecimal:
+        bullet_char = toRoman(index + 1) + "."
+    elif number_type == TSWPArchives.ListStyleArchive.kRomanUpperDoubleParen:
+        bullet_char = "(" + toRoman(index + 1) + ")"
+    elif number_type == TSWPArchives.ListStyleArchive.kRomanUpperRightParen:
+        bullet_char = toRoman(index + 1) + ")"
+    elif number_type == TSWPArchives.ListStyleArchive.kRomanLowerDecimal:
+        bullet_char = toRoman(index + 1).lower() + "."
+    elif number_type == TSWPArchives.ListStyleArchive.kRomanLowerDoubleParen:
+        bullet_char = "(" + toRoman(index + 1).lower() + ")"
+    elif number_type == TSWPArchives.ListStyleArchive.kRomanLowerRightParen:
+        bullet_char = toRoman(index + 1).lower() + ")"
+    elif number_type == TSWPArchives.ListStyleArchive.kAlphaUpperDecimal:
+        bullet_char = chr(index + 65) + "."
+    elif number_type == TSWPArchives.ListStyleArchive.kAlphaUpperDoubleParen:
+        bullet_char = "(" + chr(index + 65) + ")"
+    elif number_type == TSWPArchives.ListStyleArchive.kAlphaUpperRightParen:
+        bullet_char = chr(index + 65) + ")"
+    elif number_type == TSWPArchives.ListStyleArchive.kAlphaLowerDecimal:
+        bullet_char = chr(index + 97) + "."
+    elif number_type == TSWPArchives.ListStyleArchive.kAlphaLowerDoubleParen:
+        bullet_char = "(" + chr(index + 97) + ")"
+    elif number_type == TSWPArchives.ListStyleArchive.kAlphaLowerRightParen:
+        bullet_char = chr(index + 97) + ")"
+    else:
+        bullet_char = "XXX"
+    return bullet_char
 
 
 def node_to_col_ref(node: object, table_name: str, col_num: int) -> str:

@@ -4,3 +4,4 @@ pytest-console-scripts
 pytest-check
 python-snappy
 PyYAML
+roman
