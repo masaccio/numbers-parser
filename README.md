@@ -14,9 +14,9 @@ Currently supported features of Numbers files are:
 * Multiple tables per sheet
 * Text, numeric, date, currency, duration, percentage cell types
 
-Formulas have very limited support and rely wholly on Numbers saving values in cells as part of the saved document,
-which is not always guaranteed. When a formula value is not present, the value `*FORMULA*` is returned. Any formula
-that results in a Numbers error returns a value `*ERROR*`.
+Formulas rely on Numbers storing current values which should usually be
+the case. Formulas themselves rather than the computed values can optionally
+be extracted. Styles are not supported.
 
 ## Installation
 
