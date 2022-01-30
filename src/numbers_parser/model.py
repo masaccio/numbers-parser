@@ -505,7 +505,7 @@ def formatted_number(number_type, index):
     elif number_type == TSWPArchives.ListStyleArchive.kAlphaLowerRightParen:
         bullet_char = chr(index + 97) + ")"
     else:
-        bullet_char = "XXX"
+        bullet_char = ""
     return bullet_char
 
 
