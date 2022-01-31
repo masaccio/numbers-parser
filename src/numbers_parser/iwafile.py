@@ -105,8 +105,10 @@ class ProtobufPatch(object):
 
     @classmethod
     def FromString(cls, message_info, proto_klass, data):
-        # Recent numbers does not apear to store date this way
-        assert len(message_info.diff_field_path.path) != 1
+        # Note versus Peter Sobot's implementation: since we're
+        # not resaving archives, we can ignore some of the unimplemented
+        # patching of Protobufs. Specifically deserializing when
+        # len(diff_field_path) > 1 or when fields_to_remove is present.
         return cls(proto_klass.FromString(data))
 
 

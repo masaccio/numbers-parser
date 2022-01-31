@@ -52,3 +52,9 @@ def test_issue_7():
     assert table.cell(2, 1).value == ISSUE_7_REF_2
     table.cell(1, 1).bullets[0] == ISSUE_7_REF_1.split("\n")[0] + "\n"
     table.cell(2, 1).bullets[2] == ISSUE_7_REF_2.split("\n")[2] + "\n"
+
+
+def test_issue_9():
+    doc = Document("tests/data/issue-9.numbers")
+    sheets = doc.sheets()
+    assert len(sheets) == 7
