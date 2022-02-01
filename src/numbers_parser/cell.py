@@ -10,13 +10,13 @@ from logging import debug
 class Cell:
     @staticmethod
     def factory(model: object, table_id: int, row_num: int, col_num: int):  # NOQA: C901
-        data = model.table_cell_decode(table_id, row_num, col_num)
+        cell_value = model.table_cell_decode(table_id, row_num, col_num)
 
         row_col = (row_num, col_num)
         merge_cells = model.merge_cell_ranges(table_id)
         is_merged = row_col in merge_cells
 
-        if data is None:
+        if cell_value is None:
             if is_merged and merge_cells[row_col]["merge_type"] == "ref":
                 cell = MergedCell(*merge_cells[row_col]["rect"])
             else:
@@ -26,26 +26,25 @@ class Cell:
             cell._table_id = table_id
             return cell
 
-        cell_type = data["type"]
-        if cell_type == TSTArchives.emptyCellValueType:
+        if cell_value.type == TSTArchives.emptyCellValueType:
             cell = EmptyCell(row_num, col_num, None)
-        elif cell_type == TSTArchives.numberCellType:
-            cell = NumberCell(row_num, col_num, data["value"])
-        elif cell_type == TSTArchives.textCellType:
-            cell = TextCell(row_num, col_num, data["value"])
-        elif cell_type == TSTArchives.dateCellType:
-            cell = DateCell(row_num, col_num, data["value"])
-        elif cell_type == TSTArchives.boolCellType:
-            cell = BoolCell(row_num, col_num, data["value"])
-        elif cell_type == TSTArchives.durationCellType:
-            cell = DurationCell(row_num, col_num, timedelta(days=data["value"]))
-        elif cell_type == TSTArchives.formulaErrorCellType:
+        elif cell_value.type == TSTArchives.numberCellType:
+            cell = NumberCell(row_num, col_num, cell_value.value)
+        elif cell_value.type == TSTArchives.textCellType:
+            cell = TextCell(row_num, col_num, cell_value.value)
+        elif cell_value.type == TSTArchives.dateCellType:
+            cell = DateCell(row_num, col_num, cell_value.value)
+        elif cell_value.type == TSTArchives.boolCellType:
+            cell = BoolCell(row_num, col_num, cell_value.value)
+        elif cell_value.type == TSTArchives.durationCellType:
+            cell = DurationCell(row_num, col_num, timedelta(seconds=cell_value.value))
+        elif cell_value.type == TSTArchives.formulaErrorCellType:
             cell = ErrorCell(row_num, col_num, None)
-        elif cell_type == TSTArchives.automaticCellType:
-            cell = BulletedTextCell(row_num, col_num, data["bullets"])
+        elif cell_value.type == TSTArchives.automaticCellType:
+            cell = BulletedTextCell(row_num, col_num, cell_value.bullets)
         else:
             raise UnsupportedError(  # pragma: no cover
-                f"Unsupport cell type {cell_type} @:({row_num},{col_num})"
+                f"Unsupport cell type {cell_value.type} @:({row_num},{col_num})"
             )
 
         cell._table_id = table_id
@@ -60,7 +59,7 @@ class Cell:
             model.table_name(table_id),
             row_num,
             col_num,
-            cell_type,
+            cell_value.type,
             str(cell.value),
         )
         return cell

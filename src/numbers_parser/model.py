@@ -13,6 +13,17 @@ from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
 from numbers_parser.formula import TableFormulas
 
 
+class CellValue:
+    def __init__(self, _type):
+        self.type = _type
+        self.value = None
+        self.rich = None
+        self.text = None
+        self.ieee = None
+        self.date = None
+        self.bullets = None
+
+
 class NumbersModel:
     """
     Loads all objects from Numbers document and provides decoding
@@ -342,33 +353,36 @@ class NumbersModel:
             return None
 
         cell_type = storage_buffer[1]
-        bullets = None
-        cell_value = None
+        if storage_buffer_pre_bnc is not None:
+            cell_value = storage_buffer_value(storage_buffer_pre_bnc, cell_type)
+        else:
+            cell_value = CellValue(cell_type)
 
-        if cell_type == TSTArchives.numberCellType or cell_type == 10:
+        if cell_value.type == TSTArchives.numberCellType or cell_value.type == 10:
             if storage_buffer_pre_bnc is None:
-                cell_value = 0.0
+                cell_value.value = 0.0
             else:
-                cell_value = unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
-            cell_type = TSTArchives.numberCellType
-        elif cell_type == TSTArchives.textCellType:
-            string_key = unpack("<i", storage_buffer[12:16])[0]
-            cell_value = self.table_string(table_id, string_key)
-        elif cell_type == TSTArchives.dateCellType:
+                cell_value.value = cell_value.ieee
+            cell_value.type = TSTArchives.numberCellType
+        elif cell_value.type == TSTArchives.textCellType:
+            if cell_value.text is None:
+                cell_value.text = unpack("<i", storage_buffer[12:16])[0]
+            cell_value.value = self.table_string(table_id, cell_value.text)
+        elif cell_value.type == TSTArchives.dateCellType:
             if storage_buffer_pre_bnc is None:
-                cell_value = datetime(2001, 1, 1)
+                cell_value.value = datetime(2001, 1, 1)
             else:
-                seconds = unpack("<d", storage_buffer_pre_bnc[-12:-4])[0]
-                cell_value = datetime(2001, 1, 1) + timedelta(seconds=seconds)
-        elif cell_type == TSTArchives.boolCellType:
-            cell_value = unpack("<d", storage_buffer[12:20])[0] > 0.0
-        elif cell_type == TSTArchives.durationCellType:
-            cell_value = unpack("<d", storage_buffer[12:20])[0]
-        elif cell_type == TSTArchives.automaticCellType:
-            string_key = unpack("<i", storage_buffer[12:16])[0]
-            bullets = self.table_bullets(table_id, string_key)
+                cell_value.value = datetime(2001, 1, 1) + timedelta(
+                    seconds=cell_value.date
+                )
+        elif cell_value.type == TSTArchives.boolCellType:
+            cell_value.value = cell_value.ieee > 0.0
+        elif cell_value.type == TSTArchives.durationCellType:
+            cell_value.value = cell_value.ieee
+        elif cell_value.type == TSTArchives.automaticCellType:
+            cell_value.bullets = self.table_bullets(table_id, cell_value.rich)
 
-        return {"type": cell_type, "value": cell_value, "bullets": bullets}
+        return cell_value
 
     @lru_cache(maxsize=None)
     def table_bullets(self, table_id: int, string_key: int) -> Dict:
@@ -474,6 +488,7 @@ class NumbersModel:
 
 
 def formatted_number(number_type, index):
+    """Returns the numbered index bullet formatted for different types"""
     if number_type == TSWPArchives.ListStyleArchive.kNumericDecimal:
         bullet_char = str(index + 1) + "."
     elif number_type == TSWPArchives.ListStyleArchive.kNumericDoubleParen:
@@ -573,6 +588,27 @@ def uuid(ref: dict) -> int:
         raise UnsupportedError(f"Unsupported UUID structure: {ref}")  # pragma: no cover
 
     return uuid
+
+
+def storage_buffer_value(buffer, cell_type):
+    """Decode data values from a sturage buffer based on the type of data represented"""
+    cell_value = CellValue(cell_type)
+    flags = unpack("<i", buffer[4:8])[0]
+    data_offset = 12 + bin(flags & 0x0D8E).count("1") * 4
+    if (flags & 0x200) > 0:
+        cell_value.rich = unpack("<i", buffer[data_offset : data_offset + 4])[0]
+        data_offset = data_offset + 4
+    data_offset = data_offset + bin(flags & 0x3000).count("1") * 4
+    if (flags & 0x010) > 0:
+        cell_value.text = unpack("<i", buffer[data_offset : data_offset + 4])[0]
+        data_offset = data_offset + 4
+    if (flags & 0x020) > 0:
+        cell_value.ieee = unpack("<d", buffer[data_offset : data_offset + 8])[0]
+        data_offset = data_offset + 8
+    if (flags & 0x040) > 0:
+        cell_value.date = unpack("<d", buffer[data_offset : data_offset + 8])[0]
+        data_offset = data_offset + 8
+    return cell_value
 
 
 def get_storage_buffers_for_row(

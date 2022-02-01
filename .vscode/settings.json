@@ -15,8 +15,7 @@
     "python.linting.ignorePatterns": [
         ".vscode/*.py",
         "**/site-packages/**/*.py",
-        "${workspaceFolder}/.tox/*",
-        "${workspaceFolder}tests/*.py",
+        "**/.tox/*",
         "${workspaceFolder}/src/numbers_parser/generated/*"
     ],
     "editor.wordWrap": "wordWrapColumn",
