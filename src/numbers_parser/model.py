@@ -471,8 +471,11 @@ class NumbersModel:
         if not self.table_formulas(table_id).is_formula(row_num, col_num):
             return None
 
-        # TODO: Why is this required? Which cell types are affected?
-        mod_offset = unpack("<h", storage_buffer[6:8])[0] == 1
+        # TODO: Review this decoding mod versus storage_buffer_value()
+        mod_offset = (
+            unpack("<h", storage_buffer[6:8])[0] == 1
+            or unpack("<h", storage_buffer[6:8])[0] == 8
+        )
 
         if cell_type == TSTArchives.formulaErrorCellType:
             formula_key = unpack("<h", storage_buffer[-4:-2])[0]
@@ -591,7 +594,7 @@ def uuid(ref: dict) -> int:
 
 
 def storage_buffer_value(buffer, cell_type):
-    """Decode data values from a sturage buffer based on the type of data represented"""
+    """Decode data values from a storage buffer based on the type of data represented"""
     cell_value = CellValue(cell_type)
     flags = unpack("<i", buffer[4:8])[0]
     data_offset = 12 + bin(flags & 0x0D8E).count("1") * 4

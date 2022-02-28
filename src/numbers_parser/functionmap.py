@@ -268,4 +268,5 @@ FUNCTION_MAP = {
     288: "WEIBULL",
     304: "ISNUMBER",
     305: "ISTEXT",
+    314: "XLOOKUP",
 }

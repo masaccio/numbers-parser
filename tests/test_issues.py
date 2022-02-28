@@ -89,3 +89,14 @@ def test_issue_10():
     table = tables[0]
     for i, test_value in enumerate(ISSUE_10_REF):
         assert table.cell(i + 1, 1).value == test_value
+
+
+def test_issue_14():
+    doc = Document("tests/data/issue-14.numbers")
+    sheets = doc.sheets()
+    table = sheets["Ex 1"].tables()[0]
+    assert table.cell("G2").value == 19
+    assert table.cell("G2").formula == "XLOOKUP(F2,A2:A15,B2:B15)"
+    table = sheets["Ex 6"].tables()[0]
+    assert table.cell("F2").value == "Pam"
+    assert table.cell("F2").formula == "XLOOKUP(F1,$B$2:$B$15,$A$2:$A$15,,,-1)"

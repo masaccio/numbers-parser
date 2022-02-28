@@ -9,9 +9,10 @@ from datetime import datetime, timedelta
 
 
 class Formula(list):
-    def __init__(self, model, row_num, col_num):
+    def __init__(self, model, table_id, row_num, col_num):
         self._stack = []
         self._model = model
+        self._table_id = table_id
         self.row = row_num
         self.col = col_num
 
@@ -242,7 +243,7 @@ class TableFormulas:
             )
             return "INVALID_KEY!(" + str(formula_key) + ")"
 
-        formula = Formula(self._model, row_num, col_num)
+        formula = Formula(self._model, self._table_id, row_num, col_num)
         for node in all_formulas[formula_key]:
             node_type = self._formula_type_lookup[node.AST_node_type]
             if node_type not in NODE_FUNCTION_MAP:
