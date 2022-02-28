@@ -1,6 +1,8 @@
 from array import array
+from binascii import hexlify
 from datetime import datetime, timedelta
 from functools import lru_cache
+from pyparsing import col
 from roman import toRoman
 from struct import unpack
 from typing import Dict, List
@@ -11,6 +13,9 @@ from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
 from numbers_parser.formula import TableFormulas
+from numbers_parser.generated.TSCEArchives_pb2 import (
+    _CATEGORYREFERENCEARCHIVE_CATREFUIDLIST,
+)
 
 
 class CellValue:
@@ -467,25 +472,13 @@ class NumbersModel:
     def table_cell_formula_decode(
         self, table_id: int, row_num: int, col_num: int, cell_type: int
     ):
-        storage_buffer = self.storage_buffer(table_id, row_num, col_num)
         if not self.table_formulas(table_id).is_formula(row_num, col_num):
             return None
 
-        # TODO: Review this decoding mod versus storage_buffer_value()
-        mod_offset = (
-            unpack("<h", storage_buffer[6:8])[0] == 1
-            or unpack("<h", storage_buffer[6:8])[0] == 8
-        )
-
-        if cell_type == TSTArchives.formulaErrorCellType:
-            formula_key = unpack("<h", storage_buffer[-4:-2])[0]
-        elif (
-            cell_type == TSTArchives.textCellType
-            or cell_type == TSTArchives.durationCellType
-        ) and mod_offset:
-            formula_key = unpack("<h", storage_buffer[-16:-14])[0]
-        else:
-            formula_key = unpack("<h", storage_buffer[-12:-10])[0]
+        buffer = self.storage_buffer_pre_bnc(table_id, row_num, col_num)
+        flags = unpack("<i", buffer[4:8])[0]
+        data_offset = 8 + bin(flags & 0x0D8E).count("1") * 4
+        formula_key = unpack("<h", buffer[data_offset : data_offset + 2])[0]
 
         return formula_key
 
