@@ -1,8 +1,6 @@
 from array import array
-from binascii import hexlify
 from datetime import datetime, timedelta
 from functools import lru_cache
-from pyparsing import col
 from roman import toRoman
 from struct import unpack
 from typing import Dict, List
@@ -13,9 +11,6 @@ from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
 from numbers_parser.formula import TableFormulas
-from numbers_parser.generated.TSCEArchives_pb2 import (
-    _CATEGORYREFERENCEARCHIVE_CATREFUIDLIST,
-)
 
 
 class CellValue:
