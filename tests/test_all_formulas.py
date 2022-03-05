@@ -59,3 +59,7 @@ def test_statistical_functions():
 
 def test_extra_functions():
     compare_table_functions("Formulas", "tests/data/test-extra-formulas.numbers")
+
+
+def test_new_functions():
+    compare_table_functions("Formulas", "tests/data/test-new-formulas.numbers")
