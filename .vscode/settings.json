@@ -25,4 +25,7 @@
         "PYTHONPATH": "${workspaceFolder}/src",
     },
     "restructuredtext.confPath": "${workspaceFolder}/doc",
+    "esbonio.server.enabled": true,
+    "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build",
+    "esbonio.sphinx.confDir": "${workspaceFolder}/doc",
 }

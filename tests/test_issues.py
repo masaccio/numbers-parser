@@ -100,3 +100,12 @@ def test_issue_14():
     table = sheets["Ex 6"].tables()[0]
     assert table.cell("F2").value == "Pam"
     assert table.cell("F2").formula == "XLOOKUP(F1,$B$2:$B$15,$A$2:$A$15,,,-1)"
+
+
+def test_issue_17():
+    doc = Document("tests/data/issue-17.numbers")
+    sheets = doc.sheets()
+    table = sheets[0].tables()[0]
+    assert table.cell(0, 0).value == 123.0
+    assert table.cell(0, 0).is_merged == False
+    assert table.cell(0, 0).formula == None

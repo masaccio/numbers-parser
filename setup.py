@@ -24,7 +24,7 @@ setup(
             "unpack-numbers=numbers_parser._unpack_numbers:main",
         ],
     },
-    install_requires=["protobuf", "pytest", "python-snappy", "PyYAML", "roman"],
+    install_requires=["protobuf", "python-snappy", "roman"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

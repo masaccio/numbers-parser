@@ -123,8 +123,10 @@ class NumbersModel:
         #     },
         #
         #
-        ce_id = self.find_refs("CalculationEngineArchive")[0]
-        calc_engine = self.objects[ce_id]
+        calc_engine = self.calc_engine()
+        if calc_engine is None:
+            return {}
+
         owner_id_map = {}
         for e in calc_engine.dependency_tracker.owner_id_map.map_entry:
             owner_id_map[e.internal_owner_id] = uuid(e.owner_id)
@@ -189,10 +191,13 @@ class NumbersModel:
         #         }
         #     ]
         # }
-        cell_records = []
+        calc_engine = self.calc_engine()
+        if calc_engine is None:
+            return []
+
         table_base_id = self.table_base_id(table_id)
-        ce_id = self.find_refs("CalculationEngineArchive")[0]
-        for finfo in self.objects[ce_id].dependency_tracker.formula_owner_info:
+        cell_records = []
+        for finfo in calc_engine.dependency_tracker.formula_owner_info:
             if finfo.HasField("cell_dependencies"):
                 formula_owner_id = uuid(finfo.formula_owner_id)
                 if formula_owner_id == table_base_id:
@@ -200,6 +205,14 @@ class NumbersModel:
                         if cell_record.contains_a_formula:
                             cell_records.append((cell_record.row, cell_record.column))
         return cell_records
+
+    @lru_cache(maxsize=None)
+    def calc_engine(self):
+        ce_id = self.find_refs("CalculationEngineArchive")
+        if len(ce_id) == 0:
+            return None
+        else:
+            return self.objects[ce_id[0]]
 
     @lru_cache(maxsize=None)
     def merge_cell_ranges(self, table_id):
