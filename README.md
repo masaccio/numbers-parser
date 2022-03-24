@@ -27,7 +27,7 @@ python3 -m pip install numbers-parser
 A pre-requisite for this package is [python-snappy](https://pypi.org/project/python-snappy/) which will be installed by Python automatically, but python-snappy also requires that the binary libraries for snappy compression are present. The most straightforward way to achieve this is to use [Homebrew](https://brew.sh) and source Python from Homebrew rather than from macOS:
 
 ``` bash
-brew install snappy python
+brew install snappy python3
 python3 -m pip install numbers-parser
 ```
 
