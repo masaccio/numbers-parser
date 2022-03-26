@@ -9,7 +9,9 @@ import os
 def read_numbers_file(path, handler, store_objects=True):
     if os.path.isdir(path):
         if os.path.isfile(os.path.join(path, "Index.zip")):
-            _get_objects_from_zip_file(os.path.join(path, "Index.zip"), handler, store_objects)
+            _get_objects_from_zip_file(
+                os.path.join(path, "Index.zip"), handler, store_objects
+            )
         else:
             for filename in os.listdir(path):
                 filepath = os.path.join(path, filename)
@@ -19,7 +21,9 @@ def read_numbers_file(path, handler, store_objects=True):
                     f = open(filepath, "rb")
                     if filename.endswith(".iwa"):
                         contents = f.read()
-                        _extract_iwa_archives(contents, filepath, handler, store_objects)
+                        _extract_iwa_archives(
+                            contents, filepath, handler, store_objects
+                        )
                     elif not store_objects:
                         contents = f.read()
                         handler(contents, os.path.join(path, filename))
@@ -56,7 +60,7 @@ def _get_objects_from_zip_stream(zipf, handler, store_objects):
 
 def _extract_iwa_archives(contents, filename, handler, store_objects):
     # TODO: LZFSE compressed according to /usr/bin/file
-    if store_objects and "OperationStorage" in filename:
+    if "OperationStorage" in filename:
         return
 
     try:
@@ -71,7 +75,9 @@ def _extract_iwa_archives(contents, filename, handler, store_objects):
             )  # pragma: no cover
         for archive in iwaf.chunks[0].archives:
             if len(archive.objects) == 0:
-                raise FileFormatError(f"{filename}: no objects in {filename}")  # pragma: no cover
+                raise FileFormatError(
+                    f"{filename}: no objects in {filename}"
+                )  # pragma: no cover
 
             identifier = archive.header.identifier
             # TODO: what should we do for len(archive.objects) > 1?

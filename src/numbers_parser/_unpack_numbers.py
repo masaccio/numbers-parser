@@ -48,7 +48,7 @@ def process_file(contents, filename, output_dir, hex_uuids):
             if hex_uuids:
                 convert_uuids_to_hex(data)
             print(json.dumps(data, sort_keys=True, indent=4), file=out)
-    else:
+    elif not filename.endswith("/"):
         with open(target_path, "wb") as out:
             out.write(contents)
 

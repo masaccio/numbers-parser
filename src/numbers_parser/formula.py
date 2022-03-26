@@ -87,7 +87,7 @@ class Formula(list):
         node = args[2]
         num_args = node.AST_function_node_numArgs
         node_index = node.AST_function_node_index
-        if node_index not in FUNCTION_MAP:
+        if node_index not in FUNCTION_MAP:  # pragma: no cover
             table_name = self._model.table_name(self._table_id)
             warnings.warn(
                 f"{table_name}@[{self.row},{self.col}]: function ID {node_index} is unsupported",
@@ -97,7 +97,7 @@ class Formula(list):
         else:
             func_name = FUNCTION_MAP[node_index]
 
-        if len(self._stack) < num_args:
+        if len(self._stack) < num_args:  # pragma: no cover
             table_name = self._model.table_name(self._table_id)
             warnings.warn(
                 f"{table_name}@[{self.row},{self.col}]: stack to small for {func_name}",
@@ -235,7 +235,7 @@ class TableFormulas:
 
     def formula(self, formula_key, row_num, col_num):
         all_formulas = self._model.formula_ast(self._table_id)
-        if formula_key not in all_formulas:
+        if formula_key not in all_formulas:  # pragma: no cover
             table_name = self._model.table_name(self._table_id)
             warnings.warn(
                 f"{table_name}@[{row_num},{col_num}]: key #{formula_key} not found",
@@ -246,7 +246,7 @@ class TableFormulas:
         formula = Formula(self._model, self._table_id, row_num, col_num)
         for node in all_formulas[formula_key]:
             node_type = self._formula_type_lookup[node.AST_node_type]
-            if node_type not in NODE_FUNCTION_MAP:
+            if node_type not in NODE_FUNCTION_MAP:  # pragma: no cover
                 table_name = self._model.table_name(self._table_id)
                 warnings.warn(
                     f"{table_name}@[{row_num},{col_num}]: node type {node_type} is unsupported",
