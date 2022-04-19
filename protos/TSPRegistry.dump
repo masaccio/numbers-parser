@@ -229,6 +229,8 @@ Architecture set to: arm64e-apple-macosx-.
 	6321 -> 0x109848738 TST.CommandCategorySetGroupingColumnsArchive
 	6320 -> 0x109848c90 TST.CommandCategoryCollapseExpandGroupArchive
 	6381 -> 0x109849330 TST.CommandExtendTableIDHistoryArchive
+	6382 -> 0xdeadbeef TST.GroupByArchive.AggregatorArchive
+	6383 -> 0xdeadbeef TST.GroupByArchive.GroupNodeArchive
 	6380 -> 0x109849308 TST.CommandRewriteTrackedReferencesArchive
 	6323 -> 0x109848f98 TST.CommandRewriteHiddenStatesForGroupByChangeArchive
 	6315 -> 0x109848560 TST.CommandRewriteCategoryFormulasArchive

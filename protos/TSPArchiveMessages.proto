@@ -238,6 +238,7 @@ message SupportMetadata {
     optional int32 revision_sequence_for_materialized_on_server = 5 [default = 0];
     optional .TSP.DataUploadStatus upload_status = 4 [default = DataUploadStatus_Pending];
     optional bool is_remote_data_ever = 6 [default = false];
+    optional int32 revision_sequence_for_acknowledged_by_server = 7 [default = 0];
   }
   optional bool is_in_collaboration_mode = 1;
   repeated .TSP.SupportMetadata.DataCollaborationProperties data_collaboration_properties = 2;

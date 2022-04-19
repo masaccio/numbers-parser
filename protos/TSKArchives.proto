@@ -365,6 +365,7 @@ message NullCommandArchive {
 
 message GroupCommitCommandArchive {
   required .TSK.CommandArchive super = 1;
+  optional bool can_coalesce_group = 2;
 }
 
 message UpgradeDocPostProcessingCommandArchive {

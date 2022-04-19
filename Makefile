@@ -53,7 +53,7 @@ src/numbers_parser/generated/__init__.py: $(PROTO_SOURCES)
 protos/TSPRegistry.dump:
 	protos/dump_mappings.sh "$(NUMBERS)"
 
-src/numbers_parser/mapping.py: $(PROTO_CLASSES)
+src/numbers_parser/mapping.py: protos/generate_mapping.py protos/TSPRegistry.dump $(PROTO_CLASSES)
 	python3 protos/generate_mapping.py protos/TSPRegistry.dump > src/numbers_parser/mapping.py
 
 bootstrap: $(PROTO_DUMP) protos/TSPRegistry.dump

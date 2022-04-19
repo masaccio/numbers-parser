@@ -111,6 +111,7 @@ message StorageActionCommandArchive {
   optional bool should_migrate_styles = 10;
   optional .TSK.DataReferenceRecord changed_data_reference_record = 11;
   optional string coalescing_property = 12;
+  optional .TSWP.StorageArchive.KindType wp_kind = 13;
 }
 
 message SetColumnStyleCommandArchive {
