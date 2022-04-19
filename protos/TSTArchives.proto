@@ -937,21 +937,23 @@ message HiddenStateExtentArchive {
     required .TSP.UUID row_or_column_uid = 1;
     optional bool user_hidden = 2;
     optional bool filtered = 3;
+    optional bool pivot_hidden = 4;
   }
   enum RowOrColumnDirection {
     ColumnDirection = 0;
     RowDirection = 1;
   }
   required .TSP.UUID hidden_state_extent_uid = 1;
-  repeated .TST.HiddenStateExtentArchive.RowOrColumnState hidden_states = 2;
+  repeated .TST.HiddenStateExtentArchive.RowOrColumnState base_hidden_states = 2;
   required .TST.HiddenStateExtentArchive.RowOrColumnDirection row_or_column_direction = 3;
   repeated .TSCE.CellValueArchive threshold_value = 5;
   optional bool needs_to_update_filter_set_for_import = 6 [default = false];
   repeated .TSP.UUID collapsed_group_uids = 7;
   optional .TSP.Reference filter_set = 8;
-  optional .TSCE.IndexSetArchive view_pivot_hidden_indexes = 9;
-  optional .TSCE.IndexSetArchive view_only_filtered_indexes = 10;
+  optional .TSCE.IndexSetArchive summary_pivot_hidden_indexes = 9;
+  optional .TSCE.IndexSetArchive summary_filtered_indexes = 10;
   repeated .TST.UniqueIndexArchive unique_indexes = 11;
+  repeated .TST.HiddenStateExtentArchive.RowOrColumnState summary_hidden_states = 12;
 }
 
 message HiddenStatesArchive {
@@ -1203,6 +1205,10 @@ message GroupByArchive {
     optional .TST.AccumulatorArchive accum = 2;
     repeated .TST.GroupByArchive.AggNodeArchive child = 3;
   }
+  message AggregatorArchive {
+    required .TSP.UUID column_uid = 1;
+    optional .TST.GroupByArchive.AggNodeArchive agg_node = 2;
+  }
   message GroupNodeArchive {
     message FormatManagerArchive {
       message RowSetArchive {
@@ -1221,14 +1227,11 @@ message GroupByArchive {
     optional .TSCE.CellValueArchive group_cell_value = 7;
     optional .TSCE.IndexSetArchive row_indexes = 8;
     optional .TSCE.IndexSetArchive row_lookup_uids = 9;
-  }
-  message AggregatorArchive {
-    required .TSP.UUID column_uid = 1;
-    optional .TST.GroupByArchive.AggNodeArchive agg_node = 2;
+    repeated .TSP.Reference child_ref = 10;
   }
   required .TSP.UUID group_by_uid = 1;
   repeated .TST.GroupColumnArchive group_column = 2;
-  required .TST.GroupByArchive.GroupNodeArchive group_node_root = 3;
+  optional .TST.GroupByArchive.GroupNodeArchive group_node_root = 3;
   repeated .TST.GroupByArchive.AggregatorArchive aggregator = 4;
   repeated .TST.ColumnAggregateArchive column_agg_type = 5;
   required bool is_enabled = 6;
@@ -1242,6 +1245,8 @@ message GroupByArchive {
   optional int32 owner_index = 14 [default = 8];
   optional .TSCE.UidLookupListArchive row_uid_lookup = 15;
   optional .TSCE.CellCoordinateArchive hidden_states_changed_formula = 16;
+  repeated .TSP.Reference aggregator_ref = 17;
+  optional .TSP.Reference group_node_root_ref = 18;
 }
 
 message CategoryOwnerArchive {

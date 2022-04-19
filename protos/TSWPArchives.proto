@@ -15,6 +15,7 @@ enum SelectionType {
   SelectionType_Replace2 = 5;
   SelectionType_SmartField = 6;
   SelectionType_Visual = 7;
+  SelectionType_Logical = 8;
 }
 
 enum StyleInsertionBehavior {
@@ -35,11 +36,15 @@ enum WritingDirectionType {
 }
 
 message SelectionArchive {
-  required .TSWP.SelectionType type = 1;
-  required .TSP.Range range = 2;
+  required .TSWP.SelectionType deprecated_type = 1 [deprecated = true];
+  required .TSP.Range deprecated_range = 2 [deprecated = true];
   required .TSWP.StyleInsertionBehavior styleInsertionBehavior = 3;
   required .TSWP.CaretAffinity caretAffinity = 4;
   required .TSP.Range smart_field_range = 5;
+  optional bool leading_edge = 6;
+  optional uint32 leading_char_index = 7;
+  optional .TSWP.SelectionType type = 8;
+  repeated .TSP.Range ranges = 9;
 }
 
 message ObjectAttributeTable {
@@ -85,6 +90,7 @@ message StorageArchive {
     CELL = 5;
     UNCLASSIFIED = 6;
     TABLEOFCONTENTS = 7;
+    UNDEFINED = 8;
   }
   optional .TSWP.StorageArchive.KindType kind = 1 [default = TEXTBOX];
   optional .TSP.Reference style_sheet = 2;

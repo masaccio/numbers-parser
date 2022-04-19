@@ -180,6 +180,7 @@ message CommandInsertColumnsOrRowsArchive {
   required .TSP.UUID src_row_column_uid = 11;
   required .TSP.UUID opp_row_column_uid = 12;
   optional .TST.ColumnRowBundleArchive undo_bundle = 13;
+  optional .TST.TableGroupSortOrderUIDArchive group_sort_order = 14;
 }
 
 message ColumnRowBundleArchive {
@@ -203,6 +204,7 @@ message CommandRemoveColumnsOrRowsArchive {
   optional .TSP.Reference formula_rewrite_command_for_undo = 7;
   optional bool inverse_should_edge_expand_formula_ranges = 8;
   repeated .TSP.UUID undo_order = 9;
+  optional .TST.TableGroupSortOrderUIDArchive undo_group_sort_order = 10;
 }
 
 message CommandRowColumnRangeArchive {
@@ -885,6 +887,8 @@ message CommandPivotSetPivotRulesArchive {
   optional .TSP.UUID old_pivot_aggregate_rule_change_uid = 36;
   optional bool is_order_finalized = 37;
   optional bool undo_filter_enabled = 38;
+  optional .TSP.Reference new_filter_set = 39;
+  optional .TSP.Reference old_filter_set = 40;
 }
 
 message CommandPivotSetGroupingColumnOptionsArchive {

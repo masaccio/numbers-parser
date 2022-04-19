@@ -3,6 +3,7 @@
 # source: TSACommandArchives_sos.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -16,354 +17,17 @@ import numbers_parser.generated.TSKArchives_pb2 as TSKArchives__pb2
 import numbers_parser.generated.TSPMessages_pb2 as TSPMessages__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='TSACommandArchives_sos.proto',
-  package='TSASOS',
-  syntax='proto2',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1cTSACommandArchives_sos.proto\x12\x06TSASOS\x1a\x15TSAArchives_sos.proto\x1a\x11TSKArchives.proto\x1a\x11TSPMessages.proto\"\xd5\x01\n4InducedVerifyDrawableZOrdersWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12H\n\x1dserver_drawable_z_order_lists\x18\x02 \x03(\x0b\x32!.TSASOS.DrawableZOrderListArchive\x12/\n\'server_drawable_z_order_lists_undefined\x18\x03 \x01(\x08\"\xb8\x01\n#PropagateMasterChangeCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x36\n#uuids_of_previously_visited_objects\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x35\n-uuids_of_previously_visited_objects_undefined\x18\x03 \x01(\x08\"\x97\x01\n\x1b\x43ommandReapplyMasterArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12!\n\x0eitems_to_visit\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12 \n\x18items_to_visit_undefined\x18\x03 \x01(\x08\x12\x0f\n\x07is_undo\x18\x04 \x02(\x08\"L\n&VerifyDocumentWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"\x9c\x01\n-VerifyDrawableZOrdersWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12#\n\x10\x64rawable_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\x1a\x64rawable_id_list_undefined\x18\x03 \x01(\x08\"\x90\x01\n%VerifyObjectsWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12!\n\x0eobject_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12 \n\x18object_id_list_undefined\x18\x03 \x01(\x08\"\x82\x01\n.VerifyTransformHistoryWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x16\n\x0esequence_start\x18\x02 \x02(\x05\x12\x14\n\x0csequence_end\x18\x03 \x02(\x05'
-  ,
-  dependencies=[TSAArchives__sos__pb2.DESCRIPTOR,TSKArchives__pb2.DESCRIPTOR,TSPMessages__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cTSACommandArchives_sos.proto\x12\x06TSASOS\x1a\x15TSAArchives_sos.proto\x1a\x11TSKArchives.proto\x1a\x11TSPMessages.proto\"\xd5\x01\n4InducedVerifyDrawableZOrdersWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12H\n\x1dserver_drawable_z_order_lists\x18\x02 \x03(\x0b\x32!.TSASOS.DrawableZOrderListArchive\x12/\n\'server_drawable_z_order_lists_undefined\x18\x03 \x01(\x08\"\xb8\x01\n#PropagateMasterChangeCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x36\n#uuids_of_previously_visited_objects\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x35\n-uuids_of_previously_visited_objects_undefined\x18\x03 \x01(\x08\"\x97\x01\n\x1b\x43ommandReapplyMasterArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12!\n\x0eitems_to_visit\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12 \n\x18items_to_visit_undefined\x18\x03 \x01(\x08\x12\x0f\n\x07is_undo\x18\x04 \x02(\x08\"L\n&VerifyDocumentWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"\x9c\x01\n-VerifyDrawableZOrdersWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12#\n\x10\x64rawable_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\x1a\x64rawable_id_list_undefined\x18\x03 \x01(\x08\"\x90\x01\n%VerifyObjectsWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12!\n\x0eobject_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12 \n\x18object_id_list_undefined\x18\x03 \x01(\x08\"\x82\x01\n.VerifyTransformHistoryWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x16\n\x0esequence_start\x18\x02 \x02(\x05\x12\x14\n\x0csequence_end\x18\x03 \x02(\x05')
 
 
 
-
-_INDUCEDVERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE = _descriptor.Descriptor(
-  name='InducedVerifyDrawableZOrdersWithServerCommandArchive',
-  full_name='TSASOS.InducedVerifyDrawableZOrdersWithServerCommandArchive',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='super', full_name='TSASOS.InducedVerifyDrawableZOrdersWithServerCommandArchive.super', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='server_drawable_z_order_lists', full_name='TSASOS.InducedVerifyDrawableZOrdersWithServerCommandArchive.server_drawable_z_order_lists', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='server_drawable_z_order_lists_undefined', full_name='TSASOS.InducedVerifyDrawableZOrdersWithServerCommandArchive.server_drawable_z_order_lists_undefined', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=102,
-  serialized_end=315,
-)
-
-
-_PROPAGATEMASTERCHANGECOMMANDARCHIVE = _descriptor.Descriptor(
-  name='PropagateMasterChangeCommandArchive',
-  full_name='TSASOS.PropagateMasterChangeCommandArchive',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='super', full_name='TSASOS.PropagateMasterChangeCommandArchive.super', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='uuids_of_previously_visited_objects', full_name='TSASOS.PropagateMasterChangeCommandArchive.uuids_of_previously_visited_objects', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='uuids_of_previously_visited_objects_undefined', full_name='TSASOS.PropagateMasterChangeCommandArchive.uuids_of_previously_visited_objects_undefined', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=318,
-  serialized_end=502,
-)
-
-
-_COMMANDREAPPLYMASTERARCHIVE = _descriptor.Descriptor(
-  name='CommandReapplyMasterArchive',
-  full_name='TSASOS.CommandReapplyMasterArchive',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='super', full_name='TSASOS.CommandReapplyMasterArchive.super', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='items_to_visit', full_name='TSASOS.CommandReapplyMasterArchive.items_to_visit', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='items_to_visit_undefined', full_name='TSASOS.CommandReapplyMasterArchive.items_to_visit_undefined', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='is_undo', full_name='TSASOS.CommandReapplyMasterArchive.is_undo', index=3,
-      number=4, type=8, cpp_type=7, label=2,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=505,
-  serialized_end=656,
-)
-
-
-_VERIFYDOCUMENTWITHSERVERCOMMANDARCHIVE = _descriptor.Descriptor(
-  name='VerifyDocumentWithServerCommandArchive',
-  full_name='TSASOS.VerifyDocumentWithServerCommandArchive',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='super', full_name='TSASOS.VerifyDocumentWithServerCommandArchive.super', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=658,
-  serialized_end=734,
-)
-
-
-_VERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE = _descriptor.Descriptor(
-  name='VerifyDrawableZOrdersWithServerCommandArchive',
-  full_name='TSASOS.VerifyDrawableZOrdersWithServerCommandArchive',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='super', full_name='TSASOS.VerifyDrawableZOrdersWithServerCommandArchive.super', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='drawable_id_list', full_name='TSASOS.VerifyDrawableZOrdersWithServerCommandArchive.drawable_id_list', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='drawable_id_list_undefined', full_name='TSASOS.VerifyDrawableZOrdersWithServerCommandArchive.drawable_id_list_undefined', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=737,
-  serialized_end=893,
-)
-
-
-_VERIFYOBJECTSWITHSERVERCOMMANDARCHIVE = _descriptor.Descriptor(
-  name='VerifyObjectsWithServerCommandArchive',
-  full_name='TSASOS.VerifyObjectsWithServerCommandArchive',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='super', full_name='TSASOS.VerifyObjectsWithServerCommandArchive.super', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='object_id_list', full_name='TSASOS.VerifyObjectsWithServerCommandArchive.object_id_list', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='object_id_list_undefined', full_name='TSASOS.VerifyObjectsWithServerCommandArchive.object_id_list_undefined', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=896,
-  serialized_end=1040,
-)
-
-
-_VERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE = _descriptor.Descriptor(
-  name='VerifyTransformHistoryWithServerCommandArchive',
-  full_name='TSASOS.VerifyTransformHistoryWithServerCommandArchive',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='super', full_name='TSASOS.VerifyTransformHistoryWithServerCommandArchive.super', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='sequence_start', full_name='TSASOS.VerifyTransformHistoryWithServerCommandArchive.sequence_start', index=1,
-      number=2, type=5, cpp_type=1, label=2,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='sequence_end', full_name='TSASOS.VerifyTransformHistoryWithServerCommandArchive.sequence_end', index=2,
-      number=3, type=5, cpp_type=1, label=2,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1043,
-  serialized_end=1173,
-)
-
-_INDUCEDVERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDARCHIVE
-_INDUCEDVERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE.fields_by_name['server_drawable_z_order_lists'].message_type = TSAArchives__sos__pb2._DRAWABLEZORDERLISTARCHIVE
-_PROPAGATEMASTERCHANGECOMMANDARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDARCHIVE
-_PROPAGATEMASTERCHANGECOMMANDARCHIVE.fields_by_name['uuids_of_previously_visited_objects'].message_type = TSPMessages__pb2._UUID
-_COMMANDREAPPLYMASTERARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDARCHIVE
-_COMMANDREAPPLYMASTERARCHIVE.fields_by_name['items_to_visit'].message_type = TSPMessages__pb2._UUID
-_VERIFYDOCUMENTWITHSERVERCOMMANDARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDARCHIVE
-_VERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDARCHIVE
-_VERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE.fields_by_name['drawable_id_list'].message_type = TSPMessages__pb2._UUID
-_VERIFYOBJECTSWITHSERVERCOMMANDARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDARCHIVE
-_VERIFYOBJECTSWITHSERVERCOMMANDARCHIVE.fields_by_name['object_id_list'].message_type = TSPMessages__pb2._UUID
-_VERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE.fields_by_name['super'].message_type = TSKArchives__pb2._COMMANDARCHIVE
-DESCRIPTOR.message_types_by_name['InducedVerifyDrawableZOrdersWithServerCommandArchive'] = _INDUCEDVERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE
-DESCRIPTOR.message_types_by_name['PropagateMasterChangeCommandArchive'] = _PROPAGATEMASTERCHANGECOMMANDARCHIVE
-DESCRIPTOR.message_types_by_name['CommandReapplyMasterArchive'] = _COMMANDREAPPLYMASTERARCHIVE
-DESCRIPTOR.message_types_by_name['VerifyDocumentWithServerCommandArchive'] = _VERIFYDOCUMENTWITHSERVERCOMMANDARCHIVE
-DESCRIPTOR.message_types_by_name['VerifyDrawableZOrdersWithServerCommandArchive'] = _VERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE
-DESCRIPTOR.message_types_by_name['VerifyObjectsWithServerCommandArchive'] = _VERIFYOBJECTSWITHSERVERCOMMANDARCHIVE
-DESCRIPTOR.message_types_by_name['VerifyTransformHistoryWithServerCommandArchive'] = _VERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_INDUCEDVERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE = DESCRIPTOR.message_types_by_name['InducedVerifyDrawableZOrdersWithServerCommandArchive']
+_PROPAGATEMASTERCHANGECOMMANDARCHIVE = DESCRIPTOR.message_types_by_name['PropagateMasterChangeCommandArchive']
+_COMMANDREAPPLYMASTERARCHIVE = DESCRIPTOR.message_types_by_name['CommandReapplyMasterArchive']
+_VERIFYDOCUMENTWITHSERVERCOMMANDARCHIVE = DESCRIPTOR.message_types_by_name['VerifyDocumentWithServerCommandArchive']
+_VERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE = DESCRIPTOR.message_types_by_name['VerifyDrawableZOrdersWithServerCommandArchive']
+_VERIFYOBJECTSWITHSERVERCOMMANDARCHIVE = DESCRIPTOR.message_types_by_name['VerifyObjectsWithServerCommandArchive']
+_VERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE = DESCRIPTOR.message_types_by_name['VerifyTransformHistoryWithServerCommandArchive']
 InducedVerifyDrawableZOrdersWithServerCommandArchive = _reflection.GeneratedProtocolMessageType('InducedVerifyDrawableZOrdersWithServerCommandArchive', (_message.Message,), {
   'DESCRIPTOR' : _INDUCEDVERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE,
   '__module__' : 'TSACommandArchives_sos_pb2'
@@ -413,5 +77,21 @@ VerifyTransformHistoryWithServerCommandArchive = _reflection.GeneratedProtocolMe
   })
 _sym_db.RegisterMessage(VerifyTransformHistoryWithServerCommandArchive)
 
+if _descriptor._USE_C_DESCRIPTORS == False:
 
+  DESCRIPTOR._options = None
+  _INDUCEDVERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE._serialized_start=102
+  _INDUCEDVERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE._serialized_end=315
+  _PROPAGATEMASTERCHANGECOMMANDARCHIVE._serialized_start=318
+  _PROPAGATEMASTERCHANGECOMMANDARCHIVE._serialized_end=502
+  _COMMANDREAPPLYMASTERARCHIVE._serialized_start=505
+  _COMMANDREAPPLYMASTERARCHIVE._serialized_end=656
+  _VERIFYDOCUMENTWITHSERVERCOMMANDARCHIVE._serialized_start=658
+  _VERIFYDOCUMENTWITHSERVERCOMMANDARCHIVE._serialized_end=734
+  _VERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE._serialized_start=737
+  _VERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE._serialized_end=893
+  _VERIFYOBJECTSWITHSERVERCOMMANDARCHIVE._serialized_start=896
+  _VERIFYOBJECTSWITHSERVERCOMMANDARCHIVE._serialized_end=1040
+  _VERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE._serialized_start=1043
+  _VERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE._serialized_end=1173
 # @@protoc_insertion_point(module_scope)
