@@ -1,11 +1,11 @@
 #! /bin/bash
 
 function ok_echo {
-  echo $(tput setaf 2)"$1"$(tput setaf 0)
+  echo $(tput setaf 2)"$1"$(tput init)
 }
 
 function error_echo {
-  echo $(tput setaf 1)"$1"$(tput setaf 0)
+  echo $(tput setaf 1)"$1"$(tput init)
 }
 
 function fatal_error {
