@@ -173,6 +173,7 @@ message CommandInsertColumnsOrRowsArchive {
   optional .TSP.Reference undo_commands = 4;
   optional .TSP.Reference undo_cell_map = 5;
   optional .TST.TableSortOrderUIDArchive sort_order = 6;
+  optional .TST.TableGroupSortOrderUIDArchive group_sort_order = 14;
   optional .TSP.Reference filter_set = 7;
   optional bool should_edge_expand_formula_ranges = 8;
   optional bool was_categorized = 9;
@@ -180,7 +181,6 @@ message CommandInsertColumnsOrRowsArchive {
   required .TSP.UUID src_row_column_uid = 11;
   required .TSP.UUID opp_row_column_uid = 12;
   optional .TST.ColumnRowBundleArchive undo_bundle = 13;
-  optional .TST.TableGroupSortOrderUIDArchive group_sort_order = 14;
 }
 
 message ColumnRowBundleArchive {
@@ -201,10 +201,10 @@ message CommandRemoveColumnsOrRowsArchive {
   optional .TSP.Reference undo_cell_map = 4;
   optional .TSP.Reference undo_filter_set = 5;
   optional .TST.TableSortOrderUIDArchive undo_sort_order = 6;
+  optional .TST.TableGroupSortOrderUIDArchive undo_group_sort_order = 10;
   optional .TSP.Reference formula_rewrite_command_for_undo = 7;
   optional bool inverse_should_edge_expand_formula_ranges = 8;
   repeated .TSP.UUID undo_order = 9;
-  optional .TST.TableGroupSortOrderUIDArchive undo_group_sort_order = 10;
 }
 
 message CommandRowColumnRangeArchive {
