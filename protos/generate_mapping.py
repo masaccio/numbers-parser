@@ -60,10 +60,18 @@ print(
 
 def compute_maps():
     name_class_map = {}
+
+    def add_nested_types(message_type):
+        for name in message_type.DESCRIPTOR.nested_types_by_name:
+            child_type = getattr(message_type, name)
+            name_class_map[child_type.DESCRIPTOR.full_name] = child_type
+            add_nested_types(child_type)
+
     for file in PROTO_FILES:
         for message_name in file.DESCRIPTOR.message_types_by_name:
             message_type = getattr(file, message_name)
             name_class_map[message_type.DESCRIPTOR.full_name] = message_type
+            add_nested_types(message_type)
 
     id_name_map = {}
     for k, v in list(TSPRegistryMapping.items()):
