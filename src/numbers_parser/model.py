@@ -1,7 +1,6 @@
 from array import array
 from datetime import datetime, timedelta
 from functools import lru_cache
-from roman import toRoman
 from struct import unpack
 from typing import Dict, List
 
@@ -9,8 +8,13 @@ from numbers_parser.containers import ObjectStore
 from numbers_parser.cell import xl_rowcol_to_cell, xl_col_to_name
 from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
 from numbers_parser.formula import TableFormulas
+
+from numbers_parser.bullet_formats import (
+    BULLET_PREFIXES,
+    BULLET_CONVERTION,
+    BULLET_SUFFIXES,
+)
 
 
 class CellValue:
@@ -503,38 +507,10 @@ class NumbersModel:
 
 def formatted_number(number_type, index):
     """Returns the numbered index bullet formatted for different types"""
-    if number_type == TSWPArchives.ListStyleArchive.kNumericDecimal:
-        bullet_char = str(index + 1) + "."
-    elif number_type == TSWPArchives.ListStyleArchive.kNumericDoubleParen:
-        bullet_char = "(" + str(index + 1) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kNumericRightParen:
-        bullet_char = str(index + 1) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanUpperDecimal:
-        bullet_char = toRoman(index + 1) + "."
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanUpperDoubleParen:
-        bullet_char = "(" + toRoman(index + 1) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanUpperRightParen:
-        bullet_char = toRoman(index + 1) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanLowerDecimal:
-        bullet_char = toRoman(index + 1).lower() + "."
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanLowerDoubleParen:
-        bullet_char = "(" + toRoman(index + 1).lower() + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanLowerRightParen:
-        bullet_char = toRoman(index + 1).lower() + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaUpperDecimal:
-        bullet_char = chr(index + 65) + "."
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaUpperDoubleParen:
-        bullet_char = "(" + chr(index + 65) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaUpperRightParen:
-        bullet_char = chr(index + 65) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaLowerDecimal:
-        bullet_char = chr(index + 97) + "."
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaLowerDoubleParen:
-        bullet_char = "(" + chr(index + 97) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaLowerRightParen:
-        bullet_char = chr(index + 97) + ")"
-    else:
-        bullet_char = ""
+    bullet_char = BULLET_PREFIXES[number_type]
+    bullet_char += BULLET_CONVERTION[number_type](index)
+    bullet_char += BULLET_SUFFIXES[number_type]
+
     return bullet_char
 
 
