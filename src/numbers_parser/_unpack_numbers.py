@@ -6,7 +6,7 @@ import json
 import re
 import sys
 
-from numbers_parser.unpack import read_numbers_file
+from numbers_parser.file import read_numbers_file
 from numbers_parser import _get_version
 from numbers_parser.iwafile import IWAFile
 from numbers_parser.exceptions import FileFormatError
@@ -36,21 +36,21 @@ def convert_uuids_to_hex(obj):
                 convert_uuids_to_hex(v)
 
 
-def process_file(contents, filename, output_dir, hex_uuids):
+def process_file(filename, blob, output_dir, hex_uuids):
     filename = re.sub(r".*\.numbers/", "", filename)
     ensure_directory_exists(output_dir, filename)
     target_path = os.path.join(output_dir, filename)
-    if isinstance(contents, IWAFile):
+    if isinstance(blob, IWAFile):
         target_path = target_path.replace(".iwa", "")
         target_path += ".txt"
         with open(target_path, "w") as out:
-            data = contents.to_dict()
+            data = blob.to_dict()
             if hex_uuids:
                 convert_uuids_to_hex(data)
             print(json.dumps(data, sort_keys=True, indent=4), file=out)
     elif not filename.endswith("/"):
         with open(target_path, "wb") as out:
-            out.write(contents)
+            out.write(blob)
 
 
 def main():
@@ -76,10 +76,9 @@ def main():
             try:
                 read_numbers_file(
                     document,
-                    handler=lambda contents, filename: process_file(
-                        contents, filename, output_dir, args.hex_uuids
+                    file_handler=lambda filename, blob: process_file(
+                        filename, blob, output_dir, args.hex_uuids
                     ),
-                    store_objects=False,
                 )
             except FileFormatError as e:
                 print(f"{document}:", str(e), file=sys.stderr)
