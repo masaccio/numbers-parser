@@ -10,7 +10,7 @@ from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.formula import TableFormulas
 
-from numbers_parser.bullet_formats import (
+from numbers_parser.bullets import (
     BULLET_PREFIXES,
     BULLET_CONVERTION,
     BULLET_SUFFIXES,
