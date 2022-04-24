@@ -17,7 +17,7 @@ def test_save_document():
     temp_dir = TemporaryDirectory()
     new_filename = os.path.join(temp_dir.name, "test-1-new.numbers")
     doc.save(new_filename)
-    print("saving to", new_filename)
+
     new_doc = Document(new_filename)
     new_sheets = new_doc.sheets()
     new_tables = new_sheets["ZZZ_Sheet_1 NEW"].tables()
