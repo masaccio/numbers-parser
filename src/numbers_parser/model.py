@@ -42,14 +42,21 @@ class NumbersModel:
         self._tables_in_sheet = {}
         self._table_base_ids = {}
 
+    @property
+    def file_store(self):
+        return self.objects.file_store
+
     def find_refs(self, ref: str) -> list:
         return self.objects.find_refs(ref)
 
     def sheet_ids(self):
         return [o.identifier for o in self.objects[1].sheets]
 
-    def sheet_name(self, sheet_id):
-        return self.objects[sheet_id].name
+    def sheet_name(self, sheet_id, value=None):
+        if value is None:
+            return self.objects[sheet_id].name
+        else:
+            self.objects[sheet_id].name = value
 
     @lru_cache(maxsize=None)
     def table_ids(self, sheet_id):
@@ -86,8 +93,11 @@ class NumbersModel:
     def number_of_columns(self, table_id):
         return self.objects[table_id].number_of_columns
 
-    def table_name(self, table_id):
-        return self.objects[table_id].table_name
+    def table_name(self, table_id, value=None):
+        if value is None:
+            return self.objects[table_id].table_name
+        else:
+            self.objects[table_id].table_name = value
 
     @lru_cache(maxsize=None)
     def table_tiles(self, table_id):

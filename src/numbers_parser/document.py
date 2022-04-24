@@ -3,6 +3,7 @@ from typing import Union, Generator
 
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import NumbersModel
+from numbers_parser.file import write_numbers_file
 
 from numbers_parser.cell import (
     Cell,
@@ -22,6 +23,9 @@ class Document:
             self._sheets = ItemsList(self._model, refs, Sheet)
         return self._sheets
 
+    def save(self, filename):
+        write_numbers_file(filename, self._model.file_store)
+
 
 class Sheet:
     def __init__(self, model, sheet_id):
@@ -38,6 +42,10 @@ class Sheet:
     def name(self):
         return self._model.sheet_name(self._sheet_id)
 
+    @name.setter
+    def name(self, value):
+        self._model.sheet_name(self._sheet_id, value)
+
 
 class Table:
     def __init__(self, model, table_id):
@@ -48,6 +56,10 @@ class Table:
     @property
     def name(self):
         return self._model.table_name(self._table_id)
+
+    @name.setter
+    def name(self, value):
+        self._model.table_name(self._table_id, value)
 
     @lru_cache(maxsize=None)
     def rows(self, values_only: bool = False) -> list:
