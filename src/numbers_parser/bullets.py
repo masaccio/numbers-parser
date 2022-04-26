@@ -2,7 +2,7 @@ from roman import toRoman
 from numbers_parser.generated.TSWPArchives_pb2 import ListStyleArchive
 
 
-BULLET_PREFIXES = {
+_BULLET_PREFIXES = {
     ListStyleArchive.kNumericDecimal: "",
     ListStyleArchive.kNumericDoubleParen: "(",
     ListStyleArchive.kNumericRightParen: "",
@@ -20,7 +20,7 @@ BULLET_PREFIXES = {
     ListStyleArchive.kAlphaLowerRightParen: "",
 }
 
-BULLET_CONVERTION = {
+_BULLET_CONVERTION = {
     ListStyleArchive.kNumericDecimal: lambda x: str(x + 1),
     ListStyleArchive.kNumericDoubleParen: lambda x: str(x + 1),
     ListStyleArchive.kNumericRightParen: lambda x: str(x + 1),
@@ -38,7 +38,7 @@ BULLET_CONVERTION = {
     ListStyleArchive.kAlphaLowerRightParen: lambda x: chr(x + 97),
 }
 
-BULLET_SUFFIXES = {
+_BULLET_SUFFIXES = {
     ListStyleArchive.kNumericDecimal: ".",
     ListStyleArchive.kNumericDoubleParen: ")",
     ListStyleArchive.kNumericRightParen: ")",
