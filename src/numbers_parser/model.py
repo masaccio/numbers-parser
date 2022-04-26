@@ -11,13 +11,13 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.formula import TableFormulas
 
 from numbers_parser.bullets import (
-    BULLET_PREFIXES,
-    BULLET_CONVERTION,
-    BULLET_SUFFIXES,
+    _BULLET_PREFIXES,
+    _BULLET_CONVERTION,
+    _BULLET_SUFFIXES,
 )
 
 
-class CellValue:
+class _CellValue:
     def __init__(self, _type):
         self.type = _type
         self.value = None
@@ -28,7 +28,7 @@ class CellValue:
         self.bullets = None
 
 
-class NumbersModel:
+class _NumbersModel:
     """
     Loads all objects from Numbers document and provides decoding
     methods for other classes in the module to abstract away the
@@ -106,6 +106,7 @@ class NumbersModel:
     @lru_cache(maxsize=None)
     def table_tiles(self, table_id):
         bds = self.objects[table_id].base_data_store
+        # TODO: should only be one tile
         return [self.objects[t.tile.identifier] for t in bds.tiles.tiles]
 
     @lru_cache(maxsize=None)
@@ -383,13 +384,13 @@ class NumbersModel:
         if storage_buffer_pre_bnc is not None:
             cell_value = storage_buffer_value(storage_buffer_pre_bnc, cell_type)
         else:
-            cell_value = CellValue(cell_type)
+            cell_value = _CellValue(cell_type)
 
         if cell_value.type == TSTArchives.numberCellType or cell_value.type == 10:
-            if storage_buffer_pre_bnc is None:
-                cell_value.value = 0.0
-            else:
-                cell_value.value = cell_value.ieee
+            # if storage_buffer_pre_bnc is None:
+            #     cell_value.value = 0.0
+            # else:
+            cell_value.value = cell_value.ieee
             cell_value.type = TSTArchives.numberCellType
         elif cell_value.type == TSTArchives.textCellType:
             if cell_value.text is None:
@@ -504,12 +505,15 @@ class NumbersModel:
 
         return formula_key
 
+    def write_cell(self, table_id: int, row_num: int, col_num: int, value):
+        pass
+
 
 def formatted_number(number_type, index):
     """Returns the numbered index bullet formatted for different types"""
-    bullet_char = BULLET_PREFIXES[number_type]
-    bullet_char += BULLET_CONVERTION[number_type](index)
-    bullet_char += BULLET_SUFFIXES[number_type]
+    bullet_char = _BULLET_PREFIXES[number_type]
+    bullet_char += _BULLET_CONVERTION[number_type](index)
+    bullet_char += _BULLET_SUFFIXES[number_type]
 
     return bullet_char
 
@@ -582,7 +586,7 @@ def uuid(ref: dict) -> int:
 
 def storage_buffer_value(buffer, cell_type):
     """Decode data values from a storage buffer based on the type of data represented"""
-    cell_value = CellValue(cell_type)
+    cell_value = _CellValue(cell_type)
     flags = unpack("<i", buffer[4:8])[0]
     data_offset = 12 + bin(flags & 0x0D8E).count("1") * 4
     if (flags & 0x200) > 0:
