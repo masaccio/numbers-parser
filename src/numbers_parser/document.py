@@ -2,8 +2,10 @@ from functools import lru_cache
 from typing import Union, Generator
 
 from numbers_parser.containers import ItemsList
-from numbers_parser.model import NumbersModel
+from numbers_parser.model import _NumbersModel
 from numbers_parser.file import write_numbers_file
+from numbers_parser.cell import EmptyCell
+from numbers_parser.generated.TSTArchives_pb2 import TileRowInfo
 
 from numbers_parser.cell import (
     Cell,
@@ -15,7 +17,7 @@ from numbers_parser.cell import (
 
 class Document:
     def __init__(self, filename):
-        self._model = NumbersModel(filename)
+        self._model = _NumbersModel(filename)
 
     def sheets(self):
         if not hasattr(self, "_sheets"):
@@ -24,6 +26,9 @@ class Document:
         return self._sheets
 
     def save(self, filename):
+        for sheet in self.sheets():
+            for table in sheet.tables():
+                table._recompute_storage()
         write_numbers_file(filename, self._model.file_store)
 
 
@@ -52,6 +57,17 @@ class Table:
         super(Table, self).__init__()
         self._model = model
         self._table_id = table_id
+        self.num_rows = self._model.number_of_rows(self._table_id)
+        self.num_cols = self._model.number_of_columns(self._table_id)
+        # Cache all data now to facilite write(). Performance impact
+        # of computing all cells is minimal compared to file IO
+        self._data = [
+            [
+                Cell.factory(self._model, self._table_id, row_num, col_num)
+                for col_num in range(self.num_cols)
+            ]
+            for row_num in range(self.num_rows)
+        ]
 
     @property
     def name(self):
@@ -72,21 +88,11 @@ class Table:
         Returns:
             rows: list of rows; each row is a list of Cell objects
         """
-        row_cells = []
         if values_only:
-            for row_num in range(self.num_rows):
-                row_cells.append(
-                    [
-                        self.cell(row_num, col_num).value
-                        for col_num in range(self.num_cols)
-                    ]
-                )
+            rows = [[cell.value for cell in row] for row in self._data]
+            return rows
         else:
-            for row_num in range(self.num_rows):
-                row_cells.append(
-                    [self.cell(row_num, col_num) for col_num in range(self.num_cols)]
-                )
-        return row_cells
+            return self._data
 
     @property
     @lru_cache(maxsize=None)
@@ -94,16 +100,6 @@ class Table:
         merge_cells = self._model.merge_cell_ranges(self._table_id)
         ranges = [xl_range(*r["rect"]) for r in merge_cells.values()]
         return sorted(set(list(ranges)))
-
-    @property
-    def num_rows(self) -> int:
-        """Number of rows in the table"""
-        return self._model.number_of_rows(self._table_id)
-
-    @property
-    def num_cols(self) -> int:
-        """Number of columns in the table"""
-        return self._model.number_of_columns(self._table_id)
 
     def cell(self, *args) -> Union[Cell, MergedCell]:
         if type(args[0]) == str:
@@ -118,7 +114,7 @@ class Table:
         if col_num >= self.num_cols or col_num < 0:
             raise IndexError(f"coumn {col_num} out of range")
 
-        return Cell.factory(self._model, self._table_id, row_num, col_num)
+        return self._data[row_num][col_num]
 
     def iter_rows(
         self,
@@ -211,3 +207,52 @@ class Table:
                 yield tuple(row[col_num].value for row in rows[min_row : max_row + 1])
             else:
                 yield tuple(row[col_num] for row in rows[min_row : max_row + 1])
+
+    def write(self, *args):
+        if type(args[0]) == str:
+            (row_num, col_num) = xl_cell_to_rowcol(args[0])
+            value = args[1]
+        elif len(args) < 2:
+            raise IndexError("invalid cell reference " + str(args))
+        else:
+            (row_num, col_num) = args[0:2]
+            value = args[2]
+
+        for row in range(self.num_rows, row_num + 1):
+            self.add_row()
+
+        for row in range(self.num_cols, col_num + 1):
+            self.add_column()
+
+        self._data[row_num][col_num] = value
+
+    def add_row(self):
+        row = [
+            EmptyCell(self.num_rows - 1, col_num, None)
+            for col_num in range(self.num_cols)
+        ]
+        self._data.append(row)
+        self.num_rows += 1
+
+    def add_column(self):
+        for row_num in range(self.num_rows):
+            self._data[row_num].append(EmptyCell(row_num, self.num_cols - 1, None))
+        self.num_cols += 1
+
+    def _recompute_storage(self):
+        bds = self._model.objects[self._table_id].base_data_store
+        tile_ids = [t.tile.identifier for t in bds.tiles.tiles]
+        tile = self._model.objects[tile_ids[0]]
+        tile.numrows = self.num_rows
+        tile.rowInfos.clear()
+        for row_num in range(self.num_rows):
+            row_info = TileRowInfo()
+            row_info.storage_version = 5
+            row_info.tile_row_index = row_num
+            row_info.cell_count = sum(
+                [not isinstance(x, EmptyCell) for x in self._data[row_num]]
+            )
+            row_info.cell_storage_buffer_pre_bnc = b""
+            row_info.cell_offsets_pre_bnc = b""
+            tile.rowInfos.append(row_info)
+        return
