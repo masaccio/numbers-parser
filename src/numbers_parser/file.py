@@ -95,5 +95,6 @@ def _extract_iwa_archives(blob, filename, file_handler, object_handler):
             identifier = archive.header.identifier
             # TODO: what should we do for len(archive.objects) > 1?
             object_handler(identifier, archive.objects[0])
+
     if file_handler is not None:
         file_handler(filename, iwaf)
