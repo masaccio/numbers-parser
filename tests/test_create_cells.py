@@ -6,6 +6,7 @@ from numbers_parser import Document
 from numbers_parser.cell import EmptyCell
 
 
+@pytest.mark.experimental
 def test_edit_strings():
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets()
