@@ -249,7 +249,7 @@ def xl_cell_to_rowcol(cell_str: str) -> tuple:
     expn = 0
     col = 0
     for char in reversed(col_str):
-        col += (ord(char) - ord("A") + 1) * (26 ** expn)
+        col += (ord(char) - ord("A") + 1) * (26**expn)
         expn += 1
 
     # Convert 1-index to zero-index
