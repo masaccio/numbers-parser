@@ -37,7 +37,12 @@ class Cell:
         elif cell_value.type == TSTArchives.boolCellType:
             cell = BoolCell(row_num, col_num, cell_value.value)
         elif cell_value.type == TSTArchives.durationCellType:
-            cell = DurationCell(row_num, col_num, timedelta(seconds=cell_value.value))
+            if cell_value.value is None:
+                cell = DurationCell(row_num, col_num, timedelta(seconds=0))
+            else:
+                cell = DurationCell(
+                    row_num, col_num, timedelta(seconds=cell_value.value)
+                )
         elif cell_value.type == TSTArchives.formulaErrorCellType:
             cell = ErrorCell(row_num, col_num, None)
         elif cell_value.type == TSTArchives.automaticCellType:
@@ -126,8 +131,9 @@ class NumberCell(Cell):
 
 
 class TextCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value, relink=False):
         self._type = TSTArchives.textCellType
+        self.relink = relink
         super().__init__(row_num, col_num, value)
 
     @property
