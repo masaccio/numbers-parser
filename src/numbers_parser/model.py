@@ -16,6 +16,9 @@ from numbers_parser.bullets import (
     _BULLET_SUFFIXES,
 )
 
+EPOCH = datetime(2001, 1, 1)
+OFFSETS_WIDTH = 256
+
 
 class _CellValue:
     def __init__(self, _type):
@@ -24,8 +27,30 @@ class _CellValue:
         self.rich = None
         self.text = None
         self.ieee = None
-        self.date = None
+        self.date = EPOCH
         self.bullets = None
+
+    def __repr__(self):  # pragma: no cover
+        if self.bullets is not None:
+            bullets_str = "bullet_chars=" + self.bullets.bullet_chars
+        else:
+            bullets_str = "None"
+        return (
+            "type="
+            + str(self.type if not None else "None")
+            + ", value="
+            + str(self.value if not None else "None")
+            + ", rich="
+            + str(self.rich if not None else "None")
+            + ", text="
+            + (str(self.text) if not None else "None")
+            + ", ieee="
+            + str(self.ieee if not None else "None")
+            + ", date="
+            + str(self.date if not None else "None")
+            + ", bullets="
+            + bullets_str
+        )
 
 
 class _NumbersModel:
@@ -381,15 +406,26 @@ class _NumbersModel:
             return None
 
         cell_type = storage_buffer[1]
+        cell_value = _CellValue(cell_type)
         if storage_buffer_pre_bnc is not None:
-            cell_value = storage_buffer_value(storage_buffer_pre_bnc, cell_type)
-        else:
-            cell_value = _CellValue(cell_type)
+            buffer = storage_buffer_pre_bnc
+            flags = unpack("<i", buffer[4:8])[0]
+            offset = 12 + bin(flags & 0x0D8E).count("1") * 4
+            if (flags & 0x200) > 0:
+                cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
+                offset += 4
+            offset += bin(flags & 0x3000).count("1") * 4
+            if (flags & 0x010) > 0:
+                cell_value.text = unpack("<i", buffer[offset : offset + 4])[0]
+                offset += 4
+            if (flags & 0x020) > 0:
+                cell_value.ieee = unpack("<d", buffer[offset : offset + 8])[0]
+                offset += 8
+            if (flags & 0x040) > 0:
+                seconds = unpack("<d", buffer[offset : offset + 8])[0]
+                cell_value.date = EPOCH + timedelta(seconds=seconds)
 
         if cell_value.type == TSTArchives.numberCellType or cell_value.type == 10:
-            # if storage_buffer_pre_bnc is None:
-            #     cell_value.value = 0.0
-            # else:
             cell_value.value = cell_value.ieee
             cell_value.type = TSTArchives.numberCellType
         elif cell_value.type == TSTArchives.textCellType:
@@ -397,12 +433,7 @@ class _NumbersModel:
                 cell_value.text = unpack("<i", storage_buffer[12:16])[0]
             cell_value.value = self.table_string(table_id, cell_value.text)
         elif cell_value.type == TSTArchives.dateCellType:
-            if storage_buffer_pre_bnc is None:
-                cell_value.value = datetime(2001, 1, 1)
-            else:
-                cell_value.value = datetime(2001, 1, 1) + timedelta(
-                    seconds=cell_value.date
-                )
+            cell_value.value = cell_value.date
         elif cell_value.type == TSTArchives.boolCellType:
             cell_value.value = cell_value.ieee > 0.0
         elif cell_value.type == TSTArchives.durationCellType:
@@ -500,8 +531,8 @@ class _NumbersModel:
 
         buffer = self.storage_buffer_pre_bnc(table_id, row_num, col_num)
         flags = unpack("<i", buffer[4:8])[0]
-        data_offset = 8 + bin(flags & 0x0D8E).count("1") * 4
-        formula_key = unpack("<h", buffer[data_offset : data_offset + 2])[0]
+        offset = 8 + bin(flags & 0x0D8E).count("1") * 4
+        formula_key = unpack("<h", buffer[offset : offset + 2])[0]
 
         return formula_key
 
@@ -582,27 +613,6 @@ def uuid(ref: dict) -> int:
         raise UnsupportedError(f"Unsupported UUID structure: {ref}")  # pragma: no cover
 
     return uuid
-
-
-def storage_buffer_value(buffer, cell_type):
-    """Decode data values from a storage buffer based on the type of data represented"""
-    cell_value = _CellValue(cell_type)
-    flags = unpack("<i", buffer[4:8])[0]
-    data_offset = 12 + bin(flags & 0x0D8E).count("1") * 4
-    if (flags & 0x200) > 0:
-        cell_value.rich = unpack("<i", buffer[data_offset : data_offset + 4])[0]
-        data_offset = data_offset + 4
-    data_offset = data_offset + bin(flags & 0x3000).count("1") * 4
-    if (flags & 0x010) > 0:
-        cell_value.text = unpack("<i", buffer[data_offset : data_offset + 4])[0]
-        data_offset = data_offset + 4
-    if (flags & 0x020) > 0:
-        cell_value.ieee = unpack("<d", buffer[data_offset : data_offset + 8])[0]
-        data_offset = data_offset + 8
-    if (flags & 0x040) > 0:
-        cell_value.date = unpack("<d", buffer[data_offset : data_offset + 8])[0]
-        data_offset = data_offset + 8
-    return cell_value
 
 
 def get_storage_buffers_for_row(
