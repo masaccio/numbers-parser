@@ -1,11 +1,24 @@
+import warnings
+
 from functools import lru_cache
 from typing import Union, Generator
+from struct import pack
+from datetime import timedelta, datetime
 
+from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
 from numbers_parser.file import write_numbers_file
-from numbers_parser.cell import EmptyCell
-from numbers_parser.generated.TSTArchives_pb2 import TileRowInfo
+from numbers_parser.cell import (
+    EmptyCell,
+    BoolCell,
+    NumberCell,
+    TextCell,
+    DurationCell,
+    DateCell,
+)
+from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.model import EPOCH, OFFSETS_WIDTH
 
 from numbers_parser.cell import (
     Cell,
@@ -224,7 +237,22 @@ class Table:
         for row in range(self.num_cols, col_num + 1):
             self.add_column()
 
-        self._data[row_num][col_num] = value
+        if isinstance(value, str):
+            self._data[row_num][col_num] = TextCell(
+                row_num, col_num, value, relink=True
+            )
+        elif isinstance(value, int) or isinstance(value, float):
+            self._data[row_num][col_num] = NumberCell(row_num, col_num, value)
+        elif isinstance(value, bool):
+            self._data[row_num][col_num] = BoolCell(row_num, col_num, value)
+        elif isinstance(value, datetime):
+            self._data[row_num][col_num] = DateCell(row_num, col_num, value)
+        elif isinstance(value, timedelta):
+            self._data[row_num][col_num] = DurationCell(row_num, col_num, value)
+        else:
+            raise ValueError(
+                "Can't determine cell type from type " + type(value).__name__
+            )
 
     def add_row(self):
         row = [
@@ -244,15 +272,104 @@ class Table:
         tile_ids = [t.tile.identifier for t in bds.tiles.tiles]
         tile = self._model.objects[tile_ids[0]]
         tile.numrows = self.num_rows
+        tile.ClearField("last_saved_in_BNC")
+        tile.ClearField("should_use_wide_rows")
         tile.rowInfos.clear()
         for row_num in range(self.num_rows):
-            row_info = TileRowInfo()
+            row_info = TSTArchives.TileRowInfo()
             row_info.storage_version = 5
             row_info.tile_row_index = row_num
-            row_info.cell_count = sum(
-                [not isinstance(x, EmptyCell) for x in self._data[row_num]]
-            )
+            row_info.cell_count = 0
             row_info.cell_storage_buffer_pre_bnc = b""
             row_info.cell_offsets_pre_bnc = b""
+            row_info.cell_offsets = b""
+            storage = b""
+            # TODO: support wide offsets
+            offsets = [-1] * OFFSETS_WIDTH
+            current_offset = 0
+            for col_num in range(len(self._data[row_num])):
+                cell_storage = calculate_cell_storage(
+                    self._data[row_num][col_num],
+                    self._model.table_name(self._table_id),
+                    table_strings(self._model, self._table_id),
+                    row_num,
+                    col_num,
+                )
+                if cell_storage is not None:
+                    storage += cell_storage
+                    offsets[col_num] = current_offset
+                    current_offset += len(cell_storage)
+                    row_info.cell_count += 1
+            row_info.cell_offsets = pack(f"<{OFFSETS_WIDTH}h", *offsets)
+            row_info.cell_offsets_pre_bnc = pack(f"<{OFFSETS_WIDTH}h", *offsets)
+            row_info.cell_storage_buffer = storage
+            row_info.cell_storage_buffer_pre_bnc = storage
             tile.rowInfos.append(row_info)
         return
+
+
+@lru_cache(maxsize=None)
+def table_strings(model, table_id):
+    bds = model.objects[table_id].base_data_store
+    strings_id = bds.stringTable.identifier
+    return model.objects[strings_id].entries
+
+
+def calculate_cell_storage(cell, table_name, strings, row_num, col_num):
+    string_lookup = {x.string: x.key for x in strings}
+
+    if isinstance(cell, NumberCell):
+        # Stored with IEEE offsets
+        flags = 0x20
+        cell_type = TSTArchives.numberCellType
+        value = pack("<d", float(cell.value))
+    elif isinstance(cell, TextCell):
+        # Stored with text offsets
+        flags = 0x10
+        cell_type = TSTArchives.textCellType
+        if cell.value not in string_lookup:
+            ids = max(string_lookup.values())
+            string_id = ids + 1
+            entry = TSTArchives.TableDataList.ListEntry(
+                key=string_id, string=cell.value, refcount=1
+            )
+            strings.append(entry)
+        else:
+            string_id = string_lookup[cell.value]
+            if cell.relink:
+                # Cell created by write() and re-uses a key
+                for entry in strings:
+                    if entry.key == string_id:
+                        entry.refcount += 1
+        value = pack("<i", string_id)
+    elif isinstance(cell, DateCell):
+        # Stored with date offsets
+        flags = 0x40
+        cell_type = TSTArchives.dateCellType
+        date_delta = cell.value - EPOCH
+        value = pack("<d", float(date_delta.total_seconds()))
+    elif isinstance(cell, BoolCell):
+        # Stored with IEEE offsets
+        flags = 0x20
+        cell_type = TSTArchives.boolCellType
+        value = pack("<d", float(cell.value))
+    elif isinstance(cell, DurationCell):
+        # Stored with IEEE offsets
+        flags = 0x20
+        cell_type = TSTArchives.durationCellType
+        value = value = pack("<d", float(cell.value.total_seconds()))
+    elif isinstance(cell, EmptyCell):
+        # No data
+        return None
+    else:
+        warnings.warn(
+            f"{table_name}@[{row_num},{col_num}]: unsupported cell type for save",
+            UnsupportedWarning,
+        )
+        return None
+    storage = bytearray(32)
+    storage[0:1] = (5, cell_type)
+    storage[4:8] = pack("<i", flags)
+    storage[12 : 12 + len(value)] = value
+
+    return storage
