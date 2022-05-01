@@ -131,9 +131,8 @@ class NumberCell(Cell):
 
 
 class TextCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value, relink=False):
+    def __init__(self, row_num: int, col_num: int, value):
         self._type = TSTArchives.textCellType
-        self.relink = relink
         super().__init__(row_num, col_num, value)
 
     @property

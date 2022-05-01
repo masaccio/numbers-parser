@@ -1,12 +1,22 @@
 from array import array
 from datetime import datetime, timedelta
 from functools import lru_cache
-from struct import unpack
+from struct import pack, unpack
 from typing import Dict, List
+from warnings import warn
 
 from numbers_parser.containers import ObjectStore
-from numbers_parser.cell import xl_rowcol_to_cell, xl_col_to_name
-from numbers_parser.exceptions import UnsupportedError
+from numbers_parser.cell import (
+    xl_rowcol_to_cell,
+    xl_col_to_name,
+    BoolCell,
+    DateCell,
+    DurationCell,
+    EmptyCell,
+    NumberCell,
+    TextCell,
+)
+from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.formula import TableFormulas
 
@@ -135,12 +145,46 @@ class _NumbersModel:
         return [self.objects[t.tile.identifier] for t in bds.tiles.tiles]
 
     @lru_cache(maxsize=None)
-    def table_string(self, table_id, key):
+    def table_string(self, table_id: int, key: int) -> str:
+        """Return the string assocuated with a string ID for a particular table"""
         bds = self.objects[table_id].base_data_store
         strings_id = bds.stringTable.identifier
         for x in self.objects[strings_id].entries:  # pragma: no branch
             if x.key == key:
                 return x.string
+
+    def init_table_strings(self, table_id: int):
+        if table_id not in self._table_strings:
+            bds = self.objects[table_id].base_data_store
+            table_strings_id = bds.stringTable.identifier
+            self._table_strings[table_id] = self.objects[table_strings_id].entries
+        self._table_strings[table_id].clear()
+
+    def table_string_key(self, table_id: int, value: str) -> int:
+        """Return the key associated with a string for a particulat table. If
+        the string is not in the strings table, allocate a new entry with the
+        next available key"""
+        if table_id not in self._table_strings:
+            bds = self.objects[table_id].base_data_store
+            table_strings_id = bds.stringTable.identifier
+            self._table_strings[table_id] = self.objects[table_strings_id].entries
+
+        string_lookup = {x.string: x.key for x in self._table_strings[table_id]}
+        if value not in string_lookup:
+            if len(string_lookup) == 0:
+                key = 1
+            else:
+                key = max(string_lookup.values()) + 1
+            entry = TSTArchives.TableDataList.ListEntry(
+                key=key, string=value, refcount=1
+            )
+            self._table_strings[table_id].append(entry)
+        else:
+            key = string_lookup[value]
+            for entry in self._table_strings[table_id]:
+                if entry.key == key:
+                    entry.refcount += 1
+        return key
 
     @lru_cache(maxsize=None)
     def owner_id_map(self):
@@ -392,6 +436,167 @@ class _NumbersModel:
             return storage_buffers_pre_bnc[row_offset][col_num]
         except IndexError:
             return None
+
+    def recompute_storage(self, table_id: int, data: List):
+        table_model = self.objects[table_id]
+        table_model.number_of_rows = len(data)
+        table_model.number_of_columns = len(data[0])
+        table_model.ClearField("base_column_row_uids")
+
+        self.init_table_strings(table_id)
+
+        base_data_store = self.objects[table_id].base_data_store
+        tile_ids = [t.tile.identifier for t in base_data_store.tiles.tiles]
+        tile = self.objects[tile_ids[0]]
+        tile.maxColumn = 0
+        tile.maxRow = 0
+        tile.numCells = 0
+        tile.numrows = self.number_of_rows(table_id)
+        tile.storage_version = 5
+        tile.last_saved_in_BNC = True
+        tile.should_use_wide_rows = True
+        tile.rowInfos.clear()
+
+        for row_num in range(self.number_of_rows(table_id)):
+            row_info = TSTArchives.TileRowInfo()
+            row_info.storage_version = 5
+            row_info.tile_row_index = row_num
+            row_info.cell_count = 0
+            row_info.cell_storage_buffer_pre_bnc = b""
+            row_info.cell_offsets_pre_bnc = b""
+            row_info.cell_offsets = b""
+            cell_storage = b""
+            cell_storage_pre_bnc = b""
+            # TODO: support wide offsets
+            offsets = [-1] * OFFSETS_WIDTH
+            current_offset = 0
+            current_offset_pre_bnc = 0
+            for col_num in range(len(data[row_num])):
+                buffer = self.cell_storage_v5(
+                    table_id,
+                    data,
+                    row_num,
+                    col_num,
+                )
+
+                if buffer is not None:
+                    cell_storage += buffer
+                    offsets[col_num] = current_offset
+                    current_offset += len(buffer)
+                    row_info.cell_count += 1
+
+                buffer = self.cell_storage_v3(
+                    table_id,
+                    data,
+                    row_num,
+                    col_num,
+                )
+                if buffer is not None:
+                    cell_storage_pre_bnc += buffer
+                    offsets[col_num] = current_offset_pre_bnc
+                    current_offset_pre_bnc += len(buffer)
+                    row_info.cell_count += 1
+
+            row_info.cell_offsets = pack(f"<{OFFSETS_WIDTH}h", *offsets)
+            row_info.cell_offsets_pre_bnc = pack(f"<{OFFSETS_WIDTH}h", *offsets)
+            row_info.cell_storage_buffer = cell_storage
+            row_info.cell_storage_buffer_pre_bnc = cell_storage_pre_bnc
+            tile.rowInfos.append(row_info)
+        return
+
+    def cell_storage_v3(
+        self, table_id: int, data: List, row_num: int, col_num: int
+    ) -> bytearray:
+        cell = data[row_num][col_num]
+        length = 12
+        if isinstance(cell, NumberCell):
+            flags = 0x20
+            length += 8
+            cell_type = TSTArchives.numberCellType
+            value = pack("<d", float(cell.value))
+        elif isinstance(cell, TextCell):
+            flags = 0x10
+            length += 4
+            cell_type = TSTArchives.textCellType
+            value = pack("<i", self.table_string_key(table_id, cell.value))
+        elif isinstance(cell, DateCell):
+            flags = 0x40
+            length += 8
+            cell_type = TSTArchives.dateCellType
+            date_delta = cell.value - EPOCH
+            value = pack("<d", float(date_delta.total_seconds()))
+        elif isinstance(cell, BoolCell):
+            flags = 0x20
+            length += 8
+            cell_type = TSTArchives.boolCellType
+            value = pack("<d", float(cell.value))
+        elif isinstance(cell, DurationCell):
+            flags = 0x20
+            length += 8
+            cell_type = TSTArchives.durationCellType
+            value = value = pack("<d", float(cell.value.total_seconds()))
+        elif isinstance(cell, EmptyCell):
+            return None
+        else:
+            warn(
+                f"{self.name}@[{row_num},{col_num}]: unsupported cell type for save",
+                UnsupportedWarning,
+            )
+            return None
+        storage = bytearray(32)
+        storage[0] = 3
+        storage[2] = cell_type
+        storage[4:8] = pack("<i", flags)
+        storage[12 : 12 + len(value)] = value
+
+        return storage[0:length]
+
+    def cell_storage_v5(
+        self, table_id: int, data: List, row_num: int, col_num: int
+    ) -> bytearray:
+        cell = data[row_num][col_num]
+        length = 12
+        if isinstance(cell, NumberCell):
+            flags = 1
+            length += 16
+            cell_type = TSTArchives.numberCellType
+            value = pack("<d", float(cell.value))
+        elif isinstance(cell, TextCell):
+            flags = 8
+            length += 4
+            cell_type = TSTArchives.textCellType
+            value = pack("<i", self.table_string_key(table_id, cell.value))
+        elif isinstance(cell, DateCell):
+            flags = 4
+            length += 8
+            cell_type = TSTArchives.dateCellType
+            date_delta = cell.value - EPOCH
+            value = pack("<d", float(date_delta.total_seconds()))
+        elif isinstance(cell, BoolCell):
+            flags = 2
+            length += 8
+            cell_type = TSTArchives.boolCellType
+            value = pack("<d", float(cell.value))
+        elif isinstance(cell, DurationCell):
+            flags = 1
+            length += 16
+            cell_type = TSTArchives.durationCellType
+            value = value = pack("<d", float(cell.value.total_seconds()))
+        elif isinstance(cell, EmptyCell):
+            return None
+        else:
+            warn(
+                f"{self.name}@[{row_num},{col_num}]: unsupported cell type for save",
+                UnsupportedWarning,
+            )
+            return None
+        storage = bytearray(32)
+        storage[0] = 5
+        storage[1] = cell_type
+        storage[8:12] = pack("<i", flags)
+        storage[12 : 12 + len(value)] = value
+
+        return storage[0:length]
 
     @lru_cache(maxsize=None)
     def table_formulas(self, table_id: int):
