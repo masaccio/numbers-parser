@@ -1,6 +1,0 @@
-protobuf
-pytest
-pytest-console-scripts
-pytest-check
-python-snappy
-roman

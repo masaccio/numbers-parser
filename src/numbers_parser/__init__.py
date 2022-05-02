@@ -37,9 +37,11 @@ _SUPPORTED_NUMBERS_VERSIONS = [
 ]
 
 # Don't print the source line
-formatwarning_old = warnings.formatwarning
-warnings.formatwarning = lambda message, category, filename, lineno, line=None: formatwarning_old(  # pragma: no cover
-    message, category, filename, lineno, line=""
+old_warn_f = warnings.formatwarning
+warnings.formatwarning = (
+    lambda msg, catg, fname, lineno, line=None: old_warn_f(  # pragma: no cover
+        msg, catg, fname, lineno, line=""
+    )
 )
 
 

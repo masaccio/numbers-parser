@@ -7,8 +7,10 @@ from functools import partial
 from numbers_parser.mapping import ID_NAME_MAP
 from numbers_parser.exceptions import NotImplementedError
 
+from google.protobuf.internal.encoder import _VarintBytes
 from google.protobuf.internal.decoder import _DecodeVarint32
 from google.protobuf.json_format import MessageToDict
+from google.protobuf.message import EncodeError
 
 from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
 
@@ -41,6 +43,9 @@ class IWAFile(object):
                 raise ValueError("Failed to serialize " + self.filename) from e
             else:
                 raise
+
+    def to_buffer(self):
+        return b"".join([chunk.to_buffer() for chunk in self.chunks])
 
 
 class IWACompressedChunk(object):
@@ -89,6 +94,19 @@ class IWACompressedChunk(object):
     def to_dict(self):
         return {"archives": [archive.to_dict() for archive in self.archives]}
 
+    def to_buffer(self):
+        uncompressed = b"".join([archive.to_buffer() for archive in self.archives])
+        payloads = []
+        while uncompressed:
+            payloads.append(snappy.compress(uncompressed[:65536]))
+            uncompressed = uncompressed[65536:]
+        return b"".join(
+            [
+                b"\x00" + struct.pack("<I", len(payload))[:3] + payload
+                for payload in payloads
+            ]
+        )
+
 
 class ProtobufPatch(object):
     def __init__(self, data):
@@ -110,6 +128,9 @@ class ProtobufPatch(object):
         # patching of Protobufs. Specifically deserializing when
         # len(diff_field_path) > 1 or when fields_to_remove is present.
         return cls(proto_klass.FromString(data))
+
+    def SerializeToString(self):
+        return self.data.SerializePartialToString()
 
 
 class IWAArchiveSegment(object):
@@ -179,6 +200,25 @@ class IWAArchiveSegment(object):
             "header": header_to_dict(self.header),
             "objects": [message_to_dict(message) for message in self.objects],
         }
+
+    def to_buffer(self):
+        # Each message_info as part of the header needs to be updated
+        # so that its length matches the object contained within.
+        for obj, message_info in zip(self.objects, self.header.message_infos):
+            try:
+                object_length = len(obj.SerializeToString())
+                provided_length = message_info.length
+                if object_length != provided_length:
+                    message_info.length = object_length
+            except EncodeError as e:
+                raise ValueError(
+                    "Failed to encode object: %s\nObject: '%s'\nMessage info: %s"
+                    % (e, repr(obj), message_info)
+                )
+        return b"".join(
+            [_VarintBytes(self.header.ByteSize()), self.header.SerializeToString()]
+            + [obj.SerializeToString() for obj in self.objects]
+        )
 
 
 def message_to_dict(message):

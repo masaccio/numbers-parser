@@ -37,7 +37,12 @@ class Cell:
         elif cell_value.type == TSTArchives.boolCellType:
             cell = BoolCell(row_num, col_num, cell_value.value)
         elif cell_value.type == TSTArchives.durationCellType:
-            cell = DurationCell(row_num, col_num, timedelta(seconds=cell_value.value))
+            if cell_value.value is None:
+                cell = DurationCell(row_num, col_num, timedelta(seconds=0))
+            else:
+                cell = DurationCell(
+                    row_num, col_num, timedelta(seconds=cell_value.value)
+                )
         elif cell_value.type == TSTArchives.formulaErrorCellType:
             cell = ErrorCell(row_num, col_num, None)
         elif cell_value.type == TSTArchives.automaticCellType:
@@ -249,7 +254,7 @@ def xl_cell_to_rowcol(cell_str: str) -> tuple:
     expn = 0
     col = 0
     for char in reversed(col_str):
-        col += (ord(char) - ord("A") + 1) * (26 ** expn)
+        col += (ord(char) - ord("A") + 1) * (26**expn)
         expn += 1
 
     # Convert 1-index to zero-index

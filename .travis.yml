@@ -9,7 +9,9 @@ python:
 before_install:
   - sudo apt-get -y install libsnappy-dev
 install:
-  - pip install -U -r requirements.txt
+  - pip install -U pytest pytest-console-scripts pytest-check
   - python3 setup.py install
+  - pip uninstall -y protobuf
+  - pip install protobuf
 script:
   - PYTHONPATH=src python3 -m pytest tests

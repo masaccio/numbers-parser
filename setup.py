@@ -1,9 +1,7 @@
 from setuptools import setup, find_packages
-from distutils.util import convert_path
 
 main_ns = {}
-ver_path = convert_path("src/numbers_parser/_version.py")
-with open(ver_path) as ver_file:
+with open("src/numbers_parser/_version.py") as ver_file:
     exec(ver_file.read(), main_ns)
 
 setup(

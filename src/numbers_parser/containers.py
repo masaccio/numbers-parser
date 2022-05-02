@@ -1,4 +1,4 @@
-from numbers_parser.unpack import read_numbers_file
+from numbers_parser.file import read_numbers_file
 
 
 class ItemsList:
@@ -27,14 +27,22 @@ class ItemsList:
 class ObjectStore:
     def __init__(self, path: str) -> int:
         self._objects = {}
+        self._file_store = {}
         read_numbers_file(
             path,
-            handler=lambda identifier, obj: self._store_object(identifier, obj),
-            store_objects=True,
+            file_handler=lambda filename, blob: self._store_file(filename, blob),
+            object_handler=lambda identifier, obj: self._store_object(identifier, obj),
         )
 
     def _store_object(self, identifier, obj):
         self._objects[identifier] = obj
+
+    def _store_file(self, filename, blob):
+        self._file_store[filename] = blob
+
+    @property
+    def file_store(self):
+        return self._file_store
 
     def __getitem__(self, key: str):
         return self._objects[key]

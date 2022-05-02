@@ -1,16 +1,33 @@
 from array import array
 from datetime import datetime, timedelta
 from functools import lru_cache
-from roman import toRoman
-from struct import unpack
+from struct import pack, unpack
 from typing import Dict, List
+from warnings import warn
 
 from numbers_parser.containers import ObjectStore
-from numbers_parser.cell import xl_rowcol_to_cell, xl_col_to_name
-from numbers_parser.exceptions import UnsupportedError
+from numbers_parser.cell import (
+    xl_rowcol_to_cell,
+    xl_col_to_name,
+    BoolCell,
+    DateCell,
+    DurationCell,
+    EmptyCell,
+    NumberCell,
+    TextCell,
+)
+from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
 from numbers_parser.formula import TableFormulas
+
+from numbers_parser.bullets import (
+    BULLET_PREFIXES,
+    BULLET_CONVERTION,
+    BULLET_SUFFIXES,
+)
+
+EPOCH = datetime(2001, 1, 1)
+OFFSETS_WIDTH = 256
 
 
 class CellValue:
@@ -20,11 +37,16 @@ class CellValue:
         self.rich = None
         self.text = None
         self.ieee = None
-        self.date = None
+        self.date = EPOCH
         self.bullets = None
 
+    def __repr__(self):  # pragma: no cover
+        fields = filter(lambda x: not x.startswith("_"), dir(self))
+        values = map(lambda x: x + "=" + str(getattr(self, x)), fields)
+        return ", ".join(values)
 
-class NumbersModel:
+
+class _NumbersModel:
     """
     Loads all objects from Numbers document and provides decoding
     methods for other classes in the module to abstract away the
@@ -35,12 +57,11 @@ class NumbersModel:
 
     def __init__(self, filename):
         self.objects = ObjectStore(filename)
-        self._row_headers = {}
-        self._row_columns = {}
         self._table_strings = {}
-        self._table_tiles = {}
-        self._tables_in_sheet = {}
-        self._table_base_ids = {}
+
+    @property
+    def file_store(self):
+        return self.objects.file_store
 
     def find_refs(self, ref: str) -> list:
         return self.objects.find_refs(ref)
@@ -48,8 +69,11 @@ class NumbersModel:
     def sheet_ids(self):
         return [o.identifier for o in self.objects[1].sheets]
 
-    def sheet_name(self, sheet_id):
-        return self.objects[sheet_id].name
+    def sheet_name(self, sheet_id, value=None):
+        if value is None:
+            return self.objects[sheet_id].name
+        else:
+            self.objects[sheet_id].name = value
 
     @lru_cache(maxsize=None)
     def table_ids(self, sheet_id):
@@ -80,14 +104,21 @@ class NumbersModel:
             row_bucket_map[bucket.index] = i
         return row_bucket_map
 
-    def number_of_rows(self, table_id):
+    def number_of_rows(self, table_id, num_rows=None):
+        if num_rows is not None:
+            self.objects[table_id].number_of_rows = num_rows
         return self.objects[table_id].number_of_rows
 
-    def number_of_columns(self, table_id):
+    def number_of_columns(self, table_id, num_cols=None):
+        if num_cols is not None:
+            self.objects[table_id].number_of_columns = num_cols
         return self.objects[table_id].number_of_columns
 
-    def table_name(self, table_id):
-        return self.objects[table_id].table_name
+    def table_name(self, table_id, value=None):
+        if value is None:
+            return self.objects[table_id].table_name
+        else:
+            self.objects[table_id].table_name = value
 
     @lru_cache(maxsize=None)
     def table_tiles(self, table_id):
@@ -95,12 +126,47 @@ class NumbersModel:
         return [self.objects[t.tile.identifier] for t in bds.tiles.tiles]
 
     @lru_cache(maxsize=None)
-    def table_string(self, table_id, key):
+    def table_string(self, table_id: int, key: int) -> str:
+        """Return the string assocuated with a string ID for a particular table"""
         bds = self.objects[table_id].base_data_store
         strings_id = bds.stringTable.identifier
         for x in self.objects[strings_id].entries:  # pragma: no branch
             if x.key == key:
                 return x.string
+
+    def init_table_strings(self, table_id: int):
+        """Cache table strings reference and delete all existing keys/values"""
+        if table_id not in self._table_strings:
+            bds = self.objects[table_id].base_data_store
+            table_strings_id = bds.stringTable.identifier
+            self._table_strings[table_id] = self.objects[table_strings_id].entries
+        clear_field_container(self._table_strings[table_id])
+
+    def table_string_key(self, table_id: int, value: str) -> int:
+        """Return the key associated with a string for a particulat table. If
+        the string is not in the strings table, allocate a new entry with the
+        next available key"""
+        if table_id not in self._table_strings:
+            bds = self.objects[table_id].base_data_store
+            table_strings_id = bds.stringTable.identifier
+            self._table_strings[table_id] = self.objects[table_strings_id].entries
+
+        string_lookup = {x.string: x.key for x in self._table_strings[table_id]}
+        if value not in string_lookup:
+            if len(string_lookup) == 0:
+                key = 1
+            else:
+                key = max(string_lookup.values()) + 1
+            entry = TSTArchives.TableDataList.ListEntry(
+                key=key, string=value, refcount=1
+            )
+            self._table_strings[table_id].append(entry)
+        else:
+            key = string_lookup[value]
+            for entry in self._table_strings[table_id]:
+                if entry.key == key:
+                    entry.refcount += 1
+        return key
 
     @lru_cache(maxsize=None)
     def owner_id_map(self):
@@ -208,6 +274,7 @@ class NumbersModel:
 
     @lru_cache(maxsize=None)
     def calc_engine(self):
+        """Return the CalculationEngine object for the current document"""
         ce_id = self.find_refs("CalculationEngineArchive")
         if len(ce_id) == 0:
             return None
@@ -353,6 +420,232 @@ class NumbersModel:
         except IndexError:
             return None
 
+    def recalculate_row_headers(self, table_id: int, data: List):
+        base_data_store = self.objects[table_id].base_data_store
+        buckets = self.objects[base_data_store.rowHeaders.buckets[0].identifier]
+        clear_field_container(buckets.headers)
+        for row_num in range(len(data)):
+            header = TSTArchives.HeaderStorageBucket.Header(
+                index=row_num, numberOfCells=len(data[row_num]), size=0.0, hidingState=0
+            )
+            buckets.headers.append(header)
+
+    def init_table_tile(self, table_id: int, data: List) -> TSTArchives.Tile:
+        base_data_store = self.objects[table_id].base_data_store
+        tile_ids = [t.tile.identifier for t in base_data_store.tiles.tiles]
+        tile = self.objects[tile_ids[0]]
+        tile.maxColumn = 0
+        tile.maxRow = 0
+        tile.numCells = 0
+        tile.numrows = len(data)
+        tile.storage_version = 5
+        tile.last_saved_in_BNC = True
+        tile.should_use_wide_rows = True
+        clear_field_container(tile.rowInfos)
+        return tile
+
+    def recalculate_row_info(
+        self, table_id: int, data: List, row_num: int
+    ) -> TSTArchives.TileRowInfo:
+        row_info = TSTArchives.TileRowInfo()
+        row_info.storage_version = 5
+        row_info.tile_row_index = row_num
+        row_info.cell_count = 0
+        cell_storage = b""
+        cell_storage_pre_bnc = b""
+        # TODO: support wide offsets
+        offsets = [-1] * OFFSETS_WIDTH
+        offsets_pre_bnc = [-1] * OFFSETS_WIDTH
+        current_offset = 0
+        current_offset_pre_bnc = 0
+        for col_num in range(len(data[row_num])):
+            buffer = self.cell_storage_v5(table_id, data, row_num, col_num)
+            buffer_pre_bnc = self.cell_storage_v3(table_id, data, row_num, col_num)
+
+            if buffer is not None:
+                cell_storage += buffer
+                offsets[col_num] = current_offset
+                current_offset += len(buffer)
+
+                cell_storage_pre_bnc += buffer_pre_bnc
+                offsets_pre_bnc[col_num] = current_offset_pre_bnc
+                current_offset_pre_bnc += len(buffer_pre_bnc)
+                row_info.cell_count += 1
+
+        row_info.cell_offsets = pack(f"<{OFFSETS_WIDTH}h", *offsets)
+        row_info.cell_offsets_pre_bnc = pack(f"<{OFFSETS_WIDTH}h", *offsets_pre_bnc)
+        row_info.cell_storage_buffer = cell_storage
+        row_info.cell_storage_buffer_pre_bnc = cell_storage_pre_bnc
+        return row_info
+
+    def recalculate_table_data(self, table_id: int, data: List):
+        table_model = self.objects[table_id]
+        table_model.number_of_rows = len(data)
+        table_model.number_of_columns = len(data[0])
+        table_model.ClearField("base_column_row_uids")
+
+        self.init_table_strings(table_id)
+        self.recalculate_row_headers(table_id, data)
+        tile = self.init_table_tile(table_id, data)
+
+        for row_num in range(len(data)):
+            row_info = self.recalculate_row_info(table_id, data, row_num)
+            tile.rowInfos.append(row_info)
+        return
+
+    def cell_storage_v3(
+        self, table_id: int, data: List, row_num: int, col_num: int
+    ) -> bytearray:
+        """Create a storage buffer for a cell using v3 layout"""
+        cell = data[row_num][col_num]
+        length = 12
+        if isinstance(cell, NumberCell):
+            flags = 0x20
+            length += 8
+            cell_type = TSTArchives.numberCellType
+            value = pack("<d", float(cell.value))
+        elif isinstance(cell, TextCell):
+            flags = 0x10
+            length += 4
+            cell_type = TSTArchives.textCellType
+            value = pack("<i", self.table_string_key(table_id, cell.value))
+        elif isinstance(cell, DateCell):
+            flags = 0x40
+            length += 8
+            cell_type = TSTArchives.dateCellType
+            date_delta = cell.value - EPOCH
+            value = pack("<d", float(date_delta.total_seconds()))
+        elif isinstance(cell, BoolCell):
+            flags = 0x20
+            length += 8
+            cell_type = TSTArchives.boolCellType
+            value = pack("<d", float(cell.value))
+        elif isinstance(cell, DurationCell):
+            flags = 0x20
+            length += 8
+            cell_type = TSTArchives.durationCellType
+            value = value = pack("<d", float(cell.value.total_seconds()))
+        elif isinstance(cell, EmptyCell):
+            return None
+        else:
+            data_type = type(cell).__name__
+            table_name = self.table_name(table_id)
+            warn(
+                f"@{table_name}:[{row_num},{col_num}]: unsupported data type {data_type} for save",
+                UnsupportedWarning,
+            )
+            return None
+
+        storage = bytearray(32)
+        storage[0] = 3
+        storage[2] = cell_type
+        storage[4:8] = pack("<i", flags)
+        storage[12 : 12 + len(value)] = value
+
+        return storage[0:length]
+
+    def cell_storage_v5(
+        self, table_id: int, data: List, row_num: int, col_num: int
+    ) -> bytearray:
+        """Create a storage buffer for a cell using v5 (modern) layout"""
+        cell = data[row_num][col_num]
+        length = 12
+        if isinstance(cell, NumberCell):
+            flags = 1
+            length += 16
+            cell_type = TSTArchives.numberCellType
+            value = pack("<d", float(cell.value))
+        elif isinstance(cell, TextCell):
+            flags = 8
+            length += 4
+            cell_type = TSTArchives.textCellType
+            value = pack("<i", self.table_string_key(table_id, cell.value))
+        elif isinstance(cell, DateCell):
+            flags = 4
+            length += 8
+            cell_type = TSTArchives.dateCellType
+            date_delta = cell.value - EPOCH
+            value = pack("<d", float(date_delta.total_seconds()))
+        elif isinstance(cell, BoolCell):
+            flags = 2
+            length += 8
+            cell_type = TSTArchives.boolCellType
+            value = pack("<d", float(cell.value))
+        elif isinstance(cell, DurationCell):
+            flags = 1
+            length += 16
+            cell_type = TSTArchives.durationCellType
+            value = value = pack("<d", float(cell.value.total_seconds()))
+        elif isinstance(cell, EmptyCell):
+            return None
+        else:
+            data_type = type(cell).__name__
+            table_name = self.table_name(table_id)
+            warn(
+                f"@{table_name}:[{row_num},{col_num}]: unsupported data type {data_type} for save",
+                UnsupportedWarning,
+            )
+            return None
+
+        storage = bytearray(32)
+        storage[0] = 5
+        storage[1] = cell_type
+        storage[8:12] = pack("<i", flags)
+        storage[12 : 12 + len(value)] = value
+
+        return storage[0:length]
+
+    def decode_cell_storage_v3(self, buffer: bytes) -> CellValue:
+        version = buffer[0]
+        flags = unpack("<i", buffer[4:8])[0]
+        cell_type = buffer[2]
+        cell_value = CellValue(cell_type)
+        if version > 1:
+            offset = 12 + bin(flags & 0x0D8E).count("1") * 4
+        else:
+            offset = 8 + bin(flags & 0x018E).count("1") * 4
+
+        if flags & 0x0200:
+            cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if version > 1:
+            offset += (bin(flags).count("1") & 0x3000) * 4
+        else:
+            offset += (bin(flags).count("1") & 0x1000) * 4
+        if flags & 0x0010:
+            cell_value.text = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x0020:
+            cell_value.ieee = unpack("<d", buffer[offset : offset + 8])[0]
+            offset += 8
+        if flags & 0x0040:
+            seconds = unpack("<d", buffer[offset : offset + 8])[0]
+            cell_value.date = EPOCH + timedelta(seconds=seconds)
+            offset += 8
+        return cell_value
+
+    def decode_cell_storage_v5(self, cell_type: int, buffer: bytes) -> CellValue:
+        flags = unpack("<i", buffer[4:8])[0]
+        cell_value = CellValue(cell_type)
+
+        flags = unpack("<i", buffer[4:8])[0]
+        offset = 12 + bin(flags & 0x0D8E).count("1") * 4
+        if flags & 0x200:
+            cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        offset += bin(flags & 0x3000).count("1") * 4
+        if flags & 0x010:
+            cell_value.text = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x020:
+            cell_value.ieee = unpack("<d", buffer[offset : offset + 8])[0]
+            offset += 8
+        if flags & 0x040 > 0:
+            seconds = unpack("<d", buffer[offset : offset + 8])[0]
+            cell_value.date = EPOCH + timedelta(seconds=seconds)
+
+        return cell_value
+
     @lru_cache(maxsize=None)
     def table_formulas(self, table_id: int):
         return TableFormulas(self, table_id)
@@ -366,28 +659,23 @@ class NumbersModel:
             return None
 
         cell_type = storage_buffer[1]
+        cell_value = CellValue(cell_type)
         if storage_buffer_pre_bnc is not None:
-            cell_value = storage_buffer_value(storage_buffer_pre_bnc, cell_type)
-        else:
-            cell_value = CellValue(cell_type)
+            buffer = storage_buffer_pre_bnc
+            if buffer[0] <= 3:
+                cell_value = self.decode_cell_storage_v3(buffer)
+            else:
+                cell_value = self.decode_cell_storage_v5(cell_type, buffer)
 
         if cell_value.type == TSTArchives.numberCellType or cell_value.type == 10:
-            if storage_buffer_pre_bnc is None:
-                cell_value.value = 0.0
-            else:
-                cell_value.value = cell_value.ieee
+            cell_value.value = cell_value.ieee
             cell_value.type = TSTArchives.numberCellType
         elif cell_value.type == TSTArchives.textCellType:
             if cell_value.text is None:
                 cell_value.text = unpack("<i", storage_buffer[12:16])[0]
             cell_value.value = self.table_string(table_id, cell_value.text)
         elif cell_value.type == TSTArchives.dateCellType:
-            if storage_buffer_pre_bnc is None:
-                cell_value.value = datetime(2001, 1, 1)
-            else:
-                cell_value.value = datetime(2001, 1, 1) + timedelta(
-                    seconds=cell_value.date
-                )
+            cell_value.value = cell_value.date
         elif cell_value.type == TSTArchives.boolCellType:
             cell_value.value = cell_value.ieee > 0.0
         elif cell_value.type == TSTArchives.durationCellType:
@@ -485,46 +773,18 @@ class NumbersModel:
 
         buffer = self.storage_buffer_pre_bnc(table_id, row_num, col_num)
         flags = unpack("<i", buffer[4:8])[0]
-        data_offset = 8 + bin(flags & 0x0D8E).count("1") * 4
-        formula_key = unpack("<h", buffer[data_offset : data_offset + 2])[0]
+        offset = 8 + bin(flags & 0x0D8E).count("1") * 4
+        formula_key = unpack("<h", buffer[offset : offset + 2])[0]
 
         return formula_key
 
 
 def formatted_number(number_type, index):
     """Returns the numbered index bullet formatted for different types"""
-    if number_type == TSWPArchives.ListStyleArchive.kNumericDecimal:
-        bullet_char = str(index + 1) + "."
-    elif number_type == TSWPArchives.ListStyleArchive.kNumericDoubleParen:
-        bullet_char = "(" + str(index + 1) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kNumericRightParen:
-        bullet_char = str(index + 1) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanUpperDecimal:
-        bullet_char = toRoman(index + 1) + "."
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanUpperDoubleParen:
-        bullet_char = "(" + toRoman(index + 1) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanUpperRightParen:
-        bullet_char = toRoman(index + 1) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanLowerDecimal:
-        bullet_char = toRoman(index + 1).lower() + "."
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanLowerDoubleParen:
-        bullet_char = "(" + toRoman(index + 1).lower() + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kRomanLowerRightParen:
-        bullet_char = toRoman(index + 1).lower() + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaUpperDecimal:
-        bullet_char = chr(index + 65) + "."
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaUpperDoubleParen:
-        bullet_char = "(" + chr(index + 65) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaUpperRightParen:
-        bullet_char = chr(index + 65) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaLowerDecimal:
-        bullet_char = chr(index + 97) + "."
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaLowerDoubleParen:
-        bullet_char = "(" + chr(index + 97) + ")"
-    elif number_type == TSWPArchives.ListStyleArchive.kAlphaLowerRightParen:
-        bullet_char = chr(index + 97) + ")"
-    else:
-        bullet_char = ""
+    bullet_char = BULLET_PREFIXES[number_type]
+    bullet_char += BULLET_CONVERTION[number_type](index)
+    bullet_char += BULLET_SUFFIXES[number_type]
+
     return bullet_char
 
 
@@ -594,27 +854,6 @@ def uuid(ref: dict) -> int:
     return uuid
 
 
-def storage_buffer_value(buffer, cell_type):
-    """Decode data values from a storage buffer based on the type of data represented"""
-    cell_value = CellValue(cell_type)
-    flags = unpack("<i", buffer[4:8])[0]
-    data_offset = 12 + bin(flags & 0x0D8E).count("1") * 4
-    if (flags & 0x200) > 0:
-        cell_value.rich = unpack("<i", buffer[data_offset : data_offset + 4])[0]
-        data_offset = data_offset + 4
-    data_offset = data_offset + bin(flags & 0x3000).count("1") * 4
-    if (flags & 0x010) > 0:
-        cell_value.text = unpack("<i", buffer[data_offset : data_offset + 4])[0]
-        data_offset = data_offset + 4
-    if (flags & 0x020) > 0:
-        cell_value.ieee = unpack("<d", buffer[data_offset : data_offset + 8])[0]
-        data_offset = data_offset + 8
-    if (flags & 0x040) > 0:
-        cell_value.date = unpack("<d", buffer[data_offset : data_offset + 8])[0]
-        data_offset = data_offset + 8
-    return cell_value
-
-
 def get_storage_buffers_for_row(
     storage_buffer: bytes, offsets: list, num_cols: int, has_wide_offsets: bool
 ) -> List[bytes]:
@@ -659,3 +898,13 @@ def get_storage_buffers_for_row(
         data.append(storage_buffer[start:end])
 
     return data
+
+
+def clear_field_container(obj):
+    """Remove all entries from a protobuf RepeatedCompositeFieldContainer
+    in a portable fashion"""
+    if hasattr(obj, "clear"):
+        obj.clear()
+    else:
+        while len(obj) > 0:
+            _ = obj.pop()

@@ -111,7 +111,7 @@ In addition to extracting all table data at once, individual cells can be referr
 Merged cells
 ------------
 
-When extracting data using :py:meth:`Table.rows()` merged cells can be identified as :py:class:`MergedCell` objects which also return ``None`` when extracted as values or using the :py:property:`MergedCell.value`. When cells are merged, the cell in the top-left of the merge range is the cell chosen to contain the merged cell's data. These cells can be identified by the :py:property:`Cell.is_merged` property and have additional properties describing the extent of the merge range:
+When extracting data using :py:meth:`Table.rows()` merged cells can be identified as :py:class:`MergedCell` objects which also return ``None`` when extracted as values or using the :attr:`.MergedCell.value`. When cells are merged, the cell in the top-left of the merge range is the cell chosen to contain the merged cell's data. These cells can be identified by the :attr:`.Cell.is_merged` property and have additional properties describing the extent of the merge range:
 
 .. code-block:: python
 
