@@ -140,9 +140,7 @@ class _NumbersModel:
             bds = self.objects[table_id].base_data_store
             table_strings_id = bds.stringTable.identifier
             self._table_strings[table_id] = self.objects[table_strings_id].entries
-        print("IN init_table_strings()")
-        print(dir(self._table_strings[table_id]))
-        self._table_strings[table_id].clear()
+        clear_field_container(self._table_strings[table_id])
 
     def table_string_key(self, table_id: int, value: str) -> int:
         """Return the key associated with a string for a particulat table. If
@@ -900,3 +898,13 @@ def get_storage_buffers_for_row(
         data.append(storage_buffer[start:end])
 
     return data
+
+
+def clear_field_container(obj):
+    """Remove all entries from a protobuf RepeatedCompositeFieldContainer
+    in a portable fashion"""
+    if hasattr(obj, "clear"):
+        obj.clear()
+    else:
+        while len(obj) > 0:
+            _ = obj.pop()
