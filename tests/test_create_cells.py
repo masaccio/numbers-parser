@@ -26,8 +26,7 @@ def test_edit_cell_values():
     assert isinstance(table.cell(4, 4), EmptyCell)
 
     temp_dir = TemporaryDirectory()
-    # new_filename = os.path.join(temp_dir.name, "test-save-1-new.numbers")
-    new_filename = "/Users/jon/Downloads/test-save-1-new.numbers"
+    new_filename = os.path.join(temp_dir.name, "test-save-1-new.numbers")
     doc.save(new_filename)
 
     doc = Document(new_filename)
