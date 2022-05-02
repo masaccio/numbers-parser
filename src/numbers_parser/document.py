@@ -34,7 +34,7 @@ class Document:
     def save(self, filename):
         for sheet in self.sheets():
             for table in sheet.tables():
-                self._model.recompute_storage(table._table_id, table._data)
+                self._model.recalculate_table_data(table._table_id, table._data)
         write_numbers_file(filename, self._model.file_store)
 
 
@@ -252,8 +252,10 @@ class Table:
         ]
         self._data.append(row)
         self.num_rows += 1
+        self._model.number_of_rows(self._table_id, self.num_rows)
 
     def add_column(self):
         for row_num in range(self.num_rows):
             self._data[row_num].append(EmptyCell(row_num, self.num_cols - 1, None))
         self.num_cols += 1
+        self._model.number_of_columns(self._table_id, self.num_cols)
