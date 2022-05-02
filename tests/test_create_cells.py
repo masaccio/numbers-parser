@@ -9,7 +9,7 @@ from numbers_parser.cell import EmptyCell
 
 
 @pytest.mark.experimental
-def test_edit_strings():
+def test_edit_cell_values():
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets()
     tables = sheets[0].tables()
