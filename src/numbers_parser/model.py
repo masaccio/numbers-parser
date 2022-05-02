@@ -423,7 +423,7 @@ class _NumbersModel:
     def recalculate_row_headers(self, table_id: int, data: List):
         base_data_store = self.objects[table_id].base_data_store
         buckets = self.objects[base_data_store.rowHeaders.buckets[0].identifier]
-        buckets.headers.clear()
+        clear_field_container(buckets.headers)
         for row_num in range(len(data)):
             header = TSTArchives.HeaderStorageBucket.Header(
                 index=row_num, numberOfCells=len(data[row_num]), size=0.0, hidingState=0
@@ -441,7 +441,7 @@ class _NumbersModel:
         tile.storage_version = 5
         tile.last_saved_in_BNC = True
         tile.should_use_wide_rows = True
-        tile.rowInfos.clear()
+        clear_field_container(tile.rowInfos)
         return tile
 
     def recalculate_row_info(
