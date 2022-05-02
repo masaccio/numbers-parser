@@ -140,6 +140,8 @@ class _NumbersModel:
             bds = self.objects[table_id].base_data_store
             table_strings_id = bds.stringTable.identifier
             self._table_strings[table_id] = self.objects[table_strings_id].entries
+        print("IN init_table_strings()")
+        print(dir(self._table_strings[table_id]))
         self._table_strings[table_id].clear()
 
     def table_string_key(self, table_id: int, value: str) -> int:
