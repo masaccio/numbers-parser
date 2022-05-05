@@ -26,7 +26,7 @@ def test_save_document():
     assert cell_values == new_cell_values
 
 
-@pytest.mark.experimental
+# @pytest.mark.experimental
 def test_save_merges():
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets()
@@ -42,7 +42,7 @@ def test_save_merges():
     temp_dir = TemporaryDirectory()
     new_filename = os.path.join(temp_dir.name, "test-1-new.numbers")
     doc.save(new_filename)
-    doc.save("/Users/jon/Downloads/saved.numbers")
+    # doc.save("/Users/jon/Downloads/saved.numbers")
 
     doc = Document(new_filename)
     sheets = doc.sheets()

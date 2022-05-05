@@ -28,6 +28,7 @@ def test_edit_cell_values():
     temp_dir = TemporaryDirectory()
     new_filename = os.path.join(temp_dir.name, "test-save-1-new.numbers")
     doc.save(new_filename)
+    doc.save("/Users/jon/Downloads/saved.numbers")
 
     doc = Document(new_filename)
     sheets = doc.sheets()
