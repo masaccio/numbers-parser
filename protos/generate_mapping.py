@@ -74,12 +74,14 @@ def compute_maps():
             add_nested_types(message_type)
 
     id_name_map = {}
+    name_id_map = {}
     for k, v in list(TSPRegistryMapping.items()):
         if v in name_class_map:
             id_name_map[int(k)] = name_class_map[v]
+            name_id_map[v] = int(k)
 
-    return name_class_map, id_name_map
+    return name_class_map, id_name_map, name_id_map
 
 
-NAME_CLASS_MAP, ID_NAME_MAP = compute_maps()"""
+NAME_CLASS_MAP, ID_NAME_MAP, NAME_ID_MAP = compute_maps()"""
 )
