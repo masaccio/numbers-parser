@@ -4,15 +4,14 @@ import struct
 import snappy
 from functools import partial
 
-from numbers_parser.mapping import ID_NAME_MAP
+from numbers_parser.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_ID_MAP
 from numbers_parser.exceptions import NotImplementedError
+from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
 
 from google.protobuf.internal.encoder import _VarintBytes
 from google.protobuf.internal.decoder import _DecodeVarint32
-from google.protobuf.json_format import MessageToDict
+from google.protobuf.json_format import MessageToDict, ParseDict
 from google.protobuf.message import EncodeError
-
-from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
 
 
 class IWAFile(object):
@@ -34,6 +33,10 @@ class IWAFile(object):
                 raise ValueError("Failed to deserialize " + filename) from e
             else:
                 raise
+
+    @classmethod
+    def from_dict(cls, _dict):
+        return cls([IWACompressedChunk.from_dict(chunk) for chunk in _dict["chunks"]])
 
     def to_dict(self):
         try:
@@ -90,6 +93,10 @@ class IWACompressedChunk(object):
             archive, data = IWAArchiveSegment.from_buffer(data, filename)
             archives.append(archive)
         return cls(archives), None
+
+    @classmethod
+    def from_dict(cls, _dict):
+        return cls([IWAArchiveSegment.from_dict(d) for d in _dict["archives"]])
 
     def to_dict(self):
         return {"archives": [archive.to_dict() for archive in self.archives]}
@@ -195,6 +202,21 @@ class IWAArchiveSegment(object):
 
         return cls(archive_info, payloads), payload[n:]
 
+    @classmethod
+    def from_dict(cls, _dict):
+        header = dict_to_header(_dict["header"])
+        objects = []
+        for message_info, o in zip(header.message_infos, _dict["objects"]):
+            if message_info.diff_field_path and "_pbtype" not in o:
+                base_message_info = header.message_infos[
+                    message_info.base_message_index
+                ]
+                message_class = ID_NAME_MAP[base_message_info.type]
+                objects.append(ProtobufPatch(message_class, o))
+            else:
+                objects.append(dict_to_message(o))
+        return cls(header, objects)
+
     def to_dict(self):
         return {
             "header": header_to_dict(self.header),
@@ -236,9 +258,41 @@ def header_to_dict(message):
     return output
 
 
+def dict_to_message(_dict):
+    _type = _dict["_pbtype"]
+    del _dict["_pbtype"]
+    return ParseDict(_dict, NAME_CLASS_MAP[_type](), ignore_unknown_fields=True)
+
+
+def dict_to_header(_dict):
+    for message_info in _dict["messageInfos"]:
+        # set a dummy length value that we'll overwrite later
+        message_info["length"] = 0
+    return dict_to_message(_dict)
+
+
 def get_archive_info_and_remainder(buf):
     msg_len, new_pos = _DecodeVarint32(buf, 0)
     n = new_pos
     msg_buf = buf[n : n + msg_len]
     n += msg_len
     return ArchiveInfo.FromString(msg_buf), buf[n:]
+
+
+def create_iwa_segment(id: int, cls: object, object_dict: dict) -> object:
+    type_full_name = cls.__module__[0:3] + "." + cls.__name__
+    header = {
+        "_pbtype": "TSP.ArchiveInfo",
+        "identifier": str(id),
+        "messageInfos": [
+            {
+                "type": NAME_ID_MAP[type_full_name],
+                "version": [1, 0, 5],
+            }
+        ],
+    }
+    object_dict["_pbtype"] = type_full_name
+    archive_dict = {"header": header, "objects": [object_dict]}
+
+    iwa_segment = IWAArchiveSegment.from_dict(archive_dict)
+    return iwa_segment

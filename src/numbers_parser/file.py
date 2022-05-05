@@ -72,7 +72,7 @@ def _get_objects_from_zip_stream(zipf, file_handler, object_handler):
 
 
 def _extract_iwa_archives(blob, filename, file_handler, object_handler):
-    # TODO: LZFSE compressed according to /usr/bin/file
+    # LZFSE compressed according to /usr/bin/file
     if "OperationStorage" in filename:
         return
 
