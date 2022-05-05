@@ -13,12 +13,15 @@ from numbers_parser.cell import (
     DateCell,
     DurationCell,
     EmptyCell,
+    MergedCell,
     NumberCell,
     TextCell,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.formula import TableFormulas
+
 
 from numbers_parser.bullets import (
     BULLET_PREFIXES,
@@ -58,6 +61,7 @@ class _NumbersModel:
     def __init__(self, filename):
         self.objects = ObjectStore(filename)
         self._table_strings = {}
+        self._merge_cells = {}
 
     @property
     def file_store(self):
@@ -281,8 +285,7 @@ class _NumbersModel:
         else:
             return self.objects[ce_id[0]]
 
-    @lru_cache(maxsize=None)
-    def merge_cell_ranges(self, table_id):
+    def calculate_merge_cell_ranges(self, table_id):
         """Exract all the merge cell ranges for the Table."""
         # Merge ranges are stored in a number of structures, but the simplest is
         # a TSCE.RangePrecedentsTileArchive which exists for each Table in the
@@ -333,7 +336,13 @@ class _NumbersModel:
                                 "size": (rect.size.num_rows, rect.size.num_columns),
                             }
                     merge_cells[(row_start, col_start)]["merge_type"] = "source"
+        self._merge_cells[table_id] = merge_cells
         return merge_cells
+
+    def merge_cell_ranges(self, table_id):
+        if table_id not in self._merge_cells:
+            self._merge_cells[table_id] = self.calculate_merge_cell_ranges(table_id)
+        return self._merge_cells[table_id]
 
     @lru_cache(maxsize=None)
     def table_uuids_to_id(self, table_uuid):
@@ -430,6 +439,47 @@ class _NumbersModel:
             )
             buckets.headers.append(header)
 
+    def recalculate_column_headers(self, table_id: int, data: List):
+        base_data_store = self.objects[table_id].base_data_store
+        buckets = self.objects[base_data_store.columnHeaders.identifier]
+        clear_field_container(buckets.headers)
+        # Transpose data to get columns
+        col_data = [list(x) for x in zip(*data)]
+
+        for col_num, col in enumerate(col_data):
+            num_rows = len(col) - sum([isinstance(x, MergedCell) for x in col])
+            header = TSTArchives.HeaderStorageBucket.Header(
+                index=col_num, numberOfCells=num_rows, size=0.0, hidingState=0
+            )
+            buckets.headers.append(header)
+
+    def recalculate_merged_cells(self, table_id: int):
+        merge_cells = self.merge_cell_ranges(table_id)
+        if len(merge_cells) == 0:
+            return
+
+        merge_map_id, merge_map = self.objects.create_object_from_dict(
+            "CalculationEngine", {}, TSTArchives.MergeRegionMapArchive
+        )
+
+        for merge_cell, merge_data in merge_cells.items():
+            if merge_data["merge_type"] == "source":
+                cell_id = TSTArchives.CellID(
+                    packedData=(merge_cell[0] << 16 | merge_cell[1])
+                )
+                table_size = TSTArchives.TableSize(
+                    packedData=(merge_data["size"][0] << 16 | merge_data["size"][1])
+                )
+                cell_range = TSTArchives.CellRange(origin=cell_id, size=table_size)
+                merge_map.cell_range.append(cell_range)
+
+        self.objects.update_object(merge_map_id, merge_map)
+
+        base_data_store = self.objects[table_id].base_data_store
+        base_data_store.merge_region_map.MergeFrom(
+            TSPMessages.Reference(identifier=merge_map_id)
+        )
+
     def init_table_tile(self, table_id: int, data: List) -> TSTArchives.Tile:
         base_data_store = self.objects[table_id].base_data_store
         tile_ids = [t.tile.identifier for t in base_data_store.tiles.tiles]
@@ -453,7 +503,7 @@ class _NumbersModel:
         row_info.cell_count = 0
         cell_storage = b""
         cell_storage_pre_bnc = b""
-        # TODO: support wide offsets
+
         offsets = [-1] * OFFSETS_WIDTH
         offsets_pre_bnc = [-1] * OFFSETS_WIDTH
         current_offset = 0
@@ -486,8 +536,10 @@ class _NumbersModel:
 
         self.init_table_strings(table_id)
         self.recalculate_row_headers(table_id, data)
-        tile = self.init_table_tile(table_id, data)
+        self.recalculate_column_headers(table_id, data)
+        self.recalculate_merged_cells(table_id)
 
+        tile = self.init_table_tile(table_id, data)
         for row_num in range(len(data)):
             row_info = self.recalculate_row_info(table_id, data, row_num)
             tile.rowInfos.append(row_info)
@@ -526,6 +578,8 @@ class _NumbersModel:
             cell_type = TSTArchives.durationCellType
             value = value = pack("<d", float(cell.value.total_seconds()))
         elif isinstance(cell, EmptyCell):
+            return None
+        elif isinstance(cell, MergedCell):
             return None
         else:
             data_type = type(cell).__name__
@@ -577,6 +631,8 @@ class _NumbersModel:
             cell_type = TSTArchives.durationCellType
             value = value = pack("<d", float(cell.value.total_seconds()))
         elif isinstance(cell, EmptyCell):
+            return None
+        elif isinstance(cell, MergedCell):
             return None
         else:
             data_type = type(cell).__name__

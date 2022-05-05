@@ -245,17 +245,43 @@ class Table:
                 "Can't determine cell type from type " + type(value).__name__
             )
 
-    def add_row(self):
+    def add_row(self, num_rows=1):
         row = [
             EmptyCell(self.num_rows - 1, col_num, None)
             for col_num in range(self.num_cols)
         ]
-        self._data.append(row)
-        self.num_rows += 1
-        self._model.number_of_rows(self._table_id, self.num_rows)
+        for _ in range(num_rows):
+            self._data.append(row.copy())
+            self.num_rows += 1
+            self._model.number_of_rows(self._table_id, self.num_rows)
 
-    def add_column(self):
-        for row_num in range(self.num_rows):
-            self._data[row_num].append(EmptyCell(row_num, self.num_cols - 1, None))
-        self.num_cols += 1
-        self._model.number_of_columns(self._table_id, self.num_cols)
+    def add_column(self, num_cols=1):
+        for _ in range(num_cols):
+            for row_num in range(self.num_rows):
+                self._data[row_num].append(EmptyCell(row_num, self.num_cols - 1, None))
+            self.num_cols += 1
+            self._model.number_of_columns(self._table_id, self.num_cols)
+
+    def merge_cells(self, cell_range):
+        if isinstance(cell_range, list):
+            for x in cell_range:
+                self.merge_cells(x)
+        else:
+            (start_cell_ref, end_cell_ref) = cell_range.split(":")
+            (row_start, col_start) = xl_cell_to_rowcol(start_cell_ref)
+            (row_end, col_end) = xl_cell_to_rowcol(end_cell_ref)
+            num_rows = row_end - row_start + 1
+            num_cols = col_end - col_start + 1
+
+            merge_ranges = self._model._merge_cells[self._table_id]
+            merge_ranges[(row_start, col_start)] = {
+                "merge_type": "source",
+                "size": (num_rows, num_cols),
+            }
+            for row_num in range(row_start + 1, row_end + 1):
+                for col_num in range(col_start + 1, col_end + 1):
+                    merge_ranges[(row_num, col_num)] = {
+                        "merge_type": "ref",
+                        "rect": (row_start, col_start, row_end, col_end),
+                        "size": (num_rows, num_cols),
+                    }
