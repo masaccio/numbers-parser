@@ -1,3 +1,6 @@
+import decimal
+import math
+
 from array import array
 from datetime import datetime, timedelta
 from functools import lru_cache
@@ -41,6 +44,7 @@ class CellValue:
         self.text = None
         self.ieee = None
         self.date = EPOCH
+        self.d128 = None
         self.bullets = None
 
     def __repr__(self):  # pragma: no cover
@@ -62,6 +66,15 @@ class _NumbersModel:
         self.objects = ObjectStore(filename)
         self._table_strings = {}
         self._merge_cells = {}
+
+        decimal128_context = decimal.Context(
+            prec=34,
+            Emin=-6143,
+            Emax=6144,
+            clamp=1,
+            traps=[],
+        )
+        decimal.setcontext(decimal128_context)
 
     @property
     def file_store(self):
@@ -417,33 +430,6 @@ class _NumbersModel:
         ]
 
     @lru_cache(maxsize=None)
-    def storage_buffers(self, table_id: int) -> List:
-        row_infos = []
-        for tile in self.table_tiles(table_id):
-            row_infos += tile.rowInfos
-
-        return [
-            get_storage_buffers_for_row(
-                r.cell_storage_buffer,
-                r.cell_offsets,
-                self.number_of_columns(table_id),
-                r.has_wide_offsets,
-            )
-            for r in row_infos
-        ]
-
-    @lru_cache(maxsize=None)
-    def storage_buffer(self, table_id: int, row_num: int, col_num: int) -> bytes:
-        row_offset = self.row_storage_map(table_id)[row_num]
-        if row_offset is None:
-            return None
-        try:
-            storage_buffers = self.storage_buffers(table_id)
-            return storage_buffers[row_offset][col_num]
-        except IndexError:
-            return None
-
-    @lru_cache(maxsize=None)
     def storage_buffer_pre_bnc(
         self, table_id: int, row_num: int, col_num: int
     ) -> bytes:
@@ -453,6 +439,39 @@ class _NumbersModel:
         try:
             storage_buffers_pre_bnc = self.storage_buffers_pre_bnc(table_id)
             return storage_buffers_pre_bnc[row_offset][col_num]
+        except IndexError:
+            return None
+
+    @lru_cache(maxsize=None)
+    def storage_buffers(self, table_id: int) -> List:
+        buffers = []
+        for tile in self.table_tiles(table_id):
+            for r in tile.rowInfos:
+                if tile.last_saved_in_BNC:
+                    buffer = get_storage_buffers_for_row(
+                        r.cell_storage_buffer,
+                        r.cell_offsets,
+                        self.number_of_columns(table_id),
+                        r.has_wide_offsets,
+                    )
+                else:
+                    buffer = get_storage_buffers_for_row(
+                        r.cell_storage_buffer_pre_bnc,
+                        r.cell_offsets_pre_bnc,
+                        self.number_of_columns(table_id),
+                        r.has_wide_offsets,
+                    )
+                buffers.append(buffer)
+        return buffers
+
+    @lru_cache(maxsize=None)
+    def storage_buffer(self, table_id: int, row_num: int, col_num: int) -> bytes:
+        row_offset = self.row_storage_map(table_id)[row_num]
+        if row_offset is None:
+            return None
+        try:
+            storage_buffers = self.storage_buffers(table_id)
+            return storage_buffers[row_offset][col_num]
         except IndexError:
             return None
 
@@ -635,7 +654,7 @@ class _NumbersModel:
             flags = 1
             length += 16
             cell_type = TSTArchives.numberCellType
-            value = pack("<d", float(cell.value))
+            value = pack_decimal128(cell.value)
         elif isinstance(cell, TextCell):
             flags = 8
             length += 4
@@ -708,25 +727,24 @@ class _NumbersModel:
         return cell_value
 
     def decode_cell_storage_v5(self, cell_type: int, buffer: bytes) -> CellValue:
-        flags = unpack("<i", buffer[4:8])[0]
+        flags = unpack("<i", buffer[8:12])[0]
         cell_value = CellValue(cell_type)
-
-        flags = unpack("<i", buffer[4:8])[0]
-        offset = 12 + bin(flags & 0x0D8E).count("1") * 4
-        if flags & 0x200:
-            cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
-        offset += bin(flags & 0x3000).count("1") * 4
-        if flags & 0x010:
-            cell_value.text = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
-        if flags & 0x020:
+        offset = 12
+        if flags & 0x01:
+            cell_value.d128 = unpack_decimal128(buffer[offset : offset + 16])
+            offset += 16
+        if flags & 0x02:
             cell_value.ieee = unpack("<d", buffer[offset : offset + 8])[0]
             offset += 8
-        if flags & 0x040 > 0:
+        if flags & 0x04:
             seconds = unpack("<d", buffer[offset : offset + 8])[0]
             cell_value.date = EPOCH + timedelta(seconds=seconds)
-
+            offset += 8
+        if flags & 0x08:
+            cell_value.text = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x10:
+            cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
         return cell_value
 
     @lru_cache(maxsize=None)
@@ -735,27 +753,24 @@ class _NumbersModel:
 
     @lru_cache(maxsize=None)
     def table_cell_decode(self, table_id: int, row_num: int, col_num: int) -> Dict:
-        storage_buffer = self.storage_buffer(table_id, row_num, col_num)
-        storage_buffer_pre_bnc = self.storage_buffer_pre_bnc(table_id, row_num, col_num)
+        buffer = self.storage_buffer(table_id, row_num, col_num)
 
-        if storage_buffer is None:
+        if buffer is None:
             return None
 
-        cell_type = storage_buffer[1]
+        cell_type = buffer[1]
         cell_value = CellValue(cell_type)
-        if storage_buffer_pre_bnc is not None:
-            buffer = storage_buffer_pre_bnc
-            if buffer[0] <= 3:
-                cell_value = self.decode_cell_storage_v3(buffer)
-            else:
-                cell_value = self.decode_cell_storage_v5(cell_type, buffer)
+        if buffer[0] <= 3:
+            cell_value = self.decode_cell_storage_v3(buffer)
+        else:
+            cell_value = self.decode_cell_storage_v5(cell_type, buffer)
 
         if cell_value.type == TSTArchives.numberCellType or cell_value.type == 10:
-            cell_value.value = cell_value.ieee
+            cell_value.value = cell_value.d128
             cell_value.type = TSTArchives.numberCellType
         elif cell_value.type == TSTArchives.textCellType:
             if cell_value.text is None:
-                cell_value.text = unpack("<i", storage_buffer[12:16])[0]
+                cell_value.text = unpack("<i", buffer[12:16])[0]
             cell_value.value = self.table_string(table_id, cell_value.text)
         elif cell_value.type == TSTArchives.dateCellType:
             cell_value.value = cell_value.date
@@ -991,3 +1006,37 @@ def clear_field_container(obj):
     else:
         while len(obj) > 0:
             _ = obj.pop()
+
+
+def pack_decimal128(value: float) -> bytearray:
+    buffer = bytearray(16)
+    if value == 0:
+        exp = 0
+    else:
+        exp = int(math.floor(math.log10(math.e) * math.log(abs(value))))
+    exp = int(exp + 0x1820 - 16)
+    mantissa = int(value / math.pow(10, exp - 0x1820))
+    buffer[15] |= exp >> 7
+    buffer[14] |= (exp & 0x7F) << 1
+    i = 0
+    while mantissa >= 1:
+        buffer[i] = mantissa & 0xFF
+        i += 1
+        mantissa >>= 8
+    if value >= 0:
+        buffer[15] = 0
+    else:
+        buffer[15] = 0x80
+    return buffer
+
+
+def unpack_decimal128(buffer: bytearray) -> float:
+    exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
+    mantissa = buffer[14] & 1
+    for i in range(13, -1, -1):
+        mantissa = mantissa * 256 + buffer[i]
+
+    if buffer[15] & 0x80:
+        mantissa = -mantissa
+    value = mantissa * 10**exp
+    return float(value)

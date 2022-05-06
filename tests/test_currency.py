@@ -15,7 +15,7 @@ STATEMENT_REF = [
         2018.51,
         "Entertainment",
     ],
-    [datetime(2020, 5, 1), "Grant Coffee", None, 13.2, 2005.31, "Eating Out"],
+    [datetime(2020, 5, 1), "Grant Coffee", None, 13.25, 2005.26, "Eating Out"],
 ]
 
 

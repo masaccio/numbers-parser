@@ -34,7 +34,7 @@ ISSUE_10_REF = [
     50,
     12,
     "Item 1",
-    123.4567,  # Formatted as 123.46
+    123.456789,  # Formatted as 123.46
 ]
 
 
