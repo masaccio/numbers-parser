@@ -230,15 +230,15 @@ class Table:
         for row in range(self.num_cols, col_num + 1):
             self.add_column()
 
-        if isinstance(value, str):
+        if type(value) == str:
             self._data[row_num][col_num] = TextCell(row_num, col_num, value)
-        elif isinstance(value, int) or isinstance(value, float):
+        elif type(value) == int or type(value) == float:
             self._data[row_num][col_num] = NumberCell(row_num, col_num, value)
-        elif isinstance(value, bool):
+        elif type(value) == bool:
             self._data[row_num][col_num] = BoolCell(row_num, col_num, value)
-        elif isinstance(value, datetime):
+        elif type(value) == datetime:
             self._data[row_num][col_num] = DateCell(row_num, col_num, value)
-        elif isinstance(value, timedelta):
+        elif type(value) == timedelta:
             self._data[row_num][col_num] = DurationCell(row_num, col_num, value)
         else:
             raise ValueError(
