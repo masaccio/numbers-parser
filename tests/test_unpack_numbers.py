@@ -21,7 +21,9 @@ def test_help(script_runner):
 
 
 def test_multi_doc_error(script_runner):
-    ret = script_runner.run("unpack-numbers", "--output", "tmp", "foo", "bar", print_result=False)
+    ret = script_runner.run(
+        "unpack-numbers", "--output", "tmp", "foo", "bar", print_result=False
+    )
     assert ret.success == False
     assert ret.stdout == ""
     assert "output directory only valid" in ret.stderr
@@ -40,9 +42,9 @@ def test_unpack_file(script_runner, tmp_path):
     assert ret.stdout == ""
     assert (output_dir / "preview.jpg").exists()
     assert imghdr.what(str(output_dir / "preview.jpg")) == "jpeg"
-    assert (output_dir / "Index/CalculationEngine.txt").exists()
-    assert (output_dir / "Index/Tables/DataList-954857.txt").exists()
-    with open(str(output_dir / "Index/Tables/DataList-954857.txt")) as f:
+    assert (output_dir / "Index/CalculationEngine.json").exists()
+    assert (output_dir / "Index/Tables/DataList-954857.json").exists()
+    with open(str(output_dir / "Index/Tables/DataList-954857.json")) as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"]
     strings = [x["string"] for x in objects[0]["entries"]]
@@ -64,9 +66,9 @@ def test_unpack_dir(script_runner, tmp_path):
     assert ret.stdout == ""
     assert (output_dir / "preview.jpg").exists()
     assert imghdr.what(str(output_dir / "preview.jpg")) == "jpeg"
-    assert (output_dir / "Index/CalculationEngine.txt").exists()
-    assert (output_dir / "Index/Tables/DataList-875166.txt").exists()
-    with open(str(output_dir / "Index/Tables/DataList-875166.txt")) as f:
+    assert (output_dir / "Index/CalculationEngine.json").exists()
+    assert (output_dir / "Index/Tables/DataList-875166.json").exists()
+    with open(str(output_dir / "Index/Tables/DataList-875166.json")) as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"]
     strings = [x["string"] for x in objects[0]["entries"]]
@@ -87,14 +89,34 @@ def test_unpack_hex(script_runner, tmp_path):
     )
     assert ret.success
     assert ret.stdout == ""
-    with open(str(output_dir / "Index/CalculationEngine.txt")) as f:
+    with open(str(output_dir / "Index/CalculationEngine.json")) as f:
         data = json.load(f)
-    objects = data["chunks"][0]["archives"][0]["objects"]
+    objects = data["chunks"][0]["archives"][1]["objects"][0]
+    assert objects["baseOwnerUid"]["lower"] == "0xB749DBDDB35F99D7"
+    objects = data["chunks"][0]["archives"][0]["objects"][0]
     assert (
-        data["chunks"][0]["archives"][1]["objects"][0]["baseOwnerUid"]["lower"]
-        == "0xB749DBDDB35F99D7"
-    )
-    assert (
-        objects[0]["dependencyTracker"]["formulaOwnerInfo"][0]["formulaOwnerId"]["uuidW0"]
+        objects["dependencyTracker"]["formulaOwnerInfo"][0]["formulaOwnerId"]["uuidW0"]
         == "0xB35F99D7"
+    )
+
+
+def test_pretty_storage(script_runner, tmp_path):
+    output_dir = tmp_path / "test"
+    ret = script_runner.run(
+        "unpack-numbers",
+        "--pretty-storage",
+        "--output",
+        str(output_dir),
+        "tests/data/test-5.numbers",
+        print_result=False,
+    )
+    assert ret.success
+    assert ret.stdout == ""
+    with open(str(output_dir / "Index/Tables/Tile-875165.json")) as f:
+        data = json.load(f)
+    objects = data["chunks"][0]["archives"][0]["objects"][0]
+    assert objects["rowInfos"][0]["cellOffsets"] == "-1,0,24,48,72,96,[...]"
+    assert (
+        objects["rowInfos"][0]["cellStorageBuffer"][0:28]
+        == "b'05:03:00:00:00:00:00:00:08"
     )

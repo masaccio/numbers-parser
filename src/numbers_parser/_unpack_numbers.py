@@ -62,14 +62,14 @@ def process_file(filename, blob, output_dir, hex_uuids, pretty_storage):
     target_path = os.path.join(output_dir, filename)
     if isinstance(blob, IWAFile):
         target_path = target_path.replace(".iwa", "")
-        target_path += ".txt"
+        target_path += ".json"
         with open(target_path, "w") as out:
             data = blob.to_dict()
             if hex_uuids:
                 convert_uuids_to_hex(data)
             if pretty_storage:
                 pretty_print_cell_storage(data)
-            print(json.dumps(data, sort_keys=True, indent=4), file=out)
+            print(json.dumps(data, sort_keys=True, indent=2), file=out)
     elif not filename.endswith("/"):
         with open(target_path, "wb") as out:
             out.write(blob)
