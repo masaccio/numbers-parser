@@ -1,11 +1,9 @@
 import pytest
-import os
-from tempfile import TemporaryDirectory
 
 from numbers_parser import Document
 
 
-def test_save_document():
+def test_save_document(tmp_path):
     doc = Document("tests/data/test-1.numbers")
     sheets = doc.sheets()
     tables = sheets[0].tables()
@@ -14,8 +12,7 @@ def test_save_document():
     sheets["ZZZ_Sheet_1"].name = "ZZZ_Sheet_1 NEW"
     tables["ZZZ_Table_1"].name = "ZZZ_Table_1 NEW"
 
-    temp_dir = TemporaryDirectory()
-    new_filename = os.path.join(temp_dir.name, "test-1-new.numbers")
+    new_filename = tmp_path / "test-1-new.numbers"
     doc.save(new_filename)
 
     new_doc = Document(new_filename)
@@ -27,7 +24,7 @@ def test_save_document():
 
 
 # @pytest.mark.experimental
-def test_save_merges():
+def test_save_merges(tmp_path):
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets()
     table = sheets[0].tables()[0]
@@ -39,10 +36,8 @@ def test_save_merges():
     table.merge_cells("B2:C2")
     table.merge_cells(["B5:E5", "D2:D4"])
 
-    temp_dir = TemporaryDirectory()
-    new_filename = os.path.join(temp_dir.name, "test-1-new.numbers")
+    new_filename = tmp_path / "test-1-new.numbers"
     doc.save(new_filename)
-    # doc.save("/Users/jon/Downloads/saved.numbers")
 
     doc = Document(new_filename)
     sheets = doc.sheets()
