@@ -22,7 +22,7 @@ setup(
             "unpack-numbers=numbers_parser._unpack_numbers:main",
         ],
     },
-    install_requires=["protobuf", "python-snappy", "roman"],
+    install_requires=["protobuf", "python-snappy", "regex", "roman"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
