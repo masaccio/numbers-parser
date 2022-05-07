@@ -40,7 +40,9 @@ class Cell:
             if cell_value.value is None:
                 cell = DurationCell(row_num, col_num, timedelta(seconds=0))
             else:
-                cell = DurationCell(row_num, col_num, cell_value.value)
+                cell = DurationCell(
+                    row_num, col_num, timedelta(seconds=cell_value.value)
+                )
         elif cell_value.type == TSTArchives.formulaErrorCellType:
             cell = ErrorCell(row_num, col_num, None)
         elif cell_value.type == TSTArchives.automaticCellType:
