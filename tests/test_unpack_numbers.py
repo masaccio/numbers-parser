@@ -110,6 +110,12 @@ def test_pretty_storage(script_runner, tmp_path):
         "tests/data/test-5.numbers",
         print_result=False,
     )
+    if not ret.success:
+        print("\n===== START STDOUT =====")
+        print(ret.stdout)
+        print("===== START STDERR =====")
+        print(ret.stderr)
+        print("========================")
     assert ret.success
     assert ret.stdout == ""
     with open(str(output_dir / "Index/Tables/Tile-875165.json")) as f:
