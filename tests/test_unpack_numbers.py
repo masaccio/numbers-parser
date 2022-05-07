@@ -1,5 +1,7 @@
 import json
 import imghdr
+import sys
+
 import pytest
 
 from numbers_parser import __version__
@@ -110,19 +112,18 @@ def test_pretty_storage(script_runner, tmp_path):
         "tests/data/test-5.numbers",
         print_result=False,
     )
-    if not ret.success:
-        print("\n===== START STDOUT =====")
-        print(ret.stdout)
-        print("===== START STDERR =====")
-        print(ret.stderr)
-        print("========================")
     assert ret.success
     assert ret.stdout == ""
     with open(str(output_dir / "Index/Tables/Tile-875165.json")) as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"][0]
     assert objects["rowInfos"][0]["cellOffsets"] == "-1,0,24,48,72,96,[...]"
-    assert (
-        objects["rowInfos"][0]["cellStorageBuffer"][0:28]
-        == "b'05:03:00:00:00:00:00:00:08"
-    )
+    if sys.version_info.minor >= 8:
+        assert (
+            objects["rowInfos"][0]["cellStorageBuffer"][0:28]
+            == "b'05:03:00:00:00:00:00:00:08"
+        )
+    else:
+        assert (
+            objects["rowInfos"][0]["cellStorageBuffer"][0:28] == "b'050300000000000008"
+        )

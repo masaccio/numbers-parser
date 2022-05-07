@@ -45,7 +45,10 @@ def pretty_print_cell_storage(obj):
             if isinstance(v, dict) or isinstance(v, list):
                 pretty_print_cell_storage(v)
             elif k == "cellStorageBuffer" or k == "cellStorageBufferPreBnc":
-                obj[k] = str(hexlify(b64decode(obj[k]), sep=":"))
+                if sys.version_info.minor >= 8:
+                    obj[k] = str(hexlify(b64decode(obj[k]), sep=":"))
+                else:
+                    obj[k] = str(hexlify(b64decode(obj[k])))
             elif k == "cellOffsets" or k == "cellOffsetsPreBnc":
                 offsets = array("h", b64decode(obj[k])).tolist()
                 obj[k] = ",".join([str(x) for x in offsets])
