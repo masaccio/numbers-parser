@@ -125,5 +125,6 @@ def test_pretty_storage(script_runner, tmp_path):
         )
     else:
         assert (
-            objects["rowInfos"][0]["cellStorageBuffer"][0:28] == "b'050300000000000008"
+            objects["rowInfos"][0]["cellStorageBuffer"][0:28]
+            == "b'05030000000000000810020002"
         )
