@@ -108,7 +108,7 @@ def main():
                         filename, blob, output_dir, args.hex_uuids, args.pretty_storage
                     ),
                 )
-            except FileFormatError as e:
+            except FileFormatError as e:  # pragma: no cover
                 print(f"{document}:", str(e), file=sys.stderr)
                 sys.exit(1)
 

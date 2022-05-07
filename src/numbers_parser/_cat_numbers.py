@@ -107,7 +107,7 @@ def main():
                     print_table_names(filename)
                 else:
                     print_table(args, filename)
-            except FileFormatError as e:
+            except FileFormatError as e:  # pragma: no cover”
                 print(f"{filename}:", str(e), file=sys.stderr)
                 sys.exit(1)
 
