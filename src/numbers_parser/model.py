@@ -1,4 +1,3 @@
-import decimal
 import math
 
 from array import array
@@ -66,15 +65,6 @@ class _NumbersModel:
         self.objects = ObjectStore(filename)
         self._table_strings = {}
         self._merge_cells = {}
-
-        decimal128_context = decimal.Context(
-            prec=34,
-            Emin=-6143,
-            Emax=6144,
-            clamp=1,
-            traps=[],
-        )
-        decimal.setcontext(decimal128_context)
 
     @property
     def file_store(self):
@@ -526,6 +516,28 @@ class _NumbersModel:
             TSPMessages.Reference(identifier=merge_map_id)
         )
 
+    def recalculate_column_row_uid_map(self, table_id: int, data: List):
+        table_model = self.objects[table_id]
+        base_column_row_uids = self.objects[table_model.base_column_row_uids.identifier]
+        clear_field_container(base_column_row_uids.sorted_column_uids)
+        clear_field_container(base_column_row_uids.column_index_for_uid)
+        clear_field_container(base_column_row_uids.column_uid_for_index)
+
+        for col_num in range(table_model.number_of_columns):
+            uuid = TSPMessages.UUID(upper=col_num + 420690, lower=col_num + 420690)
+            base_column_row_uids.sorted_column_uids.append(uuid)
+            base_column_row_uids.column_index_for_uid.append(col_num)
+            base_column_row_uids.column_uid_for_index.append(col_num)
+
+        clear_field_container(base_column_row_uids.sorted_row_uids)
+        clear_field_container(base_column_row_uids.row_index_for_uid)
+        clear_field_container(base_column_row_uids.row_uid_for_index)
+        for row_num in range(table_model.number_of_rows):
+            uuid = TSPMessages.UUID(upper=row_num + 726270, lower=row_num + 726270)
+            base_column_row_uids.sorted_row_uids.append(uuid)
+            base_column_row_uids.row_index_for_uid.append(row_num)
+            base_column_row_uids.row_uid_for_index.append(row_num)
+
     def init_table_tile(self, table_id: int, data: List) -> TSTArchives.Tile:
         base_data_store = self.objects[table_id].base_data_store
         tile_ids = [t.tile.identifier for t in base_data_store.tiles.tiles]
@@ -555,8 +567,8 @@ class _NumbersModel:
         current_offset = 0
         current_offset_pre_bnc = 0
         for col_num in range(len(data[row_num])):
-            buffer = self.cell_storage_v5(table_id, data, row_num, col_num)
-            buffer_pre_bnc = self.cell_storage_v3(table_id, data, row_num, col_num)
+            buffer = self.pack_cell_storage_v5(table_id, data, row_num, col_num)
+            buffer_pre_bnc = self.pack_cell_storage_v3(table_id, data, row_num, col_num)
 
             if buffer is not None:
                 cell_storage += buffer
@@ -578,12 +590,14 @@ class _NumbersModel:
         table_model = self.objects[table_id]
         table_model.number_of_rows = len(data)
         table_model.number_of_columns = len(data[0])
-        table_model.ClearField("base_column_row_uids")
 
         self.init_table_strings(table_id)
         self.recalculate_row_headers(table_id, data)
         self.recalculate_column_headers(table_id, data)
         self.recalculate_merged_cells(table_id)
+        self.recalculate_column_row_uid_map(table_id, data)
+
+        table_model.ClearField("base_column_row_uids")
 
         tile = self.init_table_tile(table_id, data)
         for row_num in range(len(data)):
@@ -591,7 +605,7 @@ class _NumbersModel:
             tile.rowInfos.append(row_info)
         return
 
-    def cell_storage_v3(
+    def pack_cell_storage_v3(
         self, table_id: int, data: List, row_num: int, col_num: int
     ) -> bytearray:
         """Create a storage buffer for a cell using v3 layout"""
@@ -644,7 +658,7 @@ class _NumbersModel:
 
         return storage[0:length]
 
-    def cell_storage_v5(
+    def pack_cell_storage_v5(
         self, table_id: int, data: List, row_num: int, col_num: int
     ) -> bytearray:
         """Create a storage buffer for a cell using v5 (modern) layout"""
@@ -697,7 +711,7 @@ class _NumbersModel:
 
         return storage[0:length]
 
-    def decode_cell_storage_v3(self, buffer: bytes) -> CellValue:
+    def unpack_cell_storage_v3(self, buffer: bytes) -> CellValue:
         version = buffer[0]
         flags = unpack("<i", buffer[4:8])[0]
         cell_type = buffer[2]
@@ -726,7 +740,7 @@ class _NumbersModel:
             offset += 8
         return cell_value
 
-    def decode_cell_storage_v5(self, cell_type: int, buffer: bytes) -> CellValue:
+    def unpack_cell_storage_v5(self, cell_type: int, buffer: bytes) -> CellValue:
         flags = unpack("<i", buffer[8:12])[0]
         cell_value = CellValue(cell_type)
         offset = 12
@@ -761,9 +775,9 @@ class _NumbersModel:
         cell_type = buffer[1]
         cell_value = CellValue(cell_type)
         if buffer[0] <= 3:
-            cell_value = self.decode_cell_storage_v3(buffer)
+            cell_value = self.unpack_cell_storage_v3(buffer)
         else:
-            cell_value = self.decode_cell_storage_v5(cell_type, buffer)
+            cell_value = self.unpack_cell_storage_v5(cell_type, buffer)
 
         if cell_value.type == TSTArchives.numberCellType or cell_value.type == 10:
             cell_value.value = cell_value.d128
@@ -1010,11 +1024,8 @@ def clear_field_container(obj):
 
 def pack_decimal128(value: float) -> bytearray:
     buffer = bytearray(16)
-    if value == 0:
-        exp = 0
-    else:
-        exp = int(math.floor(math.log10(math.e) * math.log(abs(value))))
-    exp = int(exp + 0x1820 - 16)
+    exp = math.floor(math.log10(math.e) * math.log(abs(value))) if value != 0.0 else 0
+    exp = int(exp) + 0x1820 - 16
     mantissa = int(value / math.pow(10, exp - 0x1820))
     buffer[15] |= exp >> 7
     buffer[14] |= (exp & 0x7F) << 1
@@ -1022,11 +1033,9 @@ def pack_decimal128(value: float) -> bytearray:
     while mantissa >= 1:
         buffer[i] = mantissa & 0xFF
         i += 1
-        mantissa >>= 8
-    if value >= 0:
-        buffer[15] = 0
-    else:
-        buffer[15] = 0x80
+        mantissa = int(mantissa / 256)
+    if value < 0:
+        buffer[15] |= 0x80
     return buffer
 
 
@@ -1035,7 +1044,6 @@ def unpack_decimal128(buffer: bytearray) -> float:
     mantissa = buffer[14] & 1
     for i in range(13, -1, -1):
         mantissa = mantissa * 256 + buffer[i]
-
     if buffer[15] & 0x80:
         mantissa = -mantissa
     value = mantissa * 10**exp
