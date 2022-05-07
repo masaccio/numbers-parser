@@ -220,16 +220,15 @@ the path to a working version of `proto-dump`.
 
 ## Credits
 
-`numbers-parser` was built by [Jon Connell](http://github.com/masaccio) but derived enormously
-from [prior work](https://github.com/psobot/keynote-parser) by [Peter Sobot](https://petersobot.com).
-Both modules are derived from [previous work](https://github.com/obriensp/iWorkFileFormat/blob/master/Docs/index.md)
-by [Sean Patrick O'Brien](http://www.obriensp.com).
+`numbers-parser` was built by [Jon Connell](http://github.com/masaccio) but relies heavily on from [prior work](https://github.com/psobot/keynote-parser) by [Peter Sobot](https://petersobot.com)to read the IWA format archives used by Apple's iWork family of applications. Both modules are derived from [previous work](https://github.com/obriensp/iWorkFileFormat/blob/master/Docs/index.md) by [Sean Patrick O'Brien](http://www.obriensp.com).
 
-Decoding the data structures inside Numbers files was helped greatly by
-[previous work](https://github.com/slott56/Stingray-Reader) by [Steven Lott](https://github.com/slott56).
+Decoding the data structures inside Numbers files was helped greatly by [Stingray-Reader](https://github.com/slott56/Stingray-Reader) by [Steven Lott](https://github.com/slott56).
 
 Formula tests were adapted from JavaScript tests used in
 [fast-formula-parser](https://github.com/LesterLyu/fast-formula-parser).
+
+Decimal128 conversion to and from byte storage was adapted from work done by the
+[SheetsJS project](https://github.com/SheetJS/sheetjs). SheetJS also helped greatly with some of the steps required to successfully save a Numbers spreadsheet.
 
 ## License
 
