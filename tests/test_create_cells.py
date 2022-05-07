@@ -6,7 +6,7 @@ from numbers_parser import Document
 from numbers_parser.cell import EmptyCell
 
 
-@pytest.mark.experimental
+# @pytest.mark.experimental
 def test_edit_cell_values(tmp_path):
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets()
@@ -24,8 +24,7 @@ def test_edit_cell_values(tmp_path):
     assert isinstance(table.cell(3, 4), EmptyCell)
     assert isinstance(table.cell(4, 4), EmptyCell)
 
-    # new_filename = tmp_path / "test-save-1-new.numbers"
-    new_filename = "/Users/jon/Downloads/saved.numbers"
+    new_filename = tmp_path / "test-save-1-new.numbers"
     doc.save(new_filename)
     print(f"\nSAVE {new_filename}")
 
