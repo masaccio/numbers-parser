@@ -18,7 +18,7 @@ def test_edit_cell_values(tmp_path):
     table.write(2, 1, 7890)
     table.write(2, 2, 78.90)
     table.write(5, 3, datetime(2020, 12, 25))
-    table.write(5, 4, timedelta(seconds=7980))
+    table.write(5, 4, timedelta(seconds=7890))
     table.write(5, 5, "7890")
 
     assert isinstance(table.cell(3, 4), EmptyCell)

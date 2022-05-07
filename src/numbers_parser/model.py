@@ -686,8 +686,8 @@ class _NumbersModel:
             cell_type = TSTArchives.boolCellType
             value = pack("<d", float(cell.value))
         elif isinstance(cell, DurationCell):
-            flags = 1
-            length += 16
+            flags = 4
+            length += 8
             cell_type = TSTArchives.durationCellType
             value = value = pack("<d", float(cell.value.total_seconds()))
         elif isinstance(cell, EmptyCell):
@@ -736,7 +736,7 @@ class _NumbersModel:
             offset += 8
         if flags & 0x0040:
             seconds = unpack("<d", buffer[offset : offset + 8])[0]
-            cell_value.date = EPOCH + timedelta(seconds=seconds)
+            cell_value.date = timedelta(seconds=seconds)
             offset += 8
         return cell_value
 
@@ -752,7 +752,7 @@ class _NumbersModel:
             offset += 8
         if flags & 0x04:
             seconds = unpack("<d", buffer[offset : offset + 8])[0]
-            cell_value.date = EPOCH + timedelta(seconds=seconds)
+            cell_value.date = timedelta(seconds=seconds)
             offset += 8
         if flags & 0x08:
             cell_value.text = unpack("<i", buffer[offset : offset + 4])[0]
@@ -787,11 +787,11 @@ class _NumbersModel:
                 cell_value.text = unpack("<i", buffer[12:16])[0]
             cell_value.value = self.table_string(table_id, cell_value.text)
         elif cell_value.type == TSTArchives.dateCellType:
-            cell_value.value = cell_value.date
+            cell_value.value = EPOCH + cell_value.date
         elif cell_value.type == TSTArchives.boolCellType:
             cell_value.value = cell_value.ieee > 0.0
         elif cell_value.type == TSTArchives.durationCellType:
-            cell_value.value = cell_value.ieee
+            cell_value.value = cell_value.date
         elif cell_value.type == TSTArchives.automaticCellType:
             cell_value.bullets = self.table_bullets(table_id, cell_value.rich)
 
