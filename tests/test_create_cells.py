@@ -26,7 +26,6 @@ def test_edit_cell_values(tmp_path):
 
     new_filename = tmp_path / "test-save-1-new.numbers"
     doc.save(new_filename)
-    print(f"\nSAVE {new_filename}")
 
     doc = Document(new_filename)
     sheets = doc.sheets()
