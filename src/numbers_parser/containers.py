@@ -1,5 +1,5 @@
 from numbers_parser.file import read_numbers_file
-from numbers_parser.iwafile import create_iwa_segment
+from numbers_parser.iwafile import create_iwa_segment, IWAFile
 
 
 class ItemsList:
@@ -42,16 +42,24 @@ class ObjectStore:
 
     def create_object_from_dict(self, iwa_file: str, object_dict: dict, cls: object):
         """Create a new object and store the associated IWA segment. Return the
-        message ID for the object and the newly created object"""
+        message ID for the object and the newly created object. If the IWA
+        file cannot be found, it will be created."""
         paths = [k for k, v in self._file_store.items() if iwa_file in k]
         if len(paths) == 0:
-            raise LookupError(f"no IWA filename matching {iwa_file}")
-        iwa_pathname = paths[0]
+            iwa_pathname = None
+        else:
+            iwa_pathname = paths[0]
 
         new_id = self._new_message_id()
         iwa_segment = create_iwa_segment(new_id, cls, object_dict)
 
-        self._file_store[iwa_pathname].chunks[0].archives.append(iwa_segment)
+        if iwa_pathname is None:
+            iwa_pathname = iwa_file.format(new_id) + ".iwa"
+            chunks = {"chunks": [{"archives": [iwa_segment.to_dict()]}]}
+            self._file_store[iwa_pathname] = IWAFile.from_dict(chunks)
+        else:
+            self._file_store[iwa_pathname].chunks[0].archives.append(iwa_segment)
+
         self._objects[new_id] = cls(**object_dict)
         return new_id, self._objects[new_id]
 
@@ -59,6 +67,8 @@ class ObjectStore:
         """Copy the protobuf messages from the passed object to the cached
         version in the file store so this can be saved to a new document"""
         for filename, blob in self._file_store.items():
+            if type(blob) != IWAFile:
+                continue
             for archive in blob.chunks[0].archives:
                 if archive.header.identifier == obj_id:
                     archive.objects[0].CopyFrom(obj)

@@ -22,6 +22,8 @@ from numbers_parser.cell import (
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
+from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
+
 from numbers_parser.formula import TableFormulas
 
 
@@ -32,7 +34,9 @@ from numbers_parser.bullets import (
 )
 
 EPOCH = datetime(2001, 1, 1)
-OFFSETS_WIDTH = 256
+MAX_TILE_SIZE = 256
+DOCUMENT_ID = 1
+PACKAGE_ID = 2
 
 
 class CellValue:
@@ -74,7 +78,7 @@ class _NumbersModel:
         return self.objects.find_refs(ref)
 
     def sheet_ids(self):
-        return [o.identifier for o in self.objects[1].sheets]
+        return [o.identifier for o in self.objects[DOCUMENT_ID].sheets]
 
     def sheet_name(self, sheet_id, value=None):
         if value is None:
@@ -562,14 +566,14 @@ class _NumbersModel:
         cell_storage = b""
         cell_storage_pre_bnc = b""
 
-        if len(data[0]) >= OFFSETS_WIDTH:
+        if len(data[0]) >= MAX_TILE_SIZE:
             wide_offsets = True
             offsets = [-1] * len(data[0])
             offsets_pre_bnc = [-1] * len(data[0])
         else:
             wide_offsets = False
-            offsets = [-1] * OFFSETS_WIDTH
-            offsets_pre_bnc = [-1] * OFFSETS_WIDTH
+            offsets = [-1] * MAX_TILE_SIZE
+            offsets_pre_bnc = [-1] * MAX_TILE_SIZE
         current_offset = 0
         current_offset_pre_bnc = 0
 
@@ -605,6 +609,33 @@ class _NumbersModel:
         row_info.cell_storage_buffer_pre_bnc = cell_storage_pre_bnc
         return row_info
 
+    def update_tile_package_metadata(self, tile_id):
+        locator_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
+        if tile_id not in locator_map:
+            calc_engine_id = [
+                id
+                for id, c in locator_map.items()
+                if c.preferred_locator == "CalculationEngine"
+            ][0]
+
+            component_info = TSPArchiveMessages.ComponentInfo(
+                identifier=tile_id,
+                # document_read_version=[2, 0, 0],
+                # document_write_version=[2, 0, 0],
+                # is_stored_outside_object_archive=False,
+                locator="Tables/Tile-" + str(tile_id),
+                preferred_locator="Tables/Tile",
+                save_token=locator_map[calc_engine_id].save_token,
+            )
+
+            self.objects[PACKAGE_ID].components.append(component_info)
+            locator_map[calc_engine_id].external_references.append(
+                TSPArchiveMessages.ComponentExternalReference(
+                    component_identifier=tile_id
+                )
+            )
+            self.objects.update_object(PACKAGE_ID, self.objects[PACKAGE_ID])
+
     def recalculate_table_data(self, table_id: int, data: List):
         table_model = self.objects[table_id]
         table_model.number_of_rows = len(data)
@@ -622,14 +653,14 @@ class _NumbersModel:
         max_tile_idx = len(data) >> 8
         base_data_store = self.objects[table_id].base_data_store
         tile_ids = [t.tile.identifier for t in base_data_store.tiles.tiles]
-        # if len(data[0]) > OFFSETS_WIDTH:
-        base_data_store.tiles.should_use_wide_rows = True
+        if len(data[0]) > MAX_TILE_SIZE:
+            base_data_store.tiles.should_use_wide_rows = True
 
         while tile_idx <= max_tile_idx:
-            row_start = tile_idx * 256
-            if (len(data) - row_start) > 256:
-                num_rows = 256
-                row_end = row_start + 256
+            row_start = tile_idx * MAX_TILE_SIZE
+            if (len(data) - row_start) > MAX_TILE_SIZE:
+                num_rows = MAX_TILE_SIZE
+                row_end = row_start + MAX_TILE_SIZE
             else:
                 num_rows = len(data) - row_start
                 row_end = row_start + num_rows
@@ -646,7 +677,7 @@ class _NumbersModel:
                     "should_use_wide_rows": True,
                 }
                 tile_id, tile = self.objects.create_object_from_dict(
-                    "CalculationEngine", tile_dict, TSTArchives.Tile
+                    "Index/Tables/Tile-{}", tile_dict, TSTArchives.Tile
                 )
                 for row_num in range(row_start, row_end):
                     row_info = self.recalculate_row_info(table_id, data, row_num)
@@ -656,7 +687,15 @@ class _NumbersModel:
                 tile_ref.tileid = tile_idx
                 tile_ref.tile.MergeFrom(TSPMessages.Reference(identifier=tile_id))
                 base_data_store.tiles.tiles.append(tile_ref)
+
                 self.objects.update_object(tile_id, tile)
+
+                self.update_tile_package_metadata(tile_id)
+
+                # TODO: is this requied?
+                base_data_store.rowTileTree.nodes.append(
+                    TSTArchives.TableRBTree.Node(key=row_start, value=tile_idx)
+                )
             else:
                 tile_id = tile_ids[tile_idx]
                 tile = self.objects[tile_id]
@@ -672,6 +711,8 @@ class _NumbersModel:
                 for row_num in range(row_start, row_end):
                     row_info = self.recalculate_row_info(table_id, data, row_num)
                     tile.rowInfos.append(row_info)
+
+                self.update_tile_package_metadata(tile_id)
 
             tile_idx += 1
 
