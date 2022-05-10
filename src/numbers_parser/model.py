@@ -562,26 +562,45 @@ class _NumbersModel:
         cell_storage = b""
         cell_storage_pre_bnc = b""
 
-        offsets = [-1] * OFFSETS_WIDTH
-        offsets_pre_bnc = [-1] * OFFSETS_WIDTH
+        if len(data[0]) >= OFFSETS_WIDTH:
+            wide_offsets = True
+            offsets = [-1] * len(data[0])
+            offsets_pre_bnc = [-1] * len(data[0])
+        else:
+            wide_offsets = False
+            offsets = [-1] * OFFSETS_WIDTH
+            offsets_pre_bnc = [-1] * OFFSETS_WIDTH
         current_offset = 0
         current_offset_pre_bnc = 0
+
         for col_num in range(len(data[row_num])):
-            buffer = self.pack_cell_storage_v5(table_id, data, row_num, col_num)
-            buffer_pre_bnc = self.pack_cell_storage_v3(table_id, data, row_num, col_num)
+            buffer = self.pack_cell_storage_v5(
+                table_id, data, row_num, col_num, wide_offsets
+            )
+            buffer_pre_bnc = self.pack_cell_storage_v3(
+                table_id, data, row_num, col_num, wide_offsets
+            )
 
             if buffer is not None:
                 cell_storage += buffer
-                offsets[col_num] = current_offset
+                if wide_offsets:
+                    offsets[col_num] = current_offset >> 2
+                else:
+                    offsets[col_num] = current_offset
                 current_offset += len(buffer)
 
                 cell_storage_pre_bnc += buffer_pre_bnc
-                offsets_pre_bnc[col_num] = current_offset_pre_bnc
+                if wide_offsets:
+                    offsets_pre_bnc[col_num] = current_offset_pre_bnc >> 2
+                else:
+                    offsets_pre_bnc[col_num] = current_offset_pre_bnc
                 current_offset_pre_bnc += len(buffer_pre_bnc)
                 row_info.cell_count += 1
 
-        row_info.cell_offsets = pack(f"<{OFFSETS_WIDTH}h", *offsets)
-        row_info.cell_offsets_pre_bnc = pack(f"<{OFFSETS_WIDTH}h", *offsets_pre_bnc)
+        row_info.cell_offsets = pack(f"<{len(offsets)}h", *offsets)
+        row_info.cell_offsets_pre_bnc = pack(
+            f"<{len(offsets_pre_bnc)}h", *offsets_pre_bnc
+        )
         row_info.cell_storage_buffer = cell_storage
         row_info.cell_storage_buffer_pre_bnc = cell_storage_pre_bnc
         return row_info
@@ -599,14 +618,67 @@ class _NumbersModel:
 
         table_model.ClearField("base_column_row_uids")
 
-        tile = self.init_table_tile(table_id, data)
-        for row_num in range(len(data)):
-            row_info = self.recalculate_row_info(table_id, data, row_num)
-            tile.rowInfos.append(row_info)
+        tile_idx = 0
+        max_tile_idx = len(data) >> 8
+        base_data_store = self.objects[table_id].base_data_store
+        tile_ids = [t.tile.identifier for t in base_data_store.tiles.tiles]
+        # if len(data[0]) > OFFSETS_WIDTH:
+        base_data_store.tiles.should_use_wide_rows = True
+
+        while tile_idx <= max_tile_idx:
+            row_start = tile_idx * 256
+            if (len(data) - row_start) > 256:
+                num_rows = 256
+                row_end = row_start + 256
+            else:
+                num_rows = len(data) - row_start
+                row_end = row_start + num_rows
+
+            if tile_idx > (len(tile_ids) - 1):
+                tile_dict = {
+                    "maxColumn": 0,
+                    "maxRow": 0,
+                    "numCells": 0,
+                    "numrows": num_rows,
+                    "storage_version": 5,
+                    "rowInfos": [],
+                    "last_saved_in_BNC": True,
+                    "should_use_wide_rows": True,
+                }
+                tile_id, tile = self.objects.create_object_from_dict(
+                    "CalculationEngine", tile_dict, TSTArchives.Tile
+                )
+                for row_num in range(row_start, row_end):
+                    row_info = self.recalculate_row_info(table_id, data, row_num)
+                    tile.rowInfos.append(row_info)
+
+                tile_ref = TSTArchives.TileStorage.Tile()
+                tile_ref.tileid = tile_idx
+                tile_ref.tile.MergeFrom(TSPMessages.Reference(identifier=tile_id))
+                base_data_store.tiles.tiles.append(tile_ref)
+                self.objects.update_object(tile_id, tile)
+            else:
+                tile_id = tile_ids[tile_idx]
+                tile = self.objects[tile_id]
+                tile.maxColumn = 0
+                tile.maxRow = 0
+                tile.numCells = 0
+                tile.numrows = num_rows
+                tile.storage_version = 5
+                tile.last_saved_in_BNC = True
+                tile.should_use_wide_rows = True
+                clear_field_container(tile.rowInfos)
+
+                for row_num in range(row_start, row_end):
+                    row_info = self.recalculate_row_info(table_id, data, row_num)
+                    tile.rowInfos.append(row_info)
+
+            tile_idx += 1
+
         return
 
     def pack_cell_storage_v3(
-        self, table_id: int, data: List, row_num: int, col_num: int
+        self, table_id: int, data: List, row_num: int, col_num: int, wide_offsets: bool
     ) -> bytearray:
         """Create a storage buffer for a cell using v3 layout"""
         cell = data[row_num][col_num]
@@ -656,10 +728,15 @@ class _NumbersModel:
         storage[4:8] = pack("<i", flags)
         storage[12 : 12 + len(value)] = value
 
+        if wide_offsets and len(storage) % 4:
+            padding_len = 4 - (len(storage % 4))
+            length += padding_len
+            storage += bytearray(padding_len)
+
         return storage[0:length]
 
     def pack_cell_storage_v5(
-        self, table_id: int, data: List, row_num: int, col_num: int
+        self, table_id: int, data: List, row_num: int, col_num: int, wide_offsets: bool
     ) -> bytearray:
         """Create a storage buffer for a cell using v5 (modern) layout"""
         cell = data[row_num][col_num]
@@ -708,6 +785,11 @@ class _NumbersModel:
         storage[1] = cell_type
         storage[8:12] = pack("<i", flags)
         storage[12 : 12 + len(value)] = value
+
+        if wide_offsets and len(storage) % 4:
+            padding_len = 4 - (len(storage % 4))
+            length += padding_len
+            storage += bytearray(padding_len)
 
         return storage[0:length]
 

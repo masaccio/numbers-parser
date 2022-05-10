@@ -40,3 +40,29 @@ def test_edit_cell_values(tmp_path):
     assert table.cell(5, 3).value == datetime(2020, 12, 25)
     assert table.cell(5, 4).value == timedelta(seconds=7890)
     assert table.cell(5, 5).value == "7890"
+
+
+@pytest.mark.experimental
+def test_large_table(tmp_path):
+    doc = Document()
+    sheets = doc.sheets()
+    tables = sheets[0].tables()
+    table = tables[0]
+    for i in range(0, 300):
+        table.write(i, i, "wide")
+
+    # new_filename = tmp_path / "save-large.numbers"
+    new_filename = "/Users/jon/Downloads/saved.numbers"
+    print("\nSAVE", new_filename)
+    doc.save(new_filename)
+
+    doc = Document(new_filename)
+    sheets = doc.sheets()
+    tables = sheets[0].tables()
+    table = tables[0]
+
+    data = table.rows()
+    assert len(data) == 300
+    assert len(data[299]) == 300
+    assert table.cell(0, 0).value == "wide"
+    assert table.cell(299, 299).value == "wide"
