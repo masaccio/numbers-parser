@@ -1,6 +1,8 @@
 from datetime import timedelta, datetime
 from functools import lru_cache
 from typing import Union, Generator
+from os import path
+from pkg_resources import resource_filename
 
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
@@ -20,9 +22,13 @@ from numbers_parser.cell import (
     xl_range,
 )
 
+_DEFAULT_EMPTY_DOCUMENT = resource_filename(
+    __name__, path.join("data", "empty.numbers")
+)
+
 
 class Document:
-    def __init__(self, filename):
+    def __init__(self, filename=_DEFAULT_EMPTY_DOCUMENT):
         self._model = _NumbersModel(filename)
 
     def sheets(self):

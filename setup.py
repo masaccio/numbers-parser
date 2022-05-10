@@ -4,6 +4,7 @@ main_ns = {}
 with open("src/numbers_parser/_version.py") as ver_file:
     exec(ver_file.read(), main_ns)
 
+
 setup(
     name="numbers-parser",
     version=main_ns["__version__"],
@@ -22,6 +23,7 @@ setup(
             "unpack-numbers=numbers_parser._unpack_numbers:main",
         ],
     },
+    package_data={"": ["*.numbers"]},
     install_requires=["protobuf", "python-snappy", "regex", "roman"],
     classifiers=[
         "Programming Language :: Python :: 3",
