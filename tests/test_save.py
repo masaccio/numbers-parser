@@ -1,6 +1,17 @@
 import pytest
 
 from numbers_parser import Document
+from numbers_parser.cell import EmptyCell
+
+
+def test_empty_document():
+    doc = Document()
+    sheets = doc.sheets()
+    tables = sheets[0].tables()
+    data = tables[0].rows()
+    assert len(data) == 22
+    assert len(data[0]) == 7
+    assert type(data[0][0]) == EmptyCell
 
 
 def test_save_document(tmp_path):
@@ -23,7 +34,6 @@ def test_save_document(tmp_path):
     assert cell_values == new_cell_values
 
 
-# @pytest.mark.experimental
 def test_save_merges(tmp_path):
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets()
