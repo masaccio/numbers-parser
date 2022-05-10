@@ -120,11 +120,11 @@ def test_pretty_storage(script_runner, tmp_path):
     assert objects["rowInfos"][0]["cellOffsets"] == "-1,0,24,48,72,96,[...]"
     if sys.version_info.minor >= 8:
         assert (
-            objects["rowInfos"][0]["cellStorageBuffer"][0:28]
-            == "b'05:03:00:00:00:00:00:00:08"
+            objects["rowInfos"][0]["cellStorageBuffer"][0:26]
+            == "05:03:00:00:00:00:00:00:08"
         )
     else:
         assert (
-            objects["rowInfos"][0]["cellStorageBuffer"][0:28]
-            == "b'05030000000000000810020002"
+            objects["rowInfos"][0]["cellStorageBuffer"][0:26]
+            == "05030000000000000810020002"
         )
