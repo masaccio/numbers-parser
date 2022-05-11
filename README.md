@@ -158,11 +158,9 @@ Bulleted and numbered data can also be extracted with the bullet or number chara
 Currently only documents with single table in single sheet are supported. Most cell formats should work with the expception of `MergedCell` and `BulletedTextCell`. The following features may be introduced in the future:
 
 * more than 256 rows or columns per table
-* merged cells in rows and columns (`MergedCell`)
 * bullets in text cells (`BulletedTextCell`)
 * multiple tables per sheet
 * multiple sheets for spreadsheet document
-* creation of a new empty Numbers document
 
 During the same process, cell widths are reset and cell formats are removed from the saved file.
 
