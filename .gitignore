@@ -24,3 +24,7 @@ src/*.egg-info
 # tox
 .tox
 build
+
+# Local
+*.ignore
+.bootstrap
