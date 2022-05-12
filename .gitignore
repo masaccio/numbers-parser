@@ -17,6 +17,7 @@ __pycache__/
 
 # Setuptools
 dist
+.bootstrap
 
 # Python egg metadata, regenerated from source files by setuptools.
 src/*.egg-info
