@@ -23,7 +23,7 @@ setup(
             "unpack-numbers=numbers_parser._unpack_numbers:main",
         ],
     },
-    package_data={"": ["*.numbers"]},
+    package_data={"": ["data/*.numbers"]},
     install_requires=["protobuf", "python-snappy", "regex", "roman"],
     classifiers=[
         "Programming Language :: Python :: 3",
