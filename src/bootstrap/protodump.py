@@ -12,7 +12,6 @@ https://github.com/obriensp/proto-dump
 """
 
 from pathlib import Path
-from tqdm import tqdm
 
 from google.protobuf.internal.decoder import _DecodeVarint, SkipField
 from google.protobuf import descriptor_pb2
@@ -188,7 +187,7 @@ def main():
     )
 
     proto_files_found = set()
-    for path in tqdm(all_filenames):
+    for path in all_filenames:
         for proto in extract_proto_from_file(path, GLOBAL_DESCRIPTOR_POOL):
             proto_files_found.add(proto)
 
@@ -207,7 +206,7 @@ def main():
             f" not be found:\n{missing_deps}"
         )
     else:
-        for proto_file in tqdm(proto_files_found):
+        for proto_file in proto_files_found:
             Path(args.output_path).mkdir(parents=True, exist_ok=True)
             with open(Path(args.output_path) / proto_file.path, "w") as f:
                 source = proto_file.source

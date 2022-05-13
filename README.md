@@ -216,6 +216,24 @@ well as `mapping.py`. The makefile assumes that [proto-dump](https://github.com/
 is in a repo parallel to this one, but the make variable `PROTO_DUMP` can be overridden to pass
 the path to a working version of `proto-dump`.
 
+* Download a released version of Google protobuf [from github](https://github.com/protocolbuffers/protobuf). Build instructions are in the [`src/README.md`](https://github.com/protocolbuffers/protobuf/blob/main/src/README.md) in the distribution but for macOS with [Homebrew](https://brew.sh) the steps are:
+
+  ``` bash
+  brew install autoconf automake libtool
+  ./autogen.sh
+  ./configure --prefix=`pwd`/../protobuf
+  make -j4
+  make check
+  make install
+  cd python
+  LD_LIBRARY_PATH=../../protobuf/lib python3 setup.py build --cpp_implementation
+  LD_LIBRARY_PATH=../../protobuf/lib python3 setup.py test --cpp_implementation
+  brew unlink protobuf
+  python3 setup.py install --cpp_implementation
+  ```
+  
+  This will install protobuf in a folder above the source installation which can then be used by `make bootstrap` in the `numbers-parser` source tree.
+
 ## Credits
 
 `numbers-parser` was built by [Jon Connell](http://github.com/masaccio) but relies heavily on from [prior work](https://github.com/psobot/keynote-parser) by [Peter Sobot](https://petersobot.com)to read the IWA format archives used by Apple's iWork family of applications. Both modules are derived from [previous work](https://github.com/obriensp/iWorkFileFormat/blob/master/Docs/index.md) by [Sean Patrick O'Brien](http://www.obriensp.com).

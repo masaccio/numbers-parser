@@ -34,13 +34,10 @@ if not process:
     raise ValueError("Failed to launch process: " + exe)
 try:
     if process.GetState() == lldb.eStateStopped:
-        print("step 1")
         thread = process.GetThreadAtIndex(0)
         if thread.GetStopReason() == lldb.eStopReasonBreakpoint:
-            if (
-                thread.GetSelectedFrame().name
-                == "+[CKContainer containerWithIdentifier:]"
-            ):
+            frame = thread.GetSelectedFrame().name
+            if frame == "+[CKContainer containerWithIdentifier:]":
                 # Skip the code in CKContainer, avoiding a crash due to missing entitlements:
                 thread.ReturnFromFrame(
                     thread.GetSelectedFrame(),
@@ -48,36 +45,33 @@ try:
                 )
                 process.Continue()
     if process.GetState() == lldb.eStateStopped:
-        print("step 2")
-        if thread:
-            frame = thread.GetFrameAtIndex(0)
-            if frame:
-                registry = frame.EvaluateExpression(
-                    "[TSPRegistry sharedRegistry]"
-                ).description
-                if registry is None:
-                    raise (ValueError("Failed to extract registry"))
-                split = [
-                    x.strip().split(" -> ")
-                    for x in registry.split("{")[1].split("}")[0].split("\n")
-                    if x.strip()
-                ]
-                json_str = json.dumps(
-                    dict(
-                        sorted(
-                            [
-                                (int(a), b.split(" ")[-1])
-                                for a, b in split
-                                if "null" not in b
-                            ]
-                        )
-                    ),
-                    indent=2,
-                )
-                with open(output, "w") as fh:
-                    fh.write(json_str)
-            else:
-                raise ValueError("Could not get frame to print out registry!")
+        if thread and (frame := thread.GetFrameAtIndex(0)):
+            registry = frame.EvaluateExpression(
+                "[TSPRegistry sharedRegistry]"
+            ).description
+            if registry is None:
+                raise (ValueError("Failed to extract registry"))
+            split = [
+                x.strip().split(" -> ")
+                for x in registry.split("{")[1].split("}")[0].split("\n")
+                if x.strip()
+            ]
+            json_str = json.dumps(
+                dict(
+                    sorted(
+                        [
+                            (int(a), b.split(" ")[-1])
+                            for a, b in split
+                            if "null" not in b
+                        ]
+                    )
+                ),
+                indent=2,
+            )
+            with open(output, "w") as fh:
+                fh.write(json_str)
+        else:
+            raise ValueError("Could not get frame to print out registry!")
     else:
         raise ValueError("LLDB was unable to stop process! " + str(process))
 finally:

@@ -1,25 +1,33 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 
+# Change this to the name of a code-signing certificate. A self-signed
+# certificate is suitable for this.
+IDENTITY=python@figsandfudge.com
+
 # Change this to the location of the proto-dump executable. Default assumes
 # a repo in the same root as numbers-parser
-PROTO_DUMP=$(current_dir})../proto-dump/build/Release/proto-dump
+PROTOC=$(current_dir})../protobuf/bin/protoc 
 
 # Location of the Numbers application
 NUMBERS=/Applications/Numbers.app
 
-PROTO_SOURCES = $(wildcard protos/*.proto)
-PROTO_CLASSES = $(patsubst protos/%.proto,src/numbers_parser/generated/%_pb2.py,$(PROTO_SOURCES))
+# Xcode version of Python that includes LLDB package
+LLDB_PYTHON_PATH := ${shell lldb --python-path}
 
-SOURCE_FILES=src/numbers_parser/generated/__init__.py $(wildcard src/numbers_parser/*.py) $(wildcard scripts/*)
 RELEASE_TARBALL=dist/numbers-parser-$(shell python3 setup.py --version).tar.gz
 
-.PHONY: all clean veryclean install test coverage lint sdist upload
+.PHONY: clean veryclean test coverage sdist upload
 
-all: $(PROTO_CLASSES) src/numbers_parser/generated/__init__.py
-
-install: $(SOURCE_FILES)
-	python3 setup.py install
+all:
+	@echo "make targets:"
+	@echo "    test       - run pytest with all tests"
+	@echo "    coverage   - run pytest and generate coverage report"
+	@echo "    sdist      - build source distribution"
+	@echo "    upload     - upload source package to PyPI"
+	@echo "    clean      - delete temporary files for test, coverage, etc."
+	@echo "    veryclean  - delete all auto-generated files (requires new bootstrap)"
+	@echo "    bootstrap  - rebuild all auto-generated files for new Numbers version"
 
 $(RELEASE_TARBALL): sdist
 
@@ -33,49 +41,65 @@ upload: $(RELEASE_TARBALL)
 docs:
 	python3 setup.py build_sphinx
 
-test: all
+test:
 	PYTHONPATH=src python3 -m pytest tests
-
-lint: all
-	pylama src/numbers_parser
 
 coverage: all
 	PYTHONPATH=src python3 -m pytest --cov=numbers_parser --cov-report=html
 
-src/numbers_parser/generated/%_pb2.py: protos/%.proto 
-	@mkdir -p src/numbers_parser/generated
-	protoc -I=protos --proto_path protos --python_out=src/numbers_parser/generated $<
+bootstrap: src/numbers_parser/functionmap.py src/numbers_parser/mapping.py src/numbers_parser/generated/__init__.py
 
-src/numbers_parser/generated/__init__.py: $(PROTO_SOURCES)
+.bootstrap/Numbers.unsigned.app:
+	@echo $$(tput setaf 2)"Bootstrap: extracting protobuf mapping from Numbers"$$(tput init)
+	@mkdir -p .bootstrap
+	rm -rf $@
+	cp -r $(NUMBERS) $@
+	codesign --remove-signature $@/Contents/MacOS/Numbers
+	codesign --sign "${IDENTITY}" $@/Contents/MacOS/Numbers
+
+.bootstrap/mapping.json: .bootstrap/Numbers.unsigned.app
+	@mkdir -p .bootstrap
+	PYTHONPATH=${LLDB_PYTHON_PATH} xcrun python3 src/bootstrap/extract_mapping.py $(NUMBERS)/Contents/MacOS/Numbers $@
+
+.bootstrap/mapping.py: .bootstrap/mapping.json
+	@mkdir -p .bootstrap
+	python3 src/bootstrap/generate_mapping.py $< $@
+
+.bootstrap/functionmap.py:
+	@echo $$(tput setaf 2)"Bootstrap: extracting function names from Numbers"$$(tput init)
+	@mkdir -p .bootstrap
+	python3 src/bootstrap/extract_functions.py $(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables $@
+
+.bootstrap/protos/TNArchives.proto:
+	@echo $$(tput setaf 2)"Bootstrap: extracting protobufs from Numbers"$$(tput init)
+	python3 src/bootstrap/protodump.py /Applications/Numbers.app .bootstrap/protos
+	python3 src/bootstrap/rename_proto_files.py .bootstrap/protos
+
+src/numbers_parser/functionmap.py: .bootstrap/functionmap.py
+	cp $< $@
+
+src/numbers_parser/mapping.py: .bootstrap/mapping.py
+	cp $< $@
+
+src/numbers_parser/generated/TNArchives_pb2.py: .bootstrap/protos/TNArchives.proto
+	@echo $$(tput setaf 2)"Bootstrap: compiling Python packages from protobufs"$$(tput init)
+	for proto in .bootstrap/protos/*.proto; do \
+	    $(PROTOC) -I=.bootstrap/protos --proto_path .bootstrap/protos --python_out=src/numbers_parser/generated $$proto; \
+	done
+
+src/numbers_parser/generated/__init__.py: src/numbers_parser/generated/TNArchives_pb2.py
+	@echo $$(tput setaf 2)"Bootstrap: patching paths in generated protobuf files"$$(tput init)
+	python3 src/bootstrap/replace_paths.py src/numbers_parser/generated/T*.py
 	touch $@
-	python3 protos/replace_paths.py src/numbers_parser/generated/T*.py
 
-protos/TSPRegistry.dump:
-	protos/dump_mappings.sh "$(NUMBERS)"
-
-src/numbers_parser/mapping.py: protos/generate_mapping.py protos/TSPRegistry.dump $(PROTO_CLASSES)
-	python3 protos/generate_mapping.py protos/TSPRegistry.dump > src/numbers_parser/mapping.py
-
-bootstrap: $(PROTO_DUMP) protos/TSPRegistry.dump
-	rm -f protos/*.proto
-	rm -f src/numbers_parser/mapping.py
-	PROTO_DUMP="$(PROTO_DUMP)" protos/extract_protos.sh "$(NUMBERS)"
-	python3 protos/rename_proto_files.py protos
-	$(MAKE) all src/numbers_parser/mapping.py
-	rm -rf tmp
-
-# Deleting TSPRegistry.dump will require System Integrity Protection to
-# be disabled to then recreate using lldb
 veryclean:
-	$(MAKE) clean
-	rm -rf tmp
-	rm -f protos/*.protos
-	rm -f protos/TSPRegistry.dump
+	make clean
+	rm -rf .bootstrap
 
 clean:
-	rm -rf src/numbers_parser/generated
-	rm -rf numbers_parser.egg-info
+	rm -rf src/numbers_parser.egg-info
 	rm -rf coverage_html_report
 	rm -rf dist
 	rm -rf build
 	rm -rf .tox
+	rm -rf .pytest_cache

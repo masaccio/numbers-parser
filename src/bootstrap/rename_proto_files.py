@@ -11,7 +11,6 @@ def rename_proto_files(_dir):
         replacements[os.path.basename(old_path)] = new_file
         new_path = os.path.join(os.path.dirname(old_path), new_file)
         if old_path != new_path:
-            print(f"{old_path} -> {new_path}")
             os.rename(old_path, new_path)
 
     for proto_file in glob(os.path.join(_dir, "*.proto")):
