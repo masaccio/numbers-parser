@@ -12,6 +12,7 @@ https://github.com/obriensp/proto-dump
 """
 
 from pathlib import Path
+from termcolor import cprint
 
 from google.protobuf.internal.decoder import _DecodeVarint, SkipField
 from google.protobuf import descriptor_pb2
@@ -182,16 +183,15 @@ def main():
         str(path) for path in Path(args.input_path).rglob("*") if not path.is_dir()
     ]
 
-    print(
-        f"Scanning {len(all_filenames):,} files under {args.input_path} for protobuf definitions..."
+    cprint(
+        f"Bootstrap: scanning {len(all_filenames):,} files under {args.input_path} for protobuf definitions",
+        "green",
     )
 
     proto_files_found = set()
     for path in all_filenames:
         for proto in extract_proto_from_file(path, GLOBAL_DESCRIPTOR_POOL):
             proto_files_found.add(proto)
-
-    print(f"Found what look like {len(proto_files_found):,} protobuf definitions.")
 
     missing_deps = set()
     for found in proto_files_found:
@@ -201,9 +201,9 @@ def main():
             )
 
     if missing_deps:
-        print(
-            f"Unable to print out all Protobuf definitions; {len(missing_deps):,} proto files could"
-            f" not be found:\n{missing_deps}"
+        cprint(
+            f"Warning: unable to print out all Protobuf definitions; {len(missing_deps):,} proto files could not be found:\n{missing_deps}",
+            "red",
         )
     else:
         for proto_file in proto_files_found:
@@ -213,9 +213,10 @@ def main():
                 if source:
                     f.write(source)
                 else:
-                    print(f"Warning: no source available for {proto_file}")
-        print(
-            f"Done! Wrote {len(proto_files_found):,} proto files to {args.output_path}."
+                    cprint(f"Warning: no source available for {proto_file}", "red")
+        cprint(
+            f"Bootstrap: wrote {len(proto_files_found):,} proto files to {args.output_path}",
+            "green",
         )
 
 

@@ -5,9 +5,8 @@ current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 # certificate is suitable for this.
 IDENTITY=python@figsandfudge.com
 
-# Change this to the location of the proto-dump executable. Default assumes
-# a repo in the same root as numbers-parser
-PROTOC=$(current_dir})../protobuf/bin/protoc 
+# Change this to the location of the proto-dump executable
+PROTOC=/usr/local/bin/protoc
 
 # Location of the Numbers application
 NUMBERS=/Applications/Numbers.app
@@ -16,10 +15,6 @@ NUMBERS=/Applications/Numbers.app
 LLDB_PYTHON_PATH := ${shell lldb --python-path}
 
 RELEASE_TARBALL=dist/numbers-parser-$(shell python3 setup.py --version).tar.gz
-
-BOOTSTRAP_FILES = src/numbers_parser/functionmap.py \
-				  src/numbers_parser/mapping.py \
-				  src/numbers_parser/generated/__init__.py
 
 .PHONY: clean veryclean test coverage sdist upload
 
@@ -51,6 +46,10 @@ test:
 coverage: all
 	PYTHONPATH=src python3 -m pytest --cov=numbers_parser --cov-report=html
 
+BOOTSTRAP_FILES = src/numbers_parser/functionmap.py \
+				  src/numbers_parser/generated/__init__.py \
+				  src/numbers_parser/mapping.py \
+
 bootstrap: $(BOOTSTRAP_FILES)
 
 .bootstrap/Numbers.unsigned.app:
@@ -69,6 +68,9 @@ bootstrap: $(BOOTSTRAP_FILES)
 	@mkdir -p .bootstrap
 	python3 src/bootstrap/generate_mapping.py $< $@
 
+src/numbers_parser/functionmap.py: .bootstrap/functionmap.py
+	cp $< $@
+
 .bootstrap/functionmap.py:
 	@echo $$(tput setaf 2)"Bootstrap: extracting function names from Numbers"$$(tput init)
 	@mkdir -p .bootstrap
@@ -79,14 +81,12 @@ bootstrap: $(BOOTSTRAP_FILES)
 	python3 src/bootstrap/protodump.py /Applications/Numbers.app .bootstrap/protos
 	python3 src/bootstrap/rename_proto_files.py .bootstrap/protos
 
-src/numbers_parser/functionmap.py: .bootstrap/functionmap.py
-	cp $< $@
-
 src/numbers_parser/mapping.py: .bootstrap/mapping.py
 	cp $< $@
 
 src/numbers_parser/generated/TNArchives_pb2.py: .bootstrap/protos/TNArchives.proto
 	@echo $$(tput setaf 2)"Bootstrap: compiling Python packages from protobufs"$$(tput init)
+	@mkdir -p src/numbers_parser/generated
 	for proto in .bootstrap/protos/*.proto; do \
 	    $(PROTOC) -I=.bootstrap/protos --proto_path .bootstrap/protos --python_out=src/numbers_parser/generated $$proto; \
 	done
@@ -99,6 +99,7 @@ src/numbers_parser/generated/__init__.py: src/numbers_parser/generated/TNArchive
 veryclean:
 	make clean
 	rm -rf .bootstrap
+	rm -rf src/numbers_parser/generated
 
 clean:
 	rm -rf src/numbers_parser.egg-info
