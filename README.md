@@ -201,11 +201,9 @@ As `numbers-parser` includes private Protobuf definitions extracted from a copy 
 
 On Apple Silicon Macs, the default protobuf package installation does not include the C++ optimised version which is required by the bootstrapping scripts to extract protobufs. You will receive the following error during build if this is the case:
 
- ```
- This script requires the Protobuf installation to use the C++ implementation. Please reinstall Protobuf with C++ support.
- ```
+ `This script requires the Protobuf installation to use the C++ implementation. Please reinstall Protobuf with C++ support.`
 
-To include the C++ support, download a released version of Google protobuf [from github](https://github.com/protocolbuffers/protobuf). Build instructions are in the [`src/README.md`](https://github.com/protocolbuffers/protobuf/blob/main/src/README.md) in the distribution but for macOS with [Homebrew](https://brew.sh) the two steps are, firstly to install the native protobuf libraries, which must be on your `LD_LIBRARY_PATH`:
+ To include the C++ support, download a released version of Google protobuf [from github](https://github.com/protocolbuffers/protobuf). Build instructions are in the [`src/README.md`](https://github.com/protocolbuffers/protobuf/blob/main/src/README.md) in the distribution but for macOS with [Homebrew](https://brew.sh) the two steps are, firstly to install the native protobuf libraries, which must be on your `LD_LIBRARY_PATH`:
 
 ``` bash
 brew install autoconf automake libtool
