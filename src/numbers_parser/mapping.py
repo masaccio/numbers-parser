@@ -1,3 +1,4 @@
+
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSCH3DArchives_pb2 as TSCH3DArchives
@@ -65,8 +66,8 @@ PROTO_FILES = [
     TSAArchives,
     TSCEArchives,
     TSCHArchives_Common,
-]
 
+]
 
 TSPRegistryMapping = {
     "1": "TN.DocumentArchive",
@@ -630,8 +631,8 @@ TSPRegistryMapping = {
     "12056": "TN.FormBuilderSelectionTransformerArchive",
     "12057": "TN.FormViewerSelectionTransformerArchive",
     "12058": "TN.FormSheetSelectionTransformerArchive",
-}
 
+}
 
 def compute_maps():
     name_class_map = {}
