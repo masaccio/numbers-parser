@@ -17,6 +17,10 @@ LLDB_PYTHON_PATH := ${shell lldb --python-path}
 
 RELEASE_TARBALL=dist/numbers-parser-$(shell python3 setup.py --version).tar.gz
 
+BOOTSTRAP_FILES = src/numbers_parser/functionmap.py \
+				  src/numbers_parser/mapping.py \
+				  src/numbers_parser/generated/__init__.py
+
 .PHONY: clean veryclean test coverage sdist upload
 
 all:
@@ -47,7 +51,7 @@ test:
 coverage: all
 	PYTHONPATH=src python3 -m pytest --cov=numbers_parser --cov-report=html
 
-bootstrap: src/numbers_parser/functionmap.py src/numbers_parser/mapping.py src/numbers_parser/generated/__init__.py
+bootstrap: $(BOOTSTRAP_FILES)
 
 .bootstrap/Numbers.unsigned.app:
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobuf mapping from Numbers"$$(tput init)
