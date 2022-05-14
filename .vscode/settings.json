@@ -20,7 +20,7 @@
         "${workspaceFolder}/src/numbers_parser/generated/*"
     ],
     "editor.wordWrap": "wordWrapColumn",
-    "editor.wordWrapColumn": 100,
+    "editor.wordWrapColumn": 120,
     "python.formatting.provider": "black",
     "terminal.integrated.env.osx": {
         "PYTHONPATH": "${workspaceFolder}/src",
