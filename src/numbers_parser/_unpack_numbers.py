@@ -73,7 +73,7 @@ def process_file(filename, blob, output_dir, hex_uuids, pretty_storage):
                 convert_uuids_to_hex(data)
             if pretty_storage:
                 pretty_print_cell_storage(data)
-            print(json.dumps(data, sort_keys=True, indent=2), file=out)
+            json.dump(data, out, sort_keys=True, indent=2)
     elif not filename.endswith("/"):
         with open(target_path, "wb") as out:
             out.write(blob)
