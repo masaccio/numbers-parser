@@ -557,34 +557,26 @@ class _NumbersModel:
         return tile
 
     def recalculate_row_info(
-        self, table_id: int, data: List, row_num: int
+        self, table_id: int, data: List, tile_row_offset: int, row_num: int
     ) -> TSTArchives.TileRowInfo:
         row_info = TSTArchives.TileRowInfo()
         row_info.storage_version = 5
-        row_info.tile_row_index = row_num
+        row_info.tile_row_index = row_num - tile_row_offset
         row_info.cell_count = 0
         cell_storage = b""
-        cell_storage_pre_bnc = b""
 
         if len(data[0]) >= MAX_TILE_SIZE:
             wide_offsets = True
             offsets = [-1] * len(data[0])
-            offsets_pre_bnc = [-1] * len(data[0])
         else:
             wide_offsets = False
             offsets = [-1] * MAX_TILE_SIZE
-            offsets_pre_bnc = [-1] * MAX_TILE_SIZE
         current_offset = 0
-        current_offset_pre_bnc = 0
 
         for col_num in range(len(data[row_num])):
             buffer = self.pack_cell_storage_v5(
                 table_id, data, row_num, col_num, wide_offsets
             )
-            buffer_pre_bnc = self.pack_cell_storage_v3(
-                table_id, data, row_num, col_num, wide_offsets
-            )
-
             if buffer is not None:
                 cell_storage += buffer
                 if wide_offsets:
@@ -593,20 +585,15 @@ class _NumbersModel:
                     offsets[col_num] = current_offset
                 current_offset += len(buffer)
 
-                cell_storage_pre_bnc += buffer_pre_bnc
-                if wide_offsets:
-                    offsets_pre_bnc[col_num] = current_offset_pre_bnc >> 2
-                else:
-                    offsets_pre_bnc[col_num] = current_offset_pre_bnc
-                current_offset_pre_bnc += len(buffer_pre_bnc)
                 row_info.cell_count += 1
 
+        # TODO: only pack as many offsets as last column with data
         row_info.cell_offsets = pack(f"<{len(offsets)}h", *offsets)
-        row_info.cell_offsets_pre_bnc = pack(
-            f"<{len(offsets_pre_bnc)}h", *offsets_pre_bnc
-        )
         row_info.cell_storage_buffer = cell_storage
-        row_info.cell_storage_buffer_pre_bnc = cell_storage_pre_bnc
+        # TODO: do formulas need BNC storage?
+        row_info.cell_offsets_pre_bnc = bytes([0xF0, 0x9F, 0xA4, 0xA0])
+        row_info.cell_storage_buffer_pre_bnc = bytes([0xF0, 0x9F, 0xA4, 0xA0])
+        row_info.has_wide_offsets = wide_offsets
         return row_info
 
     def update_tile_package_metadata(self, tile_id):
@@ -680,7 +667,9 @@ class _NumbersModel:
                     "Index/Tables/Tile-{}", tile_dict, TSTArchives.Tile
                 )
                 for row_num in range(row_start, row_end):
-                    row_info = self.recalculate_row_info(table_id, data, row_num)
+                    row_info = self.recalculate_row_info(
+                        table_id, data, row_start, row_num
+                    )
                     tile.rowInfos.append(row_info)
 
                 tile_ref = TSTArchives.TileStorage.Tile()
@@ -709,7 +698,9 @@ class _NumbersModel:
                 clear_field_container(tile.rowInfos)
 
                 for row_num in range(row_start, row_end):
-                    row_info = self.recalculate_row_info(table_id, data, row_num)
+                    row_info = self.recalculate_row_info(
+                        table_id, data, row_start, row_num
+                    )
                     tile.rowInfos.append(row_info)
 
                 self.update_tile_package_metadata(tile_id)
@@ -718,63 +709,63 @@ class _NumbersModel:
 
         return
 
-    def pack_cell_storage_v3(
-        self, table_id: int, data: List, row_num: int, col_num: int, wide_offsets: bool
-    ) -> bytearray:
-        """Create a storage buffer for a cell using v3 layout"""
-        cell = data[row_num][col_num]
-        length = 12
-        if isinstance(cell, NumberCell):
-            flags = 0x20
-            length += 8
-            cell_type = TSTArchives.numberCellType
-            value = pack("<d", float(cell.value))
-        elif isinstance(cell, TextCell):
-            flags = 0x10
-            length += 4
-            cell_type = TSTArchives.textCellType
-            value = pack("<i", self.table_string_key(table_id, cell.value))
-        elif isinstance(cell, DateCell):
-            flags = 0x40
-            length += 8
-            cell_type = TSTArchives.dateCellType
-            date_delta = cell.value - EPOCH
-            value = pack("<d", float(date_delta.total_seconds()))
-        elif isinstance(cell, BoolCell):
-            flags = 0x20
-            length += 8
-            cell_type = TSTArchives.boolCellType
-            value = pack("<d", float(cell.value))
-        elif isinstance(cell, DurationCell):
-            flags = 0x20
-            length += 8
-            cell_type = TSTArchives.durationCellType
-            value = value = pack("<d", float(cell.value.total_seconds()))
-        elif isinstance(cell, EmptyCell):
-            return None
-        elif isinstance(cell, MergedCell):
-            return None
-        else:
-            data_type = type(cell).__name__
-            table_name = self.table_name(table_id)
-            warn(
-                f"@{table_name}:[{row_num},{col_num}]: unsupported data type {data_type} for save",
-                UnsupportedWarning,
-            )
-            return None
+    # def pack_cell_storage_v3(
+    #     self, table_id: int, data: List, row_num: int, col_num: int, wide_offsets: bool
+    # ) -> bytearray:
+    #     """Create a storage buffer for a cell using v3 layout"""
+    #     cell = data[row_num][col_num]
+    #     length = 12
+    #     if isinstance(cell, NumberCell):
+    #         flags = 0x20
+    #         length += 8
+    #         cell_type = TSTArchives.numberCellType
+    #         value = pack("<d", float(cell.value))
+    #     elif isinstance(cell, TextCell):
+    #         flags = 0x10
+    #         length += 4
+    #         cell_type = TSTArchives.textCellType
+    #         value = pack("<i", self.table_string_key(table_id, cell.value))
+    #     elif isinstance(cell, DateCell):
+    #         flags = 0x40
+    #         length += 8
+    #         cell_type = TSTArchives.dateCellType
+    #         date_delta = cell.value - EPOCH
+    #         value = pack("<d", float(date_delta.total_seconds()))
+    #     elif isinstance(cell, BoolCell):
+    #         flags = 0x20
+    #         length += 8
+    #         cell_type = TSTArchives.boolCellType
+    #         value = pack("<d", float(cell.value))
+    #     elif isinstance(cell, DurationCell):
+    #         flags = 0x20
+    #         length += 8
+    #         cell_type = TSTArchives.durationCellType
+    #         value = value = pack("<d", float(cell.value.total_seconds()))
+    #     elif isinstance(cell, EmptyCell):
+    #         return None
+    #     elif isinstance(cell, MergedCell):
+    #         return None
+    #     else:
+    #         data_type = type(cell).__name__
+    #         table_name = self.table_name(table_id)
+    #         warn(
+    #             f"@{table_name}:[{row_num},{col_num}]: unsupported data type {data_type} for save",
+    #             UnsupportedWarning,
+    #         )
+    #         return None
 
-        storage = bytearray(32)
-        storage[0] = 3
-        storage[2] = cell_type
-        storage[4:8] = pack("<i", flags)
-        storage[12 : 12 + len(value)] = value
+    #     storage = bytearray(32)
+    #     storage[0] = 3
+    #     storage[2] = cell_type
+    #     storage[4:8] = pack("<i", flags)
+    #     storage[12 : 12 + len(value)] = value
 
-        if wide_offsets and len(storage) % 4:
-            padding_len = 4 - (len(storage % 4))
-            length += padding_len
-            storage += bytearray(padding_len)
+    #     if wide_offsets and len(storage) % 4:
+    #         padding_len = 4 - (len(storage % 4))
+    #         length += padding_len
+    #         storage += bytearray(padding_len)
 
-        return storage[0:length]
+    #     return storage[0:length]
 
     def pack_cell_storage_v5(
         self, table_id: int, data: List, row_num: int, col_num: int, wide_offsets: bool
