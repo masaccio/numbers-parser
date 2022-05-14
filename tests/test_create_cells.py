@@ -50,9 +50,7 @@ def test_large_table(tmp_path):
     for i in range(0, 300):
         table.write(i, i, "wide")
 
-    # new_filename = tmp_path / "save-large.numbers"
-    new_filename = "/Users/jon/Downloads/saved.numbers"
-    print("\nSAVE", new_filename)
+    new_filename = tmp_path / "save-large.numbers"
     doc.save(new_filename)
 
     doc = Document(new_filename)
