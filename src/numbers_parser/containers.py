@@ -24,11 +24,18 @@ class ItemsList:
     def __len__(self) -> int:
         return len(self._items)
 
+    def __contains__(self, key):
+        return key.lower() in [x.name.lower() for x in self._items]
+
+    def append(self, item):
+        self._items.append(item)
+
 
 class ObjectStore:
     def __init__(self, path: str) -> int:
         self._objects = {}
         self._file_store = {}
+        self._dirty = {}
         read_numbers_file(
             path,
             file_handler=lambda filename, blob: self._store_file(filename, blob),
@@ -39,6 +46,9 @@ class ObjectStore:
         """Return the next available message ID for object creation"""
         max_id = max(self._objects.keys())
         return max_id + 1
+
+    def mark_as_dirty(self, obj_id: int):
+        self._dirty[obj_id] = True
 
     def create_object_from_dict(self, iwa_file: str, object_dict: dict, cls: object):
         """Create a new object and store the associated IWA segment. Return the
@@ -61,20 +71,19 @@ class ObjectStore:
             self._file_store[iwa_pathname].chunks[0].archives.append(iwa_segment)
 
         self._objects[new_id] = cls(**object_dict)
+        self.mark_as_dirty(new_id)
         return new_id, self._objects[new_id]
 
-    def update_object(self, obj_id, obj: object):
-        """Copy the protobuf messages from the passed object to the cached
+    def update_dirty_objects(self):
+        """Copy the protobuf messages from any updated object to the cached
         version in the file store so this can be saved to a new document"""
-        for filename, blob in self._file_store.items():
-            if type(blob) != IWAFile:
-                continue
-            for archive in blob.chunks[0].archives:
-                if archive.header.identifier == obj_id:
-                    archive.objects[0].CopyFrom(obj)
-                    return
-
-        raise LookupError(f"Cannot loate object for update with ID {obj_id}")
+        for obj_id in self._dirty.keys():
+            for filename, blob in self._file_store.items():
+                if type(blob) != IWAFile:
+                    continue
+                for archive in blob.chunks[0].archives:
+                    if archive.header.identifier == obj_id:
+                        archive.objects[0].CopyFrom(self._objects[obj_id])
 
     def _store_object(self, identifier, obj):
         self._objects[identifier] = obj
