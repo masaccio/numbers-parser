@@ -8,6 +8,7 @@ def pytest_addoption(parser):
         default=False,
         help="run experimental tests",
     )
+    parser.addoption("--save-file", action="store", default=None)
 
 
 def pytest_configure(config):
