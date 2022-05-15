@@ -41,7 +41,6 @@ def test_edit_cell_values(tmp_path):
     assert table.cell(5, 5).value == "7890"
 
 
-# @pytest.mark.experimental
 def test_large_table(tmp_path):
     doc = Document()
     sheets = doc.sheets()
