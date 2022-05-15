@@ -280,18 +280,18 @@ def get_archive_info_and_remainder(buf):
 
 
 def create_iwa_segment(id: int, cls: object, object_dict: dict) -> object:
-    type_full_name = cls.__module__[0:3] + "." + cls.__name__
+    full_name = cls.DESCRIPTOR.full_name
     header = {
         "_pbtype": "TSP.ArchiveInfo",
         "identifier": str(id),
         "messageInfos": [
             {
-                "type": NAME_ID_MAP[type_full_name],
+                "type": NAME_ID_MAP[full_name],
                 "version": [1, 0, 5],
             }
         ],
     }
-    object_dict["_pbtype"] = type_full_name
+    object_dict["_pbtype"] = full_name
     archive_dict = {"header": header, "objects": [object_dict]}
 
     iwa_segment = IWAArchiveSegment.from_dict(archive_dict)
