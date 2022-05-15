@@ -30,11 +30,10 @@ _DEFAULT_EMPTY_DOCUMENT = resource_filename(
 class Document:
     def __init__(self, filename=_DEFAULT_EMPTY_DOCUMENT):
         self._model = _NumbersModel(filename)
+        refs = self._model.sheet_ids()
+        self._sheets = ItemsList(self._model, refs, Sheet)
 
     def sheets(self):
-        if not hasattr(self, "_sheets"):
-            refs = self._model.sheet_ids()
-            self._sheets = ItemsList(self._model, refs, Sheet)
         return self._sheets
 
     def save(self, filename):
@@ -42,6 +41,24 @@ class Document:
             for table in sheet.tables():
                 self._model.recalculate_table_data(table._table_id, table._data)
         write_numbers_file(filename, self._model.file_store)
+
+    def add_sheet(self, sheet_name=None, table_name=None):
+        """Add a new sheet to the current document. If no sheet name is provided,
+        the next available numbered sheet will be generated"""
+        if sheet_name is not None:
+            if sheet_name in self._sheets:
+                raise IndexError(f"sheet '{sheet_name}' already exists")
+        else:
+            sheet_num = 1
+            while f"sheet {sheet_num}" in self._sheets:
+                sheet_num += 1
+            sheet_name = f"Sheet {sheet_num}"
+
+        if table_name is None:
+            table_name = "Table 1"
+
+        new_sheet_id = self._model.add_sheet(sheet_name, table_name)
+        self._sheets.append(Sheet(self._model, new_sheet_id))
 
 
 class Sheet:
