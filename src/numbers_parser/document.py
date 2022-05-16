@@ -1,8 +1,6 @@
 from datetime import timedelta, datetime
 from functools import lru_cache
 from typing import Union, Generator
-from os import path
-from pkg_resources import resource_filename
 
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
@@ -22,13 +20,9 @@ from numbers_parser.cell import (
     xl_range,
 )
 
-_DEFAULT_EMPTY_DOCUMENT = resource_filename(
-    __name__, path.join("data", "empty.numbers")
-)
-
 
 class Document:
-    def __init__(self, filename=_DEFAULT_EMPTY_DOCUMENT):
+    def __init__(self, filename=None):
         self._model = _NumbersModel(filename)
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
@@ -57,7 +51,7 @@ class Document:
         if table_name is None:
             table_name = "Table 1"
 
-        new_sheet_id = self._model.add_sheet(sheet_name, table_name)
+        new_sheet_id = self._model.add_sheet(sheet_name, table_name, self._sheets[-1])
         self._sheets.append(Sheet(self._model, new_sheet_id))
 
 
@@ -65,11 +59,10 @@ class Sheet:
     def __init__(self, model, sheet_id):
         self._sheet_id = sheet_id
         self._model = model
+        refs = self._model.table_ids(self._sheet_id)
+        self._tables = ItemsList(self._model, refs, Table)
 
     def tables(self):
-        if not hasattr(self, "_tables"):
-            refs = self._model.table_ids(self._sheet_id)
-            self._tables = ItemsList(self._model, refs, Table)
         return self._tables
 
     @property
