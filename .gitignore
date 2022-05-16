@@ -21,8 +21,9 @@ dist
 # Python egg metadata, regenerated from source files by setuptools.
 src/*.egg-info
 
-# tox
+# Testing
 .tox
+.venv
 build
 
 # Local
