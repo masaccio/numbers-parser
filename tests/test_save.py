@@ -1,7 +1,7 @@
 import pytest
 
 from numbers_parser import Document
-from numbers_parser.cell import EmptyCell
+from numbers_parser.cell import EmptyCell, TextCell, NumberCell
 
 
 def test_empty_document():
@@ -53,3 +53,45 @@ def test_save_merges(tmp_path):
     sheets = doc.sheets()
     table = sheets[0].tables()[0]
     assert table.merge_ranges == ["B2:C2", "B5:E5", "D2:D4"]
+
+
+@pytest.mark.experimental
+def test_create_sheet(tmp_path, pytestconfig):
+    doc = Document()
+
+    with pytest.raises(IndexError) as e:
+        _ = doc.add_sheet("SheeT 1")
+    assert "sheet 'SheeT 1' already exists" in str(e.value)
+
+    doc.add_sheet()
+    doc.add_sheet("New Sheet", "New Table")
+    # sheet = doc.sheets()["New Sheet"]
+    # table = sheet.tables()["New Table"]
+    # table.write(0, 1, "Column 1")
+    # table.write(0, 2, "Column 2")
+    # table.write(0, 3, "Column 3")
+    # table.write(1, 1, 1000)
+    # table.write(1, 2, 2000)
+    # table.write(1, 3, 3000)
+
+    import pdb
+
+    pdb.set_trace()
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-1-new.numbers"
+    doc.save(new_filename)
+
+    doc = Document(new_filename)
+    sheets = doc.sheets()
+    assert sheets[2].name == "New Sheet"
+
+    table = sheets[1].tables()[0]
+    assert table.name == "New Table"
+
+    assert type(table.cells(0, 1)) == TextCell
+    assert table.cells(0, 1).value == "Column 1"
+    assert type(table.cells(0, 1)) == TextCell
+    assert type(table.cells(1, 3)) == NumberCell
+    assert table.cells(1, 3).value == 3000

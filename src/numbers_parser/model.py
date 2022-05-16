@@ -3,8 +3,11 @@ import math
 from array import array
 from datetime import datetime, timedelta
 from functools import lru_cache
+from os import path
+from pkg_resources import resource_filename
 from struct import pack, unpack
 from typing import Dict, List
+from uuid import uuid1
 from warnings import warn
 
 from numbers_parser.containers import ObjectStore
@@ -22,6 +25,7 @@ from numbers_parser.cell import (
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
+from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 
 from numbers_parser.formula import TableFormulas
@@ -31,6 +35,10 @@ from numbers_parser.bullets import (
     BULLET_PREFIXES,
     BULLET_CONVERTION,
     BULLET_SUFFIXES,
+)
+
+_DEFAULT_EMPTY_DOCUMENT = resource_filename(
+    __name__, path.join("data", "empty.numbers")
 )
 
 EPOCH = datetime(2001, 1, 1)
@@ -66,6 +74,8 @@ class _NumbersModel:
     """
 
     def __init__(self, filename):
+        if filename is None:
+            filename = _DEFAULT_EMPTY_DOCUMENT
         self.objects = ObjectStore(filename)
         self._table_strings = {}
         self._merge_cells = {}
@@ -86,7 +96,7 @@ class _NumbersModel:
         else:
             self.objects[sheet_id].name = value
 
-    @lru_cache(maxsize=None)
+    # @lru_cache(maxsize=None)
     def table_ids(self, sheet_id):
         table_info_ids = self.find_refs("TableInfoArchive")
         return [
@@ -513,8 +523,6 @@ class _NumbersModel:
                 cell_range = TSTArchives.CellRange(origin=cell_id, size=table_size)
                 merge_map.cell_range.append(cell_range)
 
-        self.objects.update_object(merge_map_id, merge_map)
-
         base_data_store = self.objects[table_id].base_data_store
         base_data_store.merge_region_map.MergeFrom(
             TSPMessages.Reference(identifier=merge_map_id)
@@ -522,7 +530,10 @@ class _NumbersModel:
 
     def recalculate_column_row_uid_map(self, table_id: int, data: List):
         table_model = self.objects[table_id]
+        if table_model.base_column_row_uids.identifier == 0:
+            return
         base_column_row_uids = self.objects[table_model.base_column_row_uids.identifier]
+
         clear_field_container(base_column_row_uids.sorted_column_uids)
         clear_field_container(base_column_row_uids.column_index_for_uid)
         clear_field_container(base_column_row_uids.column_uid_for_index)
@@ -621,7 +632,8 @@ class _NumbersModel:
                     component_identifier=tile_id
                 )
             )
-            self.objects.update_object(PACKAGE_ID, self.objects[PACKAGE_ID])
+            self.objects.mark_as_dirty(PACKAGE_ID)
+            # self.objects.update_object(PACKAGE_ID, self.objects[PACKAGE_ID])
 
     def recalculate_table_data(self, table_id: int, data: List):
         table_model = self.objects[table_id]
@@ -677,8 +689,6 @@ class _NumbersModel:
                 tile_ref.tile.MergeFrom(TSPMessages.Reference(identifier=tile_id))
                 base_data_store.tiles.tiles.append(tile_ref)
 
-                self.objects.update_object(tile_id, tile)
-
                 self.update_tile_package_metadata(tile_id)
 
                 # TODO: is this requied?
@@ -707,65 +717,142 @@ class _NumbersModel:
 
             tile_idx += 1
 
-        return
+        self.objects.update_dirty_objects()
 
-    # def pack_cell_storage_v3(
-    #     self, table_id: int, data: List, row_num: int, col_num: int, wide_offsets: bool
-    # ) -> bytearray:
-    #     """Create a storage buffer for a cell using v3 layout"""
-    #     cell = data[row_num][col_num]
-    #     length = 12
-    #     if isinstance(cell, NumberCell):
-    #         flags = 0x20
-    #         length += 8
-    #         cell_type = TSTArchives.numberCellType
-    #         value = pack("<d", float(cell.value))
-    #     elif isinstance(cell, TextCell):
-    #         flags = 0x10
-    #         length += 4
-    #         cell_type = TSTArchives.textCellType
-    #         value = pack("<i", self.table_string_key(table_id, cell.value))
-    #     elif isinstance(cell, DateCell):
-    #         flags = 0x40
-    #         length += 8
-    #         cell_type = TSTArchives.dateCellType
-    #         date_delta = cell.value - EPOCH
-    #         value = pack("<d", float(date_delta.total_seconds()))
-    #     elif isinstance(cell, BoolCell):
-    #         flags = 0x20
-    #         length += 8
-    #         cell_type = TSTArchives.boolCellType
-    #         value = pack("<d", float(cell.value))
-    #     elif isinstance(cell, DurationCell):
-    #         flags = 0x20
-    #         length += 8
-    #         cell_type = TSTArchives.durationCellType
-    #         value = value = pack("<d", float(cell.value.total_seconds()))
-    #     elif isinstance(cell, EmptyCell):
-    #         return None
-    #     elif isinstance(cell, MergedCell):
-    #         return None
-    #     else:
-    #         data_type = type(cell).__name__
-    #         table_name = self.table_name(table_id)
-    #         warn(
-    #             f"@{table_name}:[{row_num},{col_num}]: unsupported data type {data_type} for save",
-    #             UnsupportedWarning,
-    #         )
-    #         return None
+    def create_string_table(self):
+        table_strings_id, table_strings = self.objects.create_object_from_dict(
+            "Index/Tables/DataList-{}-2",
+            {"listType": TSTArchives.TableDataList.ListType.STRING, "nextListID": 1},
+            TSTArchives.TableDataList,
+        )
+        return table_strings_id, table_strings
 
-    #     storage = bytearray(32)
-    #     storage[0] = 3
-    #     storage[2] = cell_type
-    #     storage[4:8] = pack("<i", flags)
-    #     storage[12 : 12 + len(value)] = value
+    def style_sheet_map(self, objects):
+        style_sheet_id = objects.find_refs("StylesheetArchive")[0]
+        style_sheet = objects[style_sheet_id]
+        style_sheet_map = {
+            x.identifier: x.style.identifier
+            for x in style_sheet.identifier_to_style_map
+        }
+        return style_sheet_map
 
-    #     if wide_offsets and len(storage) % 4:
-    #         padding_len = 4 - (len(storage % 4))
-    #         length += padding_len
-    #         storage += bytearray(padding_len)
+    def add_sheet(self, sheet_name: str, table_name: str, from_sheet: int):
+        from_table_id = self.table_ids(from_sheet._sheet_id)[0]
+        from_table = self.objects[from_table_id]
 
-    #     return storage[0:length]
+        sheet_id, sheet_archive = self.objects.create_object_from_dict(
+            "Document", {"name": sheet_name}, TNArchives.SheetArchive
+        )
+
+        self.objects[DOCUMENT_ID].sheets.append(
+            TSPMessages.Reference(identifier=sheet_id)
+        )
+
+        table_strings_id, table_strings = self.create_string_table()
+
+        table_model_id, table_model = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {
+                "table_id": str(uuid1()).upper(),
+                "number_of_rows": 22,
+                "number_of_columns": 7,
+                "table_name": table_name,
+                "default_row_height": 20.0,
+                "default_column_width": 98.0,
+            },
+            TSTArchives.TableModelArchive,
+        )
+
+        column_headers_id, _ = self.objects.create_object_from_dict(
+            "Index/Tables/HeaderStorageBucket-{}",
+            {"bucketHashFunction": 1},
+            TSTArchives.HeaderStorageBucket,
+        )
+
+        table_model.base_data_store.MergeFrom(
+            TSTArchives.DataStore(
+                stringTable=TSPMessages.Reference(identifier=table_strings_id),
+                rowHeaders=TSTArchives.HeaderStorage(bucketHashFunction=1),
+                columnHeaders=TSPMessages.Reference(identifier=column_headers_id),
+                nextRowStripID=1,
+                nextColumnStripID=0,
+                rowTileTree=TSTArchives.TableRBTree(),
+                columnTileTree=TSTArchives.TableRBTree(),
+            )
+        )
+
+        data = [
+            [EmptyCell(row_num, col_num, None) for col_num in range(0, 7)]
+            for row_num in range(0, 22)
+        ]
+
+        row_headers_id, _ = self.objects.create_object_from_dict(
+            "Index/Tables/HeaderStorageBucket-{}",
+            {"bucketHashFunction": 1},
+            TSTArchives.HeaderStorageBucket,
+        )
+        table_model.base_data_store.rowHeaders.buckets.append(
+            TSPMessages.Reference(identifier=row_headers_id)
+        )
+
+        self.recalculate_table_data(table_model_id, data)
+
+        style_table_id, _ = self.objects.create_object_from_dict(
+            "Index/Tables/TableDataList-{}",
+            {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
+            TSTArchives.TableDataList,
+        )
+        table_model.base_data_store.styleTable.MergeFrom(
+            TSPMessages.Reference(identifier=style_table_id)
+        )
+
+        formula_table_id, _ = self.objects.create_object_from_dict(
+            "Index/Tables/TableDataList-{}",
+            {"listType": TSTArchives.TableDataList.ListType.FORMULA, "nextListID": 1},
+            TSTArchives.TableDataList,
+        )
+        table_model.base_data_store.formula_table.MergeFrom(
+            TSPMessages.Reference(identifier=formula_table_id)
+        )
+
+        format_table_pre_bnc_id, _ = self.objects.create_object_from_dict(
+            "Index/Tables/TableDataList-{}",
+            {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
+            TSTArchives.TableDataList,
+        )
+        table_model.base_data_store.format_table_pre_bnc.MergeFrom(
+            TSPMessages.Reference(identifier=format_table_pre_bnc_id)
+        )
+
+        for field in [
+            "table_style",
+            "body_text_style",
+            "header_row_text_style",
+            "header_column_text_style",
+            "footer_row_text_style",
+            "footer_row_text_style",
+            "body_cell_style",
+            "header_row_style",
+            "header_column_style",
+            "footer_row_style",
+        ]:
+            getattr(table_model, field).MergeFrom(
+                TSPMessages.Reference(identifier=getattr(from_table, field).identifier)
+            )
+
+        # create TST.TableInfoArchive with parent = sheet_id
+
+        table_info_id, table_info = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {},
+            TSTArchives.TableInfoArchive,
+        )
+        table_info.tableModel.MergeFrom(
+            TSPMessages.Reference(identifier=table_model_id)
+        )
+        table_info.super.parent.MergeFrom(TSPMessages.Reference(identifier=sheet_id))
+
+        return sheet_id
 
     def pack_cell_storage_v5(
         self, table_id: int, data: List, row_num: int, col_num: int, wide_offsets: bool
