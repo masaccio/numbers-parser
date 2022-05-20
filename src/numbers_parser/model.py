@@ -1,16 +1,24 @@
 import math
+import re
 
 from array import array
-from datetime import datetime, timedelta
+from datetime import timedelta
 from functools import lru_cache
-from os import path
-from pkg_resources import resource_filename
 from struct import pack, unpack
 from typing import Dict, List
 from uuid import uuid1
 from warnings import warn
 
 from numbers_parser.containers import ObjectStore
+from numbers_parser.constants import (
+    EPOCH,
+    DEFAULT_DOCUMENT,
+    DEFAULT_COLUMN_COUNT,
+    DEFAULT_ROW_COUNT,
+    DOCUMENT_ID,
+    PACKAGE_ID,
+    MAX_TILE_SIZE,
+)
 from numbers_parser.cell import (
     xl_rowcol_to_cell,
     xl_col_to_name,
@@ -23,28 +31,18 @@ from numbers_parser.cell import (
     TextCell,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
-from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
-from numbers_parser.generated import TNArchives_pb2 as TNArchives
-from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
-
 from numbers_parser.formula import TableFormulas
-
-
 from numbers_parser.bullets import (
     BULLET_PREFIXES,
     BULLET_CONVERTION,
     BULLET_SUFFIXES,
 )
-
-_DEFAULT_EMPTY_DOCUMENT = resource_filename(
-    __name__, path.join("data", "empty.numbers")
-)
-
-EPOCH = datetime(2001, 1, 1)
-MAX_TILE_SIZE = 256
-DOCUMENT_ID = 1
-PACKAGE_ID = 2
+from numbers_parser.generated import TNArchives_pb2 as TNArchives
+from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
+from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
+from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
+from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
+from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
 
 class CellValue:
@@ -75,7 +73,7 @@ class _NumbersModel:
 
     def __init__(self, filename):
         if filename is None:
-            filename = _DEFAULT_EMPTY_DOCUMENT
+            filename = DEFAULT_DOCUMENT
         self.objects = ObjectStore(filename)
         self._table_strings = {}
         self._merge_cells = {}
@@ -607,33 +605,41 @@ class _NumbersModel:
         row_info.has_wide_offsets = wide_offsets
         return row_info
 
-    def update_tile_package_metadata(self, tile_id):
+    def update_package_metadata(
+        self, obj_id: int, parent_locator: str, locator: str = None
+    ):
         locator_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
-        if tile_id not in locator_map:
-            calc_engine_id = [
+        if obj_id not in locator_map:
+            locator_id = [
                 id
                 for id, c in locator_map.items()
-                if c.preferred_locator == "CalculationEngine"
+                if c.preferred_locator == parent_locator
             ][0]
+            save_token = locator_map[locator_id].save_token + 1
 
-            component_info = TSPArchiveMessages.ComponentInfo(
-                identifier=tile_id,
-                # document_read_version=[2, 0, 0],
-                # document_write_version=[2, 0, 0],
-                # is_stored_outside_object_archive=False,
-                locator="Tables/Tile-" + str(tile_id),
-                preferred_locator="Tables/Tile",
-                save_token=locator_map[calc_engine_id].save_token,
-            )
-
-            self.objects[PACKAGE_ID].components.append(component_info)
-            locator_map[calc_engine_id].external_references.append(
-                TSPArchiveMessages.ComponentExternalReference(
-                    component_identifier=tile_id
+            if locator is not None:
+                locator = locator.format(obj_id)
+                preferred_locator = re.sub(r"\-\d+.*", "", locator)
+                component_info = TSPArchiveMessages.ComponentInfo(
+                    identifier=obj_id,
+                    locator=locator,
+                    preferred_locator=preferred_locator,
+                    save_token=save_token,
                 )
-            )
+                self.objects[PACKAGE_ID].components.append(component_info)
+                locator_map[locator_id].external_references.append(
+                    TSPArchiveMessages.ComponentExternalReference(
+                        component_identifier=obj_id
+                    )
+                )
+            else:
+                locator_map[locator_id].external_references.append(
+                    TSPArchiveMessages.ComponentExternalReference(
+                        component_identifier=locator_id, object_identifier=obj_id
+                    )
+                )
+
             self.objects.mark_as_dirty(PACKAGE_ID)
-            # self.objects.update_object(PACKAGE_ID, self.objects[PACKAGE_ID])
 
     def recalculate_table_data(self, table_id: int, data: List):
         table_model = self.objects[table_id]
@@ -689,7 +695,9 @@ class _NumbersModel:
                 tile_ref.tile.MergeFrom(TSPMessages.Reference(identifier=tile_id))
                 base_data_store.tiles.tiles.append(tile_ref)
 
-                self.update_tile_package_metadata(tile_id)
+                self.update_package_metadata(
+                    tile_id, "CalculationEngine", "Tables/Tile-{}"
+                )
 
                 # TODO: is this requied?
                 base_data_store.rowTileTree.nodes.append(
@@ -713,7 +721,9 @@ class _NumbersModel:
                     )
                     tile.rowInfos.append(row_info)
 
-                self.update_tile_package_metadata(tile_id)
+                self.update_package_metadata(
+                    tile_id, "CalculationEngine", "Tables/Tile-{}"
+                )
 
             tile_idx += 1
 
@@ -736,17 +746,9 @@ class _NumbersModel:
         }
         return style_sheet_map
 
-    def add_sheet(self, sheet_name: str, table_name: str, from_sheet: int):
-        from_table_id = self.table_ids(from_sheet._sheet_id)[0]
+    def add_table(self, sheet_id: int, table_name: str) -> int:
+        from_table_id = self.table_ids(sheet_id)[-1]
         from_table = self.objects[from_table_id]
-
-        sheet_id, sheet_archive = self.objects.create_object_from_dict(
-            "Document", {"name": sheet_name}, TNArchives.SheetArchive
-        )
-
-        self.objects[DOCUMENT_ID].sheets.append(
-            TSPMessages.Reference(identifier=sheet_id)
-        )
 
         table_strings_id, table_strings = self.create_string_table()
 
@@ -754,8 +756,8 @@ class _NumbersModel:
             "CalculationEngine",
             {
                 "table_id": str(uuid1()).upper(),
-                "number_of_rows": 22,
-                "number_of_columns": 7,
+                "number_of_rows": DEFAULT_ROW_COUNT,
+                "number_of_columns": DEFAULT_COLUMN_COUNT,
                 "table_name": table_name,
                 "default_row_height": 20.0,
                 "default_column_width": 98.0,
@@ -767,6 +769,9 @@ class _NumbersModel:
             "Index/Tables/HeaderStorageBucket-{}",
             {"bucketHashFunction": 1},
             TSTArchives.HeaderStorageBucket,
+        )
+        self.update_package_metadata(
+            column_headers_id, "DocumentStylesheet", "Tables/DataList-{}"
         )
 
         table_model.base_data_store.MergeFrom(
@@ -782,14 +787,20 @@ class _NumbersModel:
         )
 
         data = [
-            [EmptyCell(row_num, col_num, None) for col_num in range(0, 7)]
-            for row_num in range(0, 22)
+            [
+                EmptyCell(row_num, col_num, None)
+                for col_num in range(0, DEFAULT_COLUMN_COUNT)
+            ]
+            for row_num in range(0, DEFAULT_ROW_COUNT)
         ]
 
         row_headers_id, _ = self.objects.create_object_from_dict(
             "Index/Tables/HeaderStorageBucket-{}",
             {"bucketHashFunction": 1},
             TSTArchives.HeaderStorageBucket,
+        )
+        self.update_package_metadata(
+            row_headers_id, "DocumentStylesheet", "Tables/DataList-{}"
         )
         table_model.base_data_store.rowHeaders.buckets.append(
             TSPMessages.Reference(identifier=row_headers_id)
@@ -802,6 +813,9 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
             TSTArchives.TableDataList,
         )
+        self.update_package_metadata(
+            style_table_id, "DocumentStylesheet", "Tables/DataList-{}"
+        )
         table_model.base_data_store.styleTable.MergeFrom(
             TSPMessages.Reference(identifier=style_table_id)
         )
@@ -811,6 +825,9 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.FORMULA, "nextListID": 1},
             TSTArchives.TableDataList,
         )
+        self.update_package_metadata(
+            formula_table_id, "DocumentStylesheet", "Tables/DataList-{}"
+        )
         table_model.base_data_store.formula_table.MergeFrom(
             TSPMessages.Reference(identifier=formula_table_id)
         )
@@ -819,6 +836,9 @@ class _NumbersModel:
             "Index/Tables/TableDataList-{}",
             {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
             TSTArchives.TableDataList,
+        )
+        self.update_package_metadata(
+            format_table_pre_bnc_id, "DocumentStylesheet", "Tables/DataList-{}"
         )
         table_model.base_data_store.format_table_pre_bnc.MergeFrom(
             TSPMessages.Reference(identifier=format_table_pre_bnc_id)
@@ -840,8 +860,6 @@ class _NumbersModel:
                 TSPMessages.Reference(identifier=getattr(from_table, field).identifier)
             )
 
-        # create TST.TableInfoArchive with parent = sheet_id
-
         table_info_id, table_info = self.objects.create_object_from_dict(
             "CalculationEngine",
             {},
@@ -850,7 +868,52 @@ class _NumbersModel:
         table_info.tableModel.MergeFrom(
             TSPMessages.Reference(identifier=table_model_id)
         )
-        table_info.super.parent.MergeFrom(TSPMessages.Reference(identifier=sheet_id))
+        drawable = TSDArchives.DrawableArchive(
+            parent=TSPMessages.Reference(identifier=sheet_id),
+            geometry=TSDArchives.GeometryArchive(
+                angle=0.0,
+                flags=3,
+                position=TSPMessages.Point(x=0.0, y=400.0),
+                size=TSPMessages.Size(height=200.0, width=500.0),
+            ),
+        )
+        table_info.super.MergeFrom(drawable)
+
+        self.objects[sheet_id].drawable_infos.append(
+            TSPMessages.Reference(identifier=table_info_id)
+        )
+
+        # TODO (1): is this required?
+        new_tree_node_id, tree_node = self.objects.create_object_from_dict(
+            "Document",
+            {},
+            TSKArchives.TreeNode,
+        )
+        tree_node.object.MergeFrom(TSPMessages.Reference(identifier=table_info_id))
+        for tree_node_id in self.objects.find_refs("TreeNode"):
+            if self.objects[tree_node_id].object.identifier == sheet_id:
+                self.objects[tree_node_id].children.append(
+                    TSPMessages.Reference(identifier=new_tree_node_id)
+                )
+        # TODO (2): is this required
+        self.update_package_metadata(table_info_id, "CalculationEngine")
+
+        return table_model_id
+
+    def add_sheet(self, sheet_name: str, table_name: str, from_sheet: int):
+        sheet_id, sheet_archive = self.objects.create_object_from_dict(
+            "Document", {"name": sheet_name}, TNArchives.SheetArchive
+        )
+
+        table_info_id = self.add_table(from_sheet, table_name)
+
+        self.objects[DOCUMENT_ID].sheets.append(
+            TSPMessages.Reference(identifier=sheet_id)
+        )
+
+        sheet_archive.drawable_infos.append(
+            TSPMessages.Reference(identifier=table_info_id)
+        )
 
         return sheet_id
 

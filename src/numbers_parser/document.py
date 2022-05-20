@@ -36,7 +36,7 @@ class Document:
                 self._model.recalculate_table_data(table._table_id, table._data)
         write_numbers_file(filename, self._model.file_store)
 
-    def add_sheet(self, sheet_name=None, table_name=None):
+    def add_sheet(self, sheet_name=None, table_name=None) -> object:
         """Add a new sheet to the current document. If no sheet name is provided,
         the next available numbered sheet will be generated"""
         if sheet_name is not None:
@@ -53,6 +53,7 @@ class Document:
 
         new_sheet_id = self._model.add_sheet(sheet_name, table_name, self._sheets[-1])
         self._sheets.append(Sheet(self._model, new_sheet_id))
+        return self._sheets[-1]
 
 
 class Sheet:
@@ -72,6 +73,22 @@ class Sheet:
     @name.setter
     def name(self, value):
         self._model.sheet_name(self._sheet_id, value)
+
+    def add_table(self, table_name=None) -> object:
+        """Add a new table to the current sheet. If no sheet name is provided,
+        the next available numbered sheet will be generated"""
+        if table_name is not None:
+            if table_name in self._tables:
+                raise IndexError(f"table '{table_name}' already exists")
+        else:
+            table_num = 1
+            while f"table {table_num}" in self._tables:
+                table_num += 1
+            table_name = f"Table {table_num}"
+
+        new_table_id = self._model.add_table(self._sheet_id, table_name)
+        self._tables.append(Table(self._model, new_table_id))
+        return self._tables[-1]
 
 
 class Table:
