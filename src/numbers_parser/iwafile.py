@@ -281,12 +281,17 @@ def get_archive_info_and_remainder(buf):
 
 def create_iwa_segment(id: int, cls: object, object_dict: dict) -> object:
     full_name = cls.DESCRIPTOR.full_name
+    # TODO: fix the ID mapping hack
+    if full_name == "TST.TableDataList":
+        type_id = 6005
+    else:
+        type_id = NAME_ID_MAP[full_name]
     header = {
         "_pbtype": "TSP.ArchiveInfo",
         "identifier": str(id),
         "messageInfos": [
             {
-                "type": NAME_ID_MAP[full_name],
+                "type": type_id,
                 "version": [1, 0, 5],
             }
         ],
@@ -296,3 +301,34 @@ def create_iwa_segment(id: int, cls: object, object_dict: dict) -> object:
 
     iwa_segment = IWAArchiveSegment.from_dict(archive_dict)
     return iwa_segment
+
+
+def find_references(obj, references=list):
+    if not hasattr(obj, "DESCRIPTOR"):
+        return
+    elif type(obj).__name__ == "Reference":
+        references.append(obj.identifier)
+        return
+    for field_desc in obj.ListFields():
+        _, field = field_desc
+        if type(field).__name__ == "Reference":
+            references.append(field.identifier)
+        elif "Repeated" in type(field).__name__:
+            for item in field:
+                find_references(item, references)
+        elif hasattr(field, "DESCRIPTOR"):
+            find_references(field, references)
+
+
+def copy_object_to_iwa_file(iwa_file: IWAFile, obj: object, obj_id: int):
+    for archive in iwa_file.chunks[0].archives:
+        if archive.header.identifier == obj_id:
+            archive.objects[0].CopyFrom(obj)
+            references = []
+            find_references(archive.objects[0], references)
+            if len(references) > 0:
+                msg_info = archive.header.message_infos[0]
+                while len(msg_info.object_references) > 0:
+                    _ = msg_info.object_references.pop()
+                for reference in references:
+                    msg_info.object_references.append(reference)

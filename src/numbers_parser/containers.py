@@ -1,5 +1,5 @@
 from numbers_parser.file import read_numbers_file
-from numbers_parser.iwafile import create_iwa_segment, IWAFile
+from numbers_parser.iwafile import create_iwa_segment, copy_object_to_iwa_file, IWAFile
 
 
 class ItemsList:
@@ -37,11 +37,14 @@ class ObjectStore:
     def __init__(self, path: str) -> int:
         self._objects = {}
         self._file_store = {}
+        self._object_to_filename_map = {}
         self._dirty = {}
         read_numbers_file(
             path,
             file_handler=lambda filename, blob: self._store_file(filename, blob),
-            object_handler=lambda identifier, obj: self._store_object(identifier, obj),
+            object_handler=lambda identifier, obj, filename: self._store_object(
+                identifier, obj, filename
+            ),
         )
 
     def _new_message_id(self):
@@ -73,6 +76,7 @@ class ObjectStore:
             self._file_store[iwa_pathname].chunks[0].archives.append(iwa_segment)
 
         self._objects[new_id] = cls(**object_dict)
+        self._object_to_filename_map[new_id] = iwa_pathname
         self.mark_as_dirty(new_id)
         return new_id, self._objects[new_id]
 
@@ -80,15 +84,15 @@ class ObjectStore:
         """Copy the protobuf messages from any updated object to the cached
         version in the file store so this can be saved to a new document"""
         for obj_id in self._dirty.keys():
-            for filename, blob in self._file_store.items():
-                if type(blob) != IWAFile:
-                    continue
-                for archive in blob.chunks[0].archives:
-                    if archive.header.identifier == obj_id:
-                        archive.objects[0].CopyFrom(self._objects[obj_id])
+            copy_object_to_iwa_file(
+                self._file_store[self._object_to_filename_map[obj_id]],
+                self._objects[obj_id],
+                obj_id,
+            )
 
-    def _store_object(self, identifier, obj):
+    def _store_object(self, identifier, obj, filename):
         self._objects[identifier] = obj
+        self._object_to_filename_map[identifier] = filename
 
     def _store_file(self, filename, blob):
         self._file_store[filename] = blob
