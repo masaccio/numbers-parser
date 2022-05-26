@@ -28,4 +28,8 @@
     "esbonio.server.enabled": true,
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build",
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc",
+    "todo-tree.general.tags": [
+        "TODO",
+        "FIXME"
+    ]
 }
