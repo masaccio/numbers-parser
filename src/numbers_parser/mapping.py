@@ -1,11 +1,12 @@
-
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSCH3DArchives_pb2 as TSCH3DArchives
 from numbers_parser.generated import TSSArchives_pb2 as TSSArchives
 from numbers_parser.generated import TSAArchives_sos_pb2 as TSAArchives_sos
 from numbers_parser.generated import TSCHArchives_GEN_pb2 as TSCHArchives_GEN
-from numbers_parser.generated import TSTStylePropertyArchiving_pb2 as TSTStylePropertyArchiving
+from numbers_parser.generated import (
+    TSTStylePropertyArchiving_pb2 as TSTStylePropertyArchiving,
+)
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSDCommandArchives_pb2 as TSDCommandArchives
 from numbers_parser.generated import TSCHPreUFFArchives_pb2 as TSCHPreUFFArchives
@@ -26,7 +27,9 @@ from numbers_parser.generated import TNArchives_sos_pb2 as TNArchives_sos
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSTCommandArchives_pb2 as TSTCommandArchives
 from numbers_parser.generated import TSCHArchives_pb2 as TSCHArchives
-from numbers_parser.generated import TSACommandArchives_sos_pb2 as TSACommandArchives_sos
+from numbers_parser.generated import (
+    TSACommandArchives_sos_pb2 as TSACommandArchives_sos,
+)
 from numbers_parser.generated import TSTArchives_sos_pb2 as TSTArchives_sos
 from numbers_parser.generated import TSAArchives_pb2 as TSAArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
@@ -66,7 +69,6 @@ PROTO_FILES = [
     TSAArchives,
     TSCEArchives,
     TSCHArchives_Common,
-
 ]
 
 TSPRegistryMapping = {
@@ -631,20 +633,20 @@ TSPRegistryMapping = {
     "12056": "TN.FormBuilderSelectionTransformerArchive",
     "12057": "TN.FormViewerSelectionTransformerArchive",
     "12058": "TN.FormSheetSelectionTransformerArchive",
-
 }
+
 
 def compute_maps():
     name_class_map = {}
 
     def add_nested_types(message_type):
-        for name in message_type.DESCRIPTOR.nested_types_by_name:
+        for name in dict(message_type.DESCRIPTOR.nested_types_by_name):
             child_type = getattr(message_type, name)
             name_class_map[child_type.DESCRIPTOR.full_name] = child_type
             add_nested_types(child_type)
 
     for file in PROTO_FILES:
-        for message_name in file.DESCRIPTOR.message_types_by_name:
+        for message_name in dict(file.DESCRIPTOR.message_types_by_name):
             message_type = getattr(file, message_name)
             name_class_map[message_type.DESCRIPTOR.full_name] = message_type
             add_nested_types(message_type)
