@@ -109,3 +109,11 @@ def test_issue_17():
     assert table.cell(0, 0).value == 123.0
     assert table.cell(0, 0).is_merged == False
     assert table.cell(0, 0).formula == None
+
+
+def test_issue_32():
+    doc = Document("tests/data/issue-32.numbers")
+    sheets = doc.sheets()
+    table = sheets[0].tables()[0]
+    assert table.cell("A3").value == "Foo"
+    assert table.cell("D4").value == 3
