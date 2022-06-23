@@ -116,3 +116,11 @@ def test_issue_18():
     sheets = doc.sheets()
     table = sheets[0].tables()[0]
     assert table.merge_ranges == ["B3:D3"]
+
+
+def test_issue_32():
+    doc = Document("tests/data/issue-32.numbers")
+    sheets = doc.sheets()
+    table = sheets[0].tables()[0]
+    assert table.cell("A3").value == "Foo"
+    assert table.cell("D4").value == 3

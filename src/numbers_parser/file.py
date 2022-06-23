@@ -33,8 +33,9 @@ def read_numbers_file(path, file_handler=None, object_handler=None):
         except BadZipFile as e:  # pragma: no cover
             raise FileError(f"{path}: " + str(e))
 
-        if "Index.zip" in zipf.namelist():
-            index_data = BytesIO(zipf.read("Index.zip"))
+        index_zip = [f for f in zipf.namelist() if f.lower().endswith("index.zip")]
+        if len(index_zip) > 0:
+            index_data = BytesIO(zipf.read(index_zip[0]))
             _get_objects_from_zip_stream(
                 ZipFile(index_data), file_handler, object_handler
             )
