@@ -58,13 +58,31 @@ def test_save_merges(tmp_path):
 @pytest.mark.experimental
 def test_create_sheet(tmp_path, pytestconfig):
     doc = Document()
+    sheets = doc.sheets()
+    sheets[0].tables()[0].write("B2", "data")
+    sheets[0].tables()[0].write("G2", "data")
 
     with pytest.raises(IndexError) as e:
-        _ = doc.add_sheet("SheeT 1")
-    assert "sheet 'SheeT 1' already exists" in str(e.value)
+        _ = sheets[0].add_table("TablE 1")
+    assert "table 'TablE 1' already exists" in str(e.value)
 
-    doc.add_sheet()
-    doc.add_sheet("New Sheet", "New Table")
+    # sheets[0].modify_table()
+    # table = sheets[0].tables()[0]
+
+    table = sheets[0].add_table()
+    assert table.name == "Table 2"
+    table.write("B1", "Column B")
+    table.write("C1", "Column C")
+    table.write("D1", "Column D")
+    table.write("B2", "Mary had")
+    table.write("C2", "a little")
+    table.write("D2", "lamb")
+
+    # with pytest.raises(IndexError) as e:
+    #     _ = doc.add_sheet("SheeT 1")
+    # assert "sheet 'SheeT 1' already exists" in str(e.value)
+
+    # doc.add_sheet("New Sheet", "New Table")
     # sheet = doc.sheets()["New Sheet"]
     # table = sheet.tables()["New Table"]
     # table.write(0, 1, "Column 1")
@@ -74,9 +92,6 @@ def test_create_sheet(tmp_path, pytestconfig):
     # table.write(1, 2, 2000)
     # table.write(1, 3, 3000)
 
-    import pdb
-
-    pdb.set_trace()
     if pytestconfig.getoption("save_file") is not None:
         new_filename = pytestconfig.getoption("save_file")
     else:
@@ -85,13 +100,24 @@ def test_create_sheet(tmp_path, pytestconfig):
 
     doc = Document(new_filename)
     sheets = doc.sheets()
-    assert sheets[2].name == "New Sheet"
 
-    table = sheets[1].tables()[0]
-    assert table.name == "New Table"
+    table = sheets[0].tables()[0]
+    # table = sheets[0].tables()[1]
+    # assert sheets[0].tables()[1].name == "Table 2"
+    assert table.cell("B1").value == "Column B"
+    assert table.cell("C1").value == "Column C"
+    assert table.cell("D1").value == "Column D"
+    assert table.cell("B2").value == "Mary had"
+    assert table.cell("C2").value == "a little"
+    assert table.cell("D2").value == "lamb"
 
-    assert type(table.cells(0, 1)) == TextCell
-    assert table.cells(0, 1).value == "Column 1"
-    assert type(table.cells(0, 1)) == TextCell
-    assert type(table.cells(1, 3)) == NumberCell
-    assert table.cells(1, 3).value == 3000
+    # assert sheets[2].name == "New Sheet"
+
+    # table = sheets[1].tables()[0]
+    # assert table.name == "New Table"
+
+    # assert type(table.cells(0, 1)) == TextCell
+    # assert table.cells(0, 1).value == "Column 1"
+    # assert type(table.cells(0, 1)) == TextCell
+    # assert type(table.cells(1, 3)) == NumberCell
+    # assert table.cells(1, 3).value == 3000

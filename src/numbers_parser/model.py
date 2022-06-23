@@ -606,36 +606,48 @@ class _NumbersModel:
         return row_info
 
     def update_package_metadata(
-        self, obj_id: int, parent_locator: str, locator: str = None
+        self, obj_id: int, parent: str, locator: str = None, derived=False
     ):
-        locator_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
-        if obj_id not in locator_map:
-            locator_id = [
-                id
-                for id, c in locator_map.items()
-                if c.preferred_locator == parent_locator
+        component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
+        if obj_id not in component_map:
+            component_id = [
+                id for id, c in component_map.items() if c.preferred_locator == parent
             ][0]
-            save_token = locator_map[locator_id].save_token + 1
 
-            if locator is not None:
-                locator = locator.format(obj_id)
-                preferred_locator = re.sub(r"\-\d+.*", "", locator)
-                component_info = TSPArchiveMessages.ComponentInfo(
-                    identifier=obj_id,
-                    locator=locator,
-                    preferred_locator=preferred_locator,
-                    save_token=save_token,
-                )
-                self.objects[PACKAGE_ID].components.append(component_info)
-                locator_map[locator_id].external_references.append(
-                    TSPArchiveMessages.ComponentExternalReference(
-                        component_identifier=obj_id
+            if component_id is not None:
+                if locator is not None:
+                    locator = locator.format(obj_id)
+                    preferred_locator = re.sub(r"\-\d+.*", "", locator)
+                    component_info = TSPArchiveMessages.ComponentInfo(
+                        identifier=obj_id,
+                        locator=locator,
+                        preferred_locator=preferred_locator,
+                        save_token=1,
                     )
-                )
+                else:
+                    component_info = TSPArchiveMessages.ComponentInfo(
+                        identifier=obj_id,
+                        preferred_locator=parent,
+                        save_token=1,
+                    )
+
+                self.objects[PACKAGE_ID].components.append(component_info)
+                if derived:
+                    component_map[component_id].external_references.append(
+                        TSPArchiveMessages.ComponentExternalReference(
+                            component_identifier=component_id, object_identifier=obj_id
+                        )
+                    )
+                else:
+                    component_map[component_id].external_references.append(
+                        TSPArchiveMessages.ComponentExternalReference(
+                            component_identifier=obj_id
+                        )
+                    )
             else:
-                locator_map[locator_id].external_references.append(
+                component_map[component_id].external_references.append(
                     TSPArchiveMessages.ComponentExternalReference(
-                        component_identifier=locator_id, object_identifier=obj_id
+                        component_identifier=component_id, object_identifier=obj_id
                     )
                 )
 
@@ -694,12 +706,13 @@ class _NumbersModel:
                 tile_ref.tileid = tile_idx
                 tile_ref.tile.MergeFrom(TSPMessages.Reference(identifier=tile_id))
                 base_data_store.tiles.tiles.append(tile_ref)
+                base_data_store.tiles.tile_size = MAX_TILE_SIZE
 
                 self.update_package_metadata(
                     tile_id, "CalculationEngine", "Tables/Tile-{}"
                 )
 
-                # TODO: is this requied?
+                # TODO: is this required?
                 base_data_store.rowTileTree.nodes.append(
                     TSTArchives.TableRBTree.Node(key=row_start, value=tile_idx)
                 )
@@ -750,7 +763,11 @@ class _NumbersModel:
         from_table_id = self.table_ids(sheet_id)[-1]
         from_table = self.objects[from_table_id]
 
+        print("\n")
+
         table_strings_id, table_strings = self.create_string_table()
+
+        print(f"table_strings_id = {table_strings_id}")
 
         table_model_id, table_model = self.objects.create_object_from_dict(
             "CalculationEngine",
@@ -765,13 +782,17 @@ class _NumbersModel:
             TSTArchives.TableModelArchive,
         )
 
-        column_headers_id, _ = self.objects.create_object_from_dict(
+        print(f"table_model_id = {table_model_id}")
+
+        column_headers_id, column_headers = self.objects.create_object_from_dict(
             "Index/Tables/HeaderStorageBucket-{}",
             {"bucketHashFunction": 1},
             TSTArchives.HeaderStorageBucket,
         )
+        print(f"column_headers_id = {column_headers_id}")
+
         self.update_package_metadata(
-            column_headers_id, "DocumentStylesheet", "Tables/DataList-{}"
+            column_headers_id, "DocumentStylesheet", "Tables/DataList-{}", True
         )
 
         table_model.base_data_store.MergeFrom(
@@ -783,6 +804,7 @@ class _NumbersModel:
                 nextColumnStripID=0,
                 rowTileTree=TSTArchives.TableRBTree(),
                 columnTileTree=TSTArchives.TableRBTree(),
+                tiles=TSTArchives.TileStorage(tile_size=256, should_use_wide_rows=True),
             )
         )
 
@@ -799,8 +821,10 @@ class _NumbersModel:
             {"bucketHashFunction": 1},
             TSTArchives.HeaderStorageBucket,
         )
+        print(f"row_headers_id = {row_headers_id}")
+
         self.update_package_metadata(
-            row_headers_id, "DocumentStylesheet", "Tables/DataList-{}"
+            row_headers_id, "DocumentStylesheet", "Tables/DataList-{}", True
         )
         table_model.base_data_store.rowHeaders.buckets.append(
             TSPMessages.Reference(identifier=row_headers_id)
@@ -813,8 +837,10 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
             TSTArchives.TableDataList,
         )
+        print(f"style_table_id = {style_table_id}")
+
         self.update_package_metadata(
-            style_table_id, "DocumentStylesheet", "Tables/DataList-{}"
+            style_table_id, "DocumentStylesheet", "Tables/DataList-{}", True
         )
         table_model.base_data_store.styleTable.MergeFrom(
             TSPMessages.Reference(identifier=style_table_id)
@@ -825,8 +851,10 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.FORMULA, "nextListID": 1},
             TSTArchives.TableDataList,
         )
+        print(f"formula_table_id = {formula_table_id}")
+
         self.update_package_metadata(
-            formula_table_id, "DocumentStylesheet", "Tables/DataList-{}"
+            formula_table_id, "DocumentStylesheet", "Tables/DataList-{}", True
         )
         table_model.base_data_store.formula_table.MergeFrom(
             TSPMessages.Reference(identifier=formula_table_id)
@@ -837,12 +865,16 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
             TSTArchives.TableDataList,
         )
+        print(f"format_table_pre_bnc_id = {format_table_pre_bnc_id}")
+
         self.update_package_metadata(
-            format_table_pre_bnc_id, "DocumentStylesheet", "Tables/DataList-{}"
+            format_table_pre_bnc_id, "DocumentStylesheet", "Tables/DataList-{}", True
         )
         table_model.base_data_store.format_table_pre_bnc.MergeFrom(
             TSPMessages.Reference(identifier=format_table_pre_bnc_id)
         )
+
+        # TODO: fix package metadata references
 
         for field in [
             "table_style",
@@ -865,6 +897,8 @@ class _NumbersModel:
             {},
             TSTArchives.TableInfoArchive,
         )
+        print(f"table_info_id = {table_info_id}")
+
         table_info.tableModel.MergeFrom(
             TSPMessages.Reference(identifier=table_model_id)
         )
