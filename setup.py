@@ -24,7 +24,7 @@ setup(
         ],
     },
     package_data={"": ["data/*.numbers"]},
-    install_requires=["protobuf", "python-snappy", "regex", "roman"],
+    install_requires=["protobuf>=3.20.1", "python-snappy", "regex", "roman"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
