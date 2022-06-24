@@ -3,7 +3,7 @@ import pytest
 from numbers_parser import Document
 
 
-def test_read_folder():
+def test_api_change():
     doc = Document("tests/data/test-1.numbers")
 
     with pytest.warns(DeprecationWarning) as record:
