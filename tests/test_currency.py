@@ -21,7 +21,7 @@ STATEMENT_REF = [
 
 def test_currencies():
     doc = Document("tests/data/test-2.numbers")
-    sheets = doc.sheets()
-    tables = sheets["Account"].tables()
+    sheets = doc.sheets
+    tables = sheets["Account"].tables
     data = tables["Statement"].rows(values_only=True)
     assert data == STATEMENT_REF

@@ -52,9 +52,9 @@ def compare_tables(table, ref):
 
 def test_table_functions():
     doc = Document("tests/data/test-10.numbers")
-    sheets = doc.sheets()
-    table = sheets[0].tables()[0]
+    sheets = doc.sheets
+    table = sheets[0].tables[0]
     compare_tables(table, TABLE_1_FORMULAS)
 
-    table = sheets[1].tables()[0]
+    table = sheets[1].tables[0]
     compare_tables(table, TABLE_2_FORMULAS)

@@ -9,8 +9,8 @@ DOCUMENT = "tests/data/test-all-forumulas.numbers"
 
 def compare_table_functions(sheet_name, filename=DOCUMENT):
     doc = Document(filename)
-    sheet = doc.sheets()[sheet_name]
-    table = sheet.tables()["Tests"]
+    sheet = doc.sheets[sheet_name]
+    table = sheet.tables["Tests"]
     for i, row in enumerate(table.rows()):
         if i == 0 or not row[3].value:
             # Skip header and invalid test rows

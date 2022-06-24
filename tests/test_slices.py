@@ -5,8 +5,8 @@ from numbers_parser import Document, NumberCell
 
 def test_exceptions():
     doc = Document("tests/data/test-7.numbers")
-    sheets = doc.sheets()
-    tables = sheets["ZZZ_Sheet_1"].tables()
+    sheets = doc.sheets
+    tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_1"]
     with pytest.raises(IndexError) as e:
         _ = table.cell("XYZ")
@@ -24,8 +24,8 @@ def test_exceptions():
 
 def test_iter_row_exceptions():
     doc = Document("tests/data/test-7.numbers")
-    sheets = doc.sheets()
-    tables = sheets["ZZZ_Sheet_1"].tables()
+    sheets = doc.sheets
+    tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_1"]
     with pytest.raises(IndexError) as e:
         _ = [x for x in table.iter_rows(max_row=999)]
@@ -43,8 +43,8 @@ def test_iter_row_exceptions():
 
 def test_iter_col_exceptions():
     doc = Document("tests/data/test-7.numbers")
-    sheets = doc.sheets()
-    tables = sheets["ZZZ_Sheet_1"].tables()
+    sheets = doc.sheets
+    tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_1"]
     with pytest.raises(IndexError) as e:
         _ = [x for x in table.iter_cols(max_row=999)]
@@ -62,8 +62,8 @@ def test_iter_col_exceptions():
 
 def test_cell_lookup():
     doc = Document("tests/data/test-7.numbers")
-    sheets = doc.sheets()
-    tables = sheets["ZZZ_Sheet_1"].tables()
+    sheets = doc.sheets
+    tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_1"]
     assert table.num_cols == 5
     assert table.num_rows == 4
@@ -74,8 +74,8 @@ def test_cell_lookup():
 
 def test_cell_ref_lookup():
     doc = Document("tests/data/test-7.numbers")
-    sheets = doc.sheets()
-    tables = sheets["ZZZ_Sheet_1"].tables()
+    sheets = doc.sheets
+    tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_1"]
     assert table.cell("A1").value == "XXX_COL_1"
     assert table.cell("C3").value is None
@@ -90,8 +90,8 @@ def test_cell_ref_lookup():
 
 def test_cell_wide_ref():
     doc = Document("tests/data/test-7.numbers")
-    sheets = doc.sheets()
-    tables = sheets["ZZZ_Sheet_2"].tables()
+    sheets = doc.sheets
+    tables = sheets["ZZZ_Sheet_2"].tables
     table = tables["XXX_Table_1"]
     assert table.cell("").value == "excepteur"  #  defaults to [0, 0]
     assert table.cell("A1").value == "excepteur"
@@ -102,8 +102,8 @@ def test_cell_wide_ref():
 
 def test_row_iterator():
     doc = Document("tests/data/test-7.numbers")
-    sheets = doc.sheets()
-    tables = sheets["ZZZ_Sheet_1"].tables()
+    sheets = doc.sheets
+    tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_2"]
     val = 0
     for row in table.iter_rows():
@@ -121,8 +121,8 @@ def test_row_iterator():
 
 def test_col_iterator():
     doc = Document("tests/data/test-7.numbers")
-    sheets = doc.sheets()
-    tables = sheets["ZZZ_Sheet_1"].tables()
+    sheets = doc.sheets
+    tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_2"]
     val = 0
     for col in table.iter_cols():

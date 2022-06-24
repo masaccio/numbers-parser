@@ -43,15 +43,15 @@ YYY_TABLE_1_REF = [
 
 def test_cell_merging():
     doc = Document("tests/data/test-4.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     data = tables["ZZZ_Table_1"].rows(values_only=True)
     assert data == ZZZ_TABLE_1_REF
 
 
 def test_cell_types():
     doc = Document("tests/data/test-4.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     data = tables["ZZZ_Table_2"].rows(values_only=True)
     assert data == ZZZ_TABLE_2_REF

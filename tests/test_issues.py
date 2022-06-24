@@ -40,8 +40,8 @@ ISSUE_10_REF = [
 
 def test_issue_3():
     doc = Document("tests/data/issue-3.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     table = tables[0]
     ref = []
     for row in tables[0].iter_rows():
@@ -56,8 +56,8 @@ def test_issue_3():
 
 def test_issue_4():
     doc = Document("tests/data/issue-4.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     table = tables[0]
     assert table.cell(1, 0).value == ISSUE_4_REF_1
     assert table.cell(1, 1).value == ISSUE_4_REF_2
@@ -67,8 +67,8 @@ def test_issue_4():
 
 def test_issue_7():
     doc = Document("tests/data/issue-7.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     table = tables[0]
     assert table.cell(1, 1).value == ISSUE_7_REF_1
     assert table.cell(2, 1).value == ISSUE_7_REF_2
@@ -78,14 +78,14 @@ def test_issue_7():
 
 def test_issue_9():
     doc = Document("tests/data/issue-9.numbers")
-    sheets = doc.sheets()
+    sheets = doc.sheets
     assert len(sheets) == 7
 
 
 def test_issue_10():
     doc = Document("tests/data/issue-10.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     table = tables[0]
     for i, test_value in enumerate(ISSUE_10_REF):
         assert table.cell(i + 1, 1).value == test_value
@@ -93,19 +93,19 @@ def test_issue_10():
 
 def test_issue_14():
     doc = Document("tests/data/issue-14.numbers")
-    sheets = doc.sheets()
-    table = sheets["Ex 1"].tables()[0]
+    sheets = doc.sheets
+    table = sheets["Ex 1"].tables[0]
     assert table.cell("G2").value == 19
     assert table.cell("G2").formula == "XLOOKUP(F2,A2:A15,B2:B15)"
-    table = sheets["Ex 6"].tables()[0]
+    table = sheets["Ex 6"].tables[0]
     assert table.cell("F2").value == "Pam"
     assert table.cell("F2").formula == "XLOOKUP(F1,$B$2:$B$15,$A$2:$A$15,,,-1)"
 
 
 def test_issue_17():
     doc = Document("tests/data/issue-17.numbers")
-    sheets = doc.sheets()
-    table = sheets[0].tables()[0]
+    sheets = doc.sheets
+    table = sheets[0].tables[0]
     assert table.cell(0, 0).value == 123.0
     assert table.cell(0, 0).is_merged == False
     assert table.cell(0, 0).formula == None
@@ -113,14 +113,14 @@ def test_issue_17():
 
 def test_issue_18():
     doc = Document("tests/data/issue-18.numbers")
-    sheets = doc.sheets()
-    table = sheets[0].tables()[0]
+    sheets = doc.sheets
+    table = sheets[0].tables[0]
     assert table.merge_ranges == ["B3:D3"]
 
 
 def test_issue_32():
     doc = Document("tests/data/issue-32.numbers")
-    sheets = doc.sheets()
-    table = sheets[0].tables()[0]
+    sheets = doc.sheets
+    table = sheets[0].tables[0]
     assert table.cell("A3").value == "Foo"
     assert table.cell("D4").value == 3

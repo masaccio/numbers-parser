@@ -50,13 +50,13 @@ def command_line_parser():
 
 
 def print_sheet_names(filename):
-    for sheet in Document(filename).sheets():
+    for sheet in Document(filename).sheets:
         print(f"{filename}: {sheet.name}")
 
 
 def print_table_names(filename):
-    for sheet in Document(filename).sheets():
-        for table in sheet.tables():
+    for sheet in Document(filename).sheets:
+        for table in sheet.tables:
             print(f"{filename}: {sheet.name}: {table.name}")
 
 
@@ -72,10 +72,10 @@ def cell_as_string(args, cell):
 
 
 def print_table(args, filename):
-    for sheet in Document(filename).sheets():
+    for sheet in Document(filename).sheets:
         if args.sheet is not None and sheet.name not in args.sheet:
             continue
-        for table in sheet.tables():
+        for table in sheet.tables:
             if args.table is not None and table.name not in args.table:
                 continue
             for row in table.rows():

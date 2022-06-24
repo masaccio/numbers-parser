@@ -22,8 +22,8 @@ TEST_NUMBERED_REF = [
 
 def test_bullets():
     doc = Document("tests/data/test-formats.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     table = tables[0]
 
     assert table.cell(4, 2).bullets[0] == "star-bullet-1"

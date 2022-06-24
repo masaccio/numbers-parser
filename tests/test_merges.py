@@ -28,16 +28,16 @@ XXX_TABLE_1_CLASSES = [
 
 def test_table_contents():
     doc = Document("tests/data/test-9.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     data = tables[0].rows(values_only=True)
     assert data == XXX_TABLE_1_REF
 
 
 def test_cell_classes():
     doc = Document("tests/data/test-9.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     data = []
     for row in tables[0].iter_rows():
         data.append([type(c).__name__ for c in row])
@@ -46,8 +46,8 @@ def test_cell_classes():
 
 def test_merge_references():
     doc = Document("tests/data/test-9.numbers")
-    sheets = doc.sheets()
-    table = sheets[0].tables()[0]
+    sheets = doc.sheets
+    table = sheets[0].tables[0]
     assert table.cell("B2").merge_range == "A2:B2"
     assert table.cell("C5").merge_range == "B5:E5"
     assert table.cell("B2").size == None
@@ -60,7 +60,7 @@ def test_merge_references():
     assert table.cell("C1").is_merged == False
     assert table.cell("D7").size == (2, 2)
 
-    table = sheets[1].tables()[0]
+    table = sheets[1].tables[0]
     assert table.cell("A1").is_merged
     assert table.cell("A1").size == (1, 2)
     assert table.cell("B4").is_merged
@@ -69,8 +69,8 @@ def test_merge_references():
 
 def test_all_merged_ranges():
     doc = Document("tests/data/test-9.numbers")
-    sheets = doc.sheets()
-    table = sheets[0].tables()[0]
+    sheets = doc.sheets
+    table = sheets[0].tables[0]
     assert table.merge_ranges == ["A2:B2", "B5:E5", "B6:B8", "C4:E4", "D7:E8"]
-    table = sheets[1].tables()[0]
+    table = sheets[1].tables[0]
     assert table.merge_ranges == ["A1:B1", "B4:C5"]

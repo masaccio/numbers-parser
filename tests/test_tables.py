@@ -40,7 +40,7 @@ EMPTY_ROWS_REF = [
 
 def test_sheet_exceptions():
     doc = Document("tests/data/test-1.numbers")
-    sheets = doc.sheets()
+    sheets = doc.sheets
     with pytest.raises(IndexError) as e:
         _ = sheets[3]
     assert "out of range" in str(e.value)
@@ -54,11 +54,11 @@ def test_sheet_exceptions():
 
 def test_names_refs():
     doc = Document("tests/data/test-1.numbers")
-    sheets = doc.sheets()
+    sheets = doc.sheets
     assert len(sheets) == 2
     assert sheets[0].name == "ZZZ_Sheet_1"
     assert sheets[1].name == "ZZZ_Sheet_2"
-    tables = sheets["ZZZ_Sheet_1"].tables()
+    tables = sheets["ZZZ_Sheet_1"].tables
     assert len(tables) == 2
     assert tables[0].name == "ZZZ_Table_1"
     assert tables[1].name == "ZZZ_Table_2"
@@ -68,8 +68,8 @@ def test_names_refs():
 
 def test_table_contents():
     doc = Document("tests/data/test-1.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     data = tables[0].rows(values_only=True)
     assert data == ZZZ_TABLE_1_REF
     data = tables[1].rows(values_only=True)
@@ -78,8 +78,8 @@ def test_table_contents():
 
 def test_table_contents_as_cells():
     doc = Document("tests/data/test-1.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     rows = tables[0].rows()
     for index in range(len(rows)):
         data = [cell.value or None for cell in rows[index]]
@@ -88,16 +88,16 @@ def test_table_contents_as_cells():
 
 def test_cell():
     doc = Document("tests/data/test-1.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     assert isinstance(tables[0].cell("A2"), TextCell)
     assert tables[0].cell("A2").value == "YYY_ROW_1"
 
 
 def test_empty_cells():
     doc = Document("tests/data/test-1.numbers")
-    sheets = doc.sheets()
-    tables = sheets["ZZZ_Sheet_2"].tables()
+    sheets = doc.sheets
+    tables = sheets["ZZZ_Sheet_2"].tables
     assert len(tables) == 1
     table = tables["XXX_Table_1"]
     assert table.num_cols == 6
@@ -107,7 +107,7 @@ def test_empty_cells():
 
 def test_empty_rows():
     doc = Document("tests/data/test-empty-rows.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     table = tables[0]
     assert table.rows(values_only=True) == EMPTY_ROWS_REF

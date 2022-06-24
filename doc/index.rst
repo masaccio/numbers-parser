@@ -56,11 +56,11 @@ A :py:class:`Document` object provides the primary interface to interacting with
 Referring to sheets and tables
 ------------------------------
 
-The :py:meth:`Document.sheets()` method returns a list of :py:class:`Sheet` objects which can be indexed either by a list offset or the sheet name:
+The :py:meth:`Document.sheets` method returns a list of :py:class:`Sheet` objects which can be indexed either by a list offset or the sheet name:
 
 .. code-block:: python
 
-  sheets = doc.sheets()
+  sheets = doc.sheets
   # list access method
   sheet_1 = sheets[0]
   print("Opened sheet", sheet_1.name)
@@ -69,11 +69,11 @@ The :py:meth:`Document.sheets()` method returns a list of :py:class:`Sheet` obje
   sheet_2 = sheets["Tax"]
   print("Opened sheet", sheet_2.name)
 
-In turn each :py:class:`Sheet` has a :py:meth:`Sheet.tables()` method returns a list of :py:class:`Table` objects which can be indexed either by a list offset or the table name:
+In turn each :py:class:`Sheet` has a :py:meth:`Sheet.tables` method returns a list of :py:class:`Table` objects which can be indexed either by a list offset or the table name:
 
 .. code-block:: python
 
-  tables = sheet.tables()
+  tables = sheet.tables
   # list access method
   table_1 = tables[0]
   print("Opened table", table_1.name)
@@ -111,7 +111,8 @@ In addition to extracting all table data at once, individual cells can be referr
 Merged cells
 ------------
 
-When extracting data using :py:meth:`Table.rows()` merged cells can be identified as :py:class:`MergedCell` objects which also return ``None`` when extracted as values or using the :attr:`.MergedCell.value`. When cells are merged, the cell in the top-left of the merge range is the cell chosen to contain the merged cell's data. These cells can be identified by the :attr:`.Cell.is_merged` property and have additional properties describing the extent of the merge range:
+When extracting data using :py:meth:`Table.rows()` merged cells can be identified as :py:class:`MergedCell`
+objects which also return ``None`` when extracted as values or using the :attr:`.MergedCell.value`. When cells are merged, the cell in the top-left of the merge range is the cell chosen to contain the merged cell's data. These cells can be identified by the :attr:`.Cell.is_merged` property and have additional properties describing the extent of the merge range:
 
 .. code-block:: python
 

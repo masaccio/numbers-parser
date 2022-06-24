@@ -42,8 +42,8 @@ Reading documents:
 ``` python
 from numbers_parser import Document
 doc = Document("my-spreasdsheet.numbers")
-sheets = doc.sheets()
-tables = sheets[0].tables()
+sheets = doc.sheets
+tables = sheets[0].tables
 rows = tables[0].rows()
 ```
 
@@ -54,13 +54,15 @@ of the sheet/table (`dict` syntax):
 
 ``` python
 # list access method
-sheet_1 = doc.sheets()[0]
+sheet_1 = doc.sheets[0]
 print("Opened sheet", sheet_1.name)
 
 # dict access method
 table_1 = sheets["Table 1"]
 print("Opened table", table_1.name)
 ```
+
+As of version 3.0, the `Document.sheets()` and `Sheet.tables()` methods are deprecated and will issue a `DeprecationWarning` if used. Instead of these functions, you should use the properties as demonstrated above. The legacy methods will be removed in a future version of `numbers-parser`.
 
 ### Accessing data
 
@@ -79,8 +81,8 @@ In addition to extracting all data at once, individual cells can be referred to 
 
 ``` python
 doc = Document("my-spreasdsheet.numbers")
-sheets = doc.sheets()
-tables = sheets["Sheet 1"].tables()
+sheets = doc.sheets
+tables = sheets["Sheet 1"].tables
 table = tables["Table 1"]
 
 # row, column syntax
@@ -98,8 +100,8 @@ indicates cells removed in a merge.
 
 ``` python
 doc = Document("my-spreasdsheet.numbers")
-sheets = doc.sheets()
-tables = sheets["Sheet 1"].tables()
+sheets = doc.sheets
+tables = sheets["Sheet 1"].tables
 table = tables["Table 1"]
 
 cell = table.cell("A1")
@@ -127,8 +129,8 @@ Since the return value of `data()` is a list of lists, you can pass this directl
 import pandas as pd
 
 doc = Document("simple.numbers")
-sheets = doc.sheets()
-tables = sheets[0].tables()
+sheets = doc.sheets
+tables = sheets[0].tables
 data = tables[0].rows(values_only=True)
 df = pd.DataFrame(data[1:], columns=data[0])
 ```
@@ -139,8 +141,8 @@ Cells that contain bulleted or numbered lists can be identified by the `is_bulle
 
 ``` python
 doc = Document("bullets.numbers")
-sheets = doc.sheets()
-tables = sheets[0].tables()
+sheets = doc.sheets
+tables = sheets[0].tables
 table = tables[0]
 if not table.cell(0, 1).is_bulleted:
     print(table.cell(0, 1).value)
@@ -171,8 +173,8 @@ During the same process, cell widths are reset and cell formats are removed from
 
 ``` python
 doc = Document("my-spreadsheet.numbers")
-sheets = doc.sheets()
-tables = sheets[0].tables()
+sheets = doc.sheets
+tables = sheets[0].tables
 table = tables[0]
 table.write(1, 1, "This is new text")
 table.write("B7", datetime(2020, 12, 25))

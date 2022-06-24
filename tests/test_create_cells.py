@@ -8,8 +8,8 @@ from numbers_parser.cell import EmptyCell
 
 def test_edit_cell_values(tmp_path):
     doc = Document("tests/data/test-save-1.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     table = tables[0]
     table.write("B2", "new_b2")
     table.write(1, 2, "new_c2")
@@ -27,8 +27,8 @@ def test_edit_cell_values(tmp_path):
     doc.save(new_filename)
 
     doc = Document(new_filename)
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     table = tables[0]
 
     assert table.cell(1, 1).value == "new_b2"
@@ -43,8 +43,8 @@ def test_edit_cell_values(tmp_path):
 
 def test_large_table(tmp_path):
     doc = Document()
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     table = tables[0]
     for i in range(0, 300):
         table.write(i, i, "wide")
@@ -53,8 +53,8 @@ def test_large_table(tmp_path):
     doc.save(new_filename)
 
     doc = Document(new_filename)
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     table = tables[0]
 
     data = table.rows()

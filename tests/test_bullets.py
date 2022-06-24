@@ -9,8 +9,8 @@ TEST_REF_3 = "this\nis some\nlettered\ntext"
 
 def test_bullets():
     doc = Document("tests/data/test-bullets.numbers")
-    sheets = doc.sheets()
-    tables = sheets[0].tables()
+    sheets = doc.sheets
+    tables = sheets[0].tables
     table = tables[0]
     assert table.cell(0, 1).value == TEST_REF_1
     assert table.cell(1, 1).value == TEST_REF_2

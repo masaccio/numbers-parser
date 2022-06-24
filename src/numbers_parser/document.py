@@ -27,12 +27,13 @@ class Document:
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
 
+    @property
     def sheets(self):
         return self._sheets
 
     def save(self, filename):
-        for sheet in self.sheets():
-            for table in sheet.tables():
+        for sheet in self.sheets:
+            for table in sheet.tables:
                 self._model.recalculate_table_data(table._table_id, table._data)
         write_numbers_file(filename, self._model.file_store)
 
@@ -63,6 +64,7 @@ class Sheet:
         refs = self._model.table_ids(self._sheet_id)
         self._tables = ItemsList(self._model, refs, Table)
 
+    @property
     def tables(self):
         return self._tables
 
