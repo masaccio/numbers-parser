@@ -8,7 +8,7 @@ def test_empty_document():
     doc = Document()
     sheets = doc.sheets
     tables = sheets[0].tables
-    data = tables[0].rows()
+    data = doc.sheets[0].tables[0].rows()
     assert len(data) == 22
     assert len(data[0]) == 7
     assert type(data[0][0]) == EmptyCell

@@ -31,5 +31,8 @@
     "todo-tree.general.tags": [
         "TODO",
         "FIXME"
-    ]
+    ],
+    "[json]": {
+        "editor.defaultFormatter": "j-brooke.fracturedjsonvsc"
+    },
 }
