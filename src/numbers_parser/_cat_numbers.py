@@ -1,6 +1,7 @@
 # vi: ft=python
 
 import argparse
+import csv
 import logging
 import sys
 
@@ -72,6 +73,7 @@ def cell_as_string(args, cell):
 
 
 def print_table(args, filename):
+    writer = csv.writer(sys.stdout, dialect="excel")
     for sheet in Document(filename).sheets():
         if args.sheet is not None and sheet.name not in args.sheet:
             continue
@@ -80,11 +82,9 @@ def print_table(args, filename):
                 continue
             for row in table.rows():
                 cells = [cell_as_string(args, cell) for cell in row]
-                cells_str = ",".join(cells)
-                if args.brief:
-                    print(cells_str)
-                else:
-                    print(f"{filename}: {sheet.name}: {table.name}:", cells_str)
+                if not args.brief:
+                    sys.stdout.write(f"{filename}: {sheet.name}: {table.name}: ")
+                writer.writerow(cells)
 
 
 def main():
