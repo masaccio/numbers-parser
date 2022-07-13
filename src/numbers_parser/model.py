@@ -145,13 +145,15 @@ class _NumbersModel:
         return [self.objects[t.tile.identifier] for t in bds.tiles.tiles]
 
     @lru_cache(maxsize=None)
+    def table_string_entries(self, strings_id):
+        return {x.key: x.string for x in self.objects[strings_id].entries}
+
+    @lru_cache(maxsize=None)
     def table_string(self, table_id: int, key: int) -> str:
         """Return the string assocuated with a string ID for a particular table"""
         bds = self.objects[table_id].base_data_store
         strings_id = bds.stringTable.identifier
-        for x in self.objects[strings_id].entries:  # pragma: no branch
-            if x.key == key:
-                return x.string
+        return self.table_string_entries(strings_id)[key]
 
     def init_table_strings(self, table_id: int):
         """Cache table strings reference and delete all existing keys/values"""
