@@ -95,12 +95,14 @@ class NumbersModel:
         return [self.objects[t.tile.identifier] for t in bds.tiles.tiles]
 
     @lru_cache(maxsize=None)
+    def table_string_entries(self, strings_id):
+        return {x.key: x.string for x in self.objects[strings_id].entries}
+
+    @lru_cache(maxsize=None)
     def table_string(self, table_id, key):
         bds = self.objects[table_id].base_data_store
         strings_id = bds.stringTable.identifier
-        for x in self.objects[strings_id].entries:  # pragma: no branch
-            if x.key == key:
-                return x.string
+        return self.table_string_entries(strings_id)[key]
 
     @lru_cache(maxsize=None)
     def owner_id_map(self):
