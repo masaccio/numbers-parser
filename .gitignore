@@ -25,3 +25,6 @@ src/*.egg-info
 # tox
 .tox
 build
+
+# Profiling
+*.prof
