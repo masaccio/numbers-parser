@@ -7,6 +7,7 @@ from array import array
 from argparse import ArgumentParser
 from base64 import b64decode
 from binascii import hexlify
+from compact_json import Formatter
 
 
 from numbers_parser.file import read_numbers_file
@@ -24,11 +25,11 @@ def ensure_directory_exists(prefix, path):
         pass
 
 
-def convert_uuids_to_hex(obj):
+def prettify_uuids(obj):
     if isinstance(obj, dict):
         for k, v in obj.items():
             if isinstance(v, dict) or isinstance(v, list):
-                convert_uuids_to_hex(v)
+                prettify_uuids(v)
             elif k == "lower" or k == "upper":
                 obj[k] = "0x{0:0{1}X}".format(int(v), 16)
             elif k in ["uuidW0", "uuidW1", "uuidW2", "uuidW3"]:
@@ -36,14 +37,14 @@ def convert_uuids_to_hex(obj):
     elif isinstance(obj, list):
         for v in obj:
             if isinstance(v, dict) or isinstance(v, list):
-                convert_uuids_to_hex(v)
+                prettify_uuids(v)
 
 
-def pretty_print_cell_storage(obj):
+def prettify_cell_storage(obj):
     if isinstance(obj, dict):
         for k, v in obj.items():
             if isinstance(v, dict) or isinstance(v, list):
-                pretty_print_cell_storage(v)
+                prettify_cell_storage(v)
             elif k == "cellStorageBuffer" or k == "cellStorageBufferPreBnc":
                 if sys.version_info.minor >= 8:
                     obj[k] = str(hexlify(b64decode(obj[k]), sep=":"))
@@ -57,10 +58,10 @@ def pretty_print_cell_storage(obj):
     elif isinstance(obj, list):
         for v in obj:
             if isinstance(v, dict) or isinstance(v, list):
-                pretty_print_cell_storage(v)
+                prettify_cell_storage(v)
 
 
-def process_file(filename, blob, output_dir, hex_uuids, pretty_storage):
+def process_file(filename, blob, output_dir, args):
     filename = regex.sub(r".*\.numbers/", "", filename)
     ensure_directory_exists(output_dir, filename)
     target_path = os.path.join(output_dir, filename)
@@ -69,11 +70,24 @@ def process_file(filename, blob, output_dir, hex_uuids, pretty_storage):
         target_path += ".json"
         with open(target_path, "w") as out:
             data = blob.to_dict()
-            if hex_uuids:
-                convert_uuids_to_hex(data)
-            if pretty_storage:
-                pretty_print_cell_storage(data)
-            json.dump(data, out, sort_keys=True, indent=2)
+            if args.hex_uuids or args.pretty:
+                prettify_uuids(data)
+            if args.pretty_storage or args.pretty:
+                prettify_cell_storage(data)
+            if args.compact_json or args.pretty:
+                formatter = Formatter()
+                formatter.indent_spaces = 2
+                formatter.max_inline_complexity = 50
+                formatter.max_compact_list_complexity = 50
+                formatter.max_inline_length = 160
+                formatter.max_compact_list_complexity = 2
+                formatter.simple_bracket_padding = True
+                formatter.nested_bracket_padding = False
+                formatter.always_expand_depth = 10
+                pretty_json = formatter.serialize(data)
+                out.write(pretty_json)
+            else:
+                json.dump(data, out, sort_keys=True, indent=2)
     elif not filename.endswith("/"):
         with open(target_path, "wb") as out:
             out.write(blob)
@@ -86,6 +100,12 @@ def main():
     parser.add_argument("--hex-uuids", action="store_true", help="print UUIDs as hex")
     parser.add_argument(
         "--pretty-storage", action="store_true", help="pretty print cell storage"
+    )
+    parser.add_argument(
+        "--compact-json", action="store_true", help="Format JSON compactly as possible"
+    )
+    parser.add_argument(
+        "--pretty", action="store_true", help="Enable all prettifying options"
     )
     parser.add_argument("--output", "-o", help="directory name to unpack into")
     args = parser.parse_args()
@@ -106,7 +126,7 @@ def main():
                 read_numbers_file(
                     document,
                     file_handler=lambda filename, blob: process_file(
-                        filename, blob, output_dir, args.hex_uuids, args.pretty_storage
+                        filename, blob, output_dir, args
                     ),
                 )
             except FileFormatError as e:  # pragma: no cover
