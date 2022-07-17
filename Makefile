@@ -1,5 +1,8 @@
+PACKAGE=numbers-parser
+
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+package_c := $(-,_,$(PACKAGE))
 
 # Change this to the name of a code-signing certificate. A self-signed
 # certificate is suitable for this.
@@ -14,7 +17,7 @@ NUMBERS=/Applications/Numbers.app
 # Xcode version of Python that includes LLDB package
 LLDB_PYTHON_PATH := ${shell lldb --python-path}
 
-RELEASE_TARBALL=dist/numbers-parser-$(shell python3 setup.py --version).tar.gz
+RELEASE_TARBALL=dist/$(PACKAGE)-$(shell python3 setup.py --version).tar.gz
 
 .PHONY: clean veryclean test coverage sdist upload
 
@@ -43,12 +46,12 @@ docs:
 test:
 	PYTHONPATH=src python3 -m pytest tests
 
-coverage: all
-	PYTHONPATH=src python3 -m pytest --cov=numbers_parser --cov-report=html
+coverage:
+	PYTHONPATH=src python3 -m pytest --cov=$(package_c) --cov-report=html
 
-BOOTSTRAP_FILES = src/numbers_parser/functionmap.py \
-				  src/numbers_parser/generated/__init__.py \
-				  src/numbers_parser/mapping.py \
+BOOTSTRAP_FILES = src/$(package_c)/functionmap.py \
+				  src/$(package_c)/generated/__init__.py \
+				  src/$(package_c)/mapping.py \
 
 bootstrap: $(BOOTSTRAP_FILES)
 
@@ -68,7 +71,7 @@ bootstrap: $(BOOTSTRAP_FILES)
 	@mkdir -p .bootstrap
 	python3 src/bootstrap/generate_mapping.py $< $@
 
-src/numbers_parser/functionmap.py: .bootstrap/functionmap.py
+src/$(package_c)/functionmap.py: .bootstrap/functionmap.py
 	cp $< $@
 
 .bootstrap/functionmap.py:
@@ -81,28 +84,28 @@ src/numbers_parser/functionmap.py: .bootstrap/functionmap.py
 	python3 src/bootstrap/protodump.py /Applications/Numbers.app .bootstrap/protos
 	python3 src/bootstrap/rename_proto_files.py .bootstrap/protos
 
-src/numbers_parser/mapping.py: .bootstrap/mapping.py
+src/$(package_c)/mapping.py: .bootstrap/mapping.py
 	cp $< $@
 
-src/numbers_parser/generated/TNArchives_pb2.py: .bootstrap/protos/TNArchives.proto
+src/$(package_c)/generated/TNArchives_pb2.py: .bootstrap/protos/TNArchives.proto
 	@echo $$(tput setaf 2)"Bootstrap: compiling Python packages from protobufs"$$(tput init)
-	@mkdir -p src/numbers_parser/generated
+	@mkdir -p src/$(package_c)/generated
 	for proto in .bootstrap/protos/*.proto; do \
-	    $(PROTOC) -I=.bootstrap/protos --proto_path .bootstrap/protos --python_out=src/numbers_parser/generated $$proto; \
+	    $(PROTOC) -I=.bootstrap/protos --proto_path .bootstrap/protos --python_out=src/$(package_c)/generated $$proto; \
 	done
 
-src/numbers_parser/generated/__init__.py: src/numbers_parser/generated/TNArchives_pb2.py
+src/$(package_c)/generated/__init__.py: src/$(package_c)/generated/TNArchives_pb2.py
 	@echo $$(tput setaf 2)"Bootstrap: patching paths in generated protobuf files"$$(tput init)
-	python3 src/bootstrap/replace_paths.py src/numbers_parser/generated/T*.py
+	python3 src/bootstrap/replace_paths.py src/$(package_c)/generated/T*.py
 	touch $@
 
 veryclean:
 	make clean
 	rm -rf .bootstrap
-	rm -rf src/numbers_parser/generated
+	rm -rf src/$(package_c)/generated
 
 clean:
-	rm -rf src/numbers_parser.egg-info
+	rm -rf src/$(package_c).egg-info
 	rm -rf coverage_html_report
 	rm -rf dist
 	rm -rf build
