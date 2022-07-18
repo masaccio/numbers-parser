@@ -124,3 +124,10 @@ def test_issue_32():
     table = sheets[0].tables[0]
     assert table.cell("A3").value == "Foo"
     assert table.cell("D4").value == 3
+
+
+def test_issue_35():
+    doc = Document("tests/data/issue-35.numbers")
+    table = doc.sheets[0].tables[0]
+    assert table.cell("A1").value == 72
+    assert table.cell("ALL3").value == 62
