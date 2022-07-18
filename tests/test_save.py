@@ -1,6 +1,7 @@
 import pytest
 
 from numbers_parser import Document
+from numbers_parser.document import _EXPERIMENTAL_NUMBERS_PARSER
 from numbers_parser.cell import EmptyCell, TextCell, NumberCell
 
 
@@ -57,6 +58,7 @@ def test_save_merges(tmp_path):
 
 @pytest.mark.experimental
 def test_create_sheet(tmp_path, pytestconfig):
+    _EXPERIMENTAL_NUMBERS_PARSER = True
     doc = Document()
     sheets = doc.sheets
     sheets[0].tables[0].write("B2", "data")

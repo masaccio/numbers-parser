@@ -20,6 +20,8 @@ from numbers_parser.cell import (
     xl_range,
 )
 
+_EXPERIMENTAL_NUMBERS_PARSER = False
+
 
 class Document:
     def __init__(self, filename=None):
@@ -40,6 +42,9 @@ class Document:
     def add_sheet(self, sheet_name=None, table_name=None) -> object:
         """Add a new sheet to the current document. If no sheet name is provided,
         the next available numbered sheet will be generated"""
+        if not _EXPERIMENTAL_NUMBERS_PARSER:
+            raise AttributeError("'Document' object has no attribute 'add_sheet'")
+
         if sheet_name is not None:
             if sheet_name in self._sheets:
                 raise IndexError(f"sheet '{sheet_name}' already exists")
@@ -79,6 +84,8 @@ class Sheet:
     def add_table(self, table_name=None) -> object:
         """Add a new table to the current sheet. If no sheet name is provided,
         the next available numbered sheet will be generated"""
+        if not _EXPERIMENTAL_NUMBERS_PARSER:
+            raise AttributeError("'Sheet' object has no attribute 'add_table'")
         if table_name is not None:
             if table_name in self._tables:
                 raise IndexError(f"table '{table_name}' already exists")
