@@ -30,6 +30,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -U pytest pytest-console-scripts pytest-check
         python -m pip install -U "protobuf>=3.20.1" python-snappy compact-json regex roman
+        python3 setup.py install
     - name: Test with pytest
       run: |
         PYTHONPATH=src python3 -m pytest tests
