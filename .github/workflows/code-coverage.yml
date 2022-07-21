@@ -2,10 +2,10 @@ name: Code coverage
 on: [push, workflow_dispatch]
 jobs:
   run:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     env:
-      OS: macos-latest
-      PYTHON: '3.7'
+      OS: ubuntu-latest
+      PYTHON: '3.10'
     steps:
     - uses: actions/checkout@master
     - name: Setup Python
