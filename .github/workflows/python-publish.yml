@@ -8,8 +8,10 @@
 
 name: Upload to PyPI
 
-on: [release, workflow_dispatch]
-  types: [published]
+on: 
+  release:
+    types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: read

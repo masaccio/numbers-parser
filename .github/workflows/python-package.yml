@@ -3,8 +3,12 @@
 
 name: Run all tests
 
-on: [push, pull, workflow_dispatch]
-  branches: [ "main", "v2.3" ]
+on:
+  push:
+    branches: [ "main", "v2.3" ]
+  pull_request:
+    branches: [ "main", "v2.3" ]
+  workflow_dispatch:
 
 jobs:
   build:
