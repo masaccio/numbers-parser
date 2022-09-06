@@ -77,8 +77,8 @@ def process_file(filename, blob, output_dir, args):
             if args.compact_json or args.pretty:
                 formatter = Formatter()
                 formatter.indent_spaces = 2
-                formatter.max_inline_complexity = 50
-                formatter.max_compact_list_complexity = 50
+                formatter.max_inline_complexity = 100
+                formatter.max_compact_list_complexity = 100
                 formatter.max_inline_length = 160
                 formatter.max_compact_list_complexity = 2
                 formatter.simple_bracket_padding = True

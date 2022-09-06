@@ -10,6 +10,7 @@ from uuid import uuid1
 from warnings import warn
 
 from numbers_parser.containers import ObjectStore
+from numbers_parser.iwafile import deep_print
 from numbers_parser.constants import (
     EPOCH,
     DEFAULT_DOCUMENT,
@@ -527,6 +528,22 @@ class _NumbersModel:
         base_data_store.merge_region_map.MergeFrom(
             TSPMessages.Reference(identifier=merge_map_id)
         )
+        # TODO deal with Assertion:
+        # Assert *** Assertion failure #0: -[TSPUnarchiver validateReferenceToObjectIdentifier:objectClass:isWeak:validateStrongReferences:selector:weakSelector:] /Library/Caches/com.apple.xbs/Sources/iWorkDependenciesMacOS/iWorkDependenciesMacOS-7034.0.86/shared/persistence/src/TSPUnarchiver.mm:704 Object [TSTMergeRegionMap-6347027] is not strongly referenced from message [TST.TableModelArchive-1058328] message type 6001. Use TSPReadWeakReferenceMessage<TSTMergeRegionMap>(unarchiver, message, completion) instead.
+
+        # component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
+        # component_id = [
+        #     id
+        #     for id, c in component_map.items()
+        #     if c.preferred_locator == "CalculationEngine"
+        # ][0]
+        # component_map[component_id].external_references.append(
+        #     TSPArchiveMessages.ComponentExternalReference(
+        #         component_identifier=table_id,
+        #         object_identifier=merge_map_id,
+        #         is_weak=True,
+        #     )
+        # )
 
     def recalculate_column_row_uid_map(self, table_id: int, data: List):
         table_model = self.objects[table_id]
@@ -553,20 +570,6 @@ class _NumbersModel:
             base_column_row_uids.row_index_for_uid.append(row_num)
             base_column_row_uids.row_uid_for_index.append(row_num)
 
-    def init_table_tile(self, table_id: int, data: List) -> TSTArchives.Tile:
-        base_data_store = self.objects[table_id].base_data_store
-        tile_ids = [t.tile.identifier for t in base_data_store.tiles.tiles]
-        tile = self.objects[tile_ids[0]]
-        tile.maxColumn = 0
-        tile.maxRow = 0
-        tile.numCells = 0
-        tile.numrows = len(data)
-        tile.storage_version = 5
-        tile.last_saved_in_BNC = True
-        tile.should_use_wide_rows = True
-        clear_field_container(tile.rowInfos)
-        return tile
-
     def recalculate_row_info(
         self, table_id: int, data: List, tile_row_offset: int, row_num: int
     ) -> TSTArchives.TileRowInfo:
@@ -575,17 +578,24 @@ class _NumbersModel:
         row_info.tile_row_index = row_num - tile_row_offset
         row_info.cell_count = 0
         cell_storage = b""
+        cell_storage_pre_bnc = b""
 
         if len(data[0]) >= MAX_TILE_SIZE:
             wide_offsets = True
             offsets = [-1] * len(data[0])
+            offsets_pre_bnc = [-1] * len(data[0])
         else:
             wide_offsets = False
             offsets = [-1] * MAX_TILE_SIZE
+            offsets_pre_bnc = [-1] * MAX_TILE_SIZE
         current_offset = 0
+        current_offset_pre_bnc = 0
 
         for col_num in range(len(data[row_num])):
             buffer = self.pack_cell_storage_v5(
+                table_id, data, row_num, col_num, wide_offsets
+            )
+            buffer_pre_bnc = self.pack_cell_storage_v3(
                 table_id, data, row_num, col_num, wide_offsets
             )
             if buffer is not None:
@@ -596,20 +606,25 @@ class _NumbersModel:
                     offsets[col_num] = current_offset
                 current_offset += len(buffer)
 
+                cell_storage_pre_bnc += buffer_pre_bnc
+                if wide_offsets:
+                    offsets_pre_bnc[col_num] = current_offset_pre_bnc >> 2
+                else:
+                    offsets_pre_bnc[col_num] = current_offset_pre_bnc
+                current_offset_pre_bnc += len(buffer_pre_bnc)
+
                 row_info.cell_count += 1
 
-        # TODO: only pack as many offsets as last column with data
         row_info.cell_offsets = pack(f"<{len(offsets)}h", *offsets)
+        row_info.cell_offsets_pre_bnc = pack(
+            f"<{len(offsets_pre_bnc)}h", *offsets_pre_bnc
+        )
         row_info.cell_storage_buffer = cell_storage
-        # TODO: do formulas need BNC storage?
-        row_info.cell_offsets_pre_bnc = bytes([0xF0, 0x9F, 0xA4, 0xA0])
-        row_info.cell_storage_buffer_pre_bnc = bytes([0xF0, 0x9F, 0xA4, 0xA0])
+        row_info.cell_storage_buffer_pre_bnc = cell_storage_pre_bnc
         row_info.has_wide_offsets = wide_offsets
         return row_info
 
-    def update_package_metadata(
-        self, obj_id: int, parent: str, locator: str = None, derived=False
-    ):
+    def update_package_metadata(self, obj_id: int, parent: str, locator: str = None):
         component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
         if obj_id not in component_map:
             component_id = [
@@ -634,18 +649,11 @@ class _NumbersModel:
                     )
 
                 self.objects[PACKAGE_ID].components.append(component_info)
-                if derived:
-                    component_map[component_id].external_references.append(
-                        TSPArchiveMessages.ComponentExternalReference(
-                            component_identifier=component_id, object_identifier=obj_id
-                        )
+                component_map[component_id].external_references.append(
+                    TSPArchiveMessages.ComponentExternalReference(
+                        component_identifier=obj_id
                     )
-                else:
-                    component_map[component_id].external_references.append(
-                        TSPArchiveMessages.ComponentExternalReference(
-                            component_identifier=obj_id
-                        )
-                    )
+                )
             else:
                 component_map[component_id].external_references.append(
                     TSPArchiveMessages.ComponentExternalReference(
@@ -746,9 +754,12 @@ class _NumbersModel:
 
     def create_string_table(self):
         table_strings_id, table_strings = self.objects.create_object_from_dict(
-            "Index/Tables/DataList-{}-2",
+            "Index/Tables/DataList-{}",
             {"listType": TSTArchives.TableDataList.ListType.STRING, "nextListID": 1},
             TSTArchives.TableDataList,
+        )
+        self.update_package_metadata(
+            table_strings_id, "CalculationEngine", "Tables/DataList-{}"
         )
         return table_strings_id, table_strings
 
@@ -780,6 +791,34 @@ class _NumbersModel:
                 "table_name": table_name,
                 "default_row_height": 20.0,
                 "default_column_width": 98.0,
+                "table_style": {"identifier": from_table.table_style.identifier},
+                "body_text_style": {
+                    "identifier": from_table.body_text_style.identifier
+                },
+                "header_row_text_style": {
+                    "identifier": from_table.header_row_text_style.identifier
+                },
+                "header_column_text_style": {
+                    "identifier": from_table.header_column_text_style.identifier
+                },
+                "footer_row_text_style": {
+                    "identifier": from_table.footer_row_text_style.identifier
+                },
+                "footer_row_text_style": {
+                    "identifier": from_table.footer_row_text_style.identifier
+                },
+                "body_cell_style": {
+                    "identifier": from_table.body_cell_style.identifier
+                },
+                "header_row_style": {
+                    "identifier": from_table.header_row_style.identifier
+                },
+                "header_column_style": {
+                    "identifier": from_table.header_column_style.identifier
+                },
+                "footer_row_style": {
+                    "identifier": from_table.footer_row_style.identifier
+                },
             },
             TSTArchives.TableModelArchive,
         )
@@ -794,7 +833,42 @@ class _NumbersModel:
         print(f"column_headers_id = {column_headers_id}")
 
         self.update_package_metadata(
-            column_headers_id, "DocumentStylesheet", "Tables/DataList-{}", True
+            column_headers_id, "CalculationEngine", "Tables/HeaderStorageBucket-{}"
+        )
+
+        style_table_id, _ = self.objects.create_object_from_dict(
+            "Index/Tables/DataList-{}",
+            {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
+            TSTArchives.TableDataList,
+        )
+        print(f"style_table_id = {style_table_id}")
+
+        self.update_package_metadata(
+            style_table_id, "CalculationEngine", "Tables/DataList-{}"
+        )
+
+        formula_table_id, _ = self.objects.create_object_from_dict(
+            "Index/Tables/TableDataList-{}",
+            {"listType": TSTArchives.TableDataList.ListType.FORMULA, "nextListID": 1},
+            TSTArchives.TableDataList,
+        )
+        print(f"formula_table_id = {formula_table_id}")
+
+        self.update_package_metadata(
+            formula_table_id, "CalculationEngine", "Tables/TableDataList-{}"
+        )
+
+        format_table_pre_bnc_id, _ = self.objects.create_object_from_dict(
+            "Index/Tables/TableDataList-{}",
+            {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
+            TSTArchives.TableDataList,
+        )
+        print(f"format_table_pre_bnc_id = {format_table_pre_bnc_id}")
+
+        self.update_package_metadata(
+            format_table_pre_bnc_id,
+            "DocumentStylesheet",
+            "Tables/TableDataList-{}",
         )
 
         table_model.base_data_store.MergeFrom(
@@ -807,6 +881,11 @@ class _NumbersModel:
                 rowTileTree=TSTArchives.TableRBTree(),
                 columnTileTree=TSTArchives.TableRBTree(),
                 tiles=TSTArchives.TileStorage(tile_size=256, should_use_wide_rows=True),
+                styleTable=TSPMessages.Reference(identifier=style_table_id),
+                formula_table=TSPMessages.Reference(identifier=formula_table_id),
+                format_table_pre_bnc=TSPMessages.Reference(
+                    identifier=format_table_pre_bnc_id
+                ),
             )
         )
 
@@ -826,7 +905,7 @@ class _NumbersModel:
         print(f"row_headers_id = {row_headers_id}")
 
         self.update_package_metadata(
-            row_headers_id, "DocumentStylesheet", "Tables/DataList-{}", True
+            row_headers_id, "CalculationEngine", "Tables/HeaderStorageBucket-{}"
         )
         table_model.base_data_store.rowHeaders.buckets.append(
             TSPMessages.Reference(identifier=row_headers_id)
@@ -834,65 +913,7 @@ class _NumbersModel:
 
         self.recalculate_table_data(table_model_id, data)
 
-        style_table_id, _ = self.objects.create_object_from_dict(
-            "Index/Tables/TableDataList-{}",
-            {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
-            TSTArchives.TableDataList,
-        )
-        print(f"style_table_id = {style_table_id}")
-
-        self.update_package_metadata(
-            style_table_id, "DocumentStylesheet", "Tables/DataList-{}", True
-        )
-        table_model.base_data_store.styleTable.MergeFrom(
-            TSPMessages.Reference(identifier=style_table_id)
-        )
-
-        formula_table_id, _ = self.objects.create_object_from_dict(
-            "Index/Tables/TableDataList-{}",
-            {"listType": TSTArchives.TableDataList.ListType.FORMULA, "nextListID": 1},
-            TSTArchives.TableDataList,
-        )
-        print(f"formula_table_id = {formula_table_id}")
-
-        self.update_package_metadata(
-            formula_table_id, "DocumentStylesheet", "Tables/DataList-{}", True
-        )
-        table_model.base_data_store.formula_table.MergeFrom(
-            TSPMessages.Reference(identifier=formula_table_id)
-        )
-
-        format_table_pre_bnc_id, _ = self.objects.create_object_from_dict(
-            "Index/Tables/TableDataList-{}",
-            {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
-            TSTArchives.TableDataList,
-        )
-        print(f"format_table_pre_bnc_id = {format_table_pre_bnc_id}")
-
-        self.update_package_metadata(
-            format_table_pre_bnc_id, "DocumentStylesheet", "Tables/DataList-{}", True
-        )
-        table_model.base_data_store.format_table_pre_bnc.MergeFrom(
-            TSPMessages.Reference(identifier=format_table_pre_bnc_id)
-        )
-
         # TODO: fix package metadata references
-
-        for field in [
-            "table_style",
-            "body_text_style",
-            "header_row_text_style",
-            "header_column_text_style",
-            "footer_row_text_style",
-            "footer_row_text_style",
-            "body_cell_style",
-            "header_row_style",
-            "header_column_style",
-            "footer_row_style",
-        ]:
-            getattr(table_model, field).MergeFrom(
-                TSPMessages.Reference(identifier=getattr(from_table, field).identifier)
-            )
 
         table_info_id, table_info = self.objects.create_object_from_dict(
             "CalculationEngine",
@@ -1002,6 +1023,64 @@ class _NumbersModel:
         storage[0] = 5
         storage[1] = cell_type
         storage[8:12] = pack("<i", flags)
+        storage[12 : 12 + len(value)] = value
+
+        if wide_offsets and len(storage) % 4:
+            padding_len = 4 - (len(storage % 4))
+            length += padding_len
+            storage += bytearray(padding_len)
+
+        return storage[0:length]
+
+    def pack_cell_storage_v3(
+        self, table_id: int, data: List, row_num: int, col_num: int, wide_offsets: bool
+    ) -> bytearray:
+        """Create a storage buffer for a cell using v3 layout"""
+        cell = data[row_num][col_num]
+        length = 12
+        if isinstance(cell, NumberCell):
+            flags = 0x20
+            length += 8
+            cell_type = TSTArchives.numberCellType
+            value = pack("<d", float(cell.value))
+        elif isinstance(cell, TextCell):
+            flags = 0x10
+            length += 4
+            cell_type = TSTArchives.textCellType
+            value = pack("<i", self.table_string_key(table_id, cell.value))
+        elif isinstance(cell, DateCell):
+            flags = 0x40
+            length += 8
+            cell_type = TSTArchives.dateCellType
+            date_delta = cell.value - EPOCH
+            value = pack("<d", float(date_delta.total_seconds()))
+        elif isinstance(cell, BoolCell):
+            flags = 0x20
+            length += 8
+            cell_type = TSTArchives.boolCellType
+            value = pack("<d", float(cell.value))
+        elif isinstance(cell, DurationCell):
+            flags = 0x20
+            length += 8
+            cell_type = TSTArchives.durationCellType
+            value = value = pack("<d", float(cell.value.total_seconds()))
+        elif isinstance(cell, EmptyCell):
+            return None
+        elif isinstance(cell, MergedCell):
+            return None
+        else:
+            data_type = type(cell).__name__
+            table_name = self.table_name(table_id)
+            warn(
+                f"@{table_name}:[{row_num},{col_num}]: unsupported data type {data_type} for save",
+                UnsupportedWarning,
+            )
+            return None
+
+        storage = bytearray(32)
+        storage[0] = 3
+        storage[2] = cell_type
+        storage[4:8] = pack("<i", flags)
         storage[12 : 12 + len(value)] = value
 
         if wide_offsets and len(storage) % 4:

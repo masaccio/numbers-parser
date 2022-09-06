@@ -1,7 +1,6 @@
 import pytest
 
 from numbers_parser import Document
-from numbers_parser.document import _EXPERIMENTAL_NUMBERS_PARSER
 from numbers_parser.cell import EmptyCell, TextCell, NumberCell
 
 
@@ -35,7 +34,7 @@ def test_save_document(tmp_path):
     assert cell_values == new_cell_values
 
 
-def test_save_merges(tmp_path):
+def test_save_merges(tmp_path, pytestconfig):
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets
     table = sheets[0].tables[0]
@@ -47,7 +46,10 @@ def test_save_merges(tmp_path):
     table.merge_cells("B2:C2")
     table.merge_cells(["B5:E5", "D2:D4"])
 
-    new_filename = tmp_path / "test-1-new.numbers"
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-1-new.numbers"
     doc.save(new_filename)
 
     doc = Document(new_filename)
@@ -64,6 +66,7 @@ def test_create_sheet(tmp_path, pytestconfig):
     sheets[0].tables[0].write("B2", "data")
     sheets[0].tables[0].write("G2", "data")
 
+    sheets[0]._experimental = True
     with pytest.raises(IndexError) as e:
         _ = sheets[0].add_table("TablE 1")
     assert "table 'TablE 1' already exists" in str(e.value)
@@ -80,6 +83,7 @@ def test_create_sheet(tmp_path, pytestconfig):
     table.write("C2", "a little")
     table.write("D2", "lamb")
 
+    # doc._experimental = True
     # with pytest.raises(IndexError) as e:
     #     _ = doc.add_sheet("SheeT 1")
     # assert "sheet 'SheeT 1' already exists" in str(e.value)

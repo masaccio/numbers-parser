@@ -332,3 +332,18 @@ def copy_object_to_iwa_file(iwa_file: IWAFile, obj: object, obj_id: int):
                     _ = msg_info.object_references.pop()
                 for reference in references:
                     msg_info.object_references.append(reference)
+
+
+def deep_print(obj, indent=0):
+    for descriptor in obj.DESCRIPTOR.fields:
+        value = getattr(obj, descriptor.name)
+        if descriptor.type == descriptor.TYPE_MESSAGE:
+            if descriptor.label == descriptor.LABEL_REPEATED:
+                map(lambda x: deep_print(x, indent + 1), value)
+            else:
+                deep_print(value, indent + 1)
+        elif descriptor.type == descriptor.TYPE_ENUM:
+            enum_name = descriptor.enum_type.values[value].name
+            print("  " * indent + f"{descriptor.full_name}, {enum_name}")
+        else:
+            print("  " * indent + f"{descriptor.full_name} {value}")
