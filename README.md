@@ -120,7 +120,7 @@ returning a list of the cells in that row or column
 ``` python
 for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
     sum += row
-for col in table.iter_cole(min_row=2, max_row=7):
+for col in table.iter_cols(min_row=2, max_row=7):
     sum += col.value
 ```
 
