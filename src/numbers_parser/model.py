@@ -10,7 +10,6 @@ from uuid import uuid1
 from warnings import warn
 
 from numbers_parser.containers import ObjectStore
-from numbers_parser.iwafile import deep_print
 from numbers_parser.constants import (
     EPOCH,
     DEFAULT_DOCUMENT,
@@ -44,6 +43,15 @@ from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
+
+SECONDS_IN_HOUR = 60 * 60
+SECONDS_IN_DAY = SECONDS_IN_HOUR * 24
+SECONDS_IN_WEEK = SECONDS_IN_DAY * 7
+
+FORMAT_STYLE_NONE = 0
+FORMAT_STYLE_SHORT = 1
+FORMAT_STYLE_MEDIUM = 2
 
 
 class CellValue:
@@ -56,6 +64,7 @@ class CellValue:
         self.date = EPOCH
         self.d128 = None
         self.bullets = None
+        self.formatted = None
 
     def __repr__(self):  # pragma: no cover
         fields = filter(lambda x: not x.startswith("_"), dir(self))
@@ -146,6 +155,17 @@ class _NumbersModel:
         return [self.objects[t.tile.identifier] for t in bds.tiles.tiles]
 
     @lru_cache(maxsize=None)
+    def table_format_entries(self, format_id):
+        return {x.key: x.format for x in self.objects[format_id].entries}
+
+    @lru_cache(maxsize=None)
+    def table_format(self, table_id: int, key: int) -> str:
+        """Return the format assocuated with a format ID for a particular table"""
+        bds = self.objects[table_id].base_data_store
+        format_table_id = bds.format_table.identifier
+        return self.table_format_entries(format_table_id)[key]
+
+    @lru_cache(maxsize=None)
     def table_string_entries(self, strings_id):
         return {x.key: x.string for x in self.objects[strings_id].entries}
 
@@ -153,8 +173,8 @@ class _NumbersModel:
     def table_string(self, table_id: int, key: int) -> str:
         """Return the string assocuated with a string ID for a particular table"""
         bds = self.objects[table_id].base_data_store
-        strings_id = bds.stringTable.identifier
-        return self.table_string_entries(strings_id)[key]
+        table_strings_id = bds.stringTable.identifier
+        return self.table_string_entries(table_strings_id)[key]
 
     def init_table_strings(self, table_id: int):
         """Cache table strings reference and delete all existing keys/values"""
@@ -529,7 +549,15 @@ class _NumbersModel:
             TSPMessages.Reference(identifier=merge_map_id)
         )
         # TODO deal with Assertion:
-        # Assert *** Assertion failure #0: -[TSPUnarchiver validateReferenceToObjectIdentifier:objectClass:isWeak:validateStrongReferences:selector:weakSelector:] /Library/Caches/com.apple.xbs/Sources/iWorkDependenciesMacOS/iWorkDependenciesMacOS-7034.0.86/shared/persistence/src/TSPUnarchiver.mm:704 Object [TSTMergeRegionMap-6347027] is not strongly referenced from message [TST.TableModelArchive-1058328] message type 6001. Use TSPReadWeakReferenceMessage<TSTMergeRegionMap>(unarchiver, message, completion) instead.
+        # Assert *** Assertion failure #0: -[TSPUnarchiver
+        #   validateReferenceToObjectIdentifier:objectClass:isWeak
+        #   :validateStrongReferences:selector:weakSelector:]
+        #   /Library/Caches/com.apple.xbs/Sources/iWorkDependenciesMacOS/
+        #   iWorkDependenciesMacOS-7034.0.86/shared/persistence/src/TSPUnarchiver.mm:704
+        #   Object [TSTMergeRegionMap-6347027] is not strongly referenced from message
+        #   TST.TableModelArchive-1058328] message type 6001.
+        #   Use TSPReadWeakReferenceMessage<TSTMergeRegionMap>(unarchiver, message,
+        #   completion) instead.
 
         # component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
         # component_id = [
@@ -800,9 +828,6 @@ class _NumbersModel:
                 },
                 "header_column_text_style": {
                     "identifier": from_table.header_column_text_style.identifier
-                },
-                "footer_row_text_style": {
-                    "identifier": from_table.footer_row_text_style.identifier
                 },
                 "footer_row_text_style": {
                     "identifier": from_table.footer_row_text_style.identifier
@@ -1090,7 +1115,7 @@ class _NumbersModel:
 
         return storage[0:length]
 
-    def unpack_cell_storage_v3(self, buffer: bytes) -> CellValue:
+    def unpack_cell_storage_v3(self, buffer: bytes, table_id: int) -> CellValue:
         version = buffer[0]
         flags = unpack("<i", buffer[4:8])[0]
         cell_type = buffer[2]
@@ -1117,9 +1142,18 @@ class _NumbersModel:
             seconds = unpack("<d", buffer[offset : offset + 8])[0]
             cell_value.date = EPOCH + timedelta(seconds=seconds)
             offset += 8
+
+        if version > 1 and flags & 0xFF0000 and cell_value.ieee is not None:
+            format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            cell_value.formatted = self.duration_format(
+                cell_value.ieee, format_id, version, flags >> 16, table_id
+            )
+
         return cell_value
 
-    def unpack_cell_storage_v5(self, cell_type: int, buffer: bytes) -> CellValue:
+    def unpack_cell_storage_v5(
+        self, cell_type: int, buffer: bytes, table_id: int
+    ) -> CellValue:
         flags = unpack("<i", buffer[8:12])[0]
         cell_value = CellValue(cell_type)
         offset = 12
@@ -1138,7 +1172,121 @@ class _NumbersModel:
             offset += 4
         if flags & 0x10:
             cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+
+        offset += bin(flags & 0x1FE0).count("1") * 4
+        if flags & 0x7E000 and cell_value.ieee is not None:
+            format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            cell_value.formatted = self.duration_format(
+                cell_value.ieee, format_id, buffer[0], flags >> 13, table_id
+            )
+
         return cell_value
+
+    def duration_format(
+        self,
+        cell_value: int,
+        format_id: int,
+        format_version: int,
+        flags: int,
+        table_id: int,
+    ) -> str:
+        if format_version >= 4:
+            format = self.table_format(table_id, format_id)
+        else:
+            format = self.table_format(table_id, format_id)
+
+        duration_style = format.duration_style
+        if duration_style == -1:
+            return
+        unit_largest = format.duration_unit_largest
+        unit_smallest = format.duration_unit_smallest
+        auto_units = format.use_automatic_duration_units
+
+        d = cell_value
+        dd = d
+        if auto_units:
+            if d == 0:
+                unit_largest = 2
+                unit_smallest = 2
+            else:
+                if d >= SECONDS_IN_WEEK:
+                    unit_largest = 1
+                elif d >= SECONDS_IN_DAY:
+                    unit_largest = 2
+                elif d >= SECONDS_IN_HOUR:
+                    unit_largest = 4
+                elif d >= 60:
+                    unit_largest = 8
+                elif d >= 1:
+                    unit_largest = 16
+                else:
+                    unit_largest = 32
+
+                if math.floor(d) != d:
+                    unit_smallest = 32
+                elif d % 60:
+                    unit_smallest = 16
+                elif d % SECONDS_IN_HOUR:
+                    unit_smallest = 8
+                elif d % SECONDS_IN_DAY:
+                    unit_smallest = 4
+                elif d % SECONDS_IN_WEEK:
+                    unit_smallest = 2
+                if unit_smallest < unit_largest:
+                    unit_smallest = unit_largest
+
+        if unit_largest == -1 or unit_smallest == -1:
+            return
+        dstr = []
+
+        if unit_largest == 1:
+            dd = int(d / SECONDS_IN_WEEK)
+            if unit_smallest != 1:
+                d -= SECONDS_IN_WEEK * dd
+            dstr.append(str(dd) + unit_format("week", dd, duration_style))
+        if unit_largest <= 2 and unit_smallest >= 2:
+            dd = int(d / SECONDS_IN_DAY)
+            if unit_smallest > 2:
+                d -= SECONDS_IN_DAY * dd
+            dstr.append(str(dd) + unit_format("day", dd, duration_style))
+        if unit_largest <= 4 and unit_smallest >= 4:
+            dd = int(d / SECONDS_IN_HOUR)
+            if unit_smallest > 4:
+                d -= SECONDS_IN_HOUR * dd
+            dstr.append(str(dd) + unit_format("hour", dd, duration_style))
+        if unit_largest <= 8 and unit_smallest >= 8:
+            dd = int(d / 60)
+            if unit_smallest > 8:
+                d -= 60 * dd
+            if duration_style == FORMAT_STYLE_NONE:
+                pad = (unit_largest == 8 and unit_smallest == 8) or dd > 10
+                dstr.append(("" if pad else "0") + str(dd))
+            else:
+                dstr.append(str(dd) + unit_format("minute", dd, duration_style))
+        if unit_largest <= 16 and unit_smallest >= 16:
+            dd = int(d)
+            if unit_smallest > 16:
+                d -= dd
+            if duration_style == FORMAT_STYLE_NONE:
+                pad = (unit_smallest == 16 and unit_largest == 16) or dd >= 10
+                dstr.append(("" if pad else "0") + str(dd))
+            else:
+                dstr.append(str(dd) + unit_format("second", dd, duration_style))
+        if unit_smallest >= 32:
+            dd = int(round(1000 * d))
+            if duration_style == FORMAT_STYLE_NONE:
+                padding = "0" if dd >= 10 else "00"
+                padding = "" if dd >= 100 else padding
+                dstr.append(f"{padding}{dd}")
+            else:
+                dstr.append(
+                    str(dd) + unit_format("millisecond", dd, duration_style, "ms")
+                )
+        duration_str = (":" if duration_style == 0 else " ").join(dstr)
+        if duration_style == FORMAT_STYLE_NONE:
+            duration_str = re.sub(r":(\d\d\d)$", r".\1", duration_str)
+        return duration_str
 
     @lru_cache(maxsize=None)
     def table_formulas(self, table_id: int):
@@ -1154,9 +1302,9 @@ class _NumbersModel:
         cell_type = buffer[1]
         cell_value = CellValue(cell_type)
         if buffer[0] <= 3:
-            cell_value = self.unpack_cell_storage_v3(buffer)
+            cell_value = self.unpack_cell_storage_v3(buffer, table_id)
         else:
-            cell_value = self.unpack_cell_storage_v5(cell_type, buffer)
+            cell_value = self.unpack_cell_storage_v5(cell_type, buffer, table_id)
 
         if cell_value.type == TSTArchives.numberCellType or cell_value.type == 10:
             cell_value.value = cell_value.d128
@@ -1427,3 +1575,15 @@ def unpack_decimal128(buffer: bytearray) -> float:
         mantissa = -mantissa
     value = mantissa * 10**exp
     return float(value)
+
+
+def unit_format(unit: str, value: int, style: int, abbrev: str = None):
+    plural = "" if value == 1 else "s"
+    if abbrev is None:
+        abbrev = unit[0]
+    if style >= FORMAT_STYLE_MEDIUM:
+        return f" {unit}" + plural
+    elif style == FORMAT_STYLE_SHORT:
+        return f"{abbrev}"
+    else:
+        return ""

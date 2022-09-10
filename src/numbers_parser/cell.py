@@ -41,7 +41,10 @@ class Cell:
                 cell = DurationCell(row_num, col_num, timedelta(seconds=0))
             else:
                 cell = DurationCell(
-                    row_num, col_num, timedelta(seconds=cell_value.value)
+                    row_num,
+                    col_num,
+                    timedelta(seconds=cell_value.value),
+                    cell_value.formatted,
                 )
         elif cell_value.type == TSTArchives.formulaErrorCellType:
             cell = ErrorCell(row_num, col_num, None)
@@ -197,13 +200,18 @@ class DateCell(Cell):
 
 
 class DurationCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value, formatted_value=None):
         self._type = TSTArchives.durationCellType
         super().__init__(row_num, col_num, value)
+        self._formatted_value = formatted_value
 
     @property
     def value(self) -> timedelta:
         return self._value
+
+    @property
+    def formatted_value(self) -> str:
+        return self._formatted_value
 
 
 class ErrorCell(Cell):

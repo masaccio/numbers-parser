@@ -76,6 +76,8 @@ print("Cell A1 contains", data[0][0])
 print("Cell C2 contains", data[2][1])
 ```
 
+Cells are objects with a common base class of `Cell`. All cell types have a property `value` which returns the contents of the cell in as a native Python datatype. `DurationCell` object values are `datetime.timedelta` objects which are additionally available as a formatted value matching that stored in the Numbers spreadsheet. The formatted value is returned using the `formatted_value` property.
+
 ### Cell references
 
 In addition to extracting all data at once, individual cells can be referred to as methods
