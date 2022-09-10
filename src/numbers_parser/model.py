@@ -43,7 +43,6 @@ from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
 
 SECONDS_IN_HOUR = 60 * 60
 SECONDS_IN_DAY = SECONDS_IN_HOUR * 24
