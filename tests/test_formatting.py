@@ -16,3 +16,16 @@ def test_duration_formatting():
                 duration = row[6].formatted_value
                 ref = row[13].value
                 check.equal(duration, ref)
+
+
+def test_date_formatting():
+    doc = Document("tests/data/date_formats.numbers")
+    for sheet in doc.sheets:
+        table = sheet.tables[0]
+        for row in table.iter_rows(min_row=1):
+            if type(row[6]) == EmptyCell:
+                assert type(row[7]) == EmptyCell
+            else:
+                date = row[6].formatted_value
+                ref = row[7].value
+                check.equal(date, ref)

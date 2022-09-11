@@ -33,7 +33,7 @@ class Cell:
         elif cell_value.type == TSTArchives.textCellType:
             cell = TextCell(row_num, col_num, cell_value.value)
         elif cell_value.type == TSTArchives.dateCellType:
-            cell = DateCell(row_num, col_num, cell_value.value)
+            cell = DateCell(row_num, col_num, cell_value.value, cell_value.formatted)
         elif cell_value.type == TSTArchives.boolCellType:
             cell = BoolCell(row_num, col_num, cell_value.value)
         elif cell_value.type == TSTArchives.durationCellType:
@@ -191,9 +191,10 @@ class BoolCell(Cell):
 
 
 class DateCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value, formatted_value=None):
         self._type = TSTArchives.dateCellType
         super().__init__(row_num, col_num, value)
+        self.formatted_value = formatted_value
 
     @property
     def value(self) -> timedelta:

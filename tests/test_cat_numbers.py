@@ -1,4 +1,5 @@
 import pytest
+import csv
 
 from numbers_parser import __version__
 
@@ -200,7 +201,7 @@ def test_with_formulas(script_runner):
     ]
 
 
-def test_with_formatting(script_runner):
+def test_duration_formatting(script_runner):
     ret = script_runner.run(
         "cat-numbers",
         "-b",
@@ -209,8 +210,24 @@ def test_with_formatting(script_runner):
         print_result=False,
     )
     assert ret.success
-    rows = ret.stdout.strip().split("\n")
-    for row in rows:
-        cells = row.split(",")
-        if cells[13] != "Check" and cells[13] is not None:
-            assert cells[6] == cells[13]
+    rows = ret.stdout.strip().splitlines()
+    csv_reader = csv.reader(rows)
+    for row in csv_reader:
+        if row[13] != "Check" and row[13] is not None:
+            assert row[6] == row[13]
+
+
+def test_date_formatting(script_runner):
+    ret = script_runner.run(
+        "cat-numbers",
+        "-b",
+        "--formatting",
+        "tests/data/date_formats.numbers",
+        print_result=False,
+    )
+    assert ret.success
+    rows = ret.stdout.strip().splitlines()
+    csv_reader = csv.reader(rows)
+    for row in csv_reader:
+        if row[7] != "Check" and row[7] is not None:
+            assert row[6] == row[7]

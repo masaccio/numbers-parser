@@ -2,7 +2,7 @@ import math
 import re
 
 from array import array
-from datetime import timedelta
+from datetime import timedelta, datetime
 from functools import lru_cache
 from struct import pack, unpack
 from typing import Dict, List
@@ -1174,10 +1174,16 @@ class _NumbersModel:
             offset += 4
 
         offset += bin(flags & 0x1FE0).count("1") * 4
+
         if flags & 0x7E000 and cell_value.ieee is not None:
             format_id = unpack("<i", buffer[offset : offset + 4])[0]
             cell_value.formatted = self.duration_format(
                 cell_value.ieee, format_id, buffer[0], flags >> 13, table_id
+            )
+        elif flags & 0x7E000 and cell_value.date is not None:
+            format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            cell_value.formatted = self.date_format(
+                cell_value.date, format_id, buffer[0], table_id
             )
 
         return cell_value
@@ -1200,43 +1206,14 @@ class _NumbersModel:
             return
         unit_largest = format.duration_unit_largest
         unit_smallest = format.duration_unit_smallest
-        auto_units = format.use_automatic_duration_units
-
-        d = cell_value
-        dd = d
-        if auto_units:
-            if d == 0:
-                unit_largest = 2
-                unit_smallest = 2
-            else:
-                if d >= SECONDS_IN_WEEK:
-                    unit_largest = 1
-                elif d >= SECONDS_IN_DAY:
-                    unit_largest = 2
-                elif d >= SECONDS_IN_HOUR:
-                    unit_largest = 4
-                elif d >= 60:
-                    unit_largest = 8
-                elif d >= 1:
-                    unit_largest = 16
-                else:
-                    unit_largest = 32
-
-                if math.floor(d) != d:
-                    unit_smallest = 32
-                elif d % 60:
-                    unit_smallest = 16
-                elif d % SECONDS_IN_HOUR:
-                    unit_smallest = 8
-                elif d % SECONDS_IN_DAY:
-                    unit_smallest = 4
-                elif d % SECONDS_IN_WEEK:
-                    unit_smallest = 2
-                if unit_smallest < unit_largest:
-                    unit_smallest = unit_largest
+        if format.use_automatic_duration_units:
+            unit_smallest, unit_largest = auto_units(cell_value, format)
 
         if unit_largest == -1 or unit_smallest == -1:
             return
+
+        d = cell_value
+        dd = int(cell_value)
         dstr = []
 
         if unit_largest == 1:
@@ -1286,6 +1263,40 @@ class _NumbersModel:
         if duration_style == FORMAT_STYLE_NONE:
             duration_str = re.sub(r":(\d\d\d)$", r".\1", duration_str)
         return duration_str
+
+    def date_format(
+        self,
+        cell_value: datetime,
+        format_id: int,
+        format_version: int,
+        table_id: int,
+    ) -> str:
+        if format_version >= 4:
+            format = self.table_format(table_id, format_id)
+        else:
+            format = self.table_format(table_id, format_id)
+
+        format = format.date_time_format
+        format = format.replace("a", "%p")
+        format = format.replace("EEEE", "%A")
+        format = format.replace("EEE", "%a")
+        format = re.sub(r"\by\b", "%Y", format)
+        format = format.replace("yyyy", "%Y")
+        format = format.replace("yy", "%y")
+        format = format.replace("MMMM", "%B")
+        format = format.replace("MMM", "%b")
+        format = format.replace("MM", "%m")
+        format = format.replace("M", "%-m")
+        format = re.sub(r"\bd\b", "%-d", format)
+        format = format.replace("dd", "%d")
+        format = format.replace("HH", "%H")
+        format = format.replace("h", "%-I")
+        format = format.replace("mm", "%M")
+        format = format.replace("ss", "%S")
+        if format == "":
+            return ""
+
+        return cell_value.strftime(format)
 
     @lru_cache(maxsize=None)
     def table_formulas(self, table_id: int):
@@ -1586,3 +1597,40 @@ def unit_format(unit: str, value: int, style: int, abbrev: str = None):
         return f"{abbrev}"
     else:
         return ""
+
+
+def auto_units(cell_value, format):
+    unit_largest = format.duration_unit_largest
+    unit_smallest = format.duration_unit_smallest
+
+    if cell_value == 0:
+        unit_largest = 2
+        unit_smallest = 2
+    else:
+        if cell_value >= SECONDS_IN_WEEK:
+            unit_largest = 1
+        elif cell_value >= SECONDS_IN_DAY:
+            unit_largest = 2
+        elif cell_value >= SECONDS_IN_HOUR:
+            unit_largest = 4
+        elif cell_value >= 60:
+            unit_largest = 8
+        elif cell_value >= 1:
+            unit_largest = 16
+        else:
+            unit_largest = 32
+
+        if math.floor(cell_value) != cell_value:
+            unit_smallest = 32
+        elif cell_value % 60:
+            unit_smallest = 16
+        elif cell_value % SECONDS_IN_HOUR:
+            unit_smallest = 8
+        elif cell_value % SECONDS_IN_DAY:
+            unit_smallest = 4
+        elif cell_value % SECONDS_IN_WEEK:
+            unit_smallest = 2
+        if unit_smallest < unit_largest:
+            unit_smallest = unit_largest
+
+    return unit_smallest, unit_largest
