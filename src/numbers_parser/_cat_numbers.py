@@ -41,6 +41,11 @@ def command_line_parser():
         help="Dump formulas instead of formula results",
     )
     parser.add_argument(
+        "--formatting",
+        action="store_true",
+        help="Dump formatted cells (durations) as they appear in Numbers",
+    )
+    parser.add_argument(
         "-s", "--sheet", action="append", help="Names of sheet(s) to include in export"
     )
     parser.add_argument(
@@ -66,6 +71,8 @@ def cell_as_string(args, cell):
         return ""
     elif args.formulas and cell.formula is not None:
         return cell.formula
+    elif args.formatting and cell.formatted_value is not None:
+        return cell.formatted_value
     elif cell.value is None:
         return ""
     else:

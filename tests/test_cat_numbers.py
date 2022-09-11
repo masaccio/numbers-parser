@@ -198,3 +198,19 @@ def test_with_formulas(script_runner):
         '2.0,"IF(A10<5,""smaller"",""larger"")"',
         '10.0,"IF(A11≤5,""smaller"",""larger"")"',
     ]
+
+
+def test_with_formatting(script_runner):
+    ret = script_runner.run(
+        "cat-numbers",
+        "-b",
+        "--formatting",
+        "tests/data/duration_112.numbers",
+        print_result=False,
+    )
+    assert ret.success
+    rows = ret.stdout.strip().split("\n")
+    for row in rows:
+        cells = row.split(",")
+        if cells[13] != "Check" and cells[13] is not None:
+            assert cells[6] == cells[13]

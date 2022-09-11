@@ -79,6 +79,7 @@ class Cell:
         self.size = (1, 1)
         self.is_merged = False
         self.is_bulleted = False
+        self.formatted_value = None
 
     @property
     def formula(self):
@@ -203,15 +204,11 @@ class DurationCell(Cell):
     def __init__(self, row_num: int, col_num: int, value, formatted_value=None):
         self._type = TSTArchives.durationCellType
         super().__init__(row_num, col_num, value)
-        self._formatted_value = formatted_value
+        self.formatted_value = formatted_value
 
     @property
     def value(self) -> timedelta:
         return self._value
-
-    @property
-    def formatted_value(self) -> str:
-        return self._formatted_value
 
 
 class ErrorCell(Cell):
