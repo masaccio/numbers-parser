@@ -61,6 +61,8 @@ class ObjectStore:
     def _new_message_id(self):
         """Return the next available message ID for object creation"""
         max_id = max(self._objects.keys())
+        if max_id < 10000000:
+            max_id = 10000000
         return max_id + 1
 
     def mark_as_dirty(self, obj_id: int):

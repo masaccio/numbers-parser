@@ -2,6 +2,7 @@ import math
 import re
 
 from array import array
+from collections import OrderedDict
 from datetime import timedelta, datetime
 from functools import lru_cache
 from struct import pack, unpack
@@ -51,6 +52,28 @@ SECONDS_IN_WEEK = SECONDS_IN_DAY * 7
 FORMAT_STYLE_NONE = 0
 FORMAT_STYLE_SHORT = 1
 FORMAT_STYLE_MEDIUM = 2
+
+DATETIME_TO_STRFTIME = OrderedDict(
+    [
+        ("a", "%p"),
+        ("EEEE", "%A"),
+        ("EEE", "%a"),
+        ("y", "%Y"),
+        ("yyyy", "%Y"),
+        ("yy", "%y"),
+        ("MMMM", "%B"),
+        ("MMM", "%b"),
+        ("MM", "%m"),
+        ("M", "%-m"),
+        ("d", "%-d"),
+        ("dd", "%d"),
+        ("H", "%-H"),
+        ("HH", "%H"),
+        ("h", "%-I"),
+        ("mm", "%M"),
+        ("ss", "%S"),
+    ]
+)
 
 
 class CellValue:
@@ -666,6 +689,7 @@ class _NumbersModel:
                         identifier=obj_id,
                         locator=locator,
                         preferred_locator=preferred_locator,
+                        is_stored_outside_object_archive=False,
                         save_token=1,
                     )
                 else:
@@ -1277,22 +1301,8 @@ class _NumbersModel:
             format = self.table_format(table_id, format_id)
 
         format = format.date_time_format
-        format = format.replace("a", "%p")
-        format = format.replace("EEEE", "%A")
-        format = format.replace("EEE", "%a")
-        format = re.sub(r"\by\b", "%Y", format)
-        format = format.replace("yyyy", "%Y")
-        format = format.replace("yy", "%y")
-        format = format.replace("MMMM", "%B")
-        format = format.replace("MMM", "%b")
-        format = format.replace("MM", "%m")
-        format = format.replace("M", "%-m")
-        format = re.sub(r"\bd\b", "%-d", format)
-        format = format.replace("dd", "%d")
-        format = format.replace("HH", "%H")
-        format = format.replace("h", "%-I")
-        format = format.replace("mm", "%M")
-        format = format.replace("ss", "%S")
+        for r, s in DATETIME_TO_STRFTIME.items():
+            format = re.sub(f"\\b{r}\\b", s, format)
         if format == "":
             return ""
 

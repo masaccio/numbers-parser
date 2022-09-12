@@ -1,4 +1,5 @@
 import pytest
+import re
 
 from numbers_parser import Document, NumberCell
 from datetime import datetime, timedelta
@@ -35,6 +36,16 @@ ISSUE_10_REF = [
     12,
     "Item 1",
     123.456789,  # Formatted as 123.46
+]
+
+ISSUE_37_REF = [
+    ["0:00", "0:00:00"],
+    ["1:01", "1:01:01"],
+    ["9:09", "9:09:09"],
+    ["10:10", "10:10:10"],
+    ["11:11", "11:11:11"],
+    ["12:12", "12:12:12"],
+    ["23:23", "23:23:23"],
 ]
 
 
@@ -131,3 +142,11 @@ def test_issue_35():
     table = doc.sheets[0].tables[0]
     assert table.cell("A1").value == 72
     assert table.cell("ALL3").value == 62
+
+
+def test_issue_37():
+    doc = Document("tests/data/issue-37.numbers")
+    table = doc.sheets[0].tables[0]
+    for i, row in enumerate(table.rows()[1:]):
+        assert row[-2].formatted_value == ISSUE_37_REF[i][0]
+        assert row[-1].formatted_value == ISSUE_37_REF[i][1]
