@@ -12,7 +12,7 @@ PROTOBUF_VERSIONS = ["4.21.1", "3.20.1"]
 @pytest.mark.experimental
 def test_protobuf_versions(virtualenv):
     result = subprocess.check_output(["python3", "setup.py", "bdist_wheel"], text=True)
-    match = re.search("creating '(.*?\.whl)'", result)
+    match = re.search("creating r'(.*?[.]whl)'", result)
     wheel = None
     if match:
         wheel = match.group(1)
