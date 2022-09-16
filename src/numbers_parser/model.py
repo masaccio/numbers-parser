@@ -567,7 +567,7 @@ class _NumbersModel:
                 merge_map.cell_range.append(cell_range)
 
         base_data_store = self.objects[table_id].base_data_store
-        base_data_store.merge_region_map.MergeFrom(
+        base_data_store.merge_region_map.CopyFrom(
             TSPMessages.Reference(identifier=merge_map_id)
         )
         # TODO deal with Assertion:
@@ -730,9 +730,12 @@ class _NumbersModel:
         tile_idx = 0
         max_tile_idx = len(data) >> 8
         base_data_store = self.objects[table_id].base_data_store
-        tile_ids = [t.tile.identifier for t in base_data_store.tiles.tiles]
+        base_data_store.tiles.ClearField("tiles")
         if len(data[0]) > MAX_TILE_SIZE:
             base_data_store.tiles.should_use_wide_rows = True
+
+        # TODO: is this required?
+        # base_data_store.rowTileTree.ClearField("nodes")
 
         while tile_idx <= max_tile_idx:
             row_start = tile_idx * MAX_TILE_SIZE
@@ -743,61 +746,35 @@ class _NumbersModel:
                 num_rows = len(data) - row_start
                 row_end = row_start + num_rows
 
-            if tile_idx > (len(tile_ids) - 1):
-                tile_dict = {
-                    "maxColumn": 0,
-                    "maxRow": 0,
-                    "numCells": 0,
-                    "numrows": num_rows,
-                    "storage_version": 5,
-                    "rowInfos": [],
-                    "last_saved_in_BNC": True,
-                    "should_use_wide_rows": True,
-                }
-                tile_id, tile = self.objects.create_object_from_dict(
-                    "Index/Tables/Tile-{}", tile_dict, TSTArchives.Tile
-                )
-                for row_num in range(row_start, row_end):
-                    row_info = self.recalculate_row_info(
-                        table_id, data, row_start, row_num
-                    )
-                    tile.rowInfos.append(row_info)
+            tile_dict = {
+                "maxColumn": 0,
+                "maxRow": 0,
+                "numCells": 0,
+                "numrows": num_rows,
+                "storage_version": 5,
+                "rowInfos": [],
+                "last_saved_in_BNC": True,
+                "should_use_wide_rows": True,
+            }
+            tile_id, tile = self.objects.create_object_from_dict(
+                "Index/Tables/Tile-{}", tile_dict, TSTArchives.Tile
+            )
+            for row_num in range(row_start, row_end):
+                row_info = self.recalculate_row_info(table_id, data, row_start, row_num)
+                tile.rowInfos.append(row_info)
 
-                tile_ref = TSTArchives.TileStorage.Tile()
-                tile_ref.tileid = tile_idx
-                tile_ref.tile.MergeFrom(TSPMessages.Reference(identifier=tile_id))
-                base_data_store.tiles.tiles.append(tile_ref)
-                base_data_store.tiles.tile_size = MAX_TILE_SIZE
+            tile_ref = TSTArchives.TileStorage.Tile()
+            tile_ref.tileid = tile_idx
+            tile_ref.tile.MergeFrom(TSPMessages.Reference(identifier=tile_id))
+            base_data_store.tiles.tiles.append(tile_ref)
+            base_data_store.tiles.tile_size = MAX_TILE_SIZE
 
-                self.update_package_metadata(
-                    tile_id, "CalculationEngine", "Tables/Tile-{}"
-                )
+            self.update_package_metadata(tile_id, "CalculationEngine", "Tables/Tile-{}")
 
-                # TODO: is this required?
-                base_data_store.rowTileTree.nodes.append(
-                    TSTArchives.TableRBTree.Node(key=row_start, value=tile_idx)
-                )
-            else:
-                tile_id = tile_ids[tile_idx]
-                tile = self.objects[tile_id]
-                tile.maxColumn = 0
-                tile.maxRow = 0
-                tile.numCells = 0
-                tile.numrows = num_rows
-                tile.storage_version = 5
-                tile.last_saved_in_BNC = True
-                tile.should_use_wide_rows = True
-                clear_field_container(tile.rowInfos)
-
-                for row_num in range(row_start, row_end):
-                    row_info = self.recalculate_row_info(
-                        table_id, data, row_start, row_num
-                    )
-                    tile.rowInfos.append(row_info)
-
-                self.update_package_metadata(
-                    tile_id, "CalculationEngine", "Tables/Tile-{}"
-                )
+            # TODO: is this required?
+            # base_data_store.rowTileTree.nodes.append(
+            #     TSTArchives.TableRBTree.Node(key=row_start, value=tile_idx)
+            # )
 
             tile_idx += 1
 
@@ -833,6 +810,26 @@ class _NumbersModel:
 
         print(f"table_strings_id = {table_strings_id}")
 
+        refs_to_dupe = [
+            "body_cell_style",
+            "body_text_style",
+            "footer_row_style",
+            "footer_row_text_style",
+            "formula_error_table",
+            "header_column_style",
+            "header_column_text_style",
+            "header_row_style",
+            "header_row_text_style",
+            "pivot_header_column_summary_style",
+            "table_name_shape_style",
+            "table_name_style",
+            "table_style",
+            "table_style_preset",
+        ]
+        duped_refs = {
+            x: {"identifier": getattr(from_table, x).identifier} for x in refs_to_dupe
+        }
+
         table_model_id, table_model = self.objects.create_object_from_dict(
             "CalculationEngine",
             {
@@ -842,31 +839,7 @@ class _NumbersModel:
                 "table_name": table_name,
                 "default_row_height": 20.0,
                 "default_column_width": 98.0,
-                "table_style": {"identifier": from_table.table_style.identifier},
-                "body_text_style": {
-                    "identifier": from_table.body_text_style.identifier
-                },
-                "header_row_text_style": {
-                    "identifier": from_table.header_row_text_style.identifier
-                },
-                "header_column_text_style": {
-                    "identifier": from_table.header_column_text_style.identifier
-                },
-                "footer_row_text_style": {
-                    "identifier": from_table.footer_row_text_style.identifier
-                },
-                "body_cell_style": {
-                    "identifier": from_table.body_cell_style.identifier
-                },
-                "header_row_style": {
-                    "identifier": from_table.header_row_style.identifier
-                },
-                "header_column_style": {
-                    "identifier": from_table.header_column_style.identifier
-                },
-                "footer_row_style": {
-                    "identifier": from_table.footer_row_style.identifier
-                },
+                **duped_refs,
             },
             TSTArchives.TableModelArchive,
         )
