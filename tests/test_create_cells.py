@@ -6,7 +6,7 @@ from numbers_parser import Document
 from numbers_parser.cell import EmptyCell
 
 
-def test_edit_cell_values(tmp_path):
+def test_edit_cell_values(tmp_path, pytestconfig):
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -23,7 +23,10 @@ def test_edit_cell_values(tmp_path):
     assert isinstance(table.cell(3, 4), EmptyCell)
     assert isinstance(table.cell(4, 4), EmptyCell)
 
-    new_filename = tmp_path / "test-save-1-new.numbers"
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-save-1-new.numbers"
     doc.save(new_filename)
 
     doc = Document(new_filename)
@@ -41,7 +44,7 @@ def test_edit_cell_values(tmp_path):
     assert table.cell(5, 5).value == "7890"
 
 
-def test_large_table(tmp_path):
+def test_large_table(tmp_path, pytestconfig):
     doc = Document()
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -49,7 +52,10 @@ def test_large_table(tmp_path):
     for i in range(0, 300):
         table.write(i, i, "wide")
 
-    new_filename = tmp_path / "save-large.numbers"
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "save-large.numbers"
     doc.save(new_filename)
 
     doc = Document(new_filename)

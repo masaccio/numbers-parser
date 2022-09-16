@@ -5,6 +5,7 @@ from typing import Union, Generator
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
 from numbers_parser.file import write_numbers_file
+from numbers_parser.iwafile import deep_print
 from numbers_parser.cell import (
     EmptyCell,
     BoolCell,
@@ -95,6 +96,12 @@ class Sheet:
 
         new_table_id = self._model.add_table(self._sheet_id, table_name)
         self._tables.append(Table(self._model, new_table_id))
+        for table in self._tables:
+            with open(f"/Users/jconnell/Downloads/{table._table_id}.txt", "w") as f:
+                print("==========", table._table_id, file=f)
+                deep_print(
+                    self._model.objects[table._table_id], self._model.objects, file=f
+                )
         return self._tables[-1]
 
 

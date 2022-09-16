@@ -71,9 +71,6 @@ def test_create_sheet(tmp_path, pytestconfig):
         _ = sheets[0].add_table("TablE 1")
     assert "table 'TablE 1' already exists" in str(e.value)
 
-    # sheets[0].modify_table()
-    # table = sheets[0].tables[0]
-
     table = sheets[0].add_table()
     assert table.name == "Table 2"
     table.write("B1", "Column B")

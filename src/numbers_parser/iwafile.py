@@ -2,11 +2,13 @@
 
 import struct
 import snappy
+import sys
 from functools import partial
 
 from numbers_parser.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_ID_MAP
 from numbers_parser.exceptions import NotImplementedError
 from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
+from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 
 from google.protobuf.internal.encoder import _VarintBytes
 from google.protobuf.internal.decoder import _DecodeVarint32
@@ -334,16 +336,29 @@ def copy_object_to_iwa_file(iwa_file: IWAFile, obj: object, obj_id: int):
                     msg_info.object_references.append(reference)
 
 
-def deep_print(obj, indent=0):
+def deep_print(obj, objects, indent=0, file=sys.stdout):
     for descriptor in obj.DESCRIPTOR.fields:
         value = getattr(obj, descriptor.name)
-        if descriptor.type == descriptor.TYPE_MESSAGE:
+        if isinstance(value, TSPMessages.Reference):
+            id = value.identifier
+            name = descriptor.full_name
+            if id != 0:
+                type_name = objects[id].DESCRIPTOR.full_name
+                print("  " * indent + f"{name} -> #{id} ({type_name})", file=file)
+                deep_print(objects[id], objects, indent=indent + 1, file=file)
+            else:
+                print("  " * indent + f"{name} -> #{id}", file=file)
+        elif descriptor.type == descriptor.TYPE_MESSAGE:
             if descriptor.label == descriptor.LABEL_REPEATED:
                 map(lambda x: deep_print(x, indent + 1), value)
             else:
-                deep_print(value, indent + 1)
+                print("  " * indent + f"{descriptor.full_name}", file=file)
+                deep_print(value, objects, indent=indent + 1, file=file)
         elif descriptor.type == descriptor.TYPE_ENUM:
-            enum_name = descriptor.enum_type.values[value].name
-            print("  " * indent + f"{descriptor.full_name}, {enum_name}")
+            if type(value).__name__ == "RepeatedScalarContainer":
+                enum_str = [descriptor.enum_type.values[x].name for x in value]
+            else:
+                enum_str = descriptor.enum_type.values[value - 1].name
+            print("  " * indent + f"{descriptor.full_name}, {enum_str}", file=file)
         else:
-            print("  " * indent + f"{descriptor.full_name} {value}")
+            print("  " * indent + f"{descriptor.full_name} {value}", file=file)
