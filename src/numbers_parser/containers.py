@@ -1,7 +1,9 @@
+import sys
 import warnings
 
 from numbers_parser.file import read_numbers_file
 from numbers_parser.iwafile import create_iwa_segment, copy_object_to_iwa_file, IWAFile
+from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 
 
 class ItemsList:
@@ -102,6 +104,33 @@ class ObjectStore:
                 self._objects[obj_id],
                 obj_id,
             )
+
+    def deep_print(self, obj, indent=0, file=sys.stdout):  # pragma: no cover
+        for descriptor in obj.DESCRIPTOR.fields:
+            value = getattr(obj, descriptor.name)
+            if isinstance(value, TSPMessages.Reference):
+                id = value.identifier
+                name = descriptor.full_name
+                if id != 0:
+                    type_name = self[id].DESCRIPTOR.full_name
+                    print("  " * indent + f"{name} -> #{id} ({type_name})", file=file)
+                    self.deep_print(self[id], indent=indent + 1, file=file)
+                else:
+                    print("  " * indent + f"{name} -> #{id}", file=file)
+            elif descriptor.type == descriptor.TYPE_MESSAGE:
+                if descriptor.label == descriptor.LABEL_REPEATED:
+                    map(lambda x: self.deep_print(x, indent + 1), value)
+                else:
+                    print("  " * indent + f"{descriptor.full_name}", file=file)
+                    self.deep_print(value, indent=indent + 1, file=file)
+            elif descriptor.type == descriptor.TYPE_ENUM:
+                if type(value).__name__ == "RepeatedScalarContainer":
+                    enum_str = [descriptor.enum_type.values[x].name for x in value]
+                else:
+                    enum_str = descriptor.enum_type.values[value - 1].name
+                print("  " * indent + f"{descriptor.full_name}, {enum_str}", file=file)
+            else:
+                print("  " * indent + f"{descriptor.full_name} {value}", file=file)
 
     def _store_object(self, identifier, obj, filename):
         self._objects[identifier] = obj
