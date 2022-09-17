@@ -1,4 +1,5 @@
 import pytest
+import sys
 
 from numbers_parser import Document
 from numbers_parser.cell import EmptyCell, TextCell, NumberCell
@@ -80,10 +81,10 @@ def test_create_sheet(tmp_path, pytestconfig):
     table.write("C2", "a little")
     table.write("D2", "lamb")
 
-    # doc._experimental = True
-    # with pytest.raises(IndexError) as e:
-    #     _ = doc.add_sheet("SheeT 1")
-    # assert "sheet 'SheeT 1' already exists" in str(e.value)
+    doc._experimental = True
+    with pytest.raises(IndexError) as e:
+        _ = doc.add_sheet("SheeT 1")
+    assert "sheet 'SheeT 1' already exists" in str(e.value)
 
     # doc.add_sheet("New Sheet", "New Table")
     # sheet = doc.sheets["New Sheet"]
@@ -101,12 +102,14 @@ def test_create_sheet(tmp_path, pytestconfig):
         new_filename = tmp_path / "test-1-new.numbers"
     doc.save(new_filename)
 
+    with open("/Users/jon/Downloads/saved.ids", "w") as f:
+        table._model.dump_metadata(f)
+
     doc = Document(new_filename)
     sheets = doc.sheets
 
-    table = sheets[0].tables[0]
-    # table = sheets[0].tables[1]
-    # assert sheets[0].tables[1].name == "Table 2"
+    table = sheets[0].tables[1]
+    assert sheets[0].tables[1].name == "Table 2"
     assert table.cell("B1").value == "Column B"
     assert table.cell("C1").value == "Column C"
     assert table.cell("D1").value == "Column D"
