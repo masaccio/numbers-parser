@@ -5,7 +5,6 @@ from typing import Union, Generator
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
 from numbers_parser.file import write_numbers_file
-from numbers_parser.iwafile import deep_print
 from numbers_parser.cell import (
     EmptyCell,
     BoolCell,
@@ -58,6 +57,8 @@ class Document:
 
         new_sheet_id = self._model.add_sheet(sheet_name, table_name, self._sheets[-1])
         self._sheets.append(Sheet(self._model, new_sheet_id))
+        self._sheets[-1]._experimental = True
+        self._sheets[-1].add_table(table_name)
         return self._sheets[-1]
 
 
@@ -97,10 +98,10 @@ class Sheet:
         new_table_id = self._model.add_table(self._sheet_id, table_name)
         self._tables.append(Table(self._model, new_table_id))
         for table in self._tables:
-            with open(f"/Users/jconnell/Downloads/{table._table_id}.txt", "w") as f:
+            with open(f"/Users/jon/Downloads/{table._table_id}.txt", "w") as f:
                 print("==========", table._table_id, file=f)
-                deep_print(
-                    self._model.objects[table._table_id], self._model.objects, file=f
+                self._model.objects.deep_print(
+                    self._model.objects[table._table_id], file=f
                 )
         return self._tables[-1]
 
