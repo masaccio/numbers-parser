@@ -53,12 +53,10 @@ def test_large_table(tmp_path, pytestconfig):
     for i in range(0, 300):
         table.write(i, i, "wide")
 
-    table.write(MAX_ROW_COUNT - 1, 0, "")
     with pytest.raises(IndexError) as e:
         table.write(MAX_ROW_COUNT, 0, "")
     assert "exceeds maximum row" in str(e.value)
 
-    table.write(0, MAX_COL_COUNT - 1, "")
     with pytest.raises(IndexError) as e:
         table.write(0, MAX_COL_COUNT, "")
     assert "exceeds maximum column" in str(e.value)
