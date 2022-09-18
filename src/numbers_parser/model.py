@@ -784,8 +784,35 @@ class _NumbersModel:
         }
         return style_sheet_map
 
-    def add_table(self, sheet_id: int, table_name: str) -> int:
-        from_table_id = self.table_ids(sheet_id)[-1]
+    def sheet_table_offset(self, sheet_id):
+        """Sum the heights of all rows in all tables in a sheet"""
+        if len(self.table_ids(sheet_id)) == 0:
+            return 0.0
+
+        height = 0.0
+        for table_id in self.table_ids(sheet_id):
+            number_of_rows = self.number_of_rows(table_id)
+            table_model = self.objects[table_id]
+            # height = table_model.default_row_height * number_of_rows
+
+            bds = self.objects[table_id].base_data_store
+            buckets = self.objects[bds.rowHeaders.buckets[0].identifier].headers
+            for i, row in self.row_storage_map(table_id).items():
+                if row is not None:
+                    height += buckets[i].size
+                else:
+                    height += table_model.default_row_height
+
+        # TODO: calculate gap between tables
+        height += 100.0
+
+        return height
+
+    def add_table(
+        self, sheet_id: int, table_name: str, from_table_id: int = None
+    ) -> int:
+        if from_table_id is None:
+            from_table_id = self.table_ids(sheet_id)[-1]
         from_table = self.objects[from_table_id]
 
         table_strings_id, table_strings = self.create_string_table()
@@ -798,6 +825,7 @@ class _NumbersModel:
                 "number_of_rows": DEFAULT_ROW_COUNT,
                 "number_of_columns": DEFAULT_COLUMN_COUNT,
                 "table_name": table_name,
+                "table_name_enabled": True,
                 "default_row_height": 20.0,
                 "default_column_width": 98.0,
                 **from_table_refs,
@@ -899,14 +927,13 @@ class _NumbersModel:
         table_info.tableModel.MergeFrom(
             TSPMessages.Reference(identifier=table_model_id)
         )
-        # TODO: use size of previous table to position new table
         drawable = TSDArchives.DrawableArchive(
             parent=TSPMessages.Reference(identifier=sheet_id),
             geometry=TSDArchives.GeometryArchive(
                 angle=0.0,
                 flags=3,
-                position=TSPMessages.Point(x=0.0, y=600.0),
-                size=TSPMessages.Size(height=200.0, width=500.0),
+                position=TSPMessages.Point(x=0.0, y=self.sheet_table_offset(sheet_id)),
+                size=TSPMessages.Size(height=231.0, width=494.0),
             ),
         )
         table_info.super.MergeFrom(drawable)
@@ -917,17 +944,17 @@ class _NumbersModel:
 
         return table_model_id
 
-    def add_sheet(self, sheet_name: str, table_name: str, from_sheet: int):
+    def add_sheet(self, sheet_name: str, table_name: str, from_table_id: int):
+        """Add a new sheet with a copy of a table from another sheet"""
         sheet_id, sheet_archive = self.objects.create_object_from_dict(
             "Document", {"name": sheet_name}, TNArchives.SheetArchive
         )
 
-        table_info_id = self.add_table(from_sheet._sheet_id, table_name)
+        table_info_id = self.add_table(sheet_id, table_name, from_table_id)
 
         self.objects[DOCUMENT_ID].sheets.append(
             TSPMessages.Reference(identifier=sheet_id)
         )
-
         sheet_archive.drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id)
         )
