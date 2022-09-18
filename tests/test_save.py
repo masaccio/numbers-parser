@@ -96,7 +96,6 @@ def test_create_table(tmp_path, pytestconfig):
     assert table.cell("D2").value == "lamb"
 
 
-@pytest.mark.experimental
 def test_create_sheet(tmp_path, pytestconfig):
     _EXPERIMENTAL_NUMBERS_PARSER = True
     doc = Document()
@@ -127,13 +126,13 @@ def test_create_sheet(tmp_path, pytestconfig):
     doc = Document(new_filename)
     sheets = doc.sheets
 
-    assert sheets[2].name == "New Sheet"
+    assert sheets[1].name == "New Sheet"
 
     table = sheets[1].tables[0]
     assert table.name == "New Table"
 
-    assert type(table.cells(0, 1)) == TextCell
-    assert table.cells(0, 1).value == "Column 1"
-    assert type(table.cells(0, 1)) == TextCell
-    assert type(table.cells(1, 3)) == NumberCell
-    assert table.cells(1, 3).value == 3000
+    assert type(table.cell(0, 1)) == TextCell
+    assert table.cell(0, 1).value == "Column 1"
+    assert type(table.cell(0, 1)) == TextCell
+    assert type(table.cell(1, 3)) == NumberCell
+    assert table.cell(1, 3).value == 3000
