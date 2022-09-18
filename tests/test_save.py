@@ -102,9 +102,6 @@ def test_create_sheet(tmp_path, pytestconfig):
         new_filename = tmp_path / "test-1-new.numbers"
     doc.save(new_filename)
 
-    with open("/Users/jon/Downloads/saved.ids", "w") as f:
-        table._model.dump_metadata(f)
-
     doc = Document(new_filename)
     sheets = doc.sheets
 
