@@ -158,30 +158,29 @@ Bulleted and numbered data can also be extracted with the bullet or number chara
 
 ## Writing Numbers files
 
-*This is considered experimental* and has a number of limitations. You are highly recommened not to overwrite working Numbers files and instead save data to a new file.
+*This is considered experimental*: you are highly recommened not to overwrite working Numbers files and instead save data to a new file.
 
 ### Limitations
 
-Currently only documents with single table in single sheet are supported. Most cell formats should work with the expception of `MergedCell` and `BulletedTextCell`. The following features may be introduced in the future:
+Since version 3.4.0, adding tables and sheets is supported. Known limitations to write support are:
 
-* bullets in text cells (`BulletedTextCell`)
-* multiple tables per sheet
-* multiple sheets for spreadsheet document
-
-During the same process, cell widths are reset and cell formats are removed from the saved file.
+* Creating cells of type `BulletedTextCell` is not supported
+* Formats cannot be defined for `DurationCell` or `DateCell`
+* New tables are inserted with a fixed offset below the last table in a worksheet which does not take into account title or caption size
+* New sheets insert tables with formats copied from the first table in the previous sheet rather than default table formats
 
 ### Editing cells
 
-`numbers-parser` will automatically empty rows and columns for any cell references that out of range of the current table. The `write` method accepts the same cell numbering notation as `cell` plus an additional argument representing the new cell value. The type of the new value will be used to determine the cell type.
+`numbers-parser` will automatically empty rows and columns for any cell references that are out of range of the current table. The `write` method accepts the same cell numbering notation as `cell` plus an additional argument representing the new cell value. The type of the new value will be used to determine the cell type.
 
 ``` python
-doc = Document("my-spreadsheet.numbers")
+doc = Document("old-sheet.numbers")
 sheets = doc.sheets
 tables = sheets[0].tables
 table = tables[0]
 table.write(1, 1, "This is new text")
 table.write("B7", datetime(2020, 12, 25))
-doc.save("my-edited-spreadsheet.numbers")
+doc.save("new-sheet.numbers")
 ```
 
 Sheet names and table names can be changed by assigning a new value to the `name` of each:
@@ -190,6 +189,22 @@ Sheet names and table names can be changed by assigning a new value to the `name
 sheets[0].name = "My new sheet"
 tables[0].name = "Edited table"
 ````
+
+### Adding tables and sheets
+
+Additional tables and worksheets can be added to a `Document` before saving. If no sheet name or table name is supplied, `numbers-parser` will use `Sheet 1`, `Sheet 2`, etc.
+
+```python
+doc = Document()
+doc.add_sheet("New Sheet", "New Table")
+sheet = doc.sheets["New Sheet"]
+table = sheet.tables["New Table"]
+table.write(1, 1, 1000)
+table.write(1, 2, 2000)
+table.write(1, 3, 3000)
+
+doc.save("sheet.numbers")
+```
 
 ## Command-line scripts
 

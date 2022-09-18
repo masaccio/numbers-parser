@@ -791,7 +791,6 @@ class _NumbersModel:
 
         height = 0.0
         for table_id in self.table_ids(sheet_id):
-            number_of_rows = self.number_of_rows(table_id)
             table_model = self.objects[table_id]
             # height = table_model.default_row_height * number_of_rows
 

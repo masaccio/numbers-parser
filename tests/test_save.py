@@ -60,7 +60,6 @@ def test_save_merges(tmp_path, pytestconfig):
 
 
 def test_create_table(tmp_path, pytestconfig):
-    _EXPERIMENTAL_NUMBERS_PARSER = True
     doc = Document()
     sheets = doc.sheets
 
@@ -97,12 +96,9 @@ def test_create_table(tmp_path, pytestconfig):
 
 
 def test_create_sheet(tmp_path, pytestconfig):
-    _EXPERIMENTAL_NUMBERS_PARSER = True
     doc = Document()
     sheets = doc.sheets
 
-    doc._experimental = True
-    sheets[0]._experimental = True
     with pytest.raises(IndexError) as e:
         _ = doc.add_sheet("SheeT 1")
     assert "sheet 'SheeT 1' already exists" in str(e.value)
