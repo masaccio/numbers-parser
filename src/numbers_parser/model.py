@@ -1,6 +1,5 @@
 import math
 import re
-import sys
 
 from array import array
 from collections import OrderedDict
@@ -41,7 +40,6 @@ from numbers_parser.bullets import (
 )
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
-from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
@@ -591,19 +589,19 @@ class _NumbersModel:
         #   Use TSPReadWeakReferenceMessage<TSTMergeRegionMap>(unarchiver, message,
         #   completion) instead.
 
-        component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
-        component_id = [
-            id
-            for id, c in component_map.items()
-            if c.preferred_locator == "CalculationEngine"
-        ][0]
-        component_map[component_id].external_references.append(
-            TSPArchiveMessages.ComponentExternalReference(
-                component_identifier=table_id,
-                object_identifier=merge_map_id,
-                is_weak=True,
-            )
-        )
+        # component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
+        # component_id = [
+        #     id
+        #     for id, c in component_map.items()
+        #     if c.preferred_locator == "CalculationEngine"
+        # ][0]
+        # component_map[component_id].external_references.append(
+        #     TSPArchiveMessages.ComponentExternalReference(
+        #         component_identifier=table_id,
+        #         object_identifier=merge_map_id,
+        #         is_weak=True,
+        #     )
+        # )
 
     def recalculate_column_row_uid_map(self, table_id: int, data: List):
         table_model = self.objects[table_id]
@@ -684,39 +682,6 @@ class _NumbersModel:
         row_info.has_wide_offsets = wide_offsets
         return row_info
 
-    def dump_metadata(self, file=sys.stdout):
-        component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
-        for id, c in sorted(
-            component_map.items(), key=lambda x: (x[0], x[1].preferred_locator)
-        ):
-            if len(c.external_references) > 0:
-                print(f"id={c.identifier}, file={c.preferred_locator}", file=file)
-                for ref in sorted(
-                    c.external_references, key=lambda x: x.object_identifier
-                ):
-                    c_type = type(self.objects[ref.component_identifier])
-                    c_name = (
-                        c_type.__module__.replace("_pb2", "") + "." + c_type.__name__
-                    )
-                    if ref.object_identifier:
-                        o_type = type(self.objects[ref.object_identifier])
-                        o_name = (
-                            o_type.__module__.replace("_pb2", "")
-                            + "."
-                            + o_type.__name__
-                        )
-                        print(
-                            f"  o={ref.object_identifier}({o_name}),",
-                            f"c={ref.component_identifier}({c_name}),",
-                            f"weak={ref.is_weak}",
-                            file=file,
-                        )
-                    else:
-                        print(
-                            f"  c={ref.component_identifier}({c_name})",
-                            file=file,
-                        )
-
     @lru_cache(maxsize=None)
     def metadata_component(self, component_name: str) -> int:
         """Return the ID of an object in the document metadata given it's name"""
@@ -730,7 +695,6 @@ class _NumbersModel:
 
     def add_component_metadata(self, object_id: int, parent: str, locator: str):
         """Add a new ComponentInfo record to the parent object in the document metadata"""
-        component = self.metadata_component(parent)
         locator = locator.format(object_id)
         preferred_locator = re.sub(r"\-\d+.*", "", locator)
         component_info = TSPArchiveMessages.ComponentInfo(
@@ -738,6 +702,8 @@ class _NumbersModel:
             locator=locator,
             preferred_locator=preferred_locator,
             is_stored_outside_object_archive=False,
+            document_read_version=[2, 0, 0],
+            document_write_version=[2, 0, 0],
             save_token=1,
         )
         self.objects[PACKAGE_ID].components.append(component_info)
@@ -854,36 +820,9 @@ class _NumbersModel:
         from_table_id = self.table_ids(sheet_id)[-1]
         from_table = self.objects[from_table_id]
 
-        print("\n")
-
         table_strings_id, table_strings = self.create_string_table()
 
-        print(f"table_strings_id = {table_strings_id}")
-
-        # refs_to_dupe = [
-        #     "body_cell_style",
-        #     "body_text_style",
-        #     "footer_row_style",
-        #     "footer_row_text_style",
-        #     "header_column_style",
-        #     "header_column_text_style",
-        #     "header_row_style",
-        #     "header_row_text_style",
-        #     "pivot_header_column_summary_style",
-        #     "table_name_shape_style",
-        #     "table_name_style",
-        #     "table_style",
-        #     "table_style_preset",
-        # ]
-        # duped_refs = {
-        #     x: {"identifier": getattr(from_table, x).identifier} for x in refs_to_dupe
-        # }
-        from_table_refs = {
-            x[0].name: {"identifier": getattr(from_table, x[0].name).identifier}
-            for x in from_table.ListFields()
-            if type(getattr(from_table, x[0].name)) == TSPMessages.Reference
-        }
-
+        from_table_refs = field_references(from_table)
         table_model_id, table_model = self.objects.create_object_from_dict(
             "CalculationEngine",
             {
@@ -898,15 +837,11 @@ class _NumbersModel:
             TSTArchives.TableModelArchive,
         )
 
-        print(f"table_model_id = {table_model_id}")
-
         column_headers_id, column_headers = self.objects.create_object_from_dict(
             "Index/Tables/HeaderStorageBucket-{}",
             {"bucketHashFunction": 1},
             TSTArchives.HeaderStorageBucket,
         )
-        print(f"column_headers_id = {column_headers_id}")
-
         self.add_component_metadata(
             column_headers_id, "CalculationEngine", "Tables/HeaderStorageBucket-{}"
         )
@@ -916,7 +851,6 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
             TSTArchives.TableDataList,
         )
-        print(f"style_table_id = {style_table_id}")
 
         self.add_component_metadata(
             style_table_id, "CalculationEngine", "Tables/DataList-{}"
@@ -927,7 +861,6 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.FORMULA, "nextListID": 1},
             TSTArchives.TableDataList,
         )
-        print(f"formula_table_id = {formula_table_id}")
 
         self.add_component_metadata(
             formula_table_id, "CalculationEngine", "Tables/TableDataList-{}"
@@ -938,7 +871,6 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
             TSTArchives.TableDataList,
         )
-        print(f"format_table_pre_bnc_id = {format_table_pre_bnc_id}")
 
         self.add_component_metadata(
             format_table_pre_bnc_id,
@@ -946,28 +878,25 @@ class _NumbersModel:
             "Tables/TableDataList-{}",
         )
 
+        data_store_refs = field_references(from_table.base_data_store)
+        data_store_refs["stringTable"] = {"identifier": table_strings_id}
+        data_store_refs["columnHeaders"] = {"identifier": column_headers_id}
+        data_store_refs["styleTable"] = {"identifier": style_table_id}
+        data_store_refs["formula_table"] = {"identifier": formula_table_id}
+        data_store_refs["format_table_pre_bnc"] = {
+            "identifier": format_table_pre_bnc_id
+        }
         table_model.base_data_store.MergeFrom(
             TSTArchives.DataStore(
-                stringTable=TSPMessages.Reference(identifier=table_strings_id),
                 rowHeaders=TSTArchives.HeaderStorage(bucketHashFunction=1),
-                columnHeaders=TSPMessages.Reference(identifier=column_headers_id),
                 nextRowStripID=1,
                 nextColumnStripID=0,
                 rowTileTree=TSTArchives.TableRBTree(),
                 columnTileTree=TSTArchives.TableRBTree(),
                 tiles=TSTArchives.TileStorage(tile_size=256, should_use_wide_rows=True),
-                styleTable=TSPMessages.Reference(identifier=style_table_id),
-                formula_table=TSPMessages.Reference(identifier=formula_table_id),
-                format_table_pre_bnc=TSPMessages.Reference(
-                    identifier=format_table_pre_bnc_id
-                ),
+                **data_store_refs,
             )
         )
-
-        # ********** TODO ***********
-        # Check that Metadata incluces all Object -> Reference maps (don't we do this in headers already?)
-        # Will need to understand the difference between weak and string references
-        # Is this what's causing the "not archived" messages?
 
         data = [
             [
@@ -982,7 +911,6 @@ class _NumbersModel:
             {"bucketHashFunction": 1},
             TSTArchives.HeaderStorageBucket,
         )
-        print(f"row_headers_id = {row_headers_id}")
 
         self.add_component_metadata(
             row_headers_id, "CalculationEngine", "Tables/HeaderStorageBucket-{}"
@@ -993,25 +921,23 @@ class _NumbersModel:
 
         self.recalculate_table_data(table_model_id, data)
 
-        # TODO: fix package metadata references
-
         table_info_id, table_info = self.objects.create_object_from_dict(
             "CalculationEngine",
             {},
             TSTArchives.TableInfoArchive,
         )
-        print(f"table_info_id = {table_info_id}")
         self.add_component_reference(table_info_id, "Document", self.calc_engine_id())
 
         table_info.tableModel.MergeFrom(
             TSPMessages.Reference(identifier=table_model_id)
         )
+        # TODO: use size of previous table to position new table
         drawable = TSDArchives.DrawableArchive(
             parent=TSPMessages.Reference(identifier=sheet_id),
             geometry=TSDArchives.GeometryArchive(
                 angle=0.0,
                 flags=3,
-                position=TSPMessages.Point(x=0.0, y=400.0),
+                position=TSPMessages.Point(x=0.0, y=600.0),
                 size=TSPMessages.Size(height=200.0, width=500.0),
             ),
         )
@@ -1020,21 +946,6 @@ class _NumbersModel:
         self.objects[sheet_id].drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id)
         )
-
-        # TODO (1): is this required?
-        new_tree_node_id, tree_node = self.objects.create_object_from_dict(
-            "Document",
-            {},
-            TSKArchives.TreeNode,
-        )
-        tree_node.object.MergeFrom(TSPMessages.Reference(identifier=table_info_id))
-        for tree_node_id in self.objects.find_refs("TreeNode"):
-            if self.objects[tree_node_id].object.identifier == sheet_id:
-                self.objects[tree_node_id].children.append(
-                    TSPMessages.Reference(identifier=new_tree_node_id)
-                )
-        # TODO (2): is this required
-        self.add_component_reference(table_info_id, "CalculationEngine")
 
         return table_model_id
 
@@ -1245,7 +1156,7 @@ class _NumbersModel:
 
         return cell_value
 
-    def duration_format(
+    def duration_format(  # noqa: C901
         self,
         cell_value: int,
         format_id: int,
@@ -1677,3 +1588,13 @@ def auto_units(cell_value, format):
             unit_smallest = unit_largest
 
     return unit_smallest, unit_largest
+
+
+def field_references(obj: object) -> dict:
+    """Return a dict of all fields in an object that are references to other objects"""
+    refs = {
+        x[0].name: {"identifier": getattr(obj, x[0].name).identifier}
+        for x in obj.ListFields()
+        if type(getattr(obj, x[0].name)) == TSPMessages.Reference
+    }
+    return refs
