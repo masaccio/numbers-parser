@@ -41,9 +41,6 @@ class Document:
     def add_sheet(self, sheet_name=None, table_name=None) -> object:
         """Add a new sheet to the current document. If no sheet name is provided,
         the next available numbered sheet will be generated"""
-        if getattr(self, "_experimental", None) is None:
-            raise AttributeError("'Document' object has no attribute 'add_sheet'")
-
         if sheet_name is not None:
             if sheet_name in self._sheets:
                 raise IndexError(f"sheet '{sheet_name}' already exists")
@@ -56,10 +53,10 @@ class Document:
         if table_name is None:
             table_name = "Table 1"
 
-        new_sheet_id = self._model.add_sheet(sheet_name, table_name, self._sheets[-1])
+        from_table_id = self._sheets[-1]._tables[0]._table_id
+        new_sheet_id = self._model.add_sheet(sheet_name, table_name, from_table_id)
         self._sheets.append(Sheet(self._model, new_sheet_id))
-        self._sheets[-1]._experimental = True
-        self._sheets[-1].add_table(table_name)
+
         return self._sheets[-1]
 
 
@@ -82,7 +79,7 @@ class Sheet:
     def name(self, value):
         self._model.sheet_name(self._sheet_id, value)
 
-    def add_table(self, table_name=None) -> object:
+    def add_table(self, table_name=None, from_table_id=None) -> object:
         """Add a new table to the current sheet. If no sheet name is provided,
         the next available numbered sheet will be generated"""
         if table_name is not None:
@@ -94,7 +91,7 @@ class Sheet:
                 table_num += 1
             table_name = f"Table {table_num}"
 
-        new_table_id = self._model.add_table(self._sheet_id, table_name)
+        new_table_id = self._model.add_table(self._sheet_id, table_name, from_table_id)
         self._tables.append(Table(self._model, new_table_id))
         return self._tables[-1]
 
