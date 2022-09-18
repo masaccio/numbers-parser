@@ -2,7 +2,7 @@ PACKAGE=numbers-parser
 
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
-package_c := $(-,_,$(PACKAGE))
+package_c := $(subst -,_,$(PACKAGE))
 
 # Change this to the name of a code-signing certificate. A self-signed
 # certificate is suitable for this.
