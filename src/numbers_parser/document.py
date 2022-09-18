@@ -5,6 +5,7 @@ from typing import Union, Generator
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
 from numbers_parser.file import write_numbers_file
+from numbers_parser.constants import MAX_ROW_COUNT, MAX_COL_COUNT
 from numbers_parser.cell import (
     EmptyCell,
     BoolCell,
@@ -266,7 +267,11 @@ class Table:
             (row_num, col_num) = args[0:2]
             value = args[2]
 
-        # TODO: test maximum ranges
+        if row_num >= MAX_ROW_COUNT:
+            raise IndexError(f"{row_num} exceeds maximum row {MAX_ROW_COUNT-1}")
+        if col_num >= MAX_COL_COUNT:
+            raise IndexError(f"{col_num} exceeds maximum column {MAX_COL_COUNT-1}")
+
         for row in range(self.num_rows, row_num + 1):
             self.add_row()
 

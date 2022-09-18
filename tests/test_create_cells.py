@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from numbers_parser import Document
 from numbers_parser.cell import EmptyCell
+from numbers_parser.constants import MAX_ROW_COUNT, MAX_COL_COUNT
 
 
 def test_edit_cell_values(tmp_path, pytestconfig):
@@ -51,6 +52,16 @@ def test_large_table(tmp_path, pytestconfig):
     table = tables[0]
     for i in range(0, 300):
         table.write(i, i, "wide")
+
+    table.write(MAX_ROW_COUNT - 1, 0, "")
+    with pytest.raises(IndexError) as e:
+        table.write(MAX_ROW_COUNT, 0, "")
+    assert "exceeds maximum row" in str(e.value)
+
+    table.write(0, MAX_COL_COUNT - 1, "")
+    with pytest.raises(IndexError) as e:
+        table.write(0, MAX_COL_COUNT, "")
+    assert "exceeds maximum column" in str(e.value)
 
     if pytestconfig.getoption("save_file") is not None:
         new_filename = pytestconfig.getoption("save_file")
