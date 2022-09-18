@@ -578,30 +578,6 @@ class _NumbersModel:
         base_data_store.merge_region_map.CopyFrom(
             TSPMessages.Reference(identifier=merge_map_id)
         )
-        # TODO deal with Assertion:
-        # Assert *** Assertion failure #0: -[TSPUnarchiver
-        #   validateReferenceToObjectIdentifier:objectClass:isWeak
-        #   :validateStrongReferences:selector:weakSelector:]
-        #   /Library/Caches/com.apple.xbs/Sources/iWorkDependenciesMacOS/
-        #   iWorkDependenciesMacOS-7034.0.86/shared/persistence/src/TSPUnarchiver.mm:704
-        #   Object [TSTMergeRegionMap-6347027] is not strongly referenced from message
-        #   TST.TableModelArchive-1058328] message type 6001.
-        #   Use TSPReadWeakReferenceMessage<TSTMergeRegionMap>(unarchiver, message,
-        #   completion) instead.
-
-        # component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
-        # component_id = [
-        #     id
-        #     for id, c in component_map.items()
-        #     if c.preferred_locator == "CalculationEngine"
-        # ][0]
-        # component_map[component_id].external_references.append(
-        #     TSPArchiveMessages.ComponentExternalReference(
-        #         component_identifier=table_id,
-        #         object_identifier=merge_map_id,
-        #         is_weak=True,
-        #     )
-        # )
 
     def recalculate_column_row_uid_map(self, table_id: int, data: List):
         table_model = self.objects[table_id]
@@ -750,9 +726,6 @@ class _NumbersModel:
         if len(data[0]) > MAX_TILE_SIZE:
             base_data_store.tiles.should_use_wide_rows = True
 
-        # TODO: is this required?
-        # base_data_store.rowTileTree.ClearField("nodes")
-
         while tile_idx <= max_tile_idx:
             row_start = tile_idx * MAX_TILE_SIZE
             if (len(data) - row_start) > MAX_TILE_SIZE:
@@ -786,11 +759,6 @@ class _NumbersModel:
             base_data_store.tiles.tile_size = MAX_TILE_SIZE
 
             self.add_component_metadata(tile_id, "CalculationEngine", "Tables/Tile-{}")
-
-            # TODO: is this required?
-            # base_data_store.rowTileTree.nodes.append(
-            #     TSTArchives.TableRBTree.Node(key=row_start, value=tile_idx)
-            # )
 
             tile_idx += 1
 
