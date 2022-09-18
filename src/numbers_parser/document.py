@@ -85,8 +85,6 @@ class Sheet:
     def add_table(self, table_name=None) -> object:
         """Add a new table to the current sheet. If no sheet name is provided,
         the next available numbered sheet will be generated"""
-        if getattr(self, "_experimental", None) is None:
-            raise AttributeError("'Sheet' object has no attribute 'add_table'")
         if table_name is not None:
             if table_name in self._tables:
                 raise IndexError(f"table '{table_name}' already exists")

@@ -59,15 +59,11 @@ def test_save_merges(tmp_path, pytestconfig):
     assert table.merge_ranges == ["B2:C2", "B5:E5", "D2:D4"]
 
 
-@pytest.mark.experimental
-def test_create_sheet(tmp_path, pytestconfig):
+def test_create_table(tmp_path, pytestconfig):
     _EXPERIMENTAL_NUMBERS_PARSER = True
     doc = Document()
     sheets = doc.sheets
-    sheets[0].tables[0].write("B2", "data")
-    sheets[0].tables[0].write("G2", "data")
 
-    sheets[0]._experimental = True
     with pytest.raises(IndexError) as e:
         _ = sheets[0].add_table("TablE 1")
     assert "table 'TablE 1' already exists" in str(e.value)
@@ -80,21 +76,6 @@ def test_create_sheet(tmp_path, pytestconfig):
     table.write("B2", "Mary had")
     table.write("C2", "a little")
     table.write("D2", "lamb")
-
-    doc._experimental = True
-    with pytest.raises(IndexError) as e:
-        _ = doc.add_sheet("SheeT 1")
-    assert "sheet 'SheeT 1' already exists" in str(e.value)
-
-    # doc.add_sheet("New Sheet", "New Table")
-    # sheet = doc.sheets["New Sheet"]
-    # table = sheet.tables["New Table"]
-    # table.write(0, 1, "Column 1")
-    # table.write(0, 2, "Column 2")
-    # table.write(0, 3, "Column 3")
-    # table.write(1, 1, 1000)
-    # table.write(1, 2, 2000)
-    # table.write(1, 3, 3000)
 
     if pytestconfig.getoption("save_file") is not None:
         new_filename = pytestconfig.getoption("save_file")
@@ -114,13 +95,45 @@ def test_create_sheet(tmp_path, pytestconfig):
     assert table.cell("C2").value == "a little"
     assert table.cell("D2").value == "lamb"
 
-    # assert sheets[2].name == "New Sheet"
 
-    # table = sheets[1].tables[0]
-    # assert table.name == "New Table"
+@pytest.mark.experimental
+def test_create_sheet(tmp_path, pytestconfig):
+    _EXPERIMENTAL_NUMBERS_PARSER = True
+    doc = Document()
+    sheets = doc.sheets
 
-    # assert type(table.cells(0, 1)) == TextCell
-    # assert table.cells(0, 1).value == "Column 1"
-    # assert type(table.cells(0, 1)) == TextCell
-    # assert type(table.cells(1, 3)) == NumberCell
-    # assert table.cells(1, 3).value == 3000
+    doc._experimental = True
+    sheets[0]._experimental = True
+    with pytest.raises(IndexError) as e:
+        _ = doc.add_sheet("SheeT 1")
+    assert "sheet 'SheeT 1' already exists" in str(e.value)
+
+    doc.add_sheet("New Sheet", "New Table")
+    sheet = doc.sheets["New Sheet"]
+    table = sheet.tables["New Table"]
+    table.write(0, 1, "Column 1")
+    table.write(0, 2, "Column 2")
+    table.write(0, 3, "Column 3")
+    table.write(1, 1, 1000)
+    table.write(1, 2, 2000)
+    table.write(1, 3, 3000)
+
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-1-new.numbers"
+    doc.save(new_filename)
+
+    doc = Document(new_filename)
+    sheets = doc.sheets
+
+    assert sheets[2].name == "New Sheet"
+
+    table = sheets[1].tables[0]
+    assert table.name == "New Table"
+
+    assert type(table.cells(0, 1)) == TextCell
+    assert table.cells(0, 1).value == "Column 1"
+    assert type(table.cells(0, 1)) == TextCell
+    assert type(table.cells(1, 3)) == NumberCell
+    assert table.cells(1, 3).value == 3000
