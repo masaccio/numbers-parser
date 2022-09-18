@@ -281,11 +281,7 @@ def get_archive_info_and_remainder(buf):
 
 def create_iwa_segment(id: int, cls: object, object_dict: dict) -> object:
     full_name = cls.DESCRIPTOR.full_name
-    # TODO: fix the ID mapping hack
-    if full_name == "TST.TableDataList":
-        type_id = 6005
-    else:
-        type_id = NAME_ID_MAP[full_name]
+    type_id = NAME_ID_MAP[full_name]
     header = {
         "_pbtype": "TSP.ArchiveInfo",
         "identifier": str(id),

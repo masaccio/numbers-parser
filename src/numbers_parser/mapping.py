@@ -655,7 +655,8 @@ def compute_maps():
     for k, v in list(TSPRegistryMapping.items()):
         if v in name_class_map:
             id_name_map[int(k)] = name_class_map[v]
-            name_id_map[v] = int(k)
+            if v not in name_id_map:
+                name_id_map[v] = int(k)
 
     return name_class_map, id_name_map, name_id_map
 
