@@ -25,9 +25,9 @@ def dump_metadata(objects):
                 o_name = re.sub(r"Archive\w*_pb2", "", o_type.__module__)
                 o_name += "." + o_type.__name__.replace("Archive", "")
                 o_name = f"object={ref.object_identifier}({o_name})"
-                print("  " + o_name + " " + c_name + " " + f"weak={ref.is_weak}")
+                print(f"  {o_name}, {c_name}, weak={ref.is_weak}")
             else:
-                print(c_name)
+                print(f"  {c_name}")
 
 
 parser = argparse.ArgumentParser()
