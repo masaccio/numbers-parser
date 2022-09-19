@@ -1,23 +1,18 @@
-PACKAGE=numbers-parser
-
-mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
-package_c := $(subst -,_,$(PACKAGE))
-
 # Change this to the name of a code-signing certificate. A self-signed
 # certificate is suitable for this.
 IDENTITY=python@figsandfudge.com
-
+#
 # Change this to the location of the proto-dump executable
 PROTOC=/usr/local/bin/protoc
-
+#
 # Location of the Numbers application
 NUMBERS=/Applications/Numbers.app
 
 # Xcode version of Python that includes LLDB package
 LLDB_PYTHON_PATH := ${shell lldb --python-path}
 
-RELEASE_TARBALL=dist/$(PACKAGE)-$(shell python3 setup.py --version).tar.gz
+PACKAGE=numbers-parser
+package_c := $(subst -,_,$(PACKAGE))
 
 .PHONY: clean veryclean test coverage sdist upload
 
@@ -30,6 +25,8 @@ all:
 	@echo "    clean      - delete temporary files for test, coverage, etc."
 	@echo "    veryclean  - delete all auto-generated files (requires new bootstrap)"
 	@echo "    bootstrap  - rebuild all auto-generated files for new Numbers version"
+
+RELEASE_TARBALL=dist/$(PACKAGE)-$(shell python3 setup.py --version).tar.gz
 
 $(RELEASE_TARBALL): sdist
 
