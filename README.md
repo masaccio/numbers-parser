@@ -206,6 +206,16 @@ table.write(1, 3, 3000)
 doc.save("sheet.numbers")
 ```
 
+### Positioning tables
+
+By default, new tables are positioned at a fixed offset below the last table vertically in a sheet and on the left side of the sheet. Large table headers and captions may result in new tables overlapping existing ones. The `add_table` method takes optional coordinates for positioning a table. A table's height and coordinates can also be queried to help aligning new tables:
+
+```python
+(x, y) = sheet.table[0].coordinates
+y += sheet.table[0].height + 200.0
+new_table = sheet.add_table("Offset Table", x, y)
+```
+
 ## Command-line scripts
 
 When installed from [PyPI](https://pypi.org/project/numbers-parser/), a command-like script `cat-numbers` is installed in Python's scripts folder. This script dumps Numbers spreadsheets into Excel-compatible CSV format, iterating through all the spreadsheets passed on the command-line.

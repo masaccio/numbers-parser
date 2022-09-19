@@ -132,3 +132,39 @@ def test_create_sheet(tmp_path, pytestconfig):
     assert type(table.cell(0, 1)) == TextCell
     assert type(table.cell(1, 3)) == NumberCell
     assert table.cell(1, 3).value == 3000
+
+
+def test_create_multi(tmp_path, pytestconfig):
+    doc = Document()
+
+    doc.sheets[0].tables[0].write(0, 0, "S0T1 A1")
+
+    doc.add_sheet()
+    doc.sheets[1].add_table()
+    doc.sheets[1].add_table()
+    doc.sheets[1].tables[0].write(0, 0, "S1T0 A1")
+    doc.sheets[1].tables[1].write(0, 0, "S1T1 A1")
+    doc.sheets[1].tables[2].write(0, 0, "S1T2 A1")
+
+    doc.add_sheet()
+    doc.sheets[2].add_table(x=100.0)
+    doc.sheets[2].add_table(x=0.0, y=700.0)
+    doc.sheets[2].add_table()
+    doc.sheets[2].tables[0].write(0, 0, "S2T0 A1")
+    doc.sheets[2].tables[1].write(0, 0, "S2T1 A1")
+    doc.sheets[2].tables[2].write(0, 0, "S2T2 A1")
+    doc.sheets[2].tables[3].write(0, 0, "S2T3 A1")
+
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-1-new.numbers"
+    doc.save(new_filename)
+
+    doc = Document(new_filename)
+    assert doc.sheets[1].tables[1].height == 200.0
+    assert doc.sheets[2].tables[1].coordinates == (100.0, 280.0)
+    assert doc.sheets[2].tables[2].coordinates == (0.0, 700.0)
+    assert doc.sheets[2].tables[3].coordinates == (0.0, 980.0)
+    assert len(doc.sheets) == 3
+    assert len(doc.sheets[2].tables) == 4

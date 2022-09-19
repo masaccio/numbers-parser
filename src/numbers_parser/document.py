@@ -73,15 +73,20 @@ class Sheet:
 
     @property
     def name(self):
+        """Return the sheets name"""
         return self._model.sheet_name(self._sheet_id)
 
     @name.setter
     def name(self, value):
+        """Set the sheet's name"""
         self._model.sheet_name(self._sheet_id, value)
 
-    def add_table(self, table_name=None, from_table_id=None) -> object:
+    def add_table(self, table_name=None, x=None, y=None) -> object:
         """Add a new table to the current sheet. If no sheet name is provided,
         the next available numbered sheet will be generated"""
+        return self._add_table(table_name, x, y, from_table_id=None)
+
+    def _add_table(self, table_name=None, x=None, y=None, from_table_id=None) -> object:
         if table_name is not None:
             if table_name in self._tables:
                 raise IndexError(f"table '{table_name}' already exists")
@@ -91,7 +96,9 @@ class Sheet:
                 table_num += 1
             table_name = f"Table {table_num}"
 
-        new_table_id = self._model.add_table(self._sheet_id, table_name, from_table_id)
+        new_table_id = self._model.add_table(
+            self._sheet_id, table_name, x, y, from_table_id
+        )
         self._tables.append(Table(self._model, new_table_id))
         return self._tables[-1]
 
@@ -115,11 +122,23 @@ class Table:
 
     @property
     def name(self):
+        """Return the table's name"""
         return self._model.table_name(self._table_id)
 
     @name.setter
     def name(self, value):
+        """Set the table's name"""
         self._model.table_name(self._table_id, value)
+
+    @property
+    def height(self) -> float:
+        """Return the table's height in points"""
+        return self._model.table_height(self._table_id)
+
+    @property
+    def coordinates(self) -> tuple[float]:
+        """Return the table's x,y offsets in points"""
+        return self._model.table_coordinates(self._table_id)
 
     @lru_cache(maxsize=None)
     def rows(self, values_only: bool = False) -> list:

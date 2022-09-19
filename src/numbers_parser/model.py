@@ -16,6 +16,7 @@ from numbers_parser.constants import (
     DEFAULT_DOCUMENT,
     DEFAULT_COLUMN_COUNT,
     DEFAULT_ROW_COUNT,
+    DEFAULT_TABLE_OFFSET,
     DOCUMENT_ID,
     PACKAGE_ID,
     MAX_TILE_SIZE,
@@ -125,14 +126,25 @@ class _NumbersModel:
         else:
             self.objects[sheet_id].name = value
 
-    # @lru_cache(maxsize=None)
-    def table_ids(self, sheet_id):
+    # Don't cache: new tables can be added at runtime
+    def table_ids(self, sheet_id: int) -> list:
+        """Return a list of table IDs for a given sheet ID"""
         table_info_ids = self.find_refs("TableInfoArchive")
         return [
             self.objects[t_id].tableModel.identifier
             for t_id in table_info_ids
             if self.objects[t_id].super.parent.identifier == sheet_id
         ]
+
+    # Don't cache: new tables can be added at runtime
+    def table_info_id(self, table_id: int) -> int:
+        """Return the TableInfoArchive ID for a given table ID"""
+        ids = [
+            x
+            for x in self.objects.find_refs("TableInfoArchive")
+            if self.objects[x].tableModel.identifier == table_id
+        ]
+        return ids[0]
 
     @lru_cache(maxsize=None)
     def row_storage_map(self, table_id):
@@ -785,31 +797,47 @@ class _NumbersModel:
         }
         return style_sheet_map
 
-    def sheet_table_offset(self, sheet_id):
-        """Sum the heights of all rows in all tables in a sheet"""
-        if len(self.table_ids(sheet_id)) == 0:
-            return 0.0
+    def table_height(self, table_id: int) -> float:
+        """Return the height of a table in points"""
+        table_model = self.objects[table_id]
+        bds = self.objects[table_id].base_data_store
+        buckets = self.objects[bds.rowHeaders.buckets[0].identifier].headers
 
         height = 0.0
-        for table_id in self.table_ids(sheet_id):
-            table_model = self.objects[table_id]
-            # height = table_model.default_row_height * number_of_rows
-
-            bds = self.objects[table_id].base_data_store
-            buckets = self.objects[bds.rowHeaders.buckets[0].identifier].headers
-            for i, row in self.row_storage_map(table_id).items():
-                if row is not None:
-                    height += buckets[i].size
-                else:
-                    height += table_model.default_row_height
-
-        # TODO: calculate gap between tables
-        height += 100.0
-
+        for i, row in self.row_storage_map(table_id).items():
+            if row is not None and buckets[i].size != 0.0:
+                height += buckets[i].size
+            else:
+                height += table_model.default_row_height
         return height
 
+    def table_coordinates(self, table_id: int) -> tuple[float]:
+        table_info = self.objects[self.table_info_id(table_id)]
+        return (
+            table_info.super.geometry.position.x,
+            table_info.super.geometry.position.y,
+        )
+
+    def last_table_offset(self, sheet_id):
+        """Y offset of the last table in a sheet"""
+        if len(self.table_ids(sheet_id)) == 0:
+            return 0.0
+        table_id = self.table_ids(sheet_id)[-1]
+        y_offset = [
+            self.objects[self.table_info_id(x)].super.geometry.position.y
+            for x in self.table_ids(sheet_id)
+            if x == table_id
+        ][0]
+
+        return self.table_height(table_id) + y_offset
+
     def add_table(
-        self, sheet_id: int, table_name: str, from_table_id: int = None
+        self,
+        sheet_id: int,
+        table_name: str,
+        x: float = None,
+        y: float = None,
+        from_table_id: int = None,
     ) -> int:
         if from_table_id is None:
             from_table_id = self.table_ids(sheet_id)[-1]
@@ -927,12 +955,23 @@ class _NumbersModel:
         table_info.tableModel.MergeFrom(
             TSPMessages.Reference(identifier=table_model_id)
         )
+
+        if x is not None:
+            table_x = x
+        else:
+            table_x = 0.0
+        if y is not None:
+            table_y = y
+        elif len(self.objects[sheet_id].drawable_infos) <= 1:
+            table_y = 0.0
+        else:
+            table_y = self.last_table_offset(sheet_id) + DEFAULT_TABLE_OFFSET
         drawable = TSDArchives.DrawableArchive(
             parent=TSPMessages.Reference(identifier=sheet_id),
             geometry=TSDArchives.GeometryArchive(
                 angle=0.0,
                 flags=3,
-                position=TSPMessages.Point(x=0.0, y=self.sheet_table_offset(sheet_id)),
+                position=TSPMessages.Point(x=table_x, y=table_y),
                 size=TSPMessages.Size(height=231.0, width=494.0),
             ),
         )
@@ -950,7 +989,9 @@ class _NumbersModel:
             "Document", {"name": sheet_name}, TNArchives.SheetArchive
         )
 
-        table_info_id = self.add_table(sheet_id, table_name, from_table_id)
+        table_info_id = self.add_table(
+            sheet_id, table_name, from_table_id=from_table_id
+        )
 
         self.objects[DOCUMENT_ID].sheets.append(
             TSPMessages.Reference(identifier=sheet_id)

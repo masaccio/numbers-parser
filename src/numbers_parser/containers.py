@@ -122,6 +122,7 @@ class ObjectStore:
     def __len__(self) -> int:
         return len(self._objects)
 
+    # Don't cache: new tables and sheets can be added at runtime
     def find_refs(self, ref_name) -> list:
         refs = [k for k, v in self._objects.items() if type(v).__name__ == ref_name]
         return refs
