@@ -6,7 +6,7 @@ from collections import OrderedDict
 from datetime import timedelta, datetime
 from functools import lru_cache
 from struct import pack, unpack
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from uuid import uuid1
 from warnings import warn
 
@@ -811,7 +811,7 @@ class _NumbersModel:
                 height += table_model.default_row_height
         return height
 
-    def table_coordinates(self, table_id: int) -> tuple[float]:
+    def table_coordinates(self, table_id: int) -> Tuple[float]:
         table_info = self.objects[self.table_info_id(table_id)]
         return (
             table_info.super.geometry.position.x,

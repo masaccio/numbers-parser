@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime
 from functools import lru_cache
-from typing import Union, Generator
+from typing import Union, Generator, Tuple
 
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
@@ -136,7 +136,7 @@ class Table:
         return self._model.table_height(self._table_id)
 
     @property
-    def coordinates(self) -> tuple[float]:
+    def coordinates(self) -> Tuple[float]:
         """Return the table's x,y offsets in points"""
         return self._model.table_coordinates(self._table_id)
 
