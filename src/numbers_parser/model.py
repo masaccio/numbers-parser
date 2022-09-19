@@ -684,7 +684,7 @@ class _NumbersModel:
         )
         self.objects[PACKAGE_ID].components.append(component_info)
         self.add_component_reference(object_id, parent)
-        self.objects.mark_as_dirty(PACKAGE_ID)
+        self.objects.mark_as_dirty(object_id)
 
     def add_component_reference(
         self,
@@ -762,6 +762,7 @@ class _NumbersModel:
 
             tile_idx += 1
 
+        self.objects.mark_as_dirty(table_id)
         self.objects.update_dirty_objects()
 
     def create_string_table(self):
@@ -869,7 +870,7 @@ class _NumbersModel:
 
         self.add_component_metadata(
             format_table_pre_bnc_id,
-            "Document",
+            "CalculationEngine",
             "Tables/TableDataList-{}",
         )
 
