@@ -1,6 +1,7 @@
 import warnings
 
 from numbers_parser.file import read_numbers_file
+from numbers_parser.constants import PACKAGE_ID
 from numbers_parser.iwafile import create_iwa_segment, copy_object_to_iwa_file, IWAFile
 
 
@@ -60,8 +61,8 @@ class ObjectStore:
 
     def _new_message_id(self):
         """Return the next available message ID for object creation"""
-        max_id = max(self._objects.keys())
-        return max_id + 1
+        self._objects[PACKAGE_ID].last_object_identifier += 1
+        return self._objects[PACKAGE_ID].last_object_identifier
 
     def mark_as_dirty(self, obj_id: int):
         self._dirty[obj_id] = True
@@ -94,6 +95,9 @@ class ObjectStore:
     def update_dirty_objects(self):
         """Copy the protobuf messages from any updated object to the cached
         version in the file store so this can be saved to a new document"""
+        # TODO: Revisit which objects are dirty and only re-save those
+        for obj_id in self._objects.keys():
+            self.mark_as_dirty(obj_id)
         for obj_id in self._dirty.keys():
             copy_object_to_iwa_file(
                 self._file_store[self._object_to_filename_map[obj_id]],
