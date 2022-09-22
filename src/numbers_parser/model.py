@@ -966,7 +966,7 @@ class _NumbersModel:
             table_x = 0.0
         if y is not None:
             table_y = y
-        elif len(self.objects[sheet_id].drawable_infos) <= 1:
+        elif len(self.objects[sheet_id].drawable_infos) < 1:
             table_y = 0.0
         else:
             table_y = self.last_table_offset(sheet_id) + DEFAULT_TABLE_OFFSET
