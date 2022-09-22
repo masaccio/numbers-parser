@@ -193,7 +193,7 @@ class _NumbersModel:
 
     @lru_cache(maxsize=None)
     def table_format(self, table_id: int, key: int) -> str:
-        """Return the format assocuated with a format ID for a particular table"""
+        """Return the format associated with a format ID for a particular table"""
         bds = self.objects[table_id].base_data_store
         format_table_id = bds.format_table.identifier
         return self.table_format_entries(format_table_id)[key]
@@ -1002,6 +1002,10 @@ class _NumbersModel:
         )
         sheet_archive.drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id)
+        )
+
+        self.add_component_reference(
+            sheet_id, "CalculationEngine", DOCUMENT_ID, is_weak=True
         )
 
         return sheet_id
