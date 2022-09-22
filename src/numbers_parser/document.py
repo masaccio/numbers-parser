@@ -53,11 +53,18 @@ class Document:
         if table_name is None:
             table_name = "Table 1"
 
-        from_table_id = self._sheets[-1]._tables[0]._table_id
-        new_sheet_id = self._model.add_sheet(sheet_name, table_name, from_table_id)
-        self._sheets.append(Sheet(self._model, new_sheet_id))
+        prev_table_id = self._sheets[-1]._tables[0]._table_id
+        new_sheet_id = self._model.add_sheet(sheet_name)
+        new_sheet = Sheet(self._model, new_sheet_id)
+        new_sheet._tables.append(
+            Table(
+                self._model,
+                self._model.add_table(new_sheet_id, table_name, prev_table_id),
+            )
+        )
+        self._sheets.append(new_sheet)
 
-        return self._sheets[-1]
+        return new_sheet
 
 
 class Sheet:
@@ -84,9 +91,11 @@ class Sheet:
     def add_table(self, table_name=None, x=None, y=None) -> object:
         """Add a new table to the current sheet. If no sheet name is provided,
         the next available numbered sheet will be generated"""
-        return self._add_table(table_name, x, y, from_table_id=None)
 
-    def _add_table(self, table_name=None, x=None, y=None, from_table_id=None) -> object:
+        from_table_id = self._tables[-1]._table_id
+        return self._add_table(table_name, from_table_id, x, y)
+
+    def _add_table(self, table_name, from_table_id, x, y) -> object:
         if table_name is not None:
             if table_name in self._tables:
                 raise IndexError(f"table '{table_name}' already exists")
@@ -97,7 +106,7 @@ class Sheet:
             table_name = f"Table {table_num}"
 
         new_table_id = self._model.add_table(
-            self._sheet_id, table_name, x, y, from_table_id
+            self._sheet_id, table_name, from_table_id, x, y
         )
         self._tables.append(Table(self._model, new_table_id))
         return self._tables[-1]

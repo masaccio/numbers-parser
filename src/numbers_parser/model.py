@@ -13,10 +13,13 @@ from warnings import warn
 from numbers_parser.containers import ObjectStore
 from numbers_parser.constants import (
     EPOCH,
-    DEFAULT_DOCUMENT,
     DEFAULT_COLUMN_COUNT,
+    DEFAULT_COLUMN_WIDTH,
+    DEFAULT_DOCUMENT,
     DEFAULT_ROW_COUNT,
+    DEFAULT_ROW_HEIGHT,
     DEFAULT_TABLE_OFFSET,
+    DEFAULT_TILE_SIZE,
     DOCUMENT_ID,
     PACKAGE_ID,
     MAX_TILE_SIZE,
@@ -835,12 +838,10 @@ class _NumbersModel:
         self,
         sheet_id: int,
         table_name: str,
+        from_table_id: int,
         x: float = None,
         y: float = None,
-        from_table_id: int = None,
     ) -> int:
-        if from_table_id is None:
-            from_table_id = self.table_ids(sheet_id)[-1]
         from_table = self.objects[from_table_id]
 
         table_strings_id, table_strings = self.create_string_table()
@@ -854,8 +855,8 @@ class _NumbersModel:
                 "number_of_columns": DEFAULT_COLUMN_COUNT,
                 "table_name": table_name,
                 "table_name_enabled": True,
-                "default_row_height": 20.0,
-                "default_column_width": 98.0,
+                "default_row_height": DEFAULT_ROW_HEIGHT,
+                "default_column_width": DEFAULT_COLUMN_WIDTH,
                 "number_of_header_rows": 1,
                 "number_of_header_columns": 1,
                 "header_rows_frozen": True,
@@ -921,7 +922,9 @@ class _NumbersModel:
                 nextColumnStripID=0,
                 rowTileTree=TSTArchives.TableRBTree(),
                 columnTileTree=TSTArchives.TableRBTree(),
-                tiles=TSTArchives.TileStorage(tile_size=256, should_use_wide_rows=True),
+                tiles=TSTArchives.TileStorage(
+                    tile_size=DEFAULT_TILE_SIZE, should_use_wide_rows=True
+                ),
                 **data_store_refs,
             )
         )
@@ -987,25 +990,18 @@ class _NumbersModel:
 
         return table_model_id
 
-    def add_sheet(self, sheet_name: str, table_name: str, from_table_id: int):
+    def add_sheet(self, sheet_name: str):
         """Add a new sheet with a copy of a table from another sheet"""
-        sheet_id, sheet_archive = self.objects.create_object_from_dict(
+        sheet_id, _ = self.objects.create_object_from_dict(
             "Document", {"name": sheet_name}, TNArchives.SheetArchive
-        )
-
-        table_info_id = self.add_table(
-            sheet_id, table_name, from_table_id=from_table_id
-        )
-
-        self.objects[DOCUMENT_ID].sheets.append(
-            TSPMessages.Reference(identifier=sheet_id)
-        )
-        sheet_archive.drawable_infos.append(
-            TSPMessages.Reference(identifier=table_info_id)
         )
 
         self.add_component_reference(
             sheet_id, "CalculationEngine", DOCUMENT_ID, is_weak=True
+        )
+
+        self.objects[DOCUMENT_ID].sheets.append(
+            TSPMessages.Reference(identifier=sheet_id)
         )
 
         return sheet_id
