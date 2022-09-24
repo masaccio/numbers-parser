@@ -246,7 +246,9 @@ class TableFormulas:
         formula = Formula(self._model, self._table_id, row_num, col_num)
         for node in all_formulas[formula_key]:
             node_type = self._formula_type_lookup[node.AST_node_type]
-            if node_type not in NODE_FUNCTION_MAP:  # pragma: no cover
+            if node_type == "REFERENCE_ERROR_WITH_UIDS":
+                formula.push("#REF!")
+            elif node_type not in NODE_FUNCTION_MAP:  # pragma: no cover
                 table_name = self._model.table_name(self._table_id)
                 warnings.warn(
                     f"{table_name}@[{row_num},{col_num}]: node type {node_type} is unsupported",

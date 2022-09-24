@@ -3,6 +3,7 @@ import re
 
 from numbers_parser import Document, NumberCell
 from datetime import datetime, timedelta
+from numbers_parser.cell import ErrorCell
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"
@@ -150,3 +151,22 @@ def test_issue_37():
     for i, row in enumerate(table.rows()[1:]):
         assert row[-2].formatted_value == ISSUE_37_REF[i][0]
         assert row[-1].formatted_value == ISSUE_37_REF[i][1]
+
+
+def test_issue_42(script_runner):
+    doc = Document("tests/data/issue-42.numbers")
+    table = doc.sheets[0].tables[0]
+    assert type(table.cell(6, 1)) == ErrorCell
+    assert table.cell(3, 1).formula == "#REF!×A4:A6"
+
+    ret = script_runner.run(
+        "cat-numbers",
+        "--brief",
+        "--formulas",
+        "tests/data/issue-42.numbers",
+        print_result=False,
+    )
+    assert ret.success
+    assert ret.stderr == ""
+    lines = ret.stdout.strip().split("\n")
+    assert lines[-1] == "SUM(A),#REF!"

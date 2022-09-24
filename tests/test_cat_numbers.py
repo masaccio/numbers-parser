@@ -193,7 +193,7 @@ def test_with_formulas(script_runner):
         'XXX_4,"MID(A4,2,2)"',
         'XXX_5,"RIGHT(A5,2)"',
         'XXX_6,"FIND(""_"",A6)"',
-        'XXX_7,"FIND(""YYY"",A7)"',
+        "XXX_7,#REF!",
         'XXX_8,"IF(FIND(""_"",A8)>2,A1,A2)"',
         "0.25,100×(A9×2)%",
         '2.0,"IF(A10<5,""smaller"",""larger"")"',

@@ -1,5 +1,3 @@
-# vi: ft=python
-
 import argparse
 import csv
 import logging
@@ -7,6 +5,7 @@ import sys
 
 from numbers_parser import Document, _get_version
 from numbers_parser.exceptions import FileFormatError
+from numbers_parser.cell import ErrorCell
 
 
 def command_line_parser():
@@ -69,6 +68,8 @@ def print_table_names(filename):
 def cell_as_string(args, cell):
     if cell is None:
         return ""
+    elif args.formulas and type(cell) == ErrorCell:
+        return "#REF!"
     elif args.formulas and cell.formula is not None:
         return cell.formula
     elif args.formatting and cell.formatted_value is not None:
