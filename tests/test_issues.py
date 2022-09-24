@@ -158,6 +158,19 @@ def test_issue_42(script_runner):
     table = doc.sheets[0].tables[0]
     assert type(table.cell(6, 1)) == ErrorCell
     assert table.cell(3, 1).formula == "#REF!×A4:A6"
+    assert table.cell(4, 1).formula == "#REF!×A5:A6"
+
+    ret = script_runner.run(
+        "cat-numbers",
+        "--brief",
+        "tests/data/issue-42.numbers",
+        print_result=False,
+    )
+    assert ret.success
+    assert ret.stderr == ""
+    lines = ret.stdout.strip().split("\n")
+    assert lines[5] == ",#REF!"
+    assert lines[6] == "7.0,#REF!"
 
     ret = script_runner.run(
         "cat-numbers",
@@ -169,4 +182,6 @@ def test_issue_42(script_runner):
     assert ret.success
     assert ret.stderr == ""
     lines = ret.stdout.strip().split("\n")
-    assert lines[-1] == "SUM(A),#REF!"
+    assert lines[4] == "3.0,#REF!×A5:A6"
+    assert lines[5] == ",#REF!×A6:A6"
+    assert lines[6] == "SUM(A),PRODUCT(B)"
