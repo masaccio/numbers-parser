@@ -4,7 +4,7 @@ import pytest_check as check
 from numbers_parser import Document
 from numbers_parser.cell import ErrorCell, TextCell, BoolCell, DurationCell
 
-DOCUMENT = "tests/data/test-all-forumulas.numbers"
+DOCUMENT = "tests/data/test-all-formulas.numbers"
 
 
 def compare_table_functions(sheet_name, filename=DOCUMENT):
