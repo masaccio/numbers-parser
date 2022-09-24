@@ -68,7 +68,7 @@ def print_table_names(filename):
 def cell_as_string(args, cell):
     if cell is None:
         return ""
-    elif args.formulas and type(cell) == ErrorCell:
+    elif type(cell) == ErrorCell and not (args.formulas):
         return "#REF!"
     elif args.formulas and cell.formula is not None:
         return cell.formula
