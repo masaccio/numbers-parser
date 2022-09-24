@@ -195,7 +195,7 @@ NODE_FUNCTION_MAP = {
     "BOOLEAN_NODE": "boolean",
     "CELL_REFERENCE_NODE": "xref",
     "COLON_NODE": "range",
-    # "COLON_NODE_WITH_UIDS": "unsupported",
+    "COLON_NODE_WITH_UIDS": "range",
     "CONCATENATION_NODE": "concat",
     "DATE_NODE": "date",
     "DIVISION_NODE": "div",
