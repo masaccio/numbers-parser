@@ -244,7 +244,7 @@ class _NumbersModel:
         clear_field_container(self._table_strings[table_id])
 
     def table_string_key(self, table_id: int, value: str) -> int:
-        """Return the key associated with a string for a particulat table. If
+        """Return the key associated with a string for a particular table. If
         the string is not in the strings table, allocate a new entry with the
         next available key"""
         if table_id not in self._table_strings:
@@ -527,13 +527,8 @@ class _NumbersModel:
         self, table_id: int, row_num: int, col_num: int
     ) -> bytes:
         row_offset = self.row_storage_map(table_id)[row_num]
-        if row_offset is None:
-            return None
-        try:
-            storage_buffers_pre_bnc = self.storage_buffers_pre_bnc(table_id)
-            return storage_buffers_pre_bnc[row_offset][col_num]
-        except IndexError:
-            return None
+        storage_buffers_pre_bnc = self.storage_buffers_pre_bnc(table_id)
+        return storage_buffers_pre_bnc[row_offset][col_num]
 
     @lru_cache(maxsize=None)
     def storage_buffers(self, table_id: int) -> List:
@@ -765,9 +760,9 @@ class _NumbersModel:
         self.recalculate_row_headers(table_id, data)
         self.recalculate_column_headers(table_id, data)
         self.recalculate_merged_cells(table_id)
-        self.recalculate_column_row_uid_map(table_id, data)
 
         table_model.ClearField("base_column_row_uids")
+        self.recalculate_column_row_uid_map(table_id, data)
 
         tile_idx = 0
         max_tile_idx = len(data) >> 8
