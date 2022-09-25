@@ -1,3 +1,4 @@
+import math
 import warnings
 
 from numbers_parser.file import read_numbers_file
@@ -58,11 +59,15 @@ class ObjectStore:
                 identifier, obj, filename
             ),
         )
+        # TODO: remove debug ID offset
+        self._max_id = max(self._objects.keys())
+        self._max_id = math.ceil(self._max_id / 1000000) * 1000000
 
-    def _new_message_id(self):
+    def new_message_id(self):
         """Return the next available message ID for object creation"""
-        self._objects[PACKAGE_ID].last_object_identifier += 1
-        return self._objects[PACKAGE_ID].last_object_identifier
+        self._max_id += 1
+        self._objects[PACKAGE_ID].last_object_identifier = self._max_id
+        return self._max_id
 
     def mark_as_dirty(self, obj_id: int):
         self._dirty[obj_id] = True
@@ -77,7 +82,7 @@ class ObjectStore:
         else:
             iwa_pathname = paths[0]
 
-        new_id = self._new_message_id()
+        new_id = self.new_message_id()
         iwa_segment = create_iwa_segment(new_id, cls, object_dict)
 
         if iwa_pathname is None:

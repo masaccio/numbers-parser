@@ -765,8 +765,8 @@ class _NumbersModel:
         self.recalculate_row_headers(table_id, data)
         self.recalculate_column_headers(table_id, data)
         self.recalculate_merged_cells(table_id)
-
         self.recalculate_column_row_uid_map(table_id, data)
+
         table_model.ClearField("base_column_row_uids")
 
         tile_idx = 0
