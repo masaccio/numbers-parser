@@ -5,7 +5,7 @@ from typing import Union, Generator, Tuple
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
 from numbers_parser.file import write_numbers_file
-from numbers_parser.constants import MAX_ROW_COUNT, MAX_COL_COUNT
+from numbers_parser.constants import MAX_ROW_COUNT, MAX_COL_COUNT, MAX_HEADER_COUNT
 from numbers_parser.cell import (
     EmptyCell,
     BoolCell,
@@ -130,14 +130,48 @@ class Table:
         ]
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Return the table's name"""
         return self._model.table_name(self._table_id)
 
     @name.setter
-    def name(self, value):
+    def name(self, value: str):
         """Set the table's name"""
         self._model.table_name(self._table_id, value)
+
+    @property
+    def num_header_rows(self) -> int:
+        """Return the number of header rows"""
+        return self._model.num_header_rows(self._table_id)
+
+    @num_header_rows.setter
+    def num_header_rows(self, num_headers: int):
+        """Return the number of header rows"""
+        if num_headers < 0:
+            raise ValueError("Number of headers cannot be negative")
+        elif num_headers > self.num_cols:
+            raise ValueError("Number of headers cannot exceed the number of rows")
+        elif num_headers > MAX_HEADER_COUNT:
+            raise ValueError(f"Number of headers cannot exceed {MAX_HEADER_COUNT} rows")
+        return self._model.num_header_rows(self._table_id, num_headers)
+
+    @property
+    def num_header_cols(self) -> int:
+        """Return the number of header columns"""
+        return self._model.num_header_cols(self._table_id)
+
+    @num_header_cols.setter
+    def num_header_cols(self, num_headers: int):
+        """Return the number of header columns"""
+        if num_headers < 0:
+            raise ValueError("Number of headers cannot be negative")
+        elif num_headers > self.num_cols:
+            raise ValueError("Number of headers cannot exceed the number of columns")
+        elif num_headers > MAX_HEADER_COUNT:
+            raise ValueError(
+                f"Number of headers cannot exceed {MAX_HEADER_COUNT} columns"
+            )
+        return self._model.num_header_cols(self._table_id, num_headers)
 
     @property
     def height(self) -> int:

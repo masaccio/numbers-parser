@@ -907,6 +907,20 @@ class _NumbersModel:
         else:
             return round(table_model.default_column_width)
 
+    def num_header_rows(self, table_id: int, num_headers: int = None) -> int:
+        """Return/set the number of header rows"""
+        table_model = self.objects[table_id]
+        if num_headers is not None:
+            table_model.number_of_header_rows = num_headers
+        return table_model.number_of_header_rows
+
+    def num_header_cols(self, table_id: int, num_headers: int = None) -> int:
+        """Return/set the number of header columns"""
+        table_model = self.objects[table_id]
+        if num_headers is not None:
+            table_model.number_of_header_columns = num_headers
+        return table_model.number_of_header_columns
+
     def table_coordinates(self, table_id: int) -> Tuple[float]:
         table_info = self.objects[self.table_info_id(table_id)]
         return (

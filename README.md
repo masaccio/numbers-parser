@@ -226,6 +226,20 @@ table.col_width(0, 200)
 print(f"Table column A width is {table.col_width(0)}")
 ```
 
+###  Header row and columns
+
+When new tables are created, `numbers-parser` follows the Numbers convention of creating a table with one row header and one column header. You can change the number of headers by modifying the appopriate property:
+
+```python
+doc = Document("sheet.numbers")
+table = doc.sheets[0].tables[0]
+table.num_header_rows = 2
+table.num_header_cols = 0
+doc.save("saved.numbers")
+```
+
+A zero header count will remove the headers from the table. Attempting to set a negative number of headers, or using more headers that rows or columns in the table will raise a `ValueError` exception.
+
 ### Positioning tables
 
 By default, new tables are positioned at a fixed offset below the last table vertically in a sheet and on the left side of the sheet. Large table headers and captions may result in new tables overlapping existing ones. The `add_table` method takes optional coordinates for positioning a table. A table's height and coordinates can also be queried to help aligning new tables:
