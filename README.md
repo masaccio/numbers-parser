@@ -206,6 +206,26 @@ table.write(1, 3, 3000)
 doc.save("sheet.numbers")
 ```
 
+## Table geometries
+
+`numbers-parser` can query and change the position and size of tables. Changes made to a table's row height or column width is retained when files are saved.
+
+###  Row and column sizes
+
+Row heights and column widths are queried and set using the `row_height` and `col_width` methods:
+
+```python
+doc = Document("sheet.numbers")
+table = doc.sheets[0].tables[0]
+print(f"Table size is {table.height} x {table.width}")
+print(f"Table row 1 height is {table.row_height(0)}")
+table.row_height(0, 40)
+print(f"Table row 1 height is now {table.row_height(0)}")
+print(f"Table column A width is {table.col_width(0)}")
+table.col_width(0, 200)
+print(f"Table column A width is {table.col_width(0)}")
+```
+
 ### Positioning tables
 
 By default, new tables are positioned at a fixed offset below the last table vertically in a sheet and on the left side of the sheet. Large table headers and captions may result in new tables overlapping existing ones. The `add_table` method takes optional coordinates for positioning a table. A table's height and coordinates can also be queried to help aligning new tables:

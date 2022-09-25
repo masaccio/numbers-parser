@@ -112,6 +112,8 @@ class _NumbersModel:
         self.objects = ObjectStore(filename)
         self._table_strings = {}
         self._merge_cells = {}
+        self._row_heights = {}
+        self._col_widths = {}
 
     @property
     def file_store(self):
@@ -178,6 +180,27 @@ class _NumbersModel:
         if num_cols is not None:
             self.objects[table_id].number_of_columns = num_cols
         return self.objects[table_id].number_of_columns
+
+    @lru_cache(maxsize=None)
+    def col_storage_map(self, table_id: int):
+        # The base data store contains a reference to columnHeaders
+        # which is an ordered list that identfies which offset to use
+        # to index storage buffers for each column.
+        #
+        #  {
+        #      "hidingState": 0,
+        #      "index": 0,
+        #      "numberOfCells": 3,
+        #      "size": 0.0
+        #  },
+        col_bucket_map = {
+            i: None for i in range(self.objects[table_id].number_of_columns)
+        }
+        bds = self.objects[table_id].base_data_store
+        buckets = self.objects[bds.columnHeaders.identifier].headers
+        for i, bucket in enumerate(buckets):
+            col_bucket_map[bucket.index] = i
+        return col_bucket_map
 
     def table_name(self, table_id, value=None):
         if value is None:
@@ -550,8 +573,15 @@ class _NumbersModel:
         buckets = self.objects[base_data_store.rowHeaders.buckets[0].identifier]
         clear_field_container(buckets.headers)
         for row_num in range(len(data)):
+            if table_id in self._row_heights and row_num in self._row_heights[table_id]:
+                height = self._row_heights[table_id][row_num]
+            else:
+                height = 0.0
             header = TSTArchives.HeaderStorageBucket.Header(
-                index=row_num, numberOfCells=len(data[row_num]), size=0.0, hidingState=0
+                index=row_num,
+                numberOfCells=len(data[row_num]),
+                size=height,
+                hidingState=0,
             )
             buckets.headers.append(header)
 
@@ -564,8 +594,12 @@ class _NumbersModel:
 
         for col_num, col in enumerate(col_data):
             num_rows = len(col) - sum([isinstance(x, MergedCell) for x in col])
+            if table_id in self._col_widths and col_num in self._col_widths[table_id]:
+                width = self._col_widths[table_id][col_num]
+            else:
+                width = 0.0
             header = TSTArchives.HeaderStorageBucket.Header(
-                index=col_num, numberOfCells=num_rows, size=0.0, hidingState=0
+                index=col_num, numberOfCells=num_rows, size=width, hidingState=0
             )
             buckets.headers.append(header)
 
@@ -730,8 +764,8 @@ class _NumbersModel:
         self.recalculate_row_headers(table_id, data)
         self.recalculate_column_headers(table_id, data)
         self.recalculate_merged_cells(table_id)
-        self.recalculate_column_row_uid_map(table_id, data)
 
+        # self.recalculate_column_row_uid_map(table_id, data)
         table_model.ClearField("base_column_row_uids")
 
         tile_idx = 0
@@ -800,7 +834,7 @@ class _NumbersModel:
         }
         return style_sheet_map
 
-    def table_height(self, table_id: int) -> float:
+    def table_height(self, table_id: int) -> int:
         """Return the height of a table in points"""
         table_model = self.objects[table_id]
         bds = self.objects[table_id].base_data_store
@@ -808,11 +842,69 @@ class _NumbersModel:
 
         height = 0.0
         for i, row in self.row_storage_map(table_id).items():
-            if row is not None and buckets[i].size != 0.0:
+            if table_id in self._row_heights and i in self._row_heights[table_id]:
+                height += self._row_heights[table_id][i]
+            elif row is not None and buckets[i].size != 0.0:
                 height += buckets[i].size
             else:
                 height += table_model.default_row_height
-        return height
+        return round(height)
+
+    def row_height(self, table_id: int, row_num: int, height: int = None) -> int:
+        if height is not None:
+            if table_id not in self._row_heights:
+                self._row_heights[table_id] = {}
+            self._row_heights[table_id][row_num] = height
+            return height
+
+        if table_id in self._row_heights and row_num in self._row_heights[table_id]:
+            return self._row_heights[table_id][row_num]
+
+        table_model = self.objects[table_id]
+        bds = self.objects[table_id].base_data_store
+        bucket_id = bds.rowHeaders.buckets[0].identifier
+        buckets = self.objects[bucket_id].headers
+        bucket_map = {x.index: x for x in buckets}
+        if row_num in bucket_map and bucket_map[row_num].size != 0.0:
+            return round(bucket_map[row_num].size)
+        else:
+            return round(table_model.default_row_height)
+
+    def table_width(self, table_id: int) -> int:
+        """Return the width of a table in points"""
+        table_model = self.objects[table_id]
+        bds = self.objects[table_id].base_data_store
+        buckets = self.objects[bds.columnHeaders.identifier].headers
+
+        width = 0.0
+        for i, col in self.col_storage_map(table_id).items():
+            if table_id in self._col_widths and i in self._col_widths[table_id]:
+                width += self._col_widths[table_id][i]
+            elif col is not None and buckets[i].size != 0.0:
+                width += buckets[i].size
+            else:
+                width += table_model.default_column_width
+        return round(width)
+
+    def col_width(self, table_id: int, col_num: int, width: int = None) -> int:
+        if width is not None:
+            if table_id not in self._col_widths:
+                self._col_widths[table_id] = {}
+            self._col_widths[table_id][col_num] = width
+            return width
+
+        if table_id in self._col_widths and col_num in self._col_widths[table_id]:
+            return self._col_widths[table_id][col_num]
+
+        table_model = self.objects[table_id]
+        bds = self.objects[table_id].base_data_store
+        bucket_id = bds.columnHeaders.identifier
+        buckets = self.objects[bucket_id].headers
+        bucket_map = {x.index: x for x in buckets}
+        if col_num in bucket_map and bucket_map[col_num].size != 0.0:
+            return round(bucket_map[col_num].size)
+        else:
+            return round(table_model.default_column_width)
 
     def table_coordinates(self, table_id: int) -> Tuple[float]:
         table_info = self.objects[self.table_info_id(table_id)]
@@ -833,6 +925,29 @@ class _NumbersModel:
         ][0]
 
         return self.table_height(table_id) + y_offset
+
+    def create_drawable(self, sheet_id: int, x: float, y: float) -> object:
+        """Create a DrawableArchive for a new table in a sheet"""
+        if x is not None:
+            table_x = x
+        else:
+            table_x = 0.0
+        if y is not None:
+            table_y = y
+        elif len(self.objects[sheet_id].drawable_infos) < 1:
+            table_y = 0.0
+        else:
+            table_y = self.last_table_offset(sheet_id) + DEFAULT_TABLE_OFFSET
+        drawable = TSDArchives.DrawableArchive(
+            parent=TSPMessages.Reference(identifier=sheet_id),
+            geometry=TSDArchives.GeometryArchive(
+                angle=0.0,
+                flags=3,
+                position=TSPMessages.Point(x=table_x, y=table_y),
+                size=TSPMessages.Size(height=231.0, width=494.0),
+            ),
+        )
+        return drawable
 
     def add_table(
         self,
@@ -880,7 +995,6 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
             TSTArchives.TableDataList,
         )
-
         self.add_component_metadata(
             style_table_id, "CalculationEngine", "Tables/DataList-{}"
         )
@@ -890,7 +1004,6 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.FORMULA, "nextListID": 1},
             TSTArchives.TableDataList,
         )
-
         self.add_component_metadata(
             formula_table_id, "CalculationEngine", "Tables/TableDataList-{}"
         )
@@ -900,7 +1013,6 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
             TSTArchives.TableDataList,
         )
-
         self.add_component_metadata(
             format_table_pre_bnc_id,
             "CalculationEngine",
@@ -957,32 +1069,11 @@ class _NumbersModel:
             {},
             TSTArchives.TableInfoArchive,
         )
-        self.add_component_reference(table_info_id, "Document", self.calc_engine_id())
-
         table_info.tableModel.MergeFrom(
             TSPMessages.Reference(identifier=table_model_id)
         )
-
-        if x is not None:
-            table_x = x
-        else:
-            table_x = 0.0
-        if y is not None:
-            table_y = y
-        elif len(self.objects[sheet_id].drawable_infos) < 1:
-            table_y = 0.0
-        else:
-            table_y = self.last_table_offset(sheet_id) + DEFAULT_TABLE_OFFSET
-        drawable = TSDArchives.DrawableArchive(
-            parent=TSPMessages.Reference(identifier=sheet_id),
-            geometry=TSDArchives.GeometryArchive(
-                angle=0.0,
-                flags=3,
-                position=TSPMessages.Point(x=table_x, y=table_y),
-                size=TSPMessages.Size(height=231.0, width=494.0),
-            ),
-        )
-        table_info.super.MergeFrom(drawable)
+        table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
+        self.add_component_reference(table_info_id, "Document", self.calc_engine_id())
 
         self.objects[sheet_id].drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id)

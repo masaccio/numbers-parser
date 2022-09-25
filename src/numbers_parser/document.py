@@ -140,9 +140,22 @@ class Table:
         self._model.table_name(self._table_id, value)
 
     @property
-    def height(self) -> float:
+    def height(self) -> int:
         """Return the table's height in points"""
         return self._model.table_height(self._table_id)
+
+    @property
+    def width(self) -> int:
+        """Return the table's width in points"""
+        return self._model.table_width(self._table_id)
+
+    def row_height(self, row_num: int, height: int = None) -> int:
+        """Return the height of a table row. Set the height if not None"""
+        return self._model.row_height(self._table_id, row_num, height)
+
+    def col_width(self, col_num: int, width: int = None) -> int:
+        """Return the width of a table column. Set the width if not None"""
+        return self._model.col_width(self._table_id, col_num, width)
 
     @property
     def coordinates(self) -> Tuple[float]:

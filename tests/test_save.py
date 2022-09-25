@@ -162,7 +162,7 @@ def test_create_multi(tmp_path, pytestconfig):
     doc.save(new_filename)
 
     doc = Document(new_filename)
-    assert doc.sheets[1].tables[1].height == 200.0
+    assert doc.sheets[1].tables[1].height == 200
     assert doc.sheets[2].tables[1].coordinates == (100.0, 280.0)
     assert doc.sheets[2].tables[2].coordinates == (0.0, 700.0)
     assert doc.sheets[2].tables[3].coordinates == (0.0, 980.0)
