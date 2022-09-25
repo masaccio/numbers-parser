@@ -630,6 +630,7 @@ class _NumbersModel:
 
     def recalculate_column_row_uid_map(self, table_id: int, data: List):
         table_model = self.objects[table_id]
+        table_model.ClearField("base_column_row_uids")
         if table_model.base_column_row_uids.identifier == 0:
             return
         base_column_row_uids = self.objects[table_model.base_column_row_uids.identifier]
@@ -765,7 +766,7 @@ class _NumbersModel:
         self.recalculate_column_headers(table_id, data)
         self.recalculate_merged_cells(table_id)
 
-        # self.recalculate_column_row_uid_map(table_id, data)
+        self.recalculate_column_row_uid_map(table_id, data)
         table_model.ClearField("base_column_row_uids")
 
         tile_idx = 0
@@ -825,14 +826,14 @@ class _NumbersModel:
         )
         return table_strings_id, table_strings
 
-    def style_sheet_map(self, objects):
-        style_sheet_id = objects.find_refs("StylesheetArchive")[0]
-        style_sheet = objects[style_sheet_id]
-        style_sheet_map = {
-            x.identifier: x.style.identifier
-            for x in style_sheet.identifier_to_style_map
-        }
-        return style_sheet_map
+    # def style_sheet_map(self, objects):
+    #     style_sheet_id = objects.find_refs("StylesheetArchive")[0]
+    #     style_sheet = objects[style_sheet_id]
+    #     style_sheet_map = {
+    #         x.identifier: x.style.identifier
+    #         for x in style_sheet.identifier_to_style_map
+    #     }
+    #     return style_sheet_map
 
     def table_height(self, table_id: int) -> int:
         """Return the height of a table in points"""

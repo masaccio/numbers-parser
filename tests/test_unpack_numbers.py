@@ -21,6 +21,12 @@ def test_help(script_runner):
     assert "document" in ret.stdout
     assert ret.stderr == ""
 
+    ret = script_runner.run("unpack-numbers", print_result=False)
+    assert ret.success
+    assert "directory name to unpack into" in ret.stdout
+    assert "document" in ret.stdout
+    assert ret.stderr == ""
+
 
 def test_multi_doc_error(script_runner):
     ret = script_runner.run(
@@ -128,3 +134,24 @@ def test_pretty_storage(script_runner, tmp_path):
             objects["rowInfos"][0]["cellStorageBuffer"][0:26]
             == "05030000000000000810020002"
         )
+
+
+def test_compact_json(script_runner, tmp_path):
+    output_dir = tmp_path / "test"
+    ret = script_runner.run(
+        "unpack-numbers",
+        "--compact-json",
+        "--output",
+        str(output_dir),
+        "tests/data/test-5.numbers",
+        print_result=False,
+    )
+    assert ret.success
+    assert ret.stdout == ""
+
+    with open(str(output_dir / "Index/CalculationEngine.json")) as f:
+        data = f.read()
+    assert (
+        '"column": 0, "row": 1, "containsAFormula": true, "edges": {"packedEdgeWithoutOwner":'
+        in data
+    )

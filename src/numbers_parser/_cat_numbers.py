@@ -66,9 +66,7 @@ def print_table_names(filename):
 
 
 def cell_as_string(args, cell):
-    if cell is None:
-        return ""
-    elif type(cell) == ErrorCell and not (args.formulas):
+    if type(cell) == ErrorCell and not (args.formulas):
         return "#REF!"
     elif args.formulas and cell.formula is not None:
         return cell.formula
@@ -99,7 +97,7 @@ def main():
     parser = command_line_parser()
     args = parser.parse_args()
 
-    if args.debug:
+    if args.debug:  # pragma: no cover
         logging.basicConfig(level=logging.DEBUG)
 
     if args.version:
@@ -122,4 +120,4 @@ def main():
 
 if __name__ == "__main__":
     # execute only if run as a script
-    main()
+    main()  # pragma: no cover

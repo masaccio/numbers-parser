@@ -179,7 +179,7 @@ class Formula(list):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}-{arg2}")
 
-    def unsupported(self, *args):
+    def unsupported(self, *args):  # pragma: no cover
         pass
 
     def xref(self, *args):
