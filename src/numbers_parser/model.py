@@ -90,6 +90,7 @@ class CellValue:
         self.d128 = None
         self.bullets = None
         self.formatted = None
+        self.formula_key = None
 
     def __repr__(self):  # pragma: no cover
         fields = filter(lambda x: not x.startswith("_"), dir(self))
@@ -507,48 +508,18 @@ class _NumbersModel:
         return formulas
 
     @lru_cache(maxsize=None)
-    def storage_buffers_pre_bnc(self, table_id: int) -> List:
-        row_infos = []
-        for tile in self.table_tiles(table_id):
-            row_infos += tile.rowInfos
-
-        return [
-            get_storage_buffers_for_row(
-                r.cell_storage_buffer_pre_bnc,
-                r.cell_offsets_pre_bnc,
-                self.number_of_columns(table_id),
-                r.has_wide_offsets,
-            )
-            for r in row_infos
-        ]
-
-    @lru_cache(maxsize=None)
-    def storage_buffer_pre_bnc(
-        self, table_id: int, row_num: int, col_num: int
-    ) -> bytes:
-        row_offset = self.row_storage_map(table_id)[row_num]
-        storage_buffers_pre_bnc = self.storage_buffers_pre_bnc(table_id)
-        return storage_buffers_pre_bnc[row_offset][col_num]
-
-    @lru_cache(maxsize=None)
     def storage_buffers(self, table_id: int) -> List:
         buffers = []
         for tile in self.table_tiles(table_id):
+            if not tile.last_saved_in_BNC:  # pragma: no cover
+                raise UnsupportedError("Pre-BNC storage is unsupported")
             for r in tile.rowInfos:
-                if tile.last_saved_in_BNC:
-                    buffer = get_storage_buffers_for_row(
-                        r.cell_storage_buffer,
-                        r.cell_offsets,
-                        self.number_of_columns(table_id),
-                        r.has_wide_offsets,
-                    )
-                else:
-                    buffer = get_storage_buffers_for_row(
-                        r.cell_storage_buffer_pre_bnc,
-                        r.cell_offsets_pre_bnc,
-                        self.number_of_columns(table_id),
-                        r.has_wide_offsets,
-                    )
+                buffer = get_storage_buffers_for_row(
+                    r.cell_storage_buffer,
+                    r.cell_offsets,
+                    self.number_of_columns(table_id),
+                    r.has_wide_offsets,
+                )
                 buffers.append(buffer)
         return buffers
 
@@ -1143,7 +1114,7 @@ class _NumbersModel:
             return None
         elif isinstance(cell, MergedCell):
             return None
-        else:
+        else:  # pragma: no cover
             data_type = type(cell).__name__
             table_name = self.table_name(table_id)
             warn(
@@ -1201,7 +1172,7 @@ class _NumbersModel:
             return None
         elif isinstance(cell, MergedCell):
             return None
-        else:
+        else:  # pragma: no cover
             data_type = type(cell).__name__
             table_name = self.table_name(table_id)
             warn(
@@ -1223,45 +1194,12 @@ class _NumbersModel:
 
         return storage[0:length]
 
-    def unpack_cell_storage_v3(self, buffer: bytes, table_id: int) -> CellValue:
-        version = buffer[0]
-        flags = unpack("<i", buffer[4:8])[0]
-        cell_type = buffer[2]
-        cell_value = CellValue(cell_type)
-        if version > 1:
-            offset = 12 + bin(flags & 0x0D8E).count("1") * 4
-        else:
-            offset = 8 + bin(flags & 0x018E).count("1") * 4
-
-        if flags & 0x0200:
-            cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
-        if version > 1:
-            offset += (bin(flags).count("1") & 0x3000) * 4
-        else:
-            offset += (bin(flags).count("1") & 0x1000) * 4
-        if flags & 0x0010:
-            cell_value.text = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
-        if flags & 0x0020:
-            cell_value.ieee = unpack("<d", buffer[offset : offset + 8])[0]
-            offset += 8
-        if flags & 0x0040:
-            seconds = unpack("<d", buffer[offset : offset + 8])[0]
-            cell_value.date = EPOCH + timedelta(seconds=seconds)
-            offset += 8
-
-        if version > 1 and flags & 0xFF0000 and cell_value.ieee is not None:
-            format_id = unpack("<i", buffer[offset : offset + 4])[0]
-            cell_value.formatted = self.duration_format(
-                cell_value.ieee, format_id, version, flags >> 16, table_id
-            )
-
-        return cell_value
-
-    def unpack_cell_storage_v5(
-        self, cell_type: int, buffer: bytes, table_id: int
+    def unpack_cell_storage(
+        self, cell_type: int, buffer: bytes, table_id: int, row_num, col_num
     ) -> CellValue:
+        version = buffer[0]
+        if version != 5:  # pragma: no cover
+            raise UnsupportedError(f"Cell storage version {version} is unsupported")
         flags = unpack("<i", buffer[8:12])[0]
         cell_value = CellValue(cell_type)
         offset = 12
@@ -1281,6 +1219,10 @@ class _NumbersModel:
         if flags & 0x10:
             cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
+
+        if flags & 0x200:
+            f_offset = offset + bin(flags & 0x1E0).count("1") * 4
+            cell_value.formula_key = unpack("<h", buffer[f_offset : f_offset + 2])[0]
 
         offset += bin(flags & 0x1FE0).count("1") * 4
 
@@ -1406,10 +1348,13 @@ class _NumbersModel:
 
         cell_type = buffer[1]
         cell_value = CellValue(cell_type)
-        if buffer[0] <= 3:
-            cell_value = self.unpack_cell_storage_v3(buffer, table_id)
-        else:
-            cell_value = self.unpack_cell_storage_v5(cell_type, buffer, table_id)
+        cell_value = self.unpack_cell_storage(
+            cell_type,
+            buffer,
+            table_id,
+            row_num,
+            col_num,
+        )
 
         if cell_value.type == TSTArchives.numberCellType or cell_value.type == 10:
             cell_value.value = cell_value.d128
@@ -1507,20 +1452,6 @@ class _NumbersModel:
                     "bullet_chars": bullet_chars,
                 }
         return None
-
-    @lru_cache(maxsize=None)
-    def table_cell_formula_decode(
-        self, table_id: int, row_num: int, col_num: int, cell_type: int
-    ):
-        if not self.table_formulas(table_id).is_formula(row_num, col_num):
-            return None
-
-        buffer = self.storage_buffer_pre_bnc(table_id, row_num, col_num)
-        flags = unpack("<i", buffer[4:8])[0]
-        offset = 8 + bin(flags & 0x0D8E).count("1") * 4
-        formula_key = unpack("<h", buffer[offset : offset + 2])[0]
-
-        return formula_key
 
 
 def formatted_number(number_type, index):

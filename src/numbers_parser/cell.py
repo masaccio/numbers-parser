@@ -5,6 +5,7 @@ from numbers_parser.exceptions import UnsupportedError
 
 from datetime import timedelta
 from logging import debug
+from functools import lru_cache
 
 
 class Cell:
@@ -57,6 +58,7 @@ class Cell:
 
         cell._table_id = table_id
         cell._model = model
+        cell.formula_key = cell_value.formula_key
 
         if is_merged and merge_cells[row_col]["merge_type"] == "source":
             cell.is_merged = True
@@ -80,29 +82,15 @@ class Cell:
         self.is_merged = False
         self.is_bulleted = False
         self.formatted_value = None
+        self.formula_key = None
 
     @property
+    @lru_cache(maxsize=None)
     def formula(self):
-        if hasattr(self, "_formula"):
-            return self._formula
-
-        formula_key = self._model.table_cell_formula_decode(
-            self._table_id,
-            self.row,
-            self.col,
-            self._type,
-        )
-        if formula_key is not None:
-            try:
-                table_formulas = self._model.table_formulas(self._table_id)
-                formula = table_formulas.formula(formula_key, self.row, self.col)
-            except KeyError:  # pragma: no cover
-                raise UnsupportedError(f"Formula not found ({self.row},{self.col})")
-            except IndexError:  # pragma: no cover
-                raise UnsupportedError(
-                    f"Unsupported formula buffer ({self.row},{self.col})"
-                )
-            self._formula = formula
+        formula_key = self.formula_key
+        if self.formula_key is not None:
+            table_formulas = self._model.table_formulas(self._table_id)
+            formula = table_formulas.formula(self.formula_key, self.row, self.col)
 
             debug(
                 "%s@[%d,%d]: key=%d:%s: type=%d, value=%s",
@@ -114,10 +102,9 @@ class Cell:
                 self._type,
                 str(self.value),
             )
+            return formula
         else:
-            self._formula = None
-
-        return self._formula
+            return None
 
     @property
     def bullets(self) -> str:
