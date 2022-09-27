@@ -1194,6 +1194,36 @@ class _NumbersModel:
 
         return storage[0:length]
 
+    # VALUES
+    # 1 - decimal128 value (16 bytes)
+    # 2 - double value (8 bytes)
+    # 4 - date time value (8 bytes)
+    # 8 - string ID
+    # 10 - rich text ID
+
+    # STYLES
+    # 20 - cell style ID
+    # 40 - text style ID
+    # 80 - conditional style ID
+    # 100 - conditional style applied rule ID
+
+    # FORMULAE
+    # 200 - formula ID
+    # 400 - "control cell spec" ID
+    # 800 - formula syntax error ID
+
+    # FORMATS
+    # 1000 - "suggest cell format kind" (automatic cell type?)
+    # 2000 - number format ID
+    # 4000 - currency format ID
+    # 8000 - date format ID
+    # 10000 - duration format ID
+    # 20000 - text format ID
+    # 40000 - boolean ID
+
+    # MISC
+    # 80000 - comment storage ID
+    # 100000 - import warning set ID
     def unpack_cell_storage(
         self, cell_type: int, buffer: bytes, table_id: int, row_num, col_num
     ) -> CellValue:
