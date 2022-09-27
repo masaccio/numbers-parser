@@ -1194,81 +1194,6 @@ class _NumbersModel:
 
         return storage[0:length]
 
-    # VALUES
-    # 1 - decimal128 value (16 bytes)
-    # 2 - double value (8 bytes)
-    # 4 - date time value (8 bytes)
-    # 8 - string ID
-    # 10 - rich text ID
-
-    # STYLES
-    # 20 - cell style ID
-    # 40 - text style ID
-    # 80 - conditional style ID
-    # 100 - conditional style applied rule ID
-
-    # FORMULAE
-    # 200 - formula ID
-    # 400 - "control cell spec" ID
-    # 800 - formula syntax error ID
-
-    # FORMATS
-    # 1000 - "suggest cell format kind" (automatic cell type?)
-    # 2000 - number format ID
-    # 4000 - currency format ID
-    # 8000 - date format ID
-    # 10000 - duration format ID
-    # 20000 - text format ID
-    # 40000 - boolean ID
-
-    # MISC
-    # 80000 - comment storage ID
-    # 100000 - import warning set ID
-    def unpack_cell_storage(
-        self, cell_type: int, buffer: bytes, table_id: int, row_num, col_num
-    ) -> CellValue:
-        version = buffer[0]
-        if version != 5:  # pragma: no cover
-            raise UnsupportedError(f"Cell storage version {version} is unsupported")
-        flags = unpack("<i", buffer[8:12])[0]
-        cell_value = CellValue(cell_type)
-        offset = 12
-        if flags & 0x01:
-            cell_value.d128 = unpack_decimal128(buffer[offset : offset + 16])
-            offset += 16
-        if flags & 0x02:
-            cell_value.ieee = unpack("<d", buffer[offset : offset + 8])[0]
-            offset += 8
-        if flags & 0x04:
-            seconds = unpack("<d", buffer[offset : offset + 8])[0]
-            cell_value.date = EPOCH + timedelta(seconds=seconds)
-            offset += 8
-        if flags & 0x08:
-            cell_value.text = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
-        if flags & 0x10:
-            cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
-
-        if flags & 0x200:
-            f_offset = offset + bin(flags & 0x1E0).count("1") * 4
-            cell_value.formula_key = unpack("<h", buffer[f_offset : f_offset + 2])[0]
-
-        offset += bin(flags & 0x1FE0).count("1") * 4
-
-        if flags & 0x7E000 and cell_value.ieee is not None:
-            format_id = unpack("<i", buffer[offset : offset + 4])[0]
-            cell_value.formatted = self.duration_format(
-                cell_value.ieee, format_id, buffer[0], flags >> 13, table_id
-            )
-        elif flags & 0x7E000 and cell_value.date is not None:
-            format_id = unpack("<i", buffer[offset : offset + 4])[0]
-            cell_value.formatted = self.date_format(
-                cell_value.date, format_id, buffer[0], table_id
-            )
-
-        return cell_value
-
     def duration_format(  # noqa: C901
         self,
         cell_value: int,
@@ -1369,37 +1294,102 @@ class _NumbersModel:
     def table_formulas(self, table_id: int):
         return TableFormulas(self, table_id)
 
-    @lru_cache(maxsize=None)
-    def table_cell_decode(self, table_id: int, row_num: int, col_num: int) -> Dict:
-        buffer = self.storage_buffer(table_id, row_num, col_num)
+    # VALUES
+    # 1 - decimal128 value (16 bytes)
+    # 2 - double value (8 bytes)
+    # 4 - date time value (8 bytes)
+    # 8 - string ID
+    # 10 - rich text ID
 
+    # STYLES
+    # 20 - cell style ID
+    # 40 - text style ID
+    # 80 - conditional style ID
+    # 100 - conditional style applied rule ID
+
+    # FORMULAE
+    # 200 - formula ID
+    # 400 - "control cell spec" ID
+    # 800 - formula syntax error ID
+
+    # FORMATS
+    # 1000 - "suggest cell format kind" (automatic cell type?)
+    # 2000 - number format ID
+    # 4000 - currency format ID
+    # 8000 - date format ID
+    # 10000 - duration format ID
+    # 20000 - text format ID
+    # 40000 - boolean ID
+
+    # MISC
+    # 80000 - comment storage ID
+    # 100000 - import warning set ID
+    @lru_cache(maxsize=None)
+    def table_cell_decode(  # noqa: C901
+        self, table_id: int, row_num: int, col_num: int
+    ) -> Dict:
+        buffer = self.storage_buffer(table_id, row_num, col_num)
         if buffer is None:
             return None
 
-        cell_type = buffer[1]
-        cell_value = CellValue(cell_type)
-        cell_value = self.unpack_cell_storage(
-            cell_type,
-            buffer,
-            table_id,
-            row_num,
-            col_num,
-        )
+        version = buffer[0]
+        if version != 5:  # pragma: no cover
+            raise UnsupportedError(f"Cell storage version {version} is unsupported")
 
-        if cell_value.type == TSTArchives.numberCellType or cell_value.type == 10:
+        cell_type = buffer[1]
+        if cell_type == 10:
+            cell_type = TSTArchives.numberCellType
+        cell_value = CellValue(cell_type)
+
+        flags = unpack("<i", buffer[8:12])[0]
+        offset = 12
+        if flags & 0x01:
+            cell_value.d128 = unpack_decimal128(buffer[offset : offset + 16])
+            offset += 16
+        if flags & 0x02:
+            cell_value.ieee = unpack("<d", buffer[offset : offset + 8])[0]
+            offset += 8
+        if flags & 0x04:
+            seconds = unpack("<d", buffer[offset : offset + 8])[0]
+            cell_value.date = EPOCH + timedelta(seconds=seconds)
+            offset += 8
+        if flags & 0x08:
+            cell_value.text = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x10:
+            cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+
+        if flags & 0x200:
+            f_offset = offset + bin(flags & 0x1E0).count("1") * 4
+            cell_value.formula_key = unpack("<h", buffer[f_offset : f_offset + 2])[0]
+
+        offset += bin(flags & 0x1FE0).count("1") * 4
+
+        if flags & 0x7E000 and cell_value.ieee is not None:
+            format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            cell_value.formatted = self.duration_format(
+                cell_value.ieee, format_id, buffer[0], flags >> 13, table_id
+            )
+        elif flags & 0x7E000 and cell_value.date is not None:
+            format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            cell_value.formatted = self.date_format(
+                cell_value.date, format_id, buffer[0], table_id
+            )
+
+        if cell_type == TSTArchives.numberCellType:
             cell_value.value = cell_value.d128
-            cell_value.type = TSTArchives.numberCellType
-        elif cell_value.type == TSTArchives.textCellType:
+        elif cell_type == TSTArchives.textCellType:
             if cell_value.text is None:
                 cell_value.text = unpack("<i", buffer[12:16])[0]
             cell_value.value = self.table_string(table_id, cell_value.text)
-        elif cell_value.type == TSTArchives.dateCellType:
+        elif cell_type == TSTArchives.dateCellType:
             cell_value.value = cell_value.date
-        elif cell_value.type == TSTArchives.boolCellType:
+        elif cell_type == TSTArchives.boolCellType:
             cell_value.value = cell_value.ieee > 0.0
-        elif cell_value.type == TSTArchives.durationCellType:
+        elif cell_type == TSTArchives.durationCellType:
             cell_value.value = cell_value.ieee
-        elif cell_value.type == TSTArchives.automaticCellType:
+        elif cell_type == TSTArchives.automaticCellType:
             cell_value.bullets = self.table_bullets(table_id, cell_value.rich)
 
         return cell_value
