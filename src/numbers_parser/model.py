@@ -1371,8 +1371,6 @@ class _NumbersModel:
             offset += 8
         if flags & 0x04:
             seconds = unpack("<d", buffer[offset : offset + 8])[0]
-            if seconds < 0:  # pragma: no cover
-                raise UnsupportedError("Python does not support dates before 1 AD")
             cell_value.date = EPOCH + timedelta(seconds=seconds)
             offset += 8
         if flags & 0x08:
