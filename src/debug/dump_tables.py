@@ -1,6 +1,7 @@
 import argparse
 
 from numbers_parser import Document
+from numbers_parser.constants import DOCUMENT_ID
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 
 
@@ -34,11 +35,17 @@ def deep_print(objects, obj, indent=0):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("numbers", nargs="*", help="Numbers folders/files to dump")
+parser.add_argument(
+    "--document", action="store_true", help="Dump from Document root instead of tables"
+)
 args = parser.parse_args()
 
 for filename in args.numbers:
     doc = Document(filename)
-    for sheet in doc._sheets:
-        for table in sheet._tables:
-            print(f"===== sheet={sheet.name} table={table.name}")
-            deep_print(doc._model.objects, doc._model.objects[table._table_id])
+    if args.document:
+        deep_print(doc._model.objects, doc._model.objects[DOCUMENT_ID])
+    else:
+        for sheet in doc._sheets:
+            for table in sheet._tables:
+                print(f"===== sheet={sheet.name} table={table.name}")
+                deep_print(doc._model.objects, doc._model.objects[table._table_id])
