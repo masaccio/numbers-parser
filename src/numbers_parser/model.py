@@ -75,6 +75,11 @@ DATETIME_TO_STRFTIME = OrderedDict(
         ("h", "%-I"),
         ("mm", "%M"),
         ("ss", "%S"),
+        ("W", "??"),  # TODO: support week of month
+        ("ww", "%W"),
+        ("G", "AD"),  # TODO: support BC
+        ("F", "%w"),
+        ("SSS", "%f"),
     ]
 )
 
@@ -213,6 +218,18 @@ class _NumbersModel:
     def table_tiles(self, table_id):
         bds = self.objects[table_id].base_data_store
         return [self.objects[t.tile.identifier] for t in bds.tiles.tiles]
+
+    @lru_cache(maxsize=None)
+    def custom_format_map(self):
+        custom_format_list_id = self.objects[
+            DOCUMENT_ID
+        ].super.custom_format_list.identifier
+        custom_format_list = self.objects[custom_format_list_id]
+        custom_format_map = {
+            uuid(u): custom_format_list.custom_formats[i]
+            for i, u in enumerate(custom_format_list.uuids)
+        }
+        return custom_format_map
 
     @lru_cache(maxsize=None)
     def table_format_entries(self, format_id):
@@ -1198,14 +1215,9 @@ class _NumbersModel:
         self,
         cell_value: int,
         format_id: int,
-        format_version: int,
-        flags: int,
         table_id: int,
     ) -> str:
-        if format_version >= 4:
-            format = self.table_format(table_id, format_id)
-        else:
-            format = self.table_format(table_id, format_id)
+        format = self.table_format(table_id, format_id)
 
         duration_style = format.duration_style
         if duration_style == -1:
@@ -1270,25 +1282,33 @@ class _NumbersModel:
             duration_str = re.sub(r":(\d\d\d)$", r".\1", duration_str)
         return duration_str
 
-    def date_format(
-        self,
-        cell_value: datetime,
-        format_id: int,
-        format_version: int,
-        table_id: int,
-    ) -> str:
-        if format_version >= 4:
-            format = self.table_format(table_id, format_id)
-        else:
-            format = self.table_format(table_id, format_id)
-
-        format = format.date_time_format
+    def numbers_strftime(self, format, value):
         for r, s in DATETIME_TO_STRFTIME.items():
             format = re.sub(f"\\b{r}\\b", s, format)
         if format == "":
             return ""
+        return value.strftime(format)
 
-        return cell_value.strftime(format)
+    def date_format(
+        self,
+        cell_value: datetime,
+        format_id: int,
+        table_id: int,
+    ) -> str:
+        format = self.table_format(table_id, format_id)
+        if format.HasField("custom_uid"):
+            format_uuid = uuid(format.custom_uid)
+            format_map = self.custom_format_map()
+            custom_format = format_map[format_uuid].default_format
+            format_spec = custom_format.custom_format_string
+            if custom_format.format_type == 272:
+                formatted_value = self.numbers_strftime(format_spec, cell_value)
+                formatted_value = re.sub(r"'([^']+)'", r"\1", formatted_value)
+            else:
+                formatted_value = ""
+        else:
+            formatted_value = self.numbers_strftime(format.date_time_format, cell_value)
+        return formatted_value
 
     @lru_cache(maxsize=None)
     def table_formulas(self, table_id: int):
@@ -1351,6 +1371,8 @@ class _NumbersModel:
             offset += 8
         if flags & 0x04:
             seconds = unpack("<d", buffer[offset : offset + 8])[0]
+            if seconds < 0:  # pragma: no cover
+                raise UnsupportedError("Python does not support dates before 1 AD")
             cell_value.date = EPOCH + timedelta(seconds=seconds)
             offset += 8
         if flags & 0x08:
@@ -1360,21 +1382,25 @@ class _NumbersModel:
             cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
 
-        if flags & 0x200:
-            f_offset = offset + bin(flags & 0x1E0).count("1") * 4
-            cell_value.formula_key = unpack("<h", buffer[f_offset : f_offset + 2])[0]
+        # Skips field 0x20, 0x40, 0x80, 0x100
+        offset += bin(flags & 0x01E0).count("1") * 4
 
-        offset += bin(flags & 0x1FE0).count("1") * 4
+        if flags & 0x200:
+            cell_value.formula_key = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+
+        # Skips fields 0x400, 0x800, 0x1000
+        offset += bin(flags & 0x1C00).count("1") * 4
 
         if flags & 0x7E000 and cell_value.ieee is not None:
             format_id = unpack("<i", buffer[offset : offset + 4])[0]
             cell_value.formatted = self.duration_format(
-                cell_value.ieee, format_id, buffer[0], flags >> 13, table_id
+                cell_value.ieee, format_id, table_id
             )
         elif flags & 0x7E000 and cell_value.date is not None:
             format_id = unpack("<i", buffer[offset : offset + 4])[0]
             cell_value.formatted = self.date_format(
-                cell_value.date, format_id, buffer[0], table_id
+                cell_value.date, format_id, table_id
             )
 
         if cell_type == TSTArchives.numberCellType:

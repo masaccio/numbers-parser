@@ -29,3 +29,14 @@ def test_date_formatting():
                 date = row[6].formatted_value
                 ref = row[7].value
                 check.equal(date, ref)
+
+
+@pytest.mark.experimental
+def test_custom_formatting():
+    doc = Document("tests/data/test-custom-formats.numbers")
+    for sheet in doc.sheets:
+        table = sheet.tables[0]
+        for row in table.iter_rows(min_row=1):
+            value = row[1].formatted_value
+            ref = row[2].value
+            check.equal(value, ref)
