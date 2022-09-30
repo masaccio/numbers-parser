@@ -2,10 +2,8 @@ import math
 import re
 
 from array import array
-from collections import OrderedDict
-from datetime import timedelta, datetime
 from functools import lru_cache
-from struct import pack, unpack
+from struct import pack
 from typing import Dict, List, Tuple
 from uuid import uuid1
 from warnings import warn
@@ -42,65 +40,13 @@ from numbers_parser.bullets import (
     BULLET_CONVERTION,
     BULLET_SUFFIXES,
 )
+from numbers_parser.cell_storage import CellStorage
+from numbers_parser.utils import uuid
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-
-SECONDS_IN_HOUR = 60 * 60
-SECONDS_IN_DAY = SECONDS_IN_HOUR * 24
-SECONDS_IN_WEEK = SECONDS_IN_DAY * 7
-
-FORMAT_STYLE_NONE = 0
-FORMAT_STYLE_SHORT = 1
-FORMAT_STYLE_MEDIUM = 2
-
-DATETIME_TO_STRFTIME = OrderedDict(
-    [
-        ("a", "%p"),
-        ("EEEE", "%A"),
-        ("EEE", "%a"),
-        ("y", "%Y"),
-        ("yyyy", "%Y"),
-        ("yy", "%y"),
-        ("MMMM", "%B"),
-        ("MMM", "%b"),
-        ("MM", "%m"),
-        ("M", "%-m"),
-        ("d", "%-d"),
-        ("dd", "%d"),
-        ("H", "%-H"),
-        ("HH", "%H"),
-        ("h", "%-I"),
-        ("mm", "%M"),
-        ("ss", "%S"),
-        ("W", "??"),  # TODO: support week of month
-        ("ww", "%W"),
-        ("G", "AD"),  # TODO: support BC
-        ("F", "%w"),
-        ("SSS", "%f"),
-    ]
-)
-
-
-class CellValue:
-    def __init__(self, _type):
-        self.type = _type
-        self.value = None
-        self.rich = None
-        self.text = None
-        self.ieee = None
-        self.date = EPOCH
-        self.d128 = None
-        self.bullets = None
-        self.formatted = None
-        self.formula_key = None
-
-    def __repr__(self):  # pragma: no cover
-        fields = filter(lambda x: not x.startswith("_"), dir(self))
-        values = map(lambda x: x + "=" + str(getattr(self, x)), fields)
-        return ", ".join(values)
 
 
 class _NumbersModel:
@@ -1211,105 +1157,6 @@ class _NumbersModel:
 
         return storage[0:length]
 
-    def duration_format(  # noqa: C901
-        self,
-        cell_value: int,
-        format_id: int,
-        table_id: int,
-    ) -> str:
-        format = self.table_format(table_id, format_id)
-
-        duration_style = format.duration_style
-        if duration_style == -1:
-            return
-        unit_largest = format.duration_unit_largest
-        unit_smallest = format.duration_unit_smallest
-        if format.use_automatic_duration_units:
-            unit_smallest, unit_largest = auto_units(cell_value, format)
-
-        if unit_largest == -1 or unit_smallest == -1:
-            return
-
-        d = cell_value
-        dd = int(cell_value)
-        dstr = []
-
-        if unit_largest == 1:
-            dd = int(d / SECONDS_IN_WEEK)
-            if unit_smallest != 1:
-                d -= SECONDS_IN_WEEK * dd
-            dstr.append(str(dd) + unit_format("week", dd, duration_style))
-        if unit_largest <= 2 and unit_smallest >= 2:
-            dd = int(d / SECONDS_IN_DAY)
-            if unit_smallest > 2:
-                d -= SECONDS_IN_DAY * dd
-            dstr.append(str(dd) + unit_format("day", dd, duration_style))
-        if unit_largest <= 4 and unit_smallest >= 4:
-            dd = int(d / SECONDS_IN_HOUR)
-            if unit_smallest > 4:
-                d -= SECONDS_IN_HOUR * dd
-            dstr.append(str(dd) + unit_format("hour", dd, duration_style))
-        if unit_largest <= 8 and unit_smallest >= 8:
-            dd = int(d / 60)
-            if unit_smallest > 8:
-                d -= 60 * dd
-            if duration_style == FORMAT_STYLE_NONE:
-                pad = (unit_largest == 8 and unit_smallest == 8) or dd > 10
-                dstr.append(("" if pad else "0") + str(dd))
-            else:
-                dstr.append(str(dd) + unit_format("minute", dd, duration_style))
-        if unit_largest <= 16 and unit_smallest >= 16:
-            dd = int(d)
-            if unit_smallest > 16:
-                d -= dd
-            if duration_style == FORMAT_STYLE_NONE:
-                pad = (unit_smallest == 16 and unit_largest == 16) or dd >= 10
-                dstr.append(("" if pad else "0") + str(dd))
-            else:
-                dstr.append(str(dd) + unit_format("second", dd, duration_style))
-        if unit_smallest >= 32:
-            dd = int(round(1000 * d))
-            if duration_style == FORMAT_STYLE_NONE:
-                padding = "0" if dd >= 10 else "00"
-                padding = "" if dd >= 100 else padding
-                dstr.append(f"{padding}{dd}")
-            else:
-                dstr.append(
-                    str(dd) + unit_format("millisecond", dd, duration_style, "ms")
-                )
-        duration_str = (":" if duration_style == 0 else " ").join(dstr)
-        if duration_style == FORMAT_STYLE_NONE:
-            duration_str = re.sub(r":(\d\d\d)$", r".\1", duration_str)
-        return duration_str
-
-    def numbers_strftime(self, format, value):
-        for r, s in DATETIME_TO_STRFTIME.items():
-            format = re.sub(f"\\b{r}\\b", s, format)
-        if format == "":
-            return ""
-        return value.strftime(format)
-
-    def date_format(
-        self,
-        cell_value: datetime,
-        format_id: int,
-        table_id: int,
-    ) -> str:
-        format = self.table_format(table_id, format_id)
-        if format.HasField("custom_uid"):
-            format_uuid = uuid(format.custom_uid)
-            format_map = self.custom_format_map()
-            custom_format = format_map[format_uuid].default_format
-            format_spec = custom_format.custom_format_string
-            if custom_format.format_type == 272:
-                formatted_value = self.numbers_strftime(format_spec, cell_value)
-                formatted_value = re.sub(r"'([^']+)'", r"\1", formatted_value)
-            else:
-                formatted_value = ""
-        else:
-            formatted_value = self.numbers_strftime(format.date_time_format, cell_value)
-        return formatted_value
-
     @lru_cache(maxsize=None)
     def table_formulas(self, table_id: int):
         return TableFormulas(self, table_id)
@@ -1352,71 +1199,8 @@ class _NumbersModel:
         if buffer is None:
             return None
 
-        version = buffer[0]
-        if version != 5:  # pragma: no cover
-            raise UnsupportedError(f"Cell storage version {version} is unsupported")
-
-        cell_type = buffer[1]
-        if cell_type == 10:
-            cell_type = TSTArchives.numberCellType
-        cell_value = CellValue(cell_type)
-
-        flags = unpack("<i", buffer[8:12])[0]
-        offset = 12
-        if flags & 0x01:
-            cell_value.d128 = unpack_decimal128(buffer[offset : offset + 16])
-            offset += 16
-        if flags & 0x02:
-            cell_value.ieee = unpack("<d", buffer[offset : offset + 8])[0]
-            offset += 8
-        if flags & 0x04:
-            seconds = unpack("<d", buffer[offset : offset + 8])[0]
-            cell_value.date = EPOCH + timedelta(seconds=seconds)
-            offset += 8
-        if flags & 0x08:
-            cell_value.text = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
-        if flags & 0x10:
-            cell_value.rich = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
-
-        # Skips field 0x20, 0x40, 0x80, 0x100
-        offset += bin(flags & 0x01E0).count("1") * 4
-
-        if flags & 0x200:
-            cell_value.formula_key = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
-
-        # Skips fields 0x400, 0x800, 0x1000
-        offset += bin(flags & 0x1C00).count("1") * 4
-
-        if flags & 0x7E000 and cell_value.ieee is not None:
-            format_id = unpack("<i", buffer[offset : offset + 4])[0]
-            cell_value.formatted = self.duration_format(
-                cell_value.ieee, format_id, table_id
-            )
-        elif flags & 0x7E000 and cell_value.date is not None:
-            format_id = unpack("<i", buffer[offset : offset + 4])[0]
-            cell_value.formatted = self.date_format(
-                cell_value.date, format_id, table_id
-            )
-
-        if cell_type == TSTArchives.numberCellType:
-            cell_value.value = cell_value.d128
-        elif cell_type == TSTArchives.textCellType:
-            if cell_value.text is None:
-                cell_value.text = unpack("<i", buffer[12:16])[0]
-            cell_value.value = self.table_string(table_id, cell_value.text)
-        elif cell_type == TSTArchives.dateCellType:
-            cell_value.value = cell_value.date
-        elif cell_type == TSTArchives.boolCellType:
-            cell_value.value = cell_value.ieee > 0.0
-        elif cell_type == TSTArchives.durationCellType:
-            cell_value.value = cell_value.ieee
-        elif cell_type == TSTArchives.automaticCellType:
-            cell_value.bullets = self.table_bullets(table_id, cell_value.rich)
-
-        return cell_value
+        cell = CellStorage(self, table_id, buffer)
+        return cell
 
     @lru_cache(maxsize=None)
     def table_bullets(self, table_id: int, string_key: int) -> Dict:
@@ -1544,35 +1328,6 @@ def node_to_row_col_ref(
         return ref
 
 
-def uuid(ref: dict) -> int:
-    """
-    Extract storage buffers for each cell in a table row
-
-    Args:
-        ref: Google protobuf containing either four 32-bit IDs or two 64-bit IDs
-
-    Returns:
-        uuid: 128-bit UUID
-
-    Raises:
-        UnsupportedError: object does not include expected UUID fields
-    """
-    try:
-        if hasattr(ref, "upper"):
-            uuid = ref.upper << 64 | ref.lower
-        else:
-            uuid = (
-                (ref.uuid_w3 << 96)
-                | (ref.uuid_w2 << 64)
-                | (ref.uuid_w1 << 32)
-                | ref.uuid_w0
-            )
-    except AttributeError:
-        raise UnsupportedError(f"Unsupported UUID structure: {ref}")  # pragma: no cover
-
-    return uuid
-
-
 def get_storage_buffers_for_row(
     storage_buffer: bytes, offsets: list, num_cols: int, has_wide_offsets: bool
 ) -> List[bytes]:
@@ -1644,66 +1399,6 @@ def pack_decimal128(value: float) -> bytearray:
     if value < 0:
         buffer[15] |= 0x80
     return buffer
-
-
-def unpack_decimal128(buffer: bytearray) -> float:
-    exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
-    mantissa = buffer[14] & 1
-    for i in range(13, -1, -1):
-        mantissa = mantissa * 256 + buffer[i]
-    if buffer[15] & 0x80:
-        mantissa = -mantissa
-    value = mantissa * 10**exp
-    return float(value)
-
-
-def unit_format(unit: str, value: int, style: int, abbrev: str = None):
-    plural = "" if value == 1 else "s"
-    if abbrev is None:
-        abbrev = unit[0]
-    if style >= FORMAT_STYLE_MEDIUM:
-        return f" {unit}" + plural
-    elif style == FORMAT_STYLE_SHORT:
-        return f"{abbrev}"
-    else:
-        return ""
-
-
-def auto_units(cell_value, format):
-    unit_largest = format.duration_unit_largest
-    unit_smallest = format.duration_unit_smallest
-
-    if cell_value == 0:
-        unit_largest = 2
-        unit_smallest = 2
-    else:
-        if cell_value >= SECONDS_IN_WEEK:
-            unit_largest = 1
-        elif cell_value >= SECONDS_IN_DAY:
-            unit_largest = 2
-        elif cell_value >= SECONDS_IN_HOUR:
-            unit_largest = 4
-        elif cell_value >= 60:
-            unit_largest = 8
-        elif cell_value >= 1:
-            unit_largest = 16
-        else:
-            unit_largest = 32
-
-        if math.floor(cell_value) != cell_value:
-            unit_smallest = 32
-        elif cell_value % 60:
-            unit_smallest = 16
-        elif cell_value % SECONDS_IN_HOUR:
-            unit_smallest = 8
-        elif cell_value % SECONDS_IN_DAY:
-            unit_smallest = 4
-        elif cell_value % SECONDS_IN_WEEK:
-            unit_smallest = 2
-        if unit_smallest < unit_largest:
-            unit_smallest = unit_largest
-
-    return unit_smallest, unit_largest
 
 
 def field_references(obj: object) -> dict:

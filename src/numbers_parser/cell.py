@@ -2,6 +2,7 @@ import re
 
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.exceptions import UnsupportedError
+from numbers_parser.cell_storage import CellType
 
 from datetime import timedelta
 from logging import debug
@@ -11,13 +12,13 @@ from functools import lru_cache
 class Cell:
     @staticmethod
     def factory(model: object, table_id: int, row_num: int, col_num: int):  # NOQA: C901
-        cell_value = model.table_cell_decode(table_id, row_num, col_num)
+        cell_storage = model.table_cell_decode(table_id, row_num, col_num)
 
         row_col = (row_num, col_num)
         merge_cells = model.merge_cell_ranges(table_id)
         is_merged = row_col in merge_cells
 
-        if cell_value is None:
+        if cell_storage is None:
             if is_merged and merge_cells[row_col]["merge_type"] == "ref":
                 cell = MergedCell(*merge_cells[row_col]["rect"])
             else:
@@ -27,38 +28,40 @@ class Cell:
             cell._table_id = table_id
             return cell
 
-        if cell_value.type == TSTArchives.emptyCellValueType:
+        if cell_storage.type == CellType.EMPTY_CELL_TYPE:
             cell = EmptyCell(row_num, col_num, None)
-        elif cell_value.type == TSTArchives.numberCellType:
-            cell = NumberCell(row_num, col_num, cell_value.value)
-        elif cell_value.type == TSTArchives.textCellType:
-            cell = TextCell(row_num, col_num, cell_value.value)
-        elif cell_value.type == TSTArchives.dateCellType:
-            cell = DateCell(row_num, col_num, cell_value.value, cell_value.formatted)
-        elif cell_value.type == TSTArchives.boolCellType:
-            cell = BoolCell(row_num, col_num, cell_value.value)
-        elif cell_value.type == TSTArchives.durationCellType:
-            if cell_value.value is None:
+        elif cell_storage.type == CellType.NUMBER_CELL_TYPE:
+            cell = NumberCell(row_num, col_num, cell_storage.value)
+        elif cell_storage.type == CellType.TEXT_CELL_TYPE:
+            cell = TextCell(row_num, col_num, cell_storage.value)
+        elif cell_storage.type == CellType.DATE_CELL_TYPE:
+            cell = DateCell(
+                row_num, col_num, cell_storage.value, cell_storage.formatted
+            )
+        elif cell_storage.type == CellType.BOOL_CELL_TYPE:
+            cell = BoolCell(row_num, col_num, cell_storage.value)
+        elif cell_storage.type == CellType.DURATION_CELL_TYPE:
+            if cell_storage.value is None:
                 cell = DurationCell(row_num, col_num, timedelta(seconds=0))
             else:
                 cell = DurationCell(
                     row_num,
                     col_num,
-                    timedelta(seconds=cell_value.value),
-                    cell_value.formatted,
+                    timedelta(seconds=cell_storage.value),
+                    cell_storage.formatted,
                 )
-        elif cell_value.type == TSTArchives.formulaErrorCellType:
+        elif cell_storage.type == CellType.ERROR_CELL_TYPE:
             cell = ErrorCell(row_num, col_num, None)
-        elif cell_value.type == TSTArchives.automaticCellType:
-            cell = BulletedTextCell(row_num, col_num, cell_value.bullets)
+        elif cell_storage.type == CellType.BULLET_CELL_TYPE:
+            cell = BulletedTextCell(row_num, col_num, cell_storage.bullets)
         else:
             raise UnsupportedError(  # pragma: no cover
-                f"Unsupport cell type {cell_value.type} @:({row_num},{col_num})"
+                f"Unsupport cell type {cell_storage.type} @:({row_num},{col_num})"
             )
 
         cell._table_id = table_id
         cell._model = model
-        cell.formula_key = cell_value.formula_key
+        cell.formula_key = cell_storage.formula_id
 
         if is_merged and merge_cells[row_col]["merge_type"] == "source":
             cell.is_merged = True
@@ -69,8 +72,8 @@ class Cell:
             model.table_name(table_id),
             row_num,
             col_num,
-            cell_value.type,
-            str(cell.value),
+            cell_storage.type,
+            str(cell_storage.value),
         )
         return cell
 
