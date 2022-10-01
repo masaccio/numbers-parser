@@ -31,7 +31,9 @@ class Cell:
         if cell_storage.type == CellType.EMPTY_CELL_TYPE:
             cell = EmptyCell(row_num, col_num, None)
         elif cell_storage.type == CellType.NUMBER_CELL_TYPE:
-            cell = NumberCell(row_num, col_num, cell_storage.value)
+            cell = NumberCell(
+                row_num, col_num, cell_storage.value, cell_storage.formatted
+            )
         elif cell_storage.type == CellType.TEXT_CELL_TYPE:
             cell = TextCell(row_num, col_num, cell_storage.value)
         elif cell_storage.type == CellType.DATE_CELL_TYPE:
@@ -115,9 +117,10 @@ class Cell:
 
 
 class NumberCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value, formatted_value=None):
         self._type = TSTArchives.numberCellType
         super().__init__(row_num, col_num, value)
+        self.formatted_value = formatted_value
 
     @property
     def value(self) -> int:

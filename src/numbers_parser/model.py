@@ -1360,15 +1360,14 @@ def get_storage_buffers_for_row(
         if col_num == (len(offsets) - 1):
             end = len(storage_buffer)
         else:
-            # Get next offset past current one that is not -1
-            # https://stackoverflow.com/questions/19502378/
-            idx = next(
-                (i for i, x in enumerate(offsets[col_num + 1 :]) if x >= 0), None
-            )
-            if idx is None:
+            end = None
+            # Find next positive offset
+            for i, x in enumerate(offsets[col_num + 1 :]):
+                if x >= 0:
+                    end = offsets[col_num + i + 1]
+                    break
+            if end is None:
                 end = len(storage_buffer)
-            else:
-                end = offsets[col_num + idx + 1]
         data.append(storage_buffer[start:end])
 
     return data

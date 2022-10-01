@@ -33,18 +33,26 @@ FORMAT_STYLE_SHORT = 1
 FORMAT_STYLE_MEDIUM = 2
 
 
-CUSTOM_FORMAT_1 = 1
-CUSTOM_FORMAT_2 = 256
-CUSTOM_FORMAT_3 = 257
-CUSTOM_FORMAT_4 = 258
-CUSTOM_FORMAT_5 = 260
-CUSTOM_FORMAT_6 = 261
-CUSTOM_FORMAT_7 = 262
-CUSTOM_FORMAT_8 = 268
-CUSTOM_FORMAT_9 = 269
-CUSTOM_FORMAT_10 = 270
-CUSTOM_FORMAT_DATE = 272
-CUSTOM_FORMAT_12 = 274
+class CustomFormatType(Enum):
+    X1 = 1
+    X2 = 256
+    X3 = 257
+    X4 = 258
+    X5 = 260
+    X6 = 261
+    X7 = 262
+    X8 = 268
+    X9 = 269
+    NUMBER = 270
+    DATE = 272
+    X12 = 274
+
+    def __eq__(self, other):
+        if type(other) == int:
+            return self.value == other
+        else:
+            return self.value == other.value
+
 
 DATETIME_TO_STRFTIME = OrderedDict(
     [
@@ -60,17 +68,30 @@ DATETIME_TO_STRFTIME = OrderedDict(
         ("M", "%-m"),
         ("d", "%-d"),
         ("dd", "%d"),
+        ("DDD", lambda x: str(x.timetuple().tm_yday).zfill(3)),
+        ("DD", lambda x: str(x.timetuple().tm_yday).zfill(2)),
+        ("D", lambda x: str(x.timetuple().tm_yday).zfill(1)),
         ("HH", "%H"),
         ("H", "%-H"),
+        ("hh", "%I"),
         ("h", "%-I"),
-        ("kk", "%H"),
-        ("mm", "%M"),
+        ("k", lambda x: str(x.timetuple().tm_hour).replace("0", "24")),
+        ("kk", lambda x: str(x.timetuple().tm_hour).replace("0", "24").zfill(2)),
+        ("K", lambda x: str(x.timetuple().tm_hour % 12)),
+        ("KK", lambda x: str(x.timetuple().tm_hour % 12).zfill(2)),
+        ("mm", lambda x: str(x.timetuple().tm_min).zfill(2)),
+        ("m", lambda x: str(x.timetuple().tm_min)),
         ("ss", "%S"),
+        ("s", lambda x: str(x.timetuple().tm_sec)),
         ("W", lambda x: week_of_month(x)),
         ("ww", "%W"),
         ("G", "AD"),  # TODO: support BC
         ("F", lambda x: days_occurred_in_month(x)),
+        ("S", lambda x: x.strftime("%f")[0]),
+        ("SS", lambda x: x.strftime("%f")[0:2]),
         ("SSS", lambda x: x.strftime("%f")[0:3]),
+        ("SSSS", lambda x: x.strftime("%f")[0:4]),
+        ("SSSSS", lambda x: x.strftime("%f")[0:5]),
     ]
 )
 
@@ -162,8 +183,31 @@ class CellStorage:
             return self.duration_format()
         elif self.date_format_id is not None and self.datetime is not None:
             return self.date_format()
+        elif self.num_format_id is not None:
+            return self.number_format()
         else:
             return None
+
+    def number_format(self) -> str:
+        format = self._model.table_format(self._table_id, self.num_format_id)
+        if format.HasField("custom_uid"):
+            format_uuid = uuid(format.custom_uid)
+            format_map = self._model.custom_format_map()
+            custom_format = format_map[format_uuid].default_format
+            format_spec = custom_format.custom_format_string
+            if custom_format.format_type == CustomFormatType.NUMBER:
+                formatted_value = expand_number_format(
+                    format_spec,
+                    self.d128 * custom_format.scale_factor,
+                    custom_format.show_thousands_separator,
+                )
+            else:
+                raise UnsupportedError(
+                    f"Unexpected custom format type {custom_format.format_type}"
+                )
+        else:
+            formatted_value = str(self.d128)
+        return formatted_value
 
     def date_format(self) -> str:
         format = self._model.table_format(self._table_id, self.date_format_id)
@@ -172,10 +216,12 @@ class CellStorage:
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
             format_spec = custom_format.custom_format_string
-            if custom_format.format_type == CUSTOM_FORMAT_DATE:
+            if custom_format.format_type == CustomFormatType.DATE:
                 formatted_value = expand_custom_format(format_spec, self.datetime)
             else:
-                formatted_value = ""
+                raise UnsupportedError(
+                    f"Unexpected custom format type {custom_format.format_type}"
+                )
         else:
             formatted_value = expand_custom_format(
                 format.date_time_format, self.datetime
@@ -323,6 +369,35 @@ def expand_custom_format(format, value):
         result += replace_format_field(field, value)
 
     return result
+
+
+def expand_number_format(format, value, thousands=False):
+    # Example formats:
+    #   #.##
+    #   00,000.00
+    #   ###,###,###
+    #   0,000,000.##
+    #   .0000
+    match = re.search(
+        r"""(.*?)
+            (([#,]+) | ([0,]+))?
+            ([.] ([#,]+) | ([0,]+))?
+            (.*?)""",
+        format,
+        re.VERBOSE,
+    )
+    prefix = match.group(1) or ""
+    suffix = match.group(7) or ""
+    if match.group(2) is not None:
+        width = len(match.group(1).replace(",", ""))
+    else:
+        width = 0
+    if match.group(6) is not None:
+        precision = len(match.group(5)) - 1
+    else:
+        precision = 0
+    formatted_value = f"{prefix}{value:{width}.{precision}}{suffix}"
+    return formatted_value
 
 
 def unit_format(unit: str, value: int, style: int, abbrev: str = None):
