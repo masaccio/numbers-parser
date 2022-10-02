@@ -1199,6 +1199,7 @@ class _NumbersModel:
         if buffer is None:
             return None
 
+        print(f"[{row_num},{col_num}]")
         cell = CellStorage(self, table_id, buffer)
         return cell
 

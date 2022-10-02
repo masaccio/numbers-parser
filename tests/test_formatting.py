@@ -36,7 +36,13 @@ def test_custom_formatting():
     doc = Document("tests/data/test-custom-formats.numbers")
     for sheet in doc.sheets:
         table = sheet.tables[0]
-        for row in table.iter_rows(min_row=1):
-            value = row[1].formatted_value
-            ref = row[2].value
+        if table.cell(0, 1).value == "Test":
+            test_col = 1
+        else:
+            test_col = 2
+        for i, row in enumerate(table.iter_rows(min_row=1), start=2):
+            value = row[test_col].formatted_value
+            ref = row[test_col + 1].value
+            if ref != value:
+                print(f"@row {i}: ref=>{ref}<, value=>{value}<")
             check.equal(value, ref)

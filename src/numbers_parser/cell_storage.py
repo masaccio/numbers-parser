@@ -3,8 +3,9 @@ import re
 
 from collections import OrderedDict
 from enum import Enum
-from struct import unpack
+from fractions import Fraction
 from datetime import timedelta, datetime
+from struct import unpack
 
 from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.constants import EPOCH
@@ -195,7 +196,14 @@ class CellStorage:
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
             format_spec = custom_format.custom_format_string
-            if custom_format.format_type == CustomFormatType.NUMBER:
+            if custom_format.requires_fraction_replacement:
+                accuracy = custom_format.fraction_accuracy
+                if accuracy & 0xFF000000:
+                    num_digits = 0x100000000 - accuracy
+                    formatted_value = float_to_n_digit_fraction(self.d128, num_digits)
+                else:
+                    formatted_value = float_to_fraction(self.d128, accuracy)
+            elif custom_format.format_type == CustomFormatType.NUMBER:
                 formatted_value = expand_number_format(
                     format_spec,
                     self.d128 * custom_format.scale_factor,
@@ -205,6 +213,8 @@ class CellStorage:
                 raise UnsupportedError(
                     f"Unexpected custom format type {custom_format.format_type}"
                 )
+            name = str(format_map[format_uuid].name)
+            print(f"format={format_spec}, result={formatted_value}, name={name}")
         else:
             formatted_value = str(self.d128)
         return formatted_value
@@ -397,6 +407,37 @@ def expand_number_format(format, value, thousands=False):
     else:
         precision = 0
     formatted_value = f"{prefix}{value:{width}.{precision}}{suffix}"
+    return formatted_value
+
+
+def float_to_fraction(value: float, denominator: int) -> str:
+    """Convert a float to the nearest fraction and return as a string"""
+    whole = int(value)
+    numerator = round(denominator * (value - whole))
+    if numerator == 0:
+        formatted_value = "0"
+    elif whole > 0:
+        formatted_value = f"{whole} {numerator}/{denominator}"
+    else:
+        formatted_value = f"{numerator}/{denominator}"
+    return formatted_value
+
+
+def float_to_n_digit_fraction(value: float, max_digits: int) -> str:
+    """Convert a float to a fraction of a maxinum number of digits
+    and return as a string"""
+    max_denominator = 10**max_digits - 1
+    (numerator, denominator) = (
+        Fraction.from_float(value).limit_denominator(max_denominator).as_integer_ratio()
+    )
+    whole = int(value)
+    numerator -= whole * denominator
+    if numerator == 0:
+        formatted_value = "0"
+    elif whole == 0:
+        formatted_value = f"{numerator}/{denominator}"
+    else:
+        formatted_value = f"{whole} {numerator}/{denominator}"
     return formatted_value
 
 
