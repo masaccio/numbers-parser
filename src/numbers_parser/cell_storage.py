@@ -55,7 +55,7 @@ class CustomFormatType(Enum):
             return self.value == other.value
 
 
-DATETIME_TO_STRFTIME = OrderedDict(
+DATETIME_FIELD_MAP = OrderedDict(
     [
         ("a", lambda x: x.strftime("%p").lower()),
         ("EEEE", "%A"),
@@ -98,7 +98,7 @@ DATETIME_TO_STRFTIME = OrderedDict(
 
 
 class CellStorage:
-    def __init__(self, model=object, table_id=int, buffer: bytes = None):
+    def __init__(self, model: object, table_id: int, buffer, row_num, col_num):
         version = buffer[0]
         if version != 5:  # pragma: no cover
             raise UnsupportedError(f"Cell storage version {version} is unsupported")
@@ -107,6 +107,8 @@ class CellStorage:
         self._model = model
         self._table_id = table_id
         self._flags = unpack("<i", buffer[8:12])[0]
+        self.row_num = row_num
+        self.col_num = col_num
         self.decode_flags()
 
         cell_type = buffer[1]
@@ -195,7 +197,7 @@ class CellStorage:
             format_uuid = uuid(format.custom_uid)
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
-            format_spec = custom_format.custom_format_string
+            custom_format_string = custom_format.custom_format_string
             if custom_format.requires_fraction_replacement:
                 accuracy = custom_format.fraction_accuracy
                 if accuracy & 0xFF000000:
@@ -204,17 +206,12 @@ class CellStorage:
                 else:
                     formatted_value = float_to_fraction(self.d128, accuracy)
             elif custom_format.format_type == CustomFormatType.NUMBER:
-                formatted_value = expand_number_format(
-                    format_spec,
-                    self.d128 * custom_format.scale_factor,
-                    custom_format.show_thousands_separator,
-                )
+                formatted_value = expand_number_format(custom_format, self.d128)
             else:
                 raise UnsupportedError(
                     f"Unexpected custom format type {custom_format.format_type}"
                 )
             name = str(format_map[format_uuid].name)
-            print(f"format={format_spec}, result={formatted_value}, name={name}")
         else:
             formatted_value = str(self.d128)
         return formatted_value
@@ -225,9 +222,11 @@ class CellStorage:
             format_uuid = uuid(format.custom_uid)
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
-            format_spec = custom_format.custom_format_string
+            custom_format_string = custom_format.custom_format_string
             if custom_format.format_type == CustomFormatType.DATE:
-                formatted_value = expand_custom_format(format_spec, self.datetime)
+                formatted_value = expand_custom_format(
+                    custom_format_string, self.datetime
+                )
             else:
                 raise UnsupportedError(
                     f"Unexpected custom format type {custom_format.format_type}"
@@ -324,8 +323,8 @@ def days_occurred_in_month(value: datetime) -> str:
 
 
 def replace_format_field(field: str, value: datetime) -> str:
-    if field in DATETIME_TO_STRFTIME:
-        s = DATETIME_TO_STRFTIME[field]
+    if field in DATETIME_FIELD_MAP:
+        s = DATETIME_FIELD_MAP[field]
         if callable(s):
             return s(value)
         else:
@@ -381,32 +380,78 @@ def expand_custom_format(format, value):
     return result
 
 
-def expand_number_format(format, value, thousands=False):
-    # Example formats:
-    #   #.##
-    #   00,000.00
-    #   ###,###,###
-    #   0,000,000.##
-    #   .0000
-    match = re.search(
-        r"""(.*?)
-            (([#,]+) | ([0,]+))?
-            ([.] ([#,]+) | ([0,]+))?
-            (.*?)""",
-        format,
-        re.VERBOSE,
-    )
-    prefix = match.group(1) or ""
-    suffix = match.group(7) or ""
-    if match.group(2) is not None:
-        width = len(match.group(1).replace(",", ""))
+def expand_number_format(format, value):
+    custom_format_string = format.custom_format_string
+    value *= format.scale_factor
+    match = re.search(r"([#0.,]+)", custom_format_string)
+    if match:
+        if "." in match.group(1):
+            (int_format_string, dec_format_string) = match.group(1).split(".")
+        else:
+            (int_format_string, dec_format_string) = (match.group(1), "")
+        if not format.show_thousands_separator:
+            int_format_string = int_format_string.replace(",", "")
+
+        num_decimals = len(dec_format_string)
+        integer = int(value) if num_decimals > 0 else round(value)
+        decimal = math.modf(value)[0]
+        if format.min_integer_width > 0:
+            padding = len(int_format_string)
+            if format.num_nonspace_integer_digits > 0:
+                # Pad integers with zeroes
+                if format.show_thousands_separator:
+                    formatted_value = f"{integer:0{padding},}"
+                else:
+                    formatted_value = f"{integer:0{padding}}"
+            else:
+                # Pad integers with spaces
+                if integer == 0:
+                    formatted_value = " " * padding
+                else:
+                    if format.show_thousands_separator:
+                        formatted_value = f"{integer:,}".rjust(padding)
+                    else:
+                        formatted_value = str(integer).rjust(padding)
+        else:
+            formatted_value = str(int(integer))
+
+        if format.num_nonspace_decimal_digits > 0:
+            # Pad decimal with zeroes
+            formatted_value += f"{decimal:,.{num_decimals}f}"[1:]
+        elif num_decimals > 0:
+            # Pad decimal with spaces
+            formatted_value += str(round(decimal, num_decimals))[1:].ljust(num_decimals)
+
+        formatted_value = custom_format_string.replace(match.group(1), formatted_value)
     else:
-        width = 0
-    if match.group(6) is not None:
-        precision = len(match.group(5)) - 1
-    else:
-        precision = 0
-    formatted_value = f"{prefix}{value:{width}.{precision}}{suffix}"
+        formatted_value = custom_format_string
+
+    if "'" not in formatted_value:
+        return formatted_value
+
+    chars = [*formatted_value]
+    index = 0
+    in_string = False
+    formatted_value = ""
+    while index < len(chars):
+        current_char = chars[index]
+        next_char = chars[index + 1] if index < len(chars) - 1 else None
+        if current_char == "'":
+            if next_char is None:
+                break
+            elif chars[index + 1] == "'":
+                formatted_value += "'"
+                index += 2
+            elif in_string:
+                in_string = False
+                index += 1
+            else:
+                in_string = True
+                index += 1
+        else:
+            formatted_value += current_char
+            index += 1
+
     return formatted_value
 
 
