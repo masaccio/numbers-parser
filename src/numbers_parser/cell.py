@@ -224,6 +224,7 @@ class MergedCell:
         self.col_start = col_start
         self.col_end = col_end
         self.merge_range = xl_range(row_start, col_start, row_end, col_end)
+        self.formatted_value = None
 
 
 # Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
