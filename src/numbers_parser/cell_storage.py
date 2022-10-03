@@ -45,8 +45,9 @@ class CustomFormatType(Enum):
     X8 = 268
     X9 = 269
     NUMBER = 270
+    TEXT = 271
     DATE = 272
-    X12 = 274
+    CURRENCY = 274
 
     def __eq__(self, other):
         if type(other) == int:
@@ -96,6 +97,32 @@ DATETIME_FIELD_MAP = OrderedDict(
     ]
 )
 
+CELL_STORAGE_MAP = OrderedDict(
+    [
+        (0x1, {"attr": "d128", "size": 16}),
+        (0x2, {"attr": "double", "size": 8}),
+        (0x4, {"attr": "seconds", "size": 8}),
+        (0x8, {"attr": "string_id"}),
+        (0x10, {"attr": "rich_id"}),
+        (0x20, {"attr": "cell_style_id"}),
+        (0x40, {"attr": "text_style_id"}),
+        (0x80, {"attr": "cond_style_id"}),
+        (0x100, {"attr": "cond_rule_style_id"}),
+        (0x200, {"attr": "formula_id"}),
+        (0x400, {"attr": "control_id"}),
+        (0x800, {"attr": "formula_error_id"}),
+        (0x1000, {"attr": "suggest_id"}),
+        (0x2000, {"attr": "num_format_id"}),
+        (0x4000, {"attr": "currency_format_id"}),
+        (0x8000, {"attr": "date_format_id"}),
+        (0x10000, {"attr": "duration_format_id"}),
+        (0x20000, {"attr": "text_format_id"}),
+        (0x40000, {"attr": "bool_format_id"}),
+        (0x80000, {"attr": "comment_id"}),
+        (0x100000, {"attr": "import_warning_id"}),
+    ]
+)
+
 
 class CellStorage:
     def __init__(self, model: object, table_id: int, buffer, row_num, col_num):
@@ -106,10 +133,24 @@ class CellStorage:
         self._buffer = buffer
         self._model = model
         self._table_id = table_id
-        self._flags = unpack("<i", buffer[8:12])[0]
         self.row_num = row_num
         self.col_num = col_num
-        self.decode_flags()
+
+        offset = 12
+        flags = unpack("<i", buffer[8:12])[0]
+        for mask, field in CELL_STORAGE_MAP.items():
+            if flags & mask:
+                size = field.get("size", 4)
+                if size == 16:
+                    value = unpack_decimal128(self._buffer[offset : offset + 16])
+                elif size == 8:
+                    value = unpack("<d", self._buffer[offset : offset + 8])[0]
+                else:
+                    value = unpack("<i", self._buffer[offset : offset + 4])[0]
+                setattr(self, field["attr"], value)
+                offset += size
+            else:
+                setattr(self, field["attr"], None)
 
         cell_type = buffer[1]
         if cell_type == TSTArchives.genericCellType:
@@ -122,7 +163,8 @@ class CellStorage:
             self.value = self._model.table_string(table_id, self.string_id)
             self.type = CellType.TEXT_CELL_TYPE
         elif cell_type == TSTArchives.dateCellType:
-            self.value = self.datetime
+            self.value = EPOCH + timedelta(seconds=self.seconds)
+            self.datetime = self.value
             self.type = CellType.DATE_CELL_TYPE
         elif cell_type == TSTArchives.boolCellType:
             self.value = self.double > 0.0
@@ -143,43 +185,6 @@ class CellStorage:
         else:  # pragma: no cover
             raise UnsupportedError(f"Cell type ID {cell_type} is not recognised")
 
-    def decode_flags(self):
-        self._current_offset = 12
-
-        self.d128 = self.pop_buffer(16) if self._flags & 0x1 else None
-        self.double = self.pop_buffer(8) if self._flags & 0x2 else None
-        self.datetime = (
-            EPOCH + timedelta(seconds=self.pop_buffer(8)) if self._flags & 0x4 else None
-        )
-        self.string_id = self.pop_buffer() if self._flags & 0x8 else None
-        self.rich_id = self.pop_buffer() if self._flags & 0x10 else None
-        self.cell_style_id = self.pop_buffer() if self._flags & 0x20 else None
-        self.text_style_id = self.pop_buffer() if self._flags & 0x40 else None
-        self.cond_style_id = self.pop_buffer() if self._flags & 0x80 else None
-        self.cond_rule_style_id = self.pop_buffer() if self._flags & 0x100 else None
-        self.formula_id = self.pop_buffer() if self._flags & 0x200 else None
-        self.control_id = self.pop_buffer() if self._flags & 0x400 else None
-        self.formula_error_id = self.pop_buffer() if self._flags & 0x800 else None
-        self.suggest_id = self.pop_buffer() if self._flags & 0x1000 else None
-        self.num_format_id = self.pop_buffer() if self._flags & 0x2000 else None
-        self.currency_format_id = self.pop_buffer() if self._flags & 0x4000 else None
-        self.date_format_id = self.pop_buffer() if self._flags & 0x8000 else None
-        self.duration_format_id = self.pop_buffer() if self._flags & 0x10000 else None
-        self.text_format_id = self.pop_buffer() if self._flags & 0x20000 else None
-        self.bool_format_id = self.pop_buffer() if self._flags & 0x40000 else None
-        self.comment_id = self.pop_buffer() if self._flags & 0x80000 else None
-        self.import_warning_id = self.pop_buffer() if self._flags & 0x100000 else None
-
-    def pop_buffer(self, size: int = 4):
-        offset = self._current_offset
-        self._current_offset += size
-        if size == 16:
-            return unpack_decimal128(self._buffer[offset : offset + 16])
-        elif size == 8:
-            return unpack("<d", self._buffer[offset : offset + 8])[0]
-        else:
-            return unpack("<i", self._buffer[offset : offset + 4])[0]
-
     @property
     def formatted(self):
         if self.duration_format_id is not None and self.double is not None:
@@ -192,7 +197,10 @@ class CellStorage:
             return None
 
     def number_format(self) -> str:
-        format = self._model.table_format(self._table_id, self.num_format_id)
+        if self.currency_format_id is not None:
+            format = self._model.table_format(self._table_id, self.currency_format_id)
+        else:
+            format = self._model.table_format(self._table_id, self.num_format_id)
         if format.HasField("custom_uid"):
             format_uuid = uuid(format.custom_uid)
             format_map = self._model.custom_format_map()
@@ -204,7 +212,10 @@ class CellStorage:
                     formatted_value = float_to_n_digit_fraction(self.d128, num_digits)
                 else:
                     formatted_value = float_to_fraction(self.d128, accuracy)
-            elif custom_format.format_type == CustomFormatType.NUMBER:
+            elif (
+                custom_format.format_type == CustomFormatType.NUMBER
+                or custom_format.format_type == CustomFormatType.CURRENCY
+            ):
                 formatted_value = decode_number_format(custom_format, self.d128)
             else:
                 raise UnsupportedError(
@@ -384,6 +395,12 @@ def decode_number_format(format, value):  # noqa: C901
     if "%" in custom_format_string and format.scale_factor == 1.0:
         # Per cent scale has 100x but % does not
         value *= 100.0
+
+    if format.currency_code != "":
+        # Replace currency code with symbol and no-break space
+        custom_format_string = custom_format_string.replace(
+            "\u00a4", format.currency_code + "\u00a0"
+        )
 
     if (match := re.search(r"([#0.,]+(E[+]\d+)?)", custom_format_string)) is not None:
         if "." in match.group(1):
