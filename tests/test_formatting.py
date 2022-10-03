@@ -31,7 +31,6 @@ def test_date_formatting():
                 check.equal(date, ref)
 
 
-@pytest.mark.experimental
 def test_custom_formatting():
     doc = Document("tests/data/test-custom-formats.numbers")
     for sheet in doc.sheets:
