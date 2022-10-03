@@ -4,7 +4,7 @@ import pytest_check as check
 
 from datetime import datetime
 from numbers_parser import Document
-from numbers_parser.cell import EmptyCell
+from numbers_parser.cell import EmptyCell, BoolCell
 
 
 def test_duration_formatting():
@@ -40,9 +40,7 @@ def test_custom_formatting():
             test_col = 1
         else:
             test_col = 2
-        for i, row in enumerate(table.iter_rows(min_row=1), start=2):
+        for i, row in enumerate(table.iter_rows(min_row=1), start=1):
             value = row[test_col].formatted_value
             ref = row[test_col + 1].value
-            if ref != value:
-                print(f"@row {i}: ref=>{ref}<, value=>{value}<")
             check.equal(value, ref)

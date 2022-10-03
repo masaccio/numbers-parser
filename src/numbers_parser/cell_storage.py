@@ -197,7 +197,6 @@ class CellStorage:
             format_uuid = uuid(format.custom_uid)
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
-            custom_format_string = custom_format.custom_format_string
             if custom_format.requires_fraction_replacement:
                 accuracy = custom_format.fraction_accuracy
                 if accuracy & 0xFF000000:
@@ -206,12 +205,11 @@ class CellStorage:
                 else:
                     formatted_value = float_to_fraction(self.d128, accuracy)
             elif custom_format.format_type == CustomFormatType.NUMBER:
-                formatted_value = expand_number_format(custom_format, self.d128)
+                formatted_value = decode_number_format(custom_format, self.d128)
             else:
                 raise UnsupportedError(
                     f"Unexpected custom format type {custom_format.format_type}"
                 )
-            name = str(format_map[format_uuid].name)
         else:
             formatted_value = str(self.d128)
         return formatted_value
@@ -224,7 +222,7 @@ class CellStorage:
             custom_format = format_map[format_uuid].default_format
             custom_format_string = custom_format.custom_format_string
             if custom_format.format_type == CustomFormatType.DATE:
-                formatted_value = expand_custom_format(
+                formatted_value = decode_date_format(
                     custom_format_string, self.datetime
                 )
             else:
@@ -232,9 +230,7 @@ class CellStorage:
                     f"Unexpected custom format type {custom_format.format_type}"
                 )
         else:
-            formatted_value = expand_custom_format(
-                format.date_time_format, self.datetime
-            )
+            formatted_value = decode_date_format(format.date_time_format, self.datetime)
         return formatted_value
 
     def duration_format(self) -> str:  # noqa: C901
@@ -322,7 +318,7 @@ def days_occurred_in_month(value: datetime) -> str:
     return str(n_days)
 
 
-def replace_format_field(field: str, value: datetime) -> str:
+def decode_date_format_field(field: str, value: datetime) -> str:
     if field in DATETIME_FIELD_MAP:
         s = DATETIME_FIELD_MAP[field]
         if callable(s):
@@ -333,7 +329,8 @@ def replace_format_field(field: str, value: datetime) -> str:
         raise UnsupportedError(f"Unsupported field code '{field}'")
 
 
-def expand_custom_format(format, value):
+def decode_date_format(format, value):
+    """Parse a custom date format string and return a formatted datetime value"""
     chars = [*format]
     index = 0
     in_string = False
@@ -355,7 +352,7 @@ def expand_custom_format(format, value):
             else:
                 in_string = True
                 if in_field:
-                    result += replace_format_field(field, value)
+                    result += decode_date_format_field(field, value)
                     in_field = False
                 index += 1
         elif in_string:
@@ -363,7 +360,7 @@ def expand_custom_format(format, value):
             index += 1
         elif not current_char.isalpha():
             if in_field:
-                result += replace_format_field(field, value)
+                result += decode_date_format_field(field, value)
                 in_field = False
             result += current_char
             index += 1
@@ -375,16 +372,20 @@ def expand_custom_format(format, value):
             field = current_char
             index += 1
     if in_field:
-        result += replace_format_field(field, value)
+        result += decode_date_format_field(field, value)
 
     return result
 
 
-def expand_number_format(format, value):
+def decode_number_format(format, value):  # noqa: C901
+    """Parse a custom date format string and return a formatted number value"""
     custom_format_string = format.custom_format_string
     value *= format.scale_factor
-    match = re.search(r"([#0.,]+)", custom_format_string)
-    if match:
+    if "%" in custom_format_string and format.scale_factor == 1.0:
+        # Per cent scale has 100x but % does not
+        value *= 100.0
+
+    if (match := re.search(r"([#0.,]+(E[+]\d+)?)", custom_format_string)) is not None:
         if "." in match.group(1):
             (int_format_string, dec_format_string) = match.group(1).split(".")
         else:
@@ -393,34 +394,40 @@ def expand_number_format(format, value):
             int_format_string = int_format_string.replace(",", "")
 
         num_decimals = len(dec_format_string)
+        num_integers = len(int_format_string)
         integer = int(value) if num_decimals > 0 else round(value)
         decimal = math.modf(value)[0]
-        if format.min_integer_width > 0:
-            padding = len(int_format_string)
+
+        if match.group(2) is not None:
+            formatted_value = f"{value:.{num_decimals - 4}E}"
+        elif format.min_integer_width > 0 or format.contains_integer_token:
+            num_integers = max([format.min_integer_width, num_integers])
             if format.num_nonspace_integer_digits > 0:
                 # Pad integers with zeroes
                 if format.show_thousands_separator:
-                    formatted_value = f"{integer:0{padding},}"
+                    formatted_value = f"{integer:0{num_integers},}"
                 else:
-                    formatted_value = f"{integer:0{padding}}"
+                    formatted_value = f"{integer:0{num_integers}}"
             else:
                 # Pad integers with spaces
                 if integer == 0:
-                    formatted_value = " " * padding
+                    formatted_value = " " * num_integers
                 else:
                     if format.show_thousands_separator:
-                        formatted_value = f"{integer:,}".rjust(padding)
+                        formatted_value = f"{integer:,}".rjust(num_integers)
                     else:
-                        formatted_value = str(integer).rjust(padding)
+                        formatted_value = str(integer).rjust(num_integers)
         else:
             formatted_value = str(int(integer))
 
-        if format.num_nonspace_decimal_digits > 0:
-            # Pad decimal with zeroes
-            formatted_value += f"{decimal:,.{num_decimals}f}"[1:]
-        elif num_decimals > 0:
-            # Pad decimal with spaces
-            formatted_value += str(round(decimal, num_decimals))[1:].ljust(num_decimals)
+        if match.group(2) is None:
+            if format.num_nonspace_decimal_digits > 0:
+                # Pad decimal with zeroes
+                formatted_value += "." + f"{decimal:,.{num_decimals}f}"[2:]
+            elif num_decimals > 0:
+                # Pad decimal with spaces
+                decimal_str = str(round(decimal, num_decimals))[2:]
+                formatted_value += "." + decimal_str.ljust(num_decimals)
 
         formatted_value = custom_format_string.replace(match.group(1), formatted_value)
     else:

@@ -1199,8 +1199,7 @@ class _NumbersModel:
         if buffer is None:
             return None
 
-        print(f"[{row_num},{col_num}]")
-        cell = CellStorage(self, table_id, buffer)
+        cell = CellStorage(self, table_id, buffer, row_num, col_num)
         return cell
 
     @lru_cache(maxsize=None)
