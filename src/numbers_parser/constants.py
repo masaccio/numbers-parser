@@ -7,6 +7,7 @@ from datetime import datetime
 DEFAULT_DOCUMENT = resource_filename(__name__, os.path.join("data", "empty.numbers"))
 DEFAULT_COLUMN_COUNT = 5
 DEFAULT_COLUMN_WIDTH = 98.0
+DEFAULT_PRE_BNC_BYTES = "🤠".encode("utf-8")  # Yes, really!
 DEFAULT_ROW_COUNT = 10
 DEFAULT_ROW_HEIGHT = 20.0
 DEFAULT_TABLE_OFFSET = 80.0
