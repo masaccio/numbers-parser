@@ -13,13 +13,12 @@ from numbers_parser.cell import (
     TextCell,
     DurationCell,
     DateCell,
-)
-from numbers_parser.cell import (
     Cell,
     MergedCell,
     xl_cell_to_rowcol,
     xl_range,
 )
+from numbers_parser.cell_storage import CellStorage
 
 
 class Document:
@@ -362,6 +361,9 @@ class Table:
             raise ValueError(
                 "Can't determine cell type from type " + type(value).__name__
             )
+        self._data[row_num][col_num]._storage = CellStorage(
+            self._model, self._table_id, None, row_num, col_num
+        )
 
     def add_row(self, num_rows=1):
         row = [
