@@ -1,5 +1,6 @@
-import pytest
 import csv
+import pytest
+import pytest_check as check
 
 from numbers_parser import __version__
 
@@ -28,6 +29,7 @@ XXX_TABLE_1_REF = [
 DOCUMENT = "tests/data/test-1.numbers"
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_no_documents(script_runner):
     ret = script_runner.run("cat-numbers", "--brief", print_result=False)
     assert ret.success
@@ -35,6 +37,7 @@ def test_no_documents(script_runner):
     assert ret.stderr == ""
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_version(script_runner):
     ret = script_runner.run("cat-numbers", "--version", print_result=False)
     assert ret.success
@@ -42,6 +45,7 @@ def test_version(script_runner):
     assert ret.stderr == ""
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_help(script_runner):
     ret = script_runner.run("cat-numbers", "--help", print_result=False)
     assert ret.success
@@ -50,6 +54,7 @@ def test_help(script_runner):
     assert ret.stderr == ""
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_full_contents(script_runner):
     ref = ""
     for row in ZZZ_TABLE_1_REF:
@@ -76,6 +81,7 @@ def test_full_contents(script_runner):
     assert ret.stderr == ""
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_brief_contents(script_runner):
     ref = ""
     for row in ZZZ_TABLE_1_REF:
@@ -90,6 +96,7 @@ def test_brief_contents(script_runner):
     assert ret.stderr == ""
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_select_sheet(script_runner):
     ref = ""
     for row in ZZZ_TABLE_1_REF:
@@ -109,6 +116,7 @@ def test_select_sheet(script_runner):
     assert ret.stderr == ""
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_select_table(script_runner):
     ref = ""
     for row in XXX_TABLE_1_REF:
@@ -126,6 +134,7 @@ def test_select_table(script_runner):
     assert ret.stderr == ""
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_list_sheets(script_runner):
     ret = script_runner.run("cat-numbers", "-S", DOCUMENT, print_result=False)
     assert ret.success
@@ -135,6 +144,7 @@ def test_list_sheets(script_runner):
     assert ret.stderr == ""
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_list_tables(script_runner):
     ret = script_runner.run("cat-numbers", "-T", DOCUMENT, print_result=False)
     assert ret.success
@@ -146,6 +156,7 @@ def test_list_tables(script_runner):
     assert ret.stderr == ""
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_without_formulas(script_runner):
     ret = script_runner.run(
         "cat-numbers",
@@ -174,6 +185,7 @@ def test_without_formulas(script_runner):
     assert ret.stderr == ""
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_with_formulas(script_runner):
     ret = script_runner.run(
         "cat-numbers",
@@ -201,6 +213,7 @@ def test_with_formulas(script_runner):
     ]
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_duration_formatting(script_runner):
     ret = script_runner.run(
         "cat-numbers",
@@ -214,9 +227,10 @@ def test_duration_formatting(script_runner):
     csv_reader = csv.reader(rows)
     for row in csv_reader:
         if row[13] != "Check" and row[13] is not None:
-            assert row[6] == row[13]
+            check.equal(row[6], row[13])
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_date_formatting(script_runner):
     ret = script_runner.run(
         "cat-numbers",
@@ -230,4 +244,4 @@ def test_date_formatting(script_runner):
     csv_reader = csv.reader(rows)
     for row in csv_reader:
         if row[7] != "Check" and row[7] is not None:
-            assert row[6] == row[7]
+            check.equal(row[6], row[7])
