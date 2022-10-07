@@ -2,9 +2,9 @@ import math
 import re
 
 from collections import OrderedDict
+from datetime import timedelta, datetime
 from enum import Enum
 from fractions import Fraction
-from datetime import timedelta, datetime
 from struct import unpack
 
 from numbers_parser.exceptions import UnsupportedError
@@ -15,14 +15,14 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
 
 class CellType(Enum):
-    EMPTY_CELL_TYPE = 1
-    NUMBER_CELL_TYPE = 2
-    TEXT_CELL_TYPE = 3
-    DATE_CELL_TYPE = 4
-    BOOL_CELL_TYPE = 5
-    DURATION_CELL_TYPE = 6
-    ERROR_CELL_TYPE = 7
-    BULLET_CELL_TYPE = 8
+    EMPTY = 1
+    NUMBER = 2
+    TEXT = 3
+    DATE = 4
+    BOOL = 5
+    DURATION = 6
+    ERROR = 7
+    BULLET = 8
 
 
 SECONDS_IN_HOUR = 60 * 60
@@ -97,7 +97,7 @@ DATETIME_FIELD_MAP = OrderedDict(
     ]
 )
 
-CELL_STORAGE_MAP = OrderedDict(
+CELL_STORAGE_MAP_V5 = OrderedDict(
     [
         (0x1, {"attr": "d128", "size": 16}),
         (0x2, {"attr": "double", "size": 8}),
@@ -123,22 +123,53 @@ CELL_STORAGE_MAP = OrderedDict(
     ]
 )
 
+# CELL_STORAGE_MAP_V4 = OrderedDict(
+#     [
+#         (0x2, {"attr": "cell_style_id"}),
+#         (0x80, {"attr": "text_style_id"}),  # SheetJS skips
+#         (0x400, {"attr": "conditional_style_id"}),  # SheetJS skips
+#         (0x800, {"attr": "conditional_style_rule_id"}),  # SheetJS skips
+#         (0x4, {"attr": "current_format_id"}),  # SheetJS skips
+#         (0x8, {"attr": "formula_id"}),  # SheetJS skips
+#         (0x100, {"attr": "formula_error_id"}),  # SheetJS skips
+#         (0x200, {"attr": "rich_id"}),
+#         (0x1000, {"attr": "comment_id"}),  # SheetJS skips
+#         (0x2000, {"attr": "import_warning_id"}),  # SheetJS skips
+#         (0x10, {"attr": "string_id"}),
+#         (0x20, {"attr": "double", "size": 8}),
+#         (0x40, {"attr": "seconds", "size": 8}),
+#         (0x10000, {"attr": "num_format_id"}),  # SheetJS skips
+#         (0x80000, {"attr": "currency_format_id"}),  # SheetJS skips
+#         (0x20000, {"attr": "date_format_id"}),  # SheetJS skips
+#         (0x40000, {"attr": "duration_format_id"}),  # SheetJS skips
+#         (0x100000, {"attr": "control_format_id"}),  # SheetJS skips
+#         (0x200000, {"attr": "custom_format_id"}),  # SheetJS skips
+#         (0x400000, {"attr": "base_format_id"}),  # SheetJS skips
+#         (0x800000, {"attr": "multiple_choice_id"}),  # SheetJS skips
+#     ]
+# )
+
 
 class CellStorage:
-    def __init__(self, model: object, table_id: int, buffer, row_num, col_num):
-        version = buffer[0]
-        if version != 5:  # pragma: no cover
-            raise UnsupportedError(f"Cell storage version {version} is unsupported")
-
+    def __init__(  # noqa: C901
+        self, model: object, table_id: int, buffer, row_num, col_num
+    ):
         self._buffer = buffer
         self._model = model
         self._table_id = table_id
         self.row_num = row_num
         self.col_num = col_num
 
+        if buffer is None:
+            return
+
+        version = buffer[0]
+        if version != 5:  # pragma: no cover
+            raise UnsupportedError(f"Cell storage version {version} is unsupported")
+
         offset = 12
         flags = unpack("<i", buffer[8:12])[0]
-        for mask, field in CELL_STORAGE_MAP.items():
+        for mask, field in CELL_STORAGE_MAP_V5.items():
             if flags & mask:
                 size = field.get("size", 4)
                 if size == 16:
@@ -154,50 +185,57 @@ class CellStorage:
 
         cell_type = buffer[1]
         if cell_type == TSTArchives.genericCellType:
-            self.type = CellType.EMPTY_CELL_TYPE
+            self.type = CellType.EMPTY
             self.value = None
         elif cell_type == TSTArchives.numberCellType:
             self.value = self.d128
-            self.type = CellType.NUMBER_CELL_TYPE
+            self.type = CellType.NUMBER
         elif cell_type == TSTArchives.textCellType:
             self.value = self._model.table_string(table_id, self.string_id)
-            self.type = CellType.TEXT_CELL_TYPE
+            self.type = CellType.TEXT
         elif cell_type == TSTArchives.dateCellType:
             self.value = EPOCH + timedelta(seconds=self.seconds)
             self.datetime = self.value
-            self.type = CellType.DATE_CELL_TYPE
+            self.type = CellType.DATE
         elif cell_type == TSTArchives.boolCellType:
             self.value = self.double > 0.0
-            self.type = CellType.BOOL_CELL_TYPE
+            self.type = CellType.BOOL
         elif cell_type == TSTArchives.durationCellType:
             self.value = self.double
-            self.type = CellType.DURATION_CELL_TYPE
+            self.type = CellType.DURATION
         elif cell_type == TSTArchives.formulaErrorCellType:
             self.value = None
-            self.type = CellType.ERROR_CELL_TYPE
+            self.type = CellType.ERROR
         elif cell_type == TSTArchives.automaticCellType:
             self.bullets = self._model.table_bullets(self._table_id, self.rich_id)
             self.value = None
-            self.type = CellType.BULLET_CELL_TYPE
+            self.type = CellType.BULLET
         elif cell_type == 10:
             self.value = self.d128
-            self.type = CellType.NUMBER_CELL_TYPE
+            self.type = CellType.NUMBER
         else:  # pragma: no cover
             raise UnsupportedError(f"Cell type ID {cell_type} is not recognised")
 
     @property
     def formatted(self):
+        # if (
+        #     self.text_format_id is not None
+        #     or self.num_format_id is not None
+        #     or self.currency_format_id is not None
+        # ):
+        #     return self.custom_format()
+        # elif self.duration_format_id is not None and self.double is not None:
         if self.duration_format_id is not None and self.double is not None:
             return self.duration_format()
-        elif self.date_format_id is not None and self.datetime is not None:
+        elif self.date_format_id is not None and self.seconds is not None:
             return self.date_format()
-        elif self.num_format_id is not None:
-            return self.number_format()
         else:
             return None
 
-    def number_format(self) -> str:
-        if self.currency_format_id is not None:
+    def custom_format(self) -> str:
+        if self.text_format_id is not None:
+            format = self._model.table_format(self._table_id, self.text_format_id)
+        elif self.currency_format_id is not None:
             format = self._model.table_format(self._table_id, self.currency_format_id)
         else:
             format = self._model.table_format(self._table_id, self.num_format_id)
@@ -212,6 +250,14 @@ class CellStorage:
                     formatted_value = float_to_n_digit_fraction(self.d128, num_digits)
                 else:
                     formatted_value = float_to_fraction(self.d128, accuracy)
+            elif custom_format.format_type == CustomFormatType.TEXT:
+                if self.string_id is not None:
+                    formatted_value = decode_text_format(
+                        custom_format,
+                        self._model.table_string(self._table_id, self.string_id),
+                    )
+                else:
+                    return ""
             elif (
                 custom_format.format_type == CustomFormatType.NUMBER
                 or custom_format.format_type == CustomFormatType.CURRENCY
@@ -317,6 +363,23 @@ def unpack_decimal128(buffer: bytearray) -> float:
     return float(value)
 
 
+def pack_decimal128(value: float) -> bytearray:
+    buffer = bytearray(16)
+    exp = math.floor(math.log10(math.e) * math.log(abs(value))) if value != 0.0 else 0
+    exp = int(exp) + 0x1820 - 16
+    mantissa = int(value / math.pow(10, exp - 0x1820))
+    buffer[15] |= exp >> 7
+    buffer[14] |= (exp & 0x7F) << 1
+    i = 0
+    while mantissa >= 1:
+        buffer[i] = mantissa & 0xFF
+        i += 1
+        mantissa = int(mantissa / 256)
+    if value < 0:
+        buffer[15] |= 0x80
+    return buffer
+
+
 def week_of_month(value: datetime) -> str:
     """Return the week of the month for a datetime value"""
     month_week = value.isocalendar().week - value.replace(day=1).isocalendar().week
@@ -388,6 +451,12 @@ def decode_date_format(format, value):
     return result
 
 
+def decode_text_format(format, value: str):  # noqa: C901
+    """Parse a custom date format string and return a formatted number value"""
+    custom_format_string = format.custom_format_string
+    return custom_format_string.replace("\ue421", value)
+
+
 def decode_number_format(format, value):  # noqa: C901
     """Parse a custom date format string and return a formatted number value"""
     custom_format_string = format.custom_format_string
@@ -426,14 +495,16 @@ def decode_number_format(format, value):  # noqa: C901
                 else:
                     formatted_value = f"{integer:0{num_integers}}"
             else:
-                # Pad integers with spaces
                 if integer == 0:
-                    formatted_value = " " * num_integers
+                    formatted_value = ""
+                elif format.show_thousands_separator:
+                    formatted_value = f"{integer:,}"
                 else:
-                    if format.show_thousands_separator:
-                        formatted_value = f"{integer:,}".rjust(num_integers)
-                    else:
-                        formatted_value = str(integer).rjust(num_integers)
+                    formatted_value = str(integer)
+                if format.min_integer_width > 0:
+                    # Pad integers with spaces
+                    formatted_value = formatted_value.rjust(num_integers)
+
         else:
             formatted_value = str(int(integer))
 
@@ -444,7 +515,10 @@ def decode_number_format(format, value):  # noqa: C901
             elif num_decimals > 0:
                 # Pad decimal with spaces
                 decimal_str = str(round(decimal, num_decimals))[2:]
-                formatted_value += "." + decimal_str.ljust(num_decimals)
+                if format.total_num_decimal_digits > 0:
+                    formatted_value += "." + decimal_str.ljust(num_decimals)
+                else:
+                    formatted_value += "." + decimal_str
 
         formatted_value = custom_format_string.replace(match.group(1), formatted_value)
     else:
