@@ -28,21 +28,23 @@ class Cell:
             cell._table_id = table_id
             return cell
 
-        if cell_storage.type == CellType.EMPTY_CELL_TYPE:
+        if cell_storage.type == CellType.EMPTY:
             cell = EmptyCell(row_num, col_num, None)
-        elif cell_storage.type == CellType.NUMBER_CELL_TYPE:
+        elif cell_storage.type == CellType.NUMBER:
             cell = NumberCell(
                 row_num, col_num, cell_storage.value, cell_storage.formatted
             )
-        elif cell_storage.type == CellType.TEXT_CELL_TYPE:
-            cell = TextCell(row_num, col_num, cell_storage.value)
-        elif cell_storage.type == CellType.DATE_CELL_TYPE:
+        elif cell_storage.type == CellType.TEXT:
+            cell = TextCell(
+                row_num, col_num, cell_storage.value, cell_storage.formatted
+            )
+        elif cell_storage.type == CellType.DATE:
             cell = DateCell(
                 row_num, col_num, cell_storage.value, cell_storage.formatted
             )
-        elif cell_storage.type == CellType.BOOL_CELL_TYPE:
+        elif cell_storage.type == CellType.BOOL:
             cell = BoolCell(row_num, col_num, cell_storage.value)
-        elif cell_storage.type == CellType.DURATION_CELL_TYPE:
+        elif cell_storage.type == CellType.DURATION:
             if cell_storage.value is None:
                 cell = DurationCell(row_num, col_num, timedelta(seconds=0))
             else:
@@ -52,9 +54,9 @@ class Cell:
                     timedelta(seconds=cell_storage.value),
                     cell_storage.formatted,
                 )
-        elif cell_storage.type == CellType.ERROR_CELL_TYPE:
+        elif cell_storage.type == CellType.ERROR:
             cell = ErrorCell(row_num, col_num, None)
-        elif cell_storage.type == CellType.BULLET_CELL_TYPE:
+        elif cell_storage.type == CellType.BULLET:
             cell = BulletedTextCell(row_num, col_num, cell_storage.bullets)
         else:
             raise UnsupportedError(  # pragma: no cover
@@ -63,7 +65,8 @@ class Cell:
 
         cell._table_id = table_id
         cell._model = model
-        cell.formula_key = cell_storage.formula_id
+        cell._storage = cell_storage
+        cell._formula_key = cell_storage.formula_id
 
         if is_merged and merge_cells[row_col]["merge_type"] == "source":
             cell.is_merged = True
@@ -87,15 +90,16 @@ class Cell:
         self.is_merged = False
         self.is_bulleted = False
         self.formatted_value = None
-        self.formula_key = None
+        self._formula_key = None
+        self._storage = None
 
     @property
     @lru_cache(maxsize=None)
     def formula(self):
-        formula_key = self.formula_key
-        if self.formula_key is not None:
+        formula_key = self._formula_key
+        if self._formula_key is not None:
             table_formulas = self._model.table_formulas(self._table_id)
-            formula = table_formulas.formula(self.formula_key, self.row, self.col)
+            formula = table_formulas.formula(self._formula_key, self.row, self.col)
 
             debug(
                 "%s@[%d,%d]: key=%d:%s: type=%d, value=%s",
@@ -128,9 +132,10 @@ class NumberCell(Cell):
 
 
 class TextCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value, formatted_value=None):
         self._type = TSTArchives.textCellType
         super().__init__(row_num, col_num, value)
+        self.formatted_value = formatted_value
 
     @property
     def value(self) -> str:
