@@ -14,6 +14,7 @@ from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
     DEFAULT_COLUMN_WIDTH,
     DEFAULT_DOCUMENT,
+    DEFAULT_PRE_BNC_BYTES,
     DEFAULT_ROW_COUNT,
     DEFAULT_ROW_HEIGHT,
     DEFAULT_TABLE_OFFSET,
@@ -591,24 +592,17 @@ class _NumbersModel:
         row_info.tile_row_index = row_num - tile_row_offset
         row_info.cell_count = 0
         cell_storage = b""
-        cell_storage_pre_bnc = b""
 
         if len(data[0]) >= MAX_TILE_SIZE:
             wide_offsets = True
             offsets = [-1] * len(data[0])
-            offsets_pre_bnc = [-1] * len(data[0])
         else:
             wide_offsets = False
             offsets = [-1] * MAX_TILE_SIZE
-            offsets_pre_bnc = [-1] * MAX_TILE_SIZE
         current_offset = 0
-        current_offset_pre_bnc = 0
 
         for col_num in range(len(data[row_num])):
             buffer = self.pack_cell_storage_v5(
-                table_id, data, row_num, col_num, wide_offsets
-            )
-            buffer_pre_bnc = self.pack_cell_storage_v3(
                 table_id, data, row_num, col_num, wide_offsets
             )
             if buffer is not None:
@@ -619,21 +613,12 @@ class _NumbersModel:
                     offsets[col_num] = current_offset
                 current_offset += len(buffer)
 
-                cell_storage_pre_bnc += buffer_pre_bnc
-                if wide_offsets:
-                    offsets_pre_bnc[col_num] = current_offset_pre_bnc >> 2
-                else:
-                    offsets_pre_bnc[col_num] = current_offset_pre_bnc
-                current_offset_pre_bnc += len(buffer_pre_bnc)
-
                 row_info.cell_count += 1
 
         row_info.cell_offsets = pack(f"<{len(offsets)}h", *offsets)
-        row_info.cell_offsets_pre_bnc = pack(
-            f"<{len(offsets_pre_bnc)}h", *offsets_pre_bnc
-        )
+        row_info.cell_offsets_pre_bnc = DEFAULT_PRE_BNC_BYTES
         row_info.cell_storage_buffer = cell_storage
-        row_info.cell_storage_buffer_pre_bnc = cell_storage_pre_bnc
+        row_info.cell_storage_buffer_pre_bnc = DEFAULT_PRE_BNC_BYTES
         row_info.has_wide_offsets = wide_offsets
         return row_info
 
@@ -1042,7 +1027,14 @@ class _NumbersModel:
         return sheet_id
 
     def pack_cell_storage_v5(
-        self, table_id: int, data: List, row_num: int, col_num: int, wide_offsets: bool
+        self,
+        table_id: int,
+        data: List,
+        row_num: int,
+        col_num: int,
+        wide_offsets: bool,
+        formula_id=None,
+        num_format_id=None,
     ) -> bytearray:
         """Create a storage buffer for a cell using v5 (modern) layout"""
         cell = data[row_num][col_num]
@@ -1086,69 +1078,23 @@ class _NumbersModel:
             )
             return None
 
-        storage = bytearray(32)
+        storage = bytearray(12)
         storage[0] = 5
         storage[1] = cell_type
-        storage[8:12] = pack("<i", flags)
-        storage[12 : 12 + len(value)] = value
+        storage += value
 
-        if wide_offsets and len(storage) % 4:
-            padding_len = 4 - (len(storage % 4))
-            length += padding_len
-            storage += bytearray(padding_len)
-
-        return storage[0:length]
-
-    def pack_cell_storage_v3(
-        self, table_id: int, data: List, row_num: int, col_num: int, wide_offsets: bool
-    ) -> bytearray:
-        """Create a storage buffer for a cell using v3 layout"""
-        cell = data[row_num][col_num]
-        length = 12
-        if isinstance(cell, NumberCell):
-            flags = 0x20
-            length += 8
-            cell_type = TSTArchives.numberCellType
-            value = pack("<d", float(cell.value))
-        elif isinstance(cell, TextCell):
-            flags = 0x10
+        if getattr(cell._storage, "formula_id", None) is not None:
+            flags |= 0x200
             length += 4
-            cell_type = TSTArchives.textCellType
-            value = pack("<i", self.table_string_key(table_id, cell.value))
-        elif isinstance(cell, DateCell):
-            flags = 0x40
-            length += 8
-            cell_type = TSTArchives.dateCellType
-            date_delta = cell.value - EPOCH
-            value = pack("<d", float(date_delta.total_seconds()))
-        elif isinstance(cell, BoolCell):
-            flags = 0x20
-            length += 8
-            cell_type = TSTArchives.boolCellType
-            value = pack("<d", float(cell.value))
-        elif isinstance(cell, DurationCell):
-            flags = 0x20
-            length += 8
-            cell_type = TSTArchives.durationCellType
-            value = value = pack("<d", float(cell.value.total_seconds()))
-        elif isinstance(cell, EmptyCell):
-            return None
-        elif isinstance(cell, MergedCell):
-            return None
-        else:  # pragma: no cover
-            data_type = type(cell).__name__
-            table_name = self.table_name(table_id)
-            warn(
-                f"@{table_name}:[{row_num},{col_num}]: unsupported data type {data_type} for save",
-                UnsupportedWarning,
-            )
-            return None
+            storage += pack("<i", cell._storage.formula_id)
+        if getattr(cell._storage, "num_format_id", None) is not None:
+            flags |= 0x2000
+            length += 4
+            storage += pack("<i", cell._storage.num_format_id)
 
-        storage = bytearray(32)
-        storage[0] = 3
-        storage[2] = cell_type
-        storage[4:8] = pack("<i", flags)
-        storage[12 : 12 + len(value)] = value
+        storage[8:12] = pack("<i", flags)
+        if len(storage) < 32:
+            storage += bytearray(32 - length)
 
         if wide_offsets and len(storage) % 4:
             padding_len = 4 - (len(storage % 4))
@@ -1156,41 +1102,82 @@ class _NumbersModel:
             storage += bytearray(padding_len)
 
         return storage[0:length]
+
+    # def pack_cell_storage_v4(
+    #     self, table_id: int, data: List, row_num: int, col_num: int, wide_offsets: bool
+    # ) -> bytearray:
+    #     """Create a storage buffer for a cell using v3 layout"""
+    #     cell = data[row_num][col_num]
+    #     length = 12
+    #     if isinstance(cell, NumberCell):
+    #         flags = 0x20
+    #         length += 8
+    #         cell_type = TSTArchives.numberCellType
+    #         value = pack("<d", float(cell.value))
+    #     elif isinstance(cell, TextCell):
+    #         flags = 0x10
+    #         length += 4
+    #         cell_type = TSTArchives.textCellType
+    #         value = pack("<i", self.table_string_key(table_id, cell.value))
+    #     elif isinstance(cell, DateCell):
+    #         flags = 0x40
+    #         length += 8
+    #         cell_type = TSTArchives.dateCellType
+    #         date_delta = cell.value - EPOCH
+    #         value = pack("<d", float(date_delta.total_seconds()))
+    #     elif isinstance(cell, BoolCell):
+    #         flags = 0x20
+    #         length += 8
+    #         cell_type = TSTArchives.boolCellType
+    #         value = pack("<d", float(cell.value))
+    #     elif isinstance(cell, DurationCell):
+    #         flags = 0x20
+    #         length += 8
+    #         cell_type = TSTArchives.durationCellType
+    #         value = value = pack("<d", float(cell.value.total_seconds()))
+    #     elif isinstance(cell, EmptyCell):
+    #         return None
+    #     elif isinstance(cell, MergedCell):
+    #         return None
+    #     else:  # pragma: no cover
+    #         data_type = type(cell).__name__
+    #         table_name = self.table_name(table_id)
+    #         warn(
+    #             f"@{table_name}:[{row_num},{col_num}]: unsupported data type {data_type} for save",
+    #             UnsupportedWarning,
+    #         )
+    #         return None
+
+    #     storage = bytearray(12)
+    #     storage[0] = 4
+    #     storage[2] = cell_type
+    #     storage += value
+
+    #     if getattr(cell._storage, "formula_id", None) is not None:
+    #         flags |= 0x8
+    #         length += 4
+    #         storage += pack("<i", cell._storage.formula_id)
+    #     if getattr(cell._storage, "num_format_id", None) is not None:
+    #         flags |= 0x10000
+    #         length += 4
+    #         storage += pack("<i", cell._storage.num_format_id)
+
+    #     storage[4:8] = pack("<i", flags)
+    #     if len(storage) < 32:
+    #         storage += bytearray(32 - length)
+    #         length = 32
+
+    #     if wide_offsets and len(storage) % 4:
+    #         padding_len = 4 - (len(storage % 4))
+    #         length += padding_len
+    #         storage += bytearray(padding_len)
+
+    #     return storage[0:length]
 
     @lru_cache(maxsize=None)
     def table_formulas(self, table_id: int):
         return TableFormulas(self, table_id)
 
-    # VALUES
-    # 1 - decimal128 value (16 bytes)
-    # 2 - double value (8 bytes)
-    # 4 - date time value (8 bytes)
-    # 8 - string ID
-    # 10 - rich text ID
-
-    # STYLES
-    # 20 - cell style ID
-    # 40 - text style ID
-    # 80 - conditional style ID
-    # 100 - conditional style applied rule ID
-
-    # FORMULAE
-    # 200 - formula ID
-    # 400 - "control cell spec" ID
-    # 800 - formula syntax error ID
-
-    # FORMATS
-    # 1000 - "suggest cell format kind" (automatic cell type?)
-    # 2000 - number format ID
-    # 4000 - currency format ID
-    # 8000 - date format ID
-    # 10000 - duration format ID
-    # 20000 - text format ID
-    # 40000 - boolean ID
-
-    # MISC
-    # 80000 - comment storage ID
-    # 100000 - import warning set ID
     @lru_cache(maxsize=None)
     def table_cell_decode(  # noqa: C901
         self, table_id: int, row_num: int, col_num: int
