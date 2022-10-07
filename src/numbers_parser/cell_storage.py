@@ -218,17 +218,16 @@ class CellStorage:
 
     @property
     def formatted(self):
-        # if (
-        #     self.text_format_id is not None
-        #     or self.num_format_id is not None
-        #     or self.currency_format_id is not None
-        # ):
-        #     return self.custom_format()
-        # elif self.duration_format_id is not None and self.double is not None:
         if self.duration_format_id is not None and self.double is not None:
             return self.duration_format()
         elif self.date_format_id is not None and self.seconds is not None:
             return self.date_format()
+        elif (
+            self.text_format_id is not None
+            or self.num_format_id is not None
+            or self.currency_format_id is not None
+        ):
+            return self.custom_format()
         else:
             return None
 
@@ -268,7 +267,7 @@ class CellStorage:
                     f"Unexpected custom format type {custom_format.format_type}"
                 )
         else:
-            formatted_value = str(self.d128)
+            formatted_value = self.value
         return formatted_value
 
     def date_format(self) -> str:
