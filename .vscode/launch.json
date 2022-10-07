@@ -2,7 +2,28 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Pytest current file",
+            "name": "Python: catnumbers",
+            "type": "python",
+            "request": "launch",
+            "program": "src/numbers_parser/_cat_numbers.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "-b",
+                "--formatting",
+                "tests/data/date_formats.numbers"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Pytest: Current File",
             "type": "python",
             "request": "launch",
             "module": "pytest",
