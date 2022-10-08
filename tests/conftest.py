@@ -9,6 +9,12 @@ def pytest_addoption(parser):
         help="run experimental tests",
     )
     parser.addoption("--save-file", action="store", default=None)
+    parser.addoption(
+        "--max-check-fails",
+        default=False,
+        type="int",
+        help="maximum number of pytest.check failures",
+    )
 
 
 def pytest_configure(config):
