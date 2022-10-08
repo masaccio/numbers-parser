@@ -12,7 +12,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--max-check-fails",
         default=False,
-        type="int",
+        type=int,
         help="maximum number of pytest.check failures",
     )
 
