@@ -6,8 +6,9 @@ from datetime import timedelta, datetime
 from enum import Enum
 from fractions import Fraction
 from struct import unpack
+from warnings import warn
 
-from numbers_parser.exceptions import UnsupportedError
+from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.constants import EPOCH
 from numbers_parser.utils import uuid
 
@@ -173,15 +174,21 @@ class CellStorage:
             if flags & mask:
                 size = field.get("size", 4)
                 if size == 16:
-                    value = unpack_decimal128(self._buffer[offset : offset + 16])
+                    value = unpack_decimal128(buffer[offset : offset + 16])
                 elif size == 8:
-                    value = unpack("<d", self._buffer[offset : offset + 8])[0]
+                    value = unpack("<d", buffer[offset : offset + 8])[0]
                 else:
-                    value = unpack("<i", self._buffer[offset : offset + 4])[0]
+                    value = unpack("<i", buffer[offset : offset + 4])[0]
                 setattr(self, field["attr"], value)
                 offset += size
             else:
                 setattr(self, field["attr"], None)
+
+        # other_stuff = unpack("<hhh", buffer[2:8])
+        # fields = [x["attr"] for x in CELL_STORAGE_MAP_V5.values()]
+        # active_fields = [x for x in fields if getattr(self, x) is not None]
+        # field_str = ", ".join([f"{x}=" + str(getattr(self, x)) for x in active_fields])
+        # print(f"@[{row_num}, {col_num}]: {field_str},  other={other_stuff}")
 
         cell_type = buffer[1]
         if cell_type == TSTArchives.genericCellType:
@@ -261,7 +268,9 @@ class CellStorage:
                 custom_format.format_type == CustomFormatType.NUMBER
                 or custom_format.format_type == CustomFormatType.CURRENCY
             ):
-                formatted_value = decode_number_format(custom_format, self.d128)
+                formatted_value = decode_number_format(
+                    custom_format, self.d128, format_map[format_uuid].name
+                )
             else:
                 raise UnsupportedError(
                     f"Unexpected custom format type {custom_format.format_type}"
@@ -456,77 +465,8 @@ def decode_text_format(format, value: str):  # noqa: C901
     return custom_format_string.replace("\ue421", value)
 
 
-def decode_number_format(format, value):  # noqa: C901
-    """Parse a custom date format string and return a formatted number value"""
-    custom_format_string = format.custom_format_string
-    value *= format.scale_factor
-    if "%" in custom_format_string and format.scale_factor == 1.0:
-        # Per cent scale has 100x but % does not
-        value *= 100.0
-
-    if format.currency_code != "":
-        # Replace currency code with symbol and no-break space
-        custom_format_string = custom_format_string.replace(
-            "\u00a4", format.currency_code + "\u00a0"
-        )
-
-    if (match := re.search(r"([#0.,]+(E[+]\d+)?)", custom_format_string)) is not None:
-        if "." in match.group(1):
-            (int_format_string, dec_format_string) = match.group(1).split(".")
-        else:
-            (int_format_string, dec_format_string) = (match.group(1), "")
-        if not format.show_thousands_separator:
-            int_format_string = int_format_string.replace(",", "")
-
-        num_decimals = len(dec_format_string)
-        num_integers = len(int_format_string)
-        integer = int(value) if num_decimals > 0 else round(value)
-        decimal = math.modf(value)[0]
-
-        if match.group(2) is not None:
-            formatted_value = f"{value:.{num_decimals - 4}E}"
-        elif format.min_integer_width > 0 or format.contains_integer_token:
-            num_integers = max([format.min_integer_width, num_integers])
-            if format.num_nonspace_integer_digits > 0:
-                # Pad integers with zeroes
-                if format.show_thousands_separator:
-                    formatted_value = f"{integer:0{num_integers},}"
-                else:
-                    formatted_value = f"{integer:0{num_integers}}"
-            else:
-                if integer == 0:
-                    formatted_value = ""
-                elif format.show_thousands_separator:
-                    formatted_value = f"{integer:,}"
-                else:
-                    formatted_value = str(integer)
-                if format.min_integer_width > 0:
-                    # Pad integers with spaces
-                    formatted_value = formatted_value.rjust(num_integers)
-
-        else:
-            formatted_value = str(int(integer))
-
-        if match.group(2) is None:
-            if format.num_nonspace_decimal_digits > 0:
-                # Pad decimal with zeroes
-                formatted_value += "." + f"{decimal:,.{num_decimals}f}"[2:]
-            elif num_decimals > 0:
-                # Pad decimal with spaces
-                decimal_str = str(round(decimal, num_decimals))[2:]
-                if format.total_num_decimal_digits > 0:
-                    formatted_value += "." + decimal_str.ljust(num_decimals)
-                else:
-                    formatted_value += "." + decimal_str
-
-        formatted_value = custom_format_string.replace(match.group(1), formatted_value)
-    else:
-        formatted_value = custom_format_string
-
-    if "'" not in formatted_value:
-        return formatted_value
-
-    chars = [*formatted_value]
+def expand_quotes(value: str) -> str:
+    chars = [*value]
     index = 0
     in_string = False
     formatted_value = ""
@@ -548,8 +488,113 @@ def decode_number_format(format, value):  # noqa: C901
         else:
             formatted_value += current_char
             index += 1
-
     return formatted_value
+
+
+def decode_number_format(format, value, name):  # noqa: C901
+    """Parse a custom date format string and return a formatted number value"""
+    custom_format_string = format.custom_format_string
+    value *= format.scale_factor
+    if "%" in custom_format_string and format.scale_factor == 1.0:
+        # Per cent scale has 100x but % does not
+        value *= 100.0
+
+    if format.currency_code != "":
+        # Replace currency code with symbol and no-break space
+        custom_format_string = custom_format_string.replace(
+            "\u00a4", format.currency_code + "\u00a0"
+        )
+
+    if (match := re.search(r"([#0.,]+(E[+]\d+)?)", custom_format_string)) is None:
+        warn(
+            f"Can't parse format string '{custom_format_string}'; skipping",
+            UnsupportedWarning,
+        )
+        return custom_format_string
+    format_spec = match.group(1)
+    scientific_spec = match.group(2)
+
+    if format_spec[0] == ".":
+        (int_part, dec_part) = ("", format_spec[1:])
+    elif "." in custom_format_string:
+        (int_part, dec_part) = format_spec.split(".")
+    else:
+        (int_part, dec_part) = (format_spec, "")
+
+    if scientific_spec is not None:
+        # Scientific notation
+        formatted_value = f"{value:.{len(dec_part) - 4}E}"
+        formatted_value = custom_format_string.replace(format_spec, formatted_value)
+        return expand_quotes(formatted_value)
+
+    num_decimals = len(dec_part)
+    if num_decimals > 0:
+        if dec_part[0] == "#":
+            dec_pad_zero = False
+            dec_pad_space = False
+        elif format.num_nonspace_decimal_digits > 0:
+            dec_pad_zero = True
+            dec_pad_space = False
+        else:
+            dec_pad_zero = False
+            dec_pad_space = True
+    dec_width = num_decimals
+
+    integer = int(value) if num_decimals > 0 else round(value)
+    decimal = math.modf(value)[0]
+
+    num_integers = len(int_part.replace(",", ""))
+    if num_integers > 0:
+        if int_part[0] == "#":
+            int_pad_zero = False
+            int_pad_space = True
+            int_width = len(int_part)
+        elif format.num_nonspace_integer_digits > 0:
+            int_pad_zero = True
+            int_pad_space = False
+            if format.show_thousands_separator:
+                if integer != 0:
+                    num_commas = int(math.floor(math.log10(integer)) / 3)
+                else:
+                    num_commas = 0
+                num_commas = max([num_commas, int((num_integers - 1) / 3)])
+                int_width = num_integers + num_commas
+            else:
+                int_width = num_integers
+        else:
+            int_pad_zero = False
+            int_pad_space = True
+            int_width = len(int_part)
+    else:
+        int_pad_zero = False
+        int_pad_space = False
+        int_width = num_integers
+
+    if int_pad_zero:
+        if format.show_thousands_separator:
+            formatted_value = f"{integer:0{int_width},}"
+        else:
+            formatted_value = f"{integer:0{int_width}}"
+    elif int_pad_space:
+        if integer == 0:
+            formatted_value = "".rjust(int_width)
+        elif format.show_thousands_separator:
+            formatted_value = f"{integer:,}".rjust(int_width)
+        else:
+            formatted_value = str(integer).rjust(int_width)
+    else:
+        formatted_value = str(integer)
+
+    if num_decimals and dec_pad_zero:
+        formatted_value += "." + f"{decimal:,.{dec_width}f}"[2:]
+    elif num_decimals and dec_pad_space:
+        decimal_str = str(round(decimal, dec_width))[2:]
+        formatted_value += "." + decimal_str.ljust(dec_width)
+    elif num_decimals:
+        formatted_value += "." + str(round(decimal, dec_width))[2:]
+
+    formatted_value = custom_format_string.replace(format_spec, formatted_value)
+    return expand_quotes(formatted_value)
 
 
 def float_to_fraction(value: float, denominator: int) -> str:
