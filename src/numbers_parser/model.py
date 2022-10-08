@@ -593,12 +593,8 @@ class _NumbersModel:
         row_info.cell_count = 0
         cell_storage = b""
 
-        if len(data[0]) >= MAX_TILE_SIZE:
-            wide_offsets = True
-            offsets = [-1] * len(data[0])
-        else:
-            wide_offsets = False
-            offsets = [-1] * MAX_TILE_SIZE
+        wide_offsets = True
+        offsets = [-1] * len(data[0])
         current_offset = 0
 
         for col_num in range(len(data[row_num])):
@@ -1087,10 +1083,20 @@ class _NumbersModel:
             flags |= 0x200
             length += 4
             storage += pack("<i", cell._storage.formula_id)
+        if getattr(cell._storage, "suggest_id", None) is not None:
+            flags |= 0x1000
+            length += 4
+            storage += pack("<i", cell._storage.suggest_id)
         if getattr(cell._storage, "num_format_id", None) is not None:
             flags |= 0x2000
             length += 4
             storage += pack("<i", cell._storage.num_format_id)
+            storage[4:6] = pack("<h", 2)
+            storage[6:8] = pack("<h", 1)
+        if getattr(cell._storage, "text_format_id", None) is not None:
+            flags |= 0x20000
+            length += 4
+            storage += pack("<i", cell._storage.text_format_id)
 
         storage[8:12] = pack("<i", flags)
         if len(storage) < 32:
