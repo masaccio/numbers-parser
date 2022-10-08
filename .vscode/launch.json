@@ -11,7 +11,7 @@
             "args": [
                 "-b",
                 "--formatting",
-                "tests/data/date_formats.numbers"
+                ""
             ]
         },
         {
