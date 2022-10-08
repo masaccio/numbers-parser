@@ -32,8 +32,13 @@ def test_date_formatting():
 
 
 @pytest.mark.experimental
-def test_custom_formatting():
+def test_custom_formatting(pytestconfig):
+    if pytestconfig.getoption("max_check_fails") is not None:
+        max_check_fails = pytestconfig.getoption("max_check_fails")
+    else:
+        max_check_fails = -1
     doc = Document("tests/data/test-custom-formats.numbers")
+    fails = 0
     for sheet in doc.sheets:
         table = sheet.tables[0]
         if table.cell(0, 1).value == "Test":
@@ -43,4 +48,29 @@ def test_custom_formatting():
         for i, row in enumerate(table.iter_rows(min_row=1), start=1):
             value = row[test_col].formatted_value
             ref = row[test_col + 1].value
-            check.equal(value, ref)
+            check.equal(f"@{i}:{value}", f"@{i}:{ref}")
+            if value != ref:
+                fails += 1
+            if max_check_fails > 0 and fails >= max_check_fails:
+                assert False
+
+
+@pytest.mark.experimental
+def test_formatting_stress(pytestconfig):
+    if pytestconfig.getoption("max_check_fails") is not None:
+        max_check_fails = pytestconfig.getoption("max_check_fails")
+    else:
+        max_check_fails = -1
+
+    doc = Document("tests/data/custom-format-stress.numbers")
+    fails = 0
+    for sheet in doc.sheets:
+        table = sheet.tables[0]
+        for i, row in enumerate(table.iter_rows(min_row=2), start=2):
+            value = row[7].formatted_value
+            ref = row[8].value
+            check.equal(f"@{i}:{value}", f"@{i}:{ref}")
+            if value != ref:
+                fails += 1
+            if max_check_fails > 0 and fails >= max_check_fails:
+                assert False
