@@ -239,7 +239,7 @@ class CellStorage:
             return None
 
     def custom_format(self) -> str:
-        if self.text_format_id is not None:
+        if self.text_format_id is not None and self.type == CellType.TEXT:
             format = self._model.table_format(self._table_id, self.text_format_id)
         elif self.currency_format_id is not None:
             format = self._model.table_format(self._table_id, self.currency_format_id)
@@ -547,7 +547,7 @@ def decode_number_format(format, value, name):  # noqa: C901
     if num_integers > 0:
         if int_part[0] == "#":
             int_pad_zero = False
-            int_pad_space = True
+            int_pad_space = False
             int_width = len(int_part)
         elif format.num_nonspace_integer_digits > 0:
             int_pad_zero = True
@@ -583,15 +583,21 @@ def decode_number_format(format, value, name):  # noqa: C901
         else:
             formatted_value = str(integer).rjust(int_width)
     else:
-        formatted_value = str(integer)
+        if format.show_thousands_separator:
+            formatted_value = f"{integer:,}"
+        else:
+            formatted_value = str(integer)
 
-    if num_decimals and dec_pad_zero:
-        formatted_value += "." + f"{decimal:,.{dec_width}f}"[2:]
-    elif num_decimals and dec_pad_space:
-        decimal_str = str(round(decimal, dec_width))[2:]
-        formatted_value += "." + decimal_str.ljust(dec_width)
-    elif num_decimals:
-        formatted_value += "." + str(round(decimal, dec_width))[2:]
+    if num_decimals:
+        # Possible Numbers bug: decimal padding with spaces is rendered as
+        # zeroes when there is no integer format
+        if dec_pad_zero or (dec_pad_space and num_integers == 0):
+            formatted_value += "." + f"{decimal:,.{dec_width}f}"[2:]
+        elif dec_pad_space:
+            decimal_str = str(round(decimal, dec_width))[2:]
+            formatted_value += "." + decimal_str.ljust(dec_width)
+        else:
+            formatted_value += "." + str(round(decimal, dec_width))[2:]
 
     formatted_value = custom_format_string.replace(format_spec, formatted_value)
     return expand_quotes(formatted_value)

@@ -31,7 +31,6 @@ def test_date_formatting():
                 check.equal(date, ref)
 
 
-@pytest.mark.experimental
 def test_custom_formatting(pytestconfig):
     if pytestconfig.getoption("max_check_fails") is not None:
         max_check_fails = pytestconfig.getoption("max_check_fails")
