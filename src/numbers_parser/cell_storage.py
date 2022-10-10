@@ -390,7 +390,7 @@ def pack_decimal128(value: float) -> bytearray:
 
 def week_of_month(value: datetime) -> str:
     """Return the week of the month for a datetime value"""
-    month_week = value.isocalendar().week - value.replace(day=1).isocalendar().week
+    month_week = value.isocalendar()[1] - value.replace(day=1).isocalendar()[1]
     return str(month_week)
 
 
