@@ -879,20 +879,25 @@ class _NumbersModel:
         sheet_id: int,
         table_name: str,
         from_table_id: int,
-        x: float = None,
-        y: float = None,
+        x: float,
+        y: float,
+        num_rows: int,
+        num_cols: int,
     ) -> int:
         from_table = self.objects[from_table_id]
 
+        print(f"\nadd_table(from_table_id={from_table_id}, table_name={table_name}")
+
         table_strings_id, table_strings = self.create_string_table()
+        print(f"table_strings_id={table_strings_id}")
 
         from_table_refs = field_references(from_table)
         table_model_id, table_model = self.objects.create_object_from_dict(
             "CalculationEngine",
             {
                 "table_id": str(uuid1()).upper(),
-                "number_of_rows": DEFAULT_ROW_COUNT,
-                "number_of_columns": DEFAULT_COLUMN_COUNT,
+                "number_of_rows": num_rows,
+                "number_of_columns": num_cols,
                 "table_name": table_name,
                 "table_name_enabled": True,
                 "default_row_height": DEFAULT_ROW_HEIGHT,
@@ -906,6 +911,7 @@ class _NumbersModel:
             TSTArchives.TableModelArchive,
         )
 
+        print(f"table_model_id={table_model_id}")
         column_headers_id, column_headers = self.objects.create_object_from_dict(
             "Index/Tables/HeaderStorageBucket-{}",
             {"bucketHashFunction": 1},
@@ -979,6 +985,7 @@ class _NumbersModel:
             {"bucketHashFunction": 1},
             TSTArchives.HeaderStorageBucket,
         )
+        print(f"row_headers_id={row_headers_id}")
 
         self.add_component_metadata(
             row_headers_id, "CalculationEngine", "Tables/HeaderStorageBucket-{}"
@@ -1003,10 +1010,11 @@ class _NumbersModel:
         self.objects[sheet_id].drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id)
         )
+        print(f"table_info_id={table_info_id}")
 
         return table_model_id
 
-    def add_sheet(self, sheet_name: str):
+    def add_sheet(self, sheet_name: str) -> int:
         """Add a new sheet with a copy of a table from another sheet"""
         sheet_id, _ = self.objects.create_object_from_dict(
             "Document", {"name": sheet_name}, TNArchives.SheetArchive

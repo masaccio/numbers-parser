@@ -19,6 +19,7 @@ from numbers_parser.cell import (
     xl_range,
 )
 from numbers_parser.cell_storage import CellStorage
+from numbers_parser.constants import DEFAULT_COLUMN_COUNT, DEFAULT_ROW_COUNT
 
 
 class Document:
@@ -37,7 +38,13 @@ class Document:
                 self._model.recalculate_table_data(table._table_id, table._data)
         write_numbers_file(filename, self._model.file_store)
 
-    def add_sheet(self, sheet_name=None, table_name=None) -> object:
+    def add_sheet(
+        self,
+        sheet_name=None,
+        table_name=None,
+        num_rows=DEFAULT_ROW_COUNT,
+        num_cols=DEFAULT_COLUMN_COUNT,
+    ) -> object:
         """Add a new sheet to the current document. If no sheet name is provided,
         the next available numbered sheet will be generated"""
         if sheet_name is not None:
@@ -58,7 +65,9 @@ class Document:
         new_sheet._tables.append(
             Table(
                 self._model,
-                self._model.add_table(new_sheet_id, table_name, prev_table_id),
+                self._model.add_table(
+                    new_sheet_id, table_name, prev_table_id, 0, 0, num_rows, num_cols
+                ),
             )
         )
         self._sheets.append(new_sheet)
@@ -87,14 +96,21 @@ class Sheet:
         """Set the sheet's name"""
         self._model.sheet_name(self._sheet_id, value)
 
-    def add_table(self, table_name=None, x=None, y=None) -> object:
-        """Add a new table to the current sheet. If no sheet name is provided,
-        the next available numbered sheet will be generated"""
+    def add_table(
+        self,
+        table_name=None,
+        x=None,
+        y=None,
+        num_rows=DEFAULT_ROW_COUNT,
+        num_cols=DEFAULT_COLUMN_COUNT,
+    ) -> object:
+        """Add a new table to the current sheet. If no table name is provided,
+        the next available numbered table will be generated"""
 
         from_table_id = self._tables[-1]._table_id
-        return self._add_table(table_name, from_table_id, x, y)
+        return self._add_table(table_name, from_table_id, x, y, num_rows, num_cols)
 
-    def _add_table(self, table_name, from_table_id, x, y) -> object:
+    def _add_table(self, table_name, from_table_id, x, y, num_rows, num_cols) -> object:
         if table_name is not None:
             if table_name in self._tables:
                 raise IndexError(f"table '{table_name}' already exists")
@@ -105,7 +121,7 @@ class Sheet:
             table_name = f"Table {table_num}"
 
         new_table_id = self._model.add_table(
-            self._sheet_id, table_name, from_table_id, x, y
+            self._sheet_id, table_name, from_table_id, x, y, num_rows, num_cols
         )
         self._tables.append(Table(self._model, new_table_id))
         return self._tables[-1]
