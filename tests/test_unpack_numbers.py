@@ -100,11 +100,11 @@ def test_unpack_hex(script_runner, tmp_path):
     with open(str(output_dir / "Index/CalculationEngine.json")) as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][1]["objects"][0]
-    assert objects["baseOwnerUid"]["lower"] == "0xB749DBDDB35F99D7"
+    assert objects["baseOwnerUid"] == "0x83aa364c_869c498a_b749dbdd_b35f99d7"
     objects = data["chunks"][0]["archives"][0]["objects"][0]
     assert (
-        objects["dependencyTracker"]["formulaOwnerInfo"][0]["formulaOwnerId"]["uuidW0"]
-        == "0xB35F99D7"
+        objects["dependencyTracker"]["formulaOwnerInfo"][0]["formulaOwnerId"]
+        == "0x83aa364c_869c498a_b749dbdd_b35f99d7"
     )
 
 
