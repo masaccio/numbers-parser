@@ -112,9 +112,9 @@ class _NumbersModel:
         # no storage buffers). Each bucket is:
         #
         #  {
-        #      "hidingState": 0,
+        #      "hiding_state": 0,
         #      "index": 0,
-        #      "numberOfCells": 3,
+        #      "number_of_cells": 3,
         #      "size": 0.0
         #  },
         row_bucket_map = {i: None for i in range(self.objects[table_id].number_of_rows)}
@@ -141,9 +141,9 @@ class _NumbersModel:
         # to index storage buffers for each column.
         #
         #  {
-        #      "hidingState": 0,
+        #      "hiding_state": 0,
         #      "index": 0,
-        #      "numberOfCells": 3,
+        #      "number_of_cells": 3,
         #      "size": 0.0
         #  },
         col_bucket_map = {
@@ -270,23 +270,14 @@ class _NumbersModel:
         # Look for a TSCE.FormulaOwnerDependenciesArchive objects with the following at the
         # root level of the protobuf:
         #
-        #     "baseOwnerUid": {
-        #         "lower": "0x0c4ebfb1d9676393",
-        #         "upper": "0xf9ad9f35d33aba96"
-        #     }
-        #      "formulaOwnerUid": {
-        #         "lower": "0x0c4ebfb1d96763b6",
-        #         "upper": "0xf9ad9f35d33aba96"
-        #     },
+        #     "base_owner_uid": "0x0c4ebfb1_d9676393_f9ad9f35_d33aba96",
+        #     "formula_owner_uid": "0x0c4ebfb1_d96763b6_f9ad9f35_d33aba96"
         #
         # The Table UUID is the TSCE.FormulaOwnerDependenciesArchive whose formulaOwnerUid
         # matches the UUID of the hauntedOwner of the Table:
         #
-        #    "hauntedOwner": {
-        #        "ownerUid": {
-        #            "lower": "0x0c4ebfb1d96763b6",
-        #            "upper": "0xf9ad9f35d33aba96"
-        #        }
+        #    "haunted_owner": {
+        #        "owner_uid": "0x0c4ebfb1_d96763b6_f9ad9f35_d33aba96"
         #    }
         haunted_owner = uuid(self.objects[table_id].haunted_owner.owner_uid)
         formula_owner_ids = self.find_refs("FormulaOwnerDependenciesArchive")
@@ -307,18 +298,18 @@ class _NumbersModel:
         # inside the dependencyTracker. Each of these has a cellDependencies
         # dictionary and some contain cellRecords that contain formula references:
         #
-        # "cellDependencies": {
-        #     "cellRecord": [
+        # "cell_dependencies": {
+        #     "cell_record": [
         #         {
         #             "column": 0,
-        #             "containsAFormula": true,
-        #             "edges": { "packedEdgeWithoutOwner": [ 16777216 ] },
+        #             "contains_a_formula": true,
+        #             "edges": { "packed_edge_without_owner": [ 16777216 ] },
         #             "row": 1
         #         },
         #         {
         #             "column": 1,
-        #             "containsAFormula": true,
-        #             "edges": { "packedEdgeWithoutOwner": [16777216 ] },
+        #             "contains_a_formula": true,
+        #             "edges": { "packed_edge_without_owner": [16777216 ] },
         #             "row": 1
         #         }
         #     ]
@@ -366,23 +357,15 @@ class _NumbersModel:
         # The Owner IDs need to be extracted from the Calculation Engine using
         # UUID matching (this seems fragile, but no other mechanism has been found)
         #
-        #  "fromToRange": [
-        #      {
-        #          "fromCoord": {
-        #          "column": 0,
-        #          "row": 0
-        #      },
-        #      "refersToRect": {
-        #          "origin": {
-        #              "column": 0,
-        #              "row": 0
-        #          },
-        #          "size": {
-        #              "numColumns": 2
-        #          }
+        #  "from_to_range": [
+        #      { "from_coord": { "column": 0, "row": 0 },
+        #        "refers_to_rect": {
+        #            "origin": {"column": 0,  "row": 0 },
+        #            "size": { "num_columns": 2 }
+        #        }
         #      }
         #  ],
-        #  "toOwnerId": 1
+        #  "to_owner_id": 1
         #
         owner_id_map = self.owner_id_map()
         table_base_id = self.table_base_id(table_id)
