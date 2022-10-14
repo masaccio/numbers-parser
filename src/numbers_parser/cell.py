@@ -94,6 +94,11 @@ class Cell:
         self._storage = None
 
     @property
+    def is_formula(self):
+        table_formulas = self._model.table_formulas(self._table_id)
+        return table_formulas.is_formula(self.row, self.col)
+
+    @property
     @lru_cache(maxsize=None)
     def formula(self):
         formula_key = self._formula_key
