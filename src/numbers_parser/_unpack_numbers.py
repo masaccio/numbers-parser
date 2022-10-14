@@ -25,18 +25,44 @@ def ensure_directory_exists(prefix, path):
         pass
 
 
+def dict_to_uuid(obj):
+    if "|".join(obj.keys()) == "uuidW0|uuidW1|uuidW2|uuidW3":
+        hex_parts = [
+            f"{int(x):08x}"
+            for x in [obj["uuidW3"], obj["uuidW2"], obj["uuidW1"], obj["uuidW0"]]
+        ]
+        return "0x" + "_".join(hex_parts)
+    elif "|".join(obj.keys()) == "lower|upper":
+        hex_parts = [f"{int(x):016x}" for x in [obj["upper"], obj["lower"]]]
+        hex_parts = [
+            hex_parts[0][0:8],
+            hex_parts[0][8:16],
+            hex_parts[1][0:8],
+            hex_parts[1][8:16],
+        ]
+        return "0x" + "_".join(hex_parts)
+    else:
+        return None
+
+
 def prettify_uuids(obj):
     if isinstance(obj, dict):
         for k, v in obj.items():
-            if isinstance(v, dict) or isinstance(v, list):
+            if isinstance(v, dict):
+                if (uuid := dict_to_uuid(v)) is not None:
+                    obj[k] = uuid
+                else:
+                    prettify_uuids(v)
+            elif isinstance(v, list):
                 prettify_uuids(v)
-            elif k == "lower" or k == "upper":
-                obj[k] = "0x{0:0{1}X}".format(int(v), 16)
-            elif k in ["uuidW0", "uuidW1", "uuidW2", "uuidW3"]:
-                obj[k] = "0x{0:0{1}X}".format(v, 8)
     elif isinstance(obj, list):
-        for v in obj:
-            if isinstance(v, dict) or isinstance(v, list):
+        for i, v in enumerate(obj):
+            if isinstance(v, dict):
+                if (uuid := dict_to_uuid(v)) is not None:
+                    obj[i] = uuid
+                else:
+                    prettify_uuids(v)
+            elif isinstance(v, list):
                 prettify_uuids(v)
 
 
