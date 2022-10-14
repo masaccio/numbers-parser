@@ -26,10 +26,10 @@ def ensure_directory_exists(prefix, path):
 
 
 def dict_to_uuid(obj):
-    if "|".join(obj.keys()) == "uuidW0|uuidW1|uuidW2|uuidW3":
+    if "|".join(obj.keys()) == "uuid_w0|uuid_w1|uuid_w2|uuid_w3":
         hex_parts = [
             f"{int(x):08x}"
-            for x in [obj["uuidW3"], obj["uuidW2"], obj["uuidW1"], obj["uuidW0"]]
+            for x in [obj["uuid_w3"], obj["uuid_w2"], obj["uuid_w1"], obj["uuid_w0"]]
         ]
         return "0x" + "_".join(hex_parts)
     elif "|".join(obj.keys()) == "lower|upper":

@@ -246,14 +246,14 @@ class IWAArchiveSegment(object):
 def message_to_dict(message):
     if hasattr(message, "to_dict"):
         return message.to_dict()
-    output = MessageToDict(message)
+    output = MessageToDict(message, preserving_proto_field_name=True)
     output["_pbtype"] = type(message).DESCRIPTOR.full_name
     return output
 
 
 def header_to_dict(message):
     output = message_to_dict(message)
-    for message_info in output["messageInfos"]:
+    for message_info in output["message_infos"]:
         del message_info["length"]
     return output
 
@@ -265,7 +265,7 @@ def dict_to_message(_dict):
 
 
 def dict_to_header(_dict):
-    for message_info in _dict["messageInfos"]:
+    for message_info in _dict["message_infos"]:
         # set a dummy length value that we'll overwrite later
         message_info["length"] = 0
     return dict_to_message(_dict)
@@ -285,7 +285,7 @@ def create_iwa_segment(id: int, cls: object, object_dict: dict) -> object:
     header = {
         "_pbtype": "TSP.ArchiveInfo",
         "identifier": str(id),
-        "messageInfos": [
+        "message_infos": [
             {
                 "type": type_id,
                 "version": [1, 0, 5],
