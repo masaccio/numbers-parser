@@ -100,10 +100,10 @@ def test_unpack_hex(script_runner, tmp_path):
     with open(str(output_dir / "Index/CalculationEngine.json")) as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][1]["objects"][0]
-    assert objects["baseOwnerUid"] == "0x83aa364c_869c498a_b749dbdd_b35f99d7"
+    assert objects["base_owner_uid"] == "0x83aa364c_869c498a_b749dbdd_b35f99d7"
     objects = data["chunks"][0]["archives"][0]["objects"][0]
     assert (
-        objects["dependencyTracker"]["formulaOwnerInfo"][0]["formulaOwnerId"]
+        objects["dependency_tracker"]["formula_owner_info"][0]["formula_owner_id"]
         == "0x83aa364c_869c498a_b749dbdd_b35f99d7"
     )
 
@@ -123,15 +123,15 @@ def test_pretty_storage(script_runner, tmp_path):
     with open(str(output_dir / "Index/Tables/Tile-875165.json")) as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"][0]
-    assert objects["rowInfos"][0]["cellOffsets"] == "-1,0,24,48,72,96,[...]"
+    assert objects["rowInfos"][0]["cell_offsets"] == "-1,0,24,48,72,96,[...]"
     if sys.version_info.minor >= 8:
         assert (
-            objects["rowInfos"][0]["cellStorageBuffer"][0:26]
+            objects["rowInfos"][0]["cell_storage_buffer"][0:26]
             == "05:03:00:00:00:00:00:00:08"
         )
     else:
         assert (
-            objects["rowInfos"][0]["cellStorageBuffer"][0:26]
+            objects["rowInfos"][0]["cell_storage_buffer"][0:26]
             == "05030000000000000810020002"
         )
 
@@ -152,6 +152,6 @@ def test_compact_json(script_runner, tmp_path):
     with open(str(output_dir / "Index/CalculationEngine.json")) as f:
         data = f.read()
     assert (
-        '"column": 0, "row": 1, "containsAFormula": true, "edges": {"packedEdgeWithoutOwner":'
+        '"column": 0, "row": 1, "contains_a_formula": true, "edges": {"packed_edge_without_owner":'
         in data
     )

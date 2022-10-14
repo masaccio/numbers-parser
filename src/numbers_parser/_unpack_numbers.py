@@ -71,13 +71,13 @@ def prettify_cell_storage(obj):
         for k, v in obj.items():
             if isinstance(v, dict) or isinstance(v, list):
                 prettify_cell_storage(v)
-            elif k == "cellStorageBuffer" or k == "cellStorageBufferPreBnc":
+            elif k == "cell_storage_buffer" or k == "cell_storage_buffer_pre_bnc":
                 if sys.version_info.minor >= 8:
                     obj[k] = str(hexlify(b64decode(obj[k]), sep=":"))
                 else:
                     obj[k] = str(hexlify(b64decode(obj[k])))
                 obj[k] = obj[k].replace("b'", "").replace("'", "")
-            elif k == "cellOffsets" or k == "cellOffsetsPreBnc":
+            elif k == "cell_offsets" or k == "cell_offsets_pre_bnc":
                 offsets = array("h", b64decode(obj[k])).tolist()
                 obj[k] = ",".join([str(x) for x in offsets])
                 obj[k] = regex.sub(r"(?:,-1)+$", ",[...]", obj[k])
