@@ -371,23 +371,6 @@ def unpack_decimal128(buffer: bytearray) -> float:
     return float(value)
 
 
-def pack_decimal128(value: float) -> bytearray:
-    buffer = bytearray(16)
-    exp = math.floor(math.log10(math.e) * math.log(abs(value))) if value != 0.0 else 0
-    exp = int(exp) + 0x1820 - 16
-    mantissa = int(value / math.pow(10, exp - 0x1820))
-    buffer[15] |= exp >> 7
-    buffer[14] |= (exp & 0x7F) << 1
-    i = 0
-    while mantissa >= 1:
-        buffer[i] = mantissa & 0xFF
-        i += 1
-        mantissa = int(mantissa / 256)
-    if value < 0:
-        buffer[15] |= 0x80
-    return buffer
-
-
 def week_of_month(value: datetime) -> str:
     """Return the week of the month for a datetime value"""
     month_week = value.isocalendar()[1] - value.replace(day=1).isocalendar()[1]
