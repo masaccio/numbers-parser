@@ -5,7 +5,6 @@ from array import array
 from functools import lru_cache
 from struct import pack
 from typing import Dict, List, Tuple
-from uuid import uuid1
 from warnings import warn
 
 from numbers_parser.containers import ObjectStore
@@ -42,12 +41,17 @@ from numbers_parser.bullets import (
     BULLET_SUFFIXES,
 )
 from numbers_parser.cell_storage import CellStorage
-from numbers_parser.utils import uuid
+from numbers_parser.numbers_uuid import NumbersUUID
+
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
+from numbers_parser.generated.TSCEArchives_pb2 import (
+    ASTNodeArrayArchive as ASTNodeArray,
+)
 
 
 class _NumbersModel:
@@ -173,7 +177,7 @@ class _NumbersModel:
         ].super.custom_format_list.identifier
         custom_format_list = self.objects[custom_format_list_id]
         custom_format_map = {
-            uuid(u): custom_format_list.custom_formats[i]
+            NumbersUUID(u).hex: custom_format_list.custom_formats[i]
             for i, u in enumerate(custom_format_list.uuids)
         }
         return custom_format_map
@@ -244,14 +248,11 @@ class _NumbersModel:
         # in dependencyTracker.formulaOwnerDependencies from the root level
         # of the protobuf. Each mapping contains a 32-bit style UUID:
         #
-        # "ownerIdMap": {
-        #     "mapEntry": [
+        # "owner_id_map": {
+        #     "map_entry": [
         #     {
-        #         "internalOwnerId": 33,
-        #         "ownerId": {
-        #             "uuidW0": "0x8750e563, "uuidW1": "0x1e4bfcc0,
-        #             "uuidW2": "0xc26dda92, "uuidW3": "0x3cb03f23
-        #         }
+        #         "internal_ownerId": 33,
+        #         "owner_id": 0x3cb03f23_c26dda92_1e4bfcc0_8750e563
         #     },
         #
         #
@@ -261,7 +262,7 @@ class _NumbersModel:
 
         owner_id_map = {}
         for e in calc_engine.dependency_tracker.owner_id_map.map_entry:
-            owner_id_map[e.internal_owner_id] = uuid(e.owner_id)
+            owner_id_map[e.internal_owner_id] = NumbersUUID(e.owner_id).hex
         return owner_id_map
 
     @lru_cache(maxsize=None)
@@ -270,24 +271,24 @@ class _NumbersModel:
         # Look for a TSCE.FormulaOwnerDependenciesArchive objects with the following at the
         # root level of the protobuf:
         #
-        #     "base_owner_uid": "0x0c4ebfb1_d9676393_f9ad9f35_d33aba96",
-        #     "formula_owner_uid": "0x0c4ebfb1_d96763b6_f9ad9f35_d33aba96"
+        #     "base_owner_uid": "0x6a4a5281_7b06f5a1_904b7f9e_c784b368",
+        #     "formula_owner_uid": "0x6a4a5281_7b06f5a1_904b7f9e_c784b38b"
         #
-        # The Table UUID is the TSCE.FormulaOwnerDependenciesArchive whose formulaOwnerUid
-        # matches the UUID of the hauntedOwner of the Table:
+        # The Table UUID is the TSCE.FormulaOwnerDependenciesArchive whose formula_owner_uid
+        # matches the UUID of the haunted_owner of the Table:
         #
         #    "haunted_owner": {
-        #        "owner_uid": "0x0c4ebfb1_d96763b6_f9ad9f35_d33aba96"
+        #        "owner_uid": "0x6a4a5281_7b06f5a1_904b7f9e_c784b38b"
         #    }
-        haunted_owner = uuid(self.objects[table_id].haunted_owner.owner_uid)
+        haunted_owner = NumbersUUID(self.objects[table_id].haunted_owner.owner_uid).hex
         formula_owner_ids = self.find_refs("FormulaOwnerDependenciesArchive")
         for dependency_id in formula_owner_ids:  # pragma: no branch
             obj = self.objects[dependency_id]
             if obj.HasField("base_owner_uid") and obj.HasField(
                 "formula_owner_uid"
             ):  # pragma: no branch
-                base_owner_uid = uuid(obj.base_owner_uid)
-                formula_owner_uid = uuid(obj.formula_owner_uid)
+                base_owner_uid = NumbersUUID(obj.base_owner_uid).hex
+                formula_owner_uid = NumbersUUID(obj.formula_owner_uid).hex
                 if formula_owner_uid == haunted_owner:
                     return base_owner_uid
 
@@ -322,7 +323,7 @@ class _NumbersModel:
         cell_records = []
         for finfo in calc_engine.dependency_tracker.formula_owner_info:
             if finfo.HasField("cell_dependencies"):
-                formula_owner_id = uuid(finfo.formula_owner_id)
+                formula_owner_id = NumbersUUID(finfo.formula_owner_id).hex
                 if formula_owner_id == table_base_id:
                     for cell_record in finfo.cell_dependencies.cell_record:
                         if cell_record.contains_a_formula:
@@ -435,7 +436,9 @@ class _NumbersModel:
     def node_to_ref(self, row_num: int, col_num: int, node):
         table_name = None
         if node.HasField("AST_cross_table_reference_extra_info"):
-            table_uuid = uuid(node.AST_cross_table_reference_extra_info.table_id)
+            table_uuid = NumbersUUID(
+                node.AST_cross_table_reference_extra_info.table_id
+            ).hex
             table_id = self.table_uuids_to_id(table_uuid)
             table_name = self.table_name(table_id)
 
@@ -553,7 +556,7 @@ class _NumbersModel:
         clear_field_container(base_column_row_uids.column_uid_for_index)
 
         for col_num in range(table_model.number_of_columns):
-            uuid = TSPMessages.UUID(upper=col_num + 420690, lower=col_num + 420690)
+            uuid = NumbersUUID().protobuf2
             base_column_row_uids.sorted_column_uids.append(uuid)
             base_column_row_uids.column_index_for_uid.append(col_num)
             base_column_row_uids.column_uid_for_index.append(col_num)
@@ -562,7 +565,7 @@ class _NumbersModel:
         clear_field_container(base_column_row_uids.row_index_for_uid)
         clear_field_container(base_column_row_uids.row_uid_for_index)
         for row_num in range(table_model.number_of_rows):
-            uuid = TSPMessages.UUID(upper=row_num + 726270, lower=row_num + 726270)
+            uuid = NumbersUUID().protobuf2
             base_column_row_uids.sorted_row_uids.append(uuid)
             base_column_row_uids.row_index_for_uid.append(row_num)
             base_column_row_uids.row_uid_for_index.append(row_num)
@@ -878,7 +881,7 @@ class _NumbersModel:
         table_model_id, table_model = self.objects.create_object_from_dict(
             "CalculationEngine",
             {
-                "table_id": str(uuid1()).upper(),
+                "table_id": str(NumbersUUID()).upper(),
                 "number_of_rows": num_rows,
                 "number_of_columns": num_cols,
                 "table_name": table_name,
@@ -978,6 +981,87 @@ class _NumbersModel:
         )
 
         self.recalculate_table_data(table_model_id, data)
+
+        # EXPERIMENTAL
+        formula_owner_uuid = NumbersUUID()
+        base_owner_uid = NumbersUUID()
+        table_model.haunted_owner.owner_uid.CopyFrom(formula_owner_uuid.protobuf2)
+        print(
+            f"formula_owner_uuid={formula_owner_uuid},",
+            f"base_owner_uid={base_owner_uid}",
+        )
+        calc_engine = self.calc_engine()
+        owner_id_map = calc_engine.dependency_tracker.owner_id_map.map_entry
+        next_id = max([x.internal_owner_id for x in owner_id_map]) + 1
+        owner_id_map.append(
+            TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
+                internal_owner_id=next_id, owner_id=formula_owner_uuid.protobuf4
+            )
+        )
+        formula_owner_info = calc_engine.dependency_tracker.formula_owner_info
+        formula_owner_info.append(
+            TSCEArchives.FormulaOwnerInfoArchive(
+                formula_owner_id=formula_owner_uuid.protobuf4,
+                spanning_column_dependencies=TSCEArchives.SpanningDependenciesArchive(
+                    total_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+                        top_left_column=0x7FFF,
+                        top_left_row=0x7FFFFFFF,
+                        bottom_right_column=0x7FFF,
+                        bottom_right_row=0x7FFFFFFF,
+                    ),
+                    body_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+                        top_left_column=0x7FFF,
+                        top_left_row=0x7FFFFFFF,
+                        bottom_right_column=0x7FFF,
+                        bottom_right_row=0x7FFFFFFF,
+                    ),
+                ),
+                spanning_row_dependencies=TSCEArchives.SpanningDependenciesArchive(
+                    total_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+                        top_left_column=0x7FFF,
+                        top_left_row=0x7FFFFFFF,
+                        bottom_right_column=0x7FFF,
+                        bottom_right_row=0x7FFFFFFF,
+                    ),
+                    body_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+                        top_left_column=0x7FFF,
+                        top_left_row=0x7FFFFFFF,
+                        bottom_right_column=0x7FFF,
+                        bottom_right_row=0x7FFFFFFF,
+                    ),
+                ),
+            )
+        )
+        named_reference_manager = self.objects[
+            calc_engine.named_reference_manager.identifier
+        ]
+        reference_tracker = self.objects[
+            named_reference_manager.reference_tracker.identifier
+        ]
+        next_formula_id = 99999
+        for row_num, row in enumerate(data):
+            for col_num, cell in enumerate(row):
+                node = ASTNodeArray.ASTNodeArchive(
+                    AST_node_type=ASTNodeArray.ASTNodeType.CELL_REFERENCE_NODE,
+                    AST_column=ASTNodeArray.ASTColumnCoordinateArchive(
+                        column=col_num, absolute=True
+                    ),
+                    AST_row=ASTNodeArray.ASTRowCoordinateArchive(
+                        row=row_num, absolute=True
+                    ),
+                    AST_cross_table_reference_extra_info=(
+                        ASTNodeArray.ASTCrossTableReferenceExtraInfoArchive(
+                            table_id=base_owner_uid.protobuf4
+                        )
+                    ),
+                )
+                reference_tracker.contained_tracked_reference.append(
+                    TSCEArchives.TrackedReferenceArchive(
+                        ast=ASTNodeArray(AST_node=[node]),
+                        formula_id=next_formula_id,
+                    )
+                )
+        # END EXPERIMENTAL
 
         table_info_id, table_info = self.objects.create_object_from_dict(
             "CalculationEngine",
