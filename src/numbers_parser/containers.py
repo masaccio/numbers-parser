@@ -59,7 +59,7 @@ class ObjectStore:
                 identifier, obj, filename
             ),
         )
-        # TODO: remove debug ID offset
+        # TODO: why not just use the next available ID, i.e. without the offset?
         self._max_id = max(self._objects.keys())
         self._max_id = math.ceil(self._max_id / 1000000) * 1000000
 
