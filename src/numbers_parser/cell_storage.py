@@ -10,8 +10,7 @@ from warnings import warn
 
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.constants import EPOCH
-from numbers_parser.utils import uuid
-
+from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
 
@@ -246,7 +245,7 @@ class CellStorage:
         else:
             format = self._model.table_format(self._table_id, self.num_format_id)
         if format.HasField("custom_uid"):
-            format_uuid = uuid(format.custom_uid)
+            format_uuid = NumbersUUID(format.custom_uid).hex
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
             if custom_format.requires_fraction_replacement:
@@ -282,7 +281,7 @@ class CellStorage:
     def date_format(self) -> str:
         format = self._model.table_format(self._table_id, self.date_format_id)
         if format.HasField("custom_uid"):
-            format_uuid = uuid(format.custom_uid)
+            format_uuid = NumbersUUID(format.custom_uid).hex
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
             custom_format_string = custom_format.custom_format_string
