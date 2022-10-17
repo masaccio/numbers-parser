@@ -85,6 +85,7 @@ def test_unpack_dir(script_runner, tmp_path):
     assert "XXX_COL_3" in strings
 
 
+@pytest.mark.script_launch_mode("inprocess")
 def test_unpack_hex(script_runner, tmp_path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
@@ -100,11 +101,11 @@ def test_unpack_hex(script_runner, tmp_path):
     with open(str(output_dir / "Index/CalculationEngine.json")) as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][1]["objects"][0]
-    assert objects["base_owner_uid"] == "0x83aa364c_869c498a_b749dbdd_b35f99d7"
+    assert objects["base_owner_uid"] == "83aa364c-869c-498a-b749-dbddb35f99d7"
     objects = data["chunks"][0]["archives"][0]["objects"][0]
     assert (
         objects["dependency_tracker"]["formula_owner_info"][0]["formula_owner_id"]
-        == "0x83aa364c_869c498a_b749dbdd_b35f99d7"
+        == "83aa364c-869c-498a-b749-dbddb35f99d7"
     )
 
 

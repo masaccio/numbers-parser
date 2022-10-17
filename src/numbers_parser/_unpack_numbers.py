@@ -13,7 +13,8 @@ from compact_json import Formatter
 from numbers_parser.file import read_numbers_file
 from numbers_parser import _get_version
 from numbers_parser.iwafile import IWAFile
-from numbers_parser.exceptions import FileFormatError
+from numbers_parser.exceptions import FileFormatError, UnsupportedError
+from numbers_parser.numbers_uuid import NumbersUUID
 
 
 def ensure_directory_exists(prefix, path):
@@ -25,42 +26,22 @@ def ensure_directory_exists(prefix, path):
         pass
 
 
-def dict_to_uuid(obj):
-    if "|".join(obj.keys()) == "uuid_w0|uuid_w1|uuid_w2|uuid_w3":
-        hex_parts = [
-            f"{int(x):08x}"
-            for x in [obj["uuid_w3"], obj["uuid_w2"], obj["uuid_w1"], obj["uuid_w0"]]
-        ]
-        return "0x" + "_".join(hex_parts)
-    elif "|".join(obj.keys()) == "lower|upper":
-        hex_parts = [f"{int(x):016x}" for x in [obj["upper"], obj["lower"]]]
-        hex_parts = [
-            hex_parts[0][0:8],
-            hex_parts[0][8:16],
-            hex_parts[1][0:8],
-            hex_parts[1][8:16],
-        ]
-        return "0x" + "_".join(hex_parts)
-    else:
-        return None
-
-
 def prettify_uuids(obj):
     if isinstance(obj, dict):
         for k, v in obj.items():
             if isinstance(v, dict):
-                if (uuid := dict_to_uuid(v)) is not None:
-                    obj[k] = uuid
-                else:
+                try:
+                    obj[k] = str(NumbersUUID(v))
+                except UnsupportedError:
                     prettify_uuids(v)
             elif isinstance(v, list):
                 prettify_uuids(v)
     elif isinstance(obj, list):
         for i, v in enumerate(obj):
             if isinstance(v, dict):
-                if (uuid := dict_to_uuid(v)) is not None:
-                    obj[i] = uuid
-                else:
+                try:
+                    obj[i] = str(NumbersUUID(v))
+                except UnsupportedError:
                     prettify_uuids(v)
             elif isinstance(v, list):
                 prettify_uuids(v)
