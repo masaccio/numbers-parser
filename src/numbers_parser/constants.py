@@ -1,7 +1,7 @@
 import os
 
 from pkg_resources import resource_filename
-from datetime import datetime
+from pendulum import datetime
 
 # New document defaults
 DEFAULT_DOCUMENT = resource_filename(__name__, os.path.join("data", "empty.numbers"))

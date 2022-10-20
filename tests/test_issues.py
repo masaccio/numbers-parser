@@ -2,7 +2,7 @@ import pytest
 import re
 
 from numbers_parser import Document, NumberCell
-from datetime import datetime, timedelta
+from pendulum import datetime, duration
 from numbers_parser.cell import ErrorCell
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
@@ -27,10 +27,10 @@ ISSUE_10_REF = [
     1234.56,
     "123",
     datetime(2021, 4, 3, 0, 0, 0),
-    timedelta(days=4, hours=2, minutes=3),
-    timedelta(days=5, hours=4, minutes=3, seconds=20),
-    timedelta(hours=4, minutes=3, seconds=2, milliseconds=10),
-    timedelta(weeks=12, hours=5),
+    duration(days=4, hours=2, minutes=3),
+    duration(days=5, hours=4, minutes=3, seconds=20),
+    duration(hours=4, minutes=3, seconds=2, milliseconds=10),
+    duration(weeks=12, hours=5),
     True,  # Checkbox
     3,
     50,

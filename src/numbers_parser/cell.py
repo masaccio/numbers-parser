@@ -4,7 +4,7 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.cell_storage import CellType
 
-from datetime import timedelta
+from pendulum import duration
 from logging import debug
 from functools import lru_cache
 
@@ -46,12 +46,12 @@ class Cell:
             cell = BoolCell(row_num, col_num, cell_storage.value)
         elif cell_storage.type == CellType.DURATION:
             if cell_storage.value is None:
-                cell = DurationCell(row_num, col_num, timedelta(seconds=0))
+                cell = DurationCell(row_num, col_num, duration(seconds=0))
             else:
                 cell = DurationCell(
                     row_num,
                     col_num,
-                    timedelta(seconds=cell_storage.value),
+                    duration(seconds=cell_storage.value),
                     cell_storage.formatted,
                 )
         elif cell_storage.type == CellType.ERROR:
@@ -200,7 +200,7 @@ class DateCell(Cell):
         self.formatted_value = formatted_value
 
     @property
-    def value(self) -> timedelta:
+    def value(self) -> duration:
         return self._value
 
 
@@ -211,7 +211,7 @@ class DurationCell(Cell):
         self.formatted_value = formatted_value
 
     @property
-    def value(self) -> timedelta:
+    def value(self) -> duration:
         return self._value
 
 

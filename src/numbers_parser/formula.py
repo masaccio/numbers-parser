@@ -1,11 +1,11 @@
 import re
 import warnings
 
+from pendulum import datetime, duration
+
 from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.functionmap import FUNCTION_MAP
-
-from datetime import datetime, timedelta
 
 
 class Formula(list):
@@ -68,7 +68,7 @@ class Formula(list):
     def date(self, *args):
         # Date literals exported as DATE()
         node = args[2]
-        dt = datetime(2001, 1, 1) + timedelta(seconds=node.AST_date_node_dateNum)
+        dt = datetime(2001, 1, 1) + duration(seconds=node.AST_date_node_dateNum)
         self.push(f"DATE({dt.year},{dt.month},{dt.day})")
 
     def div(self, *args):

@@ -2,7 +2,7 @@ import math
 import re
 
 from collections import OrderedDict
-from datetime import timedelta, datetime
+from pendulum import datetime, duration
 from enum import Enum
 from fractions import Fraction
 from struct import unpack
@@ -70,30 +70,30 @@ DATETIME_FIELD_MAP = OrderedDict(
         ("M", "%-m"),
         ("d", "%-d"),
         ("dd", "%d"),
-        ("DDD", lambda x: str(x.timetuple().tm_yday).zfill(3)),
-        ("DD", lambda x: str(x.timetuple().tm_yday).zfill(2)),
-        ("D", lambda x: str(x.timetuple().tm_yday).zfill(1)),
+        ("DDD", lambda x: str(x.day_of_year).zfill(3)),
+        ("DD", lambda x: str(x.day_of_year).zfill(2)),
+        ("D", lambda x: str(x.day_of_year).zfill(1)),
         ("HH", "%H"),
         ("H", "%-H"),
         ("hh", "%I"),
         ("h", "%-I"),
-        ("k", lambda x: str(x.timetuple().tm_hour).replace("0", "24")),
-        ("kk", lambda x: str(x.timetuple().tm_hour).replace("0", "24").zfill(2)),
-        ("K", lambda x: str(x.timetuple().tm_hour % 12)),
-        ("KK", lambda x: str(x.timetuple().tm_hour % 12).zfill(2)),
-        ("mm", lambda x: str(x.timetuple().tm_min).zfill(2)),
-        ("m", lambda x: str(x.timetuple().tm_min)),
+        ("k", lambda x: str(x.hour).replace("0", "24")),
+        ("kk", lambda x: str(x.hour).replace("0", "24").zfill(2)),
+        ("K", lambda x: str(x.hour % 12)),
+        ("KK", lambda x: str(x.hour % 12).zfill(2)),
+        ("mm", lambda x: str(x.minute).zfill(2)),
+        ("m", lambda x: str(x.minute)),
         ("ss", "%S"),
-        ("s", lambda x: str(x.timetuple().tm_sec)),
-        ("W", lambda x: week_of_month(x)),
+        ("s", lambda x: str(x.second)),
+        ("W", lambda x: str(x.week_of_month - 1)),
         ("ww", "%W"),
         ("G", "AD"),  # TODO: support BC
         ("F", lambda x: days_occurred_in_month(x)),
-        ("S", lambda x: x.strftime("%f")[0]),
-        ("SS", lambda x: x.strftime("%f")[0:2]),
-        ("SSS", lambda x: x.strftime("%f")[0:3]),
-        ("SSSS", lambda x: x.strftime("%f")[0:4]),
-        ("SSSSS", lambda x: x.strftime("%f")[0:5]),
+        ("S", lambda x: str(x.microsecond).zfill(6)[0]),
+        ("SS", lambda x: str(x.microsecond).zfill(6)[0:2]),
+        ("SSS", lambda x: str(x.microsecond).zfill(6)[0:3]),
+        ("SSSS", lambda x: str(x.microsecond).zfill(6)[0:4]),
+        ("SSSSS", lambda x: str(x.microsecond).zfill(6)[0:5]),
     ]
 )
 
@@ -183,12 +183,6 @@ class CellStorage:
             else:
                 setattr(self, field["attr"], None)
 
-        # other_stuff = unpack("<hhh", buffer[2:8])
-        # fields = [x["attr"] for x in CELL_STORAGE_MAP_V5.values()]
-        # active_fields = [x for x in fields if getattr(self, x) is not None]
-        # field_str = ", ".join([f"{x}=" + str(getattr(self, x)) for x in active_fields])
-        # print(f"@[{row_num}, {col_num}]: {field_str},  other={other_stuff}")
-
         cell_type = buffer[1]
         if cell_type == TSTArchives.genericCellType:
             self.type = CellType.EMPTY
@@ -200,7 +194,7 @@ class CellStorage:
             self.value = self._model.table_string(table_id, self.string_id)
             self.type = CellType.TEXT
         elif cell_type == TSTArchives.dateCellType:
-            self.value = EPOCH + timedelta(seconds=self.seconds)
+            self.value = EPOCH + duration(seconds=self.seconds)
             self.datetime = self.value
             self.type = CellType.DATE
         elif cell_type == TSTArchives.boolCellType:
@@ -368,12 +362,6 @@ def unpack_decimal128(buffer: bytearray) -> float:
         mantissa = -mantissa
     value = mantissa * 10**exp
     return float(value)
-
-
-def week_of_month(value: datetime) -> str:
-    """Return the week of the month for a datetime value"""
-    month_week = value.isocalendar()[1] - value.replace(day=1).isocalendar()[1]
-    return str(month_week)
 
 
 def days_occurred_in_month(value: datetime) -> str:

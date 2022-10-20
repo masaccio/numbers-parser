@@ -1,5 +1,5 @@
 import pytest
-from datetime import datetime, timedelta
+from pendulum import datetime, duration
 
 from numbers_parser import Document
 
@@ -18,9 +18,9 @@ ZZZ_TABLE_2_REF = [
     [1.000, 2.000, 123.456],
     [datetime(2001, 1, 1), datetime(2001, 1, 20), datetime(2002, 1, 1)],
     [
-        timedelta(seconds=1, microseconds=1000),
-        timedelta(days=1),
-        timedelta(days=10),
+        duration(seconds=1, microseconds=1000),
+        duration(days=1),
+        duration(days=10),
     ],
     [False, True, False],
     ["STRING1", "STRING2", "STRING3"],

@@ -1,6 +1,7 @@
 import pytest
 
-from datetime import datetime, timedelta
+from datetime import datetime as builtin_datetime, timedelta as builtin_timedelta
+from pendulum import datetime, duration
 
 from numbers_parser import Document
 from numbers_parser.cell import EmptyCell
@@ -17,12 +18,14 @@ def test_edit_cell_values(tmp_path, pytestconfig):
     table.write(2, 0, True)
     table.write(2, 1, 7890)
     table.write(2, 2, 78.90)
-    table.write(5, 3, datetime(2020, 12, 25))
-    table.write(5, 4, timedelta(seconds=7890))
+    table.write(4, 3, datetime(2021, 6, 15))
+    table.write(4, 4, duration(minutes=1891))
+    table.write(5, 3, builtin_datetime(2020, 12, 25))
+    table.write(5, 4, builtin_timedelta(seconds=7890))
     table.write(5, 5, "7890")
 
     assert isinstance(table.cell(3, 4), EmptyCell)
-    assert isinstance(table.cell(4, 4), EmptyCell)
+    assert isinstance(table.cell(4, 5), EmptyCell)
 
     if pytestconfig.getoption("save_file") is not None:
         new_filename = pytestconfig.getoption("save_file")
@@ -40,8 +43,10 @@ def test_edit_cell_values(tmp_path, pytestconfig):
     assert table.cell(2, 0).value == True
     assert table.cell(2, 1).value == 7890
     assert table.cell(2, 2).value == 78.90
+    assert table.cell(4, 3).value == datetime(2021, 6, 15)
+    assert table.cell(4, 4).value == duration(minutes=1891)
     assert table.cell(5, 3).value == datetime(2020, 12, 25)
-    assert table.cell(5, 4).value == timedelta(seconds=7890)
+    assert table.cell(5, 4).value == duration(seconds=7890)
     assert table.cell(5, 5).value == "7890"
 
 

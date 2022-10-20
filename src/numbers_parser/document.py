@@ -1,5 +1,6 @@
-from datetime import timedelta, datetime
+from datetime import datetime as builtin_datetime, timedelta as builtin_timedelta
 from functools import lru_cache
+from pendulum import DateTime, Duration, instance as pendulum_instance
 from typing import Union, Generator, Tuple
 
 from numbers_parser.containers import ItemsList
@@ -369,9 +370,11 @@ class Table:
             self._data[row_num][col_num] = NumberCell(row_num, col_num, value)
         elif type(value) == bool:
             self._data[row_num][col_num] = BoolCell(row_num, col_num, value)
-        elif type(value) == datetime:
-            self._data[row_num][col_num] = DateCell(row_num, col_num, value)
-        elif type(value) == timedelta:
+        elif type(value) == builtin_datetime or type(value) == DateTime:
+            self._data[row_num][col_num] = DateCell(
+                row_num, col_num, pendulum_instance(value)
+            )
+        elif type(value) == builtin_timedelta or type(value) == Duration:
             self._data[row_num][col_num] = DurationCell(row_num, col_num, value)
         else:
             raise ValueError(

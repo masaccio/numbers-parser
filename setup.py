@@ -25,6 +25,7 @@ setup(
     },
     package_data={"": ["data/*.numbers"]},
     install_requires=[
+        "pendulum",
         "protobuf>=3.20.1",
         "python-snappy",
         "compact-json",
