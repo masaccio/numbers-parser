@@ -7,7 +7,7 @@ python:
  - "3.11-dev"
 before_install:
   - sudo apt-get -y install libsnappy-dev
-  - pip installl pendulum
+  - pip install pendulum
 install:
   - pip install -U pytest pytest-console-scripts pytest-check
   - python3 setup.py install
