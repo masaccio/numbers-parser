@@ -982,6 +982,17 @@ class _NumbersModel:
 
         self.recalculate_table_data(table_model_id, data)
 
+        table_info_id, table_info = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {},
+            TSTArchives.TableInfoArchive,
+        )
+        table_info.tableModel.MergeFrom(
+            TSPMessages.Reference(identifier=table_model_id)
+        )
+        table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
+        self.add_component_reference(table_info_id, "Document", self.calc_engine_id())
+
         # EXPERIMENTAL
         formula_owner_uuid = NumbersUUID()
         base_owner_uid = NumbersUUID()
@@ -992,42 +1003,44 @@ class _NumbersModel:
         )
         calc_engine = self.calc_engine()
         owner_id_map = calc_engine.dependency_tracker.owner_id_map.map_entry
-        next_id = max([x.internal_owner_id for x in owner_id_map]) + 1
+        next_owner_id = max([x.internal_owner_id for x in owner_id_map]) + 1
         owner_id_map.append(
             TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
-                internal_owner_id=next_id, owner_id=formula_owner_uuid.protobuf4
+                internal_owner_id=next_owner_id, owner_id=formula_owner_uuid.protobuf4
             )
         )
+        next_owner_id += 1
         formula_owner_info = calc_engine.dependency_tracker.formula_owner_info
         formula_owner_info.append(
             TSCEArchives.FormulaOwnerInfoArchive(
-                formula_owner_id=formula_owner_uuid.protobuf4,
+                formula_owner_id=base_owner_uid.protobuf4,
+                formula_owner=TSPMessages.Reference(identifier=table_info_id),
                 spanning_column_dependencies=TSCEArchives.SpanningDependenciesArchive(
                     total_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
-                        top_left_column=0x7FFF,
-                        top_left_row=0x7FFFFFFF,
-                        bottom_right_column=0x7FFF,
-                        bottom_right_row=0x7FFFFFFF,
+                        top_left_column=0,
+                        top_left_row=0,
+                        bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
+                        bottom_right_row=DEFAULT_ROW_COUNT,
                     ),
                     body_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
-                        top_left_column=0x7FFF,
-                        top_left_row=0x7FFFFFFF,
-                        bottom_right_column=0x7FFF,
-                        bottom_right_row=0x7FFFFFFF,
+                        top_left_column=1,
+                        top_left_row=1,
+                        bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
+                        bottom_right_row=DEFAULT_ROW_COUNT,
                     ),
                 ),
                 spanning_row_dependencies=TSCEArchives.SpanningDependenciesArchive(
                     total_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
-                        top_left_column=0x7FFF,
-                        top_left_row=0x7FFFFFFF,
-                        bottom_right_column=0x7FFF,
-                        bottom_right_row=0x7FFFFFFF,
+                        top_left_column=0,
+                        top_left_row=0,
+                        bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
+                        bottom_right_row=DEFAULT_ROW_COUNT,
                     ),
                     body_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
-                        top_left_column=0x7FFF,
-                        top_left_row=0x7FFFFFFF,
-                        bottom_right_column=0x7FFF,
-                        bottom_right_row=0x7FFFFFFF,
+                        top_left_column=1,
+                        top_left_row=1,
+                        bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
+                        bottom_right_row=DEFAULT_ROW_COUNT,
                     ),
                 ),
             )
@@ -1038,7 +1051,7 @@ class _NumbersModel:
         reference_tracker = self.objects[
             named_reference_manager.reference_tracker.identifier
         ]
-        next_formula_id = 99999
+        # TODO: append formula ID table and get real next ID
         for row_num, row in enumerate(data):
             for col_num, cell in enumerate(row):
                 node = ASTNodeArray.ASTNodeArchive(
@@ -1058,21 +1071,17 @@ class _NumbersModel:
                 reference_tracker.contained_tracked_reference.append(
                     TSCEArchives.TrackedReferenceArchive(
                         ast=ASTNodeArray(AST_node=[node]),
-                        formula_id=next_formula_id,
+                        formula_id=next_owner_id,
                     )
                 )
+                owner_id_map.append(
+                    TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
+                        internal_owner_id=next_owner_id,
+                        owner_id=formula_owner_uuid.protobuf4,
+                    )
+                )
+                next_owner_id += 1
         # END EXPERIMENTAL
-
-        table_info_id, table_info = self.objects.create_object_from_dict(
-            "CalculationEngine",
-            {},
-            TSTArchives.TableInfoArchive,
-        )
-        table_info.tableModel.MergeFrom(
-            TSPMessages.Reference(identifier=table_model_id)
-        )
-        table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
-        self.add_component_reference(table_info_id, "Document", self.calc_engine_id())
 
         self.objects[sheet_id].drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id)
