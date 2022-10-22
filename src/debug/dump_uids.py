@@ -2,7 +2,6 @@ import argparse
 
 from numbers_parser import Document
 from numbers_parser.numbers_uuid import NumbersUUID
-from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 
 
