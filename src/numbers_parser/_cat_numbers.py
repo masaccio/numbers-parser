@@ -1,6 +1,5 @@
 import argparse
 import csv
-import logging
 import sys
 
 from numbers_parser import Document, _get_version
@@ -33,7 +32,6 @@ def command_line_parser():
         help="Don't prefix data rows with name of sheet/table (default: false)",
     )
     parser.add_argument("-V", "--version", action="store_true")
-    parser.add_argument("--debug", action="store_true", help="Enable debug output")
     parser.add_argument(
         "--formulas",
         action="store_true",
@@ -96,9 +94,6 @@ def print_table(args, filename):
 def main():
     parser = command_line_parser()
     args = parser.parse_args()
-
-    if args.debug:  # pragma: no cover
-        logging.basicConfig(level=logging.DEBUG)
 
     if args.version:
         print(_get_version())
