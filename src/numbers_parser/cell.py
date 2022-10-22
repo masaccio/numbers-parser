@@ -2,18 +2,22 @@ import re
 
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.exceptions import UnsupportedError
-from numbers_parser.cell_storage import CellType
+from numbers_parser.cell_storage import CellType, CellStorage
 
-from pendulum import duration
-from logging import debug
+from pendulum import duration, Duration, DateTime
 from functools import lru_cache
 
 
 class Cell:
-    @staticmethod
-    def factory(model: object, table_id: int, row_num: int, col_num: int):  # NOQA: C901
-        cell_storage = model.table_cell_decode(table_id, row_num, col_num)
-
+    @classmethod
+    def from_storage(
+        cls,
+        table_id: int,
+        row_num: int,
+        col_num: int,
+        model: object,
+        cell_storage: CellStorage,
+    ):  # NOQA: C901
         row_col = (row_num, col_num)
         merge_cells = model.merge_cell_ranges(table_id)
         is_merged = row_col in merge_cells
@@ -22,49 +26,39 @@ class Cell:
             if is_merged and merge_cells[row_col]["merge_type"] == "ref":
                 cell = MergedCell(*merge_cells[row_col]["rect"])
             else:
-                cell = EmptyCell(row_num, col_num, None)
+                cell = EmptyCell(row_num, col_num)
             cell.size = None
             cell._model = model
             cell._table_id = table_id
             return cell
 
         if cell_storage.type == CellType.EMPTY:
-            cell = EmptyCell(row_num, col_num, None)
+            cell = EmptyCell(row_num, col_num)
         elif cell_storage.type == CellType.NUMBER:
-            cell = NumberCell(
-                row_num, col_num, cell_storage.value, cell_storage.formatted
-            )
+            cell = NumberCell(row_num, col_num, cell_storage.value)
         elif cell_storage.type == CellType.TEXT:
-            cell = TextCell(
-                row_num, col_num, cell_storage.value, cell_storage.formatted
-            )
+            cell = TextCell(row_num, col_num, cell_storage.value)
         elif cell_storage.type == CellType.DATE:
-            cell = DateCell(
-                row_num, col_num, cell_storage.value, cell_storage.formatted
-            )
+            cell = DateCell(row_num, col_num, cell_storage.value)
         elif cell_storage.type == CellType.BOOL:
             cell = BoolCell(row_num, col_num, cell_storage.value)
         elif cell_storage.type == CellType.DURATION:
             if cell_storage.value is None:
-                cell = DurationCell(row_num, col_num, duration(seconds=0))
+                value = duration(seconds=0)
             else:
-                cell = DurationCell(
-                    row_num,
-                    col_num,
-                    duration(seconds=cell_storage.value),
-                    cell_storage.formatted,
-                )
+                value = duration(seconds=cell_storage.value)
+            cell = DurationCell(row_num, col_num, value)
         elif cell_storage.type == CellType.ERROR:
-            cell = ErrorCell(row_num, col_num, None)
+            cell = ErrorCell(row_num, col_num)
         elif cell_storage.type == CellType.BULLET:
-            cell = BulletedTextCell(row_num, col_num, cell_storage.bullets)
+            cell = BulletedTextCell(row_num, col_num, cell_storage.value)
         else:
             raise UnsupportedError(  # pragma: no cover
-                f"Unsupport cell type {cell_storage.type} @:({row_num},{col_num})"
+                f"Unsupport cell type {cell_storage.type} " + "@:({row_num},{col_num})"
             )
 
-        cell._table_id = table_id
-        cell._model = model
+        cell._table_id = cell_storage._table_id
+        cell._model = cell_storage._model
         cell._storage = cell_storage
         cell._formula_key = cell_storage.formula_id
 
@@ -72,14 +66,6 @@ class Cell:
             cell.is_merged = True
             cell.size = merge_cells[row_col]["size"]
 
-        debug(
-            "%s@[%d,%d]: type=%d, value=%s",
-            model.table_name(table_id),
-            row_num,
-            col_num,
-            cell_storage.type,
-            str(cell_storage.value),
-        )
         return cell
 
     def __init__(self, row_num: int, col_num: int, value):
@@ -89,7 +75,6 @@ class Cell:
         self.size = (1, 1)
         self.is_merged = False
         self.is_bulleted = False
-        self.formatted_value = None
         self._formula_key = None
         self._storage = None
 
@@ -101,21 +86,9 @@ class Cell:
     @property
     @lru_cache(maxsize=None)
     def formula(self):
-        formula_key = self._formula_key
         if self._formula_key is not None:
             table_formulas = self._model.table_formulas(self._table_id)
             formula = table_formulas.formula(self._formula_key, self.row, self.col)
-
-            debug(
-                "%s@[%d,%d]: key=%d:%s: type=%d, value=%s",
-                self._model.table_name(self._table_id),
-                self.row,
-                self.col,
-                formula_key,
-                formula,
-                self._type,
-                str(self.value),
-            )
             return formula
         else:
             return None
@@ -124,12 +97,15 @@ class Cell:
     def bullets(self) -> str:
         return None
 
+    @property
+    def formatted_value(self):
+        return self._storage.formatted
+
 
 class NumberCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value, formatted_value=None):
+    def __init__(self, row_num: int, col_num: int, value: float):
         self._type = TSTArchives.numberCellType
         super().__init__(row_num, col_num, value)
-        self.formatted_value = formatted_value
 
     @property
     def value(self) -> int:
@@ -137,10 +113,9 @@ class NumberCell(Cell):
 
 
 class TextCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value, formatted_value=None):
+    def __init__(self, row_num: int, col_num: int, value: str):
         self._type = TSTArchives.textCellType
         super().__init__(row_num, col_num, value)
-        self.formatted_value = formatted_value
 
     @property
     def value(self) -> str:
@@ -174,9 +149,9 @@ class BulletedTextCell(Cell):
 
 
 class EmptyCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int):
         self._type = None
-        super().__init__(row_num, col_num, value)
+        super().__init__(row_num, col_num, None)
 
     @property
     def value(self):
@@ -184,8 +159,9 @@ class EmptyCell(Cell):
 
 
 class BoolCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int, value: bool):
         self._type = TSTArchives.boolCellType
+        self._value = value
         super().__init__(row_num, col_num, value)
 
     @property
@@ -194,10 +170,9 @@ class BoolCell(Cell):
 
 
 class DateCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value, formatted_value=None):
+    def __init__(self, row_num: int, col_num: int, value: DateTime):
         self._type = TSTArchives.dateCellType
         super().__init__(row_num, col_num, value)
-        self.formatted_value = formatted_value
 
     @property
     def value(self) -> duration:
@@ -205,10 +180,9 @@ class DateCell(Cell):
 
 
 class DurationCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value, formatted_value=None):
+    def __init__(self, row_num: int, col_num: int, value: Duration):
         self._type = TSTArchives.durationCellType
         super().__init__(row_num, col_num, value)
-        self.formatted_value = formatted_value
 
     @property
     def value(self) -> duration:
@@ -216,9 +190,9 @@ class DurationCell(Cell):
 
 
 class ErrorCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value):
+    def __init__(self, row_num: int, col_num: int):
         self._type = TSTArchives.formulaErrorCellType
-        super().__init__(row_num, col_num, value)
+        super().__init__(row_num, col_num, None)
 
     @property
     def value(self):
@@ -234,7 +208,6 @@ class MergedCell:
         self.col_start = col_start
         self.col_end = col_end
         self.merge_range = xl_range(row_start, col_start, row_end, col_end)
-        self.formatted_value = None
 
 
 # Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter

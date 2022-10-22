@@ -959,10 +959,7 @@ class _NumbersModel:
         )
 
         data = [
-            [
-                EmptyCell(row_num, col_num, None)
-                for col_num in range(0, DEFAULT_COLUMN_COUNT)
-            ]
+            [EmptyCell(row_num, col_num) for col_num in range(0, DEFAULT_COLUMN_COUNT)]
             for row_num in range(0, DEFAULT_ROW_COUNT)
         ]
 

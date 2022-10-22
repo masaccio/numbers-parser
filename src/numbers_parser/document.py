@@ -139,7 +139,13 @@ class Table:
         # of computing all cells is minimal compared to file IO
         self._data = [
             [
-                Cell.factory(self._model, self._table_id, row_num, col_num)
+                Cell.from_storage(
+                    table_id,
+                    row_num,
+                    col_num,
+                    model,
+                    model.table_cell_decode(table_id, row_num, col_num),
+                )
                 for col_num in range(self.num_cols)
             ]
             for row_num in range(self.num_rows)
@@ -386,8 +392,7 @@ class Table:
 
     def add_row(self, num_rows=1):
         row = [
-            EmptyCell(self.num_rows - 1, col_num, None)
-            for col_num in range(self.num_cols)
+            EmptyCell(self.num_rows - 1, col_num) for col_num in range(self.num_cols)
         ]
         for _ in range(num_rows):
             self._data.append(row.copy())
@@ -397,7 +402,7 @@ class Table:
     def add_column(self, num_cols=1):
         for _ in range(num_cols):
             for row_num in range(self.num_rows):
-                self._data[row_num].append(EmptyCell(row_num, self.num_cols - 1, None))
+                self._data[row_num].append(EmptyCell(row_num, self.num_cols - 1))
             self.num_cols += 1
             self._model.number_of_columns(self._table_id, self.num_cols)
 

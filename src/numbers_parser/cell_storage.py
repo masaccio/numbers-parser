@@ -207,8 +207,7 @@ class CellStorage:
             self.value = None
             self.type = CellType.ERROR
         elif cell_type == TSTArchives.automaticCellType:
-            self.bullets = self._model.table_bullets(self._table_id, self.rich_id)
-            self.value = None
+            self.value = self._model.table_bullets(self._table_id, self.rich_id)
             self.type = CellType.BULLET
         elif cell_type == 10:
             self.value = self.d128
@@ -236,8 +235,10 @@ class CellStorage:
             format = self._model.table_format(self._table_id, self.text_format_id)
         elif self.currency_format_id is not None:
             format = self._model.table_format(self._table_id, self.currency_format_id)
-        else:
+        elif self.num_format_id is not None:
             format = self._model.table_format(self._table_id, self.num_format_id)
+        else:
+            return self.value
         if format.HasField("custom_uid"):
             format_uuid = NumbersUUID(format.custom_uid).hex
             format_map = self._model.custom_format_map()
