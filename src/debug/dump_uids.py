@@ -1,7 +1,8 @@
 import argparse
 
 from numbers_parser import Document
-from numbers_parser.utils import uuid
+from numbers_parser.numbers_uuid import NumbersUUID
+from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 
 
@@ -12,15 +13,10 @@ def find_fields(obj=object, tree=""):
         if isinstance(value, TSPMessages.UUID) or isinstance(
             value, TSPMessages.CFUUIDArchive
         ):
-            if uuid(value) == 0:
-                print(f"{tree}.{name} = UNDEFINED")
-            else:
-                uuid_str = f"{uuid(value):032x}"
-                uuid_str = f"0x{uuid_str[0:8]}_{uuid_str[8:16]}_{uuid_str[16:24]}_{uuid_str[24:32]}"
-                print(f"{tree}.{name} = {uuid_str}")
-        elif (
-            not isinstance(value, TSPMessages.Reference)
-            and "Archive" in type(value).__module__
+            uuid = NumbersUUID(value)
+            print(f"{tree}.{name} = {uuid}")
+        elif not isinstance(value, TSPMessages.Reference) and hasattr(
+            value, "DESCRIPTOR"
         ):
             find_fields(getattr(obj, name), tree + "." + name)
 
