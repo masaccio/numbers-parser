@@ -137,19 +137,16 @@ class Table:
         self.num_cols = self._model.number_of_columns(self._table_id)
         # Cache all data now to facilite write(). Performance impact
         # of computing all cells is minimal compared to file IO
-        self._data = [
-            [
-                Cell.from_storage(
-                    table_id,
-                    row_num,
-                    col_num,
-                    model,
-                    model.table_cell_decode(table_id, row_num, col_num),
-                )
-                for col_num in range(self.num_cols)
-            ]
-            for row_num in range(self.num_rows)
-        ]
+        self._data = []
+        for row_num in range(self.num_rows):
+            self._data.append([])
+            for col_num in range(self.num_cols):
+                cell_storage = model.table_cell_decode(table_id, row_num, col_num)
+                if cell_storage is None:
+                    cell = Cell.empty_cell(table_id, row_num, col_num, model)
+                else:
+                    cell = Cell.from_storage(cell_storage)
+                self._data[row_num].append(cell)
 
     @property
     def name(self) -> str:

@@ -10,55 +10,54 @@ from functools import lru_cache
 
 class Cell:
     @classmethod
-    def from_storage(
-        cls,
-        table_id: int,
-        row_num: int,
-        col_num: int,
-        model: object,
-        cell_storage: CellStorage,
-    ):  # NOQA: C901
+    def empty_cell(cls, table_id: int, row_num: int, col_num: int, model: object):
         row_col = (row_num, col_num)
         merge_cells = model.merge_cell_ranges(table_id)
         is_merged = row_col in merge_cells
 
-        if cell_storage is None:
-            if is_merged and merge_cells[row_col]["merge_type"] == "ref":
-                cell = MergedCell(*merge_cells[row_col]["rect"])
-            else:
-                cell = EmptyCell(row_num, col_num)
-            cell.size = None
-            cell._model = model
-            cell._table_id = table_id
-            return cell
+        if is_merged and merge_cells[row_col]["merge_type"] == "ref":
+            cell = MergedCell(*merge_cells[row_col]["rect"])
+        else:
+            cell = EmptyCell(row_num, col_num)
+        cell.size = None
+        cell._model = model
+        cell._table_id = table_id
+        return cell
+
+    @classmethod
+    def from_storage(cls, cell_storage: CellStorage):
+        row_col = (cell_storage.row_num, cell_storage.col_num)
+        merge_cells = cell_storage.model.merge_cell_ranges(cell_storage.table_id)
+        is_merged = row_col in merge_cells
 
         if cell_storage.type == CellType.EMPTY:
-            cell = EmptyCell(row_num, col_num)
+            cell = EmptyCell(cell_storage.row_num, cell_storage.col_num)
         elif cell_storage.type == CellType.NUMBER:
-            cell = NumberCell(row_num, col_num, cell_storage.value)
+            cell = NumberCell(*row_col, cell_storage.value)
         elif cell_storage.type == CellType.TEXT:
-            cell = TextCell(row_num, col_num, cell_storage.value)
+            cell = TextCell(*row_col, cell_storage.value)
         elif cell_storage.type == CellType.DATE:
-            cell = DateCell(row_num, col_num, cell_storage.value)
+            cell = DateCell(*row_col, cell_storage.value)
         elif cell_storage.type == CellType.BOOL:
-            cell = BoolCell(row_num, col_num, cell_storage.value)
+            cell = BoolCell(*row_col, cell_storage.value)
         elif cell_storage.type == CellType.DURATION:
             if cell_storage.value is None:
                 value = duration(seconds=0)
             else:
                 value = duration(seconds=cell_storage.value)
-            cell = DurationCell(row_num, col_num, value)
+            cell = DurationCell(*row_col, value)
         elif cell_storage.type == CellType.ERROR:
-            cell = ErrorCell(row_num, col_num)
+            cell = ErrorCell(*row_col)
         elif cell_storage.type == CellType.BULLET:
-            cell = BulletedTextCell(row_num, col_num, cell_storage.value)
+            cell = BulletedTextCell(*row_col, cell_storage.value)
         else:
             raise UnsupportedError(  # pragma: no cover
-                f"Unsupport cell type {cell_storage.type} " + "@:({row_num},{col_num})"
+                f"Unsupport cell type {cell_storage.type} "
+                + "@:({cell_storage.row_num},{cell_storage.col_num})"
             )
 
-        cell._table_id = cell_storage._table_id
-        cell._model = cell_storage._model
+        cell._table_id = cell_storage.table_id
+        cell._model = cell_storage.model
         cell._storage = cell_storage
         cell._formula_key = cell_storage.formula_id
 

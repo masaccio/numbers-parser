@@ -154,9 +154,9 @@ class CellStorage:
     def __init__(  # noqa: C901
         self, model: object, table_id: int, buffer, row_num, col_num
     ):
-        self._buffer = buffer
-        self._model = model
-        self._table_id = table_id
+        self.buffer = buffer
+        self.model = model
+        self.table_id = table_id
         self.row_num = row_num
         self.col_num = col_num
 
@@ -191,7 +191,7 @@ class CellStorage:
             self.value = self.d128
             self.type = CellType.NUMBER
         elif cell_type == TSTArchives.textCellType:
-            self.value = self._model.table_string(table_id, self.string_id)
+            self.value = self.model.table_string(table_id, self.string_id)
             self.type = CellType.TEXT
         elif cell_type == TSTArchives.dateCellType:
             self.value = EPOCH + duration(seconds=self.seconds)
@@ -207,7 +207,7 @@ class CellStorage:
             self.value = None
             self.type = CellType.ERROR
         elif cell_type == TSTArchives.automaticCellType:
-            self.value = self._model.table_bullets(self._table_id, self.rich_id)
+            self.value = self.model.table_bullets(self.table_id, self.rich_id)
             self.type = CellType.BULLET
         elif cell_type == 10:
             self.value = self.d128
@@ -232,16 +232,16 @@ class CellStorage:
 
     def custom_format(self) -> str:
         if self.text_format_id is not None and self.type == CellType.TEXT:
-            format = self._model.table_format(self._table_id, self.text_format_id)
+            format = self.model.table_format(self.table_id, self.text_format_id)
         elif self.currency_format_id is not None:
-            format = self._model.table_format(self._table_id, self.currency_format_id)
+            format = self.model.table_format(self.table_id, self.currency_format_id)
         elif self.num_format_id is not None:
-            format = self._model.table_format(self._table_id, self.num_format_id)
+            format = self.model.table_format(self.table_id, self.num_format_id)
         else:
             return self.value
         if format.HasField("custom_uid"):
             format_uuid = NumbersUUID(format.custom_uid).hex
-            format_map = self._model.custom_format_map()
+            format_map = self.model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
             if custom_format.requires_fraction_replacement:
                 accuracy = custom_format.fraction_accuracy
@@ -254,7 +254,7 @@ class CellStorage:
                 if self.string_id is not None:
                     formatted_value = decode_text_format(
                         custom_format,
-                        self._model.table_string(self._table_id, self.string_id),
+                        self.model.table_string(self.table_id, self.string_id),
                     )
                 else:
                     return ""
@@ -274,10 +274,10 @@ class CellStorage:
         return formatted_value
 
     def date_format(self) -> str:
-        format = self._model.table_format(self._table_id, self.date_format_id)
+        format = self.model.table_format(self.table_id, self.date_format_id)
         if format.HasField("custom_uid"):
             format_uuid = NumbersUUID(format.custom_uid).hex
-            format_map = self._model.custom_format_map()
+            format_map = self.model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
             custom_format_string = custom_format.custom_format_string
             if custom_format.format_type == CustomFormatType.DATE:
@@ -293,7 +293,7 @@ class CellStorage:
         return formatted_value
 
     def duration_format(self) -> str:  # noqa: C901
-        format = self._model.table_format(self._table_id, self.duration_format_id)
+        format = self.model.table_format(self.table_id, self.duration_format_id)
 
         duration_style = format.duration_style
         unit_largest = format.duration_unit_largest
