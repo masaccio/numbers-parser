@@ -16,7 +16,7 @@ import numbers_parser.generated.TSKArchives_pb2 as TSKArchives__pb2
 import numbers_parser.generated.TSPMessages_pb2 as TSPMessages__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cTSACommandArchives_sos.proto\x12\x06TSASOS\x1a\x15TSAArchives_sos.proto\x1a\x11TSKArchives.proto\x1a\x11TSPMessages.proto\"\xd5\x01\n4InducedVerifyDrawableZOrdersWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12H\n\x1dserver_drawable_z_order_lists\x18\x02 \x03(\x0b\x32!.TSASOS.DrawableZOrderListArchive\x12/\n\'server_drawable_z_order_lists_undefined\x18\x03 \x01(\x08\"\xb8\x01\n#PropagateMasterChangeCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x36\n#uuids_of_previously_visited_objects\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x35\n-uuids_of_previously_visited_objects_undefined\x18\x03 \x01(\x08\"\x97\x01\n\x1b\x43ommandReapplyMasterArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12!\n\x0eitems_to_visit\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12 \n\x18items_to_visit_undefined\x18\x03 \x01(\x08\x12\x0f\n\x07is_undo\x18\x04 \x02(\x08\"L\n&VerifyDocumentWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"\x9c\x01\n-VerifyDrawableZOrdersWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12#\n\x10\x64rawable_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\x1a\x64rawable_id_list_undefined\x18\x03 \x01(\x08\"\x90\x01\n%VerifyObjectsWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12!\n\x0eobject_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12 \n\x18object_id_list_undefined\x18\x03 \x01(\x08\"\x82\x01\n.VerifyTransformHistoryWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x16\n\x0esequence_start\x18\x02 \x02(\x05\x12\x14\n\x0csequence_end\x18\x03 \x02(\x05')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cTSACommandArchives_sos.proto\x12\x06TSASOS\x1a\x15TSAArchives_sos.proto\x1a\x11TSKArchives.proto\x1a\x11TSPMessages.proto\"\xd5\x01\n4InducedVerifyDrawableZOrdersWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12H\n\x1dserver_drawable_z_order_lists\x18\x02 \x03(\x0b\x32!.TSASOS.DrawableZOrderListArchive\x12/\n\'server_drawable_z_order_lists_undefined\x18\x03 \x01(\x08\"\xb8\x01\n#PropagateMasterChangeCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x36\n#uuids_of_previously_visited_objects\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\x35\n-uuids_of_previously_visited_objects_undefined\x18\x03 \x01(\x08\"\x97\x01\n\x1b\x43ommandReapplyMasterArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12!\n\x0eitems_to_visit\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12 \n\x18items_to_visit_undefined\x18\x03 \x01(\x08\x12\x0f\n\x07is_undo\x18\x04 \x02(\x08\"R\n,VerifyActivityStreamWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"L\n&VerifyDocumentWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"\x9c\x01\n-VerifyDrawableZOrdersWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12#\n\x10\x64rawable_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\x1a\x64rawable_id_list_undefined\x18\x03 \x01(\x08\"\x90\x01\n%VerifyObjectsWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12!\n\x0eobject_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12 \n\x18object_id_list_undefined\x18\x03 \x01(\x08\"\x82\x01\n.VerifyTransformHistoryWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x16\n\x0esequence_start\x18\x02 \x02(\x05\x12\x14\n\x0csequence_end\x18\x03 \x02(\x05')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'TSACommandArchives_sos_pb2', globals())
@@ -29,12 +29,14 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _PROPAGATEMASTERCHANGECOMMANDARCHIVE._serialized_end=502
   _COMMANDREAPPLYMASTERARCHIVE._serialized_start=505
   _COMMANDREAPPLYMASTERARCHIVE._serialized_end=656
-  _VERIFYDOCUMENTWITHSERVERCOMMANDARCHIVE._serialized_start=658
-  _VERIFYDOCUMENTWITHSERVERCOMMANDARCHIVE._serialized_end=734
-  _VERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE._serialized_start=737
-  _VERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE._serialized_end=893
-  _VERIFYOBJECTSWITHSERVERCOMMANDARCHIVE._serialized_start=896
-  _VERIFYOBJECTSWITHSERVERCOMMANDARCHIVE._serialized_end=1040
-  _VERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE._serialized_start=1043
-  _VERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE._serialized_end=1173
+  _VERIFYACTIVITYSTREAMWITHSERVERCOMMANDARCHIVE._serialized_start=658
+  _VERIFYACTIVITYSTREAMWITHSERVERCOMMANDARCHIVE._serialized_end=740
+  _VERIFYDOCUMENTWITHSERVERCOMMANDARCHIVE._serialized_start=742
+  _VERIFYDOCUMENTWITHSERVERCOMMANDARCHIVE._serialized_end=818
+  _VERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE._serialized_start=821
+  _VERIFYDRAWABLEZORDERSWITHSERVERCOMMANDARCHIVE._serialized_end=977
+  _VERIFYOBJECTSWITHSERVERCOMMANDARCHIVE._serialized_start=980
+  _VERIFYOBJECTSWITHSERVERCOMMANDARCHIVE._serialized_end=1124
+  _VERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE._serialized_start=1127
+  _VERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE._serialized_end=1257
 # @@protoc_insertion_point(module_scope)
