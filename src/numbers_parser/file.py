@@ -76,6 +76,8 @@ def _extract_iwa_archives(blob, filename, file_handler, object_handler):
     # LZFSE compressed according to /usr/bin/file
     if "OperationStorage" in filename:
         return
+    elif "ActivityStream" in filename:
+        return
 
     try:
         iwaf = IWAFile.from_buffer(blob, filename)

@@ -11,16 +11,19 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+import numbers_parser.generated.TSKArchives_pb2 as TSKArchives__pb2
 import numbers_parser.generated.TSPMessages_pb2 as TSPMessages__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15TSAArchives_sos.proto\x12\x06TSASOS\x1a\x11TSPMessages.proto\"\x85\x01\n\x19\x44rawableZOrderListArchive\x12\x1f\n\x0c\x63ontainer_id\x18\x01 \x01(\x0b\x32\t.TSP.UUID\x12#\n\x10\x64rawable_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\x1a\x64rawable_id_list_undefined\x18\x03 \x01(\x08')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15TSAArchives_sos.proto\x12\x06TSASOS\x1a\x11TSKArchives.proto\x1a\x11TSPMessages.proto\"\xf6\x02\n3InducedVerifyActivityStreamWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12)\n\x11server_activities\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\x12#\n\x1bserver_activities_undefined\x18\x03 \x01(\x08\x12@\n8timestamp_of_last_activity_when_last_activity_coalescing\x18\x04 \x02(\x01\x12(\n next_activity_to_transform_index\x18\x05 \x02(\x05\x12/\n\x1c\x61uthor_identifiers_to_verify\x18\x06 \x03(\x0b\x32\t.TSP.UUID\x12.\n&author_identifiers_to_verify_undefined\x18\x07 \x01(\x08\"\x85\x01\n\x19\x44rawableZOrderListArchive\x12\x1f\n\x0c\x63ontainer_id\x18\x01 \x01(\x0b\x32\t.TSP.UUID\x12#\n\x10\x64rawable_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12\"\n\x1a\x64rawable_id_list_undefined\x18\x03 \x01(\x08')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'TSAArchives_sos_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _DRAWABLEZORDERLISTARCHIVE._serialized_start=53
-  _DRAWABLEZORDERLISTARCHIVE._serialized_end=186
+  _INDUCEDVERIFYACTIVITYSTREAMWITHSERVERCOMMANDARCHIVE._serialized_start=72
+  _INDUCEDVERIFYACTIVITYSTREAMWITHSERVERCOMMANDARCHIVE._serialized_end=446
+  _DRAWABLEZORDERLISTARCHIVE._serialized_start=449
+  _DRAWABLEZORDERLISTARCHIVE._serialized_end=582
 # @@protoc_insertion_point(module_scope)

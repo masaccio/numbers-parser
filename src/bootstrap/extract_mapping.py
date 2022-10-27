@@ -1,10 +1,12 @@
+#!/usr/bin/xcrun python3
 """
-Launch Keynote (or technically Pages, or any other iWork app), set a
-breakpoint at the first reasonable method after everything is loaded,
-then dump the contents of `TSPRegistry sharedRegistry` to a JSON file.
+lldb script to dump TSPersistence registry mapping from iWork apps.
 
-Nastiest hack. Please don't use this.
-Copyright 2020 Peter Sobot (psobot.com).
+Licensed under the MIT license.
+
+Copyright 2020-2022 Peter Sobot
+Copyright 2022 Jon Connell
+Copyright 2022 SheetJS LLC
 """
 
 import os
@@ -21,39 +23,49 @@ output = sys.argv[2]
 debugger = lldb.SBDebugger.Create()
 debugger.SetAsync(False)
 target = debugger.CreateTargetWithFileAndArch(exe, None)
-target.BreakpointCreateByName("_sendFinishLaunchingNotification")
 
-target.BreakpointCreateByName("_handleAEOpenEvent:")
-# To get around the fact that we don't have iCloud entitlements when running re-signed code,
-# let's break in the CloudKit code and early exit the function before it can raise an exception:
-target.BreakpointCreateByName("[CKContainer containerWithIdentifier:]")
+# Note: original script also created breakpoints on _handleAEOpenEvent
+# but that is too early in Numbers 12.1
+target.BreakpointCreateByName("-[NSApplication _sendFinishLaunchingNotification]")
+target.BreakpointCreateByName("-[NSApplication _crashOnException:]")
+
+# Note: original script skipped [CKContainer containerWithIdentifier:]
+target.BreakpointCreateByRegex("CloudKit")
 
 process = target.LaunchSimple(None, None, os.getcwd())
-
 if not process:
     raise ValueError("Failed to launch process: " + exe)
+
+if process.GetState() == lldb.eStateExited:
+    raise ValueError(f"LLDB was unable to stop process! {process}")
+
 try:
-    if process.GetState() == lldb.eStateStopped:
+    while process.GetState() == lldb.eStateStopped:
         thread = process.GetThreadAtIndex(0)
-        if thread.GetStopReason() == lldb.eStopReasonBreakpoint:
-            frame = thread.GetSelectedFrame().name
-            if frame == "+[CKContainer containerWithIdentifier:]":
-                # Skip the code in CKContainer, avoiding a crash due to missing entitlements:
-                thread.ReturnFromFrame(
-                    thread.GetSelectedFrame(),
-                    lldb.SBValue().CreateValueFromExpression("0", ""),
-                )
-                process.Continue()
-    if process.GetState() == lldb.eStateStopped:
-        if thread and (frame := thread.GetFrameAtIndex(0)):
-            registry = frame.EvaluateExpression(
-                "[TSPRegistry sharedRegistry]"
-            ).description
-            if registry is None:
+        frame = thread.GetSelectedFrame()
+        if frame.name == "-[NSApplication _crashOnException:]":
+            print("Process crashed")
+            break
+        if thread.GetStopReason() != lldb.eStopReasonBreakpoint:
+            process.Continue()
+            continue
+        if frame.name[-8:] == "CloudKit":
+            print(f"Skipping {frame.name}")
+            thread.ReturnFromFrame(
+                thread.GetSelectedFrame(),
+                lldb.SBValue().CreateValueFromExpression("0", ""),
+            )
+            process.Continue()
+        elif frame.name == "-[NSApplication _sendFinishLaunchingNotification]":
+            registry = frame.EvaluateExpression("[TSPRegistry sharedRegistry]")
+            error = registry.GetError()
+            if error.fail:
+                print(["Failed", error.value, error.description])
+            if registry.description is None:
                 raise (ValueError("Failed to extract registry"))
             split = [
                 x.strip().split(" -> ")
-                for x in registry.split("{")[1].split("}")[0].split("\n")
+                for x in registry.description.split("{")[1].split("}")[0].split("\n")
                 if x.strip()
             ]
             json_str = json.dumps(
@@ -70,9 +82,8 @@ try:
             )
             with open(output, "w") as fh:
                 fh.write(json_str)
+            break
         else:
-            raise ValueError("Could not get frame to print out registry!")
-    else:
-        raise ValueError("LLDB was unable to stop process! " + str(process))
+            process.Continue()
 finally:
     process.Kill()

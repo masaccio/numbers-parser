@@ -62,7 +62,7 @@ bootstrap: $(BOOTSTRAP_FILES)
 
 .bootstrap/mapping.json: .bootstrap/Numbers.unsigned.app
 	@mkdir -p .bootstrap
-	PYTHONPATH=${LLDB_PYTHON_PATH} xcrun python3 src/bootstrap/extract_mapping.py $(NUMBERS)/Contents/MacOS/Numbers $@
+	PYTHONPATH=${LLDB_PYTHON_PATH} xcrun python3 src/bootstrap/extract_mapping.py .bootstrap/Numbers.unsigned.app/Contents/MacOS/Numbers $@
 
 .bootstrap/mapping.py: .bootstrap/mapping.json
 	@mkdir -p .bootstrap

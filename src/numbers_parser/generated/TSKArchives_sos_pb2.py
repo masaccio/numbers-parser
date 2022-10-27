@@ -12,15 +12,20 @@ _sym_db = _symbol_database.Default()
 
 
 import numbers_parser.generated.TSKArchives_pb2 as TSKArchives__pb2
+import numbers_parser.generated.TSPMessages_pb2 as TSPMessages__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15TSKArchives_sos.proto\x12\x06TSKSOS\x1a\x11TSKArchives.proto\"\x8c\x01\n\x1e\x46ixCorruptedDataCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1d\n\x15\x63orrupted_digest_list\x18\x02 \x03(\t\x12\'\n\x1f\x63orrupted_digest_list_undefined\x18\x03 \x01(\x08')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15TSKArchives_sos.proto\x12\x06TSKSOS\x1a\x11TSKArchives.proto\x1a\x11TSPMessages.proto\"\x8c\x01\n\x1e\x46ixCorruptedDataCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1d\n\x15\x63orrupted_digest_list\x18\x02 \x03(\t\x12\'\n\x1f\x63orrupted_digest_list_undefined\x18\x03 \x01(\x08\"\x98\x01\n%RemoveAuthorIdentifiersCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12%\n\x12\x61uthor_identifiers\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12$\n\x1c\x61uthor_identifiers_undefined\x18\x03 \x01(\x08\"G\n!ResetActivityStreamCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'TSKArchives_sos_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _FIXCORRUPTEDDATACOMMANDARCHIVE._serialized_start=53
-  _FIXCORRUPTEDDATACOMMANDARCHIVE._serialized_end=193
+  _FIXCORRUPTEDDATACOMMANDARCHIVE._serialized_start=72
+  _FIXCORRUPTEDDATACOMMANDARCHIVE._serialized_end=212
+  _REMOVEAUTHORIDENTIFIERSCOMMANDARCHIVE._serialized_start=215
+  _REMOVEAUTHORIDENTIFIERSCOMMANDARCHIVE._serialized_end=367
+  _RESETACTIVITYSTREAMCOMMANDARCHIVE._serialized_start=369
+  _RESETACTIVITYSTREAMCOMMANDARCHIVE._serialized_end=440
 # @@protoc_insertion_point(module_scope)
