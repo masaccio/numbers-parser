@@ -14,6 +14,9 @@ import sys
 import json
 import lldb
 
+from debug.lldbutil import print_stacktrace, disassemble, get_module_names
+
+
 if len(sys.argv) != 3:
     raise (ValueError(f"Usage: {sys.argv[0]} exe-file output.json"))
 
@@ -46,8 +49,17 @@ try:
         if frame.name == "-[NSApplication _crashOnException:]":
             print("Process crashed")
             break
-        if thread.GetStopReason() != lldb.eStopReasonBreakpoint:
+
+        stop_reason = thread.GetStopReason()
+        if stop_reason == lldb.eStopReasonException:
+            print_stacktrace(thread)
+            function = frame.GetFunction()
+            function_or_symbol = function if function else frame.GetSymbol()
+            # print(disassemble(target, function_or_symbol))
+            raise ValueError(f"Exception at {frame.name}")
+        if stop_reason != lldb.eStopReasonBreakpoint:
             process.Continue()
+            print(f"Stopping at {frame.name}, StopReason={stop_reason}")
             continue
         if frame.name[-8:] == "CloudKit":
             print(f"Skipping {frame.name}")
