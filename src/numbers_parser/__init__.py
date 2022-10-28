@@ -18,13 +18,15 @@ the case. Formulas themselves rather than the computed values can optionally
 be extracted. Styles are not supported.
 """
 
+import importlib.metadata
 import os
 import plistlib
 import warnings
 
 from numbers_parser.document import Document  # NOQA
 from numbers_parser.cell import *  # NOQA
-from numbers_parser._version import __version__  # NOQA
+
+__version__ = importlib.metadata.version("numbers-parser")
 
 _DEFAULT_NUMBERS_INSTALL_PATH = "/Applications/Numbers.app"
 _VERSION_PLIST_PATH = "Contents/version.plist"
