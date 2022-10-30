@@ -20,31 +20,27 @@ all:
 	@echo "make targets:"
 	@echo "    test       - run pytest with all tests"
 	@echo "    coverage   - run pytest and generate coverage report"
-	@echo "    sdist      - build source distribution"
-	@echo "    upload     - upload source package to PyPI"
+	@echo "    dist       - build distributions"
+	@echo "    upload     - upload package to PyPI"
 	@echo "    clean      - delete temporary files for test, coverage, etc."
 	@echo "    veryclean  - delete all auto-generated files (requires new bootstrap)"
 	@echo "    bootstrap  - rebuild all auto-generated files for new Numbers version"
 
-RELEASE_TARBALL=dist/$(PACKAGE)-$(shell python3 setup.py --version).tar.gz
+dist:
+	poetry build
 
-$(RELEASE_TARBALL): sdist
-
-sdist:
-	python3 setup.py sdist
-
-upload: $(RELEASE_TARBALL)
+upload:
 	tox
-	twine upload $(RELEASE_TARBALL)
+	poetry publish
 
 docs:
 	python3 setup.py build_sphinx
 
 test:
-	PYTHONPATH=src python3 -m pytest tests
+	poetry run pytest
 
 coverage:
-	PYTHONPATH=src python3 -m pytest --cov=$(package_c) --cov-report=html
+	poetry run pytest --cov=$(package_c) --cov-report=html
 
 BOOTSTRAP_FILES = src/$(package_c)/functionmap.py \
 				  src/$(package_c)/generated/__init__.py \
@@ -52,17 +48,25 @@ BOOTSTRAP_FILES = src/$(package_c)/functionmap.py \
 
 bootstrap: $(BOOTSTRAP_FILES)
 
-.bootstrap/Numbers.unsigned.app:
+ENTITLEMENTS = .bootstrap/entitlements.xml
+
+$(ENTITLEMENTS):
+	@mkdir -p .bootstrap
+	@rm -f $@
+	codesign --display --xml --entitlements $@ $(NUMBERS)
+
+.bootstrap/Numbers.unsigned.app: $(ENTITLEMENTS)
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobuf mapping from Numbers"$$(tput init)
 	@mkdir -p .bootstrap
 	rm -rf $@
 	cp -r $(NUMBERS) $@
-	codesign --remove-signature $@/Contents/MacOS/Numbers
-	codesign --sign "${IDENTITY}" $@/Contents/MacOS/Numbers
+	codesign --force --entitlements $(ENTITLEMENTS) --sign "${IDENTITY}" $@
 
 .bootstrap/mapping.json: .bootstrap/Numbers.unsigned.app
 	@mkdir -p .bootstrap
-	PYTHONPATH=${LLDB_PYTHON_PATH} xcrun python3 src/bootstrap/extract_mapping.py .bootstrap/Numbers.unsigned.app/Contents/MacOS/Numbers $@
+	PYTHONPATH=${LLDB_PYTHON_PATH}:src xcrun python3 \
+		src/bootstrap/extract_mapping.py \
+		.bootstrap/Numbers.unsigned.app/Contents/MacOS/Numbers $@
 
 .bootstrap/mapping.py: .bootstrap/mapping.json
 	@mkdir -p .bootstrap

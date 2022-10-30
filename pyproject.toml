@@ -12,7 +12,7 @@ name = "numbers-parser"
 packages = [{include = "numbers_parser", from = "src"}]
 readme = "README.md"
 repository = "https://github.com/masaccio/numbers-parser"
-version = "4.0.0"
+version = "3.8.0"
 
 [tool.poetry.scripts]
 cat-numbers = "numbers_parser._cat_numbers:main"
@@ -33,7 +33,30 @@ pylama = "^8.4.1"
 pytest = "^7.2.0"
 pytest-check = "^1.0.10"
 pytest-console-scripts = "^1.3.1"
+pytest-cov = "^4.0.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0"]
+
+[tool.coverage.run]
+branch = true
+omit = ["src/numbers_parser/generated/*.py"]
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+
+[tool.pytest.ini_options]
+addopts = "-ra -s"
+minversion = 6.0
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = true
+envlist = py38, py39, py310, py311
+[testenv]
+allowlist_externals = poetry
+commands_pre = poetry install --no-root --sync
+commands = poetry run -vvv pytest --import-mode importlib
+"""
