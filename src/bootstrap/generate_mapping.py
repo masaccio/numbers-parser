@@ -40,6 +40,7 @@ TSPRegistryMapping = {{
 {mapping_output}
 }}
 
+
 def compute_maps():
     name_class_map = {{}}
 

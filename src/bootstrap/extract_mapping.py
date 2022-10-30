@@ -14,7 +14,7 @@ import sys
 import json
 import lldb
 
-from debug.lldbutil import print_stacktrace, disassemble, get_module_names
+from debug.lldbutil import print_stacktrace
 
 
 if len(sys.argv) != 3:

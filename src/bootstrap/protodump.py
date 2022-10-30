@@ -184,7 +184,8 @@ def main():
     ]
 
     cprint(
-        f"Bootstrap: scanning {len(all_filenames):,} files under {args.input_path} for protobuf definitions",
+        f"Bootstrap: scanning {len(all_filenames):,}",
+        f"files under {args.input_path} for protobuf definitions",
         "green",
     )
 
@@ -202,7 +203,8 @@ def main():
 
     if missing_deps:
         cprint(
-            f"Warning: unable to print out all Protobuf definitions; {len(missing_deps):,} proto files could not be found:\n{missing_deps}",
+            "Warning: unable to print out all Protobuf definitions;",
+            f"{len(missing_deps):,} proto files could not be found:\n{missing_deps}",
             "red",
         )
     else:

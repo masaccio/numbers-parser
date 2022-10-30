@@ -60,3 +60,19 @@ allowlist_externals = poetry
 commands_pre = poetry install --no-root --sync
 commands = poetry run -vvv pytest --import-mode importlib
 """
+
+# linter settings
+[tool.pylama]
+linters = "pylint,mccabe,pyflakes"
+max_line_length = 100
+skip = ".bootstrap/*,.tox/*,src/numbers_parser/generated/*,src/debug/lldbutil.py"
+
+[tool.pylama.linter.pycodestyle]
+format = "pylint"
+ignore = "E203,E231,W503"
+
+[tool.pylama.linter.mccabe]
+max-complexity = 15
+
+[tool.pylama.linter.pyflakes]
+builtins = "_"

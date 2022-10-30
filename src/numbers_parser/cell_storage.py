@@ -284,7 +284,7 @@ class CellStorage:
                 formatted_value = decode_date_format(
                     custom_format_string, self.datetime
                 )
-            else:
+            else:  # pragma: no cover
                 raise UnsupportedError(
                     f"Unexpected custom format type {custom_format.format_type}"
                 )
@@ -476,7 +476,9 @@ def decode_number_format(format, value, name):  # noqa: C901
             "\u00a4", format.currency_code + "\u00a0"
         )
 
-    if (match := re.search(r"([#0.,]+(E[+]\d+)?)", custom_format_string)) is None:
+    if (
+        match := re.search(r"([#0.,]+(E[+]\d+)?)", custom_format_string)
+    ) is None:  # pragma: no cover
         warn(
             f"Can't parse format string '{custom_format_string}'; skipping",
             UnsupportedWarning,
