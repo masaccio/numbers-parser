@@ -166,8 +166,8 @@ def test_issue_42(script_runner):
         "tests/data/issue-42.numbers",
         print_result=False,
     )
-    assert ret.success
     assert ret.stderr == ""
+    assert ret.success
     lines = ret.stdout.split("\r\n")
     assert lines[5] == ",#REF!"
     assert lines[6] == "7.0,#REF!"
@@ -179,8 +179,8 @@ def test_issue_42(script_runner):
         "tests/data/issue-42.numbers",
         print_result=False,
     )
-    assert ret.success
     assert ret.stderr == ""
+    assert ret.success
     lines = ret.stdout.split("\r\n")
     assert lines[4] == "3.0,#REF!×A5:A6"
     assert lines[5] == ",#REF!×A6:A6"

@@ -9,23 +9,23 @@ from numbers_parser import __version__
 
 def test_version(script_runner):
     ret = script_runner.run("unpack-numbers", "--version", print_result=False)
-    assert ret.success
     assert ret.stdout == __version__ + "\n"
     assert ret.stderr == ""
+    assert ret.success
 
 
 def test_help(script_runner):
     ret = script_runner.run("unpack-numbers", "--help", print_result=False)
-    assert ret.success
     assert "directory name to unpack into" in ret.stdout
     assert "document" in ret.stdout
     assert ret.stderr == ""
+    assert ret.success
 
     ret = script_runner.run("unpack-numbers", print_result=False)
-    assert ret.success
     assert "directory name to unpack into" in ret.stdout
     assert "document" in ret.stdout
     assert ret.stderr == ""
+    assert ret.success
 
 
 def test_multi_doc_error(script_runner):
@@ -119,8 +119,9 @@ def test_pretty_storage(script_runner, tmp_path):
         "tests/data/test-5.numbers",
         print_result=False,
     )
-    assert ret.success
+    assert ret.stderr == ""
     assert ret.stdout == ""
+    assert ret.success
     with open(str(output_dir / "Index/Tables/Tile-875165.json")) as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"][0]
