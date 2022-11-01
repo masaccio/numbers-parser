@@ -15,13 +15,9 @@ jobs:
     - name: Generate coverage report
       run: |
         sudo apt-get -y install libsnappy-dev
-        # easy_install failing for >= 3.10
-        python3 -m pip install pendulum
-        python3 -m pip install --upgrade pip
-        python3 -m pip install -U pytest pytest-console-scripts pytest-check pytest-cov
-        python3 -m pip install -U "protobuf>=3.20.1" python-snappy compact-json regex roman
-        python3 setup.py install
-        PYTHONPATH=src python3 -m pytest --cov= --cov-report=xml
+        pip install poetry
+        poetry install
+        poetry run pytest --cov=numbers_parser --cov-report=html
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:

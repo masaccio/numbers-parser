@@ -25,12 +25,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get -y install libsnappy-dev
-        # easy_install failing for >= 3.10
-        python3 -m pip install pendulum
-        python3 -m pip install --upgrade pip
-        python3 -m pip install -U pytest pytest-console-scripts pytest-check
-        python3 -m pip install -U "protobuf>=3.20.1" python-snappy compact-json regex roman
-        python3 setup.py install
+        pip install poetry
+        poetry install
     - name: Test with pytest
       run: |
-        PYTHONPATH=src python3 -m pytest tests
+        poetry run pytest
