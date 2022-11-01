@@ -1,5 +1,5 @@
 import json
-import imghdr
+import magic
 import sys
 
 import pytest
@@ -49,7 +49,7 @@ def test_unpack_file(script_runner, tmp_path):
     assert ret.success
     assert ret.stdout == ""
     assert (output_dir / "preview.jpg").exists()
-    assert imghdr.what(str(output_dir / "preview.jpg")) == "jpeg"
+    assert "JPEG image data" in magic.from_file(str(output_dir / "preview.jpg"))
     assert (output_dir / "Index/CalculationEngine.json").exists()
     assert (output_dir / "Index/Tables/DataList-954857.json").exists()
     with open(str(output_dir / "Index/Tables/DataList-954857.json")) as f:
@@ -73,7 +73,7 @@ def test_unpack_dir(script_runner, tmp_path):
     assert ret.success
     assert ret.stdout == ""
     assert (output_dir / "preview.jpg").exists()
-    assert imghdr.what(str(output_dir / "preview.jpg")) == "jpeg"
+    assert "JPEG image data" in magic.from_file(str(output_dir / "preview.jpg"))
     assert (output_dir / "Index/CalculationEngine.json").exists()
     assert (output_dir / "Index/Tables/DataList-875166.json").exists()
     with open(str(output_dir / "Index/Tables/DataList-875166.json")) as f:
