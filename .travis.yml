@@ -6,7 +6,7 @@ python:
  - "3.10"
  - "3.11-dev"
 before_install:
-  - sudo apt-get -y install libsnappy-dev
+  - sudo apt-get -y install libsnappy-dev python3-setuptools
   - pip install poetry
 install:
   - poetry install
