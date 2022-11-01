@@ -1,16 +1,19 @@
 language: python
 dist: focal
 python:
- - "3.8"
- - "3.9"
+#  - "3.8"
+#  - "3.9"
  - "3.10"
- - "3.11-dev"
+#  - "3.11-dev"
 before_install:
   - sudo apt-get -y install libsnappy-dev
+  - pip install poetry
   # easy_install failing for >= 3.10
-  - pip install pendulum
+  # - pip install pendulum
 install:
-  - pip install -U pytest pytest-console-scripts pytest-check
-  - python3 setup.py install
+  - poetry install
+  # - pip install -U pytest pytest-console-scripts pytest-check
+  # - python3 setup.py install
 script:
-  - PYTHONPATH=src python3 -m pytest tests
+  - poetry run pytest
+#  - PYTHONPATH=src python3 -m pytest tests
