@@ -1,12 +1,12 @@
 language: python
-dist: jammy
+dist: focal
 python:
  - "3.8"
  - "3.9"
  - "3.10"
  - "3.11-dev"
 before_install:
-  - sudo apt-get -y install libsnappy-dev python3-setuptools
+  - sudo apt-get -y install libsnappy-dev
   - pip install poetry
 install:
   - poetry install
