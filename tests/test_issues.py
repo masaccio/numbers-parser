@@ -168,7 +168,7 @@ def test_issue_42(script_runner):
     )
     assert ret.success
     assert ret.stderr == ""
-    lines = ret.stdout.strip().split("\n")
+    lines = ret.stdout.split("\r\n")
     assert lines[5] == ",#REF!"
     assert lines[6] == "7.0,#REF!"
 
@@ -181,7 +181,7 @@ def test_issue_42(script_runner):
     )
     assert ret.success
     assert ret.stderr == ""
-    lines = ret.stdout.strip().split("\n")
+    lines = ret.stdout.split("\r\n")
     assert lines[4] == "3.0,#REF!×A5:A6"
     assert lines[5] == ",#REF!×A6:A6"
     assert lines[6] == "SUM(A),PRODUCT(B)"
