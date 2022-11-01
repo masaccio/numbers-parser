@@ -872,10 +872,7 @@ class _NumbersModel:
     ) -> int:
         from_table = self.objects[from_table_id]
 
-        print(f"\nadd_table(from_table_id={from_table_id}, table_name={table_name}")
-
         table_strings_id, table_strings = self.create_string_table()
-        print(f"table_strings_id={table_strings_id}")
 
         from_table_refs = field_references(from_table)
         table_model_id, table_model = self.objects.create_object_from_dict(
@@ -897,7 +894,6 @@ class _NumbersModel:
             TSTArchives.TableModelArchive,
         )
 
-        print(f"table_model_id={table_model_id}")
         column_headers_id, column_headers = self.objects.create_object_from_dict(
             "Index/Tables/HeaderStorageBucket-{}",
             {"bucketHashFunction": 1},
@@ -968,7 +964,6 @@ class _NumbersModel:
             {"bucketHashFunction": 1},
             TSTArchives.HeaderStorageBucket,
         )
-        print(f"row_headers_id={row_headers_id}")
 
         self.add_component_metadata(
             row_headers_id, "CalculationEngine", "Tables/HeaderStorageBucket-{}"
@@ -994,10 +989,6 @@ class _NumbersModel:
         formula_owner_uuid = NumbersUUID()
         base_owner_uid = NumbersUUID()
         table_model.haunted_owner.owner_uid.CopyFrom(formula_owner_uuid.protobuf2)
-        print(
-            f"formula_owner_uuid={formula_owner_uuid},",
-            f"base_owner_uid={base_owner_uid}",
-        )
         calc_engine = self.calc_engine()
         owner_id_map = calc_engine.dependency_tracker.owner_id_map.map_entry
         next_owner_id = max([x.internal_owner_id for x in owner_id_map]) + 1
@@ -1048,43 +1039,43 @@ class _NumbersModel:
         reference_tracker = self.objects[
             named_reference_manager.reference_tracker.identifier
         ]
-        # TODO: append formula ID table and get real next ID
+
+        max_formula_id = max(
+            [x.formula_id for x in reference_tracker.contained_tracked_reference]
+        )
+        formula_id = max_formula_id + 1
         for row_num, row in enumerate(data):
-            for col_num, cell in enumerate(row):
-                node = ASTNodeArray.ASTNodeArchive(
-                    AST_node_type=ASTNodeArray.ASTNodeType.CELL_REFERENCE_NODE,
-                    AST_column=ASTNodeArray.ASTColumnCoordinateArchive(
-                        column=col_num, absolute=True
-                    ),
-                    AST_row=ASTNodeArray.ASTRowCoordinateArchive(
-                        row=row_num, absolute=True
-                    ),
-                    AST_cross_table_reference_extra_info=(
-                        ASTNodeArray.ASTCrossTableReferenceExtraInfoArchive(
-                            table_id=base_owner_uid.protobuf4
-                        )
-                    ),
+            node = cell_reference_node(row_num, 0, formula_id, base_owner_uid)
+            reference_tracker.contained_tracked_reference.append(
+                TSCEArchives.TrackedReferenceArchive(
+                    ast=ASTNodeArray(AST_node=[node]),
+                    formula_id=formula_id,
                 )
-                reference_tracker.contained_tracked_reference.append(
-                    TSCEArchives.TrackedReferenceArchive(
-                        ast=ASTNodeArray(AST_node=[node]),
-                        formula_id=next_owner_id,
-                    )
+            )
+            formula_id += 1
+
+        for col_num, row in enumerate(data[0]):
+            node = cell_reference_node(0, col_num, formula_id, base_owner_uid)
+            reference_tracker.contained_tracked_reference.append(
+                TSCEArchives.TrackedReferenceArchive(
+                    ast=ASTNodeArray(AST_node=[node]),
+                    formula_id=formula_id,
                 )
-                owner_id_map.append(
-                    TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
-                        internal_owner_id=next_owner_id,
-                        owner_id=formula_owner_uuid.protobuf4,
-                    )
+            )
+            formula_id += 1
+
+        for row_num, row in enumerate(data):
+            owner_id_map.append(
+                TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
+                    internal_owner_id=next_owner_id,
+                    owner_id=formula_owner_uuid.protobuf4,
                 )
-                next_owner_id += 1
+            )
         # END EXPERIMENTAL
 
         self.objects[sheet_id].drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id)
         )
-        print(f"table_info_id={table_info_id}")
-
         return table_model_id
 
     def add_sheet(self, sheet_name: str) -> int:
@@ -1103,7 +1094,7 @@ class _NumbersModel:
 
         return sheet_id
 
-    def pack_cell_storage_v5(
+    def pack_cell_storage_v5(  # noqa: C901
         self,
         table_id: int,
         data: List,
@@ -1283,6 +1274,22 @@ class _NumbersModel:
                     "bullet_chars": bullet_chars,
                 }
         return None
+
+
+def cell_reference_node(row_num: int, col_num: int, formula_id: int, base_owner_uid):
+    node = ASTNodeArray.ASTNodeArchive(
+        AST_node_type=ASTNodeArray.ASTNodeType.CELL_REFERENCE_NODE,
+        AST_column=ASTNodeArray.ASTColumnCoordinateArchive(
+            column=col_num, absolute=True
+        ),
+        AST_row=ASTNodeArray.ASTRowCoordinateArchive(row=row_num, absolute=True),
+        AST_cross_table_reference_extra_info=(
+            ASTNodeArray.ASTCrossTableReferenceExtraInfoArchive(
+                table_id=base_owner_uid.protobuf4
+            )
+        ),
+    )
+    return node
 
 
 def formatted_number(number_type, index):
