@@ -31,7 +31,7 @@ def read_numbers_file(path, file_handler=None, object_handler=None):
     else:
         try:
             zipf = ZipFile(path)
-        except BadZipFile:  # pragma: no cover
+        except BadZipFile:
             raise FileError("Invalid Numbers file")
         except FileNotFoundError:
             raise FileError("No such file or directory")

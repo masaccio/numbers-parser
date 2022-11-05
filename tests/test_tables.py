@@ -1,6 +1,7 @@
 import pytest
 
 from numbers_parser import Document, TextCell
+from numbers_parser.exceptions import FileError
 
 ZZZ_TABLE_1_REF = [
     [None, "YYY_COL_1", "YYY_COL_2"],
@@ -36,6 +37,15 @@ EMPTY_ROWS_REF = [
     ["A_8", None, "C_8", None, None, "F_8"],
     ["A_9", None, "C_9", None, None, None],
 ]
+
+
+def test_file_exceptions():
+    with pytest.raises(FileError) as e:
+        _ = Document("tests/data/test-1.not-found")
+    assert "No such file or directory" in str(e)
+    with pytest.raises(FileError) as e:
+        _ = Document("tests/conftest.py")
+    assert "Invalid Numbers file" in str(e)
 
 
 def test_sheet_exceptions():
