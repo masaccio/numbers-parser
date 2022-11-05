@@ -13,7 +13,7 @@ from compact_json import Formatter
 from numbers_parser.file import read_numbers_file
 from numbers_parser import _get_version
 from numbers_parser.iwafile import IWAFile
-from numbers_parser.exceptions import FileFormatError, UnsupportedError
+from numbers_parser.exceptions import FileFormatError, UnsupportedError, FileError
 from numbers_parser.numbers_uuid import NumbersUUID
 
 
@@ -136,7 +136,7 @@ def main():
                         filename, blob, output_dir, args
                     ),
                 )
-            except FileFormatError as e:  # pragma: no cover
+            except (FileFormatError, FileError) as e:  # pragma: no cover
                 print(f"{document}:", str(e), file=sys.stderr)
                 sys.exit(1)
 

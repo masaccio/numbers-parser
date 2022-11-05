@@ -1,5 +1,4 @@
 from io import BytesIO
-from struct import unpack
 from zipfile import ZipFile, BadZipFile
 
 from numbers_parser.iwafile import IWAFile, is_iwa_file
@@ -32,8 +31,10 @@ def read_numbers_file(path, file_handler=None, object_handler=None):
     else:
         try:
             zipf = ZipFile(path)
-        except BadZipFile as e:  # pragma: no cover
-            raise FileError(f"{path}: " + str(e))
+        except BadZipFile:  # pragma: no cover
+            raise FileError("Invalid Numbers file")
+        except FileNotFoundError:
+            raise FileError("No such file or directory")
 
         index_zip = [f for f in zipf.namelist() if f.lower().endswith("index.zip")]
         if len(index_zip) > 0:
