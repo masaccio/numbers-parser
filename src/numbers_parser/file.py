@@ -1,7 +1,9 @@
-from zipfile import ZipFile, BadZipFile
-from numbers_parser.iwafile import IWAFile
-from numbers_parser.exceptions import FileError, FileFormatError
 from io import BytesIO
+from struct import unpack
+from zipfile import ZipFile, BadZipFile
+
+from numbers_parser.iwafile import IWAFile, is_iwa_file
+from numbers_parser.exceptions import FileError, FileFormatError
 
 import os
 
@@ -9,7 +11,7 @@ import os
 def read_numbers_file(path, file_handler=None, object_handler=None):
     if os.path.isdir(path):
         if os.path.isfile(os.path.join(path, "Index.zip")):
-            _get_objects_from_zip_file(
+            get_objects_from_zip_file(
                 os.path.join(path, "Index.zip"), file_handler, object_handler
             )
         else:
@@ -21,7 +23,7 @@ def read_numbers_file(path, file_handler=None, object_handler=None):
                     f = open(filepath, "rb")
                     if filename.endswith(".iwa"):
                         blob = f.read()
-                        _extract_iwa_archives(
+                        extract_iwa_archives(
                             blob, filepath, file_handler, object_handler
                         )
                     if file_handler is not None:
@@ -36,11 +38,11 @@ def read_numbers_file(path, file_handler=None, object_handler=None):
         index_zip = [f for f in zipf.namelist() if f.lower().endswith("index.zip")]
         if len(index_zip) > 0:
             index_data = BytesIO(zipf.read(index_zip[0]))
-            _get_objects_from_zip_stream(
+            get_objects_from_zip_stream(
                 ZipFile(index_data), file_handler, object_handler
             )
         else:
-            _get_objects_from_zip_stream(zipf, file_handler, object_handler)
+            get_objects_from_zip_stream(zipf, file_handler, object_handler)
 
 
 def write_numbers_file(filename, file_store):
@@ -53,30 +55,27 @@ def write_numbers_file(filename, file_store):
     zipf.close()
 
 
-def _get_objects_from_zip_file(path, file_handler, object_handler):
+def get_objects_from_zip_file(path, file_handler, object_handler):
     try:
         zipf = ZipFile(path)
     except BadZipFile as e:  # pragma: no cover
         raise FileError(f"{path}: " + str(e))
 
-    _get_objects_from_zip_stream(zipf, file_handler, object_handler)
+    get_objects_from_zip_stream(zipf, file_handler, object_handler)
 
 
-def _get_objects_from_zip_stream(zipf, file_handler, object_handler):
+def get_objects_from_zip_stream(zipf, file_handler, object_handler):
     for filename in zipf.namelist():
         if filename.endswith(".iwa"):
             blob = zipf.read(filename)
-            _extract_iwa_archives(blob, filename, file_handler, object_handler)
+            extract_iwa_archives(blob, filename, file_handler, object_handler)
         elif file_handler is not None:
             blob = zipf.read(filename)
             file_handler(filename, blob)
 
 
-def _extract_iwa_archives(blob, filename, file_handler, object_handler):
-    # LZFSE compressed according to /usr/bin/file
-    if "OperationStorage" in filename:
-        return
-    elif "ActivityStream" in filename:
+def extract_iwa_archives(blob, filename, file_handler, object_handler):
+    if not is_iwa_file(blob):
         return
 
     try:

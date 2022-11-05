@@ -2,7 +2,9 @@
 
 import struct
 import snappy
+
 from functools import partial
+from struct import unpack
 
 from numbers_parser.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_ID_MAP
 from numbers_parser.exceptions import NotImplementedError
@@ -64,16 +66,12 @@ class IWACompressedChunk(object):
             header = data[:4]
 
             first_byte = header[0]
-            if not isinstance(first_byte, int):
-                first_byte = ord(first_byte)
-
             if first_byte != 0x00:
                 raise ValueError(  # pragma: no cover
                     "IWA chunk does not start with 0x00! (found %x)" % first_byte
                 )
 
-            unpacked = struct.unpack_from("<I", bytes(header[1:]) + b"\x00")
-            length = unpacked[0]
+            length = unpack("<I", bytes(header[1:]) + b"\x00")[0]
             chunk = data[4 : 4 + length]
             data = data[4 + length :]
 
@@ -328,3 +326,19 @@ def copy_object_to_iwa_file(iwa_file: IWAFile, obj: object, obj_id: int):
                     _ = msg_info.object_references.pop()
                 for reference in references:
                     msg_info.object_references.append(reference)
+
+
+def is_iwa_file(data):
+    data_length = len(data)
+    length = 0
+    while data:
+        header = data[:4]
+
+        first_byte = header[0]
+        if first_byte != 0x00:
+            return False
+
+        segment_length = unpack("<I", bytes(header[1:]) + b"\x00")[0]
+        length += segment_length + 4
+        data = data[4 + segment_length :]
+    return length == data_length
