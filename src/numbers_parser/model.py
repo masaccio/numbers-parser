@@ -49,9 +49,6 @@ from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
-from numbers_parser.generated.TSCEArchives_pb2 import (
-    ASTNodeArrayArchive as ASTNodeArray,
-)
 
 
 class _NumbersModel:
@@ -271,14 +268,14 @@ class _NumbersModel:
         # Look for a TSCE.FormulaOwnerDependenciesArchive objects with the following at the
         # root level of the protobuf:
         #
-        #     "base_owner_uid": "0x6a4a5281_7b06f5a1_904b7f9e_c784b368",
-        #     "formula_owner_uid": "0x6a4a5281_7b06f5a1_904b7f9e_c784b38b"
+        #     "base_owner_uid": "6a4a5281-7b06-f5a1-904b-7f9ec784b368"",
+        #     "formula_owner_uid": "6a4a5281-7b06-f5a1-904b-7f9ec784b36d"
         #
         # The Table UUID is the TSCE.FormulaOwnerDependenciesArchive whose formula_owner_uid
         # matches the UUID of the haunted_owner of the Table:
         #
         #    "haunted_owner": {
-        #        "owner_uid": "0x6a4a5281_7b06f5a1_904b7f9e_c784b38b"
+        #        "owner_uid": "6a4a5281-7b06-f5a1-904b-7f9ec784b368""
         #    }
         haunted_owner = NumbersUUID(self.objects[table_id].haunted_owner.owner_uid).hex
         formula_owner_ids = self.find_refs("FormulaOwnerDependenciesArchive")
@@ -297,7 +294,7 @@ class _NumbersModel:
         """Exract all the formula cell ranges for the Table."""
         # The TSCE.CalculationEngineArchive contains formulaOwnerInfo records
         # inside the dependencyTracker. Each of these has a cellDependencies
-        # dictionary and some contain cellRecords that contain formula references:
+        # dictionary and some contain cell_records that contain formula references:
         #
         # "cell_dependencies": {
         #     "cell_record": [
@@ -869,6 +866,8 @@ class _NumbersModel:
         y: float,
         num_rows: int,
         num_cols: int,
+        number_of_header_rows=1,
+        number_of_header_columns=1,
     ) -> int:
         from_table = self.objects[from_table_id]
 
@@ -885,8 +884,8 @@ class _NumbersModel:
                 "table_name_enabled": True,
                 "default_row_height": DEFAULT_ROW_HEIGHT,
                 "default_column_width": DEFAULT_COLUMN_WIDTH,
-                "number_of_header_rows": 1,
-                "number_of_header_columns": 1,
+                "number_of_header_rows": number_of_header_rows,
+                "number_of_header_columns": number_of_header_columns,
                 "header_rows_frozen": True,
                 "header_columns_frozen": True,
                 **from_table_refs,
@@ -987,90 +986,434 @@ class _NumbersModel:
 
         # EXPERIMENTAL
         formula_owner_uuid = NumbersUUID()
-        base_owner_uid = NumbersUUID()
-        table_model.haunted_owner.owner_uid.CopyFrom(formula_owner_uuid.protobuf2)
+        # base_owner_uid = NumbersUUID()
         calc_engine = self.calc_engine()
         owner_id_map = calc_engine.dependency_tracker.owner_id_map.map_entry
         next_owner_id = max([x.internal_owner_id for x in owner_id_map]) + 1
+        formula_deps_id, formula_deps = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {
+                "formula_owner_uid": formula_owner_uuid.dict2,
+                "internal_formula_owner_id": next_owner_id,
+                "owner_kind": 1,
+                "cell_dependencies": {},
+                "range_dependencies": {},
+                "volatile_dependencies": {
+                    "volatile_time_cells": {},
+                    "volatile_random_cells": {},
+                    "volatile_locale_cells": {},
+                    "volatile_sheet_table_name_cells": {},
+                    "volatile_remote_data_cells": {},
+                    "volatile_geometry_cell_refs": {},
+                },
+                "spanning_column_dependencies": {
+                    "total_range_for_table": {
+                        "top_left_column": 0,
+                        "top_left_row": 0,
+                        "bottom_right_column": num_cols - 1,
+                        "bottom_right_row": num_cols - 1,
+                    },
+                    "body_range_for_table": {
+                        "top_left_column": number_of_header_columns,
+                        "top_left_row": number_of_header_rows,
+                        "bottom_right_column": num_cols - 1,
+                        "bottom_right_row": num_cols - 1,
+                    },
+                },
+                "spanning_row_dependencies": {
+                    "total_range_for_table": {
+                        "top_left_column": 0,
+                        "top_left_row": 0,
+                        "bottom_right_column": num_cols - 1,
+                        "bottom_right_row": num_cols - 1,
+                    },
+                    "body_range_for_table": {
+                        "top_left_column": number_of_header_columns,
+                        "top_left_row": number_of_header_rows,
+                        "bottom_right_column": num_cols - 1,
+                        "bottom_right_row": num_cols - 1,
+                    },
+                },
+                "whole_owner_dependencies": {"dependent_cells": {}},
+                "cell_errors": {},
+                "formula_owner": {"identifier": table_info_id},
+                "tiled_cell_dependencies": {},
+                "uuid_references": {},
+                "tiled_range_dependencies": {},
+            },
+            TSCEArchives.FormulaOwnerDependenciesArchive,
+        )
+        calc_engine.dependency_tracker.formula_owner_dependencies.append(
+            TSPMessages.Reference(identifier=formula_deps_id)
+        )
         owner_id_map.append(
             TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
                 internal_owner_id=next_owner_id, owner_id=formula_owner_uuid.protobuf4
             )
         )
-        next_owner_id += 1
-        formula_owner_info = calc_engine.dependency_tracker.formula_owner_info
-        formula_owner_info.append(
-            TSCEArchives.FormulaOwnerInfoArchive(
-                formula_owner_id=base_owner_uid.protobuf4,
-                formula_owner=TSPMessages.Reference(identifier=table_info_id),
-                spanning_column_dependencies=TSCEArchives.SpanningDependenciesArchive(
-                    total_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
-                        top_left_column=0,
-                        top_left_row=0,
-                        bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
-                        bottom_right_row=DEFAULT_ROW_COUNT,
-                    ),
-                    body_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
-                        top_left_column=1,
-                        top_left_row=1,
-                        bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
-                        bottom_right_row=DEFAULT_ROW_COUNT,
-                    ),
-                ),
-                spanning_row_dependencies=TSCEArchives.SpanningDependenciesArchive(
-                    total_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
-                        top_left_column=0,
-                        top_left_row=0,
-                        bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
-                        bottom_right_row=DEFAULT_ROW_COUNT,
-                    ),
-                    body_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
-                        top_left_column=1,
-                        top_left_row=1,
-                        bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
-                        bottom_right_row=DEFAULT_ROW_COUNT,
-                    ),
-                ),
-            )
-        )
-        named_reference_manager = self.objects[
-            calc_engine.named_reference_manager.identifier
-        ]
-        reference_tracker = self.objects[
-            named_reference_manager.reference_tracker.identifier
-        ]
 
-        max_formula_id = max(
-            [x.formula_id for x in reference_tracker.contained_tracked_reference]
-        )
-        formula_id = max_formula_id + 1
-        for row_num, row in enumerate(data):
-            node = cell_reference_node(row_num, 0, formula_id, base_owner_uid)
-            reference_tracker.contained_tracked_reference.append(
-                TSCEArchives.TrackedReferenceArchive(
-                    ast=ASTNodeArray(AST_node=[node]),
-                    formula_id=formula_id,
-                )
-            )
-            formula_id += 1
+        # table_model.haunted_owner.owner_uid.CopyFrom(formula_owner_uuid.protobuf2)
+        # owner_id_map.append(
+        #     TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
+        #         internal_owner_id=next_owner_id, owner_id=formula_owner_uuid.protobuf4
+        #     )
+        # )
 
-        for col_num, row in enumerate(data[0]):
-            node = cell_reference_node(0, col_num, formula_id, base_owner_uid)
-            reference_tracker.contained_tracked_reference.append(
-                TSCEArchives.TrackedReferenceArchive(
-                    ast=ASTNodeArray(AST_node=[node]),
-                    formula_id=formula_id,
-                )
-            )
-            formula_id += 1
+        # formula_deps_id, formula_deps = self.objects.create_object_from_dict(
+        #     "CalculationEngine",
+        #     {
+        #         "formula_owner_uid": formula_owner_uuid.dict2,
+        #         "internal_formula_owner_id": next_owner_id,
+        #         "owner_kind": 35,
+        #         "cell_dependencies": {},
+        #         "range_dependencies": {},
+        #         "volatile_dependencies": {
+        #             "volatile_time_cells": {},
+        #             "volatile_random_cells": {},
+        #             "volatile_locale_cells": {},
+        #             "volatile_sheet_table_name_cells": {},
+        #             "volatile_remote_data_cells": {},
+        #             "volatile_geometry_cell_refs": {},
+        #         },
+        #         "spanning_column_dependencies": {
+        #             "total_range_for_table": {
+        #                 "top_left_column": 0x7FFF,
+        #                 "top_left_row": 0x7FFFFFFF,
+        #                 "bottom_right_column": 0x7FFF,
+        #                 "bottom_right_row": 0x7FFFFFFF,
+        #             },
+        #             "body_range_for_table": {
+        #                 "top_left_column": 0x7FFF,
+        #                 "top_left_row": 0x7FFFFFFF,
+        #                 "bottom_right_column": 0x7FFF,
+        #                 "bottom_right_row": 0x7FFFFFFF,
+        #             },
+        #         },
+        #         "spanning_row_dependencies": {
+        #             "total_range_for_table": {
+        #                 "top_left_column": 0x7FFF,
+        #                 "top_left_row": 0x7FFFFFFF,
+        #                 "bottom_right_column": 0x7FFF,
+        #                 "bottom_right_row": 0x7FFFFFFF,
+        #             },
+        #             "body_range_for_table": {
+        #                 "top_left_column": 0x7FFF,
+        #                 "top_left_row": 0x7FFFFFFF,
+        #                 "bottom_right_column": 0x7FFF,
+        #                 "bottom_right_row": 0x7FFFFFFF,
+        #             },
+        #         },
+        #         "whole_owner_dependencies": {"dependent_cells": {}},
+        #         "cell_errors": {},
+        #         "base_owner_uid": base_owner_uid.dict2,
+        #         "tiled_cell_dependencies": {
+        #             # "cell_record_tiles": [{"identifier": "906189"}]
+        #         },
+        #         "uuid_references": {},
+        #         "tiled_range_dependencies": {},
+        #     },
+        #     TSCEArchives.FormulaOwnerDependenciesArchive,
+        # )
+        # calc_engine.dependency_tracker.formula_owner_dependencies.append(
+        #     TSPMessages.Reference(identifier=formula_deps_id)
+        # )
+        # formula_owner_info = calc_engine.dependency_tracker.formula_owner_info
+        # formula_owner_info.append(
+        #     TSCEArchives.FormulaOwnerInfoArchive(
+        #         formula_owner_id=formula_owner_uuid.protobuf4,
+        #         formula_owner=TSPMessages.Reference(identifier=table_info_id),
+        #         spanning_column_dependencies=TSCEArchives.SpanningDependenciesArchive(
+        #             total_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+        #                 top_left_column=0x7FFF,
+        #                 top_left_row=0x7FFFFFFF,
+        #                 bottom_right_column=0x7FFF,
+        #                 bottom_right_row=0x7FFFFFFF,
+        #             ),
+        #             body_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+        #                 top_left_column=0x7FFF,
+        #                 top_left_row=0x7FFFFFFF,
+        #                 bottom_right_column=0x7FFF,
+        #                 bottom_right_row=0x7FFFFFFF,
+        #             ),
+        #         ),
+        #         spanning_row_dependencies=TSCEArchives.SpanningDependenciesArchive(
+        #             total_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+        #                 top_left_column=0x7FFF,
+        #                 top_left_row=0x7FFFFFFF,
+        #                 bottom_right_column=0x7FFF,
+        #                 bottom_right_row=0x7FFFFFFF,
+        #             ),
+        #             body_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+        #                 top_left_column=0x7FFF,
+        #                 top_left_row=0x7FFFFFFF,
+        #                 bottom_right_column=0x7FFF,
+        #                 bottom_right_row=0x7FFFFFFF,
+        #             ),
+        #         ),
+        #     )
+        # )
+        # next_owner_id += 1
+        # formula_owner_info.append(
+        #     TSCEArchives.FormulaOwnerInfoArchive(
+        #         formula_owner_id=base_owner_uid.protobuf4,
+        #         formula_owner=TSPMessages.Reference(identifier=table_info_id),
+        #         spanning_column_dependencies=TSCEArchives.SpanningDependenciesArchive(
+        #             total_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+        #                 top_left_column=0,
+        #                 top_left_row=0,
+        #                 bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
+        #                 bottom_right_row=DEFAULT_ROW_COUNT,
+        #             ),
+        #             body_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+        #                 top_left_column=1,
+        #                 top_left_row=1,
+        #                 bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
+        #                 bottom_right_row=DEFAULT_ROW_COUNT,
+        #             ),
+        #         ),
+        #         spanning_row_dependencies=TSCEArchives.SpanningDependenciesArchive(
+        #             total_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+        #                 top_left_column=0,
+        #                 top_left_row=0,
+        #                 bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
+        #                 bottom_right_row=DEFAULT_ROW_COUNT,
+        #             ),
+        #             body_range_for_deleted_table=TSCEArchives.RangeCoordinateArchive(
+        #                 top_left_column=1,
+        #                 top_left_row=1,
+        #                 bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
+        #                 bottom_right_row=DEFAULT_ROW_COUNT,
+        #             ),
+        #         ),
+        #     )
+        # )
+        # # bottom_right_column=DEFAULT_COLUMN_COUNT - 1,
+        # # bottom_right_row=DEFAULT_ROW_COUNT,
 
-        for row_num, row in enumerate(data):
-            owner_id_map.append(
-                TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
-                    internal_owner_id=next_owner_id,
-                    owner_id=formula_owner_uuid.protobuf4,
-                )
-            )
+        # next_owner_id += 1
+        # formula_deps_id, formula_deps = self.objects.create_object_from_dict(
+        #     "CalculationEngine",
+        #     {
+        #         "formula_owner_uid": base_owner_uid.dict2,
+        #         "internal_formula_owner_id": next_owner_id,
+        #         "owner_kind": 1,
+        #         "cell_dependencies": {},
+        #         "range_dependencies": {},
+        #         "volatile_dependencies": {
+        #             "volatile_time_cells": {},
+        #             "volatile_random_cells": {},
+        #             "volatile_locale_cells": {},
+        #             "volatile_sheet_table_name_cells": {},
+        #             "volatile_remote_data_cells": {},
+        #             "volatile_geometry_cell_refs": {},
+        #         },
+        #         "spanning_column_dependencies": {
+        #             "total_range_for_table": {
+        #                 "top_left_column": 0,
+        #                 "top_left_row": 0,
+        #                 "bottom_right_column": 1,
+        #                 "bottom_right_row": 2,
+        #             },
+        #             "body_range_for_table": {
+        #                 "top_left_column": 1,
+        #                 "top_left_row": 1,
+        #                 "bottom_right_column": 1,
+        #                 "bottom_right_row": 2,
+        #             },
+        #         },
+        #         "spanning_row_dependencies": {
+        #             "total_range_for_table": {
+        #                 "top_left_column": 0,
+        #                 "top_left_row": 0,
+        #                 "bottom_right_column": 1,
+        #                 "bottom_right_row": 2,
+        #             },
+        #             "body_range_for_table": {
+        #                 "top_left_column": 1,
+        #                 "top_left_row": 1,
+        #                 "bottom_right_column": 1,
+        #                 "bottom_right_row": 2,
+        #             },
+        #         },
+        #         "whole_owner_dependencies": {"dependent_cells": {}},
+        #         "cell_errors": {},
+        #         "formula_owner": {"identifier": 904712},
+        #         "tiled_cell_dependencies": {},
+        #         "uuid_references": {},
+        #         "tiled_range_dependencies": {},
+        #     },
+        #     TSCEArchives.FormulaOwnerDependenciesArchive,
+        # )
+
+        # named_reference_manager = self.objects[
+        #     calc_engine.named_reference_manager.identifier
+        # ]
+        # reference_tracker = self.objects[
+        #     named_reference_manager.reference_tracker.identifier
+        # ]
+
+        # header_name_manager = self.objects[calc_engine.header_name_manager.identifier]
+        # # TODO: Fix exception from Protobuf
+        # per_table = header_name_manager.per_tables[-1].__deepcopy__()
+        # per_table.table_uid.MergeFrom(base_owner_uid.protobuf2)
+        # per_table.per_table_precedent.MergeFrom(
+        #     TSCEArchives.CellCoordinateArchive(row=0, column=0)
+        # )
+        # header_name_manager.per_tables.append(per_table)
+        # # Raises TypeError: Message must be initialized with a dict
+        # # header_name_manager.per_tables.append(
+        # #     TSTArchives.HeaderNameMgrArchive.PerTableArchive(
+        # #         table_uid=base_owner_uid,
+        # #         per_table_precedent=TSCEArchives.CellCoordinateArchive(row=2, column=1),
+        # #         header_row_uids=[],
+        # #         header_column_uids=[],
+        # #     )
+        # # )
+        # nrm_owner_uid = NumbersUUID(header_name_manager.nrm_owner_uid)
+        # nrm_formula_owner_info = [
+        #     x
+        #     for x in formula_owner_info
+        #     if NumbersUUID(x.formula_owner_id) == nrm_owner_uid
+        # ][0]
+
+        # formula_owner_dependencies = (
+        #     calc_engine.dependency_tracker.formula_owner_dependencies
+        # )
+        # formula_owner = [
+        #     self.objects[x.identifier]
+        #     for x in formula_owner_dependencies
+        #     if NumbersUUID(self.objects[x.identifier].formula_owner_uid)
+        #     == nrm_owner_uid
+        # ][0]
+
+        # cell_record_tile_id, cell_record_tile = self.objects.create_object_from_dict(
+        #     "CalculationEngine",
+        #     {
+        #         "internal_owner_id": formula_owner.internal_formula_owner_id,
+        #         "tile_column_begin": 0,
+        #         "tile_row_begin": 0,
+        #         "cell_records": [],
+        #     },
+        #     TSCEArchives.CellRecordTileArchive,
+        # )
+        # formula_owner.tiled_cell_dependencies.cell_record_tiles.append(
+        #     TSPMessages.Reference(identifier=cell_record_tile_id)
+        # )
+
+        # max_formula_id = max(
+        #     [x.formula_id for x in reference_tracker.contained_tracked_reference]
+        # )
+        # formula_id = max_formula_id + 1
+
+        # for col_num in range(number_of_header_columns, len(data[0])):
+        #     node = cell_reference_node(0, col_num, formula_id, base_owner_uid)
+        #     reference_tracker.contained_tracked_reference.append(
+        #         TSCEArchives.TrackedReferenceArchive(
+        #             ast=TSCEArchives.ASTNodeArrayArchive(AST_node=[node]),
+        #             formula_id=formula_id,
+        #         )
+        #     )
+        #     packed_row_col = 0x1000000 | (col_num << 16)
+        #     nrm_formula_owner_info.cell_dependencies.cell_record.append(
+        #         TSCEArchives.CellRecordArchive(
+        #             column=formula_id,
+        #             row=0,
+        #             contains_a_formula=True,
+        #             edges=TSCEArchives.EdgesArchive(
+        #                 packed_edge_with_owner=[packed_row_col],
+        #                 internal_owner_id_for_edge=[],
+        #             ),
+        #         )
+        #     )
+        #     formula_owner.cell_dependencies.cell_record.append(
+        #         TSCEArchives.CellRecordExpandedArchive(
+        #             column=formula_id,
+        #             row=0,
+        #             expanded_edges=TSCEArchives.ExpandedEdgesArchive(
+        #                 edge_with_owner_rows=[0],
+        #                 edge_with_owner_columns=[col_num],
+        #                 internal_owner_id_for_edge=[0],
+        #             ),
+        #         )
+        #     )
+        #     cell_record_tile.cell_records.append(
+        #         TSCEArchives.CellRecordExpandedArchive(
+        #             column=formula_id,
+        #             row=0,
+        #             expanded_edges=TSCEArchives.ExpandedEdgesArchive(
+        #                 edge_with_owner_rows=[0],
+        #                 edge_with_owner_columns=[col_num],
+        #                 internal_owner_id_for_edge=[0],
+        #             ),
+        #         )
+        #     )
+        #     formula_id += 1
+
+        # cell_record_tile_id, cell_record_tile = self.objects.create_object_from_dict(
+        #     "CalculationEngine",
+        #     {
+        #         "internal_owner_id": formula_owner.internal_formula_owner_id,
+        #         "tile_column_begin": formula_id - 1,
+        #         "tile_row_begin": 0,
+        #         "cell_records": [],
+        #     },
+        #     TSCEArchives.CellRecordTileArchive,
+        # )
+        # formula_owner.tiled_cell_dependencies.cell_record_tiles.append(
+        #     TSPMessages.Reference(identifier=cell_record_tile_id)
+        # )
+
+        # for row_num in range(number_of_header_rows, len(data)):
+        #     node = cell_reference_node(row_num, 0, formula_id, base_owner_uid)
+        #     reference_tracker.contained_tracked_reference.append(
+        #         TSCEArchives.TrackedReferenceArchive(
+        #             ast=TSCEArchives.ASTNodeArrayArchive(AST_node=[node]),
+        #             formula_id=formula_id,
+        #         )
+        #     )
+        #     packed_row_col = 0x1000000 | row_num
+        #     nrm_formula_owner_info.cell_dependencies.cell_record.append(
+        #         TSCEArchives.CellRecordArchive(
+        #             column=formula_id,
+        #             row=0,
+        #             contains_a_formula=True,
+        #             edges=TSCEArchives.EdgesArchive(
+        #                 packed_edge_with_owner=[packed_row_col],
+        #                 internal_owner_id_for_edge=[],
+        #             ),
+        #         )
+        #     )
+        #     formula_owner.cell_dependencies.cell_record.append(
+        #         TSCEArchives.CellRecordExpandedArchive(
+        #             column=formula_id,
+        #             row=0,
+        #             expanded_edges=TSCEArchives.ExpandedEdgesArchive(
+        #                 edge_with_owner_rows=[row_num],
+        #                 edge_with_owner_columns=[0],
+        #                 internal_owner_id_for_edge=[0],
+        #             ),
+        #         )
+        #     )
+        #     cell_record_tile.cell_records.append(
+        #         TSCEArchives.CellRecordExpandedArchive(
+        #             column=formula_id,
+        #             row=0,
+        #             expanded_edges=TSCEArchives.ExpandedEdgesArchive(
+        #                 edge_with_owner_rows=[row_num],
+        #                 edge_with_owner_columns=[0],
+        #                 internal_owner_id_for_edge=[0],
+        #             ),
+        #         )
+        #     )
+        #     formula_id += 1
+
+        # for row_num, row in enumerate(data):
+        #     owner_id_map.append(
+        #         TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
+        #             internal_owner_id=next_owner_id,
+        #             owner_id=formula_owner_uuid.protobuf4,
+        #         )
+        #     )
         # END EXPERIMENTAL
 
         self.objects[sheet_id].drawable_infos.append(
@@ -1277,14 +1620,16 @@ class _NumbersModel:
 
 
 def cell_reference_node(row_num: int, col_num: int, formula_id: int, base_owner_uid):
-    node = ASTNodeArray.ASTNodeArchive(
-        AST_node_type=ASTNodeArray.ASTNodeType.CELL_REFERENCE_NODE,
-        AST_column=ASTNodeArray.ASTColumnCoordinateArchive(
+    node = TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive(
+        AST_node_type=TSCEArchives.ASTNodeArrayArchive.ASTNodeType.CELL_REFERENCE_NODE,
+        AST_column=TSCEArchives.ASTNodeArrayArchive.ASTColumnCoordinateArchive(
             column=col_num, absolute=True
         ),
-        AST_row=ASTNodeArray.ASTRowCoordinateArchive(row=row_num, absolute=True),
+        AST_row=TSCEArchives.ASTNodeArrayArchive.ASTRowCoordinateArchive(
+            row=row_num, absolute=True
+        ),
         AST_cross_table_reference_extra_info=(
-            ASTNodeArray.ASTCrossTableReferenceExtraInfoArchive(
+            TSCEArchives.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive(
                 table_id=base_owner_uid.protobuf4
             )
         ),
