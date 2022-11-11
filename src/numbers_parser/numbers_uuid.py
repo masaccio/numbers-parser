@@ -41,6 +41,25 @@ class NumbersUUID(UUID):
             raise UnsupportedError(f"Unsupported UUID init type {type(uuid).__name__}")
 
     @property
+    def dict2(self) -> dict:
+        upper = self.int >> 64
+        lower = self.int & 0xFFFFFFFFFFFFFFFF
+        return {"upper": upper, "lower": lower}
+
+    @property
+    def dict4(self) -> object:
+        uuid_w3 = self.int >> 96
+        uuid_w2 = (self.int >> 64) & 0xFFFFFFFF
+        uuid_w1 = (self.int >> 32) & 0xFFFFFFFF
+        uuid_w0 = self.int & 0xFFFFFFFF
+        return {
+            "uuid_w3": uuid_w3,
+            "uuid_w2": uuid_w2,
+            "uuid_w1": uuid_w1,
+            "uuid_w0": uuid_w0,
+        }
+
+    @property
     def protobuf2(self) -> object:
         upper = self.int >> 64
         lower = self.int & 0xFFFFFFFFFFFFFFFF
