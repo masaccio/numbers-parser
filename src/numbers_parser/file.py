@@ -96,7 +96,9 @@ def extract_iwa_archives(blob, filename, file_handler, object_handler):
                 )  # pragma: no cover
 
             identifier = archive.header.identifier
-            # TODO: what should we do for len(archive.objects) > 1?
+            if len(archive.objects) > 1:
+                # TODO: what should we do for len(archive.objects) > 1?
+                pass
             object_handler(identifier, archive.objects[0], filename)
 
     if file_handler is not None:
