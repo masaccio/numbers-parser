@@ -2,19 +2,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: catnumbers",
-            "type": "python",
-            "request": "launch",
-            "program": "src/numbers_parser/_cat_numbers.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "-b",
-                "--formatting",
-                ""
-            ]
-        },
-        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
@@ -32,6 +19,13 @@
             "args": [
                 "${file}"
             ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "commandline",
+            "type":"promptString",
+            "description": "Program Args",
         }
     ]
 }
