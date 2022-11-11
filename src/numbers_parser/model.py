@@ -10,11 +10,9 @@ from warnings import warn
 from numbers_parser.containers import ObjectStore
 from numbers_parser.constants import (
     EPOCH,
-    DEFAULT_COLUMN_COUNT,
     DEFAULT_COLUMN_WIDTH,
     DEFAULT_DOCUMENT,
     DEFAULT_PRE_BNC_BYTES,
-    DEFAULT_ROW_COUNT,
     DEFAULT_ROW_HEIGHT,
     DEFAULT_TABLE_OFFSET,
     DEFAULT_TILE_SIZE,
