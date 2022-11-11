@@ -1,6 +1,81 @@
 # Numbers file format
 
-##  Debugging notes
+## Owner IDs
+
+The single `TSCE.CalculationEngineArchive` contains a number of owner ID mappings:
+
+* `formula_owner_id`: there are a large number of these (one per formula?) where the lower 16 bits of the 128-bit UUID varies by formula ID but the rest of the UUID is constant.
+* `conditional_style_formula_owner_id`: one per table.
+* `base_owner_uid`: one per table.
+* `nrm_owner_uid`: one per document.
+
+`TST.HeaderNameMgrArchive` maps the following UUIDs:
+
+* `nrm_owner_uid`: TBD but this UUID matches the `formula_owner_uid` in one of the many `TSCE.FormulaOwnerDependenciesArchive` archives.
+* `owner_uid`:
+* `per_tables`: a list of `TST.HeaderNameMgrArchive.PerTableArchive` archives that contains references to `table_uid`, `header_row_uids` and `header_column_uids`
+
+`TSCE.CalculationEngineArchive` contains the following:
+
+* `dependency_tracker` (a `.TSCE.DependencyTrackerArchive):
+  * `formula_owner_dependencies`: a list of references to `TSCE.FormulaOwnerDependenciesArchive` archives that contain information about where formulas are located and a mapping between a `base_owner_uid` and `formula_owner_id`
+  * `formula_owner_info`: a list of `.TSCE.FormulaOwnerInfoArchive` archives that contain information about where formulas are located and refer to a `formula_owner_id`.
+  * `owner_id_map`: a list of `TSCE.OwnerIDMapArchive` archives that maps a `internal_owner_id` number to a UUID, which is one of the various `conditional_style_formula_owner_id` or `formula_owner_id` UUIDs:
+
+    ```json
+    { "internal_ownerId": 33, "owner_id": 0x3cb03f23_c26dda92_1e4bfcc0_8750e563 },
+    ```
+
+The (`TST.TableModelArchive`) for each table contains a number of UUIDs:
+
+* `haunted_owner`: matches the `formula_owner_id` of one `TSCE.FormulaOwnerDependenciesArchive` which itself will contain a `base_owner_uid` which is referred to as the owner of many objects. This can be used to escalish a link between a specific table and a `base_owner_id`. The `base_owner_uid` is used in a number of ways:
+  * Resolving cross-table formula references (see `_NumbersModel.node_to_ref()` for how this is used in `numbers-parser`)
+  * Locating all cells that contain formulas (see `_NumbersModel.formula_cell_ranges()`)
+  * Naming all merge cell ranges in a from/to notation (see `_NumbersModel.calculate_merge_cell_ranges()`)
+* `merge_owner`:
+
+## Merge ranges
+
+Merge ranges are stored in a number of structures, but the simplest is a `TSCE.RangePrecedentsTileArchive` which exists for each Table in the Document. These archives contain a `from_to_range`` list which has the merge ranges associated with an integer owner ID key.
+
+ The Owner IDs need to be extracted from the Calculation Engine using the `owner_id_map` described in the [UUID maps of `TSCE.CalculationEngineArchive`](#owner-ids)
+
+``` json
+  "from_to_range": [
+      { "from_coord": { "column": 0, "row": 0 },
+        "refers_to_rect": {
+            "origin": {"column": 0,  "row": 0 },
+            "size": { "num_columns": 2 }
+        }
+      }
+  ],
+  "to_owner_id": 1
+```
+
+##  Formula ranges
+
+ The `TSCE.CalculationEngineArchive` contains `formula_owner_info` records inside `dependency_tracker`. Each of these has a list of  `cell_dependencies` that can be used to identify which cells contain formulas:
+
+ ``` json
+"cell_dependencies": {
+    "cell_record": [
+        {
+            "column": 0,
+            "contains_a_formula": true,
+            "edges": { "packed_edge_without_owner": [ 16777216 ] },
+            "row": 1
+        },
+        {
+            "column": 1,
+            "contains_a_formula": true,
+            "edges": { "packed_edge_without_owner": [16777216 ] },
+            "row": 1
+        }
+    ]
+}
+```
+
+## Creating a Formula Owner for a new Table Model
 
 Each table has a `TSCE.FormulaOwnerDependenciesArchive` with `owner_kind` 1 which identifies a TableModel. For the first table in a document, the `tiled_cell_dependencies` is empty but subsequent sheet tables have a reference to `cell_record_tiles` in them (TODO: what happens for multiple tables in the first sheet). `spanning_column_dependencies` and `spanning_row_dependencies` reflect the size of the table body and headers:
 
@@ -66,7 +141,7 @@ For `TSCE.FormulaOwnerDependenciesArchive` with a non-empty `tiled_cell_dependen
 
 Where the `internal_owner_id` is the `internal_formula_owner_id` from the associated `TSCE.FormulaOwnerDependenciesArchive`.
 
-For tiled_cell_dependencies": { "cell_record_tiles": [ { "identifier": "906191" } ] },
+## Random unformed notes
 
 Adding a new sheet to a document generates a new set of nodes in the `contained_tracked_reference` of a `TSCE.TrackedReferenceStoreArchive`:
 
@@ -259,78 +334,3 @@ Each row and column coordinate has a pair of UUIDs for the row and column which 
 * `TST.HeaderNameMgrArchive.per_tables[].header_column_uids`
 * `TST.ColumnRowUIDMapArchive.sorted_column_uids`
 * `TST.ColumnRowUIDMapArchive.sorted_row_uids`
-
-## Owner IDs
-
-The single `TSCE.CalculationEngineArchive` contains a number of owner ID mappings:
-
-* `formula_owner_id`: there are a large number of these (one per formula?) where the lower 16 bits of the 128-bit UUID varies by formula ID but the rest of the UUID is constant.
-* `conditional_style_formula_owner_id`: one per table.
-* `base_owner_uid`: one per table.
-* `nrm_owner_uid`: one per document.
-
-`TST.HeaderNameMgrArchive` maps the following UUIDs:
-
-* `nrm_owner_uid`: TBD but this UUID matches the `formula_owner_uid` in one of the many `TSCE.FormulaOwnerDependenciesArchive` archives.
-* `owner_uid`:
-* `per_tables`: a list of `TST.HeaderNameMgrArchive.PerTableArchive` archives that contains references to `table_uid`, `header_row_uids` and `header_column_uids`
-
-`TSCE.CalculationEngineArchive` contains the following:
-
-* `dependency_tracker` (a `.TSCE.DependencyTrackerArchive):
-  * `formula_owner_dependencies`: a list of references to `TSCE.FormulaOwnerDependenciesArchive` archives that contain information about where formulas are located and a mapping between a `base_owner_uid` and `formula_owner_id`
-  * `formula_owner_info`: a list of `.TSCE.FormulaOwnerInfoArchive` archives that contain information about where formulas are located and refer to a `formula_owner_id`.
-  * `owner_id_map`: a list of `TSCE.OwnerIDMapArchive` archives that maps a `internal_owner_id` number to a UUID, which is one of the various `conditional_style_formula_owner_id` or `formula_owner_id` UUIDs:
-
-    ```json
-    { "internal_ownerId": 33, "owner_id": 0x3cb03f23_c26dda92_1e4bfcc0_8750e563 },
-    ```
-
-The (`TST.TableModelArchive`) for each table contains a number of UUIDs:
-
-* `haunted_owner`: matches the `formula_owner_id` of one `TSCE.FormulaOwnerDependenciesArchive` which itself will contain a `base_owner_uid` which is referred to as the owner of many objects. This can be used to escalish a link between a specific table and a `base_owner_id`. The `base_owner_uid` is used in a number of ways:
-  * Resolving cross-table formula references (see `_NumbersModel.node_to_ref()` for how this is used in `numbers-parser`)
-  * Locating all cells that contain formulas (see `_NumbersModel.formula_cell_ranges()`)
-  * Naming all merge cell ranges in a from/to notation (see `_NumbersModel.calculate_merge_cell_ranges()`)
-* `merge_owner`:
-
-## Merge ranges
-
-Merge ranges are stored in a number of structures, but the simplest is a `TSCE.RangePrecedentsTileArchive` which exists for each Table in the Document. These archives contain a `from_to_range`` list which has the merge ranges associated with an integer owner ID key.
-
- The Owner IDs need to be extracted from the Calculation Engine using the `owner_id_map` described in the [UUID maps of `TSCE.CalculationEngineArchive`](#owner-ids)
-
-``` json
-  "from_to_range": [
-      { "from_coord": { "column": 0, "row": 0 },
-        "refers_to_rect": {
-            "origin": {"column": 0,  "row": 0 },
-            "size": { "num_columns": 2 }
-        }
-      }
-  ],
-  "to_owner_id": 1
-```
-
-##  Formula ranges
-
- The `TSCE.CalculationEngineArchive` contains `formula_owner_info` records inside `dependency_tracker`. Each of these has a list of  `cell_dependencies` that can be used to identify which cells contain formulas:
-
- ``` json
-"cell_dependencies": {
-    "cell_record": [
-        {
-            "column": 0,
-            "contains_a_formula": true,
-            "edges": { "packed_edge_without_owner": [ 16777216 ] },
-            "row": 1
-        },
-        {
-            "column": 1,
-            "contains_a_formula": true,
-            "edges": { "packed_edge_without_owner": [16777216 ] },
-            "row": 1
-        }
-    ]
-}
-```
