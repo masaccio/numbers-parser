@@ -892,6 +892,8 @@ class _NumbersModel:
             },
             TSTArchives.TableModelArchive,
         )
+        # Supresses Numbers assertion about table models sharing the same category owner
+        table_model.category_owner.identifier = 0
 
         column_headers_id, column_headers = self.objects.create_object_from_dict(
             "Index/Tables/HeaderStorageBucket-{}",
@@ -954,8 +956,8 @@ class _NumbersModel:
         )
 
         data = [
-            [EmptyCell(row_num, col_num) for col_num in range(0, DEFAULT_COLUMN_COUNT)]
-            for row_num in range(0, DEFAULT_ROW_COUNT)
+            [EmptyCell(row_num, col_num) for col_num in range(0, num_cols)]
+            for row_num in range(0, num_rows)
         ]
 
         row_headers_id, _ = self.objects.create_object_from_dict(
