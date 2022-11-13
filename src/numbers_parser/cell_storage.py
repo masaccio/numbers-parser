@@ -552,9 +552,9 @@ def decode_number_format(format, value, name):  # noqa: C901
         int_width = num_integers
 
     if integer == 0 and int_pad_space and (dec_pad_space or dec_pad_zero):
-        formatted_value = f"".rjust(int_width)
+        formatted_value = "".rjust(int_width)
     elif integer == 0 and (not int_pad_zero and not int_pad_space and dec_pad_space):
-        formatted_value = f""
+        formatted_value = ""
     elif int_pad_zero:
         if format.show_thousands_separator:
             formatted_value = f"{integer:0{int_width},}"
@@ -578,10 +578,12 @@ def decode_number_format(format, value, name):  # noqa: C901
         # zeroes when there is no integer format
         if dec_pad_zero or (dec_pad_space and num_integers == 0):
             formatted_value += "." + f"{decimal:,.{dec_width}f}"[2:]
+        elif dec_pad_space and decimal == 0:
+            formatted_value += ".".ljust(dec_width + 1)
         elif dec_pad_space:
             decimal_str = str(decimal)[2:]
             formatted_value += "." + decimal_str.ljust(dec_width)
-        else:
+        elif decimal or num_integers == 0:
             formatted_value += "." + str(decimal)[2:]
 
     formatted_value = custom_format_string.replace(format_spec, formatted_value)
