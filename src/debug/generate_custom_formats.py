@@ -109,12 +109,10 @@ def custom_format(
     num_decimals=0,
     show_thousands_separator=False,
 ) -> object:
-    format_name = "Format_"
-    format_name += "I=" + str(integer_format) + "_"
-    format_name += "Int" + str(num_integers) + "_"
-    format_name += "D=" + str(decimal_format) + "_"
-    format_name += "Dec" + str(num_decimals) + "_"
-    format_name += "Sep" if show_thousands_separator else "NoSep"
+    format_name = "Fmt:"
+    format_name += "I=" + str(num_integers) + "_" + str(integer_format) + "_"
+    format_name += "D=" + str(num_decimals) + "_" + str(decimal_format)
+    format_name += "_Sep" if show_thousands_separator else ""
 
     if num_integers == 0:
         format_string = ""
@@ -144,12 +142,7 @@ def custom_format(
     index_from_right_last_integer = (
         num_decimals + 1 if num_integers > 0 else num_decimals
     )
-    decimal_width = (
-        num_decimals
-        if decimal_format == PaddingType.SPACES and integer_format != PaddingType.ZEROS
-        else 0
-    )
-    # TODO: simplify
+    decimal_width = num_decimals if decimal_format == PaddingType.SPACES else 0
     is_complex = "0" in format_string and (
         min_integer_width > 0 or num_nonspace_decimal_digits == 0
     )
@@ -210,8 +203,9 @@ custom_format_list_id = doc._model.objects[
 ].super.custom_format_list.identifier
 custom_format_list = doc._model.objects[custom_format_list_id]
 
-test_formula_key = table.cell(1, 2)._storage.formula_id
-test_format_id = table.cell(1, 2)._storage.num_format_id
+test_formula_key = table.cell("H2")._storage.formula_id
+check_formula_key = table.cell("I2")._storage.formula_id
+check_format_id = table.cell(1, 2)._storage.num_format_id
 
 row_num = 2
 for integer_format in [
@@ -224,8 +218,6 @@ for integer_format in [
         PaddingType.ZEROS,
         PaddingType.SPACES,
     ]:
-        # for num_integers in [0, 5]:
-        #     for num_decimals in [0, 5]:
         for num_integers in range(0, 10):
             for num_decimals in range(0, 10):
                 if num_integers == 0 and num_decimals == 0:
@@ -248,6 +240,7 @@ for integer_format in [
                     for value in [
                         0.23,
                         2.34,
+                        23.0,
                         23.45,
                         234.56,
                         2345.67,
@@ -263,6 +256,8 @@ for integer_format in [
                         write_format_key(table, row_num, 7, format_id)
                         write_formula_key(table, row_num, 7, test_formula_key)
                         table.write(row_num, 8, "0.0")
+                        write_format_key(table, row_num, 8, check_format_id)
+                        write_formula_key(table, row_num, 8, check_formula_key)
                         row_num += 1
 
 doc.save("tests/data/custom-format-stress.numbers")
