@@ -511,10 +511,18 @@ def decode_number_format(format, value, name):  # noqa: C901
         else:
             dec_pad_zero = False
             dec_pad_space = True
+    else:
+        dec_pad_zero = False
+        dec_pad_space = False
     dec_width = num_decimals
 
-    integer = int(value) if num_decimals > 0 else round(value)
-    decimal = math.modf(value)[0]
+    (integer, decimal) = str(float(value)).split(".")
+    if num_decimals > 0:
+        integer = int(integer)
+        decimal = round(float(f"0.{decimal}"), num_decimals)
+    else:
+        integer = round(value)
+        decimal = float(f"0.{decimal}")
 
     num_integers = len(int_part.replace(",", ""))
     if num_integers > 0:
@@ -543,7 +551,11 @@ def decode_number_format(format, value, name):  # noqa: C901
         int_pad_space = False
         int_width = num_integers
 
-    if int_pad_zero:
+    if integer == 0 and int_pad_space and (dec_pad_space or dec_pad_zero):
+        formatted_value = f"".rjust(int_width)
+    elif integer == 0 and (not int_pad_zero and not int_pad_space and dec_pad_space):
+        formatted_value = f""
+    elif int_pad_zero:
         if format.show_thousands_separator:
             formatted_value = f"{integer:0{int_width},}"
         else:
@@ -567,10 +579,10 @@ def decode_number_format(format, value, name):  # noqa: C901
         if dec_pad_zero or (dec_pad_space and num_integers == 0):
             formatted_value += "." + f"{decimal:,.{dec_width}f}"[2:]
         elif dec_pad_space:
-            decimal_str = str(round(decimal, dec_width))[2:]
+            decimal_str = str(decimal)[2:]
             formatted_value += "." + decimal_str.ljust(dec_width)
         else:
-            formatted_value += "." + str(round(decimal, dec_width))[2:]
+            formatted_value += "." + str(decimal)[2:]
 
     formatted_value = custom_format_string.replace(format_spec, formatted_value)
     return expand_quotes(formatted_value)
