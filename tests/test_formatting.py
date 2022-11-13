@@ -2,9 +2,8 @@ import pytest
 import pytest_check as check
 
 
-from datetime import datetime
 from numbers_parser import Document
-from numbers_parser.cell import EmptyCell, BoolCell
+from numbers_parser.cell import EmptyCell
 
 
 def test_duration_formatting():
