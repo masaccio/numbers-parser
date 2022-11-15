@@ -218,8 +218,8 @@ for integer_format in [
         PaddingType.ZEROS,
         PaddingType.SPACES,
     ]:
-        for num_integers in range(0, 10):
-            for num_decimals in range(0, 10):
+        for num_integers in [0, 1, 2, 4, 9]:
+            for num_decimals in [0, 1, 2, 4, 9]:
                 if num_integers == 0 and num_decimals == 0:
                     continue
                 for show_thousands_separator in [False, True]:
@@ -241,8 +241,6 @@ for integer_format in [
                         0.23,
                         2.34,
                         23.0,
-                        23.45,
-                        234.56,
                         2345.67,
                     ]:
                         table.write(row_num, 0, format.name)
