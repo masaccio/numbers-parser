@@ -1,7 +1,7 @@
 import math
 import re
 
-from collections import OrderedDict
+from collections import OrderedDict, Tuple
 from enum import Enum
 from fractions import Fraction
 from functools import lru_cache
@@ -248,7 +248,7 @@ class CellStorage:
 
     @property
     @lru_cache(maxsize=None)
-    def image_data(self) -> tuple[bytes, str]:
+    def image_data(self) -> Tuple[bytes, str]:
         """Return the background image data for a cell or None if no image"""
         if self.cell_style_id is None:
             return None
