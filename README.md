@@ -164,6 +164,17 @@ else:
 
 Bulleted and numbered data can also be extracted with the bullet or number characters present in the text for each line in the cell in the same way as above but using the `formatted_bullets` property. A single space is inserted between the bullet character and the text string and in the case of bullets, this will be the Unicode character seen in Numbers, for example `"• some text"`.
 
+###  Cell images
+
+Querying cell formats is currently limited to image backrgounds only. If a cell has no background image, `None` is returned for all calls.
+
+``` python
+cell = table.cell("B1")
+with open (cell.image_filename, "wb") as f:
+    f.write(cell.image_data)
+print("Wrote file of type", cell.image_type)
+```
+
 ## Writing Numbers files
 
 *This is considered experimental*: you are highly recommened not to overwrite working Numbers files and instead save data to a new file.
