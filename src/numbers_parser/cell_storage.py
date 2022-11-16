@@ -2,14 +2,15 @@ import math
 import re
 
 from collections import OrderedDict
-from pendulum import datetime, duration
 from enum import Enum
 from fractions import Fraction
+from functools import lru_cache
+from pendulum import datetime, duration
 from struct import unpack
 from warnings import warn
 
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
-from numbers_parser.constants import EPOCH
+from numbers_parser.constants import EPOCH, PACKAGE_ID
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
@@ -244,6 +245,30 @@ class CellStorage:
             return self.custom_format()
         else:
             return None
+
+    @property
+    @lru_cache(maxsize=None)
+    def image_data(self) -> tuple[bytes, str]:
+        """Return the background image data for a cell or None if no image"""
+        if self.cell_style_id is None:
+            return None
+        style = self.model.table_style(self.table_id, self.cell_style_id)
+        if not style.cell_properties.cell_fill.HasField("image"):
+            return None
+
+        image_id = style.cell_properties.cell_fill.image.imagedata.identifier
+        datas = self.model.objects[PACKAGE_ID].datas
+        image_file_names = [x.file_name for x in datas if x.identifier == image_id]
+        if len(image_file_names) == 0:
+            warn(f"No image found with ID {image_id}", UnsupportedWarning)
+            return None
+
+        image_path_name = [
+            x
+            for x in self.model.objects.file_store.keys()
+            if x == f"Data/{image_file_names[0]}"
+        ][0]
+        return (self.model.objects.file_store[image_path_name], image_file_names[0])
 
     def custom_format(self) -> str:
         if self.text_format_id is not None and self.type == CellType.TEXT:
@@ -570,7 +595,7 @@ def decode_number_format(format, value, name):  # noqa: C901
     elif integer == 0 and int_pad is None and dec_pad == CellPadding.SPACE:
         formatted_value = ""
     elif integer == 0 and int_pad == CellPadding.SPACE and dec_pad is not None:
-        formatted_value = ""
+        formatted_value = "".rjust(int_width)
     elif (
         integer == 0
         and int_pad == CellPadding.SPACE
@@ -595,11 +620,7 @@ def decode_number_format(format, value, name):  # noqa: C901
             formatted_value = str(integer)
 
     if num_decimals:
-        # Possible Numbers bug: decimal padding with spaces is rendered as
-        # zeroes when there is no integer format
-        if dec_pad == CellPadding.ZERO or (
-            dec_pad == CellPadding.SPACE and num_integers == 0
-        ):
+        if dec_pad == CellPadding.ZERO:
             formatted_value += "." + f"{decimal:,.{dec_width}f}"[2:]
         elif dec_pad == CellPadding.SPACE and decimal == 0:
             formatted_value += ".".ljust(dec_width + 1)

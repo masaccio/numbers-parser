@@ -1,3 +1,4 @@
+import magic
 import re
 
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
@@ -99,6 +100,30 @@ class Cell:
     @property
     def formatted_value(self):
         return self._storage.formatted
+
+    @property
+    def image_data(self) -> bytes:
+        """Return the background image for a cell, or None if no image"""
+        data = self._storage.image_data
+        if data is None:
+            return None
+        return data[0]
+
+    @property
+    def image_filename(self) -> bytes:
+        """Return the background image filename for a cell, or None if no image"""
+        data = self._storage.image_data
+        if data is None:
+            return None
+        return self._storage.image_data[1]
+
+    @property
+    def image_type(self) -> str:
+        """Return the type of a background image for a cell, or None if no image"""
+        data = self._storage.image_data
+        if data is None:
+            return None
+        return magic.from_buffer(data[0])
 
 
 class NumberCell(Cell):

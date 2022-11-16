@@ -1,9 +1,10 @@
+import magic
 import pytest
 import re
 
 from numbers_parser import Document, NumberCell
 from pendulum import datetime, duration
-from numbers_parser.cell import ErrorCell
+from numbers_parser.cell import ErrorCell, EmptyCell
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"
@@ -54,7 +55,6 @@ def test_issue_3():
     doc = Document("tests/data/issue-3.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
-    table = tables[0]
     ref = []
     for row in tables[0].iter_rows():
         ref.append(tuple([x.value for x in row]))
@@ -185,3 +185,23 @@ def test_issue_42(script_runner):
     assert lines[4] == "3.0,#REF!×A5:A6"
     assert lines[5] == ",#REF!×A6:A6"
     assert lines[6] == "SUM(A),PRODUCT(B)"
+
+
+def test_issue_43():
+    doc = Document("tests/data/issue-43.numbers")
+    table = doc.sheets[0].tables[0]
+    cell = table.cell("A1")
+    assert type(cell) == EmptyCell
+    assert "PNG image data" in magic.from_buffer(cell.image_data)
+    assert len(cell.image_data) == 87857
+    assert "PNG image data" in cell.image_type
+    assert cell.image_filename == "pasted-image-17.png"
+
+    cell = table.cell("B1")
+    assert cell.value == "text "
+    assert "TIFF image data" in magic.from_buffer(cell.image_data)
+    assert len(cell.image_data) == 365398
+    assert "TIFF image data" in cell.image_type
+    assert cell.image_filename == "pasted-image-19.tiff"
+
+    assert table.cell("C1").image_data is None
