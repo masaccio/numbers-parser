@@ -1,12 +1,13 @@
 import math
 import re
 
-from collections import OrderedDict, Tuple
+from collections import OrderedDict
 from enum import Enum
 from fractions import Fraction
 from functools import lru_cache
 from pendulum import datetime, duration
 from struct import unpack
+from typing import Tuple
 from warnings import warn
 
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
