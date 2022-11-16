@@ -178,26 +178,33 @@ class _NumbersModel:
         return custom_format_map
 
     @lru_cache(maxsize=None)
-    def table_format_entries(self, format_id):
-        return {x.key: x.format for x in self.objects[format_id].entries}
+    def datalist(self, table_id, datalist_name: int) -> dict:
+        """Return a table's TST.DataList as a dict"""
+        base_data_store = self.objects[table_id].base_data_store
+        datalist_id = getattr(base_data_store, datalist_name).identifier
+        return {x.key: x for x in self.objects[datalist_id].entries}
+
+    @lru_cache(maxsize=None)
+    def datalist_lookup(self, table_id: int, datalist_name: str, key: int) -> str:
+        """Return the an entry in a table's datalist matching a key"""
+        data_list = self.datalist(table_id, datalist_name)
+        return data_list[key]
 
     @lru_cache(maxsize=None)
     def table_format(self, table_id: int, key: int) -> str:
         """Return the format associated with a format ID for a particular table"""
-        bds = self.objects[table_id].base_data_store
-        format_table_id = bds.format_table.identifier
-        return self.table_format_entries(format_table_id)[key]
+        return self.datalist_lookup(table_id, "format_table", key).format
 
     @lru_cache(maxsize=None)
-    def table_string_entries(self, strings_id):
-        return {x.key: x.string for x in self.objects[strings_id].entries}
+    def table_style(self, table_id: int, key: int) -> str:
+        """Return the style associated with a style ID for a particular table"""
+        style_entry = self.datalist_lookup(table_id, "styleTable", key)
+        return self.objects[style_entry.reference.identifier]
 
     @lru_cache(maxsize=None)
     def table_string(self, table_id: int, key: int) -> str:
         """Return the string assocuated with a string ID for a particular table"""
-        bds = self.objects[table_id].base_data_store
-        table_strings_id = bds.stringTable.identifier
-        return self.table_string_entries(table_strings_id)[key]
+        return self.datalist_lookup(table_id, "stringTable", key).string
 
     def init_table_strings(self, table_id: int):
         """Cache table strings reference and delete all existing keys/values"""
