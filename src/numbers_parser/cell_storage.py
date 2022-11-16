@@ -561,6 +561,8 @@ def decode_number_format(format, value, name):  # noqa: C901
         decimal = float(f"0.{decimal}")
 
     num_integers = len(int_part.replace(",", ""))
+    if not format.show_thousands_separator:
+        int_part = int_part.replace(",", "")
     if num_integers > 0:
         if int_part[0] == "#":
             int_pad = None
