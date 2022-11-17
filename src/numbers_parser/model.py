@@ -724,15 +724,6 @@ class _NumbersModel:
         )
         return table_strings_id, table_strings
 
-    # def style_sheet_map(self, objects):
-    #     style_sheet_id = objects.find_refs("StylesheetArchive")[0]
-    #     style_sheet = objects[style_sheet_id]
-    #     style_sheet_map = {
-    #         x.identifier: x.style.identifier
-    #         for x in style_sheet.identifier_to_style_map
-    #     }
-    #     return style_sheet_map
-
     def table_height(self, table_id: int) -> int:
         """Return the height of a table in points"""
         table_model = self.objects[table_id]
