@@ -245,7 +245,7 @@ class CellStorage:
         ):
             return self.custom_format()
         else:
-            return None
+            return self.value
 
     @property
     @lru_cache(maxsize=None)
@@ -586,6 +586,9 @@ def decode_number_format(format, value, name):  # noqa: C901
         int_pad = None
         int_width = num_integers
 
+    # if num_integers == 0 and dec_pad == CellPadding.SPACE:
+    #     dec_pad = CellPadding.ZERO
+
     # Formatting integer zero:
     #   Blank (padded if needed) if int_pad is SPACE and no decimals
     #   No leading zero if:
@@ -625,8 +628,8 @@ def decode_number_format(format, value, name):  # noqa: C901
     if num_decimals:
         if dec_pad == CellPadding.ZERO:
             formatted_value += "." + f"{decimal:,.{dec_width}f}"[2:]
-        elif dec_pad == CellPadding.SPACE and decimal == 0:
-            formatted_value += ".".ljust(dec_width + 1)
+        # elif dec_pad == CellPadding.SPACE and decimal == 0:
+        #     formatted_value += ".".ljust(dec_width + 1)
         elif dec_pad == CellPadding.SPACE:
             decimal_str = str(decimal)[2:]
             formatted_value += "." + decimal_str.ljust(dec_width)
