@@ -49,6 +49,67 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 
 
+class DataLists:
+    """Model for TST.DataList with caching and key generation for new values"""
+
+    def __init__(self, model: object, datalist_name: str, value_attr: str = None):
+        self._model = model
+        self._datalists = {}
+        self._value_attr = value_attr
+        self._datalist_name = datalist_name
+
+    def add_table(self, table_id: int):
+        """Cache a new datalist for a table if not already seen"""
+        if table_id not in self._datalists:
+            base_data_store = self._model.objects[table_id].base_data_store
+            datalist_id = getattr(base_data_store, self._datalist_name).identifier
+            datalist = self._model.objects[datalist_id]
+
+            max_key = 0
+            self._datalists[table_id] = {}
+            self._datalists[table_id]["by_key"] = {}
+            self._datalists[table_id]["by_value"] = {}
+            self._datalists[table_id]["datalist"] = datalist.entries
+            for entry in datalist.entries:
+                if entry.key > max_key:
+                    max_key = entry.key
+                    self._datalists[table_id]["by_key"][entry.key] = entry
+                    if self._value_attr is not None:
+                        value = getattr(entry, self._value_attr)
+                        self._datalists[table_id]["by_value"][value] = entry.key
+            self._datalists[table_id]["next_key"] = max_key + 1
+
+    def lookup_value(self, table_id: int, key: int):
+        """Return the an entry in a table's datalist matching a key"""
+        return self._datalists[table_id]["by_key"][key]
+
+    def init(self, table_id: int):
+        """Remove all entries from a datalist"""
+        self.add_table(table_id)
+        self._datalists[table_id]["by_key"] = {}
+        self._datalists[table_id]["by_value"] = {}
+        self._datalists[table_id]["next_key"] = 1
+        clear_field_container(self._datalists[table_id]["datalist"])
+
+    def lookup_key(self, table_id: int, value) -> int:
+        """Return the key associated with a value for a particular table entry.
+        If the value is not in the datalist, allocate a new entry with the
+        next available key"""
+        self.add_table(table_id)
+        if value not in self._datalists[table_id]["by_value"]:
+            key = self._datalists[table_id]["next_key"]
+            self._datalists[table_id]["next_key"] += 1
+            attrs = {"key": key, self._value_attr: value, "refcount": 1}
+            entry = TSTArchives.TableDataList.ListEntry(**attrs)
+            self._datalists[table_id]["datalist"].append(entry)
+            self._datalists[table_id]["by_key"][key] = entry
+        else:
+            key = self._datalists[table_id]["by_value"][value]
+            self._datalists[table_id]["by_key"][key].refcount += 1
+
+        return key
+
+
 class _NumbersModel:
     """
     Loads all objects from Numbers document and provides decoding
@@ -62,10 +123,13 @@ class _NumbersModel:
         if filename is None:
             filename = DEFAULT_DOCUMENT
         self.objects = ObjectStore(filename)
-        self._table_strings = {}
+        # self._table_strings = {}
         self._merge_cells = {}
         self._row_heights = {}
         self._col_widths = {}
+        self._table_formats = DataLists(self, "format_table")
+        self._table_styles = DataLists(self, "styleTable")
+        self._table_strings = DataLists(self, "stringTable", "string")
 
     @property
     def file_store(self):
@@ -178,67 +242,33 @@ class _NumbersModel:
         return custom_format_map
 
     @lru_cache(maxsize=None)
-    def datalist(self, table_id, datalist_name: int) -> dict:
-        """Return a table's TST.DataList as a dict"""
-        base_data_store = self.objects[table_id].base_data_store
-        datalist_id = getattr(base_data_store, datalist_name).identifier
-        return {x.key: x for x in self.objects[datalist_id].entries}
-
-    @lru_cache(maxsize=None)
-    def datalist_lookup(self, table_id: int, datalist_name: str, key: int) -> str:
-        """Return the an entry in a table's datalist matching a key"""
-        data_list = self.datalist(table_id, datalist_name)
-        return data_list[key]
-
-    @lru_cache(maxsize=None)
     def table_format(self, table_id: int, key: int) -> str:
         """Return the format associated with a format ID for a particular table"""
-        return self.datalist_lookup(table_id, "format_table", key).format
+        self._table_formats.add_table(table_id)
+        return self._table_formats.lookup_value(table_id, key).format
 
     @lru_cache(maxsize=None)
     def table_style(self, table_id: int, key: int) -> str:
         """Return the style associated with a style ID for a particular table"""
-        style_entry = self.datalist_lookup(table_id, "styleTable", key)
+        self._table_styles.add_table(table_id)
+        style_entry = self._table_styles.lookup_value(table_id, key)
         return self.objects[style_entry.reference.identifier]
 
     @lru_cache(maxsize=None)
     def table_string(self, table_id: int, key: int) -> str:
         """Return the string assocuated with a string ID for a particular table"""
-        return self.datalist_lookup(table_id, "stringTable", key).string
+        self._table_strings.add_table(table_id)
+        return self._table_strings.lookup_value(table_id, key).string
 
     def init_table_strings(self, table_id: int):
         """Cache table strings reference and delete all existing keys/values"""
-        if table_id not in self._table_strings:
-            bds = self.objects[table_id].base_data_store
-            table_strings_id = bds.stringTable.identifier
-            self._table_strings[table_id] = self.objects[table_strings_id].entries
-        clear_field_container(self._table_strings[table_id])
+        self._table_strings.init(table_id)
 
     def table_string_key(self, table_id: int, value: str) -> int:
         """Return the key associated with a string for a particular table. If
         the string is not in the strings table, allocate a new entry with the
         next available key"""
-        if table_id not in self._table_strings:
-            bds = self.objects[table_id].base_data_store
-            table_strings_id = bds.stringTable.identifier
-            self._table_strings[table_id] = self.objects[table_strings_id].entries
-
-        string_lookup = {x.string: x.key for x in self._table_strings[table_id]}
-        if value not in string_lookup:
-            if len(string_lookup) == 0:
-                key = 1
-            else:
-                key = max(string_lookup.values()) + 1
-            entry = TSTArchives.TableDataList.ListEntry(
-                key=key, string=value, refcount=1
-            )
-            self._table_strings[table_id].append(entry)
-        else:
-            key = string_lookup[value]
-            for entry in self._table_strings[table_id]:
-                if entry.key == key:
-                    entry.refcount += 1
-        return key
+        return self._table_strings.lookup_key(table_id, value)
 
     @lru_cache(maxsize=None)
     def owner_id_map(self):
