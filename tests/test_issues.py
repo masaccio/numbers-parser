@@ -207,14 +207,12 @@ def test_issue_43():
     assert type(cell) == EmptyCell
     assert "PNG image data" in magic.from_buffer(cell.image_data)
     assert len(cell.image_data) == 87857
-    assert "PNG image data" in cell.image_type
     assert cell.image_filename == "pasted-image-17.png"
 
     cell = table.cell("B1")
     assert cell.value == "text "
     assert "TIFF image data" in magic.from_buffer(cell.image_data)
     assert len(cell.image_data) == 365398
-    assert "TIFF image data" in cell.image_type
     assert cell.image_filename == "pasted-image-19.tiff"
 
     assert table.cell("C1").image_data is None
