@@ -242,10 +242,11 @@ class CellStorage:
             self.text_format_id is not None
             or self.num_format_id is not None
             or self.currency_format_id is not None
+            or self.bool_format_id is not None
         ):
             return self.custom_format()
         else:
-            return self.value
+            return str(self.value)
 
     @property
     @lru_cache(maxsize=None)
@@ -278,8 +279,10 @@ class CellStorage:
             format = self.model.table_format(self.table_id, self.currency_format_id)
         elif self.num_format_id is not None:
             format = self.model.table_format(self.table_id, self.num_format_id)
+        elif self.bool_format_id is not None:
+            format = self.model.table_format(self.table_id, self.bool_format_id)
         else:
-            return self.value
+            return str(self.value)
         if format.HasField("custom_uid"):
             format_uuid = NumbersUUID(format.custom_uid).hex
             format_map = self.model.custom_format_map()
@@ -310,8 +313,12 @@ class CellStorage:
                 raise UnsupportedError(
                     f"Unexpected custom format type {custom_format.format_type}"
                 )
+        elif format.format_type == FormatType.DECIMAL:
+            return format_decimal(self.d128, format)
+        elif format.format_type == FormatType.BOOLEAN:
+            return "TRUE" if self.value else "FALSE"
         else:
-            formatted_value = self.value
+            formatted_value = str(self.value)
         return formatted_value
 
     def date_format(self) -> str:
@@ -638,6 +645,31 @@ def decode_number_format(format, value, name):  # noqa: C901
 
     formatted_value = custom_format_string.replace(format_spec, formatted_value)
     return expand_quotes(formatted_value)
+
+
+def format_decimal(value, format):
+    if value < 0 and format.negative_style == 1:
+        accounting_style = False
+        value = -value
+    elif value < 0 and format.negative_style >= 2:
+        accounting_style = True
+        value = -value
+    else:
+        accounting_style = False
+    if format.show_thousands_separator:
+        thousands = ","
+    else:
+        thousands = ""
+    if value.is_integer() and format.decimal_places >= 253:
+        formatted_value = f"{int(value):{thousands}}"
+    elif format.decimal_places >= 253:
+        formatted_value = f"{value:{thousands}}"
+    else:
+        formatted_value = f"{value:{thousands}.{format.decimal_places}f}"
+    if accounting_style:
+        return f"({formatted_value})"
+    else:
+        return formatted_value
 
 
 def float_to_fraction(value: float, denominator: int) -> str:

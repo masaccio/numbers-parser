@@ -100,7 +100,7 @@ class Cell:
     @property
     def formatted_value(self):
         if self._storage is None:
-            return self._value
+            return str(self._value)
         else:
             return self._storage.formatted
 

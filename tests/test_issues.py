@@ -50,6 +50,19 @@ ISSUE_37_REF = [
     ["23:23", "23:23:23"],
 ]
 
+ISSUE_44_REF = [
+    ["1", "1.0000"],
+    ["0", "0.0000"],
+    ["-2", "-2.00000"],
+    ["-100", "100"],
+    ["(100)", "(100)"],
+    ["-100.1234", "100.1234"],
+    ["(100.1234)", "(100.1234)"],
+    ["TRUE", "FALSE"],
+    ["10000", "10,000"],
+    ["1000.125", "1000.12"],
+]
+
 
 def test_issue_3():
     doc = Document("tests/data/issue-3.numbers")
@@ -205,3 +218,27 @@ def test_issue_43():
     assert cell.image_filename == "pasted-image-19.tiff"
 
     assert table.cell("C1").image_data is None
+
+
+def test_issue_44(script_runner):
+    doc = Document("tests/data/issue-44.numbers")
+    table = doc.sheets[0].tables[0]
+    for row_num, ref in enumerate(ISSUE_44_REF):
+        assert table.cell(row_num, 0).formatted_value == ref[0]
+        assert table.cell(row_num, 1).formatted_value == ref[1]
+
+    ret = script_runner.run(
+        "cat-numbers",
+        "--brief",
+        "--formatting",
+        "tests/data/issue-44.numbers",
+        print_result=False,
+    )
+    assert ret.stderr == ""
+    assert ret.success
+    lines = ret.stdout.split("\r\n")
+    for row_num, ref in enumerate(ISSUE_44_REF):
+        # Remove " escapes
+        ref_str = ",".join([x.replace('"', "") for x in ref])
+        test_str = lines[row_num].replace('"', "")
+        assert test_str == ref_str
