@@ -28,19 +28,21 @@ As of version 3.0, `numbers-parser` has limited support for creating Numbers fil
 python3 -m pip install numbers-parser
 ```
 
-A pre-requisite for this package is [python-snappy](https://pypi.org/project/python-snappy/) which will be installed by Python automatically, but python-snappy also requires that the binary libraries for snappy compression are present. The most straightforward way to achieve this is to use [Homebrew](https://brew.sh) and source Python from Homebrew rather than from macOS as described in the [python-snappy github](https://github.com/andrix/python-snappy):
+A pre-requisite for this package is [python-snappy](https://pypi.org/project/python-snappy/) which will be installed by Python automatically, but python-snappy also requires that the binary libraries for snappy compression are present. Since version 3.9.0, `numbers-parser` also has a dependency on `libmagic` through [python-magic](https://pypi.org/project/python-magic/).
+
+The most straightforward way to install the binary dependencies is to use [Homebrew](https://brew.sh) and source Python from Homebrew rather than from macOS as described in the [python-snappy github](https://github.com/andrix/python-snappy):
 
 For Intel Macs:
 
 ``` bash
-brew install snappy python3
+brew install snappy libmagic python3
 CPPFLAGS="-I/usr/local/include -L/usr/local/lib" python3 -m pip install python-snappy
 ```
 
 And on Apple Silicon:
 
 ``` bash
-brew install snappy python3
+brew install snappy libmagic python3
 CPPFLAGS="-I/opt/homebrew/include -L/opt/homebrew/lib" python3 -m pip install python-snappy
 ```
 
