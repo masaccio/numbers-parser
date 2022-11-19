@@ -662,7 +662,6 @@ class _NumbersModel:
         )
         self.objects[PACKAGE_ID].components.append(component_info)
         self.add_component_reference(object_id, parent)
-        self.objects.mark_as_dirty(object_id)
 
     def add_component_reference(
         self,
@@ -682,7 +681,6 @@ class _NumbersModel:
         component.external_references.append(
             TSPArchiveMessages.ComponentExternalReference(**params)
         )
-        self.objects.mark_as_dirty(PACKAGE_ID)
 
     def recalculate_table_data(self, table_id: int, data: List):
         table_model = self.objects[table_id]
@@ -740,8 +738,7 @@ class _NumbersModel:
 
             tile_idx += 1
 
-        self.objects.mark_as_dirty(table_id)
-        self.objects.update_dirty_objects()
+        self.objects.update_object_file_store()
 
     def create_string_table(self):
         table_strings_id, table_strings = self.objects.create_object_from_dict(

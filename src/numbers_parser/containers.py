@@ -69,9 +69,6 @@ class ObjectStore:
         self._objects[PACKAGE_ID].last_object_identifier = self._max_id
         return self._max_id
 
-    def mark_as_dirty(self, obj_id: int):
-        self._dirty[obj_id] = True
-
     def create_object_from_dict(self, iwa_file: str, object_dict: dict, cls: object):
         """Create a new object and store the associated IWA segment. Return the
         message ID for the object and the newly created object. If the IWA
@@ -94,16 +91,12 @@ class ObjectStore:
 
         self._objects[new_id] = cls(**object_dict)
         self._object_to_filename_map[new_id] = iwa_pathname
-        self.mark_as_dirty(new_id)
         return new_id, self._objects[new_id]
 
-    def update_dirty_objects(self):
+    def update_object_file_store(self):
         """Copy the protobuf messages from any updated object to the cached
         version in the file store so this can be saved to a new document"""
-        # TODO: Revisit which objects are dirty and only re-save those
         for obj_id in self._objects.keys():
-            self.mark_as_dirty(obj_id)
-        for obj_id in self._dirty.keys():
             copy_object_to_iwa_file(
                 self._file_store[self._object_to_filename_map[obj_id]],
                 self._objects[obj_id],
