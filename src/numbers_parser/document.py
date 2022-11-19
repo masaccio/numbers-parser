@@ -250,7 +250,7 @@ class Table:
         if row_num >= self.num_rows or row_num < 0:
             raise IndexError(f"row {row_num} out of range")
         if col_num >= self.num_cols or col_num < 0:
-            raise IndexError(f"coumn {col_num} out of range")
+            raise IndexError(f"column {col_num} out of range")
 
         return self._data[row_num][col_num]
 

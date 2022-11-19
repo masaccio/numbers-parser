@@ -53,10 +53,7 @@ def prettify_cell_storage(obj):
             if isinstance(v, dict) or isinstance(v, list):
                 prettify_cell_storage(v)
             elif k == "cell_storage_buffer" or k == "cell_storage_buffer_pre_bnc":
-                if sys.version_info.minor >= 8:
-                    obj[k] = str(hexlify(b64decode(obj[k]), sep=":"))
-                else:
-                    obj[k] = str(hexlify(b64decode(obj[k])))
+                obj[k] = str(hexlify(b64decode(obj[k]), sep=":"))
                 obj[k] = obj[k].replace("b'", "").replace("'", "")
             elif k == "cell_offsets" or k == "cell_offsets_pre_bnc":
                 offsets = array("h", b64decode(obj[k])).tolist()
@@ -136,7 +133,7 @@ def main():
                         filename, blob, output_dir, args
                     ),
                 )
-            except (FileFormatError, FileError) as e:
+            except (FileFormatError, FileError) as e:  # pragma: no cover
                 print(f"{document}:", str(e), file=sys.stderr)
                 sys.exit(1)
 

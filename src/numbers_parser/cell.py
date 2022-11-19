@@ -296,10 +296,10 @@ def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
     Returns:
         A1 style string.
     """
-    if row < 0:
+    if row < 0:  # pragma: no cover
         raise IndexError(f"Row reference {row} below zero")
 
-    if col < 0:
+    if col < 0:  # pragma: no cover
         raise IndexError(f"column reference {col} below zero")
 
     row += 1  # Change to 1-index.
@@ -320,7 +320,7 @@ def xl_col_to_name(col, col_abs=False):
         Column style string.
     """
     col_num = col
-    if col_num < 0:
+    if col_num < 0:  # pragma: no cover
         raise IndexError(f"Column reference {col_num} below zero")
 
     col_num += 1  # Change to 1-index.
@@ -331,7 +331,7 @@ def xl_col_to_name(col, col_abs=False):
         # Set remainder from 1 .. 26
         remainder = col_num % 26
 
-        if remainder == 0:
+        if remainder == 0:  # pragma: no cover
             remainder = 26
 
         # Convert the remainder to a character.

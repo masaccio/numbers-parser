@@ -20,6 +20,12 @@ def test_exceptions():
     with pytest.raises(IndexError) as e:
         _ = table.cell(0, 5, 2)
     assert "invalid cell reference" in str(e.value)
+    with pytest.raises(IndexError) as e:
+        _ = table.cell(-1, 0)
+    assert "row -1 out of range" in str(e.value)
+    with pytest.raises(IndexError) as e:
+        _ = table.cell(0, -1)
+    assert "column -1 out of range" in str(e.value)
 
 
 def test_iter_row_exceptions():

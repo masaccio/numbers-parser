@@ -216,6 +216,7 @@ def test_issue_43():
     assert cell.image_filename == "pasted-image-19.tiff"
 
     assert table.cell("C1").image_data is None
+    assert table.cell("C1").image_filename is None
 
 
 def test_issue_44(script_runner):
