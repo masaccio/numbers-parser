@@ -18,5 +18,5 @@ with Profile() as pr:
 
 pr.create_stats()
 stats = Stats(pr)
-stats = stats.strip_dirs().sort_stats("time")
+stats = stats.strip_dirs().sort_stats("cumtime")
 stats.print_stats()
