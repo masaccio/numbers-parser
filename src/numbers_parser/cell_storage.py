@@ -2,7 +2,6 @@ import math
 import re
 
 from collections import OrderedDict
-from enum import Enum
 from fractions import Fraction
 from functools import lru_cache
 from pendulum import datetime, duration
@@ -10,67 +9,22 @@ from struct import unpack
 from typing import Tuple
 from warnings import warn
 
+from numbers_parser.constants import (
+    EPOCH,
+    PACKAGE_ID,
+    DECIMAL_PLACES_AUTO,
+    CellType,
+    CellPadding,
+    DurationStyle,
+    DurationUnits,
+    FormatType,
+    SECONDS_IN_HOUR,
+    SECONDS_IN_DAY,
+    SECONDS_IN_WEEK,
+)
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
-from numbers_parser.constants import EPOCH, PACKAGE_ID
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-
-
-SECONDS_IN_HOUR = 60 * 60
-SECONDS_IN_DAY = SECONDS_IN_HOUR * 24
-SECONDS_IN_WEEK = SECONDS_IN_DAY * 7
-
-
-class CellType(Enum):
-    EMPTY = 1
-    NUMBER = 2
-    TEXT = 3
-    DATE = 4
-    BOOL = 5
-    DURATION = 6
-    ERROR = 7
-    BULLET = 8
-
-
-class CellPadding(Enum):
-    SPACE = 1
-    ZERO = 2
-
-
-class FormatStyle(Enum):
-    NONE = 0
-    SHORT = 1
-    MEDIUM = 2
-
-    def __eq__(self, other):
-        if type(other) == int:
-            return self.value == other
-        else:
-            return self.value == other.value
-
-
-class FormatType(Enum):
-    BOOLEAN = 1
-    DECIMAL = 256
-    CURRENCY = 257
-    PERCENT = 258
-    TEXT = 260
-    DATE = 261
-    FRACTION = 262
-    CHECKBOX = 263
-    RATING = 267
-    DURATION = 268
-    X9 = 269
-    CUSTOM_NUMBER = 270
-    CUSTOM_TEXT = 271
-    CUSTOM_DATE = 272
-    CUSTOM_CURRENCY = 274
-
-    def __eq__(self, other):
-        if type(other) == int:
-            return self.value == other
-        else:
-            return self.value == other.value
 
 
 DATETIME_FIELD_MAP = OrderedDict(
@@ -353,42 +307,53 @@ class CellStorage:
         dd = int(self.double)
         dstr = []
 
-        if unit_largest == 1:
+        def unit_in_range(largest, smallest, unit_type):
+            return largest <= unit_type and smallest >= unit_type
+
+        def pad_digits(d, largest, smallest, unit_type):
+            return (largest == unit_type and smallest == unit_type) or d >= 10
+
+        if unit_largest == DurationUnits.WEEK:
             dd = int(d / SECONDS_IN_WEEK)
-            if unit_smallest != 1:
+            if unit_smallest != DurationUnits.WEEK:
                 d -= SECONDS_IN_WEEK * dd
             dstr.append(str(dd) + unit_format("week", dd, duration_style))
-        if unit_largest <= 2 and unit_smallest >= 2:
+
+        if unit_in_range(unit_largest, unit_smallest, DurationUnits.DAY):
             dd = int(d / SECONDS_IN_DAY)
-            if unit_smallest > 2:
+            if unit_smallest > DurationUnits.DAY:
                 d -= SECONDS_IN_DAY * dd
             dstr.append(str(dd) + unit_format("day", dd, duration_style))
-        if unit_largest <= 4 and unit_smallest >= 4:
+
+        if unit_in_range(unit_largest, unit_smallest, DurationUnits.HOUR):
             dd = int(d / SECONDS_IN_HOUR)
-            if unit_smallest > 4:
+            if unit_smallest > DurationUnits.HOUR:
                 d -= SECONDS_IN_HOUR * dd
             dstr.append(str(dd) + unit_format("hour", dd, duration_style))
-        if unit_largest <= 8 and unit_smallest >= 8:
+
+        if unit_in_range(unit_largest, unit_smallest, DurationUnits.MINUTE):
             dd = int(d / 60)
-            if unit_smallest > 8:
+            if unit_smallest > DurationUnits.MINUTE:
                 d -= 60 * dd
-            if duration_style == FormatStyle.NONE:
-                pad = (unit_largest == 8 and unit_smallest == 8) or dd > 10
+            if duration_style == DurationStyle.COMPACT:
+                pad = pad_digits(dd, unit_smallest, unit_largest, DurationUnits.MINUTE)
                 dstr.append(("" if pad else "0") + str(dd))
             else:
                 dstr.append(str(dd) + unit_format("minute", dd, duration_style))
-        if unit_largest <= 16 and unit_smallest >= 16:
+
+        if unit_in_range(unit_largest, unit_smallest, DurationUnits.SECOND):
             dd = int(d)
-            if unit_smallest > 16:
+            if unit_smallest > DurationUnits.SECOND:
                 d -= dd
-            if duration_style == FormatStyle.NONE:
-                pad = (unit_smallest == 16 and unit_largest == 16) or dd >= 10
+            if duration_style == DurationStyle.COMPACT:
+                pad = pad_digits(dd, unit_smallest, unit_largest, DurationUnits.SECOND)
                 dstr.append(("" if pad else "0") + str(dd))
             else:
                 dstr.append(str(dd) + unit_format("second", dd, duration_style))
-        if unit_smallest >= 32:
+
+        if unit_smallest >= DurationUnits.MILLISECOND:
             dd = int(round(1000 * d))
-            if duration_style == FormatStyle.NONE:
+            if duration_style == DurationStyle.COMPACT:
                 padding = "0" if dd >= 10 else "00"
                 padding = "" if dd >= 100 else padding
                 dstr.append(f"{padding}{dd}")
@@ -397,8 +362,9 @@ class CellStorage:
                     str(dd) + unit_format("millisecond", dd, duration_style, "ms")
                 )
         duration_str = (":" if duration_style == 0 else " ").join(dstr)
-        if duration_style == FormatStyle.NONE:
+        if duration_style == DurationStyle.COMPACT:
             duration_str = re.sub(r":(\d\d\d)$", r".\1", duration_str)
+
         return duration_str
 
 
@@ -660,9 +626,9 @@ def format_decimal(value, format):
         thousands = ","
     else:
         thousands = ""
-    if value.is_integer() and format.decimal_places >= 253:
+    if value.is_integer() and format.decimal_places >= DECIMAL_PLACES_AUTO:
         formatted_value = f"{int(value):{thousands}}"
-    elif format.decimal_places >= 253:
+    elif format.decimal_places >= DECIMAL_PLACES_AUTO:
         formatted_value = f"{value:{thousands}}"
     else:
         formatted_value = f"{value:{thousands}.{format.decimal_places}f}"
@@ -707,9 +673,9 @@ def unit_format(unit: str, value: int, style: int, abbrev: str = None):
     plural = "" if value == 1 else "s"
     if abbrev is None:
         abbrev = unit[0]
-    if style == FormatStyle.NONE:
+    if style == DurationStyle.COMPACT:
         return ""
-    elif style == FormatStyle.SHORT:
+    elif style == DurationStyle.SHORT:
         return f"{abbrev}"
     else:
         return f" {unit}" + plural
@@ -720,32 +686,32 @@ def auto_units(cell_value, format):
     unit_smallest = format.duration_unit_smallest
 
     if cell_value == 0:
-        unit_largest = 2
-        unit_smallest = 2
+        unit_largest = DurationUnits.DAY
+        unit_smallest = DurationUnits.DAY
     else:
         if cell_value >= SECONDS_IN_WEEK:
-            unit_largest = 1
+            unit_largest = DurationUnits.WEEK
         elif cell_value >= SECONDS_IN_DAY:
-            unit_largest = 2
+            unit_largest = DurationUnits.DAY
         elif cell_value >= SECONDS_IN_HOUR:
-            unit_largest = 4
+            unit_largest = DurationUnits.HOUR
         elif cell_value >= 60:
-            unit_largest = 8
+            unit_largest = DurationUnits.MINUTE
         elif cell_value >= 1:
-            unit_largest = 16
+            unit_largest = DurationUnits.SECOND
         else:
-            unit_largest = 32
+            unit_largest = DurationUnits.MILLISECOND
 
         if math.floor(cell_value) != cell_value:
-            unit_smallest = 32
+            unit_smallest = DurationUnits.MILLISECOND
         elif cell_value % 60:
-            unit_smallest = 16
+            unit_smallest = DurationUnits.SECOND
         elif cell_value % SECONDS_IN_HOUR:
-            unit_smallest = 8
+            unit_smallest = DurationUnits.MINUTE
         elif cell_value % SECONDS_IN_DAY:
-            unit_smallest = 4
+            unit_smallest = DurationUnits.HOUR
         elif cell_value % SECONDS_IN_WEEK:
-            unit_smallest = 2
+            unit_smallest = DurationUnits.DAY
         if unit_smallest < unit_largest:
             unit_smallest = unit_largest
 

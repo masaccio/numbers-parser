@@ -33,3 +33,4 @@ build
 # Profiling
 *.prof
 coverage.xml
+const.py
