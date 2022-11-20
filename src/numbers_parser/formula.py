@@ -100,7 +100,7 @@ class Formula(list):
         if len(self._stack) < num_args:  # pragma: no cover
             table_name = self._model.table_name(self._table_id)
             warnings.warn(
-                f"{table_name}@[{self.row},{self.col}]: stack to small for {func_name}",
+                f"{table_name}@[{self.row},{self.col}]: stack too small for {func_name}",
                 UnsupportedWarning,
             )
             num_args = len(self._stack)
@@ -149,7 +149,6 @@ class Formula(list):
             # Integer: don't use decimals
             self.push(str(node.AST_number_node_decimal_low))
         else:
-            # TODO: detect when scientific notation is present
             self.push(number_to_str(node.AST_number_node_number))
 
     def percent(self, *args):
@@ -263,18 +262,16 @@ class TableFormulas:
 
 
 def number_to_str(v: int) -> str:
+    """Format a float as a string"""
+    # Number is never negative; formula will use NEGATION_NODE
     v_str = repr(v)
     if "e" in v_str:
         number, exp = v_str.split("e")
         number = re.sub(r"[,-.]", "", number)
         zeroes = "0" * (abs(int(exp)) - 1)
-        if v < 0:
-            sign = "-"
-        else:
-            sign = ""
         if int(exp) > 0:
-            return f"{sign}{number}{zeroes}"
+            return f"{number}{zeroes}"
         else:
-            return f"{sign}0.{zeroes}{number}"
+            return f"0.{zeroes}{number}"
     else:
         return v_str
