@@ -209,13 +209,13 @@ class CellStorage:
         if self.cell_style_id is None:
             return None
         style = self.model.table_style(self.table_id, self.cell_style_id)
-        if not style.cell_properties.cell_fill.HasField("image"):
+        if not style.cell_properties.cell_fill.HasField("image"):  # pragma: no cover
             return None
 
         image_id = style.cell_properties.cell_fill.image.imagedata.identifier
         datas = self.model.objects[PACKAGE_ID].datas
         image_file_names = [x.file_name for x in datas if x.identifier == image_id]
-        if len(image_file_names) == 0:
+        if len(image_file_names) == 0:  # pragma: no cover
             warn(f"No image found with ID {image_id}", UnsupportedWarning)
             return None
 

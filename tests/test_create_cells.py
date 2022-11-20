@@ -13,6 +13,14 @@ def test_edit_cell_values(tmp_path, pytestconfig):
     sheets = doc.sheets
     tables = sheets[0].tables
     table = tables[0]
+
+    with pytest.raises(IndexError) as e:
+        table.write(0)
+    assert "invalid cell reference" in str(e.value)
+    with pytest.raises(ValueError) as e:
+        table.write(0, 0, object())
+    assert "determine cell type from type" in str(e.value)
+
     table.write("B2", "new_b2")
     table.write(1, 2, "new_c2")
     table.write(2, 0, True)
