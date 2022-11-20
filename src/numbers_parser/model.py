@@ -363,24 +363,7 @@ class _NumbersModel:
 
     def calculate_merge_cell_ranges(self, table_id):
         """Exract all the merge cell ranges for the Table."""
-        # Merge ranges are stored in a number of structures, but the simplest is
-        # a TSCE.RangePrecedentsTileArchive which exists for each Table in the
-        # Document. These archives contain a fromToRange list which has the merge
-        # ranges associated with an Owner ID
-        #
-        # The Owner IDs need to be extracted from the Calculation Engine using
-        # UUID matching (this seems fragile, but no other mechanism has been found)
-        #
-        #  "from_to_range": [
-        #      { "from_coord": { "column": 0, "row": 0 },
-        #        "refers_to_rect": {
-        #            "origin": {"column": 0,  "row": 0 },
-        #            "size": { "num_columns": 2 }
-        #        }
-        #      }
-        #  ],
-        #  "to_owner_id": 1
-        #
+        # https://github.com/masaccio/numbers-parser/blob/main/doc/Numbers.md#merge-ranges
         owner_id_map = self.owner_id_map()
         table_base_id = self.table_base_id(table_id)
 
@@ -557,32 +540,6 @@ class _NumbersModel:
             TSPMessages.Reference(identifier=merge_map_id)
         )
 
-    def recalculate_column_row_uid_map(self, table_id: int, data: List):
-        table_model = self.objects[table_id]
-        table_model.ClearField("base_column_row_uids")
-        if table_model.base_column_row_uids.identifier == 0:
-            return
-        base_column_row_uids = self.objects[table_model.base_column_row_uids.identifier]
-
-        clear_field_container(base_column_row_uids.sorted_column_uids)
-        clear_field_container(base_column_row_uids.column_index_for_uid)
-        clear_field_container(base_column_row_uids.column_uid_for_index)
-
-        for col_num in range(table_model.number_of_columns):
-            uuid = NumbersUUID().protobuf2
-            base_column_row_uids.sorted_column_uids.append(uuid)
-            base_column_row_uids.column_index_for_uid.append(col_num)
-            base_column_row_uids.column_uid_for_index.append(col_num)
-
-        clear_field_container(base_column_row_uids.sorted_row_uids)
-        clear_field_container(base_column_row_uids.row_index_for_uid)
-        clear_field_container(base_column_row_uids.row_uid_for_index)
-        for row_num in range(table_model.number_of_rows):
-            uuid = NumbersUUID().protobuf2
-            base_column_row_uids.sorted_row_uids.append(uuid)
-            base_column_row_uids.row_index_for_uid.append(row_num)
-            base_column_row_uids.row_uid_for_index.append(row_num)
-
     def recalculate_row_info(
         self, table_id: int, data: List, tile_row_offset: int, row_num: int
     ) -> TSTArchives.TileRowInfo:
@@ -674,7 +631,6 @@ class _NumbersModel:
         self.recalculate_merged_cells(table_id)
 
         table_model.ClearField("base_column_row_uids")
-        self.recalculate_column_row_uid_map(table_id, data)
 
         tile_idx = 0
         max_tile_idx = len(data) >> 8
@@ -991,6 +947,29 @@ class _NumbersModel:
         table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
         self.add_component_reference(table_info_id, "Document", self.calc_engine_id())
 
+        self.add_formula_owner(
+            table_info_id,
+            num_rows,
+            num_cols,
+            number_of_header_rows,
+            number_of_header_columns,
+        )
+
+        self.objects[sheet_id].drawable_infos.append(
+            TSPMessages.Reference(identifier=table_info_id)
+        )
+        return table_model_id
+
+    def add_formula_owner(
+        self,
+        table_info_id: int,
+        num_rows: int,
+        num_cols: int,
+        number_of_header_rows: int,
+        number_of_header_columns: int,
+    ):
+        """Create a FormulaOwnerDependenciesArchive that references a TableInfoArchive
+        so that cross-references to cells in this table will work."""
         formula_owner_uuid = NumbersUUID()
         calc_engine = self.calc_engine()
         owner_id_map = calc_engine.dependency_tracker.owner_id_map.map_entry
@@ -1056,11 +1035,6 @@ class _NumbersModel:
                 internal_owner_id=next_owner_id, owner_id=formula_owner_uuid.protobuf4
             )
         )
-
-        self.objects[sheet_id].drawable_infos.append(
-            TSPMessages.Reference(identifier=table_info_id)
-        )
-        return table_model_id
 
     def add_sheet(self, sheet_name: str) -> int:
         """Add a new sheet with a copy of a table from another sheet"""

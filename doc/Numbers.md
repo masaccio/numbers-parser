@@ -41,15 +41,15 @@ Merge ranges are stored in a number of structures, but the simplest is a `TSCE.R
  The Owner IDs need to be extracted from the Calculation Engine using the `owner_id_map` described in the [UUID maps of `TSCE.CalculationEngineArchive`](#owner-ids)
 
 ``` json
-  "from_to_range": [
+ {
+   "from_to_range": [
       { "from_coord": { "column": 0, "row": 0 },
         "refers_to_rect": {
             "origin": {"column": 0,  "row": 0 },
-            "size": { "num_columns": 2 }
-        }
-      }
+            "size": { "num_columns": 2 } } }
   ],
   "to_owner_id": 1
+}
 ```
 
 ##  Formula ranges
