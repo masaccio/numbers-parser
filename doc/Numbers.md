@@ -62,13 +62,13 @@ Merge ranges are stored in a number of structures, but the simplest is a `TSCE.R
         {
             "column": 0,
             "contains_a_formula": true,
-            "edges": { "packed_edge_without_owner": [ 16777216 ] },
+            "edges": { "packed_edge_without_owner": [ 0x1000000 ] },
             "row": 1
         },
         {
             "column": 1,
             "contains_a_formula": true,
-            "edges": { "packed_edge_without_owner": [16777216 ] },
+            "edges": { "packed_edge_without_owner": [0x1000000 ] },
             "row": 1
         }
     ]
@@ -140,172 +140,6 @@ For `TSCE.FormulaOwnerDependenciesArchive` with a non-empty `tiled_cell_dependen
 ```
 
 Where the `internal_owner_id` is the `internal_formula_owner_id` from the associated `TSCE.FormulaOwnerDependenciesArchive`.
-
-## Random unformed notes
-
-Adding a new sheet to a document generates a new set of nodes in the `contained_tracked_reference` of a `TSCE.TrackedReferenceStoreArchive`:
-
-``` json
-{ "ast": { "AST_node": [ {
-        "AST_node_type": "CELL_REFERENCE_NODE",
-        "AST_column": { "column": 1, "absolute": true },
-        "AST_row": { "row": 0, "absolute": true },
-        "AST_cross_table_reference_extra_info": { "table_id": "fffe000f-b02b-d298-8447-808f21eb01ed" } } ]
-  },
-  "formula_id": 9
-},
-{ "ast": { "AST_node": [ {
-        "AST_node_type": "CELL_REFERENCE_NODE",
-        "AST_column": { "column": 0, "absolute": true },
-        "AST_row": { "row": 1, "absolute": true },
-        "AST_cross_table_reference_extra_info": { "table_id": "fffe000f-b02b-d298-8447-808f21eb01ed" } } ] },
-  "formula_id": 10
-},
-{ "ast": { "AST_node": [ {
-        "AST_node_type": "CELL_REFERENCE_NODE",
-        "AST_column": { "column": 0, "absolute": true },
-        "AST_row": { "row": 2, "absolute": true },
-        "AST_cross_table_reference_extra_info": { "table_id": "fffe000f-b02b-d298-8447-808f21eb01ed" } } ] },
-  "formula_id": 11
-},
-{ "ast": { "AST_node": [ {
-        "AST_node_type": "CELL_REFERENCE_NODE",
-        "AST_column": { "column": 0, "absolute": true },
-        "AST_row": { "row": 3, "absolute": true },
-        "AST_cross_table_reference_extra_info": { "table_id": "fffe000f-b02b-d298-8447-808f21eb01ed" } } ] },
-  "formula_id": 12
-}
-```
-
-This archive is referenced in a `TSCE.NamedReferenceManagerArchive`:
-
-``` json
-"reference_tracker": { "identifier": "905007" }
-```
-
-And this is in turn referenced inside the document's `TSCE.CalculationEngineArchive`:
-
-``` json
-"named_reference_manager": { "identifier": "904994" }
-```
-
-The `table_id` referred to above matches a `base_owner_uid` in a number of `TSCE.FormulaOwnerDependenciesArchive`. Each of these has a different `internal_formula_owner_id` and `formula_owner_uid`. The mappign between the `internal_formula_id` and the `formula_owner_uid` is additonally stored in the Calculation Engine's `owner_id_map`:
-
-``` json
-"owner_id_map": {
-  "map_entry": [
-    { "internal_owner_id": 18, "owner_id": "fffe000f-b02b-d298-8447-808f21eb01ed" },
-    { "internal_owner_id": 19, "owner_id": "fffe000f-b02b-d298-8447-808f21eb01f1" },
-    { "internal_owner_id": 21, "owner_id": "fffe000f-b02b-d298-8447-808f21eb01f8" },
-    { "internal_owner_id": 22, "owner_id": "fffe000f-b02b-d298-8447-808f21eb01f0" },
-    { "internal_owner_id": 23, "owner_id": "fffe000f-b02b-d298-8447-808f21eb01f7" },
-    { "internal_owner_id": 24, "owner_id": "fffe000f-b02b-d298-8447-808f21eb01f2" },
-    { "internal_owner_id": 25, "owner_id": "fffe000f-b02b-d298-8447-808f21eb01f3" },
-    { "internal_owner_id": 26, "owner_id": "fffe000f-b02b-d298-8447-808f21eb01f5" },
-    { "internal_owner_id": 27, "owner_id": "fffe000f-b02b-d298-8447-808f21eb0210" },
-    { "internal_owner_id": 28, "owner_id": "fffe000f-b02b-d298-8447-808f21eb01f6" },
-  ]
-}
-```
-
-Calculation Engine's `formula_owner_dependencies` is a list of references to all the `TSCE.FormulaOwnerDependenciesArchive`.
-
-Two of the archives also have non-empty `tiled_cell_dependencies` references to a `TSCE.CellRecordTileArchive`:
-
-``` json
-"tiled_cell_dependencies": { "cell_record_tiles": [ { "identifier": "906718" } ] },
-"tiled_cell_dependencies": { "cell_record_tiles": [ { "identifier": "906719" } ] },
-```
-
-These `TSCE.CellRecordTileArchive` archives contain:
-
-``` json
-"internal_owner_id": 27,
-"tile_column_begin": 0,
-"tile_row_begin": 0,
-```
-
-And for reference ID 906719:
-
-``` json
-"internal_owner_id": 26,
-"tile_column_begin": 0,
-"tile_row_begin": 0,
-"cell_records": [
-  { "column": 0, "row": 0, "expanded_edges": { "edge_without_owner_rows": [ 0 ], "edge_without_owner_columns": [ 2 ] } },
-  { "column": 3, "row": 0, "expanded_edges": {} },
-  { "column": 7, "row": 0, "expanded_edges": { "edge_with_owner_rows": [ 0 ], "edge_with_owner_columns": [ 11 ], "internal_owner_id_for_edge": [ 27 ] } }
-],
-```
-
-`TST.HeaderNameMgrArchive` contains a list of `per_tables` with an entry for each table in addition to the first one
-
-``` json
-"owner_uid": "00000000-0000-0000-0000-00000000029a",
-"nrm_owner_uid": "924db583-f350-4a87-5f42-1278be73332e",
-"per_tables": [
-  {    
-    "table_uid": "6a4a5281-7b06-f5a1-904b-7f9ec784b368",
-    "per_table_precedent": { "column": 1, "row": 1 },
-    "header_row_uids": [ "19332f73-d13d-5d45-0716-5d5b9d909765" ],
-    "header_column_uids": [ "20cc67a1-e317-d6c4-1e4d-4e85b897cacb" ]
-  },   
-  {    
-    "table_uid": "e2cf803a-ba85-788f-3f41-0709393e975c",
-    "per_table_precedent": { "column": 2, "row": 1 },
-    "header_row_uids": [ "19332f73-d13d-5d45-0716-5d5b9d909765" ],
-    "header_column_uids": [ "20cc67a1-e317-d6c4-1e4d-4e85b897cacb" ]
-  }    
-],   
-"name_frag_tiles": [ { "identifier": "905504" } ],
-```
-
-And a further one the `tiled_cell_dependencies` plus:
-
-``` json
-"cell_dependencies": { "cell_record": [
-    { "column": 0, "row": 0, "expanded_edges": { "edge_without_owner_rows"   : [ 0 ], "edge_without_owner_columns": [ 2 ] } },
-    { "column": 3, "row": 0, "expanded_edges": {} },
-    { "column": 7, "row": 0, "expanded_edges": { "edge_with_owner_rows"      : [  0 ], "edge_with_owner_columns"   : [ 11 ], "internal_owner_id_for_edge": [ 27 ] } } ] },
-```
-
-The UUID of the `TSCE.TrackedReferenceStoreArchive` that contains formula ASTs is also the `nrm_owner_uid` in the `TST.HeaderNameMgrArchive` and has an entry in `dependency_tracker.formula_owner_info` where `cell_record` is a list of references to the formula IDs as column numbers"
-
-``` json
-{    
-  "formula_owner_id": "924db583-f350-4a87-5f42-1278be73332e",
-  "cell_dependencies": {
-    "cell_record": [
-      { "column": 27, "row": 0, "contains_a_formula": true,
-        "edges": {"packed_edge_with_owner": [ 0x1010000 ], "internal_owner_id_for_edge": [ 0 ]} },
-      { "column": 28, "row": 0, "contains_a_formula": true,
-        "edges": {"packed_edge_with_owner": [ 0x1020000 ], "internal_owner_id_for_edge": [ 0 ]} },
-      { "column": 33, "row": 0, "contains_a_formula": true,
-        "edges": {"packed_edge_with_owner": [ 0x1000001 ], "internal_owner_id_for_edge": [ 0 ]} },
-      { "column": 34, "row": 0, "contains_a_formula": true,
-        "edges": {"packed_edge_with_owner": [ 0x1000002 ], "internal_owner_id_for_edge": [ 0 ]} },
-      { "column": 35, "row": 0, "contains_a_formula": true,
-        "edges": {"packed_edge_with_owner": [ 0x1000003 ], "internal_owner_id_for_edge": [ 0 ]} } 
-    ]    
-  },  
-  "range_dependencies": {},
-  "volatile_dependencies": {},
-  "spanning_column_dependencies": {
-    "total_range_for_deleted_table": { "top_left_column": 0x7fff, "top_left_row": 0x7fffffff,
-                                       "bottom_right_column": 0x7fff, "bottom_right_row": 0x7fffffff },
-    "body_range_for_deleted_table" : { "top_left_column": 0x7fff, "top_left_row": 0x7fffffff,
-                                        "bottom_right_column": 0x7fff, "bottom_right_row": 0x7fffffff }
-  },
-  "spanning_row_dependencies": {
-    "total_range_for_deleted_table": { "top_left_column": 0x7fff, "top_left_row": 0x7fffffff,
-                                       "bottom_right_column": 0x7fff, "bottom_right_row": 0x7fffffff },
-    "body_range_for_deleted_table" : { "top_left_column": 0x7fff, "top_left_row": 0x7fffffff,
-                                       "bottom_right_column": 0x7fff, "bottom_right_row": 0x7fffffff }
-  },
-  "whole_owner_dependencies": {},
-  "cell_errors": {}
-}
-```
 
 ## Header Map
 
