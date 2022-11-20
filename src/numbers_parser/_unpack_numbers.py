@@ -36,14 +36,15 @@ def prettify_uuids(obj):
                     prettify_uuids(v)
             elif isinstance(v, list):
                 prettify_uuids(v)
-    elif isinstance(obj, list):
+    else:  # list
         for i, v in enumerate(obj):
             if isinstance(v, dict):
                 try:
                     obj[i] = str(NumbersUUID(v))
                 except UnsupportedError:
                     prettify_uuids(v)
-            elif isinstance(v, list):
+            elif isinstance(v, list):  # pragma: no cover
+                # Numbers doesn't have lists of lists, but keep just in case
                 prettify_uuids(v)
 
 
@@ -59,7 +60,7 @@ def prettify_cell_storage(obj):
                 offsets = array("h", b64decode(obj[k])).tolist()
                 obj[k] = ",".join([str(x) for x in offsets])
                 obj[k] = regex.sub(r"(?:,-1)+$", ",[...]", obj[k])
-    elif isinstance(obj, list):
+    else:  # list
         for v in obj:
             if isinstance(v, dict) or isinstance(v, list):
                 prettify_cell_storage(v)

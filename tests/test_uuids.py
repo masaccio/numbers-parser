@@ -17,10 +17,12 @@ def test_uuid():
     assert NumbersUUID(uuid.protobuf2).int == uuid.int
     assert NumbersUUID(uuid.protobuf2).protobuf4.uuid_w0 == 0x11111111
 
-    uuid = NumbersUUID(
-        {"uuid_w0": 0x1234, "uuid_w1": 0xFFFF, "uuid_w2": 0, "uuid_w3": 0x1111}
-    )
+    ref = {"uuid_w0": 0x1234, "uuid_w1": 0xFFFF, "uuid_w2": 0, "uuid_w3": 0x1111}
+    uuid = NumbersUUID(ref)
     assert uuid.hex == "00001111000000000000ffff00001234"
+    assert uuid.dict4 == ref
 
-    uuid = NumbersUUID({"upper": 0x1234, "lower": 0xFFFF})
+    ref = {"upper": 0x1234, "lower": 0xFFFF}
+    uuid = NumbersUUID(ref)
     assert uuid.hex == "0000000000001234000000000000ffff"
+    assert uuid.dict2 == ref
