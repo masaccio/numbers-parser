@@ -329,17 +329,17 @@ class _NumbersModel:
         """Exract all the formula cell ranges for the Table."""
         # https://github.com/masaccio/numbers-parser/blob/main/doc/Numbers.md#formula-ranges
         calc_engine = self.calc_engine()
-        if calc_engine is None:
+        if calc_engine is None:  # pragma: no cover
             return []
 
         table_base_id = self.table_base_id(table_id)
         cell_records = []
         for finfo in calc_engine.dependency_tracker.formula_owner_info:
-            if finfo.HasField("cell_dependencies"):
+            if finfo.HasField("cell_dependencies"):  # pragma: no branch
                 formula_owner_id = NumbersUUID(finfo.formula_owner_id).hex
                 if formula_owner_id == table_base_id:
                     for cell_record in finfo.cell_dependencies.cell_record:
-                        if cell_record.contains_a_formula:
+                        if cell_record.contains_a_formula:  # pragma: no branch
                             cell_records.append((cell_record.row, cell_record.column))
         return cell_records
 
@@ -549,20 +549,15 @@ class _NumbersModel:
         row_info.cell_count = 0
         cell_storage = b""
 
-        wide_offsets = True
         offsets = [-1] * len(data[0])
         current_offset = 0
 
         for col_num in range(len(data[row_num])):
-            buffer = self.pack_cell_storage(
-                table_id, data, row_num, col_num, wide_offsets
-            )
+            buffer = self.pack_cell_storage(table_id, data, row_num, col_num)
             if buffer is not None:
                 cell_storage += buffer
-                if wide_offsets:
-                    offsets[col_num] = current_offset >> 2
-                else:
-                    offsets[col_num] = current_offset
+                # Always use wide offsets
+                offsets[col_num] = current_offset >> 2
                 current_offset += len(buffer)
 
                 row_info.cell_count += 1
@@ -571,7 +566,7 @@ class _NumbersModel:
         row_info.cell_offsets_pre_bnc = DEFAULT_PRE_BNC_BYTES
         row_info.cell_storage_buffer = cell_storage
         row_info.cell_storage_buffer_pre_bnc = DEFAULT_PRE_BNC_BYTES
-        row_info.has_wide_offsets = wide_offsets
+        row_info.has_wide_offsets = True
         return row_info
 
     @lru_cache(maxsize=None)
@@ -1058,7 +1053,6 @@ class _NumbersModel:
         data: List,
         row_num: int,
         col_num: int,
-        wide_offsets: bool,
         formula_id=None,
         num_format_id=None,
     ) -> bytearray:
@@ -1131,11 +1125,6 @@ class _NumbersModel:
         storage[8:12] = pack("<i", flags)
         if len(storage) < 32:
             storage += bytearray(32 - length)
-
-        if wide_offsets and len(storage) % 4:
-            padding_len = 4 - (len(storage % 4))
-            length += padding_len
-            storage += bytearray(padding_len)
 
         return storage[0:length]
 
