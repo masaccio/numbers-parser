@@ -58,7 +58,7 @@ Reading documents:
 
 ``` python
 from numbers_parser import Document
-doc = Document("my-spreasdsheet.numbers")
+doc = Document("my-spreadsheet.numbers")
 sheets = doc.sheets
 tables = sheets[0].tables
 rows = tables[0].rows()
@@ -99,7 +99,7 @@ Cells are objects with a common base class of `Cell`. All cell types have a prop
 In addition to extracting all data at once, individual cells can be referred to as methods
 
 ``` python
-doc = Document("my-spreasdsheet.numbers")
+doc = Document("my-spreadsheet.numbers")
 sheets = doc.sheets
 tables = sheets["Sheet 1"].tables
 table = tables["Table 1"]
@@ -118,7 +118,7 @@ object which is typed by the type of cell in the Numbers table. ```MergeCell``` 
 indicates cells removed in a merge.
 
 ``` python
-doc = Document("my-spreasdsheet.numbers")
+doc = Document("my-spreadsheet.numbers")
 sheets = doc.sheets
 tables = sheets["Sheet 1"].tables
 table = tables["Table 1"]
