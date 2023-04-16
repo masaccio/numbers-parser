@@ -1,6 +1,6 @@
 import magic
 
-from numbers_parser import Document, NumberCell
+from numbers_parser import Document
 from pendulum import datetime, duration
 from numbers_parser.cell import ErrorCell, EmptyCell
 

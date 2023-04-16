@@ -25,7 +25,7 @@ class Cell:
         return cell
 
     @classmethod
-    def from_storage(cls, cell_storage: CellStorage):
+    def from_storage(cls, cell_storage: CellStorage):  # noqa: C901
         row_col = (cell_storage.row_num, cell_storage.col_num)
         merge_cells = cell_storage.model.merge_cell_ranges(cell_storage.table_id)
         is_merged = row_col in merge_cells
