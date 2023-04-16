@@ -321,10 +321,19 @@ The default protobuf package installation may not include the C++ optimised vers
 
  `This script requires the Protobuf installation to use the C++ implementation. Please reinstall Protobuf with C++ support.`
 
- To include the C++ support, download a released version of Google protobuf [from github](https://github.com/protocolbuffers/protobuf). Build instructions are in the [`src/README.md`](https://github.com/protocolbuffers/protobuf/blob/main/src/README.md) in the distribution but for macOS with [Homebrew](https://brew.sh) the two steps are, firstly to install the native protobuf libraries, which must be on your `LD_LIBRARY_PATH`:
+ To include the C++ support, download a released version of Google protobuf [from github](https://github.com/protocolbuffers/protobuf). Build instructions are described in [`src/README.md`](https://github.com/protocolbuffers/protobuf/blob/main/src/README).These have changed greatly over time, but as of April 2023, this was useful:
 
+```
+bazel build :protoc :protobuf
+cmake . -DCMAKE_CXX_STANDARD=14
+cmake --build . --parallel 8
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp
+export LD_LIBRARY_PATH=../bazel-bin/src/google
+cd python
+python3 setup.py -q bdist_wheel --cpp_implementation --warnings_as_errors --compile_static_extension
+```
 
-  This will install protobuf in a folder above the source installation which can then be used by `make bootstrap` in the `numbers-parser` source tree.
+This can then be used `make bootstrap` in the `numbers-parser` source tree.
 
 ## Credits
 

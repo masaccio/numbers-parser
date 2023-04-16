@@ -83,7 +83,7 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 
 .bootstrap/protos/TNArchives.proto:
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobufs from Numbers"$$(tput init)
-	poetry run python3 src/bootstrap/protodump.py $(NUMBERS) .bootstrap/protos
+	PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp python3 src/bootstrap/protodump.py $(NUMBERS) .bootstrap/protos
 	poetry run python3 src/bootstrap/rename_proto_files.py .bootstrap/protos
 
 src/$(package_c)/mapping.py: .bootstrap/mapping.py
