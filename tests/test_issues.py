@@ -241,3 +241,18 @@ def test_issue_44(script_runner):
         ref_str = ",".join([x.replace('"', "") for x in ref])
         test_str = lines[row_num].replace('"', "")
         assert test_str == ref_str
+
+
+def test_issue_49(tmp_path, pytestconfig):
+    doc = Document("tests/data/issue-49.numbers")
+
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-1-new.numbers"
+    doc.save(new_filename)
+
+    doc = Document(new_filename)
+    table = doc.sheets[0].tables[0]
+    test_values = [int(table.cell(row_num, 1).value) for row_num in range(1, 6)]
+    assert test_values == [100, 50, 0, -50, -100]
