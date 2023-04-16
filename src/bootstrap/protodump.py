@@ -11,14 +11,16 @@ Inspired by Sean Patrick O'Brien (@obriensp)'s 2013 "proto-dump":
 https://github.com/obriensp/proto-dump
 """
 
-from pathlib import Path
-from termcolor import cprint
 
-from google.protobuf.internal.decoder import _DecodeVarint, SkipField
+from pathlib import Path
+
 from google.protobuf import descriptor_pb2
+from google.protobuf.descriptor_pb2 import FileDescriptorProto, FileDescriptorSet
 from google.protobuf.descriptor_pool import DescriptorPool
-from google.protobuf.message import DecodeError
 from google.protobuf.internal import api_implementation
+from google.protobuf.internal.decoder import SkipField, _DecodeVarint
+from google.protobuf.message import DecodeError
+from termcolor import cprint
 
 
 class ProtoFile(object):
@@ -53,7 +55,10 @@ class ProtoFile(object):
     @property
     def source(self):
         if self.descriptor:
-            return self.descriptor.GetDebugString()
+            fds = FileDescriptorSet()
+            fds.file.append(FileDescriptorProto())
+            fds.file[0].ParseFromString(self.descriptor.serialized_pb)
+            return str(fds)
         return None
 
 
@@ -171,10 +176,9 @@ def main():
 
     args = parser.parse_args()
 
-    if api_implementation.Type() != "cpp":
+    if api_implementation.Type() != "upb":
         raise NotImplementedError(
-            "This script requires the Protobuf installation to use the C++ implementation. Please"
-            " reinstall Protobuf with C++ support."
+            "This script requires the Protobuf installation to use the UPB implementation."
         )
 
     GLOBAL_DESCRIPTOR_POOL = DescriptorPool()
@@ -184,8 +188,8 @@ def main():
     ]
 
     cprint(
-        f"Bootstrap: scanning {len(all_filenames):,}",
-        f"files under {args.input_path} for protobuf definitions",
+        f"Bootstrap: scanning {len(all_filenames):,}"
+        + f"files under {args.input_path} for protobuf definitions",
         "green",
     )
 
@@ -203,8 +207,8 @@ def main():
 
     if missing_deps:
         cprint(
-            "Warning: unable to print out all Protobuf definitions;",
-            f"{len(missing_deps):,} proto files could not be found:\n{missing_deps}",
+            "Warning: unable to print out all Protobuf definitions;"
+            + f"{len(missing_deps):,} proto files could not be found:\n{missing_deps}",
             "red",
         )
     else:
