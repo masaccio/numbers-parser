@@ -39,6 +39,7 @@ _SUPPORTED_NUMBERS_VERSIONS = [
     "12.1",
     "12.2",
     "12.2.1",
+    "13.0",
 ]
 
 # Don't print the source line
