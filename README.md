@@ -311,29 +311,13 @@ metadata, text, and all other definitions used in the spreadsheet.
 
 As `numbers-parser` includes private Protobuf definitions extracted from a copy of Numbers, new versions of Numbers will inevitably create `.numbers` files that cannot be read by `numbers-parser`. As new versions of Numbers are released, running `make bootstrap` will perform all the steps necessary to recreate the protobuf files used `numbers-parser` to read Numbers spreadsheets.
 
-On Apple Silicon Macs, the default protobuf package installation does not include the C++ optimised version which is required by the bootstrapping scripts to extract protobufs. You will receive the following error during build if this is the case:
+The default protobuf package installation may not include the C++ optimised version which is required by the bootstrapping scripts to extract protobufs. You will receive the following error during build if this is the case:
 
  `This script requires the Protobuf installation to use the C++ implementation. Please reinstall Protobuf with C++ support.`
 
  To include the C++ support, download a released version of Google protobuf [from github](https://github.com/protocolbuffers/protobuf). Build instructions are in the [`src/README.md`](https://github.com/protocolbuffers/protobuf/blob/main/src/README.md) in the distribution but for macOS with [Homebrew](https://brew.sh) the two steps are, firstly to install the native protobuf libraries, which must be on your `LD_LIBRARY_PATH`:
 
-``` bash
-brew install autoconf automake libtool
-./autogen.sh
-./configure --prefix=/usr/local
-make check -j`sysctl -n hw.ncpu`
-sudo make install
-```
 
-And then to install the Python libraries with C++ support. If you already have protobuf install via Homebrew, you will need to `brew unlink` the installation.
-
-``` bash
-cd python
-python3 setup.py build --cpp_implementation
-python3 setup.py test --cpp_implementation
-python3 setup.py install --cpp_implementation
-```
-  
   This will install protobuf in a folder above the source installation which can then be used by `make bootstrap` in the `numbers-parser` source tree.
 
 ## Credits
