@@ -1,6 +1,4 @@
 import magic
-import pytest
-import re
 
 from numbers_parser import Document, NumberCell
 from pendulum import datetime, duration
