@@ -46,13 +46,19 @@ brew install snappy python3
 CPPFLAGS="-I/opt/homebrew/include -L/opt/homebrew/lib" python3 -m pip install python-snappy
 ```
 
+On Windows, you will need to either arrange for snappy to be found for VSC++ or you can install python binary libraries compiled by [Christoph Gohlke](https://www.lfd.uci.edu/~gohlke/pythonlibs/#python-snappy). You must select the correct python version for your installation. For example for python 3.11:
+
+``` text
+C:\Users\Jon>pip install C:\Users\Jon\Downloads\python_snappy-0.6.1-cp311-cp311-win_amd64.whl
+```
+
 ## Usage
 
 Reading documents:
 
 ``` python
 from numbers_parser import Document
-doc = Document("my-spreasdsheet.numbers")
+doc = Document("my-spreadsheet.numbers")
 sheets = doc.sheets
 tables = sheets[0].tables
 rows = tables[0].rows()
@@ -93,7 +99,7 @@ Cells are objects with a common base class of `Cell`. All cell types have a prop
 In addition to extracting all data at once, individual cells can be referred to as methods
 
 ``` python
-doc = Document("my-spreasdsheet.numbers")
+doc = Document("my-spreadsheet.numbers")
 sheets = doc.sheets
 tables = sheets["Sheet 1"].tables
 table = tables["Table 1"]
@@ -112,7 +118,7 @@ object which is typed by the type of cell in the Numbers table. ```MergeCell``` 
 indicates cells removed in a merge.
 
 ``` python
-doc = Document("my-spreasdsheet.numbers")
+doc = Document("my-spreadsheet.numbers")
 sheets = doc.sheets
 tables = sheets["Sheet 1"].tables
 table = tables["Table 1"]
