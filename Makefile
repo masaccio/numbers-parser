@@ -75,15 +75,16 @@ $(ENTITLEMENTS):
 src/$(package_c)/functionmap.py: .bootstrap/functionmap.py
 	cp $< $@
 
+TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 .bootstrap/functionmap.py:
 	@echo $$(tput setaf 2)"Bootstrap: extracting function names from Numbers"$$(tput init)
 	@mkdir -p .bootstrap
-	python3 src/bootstrap/extract_functions.py $(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables $@
+	poetry run python3 src/bootstrap/extract_functions.py $(TST_TABLES) $@
 
 .bootstrap/protos/TNArchives.proto:
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobufs from Numbers"$$(tput init)
-	python3 src/bootstrap/protodump.py /Applications/Numbers.app .bootstrap/protos
-	python3 src/bootstrap/rename_proto_files.py .bootstrap/protos
+	poetry run python3 src/bootstrap/protodump.py $(NUMBERS) .bootstrap/protos
+	poetry run python3 src/bootstrap/rename_proto_files.py .bootstrap/protos
 
 src/$(package_c)/mapping.py: .bootstrap/mapping.py
 	cp $< $@
