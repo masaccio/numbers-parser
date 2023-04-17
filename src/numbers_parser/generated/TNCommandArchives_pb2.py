@@ -11,13 +11,107 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+import numbers_parser.generated.TSPMessages_pb2 as TSPMessages__pb2
+import numbers_parser.generated.TSKArchives_pb2 as TSKArchives__pb2
+import numbers_parser.generated.TSCHArchives_pb2 as TSCHArchives__pb2
+import numbers_parser.generated.TSCHCommandArchives_pb2 as TSCHCommandArchives__pb2
+import numbers_parser.generated.TSCEArchives_pb2 as TSCEArchives__pb2
+import numbers_parser.generated.TSSArchives_pb2 as TSSArchives__pb2
+import numbers_parser.generated.TSDArchives_pb2 as TSDArchives__pb2
+import numbers_parser.generated.TSDCommandArchives_pb2 as TSDCommandArchives__pb2
+import numbers_parser.generated.TSWPArchives_pb2 as TSWPArchives__pb2
+import numbers_parser.generated.TSAArchives_pb2 as TSAArchives__pb2
+import numbers_parser.generated.TSTArchives_pb2 as TSTArchives__pb2
+import numbers_parser.generated.TNArchives_pb2 as TNArchives__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17TNCommandArchives.proto')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17TNCommandArchives.proto\x12\x02TN\x1a\x11TSPMessages.proto\x1a\x11TSKArchives.proto\x1a\x12TSCHArchives.proto\x1a\x19TSCHCommandArchives.proto\x1a\x12TSCEArchives.proto\x1a\x11TSSArchives.proto\x1a\x11TSDArchives.proto\x1a\x18TSDCommandArchives.proto\x1a\x12TSWPArchives.proto\x1a\x11TSAArchives.proto\x1a\x11TSTArchives.proto\x1a\x10TNArchives.proto\"\xda\x01\n#CommandFormChooseTargetTableArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1b\n\x08table_id\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12$\n\x11previous_table_id\x18\x03 \x01(\x0b\x32\t.TSP.UUID\x12\x12\n\nsheet_name\x18\x04 \x02(\t\x12\x1b\n\x13previous_sheet_name\x18\x05 \x01(\t\x12\x1b\n\x08sheet_id\x18\x06 \x02(\x0b\x32\t.TSP.UUID\"\xe1\x03\n\"CommandSheetInsertDrawablesArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1b\n\x08sheet_id\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12!\n\tdrawables\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12*\n\targs_list\x18\x04 \x03(\x0b\x32\x17.TSK.AddIdOperationArgs\x12\x10\n\x08\x66orPaste\x18\x05 \x01(\x08\x12%\n\x12\x63ustom_format_keys\x18\x06 \x03(\x0b\x32\t.TSP.UUID\x12,\n\x14\x64rawable_undo_object\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12\x38\n formula_rewrite_command_for_undo\x18\t \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\"saved_next_untitled_resolver_index\x18\n \x01(\r\x12\x36\n#chart_entity_uid_for_backing_tables\x18\x0b \x03(\x0b\x32\t.TSP.UUID\x12&\n\x0e\x62\x61\x63king_tables\x18\x0c \x03(\x0b\x32\x0e.TSP.Reference\"\x96\x02\n\"CommandSheetRemoveDrawablesArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1b\n\x08sheet_id\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12-\n\targs_list\x18\x03 \x03(\x0b\x32\x1a.TSK.RemoveIdOperationArgs\x12!\n\tdrawables\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\x12\x36\n#chart_entity_uid_for_backing_tables\x18\x06 \x03(\x0b\x32\t.TSP.UUID\x12%\n\x12\x62\x61\x63king_table_uids\x18\x07 \x03(\x0b\x32\t.TSP.UUID\"\x9a\x01\n%CommandSheetMoveDrawableZOrderArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1b\n\x08sheet_id\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12\x30\n\targs_list\x18\x03 \x03(\x0b\x32\x1d.TSK.RearrangeIdOperationArgs\"\xdc\x02\n!CommandDocumentInsertSheetArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12)\n\x08\x61rgsList\x18\x02 \x03(\x0b\x32\x17.TSK.AddIdOperationArgs\x12\x1e\n\x06sheets\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12!\n\x19\x61llowSameSheetNameAsForms\x18\x04 \x01(\x08\x12%\n\x12\x63ustom_format_keys\x18\x05 \x03(\x0b\x32\t.TSP.UUID\x12,\n\x14\x64rawable_undo_object\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12=\n\x0esheet_uistates\x18\x07 \x03(\x0b\x32%.TN.UUIDSheetUIStateDictionaryArchive\x12\x11\n\tfor_paste\x18\x08 \x01(\x08\"\xfd\x01\n!CommandDocumentRemoveSheetArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12,\n\x08\x61rgsList\x18\x02 \x03(\x0b\x32\x1a.TSK.RemoveIdOperationArgs\x12\x1e\n\x06sheets\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12\x10\n\x08rescueId\x18\x04 \x02(\t\x12=\n\x0esheet_uistates\x18\x05 \x03(\x0b\x32%.TN.UUIDSheetUIStateDictionaryArchive\x12\x15\n\ris_undo_paste\x18\x06 \x01(\x08\"y\n\"CommandDocumentReorderSheetArchive\x12/\n\x08\x61rgsList\x18\x01 \x03(\x0b\x32\x1d.TSK.RearrangeIdOperationArgs\x12\"\n\x05super\x18\x02 \x02(\x0b\x32\x13.TSK.CommandArchive\"\x80\x01\n\x1a\x43ommandSetSheetNameArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x0f\n\x07newname\x18\x02 \x02(\t\x12\x1c\n\tsheet_uid\x18\x03 \x02(\x0b\x32\t.TSP.UUID\x12\x0f\n\x07oldname\x18\x04 \x01(\t\"\xb3\x01\n)CommandSetSheetShouldPrintCommentsArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12!\n\x19new_should_print_comments\x18\x02 \x02(\x08\x12\x1c\n\tsheet_uid\x18\x03 \x02(\x0b\x32\t.TSP.UUID\x12!\n\x19old_should_print_comments\x18\x04 \x02(\x08\"\xc1\x01\n\x1f\x43ommandSetSheetDirectionArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12-\n\x0cnewDirection\x18\x02 \x02(\x0e\x32\x17.TN.PageLayoutDirection\x12\x1c\n\tsheet_uid\x18\x03 \x02(\x0b\x32\t.TSP.UUID\x12-\n\x0coldDirection\x18\x04 \x01(\x0e\x32\x17.TN.PageLayoutDirection\"\xb5\x01\n CommandSetPageOrientationArchive\x12$\n\x1cin_portrait_page_orientation\x18\x01 \x02(\x08\x12\x1c\n\tsheet_uid\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12\"\n\x05super\x18\x03 \x02(\x0b\x32\x13.TSK.CommandArchive\x12)\n!prev_in_portrait_page_orientation\x18\x04 \x02(\x08\"\x85\x01\n%CommandSetShowPageNumbersValueArchive\x12\x19\n\x11show_page_numbers\x18\x01 \x02(\x08\x12\x1d\n\x05sheet\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\x05super\x18\x03 \x02(\x0b\x32\x13.TSK.CommandArchive\"\x8b\x01\n&CommandSetRepeatingHeadersValueArchive\x12\x1e\n\x16show_repeating_headers\x18\x01 \x02(\x08\x12\x1d\n\x05sheet\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\x05super\x18\x03 \x02(\x0b\x32\x13.TSK.CommandArchive\"\xad\x01\n\x1d\x43ommandSetContentScaleArchive\x12\x19\n\x11old_content_scale\x18\x02 \x01(\x02\x12\x15\n\rcontent_scale\x18\x03 \x02(\x02\x12\x1c\n\tsheet_uid\x18\x04 \x02(\x0b\x32\t.TSP.UUID\x12\"\n\x05super\x18\x05 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x18\n\x10toggled_auto_fit\x18\x06 \x02(\x08\"\xa9\x01\n\x1b\x43ommandSetDocumentPaperSize\x12\x10\n\x08paper_id\x18\x01 \x02(\t\x12\x1c\n\tpage_size\x18\x02 \x02(\x0b\x32\t.TSP.Size\x12\"\n\x05super\x18\x03 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x14\n\x0cold_paper_id\x18\x04 \x02(\t\x12 \n\rold_page_size\x18\x05 \x02(\x0b\x32\t.TSP.Size\"I\n#CommandEnterPrintPreviewModeArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"H\n\"CommandExitPrintPreviewModeArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\"\xc9\x01\n\x1f\x43ommandSetPrinterMarginsArchive\x12\x31\n\x11new_print_margins\x18\x01 \x02(\x0b\x32\x16.TSD.EdgeInsetsArchive\x12\x31\n\x11old_print_margins\x18\x02 \x01(\x0b\x32\x16.TSD.EdgeInsetsArchive\x12\x1c\n\tsheet_uid\x18\x03 \x02(\x0b\x32\t.TSP.UUID\x12\"\n\x05super\x18\x04 \x02(\x0b\x32\x13.TSK.CommandArchive\"\x9f\x01\n!CommandSetPrintBackgroundsArchive\x12\x1c\n\tsheet_uid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x19\n\x11print_backgrounds\x18\x02 \x02(\x08\x12\x1d\n\x15old_print_backgrounds\x18\x03 \x02(\x08\x12\"\n\x05super\x18\x04 \x02(\x0b\x32\x13.TSK.CommandArchive\"\xc7\x01\n#CommandSetHeaderFooterInsetsArchive\x12\x18\n\x10old_header_inset\x18\x01 \x01(\x02\x12\x18\n\x10old_footer_inset\x18\x02 \x01(\x02\x12\x14\n\x0cheader_inset\x18\x03 \x02(\x02\x12\x14\n\x0c\x66ooter_inset\x18\x04 \x02(\x02\x12\x1c\n\tsheet_uid\x18\x05 \x02(\x0b\x32\t.TSP.UUID\x12\"\n\x05super\x18\x06 \x02(\x0b\x32\x13.TSK.CommandArchive\"\x8a\x01\n\x1a\x43ommandSetPageOrderArchive\x12\x16\n\x0eold_page_order\x18\x01 \x02(\r\x12\x12\n\npage_order\x18\x02 \x02(\r\x12\x1c\n\tsheet_uid\x18\x03 \x02(\x0b\x32\t.TSP.UUID\x12\"\n\x05super\x18\x04 \x02(\x0b\x32\x13.TSK.CommandArchive\"\xb0\x01\n%CommandSetUsingStartPageNumberArchive\x12\x1f\n\x17using_start_page_number\x18\x01 \x02(\x08\x12\x1c\n\tsheet_uid\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12\"\n\x05super\x18\x03 \x02(\x0b\x32\x13.TSK.CommandArchive\x12$\n\x1cprev_using_start_page_number\x18\x04 \x02(\x08\"\x9e\x01\n CommandSetStartPageNumberArchive\x12\x1d\n\x15old_start_page_number\x18\x01 \x02(\x05\x12\x19\n\x11start_page_number\x18\x02 \x02(\x05\x12\x1c\n\tsheet_uid\x18\x03 \x02(\x0b\x32\t.TSP.UUID\x12\"\n\x05super\x18\x04 \x02(\x0b\x32\x13.TSK.CommandArchive\"\xb8\x01\n\'CommandReorderSidebarItemChildrenAchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1d\n\x05sheet\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12$\n\x0cold_children\x18\x03 \x03(\x0b\x32\x0e.TSP.Reference\x12$\n\x0cnew_children\x18\x04 \x03(\x0b\x32\x0e.TSP.Reference\"\xc0\x02\n#CommandChartMediatorSetEditingState\x12(\n\x05super\x18\x01 \x02(\x0b\x32\x19.TSCH.ChartCommandArchive\x12\x35\n\x0cold_formulas\x18\x03 \x01(\x0b\x32\x1f.TN.ChartMediatorFormulaStorage\x12\x35\n\x0cnew_formulas\x18\x04 \x01(\x0b\x32\x1f.TN.ChartMediatorFormulaStorage\x12\x15\n\rold_direction\x18\x05 \x01(\x05\x12\x15\n\rnew_direction\x18\x06 \x01(\x05\x12\x1a\n\x12old_scatter_format\x18\x07 \x01(\x05\x12\x1a\n\x12new_scatter_format\x18\x08 \x01(\x05\x12\x1b\n\x13\x66or_formula_rewrite\x18\t \x01(\x08\"\xbc\x01\n$CommandChartMediatorSetGridDirection\x12(\n\x05super\x18\x01 \x02(\x0b\x32\x19.TSCH.ChartCommandArchive\x12\x15\n\rold_direction\x18\x02 \x02(\r\x12\x15\n\rnew_direction\x18\x03 \x02(\r\x12<\n\x13old_formula_storage\x18\x04 \x01(\x0b\x32\x1f.TN.ChartMediatorFormulaStorage\"\xdc\x02\n\"CommandChartMediatorSetSeriesOrder\x12(\n\x05super\x18\x01 \x02(\x0b\x32\x19.TSCH.ChartCommandArchive\x12\x1c\n\tseries_id\x18\x02 \x01(\x0b\x32\t.TSP.UUID\x12&\n\x13preceding_series_id\x18\x03 \x01(\x0b\x32\t.TSP.UUID\x12$\n\x11inverse_series_id\x18\x04 \x01(\x0b\x32\t.TSP.UUID\x12.\n\x1binverse_preceding_series_id\x18\x05 \x01(\x0b\x32\t.TSP.UUID\x12\x1a\n\x12undo_current_index\x18\x06 \x02(\x05\x12\x16\n\x0eundo_new_index\x18\x07 \x02(\x05\x12<\n\x13old_formula_storage\x18\x08 \x01(\x0b\x32\x1f.TN.ChartMediatorFormulaStorage\"r\n)CommandChartMediatorUpdateForEntityDelete\x12(\n\x05super\x18\x01 \x02(\x0b\x32\x19.TSCH.ChartCommandArchive\x12\x1b\n\x03\x63md\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\"\xe7\x01\n\x1e\x43ommandChartMediatorSetFormula\x12(\n\x05super\x18\x01 \x02(\x0b\x32\x19.TSCH.ChartCommandArchive\x12\x1e\n\x16model_update_data_type\x18\x02 \x02(\x05\x12&\n\x08\x66ormulae\x18\x03 \x03(\x0b\x32\x14.TSCE.FormulaArchive\x12*\n\x0cold_formulae\x18\x04 \x03(\x0b\x32\x14.TSCE.FormulaArchive\x12\x14\n\x0cseries_index\x18\x05 \x02(\r\x12\x11\n\taxis_type\x18\x06 \x02(\x05\"\xaf\x01\n$CommandSheetSetBackgroundFillArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1b\n\x08sheet_id\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12\"\n\x08new_fill\x18\x03 \x02(\x0b\x32\x10.TSD.FillArchive\x12\"\n\x08old_fill\x18\x04 \x02(\x0b\x32\x10.TSD.FillArchive\"\xac\x01\n\x1b\x43ommandSheetSetStyleArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x1b\n\x08sheet_id\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12#\n\x0bsheet_style\x18\x03 \x02(\x0b\x32\x0e.TSP.Reference\x12\'\n\x0fold_sheet_style\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\"Q\n#DocumentSelectionTransformerArchive\x12*\n\x12\x64ocument_selection\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\"T\n SheetSelectionTransformerArchive\x12\x1d\n\nsheet_uuid\x18\x01 \x01(\x0b\x32\t.TSP.UUID\x12\x11\n\tpaginated\x18\x02 \x02(\x08\"z\n$FormSheetSelectionTransformerArchive\x12\x33\n\x05super\x18\x01 \x02(\x0b\x32$.TN.SheetSelectionTransformerArchive\x12\x1d\n\ntable_uuid\x18\x02 \x01(\x0b\x32\t.TSP.UUID\"\xa6\x01\n!CanvasSelectionTransformerArchive\x12P\n\x12transformer_helper\x18\x01 \x02(\x0b\x32\x34.TSD.InfoCollectionSelectionTransformerHelperArchive\x12/\n\x18header_storage_uuid_path\x18\x02 \x01(\x0b\x32\r.TSP.UUIDPath\"-\n+FormTableChooserSelectionTransformerArchive\"\x8e\x01\n&FormBuilderSelectionTransformerArchive\x12\x1d\n\ntable_uuid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12&\n\x13viewing_record_uuid\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12\x1d\n\nfield_uuid\x18\x03 \x02(\x0b\x32\t.TSP.UUID\"\x85\x01\n%FormViewerSelectionTransformerArchive\x12\x1d\n\ntable_uuid\x18\x01 \x02(\x0b\x32\t.TSP.UUID\x12\x1e\n\x0brecord_uuid\x18\x02 \x02(\x0b\x32\t.TSP.UUID\x12\x1d\n\nfield_uuid\x18\x03 \x02(\x0b\x32\t.TSP.UUID\"5\n\x16SheetChangeBaseArchive\x12\x1b\n\x08sheet_id\x18\x01 \x02(\x0b\x32\t.TSP.UUID\"\\\n\x1bSheetChangeSheetNameArchive\x12)\n\x05super\x18\x01 \x02(\x0b\x32\x1a.TN.SheetChangeBaseArchive\x12\x12\n\nsheet_name\x18\x02 \x02(\t\"~\n CommandInducedSheetChangeArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x36\n\rsheet_changes\x18\x02 \x03(\x0b\x32\x1f.TN.SheetChangeSheetNameArchive')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'TNCommandArchives_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
+  _COMMANDFORMCHOOSETARGETTABLEARCHIVE._serialized_start=277
+  _COMMANDFORMCHOOSETARGETTABLEARCHIVE._serialized_end=495
+  _COMMANDSHEETINSERTDRAWABLESARCHIVE._serialized_start=498
+  _COMMANDSHEETINSERTDRAWABLESARCHIVE._serialized_end=979
+  _COMMANDSHEETREMOVEDRAWABLESARCHIVE._serialized_start=982
+  _COMMANDSHEETREMOVEDRAWABLESARCHIVE._serialized_end=1260
+  _COMMANDSHEETMOVEDRAWABLEZORDERARCHIVE._serialized_start=1263
+  _COMMANDSHEETMOVEDRAWABLEZORDERARCHIVE._serialized_end=1417
+  _COMMANDDOCUMENTINSERTSHEETARCHIVE._serialized_start=1420
+  _COMMANDDOCUMENTINSERTSHEETARCHIVE._serialized_end=1768
+  _COMMANDDOCUMENTREMOVESHEETARCHIVE._serialized_start=1771
+  _COMMANDDOCUMENTREMOVESHEETARCHIVE._serialized_end=2024
+  _COMMANDDOCUMENTREORDERSHEETARCHIVE._serialized_start=2026
+  _COMMANDDOCUMENTREORDERSHEETARCHIVE._serialized_end=2147
+  _COMMANDSETSHEETNAMEARCHIVE._serialized_start=2150
+  _COMMANDSETSHEETNAMEARCHIVE._serialized_end=2278
+  _COMMANDSETSHEETSHOULDPRINTCOMMENTSARCHIVE._serialized_start=2281
+  _COMMANDSETSHEETSHOULDPRINTCOMMENTSARCHIVE._serialized_end=2460
+  _COMMANDSETSHEETDIRECTIONARCHIVE._serialized_start=2463
+  _COMMANDSETSHEETDIRECTIONARCHIVE._serialized_end=2656
+  _COMMANDSETPAGEORIENTATIONARCHIVE._serialized_start=2659
+  _COMMANDSETPAGEORIENTATIONARCHIVE._serialized_end=2840
+  _COMMANDSETSHOWPAGENUMBERSVALUEARCHIVE._serialized_start=2843
+  _COMMANDSETSHOWPAGENUMBERSVALUEARCHIVE._serialized_end=2976
+  _COMMANDSETREPEATINGHEADERSVALUEARCHIVE._serialized_start=2979
+  _COMMANDSETREPEATINGHEADERSVALUEARCHIVE._serialized_end=3118
+  _COMMANDSETCONTENTSCALEARCHIVE._serialized_start=3121
+  _COMMANDSETCONTENTSCALEARCHIVE._serialized_end=3294
+  _COMMANDSETDOCUMENTPAPERSIZE._serialized_start=3297
+  _COMMANDSETDOCUMENTPAPERSIZE._serialized_end=3466
+  _COMMANDENTERPRINTPREVIEWMODEARCHIVE._serialized_start=3468
+  _COMMANDENTERPRINTPREVIEWMODEARCHIVE._serialized_end=3541
+  _COMMANDEXITPRINTPREVIEWMODEARCHIVE._serialized_start=3543
+  _COMMANDEXITPRINTPREVIEWMODEARCHIVE._serialized_end=3615
+  _COMMANDSETPRINTERMARGINSARCHIVE._serialized_start=3618
+  _COMMANDSETPRINTERMARGINSARCHIVE._serialized_end=3819
+  _COMMANDSETPRINTBACKGROUNDSARCHIVE._serialized_start=3822
+  _COMMANDSETPRINTBACKGROUNDSARCHIVE._serialized_end=3981
+  _COMMANDSETHEADERFOOTERINSETSARCHIVE._serialized_start=3984
+  _COMMANDSETHEADERFOOTERINSETSARCHIVE._serialized_end=4183
+  _COMMANDSETPAGEORDERARCHIVE._serialized_start=4186
+  _COMMANDSETPAGEORDERARCHIVE._serialized_end=4324
+  _COMMANDSETUSINGSTARTPAGENUMBERARCHIVE._serialized_start=4327
+  _COMMANDSETUSINGSTARTPAGENUMBERARCHIVE._serialized_end=4503
+  _COMMANDSETSTARTPAGENUMBERARCHIVE._serialized_start=4506
+  _COMMANDSETSTARTPAGENUMBERARCHIVE._serialized_end=4664
+  _COMMANDREORDERSIDEBARITEMCHILDRENACHIVE._serialized_start=4667
+  _COMMANDREORDERSIDEBARITEMCHILDRENACHIVE._serialized_end=4851
+  _COMMANDCHARTMEDIATORSETEDITINGSTATE._serialized_start=4854
+  _COMMANDCHARTMEDIATORSETEDITINGSTATE._serialized_end=5174
+  _COMMANDCHARTMEDIATORSETGRIDDIRECTION._serialized_start=5177
+  _COMMANDCHARTMEDIATORSETGRIDDIRECTION._serialized_end=5365
+  _COMMANDCHARTMEDIATORSETSERIESORDER._serialized_start=5368
+  _COMMANDCHARTMEDIATORSETSERIESORDER._serialized_end=5716
+  _COMMANDCHARTMEDIATORUPDATEFORENTITYDELETE._serialized_start=5718
+  _COMMANDCHARTMEDIATORUPDATEFORENTITYDELETE._serialized_end=5832
+  _COMMANDCHARTMEDIATORSETFORMULA._serialized_start=5835
+  _COMMANDCHARTMEDIATORSETFORMULA._serialized_end=6066
+  _COMMANDSHEETSETBACKGROUNDFILLARCHIVE._serialized_start=6069
+  _COMMANDSHEETSETBACKGROUNDFILLARCHIVE._serialized_end=6244
+  _COMMANDSHEETSETSTYLEARCHIVE._serialized_start=6247
+  _COMMANDSHEETSETSTYLEARCHIVE._serialized_end=6419
+  _DOCUMENTSELECTIONTRANSFORMERARCHIVE._serialized_start=6421
+  _DOCUMENTSELECTIONTRANSFORMERARCHIVE._serialized_end=6502
+  _SHEETSELECTIONTRANSFORMERARCHIVE._serialized_start=6504
+  _SHEETSELECTIONTRANSFORMERARCHIVE._serialized_end=6588
+  _FORMSHEETSELECTIONTRANSFORMERARCHIVE._serialized_start=6590
+  _FORMSHEETSELECTIONTRANSFORMERARCHIVE._serialized_end=6712
+  _CANVASSELECTIONTRANSFORMERARCHIVE._serialized_start=6715
+  _CANVASSELECTIONTRANSFORMERARCHIVE._serialized_end=6881
+  _FORMTABLECHOOSERSELECTIONTRANSFORMERARCHIVE._serialized_start=6883
+  _FORMTABLECHOOSERSELECTIONTRANSFORMERARCHIVE._serialized_end=6928
+  _FORMBUILDERSELECTIONTRANSFORMERARCHIVE._serialized_start=6931
+  _FORMBUILDERSELECTIONTRANSFORMERARCHIVE._serialized_end=7073
+  _FORMVIEWERSELECTIONTRANSFORMERARCHIVE._serialized_start=7076
+  _FORMVIEWERSELECTIONTRANSFORMERARCHIVE._serialized_end=7209
+  _SHEETCHANGEBASEARCHIVE._serialized_start=7211
+  _SHEETCHANGEBASEARCHIVE._serialized_end=7264
+  _SHEETCHANGESHEETNAMEARCHIVE._serialized_start=7266
+  _SHEETCHANGESHEETNAMEARCHIVE._serialized_end=7358
+  _COMMANDINDUCEDSHEETCHANGEARCHIVE._serialized_start=7360
+  _COMMANDINDUCEDSHEETCHANGEARCHIVE._serialized_end=7486
 # @@protoc_insertion_point(module_scope)
