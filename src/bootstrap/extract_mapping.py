@@ -9,13 +9,13 @@ Copyright 2022 Jon Connell
 Copyright 2022 SheetJS LLC
 """
 
+import json
 import os
 import sys
-import json
+
 import lldb
 
 from debug.lldbutil import print_stacktrace
-
 
 if len(sys.argv) != 3:
     raise (ValueError(f"Usage: {sys.argv[0]} exe-file output.json"))
@@ -47,22 +47,20 @@ try:
         thread = process.GetThreadAtIndex(0)
         frame = thread.GetSelectedFrame()
         if frame.name == "-[NSApplication _crashOnException:]":
-            print("Process crashed")
-            break
+            raise ValueError(f"Process crashed at {frame.name}")
 
         stop_reason = thread.GetStopReason()
+
         if stop_reason == lldb.eStopReasonException:
             print_stacktrace(thread)
             function = frame.GetFunction()
             function_or_symbol = function if function else frame.GetSymbol()
-            # print(disassemble(target, function_or_symbol))
+            print(disassemble(target, function_or_symbol))
             raise ValueError(f"Exception at {frame.name}")
         if stop_reason != lldb.eStopReasonBreakpoint:
             process.Continue()
-            print(f"Stopping at {frame.name}, StopReason={stop_reason}")
             continue
         if frame.name[-8:] == "CloudKit":
-            print(f"Skipping {frame.name}")
             thread.ReturnFromFrame(
                 thread.GetSelectedFrame(),
                 lldb.SBValue().CreateValueFromExpression("0", ""),
@@ -71,10 +69,9 @@ try:
         elif frame.name == "-[NSApplication _sendFinishLaunchingNotification]":
             registry = frame.EvaluateExpression("[TSPRegistry sharedRegistry]")
             error = registry.GetError()
-            if error.fail:
-                print(["Failed", error.value, error.description])
-            if registry.description is None:
-                raise (ValueError("Failed to extract registry"))
+            if error.fail or registry.description is None:
+                continue
+                # raise (ValueError("Failed to extract registry"))
             split = [
                 x.strip().split(" -> ")
                 for x in registry.description.split("{")[1].split("}")[0].split("\n")
