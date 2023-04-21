@@ -333,7 +333,7 @@ cd python
 python3 setup.py -q bdist_wheel --cpp_implementation --warnings_as_errors --compile_static_extension
 ```
 
-This can then be used `make bootstrap` in the `numbers-parser` source tree.
+This can then be used `make bootstrap` in the `numbers-parser` source tree. The signing workflow assumes that you have an Apple Developer Account and that you have created provisioning profile that includes iCloud. Using a self-signed certificate does not seem to work, at least on Apple Silicon (a working PR contradicting this is greatly appreciated).
 
 ## Credits
 
