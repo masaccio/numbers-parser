@@ -1,6 +1,6 @@
 # Change this to the name of a code-signing certificate. A self-signed
 # certificate is suitable for this.
-IDENTITY=python@figsandfudge.com
+IDENTITY=Jonathan Connell
 #
 # Change this to the location of the proto-dump executable
 PROTOC=/usr/local/bin/protoc
@@ -48,19 +48,17 @@ BOOTSTRAP_FILES = src/$(package_c)/functionmap.py \
 
 bootstrap: $(BOOTSTRAP_FILES)
 
-ENTITLEMENTS = .bootstrap/entitlements.xml
-
-$(ENTITLEMENTS):
-	@mkdir -p .bootstrap
-	@rm -f $@
-	codesign --display --xml --entitlements $@ $(NUMBERS)
+ENTITLEMENTS = src/bootstrap/entitlements.xml
 
 .bootstrap/Numbers.unsigned.app: $(ENTITLEMENTS)
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobuf mapping from Numbers"$$(tput init)
 	@mkdir -p .bootstrap
 	rm -rf $@
-	cp -r $(NUMBERS) $@
-	codesign --force --entitlements $(ENTITLEMENTS) --sign "${IDENTITY}" $@
+	cp -R $(NUMBERS) $@
+	xattr -cr $@
+	codesign --remove-signature $@
+	codesign --entitlements $(ENTITLEMENTS) --sign "${IDENTITY}" $@
+	codesign --verify $@
 
 .bootstrap/mapping.json: .bootstrap/Numbers.unsigned.app
 	@mkdir -p .bootstrap
