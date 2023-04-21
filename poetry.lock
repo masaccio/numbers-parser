@@ -65,14 +65,13 @@ files = [
 
 [[package]]
 name = "compact-json"
-version = "1.5.0"
+version = "1.5.1"
 description = "A JSON formatter that produces compact but human-readable"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "compact_json-1.5.0-py3-none-any.whl", hash = "sha256:710a4af6f8e3d5a05748d1fcea8631c8c769dce0e016408f3693cd1142ec227a"},
-    {file = "compact_json-1.5.0.tar.gz", hash = "sha256:0965c4f3a3b85dbcdfd87032553123d969de1c75ebbe997d7e62490467d99649"},
+    {file = "compact_json-1.5.1-py3-none-any.whl", hash = "sha256:09aee112cdc576339d515d8db503be8d037ce0e297d396673d457556afc82db9"},
 ]
 
 [package.dependencies]
