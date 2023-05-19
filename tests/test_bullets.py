@@ -35,5 +35,6 @@ def test_hyperlinks():
 
     cell = table.cell(0, 0)
     assert len(cell.hyperlinks) == 2
+    assert cell.is_bulleted == True
     assert cell.hyperlinks[0] == "http://news.bbc.co.uk/"
     assert cell.value == "visit BBC News for the news and Google to find stuff"
