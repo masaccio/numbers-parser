@@ -172,6 +172,10 @@ else:
 
 Bulleted and numbered data can also be extracted with the bullet or number characters present in the text for each line in the cell in the same way as above but using the `formatted_bullets` property. A single space is inserted between the bullet character and the text string and in the case of bullets, this will be the Unicode character seen in Numbers, for example `"• some text"`.
 
+### Hyperlinks
+
+Numbers does not support hyperlinks to cells within a spreadsheet, but does allow embedding links in cells. When cells contain hyperlinks, `numbers_parser` returns the text version of the cell. The `hyperlinks` property of cells where `is_bulleted` is `True` is a list ot string URLs found in the cell.
+
 ###  Cell images
 
 Querying cell formats is currently limited to image backrgounds only. If a cell has no background image, `None` is returned for all calls.
