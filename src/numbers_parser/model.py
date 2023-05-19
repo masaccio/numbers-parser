@@ -1190,6 +1190,13 @@ class _NumbersModel:
                 table_list_styles = payload_storage.table_list_style.entries
                 offsets = [e.character_index for e in payload_entries]
 
+                smartfield_ids = [
+                    e.object.identifier or 0
+                    for e in payload_storage.table_smartfield.entries
+                ]
+                smartfields = [self.objects[id] for id in smartfield_ids if id]
+                hyperlinks = [l.url_ref for l in smartfields if l is not None]
+
                 cell_text = payload_storage.text[0]
                 bullets = []
                 bullet_chars = []
@@ -1219,7 +1226,9 @@ class _NumbersModel:
                     "text": cell_text,
                     "bullets": bullets,
                     "bullet_chars": bullet_chars,
+                    "hyperlinks": hyperlinks,
                 }
+
         return None
 
 

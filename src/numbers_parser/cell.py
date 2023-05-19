@@ -145,6 +145,7 @@ class BulletedTextCell(Cell):
         self._type = TSTArchives.automaticCellType
         super().__init__(row_num, col_num, value["text"])
         self._bullets = value["bullets"]
+        self._hyperlinks = value["hyperlinks"]
         self._formatted_bullets = [
             value["bullet_chars"][i] + " " + value["bullets"][i]
             if value["bullet_chars"][i] is not None
@@ -164,6 +165,10 @@ class BulletedTextCell(Cell):
     @property
     def formatted_bullets(self) -> str:
         return self._formatted_bullets
+
+    @property
+    def hyperlinks(self) -> list[str]:
+        return self._hyperlinks
 
 
 class EmptyCell(Cell):

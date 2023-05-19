@@ -44,6 +44,7 @@ class CellType(IntEnum):
     DURATION = 6
     ERROR = 7
     BULLET = 8
+    RICH_TEXT = 9
 
 
 class CellPadding(IntEnum):

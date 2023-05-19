@@ -94,32 +94,6 @@ CELL_STORAGE_MAP_V5 = OrderedDict(
     ]
 )
 
-# CELL_STORAGE_MAP_V4 = OrderedDict(
-#     [
-#         (0x2, {"attr": "cell_style_id"}),
-#         (0x80, {"attr": "text_style_id"}),  # SheetJS skips
-#         (0x400, {"attr": "conditional_style_id"}),  # SheetJS skips
-#         (0x800, {"attr": "conditional_style_rule_id"}),  # SheetJS skips
-#         (0x4, {"attr": "current_format_id"}),  # SheetJS skips
-#         (0x8, {"attr": "formula_id"}),  # SheetJS skips
-#         (0x100, {"attr": "formula_error_id"}),  # SheetJS skips
-#         (0x200, {"attr": "rich_id"}),
-#         (0x1000, {"attr": "comment_id"}),  # SheetJS skips
-#         (0x2000, {"attr": "import_warning_id"}),  # SheetJS skips
-#         (0x10, {"attr": "string_id"}),
-#         (0x20, {"attr": "double", "size": 8}),
-#         (0x40, {"attr": "seconds", "size": 8}),
-#         (0x10000, {"attr": "num_format_id"}),  # SheetJS skips
-#         (0x80000, {"attr": "currency_format_id"}),  # SheetJS skips
-#         (0x20000, {"attr": "date_format_id"}),  # SheetJS skips
-#         (0x40000, {"attr": "duration_format_id"}),  # SheetJS skips
-#         (0x100000, {"attr": "control_format_id"}),  # SheetJS skips
-#         (0x200000, {"attr": "custom_format_id"}),  # SheetJS skips
-#         (0x400000, {"attr": "base_format_id"}),  # SheetJS skips
-#         (0x800000, {"attr": "multiple_choice_id"}),  # SheetJS skips
-#     ]
-# )
-
 
 class CellStorage:
     def __init__(  # noqa: C901

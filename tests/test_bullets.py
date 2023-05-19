@@ -22,3 +22,18 @@ def test_bullets():
     assert table.cell(0, 0).is_bulleted == False
     assert table.cell(1, 1).is_bulleted == True
     assert table.cell(0, 0).bullets is None
+
+
+def test_hyperlinks():
+    doc = Document("tests/data/test-hlinks.numbers")
+    sheets = doc.sheets
+    tables = sheets[0].tables
+    table = tables[0]
+
+    assert len(table.cell(2, 0).bullets) == 4
+    assert len(table.cell(4, 0).bullets) == 4
+
+    cell = table.cell(0, 0)
+    assert len(cell.hyperlinks) == 2
+    assert cell.hyperlinks[0] == "http://news.bbc.co.uk/"
+    assert cell.value == "visit BBC News for the news and Google to find stuff"
