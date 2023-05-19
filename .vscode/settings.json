@@ -21,7 +21,7 @@
     ],
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 120,
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "terminal.integrated.env.osx": {
         "PYTHONPATH": "${workspaceFolder}/src",
     },
@@ -34,5 +34,8 @@
     ],
     "[json]": {
         "editor.defaultFormatter": "j-brooke.fracturedjsonvsc"
+    },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
     },
 }
