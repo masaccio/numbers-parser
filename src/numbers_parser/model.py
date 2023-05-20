@@ -47,6 +47,7 @@ from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
+from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
 
 
 class DataLists:
@@ -1186,20 +1187,27 @@ class _NumbersModel:
             if string_key == entry.key:
                 payload = self.objects[entry.rich_text_payload.identifier]
                 payload_storage = self.objects[payload.storage.identifier]
+                smartfield_entries = payload_storage.table_smartfield.entries
+                cell_text = payload_storage.text[0]
+
+                hyperlinks = []
+                for i, e in enumerate(smartfield_entries):
+                    if e.object.identifier:
+                        obj = self.objects[e.object.identifier]
+                        if type(obj) == TSWPArchives.HyperlinkFieldArchive:
+                            start = e.character_index
+                            if i < len(smartfield_entries) - 1:
+                                end = smartfield_entries[i + 1].character_index
+                            else:
+                                end = len(cell_text)
+                            url_text = cell_text[start:end]
+                            hyperlinks.append((url_text, obj.url_ref))
+
+                bullets = []
+                bullet_chars = []
                 payload_entries = payload_storage.table_para_style.entries
                 table_list_styles = payload_storage.table_list_style.entries
                 offsets = [e.character_index for e in payload_entries]
-
-                smartfield_ids = [
-                    e.object.identifier or 0
-                    for e in payload_storage.table_smartfield.entries
-                ]
-                smartfields = [self.objects[id] for id in smartfield_ids if id]
-                hyperlinks = [l.url_ref for l in smartfields if l is not None]
-
-                cell_text = payload_storage.text[0]
-                bullets = []
-                bullet_chars = []
                 for i, offset in enumerate(offsets):
                     if i == len(offsets) - 1:
                         bullets.append(cell_text[offset:])

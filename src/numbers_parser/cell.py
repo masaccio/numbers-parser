@@ -167,7 +167,7 @@ class BulletedTextCell(Cell):
         return self._formatted_bullets
 
     @property
-    def hyperlinks(self) -> list[str]:
+    def hyperlinks(self) -> list[tuple]:
         return self._hyperlinks
 
 

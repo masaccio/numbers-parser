@@ -174,7 +174,12 @@ Bulleted and numbered data can also be extracted with the bullet or number chara
 
 ### Hyperlinks
 
-Numbers does not support hyperlinks to cells within a spreadsheet, but does allow embedding links in cells. When cells contain hyperlinks, `numbers_parser` returns the text version of the cell. The `hyperlinks` property of cells where `is_bulleted` is `True` is a list ot string URLs found in the cell.
+Numbers does not support hyperlinks to cells within a spreadsheet, but does allow embedding links in cells. When cells contain hyperlinks, `numbers_parser` returns the text version of the cell. The `hyperlinks` property of cells where `is_bulleted` is `True` is a list of text and URL tuples:
+
+``` python
+cell = table.cell(0, 0)
+(text, url) = cell.hyperlinks[0]
+```
 
 ###  Cell images
 

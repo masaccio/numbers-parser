@@ -1,5 +1,3 @@
-import pytest
-
 from numbers_parser import Document
 
 TEST_REF_1 = "this\nis some\nbulleted\ntext"
@@ -19,8 +17,8 @@ def test_bullets():
     assert table.cell(0, 1).bullets[2] == TEST_REF_1.split("\n")[2]
     assert table.cell(0, 1).bullets[3] == TEST_REF_1.split("\n")[3]
     assert table.cell(2, 0).value == "t"
-    assert table.cell(0, 0).is_bulleted == False
-    assert table.cell(1, 1).is_bulleted == True
+    assert not table.cell(0, 0).is_bulleted
+    assert table.cell(1, 1).is_bulleted
     assert table.cell(0, 0).bullets is None
 
 
@@ -31,10 +29,12 @@ def test_hyperlinks():
     table = tables[0]
 
     assert len(table.cell(2, 0).bullets) == 4
-    assert len(table.cell(4, 0).bullets) == 4
+    assert len(table.cell(3, 0).bullets) == 4
 
     cell = table.cell(0, 0)
     assert len(cell.hyperlinks) == 2
-    assert cell.is_bulleted == True
-    assert cell.hyperlinks[0] == "http://news.bbc.co.uk/"
+    assert cell.is_bulleted
+    assert cell.hyperlinks[0] == ("BBC News", "http://news.bbc.co.uk/")
     assert cell.value == "visit BBC News for the news and Google to find stuff"
+
+    assert table.cell(1, 0).hyperlinks[0][0] == "Google"
