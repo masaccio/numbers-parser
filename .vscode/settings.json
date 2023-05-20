@@ -1,41 +1,31 @@
 {
-    "python.analysis.autoImportCompletions": false,
-    "python.envFile": "${workspaceFolder}/.vscode/.env",
-    "python.testing.unittestEnabled": false,
-    "python.testing.nosetestsEnabled": false,
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.wordWrap": "wordWrapColumn",
+        "editor.wordWrapColumn": 100,
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "python.formatting.provider": "none",
+    "python.linting.enabled": true,
+    "python.linting.lintOnSave": true,
+    "python.linting.pylamaEnabled": true,
+    "python.linting.ignorePatterns": [
+        "${workspaceFolder}/src/numbers_parser/generated/*"
+    ],
+    "black-formatter.args": [],
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
     "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
     "python.testing.pytestArgs": [
         "--experimental",
         "-o",
         "log_cli=True",
         "--log-cli-level=ERROR",
     ],
-    "python.linting.enabled": true,
-    "python.linting.pylamaEnabled": true,
-    "python.linting.lintOnSave": true,
-    "python.linting.ignorePatterns": [
-        ".vscode/*.py",
-        "**/site-packages/**/*.py",
-        "**/.tox/*",
-        "${workspaceFolder}/src/numbers_parser/generated/*"
-    ],
-    "editor.wordWrap": "wordWrapColumn",
-    "editor.wordWrapColumn": 120,
-    "python.formatting.provider": "none",
-    "terminal.integrated.env.osx": {
-        "PYTHONPATH": "${workspaceFolder}/src",
-    },
-    "esbonio.server.enabled": true,
-    "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build",
-    "esbonio.sphinx.confDir": "${workspaceFolder}/doc",
     "todo-tree.general.tags": [
         "TODO",
         "FIXME"
     ],
-    "[json]": {
-        "editor.defaultFormatter": "j-brooke.fracturedjsonvsc"
-    },
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
-    },
 }
