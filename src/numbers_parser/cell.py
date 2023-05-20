@@ -6,6 +6,7 @@ from numbers_parser.cell_storage import CellType, CellStorage
 
 from pendulum import duration, Duration, DateTime
 from functools import lru_cache
+from typing import List, Tuple
 
 
 class Cell:
@@ -168,7 +169,7 @@ class RichTextCell(Cell):
         return self._formatted_bullets
 
     @property
-    def hyperlinks(self) -> list[tuple]:
+    def hyperlinks(self) -> List[Tuple]:
         return self._hyperlinks
 
 
