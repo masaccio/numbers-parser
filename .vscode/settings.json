@@ -9,13 +9,11 @@
     "python.linting.enabled": true,
     "python.linting.lintOnSave": true,
     "python.linting.pylamaEnabled": true,
+    "python.linting.pylamaArgs": ["--max-complexity=15", "--ignore=E203"],
     "python.linting.ignorePatterns": [
         "${workspaceFolder}/src/numbers_parser/generated/*"
     ],
     "black-formatter.args": [],
-    "python.testing.pytestArgs": [
-        "tests"
-    ],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
     "python.testing.pytestArgs": [

@@ -332,7 +332,7 @@ The default protobuf package installation may not include the C++ optimised vers
 
  To include the C++ support, download a released version of Google protobuf [from github](https://github.com/protocolbuffers/protobuf). Build instructions are described in [`src/README.md`](https://github.com/protocolbuffers/protobuf/blob/main/src/README).These have changed greatly over time, but as of April 2023, this was useful:
 
-```
+``` shell
 bazel build :protoc :protobuf
 cmake . -DCMAKE_CXX_STANDARD=14
 cmake --build . --parallel 8

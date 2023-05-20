@@ -1231,7 +1231,7 @@ class _NumbersModel:
 
                 return {
                     "text": cell_text,
-                    "bulleted": any([c != None for c in bullet_chars]),
+                    "bulleted": any([c is not None for c in bullet_chars]),
                     "bullets": bullets,
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,
