@@ -48,8 +48,8 @@ class Cell:
             cell = DurationCell(*row_col, value)
         elif cell_storage.type == CellType.ERROR:
             cell = ErrorCell(*row_col)
-        elif cell_storage.type == CellType.BULLET:
-            cell = BulletedTextCell(*row_col, cell_storage.value)
+        elif cell_storage.type == CellType.RICH_TEXT:
+            cell = RichTextCell(*row_col, cell_storage.value)
         else:
             raise UnsupportedError(  # pragma: no cover
                 f"Unsupport cell type {cell_storage.type} "
@@ -140,19 +140,20 @@ class TextCell(Cell):
         return self._value
 
 
-class BulletedTextCell(Cell):
+class RichTextCell(Cell):
     def __init__(self, row_num: int, col_num: int, value):
         self._type = TSTArchives.automaticCellType
         super().__init__(row_num, col_num, value["text"])
         self._bullets = value["bullets"]
         self._hyperlinks = value["hyperlinks"]
-        self._formatted_bullets = [
-            value["bullet_chars"][i] + " " + value["bullets"][i]
-            if value["bullet_chars"][i] is not None
-            else value["bullets"][i]
-            for i in range(len(self._bullets))
-        ]
-        self.is_bulleted = True
+        if value["bulleted"]:
+            self._formatted_bullets = [
+                value["bullet_chars"][i] + " " + value["bullets"][i]
+                if value["bullet_chars"][i] is not None
+                else value["bullets"][i]
+                for i in range(len(self._bullets))
+            ]
+            self.is_bulleted = True
 
     @property
     def value(self) -> str:
@@ -169,6 +170,11 @@ class BulletedTextCell(Cell):
     @property
     def hyperlinks(self) -> list[tuple]:
         return self._hyperlinks
+
+
+# Backwards compatibility to earlier class names
+class BulletedTextCell(RichTextCell):
+    pass
 
 
 class EmptyCell(Cell):

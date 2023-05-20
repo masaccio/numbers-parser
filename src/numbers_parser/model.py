@@ -1145,10 +1145,9 @@ class _NumbersModel:
         return cell
 
     @lru_cache(maxsize=None)
-    def table_bullets(self, table_id: int, string_key: int) -> Dict:
+    def table_rich_text(self, table_id: int, string_key: int) -> Dict:
         """
-        Extract bullets from a rich text data cell.
-        Returns None if the cell is not rich text
+        Extract bullets and hyperlinks from a rich text data cell.
         """
         # The table model base data store contains a richTextTable field
         # which is a reference to a TST.TableDataList. The TableDataList
@@ -1226,12 +1225,13 @@ class _NumbersModel:
                         number_type = bullet_style.number_types[0]
                         bullet_char = formatted_number(number_type, i)
                     else:
-                        bullet_char = ""
+                        bullet_char = None
 
                     bullet_chars.append(bullet_char)
 
                 return {
                     "text": cell_text,
+                    "bulleted": any([c != None for c in bullet_chars]),
                     "bullets": bullets,
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,

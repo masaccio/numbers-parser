@@ -152,8 +152,8 @@ class CellStorage:
             self.value = None
             self.type = CellType.ERROR
         elif cell_type == TSTArchives.automaticCellType:
-            self.value = self.model.table_bullets(self.table_id, self.rich_id)
-            self.type = CellType.BULLET
+            self.value = self.model.table_rich_text(self.table_id, self.rich_id)
+            self.type = CellType.RICH_TEXT
         elif cell_type == 10:
             self.value = self.d128
             self.type = CellType.NUMBER

@@ -43,8 +43,7 @@ class CellType(IntEnum):
     BOOL = 5
     DURATION = 6
     ERROR = 7
-    BULLET = 8
-    RICH_TEXT = 9
+    RICH_TEXT = 8
 
 
 class CellPadding(IntEnum):
