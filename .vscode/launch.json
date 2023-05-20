@@ -2,12 +2,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Python: Debug Tests",
             "type": "python",
             "request": "launch",
             "program": "${file}",
+            "purpose": ["debug-test"],
             "console": "integratedTerminal",
-            "justMyCode": true
+            "env": {"PYTEST_ADDOPTS": "--no-cov"}, 
+            "justMyCode": false
         },
         {
             "name": "Pytest: Current File",
@@ -15,17 +17,11 @@
             "request": "launch",
             "module": "pytest",
             "console": "integratedTerminal",
+            "env": {"PYTEST_ADDOPTS": "--no-cov"}, 
             "justMyCode": true,
             "args": [
                 "${file}"
             ]
-        }
-    ],
-    "inputs": [
-        {
-            "id": "commandline",
-            "type":"promptString",
-            "description": "Program Args",
         }
     ]
 }

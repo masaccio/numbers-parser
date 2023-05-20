@@ -50,8 +50,7 @@ omit = ["src/numbers_parser/generated/*.py"]
 directory = "coverage_html_report"
 
 [tool.pytest.ini_options]
-addopts = "-ra -s"
-minversion = 6.0
+addopts = "--cov=src/numbers_parser --cov-report=term-missing"
 
 [tool.tox]
 legacy_tox_ini = """
