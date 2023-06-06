@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 import regex
 import sys
 
@@ -9,12 +10,15 @@ from base64 import b64decode
 from binascii import hexlify
 from compact_json import Formatter
 
-
 from numbers_parser.file import read_numbers_file
 from numbers_parser import _get_version
+from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser.iwafile import IWAFile
 from numbers_parser.exceptions import FileFormatError, UnsupportedError, FileError
 from numbers_parser.numbers_uuid import NumbersUUID
+
+
+logger = logging.getLogger(numbers_parser_name)
 
 
 def ensure_directory_exists(prefix, path):
@@ -113,6 +117,9 @@ def main():
         "--pretty", action="store_true", help="Enable all prettifying options"
     )
     parser.add_argument("--output", "-o", help="directory name to unpack into")
+    parser.add_argument(
+        "--debug", default=False, action="store_true", help="Enable debug logging"
+    )
     args = parser.parse_args()
     if args.version:
         print(_get_version())
@@ -125,6 +132,13 @@ def main():
     elif len(args.document) == 0:
         parser.print_help()
     else:
+        hdlr = logging.StreamHandler()
+        hdlr.setFormatter(logging.Formatter("%(levelname)s:%(name)s:%(message)s"))
+        logger.addHandler(hdlr)
+        if args.debug:
+            logger.setLevel("DEBUG")
+        else:
+            logger.setLevel("ERROR")
         for document in args.document:
             output_dir = args.output or document.replace(".numbers", "")
             try:

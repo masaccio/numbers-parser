@@ -1,10 +1,14 @@
 import argparse
 import csv
+import logging
 import sys
 
 from numbers_parser import Document, _get_version
+from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser.exceptions import FileFormatError
 from numbers_parser.cell import ErrorCell
+
+logger = logging.getLogger(numbers_parser_name)
 
 
 def command_line_parser():
@@ -49,6 +53,9 @@ def command_line_parser():
         "-t", "--table", action="append", help="Names of table(s) to include in export"
     )
     parser.add_argument("document", nargs="*", help="Document(s) to export")
+    parser.add_argument(
+        "--debug", default=False, action="store_true", help="Enable debug logging"
+    )
     return parser
 
 
@@ -100,6 +107,13 @@ def main():
     elif len(args.document) == 0:
         parser.print_help()
     else:
+        hdlr = logging.StreamHandler()
+        hdlr.setFormatter(logging.Formatter("%(levelname)s:%(name)s:%(message)s"))
+        logger.addHandler(hdlr)
+        if args.debug:
+            logger.setLevel("DEBUG")
+        else:
+            logger.setLevel("ERROR")
         for filename in args.document:
             try:
                 if args.list_sheets:

@@ -1,3 +1,5 @@
+import logging
+
 from io import BytesIO
 from zipfile import ZipFile, BadZipFile
 
@@ -6,8 +8,12 @@ from numbers_parser.exceptions import FileError, FileFormatError
 
 import os
 
+logger = logging.getLogger(__name__)
+debug = logger.debug
+
 
 def read_numbers_file(path, file_handler=None, object_handler=None):
+    debug("read_numbers_file: path=%s", path)
     if os.path.isdir(path):
         if os.path.isfile(os.path.join(path, "Index.zip")):
             get_objects_from_zip_file(
@@ -80,6 +86,7 @@ def extract_iwa_archives(blob, filename, file_handler, object_handler):
         return
 
     try:
+        debug("extract_iwa_archives: filename=%s", filename)
         iwaf = IWAFile.from_buffer(blob, filename)
     except Exception as e:  # pragma: no cover
         raise FileFormatError(f"{filename}: invalid IWA file {filename}") from e
