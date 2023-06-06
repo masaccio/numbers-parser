@@ -130,8 +130,8 @@ def test_issue_17():
     sheets = doc.sheets
     table = sheets[0].tables[0]
     assert table.cell(0, 0).value == 123.0
-    assert table.cell(0, 0).is_merged == False
-    assert table.cell(0, 0).formula == None
+    assert not table.cell(0, 0).is_merged
+    assert table.cell(0, 0).formula is None
 
 
 def test_issue_18():
