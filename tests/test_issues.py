@@ -254,3 +254,10 @@ def test_issue_49(tmp_path, pytestconfig):
     table = doc.sheets[0].tables[0]
     test_values = [int(table.cell(row_num, 1).value) for row_num in range(1, 6)]
     assert test_values == [100, 50, 0, -50, -100]
+
+
+def test_issue_50():
+    doc = Document("tests/data/issue-50.numbers")
+    table = doc.sheets[0].tables[0]
+    assert table.num_rows == 65553
+    assert table.cell(65552, 3).value == "string 262163"

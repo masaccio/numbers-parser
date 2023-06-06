@@ -183,9 +183,12 @@ class _NumbersModel:
         #  },
         row_bucket_map = {i: None for i in range(self.objects[table_id].number_of_rows)}
         bds = self.objects[table_id].base_data_store
-        buckets = self.objects[bds.rowHeaders.buckets[0].identifier].headers
-        for i, bucket in enumerate(buckets):
-            row_bucket_map[bucket.index] = i
+        bucket_ids = [x.identifier for x in bds.rowHeaders.buckets]
+        idx = 0
+        for bucket_id in bucket_ids:
+            for header in self.objects[bucket_id].headers:
+                row_bucket_map[header.index] = idx
+                idx += 1
         return row_bucket_map
 
     def number_of_rows(self, table_id, num_rows=None):
