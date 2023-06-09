@@ -272,3 +272,6 @@ def test_issue_51():
 
     table = doc.sheets[0].tables[0]
     assert table.cell(1, 0).value == decimal.Decimal("0.0001645")
+
+    # Disable for remaining tests run after this
+    _enable_experimental_features(False)
