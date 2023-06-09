@@ -5,6 +5,7 @@ import sys
 
 from numbers_parser import Document, _get_version
 from numbers_parser import __name__ as numbers_parser_name
+from numbers_parser.experimental import _enable_experimental_features
 from numbers_parser.exceptions import FileFormatError
 from numbers_parser.cell import ErrorCell
 
@@ -55,6 +56,9 @@ def command_line_parser():
     parser.add_argument("document", nargs="*", help="Document(s) to export")
     parser.add_argument(
         "--debug", default=False, action="store_true", help="Enable debug logging"
+    )
+    parser.add_argument(
+        "--experimental", default=False, action="store_true", help=argparse.SUPPRESS
     )
     return parser
 
@@ -114,6 +118,8 @@ def main():
             logger.setLevel("DEBUG")
         else:
             logger.setLevel("ERROR")
+        if args.experimental:
+            _enable_experimental_features(True)
         for filename in args.document:
             try:
                 if args.list_sheets:

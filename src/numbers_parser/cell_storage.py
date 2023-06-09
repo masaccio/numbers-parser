@@ -1,3 +1,5 @@
+import decimal
+import logging
 import math
 import re
 
@@ -6,9 +8,11 @@ from fractions import Fraction
 from functools import lru_cache
 from pendulum import datetime, duration
 from struct import unpack
-from typing import Tuple
+from typing import Tuple, Union
 from warnings import warn
 
+from numbers_parser import __name__ as numbers_parser_name
+from numbers_parser.experimental import _experimental_features
 from numbers_parser.constants import (
     EPOCH,
     PACKAGE_ID,
@@ -26,6 +30,19 @@ from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
+logger = logging.getLogger(numbers_parser_name)
+debug = logger.debug
+
+DECIMAL128_CONTEXT = decimal.Context(
+    prec=34,
+    rounding=decimal.ROUND_HALF_EVEN,
+    Emin=-6143,
+    Emax=6144,
+    capitals=1,
+    clamp=1,
+    flags=[],
+    traps=[],
+)
 
 DATETIME_FIELD_MAP = OrderedDict(
     [
@@ -159,6 +176,15 @@ class CellStorage:
             self.type = CellType.NUMBER
         else:  # pragma: no cover
             raise UnsupportedError(f"Cell type ID {cell_type} is not recognised")
+
+        debug(
+            "cell@[%d,%d]: table_id=%d, type=%s, value=%s",
+            row_num,
+            col_num,
+            table_id,
+            self.type.name,
+            self.value,
+        )
 
     @property
     def formatted(self):
@@ -342,15 +368,23 @@ class CellStorage:
         return duration_str
 
 
-def unpack_decimal128(buffer: bytearray) -> float:
+def unpack_decimal128(buffer: bytearray) -> Union[float, decimal.Decimal]:
     exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
     mantissa = buffer[14] & 1
     for i in range(13, -1, -1):
         mantissa = mantissa * 256 + buffer[i]
-    if buffer[15] & 0x80:
-        mantissa = -mantissa
-    value = mantissa * 10**exp
-    return float(value)
+    sign = 1 if buffer[15] & 0x80 else 0
+    if _experimental_features():
+        digits = tuple(int(x) for x in str(mantissa))
+        with decimal.localcontext(DECIMAL128_CONTEXT) as ctx:
+            value = ctx.create_decimal((sign, digits, exp))
+            debug("unpack_decimal128: sign=%d, digits=%s, exp=%d", sign, digits, exp)
+            return value
+    else:
+        if sign == 1:
+            mantissa = -mantissa
+        value = mantissa * 10**exp
+        return float(value)
 
 
 def days_occurred_in_month(value: datetime) -> str:

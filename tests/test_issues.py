@@ -1,4 +1,5 @@
 import magic
+import decimal
 
 from numbers_parser import Document
 from pendulum import datetime, duration
@@ -261,3 +262,13 @@ def test_issue_50():
     table = doc.sheets[0].tables[0]
     assert table.num_rows == 65553
     assert table.cell(65552, 3).value == "string 262163"
+
+
+def test_issue_51():
+    from numbers_parser.experimental import _enable_experimental_features
+
+    _enable_experimental_features(True)
+    doc = Document("tests/data/issue-51.numbers")
+
+    table = doc.sheets[0].tables[0]
+    assert table.cell(1, 0).value == decimal.Decimal("0.0001645")
