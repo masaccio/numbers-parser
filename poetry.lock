@@ -145,6 +145,18 @@ tomli = {version = "*", optional = true, markers = "python_full_version <= \"3.1
 toml = ["tomli"]
 
 [[package]]
+name = "decimal128"
+version = "1.0.0"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "decimal128-1.0.0-py3-none-any.whl", hash = "sha256:c15c65ef87c60070736f0e418f2d5598ea769c0298b4e30272a98fd50501a994"},
+    {file = "decimal128-1.0.0.tar.gz", hash = "sha256:20632d20f857f57b1f6afed6c4c5cc5b4601d943301802b920c60e4736e6a314"},
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.1.1"
 description = "Backport of PEP 654 (exception groups)"
@@ -768,4 +780,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "63a2877b3e8b52ccf1f9332190f8aedd3869b5c7448d0a021d3e9dbb56d99a12"
+content-hash = "5d09da329868592edf36f8ce01f9397ac3d561726682b3e191458bc699b216a6"

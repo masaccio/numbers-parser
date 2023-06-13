@@ -1,14 +1,14 @@
-import decimal
 import logging
 import math
 import re
 
 from collections import OrderedDict
+from decimal128 import Decimal128
 from fractions import Fraction
 from functools import lru_cache
 from pendulum import datetime, duration
 from struct import unpack
-from typing import Tuple, Union
+from typing import Tuple
 from warnings import warn
 
 from numbers_parser import __name__ as numbers_parser_name
@@ -33,16 +33,16 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 logger = logging.getLogger(numbers_parser_name)
 debug = logger.debug
 
-DECIMAL128_CONTEXT = decimal.Context(
-    prec=34,
-    rounding=decimal.ROUND_HALF_EVEN,
-    Emin=-6143,
-    Emax=6144,
-    capitals=1,
-    clamp=1,
-    flags=[],
-    traps=[],
-)
+# DECIMAL128_CONTEXT = decimal.Context(
+#     prec=34,
+#     rounding=decimal.ROUND_HALF_EVEN,
+#     Emin=-6143,
+#     Emax=6144,
+#     capitals=1,
+#     clamp=1,
+#     flags=[],
+#     traps=[],
+# )
 
 DATETIME_FIELD_MAP = OrderedDict(
     [
@@ -135,7 +135,10 @@ class CellStorage:
             if flags & mask:
                 size = field.get("size", 4)
                 if size == 16:
-                    value = unpack_decimal128(buffer[offset : offset + 16])
+                    if _experimental_features():
+                        value = Decimal128.from_bid(buffer[offset : offset + 16][::-1])
+                    else:
+                        value = unpack_decimal128(buffer[offset : offset + 16])
                 elif size == 8:
                     value = unpack("<d", buffer[offset : offset + 8])[0]
                 else:
@@ -368,23 +371,16 @@ class CellStorage:
         return duration_str
 
 
-def unpack_decimal128(buffer: bytearray) -> Union[float, decimal.Decimal]:
+def unpack_decimal128(buffer: bytearray) -> float:
     exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
     mantissa = buffer[14] & 1
     for i in range(13, -1, -1):
         mantissa = mantissa * 256 + buffer[i]
     sign = 1 if buffer[15] & 0x80 else 0
-    if _experimental_features():
-        digits = tuple(int(x) for x in str(mantissa))
-        with decimal.localcontext(DECIMAL128_CONTEXT) as ctx:
-            value = ctx.create_decimal((sign, digits, exp))
-            debug("unpack_decimal128: sign=%d, digits=%s, exp=%d", sign, digits, exp)
-            return value
-    else:
-        if sign == 1:
-            mantissa = -mantissa
-        value = mantissa * 10**exp
-        return float(value)
+    if sign == 1:
+        mantissa = -mantissa
+    value = mantissa * 10**exp
+    return float(value)
 
 
 def days_occurred_in_month(value: datetime) -> str:
