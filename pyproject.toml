@@ -12,7 +12,7 @@ name = "numbers-parser"
 packages = [{include = "numbers_parser", from = "src"}]
 readme = "README.md"
 repository = "https://github.com/masaccio/numbers-parser"
-version = "3.10.2"
+version = "3.10.3"
 
 [tool.poetry.scripts]
 cat-numbers = "numbers_parser._cat_numbers:main"

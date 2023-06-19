@@ -62,7 +62,8 @@ for line in str(disassembly).split("\\n"):
 
 with open(output_map, "w") as fh:
     fh.write("FUNCTION_MAP = {\n")
-    fh.write('    1: "ABS",\n')
+    if "ABS" not in cstring_refs:
+        fh.write('    1: "ABS",\n')
     for func, id in cstring_refs.items():
         func_c = func.replace(".", "_")
         if func_c in tsce_functions:
