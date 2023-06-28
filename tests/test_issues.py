@@ -174,9 +174,7 @@ def test_issue_42(script_runner):
     assert table.cell(4, 1).formula == "#REF!×A5:A6"
 
     ret = script_runner.run(
-        "cat-numbers",
-        "--brief",
-        "tests/data/issue-42.numbers",
+        ["cat-numbers", "--brief", "tests/data/issue-42.numbers"],
         print_result=False,
     )
     assert ret.stderr == ""
@@ -186,10 +184,7 @@ def test_issue_42(script_runner):
     assert lines[6] == "7.0,#REF!"
 
     ret = script_runner.run(
-        "cat-numbers",
-        "--brief",
-        "--formulas",
-        "tests/data/issue-42.numbers",
+        ["cat-numbers", "--brief", "--formulas", "tests/data/issue-42.numbers"],
         print_result=False,
     )
     assert ret.stderr == ""
@@ -227,10 +222,7 @@ def test_issue_44(script_runner):
         assert table.cell(row_num, 1).formatted_value == ref[1]
 
     ret = script_runner.run(
-        "cat-numbers",
-        "--brief",
-        "--formatting",
-        "tests/data/issue-44.numbers",
+        ["cat-numbers", "--brief", "--formatting", "tests/data/issue-44.numbers"],
         print_result=False,
     )
     assert ret.stderr == ""
