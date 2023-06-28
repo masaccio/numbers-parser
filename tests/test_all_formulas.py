@@ -5,7 +5,7 @@ from numbers_parser import Document
 from numbers_parser.cell import ErrorCell, TextCell, BoolCell, DurationCell
 
 DOCUMENT = "tests/data/test-all-formulas.numbers"
-DOCUMENT_13_1 = "tests/data/test-all-formulas.numbers"
+DOCUMENT_13_1 = "tests/data/test-all-formulas-13.1.numbers"
 
 
 def compare_table_functions(sheet_name, filename):
@@ -36,31 +36,53 @@ def compare_table_functions(sheet_name, filename):
 
 def test_information_functions():
     compare_table_functions("Information", DOCUMENT)
+
+
+def test_information_functions_new_version():
     compare_table_functions("Information", DOCUMENT_13_1)
 
 
 def test_text_functions():
     compare_table_functions("Text", DOCUMENT)
+
+
+def test_text_functions_new_version():
+    compare_table_functions("Text", DOCUMENT_13_1)
+
+
+def test_text_functions_new_version():
     compare_table_functions("Text", DOCUMENT_13_1)
 
 
 def test_math_functions():
     compare_table_functions("Math", DOCUMENT)
+
+
+def test_math_functions_new_version():
     compare_table_functions("Math", DOCUMENT_13_1)
 
 
 def test_reference_functions():
     compare_table_functions("Reference", DOCUMENT)
+
+
+def test_reference_functions_new_version():
     compare_table_functions("Reference", DOCUMENT_13_1)
 
 
 def test_date_functions():
     compare_table_functions("Date", DOCUMENT)
+
+
+def test_date_functions_new_version():
     compare_table_functions("Date", DOCUMENT_13_1)
 
 
 def test_statistical_functions():
     compare_table_functions("Statistical", DOCUMENT)
+
+
+def test_statistical_functions_new_version():
     compare_table_functions("Statistical", DOCUMENT_13_1)
 
 
