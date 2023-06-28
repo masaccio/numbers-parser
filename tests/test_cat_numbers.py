@@ -31,7 +31,7 @@ DOCUMENT = "tests/data/test-1.numbers"
 
 @pytest.mark.script_launch_mode("subprocess")
 def test_no_documents(script_runner):
-    ret = script_runner.run("cat-numbers", "--brief", print_result=False)
+    ret = script_runner.run(["cat-numbers", "--brief"], print_result=False)
     assert ret.success
     assert "usage: cat-numbers" in ret.stdout
     assert ret.stderr == ""
@@ -39,7 +39,7 @@ def test_no_documents(script_runner):
 
 @pytest.mark.script_launch_mode("subprocess")
 def test_version(script_runner):
-    ret = script_runner.run("cat-numbers", "--version", print_result=False)
+    ret = script_runner.run(["cat-numbers", "--version"], print_result=False)
     assert ret.success
     assert ret.stdout == __version__ + "\n"
     assert ret.stderr == ""
@@ -47,7 +47,7 @@ def test_version(script_runner):
 
 @pytest.mark.script_launch_mode("subprocess")
 def test_help(script_runner):
-    ret = script_runner.run("cat-numbers", "--help", print_result=False)
+    ret = script_runner.run(["cat-numbers", "--help"], print_result=False)
     assert ret.success
     assert "List the names of tables" in ret.stdout
     assert "Names of sheet" in ret.stdout
@@ -75,7 +75,7 @@ def test_full_contents(script_runner):
             + ",".join(["" if v is None else v for v in row])
             + "\n"
         )
-    ret = script_runner.run("cat-numbers", DOCUMENT, print_result=False)
+    ret = script_runner.run(["cat-numbers", DOCUMENT], print_result=False)
     assert ret.success
     assert ret.stdout == ref
     assert ret.stderr == ""
@@ -90,7 +90,7 @@ def test_brief_contents(script_runner):
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
     for row in XXX_TABLE_1_REF:
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
-    ret = script_runner.run("cat-numbers", "--brief", DOCUMENT, print_result=False)
+    ret = script_runner.run(["cat-numbers", "--brief", DOCUMENT], print_result=False)
     assert ret.success
     assert ret.stdout == ref
     assert ret.stderr == ""
@@ -104,11 +104,7 @@ def test_select_sheet(script_runner):
     for row in ZZZ_TABLE_2_REF:
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
     ret = script_runner.run(
-        "cat-numbers",
-        "--sheet",
-        "ZZZ_Sheet_1",
-        "--brief",
-        DOCUMENT,
+        ["cat-numbers", "--sheet", "ZZZ_Sheet_1", "--brief", DOCUMENT],
         print_result=False,
     )
     assert ret.success
@@ -122,11 +118,7 @@ def test_select_table(script_runner):
     for row in XXX_TABLE_1_REF:
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
     ret = script_runner.run(
-        "cat-numbers",
-        "--table",
-        "XXX_Table_1",
-        "--brief",
-        DOCUMENT,
+        ["cat-numbers", "--table", "XXX_Table_1", "--brief", DOCUMENT],
         print_result=False,
     )
     assert ret.success
@@ -136,7 +128,7 @@ def test_select_table(script_runner):
 
 @pytest.mark.script_launch_mode("subprocess")
 def test_list_sheets(script_runner):
-    ret = script_runner.run("cat-numbers", "-S", DOCUMENT, print_result=False)
+    ret = script_runner.run(["cat-numbers", "-S", DOCUMENT], print_result=False)
     assert ret.success
     assert ret.stdout == (
         f"{DOCUMENT}: ZZZ_Sheet_1\n" "tests/data/test-1.numbers: ZZZ_Sheet_2\n"
@@ -146,7 +138,7 @@ def test_list_sheets(script_runner):
 
 @pytest.mark.script_launch_mode("subprocess")
 def test_list_tables(script_runner):
-    ret = script_runner.run("cat-numbers", "-T", DOCUMENT, print_result=False)
+    ret = script_runner.run(["cat-numbers", "-T", DOCUMENT], print_result=False)
     assert ret.success
     assert ret.stdout == (
         f"{DOCUMENT}: ZZZ_Sheet_1: ZZZ_Table_1\n"
@@ -159,11 +151,7 @@ def test_list_tables(script_runner):
 @pytest.mark.script_launch_mode("subprocess")
 def test_without_formulas(script_runner):
     ret = script_runner.run(
-        "cat-numbers",
-        "-b",
-        "-t",
-        "Table 2",
-        "tests/data/test-10.numbers",
+        ["cat-numbers", "-b", "-t", "Table 2", "tests/data/test-10.numbers"],
         print_result=False,
     )
     assert ret.success
@@ -188,12 +176,14 @@ def test_without_formulas(script_runner):
 @pytest.mark.script_launch_mode("subprocess")
 def test_with_formulas(script_runner):
     ret = script_runner.run(
-        "cat-numbers",
-        "-b",
-        "-t",
-        "Table 2",
-        "--formulas",
-        "tests/data/test-10.numbers",
+        [
+            "cat-numbers",
+            "-b",
+            "-t",
+            "Table 2",
+            "--formulas",
+            "tests/data/test-10.numbers",
+        ],
         print_result=False,
     )
     assert ret.success
@@ -216,10 +206,7 @@ def test_with_formulas(script_runner):
 @pytest.mark.script_launch_mode("subprocess")
 def test_duration_formatting(script_runner):
     ret = script_runner.run(
-        "cat-numbers",
-        "-b",
-        "--formatting",
-        "tests/data/duration_112.numbers",
+        ["cat-numbers", "-b", "--formatting", "tests/data/duration_112.numbers"],
         print_result=False,
     )
     assert ret.success
@@ -233,10 +220,7 @@ def test_duration_formatting(script_runner):
 @pytest.mark.script_launch_mode("subprocess")
 def test_date_formatting(script_runner):
     ret = script_runner.run(
-        "cat-numbers",
-        "-b",
-        "--formatting",
-        "tests/data/date_formats.numbers",
+        ["cat-numbers", "-b", "--formatting", "tests/data/date_formats.numbers"],
         print_result=False,
     )
     assert ret.success
