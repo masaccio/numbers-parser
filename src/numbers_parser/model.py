@@ -438,11 +438,6 @@ class _NumbersModel:
                 if table_uuid == self.table_base_id(table_id):
                     return table_id
 
-        # for t_id in self.find_refs("TableInfoArchive"):  # pragma: no branch
-        #     table_model_id = self.objects[t_id].tableModel.identifier
-        #     if table_uuid == self.table_base_id(table_model_id):
-        #         return table_model_id
-
     def node_to_ref(self, this_table_id: int, row_num: int, col_num: int, node):
         if node.HasField("AST_cross_table_reference_extra_info"):
             table_uuid = NumbersUUID(
