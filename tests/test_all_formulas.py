@@ -5,9 +5,10 @@ from numbers_parser import Document
 from numbers_parser.cell import ErrorCell, TextCell, BoolCell, DurationCell
 
 DOCUMENT = "tests/data/test-all-formulas.numbers"
+DOCUMENT_13_1 = "tests/data/test-all-formulas.numbers"
 
 
-def compare_table_functions(sheet_name, filename=DOCUMENT):
+def compare_table_functions(sheet_name, filename):
     doc = Document(filename)
     sheet = doc.sheets[sheet_name]
     table = sheet.tables["Tests"]
@@ -34,27 +35,33 @@ def compare_table_functions(sheet_name, filename=DOCUMENT):
 
 
 def test_information_functions():
-    compare_table_functions("Information")
+    compare_table_functions("Information", DOCUMENT)
+    compare_table_functions("Information", DOCUMENT_13_1)
 
 
 def test_text_functions():
-    compare_table_functions("Text")
+    compare_table_functions("Text", DOCUMENT)
+    compare_table_functions("Text", DOCUMENT_13_1)
 
 
 def test_math_functions():
-    compare_table_functions("Math")
+    compare_table_functions("Math", DOCUMENT)
+    compare_table_functions("Math", DOCUMENT_13_1)
 
 
 def test_reference_functions():
-    compare_table_functions("Reference")
+    compare_table_functions("Reference", DOCUMENT)
+    compare_table_functions("Reference", DOCUMENT_13_1)
 
 
 def test_date_functions():
-    compare_table_functions("Date")
+    compare_table_functions("Date", DOCUMENT)
+    compare_table_functions("Date", DOCUMENT_13_1)
 
 
 def test_statistical_functions():
-    compare_table_functions("Statistical")
+    compare_table_functions("Statistical", DOCUMENT)
+    compare_table_functions("Statistical", DOCUMENT_13_1)
 
 
 def test_extra_functions():
