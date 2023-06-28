@@ -8,20 +8,20 @@ from numbers_parser import __version__
 
 
 def test_version(script_runner):
-    ret = script_runner.run("unpack-numbers", "--version", print_result=False)
+    ret = script_runner.run(["unpack-numbers", "--version"], print_result=False)
     assert ret.stdout == __version__ + "\n"
     assert ret.stderr == ""
     assert ret.success
 
 
 def test_help(script_runner):
-    ret = script_runner.run("unpack-numbers", "--help", print_result=False)
+    ret = script_runner.run(["unpack-numbers", "--help"], print_result=False)
     assert "directory name to unpack into" in ret.stdout
     assert "document" in ret.stdout
     assert ret.stderr == ""
     assert ret.success
 
-    ret = script_runner.run("unpack-numbers", print_result=False)
+    ret = script_runner.run(["unpack-numbers"], print_result=False)
     assert "directory name to unpack into" in ret.stdout
     assert "document" in ret.stdout
     assert ret.stderr == ""
@@ -30,7 +30,7 @@ def test_help(script_runner):
 
 def test_multi_doc_error(script_runner):
     ret = script_runner.run(
-        "unpack-numbers", "--output", "tmp", "foo", "bar", print_result=False
+        ["unpack-numbers", "--output", "tmp", "foo", "bar"], print_result=False
     )
     assert ret.success == False
     assert ret.stdout == ""
@@ -40,10 +40,7 @@ def test_multi_doc_error(script_runner):
 def test_unpack_file(script_runner, tmp_path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
-        "unpack-numbers",
-        "--output",
-        str(output_dir),
-        "tests/data/test-1.numbers",
+        ["unpack-numbers", "--output", str(output_dir), "tests/data/test-1.numbers"],
         print_result=False,
     )
     assert ret.success
@@ -64,10 +61,7 @@ def test_unpack_file(script_runner, tmp_path):
 def test_unpack_dir(script_runner, tmp_path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
-        "unpack-numbers",
-        "--output",
-        str(output_dir),
-        "tests/data/test-5.numbers",
+        ["unpack-numbers", "--output", str(output_dir), "tests/data/test-5.numbers"],
         print_result=False,
     )
     assert ret.success
@@ -89,11 +83,13 @@ def test_unpack_dir(script_runner, tmp_path):
 def test_unpack_hex(script_runner, tmp_path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
-        "unpack-numbers",
-        "--hex-uuids",
-        "--output",
-        str(output_dir),
-        "tests/data/test-5.numbers",
+        [
+            "unpack-numbers",
+            "--hex-uuids",
+            "--output",
+            str(output_dir),
+            "tests/data/test-5.numbers",
+        ],
         print_result=False,
     )
     assert ret.success
@@ -112,11 +108,13 @@ def test_unpack_hex(script_runner, tmp_path):
 def test_pretty_storage(script_runner, tmp_path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
-        "unpack-numbers",
-        "--pretty-storage",
-        "--output",
-        str(output_dir),
-        "tests/data/test-5.numbers",
+        [
+            "unpack-numbers",
+            "--pretty-storage",
+            "--output",
+            str(output_dir),
+            "tests/data/test-5.numbers",
+        ],
         print_result=False,
     )
     assert ret.stderr == ""
@@ -141,11 +139,13 @@ def test_pretty_storage(script_runner, tmp_path):
 def test_compact_json(script_runner, tmp_path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
-        "unpack-numbers",
-        "--compact-json",
-        "--output",
-        str(output_dir),
-        "tests/data/test-5.numbers",
+        [
+            "unpack-numbers",
+            "--compact-json",
+            "--output",
+            str(output_dir),
+            "tests/data/test-5.numbers",
+        ],
         print_result=False,
     )
     assert ret.success
