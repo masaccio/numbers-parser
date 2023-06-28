@@ -183,40 +183,88 @@ class Formula(list):
 
     def xref(self, *args):
         (row_num, col_num, node) = args
-        self.push(self._model.node_to_ref(row_num, col_num, node))
+        self.push(self._model.node_to_ref(self._table_id, row_num, col_num, node))
 
 
 NODE_FUNCTION_MAP = {
     "ADDITION_NODE": "add",
     "APPEND_WHITESPACE_NODE": None,
     "ARRAY_NODE": "array",
+    # Unimplemented: AVERAGE
+    # Unimplemented: AVERAGE_ALL
     "BEGIN_EMBEDDED_NODE_ARRAY": None,
+    # Unimplemented: BODY_ROWS
     "BOOLEAN_NODE": "boolean",
+    # Unimplemented: CATEGORY_REF_NODE
     "CELL_REFERENCE_NODE": "xref",
+    # Unimplemented: CHART_GROUP_VALUE_HIERARCHY
     "COLON_NODE": "range",
     "COLON_NODE_WITH_UIDS": "range",
+    "COLON_TRACT_NODE": "xref",
+    # Unimplemented: COLON_WITH_UIDS_NODE
     "CONCATENATION_NODE": "concat",
+    # Unimplemented: COUNT_ALL
+    # Unimplemented: COUNT_BLANK
+    # Unimplemented: COUNT_DUPS
+    # Unimplemented: COUNT_NO_ALL
+    # Unimplemented: COUNT_ROWS
+    # Unimplemented: COUNT_UNIQUE
+    # Unimplemented: CROSS_TABLE_CELL_REFERENCE_NODE
     "DATE_NODE": "date",
     "DIVISION_NODE": "div",
-    "END_THUNK_NODE": None,
+    # Unimplemented: DURATION_NODE
     "EMPTY_ARGUMENT_NODE": "empty",
+    "END_THUNK_NODE": None,
     "EQUAL_TO_NODE": "equals",
     "FUNCTION_NODE": "function",
     "GREATER_THAN_NODE": "greater_than",
     "GREATER_THAN_OR_EQUAL_TO_NODE": "greater_than_or_equal",
+    # Unimplemented: GROUP_VALUE
+    # Unimplemented: GROUP_VALUE_HIERARCHY
+    # Unimplemented: GSCE.CalculationEngineAstNodeType={ADDITION_NODE
+    # Unimplemented: INDIRECT
+    # Unimplemented: LABEL
     "LESS_THAN_NODE": "less_than",
     "LESS_THAN_OR_EQUAL_TO_NODE": "less_than_or_equal",
+    # Unimplemented: LINKED_CELL_REF_NODE
+    # Unimplemented: LINKED_COLUMN_REF_NODE
+    # Unimplemented: LINKED_ROW_REF_NODE
     "LIST_NODE": "list",
+    # Unimplemented: LOCAL_CELL_REFERENCE_NODE
+    # Unimplemented: MAX
+    # Unimplemented: MEDIAN
+    # Unimplemented: MIN
+    # Unimplemented: MISSING_RUNNING_TOTAL_IN_FIELD
+    # Unimplemented: MODE
     "MULTIPLICATION_NODE": "mul",
     "NEGATION_NODE": "negate",
+    # Unimplemented: NONE
     "NOT_EQUAL_TO_NODE": "not_equals",
     "NUMBER_NODE": "number",
     "PERCENT_NODE": "percent",
+    # Unimplemented: PLUS_SIGN_NODE
     "POWER_NODE": "power",
     "PREPEND_WHITESPACE_NODE": None,
+    # Unimplemented: PRODUCT
+    # Unimplemented: RANGE
+    # Unimplemented: REFERENCE_ERROR_NODE
+    # Unimplemented: REFERENCE_ERROR_WITH_UIDS_NODE
     "STRING_NODE": "string",
+    # Unimplemented: ST_DEV
+    # Unimplemented: ST_DEV_ALL
+    # Unimplemented: ST_DEV_POP
+    # Unimplemented: ST_DEV_POP_ALL
     "SUBTRACTION_NODE": "sub",
+    # Unimplemented: THUNK_NODE
     "TOKEN_NODE": "boolean",
+    # Unimplemented: TOTAL
+    # Unimplemented: UID_REFERENCE_NODE
+    # Unimplemented: UNKNOWN_FUNCTION_NODE
+    # Unimplemented: VARIANCE
+    # Unimplemented: VARIANCE_ALL
+    # Unimplemented: VARIANCE_POP
+    # Unimplemented: VARIANCE_POP_ALL
+    # Unimplemented: VIEW_TRACT_REF_NODE
 }
 
 

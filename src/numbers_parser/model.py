@@ -426,26 +426,87 @@ class _NumbersModel:
             self._merge_cells[table_id] = self.calculate_merge_cell_ranges(table_id)
         return self._merge_cells[table_id]
 
-    @lru_cache(maxsize=None)
-    def table_uuids_to_id(self, table_uuid):
-        for t_id in self.find_refs("TableInfoArchive"):  # pragma: no branch
-            table_model_id = self.objects[t_id].tableModel.identifier
-            if table_uuid == self.table_base_id(table_model_id):
-                return table_model_id
+    def table_id_to_sheet_id(self, table_id: int) -> int:
+        for sheet_id in self.sheet_ids():
+            if table_id in self.table_ids(sheet_id):
+                return sheet_id
 
-    def node_to_ref(self, row_num: int, col_num: int, node):
-        table_name = None
+    @lru_cache(maxsize=None)
+    def table_uuids_to_id(self, table_uuid) -> int:
+        for sheet_id in self.sheet_ids():
+            for table_id in self.table_ids(sheet_id):
+                if table_uuid == self.table_base_id(table_id):
+                    return table_id
+
+        # for t_id in self.find_refs("TableInfoArchive"):  # pragma: no branch
+        #     table_model_id = self.objects[t_id].tableModel.identifier
+        #     if table_uuid == self.table_base_id(table_model_id):
+        #         return table_model_id
+
+    def node_to_ref(self, this_table_id: int, row_num: int, col_num: int, node):
         if node.HasField("AST_cross_table_reference_extra_info"):
             table_uuid = NumbersUUID(
                 node.AST_cross_table_reference_extra_info.table_id
             ).hex
-            table_id = self.table_uuids_to_id(table_uuid)
-            table_name = self.table_name(table_id)
-
-        if node.HasField("AST_column") and not node.HasField("AST_row"):
-            return node_to_col_ref(node, table_name, col_num)
+            other_table_id = self.table_uuids_to_id(table_uuid)
+            other_table_name = self.table_name(other_table_id)
         else:
-            return node_to_row_col_ref(node, table_name, row_num, col_num)
+            other_table_id = None
+            other_table_name = None
+
+        if other_table_id is not None:
+            this_sheet_id = self.table_id_to_sheet_id(this_table_id)
+            other_sheet_id = self.table_id_to_sheet_id(other_table_id)
+            if this_sheet_id != other_sheet_id:
+                other_sheet_name = self.sheet_name(other_sheet_id)
+                other_table_name = f"{other_sheet_name}::" + other_table_name
+
+        if node.HasField("AST_colon_tract"):
+            return self.tract_to_row_col_ref(node, other_table_name, row_num, col_num)
+        elif node.HasField("AST_column") and not node.HasField("AST_row"):
+            return node_to_col_ref(node, other_table_name, col_num)
+        else:
+            return node_to_row_col_ref(node, other_table_name, row_num, col_num)
+
+    def tract_to_row_col_ref(
+        self, node: object, table_name: str, row_num: int, col_num: int
+    ) -> str:
+        if node.AST_sticky_bits.begin_row_is_absolute:
+            row_begin = node.AST_colon_tract.absolute_row[0].range_begin
+        else:
+            row_begin = row_num + node.AST_colon_tract.relative_row[0].range_begin
+
+        if node.AST_sticky_bits.end_row_is_absolute:
+            row_end = range_end(node.AST_colon_tract.absolute_row[0])
+        else:
+            row_end = row_num + range_end(node.AST_colon_tract.relative_row[0])
+
+        if node.AST_sticky_bits.begin_column_is_absolute:
+            col_begin = node.AST_colon_tract.absolute_column[0].range_begin
+        else:
+            col_begin = col_num + node.AST_colon_tract.relative_column[0].range_begin
+
+        if node.AST_sticky_bits.end_column_is_absolute:
+            col_end = range_end(node.AST_colon_tract.absolute_column[0])
+        else:
+            col_end = col_num + range_end(node.AST_colon_tract.relative_column[0])
+
+        begin_ref = xl_rowcol_to_cell(
+            row_begin,
+            col_begin,
+            row_abs=node.AST_sticky_bits.begin_row_is_absolute,
+            col_abs=node.AST_sticky_bits.begin_column_is_absolute,
+        )
+        end_ref = xl_rowcol_to_cell(
+            row_end,
+            col_end,
+            row_abs=node.AST_sticky_bits.end_row_is_absolute,
+            col_abs=node.AST_sticky_bits.end_column_is_absolute,
+        )
+        if table_name is not None:
+            return f"{table_name}::{begin_ref}:{end_ref}"
+        else:
+            return f"{begin_ref}:{end_ref}"
 
     @lru_cache(maxsize=None)
     def formula_ast(self, table_id: int):
@@ -1241,6 +1302,14 @@ class _NumbersModel:
                 }
 
         return None
+
+
+def range_end(obj):
+    # range_end is optional in IndexSetEntry
+    if obj.HasField("range_end"):
+        return obj.range_end
+    else:
+        return obj.range_begin
 
 
 def cell_reference_node(row_num: int, col_num: int, formula_id: int, base_owner_uid):

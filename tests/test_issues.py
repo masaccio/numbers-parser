@@ -276,3 +276,19 @@ def test_issue_51():
 
     # Disable for remaining tests run after this
     _enable_experimental_features(False)
+
+
+def test_issue_54():
+    doc = Document("tests/data/issue-54.numbers")
+    assert doc.sheets[0].tables[0].cell(4, 3).formula == "SUM(Table 1::C1:C4)"
+    assert doc.sheets[0].tables[0].cell(4, 2).formula == "SUM(Sheet 2::Table 1::C1:C2)"
+    assert (
+        doc.sheets[0].tables[1].cell(4, 1).formula
+        == "SUM(A1,Sheet 2::Table 1::B1,Sheet 2::Table 1::B3:B4)"
+    )
+    assert doc.sheets[0].tables[0].cell(4, 2).formula == "SUM(Sheet 2::Table 1::C1:C2)"
+
+    table = doc.sheets[1].tables[0]
+    for col_num in range(0, 9):
+        assert table.cell(4, col_num).formula == table.cell(5, col_num).value
+        assert table.cell(6, col_num).formula == table.cell(7, col_num).value
