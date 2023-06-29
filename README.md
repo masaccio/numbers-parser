@@ -181,9 +181,22 @@ cell = table.cell(0, 0)
 (text, url) = cell.hyperlinks[0]
 ```
 
-###  Cell images
+### Styles
 
-Querying cell formats is currently limited to image backrgounds only. If a cell has no background image, `None` is returned for all calls.
+`numbers_parser` has very limited support for cell styles. Currently only cell backgrounds are supported.
+
+#### Cell background colour
+
+The `bg_color` cell property returns either a tuple of RGB values or, in the case of gradient backgrounds, a list of tuples with each colour in the gradient. If no background color is defined, `None` is returned.
+
+``` python
+rgb = table.cell("B1").bg_color
+print("B1 RGB =", rgb[0], rgb[1], rgb[2])
+```
+
+#### Cell images
+
+The methods `image_filename`, `image_data` and `image_type` return data about the image used for a cell's background, where set. If a cell has no background image, `None` is returned for all calls.
 
 ``` python
 cell = table.cell("B1")
