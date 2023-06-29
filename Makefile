@@ -14,12 +14,13 @@ LLDB_PYTHON_PATH := ${shell lldb --python-path}
 PACKAGE=numbers-parser
 package_c := $(subst -,_,$(PACKAGE))
 
-.PHONY: clean veryclean test coverage sdist upload
+.PHONY: clean veryclean test coverage profile sdist upload
 
 all:
 	@echo "make targets:"
 	@echo "    test       - run pytest with all tests"
-	@echo "    coverage   - run pytest and generate coverage report"
+	@echo "    coverage   - run pytest and generate an HTML coverage report"
+	@echo "    profile    - run pytest and generate a profile graph"
 	@echo "    dist       - build distributions"
 	@echo "    upload     - upload package to PyPI"
 	@echo "    clean      - delete temporary files for test, coverage, etc."
@@ -32,6 +33,10 @@ dist:
 upload:
 	tox
 	poetry publish
+
+profile:
+	poetry run pytest --profile
+	poetry run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
 
 docs:
 	python3 setup.py build_sphinx

@@ -38,6 +38,7 @@ pytest-cov = "^4.0.0"
 pytest-profiling = "^1.7.0"
 python-magic = "^0.4.27"
 termcolor = "^2.2.0"
+gprof2dot = "^2022.7.29"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
