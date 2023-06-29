@@ -4,7 +4,7 @@ import re
 from array import array
 from functools import lru_cache
 from struct import pack
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 from warnings import warn
 
 from numbers_parser.containers import ObjectStore
@@ -1297,6 +1297,25 @@ class _NumbersModel:
                 }
 
         return None
+
+    def cell_bg_color(self, cell_storage: object) -> Union[Tuple, List[Tuple]]:
+        if cell_storage.cell_style_id is None:
+            return None
+
+        cell_style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
+        cell_properties = cell_style.cell_properties.cell_fill
+
+        if cell_properties.HasField("color"):
+            return (
+                int(cell_properties.color.r * 256),
+                int(cell_properties.color.g * 256),
+                int(cell_properties.color.b * 256),
+            )
+        elif cell_properties.HasField("gradient"):
+            return [
+                (int(s.color.r * 256), int(s.color.g * 256), int(s.color.b * 256))
+                for s in cell_properties.gradient.stops
+            ]
 
 
 def range_end(obj):

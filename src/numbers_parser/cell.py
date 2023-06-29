@@ -6,7 +6,7 @@ from numbers_parser.cell_storage import CellType, CellStorage
 
 from pendulum import duration, Duration, DateTime
 from functools import lru_cache
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 
 class Cell:
@@ -119,6 +119,10 @@ class Cell:
         if data is None:
             return None
         return self._storage.image_data[1]
+
+    @property
+    def bg_color(self) -> Union[Tuple, List[Tuple]]:
+        return self._model.cell_bg_color(self._storage)
 
 
 class NumberCell(Cell):
