@@ -42,10 +42,7 @@ class Cell:
         elif cell_storage.type == CellType.BOOL:
             cell = BoolCell(*row_col, cell_storage.value)
         elif cell_storage.type == CellType.DURATION:
-            if cell_storage.value is None:
-                value = duration(seconds=0)
-            else:
-                value = duration(seconds=cell_storage.value)
+            value = duration(seconds=cell_storage.value)
             cell = DurationCell(*row_col, value)
         elif cell_storage.type == CellType.ERROR:
             cell = ErrorCell(*row_col)
@@ -99,10 +96,10 @@ class Cell:
 
     @property
     def formatted_value(self):
-        if self._storage is None:
-            return str(self._value)
-        else:
-            return self._storage.formatted
+        # if self._storage is None:
+        #     return str(self._value)
+        # else:
+        return self._storage.formatted
 
     @property
     def image_data(self) -> bytes:

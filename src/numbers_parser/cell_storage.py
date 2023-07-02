@@ -334,13 +334,10 @@ class CellStorage:
                 else:
                     formatted_value = float_to_fraction(self.d128, accuracy)
             elif custom_format.format_type == FormatType.CUSTOM_TEXT:
-                if self.string_id is not None:
-                    formatted_value = decode_text_format(
-                        custom_format,
-                        self.model.table_string(self.table_id, self.string_id),
-                    )
-                else:
-                    return ""
+                formatted_value = decode_text_format(
+                    custom_format,
+                    self.model.table_string(self.table_id, self.string_id),
+                )
             elif (
                 custom_format.format_type == FormatType.CUSTOM_NUMBER
                 or custom_format.format_type == FormatType.CUSTOM_CURRENCY
@@ -349,7 +346,7 @@ class CellStorage:
                     custom_format, self.d128, format_map[format_uuid].name
                 )
             else:
-                raise UnsupportedError(
+                raise UnsupportedError(  # pragma: no cover
                     f"Unexpected custom format type {custom_format.format_type}"
                 )
         elif format.format_type == FormatType.DECIMAL:

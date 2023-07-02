@@ -210,14 +210,7 @@ class IWAArchiveSegment(object):
         header = dict_to_header(_dict["header"])
         objects = []
         for message_info, o in zip(header.message_infos, _dict["objects"]):
-            if message_info.diff_field_path and "_pbtype" not in o:
-                base_message_info = header.message_infos[
-                    message_info.base_message_index
-                ]
-                message_class = ID_NAME_MAP[base_message_info.type]
-                objects.append(ProtobufPatch(message_class, o))
-            else:
-                objects.append(dict_to_message(o))
+            objects.append(dict_to_message(o))
         return cls(header, objects)
 
     def to_dict(self):
@@ -235,7 +228,7 @@ class IWAArchiveSegment(object):
                 provided_length = message_info.length
                 if object_length != provided_length:
                     message_info.length = object_length
-            except EncodeError as e:
+            except EncodeError as e:  # pragma: no cover
                 raise ValueError(
                     "Failed to encode object: %s\nObject: '%s'\nMessage info: %s"
                     % (e, repr(obj), message_info)
