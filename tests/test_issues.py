@@ -1,6 +1,5 @@
+import decimal
 import magic
-
-from decimal128 import Decimal128
 
 from numbers_parser import Document
 from pendulum import datetime, duration
@@ -264,7 +263,8 @@ def test_issue_51():
     doc = Document("tests/data/issue-51.numbers")
 
     table = doc.sheets[0].tables[0]
-    assert table.cell(1, 0).value == Decimal128("0.0001645")
+    assert isinstance(table.cell(1, 0).value, decimal.Decimal)
+    assert table.cell(1, 0).value == decimal.Decimal("0.0001645")
 
     # Disable for remaining tests run after this
     _enable_experimental_features(False)
