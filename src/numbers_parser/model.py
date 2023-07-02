@@ -104,6 +104,7 @@ class DataLists:
             entry = TSTArchives.TableDataList.ListEntry(**attrs)
             self._datalists[table_id]["datalist"].append(entry)
             self._datalists[table_id]["by_key"][key] = entry
+            self._datalists[table_id]["by_value"][value] = key
         else:
             key = self._datalists[table_id]["by_value"][value]
             self._datalists[table_id]["by_key"][key].refcount += 1
