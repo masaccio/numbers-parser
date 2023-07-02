@@ -1326,24 +1326,6 @@ def range_end(obj):
         return obj.range_begin
 
 
-def cell_reference_node(row_num: int, col_num: int, formula_id: int, base_owner_uid):
-    node = TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive(
-        AST_node_type=TSCEArchives.ASTNodeArrayArchive.ASTNodeType.CELL_REFERENCE_NODE,
-        AST_column=TSCEArchives.ASTNodeArrayArchive.ASTColumnCoordinateArchive(
-            column=col_num, absolute=True
-        ),
-        AST_row=TSCEArchives.ASTNodeArrayArchive.ASTRowCoordinateArchive(
-            row=row_num, absolute=True
-        ),
-        AST_cross_table_reference_extra_info=(
-            TSCEArchives.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive(
-                table_id=base_owner_uid.protobuf4
-            )
-        ),
-    )
-    return node
-
-
 def formatted_number(number_type, index):
     """Returns the numbered index bullet formatted for different types"""
     bullet_char = BULLET_PREFIXES[number_type]
