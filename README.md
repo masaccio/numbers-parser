@@ -10,17 +10,11 @@
 
 It supports and is tested against Python versions from 3.8 onwards. It is not compatible with earlier versions of Python.
 
-Currently supported features of Numbers files are:
+As of version 3.0, `numbers-parser` can also create and edit number spreadsheets.
 
-* Multiple sheets per document
-* Multiple tables per sheet
-* Text, numeric, date, currency, duration, percentage cell types
+Formula evaluation relies on Numbers storing current values which should usually be the case. Formulas themselves rather than the computed values can optionally be extracted. Style support is very limited; currently only cell backgrounds are supported.
 
-Formulas rely on Numbers storing current values which should usually be
-the case. Formulas themselves rather than the computed values can optionally
-be extracted. Styles are not supported.
-
-As of version 3.0, `numbers-parser` has limited support for creating Numbers files.
+Numbers stores decimals as [decimal128 floating point](https://en.wikipedia.org/wiki/Decimal128_floating-point_format), but `numbers-parser` currently converts these values to floats which can result in rounding errors. Future releases will change the API to use decimal128.
 
 ## Installation
 
