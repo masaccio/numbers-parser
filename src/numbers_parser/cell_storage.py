@@ -5,7 +5,6 @@ import re
 
 from collections import OrderedDict
 
-# from decimal128 import Decimal128
 from fractions import Fraction
 from functools import lru_cache
 from pendulum import datetime, duration
@@ -87,34 +86,42 @@ DATETIME_FIELD_MAP = OrderedDict(
     ]
 )
 
-CELL_STORAGE_MAP_V5 = OrderedDict(
-    [
-        (0x1, {"attr": "d128", "size": 16}),
-        (0x2, {"attr": "double", "size": 8}),
-        (0x4, {"attr": "seconds", "size": 8}),
-        (0x8, {"attr": "string_id"}),
-        (0x10, {"attr": "rich_id"}),
-        (0x20, {"attr": "cell_style_id"}),
-        (0x40, {"attr": "text_style_id"}),
-        (0x80, {"attr": "cond_style_id"}),
-        (0x100, {"attr": "cond_rule_style_id"}),
-        (0x200, {"attr": "formula_id"}),
-        (0x400, {"attr": "control_id"}),
-        (0x800, {"attr": "formula_error_id"}),
-        (0x1000, {"attr": "suggest_id"}),
-        (0x2000, {"attr": "num_format_id"}),
-        (0x4000, {"attr": "currency_format_id"}),
-        (0x8000, {"attr": "date_format_id"}),
-        (0x10000, {"attr": "duration_format_id"}),
-        (0x20000, {"attr": "text_format_id"}),
-        (0x40000, {"attr": "bool_format_id"}),
-        (0x80000, {"attr": "comment_id"}),
-        (0x100000, {"attr": "import_warning_id"}),
-    ]
-)
-
 
 class CellStorage:
+    # 15% performance uplift for using slots
+    __slots__ = (
+        "buffer",
+        "datetime",
+        "model",
+        "table_id",
+        "row_num",
+        "col_num",
+        "value",
+        "type",
+        "d128",
+        "double",
+        "seconds",
+        "string_id",
+        "rich_id",
+        "cell_style_id",
+        "text_style_id",
+        # "cond_style_id",
+        # "cond_rule_style_id",
+        "formula_id",
+        # "control_id",
+        "formula_error_id",
+        # "suggest_id",
+        "num_format_id",
+        "currency_format_id",
+        "date_format_id",
+        "duration_format_id",
+        "text_format_id",
+        "bool_format_id",
+        # "comment_id",
+        # "import_warning_id",
+    )
+
+    # @profile
     def __init__(  # noqa: C901
         self, model: object, table_id: int, buffer, row_num, col_num
     ):
@@ -123,6 +130,28 @@ class CellStorage:
         self.table_id = table_id
         self.row_num = row_num
         self.col_num = col_num
+
+        self.d128 = None
+        self.double = None
+        self.seconds = None
+        self.string_id = None
+        self.rich_id = None
+        self.cell_style_id = None
+        self.text_style_id = None
+        # self.cond_style_id = None
+        # self.cond_rule_style_id = None
+        self.formula_id = None
+        # self.control_id = None
+        self.formula_error_id = None
+        # self.suggest_id = None
+        self.num_format_id = None
+        self.currency_format_id = None
+        self.date_format_id = None
+        self.duration_format_id = None
+        self.text_format_id = None
+        self.bool_format_id = None
+        # self.comment_id = None
+        # self.import_warning_id = None
 
         if buffer is None:
             return
@@ -133,19 +162,73 @@ class CellStorage:
 
         offset = 12
         flags = unpack("<i", buffer[8:12])[0]
-        for mask, field in CELL_STORAGE_MAP_V5.items():
-            if flags & mask:
-                size = field.get("size", 4)
-                if size == 16:
-                    value = unpack_decimal128(buffer[offset : offset + 16])
-                elif size == 8:
-                    value = unpack("<d", buffer[offset : offset + 8])[0]
-                else:
-                    value = unpack("<i", buffer[offset : offset + 4])[0]
-                setattr(self, field["attr"], value)
-                offset += size
-            else:
-                setattr(self, field["attr"], None)
+
+        if flags & 0x1:
+            self.d128 = unpack_decimal128(buffer[offset : offset + 16])
+            offset += 16
+        if flags & 0x2:
+            self.double = unpack("<d", buffer[offset : offset + 8])[0]
+            offset += 8
+        if flags & 0x4:
+            self.seconds = unpack("<d", buffer[offset : offset + 8])[0]
+            offset += 8
+        if flags & 0x8:
+            self.string_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x10:
+            self.rich_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x20:
+            self.cell_style_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x40:
+            self.text_style_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x80:
+            # self.cond_style_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        # if flags & 0x100:
+        #     self.cond_rule_style_id = unpack("<i", buffer[offset : offset + 4])[0]
+        #     offset += 4
+        if flags & 0x200:
+            self.formula_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        # if flags & 0x400:
+        #     self.control_id = unpack("<i", buffer[offset : offset + 4])[0]
+        #     offset += 4
+        # if flags & 0x800:
+        #     self.formula_error_id = unpack("<i", buffer[offset : offset + 4])[0]
+        #     offset += 4
+        # if flags & 0x1000:
+        #     self.suggest_id = unpack("<i", buffer[offset : offset + 4])[0]
+        #     offset += 4
+        # Skip unused flags
+        offset += 4 * bin(flags & 0x1D00).count("1")
+        #
+        if flags & 0x2000:
+            self.num_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x4000:
+            self.currency_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x8000:
+            self.date_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x10000:
+            self.duration_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x20000:
+            self.text_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x40000:
+            self.bool_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        # if flags & 0x80000:
+        #     self.comment_id = unpack("<i", buffer[offset : offset + 4])[0]
+        #     offset += 4
+        # if flags & 0x100000:
+        #     self.import_warning_id = unpack("<i", buffer[offset : offset + 4])[0]
+        #     offset += 4
 
         cell_type = buffer[1]
         if cell_type == TSTArchives.genericCellType:
@@ -179,14 +262,14 @@ class CellStorage:
         else:  # pragma: no cover
             raise UnsupportedError(f"Cell type ID {cell_type} is not recognised")
 
-        debug(
-            "cell@[%d,%d]: table_id=%d, type=%s, value=%s",
-            row_num,
-            col_num,
-            table_id,
-            self.type.name,
-            self.value,
-        )
+        # debug(
+        #     "cell@[%d,%d]: table_id=%d, type=%s, value=%s",
+        #     row_num,
+        #     col_num,
+        #     table_id,
+        #     self.type.name,
+        #     self.value,
+        # )
 
     @property
     def formatted(self):
