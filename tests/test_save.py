@@ -165,3 +165,11 @@ def test_create_multi(tmp_path, pytestconfig):
     assert doc.sheets[2].tables[3].coordinates == (0.0, 980.0)
     assert len(doc.sheets) == 3
     assert len(doc.sheets[2].tables) == 4
+
+
+def test_duplicate_name():
+    doc = Document()
+    doc.sheets[0].add_table("Test")
+    with pytest.raises(IndexError) as e:
+        doc.sheets[0].add_table("Test")
+    assert "table 'Test' already exists" in str(e)
