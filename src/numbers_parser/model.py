@@ -59,26 +59,26 @@ class DataLists:
         self._value_attr = value_attr
         self._datalist_name = datalist_name
 
+    @lru_cache(maxsize=None)
     def add_table(self, table_id: int):
         """Cache a new datalist for a table if not already seen"""
-        if table_id not in self._datalists:
-            base_data_store = self._model.objects[table_id].base_data_store
-            datalist_id = getattr(base_data_store, self._datalist_name).identifier
-            datalist = self._model.objects[datalist_id]
+        base_data_store = self._model.objects[table_id].base_data_store
+        datalist_id = getattr(base_data_store, self._datalist_name).identifier
+        datalist = self._model.objects[datalist_id]
 
-            max_key = 0
-            self._datalists[table_id] = {}
-            self._datalists[table_id]["by_key"] = {}
-            self._datalists[table_id]["by_value"] = {}
-            self._datalists[table_id]["datalist"] = datalist.entries
-            for entry in datalist.entries:
-                if entry.key > max_key:
-                    max_key = entry.key
-                    self._datalists[table_id]["by_key"][entry.key] = entry
-                    if self._value_attr is not None:
-                        value = getattr(entry, self._value_attr)
-                        self._datalists[table_id]["by_value"][value] = entry.key
-            self._datalists[table_id]["next_key"] = max_key + 1
+        max_key = 0
+        self._datalists[table_id] = {}
+        self._datalists[table_id]["by_key"] = {}
+        self._datalists[table_id]["by_value"] = {}
+        self._datalists[table_id]["datalist"] = datalist.entries
+        for entry in datalist.entries:
+            if entry.key > max_key:
+                max_key = entry.key
+                self._datalists[table_id]["by_key"][entry.key] = entry
+                if self._value_attr is not None:
+                    value = getattr(entry, self._value_attr)
+                    self._datalists[table_id]["by_value"][value] = entry.key
+        self._datalists[table_id]["next_key"] = max_key + 1
 
     def lookup_value(self, table_id: int, key: int):
         """Return the an entry in a table's datalist matching a key"""
@@ -124,7 +124,6 @@ class _NumbersModel:
         if filename is None:
             filename = DEFAULT_DOCUMENT
         self.objects = ObjectStore(filename)
-        # self._table_strings = {}
         self._merge_cells = {}
         self._row_heights = {}
         self._col_widths = {}
