@@ -427,13 +427,13 @@ class _NumbersModel:
         return self._merge_cells[table_id]
 
     def table_id_to_sheet_id(self, table_id: int) -> int:
-        for sheet_id in self.sheet_ids():
+        for sheet_id in self.sheet_ids():  # pragma: no branch
             if table_id in self.table_ids(sheet_id):
                 return sheet_id
 
     @lru_cache(maxsize=None)
     def table_uuids_to_id(self, table_uuid) -> int:
-        for sheet_id in self.sheet_ids():
+        for sheet_id in self.sheet_ids():  # pragma: no branch
             for table_id in self.table_ids(sheet_id):
                 if table_uuid == self.table_base_id(table_id):
                     return table_id

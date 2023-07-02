@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 debug = logger.debug
 
 
-def read_numbers_file(path, file_handler=None, object_handler=None):
+def read_numbers_file(path, file_handler, object_handler=None):
     debug("read_numbers_file: path=%s", path)
     if os.path.isdir(path):
         if os.path.isfile(os.path.join(path, "Index.zip")):
@@ -31,9 +31,8 @@ def read_numbers_file(path, file_handler=None, object_handler=None):
                         extract_iwa_archives(
                             blob, filepath, file_handler, object_handler
                         )
-                    if file_handler is not None:
-                        blob = f.read()
-                        file_handler(os.path.join(path, filename), blob)
+                    blob = f.read()
+                    file_handler(os.path.join(path, filename), blob)
     else:
         try:
             zipf = ZipFile(path)
@@ -76,7 +75,7 @@ def get_objects_from_zip_stream(zipf, file_handler, object_handler):
         if filename.endswith(".iwa"):
             blob = zipf.read(filename)
             extract_iwa_archives(blob, filename, file_handler, object_handler)
-        elif file_handler is not None:
+        else:
             blob = zipf.read(filename)
             file_handler(filename, blob)
 
@@ -108,5 +107,4 @@ def extract_iwa_archives(blob, filename, file_handler, object_handler):
                 pass
             object_handler(identifier, archive.objects[0], filename)
 
-    if file_handler is not None:
-        file_handler(filename, iwaf)
+    file_handler(filename, iwaf)
