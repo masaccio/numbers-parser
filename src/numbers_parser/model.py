@@ -82,6 +82,7 @@ class DataLists:
 
     def lookup_value(self, table_id: int, key: int):
         """Return the an entry in a table's datalist matching a key"""
+        self.add_table(table_id)
         return self._datalists[table_id]["by_key"][key]
 
     def init(self, table_id: int):
@@ -1306,16 +1307,57 @@ class _NumbersModel:
         cell_properties = cell_style.cell_properties.cell_fill
 
         if cell_properties.HasField("color"):
-            return (
-                int(cell_properties.color.r * 256),
-                int(cell_properties.color.g * 256),
-                int(cell_properties.color.b * 256),
-            )
+            return rgb(cell_properties.color)
         elif cell_properties.HasField("gradient"):
-            return [
-                (int(s.color.r * 256), int(s.color.g * 256), int(s.color.b * 256))
-                for s in cell_properties.gradient.stops
-            ]
+            return [(rgb(s.color)) for s in cell_properties.gradient.stops]
+
+    def cell_text_style(self, cell_storage: object) -> object:
+        if cell_storage.text_style_id is None:
+            table_model = self.objects[cell_storage.table_id]
+            style_id = table_model.body_text_style.identifier
+        else:
+            style_ref = self._table_styles.lookup_value(
+                cell_storage.table_id, cell_storage.text_style_id
+            )
+            style_id = style_ref.reference.identifier
+        return self.objects[style_id]
+
+    def cell_is_bold(self, cell_storage: object) -> bool:
+        style = self.cell_text_style(cell_storage)
+        return style.char_properties.bold
+
+    def cell_is_italic(self, cell_storage: object) -> bool:
+        style = self.cell_text_style(cell_storage)
+        return style.char_properties.italic
+
+    def cell_style_name(self, cell_storage: object) -> bool:
+        style = self.cell_text_style(cell_storage)
+        return style.super.name
+
+    def cell_font_color(self, cell_storage: object) -> Tuple:
+        style = self.cell_text_style(cell_storage)
+        font_color = style.char_properties.font_color
+        return rgb(font_color)
+
+    def cell_font_size(self, cell_storage: object) -> float:
+        style = self.cell_text_style(cell_storage)
+        if style.char_properties.HasField("font_size"):
+            return style.char_properties.font_size
+        else:
+            parent_style_id = style.super.parent.identifier
+            return self.objects[parent_style_id].char_properties.font_size
+
+    def cell_font_name(self, cell_storage: object) -> str:
+        style = self.cell_text_style(cell_storage)
+        if style.char_properties.HasField("font_name"):
+            return style.char_properties.font_name
+        else:
+            parent_style_id = style.super.parent.identifier
+            return self.objects[parent_style_id].char_properties.font_name
+
+
+def rgb(obj) -> Tuple:
+    return (round(obj.r * 255), round(obj.g * 255), round(obj.b * 255))
 
 
 def range_end(obj):

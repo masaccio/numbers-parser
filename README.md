@@ -188,6 +188,18 @@ rgb = table.cell("B1").bg_color
 print("B1 RGB =", rgb[0], rgb[1], rgb[2])
 ```
 
+#### Cell fonts
+
+Cell text fonts can be returned using a number of methods. Font names are the internal names rather than those displayed in Numbers. Currently supported font properties are:
+
+* `cell.style_name`: cell style (`str`)
+* `cell.is_bold`: `True` if the cell font is bold
+* `cell.is_italic`: `True` if the cell font is italic
+* `cell.font_color`: font color as a tuple of RGB values
+* `cell.font_size`: font size in points (`float`)
+* `cell.font_name`: font name (`str`)
+
+
 #### Cell images
 
 The methods `image_filename`, `image_data` and `image_type` return data about the image used for a cell's background, where set. If a cell has no background image, `None` is returned for all calls.

@@ -121,6 +121,30 @@ class Cell:
     def bg_color(self) -> Union[Tuple, List[Tuple]]:
         return self._model.cell_bg_color(self._storage)
 
+    @property
+    def is_bold(self) -> bool:
+        return self._model.cell_is_bold(self._storage)
+
+    @property
+    def is_italic(self) -> bool:
+        return self._model.cell_is_italic(self._storage)
+
+    @property
+    def style_name(self) -> bool:
+        return self._model.cell_style_name(self._storage)
+
+    @property
+    def font_color(self) -> bool:
+        return self._model.cell_font_color(self._storage)
+
+    @property
+    def font_size(self) -> bool:
+        return self._model.cell_font_size(self._storage)
+
+    @property
+    def font_name(self) -> str:
+        return self._model.cell_font_name(self._storage)
+
 
 class NumberCell(Cell):
     def __init__(self, row_num: int, col_num: int, value: float):
