@@ -3,9 +3,10 @@ import re
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.cell_storage import CellType, CellStorage
+from numbers_parser.constants import Justification
 
-from pendulum import duration, Duration, DateTime
 from functools import lru_cache
+from pendulum import duration, Duration, DateTime
 from typing import List, Tuple, Union
 
 
@@ -16,12 +17,12 @@ class BackgroundImage:
 
     @property
     def data(self) -> bytes:
-        """Return the background image for a cell, or None if no image"""
+        """The background image as byts for a cell, or None if no image."""
         return self._data
 
     @property
-    def filename(self) -> bytes:
-        """Return the background image filename for a cell, or None if no image"""
+    def filename(self) -> str:
+        """The image filename for a cell, or None if no image."""
         if self._data is None:
             return None
         return self._filename
@@ -34,44 +35,63 @@ class Style:
 
     @property
     def bg_image(self) -> object:
+        """The background image object for a cell, or None if no background
+        is assigned"""
         if self._storage.image_data is not None:
             return BackgroundImage(*self._storage.image_data)
 
     @property
     def bg_color(self) -> Union[Tuple, List[Tuple]]:
+        """A tuple containing the integer (0-255) RGB values for the
+        background color of a cell. For gradients, a list of tuples
+        for each colr point in the gradient."""
         return self._model.cell_bg_color(self._storage)
 
     @property
-    def is_bold(self) -> bool:
-        return self._model.cell_is_bold(self._storage)
-
-    @property
-    def is_italic(self) -> bool:
-        return self._model.cell_is_italic(self._storage)
-
-    @property
-    def is_underline(self) -> bool:
-        return self._model.cell_is_underline(self._storage)
-
-    @property
-    def is_strikethrough(self) -> bool:
-        return self._model.cell_is_strikethrough(self._storage)
-
-    @property
-    def name(self) -> bool:
-        return self._model.cell_style_name(self._storage)
-
-    @property
     def font_color(self) -> bool:
+        """A containing the integer (0-255) RGB values for the colour
+        of the font for text in the cell."""
         return self._model.cell_font_color(self._storage)
 
     @property
-    def font_size(self) -> bool:
+    def font_size(self) -> float:
+        """The point size of the font for the cell."""
         return self._model.cell_font_size(self._storage)
 
     @property
     def font_name(self) -> str:
+        """The font family assigned to the cell."""
         return self._model.cell_font_name(self._storage)
+
+    @property
+    def is_bold(self) -> bool:
+        """True if the cell is formatted to bold."""
+        return self._model.cell_is_bold(self._storage)
+
+    @property
+    def is_italic(self) -> bool:
+        """True if the cell is formatted to italic."""
+        return self._model.cell_is_italic(self._storage)
+
+    @property
+    def is_strikethrough(self) -> bool:
+        """True if the cell is formatted to strikethrough."""
+        return self._model.cell_is_strikethrough(self._storage)
+
+    @property
+    def is_underline(self) -> bool:
+        """True if the cell is formatted to underline."""
+        return self._model.cell_is_underline(self._storage)
+
+    @property
+    def alignment(self) -> Justification:
+        """The alignment of text inside the cell."""
+        return self._model.cell_alignment(self._storage)
+
+    @property
+    def name(self) -> str:
+        """The style name for the cell."""
+        return self._model.cell_style_name(self._storage)
 
 
 class Cell:

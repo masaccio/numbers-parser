@@ -19,6 +19,9 @@ from numbers_parser.constants import (
     DOCUMENT_ID,
     PACKAGE_ID,
     MAX_TILE_SIZE,
+    HorizJustification,
+    VertJustification,
+    Justification,
 )
 from numbers_parser.cell import (
     xl_rowcol_to_cell,
@@ -1302,6 +1305,24 @@ class _NumbersModel:
                 }
 
         return None
+
+    def cell_alignment(self, cell_storage: object) -> Justification:
+        if cell_storage.text_style_id is None:
+            horizontal = HorizJustification.LEFT
+        else:
+            cell_style = self.table_style(
+                cell_storage.table_id, cell_storage.text_style_id
+            )
+            horizontal = HorizJustification(cell_style.para_properties.alignment)
+
+        if cell_storage.cell_style_id is None:
+            vertical = VertJustification.TOP
+        else:
+            cell_style = self.table_style(
+                cell_storage.table_id, cell_storage.cell_style_id
+            )
+            vertical = VertJustification(cell_style.cell_properties.vertical_alignment)
+        return Justification((horizontal << 8) + vertical)
 
     def cell_bg_color(self, cell_storage: object) -> Union[Tuple, List[Tuple]]:
         if cell_storage.cell_style_id is None:

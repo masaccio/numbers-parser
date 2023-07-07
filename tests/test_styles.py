@@ -88,3 +88,7 @@ def test_styles():
             for cell in row[1:]:
                 if not isinstance(cell, EmptyCell):
                     assert cell.style.font_name == cell.value
+        elif row[0].value == "Alignment":
+            for cell in row[1:]:
+                if not isinstance(cell, EmptyCell):
+                    assert cell.style.alignment.name == cell.value

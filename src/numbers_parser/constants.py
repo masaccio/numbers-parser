@@ -83,3 +83,35 @@ class FormatType(IntEnum):
     CUSTOM_TEXT = 271
     CUSTOM_DATE = 272
     CUSTOM_CURRENCY = 274
+
+
+class HorizJustification(IntEnum):
+    LEFT = 0
+    RIGHT = 1
+    CENTER = 2
+    JUSTIFIED = 3
+    AUTO = 4
+
+
+class VertJustification(IntEnum):
+    TOP = 0
+    MIDDLE = 1
+    BOTTOM = 2
+
+
+class Justification(IntEnum):
+    LEFT_TOP = (HorizJustification.LEFT << 8) + VertJustification.TOP
+    LEFT_MIDDLE = (HorizJustification.LEFT << 8) + VertJustification.MIDDLE
+    LEFT_BOTTOM = (HorizJustification.LEFT << 8) + VertJustification.BOTTOM
+    CENTER_TOP = (HorizJustification.CENTER << 8) + VertJustification.TOP
+    CENTER_MIDDLE = (HorizJustification.CENTER << 8) + VertJustification.MIDDLE
+    CENTER_BOTTOM = (HorizJustification.CENTER << 8) + VertJustification.BOTTOM
+    RIGHT_TOP = (HorizJustification.RIGHT << 8) + VertJustification.TOP
+    RIGHT_MIDDLE = (HorizJustification.RIGHT << 8) + VertJustification.MIDDLE
+    RIGHT_BOTTOM = (HorizJustification.RIGHT << 8) + VertJustification.BOTTOM
+    JUSTIFIED_TOP = (HorizJustification.JUSTIFIED << 8) + VertJustification.TOP
+    JUSTIFIED_MIDDLE = (HorizJustification.JUSTIFIED << 8) + VertJustification.MIDDLE
+    JUSTIFIED_BOTTOM = (HorizJustification.JUSTIFIED << 8) + VertJustification.BOTTOM
+    AUTO_TOP = (HorizJustification.AUTO << 8) + VertJustification.TOP
+    AUTO_MIDDLE = (HorizJustification.AUTO << 8) + VertJustification.MIDDLE
+    AUTO_BOTTOM = (HorizJustification.AUTO << 8) + VertJustification.BOTTOM
