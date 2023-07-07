@@ -8,4 +8,6 @@ for family in sorted(font_families):
     fonts = manager.availableMembersOfFontFamily_(family)
     for font in fonts:
         print(f'    "{font[0]}": "{family}",')
+print('    "Calibri": "Calibri",')
+print('    "Cambria": "Cambria",')
 print("}")

@@ -545,4 +545,6 @@ FONT_NAME_MAP = {
     "Wingdings3": "Wingdings 3",
     "ZapfDingbatsITC": "Zapf Dingbats",
     "Zapfino": "Zapfino",
+    "Calibri": "Calibri",
+    "Cambria": "Cambria",
 }
