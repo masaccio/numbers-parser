@@ -88,17 +88,3 @@ def test_styles():
             for cell in row[1:]:
                 if not isinstance(cell, EmptyCell):
                     assert cell.font_name == cell.value
-
-    # assert table.cell("A3").style_name == "Heading Red"
-    # assert table.cell("B2").style_name == "ArialBold14"
-    # assert table.cell("C2").style_name == "CourierNew12"
-    # assert table.cell("B2").is_bold
-    # assert not table.cell("B3").is_bold
-    # assert table.cell("C2").is_italic
-    # assert table.cell("D2").font_color == (29, 177, 0)
-    # assert table.cell("B2").font_size == 14.0
-    # assert table.cell("C2").font_size == 12.0
-    # assert table.cell("D2").font_size == 11.0
-    # assert table.cell("B2").font_name == "Arial-Black"
-    # assert table.cell("C2").font_name == "CourierNewPSMT"
-    # assert table.cell("D2").font_name == "HelveticaNeue"
