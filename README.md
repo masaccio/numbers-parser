@@ -363,6 +363,8 @@ python3 setup.py -q bdist_wheel --cpp_implementation --warnings_as_errors --comp
 
 This can then be used `make bootstrap` in the `numbers-parser` source tree. The signing workflow assumes that you have an Apple Developer Account and that you have created provisioning profile that includes iCloud. Using a self-signed certificate does not seem to work, at least on Apple Silicon (a working PR contradicting this is greatly appreciated).
 
+`make bootstrap` requires [PyObjC](https://pypi.org/project/pyobjc/) to genetrate font maps, but this dependency is excluded from Poetry to ensure that tests can run on non-Mac OSes. You can run `poetry run pip install PyObjC ` to get the required packages.
+
 ## Credits
 
 `numbers-parser` was built by [Jon Connell](http://github.com/masaccio) but relies heavily on from [prior work](https://github.com/psobot/keynote-parser) by [Peter Sobot](https://petersobot.com) to read the IWA format archives used by Apple's iWork family of applications, and to regenerate the mapping files required for Python. Both modules are derived from [previous work](https://github.com/obriensp/iWorkFileFormat/blob/master/Docs/index.md) by [Sean Patrick O'Brien](http://www.obriensp.com).

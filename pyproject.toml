@@ -39,7 +39,6 @@ python-magic = "^0.4.27"
 termcolor = "^2.2.0"
 gprof2dot = "^2022.7.29"
 line-profiler = "^4.0.3"
-pyobjc = "^9.2"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
