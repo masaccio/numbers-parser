@@ -40,6 +40,7 @@ from numbers_parser.bullets import (
 )
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.numbers_uuid import NumbersUUID
+from numbers_parser.fontnames import FONT_NAME_MAP
 
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
@@ -48,6 +49,9 @@ from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessage
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
+from numbers_parser.generated.TSWPArchives_pb2 import (
+    CharacterStylePropertiesArchive as CharacterStyle,
+)
 
 
 class DataLists:
@@ -1330,6 +1334,19 @@ class _NumbersModel:
         style = self.cell_text_style(cell_storage)
         return style.char_properties.italic
 
+    def cell_is_underline(self, cell_storage: object) -> bool:
+        style = self.cell_text_style(cell_storage)
+        return (
+            style.char_properties.underline != CharacterStyle.UnderlineType.kNoUnderline
+        )
+
+    def cell_is_strikethrough(self, cell_storage: object) -> bool:
+        style = self.cell_text_style(cell_storage)
+        return (
+            style.char_properties.strikethru
+            != CharacterStyle.StrikethruType.kNoStrikethru
+        )
+
     def cell_style_name(self, cell_storage: object) -> bool:
         style = self.cell_text_style(cell_storage)
         return style.super.name
@@ -1350,10 +1367,11 @@ class _NumbersModel:
     def cell_font_name(self, cell_storage: object) -> str:
         style = self.cell_text_style(cell_storage)
         if style.char_properties.HasField("font_name"):
-            return style.char_properties.font_name
+            font_name = style.char_properties.font_name
         else:
             parent_style_id = style.super.parent.identifier
-            return self.objects[parent_style_id].char_properties.font_name
+            font_name = self.objects[parent_style_id].char_properties.font_name
+        return FONT_NAME_MAP[font_name]
 
 
 def rgb(obj) -> Tuple:

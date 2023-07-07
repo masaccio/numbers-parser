@@ -130,6 +130,14 @@ class Cell:
         return self._model.cell_is_italic(self._storage)
 
     @property
+    def is_underline(self) -> bool:
+        return self._model.cell_is_underline(self._storage)
+
+    @property
+    def is_strikethrough(self) -> bool:
+        return self._model.cell_is_strikethrough(self._storage)
+
+    @property
     def style_name(self) -> bool:
         return self._model.cell_style_name(self._storage)
 
