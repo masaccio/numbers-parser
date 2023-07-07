@@ -9,6 +9,71 @@ from functools import lru_cache
 from typing import List, Tuple, Union
 
 
+class BackgroundImage:
+    def __init__(self, image_data: bytes, filename: str):
+        self._data = image_data
+        self._filename = filename
+
+    @property
+    def data(self) -> bytes:
+        """Return the background image for a cell, or None if no image"""
+        return self._data
+
+    @property
+    def filename(self) -> bytes:
+        """Return the background image filename for a cell, or None if no image"""
+        if self._data is None:
+            return None
+        return self._filename
+
+
+class Style:
+    def __init__(self, cell_storage: object, model: object):
+        self._storage = cell_storage
+        self._model = model
+
+    @property
+    def bg_image(self) -> object:
+        if self._storage.image_data is not None:
+            return BackgroundImage(*self._storage.image_data)
+
+    @property
+    def bg_color(self) -> Union[Tuple, List[Tuple]]:
+        return self._model.cell_bg_color(self._storage)
+
+    @property
+    def is_bold(self) -> bool:
+        return self._model.cell_is_bold(self._storage)
+
+    @property
+    def is_italic(self) -> bool:
+        return self._model.cell_is_italic(self._storage)
+
+    @property
+    def is_underline(self) -> bool:
+        return self._model.cell_is_underline(self._storage)
+
+    @property
+    def is_strikethrough(self) -> bool:
+        return self._model.cell_is_strikethrough(self._storage)
+
+    @property
+    def name(self) -> bool:
+        return self._model.cell_style_name(self._storage)
+
+    @property
+    def font_color(self) -> bool:
+        return self._model.cell_font_color(self._storage)
+
+    @property
+    def font_size(self) -> bool:
+        return self._model.cell_font_size(self._storage)
+
+    @property
+    def font_name(self) -> str:
+        return self._model.cell_font_name(self._storage)
+
+
 class Cell:
     @classmethod
     def empty_cell(cls, table_id: int, row_num: int, col_num: int, model: object):
@@ -23,6 +88,7 @@ class Cell:
         cell.size = None
         cell._model = model
         cell._table_id = table_id
+        cell.style = None
         return cell
 
     @classmethod
@@ -58,6 +124,7 @@ class Cell:
         cell._model = cell_storage.model
         cell._storage = cell_storage
         cell._formula_key = cell_storage.formula_id
+        cell.style = Style(cell_storage, cell_storage.model)
 
         if is_merged and merge_cells[row_col]["merge_type"] == "source":
             cell.is_merged = True
@@ -74,6 +141,7 @@ class Cell:
         self.is_bulleted = False
         self._formula_key = None
         self._storage = None
+        self.style = None
 
     @property
     def is_formula(self):
@@ -96,62 +164,7 @@ class Cell:
 
     @property
     def formatted_value(self):
-        # if self._storage is None:
-        #     return str(self._value)
-        # else:
         return self._storage.formatted
-
-    @property
-    def image_data(self) -> bytes:
-        """Return the background image for a cell, or None if no image"""
-        data = self._storage.image_data
-        if data is None:
-            return None
-        return data[0]
-
-    @property
-    def image_filename(self) -> bytes:
-        """Return the background image filename for a cell, or None if no image"""
-        data = self._storage.image_data
-        if data is None:
-            return None
-        return self._storage.image_data[1]
-
-    @property
-    def bg_color(self) -> Union[Tuple, List[Tuple]]:
-        return self._model.cell_bg_color(self._storage)
-
-    @property
-    def is_bold(self) -> bool:
-        return self._model.cell_is_bold(self._storage)
-
-    @property
-    def is_italic(self) -> bool:
-        return self._model.cell_is_italic(self._storage)
-
-    @property
-    def is_underline(self) -> bool:
-        return self._model.cell_is_underline(self._storage)
-
-    @property
-    def is_strikethrough(self) -> bool:
-        return self._model.cell_is_strikethrough(self._storage)
-
-    @property
-    def style_name(self) -> bool:
-        return self._model.cell_style_name(self._storage)
-
-    @property
-    def font_color(self) -> bool:
-        return self._model.cell_font_color(self._storage)
-
-    @property
-    def font_size(self) -> bool:
-        return self._model.cell_font_size(self._storage)
-
-    @property
-    def font_name(self) -> str:
-        return self._model.cell_font_name(self._storage)
 
 
 class NumberCell(Cell):

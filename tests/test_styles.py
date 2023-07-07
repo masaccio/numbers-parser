@@ -40,12 +40,12 @@ def test_bg_colors():
     sheets = doc.sheets
     tables = sheets[0].tables
 
-    assert len(tables["Gradients"].cell(1, 1).bg_color) == 3
-    assert tables["Gradients"].cell(0, 0).bg_color == [
+    assert len(tables["Gradients"].cell(1, 1).style.bg_color) == 3
+    assert tables["Gradients"].cell(0, 0).style.bg_color == [
         (86, 193, 255),
         (0, 77, 128),
     ]
-    assert tables["Default Colours"].cell(1, 5).bg_color == (255, 66, 161)
+    assert tables["Default Colours"].cell(1, 5).style.bg_color == (255, 66, 161)
 
 
 def test_styles():
@@ -56,35 +56,35 @@ def test_styles():
     for row_num, row in enumerate(table.iter_rows()):
         if row_num == 0:
             for cell in row[1:]:
-                assert cell.style_name == cell.value
+                assert cell.style.name == cell.value
         elif row_num == 1:
-            assert row[1].style_name == "CustomStyle1"
-            assert row[1].is_bold
-            assert row[1].is_italic
-            assert not row[1].is_underline
-            assert not row[1].is_strikethrough
-            assert row[1].font_size == 12.0
-            assert row[1].font_name == "Arial"
-            assert row[2].font_color == (0, 0, 0)
+            assert row[1].style.name == "CustomStyle1"
+            assert row[1].style.is_bold
+            assert row[1].style.is_italic
+            assert not row[1].style.is_underline
+            assert not row[1].style.is_strikethrough
+            assert row[1].style.font_size == 12.0
+            assert row[1].style.font_name == "Arial"
+            assert row[2].style.font_color == (0, 0, 0)
 
-            assert row[2].style_name == "CustomStyle2"
-            assert not row[2].is_bold
-            assert not row[2].is_italic
-            assert row[2].is_underline
-            assert not row[2].is_strikethrough
-            assert row[2].font_size == 13.0
-            assert row[2].font_name == "Impact"
-            assert row[2].font_color == (0, 0, 0)
+            assert row[2].style.name == "CustomStyle2"
+            assert not row[2].style.is_bold
+            assert not row[2].style.is_italic
+            assert row[2].style.is_underline
+            assert not row[2].style.is_strikethrough
+            assert row[2].style.font_size == 13.0
+            assert row[2].style.font_name == "Impact"
+            assert row[2].style.font_color == (0, 0, 0)
 
-            assert row[3].style_name == "CustomStyle3"
-            assert not row[3].is_bold
-            assert not row[3].is_italic
-            assert not row[3].is_underline
-            assert row[3].is_strikethrough
-            assert row[3].font_size == 10.0
-            assert row[3].font_name == "Menlo"
-            assert row[3].font_color == (29, 177, 0)
+            assert row[3].style.name == "CustomStyle3"
+            assert not row[3].style.is_bold
+            assert not row[3].style.is_italic
+            assert not row[3].style.is_underline
+            assert row[3].style.is_strikethrough
+            assert row[3].style.font_size == 10.0
+            assert row[3].style.font_name == "Menlo"
+            assert row[3].style.font_color == (29, 177, 0)
         elif row[0].value == "Fonts":
             for cell in row[1:]:
                 if not isinstance(cell, EmptyCell):
-                    assert cell.font_name == cell.value
+                    assert cell.style.font_name == cell.value

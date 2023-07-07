@@ -199,18 +199,17 @@ def test_issue_43():
     table = doc.sheets[0].tables[0]
     cell = table.cell("A1")
     assert type(cell) == EmptyCell
-    assert "PNG image data" in magic.from_buffer(cell.image_data)
-    assert len(cell.image_data) == 87857
-    assert cell.image_filename == "pasted-image-17.png"
+    assert "PNG image data" in magic.from_buffer(cell.style.bg_image.data)
+    assert len(cell.style.bg_image.data) == 87857
+    assert cell.style.bg_image.filename == "pasted-image-17.png"
 
     cell = table.cell("B1")
     assert cell.value == "text "
-    assert "TIFF image data" in magic.from_buffer(cell.image_data)
-    assert len(cell.image_data) == 365398
-    assert cell.image_filename == "pasted-image-19.tiff"
+    assert "TIFF image data" in magic.from_buffer(cell.style.bg_image.data)
+    assert len(cell.style.bg_image.data) == 365398
+    assert cell.style.bg_image.filename == "pasted-image-19.tiff"
 
-    assert table.cell("C1").image_data is None
-    assert table.cell("C1").image_filename is None
+    assert table.cell("C1").style.bg_image is None
 
 
 def test_issue_44(script_runner):
