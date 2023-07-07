@@ -47,7 +47,8 @@ test:
 coverage:
 	poetry run pytest --cov=$(package_c) --cov-report=html
 
-BOOTSTRAP_FILES = src/$(package_c)/functionmap.py \
+BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
+				  src/$(package_c)/generated/fontmap.py \
 				  src/$(package_c)/generated/__init__.py \
 				  src/$(package_c)/mapping.py \
 
@@ -75,7 +76,10 @@ ENTITLEMENTS = src/bootstrap/entitlements.xml
 	@mkdir -p .bootstrap
 	python3 src/bootstrap/generate_mapping.py $< $@
 
-src/$(package_c)/functionmap.py: .bootstrap/functionmap.py
+src/$(package_c)/generated/functionmap.py: .bootstrap/functionmap.py
+	cp $< $@
+
+src/$(package_c)/generated/fontmap.py: .bootstrap/fontmap.py
 	cp $< $@
 
 TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
@@ -83,6 +87,11 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 	@echo $$(tput setaf 2)"Bootstrap: extracting function names from Numbers"$$(tput init)
 	@mkdir -p .bootstrap
 	poetry run python3 src/bootstrap/extract_functions.py $(TST_TABLES) $@
+
+.bootstrap/fontmap.py:
+	@echo $$(tput setaf 2)"Bootstrap: generating font name map"$$(tput init)
+	@mkdir -p .bootstrap
+	poetry run python3 src/bootstrap/generate_fontmap.py $(TST_TABLES) > $@
 
 .bootstrap/protos/TNArchives.proto:
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobufs from Numbers"$$(tput init)
