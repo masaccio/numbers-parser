@@ -40,8 +40,8 @@ from numbers_parser.bullets import (
 )
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.numbers_uuid import NumbersUUID
-from numbers_parser.fontnames import FONT_NAME_MAP
 
+from numbers_parser.generated.fontmap import FONT_NAME_MAP
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages

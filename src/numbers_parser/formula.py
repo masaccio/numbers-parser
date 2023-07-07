@@ -5,7 +5,7 @@ from pendulum import datetime, duration
 
 from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
-from numbers_parser.functionmap import FUNCTION_MAP
+from numbers_parser.generated.functionmap import FUNCTION_MAP
 
 
 class Formula(list):
