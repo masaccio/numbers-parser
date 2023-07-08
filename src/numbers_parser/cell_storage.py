@@ -452,7 +452,7 @@ class CellStorage:
 
 def unpack_decimal128(buffer: bytearray) -> float:
     if _experimental_features():
-        with decimal.localcontext(DECIMAL128_CONTEXT) as ctx:
+        with decimal.localcontext(DECIMAL128_CONTEXT) as ctx:  # noqa: W0612
             mantissa = decimal.Decimal(buffer[14] & 1)
             exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
             for i in range(13, -1, -1):
