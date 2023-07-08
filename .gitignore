@@ -31,6 +31,8 @@ build
 .bootstrap
 
 # Profiling
+prof/
 *.prof
+*.lprof
 coverage.xml
 const.py
