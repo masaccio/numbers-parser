@@ -1,3 +1,5 @@
+import pytest
+
 from numbers_parser import Document, EmptyCell
 
 TEST_NUMBERED_REF = [
@@ -84,6 +86,25 @@ def test_styles():
             assert row[3].style.font_size == 10.0
             assert row[3].style.font_name == "Menlo"
             assert row[3].style.font_color == (29, 177, 0)
+        elif row_num == 2:
+            assert row[1].style.is_bold
+            assert row[1].style.is_italic
+            assert not row[1].style.is_underline
+            assert not row[1].style.is_strikethrough
+            assert row[1].style.font_size == 11.0
+
+            assert not row[2].style.is_bold
+            assert not row[2].style.is_italic
+            assert row[2].style.is_underline
+            assert row[2].style.is_strikethrough
+            assert row[2].style.font_size == 9.0
+
+            assert not row[3].style.is_bold
+            assert not row[3].style.is_italic
+            assert not row[3].style.is_underline
+            assert not row[3].style.is_strikethrough
+            assert row[3].style.font_color == (29, 177, 0)
+            assert row[3].style.font_size == 12.0
         elif row[0].value == "Fonts":
             for cell in row[1:]:
                 if not isinstance(cell, EmptyCell):
@@ -92,3 +113,24 @@ def test_styles():
             for cell in row[1:]:
                 if not isinstance(cell, EmptyCell):
                     assert cell.style.alignment.name == cell.value
+
+
+@pytest.mark.experimental
+def test_new_styles(tmp_path, pytestconfig):
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-styles-new.numbers"
+
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+    with pytest.raises(TypeError) as e:
+        table.cell("D3").style.font_color = (0, 0, 0, 0)
+    assert "RGB color must be be a tuple" in str(e)
+    with pytest.raises(TypeError) as e:
+        table.cell("D3").style.font_color = (0, 0, 1.0)
+    assert "RGB color must be be a tuple" in str(e)
+
+    table.cell("D3").style.font_color = (29, 177, 0)
+
+    doc.save(new_filename)

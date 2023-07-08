@@ -53,10 +53,24 @@ class Style:
         of the font for text in the cell."""
         return self._model.cell_font_color(self._storage)
 
+    @font_color.setter
+    def font_color(self, color: Tuple):
+        """Set the font color to a new RGB value."""
+        if len(color) != 3 or all(isinstance(x, int) for x in color):
+            raise TypeError("RGB color must be be a tuple of 3 integers")
+        self._model.cell_font_color(self._storage, color)
+
     @property
     def font_size(self) -> float:
         """The point size of the font for the cell."""
         return self._model.cell_font_size(self._storage)
+
+    @font_size.setter
+    def font_size(self, size: float):
+        """Set the size of the font for the cell."""
+        if not isinstance(size, float):
+            raise TypeError("size must be a float number of points")
+        self._model.cell_font_size(self._storage, size)
 
     @property
     def font_name(self) -> str:
