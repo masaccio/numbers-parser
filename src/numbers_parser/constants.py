@@ -100,18 +100,18 @@ class VertJustification(IntEnum):
 
 
 class Justification(IntEnum):
-    LEFT_TOP = (HorizJustification.LEFT << 8) + VertJustification.TOP
-    LEFT_MIDDLE = (HorizJustification.LEFT << 8) + VertJustification.MIDDLE
-    LEFT_BOTTOM = (HorizJustification.LEFT << 8) + VertJustification.BOTTOM
-    CENTER_TOP = (HorizJustification.CENTER << 8) + VertJustification.TOP
-    CENTER_MIDDLE = (HorizJustification.CENTER << 8) + VertJustification.MIDDLE
-    CENTER_BOTTOM = (HorizJustification.CENTER << 8) + VertJustification.BOTTOM
-    RIGHT_TOP = (HorizJustification.RIGHT << 8) + VertJustification.TOP
-    RIGHT_MIDDLE = (HorizJustification.RIGHT << 8) + VertJustification.MIDDLE
-    RIGHT_BOTTOM = (HorizJustification.RIGHT << 8) + VertJustification.BOTTOM
-    JUSTIFIED_TOP = (HorizJustification.JUSTIFIED << 8) + VertJustification.TOP
-    JUSTIFIED_MIDDLE = (HorizJustification.JUSTIFIED << 8) + VertJustification.MIDDLE
-    JUSTIFIED_BOTTOM = (HorizJustification.JUSTIFIED << 8) + VertJustification.BOTTOM
-    AUTO_TOP = (HorizJustification.AUTO << 8) + VertJustification.TOP
-    AUTO_MIDDLE = (HorizJustification.AUTO << 8) + VertJustification.MIDDLE
-    AUTO_BOTTOM = (HorizJustification.AUTO << 8) + VertJustification.BOTTOM
+    LEFT_TOP = (HorizJustification.LEFT << 4) | VertJustification.TOP
+    LEFT_MIDDLE = (HorizJustification.LEFT << 4) | VertJustification.MIDDLE
+    LEFT_BOTTOM = (HorizJustification.LEFT << 4) | VertJustification.BOTTOM
+    CENTER_TOP = (HorizJustification.CENTER << 4) | VertJustification.TOP
+    CENTER_MIDDLE = (HorizJustification.CENTER << 4) | VertJustification.MIDDLE
+    CENTER_BOTTOM = (HorizJustification.CENTER << 4) | VertJustification.BOTTOM
+    RIGHT_TOP = (HorizJustification.RIGHT << 4) | VertJustification.TOP
+    RIGHT_MIDDLE = (HorizJustification.RIGHT << 4) | VertJustification.MIDDLE
+    RIGHT_BOTTOM = (HorizJustification.RIGHT << 4) | VertJustification.BOTTOM
+    JUSTIFIED_TOP = (HorizJustification.JUSTIFIED << 4) | VertJustification.TOP
+    JUSTIFIED_MIDDLE = (HorizJustification.JUSTIFIED << 4) | VertJustification.MIDDLE
+    JUSTIFIED_BOTTOM = (HorizJustification.JUSTIFIED << 4) | VertJustification.BOTTOM
+    AUTO_TOP = (HorizJustification.AUTO << 4) | VertJustification.TOP
+    AUTO_MIDDLE = (HorizJustification.AUTO << 4) | VertJustification.MIDDLE
+    AUTO_BOTTOM = (HorizJustification.AUTO << 4) | VertJustification.BOTTOM

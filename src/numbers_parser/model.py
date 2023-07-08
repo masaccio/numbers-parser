@@ -1260,7 +1260,7 @@ class _NumbersModel:
                 for i, e in enumerate(smartfield_entries):
                     if e.object.identifier:
                         obj = self.objects[e.object.identifier]
-                        if type(obj) == TSWPArchives.HyperlinkFieldArchive:
+                        if isinstance(obj, TSWPArchives.HyperlinkFieldArchive):
                             start = e.character_index
                             if i < len(smartfield_entries) - 1:
                                 end = smartfield_entries[i + 1].character_index
@@ -1322,7 +1322,7 @@ class _NumbersModel:
                 cell_storage.table_id, cell_storage.cell_style_id
             )
             vertical = VertJustification(cell_style.cell_properties.vertical_alignment)
-        return Justification((horizontal << 8) + vertical)
+        return Justification((horizontal << 4) | vertical)
 
     def cell_bg_color(self, cell_storage: object) -> Union[Tuple, List[Tuple]]:
         if cell_storage.cell_style_id is None:
