@@ -10,11 +10,13 @@
 
 It supports and is tested against Python versions from 3.8 onwards. It is not compatible with earlier versions of Python.
 
-As of version 3.0, `numbers-parser` can also create and edit number spreadsheets.
+Formula evaluation relies on Numbers storing current values which should usually be the case. Formulas themselves rather than the computed values can optionally be extracted. [Style support](#styles) is somewhat limited, but has grown significantly as of version 4.0.
 
-Formula evaluation relies on Numbers storing current values which should usually be the case. Formulas themselves rather than the computed values can optionally be extracted. Style support is very limited; currently only cell backgrounds are supported.
+## API changes in version 4.0
 
-Numbers stores decimals as [decimal128 floating point](https://en.wikipedia.org/wiki/Decimal128_floating-point_format), but `numbers-parser` currently converts these values to floats which can result in rounding errors. Future releases will change the API to use decimal128.
+To better partition cell styles, the new cell property `style` contains all style information for a cell including background image data which was supported in earlier versions. Image information is now found in `cell.style.bg_image`.
+
+`NumberCell` cell types return [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html) types rather than `float`. These are created in a [decimal128](https://en.wikipedia.org/wiki/Decimal128_floating-point_format) context to preserve the precision used by Numbers. Previously, using float resulted in rounding errors in unpacking internal numbers.
 
 ## Installation
 
@@ -188,32 +190,32 @@ rgb = table.cell("B1").bg_color
 print("B1 RGB =", rgb[0], rgb[1], rgb[2])
 ```
 
-#### Cell fonts
+#### Cell text attributes
 
-Cell text fonts can be returned using a number of methods. Font names are the internal names rather than those displayed in Numbers. Currently supported font properties are:
+Cell text fonts can be returned using a number of methods. Formatting changes within cells such as "This is **bold** text" are not supported.
 
-* `cell.style_name`: cell style (`str`)
-* `cell.is_bold`: `True` if the cell font is bold
-* `cell.is_italic`: `True` if the cell font is italic
-* `cell.font_color`: font color as a tuple of RGB values
-* `cell.font_size`: font size in points (`float`)
-* `cell.font_name`: font name (`str`)
-
+* `cell.style.name`: cell style (`str`)
+* `cell.style.is_bold`: `True` if the cell font is bold
+* `cell.style.is_italic`: `True` if the cell font is italic
+* `cell.style.is_underline`: `True` if the cell font is underline
+* `cell.style.is_strikethrough`: `True` if the cell font is strikethrough
+* `cell.style.font_color`: font color as a tuple of RGB values
+* `cell.style.font_size`: font size in points (`float`)
+* `cell.style.font_name`: font name (`str`)
 
 #### Cell images
 
-The methods `image_filename`, `image_data` and `image_type` return data about the image used for a cell's background, where set. If a cell has no background image, `None` is returned for all calls.
+The methods `style.bg_image.filename` and `style.bg_image.data` return data about the image used for a cell's background, where set. If a cell has no background image, `style.bg_image`  is `None`.
 
 ``` python
 cell = table.cell("B1")
-with open (cell.image_filename, "wb") as f:
-    f.write(cell.image_data)
-print("Wrote file of type", cell.image_type)
+with open (cell.style.bg_image.filename, "wb") as f:
+    f.write(cell.style.bg_image.data)
 ```
 
 ## Writing Numbers files
 
-*This is considered experimental*: you are highly recommened not to overwrite working Numbers files and instead save data to a new file.
+Whilst support for writing numbers files has been stable since version 3.4.0, you are highly recommened not to overwrite working Numbers files and instead save data to a new file.
 
 ### Limitations
 
@@ -363,7 +365,7 @@ python3 setup.py -q bdist_wheel --cpp_implementation --warnings_as_errors --comp
 
 This can then be used `make bootstrap` in the `numbers-parser` source tree. The signing workflow assumes that you have an Apple Developer Account and that you have created provisioning profile that includes iCloud. Using a self-signed certificate does not seem to work, at least on Apple Silicon (a working PR contradicting this is greatly appreciated).
 
-`make bootstrap` requires [PyObjC](https://pypi.org/project/pyobjc/) to genetrate font maps, but this dependency is excluded from Poetry to ensure that tests can run on non-Mac OSes. You can run `poetry run pip install PyObjC ` to get the required packages.
+`make bootstrap` requires [PyObjC](https://pypi.org/project/pyobjc/) to genetrate font maps, but this dependency is excluded from Poetry to ensure that tests can run on non-Mac OSes. You can run `poetry run pip install PyObjC` to get the required packages.
 
 ## Credits
 
