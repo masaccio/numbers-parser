@@ -2,6 +2,7 @@ import decimal
 import magic
 
 from numbers_parser import Document
+from numbers_parser.constants import Justification
 from pendulum import datetime, duration
 from numbers_parser.cell import ErrorCell, EmptyCell
 
@@ -284,3 +285,20 @@ def test_issue_54():
     for col_num in range(0, 9):
         assert table.cell(4, col_num).formula == table.cell(5, col_num).value
         assert table.cell(6, col_num).formula == table.cell(7, col_num).value
+
+
+def test_issue_56(tmp_path):
+    doc = Document("tests/data/issue-56.numbers")
+    table = doc.sheets[0].tables[0]
+    assert table.cell("A2").style.bg_color == (255, 149, 202)
+    assert table.cell("B2").style.alignment == Justification.RIGHT_TOP
+
+    new_filename = tmp_path / "issue-56-new.numbers"
+    doc.save(new_filename)
+
+    new_doc = Document(new_filename)
+    new_table = new_doc.sheets[0].tables[0]
+    assert new_table.col_width(0) == 98
+    assert new_table.col_width(1) == 162
+    assert new_table.cell("A2").style.bg_color == (255, 149, 202)
+    assert new_table.cell("B2").style.alignment == Justification.RIGHT_TOP
