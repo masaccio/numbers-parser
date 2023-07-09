@@ -566,6 +566,10 @@ class _NumbersModel:
             buckets.headers.append(header)
 
     def recalculate_column_headers(self, table_id: int, data: List):
+        current_column_widths = {}
+        for col_num in range(self.number_of_columns(table_id)):
+            current_column_widths[col_num] = self.col_width(table_id, col_num)
+
         base_data_store = self.objects[table_id].base_data_store
         buckets = self.objects[base_data_store.columnHeaders.identifier]
         clear_field_container(buckets.headers)
@@ -577,7 +581,7 @@ class _NumbersModel:
             if table_id in self._col_widths and col_num in self._col_widths[table_id]:
                 width = self._col_widths[table_id][col_num]
             else:
-                width = 0.0
+                width = current_column_widths[col_num]
             header = TSTArchives.HeaderStorageBucket.Header(
                 index=col_num, numberOfCells=num_rows, size=width, hidingState=0
             )
@@ -1171,21 +1175,25 @@ class _NumbersModel:
         storage[1] = cell_type
         storage += value
 
-        if getattr(cell._storage, "formula_id", None) is not None:
+        if cell._storage.cell_style_id is not None:
+            flags |= 0x20
+            length += 4
+            storage += pack("<i", cell._storage.cell_style_id)
+        if cell._storage.text_format_id is not None:
+            flags |= 0x40
+            length += 4
+            storage += pack("<i", cell._storage.text_format_id)
+        if cell._storage.formula_id is not None:
             flags |= 0x200
             length += 4
             storage += pack("<i", cell._storage.formula_id)
-        if getattr(cell._storage, "suggest_id", None) is not None:
-            flags |= 0x1000
-            length += 4
-            storage += pack("<i", cell._storage.suggest_id)
-        if getattr(cell._storage, "num_format_id", None) is not None:
+        if cell._storage.num_format_id is not None:
             flags |= 0x2000
             length += 4
             storage += pack("<i", cell._storage.num_format_id)
             storage[4:6] = pack("<h", 2)
             storage[6:8] = pack("<h", 1)
-        if getattr(cell._storage, "text_format_id", None) is not None:
+        if cell._storage.text_format_id is not None:
             flags |= 0x20000
             length += 4
             storage += pack("<i", cell._storage.text_format_id)
