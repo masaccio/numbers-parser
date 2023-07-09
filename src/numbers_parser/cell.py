@@ -3,7 +3,7 @@ import re
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.cell_storage import CellType, CellStorage
-from numbers_parser.constants import Justification
+from numbers_parser.constants import Justification, EMPTY_STORAGE_BUFFER
 
 from functools import lru_cache
 from pendulum import duration, Duration, DateTime
@@ -32,80 +32,99 @@ class Style:
     def __init__(self, cell_storage: object, model: object):
         self._storage = cell_storage
         self._model = model
+        self._dirty = False
+
+        self._alignment = self._model.cell_alignment(self._storage)
+        if self._storage.image_data is not None:
+            self._bg_image = BackgroundImage(*self._storage.image_data)
+        else:
+            self._bg_image = None
+        self._bg_color = self._model.cell_bg_color(self._storage)
+        self._font_color = self._model.cell_font_color(self._storage)
+        self._font_size = self._model.cell_font_size(self._storage)
+        self._font_name = self._model.cell_font_name(self._storage)
+        self._is_bold = self._model.cell_is_bold(self._storage)
+        self._is_italic = self._model.cell_is_italic(self._storage)
+        self._is_strikethrough = self._model.cell_is_strikethrough(self._storage)
+        self._is_underline = self._model.cell_is_underline(self._storage)
+        self._name = self._model.cell_style_name(self._storage)
+
+    @property
+    def alignment(self) -> Justification:
+        """The alignment of text inside the cell."""
+        return self._alignment
 
     @property
     def bg_image(self) -> object:
         """The background image object for a cell, or None if no background
         is assigned"""
-        if self._storage.image_data is not None:
-            return BackgroundImage(*self._storage.image_data)
+        return self._bg_image
 
     @property
     def bg_color(self) -> Union[Tuple, List[Tuple]]:
         """A tuple containing the integer (0-255) RGB values for the
         background color of a cell. For gradients, a list of tuples
         for each colr point in the gradient."""
-        return self._model.cell_bg_color(self._storage)
+        return self._bg_color
 
     @property
     def font_color(self) -> bool:
         """A containing the integer (0-255) RGB values for the colour
         of the font for text in the cell."""
-        return self._model.cell_font_color(self._storage)
+        return self._font_color
 
     @font_color.setter
     def font_color(self, color: Tuple):
         """Set the font color to a new RGB value."""
-        if len(color) != 3 or all(isinstance(x, int) for x in color):
+        if len(color) != 3 or not all(isinstance(x, int) for x in color):
             raise TypeError("RGB color must be be a tuple of 3 integers")
-        self._model.cell_font_color(self._storage, color)
+        if self._font_color != color:
+            self._font_color = color
+            self._dirty = True
 
     @property
     def font_size(self) -> float:
         """The point size of the font for the cell."""
-        return self._model.cell_font_size(self._storage)
+        return self._font_size
 
     @font_size.setter
     def font_size(self, size: float):
         """Set the size of the font for the cell."""
         if not isinstance(size, float):
             raise TypeError("size must be a float number of points")
-        self._model.cell_font_size(self._storage, size)
+        if self._font_size != size:
+            self._font_size = size
+            self._dirty = True
 
     @property
     def font_name(self) -> str:
         """The font family assigned to the cell."""
-        return self._model.cell_font_name(self._storage)
+        return self._font_name
 
     @property
     def is_bold(self) -> bool:
         """True if the cell is formatted to bold."""
-        return self._model.cell_is_bold(self._storage)
+        return self._is_bold
 
     @property
     def is_italic(self) -> bool:
         """True if the cell is formatted to italic."""
-        return self._model.cell_is_italic(self._storage)
+        return self._is_italic
 
     @property
     def is_strikethrough(self) -> bool:
         """True if the cell is formatted to strikethrough."""
-        return self._model.cell_is_strikethrough(self._storage)
+        return self._is_strikethrough
 
     @property
     def is_underline(self) -> bool:
         """True if the cell is formatted to underline."""
-        return self._model.cell_is_underline(self._storage)
-
-    @property
-    def alignment(self) -> Justification:
-        """The alignment of text inside the cell."""
-        return self._model.cell_alignment(self._storage)
+        return self._is_underline
 
     @property
     def name(self) -> str:
         """The style name for the cell."""
-        return self._model.cell_style_name(self._storage)
+        return self._name
 
 
 class Cell:
@@ -122,7 +141,7 @@ class Cell:
         cell.size = None
         cell._model = model
         cell._table_id = table_id
-        cell.style = None
+        cell._style = None
         return cell
 
     @classmethod
@@ -158,7 +177,7 @@ class Cell:
         cell._model = cell_storage.model
         cell._storage = cell_storage
         cell._formula_key = cell_storage.formula_id
-        cell.style = Style(cell_storage, cell_storage.model)
+        cell._style = None
 
         if is_merged and merge_cells[row_col]["merge_type"] == "source":
             cell.is_merged = True
@@ -175,7 +194,7 @@ class Cell:
         self.is_bulleted = False
         self._formula_key = None
         self._storage = None
-        self.style = None
+        self._style = None
 
     @property
     def is_formula(self):
@@ -199,6 +218,17 @@ class Cell:
     @property
     def formatted_value(self):
         return self._storage.formatted
+
+    @property
+    def style(self):
+        if self._storage is None:
+            self._storage = CellStorage(
+                self._model, self._table_id, EMPTY_STORAGE_BUFFER, self.row, self.col
+            )
+            self._style = Style(self._storage, self._model)
+        elif self._style is None:
+            self._style = Style(self._storage, self._model)
+        return self._style
 
 
 class NumberCell(Cell):
