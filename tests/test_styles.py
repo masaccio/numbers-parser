@@ -1,6 +1,7 @@
 import pytest
 
 from numbers_parser import Document, EmptyCell
+from numbers_parser.constants import RGB
 
 TEST_NUMBERED_REF = [
     "(1) double-paren-1",
@@ -67,7 +68,7 @@ def test_styles():
             assert not row[1].style.is_strikethrough
             assert row[1].style.font_size == 12.0
             assert row[1].style.font_name == "Arial"
-            assert row[2].style.font_color == (0, 0, 0)
+            assert row[2].style.font_color == RGB(0, 0, 0)
 
             assert row[2].style.name == "CustomStyle2"
             assert not row[2].style.is_bold
@@ -76,7 +77,7 @@ def test_styles():
             assert not row[2].style.is_strikethrough
             assert row[2].style.font_size == 13.0
             assert row[2].style.font_name == "Impact"
-            assert row[2].style.font_color == (0, 0, 0)
+            assert row[2].style.font_color == RGB(0, 0, 0)
 
             assert row[3].style.name == "CustomStyle3"
             assert not row[3].style.is_bold
@@ -85,7 +86,7 @@ def test_styles():
             assert row[3].style.is_strikethrough
             assert row[3].style.font_size == 10.0
             assert row[3].style.font_name == "Menlo"
-            assert row[3].style.font_color == (29, 177, 0)
+            assert row[3].style.font_color == RGB(29, 177, 0)
         elif row_num == 2:
             assert row[1].style.is_bold
             assert row[1].style.is_italic
@@ -103,7 +104,7 @@ def test_styles():
             assert not row[3].style.is_italic
             assert not row[3].style.is_underline
             assert not row[3].style.is_strikethrough
-            assert row[3].style.font_color == (29, 177, 0)
+            assert row[3].style.font_color == RGB(29, 177, 0)
             assert row[3].style.font_size == 12.0
         elif row[0].value == "Fonts":
             for cell in row[1:]:
@@ -112,10 +113,15 @@ def test_styles():
         elif row[0].value == "Alignment":
             for cell in row[1:]:
                 if not isinstance(cell, EmptyCell):
-                    assert cell.style.alignment.name == cell.value
+                    ref = "_".join(
+                        [
+                            cell.style.alignment.horizontal.name,
+                            cell.style.alignment.vertical.name,
+                        ]
+                    )
+                    assert cell.value == ref
 
 
-@pytest.mark.experimental
 def test_new_styles(tmp_path, pytestconfig):
     if pytestconfig.getoption("save_file") is not None:
         new_filename = pytestconfig.getoption("save_file")
@@ -131,6 +137,11 @@ def test_new_styles(tmp_path, pytestconfig):
         table.cell("D3").style.font_color = (0, 0, 1.0)
     assert "RGB color must be be a tuple" in str(e)
 
-    table.cell("D3").style.font_color = (29, 177, 0)
+    table.cell("D3").style.font_color = RGB(29, 177, 0)
+    assert table.cell("D3").style.font_color == RGB(29, 177, 0)
 
     doc.save(new_filename)
+
+    new_doc = Document(new_filename)
+    new_table = new_doc.sheets[0].tables[0]
+    # assert new_table.cell("D3").style.font_color == RGB(29, 177, 0)

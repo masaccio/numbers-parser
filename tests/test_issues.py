@@ -2,7 +2,7 @@ import decimal
 import magic
 
 from numbers_parser import Document
-from numbers_parser.constants import Justification
+from numbers_parser.constants import Alignment, RGB
 from pendulum import datetime, duration
 from numbers_parser.cell import ErrorCell, EmptyCell
 
@@ -291,14 +291,18 @@ def test_issue_56(tmp_path):
     doc = Document("tests/data/issue-56.numbers")
     table = doc.sheets[0].tables[0]
     assert table.cell("A2").style.bg_color == (255, 149, 202)
-    assert table.cell("B2").style.alignment == Justification.RIGHT_TOP
+    assert table.cell("B2").style.alignment.horizontal.name == "RIGHT"
+    assert table.cell("B2").style.alignment.vertical.name == "TOP"
 
     new_filename = tmp_path / "issue-56-new.numbers"
     doc.save(new_filename)
+    print(new_filename)
 
     new_doc = Document(new_filename)
     new_table = new_doc.sheets[0].tables[0]
     assert new_table.col_width(0) == 98
     assert new_table.col_width(1) == 162
+    assert new_table.cell("A2").style.font_name == "Helvetica Neue"
     assert new_table.cell("A2").style.bg_color == (255, 149, 202)
-    assert new_table.cell("B2").style.alignment == Justification.RIGHT_TOP
+    assert new_table.cell("B2").style.alignment.horizontal.name == "RIGHT"
+    assert new_table.cell("B2").style.alignment.vertical.name == "TOP"
