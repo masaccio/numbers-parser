@@ -1371,24 +1371,37 @@ class _NumbersModel:
 
     def cell_is_bold(self, cell_storage: object) -> bool:
         style = self.cell_text_style(cell_storage)
-        return style.char_properties.bold
+        if not style.char_properties.HasField("bold"):
+            return self.objects[style.super.parent.identifier].char_properties.bold
+        else:
+            return style.char_properties.bold
 
     def cell_is_italic(self, cell_storage: object) -> bool:
         style = self.cell_text_style(cell_storage)
-        return style.char_properties.italic
+        if not style.char_properties.HasField("italic"):
+            return self.objects[style.super.parent.identifier].char_properties.italic
+        else:
+            return style.char_properties.italic
 
     def cell_is_underline(self, cell_storage: object) -> bool:
         style = self.cell_text_style(cell_storage)
-        return (
-            style.char_properties.underline != CharacterStyle.UnderlineType.kNoUnderline
-        )
+        if not style.char_properties.HasField("underline"):
+            underline = self.objects[
+                style.super.parent.identifier
+            ].char_properties.underline
+        else:
+            underline = style.char_properties.underline
+        return underline != CharacterStyle.UnderlineType.kNoUnderline
 
     def cell_is_strikethrough(self, cell_storage: object) -> bool:
         style = self.cell_text_style(cell_storage)
-        return (
-            style.char_properties.strikethru
-            != CharacterStyle.StrikethruType.kNoStrikethru
-        )
+        if not style.char_properties.HasField("strikethru"):
+            strikethru = self.objects[
+                style.super.parent.identifier
+            ].char_properties.strikethru
+        else:
+            strikethru = style.char_properties.strikethru
+        return strikethru != CharacterStyle.StrikethruType.kNoStrikethru
 
     def cell_style_name(self, cell_storage: object) -> bool:
         style = self.cell_text_style(cell_storage)
@@ -1396,31 +1409,28 @@ class _NumbersModel:
 
     def cell_font_color(self, cell_storage: object) -> Tuple:
         style = self.cell_text_style(cell_storage)
-        if isinstance(style, TSWPArchives.ParagraphStyleArchive):
-            font_color = style.char_properties.font_color
-            return rgb(font_color)
+        if not style.char_properties.HasField("font_color"):
+            return rgb(
+                self.objects[style.super.parent.identifier].char_properties.font_color
+            )
         else:
-            return (0, 0, 0)
+            return rgb(style.char_properties.font_color)
 
     def cell_font_size(self, cell_storage: object) -> float:
         style = self.cell_text_style(cell_storage)
-        if isinstance(style, TSTArchives.CellStyleArchive):
-            pass
-        elif style.char_properties.HasField("font_size"):
-            return style.char_properties.font_size
+        if not style.char_properties.HasField("font_size"):
+            return self.objects[style.super.parent.identifier].char_properties.font_size
         else:
-            parent_style_id = style.super.parent.identifier
-            return self.objects[parent_style_id].char_properties.font_size
+            return style.char_properties.font_size
 
     def cell_font_name(self, cell_storage: object) -> str:
         style = self.cell_text_style(cell_storage)
-        if isinstance(style, TSTArchives.CellStyleArchive):
-            pass
-        elif style.char_properties.HasField("font_name"):
-            font_name = style.char_properties.font_name
+        if not style.char_properties.HasField("font_name"):
+            font_name = self.objects[
+                style.super.parent.identifier
+            ].char_properties.font_name
         else:
-            parent_style_id = style.super.parent.identifier
-            font_name = self.objects[parent_style_id].char_properties.font_name
+            font_name = style.char_properties.font_name
         return FONT_NAME_MAP[font_name]
 
 
