@@ -1,0 +1,273 @@
+syntax = "proto2";
+
+import "google/protobuf/descriptor.proto";
+package TSP;
+
+enum DataUploadStatus {
+  DataUploadStatus_Pending = 0;
+  DataUploadStatus_Reserved = 1;
+  DataUploadStatus_UnableToReserve = 2;
+  DataUploadStatus_Corrupted = 3;
+  DataUploadStatus_DocumentMayExceedDocumentSizeLimit = 4;
+  DataUploadStatus_Expired = 5;
+}
+
+enum SpotlightMetadataType {
+  None = 0;
+  Text = 1;
+  Author = 2;
+  Font = 3;
+  Table = 4;
+  Sheet = 5;
+  Chart = 6;
+  Media = 7;
+}
+
+message Reference {
+  required uint64 identifier = 1;
+  optional int32 deprecated_type = 2;
+  optional bool deprecated_is_external = 3;
+}
+
+message DataReference {
+  required uint64 identifier = 1;
+}
+
+message SparseReferenceArray {
+  message Entry {
+    required uint32 index = 1;
+    required .TSP.Reference reference = 2;
+  }
+  required uint32 count = 1;
+  repeated .TSP.SparseReferenceArray.Entry entries = 2;
+}
+
+message Point {
+  required float x = 1;
+  required float y = 2;
+}
+
+message Size {
+  required float width = 1;
+  required float height = 2;
+}
+
+message Range {
+  required uint32 location = 1;
+  required uint32 length = 2;
+}
+
+message Date {
+  required double seconds = 1;
+}
+
+message IndexSet {
+  repeated .TSP.Range ranges = 1;
+}
+
+message Color {
+  enum ColorModel {
+    rgb = 1;
+    cmyk = 2;
+    white = 3;
+  }
+  enum RGBColorSpace {
+    srgb = 1;
+    p3 = 2;
+  }
+  required .TSP.Color.ColorModel model = 1;
+  optional float r = 3;
+  optional float g = 4;
+  optional float b = 5;
+  optional .TSP.Color.RGBColorSpace rgbspace = 12;
+  optional float a = 6 [default = 1];
+  optional float c = 7;
+  optional float m = 8;
+  optional float y = 9;
+  optional float k = 10;
+  optional float w = 11;
+}
+
+message Path {
+  message Element {
+    required .TSP.Path.ElementType type = 1;
+    repeated .TSP.Point points = 2;
+  }
+  enum ElementType {
+    moveTo = 1;
+    lineTo = 2;
+    quadCurveTo = 3;
+    curveTo = 4;
+    closeSubpath = 5;
+  }
+  repeated .TSP.Path.Element elements = 1;
+}
+
+message ReferenceDictionary {
+  message Entry {
+    required .TSP.Reference key = 1;
+    required .TSP.Reference value = 2;
+  }
+  repeated .TSP.ReferenceDictionary.Entry entries = 1;
+}
+
+message UUID {
+  required uint64 lower = 1;
+  required uint64 upper = 2;
+}
+
+message CFUUIDArchive {
+  optional bytes uuid_bytes = 1;
+  optional uint32 uuid_w0 = 2;
+  optional uint32 uuid_w1 = 3;
+  optional uint32 uuid_w2 = 4;
+  optional uint32 uuid_w3 = 5;
+}
+
+message UUIDSetArchive {
+  repeated .TSP.UUID uids = 1;
+}
+
+message UUIDMapArchive {
+  repeated .TSP.UUID source = 1;
+  repeated .TSP.UUID target = 2;
+}
+
+message UUIDMultiMapArchive {
+  repeated .TSP.UUID source = 1;
+  repeated .TSP.UUID target = 2;
+}
+
+message UUIDCoordArchive {
+  required .TSP.UUID row_uid = 1;
+  required .TSP.UUID column_uid = 2;
+}
+
+message UUIDRectArchive {
+  repeated .TSP.UUID column_uids = 1;
+  repeated .TSP.UUID row_uids = 2;
+}
+
+message SparseUUIDArray {
+  message Entry {
+    required uint32 index = 1;
+    required .TSP.UUID uuid = 2;
+  }
+  required uint32 count = 1;
+  repeated .TSP.SparseUUIDArray.Entry entries = 2;
+}
+
+message UUIDPath {
+  repeated .TSP.UUID uuids = 1;
+}
+
+message SparseUUIDPathArray {
+  message Entry {
+    required uint32 index = 1;
+    required .TSP.UUIDPath uuid_path = 2;
+  }
+  required uint32 count = 1;
+  repeated .TSP.SparseUUIDPathArray.Entry entries = 2;
+}
+
+message PasteboardObject {
+  optional .TSP.Reference stylesheet = 1;
+  repeated .TSP.Reference drawables = 2;
+  repeated .TSP.Reference styles = 3;
+  optional .TSP.Reference wp_storage = 5;
+  optional .TSP.Reference guide_storage = 9;
+  optional .TSP.Reference app_native_object = 6;
+  optional bool is_text_primary = 7 [default = false];
+  optional bool is_smart = 8 [default = false];
+  repeated .TSP.Reference presets = 10;
+  repeated .TSP.Reference top_level_objects = 11;
+  optional .TSP.Reference native_content_description = 12;
+}
+
+message ObjectCollection {
+  repeated .TSP.Reference objects = 1;
+}
+
+message ObjectContainer {
+  optional uint32 identifier = 1;
+  repeated .TSP.Reference objects = 2;
+}
+
+message DataAttributes {
+  extensions 100 to 536870911;
+}
+
+message LargeArraySegment {
+  optional bool should_delay_archiving = 1;
+  optional uint32 delayed_archiving_priority = 2;
+  optional string package_locator = 3;
+}
+
+message LargeNumberArraySegment {
+  optional .TSP.LargeArraySegment large_array_segment = 1;
+  repeated double elements = 2;
+}
+
+message LargeStringArraySegment {
+  message OptionalElement {
+    optional string element = 1;
+  }
+  optional .TSP.LargeArraySegment large_array_segment = 1;
+  repeated .TSP.LargeStringArraySegment.OptionalElement elements = 2;
+}
+
+message LargeUUIDArraySegment {
+  optional .TSP.LargeArraySegment large_array_segment = 1;
+  repeated .TSP.UUID elements = 2;
+}
+
+message LargeLazyObjectArraySegment {
+  optional .TSP.LargeArraySegment large_array_segment = 1;
+  repeated .TSP.Reference elements = 2;
+}
+
+message LargeObjectArraySegment {
+  optional .TSP.LargeArraySegment large_array_segment = 1;
+  repeated .TSP.Reference elements = 2;
+}
+
+message LargeArray {
+  repeated .TSP.Range ranges = 1;
+  repeated .TSP.Reference segments = 2;
+  optional uint64 max_segment_element_count = 3;
+  optional uint64 max_segment_size = 4;
+  optional bool should_delay_archiving = 5;
+  optional uint32 delayed_archiving_priority = 6;
+  optional bool store_outside_object_archive = 7;
+  optional uint64 estimated_byte_size = 8;
+  optional uint64 max_segment_cost = 9;
+}
+
+message LargeNumberArray {
+  optional .TSP.LargeArray large_array = 1;
+}
+
+message LargeStringArray {
+  optional .TSP.LargeArray large_array = 1;
+}
+
+message LargeLazyObjectArray {
+  optional .TSP.LargeArray large_array = 1;
+}
+
+message LargeObjectArray {
+  optional .TSP.LargeArray large_array = 1;
+}
+
+message LargeUUIDArray {
+  optional .TSP.LargeArray large_array = 1;
+}
+
+message FieldOptions {
+  optional .TSP.SpotlightMetadataType metadata_type = 1;
+}
+
+extend .google.protobuf.FieldOptions {
+  optional .TSP.FieldOptions field_options = 51234;
+}
+

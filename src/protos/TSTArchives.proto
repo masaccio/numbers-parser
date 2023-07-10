@@ -1,0 +1,1456 @@
+syntax = "proto2";
+
+import "TSPMessages.proto";
+import "TSDArchives.proto";
+import "TSKArchives.proto";
+import "TSSArchives.proto";
+import "TSCEArchives.proto";
+import "TSWPArchives.proto";
+import "TSTStylePropertyArchiving.proto";
+package TST;
+
+enum CellType {
+  genericCellType = 0;
+  spanCellType = 1;
+  numberCellType = 2;
+  textCellType = 3;
+  formulaCellType = 4;
+  dateCellType = 5;
+  boolCellType = 6;
+  durationCellType = 7;
+  formulaErrorCellType = 8;
+  automaticCellType = 9;
+}
+
+enum CellValueType {
+  emptyCellValueType = 0;
+  numberCellValueType = 1;
+  stringCellValueType = 2;
+  providedCellValueType = 3;
+  dateCellValueType = 4;
+  boolCellValueType = 5;
+  durationCellValueType = 6;
+  errorCellValueType = 7;
+  richTextCellType = 8;
+  currencyCellValueType = 9;
+}
+
+enum TableDimensionArchive {
+  dimensionNeither = -1;
+  dimensionRow = 0;
+  dimensionColumn = 1;
+}
+
+enum SelectionTypeArchive {
+  deprecatedCellSelectionType = 0;
+  rowSelectionType = 1;
+  columnSelectionType = 2;
+  deprecatedCellEditingSelectionType = 3;
+  deprecatedTableNameSelectionType = 4;
+  deprecatedTableSelectionType = 5;
+  regionSelectionType = 6;
+  noSelectionType = 7;
+}
+
+enum FillDirectionArchive {
+  kTSTFillDownArchive = 1;
+  kTSTFillUpArchive = 2;
+  kTSTFillRightArchive = 3;
+  kTSTFillLeftArchive = 4;
+}
+
+enum MergeActionArchive {
+  mergeActionInsert = 1;
+  mergeActionRemove = 2;
+  mergeActionShrink = 3;
+  mergeActionGrow = 4;
+}
+
+enum HideShowActionArchive {
+  hideShowActionHide = 0;
+  hideShowActionShow = 1;
+}
+
+message CellID {
+  required fixed32 packedData = 1;
+  optional .TSCE.CellCoordinateArchive expanded_coord = 2;
+}
+
+message CellUIDLookupListArchive {
+  optional .TSCE.UidLookupListArchive column_uids = 1;
+  optional .TSCE.UidLookupListArchive row_uids = 2;
+  repeated int32 column_indexes = 3;
+  repeated int32 row_indexes = 4;
+}
+
+message CellUIDListArchive {
+  repeated .TSP.UUID row_uids = 1;
+  repeated .TSP.UUID column_uids = 2;
+  repeated int32 compressed_row_indexes = 3;
+  repeated int32 compressed_column_indexes = 4;
+  optional .TST.CellUIDLookupListArchive uncompressed_lookup_list = 5;
+}
+
+message TableSize {
+  required fixed32 packedData = 1;
+  optional uint32 num_columns = 2;
+  optional uint32 num_rows = 3;
+}
+
+message ExpandedTableSize {
+  required uint32 num_columns = 1;
+  required uint32 num_rows = 2;
+}
+
+message CellRange {
+  required .TST.CellID origin = 1;
+  required .TST.TableSize size = 2;
+}
+
+message ExpandedCellRange {
+  required .TSCE.CellCoordinateArchive origin = 1;
+  required .TST.ExpandedTableSize size = 2;
+}
+
+message TableSelection {
+  required .TST.CellRange cellRange = 1;
+  required .TST.CellRange extendedCellRange = 2;
+  required bool extendedCellRangeValid = 3;
+  required .TST.SelectionTypeArchive selection_type = 4;
+}
+
+message TileRowInfo {
+  required uint32 tile_row_index = 1;
+  required uint32 cell_count = 2;
+  required bytes cell_storage_buffer_pre_bnc = 3;
+  required bytes cell_offsets_pre_bnc = 4;
+  optional uint32 storage_version = 5;
+  optional bytes cell_storage_buffer = 6;
+  optional bytes cell_offsets = 7;
+  optional bool has_wide_offsets = 8;
+}
+
+message Tile {
+  required uint32 maxColumn = 1;
+  required uint32 maxRow = 2;
+  required uint32 numCells = 3;
+  required uint32 numrows = 4;
+  repeated .TST.TileRowInfo rowInfos = 5;
+  optional uint32 storage_version = 6;
+  optional bool last_saved_in_BNC = 7;
+  optional bool should_use_wide_rows = 8;
+}
+
+message TileStorage {
+  message Tile {
+    required uint32 tileid = 1;
+    required .TSP.Reference tile = 2;
+  }
+  repeated .TST.TileStorage.Tile tiles = 1;
+  optional uint32 tile_size = 2;
+  optional bool should_use_wide_rows = 3;
+}
+
+message PopUpMenuModel {
+  message CellValue {
+    required .TST.PopUpMenuModel.CellValueType cell_value_type = 1;
+    optional .TSCE.BooleanCellValueArchive boolean_value = 2;
+    optional .TSCE.DateCellValueArchive date_value = 3;
+    optional .TSCE.NumberCellValueArchive number_value = 4;
+    optional .TSCE.StringCellValueArchive string_value = 5;
+  }
+  enum CellValueType {
+    NIL_TYPE = 1;
+    BOOLEAN_TYPE = 2;
+    DATE_TYPE = 3;
+    NUMBER_TYPE = 4;
+    STRING_TYPE = 5;
+  }
+  repeated .TST.PopUpMenuModel.CellValue item = 1 [deprecated = true];
+  repeated .TSCE.CellValueArchive tsce_item = 2;
+}
+
+message ImportWarningSetArchive {
+  message FormulaImportWarning {
+    required .TST.ImportWarningSetArchive.FormulaWarningType formula_warning_type = 1;
+    optional string original_formula = 2;
+    optional string supplementary_text = 3;
+    optional int32 formula_warning_type_int = 4;
+  }
+  enum FormulaWarningType {
+    THREE_D_REFERENCE = 1;
+    ARRAYED_FORMULA = 2;
+    DIFFERENT_BEHAVIOR_FOR_FUNCTION = 3;
+    ERROR_TOKEN = 4;
+    EXTERNAL_REFERENCE = 5;
+    NATURAL_LANGUAGE_FORMULA = 6;
+    REFERENCE_OUT_OF_BOUNDS = 7;
+    SHARED_FORMULA_BASE_NOT_FOUND = 8;
+    UNKNOWN_NAME = 9;
+    UNSUPPORTED_FORMULA = 10;
+    UNSUPPORTED_FUNCTION = 11;
+    UNSUPPORTED_NAME = 12;
+    TRANSPOSED_NO_ISSUES = 13;
+    TRANSPOSED_WITH_ISSUES = 14;
+    TRANSPOSED_WITH_ISSUES_UNCHANGED = 15;
+  }
+  optional .TST.ImportWarningSetArchive.FormulaImportWarning formula_import_warning = 1;
+  optional bool cond_format_above_avg_equal_avg = 2 [default = false];
+  optional bool cond_format_above_avg_std_dev = 3 [default = false];
+  optional bool cond_format_complex_formula = 4 [default = false];
+  optional bool cond_format_contains_errors = 5 [default = false];
+  optional bool cond_format_expr = 6 [default = false];
+  optional bool cond_format_not_contains_errors = 7 [default = false];
+  optional bool cond_format_parameters_not_all_same_type = 8 [default = false];
+  optional bool cond_format_stop_if_true = 9 [default = false];
+  optional bool cond_format_unsupported_operator = 10 [default = false];
+  optional bool cond_format_unsupported_styling = 11 [default = false];
+  optional bool cond_format_unsupported_time_period = 12 [default = false];
+  optional bool error_cell_with_no_formula = 13 [default = false];
+  optional bool unsupported_cond_format = 14 [default = false];
+  optional string original_data_format = 15;
+  optional bool formula_warning_filtered_column_formula_not_copied = 16 [default = false];
+  optional bool duration_format_range_changed = 17 [default = false];
+}
+
+message CellRefImportWarningSetPairArchive {
+  required .TSCE.CellReferenceArchive cell_ref = 1;
+  optional .TST.ImportWarningSetArchive warning_set = 3;
+}
+
+message ImportWarningSetByCellRefArchive {
+  repeated .TST.CellRefImportWarningSetPairArchive cellref_warning_set_pair = 1;
+}
+
+message TableDataList {
+  message ListEntry {
+    required uint32 key = 1;
+    required uint32 refcount = 2;
+    optional string string = 3 [(.TSP.field_options) = {
+      metadata_type: Text
+    }];
+    optional .TSP.Reference reference = 4;
+    optional .TSCE.FormulaArchive formula = 5;
+    optional .TSK.FormatStructArchive format = 6;
+    optional .TSK.CustomFormatArchive custom_format = 8;
+    optional .TSP.Reference rich_text_payload = 9;
+    optional .TSP.Reference comment_storage = 10;
+    optional .TST.ImportWarningSetArchive import_warning_set = 11;
+    optional .TST.CellSpecArchive cell_spec = 12;
+  }
+  enum ListType {
+    STRING = 1;
+    FORMAT = 2;
+    FORMULA = 3;
+    STYLE = 4;
+    FORMULA_ERROR = 5;
+    CUSTOM_FORMAT = 6;
+    MULTIPLE_CHOICE_LIST_FORMAT = 7;
+    RICH_TEXT_PAYLOAD = 8;
+    CONDITIONAL_STYLE = 9;
+    COMMENT_STORAGE = 10;
+    IMPORT_WARNING = 11;
+    CONTROL_CELL_SPEC = 12;
+  }
+  required .TST.TableDataList.ListType listType = 1;
+  required uint32 nextListID = 2;
+  repeated .TST.TableDataList.ListEntry entries = 3;
+  repeated .TSP.Reference segments = 4;
+  optional bool is_new_for_bnc = 5;
+}
+
+message TableDataListSegment {
+  required .TST.TableDataList.ListType list_type = 1;
+  required .TSP.Range key_range = 2;
+  repeated .TST.TableDataList.ListEntry entries = 3;
+}
+
+message TableRBTree {
+  message Node {
+    required uint32 key = 1;
+    required uint32 value = 2;
+  }
+  repeated .TST.TableRBTree.Node nodes = 1;
+}
+
+message HeaderStorageBucket {
+  message Header {
+    required uint32 index = 1;
+    required float size = 2;
+    required uint32 hidingState = 3;
+    required uint32 numberOfCells = 4;
+    optional .TSP.Reference cell_style = 5;
+    optional .TSP.Reference text_style = 6;
+  }
+  required uint32 bucketHashFunction = 1;
+  repeated .TST.HeaderStorageBucket.Header headers = 2;
+}
+
+message HeaderStorage {
+  required uint32 bucketHashFunction = 1;
+  repeated .TSP.Reference buckets = 2;
+}
+
+message DataStore {
+  required .TST.HeaderStorage rowHeaders = 1;
+  required .TSP.Reference columnHeaders = 2;
+  required .TST.TileStorage tiles = 3;
+  required .TSP.Reference stringTable = 4;
+  required .TSP.Reference styleTable = 5;
+  required .TSP.Reference formula_table = 6;
+  optional .TSP.Reference formulaErrorTable = 12;
+  required .TSP.Reference format_table_pre_bnc = 11;
+  optional .TSP.Reference multipleChoiceListFormatTable = 16;
+  optional .TSP.Reference merge_region_map = 13;
+  optional .TSP.Reference deprecated_custom_format_table = 15;
+  required uint32 nextRowStripID = 7;
+  required uint32 nextColumnStripID = 8;
+  required .TST.TableRBTree rowTileTree = 9;
+  required .TST.TableRBTree columnTileTree = 10;
+  optional uint32 storage_version_pre_bnc = 14;
+  optional .TSP.Reference rich_text_table = 17;
+  optional .TSP.Reference conditionalstyletable = 18;
+  optional .TSP.Reference commentStorageTable = 19;
+  optional .TSP.Reference importWarningSetTable = 20;
+  optional .TSP.Reference control_cell_spec_table = 21;
+  optional .TSP.Reference format_table = 22;
+}
+
+message TableInfoArchive {
+  required .TSD.DrawableArchive super = 1;
+  required .TSP.Reference tableModel = 2;
+  optional .TSP.Reference editing_state = 3 [deprecated = true];
+  optional .TSP.Reference summary_model = 4;
+  optional .TSP.Reference category_order = 5;
+  optional .TSP.Reference view_column_row_uids = 6;
+  optional .TSP.UUID group_by_uuid = 7;
+  optional .TSP.UUID hidden_states_uuid = 8;
+  optional uint32 formula_coord_space_in_pre40 = 9 [deprecated = true];
+  optional uint32 formula_coord_space = 10;
+  optional .TSCE.CoordMapperArchive pasteboard_coord_mapper = 13;
+  optional .TST.LayoutEngineArchive layout_engine = 14;
+  optional .TSP.Reference pivot_data_model = 15;
+  optional bool is_a_pivot_table = 16;
+  optional .TSP.Reference pivot_order = 17;
+}
+
+message CategoryInfoArchive {
+  required .TSD.DrawableArchive super = 1;
+  required .TSP.Reference tableModel = 2;
+}
+
+message WPTableInfoArchive {
+  required .TST.TableInfoArchive super = 1;
+  optional .TSP.Reference storage = 2;
+}
+
+message TableStyleNetworkArchive {
+  required .TSP.Reference body_text_style = 1;
+  required .TSP.Reference header_row_text_style = 2;
+  required .TSP.Reference header_column_text_style = 3;
+  required .TSP.Reference footer_row_text_style = 4;
+  required .TSP.Reference body_cell_style = 5;
+  required .TSP.Reference header_row_style = 6;
+  required .TSP.Reference header_column_style = 7;
+  required .TSP.Reference footer_row_style = 8;
+  required .TSP.Reference table_style = 9;
+  optional .TSP.Reference table_name_style = 10;
+  optional .TSP.Reference table_name_shape_style = 11;
+  optional uint32 preset_id = 12;
+  optional .TSP.Reference category_level_1_text_style = 13;
+  optional .TSP.Reference category_level_2_text_style = 14;
+  optional .TSP.Reference category_level_3_text_style = 15;
+  optional .TSP.Reference category_level_4_text_style = 16;
+  optional .TSP.Reference category_level_5_text_style = 17;
+  optional .TSP.Reference category_level_1_style = 18;
+  optional .TSP.Reference category_level_2_style = 19;
+  optional .TSP.Reference category_level_3_style = 20;
+  optional .TSP.Reference category_level_4_style = 21;
+  optional .TSP.Reference category_level_5_style = 22;
+  optional .TSP.Reference label_level_1_text_style = 23;
+  optional .TSP.Reference label_level_2_text_style = 24;
+  optional .TSP.Reference label_level_3_text_style = 25;
+  optional .TSP.Reference label_level_4_text_style = 26;
+  optional .TSP.Reference label_level_5_text_style = 27;
+  optional .TSP.Reference label_level_1_style = 28;
+  optional .TSP.Reference label_level_2_style = 29;
+  optional .TSP.Reference label_level_3_style = 30;
+  optional .TSP.Reference label_level_4_style = 31;
+  optional .TSP.Reference label_level_5_style = 32;
+  optional .TSP.Reference pivot_body_summary_row_style = 33;
+  optional .TSP.Reference pivot_body_summary_column_style = 34;
+  optional .TSP.Reference pivot_header_column_summary_style = 35;
+}
+
+message TableGroupSortOrderUIDArchive {
+  message GroupSortRuleUIDArchive {
+    enum Direction {
+      ascending = 0;
+      descending = 1;
+    }
+    optional .TSP.UUID grouping_column_uid = 1;
+    optional .TSP.UUID column_uid = 2;
+    optional .TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive.Direction direction = 3;
+  }
+  repeated .TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive group_sort_rules = 1;
+}
+
+message TableSortOrderArchive {
+  message SortRuleArchive {
+    enum Direction {
+      ascending = 0;
+      descending = 1;
+    }
+    required uint32 index = 1;
+    required .TST.TableSortOrderArchive.SortRuleArchive.Direction direction = 2;
+  }
+  enum SortType {
+    entire_table = 0;
+    row_range = 1;
+  }
+  required .TST.TableSortOrderArchive.SortType type = 1;
+  repeated .TST.TableSortOrderArchive.SortRuleArchive rules = 2;
+}
+
+message TableSortOrderUIDArchive {
+  message SortRuleArchive {
+    enum Direction {
+      ascending = 0;
+      descending = 1;
+    }
+    required .TSP.UUID column_uid = 1;
+    required .TST.TableSortOrderUIDArchive.SortRuleArchive.Direction direction = 2;
+  }
+  enum SortType {
+    entire_table = 0;
+    row_range = 1;
+  }
+  required .TST.TableSortOrderUIDArchive.SortType type = 1;
+  repeated .TST.TableSortOrderUIDArchive.SortRuleArchive rules = 2;
+}
+
+message SortRuleReferenceTrackerArchive {
+  required .TSP.Reference reference_tracker = 1;
+}
+
+message CellRegion {
+  repeated .TST.CellRange cell_ranges = 1;
+}
+
+message CellUIDRegionArchive {
+  repeated .TSP.UUIDRectArchive cell_uid_ranges = 1;
+}
+
+message StructuredTextImportRecord {
+  required .TSK.StructuredTextImportSettings import_settings = 1;
+  optional string import_source = 2;
+  optional double import_date = 3;
+  optional bytes source_data = 4;
+  optional uint64 source_encoding = 5;
+  optional float confidence = 6;
+  optional .TST.CellRegion imported_region = 7;
+  optional uint64 source_row_count = 8;
+  optional uint64 source_column_count = 9;
+}
+
+message TableModelArchive {
+  required string table_id = 1;
+  optional string from_table_id = 43;
+  optional bool was_cut = 50;
+  required .TSP.Reference table_style = 3;
+  required .TSP.Reference body_text_style = 24;
+  required .TSP.Reference header_row_text_style = 25;
+  required .TSP.Reference header_column_text_style = 26;
+  required .TSP.Reference footer_row_text_style = 27;
+  required .TSP.Reference body_cell_style = 18;
+  required .TSP.Reference header_row_style = 19;
+  required .TSP.Reference header_column_style = 20;
+  required .TSP.Reference footer_row_style = 21;
+  optional .TSP.Reference table_name_style = 30;
+  optional .TSP.Reference table_name_shape_style = 36;
+  optional .TSP.Reference table_style_preset = 48;
+  optional uint32 preset_index = 28;
+  required .TST.DataStore base_data_store = 4;
+  optional .TSP.Reference provider = 5;
+  required uint32 number_of_rows = 6;
+  required uint32 number_of_columns = 7;
+  required string table_name = 8 [(.TSP.field_options) = {
+    metadata_type: Table
+  }];
+  optional bool table_name_enabled = 22;
+  optional double table_name_height = 33;
+  optional bool table_name_border_enabled = 37;
+  optional uint32 number_of_header_rows = 9;
+  optional uint32 number_of_header_columns = 10;
+  optional uint32 number_of_footer_rows = 11;
+  optional bool header_rows_frozen = 12;
+  optional bool header_columns_frozen = 13;
+  optional uint32 number_of_hidden_rows = 14;
+  optional uint32 number_of_hidden_columns = 15;
+  optional uint32 number_of_user_hidden_rows = 41;
+  optional uint32 number_of_user_hidden_columns = 42;
+  optional uint32 number_of_filtered_rows = 40;
+  required double default_row_height = 16;
+  required double default_column_width = 17;
+  optional .TST.CellID origin_offset = 23 [deprecated = true];
+  optional bool repeating_header_rows_enabled = 29;
+  optional bool style_apply_clears_all = 31;
+  optional bool repeating_header_columns_enabled = 32;
+  optional .TSP.Reference hidden_state_formula_owner_for_columns = 34;
+  optional .TSP.Reference hidden_state_formula_owner_for_rows = 35;
+  optional .TSP.Reference row_filter_set_pre_pivot = 38;
+  optional .TSP.CFUUIDArchive conditional_style_formula_owner_id = 39;
+  optional .TST.TableSortOrderArchive sort_order = 44;
+  optional .TST.SortRuleReferenceTrackerArchive sort_rule_reference_tracker = 45;
+  optional .TSP.Reference base_column_row_uids = 46;
+  optional .TST.MergeOwnerArchive merge_owner = 47;
+  optional .TSP.Reference stroke_sidecar = 49;
+  optional bool preset_needs_strong_ownership = 51;
+  optional .TST.StructuredTextImportRecord text_import_record = 52;
+  optional .TSP.Reference category_level_1_style = 60;
+  optional .TSP.Reference category_level_2_style = 61;
+  optional .TSP.Reference category_level_3_style = 62;
+  optional .TSP.Reference category_level_4_style = 63;
+  optional .TSP.Reference category_level_5_style = 64;
+  optional .TSP.Reference category_level_1_text_style = 65;
+  optional .TSP.Reference category_level_2_text_style = 66;
+  optional .TSP.Reference category_level_3_text_style = 67;
+  optional .TSP.Reference category_level_4_text_style = 68;
+  optional .TSP.Reference category_level_5_text_style = 69;
+  optional .TST.HiddenStatesOwnerArchive hidden_states_owner = 70;
+  optional .TSP.Reference label_level_1_style = 71;
+  optional .TSP.Reference label_level_2_style = 72;
+  optional .TSP.Reference label_level_3_style = 73;
+  optional .TSP.Reference label_level_4_style = 74;
+  optional .TSP.Reference label_level_5_style = 75;
+  optional .TSP.Reference label_level_1_text_style = 76;
+  optional .TSP.Reference label_level_2_text_style = 77;
+  optional .TSP.Reference label_level_3_text_style = 78;
+  optional .TSP.Reference label_level_4_text_style = 79;
+  optional .TSP.Reference label_level_5_text_style = 80;
+  optional .TST.CategoryOwnerArchive category_owner_deprecated = 81;
+  optional .TST.PencilAnnotationOwnerArchive pencil_annotation_owner = 82;
+  optional string from_group_by_uid = 83;
+  optional .TSCE.HauntedOwnerArchive haunted_owner = 84;
+  optional .TSP.Reference pivot_owner = 85;
+  optional .TSP.Reference category_owner = 86;
+  optional .TSP.Reference pivot_body_summary_row_style = 87;
+  optional .TSP.Reference pivot_body_summary_column_style = 88;
+  optional .TSP.Reference pivot_header_column_summary_style = 89;
+  repeated uint32 pivot_value_types_by_col = 90;
+  repeated uint32 pivot_date_grouping_columns = 91;
+  repeated uint32 pivot_date_grouping_types = 92;
+}
+
+message SummaryModelArchive {
+  required .TSP.Reference table_info = 1;
+  optional .TST.DataStore data_store = 2;
+  optional .TSP.Reference column_row_uids = 3;
+  optional .TSP.UUID aggregate_formula_owner_uuid = 4;
+  optional .TSP.Reference summary_cell_vendor = 5;
+  optional double category_column_width = 10;
+  optional double summary_row_level_1_height = 11 [deprecated = true];
+  optional double summary_row_level_2_height = 12 [deprecated = true];
+  optional double summary_row_level_3_height = 13 [deprecated = true];
+  optional double summary_row_level_4_height = 14 [deprecated = true];
+  optional double summary_row_level_5_height = 15 [deprecated = true];
+  optional double summary_label_row_level_1_height = 16 [deprecated = true];
+  optional double summary_label_row_level_2_height = 17 [deprecated = true];
+  optional double summary_label_row_level_3_height = 18 [deprecated = true];
+  optional double summary_label_row_level_4_height = 19 [deprecated = true];
+  optional double summary_label_row_level_5_height = 20 [deprecated = true];
+  optional uint32 label_row_visibility_1 = 21 [deprecated = true];
+  optional uint32 label_row_visibility_2 = 22 [deprecated = true];
+  optional uint32 label_row_visibility_3 = 23 [deprecated = true];
+  optional uint32 label_row_visibility_4 = 24 [deprecated = true];
+  optional uint32 label_row_visibility_5 = 25 [deprecated = true];
+  repeated double summary_row_height_list = 26;
+  repeated double label_row_height_list = 27;
+  repeated uint32 label_row_visibility_list = 28;
+  optional .TST.TableGroupSortOrderUIDArchive group_sort_order = 29;
+}
+
+message SummaryModelGroupByChangeStateArchive {
+  optional .TSP.Reference cell_map = 1;
+  repeated double summary_row_height_list = 2;
+  repeated double label_row_height_list = 3;
+  repeated uint32 label_row_visibility_list = 4;
+}
+
+message ColumnRowUIDMapArchive {
+  repeated .TSP.UUID sorted_column_uids = 1;
+  repeated uint32 column_index_for_uid = 2;
+  repeated uint32 column_uid_for_index = 3;
+  repeated .TSP.UUID sorted_row_uids = 4;
+  repeated uint32 row_index_for_uid = 5;
+  repeated uint32 row_uid_for_index = 6;
+}
+
+message StrokeLayerArchive {
+  message StrokeRunArchive {
+    optional int32 origin = 1;
+    optional uint32 length = 2;
+    optional .TSD.StrokeArchive stroke = 3;
+    optional uint32 order = 4;
+  }
+  optional uint32 row_column_index = 1;
+  repeated .TST.StrokeLayerArchive.StrokeRunArchive stroke_runs = 2;
+}
+
+message StrokeSidecarArchive {
+  optional uint32 max_order = 1;
+  optional uint32 column_count = 2;
+  optional uint32 row_count = 3;
+  repeated .TSP.Reference left_column_stroke_layers = 4;
+  repeated .TSP.Reference right_column_stroke_layers = 5;
+  repeated .TSP.Reference top_row_stroke_layers = 6;
+  repeated .TSP.Reference bottom_row_stroke_layers = 7;
+}
+
+message DurationWrapperArchive {
+}
+
+message Cell {
+  required .TST.CellValueType valueType = 2;
+  optional .TSP.Reference cell_style = 3;
+  optional .TSP.Reference text_style = 4;
+  optional double numberValue = 5;
+  optional string stringValue = 6;
+  optional bool boolValue = 7;
+  optional .TSK.FormatStructArchive current_format = 9;
+  optional .TSP.Reference formulaError = 10;
+  optional .TSK.FormatStructArchive number_format = 11;
+  optional .TSK.FormatStructArchive currency_format = 12;
+  optional .TSK.FormatStructArchive duration_format = 13;
+  optional .TSK.FormatStructArchive date_format = 14;
+  optional .TSK.FormatStructArchive custom_format = 16;
+  optional .TSK.FormatStructArchive base_format = 17;
+  optional uint32 explicit_format_flags = 19;
+  optional .TSP.Reference richText = 20;
+  optional .TSP.Reference conditional_style = 21;
+  optional .TSP.Reference comment_storage = 23;
+  optional uint32 conditional_style_applied_rule = 24;
+  optional .TST.ImportWarningSetArchive import_warning_set = 25;
+  optional .TSK.CustomFormatArchive custom_format_object = 26;
+  optional .TST.CellBorderArchive cell_border = 27;
+  optional .TST.CellSpecArchive cell_spec = 28;
+  optional uint32 cell_format_kind = 29;
+  optional .TSK.FormatStructArchive text_format = 30;
+  optional .TSK.FormatStructArchive boolean_format = 31;
+  optional uint64 decimal_value_low = 32;
+  optional uint64 decimal_value_high = 33;
+}
+
+message MergeRegionMapArchive {
+  repeated .TST.CellRange cell_range = 1;
+}
+
+message CellMapArchive {
+  repeated .TSP.Reference cell_tiles = 2;
+  required bool uid_based = 3;
+  repeated .TSCE.CellCoordinateArchive expanded_cell_ids = 14;
+  optional .TST.CellUIDListArchive cell_uid_list = 5;
+  repeated .TSP.UUIDRectArchive merge_uid_ranges = 7;
+  repeated .TSP.UUIDRectArchive unmerge_uid_ranges = 9;
+  repeated .TST.MergeOperationArchive merge_actions = 13;
+  optional bool may_modify_formulas_in_cells = 10 [default = true];
+  optional bool may_modify_values_referenced_by_formulas = 11 [default = true];
+}
+
+message CellListArchive {
+  message OptionalCell {
+    optional .TST.Cell cell = 1;
+  }
+  repeated .TST.CellListArchive.OptionalCell cells = 1;
+  optional uint32 trailing_empty_cell_count = 2;
+}
+
+message ConcurrentCellMapArchive {
+  repeated .TSP.Reference cell_lists = 1;
+  required bool uid_based = 2;
+  repeated .TST.MergeOperationArchive merge_actions = 3;
+  optional bool may_modify_formulas_in_cells = 4 [default = true];
+  optional bool may_modify_values_referenced_by_formulas = 5 [default = true];
+  optional bool affects_cell_borders = 6 [default = true];
+}
+
+message ConcurrentCellListArchive {
+  message OptionalCell {
+    optional .TST.Cell cell = 1;
+  }
+  repeated .TST.ConcurrentCellListArchive.OptionalCell cells = 1;
+  optional .TSP.UUIDRectArchive cell_uid_range = 2;
+  optional .TST.CellRange cell_range = 3;
+}
+
+message CellFormatAndValueArchive {
+  required .TST.CellValueType valueType = 1;
+  optional double numberValue = 2;
+  optional string stringValue = 3;
+  optional bool boolValue = 4;
+  optional .TSP.Reference richTextStorage = 5;
+  required bool use_all_spare_formats = 6;
+  required uint32 explicit_flags = 7;
+  required uint32 cell_format_kind = 8;
+  optional .TSK.FormatStructArchive number_format = 10;
+  optional .TSK.FormatStructArchive currency_format = 11;
+  optional .TSK.FormatStructArchive date_format = 12;
+  optional .TSK.FormatStructArchive duration_format = 13;
+  optional .TSK.FormatStructArchive text_format = 14;
+  optional .TSK.FormatStructArchive boolean_format = 15;
+  optional string formatted_value = 16;
+  optional .TSP.Reference formatted_rich_text_value = 17;
+  required bool apply_spare_format_only = 18;
+  required bool spare_format_type = 19;
+  optional uint64 decimal_low = 20;
+  optional uint64 decimal_high = 21;
+  optional bool suppress_apply_value = 22;
+}
+
+message CellSpecArchive {
+  required uint32 interaction_type = 1;
+  optional .TSCE.FormulaArchive formula = 2;
+  optional double range_control_min = 3;
+  optional double range_control_max = 4;
+  optional double range_control_inc = 5;
+  optional .TSP.Reference chooser_control_popup_model = 6;
+  optional bool chooser_control_start_w_first = 7;
+  optional bool category_summary_should_display_label = 8 [deprecated = true];
+}
+
+message CommentStorageWrapperArchive {
+  optional .TSP.Reference comment_storage = 1;
+}
+
+message CellDiffArchive {
+  required .TSS.CommandPropertyMapArchive property_map_to_set = 1;
+  required .TSS.CommandPropertyMapArchive property_map_to_reset = 2;
+}
+
+message CellDiffArray {
+  optional .TSP.LargeArray large_array = 1;
+}
+
+message CellDiffArraySegment {
+  optional .TSP.LargeArraySegment large_array_segment = 1;
+  repeated .TST.CellDiffArchive elements = 2;
+}
+
+message CellDiffMapArchive {
+  required bool uid_based = 1;
+  repeated .TSCE.CellCoordinateArchive expanded_cell_ids = 2;
+  required .TST.CellUIDListArchive cell_uids = 3;
+  optional .TSP.Reference cell_diff_array = 4;
+}
+
+message HierarchicalCellDiffMapArchive {
+  message BoxedRow {
+    required .TSP.IndexSet column_index_set = 1;
+    repeated .TST.CellDiffArchive cell_diff_list = 2;
+  }
+  required int32 num_row_rules = 1;
+  required int32 num_column_rules = 2;
+  repeated .TSP.UUID row_header_uids = 3;
+  repeated .TSP.UUID column_header_uids = 4;
+  repeated .TSP.UUID aggregate_rule_uids = 5;
+  required .TST.TableDimensionArchive active_flattening_dimension = 6;
+  repeated .TSP.UUID row_value_uids = 7;
+  repeated uint32 row_level_preorder = 8;
+  repeated .TSP.UUID column_value_uids = 9;
+  repeated uint32 column_level_preorder = 10;
+  repeated .TST.HierarchicalCellDiffMapArchive.BoxedRow cell_diff_storage = 11;
+  repeated double row_sizes = 12;
+  repeated double column_sizes = 13;
+}
+
+message DoubleStyleMapArchive {
+  message DoubleStyleMapEntryArchive {
+    required .TST.CellID cell_id = 1;
+    required .TSP.Reference old_style = 2;
+    required .TSP.Reference new_style = 3;
+  }
+  required uint32 capacity = 1;
+  required uint32 count = 2;
+  repeated .TST.DoubleStyleMapArchive.DoubleStyleMapEntryArchive cell_map_entry = 3;
+}
+
+message StyleTableMapArchive {
+  message StyleTableMapEntryArchive {
+    required uint32 key = 1;
+    required .TSP.Reference old_style = 2;
+    required .TSP.Reference new_style = 3;
+  }
+  required uint32 capacity = 1;
+  required uint32 count = 2;
+  repeated .TST.StyleTableMapArchive.StyleTableMapEntryArchive map_entry = 3;
+}
+
+message SelectionArchive {
+  optional .TSP.Reference tableModel = 1 [deprecated = true];
+  required .TST.SelectionTypeArchive selection_type = 4;
+  optional .TST.CellID anchor_cell = 5;
+  repeated .TST.CellRange cell_ranges = 6;
+  repeated .TST.CellRange base_ranges = 7;
+  optional .TST.CellID cursor_cell = 8;
+  optional .TSP.Reference table_info = 9;
+  optional .TST.CellUIDRegionArchive cell_uid_region = 10;
+  optional .TST.CellUIDRegionArchive base_uid_region = 11;
+  optional .TSP.UUIDCoordArchive anchor_cell_uid = 12;
+  optional .TSP.UUIDCoordArchive cursor_cell_uid = 13;
+}
+
+message DeathhawkRdar39989167CellSelectionArchive {
+  optional .TSP.Reference table_info = 1;
+  optional .TST.SelectionTypeArchive selection_type = 2;
+  optional .TST.CellUIDRegionArchive cell_uid_region = 3;
+  optional .TST.CellUIDRegionArchive base_uid_region = 4;
+  optional .TSP.UUIDCoordArchive anchor_cell_uid = 5;
+  optional .TSP.UUIDCoordArchive cursor_cell_uid = 6;
+}
+
+message StrokeSelectionArchive {
+  optional int32 mask = 1;
+}
+
+message ControlCellSelectionArchive {
+}
+
+message StockCellSelectionArchive {
+}
+
+message TableNameSelectionArchive {
+}
+
+message AutofillSelectionArchive {
+  optional .TST.CellRange source_cell_range = 1;
+  optional .TST.CellRange target_cell_range = 2;
+}
+
+message FilterRulePrePivotArchive {
+  required .TST.FormulaPredicatePrePivotArchive predicate = 1;
+  optional bool disabled = 2;
+}
+
+message FilterRuleArchive {
+  required .TST.FormulaPredicateArchive predicate = 1;
+}
+
+message TableStyleArchive {
+  required .TSS.StyleArchive super = 1;
+  optional uint32 override_count = 10 [default = 0];
+  optional .TST.TableStylePropertiesArchive table_properties = 11;
+}
+
+message CellStyleArchive {
+  required .TSS.StyleArchive super = 1;
+  optional uint32 override_count = 10 [default = 0];
+  optional .TST.CellStylePropertiesArchive cell_properties = 11;
+}
+
+message FormulaPredArgDataArchive {
+  optional double double_value = 1;
+  optional uint64 decimal_low = 2;
+  optional uint64 decimal_high = 3;
+  optional string string_value = 4;
+  optional double date_value = 5;
+  optional double duration_timeinterval = 6;
+  optional int32 duration_units = 7;
+  optional bool boolean_value = 8;
+}
+
+message FormulaPredArgArchive {
+  required int32 arg_type = 1;
+  optional .TST.FormulaPredArgDataArchive arg_value = 2;
+  optional .TSCE.CellReferenceArchive base_cell_ref = 3;
+  optional .TSCE.RelativeCellRefArchive relative_cell_ref = 4;
+  optional .TSCE.CategoryReferenceArchive category_ref = 5;
+  optional .TSCE.ASTNodeArrayArchive.ASTUidTractList uid_tract_list = 6;
+  optional .TSCE.CellCoordinateArchive host_cell_coord = 7;
+  optional bool preserve_row = 8;
+  optional bool preserve_column = 9;
+  repeated .TST.FormulaPredArgDataArchive list_entries = 10;
+  optional .TSCE.ViewTractRefArchive view_tract_ref = 11;
+}
+
+message FormulaPredicatePrePivotArchive {
+  required .TSCE.FormulaArchive formula = 1;
+  required int32 predicate_type = 2;
+  required int32 qualifier1 = 3;
+  required int32 qualifier2 = 4;
+  required int32 param_index1 = 5;
+  required int32 param_index2 = 6;
+  required int32 param_index0 = 7;
+}
+
+message FormulaPredicateArchive {
+  required int32 predicate_type = 1;
+  required int32 qualifier1 = 2;
+  required int32 qualifier2 = 3;
+  optional .TST.FormulaPredArgArchive param_value0 = 4;
+  optional .TST.FormulaPredArgArchive param_value1 = 5;
+  optional .TST.FormulaPredArgArchive param_value2 = 6;
+  optional .TSCE.FormulaArchive formula = 7;
+  optional bool for_conditional_style = 8;
+  optional .TSP.UUID host_table_uid = 9;
+  optional .TSP.UUID host_column_uid = 10;
+  optional .TSP.UUID host_row_uid = 11;
+}
+
+message ConditionalStyleSetArchive {
+  message ConditionalStyleRulePrePivot {
+    required .TST.FormulaPredicatePrePivotArchive predicate = 1;
+    required .TSP.Reference cell_style = 2;
+    required .TSP.Reference text_style = 3;
+  }
+  message ConditionalStyleRule {
+    optional .TST.FormulaPredicateArchive predicate = 1;
+    required .TSP.Reference cell_style = 2;
+    required .TSP.Reference text_style = 3;
+  }
+  message ConditionalStyleRules {
+    repeated .TST.ConditionalStyleSetArchive.ConditionalStyleRule rule = 1;
+  }
+  required uint32 ruleCount = 1;
+  repeated .TST.ConditionalStyleSetArchive.ConditionalStyleRulePrePivot rules_prepivot = 2;
+  optional .TST.ConditionalStyleSetArchive.ConditionalStyleRules rules = 3;
+}
+
+message FilterSetArchive {
+  enum FilterSetType {
+    FilterSetArchiveTypeAll = 0;
+    FilterSetArchiveTypeAny = 1;
+  }
+  optional .TST.FilterSetArchive.FilterSetType type = 1 [default = FilterSetArchiveTypeAll];
+  optional bool is_enabled = 2 [default = true];
+  repeated .TST.FilterRulePrePivotArchive filter_rules_prepivot = 3;
+  optional bool needs_formula_rewrite_for_import = 4 [default = false];
+  repeated uint32 filter_offsets = 5;
+  repeated bool filter_enabled = 6;
+  repeated .TST.FilterRuleArchive filter_rules = 7;
+}
+
+message UniqueIndexArchive {
+  message UniqueIndexEntryArchive {
+    required string string_value = 1;
+    repeated .TSP.UUID row_uids = 2;
+  }
+  required .TSP.UUID column_uid = 1;
+  repeated .TST.UniqueIndexArchive.UniqueIndexEntryArchive unique_entries = 2;
+}
+
+message HiddenStateExtentArchive {
+  message RowOrColumnState {
+    required .TSP.UUID row_or_column_uid = 1;
+    optional bool user_hidden = 2;
+    optional bool filtered = 3;
+    optional bool pivot_hidden = 4;
+  }
+  enum RowOrColumnDirection {
+    ColumnDirection = 0;
+    RowDirection = 1;
+  }
+  required .TSP.UUID hidden_state_extent_uid = 1;
+  repeated .TST.HiddenStateExtentArchive.RowOrColumnState base_hidden_states = 2;
+  required .TST.HiddenStateExtentArchive.RowOrColumnDirection row_or_column_direction = 3;
+  repeated .TSCE.CellValueArchive threshold_value = 5;
+  optional bool needs_to_update_filter_set_for_import = 6 [default = false];
+  repeated .TSP.UUID collapsed_group_uids = 7;
+  optional .TSP.Reference filter_set = 8;
+  optional .TSCE.IndexSetArchive summary_pivot_hidden_indexes = 9;
+  optional .TSCE.IndexSetArchive summary_filtered_indexes = 10;
+  repeated .TST.UniqueIndexArchive unique_indexes = 11;
+  repeated .TST.HiddenStateExtentArchive.RowOrColumnState summary_hidden_states = 12;
+}
+
+message HiddenStatesArchive {
+  required .TSP.UUID hidden_states_uid = 1;
+  required .TST.HiddenStateExtentArchive column_hidden_state_extent = 2;
+  required .TST.HiddenStateExtentArchive row_hidden_state_extent = 3;
+}
+
+message HiddenStatesOwnerArchive {
+  required .TSP.UUID owner_uid = 1;
+  repeated .TST.HiddenStatesArchive hidden_states = 2;
+}
+
+message ExpandCollapseStateArchive {
+  repeated .TSP.UUID uids_collapsed = 1;
+  repeated .TSP.UUID uids_expanded = 2;
+  optional .TST.TableDimensionArchive dimension = 3;
+}
+
+message TokenAttachmentArchive {
+  required .TSWP.UIGraphicalAttachment super = 1;
+  optional .TSP.Reference expressionNode = 2;
+}
+
+message FormulaArchive {
+  optional .TSP.Reference expressionTree = 1;
+}
+
+message ExpressionNodeArchive {
+  repeated .TSP.Reference children = 1;
+  optional uint64 first_index = 2 [default = 0];
+  optional uint64 last_index = 3 [default = 0];
+}
+
+message BooleanNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  required bool value = 2;
+}
+
+message NumberNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  optional double number = 2;
+  optional uint64 decimal_low = 3;
+  optional uint64 decimal_high = 4;
+}
+
+message StringNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  required string value = 2;
+}
+
+message IdentifierNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  optional string identifier = 2;
+  optional uint32 symbol = 3;
+}
+
+message ArrayNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  optional uint32 columns = 2;
+  optional uint32 rows = 3;
+}
+
+message ListNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+}
+
+message OperatorNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  required uint32 operatorChar = 2;
+}
+
+message PostfixOperatorNodeArchive {
+  required .TST.OperatorNodeArchive super = 1;
+}
+
+message PrefixOperatorNodeArchive {
+  required .TST.OperatorNodeArchive super = 1;
+}
+
+message FunctionNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  required uint32 functionIndex = 2;
+  optional string invalidFunctionName = 3;
+}
+
+message FunctionEndNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+}
+
+message DateNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  required string value = 2;
+  optional string format = 3;
+}
+
+message ReferenceNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  optional .TSCE.RangeReferenceArchive rangeReference = 2;
+  required uint32 preserve_flags = 3;
+  optional string hostTableID = 4;
+  optional .TSCE.CellReferenceArchive host_cell_ref = 10;
+  optional .TSP.UUID table_uid = 5;
+  optional .TSP.UUIDCoordArchive range_top_left = 6;
+  optional .TSP.UUIDCoordArchive range_bottom_right = 7;
+  optional .TSCE.CategoryReferenceArchive category_ref = 8;
+  optional .TSP.UUIDRectArchive uid_range_rect = 9;
+}
+
+message DurationNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  required double timeinterval = 2;
+  required uint32 smallest = 3;
+  required uint32 largest = 4;
+  required uint32 style = 5;
+}
+
+message ArgumentPlaceholderNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  optional uint32 functionIndex = 2;
+  optional uint32 argumentIndex = 3;
+  optional uint32 mode = 4;
+}
+
+message EmptyExpressionNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+}
+
+message LetNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  optional string whitespace_after_let = 2;
+  optional string whitespace_after_identifier = 3;
+  optional string whitespace_after_equals = 4;
+  optional string whitespace_after_delimiter = 5;
+}
+
+message InNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+}
+
+message VariableNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  required string identifier = 2;
+  required uint32 symbol = 3;
+}
+
+message LayoutHintArchive {
+  required bool isValid = 1;
+  optional .TST.CellRange cellRange = 2;
+  optional .TST.CellID hintID = 3;
+  required .TSP.Size maximumSize = 4;
+  required uint32 partitionPosition = 5;
+  required bool horizontal = 6;
+  optional .TSP.Size effectiveSize = 7;
+  optional uint32 partitioningPass = 8;
+}
+
+message CompletionTokenAttachmentArchive {
+  required .TST.TokenAttachmentArchive super = 1;
+  optional string completionText = 2;
+  optional uint32 caretPosition = 3;
+  optional uint32 prefixStart = 4;
+}
+
+message HiddenStateFormulaOwnerArchive {
+  optional .TSP.CFUUIDArchive owner_id = 1;
+  repeated .TSCE.CellValueArchive threshold_value = 2;
+  optional bool needs_to_update_filter_set_for_import = 3 [default = false];
+}
+
+message FormulaStoreArchive {
+  message FormulaStorePair {
+    required uint32 formula_index = 1;
+    required .TSCE.FormulaArchive formula = 2;
+  }
+  required uint32 next_formula_index = 2;
+  repeated .TST.FormulaStoreArchive.FormulaStorePair formulas = 3;
+}
+
+message MergeOperationArchive {
+  required .TST.MergeActionArchive merge_type = 1;
+  repeated .TSP.UUIDRectArchive merge_ranges = 2;
+  repeated .TSCE.FormulaArchive merge_formulas = 3;
+  repeated uint32 merge_formula_indexes = 4;
+}
+
+message MergeOwnerArchive {
+  required .TSP.CFUUIDArchive owner_id = 1;
+  optional .TST.FormulaStoreArchive formula_store = 2;
+}
+
+message PencilAnnotationArchive {
+  optional .TSP.Reference table_info = 1;
+  optional .TSP.Reference pencil_annotation_storage = 2;
+}
+
+message PencilAnnotationOwnerArchive {
+  required .TSP.CFUUIDArchive owner_id = 1;
+  optional .TST.FormulaStoreArchive formula_store = 2;
+  repeated .TSP.Reference annotations = 3;
+}
+
+message AccumulatorArchive {
+  optional uint32 bool_count = 1;
+  optional uint32 number_count = 2;
+  optional uint32 date_count = 3;
+  optional uint32 duration_count = 4;
+  optional uint32 string_count = 5;
+  required .TSCE.CellValueArchive min_value = 6;
+  required .TSCE.CellValueArchive max_value = 7;
+  required .TSCE.CellValueArchive number_total_value = 8;
+  optional .TSCE.CellValueArchive first_date_seen = 9;
+  optional double total_secs_since_ref_date = 10;
+  optional double secs_to_add = 11;
+  optional uint32 bool_true_count = 12;
+  optional uint32 error_count = 13;
+  optional bool is_circular_ref = 14;
+  optional .TSCE.CellValueArchive product_value = 15;
+  optional uint32 no_content_count = 16;
+}
+
+message GroupColumnArchive {
+  required .TSP.UUID column_uid = 1;
+  required uint32 grouping_type = 2;
+  optional .TSCE.FunctorArchive grouping_functor = 3;
+  optional .TSP.UUID grouping_column_uid = 4;
+}
+
+message GroupColumnListArchive {
+  repeated .TST.GroupColumnArchive group_column = 1;
+}
+
+message ColumnAggregateArchive {
+  required .TSP.UUID column_uid = 1;
+  required uint32 level = 2;
+  required uint32 agg_type = 3;
+  optional uint32 show_as_type = 4;
+  optional .TSP.UUID column_aggregate_uid = 5;
+  optional .TSP.UUID running_total_group_column_uid = 6;
+}
+
+message ColumnAggregateListArchive {
+  repeated .TST.ColumnAggregateArchive aggregates = 1;
+}
+
+message GroupByArchive {
+  message AggNodeArchive {
+    required .TSCE.CellCoordinateArchive formula_coord = 1;
+    optional .TST.AccumulatorArchive accum = 2;
+    repeated .TST.GroupByArchive.AggNodeArchive child = 3;
+  }
+  message AggregatorArchive {
+    required .TSP.UUID column_uid = 1;
+    optional .TST.GroupByArchive.AggNodeArchive agg_node = 2;
+  }
+  message GroupNodeArchive {
+    message FormatManagerArchive {
+      message RowSetArchive {
+        repeated .TSP.UUID row_uids = 1;
+      }
+      optional .TSCE.CellValueArchive cell_value = 1;
+      repeated .TSK.FormatStructArchive formats = 2;
+      repeated .TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive row_sets = 3;
+      repeated .TSCE.IndexSetArchive row_uid_lookup_sets = 4;
+    }
+    required .TSP.UUID group_uid = 1;
+    repeated .TST.GroupByArchive.GroupNodeArchive child = 3;
+    repeated .TSP.UUID row_uid = 4;
+    repeated .TSCE.CellCoordinateArchive agg_formula_coords = 5;
+    optional .TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive format_manager = 6;
+    optional .TSCE.CellValueArchive group_cell_value = 7;
+    optional .TSCE.IndexSetArchive row_indexes = 8;
+    optional .TSCE.IndexSetArchive row_lookup_uids = 9;
+    repeated .TSP.Reference child_ref = 10;
+  }
+  required .TSP.UUID group_by_uid = 1;
+  repeated .TST.GroupColumnArchive group_column = 2;
+  optional .TST.GroupByArchive.GroupNodeArchive group_node_root = 3;
+  repeated .TST.GroupByArchive.AggregatorArchive aggregator = 4;
+  repeated .TST.ColumnAggregateArchive column_agg_type = 5;
+  required bool is_enabled = 6;
+  optional .TSCE.CellCoordinateArchive indirect_agg_type_change_formula = 7;
+  optional .TSCE.CellCoordinateArchive grouping_columns_formula = 8;
+  optional .TSCE.CellCoordinateArchive aggs_in_group_root_formula = 9;
+  optional .TSCE.CellCoordinateArchive grouping_column_headers_formula = 10;
+  optional .TSCE.CellCoordinateArchive column_order_changed_formula = 11;
+  optional .TSCE.CellCoordinateArchive row_order_changed_formula = 12;
+  optional .TSCE.CellCoordinateArchive row_order_changed_ignoring_recalc_formula = 13;
+  optional int32 owner_index = 14 [default = 8];
+  optional .TSCE.UidLookupListArchive row_uid_lookup = 15;
+  optional .TSCE.CellCoordinateArchive hidden_states_changed_formula = 16;
+  repeated .TSP.Reference aggregator_ref = 17;
+  optional .TSP.Reference group_node_root_ref = 18;
+}
+
+message CategoryOwnerArchive {
+  required .TSP.UUID owner_uid = 1;
+  repeated .TST.GroupByArchive group_by = 2;
+}
+
+message CategoryOwnerRefArchive {
+  repeated .TSP.Reference group_by = 1;
+}
+
+message PivotGroupingColumnOptionsMapArchive {
+  repeated .TSP.UUID uids = 1;
+  repeated uint32 flags = 2;
+  repeated .TSP.UUID aggregate_rule_uids = 4;
+}
+
+message PivotOwnerArchive {
+  optional .TSP.UUID pivot_owner_uid = 2;
+  optional .TST.GroupColumnListArchive grouping_columns_for_rows = 3;
+  optional .TST.GroupColumnListArchive grouping_columns_for_columns = 4;
+  optional .TST.ColumnAggregateListArchive aggregate_columns = 5;
+  optional int32 flattening_dimension = 6;
+  optional bool is_empty_pivot = 7;
+  optional .TSP.UUID source_table_uid = 8;
+  optional double refresh_timestamp = 9;
+  optional .TSP.Reference grpg_col_options_map = 10;
+  optional bool hide_grand_total_rows = 11;
+  optional string source_table_name = 12;
+  optional bool hide_grand_total_columns = 13;
+  optional .TST.FormulaStoreArchive formula_store = 17;
+  optional .TSP.UUID refresh_uid = 18;
+  optional .TSP.UUID row_column_rule_change_uid = 19;
+  optional .TSP.UUID aggregate_rule_change_uid = 20;
+}
+
+message RichTextPayloadArchive {
+  required .TSP.Reference storage = 1;
+  optional .TSP.Range range = 2;
+  required .TST.CellID cellid = 3;
+}
+
+message FormulaEqualsTokenAttachmentArchive {
+  required .TSWP.UIGraphicalAttachment super = 1;
+}
+
+message CellFillStandIn {
+  required .TSD.FillArchive fill = 1;
+  optional bool type_is_mixed = 2;
+  optional bool color_has_been_modified = 3;
+  optional bool color_is_mixed = 4;
+  optional bool first_color_has_been_modified = 5;
+  optional bool first_color_is_mixed = 6;
+  optional bool last_color_has_been_modified = 7;
+  optional bool last_color_is_mixed = 8;
+  optional bool gradient_type_has_been_modified = 9;
+  optional bool gradient_type_is_mixed = 10;
+  optional bool gradient_angle_has_been_modified = 11;
+  optional bool gradient_angle_is_mixed = 12;
+  optional bool image_data_has_been_modified = 13;
+  optional bool image_data_is_mixed = 14;
+  optional bool tint_color_has_been_modified = 15;
+  optional bool tint_color_is_mixed = 16;
+  optional bool scale_has_been_modified = 17;
+  optional bool scale_is_mixed = 18;
+  optional bool technique_has_been_modified = 19;
+  optional bool technique_is_mixed = 20;
+}
+
+message FormulaSelectionArchive {
+  required .TSWP.SelectionArchive super = 1;
+  optional uint32 activeTokenCharIndex = 2;
+}
+
+message CellBorderArchive {
+  optional .TSD.StrokeArchive top_stroke = 1;
+  optional int32 top_stroke_order = 2;
+  optional .TSD.StrokeArchive right_stroke = 3;
+  optional int32 right_stroke_order = 4;
+  optional .TSD.StrokeArchive bottom_stroke = 5;
+  optional int32 bottom_stroke_order = 6;
+  optional .TSD.StrokeArchive left_stroke = 7;
+  optional int32 left_stroke_order = 8;
+}
+
+message DefaultCellStylesContainerArchive {
+  required .TSP.Reference table_style_network = 1;
+  repeated .TSP.UUID row_uids = 2;
+  repeated .TSP.UUID column_uids = 3;
+  repeated uint32 row_types = 4;
+  repeated uint32 column_types = 5;
+  optional bool is_a_pivot_table = 6;
+}
+
+message MultiTableRemapperArchive {
+  enum Purpose {
+    DEFAULT = 0;
+    GROUPING = 1;
+    PAGES_SECTION_DUPLICATION_NONCOLLAB = 2;
+  }
+  required .TST.MultiTableRemapperArchive.Purpose mapping_purpose = 1;
+  required bool should_steal_references = 2;
+  required bool can_reuse_table_names = 3;
+  repeated .TSCE.OwnerUIDMapperArchive owner_uid_mapper = 4;
+  required .TSP.UUIDMapArchive backing_tables_for_charts = 5;
+  required bool cross_document_paste = 6;
+  required bool nested_inner_mapper = 7;
+}
+
+message ChangePropagationMapWrapper {
+  required int32 replacement_behavior = 1;
+  repeated .TSP.Reference style_replace_prototypes = 2;
+  repeated .TSP.Reference style_replace_replacements = 3;
+  repeated .TSP.Reference style_modify_styles = 4;
+  repeated .TSP.Reference style_modify_old_prop_maps = 5;
+  repeated .TSP.Reference style_modify_new_prop_maps = 6;
+  repeated .TSP.Reference style_delete_prototypes = 7;
+  repeated .TSP.Reference style_delete_replacements = 8;
+  optional .TSP.Reference table_preset_replace_prototype = 9;
+  optional .TSP.Reference table_preset_replace_replacement = 10;
+  optional .TSP.Reference table_preset_delete_prototype = 11;
+  optional .TSP.Reference table_preset_delete_replacement = 12;
+}
+
+message SummaryCellVendorArchive {
+  message SummaryCellEntry {
+    required .TSP.UUID wildcardUID = 1;
+    required .TSP.UUID columnUID = 2;
+    required .TST.Cell cell = 3;
+  }
+  required .TSP.Reference table_info = 1;
+  repeated .TST.SummaryCellVendorArchive.SummaryCellEntry entries = 2;
+}
+
+message CategoryOrderArchive {
+  required .TSP.Reference table_info = 1;
+  required .TSP.Reference uid_map = 2;
+}
+
+message PivotOrderArchive {
+  optional .TSP.Reference uid_map = 1;
+}
+
+message HeaderNameMgrTileArchive {
+  message NameFragmentArchive {
+    required string name_fragment = 1;
+    required .TSCE.CellCoordinateArchive name_precedent = 2;
+    optional .TSCE.UidCellRefSetArchive uses_of_name_fragment = 3;
+  }
+  required string first_fragment = 1;
+  required string last_fragment = 2;
+  repeated .TST.HeaderNameMgrTileArchive.NameFragmentArchive name_frag_entries = 3;
+}
+
+message HeaderNameMgrArchive {
+  message PerTableArchive {
+    required .TSP.UUID table_uid = 1;
+    required .TSCE.CellCoordinateArchive per_table_precedent = 2;
+    optional bool is_deleted = 3;
+    repeated .TSP.UUID header_row_uids = 5;
+    repeated .TSP.UUID header_column_uids = 6;
+    repeated .TSP.UUID update_header_row_uids = 7;
+    repeated .TSP.UUID update_header_column_uids = 8;
+  }
+  required .TSP.UUID owner_uid = 1;
+  optional .TSP.UUID nrm_owner_uid = 2;
+  repeated .TST.HeaderNameMgrArchive.PerTableArchive per_tables = 3;
+  repeated .TSP.Reference name_frag_tiles = 4;
+}
+
+message WidthHeightCacheFittingEntry {
+  optional uint32 fitting_index = 1;
+  optional float fitting_size = 2;
+}
+
+message WidthHeightCache {
+  repeated .TST.WidthHeightCacheFittingEntry rows_fitting_entries = 1;
+  optional uint32 columns_count = 3;
+}
+
+message LayoutEngineArchive {
+  optional .TST.WidthHeightCache width_height_cache = 1;
+}
+
+message CollaboratorTableCursorSubselectionArchive {
+  optional .TST.CellUIDListArchive cell_uid_list = 1;
+  optional .TST.SelectionTypeArchive selection_type = 3;
+  repeated .TSP.UUID row_column_uid_list = 4;
+  extend .TSK.CollaboratorCursorArchive {
+    optional .TST.CollaboratorTableCursorSubselectionArchive table_cursor_subselection = 200;
+  }
+}
+
+extend .TSS.CommandPropertyEntryArchive {
+  optional .TST.ImportWarningSetArchive import_warning_set = 500;
+  optional .TST.CellFormatAndValueArchive format_and_value = 501;
+  optional .TST.CellBorderArchive cell_border = 503;
+  optional .TST.CommentStorageWrapperArchive comment_storage = 504;
+  optional .TST.CellSpecArchive cell_spec = 505;
+}
+

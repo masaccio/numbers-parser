@@ -1,0 +1,299 @@
+syntax = "proto2";
+
+import "TSPMessages.proto";
+import "TSKArchives.proto";
+import "TSCHArchives.proto";
+import "TSCHCommandArchives.proto";
+import "TSCEArchives.proto";
+import "TSSArchives.proto";
+import "TSDArchives.proto";
+import "TSDCommandArchives.proto";
+import "TSWPArchives.proto";
+import "TSAArchives.proto";
+import "TSTArchives.proto";
+import "TNArchives.proto";
+package TN;
+
+message CommandFormChooseTargetTableArchive {
+  required .TSK.CommandArchive super = 1;
+  required .TSP.UUID table_id = 2;
+  optional .TSP.UUID previous_table_id = 3;
+  required string sheet_name = 4;
+  optional string previous_sheet_name = 5;
+  required .TSP.UUID sheet_id = 6;
+}
+
+message CommandSheetInsertDrawablesArchive {
+  required .TSK.CommandArchive super = 1;
+  required .TSP.UUID sheet_id = 2;
+  repeated .TSP.Reference drawables = 3;
+  repeated .TSK.AddIdOperationArgs args_list = 4;
+  optional bool forPaste = 5;
+  repeated .TSP.UUID custom_format_keys = 6;
+  optional .TSP.Reference drawable_undo_object = 7;
+  optional .TSP.Reference formula_rewrite_command_for_undo = 9;
+  optional uint32 saved_next_untitled_resolver_index = 10;
+  repeated .TSP.UUID chart_entity_uid_for_backing_tables = 11;
+  repeated .TSP.Reference backing_tables = 12;
+}
+
+message CommandSheetRemoveDrawablesArchive {
+  required .TSK.CommandArchive super = 1;
+  required .TSP.UUID sheet_id = 2;
+  repeated .TSK.RemoveIdOperationArgs args_list = 3;
+  repeated .TSP.Reference drawables = 4;
+  repeated .TSP.UUID chart_entity_uid_for_backing_tables = 6;
+  repeated .TSP.UUID backing_table_uids = 7;
+}
+
+message CommandSheetMoveDrawableZOrderArchive {
+  required .TSK.CommandArchive super = 1;
+  required .TSP.UUID sheet_id = 2;
+  repeated .TSK.RearrangeIdOperationArgs args_list = 3;
+}
+
+message CommandDocumentInsertSheetArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSK.AddIdOperationArgs argsList = 2;
+  repeated .TSP.Reference sheets = 3;
+  optional bool allowSameSheetNameAsForms = 4;
+  repeated .TSP.UUID custom_format_keys = 5;
+  optional .TSP.Reference drawable_undo_object = 6;
+  repeated .TN.UUIDSheetUIStateDictionaryArchive sheet_uistates = 7;
+  optional bool for_paste = 8;
+}
+
+message CommandDocumentRemoveSheetArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSK.RemoveIdOperationArgs argsList = 2;
+  repeated .TSP.Reference sheets = 3;
+  required string rescueId = 4;
+  repeated .TN.UUIDSheetUIStateDictionaryArchive sheet_uistates = 5;
+  optional bool is_undo_paste = 6;
+}
+
+message CommandDocumentReorderSheetArchive {
+  repeated .TSK.RearrangeIdOperationArgs argsList = 1;
+  required .TSK.CommandArchive super = 2;
+}
+
+message CommandSetSheetNameArchive {
+  required .TSK.CommandArchive super = 1;
+  required string newname = 2;
+  required .TSP.UUID sheet_uid = 3;
+  optional string oldname = 4;
+}
+
+message CommandSetSheetShouldPrintCommentsArchive {
+  required .TSK.CommandArchive super = 1;
+  required bool new_should_print_comments = 2;
+  required .TSP.UUID sheet_uid = 3;
+  required bool old_should_print_comments = 4;
+}
+
+message CommandSetSheetDirectionArchive {
+  required .TSK.CommandArchive super = 1;
+  required .TN.PageLayoutDirection newDirection = 2;
+  required .TSP.UUID sheet_uid = 3;
+  optional .TN.PageLayoutDirection oldDirection = 4;
+}
+
+message CommandSetPageOrientationArchive {
+  required bool in_portrait_page_orientation = 1;
+  required .TSP.UUID sheet_uid = 2;
+  required .TSK.CommandArchive super = 3;
+  required bool prev_in_portrait_page_orientation = 4;
+}
+
+message CommandSetShowPageNumbersValueArchive {
+  required bool show_page_numbers = 1;
+  required .TSP.Reference sheet = 2;
+  required .TSK.CommandArchive super = 3;
+}
+
+message CommandSetRepeatingHeadersValueArchive {
+  required bool show_repeating_headers = 1;
+  required .TSP.Reference sheet = 2;
+  required .TSK.CommandArchive super = 3;
+}
+
+message CommandSetContentScaleArchive {
+  optional float old_content_scale = 2;
+  required float content_scale = 3;
+  required .TSP.UUID sheet_uid = 4;
+  required .TSK.CommandArchive super = 5;
+  required bool toggled_auto_fit = 6;
+}
+
+message CommandSetDocumentPaperSize {
+  required string paper_id = 1;
+  required .TSP.Size page_size = 2;
+  required .TSK.CommandArchive super = 3;
+  required string old_paper_id = 4;
+  required .TSP.Size old_page_size = 5;
+}
+
+message CommandEnterPrintPreviewModeArchive {
+  required .TSK.CommandArchive super = 1;
+}
+
+message CommandExitPrintPreviewModeArchive {
+  required .TSK.CommandArchive super = 1;
+}
+
+message CommandSetPrinterMarginsArchive {
+  required .TSD.EdgeInsetsArchive new_print_margins = 1;
+  optional .TSD.EdgeInsetsArchive old_print_margins = 2;
+  required .TSP.UUID sheet_uid = 3;
+  required .TSK.CommandArchive super = 4;
+}
+
+message CommandSetPrintBackgroundsArchive {
+  required .TSP.UUID sheet_uid = 1;
+  required bool print_backgrounds = 2;
+  required bool old_print_backgrounds = 3;
+  required .TSK.CommandArchive super = 4;
+}
+
+message CommandSetHeaderFooterInsetsArchive {
+  optional float old_header_inset = 1;
+  optional float old_footer_inset = 2;
+  required float header_inset = 3;
+  required float footer_inset = 4;
+  required .TSP.UUID sheet_uid = 5;
+  required .TSK.CommandArchive super = 6;
+}
+
+message CommandSetPageOrderArchive {
+  required uint32 old_page_order = 1;
+  required uint32 page_order = 2;
+  required .TSP.UUID sheet_uid = 3;
+  required .TSK.CommandArchive super = 4;
+}
+
+message CommandSetUsingStartPageNumberArchive {
+  required bool using_start_page_number = 1;
+  required .TSP.UUID sheet_uid = 2;
+  required .TSK.CommandArchive super = 3;
+  required bool prev_using_start_page_number = 4;
+}
+
+message CommandSetStartPageNumberArchive {
+  required int32 old_start_page_number = 1;
+  required int32 start_page_number = 2;
+  required .TSP.UUID sheet_uid = 3;
+  required .TSK.CommandArchive super = 4;
+}
+
+message CommandReorderSidebarItemChildrenAchive {
+  required .TSK.CommandArchive super = 1;
+  required .TSP.Reference sheet = 2;
+  repeated .TSP.Reference old_children = 3;
+  repeated .TSP.Reference new_children = 4;
+}
+
+message CommandChartMediatorSetEditingState {
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TN.ChartMediatorFormulaStorage old_formulas = 3;
+  optional .TN.ChartMediatorFormulaStorage new_formulas = 4;
+  optional int32 old_direction = 5;
+  optional int32 new_direction = 6;
+  optional int32 old_scatter_format = 7;
+  optional int32 new_scatter_format = 8;
+  optional bool for_formula_rewrite = 9;
+}
+
+message CommandChartMediatorSetGridDirection {
+  required .TSCH.ChartCommandArchive super = 1;
+  required uint32 old_direction = 2;
+  required uint32 new_direction = 3;
+  optional .TN.ChartMediatorFormulaStorage old_formula_storage = 4;
+}
+
+message CommandChartMediatorSetSeriesOrder {
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSP.UUID series_id = 2;
+  optional .TSP.UUID preceding_series_id = 3;
+  optional .TSP.UUID inverse_series_id = 4;
+  optional .TSP.UUID inverse_preceding_series_id = 5;
+  required int32 undo_current_index = 6;
+  required int32 undo_new_index = 7;
+  optional .TN.ChartMediatorFormulaStorage old_formula_storage = 8;
+}
+
+message CommandChartMediatorUpdateForEntityDelete {
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSP.Reference cmd = 3;
+}
+
+message CommandChartMediatorSetFormula {
+  required .TSCH.ChartCommandArchive super = 1;
+  required int32 model_update_data_type = 2;
+  repeated .TSCE.FormulaArchive formulae = 3;
+  repeated .TSCE.FormulaArchive old_formulae = 4;
+  required uint32 series_index = 5;
+  required int32 axis_type = 6;
+}
+
+message CommandSheetSetBackgroundFillArchive {
+  required .TSK.CommandArchive super = 1;
+  required .TSP.UUID sheet_id = 2;
+  required .TSD.FillArchive new_fill = 3;
+  required .TSD.FillArchive old_fill = 4;
+}
+
+message CommandSheetSetStyleArchive {
+  required .TSK.CommandArchive super = 1;
+  required .TSP.UUID sheet_id = 2;
+  required .TSP.Reference sheet_style = 3;
+  optional .TSP.Reference old_sheet_style = 4;
+}
+
+message DocumentSelectionTransformerArchive {
+  optional .TSP.Reference document_selection = 1;
+}
+
+message SheetSelectionTransformerArchive {
+  optional .TSP.UUID sheet_uuid = 1;
+  required bool paginated = 2;
+}
+
+message FormSheetSelectionTransformerArchive {
+  required .TN.SheetSelectionTransformerArchive super = 1;
+  optional .TSP.UUID table_uuid = 2;
+}
+
+message CanvasSelectionTransformerArchive {
+  required .TSD.InfoCollectionSelectionTransformerHelperArchive transformer_helper = 1;
+  optional .TSP.UUIDPath header_storage_uuid_path = 2;
+}
+
+message FormTableChooserSelectionTransformerArchive {
+}
+
+message FormBuilderSelectionTransformerArchive {
+  required .TSP.UUID table_uuid = 1;
+  required .TSP.UUID viewing_record_uuid = 2;
+  required .TSP.UUID field_uuid = 3;
+}
+
+message FormViewerSelectionTransformerArchive {
+  required .TSP.UUID table_uuid = 1;
+  required .TSP.UUID record_uuid = 2;
+  required .TSP.UUID field_uuid = 3;
+}
+
+message SheetChangeBaseArchive {
+  required .TSP.UUID sheet_id = 1;
+}
+
+message SheetChangeSheetNameArchive {
+  required .TN.SheetChangeBaseArchive super = 1;
+  required string sheet_name = 2;
+}
+
+message CommandInducedSheetChangeArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TN.SheetChangeSheetNameArchive sheet_changes = 2;
+}
+

@@ -1,0 +1,22 @@
+syntax = "proto2";
+
+import "TSKArchives.proto";
+import "TSPMessages.proto";
+package TSKSOS;
+
+message FixCorruptedDataCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated string corrupted_digest_list = 2;
+  optional bool corrupted_digest_list_undefined = 3;
+}
+
+message RemoveAuthorIdentifiersCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSP.UUID author_identifiers = 2;
+  optional bool author_identifiers_undefined = 3;
+}
+
+message ResetActivityStreamCommandArchive {
+  required .TSK.CommandArchive super = 1;
+}
+

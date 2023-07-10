@@ -1,0 +1,466 @@
+syntax = "proto2";
+
+import "TSPMessages.proto";
+import "TSKArchives.proto";
+import "TSSArchives.proto";
+import "TSDArchives.proto";
+import "TSDArchives_sos.proto";
+package TSD;
+
+enum CommentCommandVariant {
+  BaseComment = 0;
+  AddReply = 1;
+  EditReply = 2;
+  DeleteReply = 3;
+}
+
+enum CaptionOrTitleKind {
+  Caption = 1;
+  Title = 2;
+}
+
+message UndoObjectArchive {
+  optional .TSP.Reference stylesheet = 2;
+  repeated .TSP.Reference objects = 1;
+  repeated string keys = 3;
+  repeated uint32 counts = 4;
+}
+
+message GroupDrawablesCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSP.Reference drawables = 2;
+  optional .TSP.Reference group = 3;
+}
+
+message UngroupGroupCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSP.Reference drawables = 2;
+  optional .TSP.Reference group = 3;
+}
+
+message ContainerRemoveChildrenCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TSP.UUIDPath container_id_path = 2;
+  repeated .TSK.RemoveIdOperationArgs args_list = 3;
+  repeated .TSP.Reference children = 4;
+}
+
+message ContainerRemoveDrawablesCommandArchive {
+  required .TSD.ContainerRemoveChildrenCommandArchive super = 1;
+}
+
+message ContainerInsertChildrenCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TSP.UUIDPath container_id_path = 2;
+  repeated .TSP.Reference children = 3;
+  repeated .TSK.AddIdOperationArgs args_list = 4;
+  repeated .TSP.UUID custom_format_keys = 5;
+  optional .TSP.Reference undo_object = 6;
+}
+
+message ContainerInsertDrawablesCommandArchive {
+  required .TSD.ContainerInsertChildrenCommandArchive super = 1;
+  repeated .TSP.Reference drawables = 2;
+}
+
+message ContainerReorderChildrenCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TSP.UUIDPath container_id_path = 2;
+  repeated .TSK.RearrangeIdOperationArgs args_list = 3;
+}
+
+message GroupUngroupInformativeCommandArchive {
+  enum CommandType {
+    Group = 0;
+    Ungroup = 1;
+  }
+  required .TSK.CommandArchive super = 1;
+  repeated .TSP.Reference removed_infos = 2;
+  repeated .TSP.Reference inserted_infos = 3;
+  optional .TSD.GroupUngroupInformativeCommandArchive.CommandType command_type = 4;
+}
+
+message InfoCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TSP.UUIDPath info_id_path = 2;
+}
+
+message ConnectionLineConnectCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSP.UUID connected_from_id = 4;
+  optional .TSP.UUID connected_to_id = 5;
+  optional .TSP.UUID old_connected_to_id = 6;
+  optional .TSP.UUID old_connected_from_id = 7;
+}
+
+message InfoGeometryCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSD.GeometryArchive newGeometry = 2;
+  optional .TSD.GeometryArchive oldGeometry = 3;
+  optional bool matchObjectPlaceholderGeometry = 4;
+  optional bool oldMatchObjectPlaceholderGeometry = 5;
+  optional bool shouldTriggerRtuAnimation = 6;
+  optional bool initiatedOnWeb = 7;
+}
+
+message DrawablePathSourceCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSD.PathSourceArchive old_path_source = 2;
+  optional .TSD.PathSourceArchive new_path_source = 3;
+}
+
+message InstantAlphaCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSP.Path oldpath = 2;
+  optional .TSP.Path newpath = 3;
+}
+
+message DrawableApplyThemeCommandArchive {
+  required .TSS.ApplyThemeChildCommandArchive super = 1;
+  optional .TSP.Reference info = 2;
+  optional .TSP.Reference style = 3;
+}
+
+message AbstractStyleCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+}
+
+message StyledInfoSetStyleCommandArchive {
+  required .TSD.AbstractStyleCommandArchive super = 1;
+  optional .TSP.Reference new_style = 2;
+  optional .TSP.Reference rollback_style = 4;
+}
+
+message BaseApplyPresetCommandArchive {
+  required .TSD.AbstractStyleCommandArchive super = 1;
+  optional .TSP.Reference preset_style = 2;
+  optional .TSP.Reference rollback_style = 4;
+}
+
+message ShapeApplyPresetCommandArchive {
+  required .TSD.BaseApplyPresetCommandArchive super = 1;
+}
+
+message MediaApplyPresetCommandArchive {
+  required .TSD.BaseApplyPresetCommandArchive super = 1;
+}
+
+message ShapeStyleSetValueCommandArchive {
+  required .TSD.BaseStyleSetValueCommandArchive super = 1;
+  optional .TSDSOS.BaseShapeStylePropertyChangeSetArchive change = 4;
+}
+
+message BaseStyleSetValueCommandArchive {
+  required .TSD.AbstractStyleCommandArchive super = 1;
+  optional .TSP.Reference old_style = 4;
+  required bool is_border_change = 5;
+}
+
+message MovieSetValueCommandArchive {
+  message PropertyValue {
+    optional double starttime = 1;
+    optional double endtime = 2;
+    optional double postertime = 3;
+    optional .TSP.DataReference posterimagedata = 4;
+    optional bool autoplay = 5;
+    optional .TSD.MovieSetValueCommandArchive.LoopOption loopOption = 6;
+    optional float volume = 7;
+    optional .TSP.DataReference media = 8;
+    optional bool playsAcrossSlides = 9;
+  }
+  enum LoopOption {
+    None = 0;
+    Repeat = 1;
+    BackAndForth = 2;
+  }
+  required .TSD.InfoCommandArchive super = 1;
+  optional int32 property = 2;
+  optional .TSD.MovieSetValueCommandArchive.PropertyValue value = 3;
+  optional .TSD.MovieSetValueCommandArchive.PropertyValue oldValue = 4;
+  optional .TSP.DataReference importedauxiliarymedia = 5;
+  optional .TSP.DataReference oldimportedauxiliarymedia = 6;
+}
+
+message MediaStyleSetValueCommandArchive {
+  required .TSD.BaseStyleSetValueCommandArchive super = 1;
+  optional .TSDSOS.MediaStylePropertyChangeSetArchive change = 4;
+}
+
+message ImageMediaCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSP.DataReference newImageData = 8;
+  optional .TSP.DataReference oldImageData = 9;
+  optional .TSP.DataReference oldOriginalImageData = 10;
+  optional .TSP.Size oldNaturalSize = 6;
+  optional .TSP.DataReference newOriginalImageData = 11;
+  optional .TSD.ImageAdjustmentsArchive oldImageAdjustments = 12;
+  optional .TSP.DataReference oldAdjustedImageData = 13;
+  optional .TSP.DataReference oldEnhancedImageData = 14;
+  optional .TSD.ImageAdjustmentsArchive imageAdjustments = 15;
+  optional .TSP.DataReference adjustedImageData = 16;
+  optional .TSP.DataReference enhancedImageData = 17;
+  optional .TSP.DataReference newThumbnailImageData = 18;
+  optional .TSP.DataReference oldThumbnailImageData = 19;
+  optional .TSP.DataReference thumbnailAdjustedImageData = 20;
+  optional .TSP.DataReference oldThumbnailAdjustedImageData = 21;
+  optional .TSP.Reference database_newImageData = 3;
+  optional .TSP.Reference database_oldImageData = 4;
+  optional .TSP.Reference database_oldOriginalImageData = 5;
+  optional .TSP.Reference database_newOriginalImageData = 7;
+}
+
+message MediaOriginalSizeCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSP.Size newOriginalSize = 2;
+  optional .TSP.Size oldOriginalSize = 3;
+  required string propertyName = 4;
+}
+
+message MediaInfoGeometryCommandArchive {
+  required .TSD.InfoGeometryCommandArchive super = 1;
+  required .TSP.Size newOriginalSize = 2;
+  required .TSP.Size oldOriginalSize = 3;
+}
+
+message ImageNaturalSizeCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSP.Size new_natural_size = 2;
+  optional .TSP.Size old_natural_size = 3;
+}
+
+message ImageMaskCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSP.Reference newMaskInfo = 2;
+  optional .TSP.Reference oldMaskInfo = 3;
+  optional bool background_removed = 4;
+  optional bool old_background_removed = 5;
+}
+
+message ImageAdjustmentsCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSD.ImageAdjustmentsArchive old_image_adjustments = 2;
+  optional .TSD.ImageAdjustmentsArchive new_image_adjustments = 3;
+  optional .TSP.DataReference adjustedImageData = 4;
+  optional .TSP.DataReference replacedAdjustedImageData = 5;
+  optional .TSP.DataReference enhancedImageData = 6;
+  optional .TSP.DataReference replacedEnhancedImageData = 7;
+  optional .TSP.DataReference thumbnailAdjustedImageData = 8;
+  optional .TSP.DataReference replacedThumbnailAdjustedImageData = 9;
+}
+
+message MediaFlagsCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional bool was_media_replaced = 5;
+  optional bool is_placeholder = 6;
+  optional bool old_was_media_replaced = 7;
+  optional bool old_is_placeholder = 8;
+  required string property_name = 4;
+}
+
+message DrawablesCommandGroupArchive {
+  enum DrawablesCommandGroupType {
+    Constructive = 1;
+    Destructive = 2;
+    InPlace = 3;
+  }
+  required .TSK.CommandGroupArchive super = 1;
+  optional .TSD.CanvasSelectionArchive obsolete_selection = 2;
+  optional .TSP.Reference modelforselection = 3;
+  optional .TSD.DrawablesCommandGroupArchive.DrawablesCommandGroupType type = 4;
+  optional bool forDrag = 5;
+  optional .TSP.Reference archivedselection = 6;
+}
+
+message ExteriorTextWrapCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSD.ExteriorTextWrapArchive old_exterior_text_wrap = 3;
+  optional uint32 type = 4;
+  optional uint32 direction = 5;
+  optional uint32 fit_type = 6;
+  optional float margin = 7;
+  optional float alpha_threshold = 8;
+  optional bool is_html_wrap = 9;
+}
+
+message DrawableHyperlinkCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional string oldhyperlink_url = 2;
+  optional string newhyperlink_url = 3;
+}
+
+message CommentInvalidatingCommandSelectionBehaviorArchive {
+  required .TSK.CommandSelectionBehaviorArchive super = 1;
+  optional .TSP.Reference annotation_displaying_command = 2;
+  optional bool begin_editing_on_undo = 3;
+  optional bool begin_editing_on_redo = 4;
+  optional bool should_invalidate_on_undo = 5;
+  optional bool should_invalidate_on_redo = 6;
+}
+
+message ImageReplaceCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSP.DataReference new_image_data = 2;
+  optional .TSP.DataReference new_original_image_data = 3;
+  optional .TSP.DataReference old_image_data = 4;
+  optional .TSP.DataReference old_original_image_data = 5;
+  optional .TSP.Path instant_alpha_path = 6;
+  optional .TSP.Path old_instant_alpha_path = 7;
+  optional .TSP.Size natural_size_for_IAPath = 8;
+  optional .TSP.Size old_natural_size_for_IAPath = 9;
+  optional .TSD.GeometryArchive target_image_geometry = 10;
+  optional .TSD.GeometryArchive old_target_image_geometry = 12;
+  optional .TSD.GeometryArchive target_mask_geometry = 13;
+  optional .TSD.GeometryArchive old_target_mask_geometry = 14;
+  optional .TSD.ImageAdjustmentsArchive image_adjustments = 15;
+  optional .TSP.DataReference adjusted_image_data = 16;
+  optional .TSP.DataReference enhanced_image_data = 17;
+  optional .TSD.ImageAdjustmentsArchive old_image_adjustments = 18;
+  optional .TSP.DataReference old_adjusted_image_data = 19;
+  optional .TSP.DataReference old_enhanced_image_data = 20;
+  optional .TSP.DataReference thumbnail_image_data = 21;
+  optional .TSP.DataReference old_thumbnail_image_data = 22;
+  optional .TSP.DataReference thumbnail_adjusted_image_data = 23;
+  optional .TSP.DataReference old_thumbnail_adjusted_image_data = 24;
+  optional .TSP.Size natural_size = 25;
+  optional .TSP.Size old_natural_size = 26;
+}
+
+message DrawableLockCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional bool locked = 2;
+  optional bool was_locked = 3;
+}
+
+message DrawableInfoCommentCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSP.Reference old_comment = 2;
+  optional .TSP.Reference new_comment = 3;
+  optional .TSD.CommentCommandVariant forward_variant = 4;
+  optional .TSD.CommentCommandVariant inverse_variant = 5;
+}
+
+message DrawablePencilAnnotationCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSP.Reference pencil_annotation_to_add = 2;
+  optional .TSP.Reference pencil_annotation_to_remove = 3;
+}
+
+message AbstractGuideCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSD.UserDefinedGuideArchive old_guides = 7;
+  repeated .TSD.UserDefinedGuideArchive new_guides = 8;
+}
+
+message GuideCommandArchive {
+  required .TSD.AbstractGuideCommandArchive super = 1;
+  required .TSP.UUIDPath storage_id_path = 2;
+}
+
+message DrawableAspectRatioLockedCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional bool aspect_ratio_locked = 2;
+  optional bool was_aspect_ratio_locked = 3;
+}
+
+message DrawableAccessibilityDescriptionCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional string accessibility_description = 2;
+  optional string old_accessibility_description = 3;
+}
+
+message PasteStyleCommandArchive {
+  required .TSD.AbstractStyleCommandArchive super = 1;
+  optional .TSP.Reference new_style = 2;
+  optional .TSP.Reference rollback_style = 5;
+  optional bool tail_end_on_left = 4;
+}
+
+message ImageInfoAbstractGeometryCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSD.GeometryArchive new_image_geometry = 2;
+  optional .TSD.GeometryArchive old_image_geometry = 3;
+  optional .TSD.GeometryArchive new_mask_geometry = 4;
+  optional .TSD.GeometryArchive old_mask_geometry = 5;
+  optional .TSD.PathSourceArchive new_mask_path_source = 6;
+  optional .TSD.PathSourceArchive old_mask_path_source = 7;
+  optional .TSP.Size new_image_original_size = 8;
+  optional .TSP.Size old_image_original_size = 9;
+  optional bool background_removed = 10;
+  optional bool old_background_removed = 11;
+}
+
+message ImageInfoGeometryCommandArchive {
+  required .TSD.ImageInfoAbstractGeometryCommandArchive super = 1;
+}
+
+message ImageInfoMaskGeometryCommandArchive {
+  required .TSD.ImageInfoAbstractGeometryCommandArchive super = 1;
+}
+
+message InfoCollectionSelectionTransformerHelperArchive {
+  repeated .TSP.UUIDPath info_uuid_path_list = 1;
+}
+
+message DrawableSelectionTransformerArchive {
+  required .TSD.InfoCollectionSelectionTransformerHelperArchive transformer_helper = 1;
+  required .TSP.Reference untransformed_drawable_selection = 2;
+}
+
+message InfoHyperlinkSelectionTransformerArchive {
+}
+
+message CanvasSelectionTransformerArchive {
+  required .TSD.InfoCollectionSelectionTransformerHelperArchive transformer_helper = 1;
+}
+
+message PathSelectionTransformerArchive {
+}
+
+message ShapeSelectionTransformerArchive {
+  required .TSD.DrawableSelectionTransformerArchive super = 1;
+}
+
+message GroupSelectionTransformerArchive {
+  required .TSD.DrawableSelectionTransformerArchive super = 1;
+}
+
+message PencilAnnotationSelectionTransformerArchive {
+  required .TSP.UUID pencil_annotation_uuid = 1;
+}
+
+message FreehandDrawingOpacityCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional double opacity = 2;
+  optional double old_opacity = 3;
+}
+
+message FreehandDrawingAnimationCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSD.FreehandDrawingAnimationArchive animation = 2;
+  optional .TSD.FreehandDrawingAnimationArchive old_animation = 3;
+}
+
+message InsertCaptionOrTitleCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TSP.UUIDPath drawable_info_id_path = 2;
+  optional .TSP.Reference caption_or_title_info = 3;
+  optional .TSP.UUID added_caption_or_title_uuid = 4;
+  optional .TSD.CaptionOrTitleKind caption_or_title_kind = 5;
+  optional .TSP.Reference undo_object = 6;
+}
+
+message RemoveCaptionOrTitleCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TSP.UUIDPath drawable_info_id_path = 2;
+  optional .TSP.Reference removed_caption_or_title_info = 3;
+  optional .TSP.UUID removed_caption_or_title_uuid = 4;
+  optional .TSD.CaptionOrTitleKind caption_or_title_kind = 5;
+}
+
+message SetCaptionOrTitleVisibilityCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSD.CaptionOrTitleKind caption_or_title_kind = 2;
+  optional bool hidden = 3;
+  optional bool was_hidden = 4;
+}
+

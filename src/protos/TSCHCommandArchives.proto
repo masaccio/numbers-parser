@@ -1,0 +1,436 @@
+syntax = "proto2";
+
+import "TSCH3DArchives.proto";
+import "TSCHArchives_Common.proto";
+import "TSCHArchives_GEN.proto";
+import "TSCHArchives.proto";
+import "TSDArchives.proto";
+import "TSDCommandArchives.proto";
+import "TSKArchives.proto";
+import "TSPMessages.proto";
+import "TSSArchives.proto";
+import "TSWPArchives.proto";
+package TSCH;
+
+enum StyleOwnerType {
+  chart_info = 1;
+  legend_model = 2;
+  chart_axis = 3;
+  chart_series = 4;
+  reference_line = 5;
+}
+
+enum StyleSwapType {
+  chart_style = 1;
+  chart_non_style = 2;
+  legend_style = 3;
+  legend_non_style = 4;
+  value_axis_style = 5;
+  value_axis_non_style = 6;
+  category_axis_style = 7;
+  category_axis_non_style = 8;
+  series_theme_style = 9;
+  series_private_style = 10;
+  series_non_style = 11;
+  paragraph_style = 12;
+  reference_line_style = 13;
+  reference_line_non_style = 14;
+  reference_line_theme_style = 15;
+}
+
+enum ApplyPresetBehavior {
+  remove_overrides = 1;
+  preserve_overrides = 2;
+  preserve_appearance = 3;
+}
+
+message StyleOwnerPath {
+  repeated .TSP.UUID uuids = 1;
+}
+
+message CommandSetChartTypeArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSCH.ChartType new_chart_type = 2;
+  optional .TSCH.ChartType old_chart_type = 3;
+  optional .TSCH.ChartType rollback_chart_type = 4;
+  repeated .TSP.UUID row_ids = 5;
+  repeated .TSP.UUID column_ids = 6;
+  repeated .TSP.UUID old_row_ids = 7;
+  repeated .TSP.UUID old_column_ids = 8;
+  repeated .TSP.UUID rollback_row_ids = 9;
+  repeated .TSP.UUID rollback_column_ids = 10;
+  optional bool uses_captured_data = 11;
+  optional bool use_default_data = 12;
+}
+
+message StyleSwapUndoTupleArchive {
+  optional .TSP.Reference chart_info = 1;
+  optional .TSCH.StyleSwapType swap_type = 2;
+  optional uint32 index = 3;
+  optional .TSP.Reference old_value = 4;
+  optional .TSP.Reference new_value = 5;
+  optional .TSP.UUID ref_line_uuid = 6;
+}
+
+message StyleSwapUndoTuplesArchive {
+  repeated .TSCH.StyleSwapUndoTupleArchive swap_tuples = 1;
+}
+
+message CommandStyleSwapArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  repeated .TSCH.StyleSwapUndoTupleArchive undo_tuples = 2;
+}
+
+message CommandMutatePropertiesArchive {
+  message GenericPropertyDeltaMap {
+    message GenericMapUnion {
+      optional .TSCH.Generated.ChartGenericPropertyMapArchive chart_map = 2;
+      optional .TSCH.Generated.LegendGenericPropertyMapArchive legend_map = 3;
+      optional .TSCH.Generated.ChartAxisGenericPropertyMapArchive axis_map = 4;
+      optional .TSCH.Generated.ChartSeriesGenericPropertyMapArchive series_map = 5;
+      optional .TSCH.Generated.ReferenceLineGenericPropertyMapArchive reference_line_map = 6;
+    }
+    optional .TSCH.StyleOwnerPath style_owner_path = 1;
+    optional .TSCH.CommandMutatePropertiesArchive.GenericPropertyDeltaMap.GenericMapUnion forward_map = 2;
+    optional .TSCH.CommandMutatePropertiesArchive.GenericPropertyDeltaMap.GenericMapUnion reverse_map = 3;
+  }
+  message ParagraphStyleDeltaMap {
+    message ParagraphStylePropertyMapArchive {
+      optional .TSWP.CharacterStylePropertiesArchive char_properties = 1;
+      optional .TSWP.ParagraphStylePropertiesArchive para_properties = 2;
+    }
+    optional .TSCH.StyleOwnerPath style_owner_path = 1;
+    optional uint32 paragraph_style_index_property = 2;
+    optional .TSCH.CommandMutatePropertiesArchive.ParagraphStyleDeltaMap.ParagraphStylePropertyMapArchive forward_map = 3;
+    optional .TSCH.CommandMutatePropertiesArchive.ParagraphStyleDeltaMap.ParagraphStylePropertyMapArchive reverse_map = 4;
+  }
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSP.Reference rollback_cmd = 2;
+  repeated .TSCH.CommandMutatePropertiesArchive.GenericPropertyDeltaMap generic_property_delta_maps = 3;
+  repeated .TSCH.CommandMutatePropertiesArchive.ParagraphStyleDeltaMap paragraph_style_delta_maps = 4;
+  optional bool initiatedOnWeb = 5;
+}
+
+message CommandScaleAllTextArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSP.Reference rollback_cmd = 2;
+  optional double scale_factor = 3;
+}
+
+message CommandSetFontFamilyArchive {
+  message StyleSemanticTag {
+    optional .TSCH.StyleSwapType swap_type = 1;
+    optional uint32 index = 2;
+  }
+  message SemanticParagraphStyleMutationMap {
+    message ParagraphStylePropertyMapArchive {
+      optional .TSWP.CharacterStylePropertiesArchive char_properties = 1;
+      optional .TSWP.ParagraphStylePropertiesArchive para_properties = 2;
+    }
+    optional .TSCH.CommandSetFontFamilyArchive.StyleSemanticTag style_semantic_tag = 1;
+    optional uint32 paragraph_style_index_property = 2;
+    optional .TSCH.CommandSetFontFamilyArchive.SemanticParagraphStyleMutationMap.ParagraphStylePropertyMapArchive forward_map = 3;
+    optional .TSCH.CommandSetFontFamilyArchive.SemanticParagraphStyleMutationMap.ParagraphStylePropertyMapArchive reverse_map = 4;
+  }
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSP.Reference rollback_cmd = 2;
+  optional string new_font_family = 3;
+  optional string old_font_family = 4;
+  repeated .TSCH.CommandSetFontFamilyArchive.SemanticParagraphStyleMutationMap paragraph_style_delta_maps = 5;
+  required bool is_bold = 6;
+  required bool is_italic = 7;
+}
+
+message CommandApplyFillSetArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required .TSCH.ChartType chart_type = 2;
+  required .TSCH.ChartFillSetArchive fill_set = 3;
+  optional .TSCH.ChartFillSetArchive old_fill_set = 4;
+  optional string prior_last_applied_fill_set_lookup_string = 5;
+  optional .TSP.Reference rollback_cmd = 6;
+}
+
+message CommandSetSeriesNameArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required uint32 seriesIndex = 2;
+  optional string oldName = 3;
+  required string newName = 4;
+}
+
+message CommandSetCategoryNameArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required uint32 categoryIndex = 2;
+  optional string oldName = 3;
+  required string newName = 4;
+  optional bool isMultiDataIndex = 5;
+}
+
+message CommandAddGridRowsArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSP.UUID row_id = 2;
+  repeated .TSP.UUID row_id_list = 3;
+  repeated string row_name_list = 4;
+  optional .TSP.UUID undo_deletion_start_id = 5;
+  optional .TSP.UUID undo_deletion_end_id = 6;
+}
+
+message CommandAddGridColumnsArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSP.UUID column_id = 2;
+  repeated .TSP.UUID column_id_list = 3;
+  repeated string column_name_list = 4;
+  optional .TSP.UUID undo_deletion_start_id = 5;
+  optional .TSP.UUID undo_deletion_end_id = 6;
+}
+
+message CommandMoveGridRowsArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required .TSP.UUID start_row_id = 2;
+  required .TSP.UUID end_row_id = 3;
+  optional .TSP.UUID after_row_id = 4;
+  optional .TSP.UUID undo_after_row_id = 5;
+}
+
+message CommandMoveGridColumnsArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required .TSP.UUID start_column_id = 2;
+  required .TSP.UUID end_column_id = 3;
+  optional .TSP.UUID after_column_id = 4;
+  optional .TSP.UUID undo_after_column_id = 5;
+}
+
+message CommandDeleteGridRowsArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required .TSP.UUID start_row_id = 2;
+  required .TSP.UUID end_row_id = 3;
+  repeated string cut_row_names = 4;
+  repeated .TSCH.GridRow cut_values = 5;
+  optional bool undo_discards_values = 6;
+  optional .TSP.UUID undo_column_insertion_id = 7;
+  optional .TSP.UUID undo_row_insertion_id = 8;
+  repeated .TSP.UUID undo_row_id_list = 9;
+  repeated string cut_column_names = 11;
+  repeated .TSP.UUID undo_column_id_list = 12;
+}
+
+message CommandDeleteGridColumnsArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required .TSP.UUID start_column_id = 2;
+  required .TSP.UUID end_column_id = 3;
+  repeated string cut_names = 4;
+  repeated .TSCH.GridRow cut_values = 5;
+  optional bool undo_discards_values = 6;
+  optional .TSP.UUID undo_column_insertion_id = 7;
+  optional .TSP.UUID undo_row_insertion_id = 8;
+  repeated .TSP.UUID undo_column_id_list = 9;
+  repeated string cut_row_names = 11;
+  repeated .TSP.UUID undo_row_id_list = 12;
+}
+
+message CommandSetGridValueArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required uint32 rowindex = 2;
+  required uint32 columnindex = 3;
+  required double oldvalue = 4;
+  required double newvalue = 5;
+}
+
+message CommandSetGridDirectionArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required uint32 old_direction = 2;
+  required uint32 new_direction = 3;
+}
+
+message CommandSetSeriesTypeArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required uint32 seriesindex = 2;
+  required uint32 oldtype = 3;
+  required uint32 newtype = 4;
+}
+
+message CommandSetScatterFormatArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required uint32 oldformat = 3;
+  required uint32 newformat = 4;
+}
+
+message CommandSetMultiDataSetIndexArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required uint32 oldindex = 2;
+  required uint32 newindex = 3;
+}
+
+message CommandSetLegendFrameArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required .TSCH.RectArchive old_legend_frame = 2;
+  required .TSCH.RectArchive new_legend_frame = 3;
+}
+
+message CommandSetPieWedgeExplosion {
+  required .TSCH.ChartCommandArchive super = 1;
+  repeated uint32 series_indices = 2;
+  repeated double wedge_explosions = 3;
+  repeated uint32 old_series_indices = 5;
+  repeated double old_wedge_explosions = 6;
+  optional .TSP.Reference rollback_cmd = 7;
+}
+
+message CommandChartApplyTheme {
+  required .TSS.ApplyThemeChildCommandArchive super = 1;
+  required .TSP.Reference info = 2;
+  optional .TSP.Reference swap_command = 3;
+  optional .TSP.Reference preset = 4;
+}
+
+message CommandChartApplyPreset {
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSCH.ApplyPresetBehavior behavior = 2 [default = remove_overrides];
+  optional .TSP.Reference preset = 3;
+  optional .TSP.Reference old_preset = 4;
+  optional bool should_apply_swap_tuples = 5;
+  optional bool are_swap_tuples_valid = 6;
+  repeated .TSCH.StyleSwapUndoTupleArchive swap_tuples = 7;
+  repeated .TSCH.StyleSwapUndoTupleArchive inverse_swap_tuples = 8;
+  optional .TSP.Reference rollback_preset = 9;
+  repeated .TSCH.StyleSwapUndoTupleArchive rollback_swap_tuples = 10;
+}
+
+message CommandCleanupGeometryArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSP.Reference info_geometry_command = 2;
+  optional .TSP.Reference anchor_attachment_command = 3;
+  optional .TSCH.RectArchive original_legend_rect = 4;
+}
+
+message ChartCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  optional .TSP.Reference chart_info = 2;
+  optional bool original_dirty_state = 3;
+  optional .TSP.UUIDPath chart_info_id_path = 4;
+  optional bool is_for_forward_undo_redo = 5;
+}
+
+message CommandReplaceGridValuesArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  repeated .TSCH.GridRow old_data_rows = 4;
+  repeated .TSCH.GridRow new_data_rows = 5;
+  repeated string old_row_names = 6;
+  repeated string new_row_names = 7;
+  repeated string old_col_names = 8;
+  repeated string new_col_names = 9;
+  repeated .TSP.UUID update_row_uuids = 10;
+  repeated .TSP.UUID update_column_uuids = 11;
+  repeated .TSP.UUID add_row_uuids = 12;
+  repeated .TSP.UUID add_column_uuids = 13;
+  repeated .TSP.UUID delete_row_uuids = 14;
+  repeated .TSP.UUID delete_column_uuids = 15;
+  optional bool set_series_direction = 16;
+  optional uint32 new_series_direction = 17;
+}
+
+message CommandReplaceThemePresetArchive {
+  message StyleAndIdentifierPair {
+    required .TSP.Reference style = 1;
+    required string identifier = 2;
+  }
+  required .TSK.CommandArchive super = 1;
+  required .TSP.Reference theme = 2;
+  optional .TSP.Reference old_preset = 3;
+  optional .TSP.Reference new_preset = 4;
+  repeated .TSCH.CommandReplaceThemePresetArchive.StyleAndIdentifierPair identifiers = 5;
+  optional uint64 old_preset_index = 6;
+}
+
+message CommandInvalidateWPCaches {
+  required .TSK.CommandArchive super = 1;
+}
+
+message CommandReplaceCustomFormatArchive {
+  message FormatObjectMutation {
+    optional .TSCH.StyleOwnerType style_owner_type = 1;
+    optional uint32 style_owner_index = 2;
+    optional uint32 format_object_property = 3;
+    optional .TSK.FormatStructArchive format_object = 4;
+  }
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSP.Reference rollback_cmd = 2;
+  optional .TSK.FormatStructArchive old_format_object = 3;
+  optional .TSK.FormatStructArchive new_format_object = 4;
+  repeated .TSCH.CommandReplaceCustomFormatArchive.FormatObjectMutation forward_mutations = 5;
+  repeated .TSCH.CommandReplaceCustomFormatArchive.FormatObjectMutation reverse_mutations = 6;
+}
+
+message CommandAddReferenceLineArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required .TSCH.ChartAxisIDArchive axis_id = 2;
+  optional .TSP.UUID uuid = 3;
+  required .TSP.Reference non_style = 4;
+  optional .TSP.Reference style = 5;
+  repeated .TSP.Reference paragraph_styles = 6;
+  repeated .TSP.Reference rollback_commands = 7;
+}
+
+message CommandDeleteReferenceLineArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  required .TSCH.ChartAxisIDArchive axis_id = 2;
+  required .TSP.UUID uuid = 3;
+  optional .TSP.Reference non_style = 4;
+  optional .TSP.Reference style = 5;
+  repeated .TSP.Reference paragraph_styles = 6;
+  optional .TSP.Reference style_swap_command = 7;
+}
+
+message CommandPasteStyleArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSP.Reference style_swap_command = 2;
+  optional .TSCH.PropertyValueStorageContainerArchive inverse_chart_style_state = 3;
+  optional .TSCH.PropertyValueStorageContainerArchive chart_style_state = 4;
+  optional .TSP.Reference shape_style = 5;
+  repeated .TSCH.ChartSelectionPathArchive subselection = 6;
+}
+
+message CommandReplaceImageDataArchive {
+  required .TSCH.ChartCommandArchive super = 1;
+  optional .TSP.Reference style_swap_command = 2;
+  optional .TSCH.PropertyValueStorageContainerArchive inverse_chart_style_state = 3;
+  optional .TSCH.PropertyValueStorageContainerArchive chart_style_state = 4;
+}
+
+message CommandInducedReplaceChartGrid {
+  required .TSK.CommandArchive super = 1;
+}
+
+message CommandInduced3DChartGeometry {
+  required .TSK.CommandArchive super = 1;
+}
+
+message ChartTextSelectionTransformerArchive {
+  optional .TSP.Reference selection = 1;
+}
+
+message ChartDrawableSelectionTransformerArchive {
+  required .TSD.DrawableSelectionTransformerArchive super = 1;
+}
+
+message ChartSubselectionTransformerHelperArchive {
+  optional .TSP.Reference selection = 1;
+}
+
+message ChartRefLineSubselectionTransformerHelperArchive {
+  required .TSCH.ChartSubselectionTransformerHelperArchive super = 1;
+  repeated .TSP.UUID selected_reference_line_uuids = 2;
+}
+
+message ChartSubselectionIdentityTransformerHelperArchive {
+  required .TSCH.ChartSubselectionTransformerHelperArchive super = 1;
+}
+
+message ChartSubselectionTransformerArchive {
+  optional .TSP.Reference selection = 1;
+  optional .TSP.Reference helper = 2;
+}
+
+message CDESelectionTransformerArchive {
+  optional .TSP.Reference cde_selection = 1;
+}
+

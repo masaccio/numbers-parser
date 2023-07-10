@@ -1,0 +1,22 @@
+syntax = "proto2";
+
+import "TSKArchives.proto";
+import "TSPMessages.proto";
+package TSASOS;
+
+message InducedVerifyActivityStreamWithServerCommandArchive {
+  required .TSK.CommandArchive super = 1;
+  repeated .TSP.Reference server_activities = 2;
+  optional bool server_activities_undefined = 3;
+  required double timestamp_of_last_activity_when_last_activity_coalescing = 4;
+  required int32 next_activity_to_transform_index = 5;
+  repeated .TSP.UUID author_identifiers_to_verify = 6;
+  optional bool author_identifiers_to_verify_undefined = 7;
+}
+
+message DrawableZOrderListArchive {
+  optional .TSP.UUID container_id = 1;
+  repeated .TSP.UUID drawable_id_list = 2;
+  optional bool drawable_id_list_undefined = 3;
+}
+
