@@ -132,10 +132,10 @@ def test_header_styles():
     assert all([table.cell(8, row_num).style.is_bold for row_num in range(0, 3)])
     assert all([table.cell(9, row_num).style.is_bold for row_num in range(0, 4)])
 
-    assert all([not table.cell(ref).is_bold for ref in ["E1", "B5", "E9"]])
-    assert all([table.cell(ref).is_underline for ref in ["C1", "C4", "C9"]])
-    assert all([table.cell(ref).is_italic for ref in ["B1", "B4", "B9"]])
-    assert all([table.cell(ref).is_strikethrough for ref in ["D1", "A5", "D9"]])
+    assert all([not table.cell(ref).style.is_bold for ref in ["E1", "B5", "E9"]])
+    assert all([table.cell(ref).style.is_underline for ref in ["C1", "C4", "C9"]])
+    assert all([table.cell(ref).style.is_italic for ref in ["B1", "B4", "B9"]])
+    assert all([table.cell(ref).style.is_strikethrough for ref in ["D1", "A5", "D9"]])
 
     assert all(
         [
@@ -157,14 +157,15 @@ def test_header_styles():
     )
     assert all(
         [
-            table.cell(ref).style.image.filename == "pexels-evg-kowalievska-1170986.jpg"
-            for ref in ["D2", "E2", "B7", "C7", "C10", "D10"]
+            table.cell(ref).style.bg_image.filename
+            == "pexels-evg-kowalievska-1170986-16.jpg"
+            for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
         ]
     )
     assert all(
         [
-            len(table.cell(ref).style.image.data) == 418932
-            for ref in ["D2", "E2", "B7", "C7", "C10", "D10"]
+            len(table.cell(ref).style.bg_image.data) == 418932
+            for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
         ]
     )
 
