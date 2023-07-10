@@ -19,9 +19,10 @@ from numbers_parser.constants import (
     DOCUMENT_ID,
     PACKAGE_ID,
     MAX_TILE_SIZE,
-    HorizJustification,
-    VertJustification,
-    Justification,
+    Alignment,
+    HorizontalJustification,
+    VerticalJustification,
+    RGB,
 )
 from numbers_parser.cell import (
     xl_rowcol_to_cell,
@@ -256,20 +257,17 @@ class _NumbersModel:
     @lru_cache(maxsize=None)
     def table_format(self, table_id: int, key: int) -> str:
         """Return the format associated with a format ID for a particular table"""
-        self._table_formats.add_table(table_id)
         return self._table_formats.lookup_value(table_id, key).format
 
     @lru_cache(maxsize=None)
     def table_style(self, table_id: int, key: int) -> str:
         """Return the style associated with a style ID for a particular table"""
-        self._table_styles.add_table(table_id)
         style_entry = self._table_styles.lookup_value(table_id, key)
         return self.objects[style_entry.reference.identifier]
 
     @lru_cache(maxsize=None)
     def table_string(self, table_id: int, key: int) -> str:
         """Return the string assocuated with a string ID for a particular table"""
-        self._table_strings.add_table(table_id)
         return self._table_strings.lookup_value(table_id, key).string
 
     def init_table_strings(self, table_id: int):
@@ -1179,10 +1177,10 @@ class _NumbersModel:
             flags |= 0x20
             length += 4
             storage += pack("<i", cell._storage.cell_style_id)
-        if cell._storage.text_format_id is not None:
+        if cell._storage.text_style_id is not None:
             flags |= 0x40
             length += 4
-            storage += pack("<i", cell._storage.text_format_id)
+            storage += pack("<i", cell._storage.text_style_id)
         if cell._storage.formula_id is not None:
             flags |= 0x200
             length += 4
@@ -1314,23 +1312,43 @@ class _NumbersModel:
 
         return None
 
-    def cell_alignment(self, cell_storage: object) -> Justification:
-        if cell_storage.text_style_id is None:
-            horizontal = HorizJustification.LEFT
-        else:
-            cell_style = self.table_style(
-                cell_storage.table_id, cell_storage.text_style_id
+    def table_paragraph_style(self, cell_storage: object) -> object:
+        style = self.table_style(cell_storage.table_id, cell_storage.text_style_id)
+        if isinstance(style, TSWPArchives.ParagraphStyleArchive):
+            return style
+
+        table_model = self.objects[cell_storage.table_id]
+        if cell_storage.row_num in range(0, table_model.number_of_header_rows):
+            return self.objects[table_model.header_row_text_style.identfier]
+        elif cell_storage.col_num in range(0, table_model.number_of_header_columns):
+            return self.objects[table_model.header_column_text_style.identifier]
+        elif table_model.number_of_footer_rows > 0:
+            start_row_num = (
+                table_model.number_of_rows - table_model.number_of_footer_rows
             )
-            horizontal = HorizJustification(cell_style.para_properties.alignment)
+            if cell_storage.row_num in range(
+                start_row_num, table_model.number_of_header_rows
+            ):
+                return self.objects[table_model.footer_row_text_style.identifier]
+        return self.objects[table_model.body_text_style.identifier]
+
+    def cell_alignment(self, cell_storage: object) -> Alignment:
+        if cell_storage.text_style_id is None:
+            horizontal = HorizontalJustification.LEFT
+        else:
+            cell_style = self.table_paragraph_style(cell_storage)
+            horizontal = HorizontalJustification(cell_style.para_properties.alignment)
 
         if cell_storage.cell_style_id is None:
-            vertical = VertJustification.TOP
+            vertical = VerticalJustification.TOP
         else:
             cell_style = self.table_style(
                 cell_storage.table_id, cell_storage.cell_style_id
             )
-            vertical = VertJustification(cell_style.cell_properties.vertical_alignment)
-        return Justification((horizontal << 4) | vertical)
+            vertical = VerticalJustification(
+                cell_style.cell_properties.vertical_alignment
+            )
+        return Alignment(horizontal, vertical)
 
     def cell_bg_color(self, cell_storage: object) -> Union[Tuple, List[Tuple]]:
         if cell_storage.cell_style_id is None:
@@ -1347,13 +1365,9 @@ class _NumbersModel:
     def cell_text_style(self, cell_storage: object) -> object:
         if cell_storage.text_style_id is None:
             table_model = self.objects[cell_storage.table_id]
-            style_id = table_model.body_text_style.identifier
+            return self.objects[table_model.body_text_style.identifier]
         else:
-            style_ref = self._table_styles.lookup_value(
-                cell_storage.table_id, cell_storage.text_style_id
-            )
-            style_id = style_ref.reference.identifier
-        return self.objects[style_id]
+            return self.table_paragraph_style(cell_storage)
 
     def cell_is_bold(self, cell_storage: object) -> bool:
         style = self.cell_text_style(cell_storage)
@@ -1382,12 +1396,17 @@ class _NumbersModel:
 
     def cell_font_color(self, cell_storage: object) -> Tuple:
         style = self.cell_text_style(cell_storage)
-        font_color = style.char_properties.font_color
-        return rgb(font_color)
+        if isinstance(style, TSWPArchives.ParagraphStyleArchive):
+            font_color = style.char_properties.font_color
+            return rgb(font_color)
+        else:
+            return (0, 0, 0)
 
     def cell_font_size(self, cell_storage: object) -> float:
         style = self.cell_text_style(cell_storage)
-        if style.char_properties.HasField("font_size"):
+        if isinstance(style, TSTArchives.CellStyleArchive):
+            pass
+        elif style.char_properties.HasField("font_size"):
             return style.char_properties.font_size
         else:
             parent_style_id = style.super.parent.identifier
@@ -1395,7 +1414,9 @@ class _NumbersModel:
 
     def cell_font_name(self, cell_storage: object) -> str:
         style = self.cell_text_style(cell_storage)
-        if style.char_properties.HasField("font_name"):
+        if isinstance(style, TSTArchives.CellStyleArchive):
+            pass
+        elif style.char_properties.HasField("font_name"):
             font_name = style.char_properties.font_name
         else:
             parent_style_id = style.super.parent.identifier
@@ -1403,8 +1424,8 @@ class _NumbersModel:
         return FONT_NAME_MAP[font_name]
 
 
-def rgb(obj) -> Tuple:
-    return (round(obj.r * 255), round(obj.g * 255), round(obj.b * 255))
+def rgb(obj) -> RGB:
+    return RGB(round(obj.r * 255), round(obj.g * 255), round(obj.b * 255))
 
 
 def range_end(obj):
