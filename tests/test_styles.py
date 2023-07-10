@@ -190,6 +190,6 @@ def test_new_styles(tmp_path, pytestconfig):
 
     doc.save(new_filename)
 
-    new_doc = Document(new_filename)
-    new_table = new_doc.sheets[0].tables[0]
+    # new_doc = Document(new_filename)
+    # new_table = new_doc.sheets[0].tables[0]
     # assert new_table.cell("D3").style.font_color == RGB(29, 177, 0)
