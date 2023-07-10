@@ -1369,38 +1369,31 @@ class _NumbersModel:
         else:
             return self.table_paragraph_style(cell_storage)
 
+    def char_property(self, style: object, field: str):
+        """Return a char_property field from a style if present
+        in the style, or from the parent if not"""
+        if not style.char_properties.HasField(field):
+            parent = self.objects[style.super.parent.identifier]
+            return getattr(parent.char_properties, field)
+        else:
+            return getattr(style.char_properties, field)
+
     def cell_is_bold(self, cell_storage: object) -> bool:
         style = self.cell_text_style(cell_storage)
-        if not style.char_properties.HasField("bold"):
-            return self.objects[style.super.parent.identifier].char_properties.bold
-        else:
-            return style.char_properties.bold
+        return self.char_property(style, "bold")
 
     def cell_is_italic(self, cell_storage: object) -> bool:
         style = self.cell_text_style(cell_storage)
-        if not style.char_properties.HasField("italic"):
-            return self.objects[style.super.parent.identifier].char_properties.italic
-        else:
-            return style.char_properties.italic
+        return self.char_property(style, "bold")
 
     def cell_is_underline(self, cell_storage: object) -> bool:
         style = self.cell_text_style(cell_storage)
-        if not style.char_properties.HasField("underline"):
-            underline = self.objects[
-                style.super.parent.identifier
-            ].char_properties.underline
-        else:
-            underline = style.char_properties.underline
+        underline = self.char_property(style, "underline")
         return underline != CharacterStyle.UnderlineType.kNoUnderline
 
     def cell_is_strikethrough(self, cell_storage: object) -> bool:
         style = self.cell_text_style(cell_storage)
-        if not style.char_properties.HasField("strikethru"):
-            strikethru = self.objects[
-                style.super.parent.identifier
-            ].char_properties.strikethru
-        else:
-            strikethru = style.char_properties.strikethru
+        strikethru = self.char_property(style, "strikethru")
         return strikethru != CharacterStyle.StrikethruType.kNoStrikethru
 
     def cell_style_name(self, cell_storage: object) -> bool:
@@ -1409,32 +1402,20 @@ class _NumbersModel:
 
     def cell_font_color(self, cell_storage: object) -> Tuple:
         style = self.cell_text_style(cell_storage)
-        if not style.char_properties.HasField("font_color"):
-            return rgb(
-                self.objects[style.super.parent.identifier].char_properties.font_color
-            )
-        else:
-            return rgb(style.char_properties.font_color)
+        return rgb(self.char_property(style, "font_color"))
 
     def cell_font_size(self, cell_storage: object) -> float:
         style = self.cell_text_style(cell_storage)
-        if not style.char_properties.HasField("font_size"):
-            return self.objects[style.super.parent.identifier].char_properties.font_size
-        else:
-            return style.char_properties.font_size
+        return self.char_property(style, "font_size")
 
     def cell_font_name(self, cell_storage: object) -> str:
         style = self.cell_text_style(cell_storage)
-        if not style.char_properties.HasField("font_name"):
-            font_name = self.objects[
-                style.super.parent.identifier
-            ].char_properties.font_name
-        else:
-            font_name = style.char_properties.font_name
+        font_name = self.char_property(style, "font_name")
         return FONT_NAME_MAP[font_name]
 
 
 def rgb(obj) -> RGB:
+    """Convert a TSPArchives.Color into an RGB tuple"""
     return RGB(round(obj.r * 255), round(obj.g * 255), round(obj.b * 255))
 
 
