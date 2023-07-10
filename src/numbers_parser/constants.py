@@ -92,7 +92,7 @@ class FormatType(IntEnum):
 
 
 # Style return types
-Alignment = namedtuple("Alignment", ["vertical", "horizontal"])
+Alignment = namedtuple("Alignment", ["horizontal", "vertical"])
 RGB = namedtuple("RGB", ["r", "g", "b"])
 
 
