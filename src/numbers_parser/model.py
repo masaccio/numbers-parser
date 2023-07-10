@@ -1420,7 +1420,7 @@ def rgb(obj) -> RGB:
 
 
 def range_end(obj):
-    # range_end is optional in IndexSetEntry
+    """Select end range for a IndexSetArchive.IndexSetEntry"""
     if obj.HasField("range_end"):
         return obj.range_end
     else:
