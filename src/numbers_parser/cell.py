@@ -67,6 +67,15 @@ class Style:
         for each colr point in the gradient."""
         return self._bg_color
 
+    @bg_color.setter
+    def bg_color(self, color: RGB):
+        """Set the cell background color to a new RGB value."""
+        if len(color) != 3 or not all(isinstance(x, int) for x in color):
+            raise TypeError("RGB color must be be a tuple of 3 integers")
+        if self._bg_color != color:
+            self._bg_color = color
+            self._dirty = True
+
     @property
     def font_color(self) -> bool:
         """A named tuple containing the integer (0-255) RGB values for the

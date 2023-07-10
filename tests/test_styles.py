@@ -179,17 +179,17 @@ def test_new_styles(tmp_path, pytestconfig):
     doc = Document()
     table = doc.sheets[0].tables[0]
     with pytest.raises(TypeError) as e:
-        table.cell("D3").style.font_color = (0, 0, 0, 0)
+        table.cell("D3").style.bg_color = (0, 0, 0, 0)
     assert "RGB color must be be a tuple" in str(e)
     with pytest.raises(TypeError) as e:
-        table.cell("D3").style.font_color = (0, 0, 1.0)
+        table.cell("D3").style.bg_color = (0, 0, 1.0)
     assert "RGB color must be be a tuple" in str(e)
 
-    table.cell("D3").style.font_color = RGB(29, 177, 0)
-    assert table.cell("D3").style.font_color == RGB(29, 177, 0)
+    table.cell("D3").style.bg_color = RGB(29, 177, 0)
+    assert table.cell("D3").style.bg_color == RGB(29, 177, 0)
 
     doc.save(new_filename)
 
-    # new_doc = Document(new_filename)
-    # new_table = new_doc.sheets[0].tables[0]
-    # assert new_table.cell("D3").style.font_color == RGB(29, 177, 0)
+    new_doc = Document(new_filename)
+    new_table = new_doc.sheets[0].tables[0]
+    assert new_table.cell("D3").style.bg_color == RGB(29, 177, 0)
