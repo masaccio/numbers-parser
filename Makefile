@@ -51,6 +51,7 @@ BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
 				  src/$(package_c)/generated/fontmap.py \
 				  src/$(package_c)/generated/__init__.py \
 				  src/$(package_c)/mapping.py \
+				  src/$(package_c)/protos/TNArchives.proto
 
 bootstrap: $(BOOTSTRAP_FILES)
 
@@ -107,6 +108,14 @@ src/$(package_c)/generated/TNArchives_pb2.py: .bootstrap/protos/TNArchives.proto
 	for proto in .bootstrap/protos/*.proto; do \
 	    $(PROTOC) -I=.bootstrap/protos --proto_path .bootstrap/protos --python_out=src/$(package_c)/generated $$proto; \
 	done
+
+src/$(package_c)/protos/TNArchives.proto: .bootstrap/protos/TNArchives.proto
+	@echo $$(tput setaf 2)"Bootstrap: creating git-tracked copies of protos"$$(tput init)
+	@mkdir -p src/protos
+	for proto in .bootstrap/protos/*.proto; do \
+		cp $$proto src/protos; \
+	done
+
 
 src/$(package_c)/generated/__init__.py: src/$(package_c)/generated/TNArchives_pb2.py
 	@echo $$(tput setaf 2)"Bootstrap: patching paths in generated protobuf files"$$(tput init)
