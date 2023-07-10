@@ -1,8 +1,13 @@
 import os
 
+from collections import namedtuple
 from enum import IntEnum
 from pendulum import datetime
 from pkg_resources import resource_filename
+
+from numbers_parser.generated.TSWPArchives_pb2 import (
+    ParagraphStylePropertiesArchive as ParagraphStyle,
+)
 
 # New document defaults
 DEFAULT_DOCUMENT = resource_filename(__name__, os.path.join("data", "empty.numbers"))
@@ -86,33 +91,20 @@ class FormatType(IntEnum):
     CUSTOM_CURRENCY = 274
 
 
-class HorizJustification(IntEnum):
-    LEFT = 0
-    RIGHT = 1
-    CENTER = 2
-    JUSTIFIED = 3
-    AUTO = 4
+# Style return types
+Alignment = namedtuple("Alignment", ["vertical", "horizontal"])
+RGB = namedtuple("RGB", ["r", "g", "b"])
 
 
-class VertJustification(IntEnum):
-    TOP = 0
-    MIDDLE = 1
-    BOTTOM = 2
+class HorizontalJustification(IntEnum):
+    LEFT = ParagraphStyle.TextAlignmentType.TATvalue0
+    RIGHT = ParagraphStyle.TextAlignmentType.TATvalue1
+    CENTER = ParagraphStyle.TextAlignmentType.TATvalue2
+    JUSTIFIED = ParagraphStyle.TextAlignmentType.TATvalue3
+    AUTO = ParagraphStyle.TextAlignmentType.TATvalue4
 
 
-class Justification(IntEnum):
-    LEFT_TOP = (HorizJustification.LEFT << 4) | VertJustification.TOP
-    LEFT_MIDDLE = (HorizJustification.LEFT << 4) | VertJustification.MIDDLE
-    LEFT_BOTTOM = (HorizJustification.LEFT << 4) | VertJustification.BOTTOM
-    CENTER_TOP = (HorizJustification.CENTER << 4) | VertJustification.TOP
-    CENTER_MIDDLE = (HorizJustification.CENTER << 4) | VertJustification.MIDDLE
-    CENTER_BOTTOM = (HorizJustification.CENTER << 4) | VertJustification.BOTTOM
-    RIGHT_TOP = (HorizJustification.RIGHT << 4) | VertJustification.TOP
-    RIGHT_MIDDLE = (HorizJustification.RIGHT << 4) | VertJustification.MIDDLE
-    RIGHT_BOTTOM = (HorizJustification.RIGHT << 4) | VertJustification.BOTTOM
-    JUSTIFIED_TOP = (HorizJustification.JUSTIFIED << 4) | VertJustification.TOP
-    JUSTIFIED_MIDDLE = (HorizJustification.JUSTIFIED << 4) | VertJustification.MIDDLE
-    JUSTIFIED_BOTTOM = (HorizJustification.JUSTIFIED << 4) | VertJustification.BOTTOM
-    AUTO_TOP = (HorizJustification.AUTO << 4) | VertJustification.TOP
-    AUTO_MIDDLE = (HorizJustification.AUTO << 4) | VertJustification.MIDDLE
-    AUTO_BOTTOM = (HorizJustification.AUTO << 4) | VertJustification.BOTTOM
+class VerticalJustification(IntEnum):
+    TOP = ParagraphStyle.ParagraphBorderType.PBTvalue0
+    MIDDLE = ParagraphStyle.ParagraphBorderType.PBTvalue1
+    BOTTOM = ParagraphStyle.ParagraphBorderType.PBTvalue2

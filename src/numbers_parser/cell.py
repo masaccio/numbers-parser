@@ -3,7 +3,7 @@ import re
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.cell_storage import CellType, CellStorage
-from numbers_parser.constants import Justification, EMPTY_STORAGE_BUFFER
+from numbers_parser.constants import EMPTY_STORAGE_BUFFER, Alignment, RGB
 
 from functools import lru_cache
 from pendulum import duration, Duration, DateTime
@@ -50,8 +50,8 @@ class Style:
         self._name = self._model.cell_style_name(self._storage)
 
     @property
-    def alignment(self) -> Justification:
-        """The alignment of text inside the cell."""
+    def alignment(self) -> Alignment:
+        """The horizontal and vertical alignment of the cell as a named tuple."""
         return self._alignment
 
     @property
@@ -61,20 +61,20 @@ class Style:
         return self._bg_image
 
     @property
-    def bg_color(self) -> Union[Tuple, List[Tuple]]:
-        """A tuple containing the integer (0-255) RGB values for the
-        background color of a cell. For gradients, a list of tuples
+    def bg_color(self) -> Union[RGB, List[RGB]]:
+        """An named tuple containing the integer (0-255) RGB values for the
+        background color of a cell. For gradients, a list of named tuples
         for each colr point in the gradient."""
         return self._bg_color
 
     @property
     def font_color(self) -> bool:
-        """A containing the integer (0-255) RGB values for the colour
-        of the font for text in the cell."""
+        """A named tuple containing the integer (0-255) RGB values for the
+        color f the font for text in the cell."""
         return self._font_color
 
     @font_color.setter
-    def font_color(self, color: Tuple):
+    def font_color(self, color: RGB):
         """Set the font color to a new RGB value."""
         if len(color) != 3 or not all(isinstance(x, int) for x in color):
             raise TypeError("RGB color must be be a tuple of 3 integers")
