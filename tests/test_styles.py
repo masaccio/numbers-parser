@@ -54,7 +54,7 @@ def test_bg_colors():
 def test_styles():
     doc = Document("tests/data/test-styles.numbers")
     sheets = doc.sheets
-    table = sheets[0].tables[0]
+    table = sheets["Styles"].tables[0]
 
     for row_num, row in enumerate(table.iter_rows()):
         if row_num == 0:
@@ -120,6 +120,53 @@ def test_styles():
                         ]
                     )
                     assert cell.value == ref
+
+
+def test_header_styles():
+    doc = Document("tests/data/test-styles.numbers")
+    sheets = doc.sheets
+    table = sheets["Headers"].tables[0]
+
+    assert all([table.cell(0, row_num).style.is_bold for row_num in range(0, 4)])
+    assert all([table.cell(3, row_num).style.is_bold for row_num in range(0, 3)])
+    assert all([table.cell(8, row_num).style.is_bold for row_num in range(0, 3)])
+    assert all([table.cell(9, row_num).style.is_bold for row_num in range(0, 4)])
+
+    assert all([not table.cell(ref).is_bold for ref in ["E1", "B5", "E9"]])
+    assert all([table.cell(ref).is_underline for ref in ["C1", "C4", "C9"]])
+    assert all([table.cell(ref).is_italic for ref in ["B1", "B4", "B9"]])
+    assert all([table.cell(ref).is_strikethrough for ref in ["D1", "A5", "D9"]])
+
+    assert all(
+        [
+            table.cell(ref).style.font_color == RGB(29, 177, 0)
+            for ref in ["A2", "A6", "A10"]
+        ]
+    )
+    assert all(
+        [
+            table.cell(ref).style.bg_color == RGB(29, 177, 0)
+            for ref in ["B2", "B6", "B10"]
+        ]
+    )
+    assert all(
+        [
+            table.cell(ref).style.bg_color == [RGB(136, 250, 78), RGB(1, 113, 0)]
+            for ref in ["C2", "C6", "C10"]
+        ]
+    )
+    assert all(
+        [
+            table.cell(ref).style.image.filename == "pexels-evg-kowalievska-1170986.jpg"
+            for ref in ["D2", "E2", "B7", "C7", "C10", "D10"]
+        ]
+    )
+    assert all(
+        [
+            len(table.cell(ref).style.image.data) == 418932
+            for ref in ["D2", "E2", "B7", "C7", "C10", "D10"]
+        ]
+    )
 
 
 def test_new_styles(tmp_path, pytestconfig):
