@@ -34,6 +34,7 @@ from numbers_parser.cell import (
     MergedCell,
     NumberCell,
     TextCell,
+    Style,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
@@ -67,16 +68,8 @@ class DataLists:
         self._value_attr = value_attr
         self._datalist_name = datalist_name
 
-    def init(self, table_id: int):
-        """Remove all entries from a datalist"""
-        self.cache_table(table_id)
-        self._datalists[table_id]["by_key"] = {}
-        self._datalists[table_id]["by_value"] = {}
-        self._datalists[table_id]["next_key"] = 1
-        clear_field_container(self._datalists[table_id]["datalist"].entries)
-
     @lru_cache(maxsize=None)
-    def cache_table(self, table_id: int):
+    def add_table(self, table_id: int):
         """Cache a new datalist for a table if not already seen"""
         base_data_store = self._model.objects[table_id].base_data_store
         datalist_id = getattr(base_data_store, self._datalist_name).identifier
@@ -87,6 +80,7 @@ class DataLists:
         self._datalists[table_id]["by_key"] = {}
         self._datalists[table_id]["by_value"] = {}
         self._datalists[table_id]["datalist"] = datalist
+        self._datalists[table_id]["id"] = datalist_id
         for entry in datalist.entries:
             if entry.key > max_key:
                 max_key = entry.key
@@ -98,21 +92,32 @@ class DataLists:
                     self._datalists[table_id]["by_value"][value] = entry.key
         self._datalists[table_id]["next_key"] = max_key + 1
 
+    def id(self, table_id: int) -> int:
+        return self._datalists[table_id]["id"]
+
     def lookup_value(self, table_id: int, key: int):
         """Return the an entry in a table's datalist matching a key"""
-        self.cache_table(table_id)
+        self.add_table(table_id)
         return self._datalists[table_id]["by_key"][key]
+
+    def init(self, table_id: int):
+        """Remove all entries from a datalist"""
+        self.add_table(table_id)
+        self._datalists[table_id]["by_key"] = {}
+        self._datalists[table_id]["by_value"] = {}
+        self._datalists[table_id]["next_key"] = 1
+        self._datalists[table_id]["datalist"].nextListID = 1
+        clear_field_container(self._datalists[table_id]["datalist"].entries)
 
     def lookup_key(self, table_id: int, value) -> int:
         """Return the key associated with a value for a particular table entry.
         If the value is not in the datalist, allocate a new entry with the
         next available key"""
-        self.cache_table(table_id)
-        if isinstance(value, TSPMessages.Reference):
-            lookup_value = value.identifier
-        else:
-            lookup_value = value
-        if lookup_value not in self._datalists[table_id]["by_value"]:
+        self.add_table(table_id)
+        value_key = (
+            value.identifier if isinstance(value, TSPMessages.Reference) else value
+        )
+        if value_key not in self._datalists[table_id]["by_value"]:
             key = self._datalists[table_id]["next_key"]
             self._datalists[table_id]["next_key"] += 1
             self._datalists[table_id]["datalist"].nextListID += 1
@@ -120,8 +125,10 @@ class DataLists:
             entry = TSTArchives.TableDataList.ListEntry(**attrs)
             self._datalists[table_id]["datalist"].entries.append(entry)
             self._datalists[table_id]["by_key"][key] = entry
-            self._datalists[table_id]["by_value"][lookup_value] = key
+            self._datalists[table_id]["by_value"][value_key] = key
         else:
+            if isinstance(value, TSPMessages.Reference):
+                value = value.identifier
             key = self._datalists[table_id]["by_value"][value]
             self._datalists[table_id]["by_key"][key].refcount += 1
 
@@ -547,11 +554,10 @@ class _NumbersModel:
         row_offset = self.row_storage_map(table_id)[row_num]
         if row_offset is None:
             return None
-        try:
-            storage_buffers = self.storage_buffers(table_id)
-            return storage_buffers[row_offset][col_num]
-        except IndexError:
+        storage_buffers = self.storage_buffers(table_id)
+        if col_num >= len(storage_buffers[row_offset]):
             return None
+        return storage_buffers[row_offset][col_num]
 
     def recalculate_row_headers(self, table_id: int, data: List):
         base_data_store = self.objects[table_id].base_data_store
@@ -1124,27 +1130,29 @@ class _NumbersModel:
 
         return sheet_id
 
-    def add_cell_style(self, table_id: int, style: object) -> int:
+    def add_cell_style(self, table_id: int, style: Style) -> int:
         table_model = self.objects[table_id]
         cell_style_id, cell_style = self.objects.create_object_from_dict(
+            # TODO: lookup a new style name
             "DocumentStylesheet",
             {
                 "super": {
                     "name": "Custom Style 99",
-                    "style_identifier": "text-99-paragraphstyle-Custom Style 99",
+                    "style_identifier": "text-98-paragraphstyle-Custom Style 98",
                 },
                 "override_count": 1,
                 "cell_properties": {
                     "cell_fill": {
                         "color": {
                             "model": "rgb",
-                            "r": style._bg_color.r / 255,
-                            "g": style._bg_color.g / 255,
-                            "b": style._bg_color.b / 255,
+                            "r": style._bg_color.r,
+                            "g": style._bg_color.g,
+                            "b": style._bg_color.b,
                             "a": 1.0,
                             "rgbspace": "srgb",
                         }
-                    }
+                    },
+                    "vertical_alignment": style.alignment.vertical,
                 },
             },
             TSTArchives.CellStyleArchive,
@@ -1156,9 +1164,62 @@ class _NumbersModel:
         cell_style.super.stylesheet.MergeFrom(
             TSPMessages.Reference(identifier=stylesheet_id)
         )
-        self.objects[stylesheet_id].styles.append(cell_style.super.stylesheet)
-
+        self.objects[stylesheet_id].styles.append(
+            TSPMessages.Reference(identifier=cell_style_id)
+        )
         return cell_style_id
+
+    def add_text_style(self, table_id: int, style: Style) -> int:
+        table_model = self.objects[table_id]
+        if style._is_underline:
+            underline = CharacterStyle.UnderlineType.kSingleUnderline
+        else:
+            underline = CharacterStyle.UnderlineType.kNoUnderline
+        if style._is_strikethrough:
+            strikethru = CharacterStyle.StrikethruType.kSingleStrikethru
+        else:
+            strikethru = CharacterStyle.StrikethruType.kNoStrikethru
+        text_style_id, text_style = self.objects.create_object_from_dict(
+            "DocumentStylesheet",
+            {
+                "super": {
+                    "name": "Custom Style 99",
+                    "style_identifier": "text-99-paragraphstyle-Custom Style 99",
+                },
+                "override_count": 1,
+                "char_properties": {
+                    "font_color": {
+                        "model": "rgb",
+                        "r": style._font_color.r,
+                        "g": style._font_color.g,
+                        "b": style._font_color.b,
+                        "a": 1.0,
+                        "rgbspace": "srgb",
+                    },
+                    "bold": style._is_bold,
+                    "italic": style._is_italic,
+                    "underline": underline,
+                    "strikethru": strikethru,
+                    "font_size": style._font_size,
+                    "font_name": style._font_name,
+                },
+                "para_properties": {
+                    "alignment": style.alignment.horizontal,
+                },
+            },
+            TSWPArchives.ParagraphStyleArchive,
+        )
+        text_style.super.parent.MergeFrom(
+            TSPMessages.Reference(identifier=table_model.body_text_style.identifier)
+        )
+        stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
+        text_style.super.stylesheet.MergeFrom(
+            TSPMessages.Reference(identifier=stylesheet_id)
+        )
+        self.objects[stylesheet_id].styles.append(
+            TSPMessages.Reference(identifier=text_style_id)
+        )
+        return text_style_id
 
     def pack_cell_storage(  # noqa: C901
         self,
@@ -1171,18 +1232,34 @@ class _NumbersModel:
     ) -> bytearray:
         """Create a storage buffer for a cell using v5 (modern) layout"""
         cell = data[row_num][col_num]
-        update_cell_style = cell._style is not None and cell._style._dirty
-        if update_cell_style:
+        if cell._style is not None and cell._style._cell_style_updated:
             if cell._storage.cell_style_id is None:
                 cell_style_id = self.add_cell_style(cell._table_id, cell._style)
                 cell._storage.cell_style_id = self._table_styles.lookup_key(
-                    cell._table_id, TSPMessages.Reference(identifier=cell_style_id)
+                    cell._table_id,
+                    TSPMessages.Reference(identifier=cell_style_id),
                 )
-            # if cell._storage.text_style_id is None:
-            #     text_style_id = self.add_text_style(cell._table_id, cell._style)
-            #     cell._storage.text_style_id = self._table_styles.lookup_key(
-            #         cell._table_id, text_style_id
-            #     )
+                datalist_id = self._table_styles.id(cell._table_id)
+                self.add_component_reference(
+                    cell_style_id, "DocumentStylesheet", datalist_id
+                )
+            else:
+                # TODO: update existing styles
+                pass
+        if cell._style is not None and cell._style._text_style_updated:
+            if cell._storage.text_style_id is None:
+                text_style_id = self.add_text_style(cell._table_id, cell._style)
+                cell._storage.text_style_id = self._table_styles.lookup_key(
+                    cell._table_id,
+                    TSPMessages.Reference(identifier=text_style_id),
+                )
+                datalist_id = self._table_styles.id(cell._table_id)
+                self.add_component_reference(
+                    text_style_id, "DocumentStylesheet", datalist_id
+                )
+            else:
+                # TODO: update existing styles
+                pass
 
         length = 12
         if isinstance(cell, NumberCell):
@@ -1211,10 +1288,6 @@ class _NumbersModel:
             length += 8
             cell_type = TSTArchives.durationCellType
             value = value = pack("<d", float(cell.value.total_seconds()))
-        elif isinstance(cell, EmptyCell) and update_cell_style:
-            flags = 0
-            cell_type = 0
-            value = b""
         elif isinstance(cell, EmptyCell):
             return None
         elif isinstance(cell, MergedCell):
@@ -1412,7 +1485,7 @@ class _NumbersModel:
 
     def cell_bg_color(self, cell_storage: object) -> Union[Tuple, List[Tuple]]:
         if cell_storage.cell_style_id is None:
-            return None
+            return RGB(0, 0, 0)
 
         cell_style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
         cell_properties = cell_style.cell_properties.cell_fill
