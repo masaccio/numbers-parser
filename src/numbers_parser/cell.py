@@ -32,7 +32,8 @@ class Style:
     def __init__(self, cell_storage: object, model: object):
         self._storage = cell_storage
         self._model = model
-        self._dirty = False
+        self._cell_style_updated = False
+        self._text_style_updated = False
 
         self._alignment = self._model.cell_alignment(self._storage)
         if self._storage.image_data is not None:
@@ -54,6 +55,25 @@ class Style:
         """The horizontal and vertical alignment of the cell as a named tuple."""
         return self._alignment
 
+    @alignment.setter
+    def alignment(self, value: Alignment):
+        """Set the horizontal and vertical alignment of the cell."""
+        if not isinstance(value, Alignment):
+            raise TypeError("value must be an Alignment class")
+
+        if self._alignment != value:
+            self._alignment = value
+            self._text_style_updated = True
+            self._cell_style_updated = True
+
+    def check_rgb_type(self, color) -> RGB:
+        if isinstance(color, RGB):
+            return color
+        elif len(color) != 3 or not all([isinstance(x, int) for x in color]):
+            raise TypeError("RGB color must be an RGB or a tuple of 3 integers")
+        else:
+            return RGB(color)
+
     @property
     def bg_image(self) -> object:
         """The background image object for a cell, or None if no background
@@ -68,13 +88,12 @@ class Style:
         return self._bg_color
 
     @bg_color.setter
-    def bg_color(self, color: RGB):
+    def bg_color(self, color: Union[RGB, Tuple]):
         """Set the cell background color to a new RGB value."""
-        if len(color) != 3 or not all(isinstance(x, int) for x in color):
-            raise TypeError("RGB color must be be a tuple of 3 integers")
+        color = self.check_rgb_type(color)
         if self._bg_color != color:
             self._bg_color = color
-            self._dirty = True
+            self._cell_style_updated = True
 
     @property
     def font_color(self) -> bool:
@@ -85,11 +104,10 @@ class Style:
     @font_color.setter
     def font_color(self, color: RGB):
         """Set the font color to a new RGB value."""
-        if len(color) != 3 or not all(isinstance(x, int) for x in color):
-            raise TypeError("RGB color must be be a tuple of 3 integers")
+        color = self.check_rgb_type(color)
         if self._font_color != color:
             self._font_color = color
-            self._dirty = True
+            self._text_style_updated = True
 
     @property
     def font_size(self) -> float:
@@ -103,32 +121,77 @@ class Style:
             raise TypeError("size must be a float number of points")
         if self._font_size != size:
             self._font_size = size
-            self._dirty = True
+            self._text_style_updated = True
 
     @property
     def font_name(self) -> str:
         """The font family assigned to the cell."""
         return self._font_name
 
+    @font_name.setter
+    def font_name(self, font_name: str):
+        """Set the font for the cell."""
+        if not isinstance(font_name, str):
+            raise TypeError("argument must be a string")
+        if self._font_name != font_name:
+            self._font_name = font_name
+            self._text_style_updated = True
+
     @property
     def is_bold(self) -> bool:
         """True if the cell is formatted to bold."""
         return self._is_bold
+
+    @is_bold.setter
+    def is_bold(self, bold: bool):
+        """Set the size of the font for the cell."""
+        if not isinstance(bold, bool):
+            raise TypeError("argument must be boolean")
+        if self._is_bold != bold:
+            self._is_bold = bold
+            self._text_style_updated = True
 
     @property
     def is_italic(self) -> bool:
         """True if the cell is formatted to italic."""
         return self._is_italic
 
+    @is_italic.setter
+    def is_italic(self, italic: bool):
+        """Set the size of the font for the cell."""
+        if not isinstance(italic, bool):
+            raise TypeError("argument must be boolean")
+        if self._is_italic != italic:
+            self._is_italic = italic
+            self._text_style_updated = True
+
     @property
     def is_strikethrough(self) -> bool:
         """True if the cell is formatted to strikethrough."""
         return self._is_strikethrough
 
+    @is_strikethrough.setter
+    def is_strikethrough(self, strikethrough: bool):
+        """Set the size of the font for the cell."""
+        if not isinstance(strikethrough, bool):
+            raise TypeError("argument must be boolean")
+        if self._is_strikethrough != strikethrough:
+            self._is_strikethrough = strikethrough
+            self._text_style_updated = True
+
     @property
     def is_underline(self) -> bool:
         """True if the cell is formatted to underline."""
         return self._is_underline
+
+    @is_underline.setter
+    def is_underline(self, underline: bool):
+        """Set the size of the font for the cell."""
+        if not isinstance(underline, bool):
+            raise TypeError("argument must be boolean")
+        if self._is_underline != underline:
+            self._is_underline = underline
+            self._text_style_updated = True
 
     @property
     def name(self) -> str:
