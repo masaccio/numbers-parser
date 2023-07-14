@@ -1242,7 +1242,7 @@ class _NumbersModel:
                 self.add_component_reference(
                     cell_style_id,
                     "DocumentStylesheet",
-                    self._table_styles.id(cell._table_id),
+                    self.objects[DOCUMENT_ID].stylesheet.identifier,
                 )
             else:
                 # TODO: update existing styles
@@ -1257,7 +1257,7 @@ class _NumbersModel:
                 self.add_component_reference(
                     text_style_id,
                     "DocumentStylesheet",
-                    self._table_styles.id(cell._table_id),
+                    self.objects[DOCUMENT_ID].stylesheet.identifier,
                 )
             else:
                 # TODO: update existing styles
