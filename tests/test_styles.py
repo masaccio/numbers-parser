@@ -1,7 +1,12 @@
 import pytest
 
 from numbers_parser import Document, EmptyCell
-from numbers_parser.constants import RGB
+from numbers_parser.constants import (
+    RGB,
+    Alignment,
+    HorizontalJustification,
+    VerticalJustification,
+)
 
 TEST_NUMBERED_REF = [
     "(1) double-paren-1",
@@ -180,16 +185,31 @@ def test_new_styles(tmp_path, pytestconfig):
     table = doc.sheets[0].tables[0]
     with pytest.raises(TypeError) as e:
         table.cell("D3").style.bg_color = (0, 0, 0, 0)
-    assert "RGB color must be be a tuple" in str(e)
+    assert "RGB color must be an RGB" in str(e)
     with pytest.raises(TypeError) as e:
         table.cell("D3").style.bg_color = (0, 0, 1.0)
-    assert "RGB color must be be a tuple" in str(e)
+    assert "RGB color must be an RGB" in str(e)
 
     table.cell("D3").style.bg_color = RGB(29, 177, 0)
-    assert table.cell("D3").style.bg_color == RGB(29, 177, 0)
+    table.write("E3", "Red")
+    table.cell("E3").style.font_color = RGB(230, 25, 25)
+    table.cell("E3").style.font_size = 14.0
+    table.cell("E3").style.is_bold = True
+    table.cell("E3").style.is_italic = True
+    table.cell("E3").style.alignment = Alignment(
+        HorizontalJustification.RIGHT, VerticalJustification.BOTTOM
+    )
 
     doc.save(new_filename)
 
     new_doc = Document(new_filename)
     new_table = new_doc.sheets[0].tables[0]
     assert new_table.cell("D3").style.bg_color == RGB(29, 177, 0)
+
+    assert table.cell("E3").style.font_color == RGB(230, 25, 25)
+    assert table.cell("E3").style.font_size == 14.0
+    assert table.cell("E3").style.is_bold
+    assert table.cell("E3").style.is_italic
+    assert table.cell("E3").style.alignment == Alignment(
+        HorizontalJustification.RIGHT, VerticalJustification.BOTTOM
+    )
