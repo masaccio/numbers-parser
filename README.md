@@ -14,7 +14,7 @@ Formula evaluation relies on Numbers storing current values which should usually
 
 ## API changes in version 4.0
 
-To better partition cell styles, the new cell property `style` contains all style information for a cell including background image data which was supported in earlier versions. Image information is now found in `cell.style.bg_image`.
+To better partition cell styles, the new cell property `style` contains all style information for a cell including background image data which was supported in earlier versions. Image information is now found in `cell.style.bg_image`. Using the deprecated methods `image_data` and `image_filename` will issue a `DeprecationWarning` if used.The legacy methods will be removed in a future version of numbers-parser.
 
 `NumberCell` cell types return [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html) types rather than `float`. These are created in a [decimal128](https://en.wikipedia.org/wiki/Decimal128_floating-point_format) context to preserve the precision used by Numbers. Previously, using float resulted in rounding errors in unpacking internal numbers.
 
@@ -74,8 +74,6 @@ print("Opened sheet", sheet_1.name)
 table_1 = sheets["Table 1"]
 print("Opened table", table_1.name)
 ```
-
-As of version 3.0, the `Document.sheets()` and `Sheet.tables()` methods are deprecated and will issue a `DeprecationWarning` if used. Instead of these functions, you should use the properties as demonstrated above. The legacy methods will be removed in a future version of `numbers-parser`.
 
 ### Accessing data
 

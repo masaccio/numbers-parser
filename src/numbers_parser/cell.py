@@ -1,4 +1,5 @@
 import re
+import warnings
 
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.exceptions import UnsupportedError
@@ -267,6 +268,30 @@ class Cell:
         self._formula_key = None
         self._storage = None
         self._style = None
+
+    @property
+    def image_filename(self):
+        warnings.warn(
+            "image_filename is deprecated and will be removed in the future. "
+            + "Please use the style property",
+            DeprecationWarning,
+        )
+        if self.style is not None and self.style.bg_image is not None:
+            return self.style.bg_image.filename
+        else:
+            return None
+
+    @property
+    def image_data(self):
+        warnings.warn(
+            "image_data is deprecated and will be removed in the future. "
+            + "Please use the style property",
+            DeprecationWarning,
+        )
+        if self.style is not None and self.style.bg_image is not None:
+            return self.style.bg_image.data
+        else:
+            return None
 
     @property
     def is_formula(self):

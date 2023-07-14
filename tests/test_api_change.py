@@ -4,21 +4,25 @@ from numbers_parser import Document
 
 
 def test_api_change():
-    doc = Document("tests/data/test-1.numbers")
+    doc = Document("tests/data/issue-43.numbers")
+    table = doc.sheets[0].tables[0]
 
     with pytest.warns(DeprecationWarning) as record:
-        sheets = doc.sheets()
+        value = table.cell("A1").image_data
     assert len(record) == 1
-    assert "sheets() is deprecated and will be removed" in record[0].message.args[0]
-    assert sheets[0].name == "ZZZ_Sheet_1"
+    assert len(value) == 87857
 
-    sheet = doc.sheets[0]
     with pytest.warns(DeprecationWarning) as record:
-        tables = sheet.tables()
+        value = table.cell("A1").image_filename
     assert len(record) == 1
-    assert "tables() is deprecated and will be removed" in record[0].message.args[0]
-    assert tables[0].name == "ZZZ_Table_1"
+    assert value == "pasted-image-17.png"
 
-    assert len(doc.sheets) == 2
-    assert len(doc.sheets[0].tables) == 2
-    assert doc.sheets[0].tables[0].cell(1, 0).value == "YYY_ROW_1"
+    with pytest.warns(DeprecationWarning) as record:
+        value = table.cell("C1").image_data
+    assert len(record) == 1
+    assert value is None
+
+    with pytest.warns(DeprecationWarning) as record:
+        value = table.cell("C1").image_filename
+    assert len(record) == 1
+    assert value is None

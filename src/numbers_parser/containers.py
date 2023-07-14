@@ -1,5 +1,4 @@
 import math
-import warnings
 
 from numbers_parser.file import read_numbers_file
 from numbers_parser.constants import PACKAGE_ID
@@ -10,15 +9,6 @@ class ItemsList:
     def __init__(self, model, refs, item_class):
         self._item_name = item_class.__name__.lower()
         self._items = [item_class(model, _) for _ in refs]
-
-    def __call__(self):
-        method_name = self._item_name + "s"
-        warnings.warn(
-            f"{method_name}() is deprecated and will be removed in the future. "
-            + "Please use {method_name} property",
-            DeprecationWarning,
-        )
-        return self
 
     def __getitem__(self, key: int):
         if type(key) == int:
