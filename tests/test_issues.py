@@ -306,3 +306,12 @@ def test_issue_56(tmp_path):
     assert new_table.cell("A2").style.bg_color == (255, 149, 202)
     assert new_table.cell("B2").style.alignment.horizontal.name == "RIGHT"
     assert new_table.cell("B2").style.alignment.vertical.name == "TOP"
+
+
+def test_issue_59():
+    from numbers_parser import Document
+
+    doc = Document("tests/data/issue-59.numbers")
+    sheets = doc.sheets
+    tables = sheets[0].tables
+    assert tables[0].cell("J2").value == "Saturday, 15 May 2021"
