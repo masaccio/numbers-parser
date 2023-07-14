@@ -223,6 +223,7 @@ Since version 3.4.0, adding tables and sheets is supported. Known limitations to
 * Formats cannot be defined for `DurationCell` or `DateCell`
 * New tables are inserted with a fixed offset below the last table in a worksheet which does not take into account title or caption size
 * New sheets insert tables with formats copied from the first table in the previous sheet rather than default table formats
+* Style cannot be saved.
 
 ### Editing cells
 
