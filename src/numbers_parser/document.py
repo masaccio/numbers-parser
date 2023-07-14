@@ -386,6 +386,8 @@ class Table:
         self._data[row_num][col_num]._storage = CellStorage(
             self._model, self._table_id, None, row_num, col_num
         )
+        self._data[row_num][col_num]._table_id = self._table_id
+        self._data[row_num][col_num]._model = self._model
 
     def add_row(self, num_rows=1):
         row = [
