@@ -1145,9 +1145,9 @@ class _NumbersModel:
                     "cell_fill": {
                         "color": {
                             "model": "rgb",
-                            "r": style._bg_color.r,
-                            "g": style._bg_color.g,
-                            "b": style._bg_color.b,
+                            "r": style._bg_color.r / 255,
+                            "g": style._bg_color.g / 255,
+                            "b": style._bg_color.b / 255,
                             "a": 1.0,
                             "rgbspace": "srgb",
                         }
@@ -1190,9 +1190,9 @@ class _NumbersModel:
                 "char_properties": {
                     "font_color": {
                         "model": "rgb",
-                        "r": style._font_color.r,
-                        "g": style._font_color.g,
-                        "b": style._font_color.b,
+                        "r": style._font_color.r / 255,
+                        "g": style._font_color.g / 255,
+                        "b": style._font_color.b / 255,
                         "a": 1.0,
                         "rgbspace": "srgb",
                     },
@@ -1239,9 +1239,10 @@ class _NumbersModel:
                     cell._table_id,
                     TSPMessages.Reference(identifier=cell_style_id),
                 )
-                datalist_id = self._table_styles.id(cell._table_id)
                 self.add_component_reference(
-                    cell_style_id, "DocumentStylesheet", datalist_id
+                    cell_style_id,
+                    "DocumentStylesheet",
+                    self._table_styles.id(cell._table_id),
                 )
             else:
                 # TODO: update existing styles
@@ -1253,9 +1254,10 @@ class _NumbersModel:
                     cell._table_id,
                     TSPMessages.Reference(identifier=text_style_id),
                 )
-                datalist_id = self._table_styles.id(cell._table_id)
                 self.add_component_reference(
-                    text_style_id, "DocumentStylesheet", datalist_id
+                    text_style_id,
+                    "DocumentStylesheet",
+                    self._table_styles.id(cell._table_id),
                 )
             else:
                 # TODO: update existing styles
@@ -1289,7 +1291,14 @@ class _NumbersModel:
             cell_type = TSTArchives.durationCellType
             value = value = pack("<d", float(cell.value.total_seconds()))
         elif isinstance(cell, EmptyCell):
-            return None
+            if cell._style is not None and (
+                cell._style._cell_style_updated or cell._style._text_style_updated
+            ):
+                flags = 0
+                cell_type = TSTArchives.emptyCellValueType
+                value = b""
+            else:
+                return None
         elif isinstance(cell, MergedCell):
             return None
         else:  # pragma: no cover
