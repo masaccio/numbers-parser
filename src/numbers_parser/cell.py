@@ -2,13 +2,23 @@ import re
 import warnings
 
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.generated.TSWPArchives_pb2 import (
+    ParagraphStylePropertiesArchive as ParagraphStyle,
+)
 from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.cell_storage import CellType, CellStorage
-from numbers_parser.constants import EMPTY_STORAGE_BUFFER, Alignment, RGB
+from numbers_parser.constants import (
+    EMPTY_STORAGE_BUFFER,
+    DEFAULT_FONT,
+    DEFAULT_FONT_SIZE,
+)
 
+from dataclasses import dataclass
+from collections import namedtuple
+from enum import IntEnum
 from functools import lru_cache
 from pendulum import duration, Duration, DateTime
-from typing import List, Tuple, Union
+from typing import Any, List, Tuple, Union
 
 
 class BackgroundImage:
@@ -29,175 +39,130 @@ class BackgroundImage:
         return self._filename
 
 
+# Style return types
+_Alignment = namedtuple("Alignment", ["horizontal", "vertical"])
+RGB = namedtuple("RGB", ["r", "g", "b"])
+
+
+class HorizontalJustification(IntEnum):
+    LEFT = ParagraphStyle.TextAlignmentType.TATvalue0
+    RIGHT = ParagraphStyle.TextAlignmentType.TATvalue1
+    CENTER = ParagraphStyle.TextAlignmentType.TATvalue2
+    JUSTIFIED = ParagraphStyle.TextAlignmentType.TATvalue3
+    AUTO = ParagraphStyle.TextAlignmentType.TATvalue4
+
+
+class VerticalJustification(IntEnum):
+    TOP = ParagraphStyle.ParagraphBorderType.PBTvalue0
+    MIDDLE = ParagraphStyle.ParagraphBorderType.PBTvalue1
+    BOTTOM = ParagraphStyle.ParagraphBorderType.PBTvalue2
+
+
+HORIZONTAL_MAP = {
+    "left": HorizontalJustification.LEFT,
+    "right": HorizontalJustification.RIGHT,
+    "center": HorizontalJustification.CENTER,
+    "justified": HorizontalJustification.JUSTIFIED,
+    "auto": HorizontalJustification.AUTO,
+}
+
+VERTICAL_MAP = {
+    "top": VerticalJustification.TOP,
+    "middle": VerticalJustification.MIDDLE,
+    "bottom": VerticalJustification.BOTTOM,
+}
+
+
+class Alignment(_Alignment):
+    def __new__(cls, horizontal="auto", vertical="top"):
+        if isinstance(horizontal, str):
+            horizontal = horizontal.lower()
+            if horizontal not in HORIZONTAL_MAP:
+                raise TypeError("invalid horizontal alignment")
+            horizontal = HORIZONTAL_MAP[horizontal]
+
+        if isinstance(vertical, str):
+            vertical = vertical.lower()
+            if vertical not in VERTICAL_MAP:
+                raise TypeError("invalid vertical alignment")
+            vertical = VERTICAL_MAP[vertical]
+
+        self = super(_Alignment, cls).__new__(cls, (horizontal, vertical))
+        return self
+
+
+@dataclass
 class Style:
-    def __init__(self, cell_storage: object, model: object):
-        self._storage = cell_storage
-        self._model = model
-        self._cell_style_updated = False
-        self._text_style_updated = False
+    alignment: Alignment = Alignment("auto", "top")
+    bg_image: object = None
+    bg_color: Union[RGB, List[RGB]] = None
+    font_color: RGB = RGB(0, 0, 0)
+    font_size: float = DEFAULT_FONT_SIZE
+    font_name: str = DEFAULT_FONT
+    bold: bool = False
+    italic: bool = False
+    strikethrough: bool = False
+    underline: bool = False
+    name: str = None
+    _style_id: int = None
+    _update_styles: bool = False
 
-        self._alignment = self._model.cell_alignment(self._storage)
-        if self._storage.image_data is not None:
-            self._bg_image = BackgroundImage(*self._storage.image_data)
+    @classmethod
+    def from_storage(cls, cell_storage: object, model: object):
+        style = Style()
+
+        if cell_storage.image_data is not None:
+            bg_image = BackgroundImage(*cell_storage.image_data)
         else:
-            self._bg_image = None
-        self._bg_color = self._model.cell_bg_color(self._storage)
-        self._font_color = self._model.cell_font_color(self._storage)
-        self._font_size = self._model.cell_font_size(self._storage)
-        self._font_name = self._model.cell_font_name(self._storage)
-        self._is_bold = self._model.cell_is_bold(self._storage)
-        self._is_italic = self._model.cell_is_italic(self._storage)
-        self._is_strikethrough = self._model.cell_is_strikethrough(self._storage)
-        self._is_underline = self._model.cell_is_underline(self._storage)
-        self._name = self._model.cell_style_name(self._storage)
+            bg_image = None
+        style = Style(
+            alignment=model.cell_alignment(cell_storage),
+            bg_image=bg_image,
+            bg_color=model.cell_bg_color(cell_storage),
+            font_color=model.cell_font_color(cell_storage),
+            font_size=model.cell_font_size(cell_storage),
+            font_name=model.cell_font_name(cell_storage),
+            bold=model.cell_is_bold(cell_storage),
+            italic=model.cell_is_italic(cell_storage),
+            strikethrough=model.cell_is_strikethrough(cell_storage),
+            underline=model.cell_is_underline(cell_storage),
+            name=model.cell_style_name(cell_storage),
+        )
+        return style
 
-    @property
-    def alignment(self) -> Alignment:
-        """The horizontal and vertical alignment of the cell as a named tuple."""
-        return self._alignment
-
-    @alignment.setter
-    def alignment(self, value: Alignment):
-        """Set the horizontal and vertical alignment of the cell."""
-        if not isinstance(value, Alignment):
+    def __post_init__(self):
+        if not isinstance(self.alignment, Alignment):
             raise TypeError("value must be an Alignment class")
 
-        if self._alignment != value:
-            self._alignment = value
-            self._text_style_updated = True
-            self._cell_style_updated = True
+        check_rgb_type(self.bg_color)
+        check_rgb_type(self.font_color)
 
-    def check_rgb_type(self, color) -> RGB:
-        if isinstance(color, RGB):
-            return color
-        elif len(color) != 3 or not all([isinstance(x, int) for x in color]):
-            raise TypeError("RGB color must be an RGB or a tuple of 3 integers")
-        else:
-            return RGB(color)
-
-    @property
-    def bg_image(self) -> object:
-        """The background image object for a cell, or None if no background
-        is assigned"""
-        return self._bg_image
-
-    @property
-    def bg_color(self) -> Union[RGB, List[RGB]]:
-        """An named tuple containing the integer (0-255) RGB values for the
-        background color of a cell. For gradients, a list of named tuples
-        for each colr point in the gradient."""
-        return self._bg_color
-
-    @bg_color.setter
-    def bg_color(self, color: Union[RGB, Tuple]):
-        """Set the cell background color to a new RGB value."""
-        color = self.check_rgb_type(color)
-        if self._bg_color != color:
-            self._bg_color = color
-            self._cell_style_updated = True
-
-    @property
-    def font_color(self) -> bool:
-        """A named tuple containing the integer (0-255) RGB values for the
-        color f the font for text in the cell."""
-        return self._font_color
-
-    @font_color.setter
-    def font_color(self, color: RGB):
-        """Set the font color to a new RGB value."""
-        color = self.check_rgb_type(color)
-        if self._font_color != color:
-            self._font_color = color
-            self._text_style_updated = True
-
-    @property
-    def font_size(self) -> float:
-        """The point size of the font for the cell."""
-        return self._font_size
-
-    @font_size.setter
-    def font_size(self, size: float):
-        """Set the size of the font for the cell."""
-        if not isinstance(size, float):
+        if not isinstance(self.font_size, float):
             raise TypeError("size must be a float number of points")
-        if self._font_size != size:
-            self._font_size = size
-            self._text_style_updated = True
-
-    @property
-    def font_name(self) -> str:
-        """The font family assigned to the cell."""
-        return self._font_name
-
-    @font_name.setter
-    def font_name(self, font_name: str):
-        """Set the font for the cell."""
-        if not isinstance(font_name, str):
+        if not isinstance(self.font_name, str):
             raise TypeError("argument must be a string")
-        if self._font_name != font_name:
-            self._font_name = font_name
-            self._text_style_updated = True
 
-    @property
-    def is_bold(self) -> bool:
-        """True if the cell is formatted to bold."""
-        return self._is_bold
+        for field in ["bold", "italic", "underline", "strikethrough"]:
+            if not isinstance(getattr(self, field), bool):
+                raise TypeError(f"{field} argument must be boolean")
 
-    @is_bold.setter
-    def is_bold(self, bold: bool):
-        """Set the size of the font for the cell."""
-        if not isinstance(bold, bool):
-            raise TypeError("argument must be boolean")
-        if self._is_bold != bold:
-            self._is_bold = bold
-            self._text_style_updated = True
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name in self.__dict__ and self.__dict__[name] != value:
+            self.__dict__["_update_style"] = True
+        self.__dict__[name] = value
 
-    @property
-    def is_italic(self) -> bool:
-        """True if the cell is formatted to italic."""
-        return self._is_italic
 
-    @is_italic.setter
-    def is_italic(self, italic: bool):
-        """Set the size of the font for the cell."""
-        if not isinstance(italic, bool):
-            raise TypeError("argument must be boolean")
-        if self._is_italic != italic:
-            self._is_italic = italic
-            self._text_style_updated = True
-
-    @property
-    def is_strikethrough(self) -> bool:
-        """True if the cell is formatted to strikethrough."""
-        return self._is_strikethrough
-
-    @is_strikethrough.setter
-    def is_strikethrough(self, strikethrough: bool):
-        """Set the size of the font for the cell."""
-        if not isinstance(strikethrough, bool):
-            raise TypeError("argument must be boolean")
-        if self._is_strikethrough != strikethrough:
-            self._is_strikethrough = strikethrough
-            self._text_style_updated = True
-
-    @property
-    def is_underline(self) -> bool:
-        """True if the cell is formatted to underline."""
-        return self._is_underline
-
-    @is_underline.setter
-    def is_underline(self, underline: bool):
-        """Set the size of the font for the cell."""
-        if not isinstance(underline, bool):
-            raise TypeError("argument must be boolean")
-        if self._is_underline != underline:
-            self._is_underline = underline
-            self._text_style_updated = True
-
-    @property
-    def name(self) -> str:
-        """The style name for the cell."""
-        return self._name
+def check_rgb_type(color) -> RGB:
+    """Raise a TypeError if a color is not a valid RGB value"""
+    if color is None:
+        return
+    if isinstance(color, RGB):
+        return
+    if isinstance(color, tuple):
+        if not (len(color) == 3 and all([isinstance(x, int) for x in color])):
+            raise TypeError("RGB color must be an RGB or a tuple of 3 integers")
+    elif isinstance(color, list):
+        [check_rgb_type(c) for c in color]
 
 
 class Cell:
@@ -214,7 +179,7 @@ class Cell:
         cell.size = None
         cell._model = model
         cell._table_id = table_id
-        cell._style = None
+        cell.style = None
         return cell
 
     @classmethod
@@ -322,10 +287,13 @@ class Cell:
             self._storage = CellStorage(
                 self._model, self._table_id, EMPTY_STORAGE_BUFFER, self.row, self.col
             )
-            self._style = Style(self._storage, self._model)
-        elif self._style is None:
-            self._style = Style(self._storage, self._model)
+        if self._style is None:
+            self._style = Style.from_storage(self._storage, self._model)
         return self._style
+
+    @style.setter
+    def style(self, style):
+        self._style = style
 
 
 class NumberCell(Cell):

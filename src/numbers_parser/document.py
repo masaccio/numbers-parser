@@ -18,6 +18,7 @@ from numbers_parser.cell import (
     MergedCell,
     xl_cell_to_rowcol,
     xl_range,
+    Style,
 )
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import DEFAULT_COLUMN_COUNT, DEFAULT_ROW_COUNT
@@ -30,8 +31,14 @@ class Document:
         self._sheets = ItemsList(self._model, refs, Sheet)
 
     @property
-    def sheets(self):
+    def sheets(self) -> list:
+        """Return a list of all sheets in the document"""
         return self._sheets
+
+    @property
+    def styles(self) -> list:
+        """Return a list of styles available in the document"""
+        return self._model.styles
 
     def save(self, filename):
         for sheet in self.sheets:
@@ -74,6 +81,19 @@ class Document:
         self._sheets.append(new_sheet)
 
         return new_sheet
+
+    def add_style(self, **kwargs) -> Style:
+        """Add a new style to the current document. If no style name is
+        provided, the next available numbered style will be generated"""
+        if "name" in kwargs and kwargs["name"] is not None:
+            if kwargs["name"] in self._model.styles.keys():
+                raise IndexError(f"style '{kwargs['name']}' already exists")
+        style = Style(**kwargs)
+        if style.name is None:
+            style.name = self._model.custom_style_name(self._model.styles.keys())
+        style._update_styles = True
+        self._model.styles[style.name] = style
+        return style
 
 
 class Sheet:
@@ -346,7 +366,9 @@ class Table:
             else:
                 yield tuple(row[col_num] for row in rows[min_row : max_row + 1])
 
-    def write(self, *args):
+    def _validate_cell_coords(self, *args):
+        """Check first arguments are value cell references and pad
+        the table with empty cells if outside current bounds"""
         if type(args[0]) == str:
             (row_num, col_num) = xl_cell_to_rowcol(args[0])
             value = args[1]
@@ -366,6 +388,11 @@ class Table:
 
         for row in range(self.num_cols, col_num + 1):
             self.add_column()
+
+        return (row_num, col_num, value)
+
+    def write(self, *args, style=None):
+        (row_num, col_num, value) = self._validate_cell_coords(*args)
 
         if type(value) == str:
             self._data[row_num][col_num] = TextCell(row_num, col_num, value)
@@ -388,6 +415,17 @@ class Table:
         )
         self._data[row_num][col_num]._table_id = self._table_id
         self._data[row_num][col_num]._model = self._model
+
+    def set_cell_style(self, *args):
+        (row_num, col_num, style) = self._validate_cell_coords(*args)
+        if isinstance(style, Style):
+            self._data[row_num][col_num]._style = style
+        elif isinstance(style, str):
+            if style not in self._model.styles:
+                raise IndexError(f"style '{style}' does not exist")
+            self._data[row_num][col_num]._style = self._model.styles[style]
+        else:
+            raise TypeError("style must be a Style object or style name")
 
     def add_row(self, num_rows=1):
         row = [

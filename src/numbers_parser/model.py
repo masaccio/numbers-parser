@@ -8,6 +8,7 @@ from typing import Dict, List, Tuple, Union
 from warnings import warn
 
 from numbers_parser.containers import ObjectStore
+from numbers_parser.iwafile import find_extension
 from numbers_parser.constants import (
     EPOCH,
     DEFAULT_COLUMN_WIDTH,
@@ -19,10 +20,6 @@ from numbers_parser.constants import (
     DOCUMENT_ID,
     PACKAGE_ID,
     MAX_TILE_SIZE,
-    Alignment,
-    HorizontalJustification,
-    VerticalJustification,
-    RGB,
 )
 from numbers_parser.cell import (
     xl_rowcol_to_cell,
@@ -35,6 +32,10 @@ from numbers_parser.cell import (
     NumberCell,
     TextCell,
     Style,
+    Alignment,
+    HorizontalJustification,
+    VerticalJustification,
+    RGB,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
@@ -54,6 +55,7 @@ from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessage
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
+from numbers_parser.generated import TSSArchives_pb2 as TSSArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
     CharacterStylePropertiesArchive as CharacterStyle,
 )
@@ -712,6 +714,7 @@ class _NumbersModel:
         self.recalculate_row_headers(table_id, data)
         self.recalculate_column_headers(table_id, data)
         self.recalculate_merged_cells(table_id)
+        self.update_paragraph_styles()
 
         table_model.ClearField("base_column_row_uids")
 
@@ -1135,78 +1138,72 @@ class _NumbersModel:
 
         return sheet_id
 
-    def add_cell_style(self, table_id: int, style: Style) -> int:
-        table_model = self.objects[table_id]
-        cell_style_id, cell_style = self.objects.create_object_from_dict(
-            # TODO: lookup a new style name
-            "DocumentStylesheet",
-            {
-                "super": {
-                    "name": "Custom Style 99",
-                    "style_identifier": "text-98-paragraphstyle-Custom Style 98",
-                },
-                "override_count": 1,
-                "cell_properties": {
-                    "cell_fill": {
-                        "color": {
-                            "model": "rgb",
-                            "r": style._bg_color.r / 255,
-                            "g": style._bg_color.g / 255,
-                            "b": style._bg_color.b / 255,
-                            "a": 1.0,
-                            "rgbspace": "srgb",
-                        }
-                    },
-                    "vertical_alignment": style.alignment.vertical,
-                },
-            },
-            TSTArchives.CellStyleArchive,
-        )
-        cell_style.super.parent.MergeFrom(
-            TSPMessages.Reference(identifier=table_model.body_text_style.identifier)
-        )
-        stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
-        cell_style.super.stylesheet.MergeFrom(
-            TSPMessages.Reference(identifier=stylesheet_id)
-        )
-        self.objects[stylesheet_id].styles.append(
-            TSPMessages.Reference(identifier=cell_style_id)
-        )
-        return cell_style_id
+    @property
+    def styles(self):
+        return self.available_paragraph_styles()
 
-    def add_text_style(self, table_id: int, style: Style) -> int:
-        table_model = self.objects[table_id]
-        if style._is_underline:
+    @lru_cache(maxsize=None)
+    def available_paragraph_styles(self) -> List[Style]:
+        theme_id = self.objects[DOCUMENT_ID].theme.identifier
+        presets = find_extension(
+            self.objects[theme_id].super, "paragraph_style_presets"
+        )
+        presets_map = {
+            self.objects[x.identifier].super.name: {
+                "id": x.identifier,
+                "obj": self.objects[x.identifier],
+            }
+            for x in presets
+        }
+        return {
+            k: Style(
+                font_color=self.cell_font_color(v["obj"]),
+                font_size=self.cell_font_size(v["obj"]),
+                font_name=self.cell_font_name(v["obj"]),
+                bold=self.cell_is_bold(v["obj"]),
+                italic=self.cell_is_italic(v["obj"]),
+                underline=self.cell_is_underline(v["obj"]),
+                strikethrough=self.cell_is_strikethrough(v["obj"]),
+                name=self.cell_style_name(v["obj"]),
+                _style_id=v["id"],
+            )
+            for k, v in presets_map.items()
+        }
+
+    def add_paragraph_style(self, style: Style) -> int:
+        if style.underline:
             underline = CharacterStyle.UnderlineType.kSingleUnderline
         else:
             underline = CharacterStyle.UnderlineType.kNoUnderline
-        if style._is_strikethrough:
+        if style.strikethrough:
             strikethru = CharacterStyle.StrikethruType.kSingleStrikethru
         else:
             strikethru = CharacterStyle.StrikethruType.kNoStrikethru
-        text_style_id, text_style = self.objects.create_object_from_dict(
+
+        style_id_name = "numbers-parser-" + style.name.lower().replace(" ", "-")
+        para_style_id, para_style = self.objects.create_object_from_dict(
             "DocumentStylesheet",
             {
                 "super": {
-                    "name": "Custom Style 99",
-                    "style_identifier": "text-99-paragraphstyle-Custom Style 99",
+                    "name": style.name,
+                    "style_identifier": style_id_name,
                 },
                 "override_count": 1,
                 "char_properties": {
                     "font_color": {
                         "model": "rgb",
-                        "r": style._font_color.r / 255,
-                        "g": style._font_color.g / 255,
-                        "b": style._font_color.b / 255,
+                        "r": style.font_color.r / 255,
+                        "g": style.font_color.g / 255,
+                        "b": style.font_color.b / 255,
                         "a": 1.0,
                         "rgbspace": "srgb",
                     },
-                    "bold": style._is_bold,
-                    "italic": style._is_italic,
+                    "bold": style.bold,
+                    "italic": style.italic,
                     "underline": underline,
                     "strikethru": strikethru,
-                    "font_size": style._font_size,
-                    "font_name": style._font_name,
+                    "font_size": style.font_size,
+                    "font_name": style.font_name,
                 },
                 "para_properties": {
                     "alignment": style.alignment.horizontal,
@@ -1214,17 +1211,100 @@ class _NumbersModel:
             },
             TSWPArchives.ParagraphStyleArchive,
         )
-        text_style.super.parent.MergeFrom(
-            TSPMessages.Reference(identifier=table_model.body_text_style.identifier)
-        )
         stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
-        text_style.super.stylesheet.MergeFrom(
+        para_style.super.stylesheet.MergeFrom(
             TSPMessages.Reference(identifier=stylesheet_id)
         )
         self.objects[stylesheet_id].styles.append(
-            TSPMessages.Reference(identifier=text_style_id)
+            TSPMessages.Reference(identifier=para_style_id)
         )
-        return text_style_id
+        self.objects[stylesheet_id].identifier_to_style_map.append(
+            TSSArchives.StylesheetArchive.IdentifiedStyleEntry(
+                identifier=style_id_name,
+                style=TSPMessages.Reference(identifier=para_style_id),
+            )
+        )
+        # TODO: add style to theme
+        return para_style_id
+
+    def update_paragraph_styles(self):
+        """Create new paragraph style archives for any new styles that
+        have been created for this document"""
+        new_styles = [x for x in self.styles.values() if x._style_id is None]
+        for style in new_styles:
+            style._style_id = self.add_paragraph_style(style)
+            style._update_styles = True
+
+    def custom_style_name(self, current_styles: List[str]) -> Tuple[str, str]:
+        """Find custom styles in the current document and return the next
+        highest numbered style"""
+        stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
+        custom_styles = [
+            x for x in current_styles if re.fullmatch(r"Custom Style \d+", x)
+        ]
+        for style_entry in self.objects[stylesheet_id].identifier_to_style_map:
+            style_id = style_entry.style.identifier
+            style_name = getattr(self.objects[style_id].super, "name", "")
+            if re.fullmatch(r"Custom Style \d+", style_name):
+                custom_styles.append(style_name)
+
+        if len(custom_styles) > 0:
+            offset = len("Custom Style ")
+            custom_style_ids = [int(x[offset:]) for x in custom_styles]
+            return "Custom Style " + str(custom_style_ids[-1] + 1)
+        else:
+            return "Custom Style 1"
+
+    # def add_cell_style(self, table_id: int, style: Style) -> int:
+    #     (style_id_name, style_name) = self.custom_style_name("Cell")
+    #     table_model = self.objects[table_id]
+    #     if style._bg_color is not None:
+    #         color_attrs = {
+    #             "cell_fill": {
+    #                 "color": {
+    #                     "model": "rgb",
+    #                     "r": style._bg_color.r / 255,
+    #                     "g": style._bg_color.g / 255,
+    #                     "b": style._bg_color.b / 255,
+    #                     "a": 1.0,
+    #                     "rgbspace": "srgb",
+    #                 }
+    #             }
+    #         }
+    #     else:
+    #         color_attrs = {}
+    #     cell_style_id, cell_style = self.objects.create_object_from_dict(
+    #         "DocumentStylesheet",
+    #         {
+    #             "super": {
+    #                 "name": style_name,
+    #                 "style_identifier": style_id_name,
+    #             },
+    #             "override_count": 1,
+    #             "cell_properties": {
+    #                 **color_attrs,
+    #                 "vertical_alignment": style.alignment.vertical,
+    #             },
+    #         },
+    #         TSTArchives.CellStyleArchive,
+    #     )
+    #     cell_style.super.parent.MergeFrom(
+    #         TSPMessages.Reference(identifier=table_model.body_text_style.identifier)
+    #     )
+    #     stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
+    #     cell_style.super.stylesheet.MergeFrom(
+    #         TSPMessages.Reference(identifier=stylesheet_id)
+    #     )
+    #     self.objects[stylesheet_id].styles.append(
+    #         TSPMessages.Reference(identifier=cell_style_id)
+    #     )
+    #     self.objects[stylesheet_id].identifier_to_style_map.append(
+    #         TSSArchives.StylesheetArchive.IdentifiedStyleEntry(
+    #             identifier=style_id_name,
+    #             style=TSPMessages.Reference(identifier=cell_style_id),
+    #         )
+    #     )
+    #     return cell_style_id
 
     def pack_cell_storage(  # noqa: C901
         self,
@@ -1237,33 +1317,29 @@ class _NumbersModel:
     ) -> bytearray:
         """Create a storage buffer for a cell using v5 (modern) layout"""
         cell = data[row_num][col_num]
-        if cell._style is not None and cell._style._cell_style_updated:
-            if cell._storage.cell_style_id is None:
-                cell_style_id = self.add_cell_style(cell._table_id, cell._style)
-                cell._storage.cell_style_id = self._table_styles.lookup_key(
-                    cell._table_id,
-                    TSPMessages.Reference(identifier=cell_style_id),
-                )
-                self.add_component_reference(
-                    cell_style_id,
-                    parent_id=self._table_styles.id(cell._table_id),
-                )
-            else:
-                # TODO: update existing styles
-                pass
-        if cell._style is not None and cell._style._text_style_updated:
-            if cell._storage.text_style_id is None:
-                text_style_id = self.add_text_style(cell._table_id, cell._style)
-                cell._storage.text_style_id = self._table_styles.lookup_key(
-                    cell._table_id,
-                    TSPMessages.Reference(identifier=text_style_id),
-                )
-                self.add_component_reference(
-                    text_style_id, parent_id=self._table_styles.id(cell._table_id)
-                )
-            else:
-                # TODO: update existing styles
-                pass
+        if cell.style._update_styles:
+            cell._storage.text_style_id = self._table_styles.lookup_key(
+                cell._table_id,
+                TSPMessages.Reference(identifier=cell.style._style_id),
+            )
+            self.add_component_reference(
+                cell.style._style_id, parent_id=self._table_styles.id(cell._table_id)
+            )
+
+        # if cell._style is not None and cell._style._cell_style_updated:
+        #     if cell._storage.cell_style_id is None:
+        #         cell_style_id = self.add_cell_style(cell._table_id, cell._style)
+        #         cell._storage.cell_style_id = self._table_styles.lookup_key(
+        #             cell._table_id,
+        #             TSPMessages.Reference(identifier=cell_style_id),
+        #         )
+        #         self.add_component_reference(
+        #             cell_style_id,
+        #             parent_id=self._table_styles.id(cell._table_id),
+        #         )
+        #     else:
+        #         # TODO: update existing styles
+        #         pass
 
         length = 12
         if isinstance(cell, NumberCell):
@@ -1293,9 +1369,10 @@ class _NumbersModel:
             cell_type = TSTArchives.durationCellType
             value = value = pack("<d", float(cell.value.total_seconds()))
         elif isinstance(cell, EmptyCell):
-            if cell._style is not None and (
-                cell._style._cell_style_updated or cell._style._text_style_updated
-            ):
+            if cell.style._update_styles:
+                # if cell._style is not None and (
+                #     cell._style._cell_style_updated or cell._style._text_style_updated
+                # ):
                 flags = 0
                 cell_type = TSTArchives.emptyCellValueType
                 value = b""
@@ -1456,14 +1533,17 @@ class _NumbersModel:
 
         return None
 
-    def table_paragraph_style(self, cell_storage: object) -> object:
-        style = self.table_style(cell_storage.table_id, cell_storage.text_style_id)
-        if isinstance(style, TSWPArchives.ParagraphStyleArchive):
-            return style
+    def cell_text_style(self, cell_storage: object) -> object:
+        """Return the text style object for the cell or, if none
+        is defined, the default header, footer or body style"""
+        if cell_storage.text_style_id is not None:
+            style = self.table_style(cell_storage.table_id, cell_storage.text_style_id)
+            if isinstance(style, TSWPArchives.ParagraphStyleArchive):
+                return style
 
         table_model = self.objects[cell_storage.table_id]
         if cell_storage.row_num in range(0, table_model.number_of_header_rows):
-            return self.objects[table_model.header_row_text_style.identfier]
+            return self.objects[table_model.header_row_text_style.identifier]
         elif cell_storage.col_num in range(0, table_model.number_of_header_columns):
             return self.objects[table_model.header_column_text_style.identifier]
         elif table_model.number_of_footer_rows > 0:
@@ -1477,11 +1557,8 @@ class _NumbersModel:
         return self.objects[table_model.body_text_style.identifier]
 
     def cell_alignment(self, cell_storage: object) -> Alignment:
-        if cell_storage.text_style_id is None:
-            horizontal = HorizontalJustification.LEFT
-        else:
-            cell_style = self.table_paragraph_style(cell_storage)
-            horizontal = HorizontalJustification(cell_style.para_properties.alignment)
+        cell_style = self.cell_text_style(cell_storage)
+        horizontal = HorizontalJustification(cell_style.para_properties.alignment)
 
         if cell_storage.cell_style_id is None:
             vertical = VerticalJustification.TOP
@@ -1496,7 +1573,7 @@ class _NumbersModel:
 
     def cell_bg_color(self, cell_storage: object) -> Union[Tuple, List[Tuple]]:
         if cell_storage.cell_style_id is None:
-            return RGB(0, 0, 0)
+            return None
 
         cell_style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
         cell_properties = cell_style.cell_properties.cell_fill
@@ -1505,13 +1582,6 @@ class _NumbersModel:
             return rgb(cell_properties.color)
         elif cell_properties.HasField("gradient"):
             return [(rgb(s.color)) for s in cell_properties.gradient.stops]
-
-    def cell_text_style(self, cell_storage: object) -> object:
-        if cell_storage.text_style_id is None:
-            table_model = self.objects[cell_storage.table_id]
-            return self.objects[table_model.body_text_style.identifier]
-        else:
-            return self.table_paragraph_style(cell_storage)
 
     def char_property(self, style: object, field: str):
         """Return a char_property field from a style if present
@@ -1522,38 +1592,38 @@ class _NumbersModel:
         else:
             return getattr(style.char_properties, field)
 
-    def cell_is_bold(self, cell_storage: object) -> bool:
-        style = self.cell_text_style(cell_storage)
+    def cell_is_bold(self, obj: object) -> bool:
+        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
         return self.char_property(style, "bold")
 
-    def cell_is_italic(self, cell_storage: object) -> bool:
-        style = self.cell_text_style(cell_storage)
+    def cell_is_italic(self, obj: object) -> bool:
+        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
         return self.char_property(style, "bold")
 
-    def cell_is_underline(self, cell_storage: object) -> bool:
-        style = self.cell_text_style(cell_storage)
+    def cell_is_underline(self, obj: object) -> bool:
+        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
         underline = self.char_property(style, "underline")
         return underline != CharacterStyle.UnderlineType.kNoUnderline
 
-    def cell_is_strikethrough(self, cell_storage: object) -> bool:
-        style = self.cell_text_style(cell_storage)
+    def cell_is_strikethrough(self, obj: object) -> bool:
+        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
         strikethru = self.char_property(style, "strikethru")
         return strikethru != CharacterStyle.StrikethruType.kNoStrikethru
 
-    def cell_style_name(self, cell_storage: object) -> bool:
-        style = self.cell_text_style(cell_storage)
+    def cell_style_name(self, obj: object) -> bool:
+        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
         return style.super.name
 
-    def cell_font_color(self, cell_storage: object) -> Tuple:
-        style = self.cell_text_style(cell_storage)
+    def cell_font_color(self, obj: object) -> Tuple:
+        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
         return rgb(self.char_property(style, "font_color"))
 
-    def cell_font_size(self, cell_storage: object) -> float:
-        style = self.cell_text_style(cell_storage)
+    def cell_font_size(self, obj: object) -> float:
+        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
         return self.char_property(style, "font_size")
 
-    def cell_font_name(self, cell_storage: object) -> str:
-        style = self.cell_text_style(cell_storage)
+    def cell_font_name(self, obj: object) -> str:
+        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
         font_name = self.char_property(style, "font_name")
         return FONT_NAME_MAP[font_name]
 

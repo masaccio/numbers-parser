@@ -1,13 +1,8 @@
 import os
 
-from collections import namedtuple
 from enum import IntEnum
 from pendulum import datetime
 from pkg_resources import resource_filename
-
-from numbers_parser.generated.TSWPArchives_pb2 import (
-    ParagraphStylePropertiesArchive as ParagraphStyle,
-)
 
 # New document defaults
 DEFAULT_DOCUMENT = resource_filename(__name__, os.path.join("data", "empty.numbers"))
@@ -18,7 +13,7 @@ DEFAULT_ROW_COUNT = 10
 DEFAULT_ROW_HEIGHT = 20.0
 DEFAULT_TABLE_OFFSET = 80.0
 DEFAULT_TILE_SIZE = 256
-DEFAULT_FONT = "Helvetica Neue"
+DEFAULT_FONT = "HelveticaNeue"
 DEFAULT_FONT_SIZE = 11.0
 
 EMPTY_STORAGE_BUFFER = b"\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
@@ -91,22 +86,3 @@ class FormatType(IntEnum):
     CUSTOM_TEXT = 271
     CUSTOM_DATE = 272
     CUSTOM_CURRENCY = 274
-
-
-# Style return types
-Alignment = namedtuple("Alignment", ["horizontal", "vertical"])
-RGB = namedtuple("RGB", ["r", "g", "b"])
-
-
-class HorizontalJustification(IntEnum):
-    LEFT = ParagraphStyle.TextAlignmentType.TATvalue0
-    RIGHT = ParagraphStyle.TextAlignmentType.TATvalue1
-    CENTER = ParagraphStyle.TextAlignmentType.TATvalue2
-    JUSTIFIED = ParagraphStyle.TextAlignmentType.TATvalue3
-    AUTO = ParagraphStyle.TextAlignmentType.TATvalue4
-
-
-class VerticalJustification(IntEnum):
-    TOP = ParagraphStyle.ParagraphBorderType.PBTvalue0
-    MIDDLE = ParagraphStyle.ParagraphBorderType.PBTvalue1
-    BOTTOM = ParagraphStyle.ParagraphBorderType.PBTvalue2
