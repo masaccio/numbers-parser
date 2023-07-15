@@ -653,14 +653,19 @@ class _NumbersModel:
         return row_info
 
     @lru_cache(maxsize=None)
-    def metadata_component(self, component_name: str) -> int:
-        """Return the ID of an object in the document metadata given it's name"""
+    def metadata_component(self, reference: Union[str, int] = None) -> int:
+        """Return the ID of an object in the document metadata given it's name or ID"""
         component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
-        component_ids = [
-            id
-            for id, c in component_map.items()
-            if c.preferred_locator == component_name
-        ]
+        if isinstance(reference, str):
+            component_ids = [
+                id
+                for id, c in component_map.items()
+                if c.preferred_locator == reference
+            ]
+        else:
+            component_ids = [
+                id for id, c in component_map.items() if c.identifier == reference
+            ]
         return component_map[component_ids[0]]
 
     def add_component_metadata(self, object_id: int, parent: str, locator: str):
@@ -682,12 +687,12 @@ class _NumbersModel:
     def add_component_reference(
         self,
         object_id: int,
-        location: str,
+        location: str = None,
         parent_id: int = None,
         is_weak: bool = False,
     ):
         """Add an external reference to an object in a metadata component"""
-        component = self.metadata_component(location)
+        component = self.metadata_component(location or parent_id)
         if parent_id is not None:
             params = {"object_identifier": object_id, "component_identifier": parent_id}
         else:
@@ -1241,8 +1246,7 @@ class _NumbersModel:
                 )
                 self.add_component_reference(
                     cell_style_id,
-                    "DocumentStylesheet",
-                    self.objects[DOCUMENT_ID].stylesheet.identifier,
+                    parent_id=self._table_styles.id(cell._table_id),
                 )
             else:
                 # TODO: update existing styles
@@ -1255,9 +1259,7 @@ class _NumbersModel:
                     TSPMessages.Reference(identifier=text_style_id),
                 )
                 self.add_component_reference(
-                    text_style_id,
-                    "DocumentStylesheet",
-                    self.objects[DOCUMENT_ID].stylesheet.identifier,
+                    text_style_id, parent_id=self._table_styles.id(cell._table_id)
                 )
             else:
                 # TODO: update existing styles
