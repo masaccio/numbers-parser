@@ -9,7 +9,7 @@
             "purpose": ["debug-test"],
             "console": "integratedTerminal",
             "env": {"PYTEST_ADDOPTS": "--no-cov"}, 
-            "justMyCode": false
+            "justMyCode": true
         },
         {
             "name": "Pytest: Current File",
