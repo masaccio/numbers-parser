@@ -3,6 +3,7 @@
 import logging
 import struct
 import snappy
+from typing import List
 
 from functools import partial
 from struct import unpack
@@ -340,3 +341,17 @@ def is_iwa_file(data):
         length += segment_length + 4
         data = data[4 + segment_length :]
     return length == data_length
+
+
+def extensions(obj) -> List[object]:
+    return [
+        obj.Extensions[field] for field, _ in obj.ListFields() if field.is_extension
+    ]
+
+
+def find_extension(obj, name: str) -> object:
+    all_extensions = extensions(obj)
+    filtered = [
+        getattr(x, name) for x in all_extensions if getattr(x, name, None) is not None
+    ]
+    return filtered[0]
