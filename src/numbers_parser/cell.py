@@ -146,8 +146,8 @@ class Style:
             strikethrough=model.cell_is_strikethrough(cell_storage),
             underline=model.cell_is_underline(cell_storage),
             name=model.cell_style_name(cell_storage),
-            _text_style_id=cell_storage.text_style_id,
-            _cell_style_id=cell_storage.cell_style_id,
+            _text_style_id=model.text_style_object_id(cell_storage),
+            _cell_style_id=model.cell_style_object_id(cell_storage),
         )
         return style
 

@@ -1356,6 +1356,22 @@ class _NumbersModel:
         )
         return cell_style_id
 
+    def text_style_object_id(self, cell_storage) -> int:
+        if cell_storage.text_style_id is None:
+            return None
+        entry = self._table_styles.lookup_value(
+            cell_storage.table_id, cell_storage.text_style_id
+        )
+        return entry.reference.identifier
+
+    def cell_style_object_id(self, cell_storage) -> int:
+        if cell_storage.cell_style_id is None:
+            return None
+        entry = self._table_styles.lookup_value(
+            cell_storage.table_id, cell_storage.cell_style_id
+        )
+        return entry.reference.identifier
+
     def custom_style_name(self, current_styles: List[str]) -> Tuple[str, str]:
         """Find custom styles in the current document and return the next
         highest numbered style"""
@@ -1388,14 +1404,15 @@ class _NumbersModel:
         """Create a storage buffer for a cell using v5 (modern) layout"""
         cell = data[row_num][col_num]
         if cell._style is not None:
-            cell._storage.text_style_id = self._table_styles.lookup_key(
-                cell._table_id,
-                TSPMessages.Reference(identifier=cell.style._text_style_id),
-            )
-            self.add_component_reference(
-                cell.style._text_style_id,
-                parent_id=self._table_styles.id(cell._table_id),
-            )
+            if cell.style._text_style_id is not None:
+                cell._storage.text_style_id = self._table_styles.lookup_key(
+                    cell._table_id,
+                    TSPMessages.Reference(identifier=cell.style._text_style_id),
+                )
+                self.add_component_reference(
+                    cell.style._text_style_id,
+                    parent_id=self._table_styles.id(cell._table_id),
+                )
 
             if cell.style._cell_style_id is not None:
                 cell._storage.cell_style_id = self._table_styles.lookup_key(
