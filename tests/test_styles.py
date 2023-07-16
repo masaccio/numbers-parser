@@ -170,12 +170,7 @@ def test_header_styles():
     )
 
 
-def test_new_styles(tmp_path, pytestconfig):
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-styles-new.numbers"
-
+def test_style_exceptions():
     doc = Document()
     table = doc.sheets[0].tables[0]
     with pytest.raises(TypeError) as e:
@@ -210,6 +205,33 @@ def test_new_styles(tmp_path, pytestconfig):
         _ = table.set_cell_style(0, 0, object)
     assert "style must be a Style object or style name" in str(e)
 
+    with pytest.raises(TypeError) as e:
+        _ = Style(alignment=[None, object()])
+    assert "value must be an Alignment class" in str(e)
+
+    with pytest.raises(TypeError) as e:
+        _ = Style(font_size="invalid")
+    assert "size must be a float number" in str(e)
+
+    with pytest.raises(TypeError) as e:
+        _ = Style(font_name=2.0)
+    assert "font name must be a string" in str(e)
+
+    for field in ["bold", "italic", "underline", "strikethrough"]:
+        with pytest.raises(TypeError) as e:
+            attrs = {field: "invalid"}
+            _ = Style(**attrs)
+        assert f"{field} argument must be boolean" in str(e)
+
+
+def test_new_styles(tmp_path, pytestconfig):
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-styles-new.numbers"
+
+    doc = Document()
+    table = doc.sheets[0].tables[0]
     red_text = doc.add_style(
         name="Red Text",
         font_name="Lucida Grande",
@@ -228,10 +250,10 @@ def test_new_styles(tmp_path, pytestconfig):
     table.write("B2", "Red", style=red_text)
 
     table.write("C2", "Blue", style="Heading")
-    table.cell("C2").style.font_color = RGB(0, 160, 255)
+    table.cell("C2").style.font_color = (0, 160, 255)
 
     green_bg = doc.add_style(bg_color=RGB(29, 177, 0))
-    assert green_bg.name == "Custom Style 3"
+    assert green_bg.name == "Custom Style 1"
     table.set_cell_style("D2", green_bg)
     assert table.cell("D2").style.bg_color == RGB(29, 177, 0)
     assert table.cell("D2").style.font_name == "Helvetica Neue"
@@ -239,6 +261,11 @@ def test_new_styles(tmp_path, pytestconfig):
     table.set_cell_style("E2", "Heading Red")
     assert table.cell("E2").style.font_color == RGB(238, 34, 12)
     assert table.cell("E2").style.bold
+
+    table.set_cell_style("F2", "Body")
+    table.set_cell_style("G2", "Body")
+    table.cell("F2").style.bg_color = RGB(238, 34, 12)
+    table.cell("F2").style.alignment = Alignment("right", "middle")
 
     doc.save(new_filename)
 
@@ -263,6 +290,11 @@ def test_new_styles(tmp_path, pytestconfig):
     assert new_table.cell("E2").style.name == "Heading Red"
     assert new_table.cell("E2").style.font_color == RGB(238, 34, 12)
     assert new_table.cell("E2").style.bold
+
+    assert new_table.cell("F2").style.name == "Body"
+    assert new_table.cell("G2").style.name == "Body"
+    assert new_table.cell("F2").style.bg_color == RGB(238, 34, 12)
+    assert new_table.cell("F2").style.alignment == Alignment("right", "middle")
 
 
 def test_empty_styles(tmp_path, pytestconfig):

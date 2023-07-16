@@ -23,7 +23,7 @@ from typing import Any, List, Tuple, Union
 
 
 class BackgroundImage:
-    def __init__(self, image_data: bytes, filename: str):
+    def __init__(self, image_data: bytes = None, filename: str = None):
         self._data = image_data
         self._filename = filename
 
@@ -35,8 +35,6 @@ class BackgroundImage:
     @property
     def filename(self) -> str:
         """The image filename for a cell, or None if no image."""
-        if self._data is None:
-            return None
         return self._filename
 
 
@@ -161,7 +159,7 @@ class Style:
         if not isinstance(self.font_size, float):
             raise TypeError("size must be a float number of points")
         if not isinstance(self.font_name, str):
-            raise TypeError("argument must be a string")
+            raise TypeError("font name must be a string")
 
         for field in ["bold", "italic", "underline", "strikethrough"]:
             if not isinstance(getattr(self, field), bool):
