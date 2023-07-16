@@ -14,7 +14,7 @@ Formula evaluation relies on Numbers storing current values which should usually
 
 ## API changes in version 4.0
 
-To better partition cell styles, the new cell property `style` contains all style information for a cell including background image data which was supported in earlier versions. Image information is now found in `cell.style.bg_image`. Using the deprecated methods `image_data` and `image_filename` will issue a `DeprecationWarning` if used.The legacy methods will be removed in a future version of numbers-parser.
+To better partition cell styles, background image data which was supported in earlier versions through the methods `image_data` and `image_filename` is now part of the new `cell_style` property. Using the deprecated methods `image_data` and `image_filename` will issue a `DeprecationWarning` if used.The legacy methods will be removed in a future version of numbers-parser.
 
 `NumberCell` cell types return [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html) types rather than `float`. These are created in a [decimal128](https://en.wikipedia.org/wiki/Decimal128_floating-point_format) context to preserve the precision used by Numbers. Previously, using float resulted in rounding errors in unpacking internal numbers.
 
@@ -177,29 +177,31 @@ cell = table.cell(0, 0)
 
 ### Styles
 
-`numbers_parser` has very limited support for cell styles. Currently only cell backgrounds are supported.
+`numbers_parser` currently only supports paragraph styles. The following paragraph styles are suppoprted:
 
-#### Cell background colour
+* font attributes: bold, italic, underline, strikethrough
+* font selection and size
+* text foreground color
+* horizontal alignment
 
-The `bg_color` cell property returns either a tuple of RGB values or, in the case of gradient backgrounds, a list of tuples with each colour in the gradient. If no background color is defined, `None` is returned.
+Cell styles which include background color and vertical alignment are not supported, but will be added in a future version. Table styles that allow new tables to adopt a style across the whole table are not planned.
 
-``` python
-rgb = table.cell("B1").bg_color
-print("B1 RGB =", rgb[0], rgb[1], rgb[2])
-```
+#### Reading cell styles
 
-#### Cell text attributes
+The cell method `style` returns a `Style` object containing all the style information for that cell. Cells with identical style settings contain references to a single style object.
 
-Cell text fonts can be returned using a number of methods. Formatting changes within cells such as "This is **bold** text" are not supported.
+Cell text fonts can be returned using a number of methods. 
 
-* `cell.style.name`: cell style (`str`)
-* `cell.style.is_bold`: `True` if the cell font is bold
-* `cell.style.is_italic`: `True` if the cell font is italic
-* `cell.style.is_underline`: `True` if the cell font is underline
-* `cell.style.is_strikethrough`: `True` if the cell font is strikethrough
-* `cell.style.font_color`: font color as a tuple of RGB values
+* `cell.style.alignment`: the horizontal and vertical alignment of the cell as an `Alignment` names tuple
+* `cell.style.bg_color`: cell background color as an `RGB` named tuple, or a list of `RGB` values for gradients
+* `cell.style.bold`: `True` if the cell font is bold
+* `cell.style.font_color`: font color as an `RGB` named tuple
 * `cell.style.font_size`: font size in points (`float`)
 * `cell.style.font_name`: font name (`str`)
+* `cell.style.italic`: `True` if the cell font is italic
+* `cell.style.name`: cell style (`str`)
+* `cell.style.underline`: `True` if the cell font is underline
+* `cell.style.strikethrough`: `True` if the cell font is strikethrough
 
 #### Cell images
 
@@ -217,15 +219,15 @@ Whilst support for writing numbers files has been stable since version 3.4.0, yo
 
 ### Limitations
 
-Since version 3.4.0, adding tables and sheets is supported. Known limitations to write support are:
+Current limitations to write support are:
 
 * Creating cells of type `BulletedTextCell` is not supported
 * Formats cannot be defined for `DurationCell` or `DateCell`
 * New tables are inserted with a fixed offset below the last table in a worksheet which does not take into account title or caption size
 * New sheets insert tables with formats copied from the first table in the previous sheet rather than default table formats
-* Style cannot be saved.
+* Style editing is limited to paragraph styles.
 
-### Editing cells
+### Cell values
 
 `numbers-parser` will automatically empty rows and columns for any cell references that are out of range of the current table. The `write` method accepts the same cell numbering notation as `cell` plus an additional argument representing the new cell value. The type of the new value will be used to determine the cell type.
 
@@ -262,11 +264,11 @@ table.write(1, 3, 3000)
 doc.save("sheet.numbers")
 ```
 
-## Table geometries
+### Table geometries
 
 `numbers-parser` can query and change the position and size of tables. Changes made to a table's row height or column width is retained when files are saved.
 
-###  Row and column sizes
+####  Row and column sizes
 
 Row heights and column widths are queried and set using the `row_height` and `col_width` methods:
 
@@ -282,7 +284,7 @@ table.col_width(0, 200)
 print(f"Table column A width is {table.col_width(0)}")
 ```
 
-###  Header row and columns
+####  Header row and columns
 
 When new tables are created, `numbers-parser` follows the Numbers convention of creating a table with one row header and one column header. You can change the number of headers by modifying the appopriate property:
 
@@ -296,7 +298,7 @@ doc.save("saved.numbers")
 
 A zero header count will remove the headers from the table. Attempting to set a negative number of headers, or using more headers that rows or columns in the table will raise a `ValueError` exception.
 
-### Positioning tables
+#### Positioning tables
 
 By default, new tables are positioned at a fixed offset below the last table vertically in a sheet and on the left side of the sheet. Large table headers and captions may result in new tables overlapping existing ones. The `add_table` method takes optional coordinates for positioning a table. A table's height and coordinates can also be queried to help aligning new tables:
 
@@ -304,6 +306,38 @@ By default, new tables are positioned at a fixed offset below the last table ver
 (x, y) = sheet.table[0].coordinates
 y += sheet.table[0].height + 200.0
 new_table = sheet.add_table("Offset Table", x, y)
+```
+
+### Editing paragraph styles
+
+Cell text styles, known as paragraph styles, are those applied by the Text tab in Numbers Format pane. To simplify the API, when writing documents, it is not possible to make ad hoc changes to cells without assigning an existing style or creating a new one. This differs to the Numbers interface where cells can have modified styles on a per cell basis. Such styles are read correctly when reading Numbers files.
+
+Character styles, which allow formatting changes within cells such as "This is **bold** text" are not supported.
+
+Vertical alignment values and cell background colors are currently ignored.
+
+Styles are created using the `Document`'s `add_style` method, and can be applied to cells either as part of a `write` or using `set_cell_style`:
+
+``` python
+red_text = doc.add_style(
+    name="Red Text",
+    font_name="Lucida Grande",
+    font_color=RGB(230, 25, 25),
+    font_size=14.0,
+    bold=True,
+    italic=True,
+    alignment=Alignment("right", "top"),
+)
+table.write("B2", "Red", style=red_text)
+table.set_cell_style("C2", red_text)
+```
+
+Cell styles can also be referred to by name in both `Table.write` and `Table.set_cell_style`. A `dict` of available styles is returned by `Document.styles`. This contains key value pairs of style names and `Style` objects. Any changes to `Style` objects in the document are written back such that those styles are changed for all cells that use them:
+
+``` python
+doc = Document("styles.numbers")
+styles = doc.styles
+styles["Title"].font_size = 20.0
 ```
 
 ## Command-line scripts
