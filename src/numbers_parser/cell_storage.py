@@ -259,7 +259,7 @@ class CellStorage:
         elif cell_type == 10:
             self.value = self.d128
             self.type = CellType.NUMBER
-        else:  # pragma: no cover
+        else:
             raise UnsupportedError(f"Cell type ID {cell_type} is not recognised")
 
         # debug(
