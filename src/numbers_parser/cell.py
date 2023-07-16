@@ -11,6 +11,7 @@ from numbers_parser.constants import (
     EMPTY_STORAGE_BUFFER,
     DEFAULT_FONT,
     DEFAULT_FONT_SIZE,
+    DEFAULT_ALIGNMENT,
 )
 
 from dataclasses import dataclass
@@ -74,7 +75,7 @@ VERTICAL_MAP = {
 
 
 class Alignment(_Alignment):
-    def __new__(cls, horizontal="auto", vertical="top"):
+    def __new__(cls, horizontal=DEFAULT_ALIGNMENT[0], vertical=DEFAULT_ALIGNMENT[1]):
         if isinstance(horizontal, str):
             horizontal = horizontal.lower()
             if horizontal not in HORIZONTAL_MAP:
@@ -91,9 +92,12 @@ class Alignment(_Alignment):
         return self
 
 
+DEFAULT_ALIGNMENT_CLASS = Alignment(*DEFAULT_ALIGNMENT)
+
+
 @dataclass
 class Style:
-    alignment: Alignment = Alignment("auto", "top")
+    alignment: Alignment = DEFAULT_ALIGNMENT_CLASS
     bg_image: object = None
     bg_color: Union[RGB, List[RGB]] = None
     font_color: RGB = RGB(0, 0, 0)
@@ -104,8 +108,23 @@ class Style:
     strikethrough: bool = False
     underline: bool = False
     name: str = None
-    _style_id: int = None
-    _update_styles: bool = False
+    _text_style_id: int = None
+    _cell_style_id: int = None
+    _update_cell_style: bool = False
+    _update_text_style: bool = False
+
+    @staticmethod
+    def _text_attrs():
+        return [
+            "font_color",
+            "font_size",
+            "font_name",
+            "bold",
+            "italic",
+            "strikethrough",
+            "underline",
+            "name",
+        ]
 
     @classmethod
     def from_storage(cls, cell_storage: object, model: object):
@@ -127,6 +146,8 @@ class Style:
             strikethrough=model.cell_is_strikethrough(cell_storage),
             underline=model.cell_is_underline(cell_storage),
             name=model.cell_style_name(cell_storage),
+            _text_style_id=cell_storage.text_style_id,
+            _cell_style_id=cell_storage.cell_style_id,
         )
         return style
 
@@ -147,9 +168,27 @@ class Style:
                 raise TypeError(f"{field} argument must be boolean")
 
     def __setattr__(self, name: str, value: Any) -> None:
-        if name in self.__dict__ and self.__dict__[name] != value:
-            self.__dict__["_update_styles"] = True
-        self.__dict__[name] = value
+        """Detect changes to cell styles and flag the style for
+        possible updates when saving the document"""
+        if name in self.__dict__:
+            # Init has been done
+            if name in ["bg_color"]:
+                self.__dict__["_update_cell_style"] = True
+            elif name in ["alignment"]:
+                self.__dict__["_update_text_style"] = True
+                self.__dict__["_update_cell_style"] = True
+            elif name in Style._text_attrs():
+                self.__dict__["_update_text_style"] = True
+        elif name == "bg_color" and value is not None:
+            self.__dict__["_update_cell_style"] = True
+        elif (
+            name == "alignment"
+            and value is not None
+            and value[1] != DEFAULT_ALIGNMENT_CLASS[1]
+        ):
+            self.__dict__["_update_cell_style"] = True
+        if name not in ["_update_text_style", "_update_cell_style"]:
+            self.__dict__[name] = value
 
 
 def check_rgb_type(color) -> RGB:

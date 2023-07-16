@@ -726,6 +726,7 @@ class _NumbersModel:
         self.recalculate_column_headers(table_id, data)
         self.recalculate_merged_cells(table_id)
         self.update_paragraph_styles()
+        self.update_cell_styles(table_id, data)
 
         table_model.ClearField("base_column_row_uids")
 
@@ -1176,7 +1177,7 @@ class _NumbersModel:
                 underline=self.cell_is_underline(v["obj"]),
                 strikethrough=self.cell_is_strikethrough(v["obj"]),
                 name=self.cell_style_name(v["obj"]),
-                _style_id=v["id"],
+                _text_style_id=v["id"],
             )
             for k, v in presets_map.items()
         }
@@ -1192,7 +1193,6 @@ class _NumbersModel:
             strikethru = CharacterStyle.StrikethruType.kNoStrikethru
 
         style_id_name = "numbers-parser-" + style.name.lower().replace(" ", "-")
-        font_color_attrs = {}
         para_style_id, para_style = self.objects.create_object_from_dict(
             "DocumentStylesheet",
             {
@@ -1258,7 +1258,7 @@ class _NumbersModel:
             strikethru = CharacterStyle.StrikethruType.kSingleStrikethru
         else:
             strikethru = CharacterStyle.StrikethruType.kNoStrikethru
-        style_obj = self.objects[style._style_id]
+        style_obj = self.objects[style._text_style_id]
         style_obj.char_properties.font_color.r = style.font_color.r / 255
         style_obj.char_properties.font_color.g = style.font_color.g / 255
         style_obj.char_properties.font_color.b = style.font_color.b / 255
@@ -1276,18 +1276,85 @@ class _NumbersModel:
     def update_paragraph_styles(self):
         """Create new paragraph style archives for any new styles that
         have been created for this document"""
-        new_styles = [x for x in self.styles.values() if x._style_id is None]
+        new_styles = [x for x in self.styles.values() if x._text_style_id is None]
         updated_styles = [
             x
             for x in self.styles.values()
-            if x._style_id is not None and x._update_styles
+            if x._text_style_id is not None and x._update_text_style
         ]
         for style in new_styles:
-            style._style_id = self.add_paragraph_style(style)
-            style._update_styles = True
+            style._text_style_id = self.add_paragraph_style(style)
+            style._update_text_style = True
 
         for style in updated_styles:
             self.update_paragraph_style(style)
+
+    def update_cell_styles(self, table_id: int, data: List):
+        """Create new cell style archives for any cells whose styles
+        have changes that require a cell style"""
+        cell_styles = {}
+        for row_num, row in enumerate(data):
+            for col_num, cell in enumerate(row):
+                if cell._style is not None and cell._style._update_cell_style:
+                    if cell._style.bg_color is None:
+                        fingerprint = str(cell.style.alignment.vertical)
+                    else:
+                        fingerprint = "{0}-{1}-{2}-{3}".format(
+                            cell.style.alignment.vertical,
+                            cell.style.bg_color.r,
+                            cell.style.bg_color.g,
+                            cell.style.bg_color.b,
+                        )
+                    if fingerprint not in cell_styles:
+                        cell_styles[fingerprint] = self.add_cell_style(cell._style)
+                    cell._style._cell_style_id = cell_styles[fingerprint]
+
+    def add_cell_style(self, style: Style) -> int:
+        if style.bg_color is not None:
+            color_attrs = {
+                "cell_fill": {
+                    "color": {
+                        "model": "rgb",
+                        "r": style.bg_color.r / 255,
+                        "g": style.bg_color.g / 255,
+                        "b": style.bg_color.b / 255,
+                        "a": 1.0,
+                        "rgbspace": "srgb",
+                    }
+                }
+            }
+        else:
+            color_attrs = {}
+        style_id_name = f"numbers-parser-custom-{style._cell_style_id}"
+        cell_style_id, cell_style = self.objects.create_object_from_dict(
+            "DocumentStylesheet",
+            {
+                "super": {
+                    "name": style.name,
+                    "style_identifier": style_id_name,
+                },
+                "override_count": 1,
+                "cell_properties": {
+                    **color_attrs,
+                    "vertical_alignment": style.alignment.vertical,
+                },
+            },
+            TSTArchives.CellStyleArchive,
+        )
+        stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
+        cell_style.super.stylesheet.MergeFrom(
+            TSPMessages.Reference(identifier=stylesheet_id)
+        )
+        self.objects[stylesheet_id].styles.append(
+            TSPMessages.Reference(identifier=cell_style_id)
+        )
+        self.objects[stylesheet_id].identifier_to_style_map.append(
+            TSSArchives.StylesheetArchive.IdentifiedStyleEntry(
+                identifier=style_id_name,
+                style=TSPMessages.Reference(identifier=cell_style_id),
+            )
+        )
+        return cell_style_id
 
     def custom_style_name(self, current_styles: List[str]) -> Tuple[str, str]:
         """Find custom styles in the current document and return the next
@@ -1309,57 +1376,6 @@ class _NumbersModel:
         else:
             return "Custom Style 1"
 
-    # def add_cell_style(self, table_id: int, style: Style) -> int:
-    #     (style_id_name, style_name) = self.custom_style_name("Cell")
-    #     table_model = self.objects[table_id]
-    #     if style._bg_color is not None:
-    #         color_attrs = {
-    #             "cell_fill": {
-    #                 "color": {
-    #                     "model": "rgb",
-    #                     "r": style._bg_color.r / 255,
-    #                     "g": style._bg_color.g / 255,
-    #                     "b": style._bg_color.b / 255,
-    #                     "a": 1.0,
-    #                     "rgbspace": "srgb",
-    #                 }
-    #             }
-    #         }
-    #     else:
-    #         color_attrs = {}
-    #     cell_style_id, cell_style = self.objects.create_object_from_dict(
-    #         "DocumentStylesheet",
-    #         {
-    #             "super": {
-    #                 "name": style_name,
-    #                 "style_identifier": style_id_name,
-    #             },
-    #             "override_count": 1,
-    #             "cell_properties": {
-    #                 **color_attrs,
-    #                 "vertical_alignment": style.alignment.vertical,
-    #             },
-    #         },
-    #         TSTArchives.CellStyleArchive,
-    #     )
-    #     cell_style.super.parent.MergeFrom(
-    #         TSPMessages.Reference(identifier=table_model.body_text_style.identifier)
-    #     )
-    #     stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
-    #     cell_style.super.stylesheet.MergeFrom(
-    #         TSPMessages.Reference(identifier=stylesheet_id)
-    #     )
-    #     self.objects[stylesheet_id].styles.append(
-    #         TSPMessages.Reference(identifier=cell_style_id)
-    #     )
-    #     self.objects[stylesheet_id].identifier_to_style_map.append(
-    #         TSSArchives.StylesheetArchive.IdentifiedStyleEntry(
-    #             identifier=style_id_name,
-    #             style=TSPMessages.Reference(identifier=cell_style_id),
-    #         )
-    #     )
-    #     return cell_style_id
-
     def pack_cell_storage(  # noqa: C901
         self,
         table_id: int,
@@ -1374,26 +1390,22 @@ class _NumbersModel:
         if cell._style is not None:
             cell._storage.text_style_id = self._table_styles.lookup_key(
                 cell._table_id,
-                TSPMessages.Reference(identifier=cell.style._style_id),
+                TSPMessages.Reference(identifier=cell.style._text_style_id),
             )
             self.add_component_reference(
-                cell.style._style_id, parent_id=self._table_styles.id(cell._table_id)
+                cell.style._text_style_id,
+                parent_id=self._table_styles.id(cell._table_id),
             )
 
-        # if cell._style is not None and cell._style._cell_style_updated:
-        #     if cell._storage.cell_style_id is None:
-        #         cell_style_id = self.add_cell_style(cell._table_id, cell._style)
-        #         cell._storage.cell_style_id = self._table_styles.lookup_key(
-        #             cell._table_id,
-        #             TSPMessages.Reference(identifier=cell_style_id),
-        #         )
-        #         self.add_component_reference(
-        #             cell_style_id,
-        #             parent_id=self._table_styles.id(cell._table_id),
-        #         )
-        #     else:
-        #         # TODO: update existing styles
-        #         pass
+            if cell.style._cell_style_id is not None:
+                cell._storage.cell_style_id = self._table_styles.lookup_key(
+                    cell._table_id,
+                    TSPMessages.Reference(identifier=cell.style._cell_style_id),
+                )
+                self.add_component_reference(
+                    cell.style._cell_style_id,
+                    parent_id=self._table_styles.id(cell._table_id),
+                )
 
         length = 12
         if isinstance(cell, NumberCell):

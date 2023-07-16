@@ -217,7 +217,7 @@ def test_new_styles(tmp_path, pytestconfig):
         font_size=14.0,
         bold=True,
         italic=True,
-        alignment=Alignment("right", "top"),
+        alignment=Alignment("right", "middle"),
     )
     assert red_text.name == "Red Text"
 
@@ -251,14 +251,14 @@ def test_new_styles(tmp_path, pytestconfig):
     assert new_table.cell("B2").style.font_name == "Lucida Grande"
     assert new_table.cell("B2").style.bold
     assert new_table.cell("B2").style.italic
-    assert new_table.cell("B2").style.alignment == Alignment("right", "top")
+    assert new_table.cell("B2").style.alignment == Alignment("right", "middle")
 
     assert new_table.cell("C2").value == "Blue"
     assert new_table.cell("C2").style.font_color == RGB(0, 160, 255)
     assert new_table.cell("C2").style.name == "Heading"
 
-    # assert new_table.cell("D2").style.bg_color == RGB(29, 177, 0)
-    # assert new_table.cell("D2").style.font_name == "Helvetica Neue"
+    assert new_table.cell("D2").style.bg_color == RGB(29, 177, 0)
+    assert new_table.cell("D2").style.font_name == "Helvetica Neue"
 
     assert new_table.cell("E2").style.name == "Heading Red"
     assert new_table.cell("E2").style.font_color == RGB(238, 34, 12)
