@@ -331,6 +331,8 @@ table.write("B2", "Red", style=red_text)
 table.set_cell_style("C2", red_text)
 ```
 
+New styles are automatically added to the list of styles selectable in the Numbers Text pane.
+
 Cell styles can also be referred to by name in both `Table.write` and `Table.set_cell_style`. A `dict` of available styles is returned by `Document.styles`. This contains key value pairs of style names and `Style` objects. Any changes to `Style` objects in the document are written back such that those styles are changed for all cells that use them.
 
 ``` python

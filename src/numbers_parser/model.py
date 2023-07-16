@@ -167,6 +167,7 @@ class _NumbersModel:
         self._table_formats = DataLists(self, "format_table")
         self._table_styles = DataLists(self, "styleTable", "reference")
         self._table_strings = DataLists(self, "stringTable", "string")
+        self._styles = None
 
     @property
     def file_store(self):
@@ -1152,7 +1153,9 @@ class _NumbersModel:
 
     @property
     def styles(self):
-        return self.available_paragraph_styles()
+        if self._styles is None:
+            self._styles = self.available_paragraph_styles()
+        return self._styles
 
     @lru_cache(maxsize=None)
     def available_paragraph_styles(self) -> List[Style]:
@@ -1246,7 +1249,13 @@ class _NumbersModel:
                 style=TSPMessages.Reference(identifier=para_style_id),
             )
         )
-        # TODO: add style to theme
+
+        theme_id = self.objects[DOCUMENT_ID].theme.identifier
+        presets = find_extension(
+            self.objects[theme_id].super, "paragraph_style_presets"
+        )
+        presets.append(TSPMessages.Reference(identifier=para_style_id))
+        self._styles[style.name] = style
         return para_style_id
 
     def update_paragraph_style(self, style: Style):
