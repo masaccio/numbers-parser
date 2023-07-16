@@ -128,11 +128,11 @@ def main():
                     print_table_names(filename)
                 else:
                     print_table(args, filename)
-            except FileFormatError as e:  # pragma: no cover”
+            except FileFormatError as e:
                 print(f"{filename}:", str(e), file=sys.stderr)
                 sys.exit(1)
 
 
 if __name__ == "__main__":
     # execute only if run as a script
-    main()  # pragma: no cover
+    main()

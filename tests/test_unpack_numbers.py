@@ -32,7 +32,7 @@ def test_multi_doc_error(script_runner):
     ret = script_runner.run(
         ["unpack-numbers", "--output", "tmp", "foo", "bar"], print_result=False
     )
-    assert ret.success == False
+    assert not ret.success
     assert ret.stdout == ""
     assert "output directory only valid" in ret.stderr
 
@@ -157,3 +157,26 @@ def test_compact_json(script_runner, tmp_path):
         '"column": 0, "row": 1, "contains_a_formula": true, "edges": {"packed_edge_without_owner":'
         in data
     )
+
+
+@pytest.mark.script_launch_mode("subprocess")
+def test_main(script_runner):
+    ret = script_runner.run(
+        ["python3", "-m", "numbers_parser._unpack_numbers", "--help"],
+        print_result=False,
+    )
+    assert ret.success
+    assert "directory name to unpack into" in ret.stdout
+    assert ret.stderr == ""
+
+
+@pytest.mark.script_launch_mode("subprocess")
+def test_corrupted(script_runner, tmp_path):
+    output_dir = tmp_path / "test"
+    ret = script_runner.run(
+        ["unpack-numbers", "--output", str(output_dir), "tests/data/corrupted.numbers"],
+        print_result=False,
+    )
+    assert not ret.success
+    assert "Index/Metadata.iwa: invalid" in ret.stderr
+    assert ret.stdout == ""

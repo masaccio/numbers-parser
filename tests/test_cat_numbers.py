@@ -242,3 +242,24 @@ def test_debug(script_runner):
     assert rows[0] == "DEBUG:numbers_parser.experimental:Experimental features on"
 
     _enable_experimental_features(False)
+
+
+@pytest.mark.script_launch_mode("subprocess")
+def test_main(script_runner):
+    ret = script_runner.run(
+        ["python3", "-m", "numbers_parser._cat_numbers", "--help"], print_result=False
+    )
+    assert ret.success
+    assert "List the names of tables" in ret.stdout
+    assert "Names of sheet" in ret.stdout
+    assert ret.stderr == ""
+
+
+@pytest.mark.script_launch_mode("subprocess")
+def test_corrupted(script_runner):
+    ret = script_runner.run(
+        ["cat-numbers", "tests/data/corrupted.numbers"], print_result=False
+    )
+    assert not ret.success
+    assert "Index/Metadata.iwa: invalid" in ret.stderr
+    assert ret.stdout == ""
