@@ -1357,7 +1357,7 @@ class _NumbersModel:
     ) -> bytearray:
         """Create a storage buffer for a cell using v5 (modern) layout"""
         cell = data[row_num][col_num]
-        if cell.style._update_styles:
+        if cell._style is not None:
             cell._storage.text_style_id = self._table_styles.lookup_key(
                 cell._table_id,
                 TSPMessages.Reference(identifier=cell.style._style_id),
@@ -1409,10 +1409,7 @@ class _NumbersModel:
             cell_type = TSTArchives.durationCellType
             value = value = pack("<d", float(cell.value.total_seconds()))
         elif isinstance(cell, EmptyCell):
-            if cell.style._update_styles:
-                # if cell._style is not None and (
-                #     cell._style._cell_style_updated or cell._style._text_style_updated
-                # ):
+            if cell._style is not None:
                 flags = 0
                 cell_type = TSTArchives.emptyCellValueType
                 value = b""
