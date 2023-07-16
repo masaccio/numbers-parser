@@ -263,3 +263,39 @@ def test_new_styles(tmp_path, pytestconfig):
     assert new_table.cell("E2").style.name == "Heading Red"
     assert new_table.cell("E2").style.font_color == RGB(238, 34, 12)
     assert new_table.cell("E2").style.bold
+
+
+def test_empty_styles(tmp_path, pytestconfig):
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-styles-new.numbers"
+
+    doc = Document()
+    red_text = doc.add_style(
+        name="Red Text",
+        font_name="Lucida Grande",
+        font_color=RGB(230, 25, 25),
+        font_size=10.0,
+        alignment=Alignment("center", "middle"),
+    )
+    table = doc.sheets[0].tables[0]
+    row_header_style = table.cell(0, 0).style.name
+    body_style = table.cell(1, 1).style.name
+
+    table.write(5, 5, "data", style=red_text)
+    doc.save(new_filename)
+
+    new_doc = Document(new_filename)
+    new_table = new_doc.sheets[0].tables[0]
+
+    for row_num in range(0, table.num_header_rows):
+        for col_num in range(0, table.num_header_cols):
+            assert new_table.cell(row_num, col_num).style.name == row_header_style
+
+    for row_num in range(table.num_header_rows, table.num_rows):
+        for col_num in range(table.num_header_cols, table.num_cols):
+            if row_num == 5 and col_num == 5:
+                assert new_table.cell(5, 5).style.name == "Red Text"
+            else:
+                assert new_table.cell(row_num, col_num).style.name == body_style
