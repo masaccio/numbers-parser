@@ -180,3 +180,20 @@ def test_corrupted(script_runner, tmp_path):
     assert not ret.success
     assert "Index/Metadata.iwa: invalid" in ret.stderr
     assert ret.stdout == ""
+
+
+def test_debug(script_runner, tmp_path):
+    output_dir = tmp_path / "test"
+    ret = script_runner.run(
+        [
+            "unpack-numbers",
+            "--debug",
+            "--output",
+            str(output_dir),
+            "tests/data/test-1.numbers",
+        ],
+        print_result=False,
+    )
+    assert ret.success
+    rows = ret.stderr.strip().splitlines()
+    assert "DEBUG:numbers_parser.file:read_numbers_file:" in rows[0]
