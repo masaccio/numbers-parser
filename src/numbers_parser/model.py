@@ -1469,7 +1469,7 @@ class _NumbersModel:
                 return None
         elif isinstance(cell, MergedCell):
             return None
-        else:  # pragma: no cover
+        else:
             data_type = type(cell).__name__
             table_name = self.table_name(table_id)
             warn(
