@@ -197,12 +197,22 @@ def test_new_styles(tmp_path, pytestconfig):
     with pytest.raises(TypeError) as e:
         _ = Style(alignment=Alignment("invalid", "top"))
     assert "invalid horizontal alignment" in str(e)
+
     with pytest.raises(TypeError) as e:
         _ = Style(alignment=Alignment("left", "invalid"))
     assert "invalid vertical alignment" in str(e)
 
+    with pytest.raises(IndexError) as e:
+        _ = table.set_cell_style(0, 0, "Blue Text")
+    assert "style 'Blue Text' does not exist" in str(e)
+
+    with pytest.raises(TypeError) as e:
+        _ = table.set_cell_style(0, 0, object)
+    assert "style must be a Style object or style name" in str(e)
+
     red_text = doc.add_style(
         name="Red Text",
+        font_name="Lucida Grande",
         font_color=RGB(230, 25, 25),
         font_size=14.0,
         bold=True,
@@ -215,40 +225,41 @@ def test_new_styles(tmp_path, pytestconfig):
         _ = doc.add_style(name="Red Text")
     assert "style 'Red Text' already exists" in str(e)
 
-    table.write("E3", "Red", style=red_text)
+    table.write("B2", "Red", style=red_text)
+
+    table.write("C2", "Blue", style="Heading")
+    table.cell("C2").style.font_color = RGB(0, 160, 255)
 
     green_bg = doc.add_style(bg_color=RGB(29, 177, 0))
     assert green_bg.name == "Custom Style 3"
-    table.set_cell_style("D3", green_bg)
-    assert table.cell("D3").style.bg_color == RGB(29, 177, 0)
-    # assert table.cell("D3").style.font_name == "Helvetica Neue"
+    table.set_cell_style("D2", green_bg)
+    assert table.cell("D2").style.bg_color == RGB(29, 177, 0)
+    assert table.cell("D2").style.font_name == "Helvetica Neue"
 
-    with pytest.raises(IndexError) as e:
-        _ = table.set_cell_style(0, 0, "Blue Text")
-    assert "style 'Blue Text' does not exist" in str(e)
-
-    with pytest.raises(TypeError) as e:
-        _ = table.set_cell_style(0, 0, object)
-    assert "style must be a Style object or style name" in str(e)
-
-    table.set_cell_style("D4", "Heading Red")
-    assert table.cell("D4").style.font_color == RGB(238, 34, 12)
-    assert table.cell("D4").style.bold
-
-    table.set_cell_style("D2", "Heading")
-    table.cell("D2").style.font_color = RGB(0, 160, 255)
+    table.set_cell_style("E2", "Heading Red")
+    assert table.cell("E2").style.font_color == RGB(238, 34, 12)
+    assert table.cell("E2").style.bold
 
     doc.save(new_filename)
 
     new_doc = Document(new_filename)
     new_table = new_doc.sheets[0].tables[0]
 
-    assert table.cell("D2").style.font_color == RGB(0, 160, 255)
+    assert new_table.cell("B2").value == "Red"
+    assert new_table.cell("B2").style.font_color == RGB(230, 25, 25)
+    assert new_table.cell("B2").style.font_size == 14.0
+    assert new_table.cell("B2").style.font_name == "Lucida Grande"
+    assert new_table.cell("B2").style.bold
+    assert new_table.cell("B2").style.italic
+    assert new_table.cell("B2").style.alignment == Alignment("right", "top")
 
-    assert new_table.cell("D3").style.bg_color == RGB(29, 177, 0)
+    assert new_table.cell("C2").value == "Blue"
+    assert new_table.cell("C2").style.font_color == RGB(0, 160, 255)
+    assert new_table.cell("C2").style.name == "Heading"
 
-    assert table.cell("E3").style.font_color == RGB(230, 25, 25)
-    assert table.cell("E3").style.font_size == 14.0
-    assert table.cell("E3").style.bold
-    assert table.cell("E3").style.italic
-    assert table.cell("E3").style.alignment == Alignment("right", "top")
+    # assert new_table.cell("D2").style.bg_color == RGB(29, 177, 0)
+    # assert new_table.cell("D2").style.font_name == "Helvetica Neue"
+
+    assert new_table.cell("E2").style.name == "Heading Red"
+    assert new_table.cell("E2").style.font_color == RGB(238, 34, 12)
+    assert new_table.cell("E2").style.bold
