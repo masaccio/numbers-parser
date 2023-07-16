@@ -3,7 +3,7 @@ import magic
 
 from numbers_parser import Document
 from pendulum import datetime, duration
-from numbers_parser.cell import ErrorCell, EmptyCell, Alignment, RGB
+from numbers_parser.cell import ErrorCell, EmptyCell
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"
