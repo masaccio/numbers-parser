@@ -180,14 +180,17 @@ def test_style_exceptions():
         doc.add_style(bg_color=(0, 0, 1.0))
     assert "RGB color must be an RGB" in str(e)
 
+    style = doc.add_style(bg_color=(100, 100, 100))
+    assert style.bg_color == RGB(100, 100, 100)
+
     styles = doc.styles
     assert "Title" in styles
-    assert len(styles) == 6
+    assert len(styles) == 7
 
     dummy = doc.add_style()
-    assert dummy.name == "Custom Style 1"
-    dummy = doc.add_style()
     assert dummy.name == "Custom Style 2"
+    dummy = doc.add_style()
+    assert dummy.name == "Custom Style 3"
 
     with pytest.raises(TypeError) as e:
         _ = Style(alignment=Alignment("invalid", "top"))

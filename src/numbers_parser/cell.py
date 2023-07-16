@@ -153,8 +153,8 @@ class Style:
         if not isinstance(self.alignment, Alignment):
             raise TypeError("value must be an Alignment class")
 
-        check_rgb_type(self.bg_color)
-        check_rgb_type(self.font_color)
+        self.bg_color = rgb_color(self.bg_color)
+        self.font_color = rgb_color(self.font_color)
 
         if not isinstance(self.font_size, float):
             raise TypeError("size must be a float number of points")
@@ -170,6 +170,8 @@ class Style:
         possible updates when saving the document"""
         if name in self.__dict__:
             # Init has been done
+            if name in ["bg_color", "font_color"]:
+                value = rgb_color(value)
             if name in ["bg_color"]:
                 self.__dict__["_update_cell_style"] = True
             elif name in ["alignment"]:
@@ -189,17 +191,18 @@ class Style:
             self.__dict__[name] = value
 
 
-def check_rgb_type(color) -> RGB:
+def rgb_color(color) -> RGB:
     """Raise a TypeError if a color is not a valid RGB value"""
     if color is None:
-        return
+        return None
     if isinstance(color, RGB):
-        return
+        return color
     if isinstance(color, tuple):
         if not (len(color) == 3 and all([isinstance(x, int) for x in color])):
             raise TypeError("RGB color must be an RGB or a tuple of 3 integers")
+        return RGB(*color)
     elif isinstance(color, list):
-        [check_rgb_type(c) for c in color]
+        return [rgb_color(c) for c in color]
 
 
 class Cell:
@@ -243,9 +246,9 @@ class Cell:
         elif cell_storage.type == CellType.RICH_TEXT:
             cell = RichTextCell(*row_col, cell_storage.value)
         else:
-            raise UnsupportedError(  # pragma: no cover
-                f"Unsupport cell type {cell_storage.type} "
-                + "@:({cell_storage.row_num},{cell_storage.col_num})"
+            raise UnsupportedError(
+                f"Unsupported cell type {cell_storage.type} "
+                + f"@:({cell_storage.row_num},{cell_storage.col_num})"
             )
 
         cell._table_id = cell_storage.table_id
@@ -520,10 +523,10 @@ def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
     Returns:
         A1 style string.
     """
-    if row < 0:  # pragma: no cover
-        raise IndexError(f"Row reference {row} below zero")
+    if row < 0:
+        raise IndexError(f"row reference {row} below zero")
 
-    if col < 0:  # pragma: no cover
+    if col < 0:
         raise IndexError(f"column reference {col} below zero")
 
     row += 1  # Change to 1-index.
@@ -544,8 +547,8 @@ def xl_col_to_name(col, col_abs=False):
         Column style string.
     """
     col_num = col
-    if col_num < 0:  # pragma: no cover
-        raise IndexError(f"Column reference {col_num} below zero")
+    if col_num < 0:
+        raise IndexError(f"column reference {col_num} below zero")
 
     col_num += 1  # Change to 1-index.
     col_str = ""
@@ -555,7 +558,7 @@ def xl_col_to_name(col, col_abs=False):
         # Set remainder from 1 .. 26
         remainder = col_num % 26
 
-        if remainder == 0:  # pragma: no cover
+        if remainder == 0:
             remainder = 26
 
         # Convert the remainder to a character.
