@@ -1,4 +1,4 @@
-FONT_NAME_MAP = {
+FONT_NAME_TO_FAMILY = {
     "AcademyEngravedLetPlain": "Academy Engraved LET",
     "AlBayan": "Al Bayan",
     "AlBayan-Bold": "Al Bayan",

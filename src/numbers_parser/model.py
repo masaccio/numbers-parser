@@ -47,7 +47,7 @@ from numbers_parser.bullets import (
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.numbers_uuid import NumbersUUID
 
-from numbers_parser.generated.fontmap import FONT_NAME_MAP
+from numbers_parser.generated.fontmap import FONT_NAME_TO_FAMILY
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
@@ -59,6 +59,17 @@ from numbers_parser.generated import TSSArchives_pb2 as TSSArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
     CharacterStylePropertiesArchive as CharacterStyle,
 )
+
+
+def create_font_name_map(font_map: dict) -> dict:
+    new_font_map = {}
+    for k, v in font_map.items():
+        if v not in new_font_map:
+            new_font_map[v] = k
+    return new_font_map
+
+
+FONT_FAMILY_TO_NAME = create_font_name_map(FONT_NAME_TO_FAMILY)
 
 
 class DataLists:
@@ -1203,7 +1214,7 @@ class _NumbersModel:
                     "underline": underline,
                     "strikethru": strikethru,
                     "font_size": style.font_size,
-                    "font_name": style.font_name,
+                    "font_name": FONT_FAMILY_TO_NAME[style.font_name],
                 },
                 "para_properties": {
                     "alignment": style.alignment.horizontal,
@@ -1227,13 +1238,42 @@ class _NumbersModel:
         # TODO: add style to theme
         return para_style_id
 
+    def update_paragraph_style(self, style: Style):
+        if style.underline:
+            underline = CharacterStyle.UnderlineType.kSingleUnderline
+        else:
+            underline = CharacterStyle.UnderlineType.kNoUnderline
+        if style.strikethrough:
+            strikethru = CharacterStyle.StrikethruType.kSingleStrikethru
+        else:
+            strikethru = CharacterStyle.StrikethruType.kNoStrikethru
+        style_obj = self.objects[style._style_id]
+        style_obj.char_properties.font_color.r = style.font_color.r / 255
+        style_obj.char_properties.font_color.g = style.font_color.g / 255
+        style_obj.char_properties.font_color.b = style.font_color.b / 255
+        style_obj.char_properties.bold = style.bold
+        style_obj.char_properties.italic = style.italic
+        style_obj.char_properties.underline = underline
+        style_obj.char_properties.strikethru = strikethru
+        style_obj.char_properties.font_size = style.font_size
+        style_obj.char_properties.font_name = FONT_FAMILY_TO_NAME[style.font_name]
+        style_obj.para_properties.alignment = style.alignment.horizontal
+
     def update_paragraph_styles(self):
         """Create new paragraph style archives for any new styles that
         have been created for this document"""
         new_styles = [x for x in self.styles.values() if x._style_id is None]
+        updated_styles = [
+            x
+            for x in self.styles.values()
+            if x._style_id is not None and x._update_styles
+        ]
         for style in new_styles:
             style._style_id = self.add_paragraph_style(style)
             style._update_styles = True
+
+        for style in updated_styles:
+            self.update_paragraph_style(style)
 
     def custom_style_name(self, current_styles: List[str]) -> Tuple[str, str]:
         """Find custom styles in the current document and return the next
@@ -1625,7 +1665,7 @@ class _NumbersModel:
     def cell_font_name(self, obj: object) -> str:
         style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
         font_name = self.char_property(style, "font_name")
-        return FONT_NAME_MAP[font_name]
+        return FONT_NAME_TO_FAMILY[font_name]
 
 
 def rgb(obj) -> RGB:
