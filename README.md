@@ -177,31 +177,32 @@ cell = table.cell(0, 0)
 
 ### Styles
 
-`numbers_parser` currently only supports paragraph styles. The following paragraph styles are suppoprted:
+`numbers_parser` currently only supports paragraph styles and cell styles. The following paragraph styles are suppoprted:
 
 * font attributes: bold, italic, underline, strikethrough
 * font selection and size
 * text foreground color
-* horizontal alignment
+* horizontal and vertical alignment
+* cell background color
 
-Cell styles which include background color and vertical alignment are not supported, but will be added in a future version. Table styles that allow new tables to adopt a style across the whole table are not planned.
+Table styles that allow new tables to adopt a style across the whole table are not planned.
 
-#### Reading cell styles
+#### Reading styles
 
 The cell method `style` returns a `Style` object containing all the style information for that cell. Cells with identical style settings contain references to a single style object.
 
-Cell text fonts can be returned using a number of methods. 
+Cell text fonts can be returned using a number of methods.
 
-* `cell.style.alignment`: the horizontal and vertical alignment of the cell as an `Alignment` names tuple
-* `cell.style.bg_color`: cell background color as an `RGB` named tuple, or a list of `RGB` values for gradients
-* `cell.style.bold`: `True` if the cell font is bold
-* `cell.style.font_color`: font color as an `RGB` named tuple
-* `cell.style.font_size`: font size in points (`float`)
-* `cell.style.font_name`: font name (`str`)
-* `cell.style.italic`: `True` if the cell font is italic
-* `cell.style.name`: cell style (`str`)
-* `cell.style.underline`: `True` if the cell font is underline
-* `cell.style.strikethrough`: `True` if the cell font is strikethrough
+* `Cell.style.alignment`: the horizontal and vertical alignment of the cell as an `Alignment` names tuple
+* `Cell.style.bg_color`: cell background color as an `RGB` named tuple, or a list of `RGB` values for gradients
+* `Cell.style.bold`: `True` if the cell font is bold
+* `Cell.style.font_color`: font color as an `RGB` named tuple
+* `Cell.style.font_size`: font size in points (`float`)
+* `Cell.style.font_name`: font name (`str`)
+* `Cell.style.italic`: `True` if the cell font is italic
+* `Cell.style.name`: cell style (`str`)
+* `Cell.style.underline`: `True` if the cell font is underline
+* `Cell.style.strikethrough`: `True` if the cell font is strikethrough
 
 #### Cell images
 
@@ -314,8 +315,6 @@ Cell text styles, known as paragraph styles, are those applied by the Text tab i
 
 Character styles, which allow formatting changes within cells such as "This is **bold** text" are not supported.
 
-Vertical alignment values and cell background colors are currently ignored.
-
 Styles are created using the `Document`'s `add_style` method, and can be applied to cells either as part of a `write` or using `set_cell_style`:
 
 ``` python
@@ -332,13 +331,15 @@ table.write("B2", "Red", style=red_text)
 table.set_cell_style("C2", red_text)
 ```
 
-Cell styles can also be referred to by name in both `Table.write` and `Table.set_cell_style`. A `dict` of available styles is returned by `Document.styles`. This contains key value pairs of style names and `Style` objects. Any changes to `Style` objects in the document are written back such that those styles are changed for all cells that use them:
+Cell styles can also be referred to by name in both `Table.write` and `Table.set_cell_style`. A `dict` of available styles is returned by `Document.styles`. This contains key value pairs of style names and `Style` objects. Any changes to `Style` objects in the document are written back such that those styles are changed for all cells that use them.
 
 ``` python
 doc = Document("styles.numbers")
 styles = doc.styles
 styles["Title"].font_size = 20.0
 ```
+
+Since `Style` objects are shared, changing `Cell.style.font_size` will have the effect of changing the font size for that style and will in turn affect the styles of all cells using that style.
 
 ## Command-line scripts
 
