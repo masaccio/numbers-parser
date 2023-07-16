@@ -416,6 +416,9 @@ class Table:
         self._data[row_num][col_num]._table_id = self._table_id
         self._data[row_num][col_num]._model = self._model
 
+        if style is not None:
+            self.set_cell_style(row_num, col_num, style)
+
     def set_cell_style(self, *args):
         (row_num, col_num, style) = self._validate_cell_coords(*args)
         if isinstance(style, Style):
