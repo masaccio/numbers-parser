@@ -1192,6 +1192,7 @@ class _NumbersModel:
             strikethru = CharacterStyle.StrikethruType.kNoStrikethru
 
         style_id_name = "numbers-parser-" + style.name.lower().replace(" ", "-")
+        font_color_attrs = {}
         para_style_id, para_style = self.objects.create_object_from_dict(
             "DocumentStylesheet",
             {
@@ -1215,6 +1216,16 @@ class _NumbersModel:
                     "strikethru": strikethru,
                     "font_size": style.font_size,
                     "font_name": FONT_FAMILY_TO_NAME[style.font_name],
+                    "tsd_fill": {
+                        "color": {
+                            "model": "rgb",
+                            "r": style.font_color.r / 255,
+                            "g": style.font_color.g / 255,
+                            "b": style.font_color.b / 255,
+                            "a": 1.0,
+                            "rgbspace": "srgb",
+                        },
+                    },
                 },
                 "para_properties": {
                     "alignment": style.alignment.horizontal,
@@ -1257,6 +1268,9 @@ class _NumbersModel:
         style_obj.char_properties.strikethru = strikethru
         style_obj.char_properties.font_size = style.font_size
         style_obj.char_properties.font_name = FONT_FAMILY_TO_NAME[style.font_name]
+        style_obj.char_properties.tsd_fill.color.r = style.font_color.r / 255
+        style_obj.char_properties.tsd_fill.color.g = style.font_color.g / 255
+        style_obj.char_properties.tsd_fill.color.b = style.font_color.b / 255
         style_obj.para_properties.alignment = style.alignment.horizontal
 
     def update_paragraph_styles(self):
