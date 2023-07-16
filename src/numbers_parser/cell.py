@@ -148,7 +148,7 @@ class Style:
 
     def __setattr__(self, name: str, value: Any) -> None:
         if name in self.__dict__ and self.__dict__[name] != value:
-            self.__dict__["_update_style"] = True
+            self.__dict__["_update_styles"] = True
         self.__dict__[name] = value
 
 
