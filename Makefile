@@ -92,7 +92,7 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 .bootstrap/fontmap.py:
 	@echo $$(tput setaf 2)"Bootstrap: generating font name map"$$(tput init)
 	@mkdir -p .bootstrap
-	poetry run python3 src/bootstrap/generate_fontmap.py $(TST_TABLES) > $@
+	poetry run python3 src/bootstrap/generate_fontmap.py $@
 
 .bootstrap/protos/TNArchives.proto:
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobufs from Numbers"$$(tput init)
