@@ -1,11 +1,50 @@
-import os
+import importlib
+import mock
 import pytest
-import numbers_parser
 
-numbers_parser._SUPPORTED_NUMBERS_VERSIONS = ["0.0"]
+from numbers_parser import _check_installed_numbers_version
 
-def test_version(capsys):
-    if os.path.isdir(numbers_parser._DEFAULT_NUMBERS_INSTALL_PATH):
-        with pytest.warns(UserWarning) as record:
-            r = numbers_parser._check_installed_numbers_version()
-        assert r is None or "not tested with this version" in record[0].message.args[0]
+builtin_open = open
+
+
+def mock_valid_plist(file, mode):
+    if file.endswith("version.plist"):
+        return builtin_open("tests/data/numbers-version-13.0.plist", mode)
+    else:
+        return builtin_open(file, mode)
+
+
+def mock_newer_plist(file, mode):
+    if file.endswith("version.plist"):
+        return builtin_open("tests/data/numbers-version-99.0.plist", mode)
+    else:
+        return builtin_open(file, mode)
+
+
+def mock_invalid_plist(file, mode):
+    if file.endswith("version.plist"):
+        return builtin_open("tests/data/XXXX.plist", mode)
+    else:
+        return builtin_open(file, mode)
+
+
+def test_numbers_version_check():
+    with mock.patch("builtins.open", side_effect=mock_valid_plist) as m:
+        import numbers_parser
+
+        importlib.reload(numbers_parser)
+
+    with mock.patch("builtins.open", side_effect=mock_invalid_plist) as m:
+        import numbers_parser
+
+        importlib.reload(numbers_parser)
+        assert _check_installed_numbers_version() is None
+
+    with mock.patch("builtins.open", side_effect=mock_newer_plist) as m:
+        with pytest.warns(
+            match="Numbers version 99.0 not tested with this version"
+        ) as record:
+            import numbers_parser
+
+            importlib.reload(numbers_parser)
+        assert len(record) == 1

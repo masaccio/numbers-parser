@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BuildAliasOf</key>
+	<string>iWorkDependenciesMacOS</string>
+	<key>BuildVersion</key>
+	<string>2</string>
+	<key>CFBundleShortVersionString</key>
+	<string>13.0</string>
+	<key>CFBundleVersion</key>
+	<string>7037.0.101</string>
+	<key>ProductBuildVersion</key>
+	<string>1A98</string>
+	<key>ProjectName</key>
+	<string>Numbers</string>
+	<key>SourceVersion</key>
+	<string>7037000101000000</string>
+</dict>
+</plist>
