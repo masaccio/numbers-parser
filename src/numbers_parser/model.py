@@ -367,8 +367,6 @@ class _NumbersModel:
         """Exract all the formula cell ranges for the Table."""
         # https://github.com/masaccio/numbers-parser/blob/main/doc/Numbers.md#formula-ranges
         calc_engine = self.calc_engine()
-        if calc_engine is None:  # pragma: no cover
-            return []
 
         table_base_id = self.table_base_id(table_id)
         cell_records = []
