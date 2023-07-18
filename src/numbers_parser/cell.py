@@ -106,8 +106,8 @@ class Style:
     strikethrough: bool = False
     underline: bool = False
     name: str = None
-    _text_style_id: int = None
-    _cell_style_id: int = None
+    _text_style_obj_id: int = None
+    _cell_style_obj_id: int = None
     _update_cell_style: bool = False
     _update_text_style: bool = False
 
@@ -144,8 +144,8 @@ class Style:
             strikethrough=model.cell_is_strikethrough(cell_storage),
             underline=model.cell_is_underline(cell_storage),
             name=model.cell_style_name(cell_storage),
-            _text_style_id=model.text_style_object_id(cell_storage),
-            _cell_style_id=model.cell_style_object_id(cell_storage),
+            _text_style_obj_id=model.text_style_object_id(cell_storage),
+            _cell_style_obj_id=model.cell_style_object_id(cell_storage),
         )
         return style
 
