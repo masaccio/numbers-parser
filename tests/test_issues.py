@@ -314,3 +314,45 @@ def test_issue_59():
     sheets = doc.sheets
     tables = sheets[0].tables
     assert tables[0].cell("J2").value == "Saturday, 15 May 2021"
+
+
+def test_issue_60(tmp_path, pytestconfig):
+    if pytestconfig.getoption("save_file") is not None:
+        test_1_filename = pytestconfig.getoption("save_file").replace(".", "-1.")
+        test_2_filename = pytestconfig.getoption("save_file").replace(".", "-2.")
+    else:
+        test_1_filename = tmp_path / "issue-60-1.numbers"
+        test_2_filename = tmp_path / "issue-60-2.numbers"
+
+    doc = Document("tests/data/isssue-60.numbers")
+    doc.save(test_1_filename)
+
+    table = doc.sheets[0].tables[0]
+    bg_color = table.cell("A2").style.bg_color
+    table.write("A2", "Item 2")
+    table.cell("A2").style.bg_color = bg_color
+    doc.save(test_2_filename)
+
+    test_1_doc = Document(test_1_filename)
+    test_table_1 = test_1_doc.sheets[0].tables[0]
+    test_2_doc = Document(test_2_filename)
+    test_table_2 = test_2_doc.sheets[0].tables[0]
+
+    for row_num, row in enumerate(table.iter_rows()):
+        for col_num, cell in enumerate(row):
+            for attr in [
+                "alignment",
+                "bg_image",
+                "bg_color",
+                "font_color",
+                "font_size",
+                "font_name",
+                "bold",
+                "italic",
+                "strikethrough",
+                "underline",
+                "name",
+            ]:
+                ref = getattr(table.cell(row_num, col_num).style, attr)
+                assert getattr(test_table_1.cell(row_num, col_num).style, attr) == ref
+                assert getattr(test_table_2.cell(row_num, col_num).style, attr) == ref
