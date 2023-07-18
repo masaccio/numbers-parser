@@ -17,7 +17,6 @@ from numbers_parser.constants import (
     DEFAULT_ROW_HEIGHT,
     DEFAULT_TABLE_OFFSET,
     DEFAULT_TILE_SIZE,
-    DEFAULT_ALIGNMENT,
     DOCUMENT_ID,
     PACKAGE_ID,
     MAX_TILE_SIZE,
