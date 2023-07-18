@@ -324,14 +324,14 @@ def test_issue_60(tmp_path, pytestconfig):
         test_1_filename = tmp_path / "issue-60-1.numbers"
         test_2_filename = tmp_path / "issue-60-2.numbers"
 
-    doc = Document("tests/data/isssue-60.numbers")
+    doc = Document("tests/data/issue-60.numbers")
     doc.save(test_1_filename)
 
     table = doc.sheets[0].tables[0]
     test_1_doc = Document(test_1_filename)
     test_table_1 = test_1_doc.sheets[0].tables[0]
 
-    doc = Document("tests/data/isssue-60.numbers")
+    doc = Document("tests/data/issue-60.numbers")
     table = doc.sheets[0].tables[0]
     bg_color = table.cell("A2").style.bg_color
     table.write("A2", "Item 2")
