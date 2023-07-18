@@ -1,6 +1,6 @@
 import pytest
 
-from numbers_parser import Document, UnsupportedError, Cell
+from numbers_parser import Document, UnsupportedError, Cell, UnsupportedWarning
 from numbers_parser.cell import xl_range, xl_rowcol_to_cell, xl_col_to_name
 from numbers_parser.constants import EMPTY_STORAGE_BUFFER
 from numbers_parser.cell_storage import CellStorage
@@ -17,7 +17,7 @@ def test_ranges():
     assert xl_col_to_name(26) == "AA"
 
 
-def test_cell_storage():
+def test_cell_storage(tmp_path):
     doc = Document()
     table = doc.sheets[0].tables[0]
 
@@ -40,6 +40,17 @@ def test_cell_storage():
     with pytest.raises(UnsupportedError) as e:
         storage = CellStorage(doc._model, table._table_id, bytes(buffer), 0, 0)
     assert "Cell storage version 4 is unsupported" in str(e)
+
+    class DummyCell(Cell):
+        pass
+
+    doc = Document()
+    doc.sheets[0].tables[0]._data[0][0] = DummyCell(0, 0, None)
+    new_filename = tmp_path / "new.numbers"
+    with pytest.warns(UnsupportedWarning) as record:
+        doc.save(new_filename)
+    assert len(record) == 1
+    assert "unsupported data type DummyCell" in str(record[0])
 
 
 def test_range_exceptions():

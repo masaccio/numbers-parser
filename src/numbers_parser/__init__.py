@@ -25,6 +25,7 @@ import warnings
 
 from numbers_parser.document import Document  # NOQA
 from numbers_parser.cell import *  # NOQA
+from numbers_parser.exceptions import *  # NOQA
 
 __version__ = importlib.metadata.version("numbers-parser")
 
