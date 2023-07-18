@@ -17,6 +17,7 @@ from numbers_parser.constants import (
     DEFAULT_ROW_HEIGHT,
     DEFAULT_TABLE_OFFSET,
     DEFAULT_TILE_SIZE,
+    DEFAULT_ALIGNMENT,
     DOCUMENT_ID,
     PACKAGE_ID,
     MAX_TILE_SIZE,
@@ -1168,8 +1169,13 @@ class _NumbersModel:
             }
             for x in presets
         }
+        # HorizontalJustification(cell_style.para_properties.alignment)
         return {
             k: Style(
+                alignment=Alignment(
+                    HorizontalJustification(v["obj"].para_properties.alignment),
+                    VerticalJustification(0),
+                ),
                 font_color=self.cell_font_color(v["obj"]),
                 font_size=self.cell_font_size(v["obj"]),
                 font_name=self.cell_font_name(v["obj"]),
