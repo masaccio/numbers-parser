@@ -170,6 +170,37 @@ def test_header_styles():
     )
 
 
+# import collections
+
+
+# def dump_data(filename):
+#     doc = Document(filename)
+#     sheets = doc.sheets
+#     table = sheets[0].tables[0]
+#     table = sheets[0].tables[0]
+#     table_model = doc._model.objects[table._table_id]
+#     sidecar = doc._model.objects[table_model.stroke_sidecar.identifier]
+#     row_columns = [
+#         doc._model.objects[id].row_column_index
+#         for id in doc._model.find_refs("StrokeLayerArchive")
+#     ]
+#     owner_id_map = collections.OrderedDict(sorted(doc._model.owner_id_map().items()))
+#     print("\n" + filename)
+#     print("  left_column_stroke_layers", len(sidecar.left_column_stroke_layers))
+#     print("  right_column_stroke_layers", len(sidecar.left_column_stroke_layers))
+#     print("  top_row_stroke_layers", len(sidecar.left_column_stroke_layers))
+#     print("  bottom_row_stroke_layers", len(sidecar.left_column_stroke_layers))
+#     print("  row_column_index", row_columns)
+#     print("  owner_id_map", owner_id_map)
+
+
+# def test_border_styles():
+#     dump_data("tests/data/test-styles.numbers")
+#     dump_data("/Users/jon/Downloads/empty+border.numbers")
+#     dump_data("/Users/jon/Downloads/empty+border2.numbers")
+#     dump_data("/Users/jon/Downloads/test.numbers")
+
+
 def test_style_exceptions():
     doc = Document()
     table = doc.sheets[0].tables[0]
