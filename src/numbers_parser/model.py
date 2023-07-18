@@ -1178,7 +1178,7 @@ class _NumbersModel:
                 underline=self.cell_is_underline(v["obj"]),
                 strikethrough=self.cell_is_strikethrough(v["obj"]),
                 name=self.cell_style_name(v["obj"]),
-                _text_style_id=v["id"],
+                _text_style_obj_id=v["id"],
             )
             for k, v in presets_map.items()
         }
@@ -1265,7 +1265,7 @@ class _NumbersModel:
             strikethru = CharacterStyle.StrikethruType.kSingleStrikethru
         else:
             strikethru = CharacterStyle.StrikethruType.kNoStrikethru
-        style_obj = self.objects[style._text_style_id]
+        style_obj = self.objects[style._text_style_obj_id]
         style_obj.char_properties.font_color.r = style.font_color.r / 255
         style_obj.char_properties.font_color.g = style.font_color.g / 255
         style_obj.char_properties.font_color.b = style.font_color.b / 255
@@ -1283,14 +1283,14 @@ class _NumbersModel:
     def update_paragraph_styles(self):
         """Create new paragraph style archives for any new styles that
         have been created for this document"""
-        new_styles = [x for x in self.styles.values() if x._text_style_id is None]
+        new_styles = [x for x in self.styles.values() if x._text_style_obj_id is None]
         updated_styles = [
             x
             for x in self.styles.values()
-            if x._text_style_id is not None and x._update_text_style
+            if x._text_style_obj_id is not None and x._update_text_style
         ]
         for style in new_styles:
-            style._text_style_id = self.add_paragraph_style(style)
+            style._text_style_obj_id = self.add_paragraph_style(style)
             style._update_text_style = True
 
         for style in updated_styles:
@@ -1314,7 +1314,7 @@ class _NumbersModel:
                         )
                     if fingerprint not in cell_styles:
                         cell_styles[fingerprint] = self.add_cell_style(cell._style)
-                    cell._style._cell_style_id = cell_styles[fingerprint]
+                    cell._style._cell_style_obj_id = cell_styles[fingerprint]
 
     def add_cell_style(self, style: Style) -> int:
         if style.bg_color is not None:
@@ -1332,7 +1332,7 @@ class _NumbersModel:
             }
         else:
             color_attrs = {}
-        style_id_name = f"numbers-parser-custom-{style._cell_style_id}"
+        style_id_name = f"numbers-parser-custom-{style._cell_style_obj_id}"
         cell_style_id, cell_style = self.objects.create_object_from_dict(
             "DocumentStylesheet",
             {
@@ -1411,23 +1411,23 @@ class _NumbersModel:
         """Create a storage buffer for a cell using v5 (modern) layout"""
         cell = data[row_num][col_num]
         if cell._style is not None:
-            if cell.style._text_style_id is not None:
+            if cell._style._text_style_obj_id is not None:
                 cell._storage.text_style_id = self._table_styles.lookup_key(
                     cell._table_id,
-                    TSPMessages.Reference(identifier=cell.style._text_style_id),
+                    TSPMessages.Reference(identifier=cell._style._text_style_obj_id),
                 )
                 self.add_component_reference(
-                    cell.style._text_style_id,
+                    cell._style._text_style_obj_id,
                     parent_id=self._table_styles.id(cell._table_id),
                 )
 
-            if cell.style._cell_style_id is not None:
+            if cell._style._cell_style_obj_id is not None:
                 cell._storage.cell_style_id = self._table_styles.lookup_key(
                     cell._table_id,
-                    TSPMessages.Reference(identifier=cell.style._cell_style_id),
+                    TSPMessages.Reference(identifier=cell._style._cell_style_obj_id),
                 )
                 self.add_component_reference(
-                    cell.style._cell_style_id,
+                    cell._style._cell_style_obj_id,
                     parent_id=self._table_styles.id(cell._table_id),
                 )
 
@@ -1685,7 +1685,7 @@ class _NumbersModel:
 
     def cell_is_italic(self, obj: object) -> bool:
         style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
-        return self.char_property(style, "bold")
+        return self.char_property(style, "italic")
 
     def cell_is_underline(self, obj: object) -> bool:
         style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
