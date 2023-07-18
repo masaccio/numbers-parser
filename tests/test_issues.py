@@ -328,13 +328,15 @@ def test_issue_60(tmp_path, pytestconfig):
     doc.save(test_1_filename)
 
     table = doc.sheets[0].tables[0]
+    test_1_doc = Document(test_1_filename)
+    test_table_1 = test_1_doc.sheets[0].tables[0]
+
+    doc = Document("tests/data/isssue-60.numbers")
+    table = doc.sheets[0].tables[0]
     bg_color = table.cell("A2").style.bg_color
     table.write("A2", "Item 2")
     table.cell("A2").style.bg_color = bg_color
     doc.save(test_2_filename)
-
-    test_1_doc = Document(test_1_filename)
-    test_table_1 = test_1_doc.sheets[0].tables[0]
     test_2_doc = Document(test_2_filename)
     test_table_2 = test_2_doc.sheets[0].tables[0]
 
@@ -353,6 +355,6 @@ def test_issue_60(tmp_path, pytestconfig):
                 "underline",
                 "name",
             ]:
-                ref = getattr(table.cell(row_num, col_num).style, attr)
+                ref = getattr(cell.style, attr)
                 assert getattr(test_table_1.cell(row_num, col_num).style, attr) == ref
                 assert getattr(test_table_2.cell(row_num, col_num).style, attr) == ref
