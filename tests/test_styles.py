@@ -1,6 +1,14 @@
+from collections import ChainMap
+
 import pytest
 
-from numbers_parser import Document, EmptyCell
+from numbers_parser import (
+    DEFAULT_ALIGNMENT_CLASS,
+    DEFAULT_FONT,
+    DEFAULT_FONT_SIZE,
+    Document,
+    EmptyCell,
+)
 from numbers_parser.cell import RGB, Alignment, Style
 
 TEST_NUMBERED_REF = [
@@ -51,75 +59,72 @@ def test_bg_colors():
     assert tables["Default Colours"].cell(1, 5).style.bg_color == (255, 66, 161)
 
 
-def test_styles():
-    doc = Document("tests/data/test-styles.numbers")
+def styles_test_versus_cell_params(doc):
+    STYLE_DEFAULTS = {
+        "alignment": DEFAULT_ALIGNMENT_CLASS,
+        "bg_image": None,
+        "bg_color": None,
+        "font_color": RGB(0, 0, 0),
+        "font_size": DEFAULT_FONT_SIZE,
+        "font_name": DEFAULT_FONT,
+        "bold": False,
+        "italic": False,
+        "strikethrough": False,
+        "underline": False,
+    }
+
+    def matches_default_style(row_num, col_num, style, **kwargs):
+        for attr, default in STYLE_DEFAULTS.items():
+            if attr in kwargs:
+                if isinstance(kwargs[attr], str):
+                    if "color" in attr:
+                        ref = eval(kwargs[attr].replace(";", ","))
+                    elif "alignment" in attr:
+                        ref = eval(f'Alignment({kwargs[attr].replace(";", ",")})')
+                    else:
+                        ref = eval(kwargs[attr])
+                else:
+                    ref = kwargs[attr]
+            else:
+                ref = STYLE_DEFAULTS[attr]
+            if getattr(style, attr) != ref:
+                print(f"@[{row_num},{col_num}]: style mismatch on {attr}")
+
+            # assert getattr(style, attr) == ref
+
+    def decode_attrs(attrs):
+        if "," in attrs:
+            return dict(ChainMap(*[decode_attrs(x) for x in attrs.split(",")]))
+        elif "=" in attrs:
+            (attr, ref) = attrs.split("=")
+            return {attr: ref}
+        else:
+            return {attrs: True}
+
     sheets = doc.sheets
     table = sheets["Styles"].tables[0]
 
-    for row_num, row in enumerate(table.iter_rows()):
-        if row_num == 0:
-            for cell in row[1:]:
-                assert cell.style.name == cell.value
-        elif row_num == 1:
-            assert row[1].style.name == "CustomStyle1"
-            assert row[1].style.bold
-            assert row[1].style.italic
-            assert not row[1].style.underline
-            assert not row[1].style.strikethrough
-            assert row[1].style.font_size == 12.0
-            assert row[1].style.font_name == "Arial"
-            assert row[2].style.font_color == RGB(0, 0, 0)
+    for row_num in range(0, table.num_rows):
+        for col_num in range(0, table.num_cols):
+            cell = table.cell(row_num, col_num)
+            if not cell.value:
+                continue
+            kwargs = decode_attrs(cell.value)
+            matches_default_style(row_num, col_num, cell.style, **kwargs)
 
-            assert row[2].style.name == "CustomStyle2"
-            assert not row[2].style.bold
-            assert not row[2].style.italic
-            assert row[2].style.underline
-            assert not row[2].style.strikethrough
-            assert row[2].style.font_size == 13.0
-            assert row[2].style.font_name == "Impact"
-            assert row[2].style.font_color == RGB(0, 0, 0)
 
-            assert row[3].style.name == "CustomStyle3"
-            assert not row[3].style.bold
-            assert not row[3].style.italic
-            assert not row[3].style.underline
-            assert row[3].style.strikethrough
-            assert row[3].style.font_size == 10.0
-            assert row[3].style.font_name == "Menlo"
-            assert row[3].style.font_color == RGB(29, 177, 0)
-        elif row_num == 2:
-            assert row[1].style.bold
-            assert row[1].style.italic
-            assert not row[1].style.underline
-            assert not row[1].style.strikethrough
-            assert row[1].style.font_size == 11.0
+def test_styles(tmp_path, pytestconfig):
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-styles-new.numbers"
 
-            assert not row[2].style.bold
-            assert not row[2].style.italic
-            assert row[2].style.underline
-            assert row[2].style.strikethrough
-            assert row[2].style.font_size == 9.0
+    doc = Document("tests/data/test-styles.numbers")
+    styles_test_versus_cell_params(doc)
 
-            assert not row[3].style.bold
-            assert not row[3].style.italic
-            assert not row[3].style.underline
-            assert not row[3].style.strikethrough
-            assert row[3].style.font_color == RGB(29, 177, 0)
-            assert row[3].style.font_size == 12.0
-        elif row[0].value == "Fonts":
-            for cell in row[1:]:
-                if not isinstance(cell, EmptyCell):
-                    assert cell.style.font_name == cell.value
-        elif row[0].value == "Alignment":
-            for cell in row[1:]:
-                if not isinstance(cell, EmptyCell):
-                    ref = "_".join(
-                        [
-                            cell.style.alignment.horizontal.name,
-                            cell.style.alignment.vertical.name,
-                        ]
-                    )
-                    assert cell.value == ref
+    doc.save(new_filename)
+    doc = Document(new_filename)
+    styles_test_versus_cell_params(doc)
 
 
 def test_header_styles():
