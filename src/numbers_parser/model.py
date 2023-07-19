@@ -1650,7 +1650,13 @@ class _NumbersModel:
 
     def cell_alignment(self, cell_storage: object) -> Alignment:
         cell_style = self.cell_text_style(cell_storage)
-        horizontal = HorizontalJustification(cell_style.para_properties.alignment)
+        if cell_style.para_properties.HasField("alignment"):
+            horizontal = HorizontalJustification(cell_style.para_properties.alignment)
+        else:
+            parent_obj_id = cell_style.super.parent.identifier
+            horizontal = HorizontalJustification(
+                self.objects[parent_obj_id].para_properties.alignment
+            )
 
         if cell_storage.cell_style_id is None:
             vertical = VerticalJustification.TOP
