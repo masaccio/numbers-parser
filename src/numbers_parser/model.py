@@ -1337,13 +1337,12 @@ class _NumbersModel:
             }
         else:
             color_attrs = {}
-        style_id_name = f"numbers-parser-custom-{style._cell_style_obj_id}"
         cell_style_id, cell_style = self.objects.create_object_from_dict(
             "DocumentStylesheet",
             {
                 "super": {
                     "name": style.name,
-                    "style_identifier": style_id_name,
+                    "style_identifier": "",
                 },
                 "override_count": 1,
                 "cell_properties": {
@@ -1353,6 +1352,9 @@ class _NumbersModel:
             },
             TSTArchives.CellStyleArchive,
         )
+        style_id_name = f"numbers-parser-custom-{cell_style_id}"
+        cell_style.super.style_identifier = style_id_name
+
         stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
         cell_style.super.stylesheet.MergeFrom(
             TSPMessages.Reference(identifier=stylesheet_id)
@@ -1384,10 +1386,11 @@ class _NumbersModel:
         )
         return entry.reference.identifier
 
-    def custom_style_name(self, current_styles: List[str]) -> Tuple[str, str]:
+    def custom_style_name(self) -> Tuple[str, str]:
         """Find custom styles in the current document and return the next
         highest numbered style"""
         stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
+        current_styles = self.styles.keys()
         custom_styles = [
             x for x in current_styles if re.fullmatch(r"Custom Style \d+", x)
         ]
