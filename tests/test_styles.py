@@ -1,4 +1,6 @@
 from collections import ChainMap
+from pytest_check import check
+
 
 import pytest
 
@@ -6,10 +8,13 @@ from numbers_parser import (
     DEFAULT_ALIGNMENT_CLASS,
     DEFAULT_FONT,
     DEFAULT_FONT_SIZE,
+    RGB,
+    Alignment,
     Document,
-    EmptyCell,
+    HorizontalJustification,
+    Style,
+    VerticalJustification,
 )
-from numbers_parser.cell import RGB, Alignment, Style
 
 TEST_NUMBERED_REF = [
     "(1) double-paren-1",
@@ -59,72 +64,137 @@ def test_bg_colors():
     assert tables["Default Colours"].cell(1, 5).style.bg_color == (255, 66, 161)
 
 
-def styles_test_versus_cell_params(doc):
-    STYLE_DEFAULTS = {
-        "alignment": DEFAULT_ALIGNMENT_CLASS,
-        "bg_image": None,
-        "bg_color": None,
-        "font_color": RGB(0, 0, 0),
-        "font_size": DEFAULT_FONT_SIZE,
-        "font_name": DEFAULT_FONT,
-        "bold": False,
-        "italic": False,
-        "strikethrough": False,
-        "underline": False,
-    }
+STYLE_DEFAULTS = {
+    "alignment": DEFAULT_ALIGNMENT_CLASS,
+    "bg_image": None,
+    "bg_color": None,
+    "font_color": RGB(0, 0, 0),
+    "font_size": DEFAULT_FONT_SIZE,
+    "font_name": DEFAULT_FONT,
+    "bold": False,
+    "italic": False,
+    "strikethrough": False,
+    "underline": False,
+}
 
-    def matches_default_style(row_num, col_num, style, **kwargs):
-        for attr, default in STYLE_DEFAULTS.items():
-            if attr in kwargs:
-                if isinstance(kwargs[attr], str):
-                    if "color" in attr:
-                        ref = eval(kwargs[attr].replace(";", ","))
-                    elif "alignment" in attr:
-                        ref = eval(f'Alignment({kwargs[attr].replace(";", ",")})')
-                    else:
-                        ref = eval(kwargs[attr])
-                else:
-                    ref = kwargs[attr]
-            else:
-                ref = STYLE_DEFAULTS[attr]
-            if getattr(style, attr) != ref:
-                print(f"@[{row_num},{col_num}]: style mismatch on {attr}")
 
-            # assert getattr(style, attr) == ref
-
-    def decode_attrs(attrs):
-        if "," in attrs:
-            return dict(ChainMap(*[decode_attrs(x) for x in attrs.split(",")]))
-        elif "=" in attrs:
-            (attr, ref) = attrs.split("=")
-            return {attr: ref}
+def check_style(style, **kwargs):
+    matches = []
+    for attr, default in STYLE_DEFAULTS.items():
+        if attr in kwargs:
+            ref = kwargs[attr]
         else:
-            return {attrs: True}
+            ref = STYLE_DEFAULTS[attr]
 
-    sheets = doc.sheets
-    table = sheets["Styles"].tables[0]
-
-    for row_num in range(0, table.num_rows):
-        for col_num in range(0, table.num_cols):
-            cell = table.cell(row_num, col_num)
-            if not cell.value:
-                continue
-            kwargs = decode_attrs(cell.value)
-            matches_default_style(row_num, col_num, cell.style, **kwargs)
+        matches.append(check.equal(getattr(style, attr), ref))
+    return all(matches)
 
 
-def test_styles(tmp_path, pytestconfig):
+def decode_style_attrs(attrs):
+    if "," in attrs:
+        return dict(ChainMap(*[decode_style_attrs(x) for x in attrs.split(",")]))
+    elif "=" in attrs:
+        (attr, ref) = attrs.split("=")
+        if isinstance(ref, str):
+            if "color" in attr:
+                ref = eval(ref.replace(";", ","))
+            elif "alignment" in attr:
+                ref = eval(f'Alignment({ref.replace(";", ",")})')
+            else:
+                ref = eval(ref)
+
+        return {attr: ref}
+    else:
+        return {attrs: True}
+
+
+def invert_style_attrs(attrs):
+    for attr, default in STYLE_DEFAULTS.items():
+        if attr not in attrs:
+            attrs[attr] = default
+
+    horizontal = HorizontalJustification((attrs["alignment"].horizontal + 1) % 4)
+    vertical = VerticalJustification((attrs["alignment"].vertical + 1) % 3)
+    attrs["alignment"] = Alignment(horizontal, vertical)
+    if attrs["font_name"] == "Arial":
+        attrs["font_name"] = "Menlo"
+    else:
+        attrs["font_name"] = "Arial"
+    attrs["bold"] = not attrs["bold"]
+    attrs["italic"] = not attrs["italic"]
+    attrs["strikethrough"] = not attrs["strikethrough"]
+    attrs["underline"] = not attrs["underline"]
+    attrs["bold"] = not attrs["bold"]
+    attrs["font_color"] = RGB(
+        ((attrs["font_color"].r + 128) % 255),
+        ((attrs["font_color"].g + 128) % 255),
+        ((attrs["font_color"].b + 128) % 255),
+    )
+    attrs["font_size"] = float(attrs["font_size"]) + 2.0
+    return attrs
+
+
+def test_all_styles(tmp_path, pytestconfig):
     if pytestconfig.getoption("save_file") is not None:
         new_filename = pytestconfig.getoption("save_file")
     else:
         new_filename = tmp_path / "test-styles-new.numbers"
 
     doc = Document("tests/data/test-styles.numbers")
-    styles_test_versus_cell_params(doc)
+    table = doc.sheets["Styles"].tables[0]
+    for row_num in range(0, table.num_rows):
+        for col_num in range(0, table.num_cols):
+            cell = table.cell(row_num, col_num)
+            if not cell.value:
+                continue
+            attrs = decode_style_attrs(cell.value)
+            assert check_style(cell.style, **attrs)
+
+    # Re-save doc and check again
+    doc.save(new_filename)
+    doc = Document(new_filename)
+    table = doc.sheets["Styles"].tables[0]
+    for row_num in range(0, table.num_rows):
+        for col_num in range(0, table.num_cols):
+            cell = table.cell(row_num, col_num)
+            if not cell.value:
+                continue
+            attrs = decode_style_attrs(cell.value)
+            assert check_style(cell.style, **attrs)
+
+
+def test_all_style_changes(tmp_path, pytestconfig):
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-styles-new.numbers"
+
+    # Flip styles and re-save as new custom styles
+    doc = Document("tests/data/test-styles.numbers")
+    table = doc.sheets["Styles"].tables[0]
+    for row_num in range(0, table.num_rows):
+        for col_num in range(0, table.num_cols):
+            cell = table.cell(row_num, col_num)
+            if not cell.value:
+                continue
+            attrs = decode_style_attrs(cell.value)
+            attrs = invert_style_attrs(attrs)
+            if "name" in attrs:
+                del attrs["name"]
+            style = doc.add_style(**attrs)
+            table.set_cell_style(row_num, col_num, style)
 
     doc.save(new_filename)
     doc = Document(new_filename)
-    styles_test_versus_cell_params(doc)
+    table = doc.sheets["Styles"].tables[0]
+    for row_num in range(0, table.num_rows):
+        for col_num in range(0, table.num_cols):
+            cell = table.cell(row_num, col_num)
+            if not cell.value:
+                continue
+            attrs = decode_style_attrs(cell.value)
+            attrs = invert_style_attrs(attrs)
+            assert check_style(cell.style, **attrs)
 
 
 def test_header_styles():
@@ -173,37 +243,6 @@ def test_header_styles():
             for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
         ]
     )
-
-
-# import collections
-
-
-# def dump_data(filename):
-#     doc = Document(filename)
-#     sheets = doc.sheets
-#     table = sheets[0].tables[0]
-#     table = sheets[0].tables[0]
-#     table_model = doc._model.objects[table._table_id]
-#     sidecar = doc._model.objects[table_model.stroke_sidecar.identifier]
-#     row_columns = [
-#         doc._model.objects[id].row_column_index
-#         for id in doc._model.find_refs("StrokeLayerArchive")
-#     ]
-#     owner_id_map = collections.OrderedDict(sorted(doc._model.owner_id_map().items()))
-#     print("\n" + filename)
-#     print("  left_column_stroke_layers", len(sidecar.left_column_stroke_layers))
-#     print("  right_column_stroke_layers", len(sidecar.left_column_stroke_layers))
-#     print("  top_row_stroke_layers", len(sidecar.left_column_stroke_layers))
-#     print("  bottom_row_stroke_layers", len(sidecar.left_column_stroke_layers))
-#     print("  row_column_index", row_columns)
-#     print("  owner_id_map", owner_id_map)
-
-
-# def test_border_styles():
-#     dump_data("tests/data/test-styles.numbers")
-#     dump_data("/Users/jon/Downloads/empty+border.numbers")
-#     dump_data("/Users/jon/Downloads/empty+border2.numbers")
-#     dump_data("/Users/jon/Downloads/test.numbers")
 
 
 def test_style_exceptions():
