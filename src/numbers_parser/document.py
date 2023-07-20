@@ -90,7 +90,7 @@ class Document:
                 raise IndexError(f"style '{kwargs['name']}' already exists")
         style = Style(**kwargs)
         if style.name is None:
-            style.name = self._model.custom_style_name(self._model.styles.keys())
+            style.name = self._model.custom_style_name()
         style._update_styles = True
         self._model.styles[style.name] = style
         return style
