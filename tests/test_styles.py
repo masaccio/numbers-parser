@@ -124,11 +124,11 @@ def invert_style_attrs(attrs):
     attrs["italic"] = not attrs["italic"]
     attrs["strikethrough"] = not attrs["strikethrough"]
     attrs["underline"] = not attrs["underline"]
-    attrs["bold"] = not attrs["bold"]
     attrs["font_color"] = RGB(
-        ((attrs["font_color"].r + 128) % 255),
-        ((attrs["font_color"].g + 128) % 255),
-        ((attrs["font_color"].b + 128) % 255),
+        # 200 so black -> white text is still visible
+        abs(200 - attrs["font_color"].r),
+        abs(200 - attrs["font_color"].g),
+        abs(200 - attrs["font_color"].b),
     )
     attrs["font_size"] = float(attrs["font_size"]) + 2.0
     return attrs
@@ -187,6 +187,7 @@ def test_all_style_changes(tmp_path, pytestconfig):
     doc.save(new_filename)
     doc = Document(new_filename)
     table = doc.sheets["Styles"].tables[0]
+    style_num = 1
     for row_num in range(0, table.num_rows):
         for col_num in range(0, table.num_cols):
             cell = table.cell(row_num, col_num)
@@ -195,6 +196,8 @@ def test_all_style_changes(tmp_path, pytestconfig):
             attrs = decode_style_attrs(cell.value)
             attrs = invert_style_attrs(attrs)
             assert check_style(cell.style, **attrs)
+            assert cell.style.name == f"Custom Style {style_num}"
+            style_num += 1
 
 
 def test_header_styles():
