@@ -75,6 +75,10 @@ STYLE_DEFAULTS = {
     "italic": False,
     "strikethrough": False,
     "underline": False,
+    "first_indent": 0.0,
+    "left_indent": 0.0,
+    "right_indent": 0.0,
+    "text_inset": 4.0,
 }
 
 
@@ -85,7 +89,6 @@ def check_style(style, **kwargs):
             ref = kwargs[attr]
         else:
             ref = STYLE_DEFAULTS[attr]
-
         matches.append(check.equal(getattr(style, attr), ref))
     return all(matches)
 
@@ -131,6 +134,10 @@ def invert_style_attrs(attrs):
         abs(200 - attrs["font_color"].b),
     )
     attrs["font_size"] = float(attrs["font_size"]) + 2.0
+    attrs["first_indent"] = float(attrs["first_indent"]) + 2.0
+    attrs["left_indent"] = float(attrs["left_indent"]) + 2.0
+    attrs["right_indent"] = float(attrs["right_indent"]) + 2.0
+    attrs["text_inset"] = float(attrs["text_inset"]) + 2.0
     return attrs
 
 
@@ -148,7 +155,8 @@ def test_all_styles(tmp_path, pytestconfig):
             if not cell.value:
                 continue
             attrs = decode_style_attrs(cell.value)
-            assert check_style(cell.style, **attrs)
+            valid = check_style(cell.style, **attrs)
+            assert valid
 
     # Re-save doc and check again
     doc.save(new_filename)
@@ -195,7 +203,8 @@ def test_all_style_changes(tmp_path, pytestconfig):
                 continue
             attrs = decode_style_attrs(cell.value)
             attrs = invert_style_attrs(attrs)
-            assert check_style(cell.style, **attrs)
+            valid = check_style(cell.style, **attrs)
+            assert valid
             assert cell.style.name == f"Custom Style {style_num}"
             style_num += 1
 

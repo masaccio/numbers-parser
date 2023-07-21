@@ -1287,6 +1287,9 @@ class _NumbersModel:
         style_obj.char_properties.tsd_fill.color.g = style.font_color.g / 255
         style_obj.char_properties.tsd_fill.color.b = style.font_color.b / 255
         style_obj.para_properties.alignment = style.alignment.horizontal
+        style_obj.para_properties.first_line_indent = style.first_indent
+        style_obj.para_properties.left_indent = style.left_indent
+        style_obj.para_properties.right_indent = style.right_indent
 
     def update_paragraph_styles(self):
         """Create new paragraph style archives for any new styles that
@@ -1311,16 +1314,16 @@ class _NumbersModel:
         for row_num, row in enumerate(data):
             for col_num, cell in enumerate(row):
                 if cell._style is not None and cell._style._update_cell_style:
-                    if cell._style.bg_color is None:
-                        fingerprint = str(cell.style.alignment.vertical)
-                    else:
-                        fingerprint = (
-                            str(cell.style.alignment.vertical)
-                            + str(cell.style.first_indent)
-                            + str(cell.style.left_indent)
-                            + str(cell.style.right_indent)
-                            + str(cell.style.text_inset)
-                            + str(cell.style.bg_color.r)
+                    fingerprint = (
+                        str(cell.style.alignment.vertical)
+                        + str(cell.style.first_indent)
+                        + str(cell.style.left_indent)
+                        + str(cell.style.right_indent)
+                        + str(cell.style.text_inset)
+                    )
+                    if cell._style.bg_color is not None:
+                        fingerprint = fingerprint + (
+                            str(cell.style.bg_color.r)
                             + str(cell.style.bg_color.g)
                             + str(cell.style.bg_color.b)
                         )
@@ -1672,7 +1675,9 @@ class _NumbersModel:
             vertical = VerticalJustification.TOP
         else:
             style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
-            vertical = VerticalJustification(style.cell_properties.vertical_alignment)
+            vertical = VerticalJustification(
+                self.cell_property(style, "vertical_alignment")
+            )
         return Alignment(horizontal, vertical)
 
     def cell_bg_color(self, cell_storage: object) -> Union[Tuple, List[Tuple]]:
@@ -1706,6 +1711,17 @@ class _NumbersModel:
             return getattr(parent.para_properties, field)
         else:
             return getattr(style.para_properties, field)
+
+    def cell_property(self, style: object, field: str) -> float:
+        """Return a cell_property field from a style if present
+        in the style, or from the parent if not"""
+        if not style.cell_properties.HasField(field):
+            if not style.super.parent.identifier:
+                return 0.0
+            parent = self.objects[style.super.parent.identifier]
+            return getattr(parent.cell_properties, field)
+        else:
+            return getattr(style.cell_properties, field)
 
     def cell_is_bold(self, obj: object) -> bool:
         style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
@@ -1759,19 +1775,10 @@ class _NumbersModel:
             return DEFAULT_TEXT_INSET
         else:
             style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
-            text_inset = style.cell_properties.padding.left
-            if not all(
-                [
-                    style.cell_properties.padding.top == text_inset,
-                    style.cell_properties.padding.right == text_inset,
-                    style.cell_properties.padding.bottom == text_inset,
-                ]
-            ):
-                warn(
-                    f"@[{cell_storage.row_num},{cell_storage.col_num}]: padding mismatch",
-                    UnsupportedWarning,
-                )
-            return style.cell_properties.padding.left
+            padding = self.cell_property(style, "padding")
+            # Padding is always identical (only one UI setting)
+            text_inset = padding.left
+            return text_inset
 
 
 def rgb(obj) -> RGB:
