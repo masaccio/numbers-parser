@@ -17,6 +17,7 @@ from numbers_parser.constants import (
     DEFAULT_ROW_HEIGHT,
     DEFAULT_TABLE_OFFSET,
     DEFAULT_TILE_SIZE,
+    DEFAULT_TEXT_INSET,
     DOCUMENT_ID,
     PACKAGE_ID,
     MAX_TILE_SIZE,
@@ -1168,7 +1169,6 @@ class _NumbersModel:
             }
             for x in presets
         }
-        # HorizontalJustification(cell_style.para_properties.alignment)
         return {
             k: Style(
                 alignment=Alignment(
@@ -1235,6 +1235,9 @@ class _NumbersModel:
                 },
                 "para_properties": {
                     "alignment": style.alignment.horizontal,
+                    "first_line_indent": style.first_indent,
+                    "left_indent": style.left_indent,
+                    "right_indent": style.right_indent,
                 },
             },
             TSWPArchives.ParagraphStyleArchive,
@@ -1311,11 +1314,15 @@ class _NumbersModel:
                     if cell._style.bg_color is None:
                         fingerprint = str(cell.style.alignment.vertical)
                     else:
-                        fingerprint = "{0}-{1}-{2}-{3}".format(
-                            cell.style.alignment.vertical,
-                            cell.style.bg_color.r,
-                            cell.style.bg_color.g,
-                            cell.style.bg_color.b,
+                        fingerprint = (
+                            str(cell.style.alignment.vertical)
+                            + str(cell.style.first_indent)
+                            + str(cell.style.left_indent)
+                            + str(cell.style.right_indent)
+                            + str(cell.style.text_inset)
+                            + str(cell.style.bg_color.r)
+                            + str(cell.style.bg_color.g)
+                            + str(cell.style.bg_color.b)
                         )
                     if fingerprint not in cell_styles:
                         cell_styles[fingerprint] = self.add_cell_style(cell._style)
@@ -1347,6 +1354,12 @@ class _NumbersModel:
                 "override_count": 1,
                 "cell_properties": {
                     **color_attrs,
+                    "padding": {
+                        "left": style.text_inset,
+                        "top": style.text_inset,
+                        "right": style.text_inset,
+                        "bottom": style.text_inset,
+                    },
                     "vertical_alignment": style.alignment.vertical,
                 },
             },
@@ -1652,32 +1665,22 @@ class _NumbersModel:
         return self.objects[table_model.body_text_style.identifier]
 
     def cell_alignment(self, cell_storage: object) -> Alignment:
-        cell_style = self.cell_text_style(cell_storage)
-        if cell_style.para_properties.HasField("alignment"):
-            horizontal = HorizontalJustification(cell_style.para_properties.alignment)
-        else:
-            parent_obj_id = cell_style.super.parent.identifier
-            horizontal = HorizontalJustification(
-                self.objects[parent_obj_id].para_properties.alignment
-            )
+        style = self.cell_text_style(cell_storage)
+        horizontal = HorizontalJustification(self.para_property(style, "alignment"))
 
         if cell_storage.cell_style_id is None:
             vertical = VerticalJustification.TOP
         else:
-            cell_style = self.table_style(
-                cell_storage.table_id, cell_storage.cell_style_id
-            )
-            vertical = VerticalJustification(
-                cell_style.cell_properties.vertical_alignment
-            )
+            style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
+            vertical = VerticalJustification(style.cell_properties.vertical_alignment)
         return Alignment(horizontal, vertical)
 
     def cell_bg_color(self, cell_storage: object) -> Union[Tuple, List[Tuple]]:
         if cell_storage.cell_style_id is None:
             return None
 
-        cell_style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
-        cell_properties = cell_style.cell_properties.cell_fill
+        style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
+        cell_properties = style.cell_properties.cell_fill
 
         if cell_properties.HasField("color"):
             return rgb(cell_properties.color)
@@ -1692,6 +1695,17 @@ class _NumbersModel:
             return getattr(parent.char_properties, field)
         else:
             return getattr(style.char_properties, field)
+
+    def para_property(self, style: object, field: str) -> float:
+        """Return a para_property field from a style if present
+        in the style, or from the parent if not"""
+        if not style.para_properties.HasField(field):
+            if not style.super.parent.identifier:
+                return 0.0
+            parent = self.objects[style.super.parent.identifier]
+            return getattr(parent.para_properties, field)
+        else:
+            return getattr(style.para_properties, field)
 
     def cell_is_bold(self, obj: object) -> bool:
         style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
@@ -1727,6 +1741,37 @@ class _NumbersModel:
         style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
         font_name = self.char_property(style, "font_name")
         return FONT_NAME_TO_FAMILY[font_name]
+
+    def cell_first_indent(self, obj: object) -> float:
+        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+        return self.para_property(style, "first_line_indent")
+
+    def cell_left_indent(self, obj: object) -> float:
+        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+        return self.para_property(style, "left_indent")
+
+    def cell_right_indent(self, obj: object) -> float:
+        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+        return self.para_property(style, "right_indent")
+
+    def cell_text_inset(self, cell_storage: CellStorage) -> float:
+        if cell_storage.cell_style_id is None:
+            return DEFAULT_TEXT_INSET
+        else:
+            style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
+            text_inset = style.cell_properties.padding.left
+            if not all(
+                [
+                    style.cell_properties.padding.top == text_inset,
+                    style.cell_properties.padding.right == text_inset,
+                    style.cell_properties.padding.bottom == text_inset,
+                ]
+            ):
+                warn(
+                    f"@[{cell_storage.row_num},{cell_storage.col_num}]: padding mismatch",
+                    UnsupportedWarning,
+                )
+            return style.cell_properties.padding.left
 
 
 def rgb(obj) -> RGB:

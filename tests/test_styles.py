@@ -257,6 +257,10 @@ def test_style_exceptions():
     with pytest.raises(TypeError) as e:
         doc.add_style(bg_color=(0, 0, 1.0))
     assert "RGB color must be an RGB" in str(e)
+    with pytest.raises(TypeError) as e:
+        style = Style(bg_color=(0, 0, 0))
+        style.bg_color = object()
+    assert "RGB color must be an RGB" in str(e)
 
     style = doc.add_style(bg_color=(100, 100, 100))
     assert style.bg_color == RGB(100, 100, 100)
@@ -270,10 +274,21 @@ def test_style_exceptions():
     dummy = doc.add_style()
     assert dummy.name == "Custom Style 3"
 
+    style = Style(alignment=Alignment("left", "top"))
+    style.alignment = None
+    assert style.alignment.horizontal == HorizontalJustification.AUTO
+    with pytest.raises(TypeError) as e:
+        style.alignment = ("invalid", "top")
+    assert "invalid horizontal alignment" in str(e)
+    with pytest.raises(TypeError) as e:
+        style.alignment = object()
+    assert "Alignment must be an Alignment or a tuple" in str(e)
+    with pytest.raises(TypeError) as e:
+        style.alignment = (0, 0, 0)
+    assert "Alignment must be an Alignment or a tuple" in str(e)
     with pytest.raises(TypeError) as e:
         _ = Style(alignment=Alignment("invalid", "top"))
     assert "invalid horizontal alignment" in str(e)
-
     with pytest.raises(TypeError) as e:
         _ = Style(alignment=Alignment("left", "invalid"))
     assert "invalid vertical alignment" in str(e)
@@ -288,7 +303,7 @@ def test_style_exceptions():
 
     with pytest.raises(TypeError) as e:
         _ = Style(alignment=[None, object()])
-    assert "value must be an Alignment class" in str(e)
+    assert "Alignment must be an Alignment or a tuple" in str(e)
 
     with pytest.raises(TypeError) as e:
         _ = Style(font_size="invalid")
