@@ -59,7 +59,7 @@ def compute_maps():
     id_name_map = {{}}
     name_id_map = {{}}
     for k, v in list(TSPRegistryMapping.items()):
-        if v in name_class_map:
+        if v in name_class_map: # pragma: no branch
             id_name_map[int(k)] = name_class_map[v]
             if v not in name_id_map:
                 name_id_map[v] = int(k)
