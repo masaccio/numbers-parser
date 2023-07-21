@@ -12,6 +12,7 @@ from numbers_parser.constants import (
     DEFAULT_FONT,
     DEFAULT_FONT_SIZE,
     DEFAULT_ALIGNMENT,
+    DEFAULT_TEXT_INSET,
 )
 
 from dataclasses import dataclass
@@ -105,6 +106,10 @@ class Style:
     italic: bool = False
     strikethrough: bool = False
     underline: bool = False
+    first_indent: float = 0
+    left_indent: float = 0
+    right_indent: float = 0
+    text_inset: float = DEFAULT_TEXT_INSET
     name: str = None
     _text_style_obj_id: int = None
     _cell_style_obj_id: int = None
@@ -122,6 +127,21 @@ class Style:
             "strikethrough",
             "underline",
             "name",
+            "first_indent",
+            "left_indent",
+            "right_indent",
+            "text_inset",
+        ]
+
+    @staticmethod
+    def _cell_attrs():
+        return [
+            "alignment",
+            "bg_color",
+            "first_indent",
+            "left_indent",
+            "right_indent",
+            "text_inset",
         ]
 
     @classmethod
@@ -144,6 +164,10 @@ class Style:
             strikethrough=model.cell_is_strikethrough(cell_storage),
             underline=model.cell_is_underline(cell_storage),
             name=model.cell_style_name(cell_storage),
+            first_indent=model.cell_first_indent(cell_storage),
+            left_indent=model.cell_left_indent(cell_storage),
+            right_indent=model.cell_right_indent(cell_storage),
+            text_inset=model.cell_text_inset(cell_storage),
             _text_style_obj_id=model.text_style_object_id(cell_storage),
             _cell_style_obj_id=model.cell_style_object_id(cell_storage),
         )
@@ -168,25 +192,15 @@ class Style:
     def __setattr__(self, name: str, value: Any) -> None:
         """Detect changes to cell styles and flag the style for
         possible updates when saving the document"""
-        if name in self.__dict__:
-            # Init has been done
-            if name in ["bg_color", "font_color"]:
-                value = rgb_color(value)
-            if name in ["bg_color"]:
-                self.__dict__["_update_cell_style"] = True
-            elif name in ["alignment"]:
-                self.__dict__["_update_text_style"] = True
-                self.__dict__["_update_cell_style"] = True
-            elif name in Style._text_attrs():
-                self.__dict__["_update_text_style"] = True
-        elif name == "bg_color" and value is not None:
+        if name in ["bg_color", "font_color"]:
+            value = rgb_color(value)
+        if name == "alignment":
+            value = alignment(value)
+        if name in Style._text_attrs():
+            self.__dict__["_update_text_style"] = True
+        if name in Style._cell_attrs():
             self.__dict__["_update_cell_style"] = True
-        elif (
-            name == "alignment"
-            and value is not None
-            and value[1] != DEFAULT_ALIGNMENT_CLASS[1]
-        ):
-            self.__dict__["_update_cell_style"] = True
+
         if name not in ["_update_text_style", "_update_cell_style"]:
             self.__dict__[name] = value
 
@@ -203,6 +217,22 @@ def rgb_color(color) -> RGB:
         return RGB(*color)
     elif isinstance(color, list):
         return [rgb_color(c) for c in color]
+    raise TypeError("RGB color must be an RGB or a tuple of 3 integers")
+
+
+def alignment(value) -> Alignment:
+    """Raise a TypeError if a alignment is not a valid"""
+    if value is None:
+        return Alignment()
+    if isinstance(value, Alignment):
+        return value
+    if isinstance(value, tuple):
+        if not (len(value) == 2 and all([isinstance(x, (int, str)) for x in value])):
+            raise TypeError(
+                "Alignment must be an Alignment or a tuple of 2 integers/strings"
+            )
+        return Alignment(*value)
+    raise TypeError("Alignment must be an Alignment or a tuple of 2 integers/strings")
 
 
 class Cell:
