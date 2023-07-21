@@ -184,14 +184,17 @@ cell = table.cell(0, 0)
 * text foreground color
 * horizontal and vertical alignment
 * cell background color
+* cell indents (first line, left, right, and text inset)
 
 Table styles that allow new tables to adopt a style across the whole table are not planned.
+
+Numbers conflates style attributes that can be stored in paragraph styles (the style menu in the text panel) with the settings that are available on the Style tab of the Text panel. Some attributes in Numbers are not applied to new cells when a style is applied. To keep the API simple, `numbers-parser` packs all styling into a single `Style` object. When a document is saved, the attributes not stored in a paragraph style are applied to each cell that includes it. Attributes behaving in this way are currently `Cell.alignment.vertical` and `Cell.style.text_inset`. The cell background colour `Cell.style.bg_color` also behaves this way, though this is in line with the separation in Numbers.
 
 #### Reading styles
 
 The cell method `style` returns a `Style` object containing all the style information for that cell. Cells with identical style settings contain references to a single style object.
 
-Cell text fonts can be returned using a number of methods.
+Cell style attributes can be returned using a number of methods:
 
 * `Cell.style.alignment`: the horizontal and vertical alignment of the cell as an `Alignment` names tuple
 * `Cell.style.bg_color`: cell background color as an `RGB` named tuple, or a list of `RGB` values for gradients
@@ -203,6 +206,11 @@ Cell text fonts can be returned using a number of methods.
 * `Cell.style.name`: cell style (`str`)
 * `Cell.style.underline`: `True` if the cell font is underline
 * `Cell.style.strikethrough`: `True` if the cell font is strikethrough
+* `Cell.style.first_indent`: first line indent in points (`float`)
+* `Cell.style.left_indent`: left indent in points (`float`)
+* `Cell.style.right_indent`: right indent in points (`float`)
+* `Cell.style.text_inset`: text inset in points (`float`)
+
 
 #### Cell images
 
