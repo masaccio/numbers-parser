@@ -51,7 +51,7 @@ BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
 				  src/$(package_c)/generated/fontmap.py \
 				  src/$(package_c)/generated/__init__.py \
 				  src/$(package_c)/mapping.py \
-				  src/$(package_c)/protos/TNArchives.proto
+				  src/protos/TNArchives.proto
 
 bootstrap: $(BOOTSTRAP_FILES)
 
@@ -74,13 +74,15 @@ ENTITLEMENTS = src/bootstrap/entitlements.xml
 		.bootstrap/Numbers.unsigned.app/Contents/MacOS/Numbers $@
 
 .bootstrap/mapping.py: .bootstrap/mapping.json
-	@mkdir -p .bootstrap
+	@mkdir -p $(dir $@)
 	python3 src/bootstrap/generate_mapping.py $< $@
 
 src/$(package_c)/generated/functionmap.py: .bootstrap/functionmap.py
+	@mkdir -p $(dir $@)
 	cp $< $@
 
 src/$(package_c)/generated/fontmap.py: .bootstrap/fontmap.py
+	@mkdir -p $(dir $@)
 	cp $< $@
 
 TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
@@ -109,7 +111,7 @@ src/$(package_c)/generated/TNArchives_pb2.py: .bootstrap/protos/TNArchives.proto
 	    $(PROTOC) -I=.bootstrap/protos --proto_path .bootstrap/protos --python_out=src/$(package_c)/generated $$proto; \
 	done
 
-src/$(package_c)/protos/TNArchives.proto: .bootstrap/protos/TNArchives.proto
+src/protos/TNArchives.proto: .bootstrap/protos/TNArchives.proto
 	@echo $$(tput setaf 2)"Bootstrap: creating git-tracked copies of protos"$$(tput init)
 	@mkdir -p src/protos
 	for proto in .bootstrap/protos/*.proto; do \
