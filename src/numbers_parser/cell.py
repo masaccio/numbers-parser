@@ -13,6 +13,10 @@ from numbers_parser.constants import (
     DEFAULT_FONT_SIZE,
     DEFAULT_ALIGNMENT,
     DEFAULT_TEXT_INSET,
+    DEFAULT_BORDER,
+    DEFAULT_BORDER_WIDTH,
+    DEFAULT_BORDER_COLOR,
+    DEFAULT_BORDER_STYLE,
 )
 
 from dataclasses import dataclass
@@ -37,11 +41,6 @@ class BackgroundImage:
     def filename(self) -> str:
         """The image filename for a cell, or None if no image."""
         return self._filename
-
-
-# Style return types
-_Alignment = namedtuple("Alignment", ["horizontal", "vertical"])
-RGB = namedtuple("RGB", ["r", "g", "b"])
 
 
 class HorizontalJustification(IntEnum):
@@ -72,6 +71,8 @@ VERTICAL_MAP = {
     "bottom": VerticalJustification.BOTTOM,
 }
 
+_Alignment = namedtuple("Alignment", ["horizontal", "vertical"])
+
 
 class Alignment(_Alignment):
     def __new__(cls, horizontal=DEFAULT_ALIGNMENT[0], vertical=DEFAULT_ALIGNMENT[1]):
@@ -92,6 +93,8 @@ class Alignment(_Alignment):
 
 
 DEFAULT_ALIGNMENT_CLASS = Alignment(*DEFAULT_ALIGNMENT)
+
+RGB = namedtuple("RGB", ["r", "g", "b"])
 
 
 @dataclass
@@ -235,6 +238,52 @@ def alignment(value) -> Alignment:
     raise TypeError("Alignment must be an Alignment or a tuple of 2 integers/strings")
 
 
+BORDER_STYLE_MAP = {"solid": 0, "dashes": 1, "dots": 2, "none": 3}
+
+
+class BorderType(IntEnum):
+    SOLID = BORDER_STYLE_MAP["solid"]
+    DASHES = BORDER_STYLE_MAP["dashes"]
+    DOTS = BORDER_STYLE_MAP["dots"]
+    NONE = BORDER_STYLE_MAP["none"]
+
+
+_Border = namedtuple("Border", ["width", "color", "style"])
+
+
+@dataclass
+class Border(_Border):
+    width: float = DEFAULT_BORDER_WIDTH
+    color: RGB = RGB(*DEFAULT_BORDER_COLOR)
+    style: BorderType = BorderType(BORDER_STYLE_MAP[DEFAULT_BORDER_STYLE])
+
+    def __new__(
+        cls, width=DEFAULT_BORDER_WIDTH, color=DEFAULT_BORDER_COLOR, style="solid"
+    ):
+        if not isinstance(width, float):
+            raise TypeError("width must be a float number of points")
+        color = rgb_color(color)
+        if isinstance(style, str):
+            style = style.lower()
+            if style not in BORDER_STYLE_MAP:
+                raise TypeError("invalid style alignment")
+            style = BORDER_STYLE_MAP[style]
+
+        self = super(_Border, cls).__new__(cls, (width, color, style))
+        return self
+
+
+@dataclass
+class CellBorder:
+    top = None
+    right = None
+    bottom = None
+    left = None
+
+
+DEFAULT_BORDER_CLASS = Border(*DEFAULT_BORDER)
+
+
 class Cell:
     @classmethod
     def empty_cell(cls, table_id: int, row_num: int, col_num: int, model: object):
@@ -249,7 +298,8 @@ class Cell:
         cell.size = None
         cell._model = model
         cell._table_id = table_id
-        cell.style = None
+        cell._style = None
+        cell._border = CellBorder()
         return cell
 
     @classmethod
@@ -286,6 +336,7 @@ class Cell:
         cell._storage = cell_storage
         cell._formula_key = cell_storage.formula_id
         cell._style = None
+        cell._border = CellBorder()
 
         if is_merged and merge_cells[row_col]["merge_type"] == "source":
             cell.is_merged = True
@@ -474,10 +525,9 @@ class ErrorCell(Cell):
         return None
 
 
-class MergedCell:
+class MergedCell(Cell):
     def __init__(self, row_start: int, col_start: int, row_end: int, col_end: int):
         self.value = None
-        self.formula = None
         self.row_start = row_start
         self.row_end = row_end
         self.col_start = col_start
