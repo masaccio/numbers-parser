@@ -1,3 +1,5 @@
+import pytest
+
 from pytest_check import check
 
 from numbers_parser import Document, MergedCell
@@ -42,7 +44,11 @@ def print_borders(table):
 def test_borders():
     doc = Document("tests/data/test-styles.numbers")
     table = doc.sheets["Large Borders"].tables[0]
-    strokes = doc._model.extract_strokes(table._table_id)
+
+    with pytest.warns() as record:
+        table.cell(0, 0).border = object()
+    assert len(record) == 1
+    assert "cell border values cannot be set" in str(record[0])
 
     for row_num, row in enumerate(table.iter_rows()):
         for col_num, cell in enumerate(row):
@@ -51,16 +57,16 @@ def test_borders():
 
             tests = cell.value.split("\n")
             valid = [
-                check_border(cell._border.top, tests[0][2:]),
-                check_border(cell._border.right, tests[1][2:]),
-                check_border(cell._border.bottom, tests[2][2:]),
-                check_border(cell._border.left, tests[3][2:]),
+                check_border(cell.border.top, tests[0][2:]),
+                check_border(cell.border.right, tests[1][2:]),
+                check_border(cell.border.bottom, tests[2][2:]),
+                check_border(cell.border.left, tests[3][2:]),
             ]
             if not all(valid):
                 print(f"@[{xl_rowcol_to_cell(row_num, col_num)}]: FAIL {valid}")
                 print("   reference :", ", ".join(tests))
-                print("   top       :", cell._border.top)
-                print("   right     :", cell._border.right)
-                print("   bottom    :", cell._border.bottom)
-                print("   left      :", cell._border.left)
+                print("   top       :", cell.border.top)
+                print("   right     :", cell.border.right)
+                print("   bottom    :", cell.border.bottom)
+                print("   left      :", cell.border.left)
             assert valid

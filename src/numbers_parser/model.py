@@ -1819,6 +1819,7 @@ class _NumbersModel:
                 strokes.append([range(start_row, start_column), range(end_row, end_column)])
         return strokes
 
+    @lru_cache(maxsize=None)
     def extract_strokes(self, table_id: int) -> List[List]:
         table_obj = self.objects[table_id]
         sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]

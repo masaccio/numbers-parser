@@ -5,7 +5,7 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
     ParagraphStylePropertiesArchive as ParagraphStyle,
 )
-from numbers_parser.exceptions import UnsupportedError
+from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.cell_storage import CellType, CellStorage
 from numbers_parser.constants import (
     EMPTY_STORAGE_BUFFER,
@@ -462,6 +462,17 @@ class Cell:
     @style.setter
     def style(self, style):
         self._style = style
+
+    @property
+    def border(self):
+        self._model.extract_strokes(self._table_id)
+        return self._border
+
+    @border.setter
+    def border(self, _):
+        warnings.warn(
+            "cell border values cannot be set; use Table.add_border() instead", UnsupportedWarning
+        )
 
 
 class NumberCell(Cell):
