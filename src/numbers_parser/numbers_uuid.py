@@ -17,10 +17,7 @@ class NumbersUUID(UUID):
             super().__init__(int=uuid_int)
         elif type(uuid) == TSPMessages.CFUUIDArchive:
             uuid_int = (
-                (uuid.uuid_w3 << 96)
-                | (uuid.uuid_w2 << 64)
-                | (uuid.uuid_w1 << 32)
-                | uuid.uuid_w0
+                (uuid.uuid_w3 << 96) | (uuid.uuid_w2 << 64) | (uuid.uuid_w1 << 32) | uuid.uuid_w0
             )
             super().__init__(int=uuid_int)
         elif type(uuid) == dict:

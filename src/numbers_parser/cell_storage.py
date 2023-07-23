@@ -122,9 +122,7 @@ class CellStorage:
     )
 
     # @profile
-    def __init__(  # noqa: C901
-        self, model: object, table_id: int, buffer, row_num, col_num
-    ):
+    def __init__(self, model: object, table_id: int, buffer, row_num, col_num):  # noqa: C901
         self.buffer = buffer
         self.model = model
         self.table_id = table_id
@@ -305,9 +303,7 @@ class CellStorage:
             return None
 
         image_path_name = [
-            x
-            for x in self.model.objects.file_store.keys()
-            if x == f"Data/{image_file_names[0]}"
+            x for x in self.model.objects.file_store.keys() if x == f"Data/{image_file_names[0]}"
         ][0]
         return (self.model.objects.file_store[image_path_name], image_file_names[0])
 
@@ -365,13 +361,9 @@ class CellStorage:
             custom_format = format_map[format_uuid].default_format
             custom_format_string = custom_format.custom_format_string
             if custom_format.format_type == FormatType.CUSTOM_DATE:
-                formatted_value = decode_date_format(
-                    custom_format_string, self.datetime
-                )
+                formatted_value = decode_date_format(custom_format_string, self.datetime)
             else:  # pragma: no cover
-                raise UnsupportedError(
-                    f"Unexpected custom format type {custom_format.format_type}"
-                )
+                raise UnsupportedError(f"Unexpected custom format type {custom_format.format_type}")
         else:
             formatted_value = decode_date_format(format.date_time_format, self.datetime)
         return formatted_value
@@ -440,9 +432,7 @@ class CellStorage:
                 padding = "" if dd >= 100 else padding
                 dstr.append(f"{padding}{dd}")
             else:
-                dstr.append(
-                    str(dd) + unit_format("millisecond", dd, duration_style, "ms")
-                )
+                dstr.append(str(dd) + unit_format("millisecond", dd, duration_style, "ms"))
         duration_str = (":" if duration_style == 0 else " ").join(dstr)
         if duration_style == DurationStyle.COMPACT:
             duration_str = re.sub(r":(\d\d\d)$", r".\1", duration_str)

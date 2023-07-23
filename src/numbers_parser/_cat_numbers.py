@@ -54,9 +54,7 @@ def command_line_parser():
         "-t", "--table", action="append", help="Names of table(s) to include in export"
     )
     parser.add_argument("document", nargs="*", help="Document(s) to export")
-    parser.add_argument(
-        "--debug", default=False, action="store_true", help="Enable debug logging"
-    )
+    parser.add_argument("--debug", default=False, action="store_true", help="Enable debug logging")
     parser.add_argument(
         "--experimental", default=False, action="store_true", help=argparse.SUPPRESS
     )

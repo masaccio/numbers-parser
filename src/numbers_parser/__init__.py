@@ -48,9 +48,7 @@ _SUPPORTED_NUMBERS_VERSIONS = [
 old_warn_f = warnings.formatwarning
 warnings.formatwarning = (
     # pragma: no cover -- lambda not run by coverage
-    lambda msg, catg, fname, lineno, line=None: old_warn_f(
-        msg, catg, fname, lineno, line=""
-    )
+    lambda msg, catg, fname, lineno, line=None: old_warn_f(msg, catg, fname, lineno, line="")
 )
 
 
@@ -60,17 +58,13 @@ def _get_version():
 
 def _check_installed_numbers_version():
     try:
-        fp = open(
-            os.path.join(_DEFAULT_NUMBERS_INSTALL_PATH, _VERSION_PLIST_PATH), "rb"
-        )
+        fp = open(os.path.join(_DEFAULT_NUMBERS_INSTALL_PATH, _VERSION_PLIST_PATH), "rb")
     except IOError:
         return None
     version_dict = plistlib.load(fp)
     installed_version = version_dict["CFBundleShortVersionString"]
     if installed_version not in _SUPPORTED_NUMBERS_VERSIONS:
-        warnings.warn(
-            f"Numbers version {installed_version} not tested with this version"
-        )
+        warnings.warn(f"Numbers version {installed_version} not tested with this version")
     fp.close()
     return installed_version
 

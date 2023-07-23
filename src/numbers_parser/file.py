@@ -16,9 +16,7 @@ def read_numbers_file(path, file_handler, object_handler=None):
     debug("read_numbers_file: path=%s", path)
     if os.path.isdir(path):
         if os.path.isfile(os.path.join(path, "Index.zip")):
-            get_objects_from_zip_file(
-                os.path.join(path, "Index.zip"), file_handler, object_handler
-            )
+            get_objects_from_zip_file(os.path.join(path, "Index.zip"), file_handler, object_handler)
         else:
             for filename in os.listdir(path):
                 filepath = os.path.join(path, filename)
@@ -28,9 +26,7 @@ def read_numbers_file(path, file_handler, object_handler=None):
                     f = open(filepath, "rb")
                     if filename.endswith(".iwa"):
                         blob = f.read()
-                        extract_iwa_archives(
-                            blob, filepath, file_handler, object_handler
-                        )
+                        extract_iwa_archives(blob, filepath, file_handler, object_handler)
                     blob = f.read()
                     file_handler(os.path.join(path, filename), blob)
     else:
@@ -44,9 +40,7 @@ def read_numbers_file(path, file_handler, object_handler=None):
         index_zip = [f for f in zipf.namelist() if f.lower().endswith("index.zip")]
         if len(index_zip) > 0:
             index_data = BytesIO(zipf.read(index_zip[0]))
-            get_objects_from_zip_stream(
-                ZipFile(index_data), file_handler, object_handler
-            )
+            get_objects_from_zip_stream(ZipFile(index_data), file_handler, object_handler)
         else:
             get_objects_from_zip_stream(zipf, file_handler, object_handler)
 
@@ -92,14 +86,10 @@ def extract_iwa_archives(blob, filename, file_handler, object_handler):
 
     if object_handler is not None:
         if len(iwaf.chunks) != 1:
-            raise FileFormatError(
-                f"{filename}: chunk count != 1 in {filename}"
-            )  # pragma: no cover
+            raise FileFormatError(f"{filename}: chunk count != 1 in {filename}")  # pragma: no cover
         for archive in iwaf.chunks[0].archives:
             if len(archive.objects) == 0:
-                raise FileFormatError(
-                    f"{filename}: no objects in {filename}"
-                )  # pragma: no cover
+                raise FileFormatError(f"{filename}: no objects in {filename}")  # pragma: no cover
 
             identifier = archive.header.identifier
             if len(archive.objects) > 1:

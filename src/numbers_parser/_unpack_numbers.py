@@ -107,19 +107,13 @@ def main():
     parser.add_argument("document", help="Apple Numbers file(s)", nargs="*")
     parser.add_argument("-V", "--version", action="store_true")
     parser.add_argument("--hex-uuids", action="store_true", help="print UUIDs as hex")
-    parser.add_argument(
-        "--pretty-storage", action="store_true", help="pretty print cell storage"
-    )
+    parser.add_argument("--pretty-storage", action="store_true", help="pretty print cell storage")
     parser.add_argument(
         "--compact-json", action="store_true", help="Format JSON compactly as possible"
     )
-    parser.add_argument(
-        "--pretty", action="store_true", help="Enable all prettifying options"
-    )
+    parser.add_argument("--pretty", action="store_true", help="Enable all prettifying options")
     parser.add_argument("--output", "-o", help="directory name to unpack into")
-    parser.add_argument(
-        "--debug", default=False, action="store_true", help="Enable debug logging"
-    )
+    parser.add_argument("--debug", default=False, action="store_true", help="Enable debug logging")
     args = parser.parse_args()
     if args.version:
         print(_get_version())
