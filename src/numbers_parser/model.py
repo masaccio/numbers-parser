@@ -37,6 +37,7 @@ from numbers_parser.cell import (
     HorizontalJustification,
     VerticalJustification,
     RGB,
+    Border,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
@@ -59,6 +60,9 @@ from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
 from numbers_parser.generated import TSSArchives_pb2 as TSSArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
     CharacterStylePropertiesArchive as CharacterStyle,
+)
+from numbers_parser.generated.TSDArchives_pb2 import (
+    StrokePatternArchive as StrokePattern,
 )
 
 
@@ -168,6 +172,7 @@ class _NumbersModel:
         self._table_formats = DataLists(self, "format_table")
         self._table_styles = DataLists(self, "styleTable", "reference")
         self._table_strings = DataLists(self, "stringTable", "string")
+        self._table_data = {}
         self._styles = None
 
     @property
@@ -185,6 +190,9 @@ class _NumbersModel:
             return self.objects[sheet_id].name
         else:
             self.objects[sheet_id].name = value
+
+    def set_table_data(self, table_id: int, data: List):
+        self._table_data[table_id] = data
 
     # Don't cache: new tables can be added at runtime
     def table_ids(self, sheet_id: int) -> list:
@@ -1779,6 +1787,109 @@ class _NumbersModel:
             # Padding is always identical (only one UI setting)
             text_inset = padding.left
             return text_inset
+
+    def extract_strokes_in_layers(
+        self, table_id: int, layer_ids: List, border: str
+    ) -> List[List]:
+        strokes = []
+        if border in ["top", "bottom"]:
+            is_row = True
+        else:
+            is_row = False
+        for layer_id in layer_ids:
+            stroke_layer = self.objects[layer_id.identifier]
+            start_row = stroke_layer.row_column_index
+            for stroke_run in stroke_layer.stroke_runs:
+                start_column = stroke_run.origin
+                if (
+                    stroke_run.stroke.pattern.type
+                    == StrokePattern.StrokePatternType.TSDSolidPattern
+                ):
+                    style = "solid"
+                elif (
+                    stroke_run.stroke.pattern.type
+                    == StrokePattern.StrokePatternType.TSDPattern
+                ):
+                    if stroke_run.stroke.pattern.pattern[0] < 1.0:
+                        style = "dots"
+                    else:
+                        style = "dashes"
+                else:
+                    style = "none"
+                width = round(stroke_run.stroke.width, 2)
+                if is_row:
+                    for row_num in range(start_row, start_row + stroke_run.length):
+                        if row_num < len(
+                            self._table_data[table_id]
+                        ) and start_column < len(self._table_data[table_id][row_num]):
+                            if row_num == 1 and start_column == 1:
+                                print(
+                                    f"@B2: layer_id={layer_id.identifier} border={border}",
+                                    width,
+                                    rgb(stroke_run.stroke.color),
+                                    style,
+                                )
+                            setattr(
+                                self._table_data[table_id][row_num][
+                                    start_column
+                                ]._border,
+                                border,
+                                Border(
+                                    width,
+                                    rgb(stroke_run.stroke.color),
+                                    style,
+                                ),
+                            )
+                    end_row = start_row + stroke_run.length
+                    end_column = start_column
+                else:
+                    for col_num in range(
+                        start_column, start_column + stroke_run.length
+                    ):
+                        if start_row < len(
+                            self._table_data[table_id]
+                        ) and col_num < len(self._table_data[table_id][start_row]):
+                            if start_row == 1 and col_num == 1:
+                                print(
+                                    f"@B2: layer_id={layer_id.identifier} border={border}",
+                                    width,
+                                    rgb(stroke_run.stroke.color),
+                                    style,
+                                )
+                            setattr(
+                                self._table_data[table_id][start_row][col_num]._border,
+                                border,
+                                Border(
+                                    width,
+                                    rgb(stroke_run.stroke.color),
+                                    style,
+                                ),
+                            )
+                    end_row = start_row
+                    end_column = start_column + stroke_run.length
+                strokes.append(
+                    [range(start_row, start_column), range(end_row, end_column)]
+                )
+        return strokes
+
+    def extract_strokes(self, table_id: int) -> List[List]:
+        table_obj = self.objects[table_id]
+        sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]
+        strokes = {
+            "top": self.extract_strokes_in_layers(
+                table_id, sidecar_obj.top_row_stroke_layers, "top"
+            ),
+            "left": self.extract_strokes_in_layers(
+                table_id, sidecar_obj.left_column_stroke_layers, "left"
+            ),
+            "right": self.extract_strokes_in_layers(
+                table_id, sidecar_obj.right_column_stroke_layers, "right"
+            ),
+            "bottom": self.extract_strokes_in_layers(
+                table_id, sidecar_obj.bottom_row_stroke_layers, "bottom"
+            ),
+        }
+        return strokes
 
 
 def rgb(obj) -> RGB:
