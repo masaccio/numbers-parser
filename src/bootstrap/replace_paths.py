@@ -7,7 +7,7 @@ for filename in sys.argv[1:]:
     old_f = open(filename, "r")
     new_f = open(new_filename, "w")
     for line in old_f.readlines():
-        line = re.sub('^import T', 'import numbers_parser.generated.T', line)
+        line = re.sub("^import T", "import numbers_parser.generated.T", line)
         new_f.write(line)
 
     old_f.close()

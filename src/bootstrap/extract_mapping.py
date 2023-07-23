@@ -78,15 +78,7 @@ try:
                 if x.strip()
             ]
             json_str = json.dumps(
-                dict(
-                    sorted(
-                        [
-                            (int(a), b.split(" ")[-1])
-                            for a, b in split
-                            if "null" not in b
-                        ]
-                    )
-                ),
+                dict(sorted([(int(a), b.split(" ")[-1]) for a, b in split if "null" not in b])),
                 indent=2,
             )
             with open(output, "w") as fh:

@@ -162,12 +162,8 @@ def main():
             " printing usable .proto files to a given directory."
         )
     )
-    parser.add_argument(
-        "input_path", help="Input path to scan. May be a file or directory."
-    )
-    parser.add_argument(
-        "output_path", help="Output directory to dump .protoc files to."
-    )
+    parser.add_argument("input_path", help="Input path to scan. May be a file or directory.")
+    parser.add_argument("output_path", help="Output directory to dump .protoc files to.")
 
     args = parser.parse_args()
 
@@ -179,9 +175,7 @@ def main():
 
     GLOBAL_DESCRIPTOR_POOL = DescriptorPool()
 
-    all_filenames = [
-        str(path) for path in Path(args.input_path).rglob("*") if not path.is_dir()
-    ]
+    all_filenames = [str(path) for path in Path(args.input_path).rglob("*") if not path.is_dir()]
 
     cprint(
         f"Bootstrap: scanning {len(all_filenames):,}"
@@ -197,9 +191,7 @@ def main():
     missing_deps = set()
     for found in proto_files_found:
         if not found.attempt_to_load():
-            missing_deps.update(
-                find_missing_dependencies(proto_files_found, found.path)
-            )
+            missing_deps.update(find_missing_dependencies(proto_files_found, found.path))
 
     if missing_deps:
         cprint(
