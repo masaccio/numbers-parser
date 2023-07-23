@@ -1,7 +1,7 @@
 import pytest
 
 from numbers_parser import Document
-from numbers_parser.cell import EmptyCell, TextCell, NumberCell
+from numbers_parser.cell import EmptyCell, TextCell, NumberCell, MergedCell
 
 
 def test_empty_document():
@@ -42,7 +42,7 @@ def test_save_merges(tmp_path, pytestconfig):
     table.write("B5", "merge_2")
     table.write("D2", "merge_3")
     table.merge_cells("B2:C2")
-    table.merge_cells(["B5:E5", "D2:D4"])
+    table.merge_cells(["B5:E5", "D2:F4"])
 
     if pytestconfig.getoption("save_file") is not None:
         new_filename = pytestconfig.getoption("save_file")
@@ -53,7 +53,9 @@ def test_save_merges(tmp_path, pytestconfig):
     doc = Document(new_filename)
     sheets = doc.sheets
     table = sheets[0].tables[0]
-    assert table.merge_ranges == ["B2:C2", "B5:E5", "D2:D4"]
+    assert table.merge_ranges == ["B2:C2", "B5:E5", "D2:F4"]
+    assert all([isinstance(table.cell(row, 3), MergedCell) for row in range(2, 4)])
+    assert all([isinstance(table.cell(row, 4), MergedCell) for row in range(1, 4)])
 
 
 def test_create_table(tmp_path, pytestconfig):
