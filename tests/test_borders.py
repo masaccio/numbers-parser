@@ -41,32 +41,41 @@ def print_borders(table):
             print("   left      :", cell._border.left)
 
 
+@pytest.mark.experimental
 def test_borders():
     doc = Document("tests/data/test-styles.numbers")
-    table = doc.sheets["Large Borders"].tables[0]
 
-    with pytest.warns() as record:
-        table.cell(0, 0).border = object()
-    assert len(record) == 1
-    assert "cell border values cannot be set" in str(record[0])
+    for sheet_name in ["Borders", "Large Borders"]:
+        table = doc.sheets[sheet_name].tables[0]
 
-    for row_num, row in enumerate(table.iter_rows()):
-        for col_num, cell in enumerate(row):
-            if isinstance(cell, MergedCell):
-                continue
+        with pytest.warns() as record:
+            table.cell(0, 0).border = object()
+        assert len(record) == 1
+        assert "cell border values cannot be set" in str(record[0])
 
-            tests = cell.value.split("\n")
-            valid = [
-                check_border(cell.border.top, tests[0][2:]),
-                check_border(cell.border.right, tests[1][2:]),
-                check_border(cell.border.bottom, tests[2][2:]),
-                check_border(cell.border.left, tests[3][2:]),
-            ]
-            if not all(valid):
-                print(f"@[{xl_rowcol_to_cell(row_num, col_num)}]: FAIL {valid}")
-                print("   reference :", ", ".join(tests))
-                print("   top       :", cell.border.top)
-                print("   right     :", cell.border.right)
-                print("   bottom    :", cell.border.bottom)
-                print("   left      :", cell.border.left)
-            assert valid
+        for row_num, row in enumerate(table.iter_rows()):
+            for col_num, cell in enumerate(row):
+                if isinstance(cell, MergedCell) or not cell.value:
+                    continue
+
+                # Cell test values are of the form:
+                #
+                # T=1,(0;162;255),dashes
+                # R=1,(0;162;255),dashes
+                # B=1,(0;162;255),dashes
+                # L=1,(0;162;255),dashes
+                tests = cell.value.split("\n")
+                valid = [
+                    check_border(cell.border.top, tests[0][2:]),
+                    check_border(cell.border.right, tests[1][2:]),
+                    check_border(cell.border.bottom, tests[2][2:]),
+                    check_border(cell.border.left, tests[3][2:]),
+                ]
+                if not all(valid):
+                    print(f"{sheet_name}@{xl_rowcol_to_cell(row_num, col_num)}: FAIL {valid}")
+                    print("   reference :", ", ".join(tests))
+                    print("   top       :", cell.border.top)
+                    print("   right     :", cell.border.right)
+                    print("   bottom    :", cell.border.bottom)
+                    print("   left      :", cell.border.left)
+                # assert valid
