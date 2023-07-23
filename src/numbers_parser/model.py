@@ -1753,28 +1753,25 @@ class _NumbersModel:
             return None
         if row_num >= len(data) or col_num >= len(data[row_num]):
             return None
+        if isinstance(data[row_num][col_num], MergedCell):
+            return None
         return data[row_num][col_num]
 
     def set_cell_border(
-        self,
-        table_id: int,
-        row_num: int,
-        col_num: int,
-        border: str,
-        border_value: Border,
+        self, table_id: int, row_num: int, col_num: int, side: str, border_value: Border
     ):
         """Set the 2 borders adjacent to a stroke if within the table range"""
-        if border == "top":
+        if side == "top":
             if (cell := self.cell_for_stroke(table_id, row_num, col_num)) is not None:
                 cell._border.top = border_value
             if (cell := self.cell_for_stroke(table_id, row_num - 1, col_num)) is not None:
                 cell._border.bottom = border_value
-        elif border == "right":
+        elif side == "right":
             if (cell := self.cell_for_stroke(table_id, row_num, col_num)) is not None:
                 cell._border.right = border_value
             if (cell := self.cell_for_stroke(table_id, row_num, col_num + 1)) is not None:
                 cell._border.left = border_value
-        elif border == "bottom":
+        elif side == "bottom":
             if (cell := self.cell_for_stroke(table_id, row_num, col_num)) is not None:
                 cell._border.bottom = border_value
             if (cell := self.cell_for_stroke(table_id, row_num + 1, col_num)) is not None:
@@ -1785,9 +1782,9 @@ class _NumbersModel:
             if (cell := self.cell_for_stroke(table_id, row_num, col_num - 1)) is not None:
                 cell._border.right = border_value
 
-    def extract_strokes_in_layers(self, table_id: int, layer_ids: List, border: str) -> List[List]:
+    def extract_strokes_in_layers(self, table_id: int, layer_ids: List, side: str) -> List[List]:
         strokes = []
-        if border in ["top", "bottom"]:
+        if side in ["top", "bottom"]:
             is_row = True
         else:
             is_row = False
@@ -1804,18 +1801,19 @@ class _NumbersModel:
                     stroke_range = range(start_row, start_row + stroke_run.length)
 
                 border_value = Border(
-                    round(stroke_run.stroke.width, 2),
-                    rgb(stroke_run.stroke.color),
-                    self.stroke_type(stroke_run),
+                    width=round(stroke_run.stroke.width, 2),
+                    color=rgb(stroke_run.stroke.color),
+                    style=self.stroke_type(stroke_run),
+                    _order=stroke_run.order,
                 )
                 if is_row:
                     for col_num in stroke_range:
-                        self.set_cell_border(table_id, start_row, col_num, border, border_value)
+                        self.set_cell_border(table_id, start_row, col_num, side, border_value)
                     end_row = start_row + stroke_run.length
                     end_column = start_column
                 else:
                     for row_num in stroke_range:
-                        self.set_cell_border(table_id, row_num, start_column, border, border_value)
+                        self.set_cell_border(table_id, row_num, start_column, side, border_value)
                     end_row = start_row
                     end_column = start_column + stroke_run.length
                 strokes.append([range(start_row, start_column), range(end_row, end_column)])

@@ -13,7 +13,6 @@ from numbers_parser.constants import (
     DEFAULT_FONT_SIZE,
     DEFAULT_ALIGNMENT,
     DEFAULT_TEXT_INSET,
-    DEFAULT_BORDER,
     DEFAULT_BORDER_WIDTH,
     DEFAULT_BORDER_COLOR,
     DEFAULT_BORDER_STYLE,
@@ -246,38 +245,90 @@ class BorderType(IntEnum):
     NONE = BORDER_STYLE_MAP["none"]
 
 
-_Border = namedtuple("Border", ["width", "color", "style"])
-
-
-@dataclass
-class Border(_Border):
-    width: float = DEFAULT_BORDER_WIDTH
-    color: RGB = RGB(*DEFAULT_BORDER_COLOR)
-    style: BorderType = BorderType(BORDER_STYLE_MAP[DEFAULT_BORDER_STYLE])
-
-    def __new__(cls, width=DEFAULT_BORDER_WIDTH, color=DEFAULT_BORDER_COLOR, style="solid"):
+class Border:
+    def __init__(
+        self,
+        width: float = DEFAULT_BORDER_WIDTH,
+        color: RGB = RGB(*DEFAULT_BORDER_COLOR),
+        style: BorderType = BorderType(BORDER_STYLE_MAP[DEFAULT_BORDER_STYLE]),
+        _order: int = 0,
+    ):
         if not isinstance(width, float):
             raise TypeError("width must be a float number of points")
-        color = rgb_color(color)
+        self.width = width
+
+        self.color = rgb_color(color)
+
         if isinstance(style, str):
             style = style.lower()
             if style not in BORDER_STYLE_MAP:
                 raise TypeError("invalid style alignment")
-            style = BORDER_STYLE_MAP[style]
+            self.style = BORDER_STYLE_MAP[style]
+        else:
+            self.style = style
 
-        self = super(_Border, cls).__new__(cls, (width, color, style))
-        return self
+        self._order = _order
+
+    def __repr__(self) -> str:
+        style_name = BorderType(self.style).name.lower()
+        return f"Border(width={self.width}, color={self.color}, style={style_name})"
+
+    def __eq__(self, value: object) -> bool:
+        return all(
+            [self.width == value.width, self.color == value.color, self.style == value.style]
+        )
 
 
-@dataclass
 class CellBorder:
-    top = None
-    right = None
-    bottom = None
-    left = None
+    def __init__(self):
+        self._top = None
+        self._right = None
+        self._bottom = None
+        self._left = None
 
+    @property
+    def top(self):
+        return self._top
 
-DEFAULT_BORDER_CLASS = Border(*DEFAULT_BORDER)
+    @top.setter
+    def top(self, value):
+        if self._top is None:
+            self._top = value
+        elif value._order > self.top._order:
+            self._top = value
+
+    @property
+    def right(self):
+        return self._right
+
+    @right.setter
+    def right(self, value):
+        if self._right is None:
+            self._right = value
+        elif value._order > self._right._order:
+            self._right = value
+
+    @property
+    def bottom(self):
+        return self._bottom
+
+    @bottom.setter
+    def bottom(self, value):
+        if self._bottom is None:
+            self._bottom = value
+        elif value._order > self._bottom._order:
+            self._bottom = value
+
+    @property
+    def left(self):
+        return self._left
+
+    @left.setter
+    def left(self, value):
+        if self._left is None:
+            self._left = value
+        elif value._order > self._left._order:
+            self._left = value
 
 
 class Cell:
