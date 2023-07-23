@@ -1,4 +1,3 @@
-
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSCH3DArchives_pb2 as TSCH3DArchives
@@ -31,7 +30,6 @@ from numbers_parser.generated import TSTArchives_sos_pb2 as TSTArchives_sos
 from numbers_parser.generated import TSAArchives_pb2 as TSAArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated import TSCHArchives_Common_pb2 as TSCHArchives_Common
-
 
 PROTO_FILES = [
     TNArchives,
@@ -66,7 +64,6 @@ PROTO_FILES = [
     TSAArchives,
     TSCEArchives,
     TSCHArchives_Common,
-
 ]
 
 TSPRegistryMapping = {
@@ -651,7 +648,6 @@ TSPRegistryMapping = {
     "12057": "TN.FormViewerSelectionTransformerArchive",
     "12058": "TN.FormSheetSelectionTransformerArchive",
     "12059": "TN.FormCommandActivityBehaviorArchive",
-
 }
 
 
@@ -673,7 +669,7 @@ def compute_maps():
     id_name_map = {}
     name_id_map = {}
     for k, v in list(TSPRegistryMapping.items()):
-        if v in name_class_map: # pragma: no branch
+        if v in name_class_map:  # pragma: no branch
             id_name_map[int(k)] = name_class_map[v]
             if v not in name_id_map:
                 name_id_map[v] = int(k)
