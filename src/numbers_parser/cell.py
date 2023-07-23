@@ -231,9 +231,7 @@ def alignment(value) -> Alignment:
         return value
     if isinstance(value, tuple):
         if not (len(value) == 2 and all([isinstance(x, (int, str)) for x in value])):
-            raise TypeError(
-                "Alignment must be an Alignment or a tuple of 2 integers/strings"
-            )
+            raise TypeError("Alignment must be an Alignment or a tuple of 2 integers/strings")
         return Alignment(*value)
     raise TypeError("Alignment must be an Alignment or a tuple of 2 integers/strings")
 
@@ -257,9 +255,7 @@ class Border(_Border):
     color: RGB = RGB(*DEFAULT_BORDER_COLOR)
     style: BorderType = BorderType(BORDER_STYLE_MAP[DEFAULT_BORDER_STYLE])
 
-    def __new__(
-        cls, width=DEFAULT_BORDER_WIDTH, color=DEFAULT_BORDER_COLOR, style="solid"
-    ):
+    def __new__(cls, width=DEFAULT_BORDER_WIDTH, color=DEFAULT_BORDER_COLOR, style="solid"):
         if not isinstance(width, float):
             raise TypeError("width must be a float number of points")
         color = rgb_color(color)
