@@ -17,11 +17,8 @@ for filename in os.listdir("src/numbers_parser/generated"):
     if "pb2" in filename:
         module = filename.replace("_pb2.py", "")
         modules.append(module)
-        module_import_output += (
-            f"from numbers_parser.generated import {module}_pb2 as {module}\n"
-        )
+        module_import_output += f"from numbers_parser.generated import {module}_pb2 as {module}\n"
         module_files_output += f"    {module},\n"
-
 
 with open(mapping_json) as fh:
     mappings = json.load(fh)
@@ -29,15 +26,14 @@ with open(mapping_json) as fh:
 for index, symbol in sorted(mappings.items(), key=lambda x: int(x[0])):
     mapping_output += f'    "{index}": "{symbol}",\n'
 
-OUTPUT_CODE = f"""
-{module_import_output}
+OUTPUT_CODE = f"""{module_import_output.strip()}
 
 PROTO_FILES = [
-{module_files_output}
+    {module_files_output.strip()}
 ]
 
 TSPRegistryMapping = {{
-{mapping_output}
+    {mapping_output.strip()}
 }}
 
 
@@ -59,7 +55,7 @@ def compute_maps():
     id_name_map = {{}}
     name_id_map = {{}}
     for k, v in list(TSPRegistryMapping.items()):
-        if v in name_class_map: # pragma: no branch
+        if v in name_class_map:  # pragma: no branch
             id_name_map[int(k)] = name_class_map[v]
             if v not in name_id_map:
                 name_id_map[v] = int(k)
