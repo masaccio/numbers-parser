@@ -158,6 +158,7 @@ class Table:
         # Cache all data now to facilite write(). Performance impact
         # of computing all cells is minimal compared to file IO
         self._data = []
+        self._model.set_table_data(table_id, self._data)
         for row_num in range(self.num_rows):
             self._data.append([])
             for col_num in range(self.num_cols):
