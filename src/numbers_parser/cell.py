@@ -16,6 +16,7 @@ from numbers_parser.constants import (
     DEFAULT_BORDER_WIDTH,
     DEFAULT_BORDER_COLOR,
     DEFAULT_BORDER_STYLE,
+    DEFAULT_BORDER,
 )
 
 from dataclasses import dataclass
@@ -279,6 +280,9 @@ class Border:
         )
 
 
+DEFAULT_BORDER_CLASS = Border(*DEFAULT_BORDER)
+
+
 class CellBorder:
     def __init__(self):
         self._top = None
@@ -288,6 +292,8 @@ class CellBorder:
 
     @property
     def top(self):
+        if self._top is None:
+            return DEFAULT_BORDER_CLASS
         return self._top
 
     @top.setter
@@ -299,6 +305,8 @@ class CellBorder:
 
     @property
     def right(self):
+        if self._right is None:
+            return DEFAULT_BORDER_CLASS
         return self._right
 
     @right.setter
@@ -310,6 +318,8 @@ class CellBorder:
 
     @property
     def bottom(self):
+        if self._bottom is None:
+            return DEFAULT_BORDER_CLASS
         return self._bottom
 
     @bottom.setter
@@ -321,6 +331,8 @@ class CellBorder:
 
     @property
     def left(self):
+        if self._left is None:
+            return DEFAULT_BORDER_CLASS
         return self._left
 
     @left.setter
