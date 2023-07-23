@@ -208,9 +208,7 @@ class Table:
         elif num_headers > self.num_cols:
             raise ValueError("Number of headers cannot exceed the number of columns")
         elif num_headers > MAX_HEADER_COUNT:
-            raise ValueError(
-                f"Number of headers cannot exceed {MAX_HEADER_COUNT} columns"
-            )
+            raise ValueError(f"Number of headers cannot exceed {MAX_HEADER_COUNT} columns")
         return self._model.num_header_cols(self._table_id, num_headers)
 
     @property
@@ -402,15 +400,11 @@ class Table:
         elif type(value) == bool:
             self._data[row_num][col_num] = BoolCell(row_num, col_num, value)
         elif type(value) == builtin_datetime or type(value) == DateTime:
-            self._data[row_num][col_num] = DateCell(
-                row_num, col_num, pendulum_instance(value)
-            )
+            self._data[row_num][col_num] = DateCell(row_num, col_num, pendulum_instance(value))
         elif type(value) == builtin_timedelta or type(value) == Duration:
             self._data[row_num][col_num] = DurationCell(row_num, col_num, value)
         else:
-            raise ValueError(
-                "Can't determine cell type from type " + type(value).__name__
-            )
+            raise ValueError("Can't determine cell type from type " + type(value).__name__)
         self._data[row_num][col_num]._storage = CellStorage(
             self._model, self._table_id, None, row_num, col_num
         )
@@ -432,9 +426,7 @@ class Table:
             raise TypeError("style must be a Style object or style name")
 
     def add_row(self, num_rows=1):
-        row = [
-            EmptyCell(self.num_rows - 1, col_num) for col_num in range(self.num_cols)
-        ]
+        row = [EmptyCell(self.num_rows - 1, col_num) for col_num in range(self.num_cols)]
         for _ in range(num_rows):
             self._data.append(row.copy())
             self.num_rows += 1
