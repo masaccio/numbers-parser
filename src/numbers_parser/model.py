@@ -132,9 +132,7 @@ class DataLists:
         If the value is not in the datalist, allocate a new entry with the
         next available key"""
         self.add_table(table_id)
-        value_key = (
-            value.identifier if isinstance(value, TSPMessages.Reference) else value
-        )
+        value_key = value.identifier if isinstance(value, TSPMessages.Reference) else value
         if value_key not in self._datalists[table_id]["by_value"]:
             key = self._datalists[table_id]["next_key"]
             self._datalists[table_id]["next_key"] += 1
@@ -259,9 +257,7 @@ class _NumbersModel:
         #      "number_of_cells": 3,
         #      "size": 0.0
         #  },
-        col_bucket_map = {
-            i: None for i in range(self.objects[table_id].number_of_columns)
-        }
+        col_bucket_map = {i: None for i in range(self.objects[table_id].number_of_columns)}
         bds = self.objects[table_id].base_data_store
         buckets = self.objects[bds.columnHeaders.identifier].headers
         for i, bucket in enumerate(buckets):
@@ -281,9 +277,7 @@ class _NumbersModel:
 
     @lru_cache(maxsize=None)
     def custom_format_map(self):
-        custom_format_list_id = self.objects[
-            DOCUMENT_ID
-        ].super.custom_format_list.identifier
+        custom_format_list_id = self.objects[DOCUMENT_ID].super.custom_format_list.identifier
         custom_format_list = self.objects[custom_format_list_id]
         custom_format_map = {
             NumbersUUID(u).hex: custom_format_list.custom_formats[i]
@@ -481,9 +475,7 @@ class _NumbersModel:
 
     def node_to_ref(self, this_table_id: int, row_num: int, col_num: int, node):
         if node.HasField("AST_cross_table_reference_extra_info"):
-            table_uuid = NumbersUUID(
-                node.AST_cross_table_reference_extra_info.table_id
-            ).hex
+            table_uuid = NumbersUUID(node.AST_cross_table_reference_extra_info.table_id).hex
             other_table_id = self.table_uuids_to_id(table_uuid)
             other_table_name = self.table_name(other_table_id)
         else:
@@ -630,9 +622,7 @@ class _NumbersModel:
 
         for merge_cell, merge_data in merge_cells.items():
             if merge_data["merge_type"] == "source":
-                cell_id = TSTArchives.CellID(
-                    packedData=(merge_cell[1] << 16 | merge_cell[0])
-                )
+                cell_id = TSTArchives.CellID(packedData=(merge_cell[1] << 16 | merge_cell[0]))
                 table_size = TSTArchives.TableSize(
                     packedData=(merge_data["size"][1] << 16 | merge_data["size"][0])
                 )
@@ -640,9 +630,7 @@ class _NumbersModel:
                 merge_map.cell_range.append(cell_range)
 
         base_data_store = self.objects[table_id].base_data_store
-        base_data_store.merge_region_map.CopyFrom(
-            TSPMessages.Reference(identifier=merge_map_id)
-        )
+        base_data_store.merge_region_map.CopyFrom(TSPMessages.Reference(identifier=merge_map_id))
 
     def recalculate_row_info(
         self, table_id: int, data: List, tile_row_offset: int, row_num: int
@@ -679,14 +667,10 @@ class _NumbersModel:
         component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
         if isinstance(reference, str):
             component_ids = [
-                id
-                for id, c in component_map.items()
-                if c.preferred_locator == reference
+                id for id, c in component_map.items() if c.preferred_locator == reference
             ]
         else:
-            component_ids = [
-                id for id, c in component_map.items() if c.identifier == reference
-            ]
+            component_ids = [id for id, c in component_map.items() if c.identifier == reference]
         return component_map[component_ids[0]]
 
     def add_component_metadata(self, object_id: int, parent: str, locator: str):
@@ -789,9 +773,7 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.STRING, "nextListID": 1},
             TSTArchives.TableDataList,
         )
-        self.add_component_metadata(
-            table_strings_id, "CalculationEngine", "Tables/DataList-{}"
-        )
+        self.add_component_metadata(table_strings_id, "CalculationEngine", "Tables/DataList-{}")
         return table_strings_id, table_strings
 
     def table_height(self, table_id: int) -> int:
@@ -976,9 +958,7 @@ class _NumbersModel:
             {"listType": TSTArchives.TableDataList.ListType.STYLE, "nextListID": 1},
             TSTArchives.TableDataList,
         )
-        self.add_component_metadata(
-            style_table_id, "CalculationEngine", "Tables/DataList-{}"
-        )
+        self.add_component_metadata(style_table_id, "CalculationEngine", "Tables/DataList-{}")
 
         formula_table_id, _ = self.objects.create_object_from_dict(
             "Index/Tables/TableDataList-{}",
@@ -1005,9 +985,7 @@ class _NumbersModel:
         data_store_refs["columnHeaders"] = {"identifier": column_headers_id}
         data_store_refs["styleTable"] = {"identifier": style_table_id}
         data_store_refs["formula_table"] = {"identifier": formula_table_id}
-        data_store_refs["format_table_pre_bnc"] = {
-            "identifier": format_table_pre_bnc_id
-        }
+        data_store_refs["format_table_pre_bnc"] = {"identifier": format_table_pre_bnc_id}
         table_model.base_data_store.MergeFrom(
             TSTArchives.DataStore(
                 rowHeaders=TSTArchives.HeaderStorage(bucketHashFunction=1),
@@ -1047,9 +1025,7 @@ class _NumbersModel:
             {},
             TSTArchives.TableInfoArchive,
         )
-        table_info.tableModel.MergeFrom(
-            TSPMessages.Reference(identifier=table_model_id)
-        )
+        table_info.tableModel.MergeFrom(TSPMessages.Reference(identifier=table_model_id))
         table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
         self.add_component_reference(table_info_id, "Document", self.calc_engine_id())
 
@@ -1148,13 +1124,9 @@ class _NumbersModel:
             "Document", {"name": sheet_name}, TNArchives.SheetArchive
         )
 
-        self.add_component_reference(
-            sheet_id, "CalculationEngine", DOCUMENT_ID, is_weak=True
-        )
+        self.add_component_reference(sheet_id, "CalculationEngine", DOCUMENT_ID, is_weak=True)
 
-        self.objects[DOCUMENT_ID].sheets.append(
-            TSPMessages.Reference(identifier=sheet_id)
-        )
+        self.objects[DOCUMENT_ID].sheets.append(TSPMessages.Reference(identifier=sheet_id))
 
         return sheet_id
 
@@ -1167,9 +1139,7 @@ class _NumbersModel:
     @lru_cache(maxsize=None)
     def available_paragraph_styles(self) -> List[Style]:
         theme_id = self.objects[DOCUMENT_ID].theme.identifier
-        presets = find_extension(
-            self.objects[theme_id].super, "paragraph_style_presets"
-        )
+        presets = find_extension(self.objects[theme_id].super, "paragraph_style_presets")
         presets_map = {
             self.objects[x.identifier].super.name: {
                 "id": x.identifier,
@@ -1251,12 +1221,8 @@ class _NumbersModel:
             TSWPArchives.ParagraphStyleArchive,
         )
         stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
-        para_style.super.stylesheet.MergeFrom(
-            TSPMessages.Reference(identifier=stylesheet_id)
-        )
-        self.objects[stylesheet_id].styles.append(
-            TSPMessages.Reference(identifier=para_style_id)
-        )
+        para_style.super.stylesheet.MergeFrom(TSPMessages.Reference(identifier=stylesheet_id))
+        self.objects[stylesheet_id].styles.append(TSPMessages.Reference(identifier=para_style_id))
         self.objects[stylesheet_id].identifier_to_style_map.append(
             TSSArchives.StylesheetArchive.IdentifiedStyleEntry(
                 identifier=style_id_name,
@@ -1265,9 +1231,7 @@ class _NumbersModel:
         )
 
         theme_id = self.objects[DOCUMENT_ID].theme.identifier
-        presets = find_extension(
-            self.objects[theme_id].super, "paragraph_style_presets"
-        )
+        presets = find_extension(self.objects[theme_id].super, "paragraph_style_presets")
         presets.append(TSPMessages.Reference(identifier=para_style_id))
         self._styles[style.name] = style
         return para_style_id
@@ -1380,12 +1344,8 @@ class _NumbersModel:
         cell_style.super.style_identifier = style_id_name
 
         stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
-        cell_style.super.stylesheet.MergeFrom(
-            TSPMessages.Reference(identifier=stylesheet_id)
-        )
-        self.objects[stylesheet_id].styles.append(
-            TSPMessages.Reference(identifier=cell_style_id)
-        )
+        cell_style.super.stylesheet.MergeFrom(TSPMessages.Reference(identifier=stylesheet_id))
+        self.objects[stylesheet_id].styles.append(TSPMessages.Reference(identifier=cell_style_id))
         self.objects[stylesheet_id].identifier_to_style_map.append(
             TSSArchives.StylesheetArchive.IdentifiedStyleEntry(
                 identifier=style_id_name,
@@ -1397,17 +1357,13 @@ class _NumbersModel:
     def text_style_object_id(self, cell_storage) -> int:
         if cell_storage.text_style_id is None:
             return None
-        entry = self._table_styles.lookup_value(
-            cell_storage.table_id, cell_storage.text_style_id
-        )
+        entry = self._table_styles.lookup_value(cell_storage.table_id, cell_storage.text_style_id)
         return entry.reference.identifier
 
     def cell_style_object_id(self, cell_storage) -> int:
         if cell_storage.cell_style_id is None:
             return None
-        entry = self._table_styles.lookup_value(
-            cell_storage.table_id, cell_storage.cell_style_id
-        )
+        entry = self._table_styles.lookup_value(cell_storage.table_id, cell_storage.cell_style_id)
         return entry.reference.identifier
 
     def custom_style_name(self) -> Tuple[str, str]:
@@ -1415,9 +1371,7 @@ class _NumbersModel:
         highest numbered style"""
         stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
         current_styles = self.styles.keys()
-        custom_styles = [
-            x for x in current_styles if re.fullmatch(r"Custom Style \d+", x)
-        ]
+        custom_styles = [x for x in current_styles if re.fullmatch(r"Custom Style \d+", x)]
         for style_entry in self.objects[stylesheet_id].identifier_to_style_map:
             style_id = style_entry.style.identifier
             style_name = getattr(self.objects[style_id].super, "name", "")
@@ -1547,9 +1501,7 @@ class _NumbersModel:
         return TableFormulas(self, table_id)
 
     @lru_cache(maxsize=None)
-    def table_cell_decode(  # noqa: C901
-        self, table_id: int, row_num: int, col_num: int
-    ) -> Dict:
+    def table_cell_decode(self, table_id: int, row_num: int, col_num: int) -> Dict:  # noqa: C901
         buffer = self.storage_buffer(table_id, row_num, col_num)
         if buffer is None:
             return None
@@ -1666,12 +1618,8 @@ class _NumbersModel:
         elif cell_storage.col_num in range(0, table_model.number_of_header_columns):
             return self.objects[table_model.header_column_text_style.identifier]
         elif table_model.number_of_footer_rows > 0:
-            start_row_num = (
-                table_model.number_of_rows - table_model.number_of_footer_rows
-            )
-            if cell_storage.row_num in range(
-                start_row_num, table_model.number_of_header_rows
-            ):
+            start_row_num = table_model.number_of_rows - table_model.number_of_footer_rows
+            if cell_storage.row_num in range(start_row_num, table_model.number_of_header_rows):
                 return self.objects[table_model.footer_row_text_style.identifier]
         return self.objects[table_model.body_text_style.identifier]
 
@@ -1683,9 +1631,7 @@ class _NumbersModel:
             vertical = VerticalJustification.TOP
         else:
             style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
-            vertical = VerticalJustification(
-                self.cell_property(style, "vertical_alignment")
-            )
+            vertical = VerticalJustification(self.cell_property(style, "vertical_alignment"))
         return Alignment(horizontal, vertical)
 
     def cell_bg_color(self, cell_storage: object) -> Union[Tuple, List[Tuple]]:
@@ -1788,9 +1734,58 @@ class _NumbersModel:
             text_inset = padding.left
             return text_inset
 
-    def extract_strokes_in_layers(
-        self, table_id: int, layer_ids: List, border: str
-    ) -> List[List]:
+    def stroke_type(self, stroke_run: object) -> str:
+        """Return the stroke type for a stroke run"""
+        stroke_type = stroke_run.stroke.pattern.type
+        if stroke_type == StrokePattern.StrokePatternType.TSDSolidPattern:
+            return "solid"
+        elif stroke_type == StrokePattern.StrokePatternType.TSDPattern:
+            if stroke_run.stroke.pattern.pattern[0] < 1.0:
+                return "dots"
+            else:
+                return "dashes"
+        else:
+            return "none"
+
+    def cell_for_stroke(self, table_id: int, row_num: int, col_num: int) -> object:
+        data = self._table_data[table_id]
+        if row_num < 0 or col_num < 0:
+            return None
+        if row_num >= len(data) or col_num >= len(data[row_num]):
+            return None
+        return data[row_num][col_num]
+
+    def set_cell_border(
+        self,
+        table_id: int,
+        row_num: int,
+        col_num: int,
+        border: str,
+        border_value: Border,
+    ):
+        """Set the 2 borders adjacent to a stroke if within the table range"""
+        if border == "top":
+            if (cell := self.cell_for_stroke(table_id, row_num, col_num)) is not None:
+                cell._border.top = border_value
+            if (cell := self.cell_for_stroke(table_id, row_num - 1, col_num)) is not None:
+                cell._border.bottom = border_value
+        elif border == "right":
+            if (cell := self.cell_for_stroke(table_id, row_num, col_num)) is not None:
+                cell._border.right = border_value
+            if (cell := self.cell_for_stroke(table_id, row_num, col_num + 1)) is not None:
+                cell._border.left = border_value
+        elif border == "bottom":
+            if (cell := self.cell_for_stroke(table_id, row_num, col_num)) is not None:
+                cell._border.bottom = border_value
+            if (cell := self.cell_for_stroke(table_id, row_num + 1, col_num)) is not None:
+                cell._border.top = border_value
+        else:  # left border
+            if (cell := self.cell_for_stroke(table_id, row_num, col_num)) is not None:
+                cell._border.left = border_value
+            if (cell := self.cell_for_stroke(table_id, row_num, col_num - 1)) is not None:
+                cell._border.right = border_value
+
+    def extract_strokes_in_layers(self, table_id: int, layer_ids: List, border: str) -> List[List]:
         strokes = []
         if border in ["top", "bottom"]:
             is_row = True
@@ -1798,78 +1793,32 @@ class _NumbersModel:
             is_row = False
         for layer_id in layer_ids:
             stroke_layer = self.objects[layer_id.identifier]
-            start_row = stroke_layer.row_column_index
             for stroke_run in stroke_layer.stroke_runs:
-                start_column = stroke_run.origin
-                if (
-                    stroke_run.stroke.pattern.type
-                    == StrokePattern.StrokePatternType.TSDSolidPattern
-                ):
-                    style = "solid"
-                elif (
-                    stroke_run.stroke.pattern.type
-                    == StrokePattern.StrokePatternType.TSDPattern
-                ):
-                    if stroke_run.stroke.pattern.pattern[0] < 1.0:
-                        style = "dots"
-                    else:
-                        style = "dashes"
-                else:
-                    style = "none"
-                width = round(stroke_run.stroke.width, 2)
                 if is_row:
-                    for row_num in range(start_row, start_row + stroke_run.length):
-                        if row_num < len(
-                            self._table_data[table_id]
-                        ) and start_column < len(self._table_data[table_id][row_num]):
-                            if row_num == 1 and start_column == 1:
-                                print(
-                                    f"@B2: layer_id={layer_id.identifier} border={border}",
-                                    width,
-                                    rgb(stroke_run.stroke.color),
-                                    style,
-                                )
-                            setattr(
-                                self._table_data[table_id][row_num][
-                                    start_column
-                                ]._border,
-                                border,
-                                Border(
-                                    width,
-                                    rgb(stroke_run.stroke.color),
-                                    style,
-                                ),
-                            )
+                    start_row = stroke_layer.row_column_index
+                    start_column = stroke_run.origin
+                    stroke_range = range(start_column, start_column + stroke_run.length)
+                else:
+                    start_row = stroke_run.origin
+                    start_column = stroke_layer.row_column_index
+                    stroke_range = range(start_row, start_row + stroke_run.length)
+
+                border_value = Border(
+                    round(stroke_run.stroke.width, 2),
+                    rgb(stroke_run.stroke.color),
+                    self.stroke_type(stroke_run),
+                )
+                if is_row:
+                    for col_num in stroke_range:
+                        self.set_cell_border(table_id, start_row, col_num, border, border_value)
                     end_row = start_row + stroke_run.length
                     end_column = start_column
                 else:
-                    for col_num in range(
-                        start_column, start_column + stroke_run.length
-                    ):
-                        if start_row < len(
-                            self._table_data[table_id]
-                        ) and col_num < len(self._table_data[table_id][start_row]):
-                            if start_row == 1 and col_num == 1:
-                                print(
-                                    f"@B2: layer_id={layer_id.identifier} border={border}",
-                                    width,
-                                    rgb(stroke_run.stroke.color),
-                                    style,
-                                )
-                            setattr(
-                                self._table_data[table_id][start_row][col_num]._border,
-                                border,
-                                Border(
-                                    width,
-                                    rgb(stroke_run.stroke.color),
-                                    style,
-                                ),
-                            )
+                    for row_num in stroke_range:
+                        self.set_cell_border(table_id, row_num, start_column, border, border_value)
                     end_row = start_row
                     end_column = start_column + stroke_run.length
-                strokes.append(
-                    [range(start_row, start_column), range(end_row, end_column)]
-                )
+                strokes.append([range(start_row, start_column), range(end_row, end_column)])
         return strokes
 
     def extract_strokes(self, table_id: int) -> List[List]:
@@ -1927,9 +1876,7 @@ def node_to_col_ref(node: object, table_name: str, col_num: int) -> str:
         return col_name
 
 
-def node_to_row_col_ref(
-    node: object, table_name: str, row_num: int, col_num: int
-) -> str:
+def node_to_row_col_ref(node: object, table_name: str, row_num: int, col_num: int) -> str:
     if node.AST_row.absolute:
         row = node.AST_row.row
     else:
