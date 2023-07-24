@@ -32,7 +32,7 @@ def test_save_document(tmp_path):
     assert cell_values == new_cell_values
 
 
-def test_save_merges(tmp_path, pytestconfig):
+def test_save_merges(configurable_save_file):
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets
     table = sheets[0].tables[0]
@@ -44,13 +44,9 @@ def test_save_merges(tmp_path, pytestconfig):
     table.merge_cells("B2:C2")
     table.merge_cells(["B5:E5", "D2:F4"])
 
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-1-new.numbers"
-    doc.save(new_filename)
+    doc.save(configurable_save_file)
 
-    doc = Document(new_filename)
+    doc = Document(configurable_save_file)
     sheets = doc.sheets
     table = sheets[0].tables[0]
     assert table.merge_ranges == ["B2:C2", "B5:E5", "D2:F4"]
@@ -58,7 +54,7 @@ def test_save_merges(tmp_path, pytestconfig):
     assert all([isinstance(table.cell(row, 4), MergedCell) for row in range(1, 4)])
 
 
-def test_create_table(tmp_path, pytestconfig):
+def test_create_table(configurable_save_file):
     doc = Document()
     sheets = doc.sheets
 
@@ -75,13 +71,9 @@ def test_create_table(tmp_path, pytestconfig):
     table.write("C2", "a little")
     table.write("D2", "lamb")
 
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-1-new.numbers"
-    doc.save(new_filename)
+    doc.save(configurable_save_file)
 
-    doc = Document(new_filename)
+    doc = Document(configurable_save_file)
     sheets = doc.sheets
 
     table = sheets[0].tables[1]
@@ -94,7 +86,7 @@ def test_create_table(tmp_path, pytestconfig):
     assert table.cell("D2").value == "lamb"
 
 
-def test_create_sheet(tmp_path, pytestconfig):
+def test_create_sheet(configurable_save_file):
     doc = Document()
     sheets = doc.sheets
 
@@ -112,13 +104,9 @@ def test_create_sheet(tmp_path, pytestconfig):
     table.write(1, 2, 2000)
     table.write(1, 3, 3000)
 
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-1-new.numbers"
-    doc.save(new_filename)
+    doc.save(configurable_save_file)
 
-    doc = Document(new_filename)
+    doc = Document(configurable_save_file)
     sheets = doc.sheets
 
     assert sheets[1].name == "New Sheet"
@@ -133,7 +121,7 @@ def test_create_sheet(tmp_path, pytestconfig):
     assert table.cell(1, 3).value == 3000
 
 
-def test_create_multi(tmp_path, pytestconfig):
+def test_create_multi(configurable_save_file):
     doc = Document()
 
     doc.sheets[0].tables[0].write(0, 0, "S0T1 A1")
@@ -154,13 +142,9 @@ def test_create_multi(tmp_path, pytestconfig):
     doc.sheets[2].tables[2].write(0, 0, "S2T2 A1")
     doc.sheets[2].tables[3].write(0, 0, "S2T3 A1")
 
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-1-new.numbers"
-    doc.save(new_filename)
+    doc.save(configurable_save_file)
 
-    doc = Document(new_filename)
+    doc = Document(configurable_save_file)
     assert doc.sheets[1].tables[1].height == 200
     assert doc.sheets[2].tables[1].coordinates == (100.0, 280.0)
     assert doc.sheets[2].tables[2].coordinates == (0.0, 700.0)

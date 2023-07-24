@@ -131,3 +131,8 @@ def test_empty_borders():
     assert table.cell("H10").border.bottom is None
     assert table.cell("H13").border.left is None
     assert table.cell("H13").border.top is None
+
+
+@pytest.mark.experimental
+def test_create_borders(configurable_save_file):
+    print("\n", configurable_save_file)

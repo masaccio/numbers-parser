@@ -141,12 +141,7 @@ def invert_style_attrs(attrs):
     return attrs
 
 
-def test_all_styles(tmp_path, pytestconfig):
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-styles-new.numbers"
-
+def test_all_styles(configurable_save_file):
     doc = Document("tests/data/test-styles.numbers")
     table = doc.sheets["Styles"].tables[0]
     for row_num in range(0, table.num_rows):
@@ -159,8 +154,8 @@ def test_all_styles(tmp_path, pytestconfig):
             assert valid
 
     # Re-save doc and check again
-    doc.save(new_filename)
-    doc = Document(new_filename)
+    doc.save(configurable_save_file)
+    doc = Document(configurable_save_file)
     table = doc.sheets["Styles"].tables[0]
     for row_num in range(0, table.num_rows):
         for col_num in range(0, table.num_cols):
@@ -171,12 +166,7 @@ def test_all_styles(tmp_path, pytestconfig):
             assert check_style(cell.style, **attrs)
 
 
-def test_all_style_changes(tmp_path, pytestconfig):
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-styles-new.numbers"
-
+def test_all_style_changes(configurable_save_file):
     # Flip styles and re-save as new custom styles
     doc = Document("tests/data/test-styles.numbers")
     table = doc.sheets["Styles"].tables[0]
@@ -192,8 +182,8 @@ def test_all_style_changes(tmp_path, pytestconfig):
             style = doc.add_style(**attrs)
             table.set_cell_style(row_num, col_num, style)
 
-    doc.save(new_filename)
-    doc = Document(new_filename)
+    doc.save(configurable_save_file)
+    doc = Document(configurable_save_file)
     table = doc.sheets["Styles"].tables[0]
     style_num = 1
     for row_num in range(0, table.num_rows):
@@ -318,12 +308,7 @@ def test_style_exceptions():
         assert f"{field} argument must be boolean" in str(e)
 
 
-def test_new_styles(tmp_path, pytestconfig):
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-styles-new.numbers"
-
+def test_new_styles(configurable_save_file):
     doc = Document()
     table = doc.sheets[0].tables[0]
     red_text = doc.add_style(
@@ -361,9 +346,9 @@ def test_new_styles(tmp_path, pytestconfig):
     table.cell("F2").style.bg_color = RGB(238, 34, 12)
     table.cell("F2").style.alignment = Alignment("right", "middle")
 
-    doc.save(new_filename)
+    doc.save(configurable_save_file)
 
-    new_doc = Document(new_filename)
+    new_doc = Document(configurable_save_file)
     new_table = new_doc.sheets[0].tables[0]
 
     assert new_table.cell("B2").value == "Red"
@@ -391,12 +376,7 @@ def test_new_styles(tmp_path, pytestconfig):
     assert new_table.cell("F2").style.alignment == Alignment("right", "middle")
 
 
-def test_empty_styles(tmp_path, pytestconfig):
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-styles-new.numbers"
-
+def test_empty_styles(configurable_save_file):
     doc = Document()
     red_text = doc.add_style(
         name="Red Text",
@@ -410,9 +390,9 @@ def test_empty_styles(tmp_path, pytestconfig):
     body_style = table.cell(1, 1).style.name
 
     table.write(5, 5, "data", style=red_text)
-    doc.save(new_filename)
+    doc.save(configurable_save_file)
 
-    new_doc = Document(new_filename)
+    new_doc = Document(configurable_save_file)
     new_table = new_doc.sheets[0].tables[0]
 
     for row_num in range(0, table.num_header_rows):
