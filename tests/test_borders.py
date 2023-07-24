@@ -4,7 +4,7 @@ from collections import defaultdict
 from pytest_check import check
 
 from numbers_parser import Document, MergedCell
-from numbers_parser.cell import Border, xl_rowcol_to_cell, Cell
+from numbers_parser.cell import Border, xl_rowcol_to_cell, Cell, BorderType
 
 
 def check_border(cell: Cell, side: str, test_value: str) -> bool:
@@ -48,6 +48,29 @@ def unpack_test_string(test_value):
     return test_values
 
 
+def test_exceptions():
+    with pytest.raises(TypeError) as e:
+        _ = Border(width="invalid")
+    assert "width must be a float number" in str(e)
+    with pytest.raises(TypeError) as e:
+        _ = Border(width="invalid")
+    assert "width must be a float number" in str(e)
+
+    with pytest.raises(TypeError) as e:
+        _ = Border(color=(0, 0, 0, 0))
+    assert "RGB color must be an RGB" in str(e)
+    with pytest.raises(TypeError) as e:
+        _ = Border(color=(0, 0, 1.0))
+    assert "RGB color must be an RGB" in str(e)
+
+    with pytest.raises(TypeError) as e:
+        _ = Border(style="invalid")
+    assert "invalid border style" in str(e)
+
+    style = Border(style=BorderType(3))
+    assert str(style) == "Border(width=0.35, color=RGB(r=0, g=0, b=0), style=none)"
+
+
 def test_borders():
     doc = Document("tests/data/test-styles.numbers")
 
@@ -72,14 +95,11 @@ def test_borders():
                     col_end = col_num + cell.size[1] - 1
                     offset = 0
                     for merge_row_num in range(row_start, row_end + 1):
-                        try:
-                            merge_cell = table.cell(merge_row_num, col_num)
-                            valid.append(check_border(merge_cell, "left", tests["left"][offset]))
-                            merge_cell = table.cell(merge_row_num, col_end)
-                            valid.append(check_border(merge_cell, "right", tests["right"][offset]))
-                            offset += 1
-                        except:
-                            pass
+                        merge_cell = table.cell(merge_row_num, col_num)
+                        valid.append(check_border(merge_cell, "left", tests["left"][offset]))
+                        merge_cell = table.cell(merge_row_num, col_end)
+                        valid.append(check_border(merge_cell, "right", tests["right"][offset]))
+                        offset += 1
 
                     offset = 0
                     for merge_col_num in range(col_start, col_end + 1):
@@ -96,3 +116,18 @@ def test_borders():
                         check_border(cell, "left", tests["left"]),
                     ]
                 assert valid
+
+
+def test_empty_borders():
+    doc = Document("tests/data/test-styles.numbers")
+    sheet = doc.sheets["Large Borders"]
+    table = sheet.tables[0]
+
+    assert table.cell("F10").border.right is None
+    assert table.cell("F10").border.bottom is None
+    assert table.cell("F13").border.top is None
+    assert table.cell("F13").border.right is None
+    assert table.cell("H10").border.left is None
+    assert table.cell("H10").border.bottom is None
+    assert table.cell("H13").border.left is None
+    assert table.cell("H13").border.top is None
