@@ -1,5 +1,6 @@
 import pytest
 
+from collections import defaultdict
 from pytest_check import check
 
 from numbers_parser import Document, MergedCell
@@ -9,10 +10,7 @@ from numbers_parser.cell import Border, xl_rowcol_to_cell, Cell
 def check_border(cell: Cell, side: str, test_value: str) -> bool:
     values = test_value.split(",")
     values[0] = float(values[0])
-    try:
-        values[1] = eval(values[1].replace(";", ","))
-    except:
-        pass
+    values[1] = eval(values[1].replace(";", ","))
     border_value = getattr(cell.border, side, None)
     if border_value is None:
         return False
@@ -22,6 +20,9 @@ def check_border(cell: Cell, side: str, test_value: str) -> bool:
         cell_name = xl_rowcol_to_cell(cell.row, cell.col)
         print(f"@{cell_name}[{cell.row},{cell.col}].{side}: {border_value} != {ref}")
     return valid
+
+
+TAG_TO_BORDER_MAP = {"T": "top", "R": "right", "B": "bottom", "L": "left"}
 
 
 def unpack_test_string(test_value):
@@ -34,34 +35,23 @@ def unpack_test_string(test_value):
     #
     # Merge cells have multiple values T0, T1, etc.
     tests = test_value.split("\n")
-    if len(tests) == 4:
-        return {
-            "top": tests[0][2:],
-            "right": tests[1][2:],
-            "bottom": tests[2][2:],
-            "left": tests[3][2:],
-        }
-    else:
-        test_values = {"top": [], "right": [], "bottom": [], "left": []}
-        for test in tests:
-            if test[0] == "T":
-                test_values["top"].append(test[3:])
-            elif test[0] == "R":
-                test_values["right"].append(test[3:])
-            elif test[0] == "B":
-                test_values["bottom"].append(test[3:])
-            elif test[0] == "L":
-                test_values["left"].append(test[3:])
+    test_values = {}
+    for test in tests:
+        tag = TAG_TO_BORDER_MAP[test[0]]
+        if test[1] == "=":
+            test_values[tag] = test[2:]
+        else:
+            if tag not in test_values:
+                test_values[tag] = defaultdict()
+            offset = int(test[1])
+            test_values[tag][offset] = test[3:]
     return test_values
 
 
-@pytest.mark.experimental
 def test_borders():
     doc = Document("tests/data/test-styles.numbers")
-    # doc = Document("/Users/jon/Downloads/test.numbers")
 
     for sheet_name in ["Borders", "Large Borders"]:
-        # for sheet_name in ["Sheet 1"]:
         table = doc.sheets[sheet_name].tables[0]
 
         with pytest.warns() as record:
@@ -82,11 +72,14 @@ def test_borders():
                     col_end = col_num + cell.size[1] - 1
                     offset = 0
                     for merge_row_num in range(row_start, row_end + 1):
-                        merge_cell = table.cell(merge_row_num, col_num)
-                        valid.append(check_border(merge_cell, "left", tests["left"][offset]))
-                        merge_cell = table.cell(merge_row_num, col_end)
-                        valid.append(check_border(merge_cell, "right", tests["right"][offset]))
-                        offset += 1
+                        try:
+                            merge_cell = table.cell(merge_row_num, col_num)
+                            valid.append(check_border(merge_cell, "left", tests["left"][offset]))
+                            merge_cell = table.cell(merge_row_num, col_end)
+                            valid.append(check_border(merge_cell, "right", tests["right"][offset]))
+                            offset += 1
+                        except:
+                            pass
 
                     offset = 0
                     for merge_col_num in range(col_start, col_end + 1):
@@ -98,8 +91,8 @@ def test_borders():
                 else:
                     valid = [
                         check_border(cell, "top", tests["top"]),
-                        check_border(cell, "left", tests["right"]),
+                        check_border(cell, "right", tests["right"]),
                         check_border(cell, "bottom", tests["bottom"]),
                         check_border(cell, "left", tests["left"]),
                     ]
-                # assert valid
+                assert valid
