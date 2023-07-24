@@ -1747,39 +1747,59 @@ class _NumbersModel:
         else:
             return "none"
 
-    def cell_for_stroke(self, table_id: int, row_num: int, col_num: int) -> object:
+    def cell_for_stroke(self, table_id: int, side: str, row_num: int, col_num: int) -> object:
         data = self._table_data[table_id]
         if row_num < 0 or col_num < 0:
             return None
         if row_num >= len(data) or col_num >= len(data[row_num]):
             return None
-        if isinstance(data[row_num][col_num], MergedCell):
-            return None
-        return data[row_num][col_num]
+        cell = self._table_data[table_id][row_num][col_num]
+        if isinstance(cell, MergedCell):
+            if side == "top":
+                if row_num == cell.row_start:
+                    return cell
+                else:
+                    return None
+            elif side == "right":
+                if col_num == cell.col_end:
+                    return cell
+                else:
+                    return None
+            elif side == "bottom":
+                if row_num == cell.row_end:
+                    return cell
+                else:
+                    return None
+            else:  # left
+                if col_num == cell.col_start:
+                    return cell
+                else:
+                    return None
+        return cell
 
     def set_cell_border(
         self, table_id: int, row_num: int, col_num: int, side: str, border_value: Border
     ):
         """Set the 2 borders adjacent to a stroke if within the table range"""
         if side == "top":
-            if (cell := self.cell_for_stroke(table_id, row_num, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "top", row_num, col_num)) is not None:
                 cell._border.top = border_value
-            if (cell := self.cell_for_stroke(table_id, row_num - 1, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "bottom", row_num - 1, col_num)) is not None:
                 cell._border.bottom = border_value
         elif side == "right":
-            if (cell := self.cell_for_stroke(table_id, row_num, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "right", row_num, col_num)) is not None:
                 cell._border.right = border_value
-            if (cell := self.cell_for_stroke(table_id, row_num, col_num + 1)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "left", row_num, col_num + 1)) is not None:
                 cell._border.left = border_value
         elif side == "bottom":
-            if (cell := self.cell_for_stroke(table_id, row_num, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "bottom", row_num, col_num)) is not None:
                 cell._border.bottom = border_value
-            if (cell := self.cell_for_stroke(table_id, row_num + 1, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "top", row_num + 1, col_num)) is not None:
                 cell._border.top = border_value
         else:  # left border
-            if (cell := self.cell_for_stroke(table_id, row_num, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "left", row_num, col_num)) is not None:
                 cell._border.left = border_value
-            if (cell := self.cell_for_stroke(table_id, row_num, col_num - 1)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "right", row_num, col_num - 1)) is not None:
                 cell._border.right = border_value
 
     def extract_strokes_in_layers(self, table_id: int, layer_ids: List, side: str) -> List[List]:

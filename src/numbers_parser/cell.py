@@ -284,15 +284,27 @@ DEFAULT_BORDER_CLASS = Border(*DEFAULT_BORDER)
 
 
 class CellBorder:
-    def __init__(self):
+    def __init__(
+        self,
+        top_is_none: bool = False,
+        right_is_none: bool = False,
+        bottom_is_none: bool = False,
+        left_is_none: bool = False,
+    ):
         self._top = None
         self._right = None
         self._bottom = None
         self._left = None
+        self._top_is_none = top_is_none
+        self._right_is_none = right_is_none
+        self._bottom_is_none = bottom_is_none
+        self._left_is_none = left_is_none
 
     @property
     def top(self):
-        if self._top is None:
+        if self._top_is_none:
+            return None
+        elif self._top is None:
             return DEFAULT_BORDER_CLASS
         return self._top
 
@@ -305,7 +317,9 @@ class CellBorder:
 
     @property
     def right(self):
-        if self._right is None:
+        if self._right_is_none:
+            return None
+        elif self._right is None:
             return DEFAULT_BORDER_CLASS
         return self._right
 
@@ -318,7 +332,9 @@ class CellBorder:
 
     @property
     def bottom(self):
-        if self._bottom is None:
+        if self._bottom_is_none:
+            return None
+        elif self._bottom is None:
             return DEFAULT_BORDER_CLASS
         return self._bottom
 
@@ -331,7 +347,9 @@ class CellBorder:
 
     @property
     def left(self):
-        if self._left is None:
+        if self._left_is_none:
+            return None
+        elif self._left is None:
             return DEFAULT_BORDER_CLASS
         return self._left
 
@@ -351,14 +369,13 @@ class Cell:
         is_merged = row_col in merge_cells
 
         if is_merged and merge_cells[row_col]["merge_type"] == "ref":
-            cell = MergedCell(*merge_cells[row_col]["rect"])
+            cell = MergedCell(*merge_cells[row_col]["rect"], row_num, col_num)
         else:
             cell = EmptyCell(row_num, col_num)
         cell.size = None
         cell._model = model
         cell._table_id = table_id
         cell._style = None
-        cell._border = CellBorder()
         return cell
 
     @classmethod
@@ -546,8 +563,9 @@ class BulletedTextCell(RichTextCell):
 
 class EmptyCell(Cell):
     def __init__(self, row_num: int, col_num: int):
-        self._type = None
         super().__init__(row_num, col_num, None)
+        self._type = None
+        self._border = CellBorder()
 
     @property
     def value(self):
@@ -596,13 +614,22 @@ class ErrorCell(Cell):
 
 
 class MergedCell(Cell):
-    def __init__(self, row_start: int, col_start: int, row_end: int, col_end: int):
+    def __init__(
+        self, row_start: int, col_start: int, row_end: int, col_end: int, row_num: int, col_num: int
+    ):
+        super().__init__(row_num, col_num, None)
         self.value = None
         self.row_start = row_start
         self.row_end = row_end
         self.col_start = col_start
         self.col_end = col_end
+        self.is_merged = False
         self.merge_range = xl_range(row_start, col_start, row_end, col_end)
+        top_is_none = row_num > row_start
+        right_is_none = col_num < col_end
+        bottom_is_none = row_num < row_end
+        left_is_none = col_num > col_start
+        self._border = CellBorder(top_is_none, right_is_none, bottom_is_none, left_is_none)
 
 
 # Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
