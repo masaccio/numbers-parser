@@ -3,7 +3,7 @@ import pytest
 from numbers_parser import Document
 
 
-def test_row_col_sizes(tmp_path, pytestconfig):
+def test_row_col_sizes(configurable_save_file):
     doc = Document("tests/data/test-1.numbers")
     table = doc.sheets[0].tables[0]
     assert table.height == 100
@@ -19,13 +19,9 @@ def test_row_col_sizes(tmp_path, pytestconfig):
     table.col_width(2, 200)
     assert table.width == 348
 
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-1-new.numbers"
-    doc.save(new_filename)
+    doc.save(configurable_save_file)
 
-    doc = Document(new_filename)
+    doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
     assert table.row_height(0) == 20
     assert table.row_height(2) == 40
@@ -36,7 +32,7 @@ def test_row_col_sizes(tmp_path, pytestconfig):
     assert table.width == 348
 
 
-def test_header_size(tmp_path, pytestconfig):
+def test_header_size(configurable_save_file):
     doc = Document()
     table = doc.sheets[0].tables[0]
 
@@ -71,13 +67,9 @@ def test_header_size(tmp_path, pytestconfig):
     assert table.num_header_rows == 2
     assert table.num_header_cols == 2
 
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-1-new.numbers"
-    doc.save(new_filename)
+    doc.save(configurable_save_file)
 
-    doc = Document(new_filename)
+    doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
     assert table.num_header_rows == 2
     assert table.num_header_cols == 2

@@ -8,7 +8,7 @@ from numbers_parser.cell import EmptyCell
 from numbers_parser.constants import MAX_ROW_COUNT, MAX_COL_COUNT
 
 
-def test_edit_cell_values(tmp_path, pytestconfig):
+def test_edit_cell_values(configurable_save_file):
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -35,13 +35,9 @@ def test_edit_cell_values(tmp_path, pytestconfig):
     assert isinstance(table.cell(3, 4), EmptyCell)
     assert isinstance(table.cell(4, 5), EmptyCell)
 
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-save-1-new.numbers"
-    doc.save(new_filename)
+    doc.save(configurable_save_file)
 
-    doc = Document(new_filename)
+    doc = Document(configurable_save_file)
     sheets = doc.sheets
     tables = sheets[0].tables
     table = tables[0]
@@ -58,7 +54,7 @@ def test_edit_cell_values(tmp_path, pytestconfig):
     assert table.cell(5, 5).value == "7890"
 
 
-def test_large_table(tmp_path, pytestconfig):
+def test_large_table(configurable_save_file):
     doc = Document()
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -74,13 +70,9 @@ def test_large_table(tmp_path, pytestconfig):
         table.write(0, MAX_COL_COUNT, "")
     assert "exceeds maximum column" in str(e.value)
 
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "save-large.numbers"
-    doc.save(new_filename)
+    doc.save(configurable_save_file)
 
-    doc = Document(new_filename)
+    doc = Document(configurable_save_file)
     sheets = doc.sheets
     tables = sheets[0].tables
     table = tables[0]
