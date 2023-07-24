@@ -177,9 +177,6 @@ class Style:
         return style
 
     def __post_init__(self):
-        if not isinstance(self.alignment, Alignment):
-            raise TypeError("value must be an Alignment class")
-
         self.bg_color = rgb_color(self.bg_color)
         self.font_color = rgb_color(self.font_color)
 
@@ -263,7 +260,7 @@ class Border:
         if isinstance(style, str):
             style = style.lower()
             if style not in BORDER_STYLE_MAP:
-                raise TypeError("invalid style alignment")
+                raise TypeError("invalid border style")
             self.style = BORDER_STYLE_MAP[style]
         else:
             self.style = style
@@ -412,11 +409,15 @@ class Cell:
         cell._storage = cell_storage
         cell._formula_key = cell_storage.formula_id
         cell._style = None
-        cell._border = CellBorder()
 
         if is_merged and merge_cells[row_col]["merge_type"] == "source":
             cell.is_merged = True
             cell.size = merge_cells[row_col]["size"]
+            right_is_none = cell.size[0] > 1
+            bottom_is_none = cell.size[1] > 1
+            cell._border = CellBorder(False, right_is_none, bottom_is_none, False)
+        else:
+            cell._border = CellBorder()
 
         return cell
 
