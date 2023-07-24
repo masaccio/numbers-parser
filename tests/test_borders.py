@@ -3,49 +3,65 @@ import pytest
 from pytest_check import check
 
 from numbers_parser import Document, MergedCell
-from numbers_parser.cell import Border, xl_rowcol_to_cell
+from numbers_parser.cell import Border, xl_rowcol_to_cell, Cell
 
 
-def check_border(border, test_value):
+def check_border(cell: Cell, side: str, test_value: str) -> bool:
     values = test_value.split(",")
     values[0] = float(values[0])
-    values[1] = eval(values[1].replace(";", ","))
-    if border is None:
+    try:
+        values[1] = eval(values[1].replace(";", ","))
+    except:
+        pass
+    border_value = getattr(cell.border, side, None)
+    if border_value is None:
         return False
-    return check.equal(border, Border(values[0], values[1], values[2]))
+    ref = Border(values[0], values[1], values[2])
+    valid = check.equal(border_value, ref)
+    if not valid:
+        cell_name = xl_rowcol_to_cell(cell.row, cell.col)
+        print(f"@{cell_name}[{cell.row},{cell.col}].{side}: {border_value} != {ref}")
+    return valid
 
 
-def print_borders(table):
-    for row_num, row in enumerate(table.iter_rows()):
-        for col_num, cell in enumerate(row):
-            if isinstance(cell, MergedCell):
-                continue
-
-            if all(
-                [
-                    x is None
-                    for x in [
-                        cell._border.top,
-                        cell._border.left,
-                        cell._border.right,
-                        cell._border.bottom,
-                    ]
-                ]
-            ):
-                continue
-
-            print(f"@[{row_num},{col_num}]:")
-            print("   top       :", cell._border.top)
-            print("   right     :", cell._border.right)
-            print("   bottom    :", cell._border.bottom)
-            print("   left      :", cell._border.left)
+def unpack_test_string(test_value):
+    # Cell test values are of the form:
+    #
+    # T=1,(0;162;255),dashes
+    # R=1,(0;162;255),dashes
+    # B=1,(0;162;255),dashes
+    # L=1,(0;162;255),dashes
+    #
+    # Merge cells have multiple values T0, T1, etc.
+    tests = test_value.split("\n")
+    if len(tests) == 4:
+        return {
+            "top": tests[0][2:],
+            "right": tests[1][2:],
+            "bottom": tests[2][2:],
+            "left": tests[3][2:],
+        }
+    else:
+        test_values = {"top": [], "right": [], "bottom": [], "left": []}
+        for test in tests:
+            if test[0] == "T":
+                test_values["top"].append(test[3:])
+            elif test[0] == "R":
+                test_values["right"].append(test[3:])
+            elif test[0] == "B":
+                test_values["bottom"].append(test[3:])
+            elif test[0] == "L":
+                test_values["left"].append(test[3:])
+    return test_values
 
 
 @pytest.mark.experimental
 def test_borders():
     doc = Document("tests/data/test-styles.numbers")
+    # doc = Document("/Users/jon/Downloads/test.numbers")
 
     for sheet_name in ["Borders", "Large Borders"]:
+        # for sheet_name in ["Sheet 1"]:
         table = doc.sheets[sheet_name].tables[0]
 
         with pytest.warns() as record:
@@ -55,27 +71,35 @@ def test_borders():
 
         for row_num, row in enumerate(table.iter_rows()):
             for col_num, cell in enumerate(row):
-                if isinstance(cell, MergedCell) or not cell.value:
+                if not cell.value or isinstance(cell, MergedCell):
                     continue
+                tests = unpack_test_string(cell.value)
+                if cell.is_merged:
+                    valid = []
+                    row_start = row_num
+                    row_end = row_num + cell.size[0] - 1
+                    col_start = col_num
+                    col_end = col_num + cell.size[1] - 1
+                    offset = 0
+                    for merge_row_num in range(row_start, row_end + 1):
+                        merge_cell = table.cell(merge_row_num, col_num)
+                        valid.append(check_border(merge_cell, "left", tests["left"][offset]))
+                        merge_cell = table.cell(merge_row_num, col_end)
+                        valid.append(check_border(merge_cell, "right", tests["right"][offset]))
+                        offset += 1
 
-                # Cell test values are of the form:
-                #
-                # T=1,(0;162;255),dashes
-                # R=1,(0;162;255),dashes
-                # B=1,(0;162;255),dashes
-                # L=1,(0;162;255),dashes
-                tests = cell.value.split("\n")
-                valid = [
-                    check_border(cell.border.top, tests[0][2:]),
-                    check_border(cell.border.right, tests[1][2:]),
-                    check_border(cell.border.bottom, tests[2][2:]),
-                    check_border(cell.border.left, tests[3][2:]),
-                ]
-                if not all(valid):
-                    print(f"{sheet_name}@{xl_rowcol_to_cell(row_num, col_num)}: FAIL {valid}")
-                    print("   reference :", ", ".join(tests))
-                    print("   top       :", cell.border.top)
-                    print("   right     :", cell.border.right)
-                    print("   bottom    :", cell.border.bottom)
-                    print("   left      :", cell.border.left)
+                    offset = 0
+                    for merge_col_num in range(col_start, col_end + 1):
+                        merge_cell = table.cell(row_num, merge_col_num)
+                        valid.append(check_border(merge_cell, "top", tests["top"][offset]))
+                        merge_cell = table.cell(row_end, merge_col_num)
+                        valid.append(check_border(merge_cell, "bottom", tests["bottom"][offset]))
+                        offset += 1
+                else:
+                    valid = [
+                        check_border(cell, "top", tests["top"]),
+                        check_border(cell, "left", tests["right"]),
+                        check_border(cell, "bottom", tests["bottom"]),
+                        check_border(cell, "left", tests["left"]),
+                    ]
                 # assert valid
