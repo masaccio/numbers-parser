@@ -29,9 +29,7 @@ def test_help(script_runner):
 
 
 def test_multi_doc_error(script_runner):
-    ret = script_runner.run(
-        ["unpack-numbers", "--output", "tmp", "foo", "bar"], print_result=False
-    )
+    ret = script_runner.run(["unpack-numbers", "--output", "tmp", "foo", "bar"], print_result=False)
     assert not ret.success
     assert ret.stdout == ""
     assert "output directory only valid" in ret.stderr
@@ -125,15 +123,9 @@ def test_pretty_storage(script_runner, tmp_path):
     objects = data["chunks"][0]["archives"][0]["objects"][0]
     assert objects["rowInfos"][0]["cell_offsets"] == "-1,0,24,48,72,96,[...]"
     if sys.version_info.minor >= 8:
-        assert (
-            objects["rowInfos"][0]["cell_storage_buffer"][0:26]
-            == "05:03:00:00:00:00:00:00:08"
-        )
+        assert objects["rowInfos"][0]["cell_storage_buffer"][0:26] == "05:03:00:00:00:00:00:00:08"
     else:
-        assert (
-            objects["rowInfos"][0]["cell_storage_buffer"][0:26]
-            == "05030000000000000810020002"
-        )
+        assert objects["rowInfos"][0]["cell_storage_buffer"][0:26] == "05030000000000000810020002"
 
 
 def test_compact_json(script_runner, tmp_path):

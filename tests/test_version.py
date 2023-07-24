@@ -47,9 +47,7 @@ def test_numbers_version_check():
         assert _check_installed_numbers_version() is None
 
     with mock.patch("builtins.open", side_effect=mock_newer_plist):
-        with pytest.warns(
-            match="Numbers version 99.0 not tested with this version"
-        ) as record:
+        with pytest.warns(match="Numbers version 99.0 not tested with this version") as record:
             import numbers_parser
 
             importlib.reload(numbers_parser)

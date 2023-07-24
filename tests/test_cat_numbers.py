@@ -131,9 +131,7 @@ def test_select_table(script_runner):
 def test_list_sheets(script_runner):
     ret = script_runner.run(["cat-numbers", "-S", DOCUMENT], print_result=False)
     assert ret.success
-    assert ret.stdout == (
-        f"{DOCUMENT}: ZZZ_Sheet_1\n" "tests/data/test-1.numbers: ZZZ_Sheet_2\n"
-    )
+    assert ret.stdout == (f"{DOCUMENT}: ZZZ_Sheet_1\n" "tests/data/test-1.numbers: ZZZ_Sheet_2\n")
     assert ret.stderr == ""
 
 
@@ -257,9 +255,7 @@ def test_main(script_runner):
 
 @pytest.mark.script_launch_mode("subprocess")
 def test_corrupted(script_runner):
-    ret = script_runner.run(
-        ["cat-numbers", "tests/data/corrupted.numbers"], print_result=False
-    )
+    ret = script_runner.run(["cat-numbers", "tests/data/corrupted.numbers"], print_result=False)
     assert not ret.success
     assert "Index/Metadata.iwa: invalid" in ret.stderr
     assert ret.stdout == ""

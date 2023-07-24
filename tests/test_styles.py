@@ -224,18 +224,8 @@ def test_header_styles():
     assert all([table.cell(ref).style.italic for ref in ["B1", "B4", "B9"]])
     assert all([table.cell(ref).style.strikethrough for ref in ["D1", "A5", "D9"]])
 
-    assert all(
-        [
-            table.cell(ref).style.font_color == RGB(29, 177, 0)
-            for ref in ["A2", "A6", "A10"]
-        ]
-    )
-    assert all(
-        [
-            table.cell(ref).style.bg_color == RGB(29, 177, 0)
-            for ref in ["B2", "B6", "B10"]
-        ]
-    )
+    assert all([table.cell(ref).style.font_color == RGB(29, 177, 0) for ref in ["A2", "A6", "A10"]])
+    assert all([table.cell(ref).style.bg_color == RGB(29, 177, 0) for ref in ["B2", "B6", "B10"]])
     assert all(
         [
             table.cell(ref).style.bg_color == [RGB(136, 250, 78), RGB(1, 113, 0)]
@@ -244,8 +234,7 @@ def test_header_styles():
     )
     assert all(
         [
-            table.cell(ref).style.bg_image.filename
-            == "pexels-evg-kowalievska-1170986-16.jpg"
+            table.cell(ref).style.bg_image.filename == "pexels-evg-kowalievska-1170986-16.jpg"
             for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
         ]
     )

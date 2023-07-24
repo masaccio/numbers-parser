@@ -21,9 +21,7 @@ def test_protobuf_versions(virtualenv):
     virtualenv.run(["pip", "install", f"{SOURCE_DIR}/{wheel}"])
 
     for protobuf_version in PROTOBUF_VERSIONS:
-        virtualenv.install_package(
-            "protobuf", version=protobuf_version, installer="pip"
-        )
+        virtualenv.install_package("protobuf", version=protobuf_version, installer="pip")
         pip_output = virtualenv.run(["pip", "show", "protobuf"], capture=True)
         match = re.search(f"Version: {protobuf_version}", pip_output)
         assert match is not None
