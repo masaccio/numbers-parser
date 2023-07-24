@@ -1,5 +1,6 @@
 import decimal
 import magic
+import pytest
 
 from numbers_parser import Document
 from pendulum import datetime, duration
@@ -311,13 +312,9 @@ def test_issue_59():
     assert tables[0].cell("J2").value == "Saturday, 15 May 2021"
 
 
-def test_issue_60(tmp_path, pytestconfig):
-    if pytestconfig.getoption("save_file") is not None:
-        test_1_filename = pytestconfig.getoption("save_file").replace(".", "-1.")
-        test_2_filename = pytestconfig.getoption("save_file").replace(".", "-2.")
-    else:
-        test_1_filename = tmp_path / "issue-60-1.numbers"
-        test_2_filename = tmp_path / "issue-60-2.numbers"
+@pytest.mark.parametrize("configurable_multi_save_file", [[2]], indirect=True)
+def test_issue_60(configurable_multi_save_file):
+    test_1_filename, test_2_filename = configurable_multi_save_file
 
     doc = Document("tests/data/issue-60.numbers")
     doc.save(test_1_filename)

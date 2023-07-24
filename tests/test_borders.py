@@ -135,4 +135,4 @@ def test_empty_borders():
 
 @pytest.mark.experimental
 def test_create_borders(configurable_save_file):
-    print("\n", configurable_save_file)
+    pass

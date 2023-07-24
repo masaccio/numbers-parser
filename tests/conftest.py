@@ -30,10 +30,29 @@ def pytest_collection_modifyitems(config, items):
 
 
 @pytest.fixture(name="configurable_save_file")
-def configurable_save_file_fixture(tmp_path, pytestconfig):
+def configurable_save_file_fixture(request, tmp_path, pytestconfig):
     if pytestconfig.getoption("save_file") is not None:
         new_filename = pytestconfig.getoption("save_file")
     else:
-        new_filename = tmp_path / "test-styles-new.numbers"
+        new_filename = tmp_path / "test-save-new.numbers"
 
     yield new_filename
+
+
+@pytest.fixture(name="configurable_multi_save_file", params="num_files")
+def configurable_multi_save_file_fixture(request, tmp_path, pytestconfig):
+    if type(request.param) == list and len(request.param) == 1:
+        num_files = request.param[0]
+    else:
+        num_files = 0
+
+    if pytestconfig.getoption("save_file") is not None:
+        new_filename = pytestconfig.getoption("save_file")
+    else:
+        new_filename = tmp_path / "test-save-new.numbers"
+
+    if num_files <= 1:
+        yield new_filename
+    else:
+        new_filenames = [str(new_filename).replace(".", f"-{x}.") for x in range(num_files)]
+        yield new_filenames
