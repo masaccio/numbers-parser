@@ -16,7 +16,6 @@ from numbers_parser.constants import (
     DEFAULT_BORDER_WIDTH,
     DEFAULT_BORDER_COLOR,
     DEFAULT_BORDER_STYLE,
-    DEFAULT_BORDER,
 )
 
 from dataclasses import dataclass
@@ -277,32 +276,29 @@ class Border:
         )
 
 
-DEFAULT_BORDER_CLASS = Border(*DEFAULT_BORDER)
-
-
 class CellBorder:
     def __init__(
         self,
-        top_is_none: bool = False,
-        right_is_none: bool = False,
-        bottom_is_none: bool = False,
-        left_is_none: bool = False,
+        top_merged: bool = False,
+        right_merged: bool = False,
+        bottom_merged: bool = False,
+        left_merged: bool = False,
     ):
         self._top = None
         self._right = None
         self._bottom = None
         self._left = None
-        self._top_is_none = top_is_none
-        self._right_is_none = right_is_none
-        self._bottom_is_none = bottom_is_none
-        self._left_is_none = left_is_none
+        self._top_merged = top_merged
+        self._right_merged = right_merged
+        self._bottom_merged = bottom_merged
+        self._left_merged = left_merged
 
     @property
     def top(self):
-        if self._top_is_none:
+        if self._top_merged:
             return None
         elif self._top is None:
-            return DEFAULT_BORDER_CLASS
+            return None
         return self._top
 
     @top.setter
@@ -314,10 +310,10 @@ class CellBorder:
 
     @property
     def right(self):
-        if self._right_is_none:
+        if self._right_merged:
             return None
         elif self._right is None:
-            return DEFAULT_BORDER_CLASS
+            return None
         return self._right
 
     @right.setter
@@ -329,10 +325,10 @@ class CellBorder:
 
     @property
     def bottom(self):
-        if self._bottom_is_none:
+        if self._bottom_merged:
             return None
         elif self._bottom is None:
-            return DEFAULT_BORDER_CLASS
+            return None
         return self._bottom
 
     @bottom.setter
@@ -344,10 +340,10 @@ class CellBorder:
 
     @property
     def left(self):
-        if self._left_is_none:
+        if self._left_merged:
             return None
         elif self._left is None:
-            return DEFAULT_BORDER_CLASS
+            return None
         return self._left
 
     @left.setter
@@ -413,9 +409,9 @@ class Cell:
         if is_merged and merge_cells[row_col]["merge_type"] == "source":
             cell.is_merged = True
             cell.size = merge_cells[row_col]["size"]
-            right_is_none = cell.size[0] > 1
-            bottom_is_none = cell.size[1] > 1
-            cell._border = CellBorder(False, right_is_none, bottom_is_none, False)
+            right_merged = cell.size[0] > 1
+            bottom_merged = cell.size[1] > 1
+            cell._border = CellBorder(False, right_merged, bottom_merged, False)
         else:
             cell._border = CellBorder()
 
@@ -626,11 +622,11 @@ class MergedCell(Cell):
         self.col_end = col_end
         self.is_merged = False
         self.merge_range = xl_range(row_start, col_start, row_end, col_end)
-        top_is_none = row_num > row_start
-        right_is_none = col_num < col_end
-        bottom_is_none = row_num < row_end
-        left_is_none = col_num > col_start
-        self._border = CellBorder(top_is_none, right_is_none, bottom_is_none, left_is_none)
+        top_merged = row_num > row_start
+        right_merged = col_num < col_end
+        bottom_merged = row_num < row_end
+        left_merged = col_num > col_start
+        self._border = CellBorder(top_merged, right_merged, bottom_merged, left_merged)
 
 
 # Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
