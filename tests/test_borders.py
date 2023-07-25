@@ -8,14 +8,18 @@ from numbers_parser.cell import Border, xl_rowcol_to_cell, Cell, BorderType
 
 
 def check_border(cell: Cell, side: str, test_value: str) -> bool:
-    values = test_value.split(",")
-    values[0] = float(values[0])
-    values[1] = eval(values[1].replace(";", ","))
     border_value = getattr(cell.border, side, None)
-    if border_value is None:
-        return False
-    ref = Border(values[0], values[1], values[2])
-    valid = check.equal(border_value, ref)
+    if test_value == "None":
+        valid = check.is_none(border_value)
+        ref = "None"
+    else:
+        values = test_value.split(",")
+        values[0] = float(values[0])
+        values[1] = eval(values[1].replace(";", ","))
+        if border_value is None:
+            return False
+        ref = Border(values[0], values[1], values[2])
+        valid = check.equal(border_value, ref)
     if not valid:
         cell_name = xl_rowcol_to_cell(cell.row, cell.col)
         print(f"@{cell_name}[{cell.row},{cell.col}].{side}: {border_value} != {ref}")
