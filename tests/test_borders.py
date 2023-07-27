@@ -4,7 +4,7 @@ from collections import defaultdict
 from pytest_check import check
 
 from numbers_parser import Document, MergedCell
-from numbers_parser.cell import Border, xl_rowcol_to_cell, Cell, BorderType
+from numbers_parser.cell import Border, xl_rowcol_to_cell, Cell, BorderType, RGB
 
 
 def check_border(cell: Cell, side: str, test_value: str) -> bool:
@@ -74,6 +74,29 @@ def test_exceptions():
     style = Border(style=BorderType(3))
     assert str(style) == "Border(width=0.35, color=RGB(r=0, g=0, b=0), style=none)"
 
+    doc = Document()
+    with pytest.raises(TypeError) as e:
+        doc.sheets[0].tables[0].add_border("A1", 1)
+    assert "invalid number of arguments to border_value()" in str(e)
+
+    with pytest.raises(TypeError) as e:
+        doc.sheets[0].tables[0].add_border("A1", 1, 2, 3, 4)
+    assert "invalid number of arguments to border_value()" in str(e)
+
+    with pytest.raises(TypeError) as e:
+        doc.sheets[0].tables[0].add_border("A1", "invalid", Border(1.0, RGB(0, 0, 0), "solid"))
+    assert "side must be a valid border segment" in str(e)
+
+    with pytest.raises(TypeError) as e:
+        doc.sheets[0].tables[0].add_border("A1", "left", object())
+    assert "border value must be a Border object" in str(e)
+
+    with pytest.raises(TypeError) as e:
+        doc.sheets[0].tables[0].add_border(
+            "A1", "left", Border(1.0, RGB(0, 0, 0), "solid"), "invalid"
+        )
+    assert "border length must be an int" in str(e)
+
 
 def test_borders():
     doc = Document("tests/data/test-styles.numbers")
@@ -138,5 +161,24 @@ def test_empty_borders():
 
 
 @pytest.mark.experimental
-def test_create_borders(configurable_save_file):
-    pass
+def test_edit_borders(configurable_save_file):
+    doc = Document("tests/data/test-styles.numbers")
+    sheet = doc.sheets["Borders"]
+    table = sheet.tables[0]
+
+    table.add_border("B6", "left", Border(8.0, RGB(29, 177, 0), "dashes"), 2)
+    table.add_border(6, 1, "right", Border(8.0, RGB(29, 177, 0), "dashes"))
+
+    doc.save(configurable_save_file)
+
+    new_doc = Document(configurable_save_file)
+    sheet = new_doc.sheets["Borders"]
+    table = sheet.tables[0]
+    assert (
+        str(table.cell("B6").border.left)
+        == "Border(width=8.0, color=RGB(r=29, g=177, b=0), style=dashes"
+    )
+    assert (
+        str(table.cell("B7").border.right)
+        == "Border(width=8.0, color=RGB(r=29, g=177, b=0), style=dashes"
+    )

@@ -19,6 +19,7 @@ from numbers_parser.cell import (
     xl_cell_to_rowcol,
     xl_range,
     Style,
+    Border,
 )
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import DEFAULT_COLUMN_COUNT, DEFAULT_ROW_COUNT
@@ -370,12 +371,12 @@ class Table:
         the table with empty cells if outside current bounds"""
         if type(args[0]) == str:
             (row_num, col_num) = xl_cell_to_rowcol(args[0])
-            value = args[1]
+            values = args[1:]
         elif len(args) < 2:
             raise IndexError("invalid cell reference " + str(args))
         else:
             (row_num, col_num) = args[0:2]
-            value = args[2]
+            values = args[2:]
 
         if row_num >= MAX_ROW_COUNT:
             raise IndexError(f"{row_num} exceeds maximum row {MAX_ROW_COUNT-1}")
@@ -388,7 +389,7 @@ class Table:
         for row in range(self.num_cols, col_num + 1):
             self.add_column()
 
-        return (row_num, col_num, value)
+        return (row_num, col_num) + tuple(values)
 
     def write(self, *args, style=None):
         (row_num, col_num, value) = self._validate_cell_coords(*args)
@@ -462,3 +463,34 @@ class Table:
                         "rect": (row_start, col_start, row_end, col_end),
                         "size": (num_rows, num_cols),
                     }
+
+    def add_border(self, *args):
+        (row_num, col_num, *args) = self._validate_cell_coords(*args)
+        if len(args) == 2:
+            (side, border_value) = args
+            length = 0
+        elif len(args) == 3:
+            (side, border_value, length) = args
+        else:
+            raise TypeError("invalid number of arguments to border_value()")
+
+        if not isinstance(border_value, Border):
+            raise TypeError("border value must be a Border object")
+
+        if not isinstance(length, int):
+            raise TypeError("border length must be an int")
+
+        if side == "top" or side == "bottom":
+            for border_col_num in range(col_num, col_num + length):
+                self._model.set_cell_border(
+                    self._table_id, row_num, border_col_num, side, border_value
+                )
+        elif side == "left" or side == "right":
+            for border_row_num in range(row_num, row_num + length):
+                self._model.set_cell_border(
+                    self._table_id, border_row_num, col_num, side, border_value
+                )
+        else:
+            raise TypeError("side must be a valid border segment")
+
+        self._model.update_strokes(self._table_id, row_num, col_num, side, length)

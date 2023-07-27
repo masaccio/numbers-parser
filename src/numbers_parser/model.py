@@ -2,6 +2,7 @@ import math
 import re
 
 from array import array
+from collections import defaultdict
 from functools import lru_cache
 from struct import pack
 from typing import Dict, List, Tuple, Union
@@ -172,6 +173,7 @@ class _NumbersModel:
         self._table_strings = DataLists(self, "stringTable", "string")
         self._table_data = {}
         self._styles = None
+        self._strokes = defaultdict()
 
     @property
     def file_store(self):
@@ -1829,35 +1831,56 @@ class _NumbersModel:
                 if is_row:
                     for col_num in stroke_range:
                         self.set_cell_border(table_id, start_row, col_num, side, border_value)
-                    end_row = start_row + stroke_run.length
-                    end_column = start_column
+                        self.cache_stroke(
+                            table_id,
+                            stroke_layer.row_column_index,
+                            start_row,
+                            col_num,
+                            side,
+                            stroke_run,
+                        )
                 else:
                     for row_num in stroke_range:
+                        self.cache_stroke(
+                            table_id,
+                            stroke_layer.row_column_index,
+                            row_num,
+                            start_column,
+                            side,
+                            stroke_run,
+                        )
                         self.set_cell_border(table_id, row_num, start_column, side, border_value)
-                    end_row = start_row
-                    end_column = start_column + stroke_run.length
-                strokes.append([range(start_row, start_column), range(end_row, end_column)])
-        return strokes
+
+    def cache_stroke(
+        self,
+        table_id: int,
+        row_column: int,
+        row_num: int,
+        col_num: int,
+        side: str,
+        stroke_run: object,
+    ):
+        if table_id not in self._strokes:
+            self._strokes[table_id] = defaultdict()
+        if row_num not in self._strokes[table_id]:
+            self._strokes[table_id][row_num] = defaultdict()
+            self._strokes[table_id][row_num][col_num] = {
+                "row_column": row_column,
+                "side": side,
+                "stroke": stroke_run,
+            }
 
     @lru_cache(maxsize=None)
-    def extract_strokes(self, table_id: int) -> List[List]:
+    def extract_strokes(self, table_id: int):
         table_obj = self.objects[table_id]
         sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]
-        strokes = {
-            "top": self.extract_strokes_in_layers(
-                table_id, sidecar_obj.top_row_stroke_layers, "top"
-            ),
-            "left": self.extract_strokes_in_layers(
-                table_id, sidecar_obj.left_column_stroke_layers, "left"
-            ),
-            "right": self.extract_strokes_in_layers(
-                table_id, sidecar_obj.right_column_stroke_layers, "right"
-            ),
-            "bottom": self.extract_strokes_in_layers(
-                table_id, sidecar_obj.bottom_row_stroke_layers, "bottom"
-            ),
-        }
-        return strokes
+        self.extract_strokes_in_layers(table_id, sidecar_obj.top_row_stroke_layers, "top")
+        self.extract_strokes_in_layers(table_id, sidecar_obj.left_column_stroke_layers, "left")
+        self.extract_strokes_in_layers(table_id, sidecar_obj.right_column_stroke_layers, "right")
+        self.extract_strokes_in_layers(table_id, sidecar_obj.bottom_row_stroke_layers, "bottom")
+
+    def update_strokes(self, table_id: int, row_num: int, col_num: int, side: str, length: int):
+        pass
 
 
 def rgb(obj) -> RGB:
