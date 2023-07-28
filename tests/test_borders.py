@@ -162,23 +162,23 @@ def test_empty_borders():
 
 @pytest.mark.experimental
 def test_edit_borders(configurable_save_file):
-    doc = Document("tests/data/test-styles.numbers")
-    sheet = doc.sheets["Borders"]
+    doc = Document()
+    sheet = doc.sheets[0]
     table = sheet.tables[0]
 
-    table.add_border("B6", "left", Border(8.0, RGB(29, 177, 0), "dashes"), 2)
+    table.add_border("B6", "left", Border(8.0, RGB(29, 177, 0), "solid"), 3)
     table.add_border(6, 1, "right", Border(8.0, RGB(29, 177, 0), "dashes"))
 
     doc.save(configurable_save_file)
 
     new_doc = Document(configurable_save_file)
-    sheet = new_doc.sheets["Borders"]
+    sheet = new_doc.sheets[0]
     table = sheet.tables[0]
     assert (
         str(table.cell("B6").border.left)
-        == "Border(width=8.0, color=RGB(r=29, g=177, b=0), style=dashes"
+        == "Border(width=8.0, color=RGB(r=29, g=177, b=0), style=solid)"
     )
     assert (
         str(table.cell("B7").border.right)
-        == "Border(width=8.0, color=RGB(r=29, g=177, b=0), style=dashes"
+        == "Border(width=8.0, color=RGB(r=29, g=177, b=0), style=dashes)"
     )

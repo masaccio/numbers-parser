@@ -493,4 +493,4 @@ class Table:
         else:
             raise TypeError("side must be a valid border segment")
 
-        self._model.update_strokes(self._table_id, row_num, col_num, side, length)
+        self._model.add_stroke(self._table_id, row_num, col_num, side, border_value, length)

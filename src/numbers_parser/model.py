@@ -2,7 +2,6 @@ import math
 import re
 
 from array import array
-from collections import defaultdict
 from functools import lru_cache
 from struct import pack
 from typing import Dict, List, Tuple, Union
@@ -39,6 +38,7 @@ from numbers_parser.cell import (
     VerticalJustification,
     RGB,
     Border,
+    BorderType,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
@@ -173,7 +173,7 @@ class _NumbersModel:
         self._table_strings = DataLists(self, "stringTable", "string")
         self._table_data = {}
         self._styles = None
-        self._strokes = defaultdict()
+        self._max_stroke_order = 0
 
     @property
     def file_store(self):
@@ -1804,71 +1804,28 @@ class _NumbersModel:
             if (cell := self.cell_for_stroke(table_id, "right", row_num, col_num - 1)) is not None:
                 cell._border.right = border_value
 
-    def extract_strokes_in_layers(self, table_id: int, layer_ids: List, side: str) -> List[List]:
-        strokes = []
-        if side in ["top", "bottom"]:
-            is_row = True
-        else:
-            is_row = False
+    def extract_strokes_in_layers(self, table_id: int, layer_ids: List, side: str):
         for layer_id in layer_ids:
             stroke_layer = self.objects[layer_id.identifier]
             for stroke_run in stroke_layer.stroke_runs:
-                if is_row:
-                    start_row = stroke_layer.row_column_index
-                    start_column = stroke_run.origin
-                    stroke_range = range(start_column, start_column + stroke_run.length)
-                else:
-                    start_row = stroke_run.origin
-                    start_column = stroke_layer.row_column_index
-                    stroke_range = range(start_row, start_row + stroke_run.length)
-
+                if stroke_run.order > self._max_stroke_order:
+                    self._max_stroke_order = stroke_run.order
                 border_value = Border(
                     width=round(stroke_run.stroke.width, 2),
                     color=rgb(stroke_run.stroke.color),
                     style=self.stroke_type(stroke_run),
                     _order=stroke_run.order,
                 )
-                if is_row:
-                    for col_num in stroke_range:
+                if side in ["top", "bottom"]:
+                    start_row = stroke_layer.row_column_index
+                    start_column = stroke_run.origin
+                    for col_num in range(start_column, start_column + stroke_run.length):
                         self.set_cell_border(table_id, start_row, col_num, side, border_value)
-                        self.cache_stroke(
-                            table_id,
-                            stroke_layer.row_column_index,
-                            start_row,
-                            col_num,
-                            side,
-                            stroke_run,
-                        )
                 else:
-                    for row_num in stroke_range:
-                        self.cache_stroke(
-                            table_id,
-                            stroke_layer.row_column_index,
-                            row_num,
-                            start_column,
-                            side,
-                            stroke_run,
-                        )
+                    start_row = stroke_run.origin
+                    start_column = stroke_layer.row_column_index
+                    for row_num in range(start_row, start_row + stroke_run.length):
                         self.set_cell_border(table_id, row_num, start_column, side, border_value)
-
-    def cache_stroke(
-        self,
-        table_id: int,
-        row_column: int,
-        row_num: int,
-        col_num: int,
-        side: str,
-        stroke_run: object,
-    ):
-        if table_id not in self._strokes:
-            self._strokes[table_id] = defaultdict()
-        if row_num not in self._strokes[table_id]:
-            self._strokes[table_id][row_num] = defaultdict()
-            self._strokes[table_id][row_num][col_num] = {
-                "row_column": row_column,
-                "side": side,
-                "stroke": stroke_run,
-            }
 
     @lru_cache(maxsize=None)
     def extract_strokes(self, table_id: int):
@@ -1879,8 +1836,123 @@ class _NumbersModel:
         self.extract_strokes_in_layers(table_id, sidecar_obj.right_column_stroke_layers, "right")
         self.extract_strokes_in_layers(table_id, sidecar_obj.bottom_row_stroke_layers, "bottom")
 
-    def update_strokes(self, table_id: int, row_num: int, col_num: int, side: str, length: int):
+    def add_stroke_sidecar(self, table_id: int):
         pass
+
+    def create_stroke(self, origin: int, length: int, border_value: Border):
+        self._max_stroke_order += 1
+        line_cap = TSDArchives.StrokeArchive.LineCap.ButtCap
+        line_join = TSDArchives.LineJoin.MiterJoin
+        if border_value.style == BorderType.SOLID:
+            pattern = TSDArchives.StrokePatternArchive(
+                type=StrokePattern.StrokePatternType.TSDSolidPattern,
+                phase=0.0,
+                count=0,
+                pattern=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            )
+        elif border_value.style == BorderType.DASHES:
+            pattern = TSDArchives.StrokePatternArchive(
+                type=StrokePattern.StrokePatternType.TSDPattern,
+                phase=0.0,
+                count=0,
+                pattern=[2.0, 2.0, 0.0, 0.0, 0.0, 0.0],
+            )
+        elif border_value.style == BorderType.DOTS:
+            pattern = TSDArchives.StrokePatternArchive(
+                type=StrokePattern.StrokePatternType.TSDPattern,
+                phase=0.0,
+                count=2,
+                pattern=[0.0001, 2.0, 0.0, 0.0, 0.0, 0.0],
+            )
+            line_cap = TSDArchives.StrokeArchive.LineCap.RoundCap
+            line_join = TSDArchives.LineJoin.RoundJoin
+        else:
+            pattern = TSDArchives.StrokePatternArchive(
+                type=StrokePattern.StrokePatternType.TSDEmptyPattern,
+                phase=0.0,
+                count=0,
+                pattern=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            )
+
+        if border_value is None:
+            color = TSPMessages.Color(
+                model=TSPMessages.Color.rgb,
+                rgbspace=TSPMessages.Color.srgb,
+                r=0.0,
+                g=0.0,
+                b=0.0,
+                a=1.0,
+            )
+            width = 0.0
+        else:
+            color = TSPMessages.Color(
+                model=TSPMessages.Color.rgb,
+                rgbspace=TSPMessages.Color.srgb,
+                r=border_value.color.r / 255,
+                g=border_value.color.g / 255,
+                b=border_value.color.b / 255,
+                a=1.0,
+            )
+            width = border_value.width
+        return TSTArchives.StrokeLayerArchive.StrokeRunArchive(
+            origin=origin,
+            length=length,
+            order=self._max_stroke_order,
+            stroke=TSDArchives.StrokeArchive(
+                color=color,
+                width=width,
+                cap=line_cap,
+                join=line_join,
+                miter_limit=4.0,
+                pattern=pattern,
+            ),
+        )
+
+    def add_stroke(
+        self,
+        table_id: int,
+        row_num: int,
+        col_num: int,
+        side: str,
+        border_value: Border,
+        length: int,
+    ):
+        table_obj = self.objects[table_id]
+        sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]
+
+        if side == "top":
+            layer_ids = sidecar_obj.top_row_stroke_layers
+            row_column_index = row_num
+            origin = col_num
+        elif side == "right":
+            layer_ids = sidecar_obj.right_column_stroke_layers
+            row_column_index = col_num
+            origin = row_num
+        elif side == "bottom":
+            layer_ids = sidecar_obj.bottom_row_stroke_layers
+            row_column_index = row_num
+            origin = col_num
+        else:  # left border
+            layer_ids = sidecar_obj.left_column_stroke_layers
+            row_column_index = col_num
+            origin = row_num
+
+        stroke_layer = None
+        for layer_id in layer_ids:
+            if self.objects[layer_id.identifier].row_column_index == row_column_index:
+                stroke_layer = self.objects[layer_id.identifier]
+        if stroke_layer is not None:
+            stroke_layer.append(self.create_stroke(origin, length, border_value))
+        else:
+            stroke_layer_id, stroke_layer = self.objects.create_object_from_dict(
+                "CalculationEngine",
+                {
+                    "row_column_index": row_column_index,
+                },
+                TSTArchives.StrokeLayerArchive,
+            )
+            stroke_layer.stroke_runs.append(self.create_stroke(origin, length, border_value))
+            layer_ids.append(TSPMessages.Reference(identifier=stroke_layer_id))
 
 
 def rgb(obj) -> RGB:
