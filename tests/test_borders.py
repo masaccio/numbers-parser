@@ -160,14 +160,16 @@ def test_empty_borders():
     assert table.cell("H13").border.top is None
 
 
-@pytest.mark.experimental
 def test_edit_borders(configurable_save_file):
     doc = Document()
     sheet = doc.sheets[0]
     table = sheet.tables[0]
 
     table.add_border("B6", "left", Border(8.0, RGB(29, 177, 0), "solid"), 3)
-    table.add_border(6, 1, "right", Border(8.0, RGB(29, 177, 0), "dashes"))
+    table.add_border(6, 1, "right", Border(5.0, RGB(29, 177, 0), "dashes"))
+    table.add_border("C3", "top", Border(3.0, RGB(0, 162, 255), "dots"), 4)
+    table.merge_cells(["C3:F3", "C10:F10"])
+    table.add_border("C10", "top", Border(3.0, RGB(0, 162, 255), "dots"), 4)
 
     doc.save(configurable_save_file)
 
@@ -180,5 +182,6 @@ def test_edit_borders(configurable_save_file):
     )
     assert (
         str(table.cell("B7").border.right)
-        == "Border(width=8.0, color=RGB(r=29, g=177, b=0), style=dashes)"
+        == "Border(width=5.0, color=RGB(r=29, g=177, b=0), style=dashes)"
     )
+    assert table.cell("C4").border.right is None
