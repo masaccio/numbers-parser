@@ -1836,9 +1836,6 @@ class _NumbersModel:
         self.extract_strokes_in_layers(table_id, sidecar_obj.right_column_stroke_layers, "right")
         self.extract_strokes_in_layers(table_id, sidecar_obj.bottom_row_stroke_layers, "bottom")
 
-    def add_stroke_sidecar(self, table_id: int):
-        pass
-
     def create_stroke(self, origin: int, length: int, border_value: Border):
         self._max_stroke_order += 1
         line_cap = TSDArchives.StrokeArchive.LineCap.ButtCap
