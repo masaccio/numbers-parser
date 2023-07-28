@@ -1854,7 +1854,7 @@ class _NumbersModel:
             pattern = TSDArchives.StrokePatternArchive(
                 type=StrokePattern.StrokePatternType.TSDPattern,
                 phase=0.0,
-                count=0,
+                count=2,
                 pattern=[2.0, 2.0, 0.0, 0.0, 0.0, 0.0],
             )
         elif border_value.style == BorderType.DOTS:
