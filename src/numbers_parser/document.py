@@ -468,7 +468,7 @@ class Table:
         (row_num, col_num, *args) = self._validate_cell_coords(*args)
         if len(args) == 2:
             (side, border_value) = args
-            length = 0
+            length = 1
         elif len(args) == 3:
             (side, border_value, length) = args
         else:
