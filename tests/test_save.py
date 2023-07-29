@@ -169,7 +169,7 @@ def test_duplicate_name():
 
 
 def test_save_formats(configurable_save_file):
-    doc = Document("/Users/jon/Downloads/test.numbers")
+    doc = Document("tests/data/test-format-save.numbers")
     doc.save(configurable_save_file)
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
