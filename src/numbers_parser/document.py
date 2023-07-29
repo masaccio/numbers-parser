@@ -394,6 +394,7 @@ class Table:
     def write(self, *args, style=None):
         (row_num, col_num, value) = self._validate_cell_coords(*args)
 
+        # TODO: write needs to retain/init the border
         if type(value) == str:
             self._data[row_num][col_num] = TextCell(row_num, col_num, value)
         elif type(value) == int or type(value) == float:
@@ -464,7 +465,7 @@ class Table:
                         "size": (num_rows, num_cols),
                     }
 
-    def add_border(self, *args):
+    def set_cell_border(self, *args):
         (row_num, col_num, *args) = self._validate_cell_coords(*args)
         if len(args) == 2:
             (side, border_value) = args
@@ -479,6 +480,11 @@ class Table:
 
         if not isinstance(length, int):
             raise TypeError("border length must be an int")
+
+        if isinstance(side, list):
+            for s in side:
+                self.set_cell_border(row_num, col_num, s, border_value, length)
+            return
 
         if side == "top" or side == "bottom":
             for border_col_num in range(col_num, col_num + length):
