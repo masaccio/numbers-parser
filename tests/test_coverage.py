@@ -4,6 +4,7 @@ from numbers_parser import Document, UnsupportedError, Cell, UnsupportedWarning
 from numbers_parser.cell import xl_range, xl_rowcol_to_cell, xl_col_to_name
 from numbers_parser.constants import EMPTY_STORAGE_BUFFER
 from numbers_parser.cell_storage import CellStorage
+from numbers_parser.numbers_uuid import NumbersUUID
 
 
 def test_containers():
@@ -51,6 +52,40 @@ def test_cell_storage(tmp_path):
         doc.save(new_filename)
     assert len(record) == 1
     assert "unsupported data type DummyCell" in str(record[0])
+
+
+def test_formatting_exceptions():
+    doc = Document("tests/data/test-custom-formats.numbers")
+
+    cell = doc.sheets[0].tables[0].cell("B4")
+    format = doc._model.table_format(cell._table_id, cell._storage.date_format_id)
+    format_uuid = NumbersUUID(format.custom_uid).hex
+    format_map = doc._model.custom_format_map()
+    custom_format = format_map[format_uuid].default_format
+
+    custom_format.format_type = 299
+    with pytest.warns(UnsupportedWarning) as record:
+        _ = cell.formatted_value
+    assert len(record) == 1
+    assert "Unexpected custom format type 299" in str(record[0])
+
+    custom_format.format_type = 272
+    custom_format.custom_format_string = "ZZ"
+    with pytest.warns(UnsupportedWarning) as record:
+        _ = cell.formatted_value
+    assert len(record) == 1
+    assert "Unsupported field code 'ZZ'" in str(record[0])
+
+    cell = doc.sheets["Numbers"].tables[0].cell("C38")
+    format = doc._model.table_format(cell._table_id, cell._storage.num_format_id)
+    format_uuid = NumbersUUID(format.custom_uid).hex
+    format_map = doc._model.custom_format_map()
+    custom_format = format_map[format_uuid].default_format
+    custom_format.custom_format_string = "XX"
+    with pytest.warns(UnsupportedWarning) as record:
+        _ = cell.formatted_value
+    assert len(record) == 1
+    assert "Can't parse format string 'XX'" in str(record[0])
 
 
 def test_range_exceptions():

@@ -155,7 +155,7 @@ class CellStorage:
             return
 
         version = buffer[0]
-        if version != 5:  # pragma: no cover
+        if version != 5:
             raise UnsupportedError(f"Cell storage version {version} is unsupported")
 
         offset = 12
@@ -292,20 +292,15 @@ class CellStorage:
         if self.cell_style_id is None:
             return None
         style = self.model.table_style(self.table_id, self.cell_style_id)
-        if not style.cell_properties.cell_fill.HasField("image"):  # pragma: no cover
+        if not style.cell_properties.cell_fill.HasField("image"):
             return None
 
         image_id = style.cell_properties.cell_fill.image.imagedata.identifier
         datas = self.model.objects[PACKAGE_ID].datas
-        image_file_names = [x.file_name for x in datas if x.identifier == image_id]
-        if len(image_file_names) == 0:  # pragma: no cover
-            warn(f"No image found with ID {image_id}", UnsupportedWarning)
-            return None
-
-        image_path_name = [
-            x for x in self.model.objects.file_store.keys() if x == f"Data/{image_file_names[0]}"
-        ][0]
-        return (self.model.objects.file_store[image_path_name], image_file_names[0])
+        image_filename = [x.file_name for x in datas if x.identifier == image_id][0]
+        all_paths = self.model.objects.file_store.keys()
+        image_pathname = [x for x in all_paths if x == f"Data/{image_filename}"][0]
+        return (self.model.objects.file_store[image_pathname], image_filename)
 
     def custom_format(self) -> str:
         if self.text_format_id is not None and self.type == CellType.TEXT:
@@ -334,16 +329,9 @@ class CellStorage:
                     custom_format,
                     self.model.table_string(self.table_id, self.string_id),
                 )
-            elif (
-                custom_format.format_type == FormatType.CUSTOM_NUMBER
-                or custom_format.format_type == FormatType.CUSTOM_CURRENCY
-            ):
+            else:
                 formatted_value = decode_number_format(
                     custom_format, self.d128, format_map[format_uuid].name
-                )
-            else:
-                raise UnsupportedError(  # pragma: no cover
-                    f"Unexpected custom format type {custom_format.format_type}"
                 )
         elif format.format_type == FormatType.DECIMAL:
             return format_decimal(self.d128, format)
@@ -362,8 +350,11 @@ class CellStorage:
             custom_format_string = custom_format.custom_format_string
             if custom_format.format_type == FormatType.CUSTOM_DATE:
                 formatted_value = decode_date_format(custom_format_string, self.datetime)
-            else:  # pragma: no cover
-                raise UnsupportedError(f"Unexpected custom format type {custom_format.format_type}")
+            else:
+                warn(
+                    f"Unexpected custom format type {custom_format.format_type}", UnsupportedWarning
+                )
+                return ""
         else:
             formatted_value = decode_date_format(format.date_time_format, self.datetime)
         return formatted_value
@@ -478,8 +469,9 @@ def decode_date_format_field(field: str, value: datetime) -> str:
             return s(value)
         else:
             return value.strftime(s)
-    else:  # pragma: no cover
-        raise UnsupportedError(f"Unsupported field code '{field}'")
+    else:
+        warn(f"Unsupported field code '{field}'", UnsupportedWarning)
+        return ""
 
 
 def decode_date_format(format, value):
@@ -576,9 +568,7 @@ def decode_number_format(format, value, name):  # noqa: C901
             "\u00a4", format.currency_code + "\u00a0"
         )
 
-    if (
-        match := re.search(r"([#0.,]+(E[+]\d+)?)", custom_format_string)
-    ) is None:  # pragma: no cover
+    if (match := re.search(r"([#0.,]+(E[+]\d+)?)", custom_format_string)) is None:
         warn(
             f"Can't parse format string '{custom_format_string}'; skipping",
             UnsupportedWarning,
