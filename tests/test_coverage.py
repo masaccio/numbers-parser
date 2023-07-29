@@ -2,9 +2,16 @@ import pytest
 
 from numbers_parser import Document, UnsupportedError, Cell, UnsupportedWarning
 from numbers_parser.cell import xl_range, xl_rowcol_to_cell, xl_col_to_name
-from numbers_parser.constants import EMPTY_STORAGE_BUFFER
-from numbers_parser.cell_storage import CellStorage
+from numbers_parser.constants import EMPTY_STORAGE_BUFFER, DurationUnits
+from numbers_parser.cell_storage import (
+    CellStorage,
+    float_to_n_digit_fraction,
+    auto_units,
+    decode_number_format,
+)
 from numbers_parser.numbers_uuid import NumbersUUID
+
+from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 
 
 def test_containers():
@@ -52,6 +59,40 @@ def test_cell_storage(tmp_path):
         doc.save(new_filename)
     assert len(record) == 1
     assert "unsupported data type DummyCell" in str(record[0])
+
+    assert float_to_n_digit_fraction(0.0, 1) == "0"
+
+    format = TSKArchives.FormatStructArchive(
+        format_type=268,
+        duration_style=0,
+        duration_unit_largest=1,
+        duration_unit_smallest=0,
+        use_automatic_duration_units=True,
+    )
+    assert auto_units(60 * 60 * 24 * 7.0, format) == (DurationUnits.WEEK, DurationUnits.WEEK)
+
+    format = TSKArchives.FormatStructArchive(
+        format_type=270,
+        show_thousands_separator=False,
+        use_accounting_style=False,
+        fraction_accuracy=0xFFFFFFFD,
+        custom_format_string="0000.##",
+        scale_factor=1,
+        requires_fraction_replacement=False,
+        decimal_width=0,
+        min_integer_width=0,
+        num_nonspace_integer_digits=0,
+        num_nonspace_decimal_digits=4,
+        index_from_right_last_integer=4,
+        num_hash_decimal_digits=0,
+        total_num_decimal_digits=0,
+        is_complex=False,
+        contains_integer_token=False,
+    )
+    assert decode_number_format(format, 0.1, "test") == "    .1"
+
+    format.custom_format_string = "0.##"
+    assert decode_number_format(format, 1.0, "test") == "1"
 
 
 def test_formatting_exceptions():
