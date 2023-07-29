@@ -2,6 +2,7 @@ import math
 import re
 
 from array import array
+from collections import defaultdict
 from functools import lru_cache
 from struct import pack
 from typing import Dict, List, Tuple, Union
@@ -174,6 +175,12 @@ class _NumbersModel:
         self._table_data = {}
         self._styles = None
         self._max_stroke_order = 0
+        self._strokes = {
+            "top": defaultdict(),
+            "right": defaultdict(),
+            "bottom": defaultdict(),
+            "left": defaultdict(),
+        }
 
     @property
     def file_store(self):
@@ -1852,6 +1859,7 @@ class _NumbersModel:
 
     def create_stroke(self, origin: int, length: int, border_value: Border):
         self._max_stroke_order += 1
+        order = self._max_stroke_order
         line_cap = TSDArchives.StrokeArchive.LineCap.ButtCap
         line_join = TSDArchives.LineJoin.MiterJoin
         if border_value.style == BorderType.SOLID:
@@ -1908,7 +1916,7 @@ class _NumbersModel:
         return TSTArchives.StrokeLayerArchive.StrokeRunArchive(
             origin=origin,
             length=length,
-            order=self._max_stroke_order,
+            order=order,
             stroke=TSDArchives.StrokeArchive(
                 color=color,
                 width=width,
@@ -1955,11 +1963,32 @@ class _NumbersModel:
         if stroke_layer is not None:
             stroke_patched = False
             for stroke_run in stroke_layer.stroke_runs:
-                if stroke_run.origin == origin and stroke_run.length == length:
+                stroke_start = stroke_run.origin
+                stroke_end = stroke_run.origin + stroke_run.length
+                stroke_range = range(stroke_start, stroke_end)
+                if origin <= stroke_start and (origin + length) >= stroke_end:
+                    # New stroke overwrites all of existing stroke
                     stroke_run.CopyFrom(self.create_stroke(origin, length, border_value))
                     stroke_patched = True
+                elif origin == stroke_start and length < stroke_run.length:
+                    # New stroke writes to start of existing stroke
+                    stroke_run.origin = origin + length
+                    stroke_run.length = stroke_run.length - length
+                elif origin in stroke_range and (origin + length) == stroke_end:
+                    # New stoke writes to end of existing stroke
+                    stroke_run.length = stroke_run.length - length
+                elif origin in stroke_range and (origin + length) in stroke_range:
+                    # New stroke in middle of existing stroke
+                    stroke_run.length = origin - stroke_start
+                    stroke_layer.stroke_runs.append(
+                        TSTArchives.StrokeLayerArchive.StrokeRunArchive()
+                    )
+                    stroke_layer.stroke_runs[-1].CopyFrom(stroke_run)
+                    stroke_layer.stroke_runs[-1].origin = origin + length
+                    stroke_layer.stroke_runs[-1].length = stroke_end - origin - length
             if not stroke_patched:
                 stroke_layer.stroke_runs.append(self.create_stroke(origin, length, border_value))
+            stroke_layer.stroke_runs.sort(key=lambda x: x.origin)
         else:
             stroke_layer_id, stroke_layer = self.objects.create_object_from_dict(
                 "CalculationEngine",
