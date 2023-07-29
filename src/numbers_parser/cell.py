@@ -427,6 +427,7 @@ class Cell:
         self._formula_key = None
         self._storage = None
         self._style = None
+        self._border = CellBorder()
 
     @property
     def image_filename(self):
@@ -486,8 +487,10 @@ class Cell:
         return self._style
 
     @style.setter
-    def style(self, style):
-        self._style = style
+    def style(self, _):
+        warnings.warn(
+            "cell style cannot be set; use Table.set_cell_style() instead", UnsupportedWarning
+        )
 
     @property
     def border(self):
@@ -497,7 +500,8 @@ class Cell:
     @border.setter
     def border(self, _):
         warnings.warn(
-            "cell border values cannot be set; use Table.add_border() instead", UnsupportedWarning
+            "cell border values cannot be set; use Table.set_cell_border() instead",
+            UnsupportedWarning,
         )
 
 

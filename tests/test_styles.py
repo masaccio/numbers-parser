@@ -14,6 +14,7 @@ from numbers_parser import (
     HorizontalJustification,
     Style,
     VerticalJustification,
+    UnsupportedWarning,
 )
 
 TEST_NUMBERED_REF = [
@@ -280,6 +281,12 @@ def test_style_exceptions():
     with pytest.raises(TypeError) as e:
         _ = Style(alignment=Alignment("left", "invalid"))
     assert "invalid vertical alignment" in str(e)
+    with pytest.raises(TypeError) as e:
+        _ = Style(alignment=Alignment("left", "invalid"))
+    with pytest.warns(UnsupportedWarning) as record:
+        table.cell("A1").style = None
+    assert len(record) == 1
+    assert "cell style cannot be set" in str(record[0])
 
     with pytest.raises(IndexError) as e:
         _ = table.set_cell_style(0, 0, "Blue Text")
