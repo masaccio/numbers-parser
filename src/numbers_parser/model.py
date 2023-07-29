@@ -1485,12 +1485,26 @@ class _NumbersModel:
             flags |= 0x2000
             length += 4
             storage += pack("<i", cell._storage.num_format_id)
-            storage[4:6] = pack("<h", 2)
-            storage[6:8] = pack("<h", 1)
+        if cell._storage.currency_format_id is not None:
+            flags |= 0x4000
+            length += 4
+            storage += pack("<i", cell._storage.currency_format_id)
+        if cell._storage.date_format_id is not None:
+            flags |= 0x8000
+            length += 4
+            storage += pack("<i", cell._storage.date_format_id)
+        if cell._storage.duration_format_id is not None:
+            flags |= 0x10000
+            length += 4
+            storage += pack("<i", cell._storage.duration_format_id)
         if cell._storage.text_format_id is not None:
             flags |= 0x20000
             length += 4
             storage += pack("<i", cell._storage.text_format_id)
+        if cell._storage.bool_format_id is not None:
+            flags |= 0x40000
+            length += 4
+            storage += pack("<i", cell._storage.text_forbool_format_idmat_id)
 
         storage[8:12] = pack("<i", flags)
         if len(storage) < 32:
