@@ -14,6 +14,7 @@ def test_row_col_sizes(configurable_save_file):
     assert table.col_width(table.num_cols - 1) == 98
 
     table.row_height(2, 40)
+    assert table.row_height(2) == 40
     table.row_height(3, 10)
     table.col_width(0, 50)
     table.col_width(2, 200)
