@@ -486,6 +486,8 @@ class Table:
                 self.set_cell_border(row_num, col_num, s, border_value, length)
             return
 
+        self._model.extract_strokes(self._table_id)
+
         if side == "top" or side == "bottom":
             for border_col_num in range(col_num, col_num + length):
                 self._model.set_cell_border(
