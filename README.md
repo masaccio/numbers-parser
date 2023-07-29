@@ -106,10 +106,7 @@ print("Cell C2 contains", table.cell("C2"))
 
 ### Merged cells
 
-When extracting data using ```rows()``` merged cells are ignored since only text values
-are returned. The ```cell()``` method of ```Table``` objects returns a ```Cell``` type
-object which is typed by the type of cell in the Numbers table. ```MergeCell``` objects
-indicates cells removed in a merge.
+When extracting data using `rows()` merged cells are ignored since only text values are returned. The `cell()` method of `Table` objects returns a `Cell` type object which is typed by the type of cell in the Numbers table. `MergeCell` objects indicates cells removed in a merge. The remaining `Cell` has a `bool` property `is_merged` which is `True` if the cell is the result of a merge. Such cells return a `tuple` for their `size` property indicating the number of rows and columns in the merged cell. Unmerged cells return a `size` of `None`.
 
 ``` python
 doc = Document("my-spreadsheet.numbers")
