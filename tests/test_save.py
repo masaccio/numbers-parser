@@ -49,6 +49,12 @@ def test_save_merges(configurable_save_file):
     doc = Document(configurable_save_file)
     sheets = doc.sheets
     table = sheets[0].tables[0]
+    assert table.cell("B2").is_merged
+    assert table.cell("B2").size == (2, 1)
+    assert table.cell("B5").is_merged
+    assert table.cell("B5").size == (2, 1)
+    assert table.cell("D2").is_merged
+    assert table.cell("D2").size == (3, 3)
     assert table.merge_ranges == ["B2:C2", "B5:E5", "D2:F4"]
     assert all([isinstance(table.cell(row, 3), MergedCell) for row in range(2, 4)])
     assert all([isinstance(table.cell(row, 4), MergedCell) for row in range(1, 4)])
