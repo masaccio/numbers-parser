@@ -27,6 +27,7 @@ def check_border(cell: Cell, side: str, test_value: str) -> bool:
 
 
 TAG_TO_BORDER_MAP = {"T": "top", "R": "right", "B": "bottom", "L": "left"}
+BORDER_TO_TAG_MAP = {v: k for k, v in TAG_TO_BORDER_MAP.items()}
 
 
 def unpack_test_string(test_value):
@@ -76,23 +77,23 @@ def test_exceptions():
 
     doc = Document()
     with pytest.raises(TypeError) as e:
-        doc.sheets[0].tables[0].add_border("A1", 1)
+        doc.sheets[0].tables[0].set_cell_border("A1", 1)
     assert "invalid number of arguments to border_value()" in str(e)
 
     with pytest.raises(TypeError) as e:
-        doc.sheets[0].tables[0].add_border("A1", 1, 2, 3, 4)
+        doc.sheets[0].tables[0].set_cell_border("A1", 1, 2, 3, 4)
     assert "invalid number of arguments to border_value()" in str(e)
 
     with pytest.raises(TypeError) as e:
-        doc.sheets[0].tables[0].add_border("A1", "invalid", Border(1.0, RGB(0, 0, 0), "solid"))
+        doc.sheets[0].tables[0].set_cell_border("A1", "invalid", Border(1.0, RGB(0, 0, 0), "solid"))
     assert "side must be a valid border segment" in str(e)
 
     with pytest.raises(TypeError) as e:
-        doc.sheets[0].tables[0].add_border("A1", "left", object())
+        doc.sheets[0].tables[0].set_cell_border("A1", "left", object())
     assert "border value must be a Border object" in str(e)
 
     with pytest.raises(TypeError) as e:
-        doc.sheets[0].tables[0].add_border(
+        doc.sheets[0].tables[0].set_cell_border(
             "A1", "left", Border(1.0, RGB(0, 0, 0), "solid"), "invalid"
         )
     assert "border length must be an int" in str(e)
@@ -165,11 +166,14 @@ def test_edit_borders(configurable_save_file):
     sheet = doc.sheets[0]
     table = sheet.tables[0]
 
-    table.add_border("B6", "left", Border(8.0, RGB(29, 177, 0), "solid"), 3)
-    table.add_border(6, 1, "right", Border(5.0, RGB(29, 177, 0), "dashes"))
-    table.add_border("C3", "top", Border(3.0, RGB(0, 162, 255), "dots"), 4)
+    table.set_cell_border("B6", "left", Border(8.0, RGB(29, 177, 0), "solid"), 3)
+    table.set_cell_border(6, 1, "right", Border(5.0, RGB(29, 177, 0), "dashes"))
+    table.set_cell_border("C3", "top", Border(3.0, RGB(0, 162, 255), "dots"), 4)
     table.merge_cells(["C3:F3", "C10:F10"])
-    table.add_border("C10", "top", Border(3.0, RGB(0, 162, 255), "dots"), 4)
+    table.set_cell_border("C10", "top", Border(3.0, RGB(0, 162, 255), "dots"), 4)
+    table.set_cell_border(
+        "B2", ["top", "right", "bottom", "left"], Border(4.0, RGB(0, 0, 0), "solid")
+    )
 
     doc.save(configurable_save_file)
 
@@ -185,3 +189,76 @@ def test_edit_borders(configurable_save_file):
         == "Border(width=5.0, color=RGB(r=29, g=177, b=0), style=dashes)"
     )
     assert table.cell("C4").border.right is None
+
+
+def invert_border_test(test):
+    if test == "None":
+        return None, None
+    else:
+        values = test.split(",")
+        width = float(values[0])
+        color = eval(values[1].replace(";", ","))
+        style = values[2]
+        if width < 4.0:
+            width = round(width * 2.0, 1)
+        else:
+            width = round(width / 2.0, 1)
+
+        color = (abs(200 - color[0]), abs(200 - color[1]), abs(200 - color[2]))
+
+        if style == "solid":
+            style = "dashes"
+        elif style == "dashes":
+            style = "dots"
+        elif style == "dots":
+            style = "none"
+            width = 0.0
+            color = (0, 0, 0)
+        elif style == "none":
+            style = "solid"
+
+        border = Border(width, color, style)
+
+        color = "(" + ";".join([str(x) for x in color]) + ")"
+        test_value = ",".join([str(width), color, style])
+        return test_value, border
+
+
+def invert_tests(tests):
+    new_tests = []
+    new_borders = []
+    test_string = ""
+    for side, test in tests.items():
+        if isinstance(test, str):
+            (new_test, border) = invert_border_test(test)
+            new_tests.append(new_test)
+            new_borders.append(border)
+            test_string += BORDER_TO_TAG_MAP[side] + "=" + str(new_tests[-1]) + "\n"
+        else:
+            for i in range(len(test)):
+                (new_test, border) = invert_border_test(test[i])
+                new_tests.append(new_test)
+                new_borders.append(border)
+                test_string += BORDER_TO_TAG_MAP[side] + "{i}=" + str(new_tests[-1]) + "\n"
+    return test_string, new_tests, new_borders
+
+
+def test_resave_borders(configurable_save_file):
+    doc = Document("tests/data/test-styles.numbers")
+
+    for sheet_name in ["Borders"]:  # , "Large Borders"]:
+        table = doc.sheets[sheet_name].tables[0]
+
+        for row_num, row in enumerate(table.iter_rows()):
+            for col_num, cell in enumerate(row):
+                print(row_num, col_num)
+                if not cell.value or isinstance(cell, MergedCell):
+                    continue
+                tests = unpack_test_string(cell.value)
+                (test_string, new_tests, borders) = invert_tests(tests)
+                table.write(row_num, col_num, test_string)
+                for i, side in enumerate(tests):
+                    if borders[i] is not None:
+                        table.set_cell_border(row_num, col_num, side, borders[i])
+
+    doc.save(configurable_save_file)
