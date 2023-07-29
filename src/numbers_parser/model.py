@@ -474,11 +474,11 @@ class _NumbersModel:
                             )
                     self._merge_cells[table_id].add_anchor(row_start, col_start, size)
 
-        bds = self.objects[table_id].base_data_store
-        if bds.merge_region_map.identifier == 0:
+        base_data_store = self.objects[table_id].base_data_store
+        if base_data_store.merge_region_map.identifier == 0:
             return
 
-        cell_range = self.objects[bds.merge_region_map.identifier]
+        cell_range = self.objects[base_data_store.merge_region_map.identifier]
         for cell_range in cell_range.cell_range:
             (col_start, row_start) = (
                 cell_range.origin.packedData >> 16,
@@ -495,8 +495,7 @@ class _NumbersModel:
                     self._merge_cells[table_id].add_reference(
                         row_num, col_num, (row_start, col_start, row_end, col_end)
                     )
-            size = (row_end - row_start + 1, col_end - col_start + 1)
-            self._merge_cells[table_id].add_anchor(row_start, col_start, size)
+            self._merge_cells[table_id].add_anchor(row_start, col_start, (num_rows, num_columns))
 
     def merge_cells(self, table_id):
         self.calculate_merge_cell_ranges(table_id)
@@ -661,14 +660,13 @@ class _NumbersModel:
             "CalculationEngine", {}, TSTArchives.MergeRegionMapArchive
         )
 
-        for merge_cell, merge_data in merge_cells.merge_cells():
-            if isinstance(merge_data, MergeAnchor):
-                cell_id = TSTArchives.CellID(packedData=(merge_cell[1] << 16 | merge_cell[0]))
-                table_size = TSTArchives.TableSize(
-                    packedData=(merge_data["size"][1] << 16 | merge_data["size"][0])
-                )
-                cell_range = TSTArchives.CellRange(origin=cell_id, size=table_size)
-                merge_map.cell_range.append(cell_range)
+        merge_cells = self.merge_cells(table_id)
+        for row_col in merge_cells.merge_cells():
+            size = merge_cells.size(row_col)
+            cell_id = TSTArchives.CellID(packedData=(row_col[1] << 16 | row_col[0]))
+            table_size = TSTArchives.TableSize(packedData=(size[1] << 16 | size[0]))
+            cell_range = TSTArchives.CellRange(origin=cell_id, size=table_size)
+            merge_map.cell_range.append(cell_range)
 
         base_data_store = self.objects[table_id].base_data_store
         base_data_store.merge_region_map.CopyFrom(TSPMessages.Reference(identifier=merge_map_id))
