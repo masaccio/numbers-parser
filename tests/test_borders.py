@@ -99,8 +99,8 @@ def test_exceptions():
     assert "border length must be an int" in str(e)
 
 
-def test_borders():
-    doc = Document("tests/data/test-styles.numbers")
+def run_border_tests(filename):
+    doc = Document(filename)
 
     for sheet_name in ["Borders", "Large Borders"]:
         table = doc.sheets[sheet_name].tables[0]
@@ -144,6 +144,10 @@ def test_borders():
                         check_border(cell, "left", tests["left"]),
                     ]
                 assert valid
+
+
+def test_borders():
+    run_border_tests("tests/data/test-styles.numbers")
 
 
 def test_empty_borders():
@@ -239,26 +243,36 @@ def invert_tests(tests):
                 (new_test, border) = invert_border_test(test[i])
                 new_tests.append(new_test)
                 new_borders.append(border)
-                test_string += BORDER_TO_TAG_MAP[side] + "{i}=" + str(new_tests[-1]) + "\n"
-    return test_string, new_tests, new_borders
+                test_string += BORDER_TO_TAG_MAP[side] + f"{i}=" + str(new_tests[-1]) + "\n"
+    return test_string.strip(), new_tests, new_borders
 
 
+@pytest.mark.experimental
 def test_resave_borders(configurable_save_file):
     doc = Document("tests/data/test-styles.numbers")
 
-    for sheet_name in ["Borders"]:  # , "Large Borders"]:
+    style = doc.add_style(font_size=8.0, bold=False, name="Border Test Style")
+    # for sheet_name in ["Borders", "Large Borders"]:
+    for sheet_name in ["Borders"]:
         table = doc.sheets[sheet_name].tables[0]
 
         for row_num, row in enumerate(table.iter_rows()):
             for col_num, cell in enumerate(row):
-                print(row_num, col_num)
                 if not cell.value or isinstance(cell, MergedCell):
                     continue
                 tests = unpack_test_string(cell.value)
                 (test_string, new_tests, borders) = invert_tests(tests)
-                table.write(row_num, col_num, test_string)
+                table.write(row_num, col_num, test_string, style=style)
                 for i, side in enumerate(tests):
+                    if cell.is_merged:
+                        if side in ["left", "right"]:
+                            length = cell.size[0]
+                        else:
+                            length = cell.size[1]
+                    else:
+                        length = 1
                     if borders[i] is not None:
-                        table.set_cell_border(row_num, col_num, side, borders[i])
+                        table.set_cell_border(row_num, col_num, side, borders[i], length)
 
     doc.save(configurable_save_file)
+    run_border_tests(configurable_save_file)
