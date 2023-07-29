@@ -2,6 +2,7 @@ import pytest
 
 from numbers_parser import Document
 from numbers_parser.cell import EmptyCell, TextCell, NumberCell, MergedCell
+from pendulum import Duration, datetime
 
 
 def test_empty_document():
@@ -165,3 +166,14 @@ def test_duplicate_name():
     with pytest.raises(IndexError) as e:
         doc.sheets[0].add_table("Test")
     assert "table 'Test' already exists" in str(e)
+
+
+def test_save_formats(configurable_save_file):
+    doc = Document("/Users/jon/Downloads/test.numbers")
+    doc.save(configurable_save_file)
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    assert table.cell("A1").value == True
+    assert table.cell("A2").value == 123.45
+    assert table.cell("A3").value == Duration(days=5)
+    assert table.cell("A4").value == datetime(2000, 12, 1)

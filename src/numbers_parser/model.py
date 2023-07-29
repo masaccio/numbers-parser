@@ -1541,7 +1541,7 @@ class _NumbersModel:
         if cell._storage.bool_format_id is not None:
             flags |= 0x40000
             length += 4
-            storage += pack("<i", cell._storage.text_forbool_format_idmat_id)
+            storage += pack("<i", cell._storage.bool_format_id)
 
         storage[8:12] = pack("<i", flags)
         if len(storage) < 32:
