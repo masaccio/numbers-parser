@@ -354,21 +354,14 @@ class CellBorder:
             self._left = value
 
 
-class MergeInstance:
-    """Base class for merged cell references"""
-
-    def __init__(self):
-        pass
-
-
-class MergeReference(MergeInstance):
+class MergeReference:
     """Cell reference for cells eliminated by a merge"""
 
     def __init__(self, row_start: int, col_start: int, row_end: int, col_end: int):
         self.rect = (row_start, col_start, row_end, col_end)
 
 
-class MergeAnchor(MergeInstance):
+class MergeAnchor:
     """Cell reference for the merged cell"""
 
     def __init__(self, size: Tuple):
