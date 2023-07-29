@@ -354,15 +354,35 @@ class CellBorder:
             self._left = value
 
 
+class MergeInstance:
+    """Base class for merged cell references"""
+
+    def __init__(self):
+        pass
+
+
+class MergeReference(MergeInstance):
+    """Cell reference for cells eliminated by a merge"""
+
+    def __init__(self, row_start: int, col_start: int, row_end: int, col_end: int):
+        self.rect = (row_start, col_start, row_end, col_end)
+
+
+class MergeAnchor(MergeInstance):
+    """Cell reference for the merged cell"""
+
+    def __init__(self, size: Tuple):
+        self.size = size
+
+
 class Cell:
     @classmethod
     def empty_cell(cls, table_id: int, row_num: int, col_num: int, model: object):
         row_col = (row_num, col_num)
-        merge_cells = model.merge_cell_ranges(table_id)
-        is_merged = row_col in merge_cells
+        merge_cells = model.merge_cells(table_id)
 
-        if is_merged and merge_cells[row_col]["merge_type"] == "ref":
-            cell = MergedCell(*merge_cells[row_col]["rect"], row_num, col_num)
+        if merge_cells.is_merge_reference(row_col):
+            cell = MergedCell(*merge_cells.rect(row_col), row_num, col_num)
         else:
             cell = EmptyCell(row_num, col_num)
         cell.size = None
@@ -374,8 +394,6 @@ class Cell:
     @classmethod
     def from_storage(cls, cell_storage: CellStorage):  # noqa: C901
         row_col = (cell_storage.row_num, cell_storage.col_num)
-        merge_cells = cell_storage.model.merge_cell_ranges(cell_storage.table_id)
-        is_merged = row_col in merge_cells
 
         if cell_storage.type == CellType.EMPTY:
             cell = EmptyCell(cell_storage.row_num, cell_storage.col_num)
@@ -406,9 +424,10 @@ class Cell:
         cell._formula_key = cell_storage.formula_id
         cell._style = None
 
-        if is_merged and merge_cells[row_col]["merge_type"] == "source":
+        merge_cells = cell_storage.model.merge_cells(cell_storage.table_id)
+        if merge_cells.is_merge_anchor(row_col):
             cell.is_merged = True
-            cell.size = merge_cells[row_col]["size"]
+            cell.size = merge_cells.size(row_col)
             right_merged = cell.size[0] > 1
             bottom_merged = cell.size[1] > 1
             cell._border = CellBorder(False, right_merged, bottom_merged, False)

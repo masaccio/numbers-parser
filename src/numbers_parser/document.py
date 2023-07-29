@@ -17,7 +17,6 @@ from numbers_parser.cell import (
     Cell,
     MergedCell,
     xl_cell_to_rowcol,
-    xl_range,
     Style,
     Border,
 )
@@ -255,9 +254,8 @@ class Table:
     @property
     @lru_cache(maxsize=None)
     def merge_ranges(self) -> list:
-        merge_cells = self._model.merge_cell_ranges(self._table_id)
-        ranges = [xl_range(*r["rect"]) for r in merge_cells.values()]
-        return sorted(set(list(ranges)))
+        merge_cells = self._model.merge_cells(self._table_id).merge_cell_names()
+        return sorted(set(list(merge_cells)))
 
     def cell(self, *args) -> Union[Cell, MergedCell]:
         if type(args[0]) == str:
@@ -452,18 +450,13 @@ class Table:
             num_rows = row_end - row_start + 1
             num_cols = col_end - col_start + 1
 
-            merge_ranges = self._model._merge_cells[self._table_id]
-            merge_ranges[(row_start, col_start)] = {
-                "merge_type": "source",
-                "size": (num_rows, num_cols),
-            }
+            merge_cells = self._model.merge_cells(self._table_id)
+            merge_cells.add_anchor(row_start, col_start, (num_rows, num_cols))
             for row_num in range(row_start + 1, row_end + 1):
                 for col_num in range(col_start + 1, col_end + 1):
-                    merge_ranges[(row_num, col_num)] = {
-                        "merge_type": "ref",
-                        "rect": (row_start, col_start, row_end, col_end),
-                        "size": (num_rows, num_cols),
-                    }
+                    merge_cells.add_reference(
+                        row_num, col_num, (row_start, col_start, row_end, col_end)
+                    )
 
     def set_cell_border(self, *args):
         (row_num, col_num, *args) = self._validate_cell_coords(*args)

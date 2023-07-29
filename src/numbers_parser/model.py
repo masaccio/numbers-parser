@@ -26,6 +26,7 @@ from numbers_parser.constants import (
 from numbers_parser.cell import (
     xl_rowcol_to_cell,
     xl_col_to_name,
+    xl_range,
     BoolCell,
     DateCell,
     DurationCell,
@@ -40,6 +41,8 @@ from numbers_parser.cell import (
     RGB,
     Border,
     BorderType,
+    MergeReference,
+    MergeAnchor,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
@@ -77,6 +80,42 @@ def create_font_name_map(font_map: dict) -> dict:
 
 
 FONT_FAMILY_TO_NAME = create_font_name_map(FONT_NAME_TO_FAMILY)
+
+
+class MergeCells:
+    def __init__(self):
+        self._references = defaultdict(lambda: False)
+
+    def add_reference(self, row_num: int, col_num: int, rect: Tuple):
+        self._references[(row_num, col_num)] = MergeReference(*rect)
+
+    def add_anchor(self, row_num: int, col_num: int, size: Tuple):
+        self._references[(row_num, col_num)] = MergeAnchor(size)
+
+    def is_merge_reference(self, row_col: Tuple) -> bool:
+        return isinstance(self._references[row_col], MergeReference)
+
+    def is_merge_anchor(self, row_col: Tuple) -> bool:
+        return isinstance(self._references[row_col], MergeAnchor)
+
+    def size(self, row_col: Tuple) -> Tuple:
+        return self._references[row_col].size
+
+    def rect(self, row_col: Tuple) -> Tuple:
+        return self._references[row_col].rect
+
+    def merge_cell_names(self):
+        ranges = [
+            xl_range(*v.rect) for k, v in self._references.items() if self.is_merge_reference(k)
+        ]
+        return ranges
+
+    def merge_cells(self):
+        ranges = [k for k, v in self._references.items() if self.is_merge_anchor(k)]
+        return ranges
+
+    def __len__(self):
+        return len(self._references.keys())
 
 
 class DataLists:
@@ -166,7 +205,7 @@ class _NumbersModel:
         if filename is None:
             filename = DEFAULT_DOCUMENT
         self.objects = ObjectStore(filename)
-        self._merge_cells = {}
+        self._merge_cells = defaultdict(MergeCells)
         self._row_heights = {}
         self._col_widths = {}
         self._table_formats = DataLists(self, "format_table")
@@ -409,13 +448,13 @@ class _NumbersModel:
         else:
             return self.objects[ce_id]
 
+    @lru_cache(maxsize=None)
     def calculate_merge_cell_ranges(self, table_id):
         """Exract all the merge cell ranges for the Table."""
         # https://github.com/masaccio/numbers-parser/blob/main/doc/Numbers.md#merge-ranges
         owner_id_map = self.owner_id_map()
         table_base_id = self.table_base_id(table_id)
 
-        merge_cells = {}
         range_table_ids = self.find_refs("RangePrecedentsTileArchive")
         for range_id in range_table_ids:
             o = self.objects[range_id]
@@ -427,22 +466,19 @@ class _NumbersModel:
                     row_end = row_start + rect.size.num_rows - 1
                     col_start = rect.origin.column
                     col_end = col_start + rect.size.num_columns - 1
+                    size = (row_end - row_start + 1, col_end - col_start + 1)
                     for row_num in range(row_start, row_end + 1):
                         for col_num in range(col_start, col_end + 1):
-                            merge_cells[(row_num, col_num)] = {
-                                "merge_type": "ref",
-                                "rect": (row_start, col_start, row_end, col_end),
-                                "size": (rect.size.num_rows, rect.size.num_columns),
-                            }
-                    merge_cells[(row_start, col_start)]["merge_type"] = "source"
-        self._merge_cells[table_id] = merge_cells
+                            self._merge_cells[table_id].add_reference(
+                                row_num, col_num, (row_start, col_start, row_end, col_end)
+                            )
+                    self._merge_cells[table_id].add_anchor(row_start, col_start, size)
 
         bds = self.objects[table_id].base_data_store
-        if bds.merge_region_map.identifier != 0:
-            cell_range = self.objects[bds.merge_region_map.identifier]
-        else:
-            return merge_cells
+        if bds.merge_region_map.identifier == 0:
+            return
 
+        cell_range = self.objects[bds.merge_region_map.identifier]
         for cell_range in cell_range.cell_range:
             (col_start, row_start) = (
                 cell_range.origin.packedData >> 16,
@@ -456,18 +492,14 @@ class _NumbersModel:
             col_end = col_start + num_columns - 1
             for row_num in range(row_start, row_end + 1):
                 for col_num in range(col_start, col_end + 1):
-                    merge_cells[(row_num, col_num)] = {
-                        "merge_type": "ref",
-                        "rect": (row_start, col_start, row_end, col_end),
-                        "size": (num_rows, num_columns),
-                    }
-        merge_cells[(row_start, col_start)]["merge_type"] = "source"
+                    self._merge_cells[table_id].add_reference(
+                        row_num, col_num, (row_start, col_start, row_end, col_end)
+                    )
+            size = (row_end - row_start + 1, col_end - col_start + 1)
+            self._merge_cells[table_id].add_anchor(row_start, col_start, size)
 
-        return merge_cells
-
-    def merge_cell_ranges(self, table_id):
-        if table_id not in self._merge_cells:
-            self._merge_cells[table_id] = self.calculate_merge_cell_ranges(table_id)
+    def merge_cells(self, table_id):
+        self.calculate_merge_cell_ranges(table_id)
         return self._merge_cells[table_id]
 
     def table_id_to_sheet_id(self, table_id: int) -> int:
@@ -621,7 +653,7 @@ class _NumbersModel:
             buckets.headers.append(header)
 
     def recalculate_merged_cells(self, table_id: int):
-        merge_cells = self.merge_cell_ranges(table_id)
+        merge_cells = self.merge_cells(table_id)
         if len(merge_cells) == 0:
             return
 
@@ -629,8 +661,8 @@ class _NumbersModel:
             "CalculationEngine", {}, TSTArchives.MergeRegionMapArchive
         )
 
-        for merge_cell, merge_data in merge_cells.items():
-            if merge_data["merge_type"] == "source":
+        for merge_cell, merge_data in merge_cells.merge_cells():
+            if isinstance(merge_data, MergeAnchor):
                 cell_id = TSTArchives.CellID(packedData=(merge_cell[1] << 16 | merge_cell[0]))
                 table_size = TSTArchives.TableSize(
                     packedData=(merge_data["size"][1] << 16 | merge_data["size"][0])
