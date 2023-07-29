@@ -1953,7 +1953,13 @@ class _NumbersModel:
             if self.objects[layer_id.identifier].row_column_index == row_column_index:
                 stroke_layer = self.objects[layer_id.identifier]
         if stroke_layer is not None:
-            stroke_layer.stroke_runs.append(self.create_stroke(origin, length, border_value))
+            stroke_patched = False
+            for stroke_run in stroke_layer.stroke_runs:
+                if stroke_run.origin == origin and stroke_run.length == length:
+                    stroke_run.CopyFrom(self.create_stroke(origin, length, border_value))
+                    stroke_patched = True
+            if not stroke_patched:
+                stroke_layer.stroke_runs.append(self.create_stroke(origin, length, border_value))
         else:
             stroke_layer_id, stroke_layer = self.objects.create_object_from_dict(
                 "CalculationEngine",
