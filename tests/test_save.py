@@ -42,6 +42,7 @@ def test_save_merges(configurable_save_file):
     table.write("B2", "merge_1")
     table.write("B5", "merge_2")
     table.write("D2", "merge_3")
+    table.write("F4", "")
     table.merge_cells("B2:C2")
     table.merge_cells(["B5:E5", "D2:F4"])
 
