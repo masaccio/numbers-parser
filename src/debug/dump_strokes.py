@@ -13,7 +13,8 @@ def dump_strokes_for_layer(objects, model, layer_ids, side):
             width = round(stroke_run.stroke.width, 2)
             color = rgb(stroke_run.stroke.color)
             style = model.stroke_type(stroke_run)
-            border_value = f"width={width}, color={color}, style={style}"
+            length = stroke_run.length
+            border_value = f"width={width}, color={color}, style={style}, length={length}"
 
             if side in ["top", "bottom"]:
                 start_row = stroke_layer.row_column_index
