@@ -8,7 +8,6 @@ from numbers_parser.model import _NumbersModel
 from numbers_parser.file import write_numbers_file
 from numbers_parser.constants import MAX_ROW_COUNT, MAX_COL_COUNT, MAX_HEADER_COUNT
 from numbers_parser.cell import (
-    EmptyCell,
     BoolCell,
     NumberCell,
     TextCell,
@@ -258,7 +257,7 @@ class Table:
         return sorted(set(list(merge_cells)))
 
     def cell(self, *args) -> Union[Cell, MergedCell]:
-        if type(args[0]) == str:
+        if isinstance(args[0], str):
             (row_num, col_num) = xl_cell_to_rowcol(args[0])
         elif len(args) != 2:
             raise IndexError("invalid cell reference " + str(args))
@@ -367,7 +366,7 @@ class Table:
     def _validate_cell_coords(self, *args):
         """Check first arguments are value cell references and pad
         the table with empty cells if outside current bounds"""
-        if type(args[0]) == str:
+        if isinstance(args[0], str):
             (row_num, col_num) = xl_cell_to_rowcol(args[0])
             values = args[1:]
         elif len(args) < 2:
@@ -393,15 +392,15 @@ class Table:
         (row_num, col_num, value) = self._validate_cell_coords(*args)
 
         # TODO: write needs to retain/init the border
-        if type(value) == str:
+        if isinstance(value, str):
             self._data[row_num][col_num] = TextCell(row_num, col_num, value)
-        elif type(value) == int or type(value) == float:
+        elif isinstance(value, int) or isinstance(value, float):
             self._data[row_num][col_num] = NumberCell(row_num, col_num, value)
-        elif type(value) == bool:
+        elif isinstance(value, bool):
             self._data[row_num][col_num] = BoolCell(row_num, col_num, value)
-        elif type(value) == builtin_datetime or type(value) == DateTime:
+        elif isinstance(value, builtin_datetime) or isinstance(value, DateTime):
             self._data[row_num][col_num] = DateCell(row_num, col_num, pendulum_instance(value))
-        elif type(value) == builtin_timedelta or type(value) == Duration:
+        elif isinstance(value, builtin_timedelta) or isinstance(value, Duration):
             self._data[row_num][col_num] = DurationCell(row_num, col_num, value)
         else:
             raise ValueError("Can't determine cell type from type " + type(value).__name__)
@@ -426,7 +425,10 @@ class Table:
             raise TypeError("style must be a Style object or style name")
 
     def add_row(self, num_rows=1):
-        row = [EmptyCell(self.num_rows - 1, col_num) for col_num in range(self.num_cols)]
+        row = [
+            Cell.empty_cell(self._table_id, self.num_rows - 1, col_num, self._model)
+            for col_num in range(self.num_cols)
+        ]
         for _ in range(num_rows):
             self._data.append(row.copy())
             self.num_rows += 1
@@ -435,7 +437,9 @@ class Table:
     def add_column(self, num_cols=1):
         for _ in range(num_cols):
             for row_num in range(self.num_rows):
-                self._data[row_num].append(EmptyCell(row_num, self.num_cols - 1))
+                self._data[row_num].append(
+                    Cell.empty_cell(self._table_id, row_num, self.num_cols - 1, self._model)
+                )
             self.num_cols += 1
             self._model.number_of_columns(self._table_id, self.num_cols)
 
