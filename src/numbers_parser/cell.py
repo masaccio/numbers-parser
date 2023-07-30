@@ -376,9 +376,12 @@ class Cell:
 
         if merge_cells.is_merge_reference(row_col):
             cell = MergedCell(*merge_cells.rect(row_col), row_num, col_num)
+            cell.size = None
         else:
             cell = EmptyCell(row_num, col_num)
-        cell.size = None
+            if merge_cells.is_merge_anchor(row_col):
+                cell.is_merged = True
+                cell.size = merge_cells.size(row_col)
         cell._model = model
         cell._table_id = table_id
         cell._style = None

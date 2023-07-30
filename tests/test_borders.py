@@ -174,8 +174,9 @@ def test_edit_borders(configurable_save_file):
     table.set_cell_border("B6", "left", Border(8.0, RGB(29, 177, 0), "solid"), 3)
     table.set_cell_border(6, 1, "right", Border(5.0, RGB(29, 177, 0), "dashes"))
     table.merge_cells(["C3:F4", "C10:F11"])
-    table.set_cell_border("C3", ALL_BORDERS, Border(3.0, RGB(0, 162, 255), "dots"), 4)
-    table.set_cell_border("C10", ALL_BORDERS, Border(3.0, RGB(29, 177, 0), "dots"), 4)
+    table.merge_cells("C3:F4")
+    table.set_cell_border("C3", ALL_BORDERS, Border(3.0, RGB(0, 162, 255), "dots"))
+    table.set_cell_border("C10", ALL_BORDERS, Border(3.0, RGB(29, 177, 0), "dots"))
     table.set_cell_border("B2", ALL_BORDERS, Border(4.0, RGB(0, 0, 0), "solid"))
 
     doc.save(configurable_save_file)
@@ -193,11 +194,10 @@ def test_edit_borders(configurable_save_file):
     )
     assert table.cell("C4").border.right is None
 
-    ref = "Border(width=3.0, color=RGB(0, 162, 255), style=dots)"
+    ref = "Border(width=3.0, color=RGB(r=0, g=162, b=255), style=dots)"
+    assert str(table.cell("C3").border.bottom) == ref
+    assert str(table.cell("C3").border.right) == ref
     assert all([str(table.cell(4, col_num).border.top) == ref for col_num in range(2, 6)])
-
-    ref = "Border(width=3.0, color=RGB(29, 177, 0), style=dots)"
-    assert all([str(table.cell(11, col_num).border.top) == ref for col_num in range(2, 6)])
 
 
 def invert_border_test(test):

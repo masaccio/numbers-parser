@@ -456,8 +456,13 @@ class Table:
 
             merge_cells = self._model.merge_cells(self._table_id)
             merge_cells.add_anchor(row_start, col_start, (num_rows, num_cols))
+            self._data[row_start][col_start].is_merged = True
+            self._data[row_start][col_start].size = (num_rows, num_cols)
             for row_num in range(row_start + 1, row_end + 1):
                 for col_num in range(col_start + 1, col_end + 1):
+                    self._data[row_num][col_num] = MergedCell(
+                        row_start, col_start, row_end, col_end, row_num, col_num
+                    )
                     merge_cells.add_reference(
                         row_num, col_num, (row_start, col_start, row_end, col_end)
                     )
@@ -486,11 +491,19 @@ class Table:
         self._model.extract_strokes(self._table_id)
 
         if side == "top" or side == "bottom":
+            if self._data[row_num][col_num].is_merged:
+                length = max([length, self._data[row_num][col_num].size[1]])
+                if side == "bottom":
+                    row_num += self._data[row_num][col_num].size[0] - 1
             for border_col_num in range(col_num, col_num + length):
                 self._model.set_cell_border(
                     self._table_id, row_num, border_col_num, side, border_value
                 )
         elif side == "left" or side == "right":
+            if self._data[row_num][col_num].is_merged:
+                length = max([length, self._data[row_num][col_num].size[0]])
+                if side == "right":
+                    col_num += self._data[row_num][col_num].size[1] - 1
             for border_row_num in range(row_num, row_num + length):
                 self._model.set_cell_border(
                     self._table_id, border_row_num, col_num, side, border_value

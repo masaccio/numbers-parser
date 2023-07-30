@@ -1842,11 +1842,17 @@ class _NumbersModel:
         elif side == "right":
             if (cell := self.cell_for_stroke(table_id, "right", row_num, col_num)) is not None:
                 cell._border.right = border_value
+                if isinstance(cell, MergedCell):
+                    merge_anchor = self._table_data[table_id][cell.row_start][cell.col_start]
+                    merge_anchor._border.right = border_value
             if (cell := self.cell_for_stroke(table_id, "left", row_num, col_num + 1)) is not None:
                 cell._border.left = border_value
         elif side == "bottom":
             if (cell := self.cell_for_stroke(table_id, "bottom", row_num, col_num)) is not None:
                 cell._border.bottom = border_value
+                if isinstance(cell, MergedCell):
+                    merge_anchor = self._table_data[table_id][cell.row_start][cell.col_start]
+                    merge_anchor._border.bottom = border_value
             if (cell := self.cell_for_stroke(table_id, "top", row_num + 1, col_num)) is not None:
                 cell._border.top = border_value
         else:  # left border
