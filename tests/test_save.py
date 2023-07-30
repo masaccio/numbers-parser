@@ -174,7 +174,7 @@ def test_save_formats(configurable_save_file):
     doc.save(configurable_save_file)
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
-    assert table.cell("A1").value == True
+    assert table.cell("A1").value
     assert table.cell("A2").value == 123.45
     assert table.cell("A3").value == Duration(days=5)
     assert table.cell("A4").value == datetime(2000, 12, 1)
