@@ -394,10 +394,10 @@ class Table:
         # TODO: write needs to retain/init the border
         if isinstance(value, str):
             self._data[row_num][col_num] = TextCell(row_num, col_num, value)
-        elif isinstance(value, int) or isinstance(value, float):
-            self._data[row_num][col_num] = NumberCell(row_num, col_num, value)
         elif isinstance(value, bool):
             self._data[row_num][col_num] = BoolCell(row_num, col_num, value)
+        elif isinstance(value, int) or isinstance(value, float):
+            self._data[row_num][col_num] = NumberCell(row_num, col_num, value)
         elif isinstance(value, builtin_datetime) or isinstance(value, DateTime):
             self._data[row_num][col_num] = DateCell(row_num, col_num, pendulum_instance(value))
         elif isinstance(value, builtin_timedelta) or isinstance(value, Duration):
