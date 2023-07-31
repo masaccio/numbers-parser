@@ -74,3 +74,55 @@ def test_header_size(configurable_save_file):
     table = doc.sheets[0].tables[0]
     assert table.num_header_rows == 2
     assert table.num_header_cols == 2
+
+
+def test_new_doc(configurable_save_file):
+    with pytest.warns(RuntimeWarning) as record:
+        _ = Document("tests/data/test-1.numbers", sheet_name="invalid")
+    assert len(record) == 1
+    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
+
+    with pytest.warns(RuntimeWarning) as record:
+        _ = Document("tests/data/test-1.numbers", table_name="invalid")
+    assert len(record) == 1
+    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
+
+    with pytest.warns(RuntimeWarning) as record:
+        _ = Document("tests/data/test-1.numbers", num_header_rows=-1)
+    assert len(record) == 1
+
+    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
+    with pytest.warns(RuntimeWarning) as record:
+        _ = Document("tests/data/test-1.numbers", num_header_cols=-1)
+    assert len(record) == 1
+
+    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
+    with pytest.warns(RuntimeWarning) as record:
+        _ = Document("tests/data/test-1.numbers", num_rows=-1)
+    assert len(record) == 1
+    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
+
+    with pytest.warns(RuntimeWarning) as record:
+        _ = Document("tests/data/test-1.numbers", num_cols=-1)
+    assert len(record) == 1
+    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
+
+    doc = Document(
+        sheet_name="Test Sheet",
+        table_name="Test Table",
+        num_header_rows=2,
+        num_header_cols=2,
+        num_rows=10,
+        num_cols=5,
+    )
+    doc.save(configurable_save_file)
+    new_doc = Document(configurable_save_file)
+    assert new_doc.sheets[0].name == "Test Sheet"
+    assert new_doc.sheets[0].tables[0].name == "Test Table"
+    assert new_doc.sheets[0].tables[0].num_header_rows == 2
+    assert new_doc.sheets[0].tables[0].num_rows == 10
+    assert new_doc.sheets[0].tables[0].num_cols == 5
+    assert new_doc.sheets[0].tables[0].cell("A1").style.bold
+    assert new_doc.sheets[0].tables[0].cell("B1").style.bold
+    assert new_doc.sheets[0].tables[0].cell("B2").style.bold
+    assert not new_doc.sheets[0].tables[0].cell("C3").style.bold

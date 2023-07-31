@@ -7,7 +7,14 @@ from warnings import warn
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
 from numbers_parser.file import write_numbers_file
-from numbers_parser.constants import MAX_ROW_COUNT, MAX_COL_COUNT, MAX_HEADER_COUNT
+from numbers_parser.constants import (
+    MAX_ROW_COUNT,
+    MAX_COL_COUNT,
+    MAX_HEADER_COUNT,
+    DEFAULT_NUM_HEADERS,
+    DEFAULT_COLUMN_COUNT,
+    DEFAULT_ROW_COUNT,
+)
 from numbers_parser.cell import (
     BoolCell,
     NumberCell,
@@ -21,14 +28,54 @@ from numbers_parser.cell import (
     Border,
 )
 from numbers_parser.cell_storage import CellStorage
-from numbers_parser.constants import DEFAULT_COLUMN_COUNT, DEFAULT_ROW_COUNT
 
 
 class Document:
-    def __init__(self, filename=None):
+    def __init__(
+        self,
+        filename: str = None,
+        sheet_name: str = None,
+        table_name: str = None,
+        num_header_rows: int = None,
+        num_header_cols: int = None,
+        num_rows: int = None,
+        num_cols: int = None,
+    ):
+        if filename is not None and (
+            (sheet_name is not None)
+            or (table_name is not None)
+            or (num_header_rows is not None)
+            or (num_header_cols is not None)
+            or (num_rows is not None)
+            or (num_cols is not None)
+        ):
+            warn("can't set table/sheet attributes on load of existing document", RuntimeWarning)
+
         self._model = _NumbersModel(filename)
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
+
+        if filename is None:
+            if sheet_name is not None:
+                self.sheets[0].name = sheet_name
+            table = self.sheets[0].tables[0]
+            if table_name is not None:
+                table.name = table_name
+
+            if num_header_rows is None:
+                num_header_rows = DEFAULT_NUM_HEADERS
+            if num_header_cols is None:
+                num_header_cols = DEFAULT_NUM_HEADERS
+            if num_rows is None:
+                num_rows = DEFAULT_ROW_COUNT
+            if num_cols is None:
+                num_cols = DEFAULT_COLUMN_COUNT
+
+            # Table starts as 1x1 with no headers
+            table.add_row(num_rows - 1)
+            table.num_header_rows = num_header_rows
+            table.add_column(num_cols - 1)
+            table.num_header_cols = num_header_cols
 
     @property
     def sheets(self) -> list:
@@ -194,7 +241,7 @@ class Table:
         """Return the number of header rows"""
         if num_headers < 0:
             raise ValueError("Number of headers cannot be negative")
-        elif num_headers > self.num_cols:
+        elif num_headers > self.num_rows:
             raise ValueError("Number of headers cannot exceed the number of rows")
         elif num_headers > MAX_HEADER_COUNT:
             raise ValueError(f"Number of headers cannot exceed {MAX_HEADER_COUNT} rows")

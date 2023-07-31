@@ -2,15 +2,18 @@ import pytest
 
 from numbers_parser import Document
 from numbers_parser.cell import EmptyCell, TextCell, NumberCell, MergedCell
+from numbers_parser.constants import DEFAULT_ROW_COUNT, DEFAULT_COLUMN_COUNT, DEFAULT_NUM_HEADERS
 from pendulum import Duration, datetime
 
 
 def test_empty_document():
     doc = Document()
     data = doc.sheets[0].tables[0].rows()
-    assert len(data) == 22
-    assert len(data[0]) == 7
+    assert len(data) == DEFAULT_ROW_COUNT
+    assert len(data[0]) == DEFAULT_COLUMN_COUNT
     assert type(data[0][0]) == EmptyCell
+    assert doc.sheets[0].tables[0].num_header_rows == DEFAULT_NUM_HEADERS
+    assert doc.sheets[0].tables[0].num_header_cols == DEFAULT_NUM_HEADERS
 
 
 def test_save_document(tmp_path):
