@@ -2,7 +2,13 @@ import pytest
 
 from numbers_parser import Document
 from numbers_parser.cell import EmptyCell, TextCell, NumberCell, MergedCell
-from numbers_parser.constants import DEFAULT_ROW_COUNT, DEFAULT_COLUMN_COUNT, DEFAULT_NUM_HEADERS
+from numbers_parser.constants import (
+    DEFAULT_ROW_COUNT,
+    DEFAULT_COLUMN_COUNT,
+    DEFAULT_NUM_HEADERS,
+    DEFAULT_ROW_HEIGHT,
+    DEFAULT_TABLE_OFFSET,
+)
 from pendulum import Duration, datetime
 
 
@@ -145,8 +151,9 @@ def test_create_multi(configurable_save_file):
     doc.sheets[1].tables[2].write(0, 0, "S1T2 A1")
 
     doc.add_sheet()
+    offset = 700
     doc.sheets[2].add_table(x=100.0)
-    doc.sheets[2].add_table(x=0.0, y=700.0)
+    doc.sheets[2].add_table(x=0.0, y=offset)
     doc.sheets[2].add_table()
     doc.sheets[2].tables[0].write(0, 0, "S2T0 A1")
     doc.sheets[2].tables[1].write(0, 0, "S2T1 A1")
@@ -156,10 +163,12 @@ def test_create_multi(configurable_save_file):
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
-    assert doc.sheets[1].tables[1].height == 200
-    assert doc.sheets[2].tables[1].coordinates == (100.0, 280.0)
-    assert doc.sheets[2].tables[2].coordinates == (0.0, 700.0)
-    assert doc.sheets[2].tables[3].coordinates == (0.0, 980.0)
+    height1 = DEFAULT_ROW_HEIGHT * DEFAULT_ROW_COUNT
+    height2 = height1 + offset + DEFAULT_TABLE_OFFSET
+    assert doc.sheets[1].tables[1].height == height1
+    assert doc.sheets[2].tables[1].coordinates == (100.0, height1 + DEFAULT_TABLE_OFFSET)
+    assert doc.sheets[2].tables[2].coordinates == (0.0, offset)
+    assert doc.sheets[2].tables[3].coordinates == (0.0, height2)
     assert len(doc.sheets) == 3
     assert len(doc.sheets[2].tables) == 4
 
