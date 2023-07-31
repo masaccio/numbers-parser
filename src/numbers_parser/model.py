@@ -98,6 +98,9 @@ class MergeCells:
     def is_merge_anchor(self, row_col: Tuple) -> bool:
         return isinstance(self._references[row_col], MergeAnchor)
 
+    def get(self, row_col: Tuple) -> Union[MergeAnchor, MergeReference]:
+        return self._references[row_col]
+
     def size(self, row_col: Tuple) -> Tuple:
         return self._references[row_col].size
 
@@ -1808,27 +1811,19 @@ class _NumbersModel:
             return None
         cell = self._table_data[table_id][row_num][col_num]
         if isinstance(cell, MergedCell):
-            if side == "top":
-                if row_num == cell.row_start:
-                    return cell
-                else:
-                    return None
-            elif side == "right":
-                if col_num == cell.col_end:
-                    return cell
-                else:
-                    return None
-            elif side == "bottom":
-                if row_num == cell.row_end:
-                    return cell
-                else:
-                    return None
-            else:  # left
-                if col_num == cell.col_start:
-                    return cell
-                else:
-                    return None
-        return cell
+            if (
+                (side == "top" and row_num == cell.row_start)
+                or (side == "right" and col_num == cell.col_end)
+                or (side == "bottom" and row_num == cell.row_end)
+                or (side == "left" and col_num == cell.col_start)
+            ):
+                return cell
+        elif cell.is_merged:
+            if side == "top" or side == "left":
+                return cell
+        else:
+            return cell
+        return None
 
     def set_cell_border(
         self, table_id: int, row_num: int, col_num: int, side: str, border_value: Border
@@ -1842,17 +1837,11 @@ class _NumbersModel:
         elif side == "right":
             if (cell := self.cell_for_stroke(table_id, "right", row_num, col_num)) is not None:
                 cell._border.right = border_value
-                if isinstance(cell, MergedCell):
-                    merge_anchor = self._table_data[table_id][cell.row_start][cell.col_start]
-                    merge_anchor._border.right = border_value
             if (cell := self.cell_for_stroke(table_id, "left", row_num, col_num + 1)) is not None:
                 cell._border.left = border_value
         elif side == "bottom":
             if (cell := self.cell_for_stroke(table_id, "bottom", row_num, col_num)) is not None:
                 cell._border.bottom = border_value
-                if isinstance(cell, MergedCell):
-                    merge_anchor = self._table_data[table_id][cell.row_start][cell.col_start]
-                    merge_anchor._border.bottom = border_value
             if (cell := self.cell_for_stroke(table_id, "top", row_num + 1, col_num)) is not None:
                 cell._border.top = border_value
         else:  # left border

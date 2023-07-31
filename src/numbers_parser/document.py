@@ -2,6 +2,7 @@ from datetime import datetime as builtin_datetime, timedelta as builtin_timedelt
 from functools import lru_cache
 from pendulum import DateTime, Duration, instance as pendulum_instance
 from typing import Union, Generator, Tuple
+from warnings import warn
 
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
@@ -158,14 +159,20 @@ class Table:
         # of computing all cells is minimal compared to file IO
         self._data = []
         self._model.set_table_data(table_id, self._data)
+        merge_cells = self._model.merge_cells(table_id)
+
         for row_num in range(self.num_rows):
             self._data.append([])
             for col_num in range(self.num_cols):
                 cell_storage = model.table_cell_decode(table_id, row_num, col_num)
                 if cell_storage is None:
-                    cell = Cell.empty_cell(table_id, row_num, col_num, model)
+                    if merge_cells.is_merge_reference((row_num, col_num)):
+                        cell = Cell.merged_cell(table_id, row_num, col_num, model)
+                    else:
+                        cell = Cell.empty_cell(table_id, row_num, col_num, model)
                 else:
                     cell = Cell.from_storage(cell_storage)
+                cell._set_merge(merge_cells.get((row_num, col_num)))
                 self._data[row_num].append(cell)
 
     @property
@@ -444,6 +451,7 @@ class Table:
             self._model.number_of_columns(self._table_id, self.num_cols)
 
     def merge_cells(self, cell_range):
+        """Convert a cell range or list of cell ranges into merged cells"""
         if isinstance(cell_range, list):
             for x in cell_range:
                 self.merge_cells(x)
@@ -456,16 +464,16 @@ class Table:
 
             merge_cells = self._model.merge_cells(self._table_id)
             merge_cells.add_anchor(row_start, col_start, (num_rows, num_cols))
-            self._data[row_start][col_start].is_merged = True
-            self._data[row_start][col_start].size = (num_rows, num_cols)
             for row_num in range(row_start + 1, row_end + 1):
                 for col_num in range(col_start + 1, col_end + 1):
-                    self._data[row_num][col_num] = MergedCell(
-                        row_start, col_start, row_end, col_end, row_num, col_num
-                    )
+                    self._data[row_num][col_num] = MergedCell(row_num, col_num)
                     merge_cells.add_reference(
                         row_num, col_num, (row_start, col_start, row_end, col_end)
                     )
+
+            for row_num, row in enumerate(self._data):
+                for col_num, cell in enumerate(row):
+                    cell._set_merge(merge_cells.get((row_num, col_num)))
 
     def set_cell_border(self, *args):
         (row_num, col_num, *args) = self._validate_cell_coords(*args)
@@ -488,22 +496,18 @@ class Table:
                 self.set_cell_border(row_num, col_num, s, border_value, length)
             return
 
+        if self._data[row_num][col_num].is_merged and side in ["bottom", "right"]:
+            warn(f"cell [{row_num},{col_num}] is merged; {side} border not set", RuntimeWarning)
+            return
+
         self._model.extract_strokes(self._table_id)
 
         if side == "top" or side == "bottom":
-            if self._data[row_num][col_num].is_merged:
-                length = max([length, self._data[row_num][col_num].size[1]])
-                if side == "bottom":
-                    row_num += self._data[row_num][col_num].size[0] - 1
             for border_col_num in range(col_num, col_num + length):
                 self._model.set_cell_border(
                     self._table_id, row_num, border_col_num, side, border_value
                 )
         elif side == "left" or side == "right":
-            if self._data[row_num][col_num].is_merged:
-                length = max([length, self._data[row_num][col_num].size[0]])
-                if side == "right":
-                    col_num += self._data[row_num][col_num].size[1] - 1
             for border_row_num in range(row_num, row_num + length):
                 self._model.set_cell_border(
                     self._table_id, border_row_num, col_num, side, border_value

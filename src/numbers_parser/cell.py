@@ -371,43 +371,37 @@ class MergeAnchor:
 class Cell:
     @classmethod
     def empty_cell(cls, table_id: int, row_num: int, col_num: int, model: object):
-        row_col = (row_num, col_num)
-        merge_cells = model.merge_cells(table_id)
-
-        if merge_cells.is_merge_reference(row_col):
-            cell = MergedCell(*merge_cells.rect(row_col), row_num, col_num)
-            cell.size = None
-        else:
-            cell = EmptyCell(row_num, col_num)
-            if merge_cells.is_merge_anchor(row_col):
-                cell.is_merged = True
-                cell.size = merge_cells.size(row_col)
+        cell = EmptyCell(row_num, col_num)
         cell._model = model
         cell._table_id = table_id
-        cell._style = None
         return cell
 
     @classmethod
-    def from_storage(cls, cell_storage: CellStorage):  # noqa: C901
-        row_col = (cell_storage.row_num, cell_storage.col_num)
+    def merged_cell(cls, table_id: int, row_num: int, col_num: int, model: object):
+        cell = MergedCell(row_num, col_num)
+        cell._model = model
+        cell._table_id = table_id
+        return cell
 
+    @classmethod
+    def from_storage(cls, cell_storage: CellStorage):
         if cell_storage.type == CellType.EMPTY:
             cell = EmptyCell(cell_storage.row_num, cell_storage.col_num)
         elif cell_storage.type == CellType.NUMBER:
-            cell = NumberCell(*row_col, cell_storage.value)
+            cell = NumberCell(cell_storage.row_num, cell_storage.col_num, cell_storage.value)
         elif cell_storage.type == CellType.TEXT:
-            cell = TextCell(*row_col, cell_storage.value)
+            cell = TextCell(cell_storage.row_num, cell_storage.col_num, cell_storage.value)
         elif cell_storage.type == CellType.DATE:
-            cell = DateCell(*row_col, cell_storage.value)
+            cell = DateCell(cell_storage.row_num, cell_storage.col_num, cell_storage.value)
         elif cell_storage.type == CellType.BOOL:
-            cell = BoolCell(*row_col, cell_storage.value)
+            cell = BoolCell(cell_storage.row_num, cell_storage.col_num, cell_storage.value)
         elif cell_storage.type == CellType.DURATION:
             value = duration(seconds=cell_storage.value)
-            cell = DurationCell(*row_col, value)
+            cell = DurationCell(cell_storage.row_num, cell_storage.col_num, value)
         elif cell_storage.type == CellType.ERROR:
-            cell = ErrorCell(*row_col)
+            cell = ErrorCell(cell_storage.row_num, cell_storage.col_num)
         elif cell_storage.type == CellType.RICH_TEXT:
-            cell = RichTextCell(*row_col, cell_storage.value)
+            cell = RichTextCell(cell_storage.row_num, cell_storage.col_num, cell_storage.value)
         else:
             raise UnsupportedError(
                 f"Unsupported cell type {cell_storage.type} "
@@ -418,17 +412,6 @@ class Cell:
         cell._model = cell_storage.model
         cell._storage = cell_storage
         cell._formula_key = cell_storage.formula_id
-        cell._style = None
-
-        merge_cells = cell_storage.model.merge_cells(cell_storage.table_id)
-        if merge_cells.is_merge_anchor(row_col):
-            cell.is_merged = True
-            cell.size = merge_cells.size(row_col)
-            right_merged = cell.size[0] > 1
-            bottom_merged = cell.size[1] > 1
-            cell._border = CellBorder(False, right_merged, bottom_merged, False)
-        else:
-            cell._border = CellBorder()
 
         return cell
 
@@ -436,13 +419,33 @@ class Cell:
         self._value = value
         self.row = row_num
         self.col = col_num
-        self.size = (1, 1)
-        self.is_merged = False
         self.is_bulleted = False
         self._formula_key = None
         self._storage = None
         self._style = None
-        self._border = CellBorder()
+
+    def _set_merge(self, merge_ref):
+        if isinstance(merge_ref, MergeAnchor):
+            self.is_merged = True
+            self.size = merge_ref.size
+            self._border = CellBorder()
+        elif isinstance(merge_ref, MergeReference):
+            self.is_merged = False
+            self.size = None
+            self.row_start = merge_ref.rect[0]
+            self.col_start = merge_ref.rect[1]
+            self.row_end = merge_ref.rect[2]
+            self.col_end = merge_ref.rect[3]
+            self.merge_range = xl_range(*merge_ref.rect)
+            top_merged = self.row > self.row_start
+            right_merged = self.col < self.col_end
+            bottom_merged = self.row < self.row_end
+            left_merged = self.col > self.col_start
+            self._border = CellBorder(top_merged, right_merged, bottom_merged, left_merged)
+        else:
+            self.is_merged = False
+            self.size = (1, 1)
+            self._border = CellBorder()
 
     @property
     def image_filename(self):
@@ -581,7 +584,6 @@ class EmptyCell(Cell):
     def __init__(self, row_num: int, col_num: int):
         super().__init__(row_num, col_num, None)
         self._type = None
-        self._border = CellBorder()
 
     @property
     def value(self):
@@ -630,22 +632,12 @@ class ErrorCell(Cell):
 
 
 class MergedCell(Cell):
-    def __init__(
-        self, row_start: int, col_start: int, row_end: int, col_end: int, row_num: int, col_num: int
-    ):
+    def __init__(self, row_num: int, col_num: int):
         super().__init__(row_num, col_num, None)
-        self.value = None
-        self.row_start = row_start
-        self.row_end = row_end
-        self.col_start = col_start
-        self.col_end = col_end
-        self.is_merged = False
-        self.merge_range = xl_range(row_start, col_start, row_end, col_end)
-        top_merged = row_num > row_start
-        right_merged = col_num < col_end
-        bottom_merged = row_num < row_end
-        left_merged = col_num > col_start
-        self._border = CellBorder(top_merged, right_merged, bottom_merged, left_merged)
+
+    @property
+    def value(self):
+        return None
 
 
 # Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
