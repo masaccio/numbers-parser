@@ -414,8 +414,10 @@ class Table:
         self._data[row_num][col_num]._storage = CellStorage(
             self._model, self._table_id, None, row_num, col_num
         )
+        merge_cells = self._model.merge_cells(self._table_id)
         self._data[row_num][col_num]._table_id = self._table_id
         self._data[row_num][col_num]._model = self._model
+        self._data[row_num][col_num]._set_merge(merge_cells.get((row_num, col_num)))
 
         if style is not None:
             self.set_cell_style(row_num, col_num, style)
