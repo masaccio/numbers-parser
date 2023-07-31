@@ -393,8 +393,8 @@ def test_empty_styles(configurable_save_file):
         alignment=Alignment("center", "middle"),
     )
     table = doc.sheets[0].tables[0]
-    row_header_style = table.cell(0, 0).style.name
-    body_style = table.cell(1, 1).style.name
+    row_header_style = table.cell("A1").style.name
+    body_style = table.cell("C2").style.name
 
     table.write(5, 5, "data", style=red_text)
     doc.save(configurable_save_file)
