@@ -174,30 +174,35 @@ def test_edit_borders(configurable_save_file):
     table.set_cell_border("B6", "left", Border(8.0, RGB(29, 177, 0), "solid"), 3)
     table.set_cell_border(6, 1, "right", Border(5.0, RGB(29, 177, 0), "dashes"))
     table.merge_cells(["C3:F4", "C10:F11"])
-    table.merge_cells("C3:F4")
-    table.set_cell_border("C3", ALL_BORDERS, Border(3.0, RGB(0, 162, 255), "dots"))
-    table.set_cell_border("C10", ALL_BORDERS, Border(3.0, RGB(29, 177, 0), "dots"))
-    table.set_cell_border("B2", ALL_BORDERS, Border(4.0, RGB(0, 0, 0), "solid"))
+
+    with pytest.warns(RuntimeWarning) as record:
+        table.set_cell_border("C3", ALL_BORDERS, Border(3.0, RGB(0, 162, 255), "dots"))
+    assert len(record) == 2
+    assert "cell [2,2] is merged; right border not set" in str(record[0])
+    assert "cell [2,2] is merged; bottom border not set" in str(record[1])
+
+    table.set_cell_border("C4", "bottom", Border(4.0, RGB(29, 177, 0), "solid"))
+    table.set_cell_border("D4", "bottom", Border(4.0, RGB(0, 0, 0), "solid"))
+    table.set_cell_border("E4", "bottom", Border(4.0, RGB(0, 162, 255), "solid"))
+    table.set_cell_border("F4", "bottom", Border(4.0, RGB(212, 24, 118), "solid"))
 
     doc.save(configurable_save_file)
 
     new_doc = Document(configurable_save_file)
     sheet = new_doc.sheets[0]
     table = sheet.tables[0]
-    assert (
-        str(table.cell("B6").border.left)
-        == "Border(width=8.0, color=RGB(r=29, g=177, b=0), style=solid)"
-    )
-    assert (
-        str(table.cell("B7").border.right)
-        == "Border(width=5.0, color=RGB(r=29, g=177, b=0), style=dashes)"
-    )
-    assert table.cell("C4").border.right is None
+    assert table.cell("B6").border.left == Border(8.0, RGB(29, 177, 0), "solid")
+    assert table.cell("B7").border.right == Border(5.0, RGB(29, 177, 0), "dashes")
 
-    ref = "Border(width=3.0, color=RGB(r=0, g=162, b=255), style=dots)"
-    assert str(table.cell("C3").border.bottom) == ref
-    assert str(table.cell("C3").border.right) == ref
-    assert all([str(table.cell(4, col_num).border.top) == ref for col_num in range(2, 6)])
+    for merge_ref in ["C4", "D4", "E4", "F4"]:
+        assert table.cell(merge_ref).border.top is None
+    for merge_ref in ["C4", "D4", "E4"]:
+        assert table.cell(merge_ref).border.right is None
+
+    assert table.cell("C4").border.bottom == Border(4.0, RGB(29, 177, 0), "solid")
+    assert table.cell("D4").border.bottom == Border(4.0, RGB(0, 0, 0), "solid")
+    assert table.cell("E4").border.bottom == Border(4.0, RGB(0, 162, 255), "solid")
+    assert table.cell("F4").border.bottom == Border(4.0, RGB(212, 24, 118), "solid")
 
 
 def invert_border_test(test):
