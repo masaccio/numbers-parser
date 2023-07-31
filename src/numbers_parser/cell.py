@@ -374,6 +374,9 @@ class Cell:
         cell = EmptyCell(row_num, col_num)
         cell._model = model
         cell._table_id = table_id
+        merge_cells = model.merge_cells(table_id)
+        cell._set_merge(merge_cells.get((row_num, col_num)))
+
         return cell
 
     @classmethod
@@ -381,6 +384,8 @@ class Cell:
         cell = MergedCell(row_num, col_num)
         cell._model = model
         cell._table_id = table_id
+        merge_cells = model.merge_cells(table_id)
+        cell._set_merge(merge_cells.get((row_num, col_num)))
         return cell
 
     @classmethod
@@ -412,7 +417,8 @@ class Cell:
         cell._model = cell_storage.model
         cell._storage = cell_storage
         cell._formula_key = cell_storage.formula_id
-
+        merge_cells = cell_storage.model.merge_cells(cell_storage.table_id)
+        cell._set_merge(merge_cells.get((cell_storage.row_num, cell_storage.col_num)))
         return cell
 
     def __init__(self, row_num: int, col_num: int, value):

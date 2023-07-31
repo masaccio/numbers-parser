@@ -172,7 +172,6 @@ class Table:
                         cell = Cell.empty_cell(table_id, row_num, col_num, model)
                 else:
                     cell = Cell.from_storage(cell_storage)
-                cell._set_merge(merge_cells.get((row_num, col_num)))
                 self._data[row_num].append(cell)
 
     @property
