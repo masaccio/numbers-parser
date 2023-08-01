@@ -216,7 +216,6 @@ class _NumbersModel:
         self._table_strings = DataLists(self, "stringTable", "string")
         self._table_data = {}
         self._styles = None
-        self._max_stroke_order = 0
         self._strokes = {
             "top": defaultdict(),
             "right": defaultdict(),
@@ -698,9 +697,6 @@ class _NumbersModel:
 
                 row_info.cell_count += 1
 
-        if len(cell_storage) == 0:
-            return None
-
         row_info.cell_offsets = pack(f"<{len(offsets)}h", *offsets)
         row_info.cell_offsets_pre_bnc = DEFAULT_PRE_BNC_BYTES
         row_info.cell_storage_buffer = cell_storage
@@ -800,8 +796,7 @@ class _NumbersModel:
             )
             for row_num in range(row_start, row_end):
                 row_info = self.recalculate_row_info(table_id, data, row_start, row_num)
-                if row_info is not None:
-                    tile.rowInfos.append(row_info)
+                tile.rowInfos.append(row_info)
 
             tile_ref = TSTArchives.TileStorage.Tile()
             tile_ref.tileid = tile_idx
@@ -1860,8 +1855,6 @@ class _NumbersModel:
         for layer_id in layer_ids:
             stroke_layer = self.objects[layer_id.identifier]
             for stroke_run in stroke_layer.stroke_runs:
-                if stroke_run.order > self._max_stroke_order:
-                    self._max_stroke_order = stroke_run.order
                 border_value = Border(
                     width=round(stroke_run.stroke.width, 2),
                     color=rgb(stroke_run.stroke.color),
@@ -1889,8 +1882,6 @@ class _NumbersModel:
         self.extract_strokes_in_layers(table_id, sidecar_obj.bottom_row_stroke_layers, "bottom")
 
     def create_stroke(self, origin: int, length: int, border_value: Border):
-        self._max_stroke_order += 1
-        order = self._max_stroke_order
         line_cap = TSDArchives.StrokeArchive.LineCap.ButtCap
         line_join = TSDArchives.LineJoin.MiterJoin
         if border_value.style == BorderType.SOLID:
@@ -1947,7 +1938,7 @@ class _NumbersModel:
         return TSTArchives.StrokeLayerArchive.StrokeRunArchive(
             origin=origin,
             length=length,
-            order=order,
+            order=border_value._order,
             stroke=TSDArchives.StrokeArchive(
                 color=color,
                 width=width,
@@ -1969,6 +1960,10 @@ class _NumbersModel:
     ):
         table_obj = self.objects[table_id]
         sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]
+        sidecar_obj.max_order += 1
+        sidecar_obj.row_count = table_obj.number_of_rows
+        sidecar_obj.column_count = table_obj.number_of_columns
+        border_value._order = sidecar_obj.max_order
 
         if side == "top":
             layer_ids = sidecar_obj.top_row_stroke_layers
