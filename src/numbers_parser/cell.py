@@ -18,11 +18,12 @@ from numbers_parser.constants import (
     DEFAULT_BORDER_STYLE,
 )
 
-from dataclasses import dataclass
 from collections import namedtuple
+from dataclasses import dataclass
+from datetime import datetime as builtin_datetime, timedelta as builtin_timedelta
 from enum import IntEnum
 from functools import lru_cache
-from pendulum import duration, Duration, DateTime
+from pendulum import duration, Duration, DateTime, instance as pendulum_instance
 from typing import Any, List, Tuple, Union
 
 
@@ -420,6 +421,22 @@ class Cell:
         merge_cells = cell_storage.model.merge_cells(cell_storage.table_id)
         cell._set_merge(merge_cells.get((cell_storage.row_num, cell_storage.col_num)))
         return cell
+
+    @classmethod
+    def from_value(cls, row_num: int, col_num: int, value):
+        # TODO: write needs to retain/init the border
+        if isinstance(value, str):
+            return TextCell(row_num, col_num, value)
+        elif isinstance(value, bool):
+            return BoolCell(row_num, col_num, value)
+        elif isinstance(value, int) or isinstance(value, float):
+            return NumberCell(row_num, col_num, value)
+        elif isinstance(value, builtin_datetime) or isinstance(value, DateTime):
+            return DateCell(row_num, col_num, pendulum_instance(value))
+        elif isinstance(value, builtin_timedelta) or isinstance(value, Duration):
+            return DurationCell(row_num, col_num, value)
+        else:
+            raise ValueError("Can't determine cell type from type " + type(value).__name__)
 
     def __init__(self, row_num: int, col_num: int, value):
         self._value = value

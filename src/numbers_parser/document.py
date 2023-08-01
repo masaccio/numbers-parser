@@ -1,6 +1,4 @@
-from datetime import datetime as builtin_datetime, timedelta as builtin_timedelta
 from functools import lru_cache
-from pendulum import DateTime, Duration, instance as pendulum_instance
 from typing import Union, Generator, Tuple
 from warnings import warn
 
@@ -16,11 +14,6 @@ from numbers_parser.constants import (
     DEFAULT_ROW_COUNT,
 )
 from numbers_parser.cell import (
-    BoolCell,
-    NumberCell,
-    TextCell,
-    DurationCell,
-    DateCell,
     Cell,
     MergedCell,
     xl_cell_to_rowcol,
@@ -442,21 +435,9 @@ class Table:
         return (row_num, col_num) + tuple(values)
 
     def write(self, *args, style=None):
-        (row_num, col_num, value) = self._validate_cell_coords(*args)
-
         # TODO: write needs to retain/init the border
-        if isinstance(value, str):
-            self._data[row_num][col_num] = TextCell(row_num, col_num, value)
-        elif isinstance(value, bool):
-            self._data[row_num][col_num] = BoolCell(row_num, col_num, value)
-        elif isinstance(value, int) or isinstance(value, float):
-            self._data[row_num][col_num] = NumberCell(row_num, col_num, value)
-        elif isinstance(value, builtin_datetime) or isinstance(value, DateTime):
-            self._data[row_num][col_num] = DateCell(row_num, col_num, pendulum_instance(value))
-        elif isinstance(value, builtin_timedelta) or isinstance(value, Duration):
-            self._data[row_num][col_num] = DurationCell(row_num, col_num, value)
-        else:
-            raise ValueError("Can't determine cell type from type " + type(value).__name__)
+        (row_num, col_num, value) = self._validate_cell_coords(*args)
+        self._data[row_num][col_num] = Cell.from_value(row_num, col_num, value)
         self._data[row_num][col_num]._storage = CellStorage(
             self._model, self._table_id, None, row_num, col_num
         )
