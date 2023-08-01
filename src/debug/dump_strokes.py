@@ -14,7 +14,10 @@ def dump_strokes_for_layer(objects, model, layer_ids, side):
             color = rgb(stroke_run.stroke.color)
             style = model.stroke_type(stroke_run)
             length = stroke_run.length
-            border_value = f"width={width}, color={color}, style={style}, length={length}"
+            order = stroke_run.order
+            border_value = (
+                f"width={width}, color={color}, style={style}, length={length}, order={order}"
+            )
 
             if side in ["top", "bottom"]:
                 start_row = stroke_layer.row_column_index
