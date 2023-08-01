@@ -12,9 +12,17 @@ from numbers_parser.constants import (
 from pendulum import Duration, datetime
 
 
-def test_empty_document():
+def test_empty_document(configurable_save_file):
     doc = Document()
     data = doc.sheets[0].tables[0].rows()
+    assert len(data) == DEFAULT_ROW_COUNT
+    assert len(data[0]) == DEFAULT_COLUMN_COUNT
+    assert type(data[0][0]) == EmptyCell
+    assert doc.sheets[0].tables[0].num_header_rows == DEFAULT_NUM_HEADERS
+    assert doc.sheets[0].tables[0].num_header_cols == DEFAULT_NUM_HEADERS
+
+    doc.save(configurable_save_file)
+    doc = Document(configurable_save_file)
     assert len(data) == DEFAULT_ROW_COUNT
     assert len(data[0]) == DEFAULT_COLUMN_COUNT
     assert type(data[0][0]) == EmptyCell

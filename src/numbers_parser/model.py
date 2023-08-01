@@ -611,6 +611,8 @@ class _NumbersModel:
         if row_offset is None:
             return None
         storage_buffers = self.storage_buffers(table_id)
+        if len(storage_buffers) == 0:
+            return None
         if col_num >= len(storage_buffers[row_offset]):
             return None
         return storage_buffers[row_offset][col_num]
@@ -695,6 +697,9 @@ class _NumbersModel:
                 current_offset += len(buffer)
 
                 row_info.cell_count += 1
+
+        if len(cell_storage) == 0:
+            return None
 
         row_info.cell_offsets = pack(f"<{len(offsets)}h", *offsets)
         row_info.cell_offsets_pre_bnc = DEFAULT_PRE_BNC_BYTES
@@ -795,7 +800,8 @@ class _NumbersModel:
             )
             for row_num in range(row_start, row_end):
                 row_info = self.recalculate_row_info(table_id, data, row_start, row_num)
-                tile.rowInfos.append(row_info)
+                if row_info is not None:
+                    tile.rowInfos.append(row_info)
 
             tile_ref = TSTArchives.TileStorage.Tile()
             tile_ref.tileid = tile_idx
