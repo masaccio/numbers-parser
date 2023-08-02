@@ -1,5 +1,5 @@
 import re
-import warnings
+import sigfig
 
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
@@ -16,6 +16,7 @@ from numbers_parser.constants import (
     DEFAULT_BORDER_WIDTH,
     DEFAULT_BORDER_COLOR,
     DEFAULT_BORDER_STYLE,
+    MAX_SIGNIFICANT_DIGITS,
 )
 
 from collections import namedtuple
@@ -25,6 +26,7 @@ from enum import IntEnum
 from functools import lru_cache
 from pendulum import duration, Duration, DateTime, instance as pendulum_instance
 from typing import Any, List, Tuple, Union
+from warnings import warn
 
 
 class BackgroundImage:
@@ -429,8 +431,16 @@ class Cell:
             return TextCell(row_num, col_num, value)
         elif isinstance(value, bool):
             return BoolCell(row_num, col_num, value)
-        elif isinstance(value, int) or isinstance(value, float):
+        elif isinstance(value, int):
             return NumberCell(row_num, col_num, value)
+        elif isinstance(value, float):
+            rounded_value = sigfig.round(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
+            if rounded_value != value:
+                warn(
+                    f"'{value}' rounded to {MAX_SIGNIFICANT_DIGITS} significant digits",
+                    RuntimeWarning,
+                )
+            return NumberCell(row_num, col_num, rounded_value)
         elif isinstance(value, builtin_datetime) or isinstance(value, DateTime):
             return DateCell(row_num, col_num, pendulum_instance(value))
         elif isinstance(value, builtin_timedelta) or isinstance(value, Duration):
@@ -472,7 +482,7 @@ class Cell:
 
     @property
     def image_filename(self):
-        warnings.warn(
+        warn(
             "image_filename is deprecated and will be removed in the future. "
             + "Please use the style property",
             DeprecationWarning,
@@ -484,7 +494,7 @@ class Cell:
 
     @property
     def image_data(self):
-        warnings.warn(
+        warn(
             "image_data is deprecated and will be removed in the future. "
             + "Please use the style property",
             DeprecationWarning,
@@ -529,9 +539,7 @@ class Cell:
 
     @style.setter
     def style(self, _):
-        warnings.warn(
-            "cell style cannot be set; use Table.set_cell_style() instead", UnsupportedWarning
-        )
+        warn("cell style cannot be set; use Table.set_cell_style() instead", UnsupportedWarning)
 
     @property
     def border(self):
@@ -540,7 +548,7 @@ class Cell:
 
     @border.setter
     def border(self, _):
-        warnings.warn(
+        warn(
             "cell border values cannot be set; use Table.set_cell_border() instead",
             UnsupportedWarning,
         )

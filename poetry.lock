@@ -802,6 +802,21 @@ files = [
 ]
 
 [[package]]
+name = "sigfig"
+version = "1.3.2"
+description = "Python library for rounding numbers (with expected results)"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sigfig-1.3.2-py3-none-any.whl", hash = "sha256:b54d4943ba553671bf18da2da109d7824cf44e7c80032a0fb56a6c209e558ee3"},
+    {file = "sigfig-1.3.2.tar.gz", hash = "sha256:97a1225a38924e0586365500668fa3f2ba023bdb103207ea676507af378fce32"},
+]
+
+[package.dependencies]
+SortedContainers = "*"
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -823,6 +838,18 @@ python-versions = "*"
 files = [
     {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
     {file = "snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},
+]
+
+[[package]]
+name = "sortedcontainers"
+version = "2.4.0"
+description = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
+    {file = "sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88"},
 ]
 
 [[package]]
@@ -895,4 +922,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "2d0824f65932d8710b2b0004c83007a332092f690382f7eec0a3de51e7b2e157"
+content-hash = "a375b67a29d96b69c7baadeb35a97b3c0d0dd1f186698874909eb4fbe447c306"

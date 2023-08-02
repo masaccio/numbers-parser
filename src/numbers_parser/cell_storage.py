@@ -1,10 +1,9 @@
-import decimal
 import logging
 import math
 import re
+import sigfig
 
 from collections import OrderedDict
-
 from fractions import Fraction
 from functools import lru_cache
 from pendulum import datetime, duration
@@ -13,7 +12,6 @@ from typing import Tuple
 from warnings import warn
 
 from numbers_parser import __name__ as numbers_parser_name
-from numbers_parser.experimental import _experimental_features
 from numbers_parser.constants import (
     EPOCH,
     PACKAGE_ID,
@@ -26,6 +24,7 @@ from numbers_parser.constants import (
     SECONDS_IN_HOUR,
     SECONDS_IN_DAY,
     SECONDS_IN_WEEK,
+    MAX_SIGNIFICANT_DIGITS,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.numbers_uuid import NumbersUUID
@@ -33,17 +32,6 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
 logger = logging.getLogger(numbers_parser_name)
 debug = logger.debug
-
-DECIMAL128_CONTEXT = decimal.Context(
-    prec=34,
-    rounding=decimal.ROUND_HALF_EVEN,
-    Emin=-6143,
-    Emax=6144,
-    capitals=1,
-    clamp=1,
-    flags=[],
-    traps=[],
-)
 
 DATETIME_FIELD_MAP = OrderedDict(
     [
@@ -432,28 +420,15 @@ class CellStorage:
 
 
 def unpack_decimal128(buffer: bytearray) -> float:
-    if _experimental_features():
-        with decimal.localcontext(DECIMAL128_CONTEXT) as ctx:  # noqa: W0612
-            mantissa = decimal.Decimal(buffer[14] & 1)
-            exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
-            for i in range(13, -1, -1):
-                mantissa = mantissa * 256 + buffer[i]
-            sign = 1 if buffer[15] & 0x80 else 0
-            if sign == 1:
-                mantissa = -mantissa
-            value = mantissa * decimal.Decimal(10) ** decimal.Decimal(exp)
-            return value
-    else:
-        exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
-        mantissa = buffer[14] & 1
-        mantissa = buffer[14] & 1
-        for i in range(13, -1, -1):
-            mantissa = mantissa * 256 + buffer[i]
-        sign = 1 if buffer[15] & 0x80 else 0
-        if sign == 1:
-            mantissa = -mantissa
-        value = mantissa * 10**exp
-        return float(value)
+    exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
+    mantissa = buffer[14] & 1
+    for i in range(13, -1, -1):
+        mantissa = mantissa * 256 + buffer[i]
+    sign = 1 if buffer[15] & 0x80 else 0
+    if sign == 1:
+        mantissa = -mantissa
+    value = mantissa * 10**exp
+    return float(value)
 
 
 def days_occurred_in_month(value: datetime) -> str:
@@ -684,7 +659,7 @@ def decode_number_format(format, value, name):  # noqa: C901
     return expand_quotes(formatted_value)
 
 
-def format_decimal(value, format):
+def format_decimal(value: float, format) -> str:
     if value < 0 and format.negative_style == 1:
         accounting_style = False
         value = -value
@@ -697,12 +672,22 @@ def format_decimal(value, format):
         thousands = ","
     else:
         thousands = ""
+
     if value.is_integer() and format.decimal_places >= DECIMAL_PLACES_AUTO:
         formatted_value = f"{int(value):{thousands}}"
-    elif format.decimal_places >= DECIMAL_PLACES_AUTO:
-        formatted_value = f"{value:{thousands}}"
     else:
-        formatted_value = f"{value:{thousands}.{format.decimal_places}f}"
+        if format.decimal_places >= DECIMAL_PLACES_AUTO:
+            formatted_value = str(sigfig.round(value, MAX_SIGNIFICANT_DIGITS, warn=False))
+        else:
+            formatted_value = sigfig.round(value, MAX_SIGNIFICANT_DIGITS, type=str, warn=False)
+            formatted_value = sigfig.round(
+                formatted_value, decimals=format.decimal_places, type=str
+            )
+        if format.show_thousands_separator:
+            formatted_value = sigfig.round(formatted_value, spacer=",", spacing=3, type=str)
+            (integer, decimal) = formatted_value.split(".")
+            formatted_value = integer + "." + decimal.replace(",", "")
+
     if accounting_style:
         return f"({formatted_value})"
     else:

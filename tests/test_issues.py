@@ -1,4 +1,3 @@
-import decimal
 import magic
 import pytest
 
@@ -252,18 +251,16 @@ def test_issue_50():
 
 
 def test_issue_51():
-    from numbers_parser.experimental import _enable_experimental_features
-
-    _enable_experimental_features(True)
     doc = Document("tests/data/issue-51.numbers")
 
     table = doc.sheets[0].tables[0]
-    assert isinstance(table.cell(1, 0).value, decimal.Decimal)
-    assert table.cell(1, 0).value == decimal.Decimal("0.0001645")
-    assert table.cell(4, 0).value == decimal.Decimal("-0.0001645")
+    for row in table.iter_rows(min_row=1):
+        assert str(row[0].formatted_value) == row[1].value
 
-    # Disable for remaining tests run after this
-    _enable_experimental_features(False)
+    with pytest.warns(RuntimeWarning) as record:
+        table.write(5, 0, 0.00016450000000000001)
+    assert len(record) == 1
+    assert str(record[0].message) == "'0.00016450000000000001' rounded to 15 significant digits"
 
 
 def test_issue_54():
