@@ -16,7 +16,7 @@ Formula evaluation relies on Numbers storing current values which should usually
 
 To better partition cell styles, background image data which was supported in earlier versions through the methods `image_data` and `image_filename` is now part of the new `cell_style` property. Using the deprecated methods `image_data` and `image_filename` will issue a `DeprecationWarning` if used.The legacy methods will be removed in a future version of numbers-parser.
 
-`NumberCell` cell types return [`decimal.Decimal`](https://docs.python.org/3/library/decimal.html) types rather than `float`. These are created in a [decimal128](https://en.wikipedia.org/wiki/Decimal128_floating-point_format) context to preserve the precision used by Numbers. Previously, using float resulted in rounding errors in unpacking internal numbers.
+`NumberCell` cell values are now limited to 15 significant figues to match the implementation of floating point numbers in Apple Numbers. For example, the value `1234567890123456` is rounded to `1234567890123460` in the same was as in Numbers. Previously, using native `float` with no checking resulted in rounding errors in unpacking internal numbers. Attempting to write a number with too many significant digits results in a `RuntimeWarning`.
 
 ## Installation
 
@@ -218,6 +218,33 @@ cell = table.cell("B1")
 with open (cell.style.bg_image.filename, "wb") as f:
     f.write(cell.style.bg_image.data)
 ```
+
+### Borders
+
+`numbers-parser` supports reading and writing cell borders, though the interface for each differs. Individual cells can have each of their four borders tested, but when drawing new borders, these are set for the table to allow for drawing borders across multiple cells. Setting the border of merged cells is not possible unless the edge of the cells is at the end of the merged region.
+
+Borders are represeted using the `Border` class that can be initialised with line width, color and line style:
+
+``` python
+border = Border(4.0, RGB(0, 162, 255), "solid"))
+```
+
+Valid values for the line `style` parameter are `"solid"`, `"dashes"`, `"dots"` and `"none"`.
+
+#### Reading Cell Borders
+
+Cells have a property `border` which itself has the properties `top`, `right`, `bottom` and `left`, each of which is a `Border` class representing the line type for that cell. Cells with no border set at all, and merged cells which are inside the range of the merge return `None` for these cells. The absence of a specified border is different from no border in Numbers which is a valid `Border` class with `style="none"`.
+
+#### Writing Cell Borders
+
+The `Table` method `set_cell_border()` sets the border for a cell edge or a range of cells:
+
+``` python
+table.set_cell_border("C1", ["top", "left"], Border(0.0, RGB(0, 0, 0), "none"))
+table.set_cell_border(0, 4, "right", Border(1.0, RGB(0, 0, 0), "solid"), 3)
+```
+
+The last positional parameter specifies the length of the border and defaults to 1. A single call to `set_cell_border()` can set the borders to one or more sides of the cell as above. Like `Table.write()`, `set_cell_border()` supports both row/column and Excel-style cell references.
 
 ## Writing Numbers files
 
