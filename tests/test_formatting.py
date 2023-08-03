@@ -1,6 +1,5 @@
-import pytest
 import pytest_check as check
-
+import pytest
 
 from numbers_parser import Document
 from numbers_parser.cell import EmptyCell
@@ -11,7 +10,7 @@ def test_duration_formatting():
     for sheet in doc.sheets:
         table = sheet.tables[0]
         for row in table.iter_rows(min_row=1):
-            if type(row[13]) != EmptyCell:
+            if not isinstance(row[13], EmptyCell):
                 duration = row[6].formatted_value
                 ref = row[13].value
                 check.equal(duration, ref)
@@ -22,8 +21,8 @@ def test_date_formatting():
     for sheet in doc.sheets:
         table = sheet.tables[0]
         for row in table.iter_rows(min_row=1):
-            if type(row[6]) == EmptyCell:
-                assert type(row[7]) == EmptyCell
+            if isinstance(row[6], EmptyCell):
+                assert isinstance(row[7], EmptyCell)
             else:
                 date = row[6].formatted_value
                 ref = row[7].value
@@ -64,10 +63,10 @@ def test_formatting_stress(pytestconfig):
     fails = 0
     for sheet in doc.sheets:
         table = sheet.tables[0]
-        for i, row in enumerate(table.iter_rows(min_row=2), start=2):
+        for i, row in enumerate(table.iter_rows(min_row=2), start=3):
             value = row[7].formatted_value
             ref = row[8].value
-            check.equal(f"@{i}:{value}", f"@{i}:{ref}")
+            check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'")
             if value != ref:
                 fails += 1
             if max_check_fails > 0 and fails >= max_check_fails:
