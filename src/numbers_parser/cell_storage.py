@@ -98,7 +98,7 @@ class CellStorage:
         "formula_id",
         # "control_id",
         "formula_error_id",
-        # "suggest_id",
+        "suggest_id",
         "num_format_id",
         "currency_format_id",
         "date_format_id",
@@ -129,7 +129,7 @@ class CellStorage:
         self.formula_id = None
         # self.control_id = None
         self.formula_error_id = None
-        # self.suggest_id = None
+        self.suggest_id = None
         self.num_format_id = None
         self.currency_format_id = None
         self.date_format_id = None
@@ -185,11 +185,11 @@ class CellStorage:
         # if flags & 0x800:
         #     self.formula_error_id = unpack("<i", buffer[offset : offset + 4])[0]
         #     offset += 4
-        # if flags & 0x1000:
-        #     self.suggest_id = unpack("<i", buffer[offset : offset + 4])[0]
-        #     offset += 4
+        if flags & 0x1000:
+            self.suggest_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
         # Skip unused flags
-        offset += 4 * bin(flags & 0x1D00).count("1")
+        offset += 4 * bin(flags & 0xD00).count("1")
         #
         if flags & 0x2000:
             self.num_format_id = unpack("<i", buffer[offset : offset + 4])[0]

@@ -1429,13 +1429,7 @@ class _NumbersModel:
             return "Custom Style 1"
 
     def pack_cell_storage(  # noqa: C901
-        self,
-        table_id: int,
-        data: List,
-        row_num: int,
-        col_num: int,
-        formula_id=None,
-        num_format_id=None,
+        self, table_id: int, data: List, row_num: int, col_num: int
     ) -> bytearray:
         """Create a storage buffer for a cell using v5 (modern) layout"""
         cell = data[row_num][col_num]
@@ -1522,10 +1516,16 @@ class _NumbersModel:
             flags |= 0x200
             length += 4
             storage += pack("<i", cell._storage.formula_id)
+        if cell._storage.suggest_id is not None:
+            flags |= 0x1000
+            length += 4
+            storage += pack("<i", cell._storage.suggest_id)
         if cell._storage.num_format_id is not None:
             flags |= 0x2000
             length += 4
             storage += pack("<i", cell._storage.num_format_id)
+            storage[4:6] = pack("<h", 2)
+            storage[6:8] = pack("<h", 1)
         if cell._storage.currency_format_id is not None:
             flags |= 0x4000
             length += 4
