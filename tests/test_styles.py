@@ -353,6 +353,11 @@ def test_new_styles(configurable_save_file):
     table.cell("F2").style.bg_color = RGB(238, 34, 12)
     table.cell("F2").style.alignment = Alignment("right", "middle")
 
+    table.write("F3", "Lorem ipsum dolor sit amet, consectetur adipiscing elit")
+    table.write("F4", "Lorem ipsum dolor sit amet, consectetur adipiscing elit")
+    assert table.cell("F3").style.text_wrap
+    table.cell("F3").style.text_wrap = False
+
     doc.save(configurable_save_file)
 
     new_doc = Document(configurable_save_file)
@@ -381,6 +386,8 @@ def test_new_styles(configurable_save_file):
     assert new_table.cell("G2").style.name == "Body"
     assert new_table.cell("F2").style.bg_color == RGB(238, 34, 12)
     assert new_table.cell("F2").style.alignment == Alignment("right", "middle")
+
+    assert not table.cell("F3").style.text_wrap
 
 
 def test_empty_styles(configurable_save_file):

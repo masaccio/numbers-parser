@@ -13,6 +13,7 @@ from numbers_parser.constants import (
     DEFAULT_FONT_SIZE,
     DEFAULT_ALIGNMENT,
     DEFAULT_TEXT_INSET,
+    DEFAULT_TEXT_WRAP,
     DEFAULT_BORDER_WIDTH,
     DEFAULT_BORDER_COLOR,
     DEFAULT_BORDER_STYLE,
@@ -115,6 +116,7 @@ class Style:
     left_indent: float = 0
     right_indent: float = 0
     text_inset: float = DEFAULT_TEXT_INSET
+    text_wrap: bool = DEFAULT_TEXT_WRAP
     name: str = None
     _text_style_obj_id: int = None
     _cell_style_obj_id: int = None
@@ -147,6 +149,7 @@ class Style:
             "left_indent",
             "right_indent",
             "text_inset",
+            "text_wrap",
         ]
 
     @classmethod
@@ -173,6 +176,7 @@ class Style:
             left_indent=model.cell_left_indent(cell_storage),
             right_indent=model.cell_right_indent(cell_storage),
             text_inset=model.cell_text_inset(cell_storage),
+            text_wrap=model.cell_text_wrap(cell_storage),
             _text_style_obj_id=model.text_style_object_id(cell_storage),
             _cell_style_obj_id=model.cell_style_object_id(cell_storage),
         )

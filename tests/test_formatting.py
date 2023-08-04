@@ -42,7 +42,7 @@ def test_custom_formatting(pytestconfig):
             test_col = 1
         else:
             test_col = 2
-        for i, row in enumerate(table.iter_rows(min_row=1), start=1):
+        for i, row in enumerate(table.iter_rows(min_row=1), start=2):
             value = row[test_col].formatted_value
             ref = row[test_col + 1].value
             check.equal(f"@{i}:{value}", f"@{i}:{ref}")
@@ -66,7 +66,7 @@ def test_formatting_stress(pytestconfig):
         for i, row in enumerate(table.iter_rows(min_row=2), start=3):
             value = row[7].formatted_value
             ref = row[8].value
-            check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'")
+            check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'", row[0].value)
             if value != ref:
                 fails += 1
             if max_check_fails > 0 and fails >= max_check_fails:
