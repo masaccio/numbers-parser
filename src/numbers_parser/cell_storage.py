@@ -529,12 +529,8 @@ def expand_quotes(value: str) -> str:
     return formatted_value
 
 
-# import inspect
-
-
 def decode_number_format(format, value, name):  # noqa: C901
     """Parse a custom date format string and return a formatted number value"""
-    # cell = inspect.currentframe().f_back.f_back.f_back.f_locals["self"]
     custom_format_string = format.custom_format_string
     value *= format.scale_factor
     if "%" in custom_format_string and format.scale_factor == 1.0:
@@ -614,8 +610,17 @@ def decode_number_format(format, value, name):  # noqa: C901
         int_pad = None
         int_width = num_integers
 
-    # if num_integers == 0 and dec_pad == CellPadding.SPACE:
-    #     dec_pad = CellPadding.ZERO
+    # value_1 = str(value).split(".")[0]
+    # value_2 = sigfig.round(str(value).split(".")[1], sigfig=MAX_SIGNIFICANT_DIGITS, warn=False)
+    # int_pad_space_as_zero = (
+    #     num_integers > 0
+    #     and num_decimals > 0
+    #     and int_pad == CellPadding.SPACE
+    #     and dec_pad is None
+    #     and num_integers > len(value_1)
+    #     and num_decimals > len(value_2)
+    # )
+    int_pad_space_as_zero = False
 
     # Formatting integer zero:
     #   Blank (padded if needed) if int_pad is SPACE and no decimals
@@ -637,7 +642,7 @@ def decode_number_format(format, value, name):  # noqa: C901
         and len(str(decimal)) > num_decimals
     ):
         formatted_value = "".rjust(int_width)
-    elif int_pad == CellPadding.ZERO:
+    elif int_pad_space_as_zero or int_pad == CellPadding.ZERO:
         if format.show_thousands_separator:
             formatted_value = f"{integer:0{int_width},}"
         else:
