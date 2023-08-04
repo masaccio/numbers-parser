@@ -17,6 +17,7 @@ from numbers_parser.cell_storage import (
     decode_number_format,
 )
 from numbers_parser.numbers_uuid import NumbersUUID
+from numbers_parser.experimental import _enable_experimental_features, _experimental_features
 
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 
@@ -157,3 +158,11 @@ def test_datalists():
     assert doc._model._table_strings.lookup_key(table_id, "TEST") == 19
     assert doc._model._table_strings.lookup_key(table_id, "TEST") == 19
     assert doc._model._table_strings.lookup_value(table_id, 19).string == "TEST"
+
+
+def test_experimental():
+    assert not _experimental_features()
+    _enable_experimental_features(True)
+    assert _experimental_features()
+    _enable_experimental_features(False)
+    assert not _experimental_features()
