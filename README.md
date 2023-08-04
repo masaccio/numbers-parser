@@ -207,7 +207,7 @@ Cell style attributes can be returned using a number of methods:
 * `Cell.style.left_indent`: left indent in points (`float`)
 * `Cell.style.right_indent`: right indent in points (`float`)
 * `Cell.style.text_inset`: text inset in points (`float`)
-
+* `Cell.style.text_wrap`: `True` if text wrapping is enabled (default for new cells)
 
 #### Cell images
 
