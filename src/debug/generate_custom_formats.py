@@ -29,9 +29,7 @@ def add_format_to_table_data(table, format_uuid, format_id):
             refcount=1,
             format=TSKArchives.FormatStructArchive(
                 format_type=270,
-                custom_uid=TSPMessages.UUID(
-                    lower=format_uuid.lower, upper=format_uuid.upper
-                ),
+                custom_uid=TSPMessages.UUID(lower=format_uuid.lower, upper=format_uuid.upper),
             ),
         )
     )
@@ -44,9 +42,7 @@ def add_format_to_table_data(table, format_uuid, format_id):
             refcount=1,
             format=TSKArchives.FormatStructArchive(
                 format_type=270,
-                custom_uid=TSPMessages.UUID(
-                    lower=format_uuid.lower, upper=format_uuid.upper
-                ),
+                custom_uid=TSPMessages.UUID(lower=format_uuid.lower, upper=format_uuid.upper),
             ),
         )
     )
@@ -133,15 +129,14 @@ def custom_format(
     min_integer_width = (
         num_integers if num_integers > 0 and integer_format != PaddingType.NONE else 0
     )
-    num_nonspace_decimal_digits = (
-        num_decimals if decimal_format == PaddingType.ZEROS else 0
-    )
-    num_nonspace_integer_digits = (
-        num_integers if integer_format == PaddingType.ZEROS else 0
-    )
-    index_from_right_last_integer = (
-        num_decimals + 1 if num_integers > 0 else num_decimals
-    )
+    num_nonspace_decimal_digits = num_decimals if decimal_format == PaddingType.ZEROS else 0
+    num_nonspace_integer_digits = num_integers if integer_format == PaddingType.ZEROS else 0
+    index_from_right_last_integer = num_decimals + 1 if num_integers > 0 else num_decimals
+    # Emperically correct:
+    if index_from_right_last_integer == 1:
+        index_from_right_last_integer = 0
+    elif index_from_right_last_integer == 0:
+        index_from_right_last_integer = 1
     decimal_width = num_decimals if decimal_format == PaddingType.SPACES else 0
     is_complex = "0" in format_string and (
         min_integer_width > 0 or num_nonspace_decimal_digits == 0
@@ -171,9 +166,7 @@ def custom_format(
         ),
     )
     hex_uuid = uuid1().hex
-    uuid = TSPMessages.UUID(
-        lower=int(hex_uuid[0:16], 16), upper=int(hex_uuid[16:32], 16)
-    )
+    uuid = TSPMessages.UUID(lower=int(hex_uuid[0:16], 16), upper=int(hex_uuid[16:32], 16))
     return (uuid, custom_format)
 
 
@@ -198,9 +191,9 @@ table.col_width(6, 50)
 table.col_width(7, 100)
 table.col_width(8, 130)
 
-custom_format_list_id = doc._model.objects[
-    DOCUMENT_ID
-].super.custom_format_list.identifier
+doc.add_style(alignment=("left", "middle"), name="Left Align")
+
+custom_format_list_id = doc._model.objects[DOCUMENT_ID].super.custom_format_list.identifier
 custom_format_list = doc._model.objects[custom_format_list_id]
 
 test_formula_key = table.cell("H2")._storage.formula_id
@@ -208,21 +201,16 @@ check_formula_key = table.cell("I2")._storage.formula_id
 check_format_id = table.cell(1, 2)._storage.num_format_id
 
 row_num = 2
-for integer_format in [
-    PaddingType.NONE,
-    PaddingType.ZEROS,
-    PaddingType.SPACES,
-]:
-    for decimal_format in [
-        PaddingType.NONE,
-        PaddingType.ZEROS,
-        PaddingType.SPACES,
-    ]:
+for integer_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
+    for decimal_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
         for num_integers in [0, 1, 2, 4, 9]:
             for num_decimals in [0, 1, 2, 4, 9]:
                 if num_integers == 0 and num_decimals == 0:
                     continue
                 for show_thousands_separator in [False, True]:
+                    if num_integers == 0 and show_thousands_separator:
+                        continue
+
                     (uuid, format) = custom_format(
                         integer_format=integer_format,
                         decimal_format=decimal_format,
@@ -233,27 +221,21 @@ for integer_format in [
                     custom_format_list.custom_formats.append(format)
                     custom_format_list.uuids.append(uuid)
                     format_id = next_format_key(table)
-                    add_format_to_table_data(
-                        table, custom_format_list.uuids[-1], format_id
-                    )
+                    add_format_to_table_data(table, custom_format_list.uuids[-1], format_id)
 
-                    for value in [
-                        0.23,
-                        2.34,
-                        23.0,
-                        2345.67,
-                    ]:
-                        table.write(row_num, 0, format.name)
-                        table.write(row_num, 1, str(integer_format))
-                        table.write(row_num, 2, str(decimal_format))
-                        table.write(row_num, 3, num_integers)
-                        table.write(row_num, 4, num_decimals)
-                        table.write(row_num, 5, show_thousands_separator)
-                        table.write(row_num, 6, value)
-                        table.write(row_num, 7, value)
+                    # for value in [0.23, 0.2345678901234, 2.34, 23.0, 2345.67, 23456790123.34]:
+                    for value in [0.23, 2.34, 23.0, 2345.67]:
+                        table.write(row_num, 0, format.name, style="Left Align")
+                        table.write(row_num, 1, str(integer_format), style="Left Align")
+                        table.write(row_num, 2, str(decimal_format), style="Left Align")
+                        table.write(row_num, 3, num_integers, style="Left Align")
+                        table.write(row_num, 4, num_decimals, style="Left Align")
+                        table.write(row_num, 5, show_thousands_separator, style="Left Align")
+                        table.write(row_num, 6, value, style="Left Align")
+                        table.write(row_num, 7, value, style="Left Align")
                         write_format_key(table, row_num, 7, format_id)
                         write_formula_key(table, row_num, 7, test_formula_key)
-                        table.write(row_num, 8, "0.0")
+                        table.write(row_num, 8, "0.0", style="Left Align")
                         write_format_key(table, row_num, 8, check_format_id)
                         write_formula_key(table, row_num, 8, check_formula_key)
                         row_num += 1
