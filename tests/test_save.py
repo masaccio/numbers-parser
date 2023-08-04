@@ -1,7 +1,6 @@
 import pytest
 
-from numbers_parser import Document
-from numbers_parser.cell import EmptyCell, TextCell, NumberCell, MergedCell
+from numbers_parser import Document, EmptyCell, TextCell, NumberCell, MergedCell
 from numbers_parser.constants import (
     DEFAULT_ROW_COUNT,
     DEFAULT_COLUMN_COUNT,
@@ -17,7 +16,7 @@ def test_empty_document(configurable_save_file):
     data = doc.sheets[0].tables[0].rows()
     assert len(data) == DEFAULT_ROW_COUNT
     assert len(data[0]) == DEFAULT_COLUMN_COUNT
-    assert type(data[0][0]) == EmptyCell
+    assert isinstance(data[0][0], EmptyCell)
     assert doc.sheets[0].tables[0].num_header_rows == DEFAULT_NUM_HEADERS
     assert doc.sheets[0].tables[0].num_header_cols == DEFAULT_NUM_HEADERS
 
@@ -25,7 +24,7 @@ def test_empty_document(configurable_save_file):
     doc = Document(configurable_save_file)
     assert len(data) == DEFAULT_ROW_COUNT
     assert len(data[0]) == DEFAULT_COLUMN_COUNT
-    assert type(data[0][0]) == EmptyCell
+    assert isinstance(data[0][0], EmptyCell)
     assert doc.sheets[0].tables[0].num_header_rows == DEFAULT_NUM_HEADERS
     assert doc.sheets[0].tables[0].num_header_cols == DEFAULT_NUM_HEADERS
 

@@ -1,9 +1,8 @@
 import magic
 import pytest
 
-from numbers_parser import Document
+from numbers_parser import Document, ErrorCell, EmptyCell
 from pendulum import datetime, duration
-from numbers_parser.cell import ErrorCell, EmptyCell
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"
@@ -198,7 +197,7 @@ def test_issue_43():
     doc = Document("tests/data/issue-43.numbers")
     table = doc.sheets[0].tables[0]
     cell = table.cell("A1")
-    assert type(cell) == EmptyCell
+    assert isinstance(cell, EmptyCell)
     assert "PNG image data" in magic.from_buffer(cell.style.bg_image.data)
     assert len(cell.style.bg_image.data) == 87857
     assert cell.style.bg_image.filename == "pasted-image-17.png"

@@ -1,8 +1,7 @@
 import pytest_check as check
 import pytest
 
-from numbers_parser import Document
-from numbers_parser.cell import EmptyCell
+from numbers_parser import Document, EmptyCell
 
 
 def test_duration_formatting():

@@ -3,8 +3,7 @@ import pytest
 from datetime import datetime as builtin_datetime, timedelta as builtin_timedelta
 from pendulum import datetime, duration
 
-from numbers_parser import Document
-from numbers_parser.cell import EmptyCell
+from numbers_parser import Document, EmptyCell
 from numbers_parser.constants import MAX_ROW_COUNT, MAX_COL_COUNT
 
 
@@ -44,7 +43,7 @@ def test_edit_cell_values(configurable_save_file):
 
     assert table.cell(1, 1).value == "new_b2"
     assert table.cell("C2").value == "new_c2"
-    assert table.cell(2, 0).value == True
+    assert table.cell(2, 0).value
     assert table.cell(2, 1).value == 7890
     assert table.cell(2, 2).value == 78.90
     assert table.cell(4, 3).value == datetime(2021, 6, 15)

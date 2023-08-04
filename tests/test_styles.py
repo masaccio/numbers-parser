@@ -5,9 +5,6 @@ from pytest_check import check
 import pytest
 
 from numbers_parser import (
-    DEFAULT_ALIGNMENT_CLASS,
-    DEFAULT_FONT,
-    DEFAULT_FONT_SIZE,
     RGB,
     Alignment,
     Document,
@@ -16,6 +13,9 @@ from numbers_parser import (
     VerticalJustification,
     UnsupportedWarning,
 )
+from numbers_parser.constants import DEFAULT_FONT, DEFAULT_FONT_SIZE
+from numbers_parser.cell import DEFAULT_ALIGNMENT_CLASS
+
 
 TEST_NUMBERED_REF = [
     "(1) double-paren-1",

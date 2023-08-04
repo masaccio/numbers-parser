@@ -1,7 +1,14 @@
 import pytest
 
-from numbers_parser import Document, UnsupportedError, Cell, UnsupportedWarning
-from numbers_parser.cell import xl_range, xl_rowcol_to_cell, xl_col_to_name
+from numbers_parser import (
+    Document,
+    UnsupportedError,
+    Cell,
+    UnsupportedWarning,
+    xl_range,
+    xl_rowcol_to_cell,
+    xl_col_to_name,
+)
 from numbers_parser.constants import EMPTY_STORAGE_BUFFER, DurationUnits
 from numbers_parser.cell_storage import (
     CellStorage,

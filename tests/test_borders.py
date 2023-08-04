@@ -3,8 +3,7 @@ import pytest
 from collections import defaultdict
 from pytest_check import check
 
-from numbers_parser import Document, MergedCell
-from numbers_parser.cell import Border, xl_rowcol_to_cell, Cell, BorderType, RGB
+from numbers_parser import Document, MergedCell, Border, xl_rowcol_to_cell, Cell, BorderType, RGB
 
 
 def check_border(cell: Cell, side: str, test_value: str) -> bool:

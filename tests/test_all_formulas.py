@@ -1,8 +1,6 @@
-import pytest
 import pytest_check as check
 
-from numbers_parser import Document
-from numbers_parser.cell import ErrorCell, TextCell, BoolCell, DurationCell
+from numbers_parser import Document, ErrorCell, TextCell, BoolCell
 
 DOCUMENT = "tests/data/test-all-formulas.numbers"
 DOCUMENT_13_1 = "tests/data/test-all-formulas-13.1.numbers"
@@ -44,10 +42,6 @@ def test_information_functions_new_version():
 
 def test_text_functions():
     compare_table_functions("Text", DOCUMENT)
-
-
-def test_text_functions_new_version():
-    compare_table_functions("Text", DOCUMENT_13_1)
 
 
 def test_text_functions_new_version():
