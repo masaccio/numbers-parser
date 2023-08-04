@@ -19,6 +19,7 @@ from numbers_parser.constants import (
     DEFAULT_TABLE_OFFSET,
     DEFAULT_TILE_SIZE,
     DEFAULT_TEXT_INSET,
+    DEFAULT_TEXT_WRAP,
     DOCUMENT_ID,
     PACKAGE_ID,
     MAX_TILE_SIZE,
@@ -1335,6 +1336,7 @@ class _NumbersModel:
                         + str(cell.style.left_indent)
                         + str(cell.style.right_indent)
                         + str(cell.style.text_inset)
+                        + str(cell.style.text_wrap)
                     )
                     if cell._style.bg_color is not None:
                         fingerprint = fingerprint + (
@@ -1378,6 +1380,7 @@ class _NumbersModel:
                         "right": style.text_inset,
                         "bottom": style.text_inset,
                     },
+                    "text_wrap": style.text_wrap,
                     "vertical_alignment": style.alignment.vertical,
                 },
             },
@@ -1790,6 +1793,13 @@ class _NumbersModel:
             # Padding is always identical (only one UI setting)
             text_inset = padding.left
             return text_inset
+
+    def cell_text_wrap(self, cell_storage: CellStorage) -> float:
+        if cell_storage.cell_style_id is None:
+            return DEFAULT_TEXT_WRAP
+        else:
+            style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
+            return self.cell_property(style, "text_wrap")
 
     def stroke_type(self, stroke_run: object) -> str:
         """Return the stroke type for a stroke run"""
