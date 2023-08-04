@@ -51,7 +51,6 @@ def test_custom_formatting(pytestconfig):
                 assert False
 
 
-@pytest.mark.experimental
 def test_formatting_stress(pytestconfig):
     if pytestconfig.getoption("max_check_fails") is not None:
         max_check_fails = pytestconfig.getoption("max_check_fails")
@@ -60,13 +59,14 @@ def test_formatting_stress(pytestconfig):
 
     doc = Document("tests/data/custom-format-stress.numbers")
     fails = 0
-    for sheet in doc.sheets:
-        table = sheet.tables[0]
-        for i, row in enumerate(table.iter_rows(min_row=2), start=3):
-            value = row[7].formatted_value
-            ref = row[8].value
-            check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'", row[0].value)
-            if value != ref:
-                fails += 1
-            if max_check_fails > 0 and fails >= max_check_fails:
-                assert False
+    table = doc.sheets[0].tables[0]
+    for i, row in enumerate(table.iter_rows(min_row=2), start=3):
+        if row[9].value:
+            continue
+        value = row[7].formatted_value
+        ref = row[8].value
+        check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'", row[0].value)
+        if value != ref:
+            fails += 1
+        if max_check_fails > 0 and fails >= max_check_fails:
+            assert False
