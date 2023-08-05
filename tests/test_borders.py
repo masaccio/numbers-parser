@@ -256,6 +256,42 @@ def invert_tests(tests):
     return test_string.strip(), new_tests, new_borders
 
 
+def test_extra_borders(configurable_save_file):
+    doc = Document("tests/data/test-extra-borders.numbers")
+    table = doc.sheets[0].tables[0]
+    border = Border(3.0, RGB(0, 162, 255), "dots")
+    coords = [
+        (1, 0, "right", 1),
+        (5, 0, "right", 1),
+        (11, 0, "right", 1),
+        (0, 1, "bottom", 1),
+        (0, 5, "bottom", 1),
+        (0, 11, "bottom", 1),
+        (1, 11, "right", 3),
+        (5, 11, "right", 3),
+        (9, 11, "right", 3),
+        (11, 1, "bottom", 3),
+        (11, 5, "bottom", 3),
+        (11, 9, "bottom", 3),
+        (14, 0, "right", 2),
+        (13, 1, "bottom", 11),
+        (14, 11, "right", 2),
+        (15, 1, "bottom", 11),
+    ]
+    for coord in coords:
+        (row_num, col_num, side, length) = coord
+        table.set_cell_border(row_num, col_num, side, border, length)
+
+    doc.save(configurable_save_file)
+
+    new_doc = Document(configurable_save_file)
+    table = new_doc.sheets[0].tables[0]
+    for coord in coords:
+        (row_num, col_num, side, length) = coord
+        for offset in range(length):
+            assert getattr(table.cell(row_num, col_num).border, side) == border
+
+
 @pytest.mark.experimental
 def test_resave_borders(configurable_save_file):
     doc = Document("tests/data/test-styles.numbers")

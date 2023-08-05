@@ -2148,11 +2148,8 @@ def get_storage_buffers_for_row(
 def clear_field_container(obj):
     """Remove all entries from a protobuf RepeatedCompositeFieldContainer
     in a portable fashion"""
-    if hasattr(obj, "clear"):
-        obj.clear()
-    else:
-        while len(obj) > 0:
-            _ = obj.pop()
+    while len(obj) > 0:
+        _ = obj.pop()
 
 
 def pack_decimal128(value: float) -> bytearray:
