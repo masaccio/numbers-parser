@@ -160,6 +160,17 @@ def test_datalists():
     assert doc._model._table_strings.lookup_value(table_id, 19).string == "TEST"
 
 
+def test_merge(configurable_save_file):
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+    table.merge_cells("A1:A4")
+    doc.save(configurable_save_file)
+
+    new_doc = Document(configurable_save_file)
+    table = new_doc.sheets[0].tables[0]
+    new_doc._model.merge_cells(table._table_id).rect((3, 0)) == (0, 0, 3, 0)
+
+
 def test_experimental():
     assert not _experimental_features()
     _enable_experimental_features(True)
