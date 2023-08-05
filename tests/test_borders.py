@@ -259,27 +259,30 @@ def invert_tests(tests):
 def test_extra_borders(configurable_save_file):
     doc = Document("tests/data/test-extra-borders.numbers")
     table = doc.sheets[0].tables[0]
-    border = Border(3.0, RGB(0, 162, 255), "dots")
+    dots_border = Border(3.0, RGB(0, 162, 255), "dots")
+    no_border = Border(0.0, RGB(0, 0, 0), "none")
     coords = [
-        (1, 0, "right", 1),
-        (5, 0, "right", 1),
-        (11, 0, "right", 1),
-        (0, 1, "bottom", 1),
-        (0, 5, "bottom", 1),
-        (0, 11, "bottom", 1),
-        (1, 11, "right", 3),
-        (5, 11, "right", 3),
-        (9, 11, "right", 3),
-        (11, 1, "bottom", 3),
-        (11, 5, "bottom", 3),
-        (11, 9, "bottom", 3),
-        (14, 0, "right", 2),
-        (13, 1, "bottom", 11),
-        (14, 11, "right", 2),
-        (15, 1, "bottom", 11),
+        (1, 0, "right", 1, dots_border),
+        (5, 0, "right", 1, dots_border),
+        (11, 0, "right", 1, dots_border),
+        (0, 1, "bottom", 1, dots_border),
+        (0, 5, "bottom", 1, dots_border),
+        (0, 11, "bottom", 1, dots_border),
+        (1, 11, "right", 3, dots_border),
+        (5, 11, "right", 3, dots_border),
+        (9, 11, "right", 3, dots_border),
+        (11, 1, "bottom", 3, dots_border),
+        (11, 5, "bottom", 3, dots_border),
+        (11, 9, "bottom", 3, dots_border),
+        (14, 0, "right", 2, dots_border),
+        (13, 1, "bottom", 11, dots_border),
+        (14, 11, "right", 2, dots_border),
+        (15, 1, "bottom", 11, dots_border),
+        (17, 1, "bottom", 11, no_border),
+        (18, 0, "right", 2, dots_border),
     ]
     for coord in coords:
-        (row_num, col_num, side, length) = coord
+        (row_num, col_num, side, length, border) = coord
         table.set_cell_border(row_num, col_num, side, border, length)
 
     doc.save(configurable_save_file)
@@ -287,7 +290,7 @@ def test_extra_borders(configurable_save_file):
     new_doc = Document(configurable_save_file)
     table = new_doc.sheets[0].tables[0]
     for coord in coords:
-        (row_num, col_num, side, length) = coord
+        (row_num, col_num, side, length, border) = coord
         for offset in range(length):
             assert getattr(table.cell(row_num, col_num).border, side) == border
 

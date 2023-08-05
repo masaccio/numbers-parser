@@ -1931,26 +1931,15 @@ class _NumbersModel:
                 pattern=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             )
 
-        if border_value is None:
-            color = TSPMessages.Color(
-                model=TSPMessages.Color.rgb,
-                rgbspace=TSPMessages.Color.srgb,
-                r=0.0,
-                g=0.0,
-                b=0.0,
-                a=1.0,
-            )
-            width = 0.0
-        else:
-            color = TSPMessages.Color(
-                model=TSPMessages.Color.rgb,
-                rgbspace=TSPMessages.Color.srgb,
-                r=border_value.color.r / 255,
-                g=border_value.color.g / 255,
-                b=border_value.color.b / 255,
-                a=1.0,
-            )
-            width = border_value.width
+        color = TSPMessages.Color(
+            model=TSPMessages.Color.rgb,
+            rgbspace=TSPMessages.Color.srgb,
+            r=border_value.color.r / 255,
+            g=border_value.color.g / 255,
+            b=border_value.color.b / 255,
+            a=1.0,
+        )
+        width = border_value.width
         return TSTArchives.StrokeLayerArchive.StrokeRunArchive(
             origin=origin,
             length=length,
