@@ -126,3 +126,11 @@ def test_new_doc(configurable_save_file):
     assert new_doc.sheets[0].tables[0].cell("B1").style.bold
     assert new_doc.sheets[0].tables[0].cell("B2").style.bold
     assert not new_doc.sheets[0].tables[0].cell("C3").style.bold
+
+
+def test_table_options(configurable_save_file):
+    doc = Document()
+    doc.sheets[0].tables[0].table_name_enabled = False
+    doc.save(configurable_save_file)
+    doc = Document(configurable_save_file)
+    assert not doc.sheets[0].tables[0].table_name_enabled

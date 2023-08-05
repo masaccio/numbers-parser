@@ -225,6 +225,14 @@ class Table:
         self._model.table_name(self._table_id, value)
 
     @property
+    def table_name_enabled(self):
+        return self._model.table_name_enabled(self._table_id)
+
+    @table_name_enabled.setter
+    def table_name_enabled(self, enabled):
+        self._model.table_name_enabled(self._table_id, enabled)
+
+    @property
     def num_header_rows(self) -> int:
         """Return the number of header rows"""
         return self._model.num_header_rows(self._table_id)

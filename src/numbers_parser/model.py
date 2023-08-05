@@ -321,6 +321,12 @@ class _NumbersModel:
         else:
             self.objects[table_id].table_name = value
 
+    def table_name_enabled(self, table_id: int, enabled: bool = None):
+        if enabled is not None:
+            self.objects[table_id].table_name_enabled = enabled
+        else:
+            return self.objects[table_id].table_name_enabled
+
     @lru_cache(maxsize=None)
     def table_tiles(self, table_id):
         bds = self.objects[table_id].base_data_store
