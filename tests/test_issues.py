@@ -249,7 +249,7 @@ def test_issue_50():
     assert table.cell(65552, 3).value == "string 262163"
 
 
-def test_issue_51():
+def test_issue_51(script_runner):
     doc = Document("tests/data/issue-51.numbers")
 
     table = doc.sheets[0].tables[0]
@@ -260,6 +260,21 @@ def test_issue_51():
         table.write(5, 0, 0.00016450000000000001)
     assert len(record) == 1
     assert str(record[0].message) == "'0.00016450000000000001' rounded to 15 significant digits"
+
+    ret = script_runner.run(
+        ["cat-numbers", "-b", "tests/data/issue-51.numbers"],
+        print_result=False,
+    )
+    assert ret.stderr == ""
+    assert ret.success
+    lines = ret.stdout.split("\r\n")
+    assert lines[1:6] == [
+        "0.0001645,0.0001645",
+        "0.123,0.123",
+        "0.1,0.1",
+        "-0.0001645,-0.0001645",
+        "0.0001645,0.00016450000000000000",
+    ]
 
 
 def test_issue_54():

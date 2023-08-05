@@ -1,13 +1,19 @@
 import argparse
 import csv
 import logging
+import sigfig
 import sys
 
-from numbers_parser import Document, _get_version
+from numbers_parser import (
+    Document,
+    _get_version,
+    NumberCell,
+    ErrorCell,
+    FileFormatError,
+)
 from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser.experimental import _enable_experimental_features
-from numbers_parser.exceptions import FileFormatError
-from numbers_parser.cell import ErrorCell
+from numbers_parser.constants import MAX_SIGNIFICANT_DIGITS
 
 logger = logging.getLogger(numbers_parser_name)
 
@@ -73,12 +79,14 @@ def print_table_names(filename):
 
 
 def cell_as_string(args, cell):
-    if type(cell) == ErrorCell and not (args.formulas):
+    if isinstance(cell, ErrorCell) and not (args.formulas):
         return "#REF!"
     elif args.formulas and cell.formula is not None:
         return cell.formula
     elif args.formatting and cell.formatted_value is not None:
         return cell.formatted_value
+    elif isinstance(cell, NumberCell):
+        return sigfig.round(cell.value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
     elif cell.value is None:
         return ""
     else:
