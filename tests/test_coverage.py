@@ -1,4 +1,3 @@
-import json
 import pytest
 
 from numbers_parser import (
