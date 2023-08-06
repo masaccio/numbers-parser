@@ -1,12 +1,10 @@
 import logging
-
+import os
 from io import BytesIO
 from zipfile import ZipFile, BadZipFile
 
-from numbers_parser.iwafile import IWAFile, is_iwa_file
 from numbers_parser.exceptions import FileError, FileFormatError
-
-import os
+from numbers_parser.iwafile import IWAFile, is_iwa_file
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
@@ -33,16 +31,19 @@ def read_numbers_file(path, file_handler, object_handler=None):
         try:
             zipf = ZipFile(path)
         except BadZipFile:
-            raise FileError("Invalid Numbers file")
+            raise FileFormatError("Invalid Numbers file")
         except FileNotFoundError:
             raise FileError("No such file or directory")
 
-        index_zip = [f for f in zipf.namelist() if f.lower().endswith("index.zip")]
-        if len(index_zip) > 0:
-            index_data = BytesIO(zipf.read(index_zip[0]))
-            get_objects_from_zip_stream(ZipFile(index_data), file_handler, object_handler)
-        else:
-            get_objects_from_zip_stream(zipf, file_handler, object_handler)
+        try:
+            index_zip = [f for f in zipf.namelist() if f.lower().endswith("index.zip")]
+            if len(index_zip) > 0:
+                index_data = BytesIO(zipf.read(index_zip[0]))
+                get_objects_from_zip_stream(ZipFile(index_data), file_handler, object_handler)
+            else:
+                get_objects_from_zip_stream(zipf, file_handler, object_handler)
+        except BadZipFile:
+            raise FileFormatError("Invalid Numbers file")
 
 
 def write_numbers_file(filename, file_store):
@@ -58,8 +59,8 @@ def write_numbers_file(filename, file_store):
 def get_objects_from_zip_file(path, file_handler, object_handler):
     try:
         zipf = ZipFile(path)
-    except BadZipFile as e:  # pragma: no cover
-        raise FileError(f"{path}: " + str(e))
+    except BadZipFile:
+        raise FileFormatError("Invalid Numbers file")
 
     get_objects_from_zip_stream(zipf, file_handler, object_handler)
 
@@ -81,15 +82,15 @@ def extract_iwa_archives(blob, filename, file_handler, object_handler):
     try:
         debug("extract_iwa_archives: filename=%s", filename)
         iwaf = IWAFile.from_buffer(blob, filename)
-    except Exception as e:  # pragma: no cover
+    except Exception as e:
         raise FileFormatError(f"{filename}: invalid IWA file {filename}") from e
 
     if object_handler is not None:
         if len(iwaf.chunks) != 1:
-            raise FileFormatError(f"{filename}: chunk count != 1 in {filename}")  # pragma: no cover
+            raise FileFormatError(f"{filename}: chunk count != 1 in {filename}")
         for archive in iwaf.chunks[0].archives:
             if len(archive.objects) == 0:
-                raise FileFormatError(f"{filename}: no objects in {filename}")  # pragma: no cover
+                raise FileFormatError(f"{filename}: no objects in {filename}")
 
             identifier = archive.header.identifier
             if len(archive.objects) > 1:

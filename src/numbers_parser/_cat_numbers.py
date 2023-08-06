@@ -1,19 +1,15 @@
 import argparse
 import csv
 import logging
-import sigfig
 import sys
 
-from numbers_parser import (
-    Document,
-    _get_version,
-    NumberCell,
-    ErrorCell,
-    FileFormatError,
-)
+import sigfig
+
+from numbers_parser import Document, ErrorCell, FileFormatError, NumberCell
 from numbers_parser import __name__ as numbers_parser_name
-from numbers_parser.experimental import _enable_experimental_features
+from numbers_parser import _get_version
 from numbers_parser.constants import MAX_SIGNIFICANT_DIGITS
+from numbers_parser.experimental import _enable_experimental_features
 
 logger = logging.getLogger(numbers_parser_name)
 

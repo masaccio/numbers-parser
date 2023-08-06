@@ -259,3 +259,18 @@ def test_corrupted(script_runner):
     assert not ret.success
     assert "Index/Metadata.iwa: invalid" in ret.stderr
     assert ret.stdout == ""
+
+    ret = script_runner.run(["cat-numbers", "tests/data/badzipfile.numbers"], print_result=False)
+    assert not ret.success
+    assert "tests/data/badzipfile.numbers: Invalid Numbers file" in ret.stderr
+    assert ret.stdout == ""
+
+    ret = script_runner.run(["cat-numbers", "tests/data/badindexzip.numbers"], print_result=False)
+    assert not ret.success
+    assert "tests/data/badindexzip.numbers: Invalid Numbers file" in ret.stderr
+    assert ret.stdout == ""
+
+    ret = script_runner.run(["cat-numbers", "tests/data/badindexzip2.numbers"], print_result=False)
+    assert not ret.success
+    assert "tests/data/badindexzip2.numbers: Invalid Numbers file" in ret.stderr
+    assert ret.stdout == ""
