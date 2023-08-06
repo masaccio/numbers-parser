@@ -540,6 +540,8 @@ class _NumbersModel:
 
         if node.HasField("AST_colon_tract"):
             return self.tract_to_row_col_ref(node, other_table_name, row_num, col_num)
+        elif node.HasField("AST_row") and not node.HasField("AST_column"):
+            return node_to_row_ref(node, other_table_name, row_num)
         elif node.HasField("AST_column") and not node.HasField("AST_row"):
             return node_to_col_ref(node, other_table_name, col_num)
         else:
@@ -599,7 +601,7 @@ class _NumbersModel:
     def storage_buffers(self, table_id: int) -> List:
         buffers = []
         for tile in self.table_tiles(table_id):
-            if not tile.last_saved_in_BNC:  # pragma: no cover
+            if not tile.last_saved_in_BNC:
                 raise UnsupportedError("Pre-BNC storage is unsupported")
             for r in tile.rowInfos:
                 buffer = get_storage_buffers_for_row(
@@ -2062,6 +2064,19 @@ def node_to_col_ref(node: object, table_name: str, col_num: int) -> str:
         return f"{table_name}::{col_name}"
     else:
         return col_name
+
+
+def node_to_row_ref(node: object, table_name: str, row_num: int) -> str:
+    if node.AST_row.absolute:
+        row = node.AST_row.row
+    else:
+        row = row_num + node.AST_row.row
+
+    row_name = f"${row+1}" if node.AST_row.absolute else f"{row+1}"
+    if table_name is not None:
+        return f"{table_name}::{row_name}:{row_name}"
+    else:
+        return f"{row_name}:{row_name}"
 
 
 def node_to_row_col_ref(node: object, table_name: str, row_num: int, col_num: int) -> str:
