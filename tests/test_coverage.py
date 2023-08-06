@@ -102,6 +102,10 @@ def test_cell_storage(tmp_path):
     format.custom_format_string = "0.##"
     assert decode_number_format(format, 1.0, "test") == "1"
 
+    with pytest.raises(UnsupportedError) as e:
+        _ = Document("tests/data/pre-bnc.numbers")
+    assert str(e.value) == "Pre-BNC storage is unsupported"
+
 
 def test_formatting_exceptions():
     doc = Document("tests/data/test-custom-formats.numbers")
