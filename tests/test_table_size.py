@@ -19,6 +19,7 @@ def test_row_col_sizes(configurable_save_file):
     table.col_width(0, 50)
     table.col_width(2, 200)
     assert table.width == 348
+    assert table.height == 110
 
     doc.save(configurable_save_file)
 

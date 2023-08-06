@@ -46,9 +46,8 @@ _SUPPORTED_NUMBERS_VERSIONS = [
 
 # Don't print the source line
 old_warn_f = warnings.formatwarning
-warnings.formatwarning = (
-    # pragma: no cover -- lambda not run by coverage
-    lambda msg, catg, fname, lineno, line=None: old_warn_f(msg, catg, fname, lineno, line="")
+warnings.formatwarning = lambda msg, catg, fname, lineno, line=None: old_warn_f(
+    msg, catg, fname, lineno, line=""
 )
 
 

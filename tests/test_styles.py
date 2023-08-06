@@ -199,6 +199,9 @@ def test_all_style_changes(configurable_save_file):
             assert cell.style.name == f"Custom Style {style_num}"
             style_num += 1
 
+    style = doc.add_style(bold=True)
+    assert style.name == f"Custom Style {style_num}"
+
 
 def test_header_styles():
     doc = Document("tests/data/test-styles.numbers")
