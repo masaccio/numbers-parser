@@ -12,12 +12,6 @@ It supports and is tested against Python versions from 3.8 onwards. It is not co
 
 Formula evaluation relies on Numbers storing current values which should usually be the case. Formulas themselves rather than the computed values can optionally be extracted. [Style support](#styles) is somewhat limited, but has grown significantly as of version 4.0.
 
-## API changes in version 4.0
-
-To better partition cell styles, background image data which was supported in earlier versions through the methods `image_data` and `image_filename` is now part of the new `cell_style` property. Using the deprecated methods `image_data` and `image_filename` will issue a `DeprecationWarning` if used.The legacy methods will be removed in a future version of numbers-parser.
-
-`NumberCell` cell values are now limited to 15 significant figues to match the implementation of floating point numbers in Apple Numbers. For example, the value `1234567890123456` is rounded to `1234567890123460` in the same was as in Numbers. Previously, using native `float` with no checking resulted in rounding errors in unpacking internal numbers. Attempting to write a number with too many significant digits results in a `RuntimeWarning`.
-
 ## Installation
 
 ``` bash
@@ -35,11 +29,17 @@ brew install snappy python3
 CPPFLAGS="-I/usr/local/include -L/usr/local/lib" python3 -m pip install python-snappy
 ```
 
-And on Apple Silicon:
+For Apple Silicon Macs:
 
 ``` bash
 brew install snappy python3
 CPPFLAGS="-I/opt/homebrew/include -L/opt/homebrew/lib" python3 -m pip install python-snappy
+```
+
+For Linux (your package manager may be different):
+
+``` bash
+sudo apt-get -y install libsnappy-dev
 ```
 
 On Windows, you will need to either arrange for snappy to be found for VSC++ or you can install python binary libraries compiled by [Christoph Gohlke](https://www.lfd.uci.edu/~gohlke/pythonlibs/#python-snappy). You must select the correct python version for your installation. For example for python 3.11:
@@ -47,6 +47,12 @@ On Windows, you will need to either arrange for snappy to be found for VSC++ or 
 ``` text
 C:\Users\Jon>pip install C:\Users\Jon\Downloads\python_snappy-0.6.1-cp311-cp311-win_amd64.whl
 ```
+
+## API changes in version 4.0
+
+To better partition cell styles, background image data which was supported in earlier versions through the methods `image_data` and `image_filename` is now part of the new `cell_style` property. Using the deprecated methods `image_data` and `image_filename` will issue a `DeprecationWarning` if used.The legacy methods will be removed in a future version of numbers-parser.
+
+`NumberCell` cell values are now limited to 15 significant figues to match the implementation of floating point numbers in Apple Numbers. For example, the value `1234567890123456` is rounded to `1234567890123460` in the same was as in Numbers. Previously, using native `float` with no checking resulted in rounding errors in unpacking internal numbers. Attempting to write a number with too many significant digits results in a `RuntimeWarning`.
 
 ## Usage
 
