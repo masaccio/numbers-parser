@@ -155,18 +155,19 @@ class Style:
     @staticmethod
     def _text_attrs():
         return [
-            "font_color",
-            "font_size",
-            "font_name",
+            "alignment",
             "bold",
-            "italic",
-            "strikethrough",
-            "underline",
-            "name",
             "first_indent",
+            "font_color",
+            "font_name",
+            "font_size",
+            "italic",
             "left_indent",
+            "name",
             "right_indent",
+            "strikethrough",
             "text_inset",
+            "underline",
         ]
 
     @staticmethod
