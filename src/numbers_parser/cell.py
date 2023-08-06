@@ -515,6 +515,8 @@ class Cell:
         else:
             self.is_merged = False
             self.size = (1, 1)
+            self.merge_range = None
+            self.rect = None
             self._border = CellBorder()
 
     @property
