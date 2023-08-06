@@ -1,6 +1,4 @@
-import pytest
-
-from numbers_parser import Document, Cell, MergedCell
+from numbers_parser import Document
 
 XXX_TABLE_1_REF = [
     ["XXX_COL_1", "XXX_COL_2", "XXX_COL_3", "XXX_COL_4", "XXX_COL_5"],
@@ -49,15 +47,20 @@ def test_merge_references():
     sheets = doc.sheets
     table = sheets[0].tables[0]
     assert table.cell("B2").merge_range == "A2:B2"
+    assert table.cell("B2").rect == (1, 0, 1, 1)
+    assert table.cell("B2").size is None
     assert table.cell("C5").merge_range == "B5:E5"
-    assert table.cell("B2").size == None
-    assert table.cell("C5").size == None
+    assert table.cell("C5").rect == (4, 1, 4, 4)
+    assert table.cell("C5").size is None
     assert table.cell("C5").row_start == 4
     assert table.cell("C5").row_end == 4
     assert table.cell("C5").col_start == 1
     assert table.cell("C5").col_end == 4
     assert table.cell("A2").is_merged
-    assert table.cell("C1").is_merged == False
+    assert table.cell("A2").rect is None
+    assert not table.cell("C1").is_merged
+    assert table.cell("C1").size == (1, 1)
+    assert table.cell("C1").merge_range is None
     assert table.cell("D7").size == (2, 2)
 
     table = sheets[1].tables[0]

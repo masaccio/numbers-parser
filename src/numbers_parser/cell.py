@@ -495,6 +495,8 @@ class Cell:
         if isinstance(merge_ref, MergeAnchor):
             self.is_merged = True
             self.size = merge_ref.size
+            self.merge_range = None
+            self.rect = None
             self._border = CellBorder()
         elif isinstance(merge_ref, MergeReference):
             self.is_merged = False
@@ -504,6 +506,7 @@ class Cell:
             self.row_end = merge_ref.rect[2]
             self.col_end = merge_ref.rect[3]
             self.merge_range = xl_range(*merge_ref.rect)
+            self.rect = merge_ref.rect
             top_merged = self.row > self.row_start
             right_merged = self.col < self.col_end
             bottom_merged = self.row < self.row_end
