@@ -5,7 +5,7 @@ import sys
 
 import sigfig
 
-from numbers_parser import Document, ErrorCell, FileFormatError, NumberCell
+from numbers_parser import Document, ErrorCell, FileFormatError, NumberCell, FileError
 from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser import _get_version
 from numbers_parser.constants import MAX_SIGNIFICANT_DIGITS
@@ -131,6 +131,9 @@ def main():
                 else:
                     print_table(args, filename)
             except FileFormatError as e:
+                print(f"{filename}:", str(e), file=sys.stderr)
+                sys.exit(1)
+            except FileError as e:
                 print(f"{filename}:", str(e), file=sys.stderr)
                 sys.exit(1)
 
