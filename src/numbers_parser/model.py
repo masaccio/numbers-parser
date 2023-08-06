@@ -921,8 +921,6 @@ class _NumbersModel:
 
     def last_table_offset(self, sheet_id):
         """Y offset of the last table in a sheet"""
-        if len(self.table_ids(sheet_id)) == 0:
-            return 0.0
         table_id = self.table_ids(sheet_id)[-1]
         y_offset = [
             self.objects[self.table_info_id(x)].super.geometry.position.y
@@ -940,8 +938,6 @@ class _NumbersModel:
             table_x = 0.0
         if y is not None:
             table_y = y
-        elif len(self.objects[sheet_id].drawable_infos) < 1:
-            table_y = 0.0
         else:
             table_y = self.last_table_offset(sheet_id) + DEFAULT_TABLE_OFFSET
         drawable = TSDArchives.DrawableArchive(
@@ -1197,7 +1193,7 @@ class _NumbersModel:
             }
             for x in presets
         }
-        return {
+        styles = {
             k: Style(
                 alignment=Alignment(
                     HorizontalJustification(v["obj"].para_properties.alignment),
@@ -1215,6 +1211,11 @@ class _NumbersModel:
             )
             for k, v in presets_map.items()
         }
+        for style in styles.values():
+            # Override __setattr__ behaviour for builtin styles
+            style.__dict__["_update_text_style"] = False
+            style.__dict__["_update_cell_style"] = False
+        return styles
 
     def add_paragraph_style(self, style: Style) -> int:
         if style.underline:
