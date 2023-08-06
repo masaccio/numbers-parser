@@ -254,7 +254,7 @@ def test_main(script_runner):
 
 
 @pytest.mark.script_launch_mode("subprocess")
-def test_corrupted(script_runner):
+def test_errors(script_runner):
     ret = script_runner.run(["cat-numbers", "tests/data/corrupted.numbers"], print_result=False)
     assert not ret.success
     assert "Index/Metadata.iwa: invalid" in ret.stderr
@@ -273,4 +273,9 @@ def test_corrupted(script_runner):
     ret = script_runner.run(["cat-numbers", "tests/data/badindexzip2.numbers"], print_result=False)
     assert not ret.success
     assert "tests/data/badindexzip2.numbers: Invalid Numbers file" in ret.stderr
+    assert ret.stdout == ""
+
+    ret = script_runner.run(["cat-numbers", "invalid.numbers"], print_result=False)
+    assert not ret.success
+    assert "invalid.numbers: No such file or directory" in ret.stderr
     assert ret.stdout == ""
