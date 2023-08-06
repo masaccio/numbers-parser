@@ -617,8 +617,6 @@ class _NumbersModel:
         if row_offset is None:
             return None
         storage_buffers = self.storage_buffers(table_id)
-        if len(storage_buffers) == 0:
-            return None
         if col_num >= len(storage_buffers[row_offset]):
             return None
         return storage_buffers[row_offset][col_num]
@@ -1614,7 +1612,7 @@ class _NumbersModel:
         # a string with a new bullet character
         bds = self.objects[table_id].base_data_store
         rich_text_table = self.objects[bds.rich_text_table.identifier]
-        for entry in rich_text_table.entries:
+        for entry in rich_text_table.entries:  # pragma: no branch
             if string_key == entry.key:
                 payload = self.objects[entry.rich_text_payload.identifier]
                 payload_storage = self.objects[payload.storage.identifier]
@@ -1668,8 +1666,6 @@ class _NumbersModel:
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,
                 }
-
-        return None
 
     def cell_text_style(self, cell_storage: object) -> object:
         """Return the text style object for the cell or, if none
