@@ -86,16 +86,11 @@ def extract_iwa_archives(blob, filename, file_handler, object_handler):
         raise FileFormatError(f"{filename}: invalid IWA file {filename}") from e
 
     if object_handler is not None:
-        if len(iwaf.chunks) != 1:
-            raise FileFormatError(f"{filename}: chunk count != 1 in {filename}")
+        # Data from Numbers always has just one chunk. Some archives
+        # have multiple objects though they appear not to contain
+        # useful data.
         for archive in iwaf.chunks[0].archives:
-            if len(archive.objects) == 0:
-                raise FileFormatError(f"{filename}: no objects in {filename}")
-
             identifier = archive.header.identifier
-            if len(archive.objects) > 1:
-                # TODO: what should we do for len(archive.objects) > 1?
-                pass
             object_handler(identifier, archive.objects[0], filename)
 
     file_handler(filename, iwaf)
