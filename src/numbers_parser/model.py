@@ -1673,9 +1673,7 @@ class _NumbersModel:
         """Return the text style object for the cell or, if none
         is defined, the default header, footer or body style"""
         if cell_storage.text_style_id is not None:
-            style = self.table_style(cell_storage.table_id, cell_storage.text_style_id)
-            if isinstance(style, TSWPArchives.ParagraphStyleArchive):
-                return style
+            return self.table_style(cell_storage.table_id, cell_storage.text_style_id)
 
         table_model = self.objects[cell_storage.table_id]
         if cell_storage.row_num in range(0, table_model.number_of_header_rows):
@@ -1684,7 +1682,8 @@ class _NumbersModel:
             return self.objects[table_model.header_column_text_style.identifier]
         elif table_model.number_of_footer_rows > 0:
             start_row_num = table_model.number_of_rows - table_model.number_of_footer_rows
-            if cell_storage.row_num in range(start_row_num, table_model.number_of_header_rows):
+            end_row_num = start_row_num + table_model.number_of_footer_rows
+            if cell_storage.row_num in range(start_row_num, end_row_num):
                 return self.objects[table_model.footer_row_text_style.identifier]
         return self.objects[table_model.body_text_style.identifier]
 
@@ -1724,8 +1723,6 @@ class _NumbersModel:
         """Return a para_property field from a style if present
         in the style, or from the parent if not"""
         if not style.para_properties.HasField(field):
-            if not style.super.parent.identifier:
-                return 0.0
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.para_properties, field)
         else:
@@ -1735,8 +1732,6 @@ class _NumbersModel:
         """Return a cell_property field from a style if present
         in the style, or from the parent if not"""
         if not style.cell_properties.HasField(field):
-            if not style.super.parent.identifier:
-                return 0.0
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.cell_properties, field)
         else:

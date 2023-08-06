@@ -238,6 +238,11 @@ def test_header_styles():
             for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
         ]
     )
+    assert table.cell("A9").style.bold
+    assert table.cell("B9").style.italic and table.cell("B9").style.bold
+    assert table.cell("C9").style.underline
+    assert table.cell("D9").style.strikethrough
+    assert not table.cell("E9").style.bold
 
 
 def test_style_exceptions():
