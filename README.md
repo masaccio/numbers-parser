@@ -159,7 +159,7 @@ for col in table.iter_cols(min_row=2, max_row=7):
     sum += col.value
 ```
 
-### Forumlas
+### Formulas
 
 Formula evaluation relies on Numbers storing current values which should usually be the case. In cells containing a formula, `value` returns the computed value of the formula. The formula itself is available using the `foruma` property.
 
