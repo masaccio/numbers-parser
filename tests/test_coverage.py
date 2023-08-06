@@ -1,3 +1,4 @@
+import json
 import pytest
 
 from numbers_parser import (
@@ -17,6 +18,7 @@ from numbers_parser.cell_storage import (
     decode_number_format,
 )
 from numbers_parser.numbers_uuid import NumbersUUID
+from numbers_parser._unpack_numbers import prettify_uuids
 from numbers_parser.experimental import _enable_experimental_features, _experimental_features
 
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
@@ -181,3 +183,10 @@ def test_experimental():
     assert _experimental_features()
     _enable_experimental_features(False)
     assert not _experimental_features()
+
+
+def test_prettify_uuids():
+    uuid = {"upper": 0, "lower": 0}
+    obj = [[1, 2, 3], ["a", "b", "c"], [uuid, uuid, uuid]]
+    prettify_uuids(obj)
+    assert obj[2][0] == "00000000-0000-0000-0000-000000000000"

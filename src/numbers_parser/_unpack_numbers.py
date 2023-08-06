@@ -47,8 +47,7 @@ def prettify_uuids(obj):
                     obj[i] = str(NumbersUUID(v))
                 except UnsupportedError:
                     prettify_uuids(v)
-            elif isinstance(v, list):  # pragma: no cover
-                # Numbers doesn't have lists of lists, but keep just in case
+            elif isinstance(v, list):
                 prettify_uuids(v)
 
 
