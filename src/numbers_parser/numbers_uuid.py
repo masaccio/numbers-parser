@@ -8,19 +8,19 @@ class NumbersUUID(UUID):
     def __init__(self, uuid=None):
         if uuid is None:
             super().__init__(int=uuid1().int)
-        elif type(uuid) == int:
+        elif isinstance(uuid, int):
             super().__init__(int=uuid)
-        elif type(uuid) == str:
+        elif isinstance(uuid, str):
             super().__init__(hex=uuid)
-        elif type(uuid) == TSPMessages.UUID:
+        elif isinstance(uuid, TSPMessages.UUID):
             uuid_int = uuid.upper << 64 | uuid.lower
             super().__init__(int=uuid_int)
-        elif type(uuid) == TSPMessages.CFUUIDArchive:
+        elif isinstance(uuid, TSPMessages.CFUUIDArchive):
             uuid_int = (
                 (uuid.uuid_w3 << 96) | (uuid.uuid_w2 << 64) | (uuid.uuid_w1 << 32) | uuid.uuid_w0
             )
             super().__init__(int=uuid_int)
-        elif type(uuid) == dict:
+        elif isinstance(uuid, dict):
             if "uuid_w0" in uuid and "uuid_w1" in uuid:
                 uuid_int = (
                     (int(uuid["uuid_w3"]) << 96)
@@ -34,7 +34,7 @@ class NumbersUUID(UUID):
                 super().__init__(int=uuid_int)
             else:
                 raise UnsupportedError("Unsupported UUID dict structure")
-        else:  # pragma: no cover
+        else:
             raise UnsupportedError(f"Unsupported UUID init type {type(uuid).__name__}")
 
     @property

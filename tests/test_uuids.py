@@ -1,5 +1,6 @@
 import pytest
 
+from numbers_parser import UnsupportedError
 from numbers_parser.numbers_uuid import NumbersUUID
 
 
@@ -26,3 +27,11 @@ def test_uuid():
     uuid = NumbersUUID(ref)
     assert uuid.hex == "0000000000001234000000000000ffff"
     assert uuid.dict2 == ref
+
+    with pytest.raises(UnsupportedError) as e:
+        _ = NumbersUUID({"a": 1, "b": 2})
+    assert str(e.value) == "Unsupported UUID dict structure"
+
+    with pytest.raises(UnsupportedError) as e:
+        _ = NumbersUUID(3.14)
+    assert str(e.value) == "Unsupported UUID init type float"
