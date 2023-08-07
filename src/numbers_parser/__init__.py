@@ -44,12 +44,6 @@ _SUPPORTED_NUMBERS_VERSIONS = [
     "13.1",
 ]
 
-# Don't print the source line
-old_warn_f = warnings.formatwarning
-warnings.formatwarning = lambda msg, catg, fname, lineno, line=None: old_warn_f(
-    msg, catg, fname, lineno, line=""
-)
-
 
 def _get_version():
     return __version__
