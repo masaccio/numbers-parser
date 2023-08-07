@@ -25,20 +25,27 @@ def test_bullets():
     assert table.cell(0, 0).bullets is None
 
 
-def test_hyperlinks():
+def test_hyperlinks(configurable_save_file):
+    def check_doc_links(doc):
+        sheets = doc.sheets
+        tables = sheets[0].tables
+        table = tables[0]
+
+        assert len(table.cell(2, 0).bullets) == 4
+        assert table.cell(2, 0).is_bulleted
+        assert len(table.cell(3, 0).bullets) == 4
+
+        cell = table.cell(0, 0)
+        assert len(cell.hyperlinks) == 2
+        assert not cell.is_bulleted
+        assert cell.hyperlinks[0] == ("BBC News", "http://news.bbc.co.uk/")
+        assert cell.value == "visit BBC News for the news and Google to find stuff"
+
+        assert table.cell(1, 0).hyperlinks[0][0] == "Google"
+
     doc = Document("tests/data/test-hlinks.numbers")
-    sheets = doc.sheets
-    tables = sheets[0].tables
-    table = tables[0]
+    check_doc_links(doc)
 
-    assert len(table.cell(2, 0).bullets) == 4
-    assert table.cell(2, 0).is_bulleted
-    assert len(table.cell(3, 0).bullets) == 4
-
-    cell = table.cell(0, 0)
-    assert len(cell.hyperlinks) == 2
-    assert not cell.is_bulleted
-    assert cell.hyperlinks[0] == ("BBC News", "http://news.bbc.co.uk/")
-    assert cell.value == "visit BBC News for the news and Google to find stuff"
-
-    assert table.cell(1, 0).hyperlinks[0][0] == "Google"
+    doc.save(configurable_save_file)
+    new_doc = Document(configurable_save_file)
+    check_doc_links(new_doc)

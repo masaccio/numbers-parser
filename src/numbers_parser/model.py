@@ -25,25 +25,26 @@ from numbers_parser.constants import (
     MAX_TILE_SIZE,
 )
 from numbers_parser.cell import (
-    xl_rowcol_to_cell,
-    xl_col_to_name,
-    xl_range,
+    Alignment,
     BoolCell,
+    Border,
+    BorderType,
     DateCell,
     DurationCell,
     EmptyCell,
-    MergedCell,
-    NumberCell,
-    TextCell,
-    Style,
-    Alignment,
     HorizontalJustification,
-    VerticalJustification,
-    RGB,
-    Border,
-    BorderType,
-    MergeReference,
     MergeAnchor,
+    MergedCell,
+    MergeReference,
+    NumberCell,
+    RGB,
+    RichTextCell,
+    Style,
+    TextCell,
+    VerticalJustification,
+    xl_col_to_name,
+    xl_range,
+    xl_rowcol_to_cell,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
@@ -1500,6 +1501,11 @@ class _NumbersModel:
                 return None
         elif isinstance(cell, MergedCell):
             return None
+        elif isinstance(cell, RichTextCell):
+            flags = 0
+            length += 4
+            cell_type = TSTArchives.automaticCellType
+            value = pack("<i", cell._storage.rich_id)
         else:
             data_type = type(cell).__name__
             table_name = self.table_name(table_id)
@@ -1514,6 +1520,10 @@ class _NumbersModel:
         storage[1] = cell_type
         storage += value
 
+        if cell._storage.rich_id is not None:
+            flags |= 0x10
+            length += 4
+            storage += pack("<i", cell._storage.rich_id)
         if cell._storage.cell_style_id is not None:
             flags |= 0x20
             length += 4
