@@ -17,7 +17,7 @@ jobs:
         sudo apt-get -y install libsnappy-dev
         pip install poetry
         poetry install
-        poetry run pytest --cov=numbers_parser --cov-report=xml
+        poetry run pytest  -n logical --cov=numbers_parser --cov-report=xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:

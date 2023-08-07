@@ -42,10 +42,10 @@ docs:
 	python3 setup.py build_sphinx
 
 test:
-	poetry run pytest
+	poetry run pytest -n logical
 
 coverage:
-	poetry run pytest --cov=$(package_c) --cov-report=html
+	poetry run pytest -n logical --cov=$(package_c) --cov-report=html
 
 BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
 				  src/$(package_c)/generated/fontmap.py \
