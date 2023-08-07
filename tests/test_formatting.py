@@ -1,5 +1,4 @@
 import pytest_check as check
-import pytest
 
 from numbers_parser import Document, EmptyCell
 

@@ -1,5 +1,3 @@
-import pytest
-
 from numbers_parser import Document
 
 XXX_TABLE_1_REF = [

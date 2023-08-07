@@ -1,5 +1,3 @@
-import pytest
-
 from numbers_parser import Document, ErrorCell
 
 

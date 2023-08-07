@@ -1,4 +1,3 @@
-import pytest
 from pendulum import datetime, duration
 
 from numbers_parser import Document

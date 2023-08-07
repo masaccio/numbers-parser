@@ -1,6 +1,5 @@
 import pytest
-
-from numbers_parser import Document, NumberCell
+from numbers_parser import Document
 
 
 def test_exceptions():

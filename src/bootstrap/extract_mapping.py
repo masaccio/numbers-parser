@@ -55,7 +55,6 @@ try:
             print_stacktrace(thread)
             function = frame.GetFunction()
             function_or_symbol = function if function else frame.GetSymbol()
-            print(disassemble(target, function_or_symbol))
             raise ValueError(f"Exception at {frame.name}")
         if stop_reason != lldb.eStopReasonBreakpoint:
             process.Continue()

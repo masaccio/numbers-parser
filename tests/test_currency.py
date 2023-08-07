@@ -1,5 +1,3 @@
-import pytest
-
 from pendulum import datetime
 from numbers_parser import Document
 
