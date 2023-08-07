@@ -246,7 +246,7 @@ def test_issue_50():
     doc = Document("tests/data/issue-50.numbers")
     table = doc.sheets[0].tables[0]
     assert table.num_rows == 65553
-    assert table.cell(65552, 3).value == "string 262163"
+    assert table.cell(65552, 0).value == "string 262161"
 
 
 def test_issue_51(script_runner):
