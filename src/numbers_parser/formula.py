@@ -87,7 +87,7 @@ class Formula(list):
         node = args[2]
         num_args = node.AST_function_node_numArgs
         node_index = node.AST_function_node_index
-        if node_index not in FUNCTION_MAP:  # pragma: no cover
+        if node_index not in FUNCTION_MAP:
             table_name = self._model.table_name(self._table_id)
             warnings.warn(
                 f"{table_name}@[{self.row},{self.col}]: function ID {node_index} is unsupported",
@@ -97,7 +97,7 @@ class Formula(list):
         else:
             func_name = FUNCTION_MAP[node_index]
 
-        if len(self._stack) < num_args:  # pragma: no cover
+        if len(self._stack) < num_args:
             table_name = self._model.table_name(self._table_id)
             warnings.warn(
                 f"{table_name}@[{self.row},{self.col}]: stack too small for {func_name}",
@@ -177,9 +177,6 @@ class Formula(list):
     def sub(self, *args):
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}-{arg2}")
-
-    def unsupported(self, *args):  # pragma: no cover
-        pass
 
     def xref(self, *args):
         (row_num, col_num, node) = args
@@ -282,7 +279,7 @@ class TableFormulas:
 
     def formula(self, formula_key, row_num, col_num):
         all_formulas = self._model.formula_ast(self._table_id)
-        if formula_key not in all_formulas:  # pragma: no cover
+        if formula_key not in all_formulas:
             table_name = self._model.table_name(self._table_id)
             warnings.warn(
                 f"{table_name}@[{row_num},{col_num}]: key #{formula_key} not found",
@@ -295,7 +292,7 @@ class TableFormulas:
             node_type = self._formula_type_lookup[node.AST_node_type]
             if node_type == "REFERENCE_ERROR_WITH_UIDS":
                 formula.push("#REF!")
-            elif node_type not in NODE_FUNCTION_MAP:  # pragma: no cover
+            elif node_type not in NODE_FUNCTION_MAP:
                 table_name = self._model.table_name(self._table_id)
                 warnings.warn(
                     f"{table_name}@[{row_num},{col_num}]: node type {node_type} is unsupported",

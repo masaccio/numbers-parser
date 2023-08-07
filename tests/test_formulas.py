@@ -1,7 +1,7 @@
 import pytest
 import pytest_check as check
 
-from numbers_parser import Document, ErrorCell
+from numbers_parser import Document, UnsupportedWarning
 
 TABLE_1_FORMULAS = [
     [None, "A1", "$B$1=1"],
@@ -59,3 +59,48 @@ def test_table_functions():
 
     table = sheets[1].tables[0]
     compare_tables(table, TABLE_2_FORMULAS)
+
+
+def test_exceptions(configurable_save_file):
+    def get_formula(doc):
+        table_id = doc.sheets[0].tables[0]._table_id
+        base_data_store = doc._model.objects[table_id].base_data_store
+        formula_table_id = base_data_store.formula_table.identifier
+        formula_table = doc._model.objects[formula_table_id]
+        return formula_table.entries[0].formula
+
+    doc = Document("tests/data/simple-func.numbers")
+    formula = get_formula(doc)
+    formula.AST_node_array.AST_node[2].AST_function_node_index = 999
+    with pytest.warns(UnsupportedWarning) as record:
+        value = doc.sheets[0].tables[0].cell(0, 1).formula
+    assert value == "UNDEFINED!(1,2)"
+    assert str(record[0].message) == "Table 1@[0,1]: function ID 999 is unsupported"
+
+    doc = Document("tests/data/simple-func.numbers")
+    formula = get_formula(doc)
+    formula.AST_node_array.AST_node[2].AST_function_node_numArgs = 3
+    with pytest.warns(UnsupportedWarning) as record:
+        value = doc.sheets[0].tables[0].cell(0, 1).formula
+    assert str(record[0].message) == "Table 1@[0,1]: stack too small for SUM"
+
+    doc = Document("tests/data/simple-func.numbers")
+    formula = get_formula(doc)
+    formula.AST_node_array.AST_node[2].AST_function_node_numArgs = 3
+    with pytest.warns(UnsupportedWarning) as record:
+        value = doc.sheets[0].tables[0].cell(0, 1).formula
+    assert str(record[0].message) == "Table 1@[0,1]: stack too small for SUM"
+
+    doc = Document("tests/data/simple-func.numbers")
+    formula = get_formula(doc)
+    formula.AST_node_array.AST_node[2].AST_node_type = 68
+    with pytest.warns(UnsupportedWarning) as record:
+        value = doc.sheets[0].tables[0].cell(0, 1).formula
+    assert str(record[0].message) == "Table 1@[0,1]: node type VIEW_TRACT_REF_NODE is unsupported"
+
+    doc = Document("tests/data/simple-func.numbers")
+    doc.sheets[0].tables[0].cell(0, 1)._formula_key = 999
+    with pytest.warns(UnsupportedWarning) as record:
+        _ = doc.sheets[0].tables[0].cell(0, 1).formula
+
+    assert str(record[0].message) == "Table 1@[0,1]: key #999 not found"
