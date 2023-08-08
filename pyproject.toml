@@ -50,13 +50,15 @@ requires = ["poetry-core>=1.0.0"]
 
 [tool.coverage.run]
 branch = true
+# dynamic_context = "test_function"
 omit = ["src/numbers_parser/generated/*.py"]
 
 [tool.coverage.html]
 directory = "coverage_html_report"
+show_contexts = true
 
 [tool.pytest.ini_options]
-addopts = "--cov=src/numbers_parser --cov-report=term-missing:skip-covered"
+addopts = "--cov=src/numbers_parser --cov-report=term-missing:skip-covered --cov-context=test"
 
 [tool.tox]
 legacy_tox_ini = """
