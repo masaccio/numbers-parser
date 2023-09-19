@@ -51,6 +51,8 @@ To better partition cell styles, background image data which was supported in ea
 
 `NumberCell` cell values are now limited to 15 significant figues to match the implementation of floating point numbers in Apple Numbers. For example, the value `1234567890123456` is rounded to `1234567890123460` in the same was as in Numbers. Previously, using native `float` with no checking resulted in rounding errors in unpacking internal numbers. Attempting to write a number with too many significant digits results in a `RuntimeWarning`.
 
+The previously deprecated methods `Document.sheets()` and `Sheet.tables()` are now only available using the properties of the same name (see examples in this README).
+
 ## Usage
 
 Reading documents:
