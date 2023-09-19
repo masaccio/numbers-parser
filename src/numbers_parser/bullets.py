@@ -20,7 +20,7 @@ BULLET_PREFIXES = {
     ListStyleArchive.kAlphaLowerRightParen: "",
 }
 
-BULLET_CONVERTION = {
+BULLET_CONVERSION = {
     ListStyleArchive.kNumericDecimal: lambda x: str(x + 1),
     ListStyleArchive.kNumericDoubleParen: lambda x: str(x + 1),
     ListStyleArchive.kNumericRightParen: lambda x: str(x + 1),
