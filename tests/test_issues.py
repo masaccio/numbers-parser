@@ -361,3 +361,11 @@ def test_issue_60(configurable_multi_save_file):
                 ref = getattr(cell.style, attr)
                 assert getattr(test_table_1.cell(row_num, col_num).style, attr) == ref
                 assert getattr(test_table_2.cell(row_num, col_num).style, attr) == ref
+
+
+def test_issue_66():
+    from numbers_parser import Document
+
+    doc = Document("tests/data/issue-66-collab.numbers")
+    sheets = doc.sheets
+    assert sheets[0].name == "Credit"

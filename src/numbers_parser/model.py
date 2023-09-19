@@ -620,6 +620,8 @@ class _NumbersModel:
         if row_offset is None:
             return None
         storage_buffers = self.storage_buffers(table_id)
+        if row_offset >= len(storage_buffers):
+            return None
         if col_num >= len(storage_buffers[row_offset]):
             return None
         return storage_buffers[row_offset][col_num]
