@@ -49,7 +49,7 @@ C:\Users\Jon>pip install C:\Users\Jon\Downloads\python_snappy-0.6.1-cp311-cp311-
 
 To better partition cell styles, background image data which was supported in earlier versions through the methods `image_data` and `image_filename` is now part of the new `cell_style` property. Using the deprecated methods `image_data` and `image_filename` will issue a `DeprecationWarning` if used.The legacy methods will be removed in a future version of numbers-parser.
 
-`NumberCell` cell values are now limited to 15 significant figues to match the implementation of floating point numbers in Apple Numbers. For example, the value `1234567890123456` is rounded to `1234567890123460` in the same was as in Numbers. Previously, using native `float` with no checking resulted in rounding errors in unpacking internal numbers. Attempting to write a number with too many significant digits results in a `RuntimeWarning`.
+`NumberCell` cell values are now limited to 15 significant figures to match the implementation of floating point numbers in Apple Numbers. For example, the value `1234567890123456` is rounded to `1234567890123460` in the same was as in Numbers. Previously, using native `float` with no checking resulted in rounding errors in unpacking internal numbers. Attempting to write a number with too many significant digits results in a `RuntimeWarning`.
 
 The previously deprecated methods `Document.sheets()` and `Sheet.tables()` are now only available using the properties of the same name (see examples in this README).
 
@@ -163,7 +163,7 @@ for col in table.iter_cols(min_row=2, max_row=7):
 
 ### Formulas
 
-Formula evaluation relies on Numbers storing current values which should usually be the case. In cells containing a formula, `value` returns the computed value of the formula. The formula itself is available using the `foruma` property.
+Formula evaluation relies on Numbers storing current values which should usually be the case. In cells containing a formula, `value` returns the computed value of the formula. The formula itself is available using the `formula` property.
 
 ### Pandas
 
@@ -208,7 +208,7 @@ cell = table.cell(0, 0)
 
 ### Styles
 
-`numbers_parser` currently only supports paragraph styles and cell styles. The following paragraph styles are suppoprted:
+`numbers_parser` currently only supports paragraph styles and cell styles. The following paragraph styles are supported:
 
 * font attributes: bold, italic, underline, strikethrough
 * font selection and size
@@ -219,7 +219,7 @@ cell = table.cell(0, 0)
 
 Table styles that allow new tables to adopt a style across the whole table are not planned.
 
-Numbers conflates style attributes that can be stored in paragraph styles (the style menu in the text panel) with the settings that are available on the Style tab of the Text panel. Some attributes in Numbers are not applied to new cells when a style is applied. To keep the API simple, `numbers-parser` packs all styling into a single `Style` object. When a document is saved, the attributes not stored in a paragraph style are applied to each cell that includes it. Attributes behaving in this way are currently `Cell.alignment.vertical` and `Cell.style.text_inset`. The cell background colour `Cell.style.bg_color` also behaves this way, though this is in line with the separation in Numbers.
+Numbers conflates style attributes that can be stored in paragraph styles (the style menu in the text panel) with the settings that are available on the Style tab of the Text panel. Some attributes in Numbers are not applied to new cells when a style is applied. To keep the API simple, `numbers-parser` packs all styling into a single `Style` object. When a document is saved, the attributes not stored in a paragraph style are applied to each cell that includes it. Attributes behaving in this way are currently `Cell.alignment.vertical` and `Cell.style.text_inset`. The cell background color `Cell.style.bg_color` also behaves this way, though this is in line with the separation in Numbers.
 
 #### Reading styles
 
@@ -257,7 +257,7 @@ with open (cell.style.bg_image.filename, "wb") as f:
 
 `numbers-parser` supports reading and writing cell borders, though the interface for each differs. Individual cells can have each of their four borders tested, but when drawing new borders, these are set for the table to allow for drawing borders across multiple cells. Setting the border of merged cells is not possible unless the edge of the cells is at the end of the merged region.
 
-Borders are represeted using the `Border` class that can be initialised with line width, color and line style:
+Borders are represented using the `Border` class that can be initialized with line width, color and line style:
 
 ``` python
 border = Border(4.0, RGB(0, 162, 255), "solid"))
@@ -282,7 +282,7 @@ The last positional parameter specifies the length of the border and defaults to
 
 ## Writing Numbers files
 
-Whilst support for writing numbers files has been stable since version 3.4.0, you are highly recommened not to overwrite working Numbers files and instead save data to a new file.
+Whilst support for writing numbers files has been stable since version 3.4.0, you are highly recommended not to overwrite working Numbers files and instead save data to a new file.
 
 ### Limitations
 
@@ -352,7 +352,7 @@ print(f"Table column A width is {table.col_width(0)}")
 
 ####  Header row and columns
 
-When new tables are created, `numbers-parser` follows the Numbers convention of creating a table with one row header and one column header. You can change the number of headers by modifying the appopriate property:
+When new tables are created, `numbers-parser` follows the Numbers convention of creating a table with one row header and one column header. You can change the number of headers by modifying the appropriate property:
 
 ```python
 doc = Document("sheet.numbers")
@@ -434,7 +434,7 @@ optional arguments:
   -t TABLE, --table TABLE  Names of table(s) to include in export
 ```
 
-Note: `--formatting` will return different capitalisation for 12-hour times due to differences between Numbers' representation of these dates and `datetime.strftime`. Numbers in English locales displays 12-hour times with 'am' and 'pm', but `datetime.strftime` on macOS at least cannot return lower-case versions of AM/PM.
+Note: `--formatting` will return different capitalization for 12-hour times due to differences between Numbers' representation of these dates and `datetime.strftime`. Numbers in English locales displays 12-hour times with 'am' and 'pm', but `datetime.strftime` on macOS at least cannot return lower-case versions of AM/PM.
 
 ## Numbers File Formats
 
@@ -445,7 +445,7 @@ Numbers uses a proprietary, compressed binary format to store its tables. This f
 
 As `numbers-parser` includes private Protobuf definitions extracted from a copy of Numbers, new versions of Numbers will inevitably create `.numbers` files that cannot be read by `numbers-parser`. As new versions of Numbers are released, running `make bootstrap` will perform all the steps necessary to recreate the protobuf files used `numbers-parser` to read Numbers spreadsheets.
 
-The default protobuf package installation may not include the C++ optimised version which is required by the bootstrapping scripts to extract protobufs. You will receive the following error during build if this is the case:
+The default protobuf package installation may not include the C++ optimized version which is required by the bootstrapping scripts to extract protobufs. You will receive the following error during build if this is the case:
 
  `This script requires the Protobuf installation to use the C++ implementation. Please reinstall Protobuf with C++ support.`
 
@@ -463,7 +463,7 @@ python3 setup.py -q bdist_wheel --cpp_implementation --warnings_as_errors --comp
 
 This can then be used `make bootstrap` in the `numbers-parser` source tree. The signing workflow assumes that you have an Apple Developer Account and that you have created provisioning profile that includes iCloud. Using a self-signed certificate does not seem to work, at least on Apple Silicon (a working PR contradicting this is greatly appreciated).
 
-`make bootstrap` requires [PyObjC](https://pypi.org/project/pyobjc/) to genetrate font maps, but this dependency is excluded from Poetry to ensure that tests can run on non-Mac OSes. You can run `poetry run pip install PyObjC` to get the required packages.
+`make bootstrap` requires [PyObjC](https://pypi.org/project/pyobjc/) to generate font maps, but this dependency is excluded from Poetry to ensure that tests can run on non-Mac OSes. You can run `poetry run pip install PyObjC` to get the required packages.
 
 ## Credits
 

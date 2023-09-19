@@ -26,4 +26,20 @@
         "TODO",
         "FIXME"
     ],
+    "cSpell.words": [
+        "bazel",
+        "bdist",
+        "codecov",
+        "CPPFLAGS",
+        "dataframe",
+        "DCMAKE",
+        "Gohlke",
+        "libsnappy",
+        "Lucida",
+        "Protobuf",
+        "protobufs",
+        "protoc",
+        "Sobot",
+        "strikethrough"
+    ],
 }
