@@ -50,7 +50,7 @@ from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
 from numbers_parser.bullets import (
     BULLET_PREFIXES,
-    BULLET_CONVERTION,
+    BULLET_CONVERSION,
     BULLET_SUFFIXES,
 )
 from numbers_parser.cell_storage import CellStorage
@@ -2054,7 +2054,7 @@ def range_end(obj):
 def formatted_number(number_type, index):
     """Returns the numbered index bullet formatted for different types"""
     bullet_char = BULLET_PREFIXES[number_type]
-    bullet_char += BULLET_CONVERTION[number_type](index)
+    bullet_char += BULLET_CONVERSION[number_type](index)
     bullet_char += BULLET_SUFFIXES[number_type]
 
     return bullet_char
