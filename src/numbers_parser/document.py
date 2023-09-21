@@ -1,26 +1,19 @@
-from functools import lru_cache
-from typing import Union, Generator, Tuple
+from typing import Generator, Tuple, Union
 from warnings import warn
-
-from numbers_parser.containers import ItemsList
-from numbers_parser.model import _NumbersModel
-from numbers_parser.file import write_numbers_file
+from numbers_parser.cell import Border, Cell, MergedCell, Style, xl_cell_to_rowcol
+from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import (
-    MAX_ROW_COUNT,
+    DEFAULT_COLUMN_COUNT,
+    DEFAULT_NUM_HEADERS,
+    DEFAULT_ROW_COUNT,
     MAX_COL_COUNT,
     MAX_HEADER_COUNT,
-    DEFAULT_NUM_HEADERS,
-    DEFAULT_COLUMN_COUNT,
-    DEFAULT_ROW_COUNT,
+    MAX_ROW_COUNT,
 )
-from numbers_parser.cell import (
-    Cell,
-    MergedCell,
-    xl_cell_to_rowcol,
-    Style,
-    Border,
-)
-from numbers_parser.cell_storage import CellStorage
+from numbers_parser.containers import ItemsList
+from numbers_parser.file import write_numbers_file
+from numbers_parser.model import _NumbersModel
+from numbers_parser.numbers_cache import cache, Cacheable
 
 
 class Document:
@@ -188,7 +181,7 @@ class Sheet:
         return self._tables[-1]
 
 
-class Table:
+class Table(Cacheable):
     def __init__(self, model, table_id):
         super(Table, self).__init__()
         self._model = model
@@ -287,7 +280,6 @@ class Table:
         """Return the table's x,y offsets in points"""
         return self._model.table_coordinates(self._table_id)
 
-    @lru_cache(maxsize=None)
     def rows(self, values_only: bool = False) -> list:
         """
         Return all rows of cells for the Table.
@@ -305,7 +297,7 @@ class Table:
             return self._data
 
     @property
-    @lru_cache(maxsize=None)
+    @cache(num_args=0)
     def merge_ranges(self) -> list:
         merge_cells = self._model.merge_cells(self._table_id).merge_cell_names()
         return sorted(set(list(merge_cells)))

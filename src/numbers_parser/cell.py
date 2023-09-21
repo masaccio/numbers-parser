@@ -1,33 +1,35 @@
 import re
-import sigfig
+from collections import namedtuple
+from dataclasses import dataclass
+from datetime import datetime as builtin_datetime
+from datetime import timedelta as builtin_timedelta
+from enum import IntEnum
+from typing import Any, List, Tuple, Union
+from warnings import warn
 
+import sigfig
+from pendulum import DateTime, Duration, duration
+from pendulum import instance as pendulum_instance
+
+from numbers_parser.cell_storage import CellStorage, CellType
+from numbers_parser.constants import (
+    DEFAULT_ALIGNMENT,
+    DEFAULT_BORDER_COLOR,
+    DEFAULT_BORDER_STYLE,
+    DEFAULT_BORDER_WIDTH,
+    DEFAULT_FONT,
+    DEFAULT_FONT_SIZE,
+    DEFAULT_TEXT_INSET,
+    DEFAULT_TEXT_WRAP,
+    EMPTY_STORAGE_BUFFER,
+    MAX_SIGNIFICANT_DIGITS,
+)
+from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
     ParagraphStylePropertiesArchive as ParagraphStyle,
 )
-from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
-from numbers_parser.cell_storage import CellType, CellStorage
-from numbers_parser.constants import (
-    EMPTY_STORAGE_BUFFER,
-    DEFAULT_FONT,
-    DEFAULT_FONT_SIZE,
-    DEFAULT_ALIGNMENT,
-    DEFAULT_TEXT_INSET,
-    DEFAULT_TEXT_WRAP,
-    DEFAULT_BORDER_WIDTH,
-    DEFAULT_BORDER_COLOR,
-    DEFAULT_BORDER_STYLE,
-    MAX_SIGNIFICANT_DIGITS,
-)
-
-from collections import namedtuple
-from dataclasses import dataclass
-from datetime import datetime as builtin_datetime, timedelta as builtin_timedelta
-from enum import IntEnum
-from functools import lru_cache
-from pendulum import duration, Duration, DateTime, instance as pendulum_instance
-from typing import Any, List, Tuple, Union
-from warnings import warn
+from numbers_parser.numbers_cache import cache, Cacheable
 
 __all__ = [
     "Alignment",
@@ -405,7 +407,7 @@ class MergeAnchor:
         self.size = size
 
 
-class Cell:
+class Cell(Cacheable):
     @classmethod
     def empty_cell(cls, table_id: int, row_num: int, col_num: int, model: object):
         cell = EmptyCell(row_num, col_num)
@@ -549,7 +551,7 @@ class Cell:
         return table_formulas.is_formula(self.row, self.col)
 
     @property
-    @lru_cache(maxsize=None)
+    @cache(num_args=0)
     def formula(self):
         if self._formula_key is not None:
             table_formulas = self._model.table_formulas(self._table_id)

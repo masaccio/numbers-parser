@@ -3,7 +3,7 @@ import re
 
 from array import array
 from collections import defaultdict
-from functools import lru_cache
+from numbers_parser.numbers_cache import cache, Cacheable
 from struct import pack
 from typing import Dict, List, Tuple, Union
 from warnings import warn
@@ -123,7 +123,7 @@ class MergeCells:
         return len(self._references.keys())
 
 
-class DataLists:
+class DataLists(Cacheable):
     """Model for TST.DataList with caching and key generation for new values"""
 
     def __init__(self, model: object, datalist_name: str, value_attr: str = None):
@@ -132,7 +132,7 @@ class DataLists:
         self._value_attr = value_attr
         self._datalist_name = datalist_name
 
-    @lru_cache(maxsize=None)
+    @cache()
     def add_table(self, table_id: int):
         """Cache a new datalist for a table if not already seen"""
         base_data_store = self._model.objects[table_id].base_data_store
@@ -197,7 +197,7 @@ class DataLists:
         return key
 
 
-class _NumbersModel:
+class _NumbersModel(Cacheable):
     """
     Loads all objects from Numbers document and provides decoding
     methods for other classes in the module to abstract away the
@@ -264,7 +264,7 @@ class _NumbersModel:
         ]
         return ids[0]
 
-    @lru_cache(maxsize=None)
+    @cache()
     def row_storage_map(self, table_id):
         # The base data store contains a reference to rowHeaders.buckets
         # which is an ordered list that matches the storage buffers, but
@@ -297,7 +297,7 @@ class _NumbersModel:
             self.objects[table_id].number_of_columns = num_cols
         return self.objects[table_id].number_of_columns
 
-    @lru_cache(maxsize=None)
+    @cache()
     def col_storage_map(self, table_id: int):
         # The base data store contains a reference to columnHeaders
         # which is an ordered list that identfies which offset to use
@@ -328,12 +328,12 @@ class _NumbersModel:
         else:
             return self.objects[table_id].table_name_enabled
 
-    @lru_cache(maxsize=None)
+    @cache()
     def table_tiles(self, table_id):
         bds = self.objects[table_id].base_data_store
         return [self.objects[t.tile.identifier] for t in bds.tiles.tiles]
 
-    @lru_cache(maxsize=None)
+    @cache(num_args=0)
     def custom_format_map(self):
         custom_format_list_id = self.objects[DOCUMENT_ID].super.custom_format_list.identifier
         custom_format_list = self.objects[custom_format_list_id]
@@ -343,20 +343,20 @@ class _NumbersModel:
         }
         return custom_format_map
 
-    @lru_cache(maxsize=None)
+    @cache(num_args=2)
     def table_format(self, table_id: int, key: int) -> str:
         """Return the format associated with a format ID for a particular table"""
         return self._table_formats.lookup_value(table_id, key).format
 
-    @lru_cache(maxsize=None)
+    @cache(num_args=2)
     def table_style(self, table_id: int, key: int) -> str:
         """Return the style associated with a style ID for a particular table"""
         style_entry = self._table_styles.lookup_value(table_id, key)
         return self.objects[style_entry.reference.identifier]
 
-    @lru_cache(maxsize=None)
+    @cache(num_args=2)
     def table_string(self, table_id: int, key: int) -> str:
-        """Return the string assocuated with a string ID for a particular table"""
+        """Return the string associated with a string ID for a particular table"""
         return self._table_strings.lookup_value(table_id, key).string
 
     def init_table_strings(self, table_id: int):
@@ -369,7 +369,7 @@ class _NumbersModel:
         next available key"""
         return self._table_strings.lookup_key(table_id, value)
 
-    @lru_cache(maxsize=None)
+    @cache(num_args=0)
     def owner_id_map(self):
         """ "
         Extracts the mapping table from Owner IDs to UUIDs. Returns a
@@ -396,7 +396,7 @@ class _NumbersModel:
             owner_id_map[e.internal_owner_id] = NumbersUUID(e.owner_id).hex
         return owner_id_map
 
-    @lru_cache(maxsize=None)
+    @cache()
     def table_base_id(self, table_id: int) -> int:
         """ "Finds the UUID of a table"""
         # Look for a TSCE.FormulaOwnerDependenciesArchive objects with the following at the
@@ -423,7 +423,7 @@ class _NumbersModel:
                 if formula_owner_uid == haunted_owner:
                     return base_owner_uid
 
-    @lru_cache(maxsize=None)
+    @cache()
     def formula_cell_ranges(self, table_id: int) -> list:
         """Exract all the formula cell ranges for the Table."""
         # https://github.com/masaccio/numbers-parser/blob/main/doc/Numbers.md#formula-ranges
@@ -440,7 +440,7 @@ class _NumbersModel:
                             cell_records.append((cell_record.row, cell_record.column))
         return cell_records
 
-    @lru_cache(maxsize=None)
+    @cache(num_args=0)
     def calc_engine_id(self):
         """Return the CalculationEngine ID for the current document"""
         ce_id = self.find_refs("CalculationEngineArchive")
@@ -449,7 +449,7 @@ class _NumbersModel:
         else:
             return ce_id[0]
 
-    @lru_cache(maxsize=None)
+    @cache(num_args=0)
     def calc_engine(self):
         """Return the CalculationEngine object for the current document"""
         ce_id = self.calc_engine_id()
@@ -458,7 +458,7 @@ class _NumbersModel:
         else:
             return self.objects[ce_id]
 
-    @lru_cache(maxsize=None)
+    @cache()
     def calculate_merge_cell_ranges(self, table_id):
         """Exract all the merge cell ranges for the Table."""
         # https://github.com/masaccio/numbers-parser/blob/main/doc/Numbers.md#merge-ranges
@@ -516,7 +516,7 @@ class _NumbersModel:
             if table_id in self.table_ids(sheet_id):
                 return sheet_id
 
-    @lru_cache(maxsize=None)
+    @cache()
     def table_uuids_to_id(self, table_uuid) -> int:
         for sheet_id in self.sheet_ids():  # pragma: no branch
             for table_id in self.table_ids(sheet_id):
@@ -588,7 +588,7 @@ class _NumbersModel:
         else:
             return f"{begin_ref}:{end_ref}"
 
-    @lru_cache(maxsize=None)
+    @cache()
     def formula_ast(self, table_id: int):
         bds = self.objects[table_id].base_data_store
         formula_table_id = bds.formula_table.identifier
@@ -598,7 +598,7 @@ class _NumbersModel:
             formulas[formula.key] = formula.formula.AST_node_array.AST_node
         return formulas
 
-    @lru_cache(maxsize=None)
+    @cache()
     def storage_buffers(self, table_id: int) -> List:
         buffers = []
         for tile in self.table_tiles(table_id):
@@ -614,7 +614,7 @@ class _NumbersModel:
                 buffers.append(buffer)
         return buffers
 
-    @lru_cache(maxsize=None)
+    @cache(num_args=3)
     def storage_buffer(self, table_id: int, row_num: int, col_num: int) -> bytes:
         row_offset = self.row_storage_map(table_id)[row_num]
         if row_offset is None:
@@ -714,7 +714,7 @@ class _NumbersModel:
         row_info.has_wide_offsets = True
         return row_info
 
-    @lru_cache(maxsize=None)
+    @cache()
     def metadata_component(self, reference: Union[str, int] = None) -> int:
         """Return the ID of an object in the document metadata given it's name or ID"""
         component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
@@ -1185,7 +1185,7 @@ class _NumbersModel:
             self._styles = self.available_paragraph_styles()
         return self._styles
 
-    @lru_cache(maxsize=None)
+    @cache(num_args=0)
     def available_paragraph_styles(self) -> List[Style]:
         theme_id = self.objects[DOCUMENT_ID].theme.identifier
         presets = find_extension(self.objects[theme_id].super, "paragraph_style_presets")
@@ -1575,11 +1575,11 @@ class _NumbersModel:
 
         return storage[0:length]
 
-    @lru_cache(maxsize=None)
+    @cache()
     def table_formulas(self, table_id: int):
         return TableFormulas(self, table_id)
 
-    @lru_cache(maxsize=None)
+    @cache(num_args=3)
     def table_cell_decode(self, table_id: int, row_num: int, col_num: int) -> Dict:  # noqa: C901
         buffer = self.storage_buffer(table_id, row_num, col_num)
         if buffer is None:
@@ -1588,7 +1588,7 @@ class _NumbersModel:
         cell = CellStorage(self, table_id, buffer, row_num, col_num)
         return cell
 
-    @lru_cache(maxsize=None)
+    @cache(num_args=2)
     def table_rich_text(self, table_id: int, string_key: int) -> Dict:
         """
         Extract bullets and hyperlinks from a rich text data cell.
@@ -1894,7 +1894,7 @@ class _NumbersModel:
                     for row_num in range(start_row, start_row + stroke_run.length):
                         self.set_cell_border(table_id, row_num, start_column, side, border_value)
 
-    @lru_cache(maxsize=None)
+    @cache()
     def extract_strokes(self, table_id: int):
         table_obj = self.objects[table_id]
         sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]

@@ -1,6 +1,7 @@
 import magic
 import pytest
 
+from psutil import Process
 from numbers_parser import Document, ErrorCell, EmptyCell
 from pendulum import datetime, duration
 
@@ -364,8 +365,18 @@ def test_issue_60(configurable_multi_save_file):
 
 
 def test_issue_66():
-    from numbers_parser import Document
-
     doc = Document("tests/data/issue-66-collab.numbers")
     sheets = doc.sheets
     assert sheets[0].name == "Credit"
+
+
+@pytest.mark.experimental
+def test_issue_67():
+    """Memory leak test"""
+    process = Process()
+    rss_base = process.memory_info().rss
+    for i in range(0, 10):
+        doc = Document("tests/data/issue-67.numbers")
+        assert doc.sheets[0].tables[0].cell(0, 0).value == "A"
+
+    assert process.memory_info().rss < rss_base * 5

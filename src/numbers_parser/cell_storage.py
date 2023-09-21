@@ -1,34 +1,34 @@
 import logging
 import math
 import re
-import sigfig
-
 from collections import OrderedDict
 from fractions import Fraction
-from functools import lru_cache
-from pendulum import datetime, duration
 from struct import unpack
 from typing import Tuple
 from warnings import warn
 
+import sigfig
+from pendulum import datetime, duration
+
 from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser.constants import (
-    EPOCH,
-    PACKAGE_ID,
     DECIMAL_PLACES_AUTO,
-    CellType,
+    EPOCH,
+    MAX_SIGNIFICANT_DIGITS,
+    PACKAGE_ID,
+    SECONDS_IN_DAY,
+    SECONDS_IN_HOUR,
+    SECONDS_IN_WEEK,
     CellPadding,
+    CellType,
     DurationStyle,
     DurationUnits,
     FormatType,
-    SECONDS_IN_HOUR,
-    SECONDS_IN_DAY,
-    SECONDS_IN_WEEK,
-    MAX_SIGNIFICANT_DIGITS,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
-from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.numbers_cache import cache, Cacheable
+from numbers_parser.numbers_uuid import NumbersUUID
 
 logger = logging.getLogger(numbers_parser_name)
 debug = logger.debug
@@ -75,7 +75,7 @@ DATETIME_FIELD_MAP = OrderedDict(
 )
 
 
-class CellStorage:
+class CellStorage(Cacheable):
     # 15% performance uplift for using slots
     __slots__ = (
         "buffer",
@@ -107,6 +107,7 @@ class CellStorage:
         "bool_format_id",
         # "comment_id",
         # "import_warning_id",
+        "_cache",
     )
 
     # @profile
@@ -274,7 +275,7 @@ class CellStorage:
             return str(self.value)
 
     @property
-    @lru_cache(maxsize=None)
+    @cache(num_args=0)
     def image_data(self) -> Tuple[bytes, str]:
         """Return the background image data for a cell or None if no image"""
         if self.cell_style_id is None:
