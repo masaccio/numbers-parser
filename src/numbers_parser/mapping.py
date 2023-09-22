@@ -182,6 +182,8 @@ TSPRegistryMapping = {
     "638": "TSASOS.VerifyActivityStreamWithServerCommandArchive",
     "639": "TSASOS.InducedVerifyActivityStreamWithServerCommandArchive",
     "640": "TSASOS.VerifyTransformHistoryWithServerCommandArchive",
+    "641": "TSA.Object3DInfoSetValueCommandArchive",
+    "642": "TSA.Object3DInfoCommandArchive",
     "2001": "TSWP.StorageArchive",
     "2002": "TSWP.SelectionArchive",
     "2003": "TSWP.DrawableAttachmentArchive",

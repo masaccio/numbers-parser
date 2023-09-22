@@ -263,12 +263,23 @@ message ParagraphStylePropertiesArchive {
     TATvalue3 = 3;
     TATvalue4 = 4;
   }
-  enum ParagraphBorderType {
+  enum DeprecatedParagraphBorderType {
     PBTvalue0 = 0;
     PBTvalue1 = 1;
     PBTvalue2 = 2;
     PBTvalue3 = 3;
     PBTvalue4 = 4;
+    PBTvalue5 = 8;
+    PBTvalue6 = 9;
+    PBTvalue7 = 10;
+    PBTvalue8 = 11;
+    PBTvalue9 = 16;
+    PBTvalue10 = 17;
+    PBTvalue11 = 18;
+    PBTvalue12 = 19;
+    PBTvalue13 = 24;
+    PBTvalue14 = 25;
+    PBTvalue15 = 26;
   }
   enum OutlineStyleType {
     OSTvalue0 = 0;
@@ -289,9 +300,9 @@ message ParagraphStylePropertiesArchive {
   optional bool line_spacing_null = 12;
   optional .TSWP.LineSpacingArchive line_spacing = 13;
   optional bool page_break_before = 14;
-  optional .TSWP.ParagraphStylePropertiesArchive.ParagraphBorderType borders = 15;
-  optional bool rule_offset_null = 16;
-  optional .TSP.Point rule_offset = 17;
+  optional .TSWP.ParagraphStylePropertiesArchive.DeprecatedParagraphBorderType deprecated_borders = 15;
+  optional bool historical_rule_offset_null = 16;
+  optional .TSP.Point historical_rule_offset = 17;
   optional float rule_width = 18;
   optional float right_indent = 19;
   optional float space_after = 20;
@@ -315,6 +326,8 @@ message ParagraphStylePropertiesArchive {
   optional .TSP.Reference following_style = 42;
   optional bool show_in_bookmarks_list = 43;
   optional bool show_in_toc_navigator = 44;
+  optional int32 border_positions = 45;
+  optional bool rounded_corners = 46;
 }
 
 message ParagraphStyleArchive {

@@ -42,6 +42,7 @@ _SUPPORTED_NUMBERS_VERSIONS = [
     "12.2.1",
     "13.0",
     "13.1",
+    "13.2",
 ]
 
 

@@ -47,6 +47,17 @@ message Point {
   required float y = 2;
 }
 
+message Pose3D {
+  required float yaw = 1;
+  required float pitch = 2;
+  required float roll = 3;
+}
+
+message Rect {
+  required .TSP.Point origin = 1;
+  required .TSP.Size size = 2;
+}
+
 message Size {
   required float width = 1;
   required float height = 2;

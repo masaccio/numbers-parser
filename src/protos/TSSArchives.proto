@@ -60,6 +60,7 @@ message StylesheetArchive {
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_12_2 = 15;
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_13_0 = 16;
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_13_1 = 17;
+  optional .TSS.StylesheetArchive.VersionedStyles styles_for_13_2 = 18;
 }
 
 message ThemeArchive {

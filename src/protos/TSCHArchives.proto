@@ -300,6 +300,25 @@ message CollaboratorChartTitleCursorSubselectionArchive {
   }
 }
 
+message CachedAxisDataFormatterPersistableStyleObject {
+  optional .TSCH.ChartAxisIDArchive axis_id = 1;
+  optional .TSK.FormatStructArchive style_object = 2;
+}
+
+message CachedSeriesDataFormatterPersistableStyleObject {
+  optional int32 series_index = 1;
+  optional .TSK.FormatStructArchive style_object = 2;
+}
+
+message CachedDataFormatterPersistableStyleObjects {
+  repeated .TSCH.CachedAxisDataFormatterPersistableStyleObject axis_data_formatter_list = 1;
+  repeated .TSCH.CachedSeriesDataFormatterPersistableStyleObject series_data_formatter_list = 2;
+  optional .TSK.FormatStructArchive summary_label_style_object = 3;
+  extend .TSCH.ChartArchive {
+    optional .TSCH.CachedDataFormatterPersistableStyleObjects cached_data_formatter_persistable_style_objects = 10030;
+  }
+}
+
 extend .TSCH.ChartArchive {
   optional bool scene3d_settings_constant_depth = 10002;
   optional string last_applied_fill_set_lookup_string = 10004;

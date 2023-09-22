@@ -274,3 +274,46 @@ message TitlePlacementCommandArchive {
   optional .TSP.Reference old_placement = 4;
 }
 
+message Object3DInfo {
+  optional .TSP.DataReference object_data = 1;
+  optional bool plays_animations = 2;
+  optional .TSP.Pose3D pose3d = 3;
+  optional .TSP.Rect boundingRect = 4;
+  optional .TSP.DataReference thumbnail_image_data = 5;
+  optional bool embedded_animations = 6;
+  optional .TSP.Path tracedPath = 7;
+  extend .TSD.MovieArchive {
+    optional .TSA.Object3DInfo object_3D_info = 200;
+  }
+}
+
+message Object3DInfoCommandArchive {
+  required .TSD.InfoCommandArchive super = 1;
+  optional .TSP.Reference info = 2;
+  optional .TSP.UUIDPath info_id_path = 3;
+  optional .TSP.DataReference thumbnail_image_data = 4;
+  optional .TSP.DataReference old_thumbnail_image_data = 5;
+  optional .TSP.Pose3D pose3d = 6;
+  optional .TSP.Pose3D old_pose3d = 7;
+  optional .TSP.Rect boundingRect = 8;
+  optional .TSP.Rect oldBoundingRect = 9;
+  optional .TSP.Path tracedPath = 10;
+  optional .TSP.Path oldTracedPath = 11;
+}
+
+message Object3DInfoSetValueCommandArchive {
+  message PropertyValue {
+    optional bool plays_animations = 4;
+    optional float opacity = 10;
+  }
+  enum Property {
+    PlaysAnimations = 3;
+    Opacity = 9;
+  }
+  required .TSK.CommandArchive super = 1;
+  required .TSP.UUIDPath object_3d_info_id_path = 2;
+  required .TSA.Object3DInfoSetValueCommandArchive.Property property = 3;
+  optional .TSA.Object3DInfoSetValueCommandArchive.PropertyValue value = 4;
+  optional .TSA.Object3DInfoSetValueCommandArchive.PropertyValue old_value = 5;
+}
+

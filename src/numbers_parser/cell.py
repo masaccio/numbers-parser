@@ -86,9 +86,9 @@ class HorizontalJustification(IntEnum):
 
 
 class VerticalJustification(IntEnum):
-    TOP = ParagraphStyle.ParagraphBorderType.PBTvalue0
-    MIDDLE = ParagraphStyle.ParagraphBorderType.PBTvalue1
-    BOTTOM = ParagraphStyle.ParagraphBorderType.PBTvalue2
+    TOP = ParagraphStyle.DeprecatedParagraphBorderType.PBTvalue0
+    MIDDLE = ParagraphStyle.DeprecatedParagraphBorderType.PBTvalue1
+    BOTTOM = ParagraphStyle.DeprecatedParagraphBorderType.PBTvalue2
 
 
 HORIZONTAL_MAP = {
