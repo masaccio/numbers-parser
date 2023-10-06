@@ -74,8 +74,8 @@ def test_save_merges(configurable_save_file):
     assert table.cell("D2").is_merged
     assert table.cell("D2").size == (3, 3)
     assert table.merge_ranges == ["B2:C2", "B5:E5", "D2:F4"]
-    assert all([isinstance(table.cell(row, 3), MergedCell) for row in range(2, 4)])
-    assert all([isinstance(table.cell(row, 4), MergedCell) for row in range(1, 4)])
+    assert all(isinstance(table.cell(row, 3), MergedCell) for row in range(2, 4))
+    assert all(isinstance(table.cell(row, 4), MergedCell) for row in range(1, 4))
 
 
 def test_create_table(configurable_save_file):

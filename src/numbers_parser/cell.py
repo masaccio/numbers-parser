@@ -250,7 +250,7 @@ def rgb_color(color) -> RGB:
     if isinstance(color, RGB):
         return color
     if isinstance(color, tuple):
-        if not (len(color) == 3 and all([isinstance(x, int) for x in color])):
+        if not (len(color) == 3 and all(isinstance(x, int) for x in color)):
             raise TypeError("RGB color must be an RGB or a tuple of 3 integers")
         return RGB(*color)
     elif isinstance(color, list):
@@ -265,7 +265,7 @@ def alignment(value) -> Alignment:
     if isinstance(value, Alignment):
         return value
     if isinstance(value, tuple):
-        if not (len(value) == 2 and all([isinstance(x, (int, str)) for x in value])):
+        if not (len(value) == 2 and all(isinstance(x, (int, str)) for x in value)):
             raise TypeError("Alignment must be an Alignment or a tuple of 2 integers/strings")
         return Alignment(*value)
     raise TypeError("Alignment must be an Alignment or a tuple of 2 integers/strings")

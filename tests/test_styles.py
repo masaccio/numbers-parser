@@ -206,35 +206,29 @@ def test_header_styles():
     sheets = doc.sheets
     table = sheets["Headers"].tables[0]
 
-    assert all([table.cell(0, row_num).style.bold for row_num in range(0, 4)])
-    assert all([table.cell(3, row_num).style.bold for row_num in range(0, 3)])
-    assert all([table.cell(8, row_num).style.bold for row_num in range(0, 3)])
-    assert all([table.cell(9, row_num).style.bold for row_num in range(0, 4)])
+    assert all(table.cell(0, row_num).style.bold for row_num in range(0, 4))
+    assert all(table.cell(3, row_num).style.bold for row_num in range(0, 3))
+    assert all(table.cell(8, row_num).style.bold for row_num in range(0, 3))
+    assert all(table.cell(9, row_num).style.bold for row_num in range(0, 4))
 
-    assert all([not table.cell(ref).style.bold for ref in ["E1", "B5", "E9"]])
-    assert all([table.cell(ref).style.underline for ref in ["C1", "C4", "C9"]])
-    assert all([table.cell(ref).style.italic for ref in ["B1", "B4", "B9"]])
-    assert all([table.cell(ref).style.strikethrough for ref in ["D1", "A5", "D9"]])
+    assert all(not table.cell(ref).style.bold for ref in ["E1", "B5", "E9"])
+    assert all(table.cell(ref).style.underline for ref in ["C1", "C4", "C9"])
+    assert all(table.cell(ref).style.italic for ref in ["B1", "B4", "B9"])
+    assert all(table.cell(ref).style.strikethrough for ref in ["D1", "A5", "D9"])
 
-    assert all([table.cell(ref).style.font_color == RGB(29, 177, 0) for ref in ["A2", "A6", "A10"]])
-    assert all([table.cell(ref).style.bg_color == RGB(29, 177, 0) for ref in ["B2", "B6", "B10"]])
+    assert all(table.cell(ref).style.font_color == RGB(29, 177, 0) for ref in ["A2", "A6", "A10"])
+    assert all(table.cell(ref).style.bg_color == RGB(29, 177, 0) for ref in ["B2", "B6", "B10"])
     assert all(
-        [
-            table.cell(ref).style.bg_color == [RGB(136, 250, 78), RGB(1, 113, 0)]
+        table.cell(ref).style.bg_color == [RGB(136, 250, 78), RGB(1, 113, 0)]
             for ref in ["C2", "C6", "C10"]
-        ]
     )
     assert all(
-        [
-            table.cell(ref).style.bg_image.filename == "pexels-evg-kowalievska-1170986-16.jpg"
+        table.cell(ref).style.bg_image.filename == "pexels-evg-kowalievska-1170986-16.jpg"
             for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
-        ]
     )
     assert all(
-        [
-            len(table.cell(ref).style.bg_image.data) == 418932
+        len(table.cell(ref).style.bg_image.data) == 418932
             for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
-        ]
     )
     assert table.cell("A9").style.bold
     assert table.cell("B9").style.italic and table.cell("B9").style.bold
