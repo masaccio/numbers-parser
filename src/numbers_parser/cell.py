@@ -285,16 +285,20 @@ class Border:
     def __init__(
         self,
         width: float = DEFAULT_BORDER_WIDTH,
-        color: RGB = RGB(*DEFAULT_BORDER_COLOR),
-        style: BorderType = BorderType(BORDER_STYLE_MAP[DEFAULT_BORDER_STYLE]),
+        color: RGB = None,
+        style: BorderType = None,
         _order: int = 0,
     ):
         if not isinstance(width, float):
             raise TypeError("width must be a float number of points")
         self.width = width
 
+        if color is None:
+            color = RGB(*DEFAULT_BORDER_COLOR)
         self.color = rgb_color(color)
 
+        if style is None:
+            style = BorderType(BORDER_STYLE_MAP[DEFAULT_BORDER_STYLE])
         if isinstance(style, str):
             style = style.lower()
             if style not in BORDER_STYLE_MAP:
