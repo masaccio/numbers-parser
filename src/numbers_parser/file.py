@@ -31,9 +31,9 @@ def read_numbers_file(path, file_handler, object_handler=None):
         try:
             zipf = ZipFile(path)
         except BadZipFile:
-            raise FileFormatError("Invalid Numbers file")
+            raise FileFormatError("Invalid Numbers file") from None
         except FileNotFoundError:
-            raise FileError("No such file or directory")
+            raise FileError("No such file or directory") from None
 
         try:
             index_zip = [f for f in zipf.namelist() if f.lower().endswith("index.zip")]
@@ -43,7 +43,7 @@ def read_numbers_file(path, file_handler, object_handler=None):
             else:
                 get_objects_from_zip_stream(zipf, file_handler, object_handler)
         except BadZipFile:
-            raise FileFormatError("Invalid Numbers file")
+            raise FileFormatError("Invalid Numbers file") from None
 
 
 def write_numbers_file(filename, file_store):
@@ -60,7 +60,7 @@ def get_objects_from_zip_file(path, file_handler, object_handler):
     try:
         zipf = ZipFile(path)
     except BadZipFile:
-        raise FileFormatError("Invalid Numbers file")
+        raise FileFormatError("Invalid Numbers file") from None
 
     get_objects_from_zip_stream(zipf, file_handler, object_handler)
 
