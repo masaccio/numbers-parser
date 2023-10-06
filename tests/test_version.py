@@ -1,6 +1,6 @@
 import importlib
+from unittest import mock
 
-import mock
 import pytest
 
 from numbers_parser import _check_installed_numbers_version, _get_version

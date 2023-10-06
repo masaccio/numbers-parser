@@ -4,7 +4,7 @@ import sys
 
 for filename in sys.argv[1:]:
     new_filename = filename + ".new"
-    old_f = open(filename, "r")
+    old_f = open(filename)
     new_f = open(new_filename, "w")
     for line in old_f.readlines():
         line = re.sub("^import T", "import numbers_parser.generated.T", line)

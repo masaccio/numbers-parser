@@ -21,7 +21,7 @@ from google.protobuf.message import DecodeError
 from termcolor import cprint
 
 
-class ProtoFile(object):
+class ProtoFile:
     def __init__(self, data, pool):
         self.data = data
         self.pool = pool
@@ -48,7 +48,7 @@ class ProtoFile(object):
         return self.attempt_to_load()
 
     def __repr__(self):
-        return '<%s: path="%s">' % (self.__class__.__name__, self.path)
+        return f'<{self.__class__.__name__}: path="{self.path}">'
 
     @property
     def source(self):

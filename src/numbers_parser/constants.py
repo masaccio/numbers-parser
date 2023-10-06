@@ -8,7 +8,7 @@ from pkg_resources import resource_filename
 DEFAULT_DOCUMENT = resource_filename(__name__, os.path.join("data", "empty.numbers"))
 DEFAULT_COLUMN_COUNT = 8
 DEFAULT_COLUMN_WIDTH = 98.0
-DEFAULT_PRE_BNC_BYTES = "🤠".encode("utf-8")  # Yes, really!
+DEFAULT_PRE_BNC_BYTES = "🤠".encode()  # Yes, really!
 DEFAULT_ROW_COUNT = 12
 DEFAULT_ROW_HEIGHT = 20.0
 DEFAULT_NUM_HEADERS = 1

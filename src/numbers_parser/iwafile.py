@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 debug = logger.debug
 
 
-class IWAFile(object):
+class IWAFile:
     def __init__(self, chunks, filename=None):
         self.chunks = chunks
         self.filename = filename
@@ -58,7 +58,7 @@ class IWAFile(object):
         return b"".join([chunk.to_buffer() for chunk in self.chunks])
 
 
-class IWACompressedChunk(object):
+class IWACompressedChunk:
     def __init__(self, archives):
         self.archives = archives
 
@@ -116,7 +116,7 @@ class IWACompressedChunk(object):
         )
 
 
-class ProtobufPatch(object):
+class ProtobufPatch:
     def __init__(self, data):
         self.data = data
 
@@ -124,7 +124,7 @@ class ProtobufPatch(object):
         return self.data == other.data  # pragma: no cover
 
     def __repr__(self):
-        return "<%s %s>" % (self.__class__.__name__, self.data)  # pragma: no cover
+        return f"<{self.__class__.__name__} {self.data}>"  # pragma: no cover
 
     def to_dict(self):
         return message_to_dict(self.data)
@@ -140,7 +140,7 @@ class ProtobufPatch(object):
         return self.data.SerializePartialToString()
 
 
-class IWAArchiveSegment(object):
+class IWAArchiveSegment:
     def __init__(self, header, objects):
         self.header = header
         self.objects = objects
@@ -148,12 +148,9 @@ class IWAArchiveSegment(object):
     def __eq__(self, other):
         return self.header == other.header and self.objects == other.objects  # pragma: no cover
 
-    def __repr__(self):
-        return "<%s identifier=%s objects=%s>" % (  # pragma: no cover
-            self.__class__.__name__,
-            self.header.identifier,
-            repr(self.objects).replace("\n", " ").replace("  ", " "),
-        )
+    def __repr__(self):  # pragma: no cover
+        self_str = repr(self.objects).replace("\n", " ").replace("  ", " ")
+        return f"<{self.__class__.__name__} identifier={self.header.identifier} objects={self_str}>"
 
     @classmethod
     def from_buffer(cls, buf, filename=None):
@@ -222,8 +219,9 @@ class IWAArchiveSegment(object):
                     message_info.length = object_length
             except EncodeError as e:  # pragma: no cover
                 raise ValueError(
-                    "Failed to encode object: %s\nObject: '%s'\nMessage info: %s"
-                    % (e, repr(obj), message_info)
+                    "Failed to encode object: {}\nObject: '{}'\nMessage info: {}".format(
+                        e, repr(obj), message_info
+                    )
                 ) from None
         return b"".join(
             [_VarintBytes(self.header.ByteSize()), self.header.SerializeToString()]

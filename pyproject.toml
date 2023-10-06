@@ -59,7 +59,7 @@ directory = "coverage_html_report"
 show_contexts = true
 
 [tool.pytest.ini_options]
-addopts = "--cov=src/numbers_parser --cov-report=term-missing:skip-covered --cov-context=test"
+addopts = "--cov=src/numbers_parser --cov-report=html --cov-report=term-missing:skip-covered --cov-context=test"
 
 [tool.tox]
 legacy_tox_ini = """
@@ -117,7 +117,9 @@ select = [
     # isort
     "I",
     # PEP naming
-    "N"
+    "N",
+    # pyupgrade
+    "UP"
 ]
 src = ["src", "tests"]
 

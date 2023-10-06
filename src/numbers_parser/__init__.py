@@ -53,7 +53,7 @@ def _get_version():
 def _check_installed_numbers_version():
     try:
         fp = open(os.path.join(_DEFAULT_NUMBERS_INSTALL_PATH, _VERSION_PLIST_PATH), "rb")
-    except IOError:
+    except OSError:
         return None
     version_dict = plistlib.load(fp)
     installed_version = version_dict["CFBundleShortVersionString"]

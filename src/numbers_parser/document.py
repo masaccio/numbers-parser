@@ -188,7 +188,7 @@ class Sheet:
 
 class Table(Cacheable):
     def __init__(self, model, table_id):
-        super(Table, self).__init__()
+        super().__init__()
         self._model = model
         self._table_id = table_id
         self.num_rows = self._model.number_of_rows(self._table_id)
