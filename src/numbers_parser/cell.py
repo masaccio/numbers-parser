@@ -482,9 +482,9 @@ class Cell(Cacheable):
                     stacklevel=2,
                 )
             return NumberCell(row_num, col_num, rounded_value)
-        elif isinstance(value, builtin_datetime) or isinstance(value, DateTime):
+        elif isinstance(value, (DateTime, builtin_datetime)):
             return DateCell(row_num, col_num, pendulum_instance(value))
-        elif isinstance(value, builtin_timedelta) or isinstance(value, Duration):
+        elif isinstance(value, (Duration, builtin_timedelta)):
             return DurationCell(row_num, col_num, value)
         else:
             raise ValueError("Can't determine cell type from type " + type(value).__name__)

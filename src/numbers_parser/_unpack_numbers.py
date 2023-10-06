@@ -53,18 +53,18 @@ def prettify_uuids(obj):
 def prettify_cell_storage(obj):
     if isinstance(obj, dict):
         for k, v in obj.items():
-            if isinstance(v, dict) or isinstance(v, list):
+            if isinstance(v, (dict, list)):
                 prettify_cell_storage(v)
-            elif k == "cell_storage_buffer" or k == "cell_storage_buffer_pre_bnc":
+            elif k in ["cell_storage_buffer", "cell_storage_buffer_pre_bnc"]:
                 obj[k] = str(hexlify(b64decode(obj[k]), sep=":"))
                 obj[k] = obj[k].replace("b'", "").replace("'", "")
-            elif k == "cell_offsets" or k == "cell_offsets_pre_bnc":
+            elif k in ["cell_offsets", k == "cell_offsets_pre_bnc"]:
                 offsets = array("h", b64decode(obj[k])).tolist()
                 obj[k] = ",".join([str(x) for x in offsets])
                 obj[k] = regex.sub(r"(?:,-1)+$", ",[...]", obj[k])
     else:  # list
         for v in obj:
-            if isinstance(v, dict) or isinstance(v, list):
+            if isinstance(v, (dict, list)):
                 prettify_cell_storage(v)
 
 

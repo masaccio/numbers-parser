@@ -39,7 +39,7 @@ tsce_functions = {}
 cstring_refs = {}
 
 for line in str(disassembly).split("\\n"):
-    line = str(line).replace("\\t", " ")
+    line = str(line).replace("\\t", " ")  # noqa: PLW2901
     if m := re.search(r"mov *w8, #(\d+)", line):
         arg = m.group(1)
         continue

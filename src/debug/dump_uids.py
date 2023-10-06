@@ -9,9 +9,7 @@ def find_fields(obj=object, tree=""):
     for descriptor in obj.DESCRIPTOR.fields:
         value = getattr(obj, descriptor.name)
         name = descriptor.name
-        if isinstance(value, TSPMessages.UUID) or isinstance(
-            value, TSPMessages.CFUUIDArchive
-        ):
+        if isinstance(value, (TSPMessages.CFUUIDArchive, TSPMessages.UUID)):
             uuid = NumbersUUID(value)
             print(f"{tree}.{name} = {uuid}")
         elif not isinstance(value, TSPMessages.Reference) and hasattr(

@@ -8,7 +8,7 @@ from numbers_parser.numbers_uuid import NumbersUUID
 MAX_DEPTH = 10
 
 
-def deep_print(objects, obj, indent=0, max_depth=MAX_DEPTH):
+def deep_print(objects, obj, indent=0, max_depth=MAX_DEPTH):  # noqa: PLR0912
     if indent >= max_depth:
         return
     for descriptor in obj.DESCRIPTOR.fields:
@@ -22,9 +22,7 @@ def deep_print(objects, obj, indent=0, max_depth=MAX_DEPTH):
                 deep_print(objects, objects[id], indent=indent + 1, max_depth=max_depth)
             else:
                 print("  " * indent + f"{name}->#{id}")
-        elif isinstance(value, TSPMessages.UUID) or isinstance(
-            value, TSPMessages.CFUUIDArchive
-        ):
+        elif isinstance(value, (TSPMessages.CFUUIDArchive, TSPMessages.UUID)):
             uuid = NumbersUUID(value)
             print("  " * indent + f"{descriptor.name}={uuid}")
         elif descriptor.type == descriptor.TYPE_MESSAGE:
@@ -108,12 +106,8 @@ for filename in args.numbers:
             ]
             for id in sorted(object_ids):
                 print(f"===== object={id}")
-                deep_print(
-                    doc._model.objects, doc._model.objects[id], max_depth=args.max_depth
-                )
+                deep_print(doc._model.objects, doc._model.objects[id], max_depth=args.max_depth)
     else:
         for id in doc._model.find_refs(args.archive):
             print(f"===== object={id}")
-            deep_print(
-                doc._model.objects, doc._model.objects[id], max_depth=args.max_depth
-            )
+            deep_print(doc._model.objects, doc._model.objects[id], max_depth=args.max_depth)

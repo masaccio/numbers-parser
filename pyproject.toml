@@ -30,20 +30,20 @@ sigfig = "^1.3.2"
 
 [tool.poetry.group.dev.dependencies]
 black = {version = "^22.10.0", allow-prereleases = true}
+gprof2dot = "^2022.7.29"
+line-profiler = "^4.0.3"
+mock = "^5.1.0"
+psutil = "^5.9.5"
 pylama = {extras = ["toml"], version = "^8.4.1"}
 pytest = "^7.2.0"
 pytest-check = "^1.0.10"
 pytest-console-scripts = "^1.3.1"
 pytest-cov = "^4.0.0"
 pytest-profiling = "^1.7.0"
-python-magic = "^0.4.27"
-termcolor = "^2.2.0"
-gprof2dot = "^2022.7.29"
-line-profiler = "^4.0.3"
-mock = "^5.1.0"
 pytest-xdist = "^3.3.1"
-psutil = "^5.9.5"
+python-magic = "^0.4.27"
 ruff = "^0.0.292"
+termcolor = "^2.2.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
@@ -92,36 +92,39 @@ builtins = "_"
 profile = "black"
 
 [tool.ruff]
-fix = true
-unfixable = [
-    "ERA", # do not autoremove commented out code
-]
-target-version = "py38"
-line-length = 100
 exclude = [
-    # Machine-generated files
-    ".bootstrap/*",
-	"src/numbers_parser/generated/*",
-	# Third-part files not to lint
-	"src/debug/lldbutil.py",
-	# Tox
-	".tox/*"
+  # Machine-generated files
+  ".bootstrap/*",
+  "src/numbers_parser/generated/*",
+  # Third-party files not to lint
+  "src/debug/lldbutil.py", # Tox
+  ".tox/*",
 ]
+fix = true
+ignore = [
+  "PLR2004", # Allow constant values
+]
+line-length = 100
 select = [
-    # Pyflakes including bugbears
-    "F",
-    "B",
-    # Pycodestyle
-    "E",
-    "W",
-    # isort
-    "I",
-    # PEP naming
-    "N",
-    # pyupgrade
-    "UP"
+  # Pyflakes including bugbears
+  "F",
+  "B", # Pycodestyle
+  "E",
+  "W", # isort
+  "I", # PEP naming
+  "N", # pyupgrade
+  "UP", # Pylama
+  "PL",
 ]
 src = ["src", "tests"]
+target-version = "py38"
+unfixable = [
+  "ERA", # do not autoremove commented out code
+]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
+
+[tool.ruff.per-file-ignores]
+"src/bootstrap/**" = ["PLR2004"]
+"tests/**" = ["PLR2004"]

@@ -103,7 +103,7 @@ def print_table(args, filename):
                 writer.writerow(cells)
 
 
-def main():
+def main():  # noqa: PLR0912
     parser = command_line_parser()
     args = parser.parse_args()
 
