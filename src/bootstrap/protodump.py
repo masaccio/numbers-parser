@@ -83,35 +83,35 @@ def extract_proto_from_file(filename, descriptor_pool):
         data = f.read()
     offset = 0
 
-    PROTO_MARKER = b".proto"
+    proto_marker = b".proto"
 
     while True:
         # Look for ".proto"
-        suffix_position = data.find(PROTO_MARKER, offset)
+        suffix_position = data.find(proto_marker, offset)
         if suffix_position == -1:
             break
 
         marker_start = data.rfind(b"\x0A", offset, suffix_position)
         if marker_start == -1:
             # Doesn't look like a proto descriptor
-            offset = suffix_position + len(PROTO_MARKER)
+            offset = suffix_position + len(proto_marker)
             continue
 
         try:
             name_length, new_pos = _DecodeVarint(data, marker_start)
         except Exception:
             # Expected a VarInt here, so if not, continue
-            offset = suffix_position + len(PROTO_MARKER)
+            offset = suffix_position + len(proto_marker)
             continue
 
         # Length = 1 byte for the marker (0x0A)
         # + length of the varint + length of the descriptor name
         expected_length = 1 + (new_pos - marker_start) + name_length + 7
-        current_length = (suffix_position + len(PROTO_MARKER)) - marker_start
+        current_length = (suffix_position + len(proto_marker)) - marker_start
 
         # Huge margin of error here - my calculations above are probably just wrong.
         if current_length > expected_length + 30:
-            offset = suffix_position + len(PROTO_MARKER)
+            offset = suffix_position + len(proto_marker)
             continue
 
         # Split the data starting at the marker byte and try to read it as a
@@ -173,7 +173,7 @@ def main():
             " reinstall Protobuf with C++ support."
         )
 
-    GLOBAL_DESCRIPTOR_POOL = DescriptorPool()
+    global_descriptor_pool = DescriptorPool()
 
     all_filenames = [str(path) for path in Path(args.input_path).rglob("*") if not path.is_dir()]
 
@@ -185,7 +185,7 @@ def main():
 
     proto_files_found = set()
     for path in all_filenames:
-        for proto in extract_proto_from_file(path, GLOBAL_DESCRIPTOR_POOL):
+        for proto in extract_proto_from_file(path, global_descriptor_pool):
             proto_files_found.add(proto)
 
     missing_deps = set()

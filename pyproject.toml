@@ -115,7 +115,9 @@ select = [
     "E",
     "W",
     # isort
-    "I001"
+    "I",
+    # PEP naming
+    "N"
 ]
 src = ["src", "tests"]
 
