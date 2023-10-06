@@ -54,7 +54,7 @@ class ObjectStore:
         self._max_id = math.ceil(self._max_id / 1000000) * 1000000
 
     def new_message_id(self):
-        """Return the next available message ID for object creation"""
+        """Return the next available message ID for object creation."""
         self._max_id += 1
         self._objects[PACKAGE_ID].last_object_identifier = self._max_id
         return self._max_id
@@ -62,7 +62,8 @@ class ObjectStore:
     def create_object_from_dict(self, iwa_file: str, object_dict: dict, cls: object):
         """Create a new object and store the associated IWA segment. Return the
         message ID for the object and the newly created object. If the IWA
-        file cannot be found, it will be created."""
+        file cannot be found, it will be created.
+        """
         paths = [k for k, v in self._file_store.items() if iwa_file in k]
         iwa_pathname = None if len(paths) == 0 else paths[0]
 
@@ -82,7 +83,8 @@ class ObjectStore:
 
     def update_object_file_store(self):
         """Copy the protobuf messages from any updated object to the cached
-        version in the file store so this can be saved to a new document"""
+        version in the file store so this can be saved to a new document.
+        """
         for obj_id in self._objects.keys():
             copy_object_to_iwa_file(
                 self._file_store[self._object_to_filename_map[obj_id]],

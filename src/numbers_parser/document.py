@@ -70,12 +70,12 @@ class Document:
 
     @property
     def sheets(self) -> list:
-        """Return a list of all sheets in the document"""
+        """Return a list of all sheets in the document."""
         return self._sheets
 
     @property
     def styles(self) -> list:
-        """Return a list of styles available in the document"""
+        """Return a list of styles available in the document."""
         return self._model.styles
 
     def save(self, filename):
@@ -92,7 +92,8 @@ class Document:
         num_cols=DEFAULT_COLUMN_COUNT,
     ) -> object:
         """Add a new sheet to the current document. If no sheet name is provided,
-        the next available numbered sheet will be generated"""
+        the next available numbered sheet will be generated.
+        """
         if sheet_name is not None:
             if sheet_name in self._sheets:
                 raise IndexError(f"sheet '{sheet_name}' already exists")
@@ -122,7 +123,8 @@ class Document:
 
     def add_style(self, **kwargs) -> Style:
         """Add a new style to the current document. If no style name is
-        provided, the next available numbered style will be generated"""
+        provided, the next available numbered style will be generated.
+        """
         if "name" in kwargs and kwargs["name"] is not None:
             if kwargs["name"] in self._model.styles.keys():
                 raise IndexError(f"style '{kwargs['name']}' already exists")
@@ -147,12 +149,12 @@ class Sheet:
 
     @property
     def name(self):
-        """Return the sheets name"""
+        """Return the sheets name."""
         return self._model.sheet_name(self._sheet_id)
 
     @name.setter
     def name(self, value):
-        """Set the sheet's name"""
+        """Set the sheet's name."""
         self._model.sheet_name(self._sheet_id, value)
 
     def add_table(  # noqa: PLR0913
@@ -164,8 +166,8 @@ class Sheet:
         num_cols=DEFAULT_COLUMN_COUNT,
     ) -> object:
         """Add a new table to the current sheet. If no table name is provided,
-        the next available numbered table will be generated"""
-
+        the next available numbered table will be generated.
+        """
         from_table_id = self._tables[-1]._table_id
         return self._add_table(table_name, from_table_id, x, y, num_rows, num_cols)
 
@@ -216,12 +218,12 @@ class Table(Cacheable):
 
     @property
     def name(self) -> str:
-        """Return the table's name"""
+        """Return the table's name."""
         return self._model.table_name(self._table_id)
 
     @name.setter
     def name(self, value: str):
-        """Set the table's name"""
+        """Set the table's name."""
         self._model.table_name(self._table_id, value)
 
     @property
@@ -234,12 +236,12 @@ class Table(Cacheable):
 
     @property
     def num_header_rows(self) -> int:
-        """Return the number of header rows"""
+        """Return the number of header rows."""
         return self._model.num_header_rows(self._table_id)
 
     @num_header_rows.setter
     def num_header_rows(self, num_headers: int):
-        """Return the number of header rows"""
+        """Return the number of header rows."""
         if num_headers < 0:
             raise ValueError("Number of headers cannot be negative")
         elif num_headers > self.num_rows:
@@ -250,12 +252,12 @@ class Table(Cacheable):
 
     @property
     def num_header_cols(self) -> int:
-        """Return the number of header columns"""
+        """Return the number of header columns."""
         return self._model.num_header_cols(self._table_id)
 
     @num_header_cols.setter
     def num_header_cols(self, num_headers: int):
-        """Return the number of header columns"""
+        """Return the number of header columns."""
         if num_headers < 0:
             raise ValueError("Number of headers cannot be negative")
         elif num_headers > self.num_cols:
@@ -266,30 +268,29 @@ class Table(Cacheable):
 
     @property
     def height(self) -> int:
-        """Return the table's height in points"""
+        """Return the table's height in points."""
         return self._model.table_height(self._table_id)
 
     @property
     def width(self) -> int:
-        """Return the table's width in points"""
+        """Return the table's width in points."""
         return self._model.table_width(self._table_id)
 
     def row_height(self, row_num: int, height: int = None) -> int:
-        """Return the height of a table row. Set the height if not None"""
+        """Return the height of a table row. Set the height if not None."""
         return self._model.row_height(self._table_id, row_num, height)
 
     def col_width(self, col_num: int, width: int = None) -> int:
-        """Return the width of a table column. Set the width if not None"""
+        """Return the width of a table column. Set the width if not None."""
         return self._model.col_width(self._table_id, col_num, width)
 
     @property
     def coordinates(self) -> Tuple[float]:
-        """Return the table's x,y offsets in points"""
+        """Return the table's x,y offsets in points."""
         return self._model.table_coordinates(self._table_id)
 
     def rows(self, values_only: bool = False) -> list:
-        """
-        Return all rows of cells for the Table.
+        """Return all rows of cells for the Table.
 
         Args:
             values_only: if True, return cell values instead of Cell objects
@@ -331,8 +332,7 @@ class Table(Cacheable):
         max_col: int = None,
         values_only: bool = False,
     ) -> Generator[tuple, None, None]:
-        """
-        Produces cells from a table, by row. Specify the iteration range using
+        """Produces cells from a table, by row. Specify the iteration range using
         the indexes of the rows and columns.
 
         Args:
@@ -377,8 +377,7 @@ class Table(Cacheable):
         max_row: int = None,
         values_only: bool = False,
     ) -> Generator[tuple, None, None]:
-        """
-        Produces cells from a table, by column. Specify the iteration range using
+        """Produces cells from a table, by column. Specify the iteration range using
         the indexes of the rows and columns.
 
         Args:
@@ -417,7 +416,8 @@ class Table(Cacheable):
 
     def _validate_cell_coords(self, *args):
         """Check first arguments are value cell references and pad
-        the table with empty cells if outside current bounds"""
+        the table with empty cells if outside current bounds.
+        """
         if isinstance(args[0], str):
             (row_num, col_num) = xl_cell_to_rowcol(args[0])
             values = args[1:]
@@ -486,7 +486,7 @@ class Table(Cacheable):
             self._model.number_of_columns(self._table_id, self.num_cols)
 
     def merge_cells(self, cell_range):
-        """Convert a cell range or list of cell ranges into merged cells"""
+        """Convert a cell range or list of cell ranges into merged cells."""
         if isinstance(cell_range, list):
             for x in cell_range:
                 self.merge_cells(x)

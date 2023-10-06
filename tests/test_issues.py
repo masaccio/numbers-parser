@@ -289,7 +289,7 @@ def test_issue_54():
     assert doc.sheets[0].tables[0].cell(4, 2).formula == "SUM(Sheet 2::Table 1::C1:C2)"
 
     table = doc.sheets[1].tables[0]
-    for col_num in range(0, 9):
+    for col_num in range(9):
         assert table.cell(4, col_num).formula == table.cell(5, col_num).value
         assert table.cell(6, col_num).formula == table.cell(7, col_num).value
 
@@ -372,10 +372,10 @@ def test_issue_66():
 
 @pytest.mark.experimental
 def test_issue_67():
-    """Memory leak test"""
+    """Memory leak test."""
     process = Process()
     rss_base = process.memory_info().rss
-    for _i in range(0, 10):
+    for _i in range(10):
         doc = Document("tests/data/issue-67.numbers")
         assert doc.sheets[0].tables[0].cell(0, 0).value == "A"
 

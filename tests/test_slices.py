@@ -34,16 +34,16 @@ def test_iter_row_exceptions():
     tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_1"]
     with pytest.raises(IndexError) as e:
-        _ = [x for x in table.iter_rows(max_row=999)]
+        _ = list(table.iter_rows(max_row=999))
     assert str(e.value) == "row 999 out of range"
     with pytest.raises(IndexError) as e:
-        _ = [x for x in table.iter_rows(min_row=-1)]
+        _ = list(table.iter_rows(min_row=-1))
     assert str(e.value) == "row -1 out of range"
     with pytest.raises(IndexError) as e:
-        _ = [x for x in table.iter_rows(max_col=999)]
+        _ = list(table.iter_rows(max_col=999))
     assert str(e.value) == "column 999 out of range"
     with pytest.raises(IndexError) as e:
-        _ = [x for x in table.iter_rows(min_col=-1)]
+        _ = list(table.iter_rows(min_col=-1))
     assert str(e.value) == "column -1 out of range"
 
 
@@ -53,16 +53,16 @@ def test_iter_col_exceptions():
     tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_1"]
     with pytest.raises(IndexError) as e:
-        _ = [x for x in table.iter_cols(max_row=999)]
+        _ = list(table.iter_cols(max_row=999))
     assert str(e.value) == "row 999 out of range"
     with pytest.raises(IndexError) as e:
-        _ = [x for x in table.iter_cols(min_row=-1)]
+        _ = list(table.iter_cols(min_row=-1))
     assert str(e.value) == "row -1 out of range"
     with pytest.raises(IndexError) as e:
-        _ = [x for x in table.iter_cols(max_col=999)]
+        _ = list(table.iter_cols(max_col=999))
     assert str(e.value) == "column 999 out of range"
     with pytest.raises(IndexError) as e:
-        _ = [x for x in table.iter_cols(min_col=-1)]
+        _ = list(table.iter_cols(min_col=-1))
     assert str(e.value) == "column -1 out of range"
 
 

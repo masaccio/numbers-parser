@@ -11,7 +11,8 @@ class Cacheable:
 
 def cache(num_args=1):
     """Decorator to memoize a class method using a precise subset of
-    its arguments"""
+    its arguments.
+    """
 
     def cache_decorator(func):
         @wraps(func)

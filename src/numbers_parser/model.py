@@ -120,7 +120,7 @@ class MergeCells:
 
 
 class DataLists(Cacheable):
-    """Model for TST.DataList with caching and key generation for new values"""
+    """Model for TST.DataList with caching and key generation for new values."""
 
     def __init__(self, model: object, datalist_name: str, value_attr: str = None):
         self._model = model
@@ -130,7 +130,7 @@ class DataLists(Cacheable):
 
     @cache()
     def add_table(self, table_id: int):
-        """Cache a new datalist for a table if not already seen"""
+        """Cache a new datalist for a table if not already seen."""
         base_data_store = self._model.objects[table_id].base_data_store
         datalist_id = getattr(base_data_store, self._datalist_name).identifier
         datalist = self._model.objects[datalist_id]
@@ -156,12 +156,12 @@ class DataLists(Cacheable):
         return self._datalists[table_id]["id"]
 
     def lookup_value(self, table_id: int, key: int):
-        """Return the an entry in a table's datalist matching a key"""
+        """Return the an entry in a table's datalist matching a key."""
         self.add_table(table_id)
         return self._datalists[table_id]["by_key"][key]
 
     def init(self, table_id: int):
-        """Remove all entries from a datalist"""
+        """Remove all entries from a datalist."""
         self.add_table(table_id)
         self._datalists[table_id]["by_key"] = {}
         self._datalists[table_id]["by_value"] = {}
@@ -172,7 +172,8 @@ class DataLists(Cacheable):
     def lookup_key(self, table_id: int, value) -> int:
         """Return the key associated with a value for a particular table entry.
         If the value is not in the datalist, allocate a new entry with the
-        next available key"""
+        next available key.
+        """
         self.add_table(table_id)
         value_key = value.identifier if isinstance(value, TSPMessages.Reference) else value
         if value_key not in self._datalists[table_id]["by_value"]:
@@ -194,8 +195,7 @@ class DataLists(Cacheable):
 
 
 class _NumbersModel(Cacheable):
-    """
-    Loads all objects from Numbers document and provides decoding
+    """Loads all objects from Numbers document and provides decoding
     methods for other classes in the module to abstract away the
     internal structures of Numbers document data structures.
 
@@ -242,7 +242,7 @@ class _NumbersModel(Cacheable):
 
     # Don't cache: new tables can be added at runtime
     def table_ids(self, sheet_id: int) -> list:
-        """Return a list of table IDs for a given sheet ID"""
+        """Return a list of table IDs for a given sheet ID."""
         table_info_ids = self.find_refs("TableInfoArchive")
         return [
             self.objects[t_id].tableModel.identifier
@@ -252,7 +252,7 @@ class _NumbersModel(Cacheable):
 
     # Don't cache: new tables can be added at runtime
     def table_info_id(self, table_id: int) -> int:
-        """Return the TableInfoArchive ID for a given table ID"""
+        """Return the TableInfoArchive ID for a given table ID."""
         ids = [
             x
             for x in self.objects.find_refs("TableInfoArchive")
@@ -340,28 +340,29 @@ class _NumbersModel(Cacheable):
 
     @cache(num_args=2)
     def table_format(self, table_id: int, key: int) -> str:
-        """Return the format associated with a format ID for a particular table"""
+        """Return the format associated with a format ID for a particular table."""
         return self._table_formats.lookup_value(table_id, key).format
 
     @cache(num_args=2)
     def table_style(self, table_id: int, key: int) -> str:
-        """Return the style associated with a style ID for a particular table"""
+        """Return the style associated with a style ID for a particular table."""
         style_entry = self._table_styles.lookup_value(table_id, key)
         return self.objects[style_entry.reference.identifier]
 
     @cache(num_args=2)
     def table_string(self, table_id: int, key: int) -> str:
-        """Return the string associated with a string ID for a particular table"""
+        """Return the string associated with a string ID for a particular table."""
         return self._table_strings.lookup_value(table_id, key).string
 
     def init_table_strings(self, table_id: int):
-        """Cache table strings reference and delete all existing keys/values"""
+        """Cache table strings reference and delete all existing keys/values."""
         self._table_strings.init(table_id)
 
     def table_string_key(self, table_id: int, value: str) -> int:
         """Return the key associated with a string for a particular table. If
         the string is not in the strings table, allocate a new entry with the
-        next available key"""
+        next available key.
+        """
         return self._table_strings.lookup_key(table_id, value)
 
     @cache(num_args=0)
@@ -393,7 +394,7 @@ class _NumbersModel(Cacheable):
 
     @cache()
     def table_base_id(self, table_id: int) -> int:
-        """ "Finds the UUID of a table"""
+        """ "Finds the UUID of a table."""
         # Look for a TSCE.FormulaOwnerDependenciesArchive objects with the following at the
         # root level of the protobuf:
         #
@@ -437,7 +438,7 @@ class _NumbersModel(Cacheable):
 
     @cache(num_args=0)
     def calc_engine_id(self):
-        """Return the CalculationEngine ID for the current document"""
+        """Return the CalculationEngine ID for the current document."""
         ce_id = self.find_refs("CalculationEngineArchive")
         if len(ce_id) == 0:
             return 0
@@ -446,7 +447,7 @@ class _NumbersModel(Cacheable):
 
     @cache(num_args=0)
     def calc_engine(self):
-        """Return the CalculationEngine object for the current document"""
+        """Return the CalculationEngine object for the current document."""
         ce_id = self.calc_engine_id()
         if ce_id == 0:
             return None
@@ -711,7 +712,7 @@ class _NumbersModel(Cacheable):
 
     @cache()
     def metadata_component(self, reference: Union[str, int] = None) -> int:
-        """Return the ID of an object in the document metadata given it's name or ID"""
+        """Return the ID of an object in the document metadata given it's name or ID."""
         component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
         if isinstance(reference, str):
             component_ids = [
@@ -722,7 +723,7 @@ class _NumbersModel(Cacheable):
         return component_map[component_ids[0]]
 
     def add_component_metadata(self, object_id: int, parent: str, locator: str):
-        """Add a new ComponentInfo record to the parent object in the document metadata"""
+        """Add a new ComponentInfo record to the parent object in the document metadata."""
         locator = locator.format(object_id)
         preferred_locator = re.sub(r"\-\d+.*", "", locator)
         component_info = TSPArchiveMessages.ComponentInfo(
@@ -744,7 +745,7 @@ class _NumbersModel(Cacheable):
         parent_id: int = None,
         is_weak: bool = False,
     ):
-        """Add an external reference to an object in a metadata component"""
+        """Add an external reference to an object in a metadata component."""
         component = self.metadata_component(location or parent_id)
         if parent_id is not None:
             params = {"object_identifier": object_id, "component_identifier": parent_id}
@@ -825,7 +826,7 @@ class _NumbersModel(Cacheable):
         return table_strings_id, table_strings
 
     def table_height(self, table_id: int) -> int:
-        """Return the height of a table in points"""
+        """Return the height of a table in points."""
         table_model = self.objects[table_id]
         bds = self.objects[table_id].base_data_store
         buckets = self.objects[bds.rowHeaders.buckets[0].identifier].headers
@@ -861,7 +862,7 @@ class _NumbersModel(Cacheable):
             return round(table_model.default_row_height)
 
     def table_width(self, table_id: int) -> int:
-        """Return the width of a table in points"""
+        """Return the width of a table in points."""
         table_model = self.objects[table_id]
         bds = self.objects[table_id].base_data_store
         buckets = self.objects[bds.columnHeaders.identifier].headers
@@ -897,14 +898,14 @@ class _NumbersModel(Cacheable):
             return round(table_model.default_column_width)
 
     def num_header_rows(self, table_id: int, num_headers: int = None) -> int:
-        """Return/set the number of header rows"""
+        """Return/set the number of header rows."""
         table_model = self.objects[table_id]
         if num_headers is not None:
             table_model.number_of_header_rows = num_headers
         return table_model.number_of_header_rows
 
     def num_header_cols(self, table_id: int, num_headers: int = None) -> int:
-        """Return/set the number of header columns"""
+        """Return/set the number of header columns."""
         table_model = self.objects[table_id]
         if num_headers is not None:
             table_model.number_of_header_columns = num_headers
@@ -918,7 +919,7 @@ class _NumbersModel(Cacheable):
         )
 
     def last_table_offset(self, sheet_id):
-        """Y offset of the last table in a sheet"""
+        """Y offset of the last table in a sheet."""
         table_id = self.table_ids(sheet_id)[-1]
         y_offset = [
             self.objects[self.table_info_id(x)].super.geometry.position.y
@@ -929,7 +930,7 @@ class _NumbersModel(Cacheable):
         return self.table_height(table_id) + y_offset
 
     def create_drawable(self, sheet_id: int, x: float, y: float) -> object:
-        """Create a DrawableArchive for a new table in a sheet"""
+        """Create a DrawableArchive for a new table in a sheet."""
         table_x = x if x is not None else 0.0
         table_y = y if y is not None else self.last_table_offset(sheet_id) + DEFAULT_TABLE_OFFSET
         return TSDArchives.DrawableArchive(
@@ -1038,8 +1039,8 @@ class _NumbersModel(Cacheable):
         )
 
         data = [
-            [EmptyCell(row_num, col_num) for col_num in range(0, num_cols)]
-            for row_num in range(0, num_rows)
+            [EmptyCell(row_num, col_num) for col_num in range(num_cols)]
+            for row_num in range(num_rows)
         ]
 
         row_headers_id, _ = self.objects.create_object_from_dict(
@@ -1088,7 +1089,8 @@ class _NumbersModel(Cacheable):
         number_of_header_columns: int,
     ):
         """Create a FormulaOwnerDependenciesArchive that references a TableInfoArchive
-        so that cross-references to cells in this table will work."""
+        so that cross-references to cells in this table will work.
+        """
         formula_owner_uuid = NumbersUUID()
         calc_engine = self.calc_engine()
         owner_id_map = calc_engine.dependency_tracker.owner_id_map.map_entry
@@ -1156,7 +1158,7 @@ class _NumbersModel(Cacheable):
         )
 
     def add_sheet(self, sheet_name: str) -> int:
-        """Add a new sheet with a copy of a table from another sheet"""
+        """Add a new sheet with a copy of a table from another sheet."""
         sheet_id, _ = self.objects.create_object_from_dict(
             "Document", {"name": sheet_name}, TNArchives.SheetArchive
         )
@@ -1307,7 +1309,8 @@ class _NumbersModel(Cacheable):
 
     def update_paragraph_styles(self):
         """Create new paragraph style archives for any new styles that
-        have been created for this document"""
+        have been created for this document.
+        """
         new_styles = [x for x in self.styles.values() if x._text_style_obj_id is None]
         updated_styles = [
             x
@@ -1323,7 +1326,8 @@ class _NumbersModel(Cacheable):
 
     def update_cell_styles(self, table_id: int, data: List):
         """Create new cell style archives for any cells whose styles
-        have changes that require a cell style"""
+        have changes that require a cell style.
+        """
         cell_styles = {}
         for _, row in enumerate(data):
             for _, cell in enumerate(row):
@@ -1412,7 +1416,8 @@ class _NumbersModel(Cacheable):
 
     def custom_style_name(self) -> Tuple[str, str]:
         """Find custom styles in the current document and return the next
-        highest numbered style"""
+        highest numbered style.
+        """
         stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
         current_styles = self.styles.keys()
         custom_styles = [x for x in current_styles if re.fullmatch(r"Custom Style \d+", x)]
@@ -1432,7 +1437,7 @@ class _NumbersModel(Cacheable):
     def pack_cell_storage(  # noqa: PLR0915, PLR0912
         self, table_id: int, data: List, row_num: int, col_num: int
     ) -> bytearray:
-        """Create a storage buffer for a cell using v5 (modern) layout"""
+        """Create a storage buffer for a cell using v5 (modern) layout."""
         cell = data[row_num][col_num]
         if cell._style is not None:
             if cell._style._text_style_obj_id is not None:
@@ -1578,9 +1583,7 @@ class _NumbersModel(Cacheable):
 
     @cache(num_args=2)
     def table_rich_text(self, table_id: int, string_key: int) -> Dict:
-        """
-        Extract bullets and hyperlinks from a rich text data cell.
-        """
+        """Extract bullets and hyperlinks from a rich text data cell."""
         # The table model base data store contains a richTextTable field
         # which is a reference to a TST.TableDataList. The TableDataList
         # has a list of payloads in a field called entries. This will be
@@ -1671,14 +1674,15 @@ class _NumbersModel(Cacheable):
 
     def cell_text_style(self, cell_storage: object) -> object:
         """Return the text style object for the cell or, if none
-        is defined, the default header, footer or body style"""
+        is defined, the default header, footer or body style.
+        """
         if cell_storage.text_style_id is not None:
             return self.table_style(cell_storage.table_id, cell_storage.text_style_id)
 
         table_model = self.objects[cell_storage.table_id]
-        if cell_storage.row_num in range(0, table_model.number_of_header_rows):
+        if cell_storage.row_num in range(table_model.number_of_header_rows):
             return self.objects[table_model.header_row_text_style.identifier]
-        elif cell_storage.col_num in range(0, table_model.number_of_header_columns):
+        elif cell_storage.col_num in range(table_model.number_of_header_columns):
             return self.objects[table_model.header_column_text_style.identifier]
         elif table_model.number_of_footer_rows > 0:
             start_row_num = table_model.number_of_rows - table_model.number_of_footer_rows
@@ -1712,7 +1716,8 @@ class _NumbersModel(Cacheable):
 
     def char_property(self, style: object, field: str):
         """Return a char_property field from a style if present
-        in the style, or from the parent if not"""
+        in the style, or from the parent if not.
+        """
         if not style.char_properties.HasField(field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.char_properties, field)
@@ -1721,7 +1726,8 @@ class _NumbersModel(Cacheable):
 
     def para_property(self, style: object, field: str) -> float:
         """Return a para_property field from a style if present
-        in the style, or from the parent if not"""
+        in the style, or from the parent if not.
+        """
         if not style.para_properties.HasField(field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.para_properties, field)
@@ -1730,7 +1736,8 @@ class _NumbersModel(Cacheable):
 
     def cell_property(self, style: object, field: str) -> float:
         """Return a cell_property field from a style if present
-        in the style, or from the parent if not"""
+        in the style, or from the parent if not.
+        """
         if not style.cell_properties.HasField(field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.cell_properties, field)
@@ -1801,7 +1808,7 @@ class _NumbersModel(Cacheable):
             return self.cell_property(style, "text_wrap")
 
     def stroke_type(self, stroke_run: object) -> str:
-        """Return the stroke type for a stroke run"""
+        """Return the stroke type for a stroke run."""
         stroke_type = stroke_run.stroke.pattern.type
         if stroke_type == StrokePattern.StrokePatternType.TSDSolidPattern:
             return "solid"
@@ -1838,7 +1845,7 @@ class _NumbersModel(Cacheable):
     def set_cell_border(  # noqa: PLR0913
         self, table_id: int, row_num: int, col_num: int, side: str, border_value: Border
     ):
-        """Set the 2 borders adjacent to a stroke if within the table range"""
+        """Set the 2 borders adjacent to a stroke if within the table range."""
         if side == "top":
             if (cell := self.cell_for_stroke(table_id, "top", row_num, col_num)) is not None:
                 cell._border.top = border_value
@@ -2026,12 +2033,12 @@ class _NumbersModel(Cacheable):
 
 
 def rgb(obj) -> RGB:
-    """Convert a TSPArchives.Color into an RGB tuple"""
+    """Convert a TSPArchives.Color into an RGB tuple."""
     return RGB(round(obj.r * 255), round(obj.g * 255), round(obj.b * 255))
 
 
 def range_end(obj):
-    """Select end range for a IndexSetArchive.IndexSetEntry"""
+    """Select end range for a IndexSetArchive.IndexSetEntry."""
     if obj.HasField("range_end"):
         return obj.range_end
     else:
@@ -2039,7 +2046,7 @@ def range_end(obj):
 
 
 def formatted_number(number_type, index):
-    """Returns the numbered index bullet formatted for different types"""
+    """Returns the numbered index bullet formatted for different types."""
     bullet_char = BULLET_PREFIXES[number_type]
     bullet_char += BULLET_CONVERSION[number_type](index)
     bullet_char += BULLET_SUFFIXES[number_type]
@@ -2086,8 +2093,7 @@ def node_to_row_col_ref(node: object, table_name: str, row_num: int, col_num: in
 def get_storage_buffers_for_row(
     storage_buffer: bytes, offsets: list, num_cols: int, has_wide_offsets: bool
 ) -> List[bytes]:
-    """
-    Extract storage buffers for each cell in a table row
+    """Extract storage buffers for each cell in a table row.
 
     Args:
         storage_buffer:  cell_storage_buffer or cell_storage_buffer for a table row
@@ -2130,7 +2136,8 @@ def get_storage_buffers_for_row(
 
 def clear_field_container(obj):
     """Remove all entries from a protobuf RepeatedCompositeFieldContainer
-    in a portable fashion"""
+    in a portable fashion.
+    """
     while len(obj) > 0:
         _ = obj.pop()
 
@@ -2153,7 +2160,7 @@ def pack_decimal128(value: float) -> bytearray:
 
 
 def field_references(obj: object) -> dict:
-    """Return a dict of all fields in an object that are references to other objects"""
+    """Return a dict of all fields in an object that are references to other objects."""
     return {
         x[0].name: {"identifier": getattr(obj, x[0].name).identifier}
         for x in obj.ListFields()

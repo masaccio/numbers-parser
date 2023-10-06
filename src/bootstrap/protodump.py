@@ -1,5 +1,4 @@
-"""
-Super hacky script to parse compiled Protobuf definitions out of
+"""Super hacky script to parse compiled Protobuf definitions out of
 one or more binary files in a directory tree.
 
 Requires `pip install 'protobuf>=3.20.0rc1'`.

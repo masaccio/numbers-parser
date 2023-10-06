@@ -227,7 +227,8 @@ class Style:
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Detect changes to cell styles and flag the style for
-        possible updates when saving the document"""
+        possible updates when saving the document.
+        """
         if name in ["bg_color", "font_color"]:
             value = rgb_color(value)
         if name == "alignment":
@@ -242,7 +243,7 @@ class Style:
 
 
 def rgb_color(color) -> RGB:
-    """Raise a TypeError if a color is not a valid RGB value"""
+    """Raise a TypeError if a color is not a valid RGB value."""
     if color is None:
         return None
     if isinstance(color, RGB):
@@ -257,7 +258,7 @@ def rgb_color(color) -> RGB:
 
 
 def alignment(value) -> Alignment:
-    """Raise a TypeError if a alignment is not a valid"""
+    """Raise a TypeError if a alignment is not a valid."""
     if value is None:
         return Alignment()
     if isinstance(value, Alignment):
@@ -396,14 +397,14 @@ class CellBorder:
 
 
 class MergeReference:
-    """Cell reference for cells eliminated by a merge"""
+    """Cell reference for cells eliminated by a merge."""
 
     def __init__(self, row_start: int, col_start: int, row_end: int, col_end: int):
         self.rect = (row_start, col_start, row_end, col_end)
 
 
 class MergeAnchor:
-    """Cell reference for the merged cell"""
+    """Cell reference for the merged cell."""
 
     def __init__(self, size: Tuple):
         self.size = size
@@ -727,8 +728,7 @@ range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
 
 
 def xl_cell_to_rowcol(cell_str: str) -> tuple:
-    """
-    Convert a cell reference in A1 notation to a zero indexed row and column.
+    """Convert a cell reference in A1 notation to a zero indexed row and column.
     Args:
         cell_str:  A1 style string.
     Returns:
@@ -759,8 +759,7 @@ def xl_cell_to_rowcol(cell_str: str) -> tuple:
 
 
 def xl_range(first_row, first_col, last_row, last_col):
-    """
-    Convert zero indexed row and col cell references to a A1:B1 range string.
+    """Convert zero indexed row and col cell references to a A1:B1 range string.
     Args:
        first_row: The first cell row.    Int.
        first_col: The first cell column. Int.
@@ -779,8 +778,7 @@ def xl_range(first_row, first_col, last_row, last_col):
 
 
 def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
-    """
-    Convert a zero indexed row and column cell reference to a A1 style string.
+    """Convert a zero indexed row and column cell reference to a A1 style string.
     Args:
        row:     The cell row.    Int.
        col:     The cell column. Int.
@@ -804,8 +802,7 @@ def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
 
 
 def xl_col_to_name(col, col_abs=False):
-    """
-    Convert a zero indexed column cell reference to a string.
+    """Convert a zero indexed column cell reference to a string.
     Args:
        col:     The cell column. Int.
        col_abs: Optional flag to make the column absolute. Bool.

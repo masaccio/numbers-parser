@@ -311,7 +311,7 @@ class TableFormulas:
 
 
 def number_to_str(v: int) -> str:
-    """Format a float as a string"""
+    """Format a float as a string."""
     # Number is never negative; formula will use NEGATION_NODE
     v_str = repr(v)
     if "e" in v_str:

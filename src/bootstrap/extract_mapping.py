@@ -1,6 +1,5 @@
 #!/usr/bin/xcrun python3
-"""
-lldb script to dump TSPersistence registry mapping from iWork apps.
+"""lldb script to dump TSPersistence registry mapping from iWork apps.
 
 Licensed under the MIT license.
 

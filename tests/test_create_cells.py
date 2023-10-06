@@ -59,7 +59,7 @@ def test_large_table(configurable_save_file):
     sheets = doc.sheets
     tables = sheets[0].tables
     table = tables[0]
-    for i in range(0, 300):
+    for i in range(300):
         table.write(i, i, "wide")
 
     with pytest.raises(IndexError) as e:

@@ -279,7 +279,7 @@ class CellStorage(Cacheable):
     @property
     @cache(num_args=0)
     def image_data(self) -> Tuple[bytes, str]:
-        """Return the background image data for a cell or None if no image"""
+        """Return the background image data for a cell or None if no image."""
         if self.cell_style_id is None:
             return None
         style = self.model.table_style(self.table_id, self.cell_style_id)
@@ -437,7 +437,7 @@ def unpack_decimal128(buffer: bytearray) -> float:
 
 
 def days_occurred_in_month(value: datetime) -> str:
-    """Return how many times the day of the datetime value has fallen in the month"""
+    """Return how many times the day of the datetime value has fallen in the month."""
     n_days = int((value - value.replace(day=1)).days / 7) + 1
     return str(n_days)
 
@@ -455,7 +455,7 @@ def decode_date_format_field(field: str, value: datetime) -> str:
 
 
 def decode_date_format(format, value):
-    """Parse a custom date format string and return a formatted datetime value"""
+    """Parse a custom date format string and return a formatted datetime value."""
     chars = [*format]
     index = 0
     in_string = False
@@ -503,7 +503,7 @@ def decode_date_format(format, value):
 
 
 def decode_text_format(format, value: str):  # noqa: C901
-    """Parse a custom date format string and return a formatted number value"""
+    """Parse a custom date format string and return a formatted number value."""
     custom_format_string = format.custom_format_string
     return custom_format_string.replace("\ue421", value)
 
@@ -535,7 +535,7 @@ def expand_quotes(value: str) -> str:
 
 
 def decode_number_format(format, value, name):  # noqa: PLR0912
-    """Parse a custom date format string and return a formatted number value"""
+    """Parse a custom date format string and return a formatted number value."""
     custom_format_string = format.custom_format_string
     value *= format.scale_factor
     if "%" in custom_format_string and format.scale_factor == 1.0:
@@ -708,7 +708,7 @@ def format_decimal(value: float, format) -> str:
 
 
 def float_to_fraction(value: float, denominator: int) -> str:
-    """Convert a float to the nearest fraction and return as a string"""
+    """Convert a float to the nearest fraction and return as a string."""
     whole = int(value)
     numerator = round(denominator * (value - whole))
     if numerator == 0:
@@ -722,7 +722,8 @@ def float_to_fraction(value: float, denominator: int) -> str:
 
 def float_to_n_digit_fraction(value: float, max_digits: int) -> str:
     """Convert a float to a fraction of a maxinum number of digits
-    and return as a string"""
+    and return as a string.
+    """
     max_denominator = 10**max_digits - 1
     (numerator, denominator) = (
         Fraction.from_float(value).limit_denominator(max_denominator).as_integer_ratio()

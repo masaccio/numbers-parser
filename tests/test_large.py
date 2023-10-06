@@ -25,9 +25,9 @@ def ref_cell_text(row, col):
 
 
 def test_large_table():
-    row = [None for i in range(0, 270)]
-    ref = [row.copy() for i in range(0, 90)]
-    for i in range(0, 90):
+    row = [None for i in range(270)]
+    ref = [row.copy() for i in range(90)]
+    for i in range(90):
         ref[i][i] = ref_cell_text(i, i)
         ref[i][90 + i] = ref_cell_text(i, 90 + i)
         ref[i][180 + i] = ref_cell_text(i, 180 + i)

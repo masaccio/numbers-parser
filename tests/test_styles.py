@@ -140,8 +140,8 @@ def invert_style_attrs(attrs):
 def test_all_styles(configurable_save_file):
     doc = Document("tests/data/test-styles.numbers")
     table = doc.sheets["Styles"].tables[0]
-    for row_num in range(0, table.num_rows):
-        for col_num in range(0, table.num_cols):
+    for row_num in range(table.num_rows):
+        for col_num in range(table.num_cols):
             cell = table.cell(row_num, col_num)
             if not cell.value:
                 continue
@@ -153,8 +153,8 @@ def test_all_styles(configurable_save_file):
     doc.save(configurable_save_file)
     doc = Document(configurable_save_file)
     table = doc.sheets["Styles"].tables[0]
-    for row_num in range(0, table.num_rows):
-        for col_num in range(0, table.num_cols):
+    for row_num in range(table.num_rows):
+        for col_num in range(table.num_cols):
             cell = table.cell(row_num, col_num)
             if not cell.value:
                 continue
@@ -166,8 +166,8 @@ def test_all_style_changes(configurable_save_file):
     # Flip styles and re-save as new custom styles
     doc = Document("tests/data/test-styles.numbers")
     table = doc.sheets["Styles"].tables[0]
-    for row_num in range(0, table.num_rows):
-        for col_num in range(0, table.num_cols):
+    for row_num in range(table.num_rows):
+        for col_num in range(table.num_cols):
             cell = table.cell(row_num, col_num)
             if not cell.value:
                 continue
@@ -182,8 +182,8 @@ def test_all_style_changes(configurable_save_file):
     doc = Document(configurable_save_file)
     table = doc.sheets["Styles"].tables[0]
     style_num = 1
-    for row_num in range(0, table.num_rows):
-        for col_num in range(0, table.num_cols):
+    for row_num in range(table.num_rows):
+        for col_num in range(table.num_cols):
             cell = table.cell(row_num, col_num)
             if not cell.value:
                 continue
@@ -203,10 +203,10 @@ def test_header_styles():
     sheets = doc.sheets
     table = sheets["Headers"].tables[0]
 
-    assert all(table.cell(0, row_num).style.bold for row_num in range(0, 4))
-    assert all(table.cell(3, row_num).style.bold for row_num in range(0, 3))
-    assert all(table.cell(8, row_num).style.bold for row_num in range(0, 3))
-    assert all(table.cell(9, row_num).style.bold for row_num in range(0, 4))
+    assert all(table.cell(0, row_num).style.bold for row_num in range(4))
+    assert all(table.cell(3, row_num).style.bold for row_num in range(3))
+    assert all(table.cell(8, row_num).style.bold for row_num in range(3))
+    assert all(table.cell(9, row_num).style.bold for row_num in range(4))
 
     assert all(not table.cell(ref).style.bold for ref in ["E1", "B5", "E9"])
     assert all(table.cell(ref).style.underline for ref in ["C1", "C4", "C9"])
@@ -406,8 +406,8 @@ def test_empty_styles(configurable_save_file):
     new_doc = Document(configurable_save_file)
     new_table = new_doc.sheets[0].tables[0]
 
-    for row_num in range(0, table.num_header_rows):
-        for col_num in range(0, table.num_header_cols):
+    for row_num in range(table.num_header_rows):
+        for col_num in range(table.num_header_cols):
             assert new_table.cell(row_num, col_num).style.name == row_header_style
 
     for row_num in range(table.num_header_rows, table.num_rows):
