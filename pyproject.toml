@@ -122,9 +122,13 @@ unfixable = [
   "ERA", # do not autoremove commented out code
 ]
 
+[tool.ruff.pylint]
+max-statements = 100
+max-branches = 20
+
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
 
 [tool.ruff.per-file-ignores]
 "src/bootstrap/**" = ["PLR2004"]
-"tests/**" = ["PLR2004"]
+"tests/**" = ["PLR2004", "S101"]

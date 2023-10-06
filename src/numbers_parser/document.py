@@ -18,7 +18,7 @@ from numbers_parser.numbers_cache import Cacheable, cache
 
 
 class Document:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filename: str = None,
         sheet_name: str = None,
@@ -155,7 +155,7 @@ class Sheet:
         """Set the sheet's name"""
         self._model.sheet_name(self._sheet_id, value)
 
-    def add_table(
+    def add_table(  # noqa: PLR0913
         self,
         table_name=None,
         x=None,
@@ -169,7 +169,9 @@ class Sheet:
         from_table_id = self._tables[-1]._table_id
         return self._add_table(table_name, from_table_id, x, y, num_rows, num_cols)
 
-    def _add_table(self, table_name, from_table_id, x, y, num_rows, num_cols) -> object:
+    def _add_table(  # noqa: PLR0913
+        self, table_name, from_table_id, x, y, num_rows, num_cols
+    ) -> object:
         if table_name is not None:
             if table_name in self._tables:
                 raise IndexError(f"table '{table_name}' already exists")
@@ -322,7 +324,7 @@ class Table(Cacheable):
 
         return self._data[row_num][col_num]
 
-    def iter_rows(
+    def iter_rows(  # noqa: PLR0913
         self,
         min_row: int = None,
         max_row: int = None,
@@ -368,7 +370,7 @@ class Table(Cacheable):
             else:
                 yield tuple(rows[row_num][min_col : max_col + 1])
 
-    def iter_cols(
+    def iter_cols(  # noqa: PLR0913
         self,
         min_col: int = None,
         max_col: int = None,
@@ -540,12 +542,12 @@ class Table(Cacheable):
 
         self._model.extract_strokes(self._table_id)
 
-        if side == "top" or side == "bottom":
+        if side in ["top", "bottom"]:
             for border_col_num in range(col_num, col_num + length):
                 self._model.set_cell_border(
                     self._table_id, row_num, border_col_num, side, border_value
                 )
-        elif side == "left" or side == "right":
+        elif side in ["left", "right"]:
             for border_row_num in range(row_num, row_num + length):
                 self._model.set_cell_border(
                     self._table_id, border_row_num, col_num, side, border_value

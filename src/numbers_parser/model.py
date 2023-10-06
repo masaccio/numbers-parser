@@ -952,7 +952,7 @@ class _NumbersModel(Cacheable):
         )
         return drawable
 
-    def add_table(
+    def add_table(  # noqa: PLR0913
         self,
         sheet_id: int,
         table_name: str,
@@ -1089,7 +1089,7 @@ class _NumbersModel(Cacheable):
         )
         return table_model_id
 
-    def add_formula_owner(
+    def add_formula_owner(  # noqa: PLR0913
         self,
         table_info_id: int,
         num_rows: int,
@@ -1439,7 +1439,7 @@ class _NumbersModel(Cacheable):
         else:
             return "Custom Style 1"
 
-    def pack_cell_storage(  # noqa: C901
+    def pack_cell_storage(  # noqa: PLR0915, PLR0912
         self, table_id: int, data: List, row_num: int, col_num: int
     ) -> bytearray:
         """Create a storage buffer for a cell using v5 (modern) layout"""
@@ -1674,7 +1674,7 @@ class _NumbersModel(Cacheable):
 
                 return {
                     "text": cell_text,
-                    "bulleted": any([c is not None for c in bullet_chars]),
+                    "bulleted": any(c is not None for c in bullet_chars),
                     "bullets": bullets,
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,
@@ -1841,13 +1841,13 @@ class _NumbersModel(Cacheable):
             ):
                 return cell
         elif cell.is_merged:
-            if side == "top" or side == "left":
+            if side in ["top", "left"]:
                 return cell
         else:
             return cell
         return None
 
-    def set_cell_border(
+    def set_cell_border(  # noqa: PLR0913
         self, table_id: int, row_num: int, col_num: int, side: str, border_value: Border
     ):
         """Set the 2 borders adjacent to a stroke if within the table range"""
@@ -1959,7 +1959,7 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-    def add_stroke(
+    def add_stroke(  # noqa: PLR0913
         self,
         table_id: int,
         row_num: int,

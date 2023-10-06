@@ -111,7 +111,9 @@ class CellStorage(Cacheable):
     )
 
     # @profile
-    def __init__(self, model: object, table_id: int, buffer, row_num, col_num):  # noqa: C901
+    def __init__(  # noqa: PLR0913, PLR0912, PLR0915
+        self, model: object, table_id: int, buffer, row_num, col_num
+    ):
         self.buffer = buffer
         self.model = model
         self.table_id = table_id
@@ -350,7 +352,7 @@ class CellStorage(Cacheable):
             formatted_value = decode_date_format(format.date_time_format, self.datetime)
         return formatted_value
 
-    def duration_format(self) -> str:  # noqa: C901
+    def duration_format(self) -> str:
         format = self.model.table_format(self.table_id, self.duration_format_id)
 
         duration_style = format.duration_style
@@ -532,7 +534,7 @@ def expand_quotes(value: str) -> str:
     return formatted_value
 
 
-def decode_number_format(format, value, name):  # noqa: C901
+def decode_number_format(format, value, name):  # noqa: PLR0912
     """Parse a custom date format string and return a formatted number value"""
     custom_format_string = format.custom_format_string
     value *= format.scale_factor
@@ -656,11 +658,10 @@ def decode_number_format(format, value, name):  # noqa: C901
             formatted_value = f"{integer:,}".rjust(int_width)
         else:
             formatted_value = str(integer).rjust(int_width)
+    elif format.show_thousands_separator:
+        formatted_value = f"{integer:,}"
     else:
-        if format.show_thousands_separator:
-            formatted_value = f"{integer:,}"
-        else:
-            formatted_value = str(integer)
+        formatted_value = str(integer)
 
     if num_decimals:
         if dec_pad == CellPadding.ZERO or (dec_pad == CellPadding.SPACE and num_integers == 0):
