@@ -1,7 +1,7 @@
 import logging
 import os
 from io import BytesIO
-from zipfile import ZipFile, BadZipFile
+from zipfile import BadZipFile, ZipFile
 
 from numbers_parser.exceptions import FileError, FileFormatError
 from numbers_parser.iwafile import IWAFile, is_iwa_file

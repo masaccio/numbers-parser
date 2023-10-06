@@ -1,6 +1,6 @@
 from roman import toRoman
-from numbers_parser.generated.TSWPArchives_pb2 import ListStyleArchive
 
+from numbers_parser.generated.TSWPArchives_pb2 import ListStyleArchive
 
 BULLET_PREFIXES = {
     ListStyleArchive.kNumericDecimal: "",

@@ -1,22 +1,21 @@
-import os
 import json
 import logging
-import regex
+import os
 import sys
-
-from array import array
 from argparse import ArgumentParser
+from array import array
 from base64 import b64decode
 from binascii import hexlify
+
+import regex
 from compact_json import Formatter
 
-from numbers_parser.file import read_numbers_file
-from numbers_parser import _get_version
 from numbers_parser import __name__ as numbers_parser_name
+from numbers_parser import _get_version
+from numbers_parser.exceptions import FileError, FileFormatError, UnsupportedError
+from numbers_parser.file import read_numbers_file
 from numbers_parser.iwafile import IWAFile
-from numbers_parser.exceptions import FileFormatError, UnsupportedError, FileError
 from numbers_parser.numbers_uuid import NumbersUUID
-
 
 logger = logging.getLogger(numbers_parser_name)
 

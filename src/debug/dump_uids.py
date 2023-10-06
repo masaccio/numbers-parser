@@ -1,8 +1,8 @@
 import argparse
 
 from numbers_parser import Document
-from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
+from numbers_parser.numbers_uuid import NumbersUUID
 
 
 def find_fields(obj=object, tree=""):

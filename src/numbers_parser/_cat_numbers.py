@@ -5,9 +5,8 @@ import sys
 
 import sigfig
 
-from numbers_parser import Document, ErrorCell, FileFormatError, NumberCell, FileError
+from numbers_parser import Document, ErrorCell, FileError, FileFormatError, NumberCell, _get_version
 from numbers_parser import __name__ as numbers_parser_name
-from numbers_parser import _get_version
 from numbers_parser.constants import MAX_SIGNIFICANT_DIGITS
 from numbers_parser.experimental import _enable_experimental_features
 

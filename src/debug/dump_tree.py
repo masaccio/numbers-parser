@@ -2,8 +2,8 @@ import argparse
 
 from numbers_parser import Document
 from numbers_parser.constants import DOCUMENT_ID
-from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
+from numbers_parser.numbers_uuid import NumbersUUID
 
 MAX_DEPTH = 10
 

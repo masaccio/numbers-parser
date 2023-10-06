@@ -1,13 +1,12 @@
 import re
-
 from enum import Enum
 from uuid import uuid1
 
 from numbers_parser import Document
 from numbers_parser.constants import DOCUMENT_ID
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
-from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
+from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 
 
 class PaddingType(Enum):

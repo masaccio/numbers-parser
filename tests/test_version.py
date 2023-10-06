@@ -1,7 +1,7 @@
 import importlib
+
 import mock
 import pytest
-
 from numbers_parser import _check_installed_numbers_version, _get_version
 
 builtin_open = open

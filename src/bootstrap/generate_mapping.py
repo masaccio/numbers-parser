@@ -2,7 +2,6 @@ import json
 import os
 import sys
 
-
 if len(sys.argv) != 3:
     raise (ValueError(f"Usage: {sys.argv[0]} mapping.json mapping.py"))
 

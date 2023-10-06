@@ -1,10 +1,9 @@
 import pytest
-
-from numbers_parser import Document, EmptyCell, TextCell, NumberCell, MergedCell
+from numbers_parser import Document, EmptyCell, MergedCell, NumberCell, TextCell
 from numbers_parser.constants import (
-    DEFAULT_ROW_COUNT,
     DEFAULT_COLUMN_COUNT,
     DEFAULT_NUM_HEADERS,
+    DEFAULT_ROW_COUNT,
     DEFAULT_ROW_HEIGHT,
     DEFAULT_TABLE_OFFSET,
 )

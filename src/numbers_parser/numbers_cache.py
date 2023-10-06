@@ -1,5 +1,5 @@
-from functools import wraps
 from collections import defaultdict
+from functools import wraps
 
 
 class Cacheable:

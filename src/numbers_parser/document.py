@@ -1,5 +1,6 @@
 from typing import Generator, Tuple, Union
 from warnings import warn
+
 from numbers_parser.cell import Border, Cell, MergedCell, Style, xl_cell_to_rowcol
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import (
@@ -13,7 +14,7 @@ from numbers_parser.constants import (
 from numbers_parser.containers import ItemsList
 from numbers_parser.file import write_numbers_file
 from numbers_parser.model import _NumbersModel
-from numbers_parser.numbers_cache import cache, Cacheable
+from numbers_parser.numbers_cache import Cacheable, cache
 
 
 class Document:

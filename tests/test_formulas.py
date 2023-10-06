@@ -1,6 +1,5 @@
 import pytest
 import pytest_check as check
-
 from numbers_parser import Document, UnsupportedWarning
 
 TABLE_1_FORMULAS = [

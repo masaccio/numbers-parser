@@ -1,7 +1,6 @@
 import pytest
-
 from numbers_parser import Document, TextCell
-from numbers_parser.exceptions import FileFormatError, FileError
+from numbers_parser.exceptions import FileError, FileFormatError
 
 ZZZ_TABLE_1_REF = [
     [None, "YYY_COL_1", "YYY_COL_2"],

@@ -1,7 +1,6 @@
 import re
 import sys
-
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 
 # Code pattern in AArch64:
 #

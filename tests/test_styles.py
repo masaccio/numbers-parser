@@ -1,21 +1,18 @@
 from collections import ChainMap
-from pytest_check import check
-
 
 import pytest
-
 from numbers_parser import (
     RGB,
     Alignment,
     Document,
     HorizontalJustification,
     Style,
-    VerticalJustification,
     UnsupportedWarning,
+    VerticalJustification,
 )
-from numbers_parser.constants import DEFAULT_FONT, DEFAULT_FONT_SIZE
 from numbers_parser.cell import DEFAULT_ALIGNMENT_CLASS
-
+from numbers_parser.constants import DEFAULT_FONT, DEFAULT_FONT_SIZE
+from pytest_check import check
 
 TEST_NUMBERED_REF = [
     "(1) double-paren-1",

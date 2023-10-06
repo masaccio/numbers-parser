@@ -12,13 +12,13 @@ https://github.com/obriensp/proto-dump
 """
 
 from pathlib import Path
-from termcolor import cprint
 
-from google.protobuf.internal.decoder import _DecodeVarint, SkipField
 from google.protobuf import descriptor_pb2
 from google.protobuf.descriptor_pool import DescriptorPool
-from google.protobuf.message import DecodeError
 from google.protobuf.internal import api_implementation
+from google.protobuf.internal.decoder import SkipField, _DecodeVarint
+from google.protobuf.message import DecodeError
+from termcolor import cprint
 
 
 class ProtoFile(object):

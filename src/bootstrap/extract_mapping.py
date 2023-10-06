@@ -14,7 +14,6 @@ import os
 import sys
 
 import lldb
-
 from debug.lldbutil import print_stacktrace
 
 if len(sys.argv) != 3:

@@ -1,6 +1,5 @@
-from pendulum import datetime
 from numbers_parser import Document
-
+from pendulum import datetime
 
 STATEMENT_REF = [
     ["Date", "Transaction Details", "Paid In", "Withdrawn", "Balance", "Category"],

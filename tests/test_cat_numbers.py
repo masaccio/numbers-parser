@@ -1,7 +1,7 @@
 import csv
+
 import pytest
 import pytest_check as check
-
 from numbers_parser import __version__
 from numbers_parser.experimental import _enable_experimental_features
 

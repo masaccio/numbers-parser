@@ -1,6 +1,6 @@
 import os
-
 from enum import IntEnum
+
 from pendulum import datetime
 from pkg_resources import resource_filename
 

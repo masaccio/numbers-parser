@@ -1,4 +1,5 @@
 import sys
+
 import Cocoa
 
 if len(sys.argv) != 2:

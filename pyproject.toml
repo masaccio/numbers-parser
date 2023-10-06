@@ -107,8 +107,16 @@ exclude = [
 	# Tox
 	".tox/*"
 ]
-# Enable flake8-bugbear rules, in addition to the defaults.
-extend-select = ["B"]
+select-extend = [
+    # Pyflakes including bugbears
+    "F",
+    "B",
+    # Pycodestyle
+    "E",
+    "W",
+    # isort
+    "I001"
+]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"

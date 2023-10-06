@@ -1,5 +1,4 @@
 import pytest
-
 from numbers_parser import UnsupportedError
 from numbers_parser.numbers_uuid import NumbersUUID
 

@@ -27,7 +27,7 @@ from numbers_parser.constants import (
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-from numbers_parser.numbers_cache import cache, Cacheable
+from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID
 
 logger = logging.getLogger(numbers_parser_name)

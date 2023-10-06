@@ -1,9 +1,8 @@
 import json
-import magic
 import sys
 
+import magic
 import pytest
-
 from numbers_parser import __version__
 
 

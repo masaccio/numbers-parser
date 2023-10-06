@@ -1,6 +1,5 @@
 import pytest_check as check
-
-from numbers_parser import Document, ErrorCell, TextCell, BoolCell
+from numbers_parser import BoolCell, Document, ErrorCell, TextCell
 
 DOCUMENT = "tests/data/test-all-formulas.numbers"
 DOCUMENT_13_1 = "tests/data/test-all-formulas-13.1.numbers"

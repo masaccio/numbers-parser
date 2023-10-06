@@ -29,7 +29,7 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
     ParagraphStylePropertiesArchive as ParagraphStyle,
 )
-from numbers_parser.numbers_cache import cache, Cacheable
+from numbers_parser.numbers_cache import Cacheable, cache
 
 __all__ = [
     "Alignment",

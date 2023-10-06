@@ -1,30 +1,18 @@
 import math
 import re
-
 from array import array
 from collections import defaultdict
-from numbers_parser.numbers_cache import cache, Cacheable
 from struct import pack
 from typing import Dict, List, Tuple, Union
 from warnings import warn
 
-from numbers_parser.containers import ObjectStore
-from numbers_parser.iwafile import find_extension
-from numbers_parser.constants import (
-    EPOCH,
-    DEFAULT_COLUMN_WIDTH,
-    DEFAULT_DOCUMENT,
-    DEFAULT_PRE_BNC_BYTES,
-    DEFAULT_ROW_HEIGHT,
-    DEFAULT_TABLE_OFFSET,
-    DEFAULT_TILE_SIZE,
-    DEFAULT_TEXT_INSET,
-    DEFAULT_TEXT_WRAP,
-    DOCUMENT_ID,
-    PACKAGE_ID,
-    MAX_TILE_SIZE,
+from numbers_parser.bullets import (
+    BULLET_CONVERSION,
+    BULLET_PREFIXES,
+    BULLET_SUFFIXES,
 )
 from numbers_parser.cell import (
+    RGB,
     Alignment,
     BoolCell,
     Border,
@@ -37,7 +25,6 @@ from numbers_parser.cell import (
     MergedCell,
     MergeReference,
     NumberCell,
-    RGB,
     RichTextCell,
     Style,
     TextCell,
@@ -46,31 +33,42 @@ from numbers_parser.cell import (
     xl_range,
     xl_rowcol_to_cell,
 )
+from numbers_parser.cell_storage import CellStorage
+from numbers_parser.constants import (
+    DEFAULT_COLUMN_WIDTH,
+    DEFAULT_DOCUMENT,
+    DEFAULT_PRE_BNC_BYTES,
+    DEFAULT_ROW_HEIGHT,
+    DEFAULT_TABLE_OFFSET,
+    DEFAULT_TEXT_INSET,
+    DEFAULT_TEXT_WRAP,
+    DEFAULT_TILE_SIZE,
+    DOCUMENT_ID,
+    EPOCH,
+    MAX_TILE_SIZE,
+    PACKAGE_ID,
+)
+from numbers_parser.containers import ObjectStore
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
-from numbers_parser.bullets import (
-    BULLET_PREFIXES,
-    BULLET_CONVERSION,
-    BULLET_SUFFIXES,
-)
-from numbers_parser.cell_storage import CellStorage
-from numbers_parser.numbers_uuid import NumbersUUID
-
-from numbers_parser.generated.fontmap import FONT_NAME_TO_FAMILY
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
-from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
-from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
-from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
-from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
-from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
+from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
+from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
+from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSSArchives_pb2 as TSSArchives
-from numbers_parser.generated.TSWPArchives_pb2 import (
-    CharacterStylePropertiesArchive as CharacterStyle,
-)
+from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
+from numbers_parser.generated.fontmap import FONT_NAME_TO_FAMILY
 from numbers_parser.generated.TSDArchives_pb2 import (
     StrokePatternArchive as StrokePattern,
 )
+from numbers_parser.generated.TSWPArchives_pb2 import (
+    CharacterStylePropertiesArchive as CharacterStyle,
+)
+from numbers_parser.iwafile import find_extension
+from numbers_parser.numbers_cache import Cacheable, cache
+from numbers_parser.numbers_uuid import NumbersUUID
 
 
 def create_font_name_map(font_map: dict) -> dict:

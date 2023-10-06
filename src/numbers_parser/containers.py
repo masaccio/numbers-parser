@@ -1,8 +1,8 @@
 import math
 
-from numbers_parser.file import read_numbers_file
 from numbers_parser.constants import PACKAGE_ID
-from numbers_parser.iwafile import create_iwa_segment, copy_object_to_iwa_file, IWAFile
+from numbers_parser.file import read_numbers_file
+from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
 
 
 class ItemsList:

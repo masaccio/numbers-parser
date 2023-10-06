@@ -2,20 +2,19 @@
 
 import logging
 import struct
-import snappy
-from typing import List
-
 from functools import partial
 from struct import unpack
+from typing import List
 
-from numbers_parser.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_ID_MAP
-from numbers_parser.exceptions import NotImplementedError
-from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
-
-from google.protobuf.internal.encoder import _VarintBytes
+import snappy
 from google.protobuf.internal.decoder import _DecodeVarint32
+from google.protobuf.internal.encoder import _VarintBytes
 from google.protobuf.json_format import MessageToDict, ParseDict
 from google.protobuf.message import EncodeError
+
+from numbers_parser.exceptions import NotImplementedError
+from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
+from numbers_parser.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_ID_MAP
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
