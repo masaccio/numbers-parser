@@ -341,7 +341,9 @@ class CellStorage(Cacheable):
                 formatted_value = decode_date_format(custom_format_string, self.datetime)
             else:
                 warn(
-                    f"Unexpected custom format type {custom_format.format_type}", UnsupportedWarning
+                    f"Unexpected custom format type {custom_format.format_type}",
+                    UnsupportedWarning,
+                    stacklevel=3,
                 )
                 return ""
         else:
@@ -446,7 +448,7 @@ def decode_date_format_field(field: str, value: datetime) -> str:
         else:
             return value.strftime(s)
     else:
-        warn(f"Unsupported field code '{field}'", UnsupportedWarning)
+        warn(f"Unsupported field code '{field}'", UnsupportedWarning, stacklevel=4)
         return ""
 
 
@@ -548,6 +550,7 @@ def decode_number_format(format, value, name):  # noqa: C901
         warn(
             f"Can't parse format string '{custom_format_string}'; skipping",
             UnsupportedWarning,
+            stacklevel=1,
         )
         return custom_format_string
     format_spec = match.group(1)
