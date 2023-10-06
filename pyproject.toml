@@ -43,6 +43,7 @@ line-profiler = "^4.0.3"
 mock = "^5.1.0"
 pytest-xdist = "^3.3.1"
 psutil = "^5.9.5"
+ruff = "^0.0.292"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
@@ -86,3 +87,28 @@ max-complexity = 15
 
 [tool.pylama.linter.pyflakes]
 builtins = "_"
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+fix = true
+unfixable = [
+    "ERA", # do not autoremove commented out code
+]
+target-version = "py38"
+line-length = 100
+exclude = [
+    # Machine-generated files
+    ".bootstrap/*",
+	"src/numbers_parser/generated/*",
+	# Third-part files not to lint
+	"src/debug/lldbutil.py",
+	# Tox
+	".tox/*"
+]
+# Enable flake8-bugbear rules, in addition to the defaults.
+extend-select = ["B"]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"

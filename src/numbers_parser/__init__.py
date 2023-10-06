@@ -58,7 +58,9 @@ def _check_installed_numbers_version():
     version_dict = plistlib.load(fp)
     installed_version = version_dict["CFBundleShortVersionString"]
     if installed_version not in _SUPPORTED_NUMBERS_VERSIONS:
-        warnings.warn(f"Numbers version {installed_version} not tested with this version")
+        warnings.warn(
+            f"Numbers version {installed_version} not tested with this version", stacklevel=2
+        )
     fp.close()
     return installed_version
 

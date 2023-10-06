@@ -475,6 +475,7 @@ class Cell(Cacheable):
                 warn(
                     f"'{value}' rounded to {MAX_SIGNIFICANT_DIGITS} significant digits",
                     RuntimeWarning,
+                    stacklevel=2,
                 )
             return NumberCell(row_num, col_num, rounded_value)
         elif isinstance(value, builtin_datetime) or isinstance(value, DateTime):
@@ -527,6 +528,7 @@ class Cell(Cacheable):
             "image_filename is deprecated and will be removed in the future. "
             + "Please use the style property",
             DeprecationWarning,
+            stacklevel=2,
         )
         if self.style is not None and self.style.bg_image is not None:
             return self.style.bg_image.filename
@@ -539,6 +541,7 @@ class Cell(Cacheable):
             "image_data is deprecated and will be removed in the future. "
             + "Please use the style property",
             DeprecationWarning,
+            stacklevel=2,
         )
         if self.style is not None and self.style.bg_image is not None:
             return self.style.bg_image.data
@@ -580,7 +583,11 @@ class Cell(Cacheable):
 
     @style.setter
     def style(self, _):
-        warn("cell style cannot be set; use Table.set_cell_style() instead", UnsupportedWarning)
+        warn(
+            "cell style cannot be set; use Table.set_cell_style() instead",
+            UnsupportedWarning,
+            stacklevel=2,
+        )
 
     @property
     def border(self):
@@ -592,6 +599,7 @@ class Cell(Cacheable):
         warn(
             "cell border values cannot be set; use Table.set_cell_border() instead",
             UnsupportedWarning,
+            stacklevel=2,
         )
 
 

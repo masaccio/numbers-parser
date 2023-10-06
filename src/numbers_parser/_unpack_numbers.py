@@ -137,7 +137,7 @@ def main():
             try:
                 read_numbers_file(
                     document,
-                    file_handler=lambda filename, blob: process_file(
+                    file_handler=lambda filename, blob, output_dir=output_dir: process_file(
                         filename, blob, output_dir, args
                     ),
                 )

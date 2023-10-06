@@ -41,7 +41,7 @@ def configurable_save_file_fixture(request, tmp_path, pytestconfig):
 
 @pytest.fixture(name="configurable_multi_save_file", params="num_files")
 def configurable_multi_save_file_fixture(request, tmp_path, pytestconfig):
-    if type(request.param) == list and len(request.param) == 1:
+    if isinstance(request.param, list) and len(request.param) == 1:
         num_files = request.param[0]
     else:
         num_files = 0
