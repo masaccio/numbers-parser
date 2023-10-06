@@ -47,7 +47,7 @@ def test_custom_formatting(pytestconfig):
             if value != ref:
                 fails += 1
             if max_check_fails > 0 and fails >= max_check_fails:
-                assert False
+                raise AssertionError()
 
 
 def test_formatting_stress(pytestconfig):
@@ -68,4 +68,4 @@ def test_formatting_stress(pytestconfig):
         if value != ref:
             fails += 1
         if max_check_fails > 0 and fails >= max_check_fails:
-            assert False
+            raise AssertionError()

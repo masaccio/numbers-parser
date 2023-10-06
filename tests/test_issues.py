@@ -96,8 +96,8 @@ def test_issue_7():
     table = tables[0]
     assert table.cell(1, 1).value == ISSUE_7_REF_1
     assert table.cell(2, 1).value == ISSUE_7_REF_2
-    table.cell(1, 1).bullets[0] == ISSUE_7_REF_1.split("\n")[0] + "\n"
-    table.cell(2, 1).bullets[2] == ISSUE_7_REF_2.split("\n")[2] + "\n"
+    assert table.cell(1, 1).bullets[0] == ISSUE_7_REF_1.split("\n")[0]
+    assert table.cell(2, 1).bullets[2] == ISSUE_7_REF_2.split("\n")[2]
 
 
 def test_issue_9():
@@ -375,7 +375,7 @@ def test_issue_67():
     """Memory leak test"""
     process = Process()
     rss_base = process.memory_info().rss
-    for i in range(0, 10):
+    for _i in range(0, 10):
         doc = Document("tests/data/issue-67.numbers")
         assert doc.sheets[0].tables[0].cell(0, 0).value == "A"
 

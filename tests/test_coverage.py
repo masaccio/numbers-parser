@@ -173,7 +173,7 @@ def test_merge(configurable_save_file):
 
     new_doc = Document(configurable_save_file)
     table = new_doc.sheets[0].tables[0]
-    new_doc._model.merge_cells(table._table_id).rect((3, 0)) == (0, 0, 3, 0)
+    assert new_doc._model.merge_cells(table._table_id).rect((3, 0)) == (0, 0, 3, 0)
 
 
 def test_experimental():

@@ -291,7 +291,7 @@ def test_extra_borders(configurable_save_file):
     table = new_doc.sheets[0].tables[0]
     for coord in coords:
         (row_num, col_num, side, length, border) = coord
-        for offset in range(length):
+        for _ in range(length):
             assert getattr(table.cell(row_num, col_num).border, side) == border
 
 
