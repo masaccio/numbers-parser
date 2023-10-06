@@ -35,7 +35,11 @@ class Document:
             or (num_rows is not None)
             or (num_cols is not None)
         ):
-            warn("can't set table/sheet attributes on load of existing document", RuntimeWarning)
+            warn(
+                "can't set table/sheet attributes on load of existing document",
+                RuntimeWarning,
+                stacklevel=2,
+            )
 
         self._model = _NumbersModel(filename)
         refs = self._model.sheet_ids()
@@ -426,10 +430,10 @@ class Table(Cacheable):
         if col_num >= MAX_COL_COUNT:
             raise IndexError(f"{col_num} exceeds maximum column {MAX_COL_COUNT-1}")
 
-        for row in range(self.num_rows, row_num + 1):
+        for _ in range(self.num_rows, row_num + 1):
             self.add_row()
 
-        for row in range(self.num_cols, col_num + 1):
+        for _ in range(self.num_cols, col_num + 1):
             self.add_column()
 
         return (row_num, col_num) + tuple(values)
@@ -526,7 +530,11 @@ class Table(Cacheable):
             return
 
         if self._data[row_num][col_num].is_merged and side in ["bottom", "right"]:
-            warn(f"cell [{row_num},{col_num}] is merged; {side} border not set", RuntimeWarning)
+            warn(
+                f"cell [{row_num},{col_num}] is merged; {side} border not set",
+                RuntimeWarning,
+                stacklevel=2,
+            )
             return
 
         self._model.extract_strokes(self._table_id)

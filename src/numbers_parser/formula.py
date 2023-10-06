@@ -24,7 +24,7 @@ class Formula(list):
 
     def popn(self, num_args: int) -> tuple:
         values = ()
-        for i in range(num_args):
+        for _i in range(num_args):
             values += (self._stack.pop(),)
         return values
 
@@ -47,7 +47,7 @@ class Formula(list):
         else:
             # 2-dimentional array: {a,b;c,d}
             rows = []
-            for row_num in range(num_rows):
+            for _row_num in range(num_rows):
                 args = self.popn(num_cols)
                 args = ",".join(reversed(args))
                 rows.append(f"{args}")
@@ -92,6 +92,7 @@ class Formula(list):
             warnings.warn(
                 f"{table_name}@[{self.row},{self.col}]: function ID {node_index} is unsupported",
                 UnsupportedWarning,
+                stacklevel=2,
             )
             func_name = "UNDEFINED!"
         else:
@@ -102,6 +103,7 @@ class Formula(list):
             warnings.warn(
                 f"{table_name}@[{self.row},{self.col}]: stack too small for {func_name}",
                 UnsupportedWarning,
+                stacklevel=2,
             )
             num_args = len(self._stack)
 
@@ -284,6 +286,7 @@ class TableFormulas:
             warnings.warn(
                 f"{table_name}@[{row_num},{col_num}]: key #{formula_key} not found",
                 UnsupportedWarning,
+                stacklevel=2,
             )
             return "INVALID_KEY!(" + str(formula_key) + ")"
 
@@ -297,6 +300,7 @@ class TableFormulas:
                 warnings.warn(
                     f"{table_name}@[{row_num},{col_num}]: node type {node_type} is unsupported",
                     UnsupportedWarning,
+                    stacklevel=2,
                 )
                 pass
             elif NODE_FUNCTION_MAP[node_type] is not None:
