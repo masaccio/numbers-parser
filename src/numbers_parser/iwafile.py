@@ -181,7 +181,7 @@ class IWAArchiveSegment(object):
             except KeyError:  # pragma: no cover
                 raise NotImplementedError(
                     "Don't know how to parse Protobuf message type " + str(message_info.type)
-                )
+                ) from None
             try:
                 message_payload = payload[n : n + message_info.length]
                 if hasattr(klass, "FromString"):
@@ -192,7 +192,7 @@ class IWAArchiveSegment(object):
                 raise ValueError(
                     "Failed to deserialize %s payload of length %d: %s"
                     % (klass, message_info.length, e)
-                )
+                ) from None
             payloads.append(output)
             n += message_info.length
 
@@ -202,7 +202,7 @@ class IWAArchiveSegment(object):
     def from_dict(cls, _dict):
         header = dict_to_header(_dict["header"])
         objects = []
-        for message_info, o in zip(header.message_infos, _dict["objects"]):
+        for _message_info, o in zip(header.message_infos, _dict["objects"]):
             objects.append(dict_to_message(o))
         return cls(header, objects)
 
@@ -225,7 +225,7 @@ class IWAArchiveSegment(object):
                 raise ValueError(
                     "Failed to encode object: %s\nObject: '%s'\nMessage info: %s"
                     % (e, repr(obj), message_info)
-                )
+                ) from None
         return b"".join(
             [_VarintBytes(self.header.ByteSize()), self.header.SerializeToString()]
             + [obj.SerializeToString() for obj in self.objects]

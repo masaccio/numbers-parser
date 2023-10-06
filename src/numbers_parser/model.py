@@ -488,8 +488,8 @@ class _NumbersModel(Cacheable):
         if base_data_store.merge_region_map.identifier == 0:
             return
 
-        cell_range = self.objects[base_data_store.merge_region_map.identifier]
-        for cell_range in cell_range.cell_range:
+        cell_ranges = self.objects[base_data_store.merge_region_map.identifier]
+        for cell_range in cell_ranges.cell_range:
             (col_start, row_start) = (
                 cell_range.origin.packedData >> 16,
                 cell_range.origin.packedData & 0xFFFF,
@@ -1337,8 +1337,8 @@ class _NumbersModel(Cacheable):
         """Create new cell style archives for any cells whose styles
         have changes that require a cell style"""
         cell_styles = {}
-        for row_num, row in enumerate(data):
-            for col_num, cell in enumerate(row):
+        for _, row in enumerate(data):
+            for _, cell in enumerate(row):
                 if cell._style is not None and cell._style._update_cell_style:
                     fingerprint = (
                         str(cell.style.alignment.vertical)
@@ -1514,6 +1514,7 @@ class _NumbersModel(Cacheable):
             warn(
                 f"@{table_name}:[{row_num},{col_num}]: unsupported data type {data_type} for save",
                 UnsupportedWarning,
+                stacklevel=1,
             )
             return None
 
