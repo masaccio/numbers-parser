@@ -287,6 +287,8 @@ def test_extra_borders(configurable_save_file):
 
     doc.save(configurable_save_file)
 
+    assert Border() == Border(width=0.35, color=RGB(r=0, g=0, b=0), style="solid")
+
     new_doc = Document(configurable_save_file)
     table = new_doc.sheets[0].tables[0]
     for coord in coords:
