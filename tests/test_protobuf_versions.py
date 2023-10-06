@@ -3,6 +3,7 @@ import re
 import subprocess
 
 import pytest
+
 from numbers_parser import _get_version
 
 SOURCE_DIR = os.getcwd()

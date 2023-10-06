@@ -2,9 +2,10 @@ from datetime import datetime as builtin_datetime
 from datetime import timedelta as builtin_timedelta
 
 import pytest
+from pendulum import datetime, duration
+
 from numbers_parser import Document, EmptyCell
 from numbers_parser.constants import MAX_COL_COUNT, MAX_ROW_COUNT
-from pendulum import datetime, duration
 
 
 def test_edit_cell_values(configurable_save_file):

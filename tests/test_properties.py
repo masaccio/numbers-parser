@@ -1,5 +1,6 @@
-from numbers_parser import Document
 from pendulum import datetime, duration
+
+from numbers_parser import Document
 
 ZZZ_TABLE_1_REF = [
     ["YYY_1_1", "YYY_1_2"],

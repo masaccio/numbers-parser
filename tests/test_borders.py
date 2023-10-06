@@ -1,8 +1,9 @@
 from collections import defaultdict
 
 import pytest
-from numbers_parser import RGB, Border, BorderType, Cell, Document, MergedCell, xl_rowcol_to_cell
 from pytest_check import check
+
+from numbers_parser import RGB, Border, BorderType, Cell, Document, MergedCell, xl_rowcol_to_cell
 
 
 def check_border(cell: Cell, side: str, test_value: str) -> bool:

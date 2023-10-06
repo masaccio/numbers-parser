@@ -107,7 +107,7 @@ exclude = [
 	# Tox
 	".tox/*"
 ]
-select-extend = [
+select = [
     # Pyflakes including bugbears
     "F",
     "B",
@@ -117,6 +117,7 @@ select-extend = [
     # isort
     "I001"
 ]
+src = ["src", "tests"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"

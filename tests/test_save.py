@@ -1,4 +1,6 @@
 import pytest
+from pendulum import Duration, datetime
+
 from numbers_parser import Document, EmptyCell, MergedCell, NumberCell, TextCell
 from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
@@ -7,7 +9,6 @@ from numbers_parser.constants import (
     DEFAULT_ROW_HEIGHT,
     DEFAULT_TABLE_OFFSET,
 )
-from pendulum import Duration, datetime
 
 
 def test_empty_document(configurable_save_file):

@@ -1,6 +1,8 @@
 from collections import ChainMap
 
 import pytest
+from pytest_check import check
+
 from numbers_parser import (
     RGB,
     Alignment,
@@ -12,7 +14,6 @@ from numbers_parser import (
 )
 from numbers_parser.cell import DEFAULT_ALIGNMENT_CLASS
 from numbers_parser.constants import DEFAULT_FONT, DEFAULT_FONT_SIZE
-from pytest_check import check
 
 TEST_NUMBERED_REF = [
     "(1) double-paren-1",

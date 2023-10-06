@@ -1,8 +1,9 @@
 import magic
 import pytest
-from numbers_parser import Document, EmptyCell, ErrorCell
 from pendulum import datetime, duration
 from psutil import Process
+
+from numbers_parser import Document, EmptyCell, ErrorCell
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"

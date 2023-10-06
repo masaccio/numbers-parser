@@ -1,4 +1,5 @@
 import pytest
+
 from numbers_parser import (
     Cell,
     Document,

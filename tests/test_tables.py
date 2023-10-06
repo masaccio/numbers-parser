@@ -1,4 +1,5 @@
 import pytest
+
 from numbers_parser import Document, TextCell
 from numbers_parser.exceptions import FileError, FileFormatError
 
