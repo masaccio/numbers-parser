@@ -122,8 +122,7 @@ class Alignment(_Alignment):
                 raise TypeError("invalid vertical alignment")
             vertical = VERTICAL_MAP[vertical]
 
-        self = super(_Alignment, cls).__new__(cls, (horizontal, vertical))
-        return self
+        return super(_Alignment, cls).__new__(cls, (horizontal, vertical))
 
 
 DEFAULT_ALIGNMENT_CLASS = Alignment(*DEFAULT_ALIGNMENT)
@@ -192,7 +191,7 @@ class Style:
             bg_image = BackgroundImage(*cell_storage.image_data)
         else:
             bg_image = None
-        style = Style(
+        return Style(
             alignment=model.cell_alignment(cell_storage),
             bg_image=bg_image,
             bg_color=model.cell_bg_color(cell_storage),
@@ -212,7 +211,6 @@ class Style:
             _text_style_obj_id=model.text_style_object_id(cell_storage),
             _cell_style_obj_id=model.cell_style_object_id(cell_storage),
         )
-        return style
 
     def __post_init__(self):
         self.bg_color = rgb_color(self.bg_color)
@@ -562,8 +560,7 @@ class Cell(Cacheable):
     def formula(self):
         if self._formula_key is not None:
             table_formulas = self._model.table_formulas(self._table_id)
-            formula = table_formulas.formula(self._formula_key, self.row, self.col)
-            return formula
+            return table_formulas.formula(self._formula_key, self.row, self.col)
         else:
             return None
 

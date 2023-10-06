@@ -84,10 +84,7 @@ STYLE_DEFAULTS = {
 def check_style(style, **kwargs):
     matches = []
     for attr, _ in STYLE_DEFAULTS.items():
-        if attr in kwargs:
-            ref = kwargs[attr]
-        else:
-            ref = STYLE_DEFAULTS[attr]
+        ref = kwargs[attr] if attr in kwargs else STYLE_DEFAULTS[attr]
         matches.append(check.equal(getattr(style, attr), ref))
     return all(matches)
 

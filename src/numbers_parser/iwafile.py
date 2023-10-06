@@ -281,8 +281,7 @@ def create_iwa_segment(id: int, cls: object, object_dict: dict) -> object:
     object_dict["_pbtype"] = full_name
     archive_dict = {"header": header, "objects": [object_dict]}
 
-    iwa_segment = IWAArchiveSegment.from_dict(archive_dict)
-    return iwa_segment
+    return IWAArchiveSegment.from_dict(archive_dict)
 
 
 def find_references(obj, references=list):

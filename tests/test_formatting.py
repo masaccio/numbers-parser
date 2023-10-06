@@ -36,10 +36,7 @@ def test_custom_formatting(pytestconfig):
     fails = 0
     for sheet in doc.sheets:
         table = sheet.tables[0]
-        if table.cell(0, 1).value == "Test":
-            test_col = 1
-        else:
-            test_col = 2
+        test_col = 1 if table.cell(0, 1).value == "Test" else 2
         for i, row in enumerate(table.iter_rows(min_row=1), start=2):
             value = row[test_col].formatted_value
             ref = row[test_col + 1].value

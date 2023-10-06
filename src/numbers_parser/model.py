@@ -108,14 +108,12 @@ class MergeCells:
         return self._references[row_col].rect
 
     def merge_cell_names(self):
-        ranges = [
+        return [
             xl_range(*v.rect) for k, v in self._references.items() if self.is_merge_reference(k)
         ]
-        return ranges
 
     def merge_cells(self):
-        ranges = [k for k, v in self._references.items() if self.is_merge_anchor(k)]
-        return ranges
+        return [k for k, v in self._references.items() if self.is_merge_anchor(k)]
 
     def __len__(self):
         return len(self._references.keys())
@@ -335,11 +333,10 @@ class _NumbersModel(Cacheable):
     def custom_format_map(self):
         custom_format_list_id = self.objects[DOCUMENT_ID].super.custom_format_list.identifier
         custom_format_list = self.objects[custom_format_list_id]
-        custom_format_map = {
+        return {
             NumbersUUID(u).hex: custom_format_list.custom_formats[i]
             for i, u in enumerate(custom_format_list.uuids)
         }
-        return custom_format_map
 
     @cache(num_args=2)
     def table_format(self, table_id: int, key: int) -> str:
@@ -933,15 +930,9 @@ class _NumbersModel(Cacheable):
 
     def create_drawable(self, sheet_id: int, x: float, y: float) -> object:
         """Create a DrawableArchive for a new table in a sheet"""
-        if x is not None:
-            table_x = x
-        else:
-            table_x = 0.0
-        if y is not None:
-            table_y = y
-        else:
-            table_y = self.last_table_offset(sheet_id) + DEFAULT_TABLE_OFFSET
-        drawable = TSDArchives.DrawableArchive(
+        table_x = x if x is not None else 0.0
+        table_y = y if y is not None else self.last_table_offset(sheet_id) + DEFAULT_TABLE_OFFSET
+        return TSDArchives.DrawableArchive(
             parent=TSPMessages.Reference(identifier=sheet_id),
             geometry=TSDArchives.GeometryArchive(
                 angle=0.0,
@@ -950,7 +941,6 @@ class _NumbersModel(Cacheable):
                 size=TSPMessages.Size(height=231.0, width=494.0),
             ),
         )
-        return drawable
 
     def add_table(  # noqa: PLR0913
         self,
@@ -1584,8 +1574,7 @@ class _NumbersModel(Cacheable):
         if buffer is None:
             return None
 
-        cell = CellStorage(self, table_id, buffer, row_num, col_num)
-        return cell
+        return CellStorage(self, table_id, buffer, row_num, col_num)
 
     @cache(num_args=2)
     def table_rich_text(self, table_id: int, string_key: int) -> Dict:
@@ -1802,8 +1791,7 @@ class _NumbersModel(Cacheable):
             style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
             padding = self.cell_property(style, "padding")
             # Padding is always identical (only one UI setting)
-            text_inset = padding.left
-            return text_inset
+            return padding.left
 
     def cell_text_wrap(self, cell_storage: CellStorage) -> float:
         if cell_storage.cell_style_id is None:
@@ -2060,10 +2048,7 @@ def formatted_number(number_type, index):
 
 
 def node_to_col_ref(node: object, table_name: str, col_num: int) -> str:
-    if node.AST_column.absolute:
-        col = node.AST_column.column
-    else:
-        col = col_num + node.AST_column.column
+    col = node.AST_column.column if node.AST_column.absolute else col_num + node.AST_column.column
 
     col_name = xl_col_to_name(col, node.AST_column.absolute)
     if table_name is not None:
@@ -2073,10 +2058,7 @@ def node_to_col_ref(node: object, table_name: str, col_num: int) -> str:
 
 
 def node_to_row_ref(node: object, table_name: str, row_num: int) -> str:
-    if node.AST_row.absolute:
-        row = node.AST_row.row
-    else:
-        row = row_num + node.AST_row.row
+    row = node.AST_row.row if node.AST_row.absolute else row_num + node.AST_row.row
 
     row_name = f"${row+1}" if node.AST_row.absolute else f"{row+1}"
     if table_name is not None:
@@ -2086,14 +2068,8 @@ def node_to_row_ref(node: object, table_name: str, row_num: int) -> str:
 
 
 def node_to_row_col_ref(node: object, table_name: str, row_num: int, col_num: int) -> str:
-    if node.AST_row.absolute:
-        row = node.AST_row.row
-    else:
-        row = row_num + node.AST_row.row
-    if node.AST_column.absolute:
-        col = node.AST_column.column
-    else:
-        col = col_num + node.AST_column.column
+    row = node.AST_row.row if node.AST_row.absolute else row_num + node.AST_row.row
+    col = node.AST_column.column if node.AST_column.absolute else col_num + node.AST_column.column
 
     ref = xl_rowcol_to_cell(
         row,
@@ -2178,9 +2154,8 @@ def pack_decimal128(value: float) -> bytearray:
 
 def field_references(obj: object) -> dict:
     """Return a dict of all fields in an object that are references to other objects"""
-    refs = {
+    return {
         x[0].name: {"identifier": getattr(obj, x[0].name).identifier}
         for x in obj.ListFields()
         if type(getattr(obj, x[0].name)) == TSPMessages.Reference
     }
-    return refs

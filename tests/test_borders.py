@@ -212,10 +212,7 @@ def invert_border_test(test):
         width = float(values[0])
         color = eval(values[1].replace(";", ","))
         style = values[2]
-        if width < 4.0:
-            width = round(width * 2.0, 1)
-        else:
-            width = round(width / 2.0, 1)
+        width = round(width * 2.0, 1) if width < 4.0 else round(width / 2.0, 1)
 
         color = (abs(200 - color[0]), abs(200 - color[1]), abs(200 - color[2]))
 
@@ -315,10 +312,7 @@ def test_resave_borders(configurable_save_file):
                 table.write(row_num, col_num, test_string, style=style)
                 for i, side in enumerate(tests):
                     if cell.is_merged:
-                        if side in ["left", "right"]:
-                            length = cell.size[0]
-                        else:
-                            length = cell.size[1]
+                        length = cell.size[0] if side in ["left", "right"] else cell.size[1]
                     else:
                         length = 1
                     if borders[i] is not None:

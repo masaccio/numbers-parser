@@ -298,8 +298,7 @@ class Table(Cacheable):
             rows: list of rows; each row is a list of Cell objects
         """
         if values_only:
-            rows = [[cell.value for cell in row] for row in self._data]
-            return rows
+            return [[cell.value for cell in row] for row in self._data]
         else:
             return self._data
 

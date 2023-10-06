@@ -601,10 +601,7 @@ def decode_number_format(format, value, name):  # noqa: PLR0912
         elif format.num_nonspace_integer_digits > 0:
             int_pad = CellPadding.ZERO
             if format.show_thousands_separator:
-                if integer != 0:
-                    num_commas = int(math.floor(math.log10(integer)) / 3)
-                else:
-                    num_commas = 0
+                num_commas = int(math.floor(math.log10(integer)) / 3) if integer != 0 else 0
                 num_commas = max([num_commas, int((num_integers - 1) / 3)])
                 int_width = num_integers + num_commas
             else:
@@ -687,10 +684,7 @@ def format_decimal(value: float, format) -> str:
         value = -value
     else:
         accounting_style = False
-    if format.show_thousands_separator:
-        thousands = ","
-    else:
-        thousands = ""
+    thousands = "," if format.show_thousands_separator else ""
 
     if value.is_integer() and format.decimal_places >= DECIMAL_PLACES_AUTO:
         formatted_value = f"{int(value):{thousands}}"
