@@ -111,7 +111,7 @@ class CellStorage(Cacheable):
     )
 
     # @profile
-    def __init__(  # noqa: PLR0913, PLR0912, PLR0915
+    def __init__(  # noqa: PLR0912, PLR0913, PLR0915
         self, model: object, table_id: int, buffer, row_num, col_num
     ):
         self.buffer = buffer
@@ -502,7 +502,7 @@ def decode_date_format(format, value):
     return result
 
 
-def decode_text_format(format, value: str):  # noqa: C901
+def decode_text_format(format, value: str):
     """Parse a custom date format string and return a formatted number value."""
     custom_format_string = format.custom_format_string
     return custom_format_string.replace("\ue421", value)

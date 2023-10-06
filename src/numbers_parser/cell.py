@@ -185,8 +185,6 @@ class Style:
 
     @classmethod
     def from_storage(cls, cell_storage: object, model: object):
-        style = Style()
-
         if cell_storage.image_data is not None:
             bg_image = BackgroundImage(*cell_storage.image_data)
         else:

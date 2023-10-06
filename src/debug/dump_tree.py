@@ -8,7 +8,7 @@ from numbers_parser.numbers_uuid import NumbersUUID
 MAX_DEPTH = 10
 
 
-def deep_print(objects, obj, indent=0, max_depth=MAX_DEPTH):  # noqa: PLR0912
+def deep_print(objects, obj, indent=0, max_depth=MAX_DEPTH):
     if indent >= max_depth:
         return
     for descriptor in obj.DESCRIPTOR.fields:
@@ -97,11 +97,11 @@ for filename in args.numbers:
                     max_depth=args.max_depth,
                 )
     elif args.iwa:
-        filenames = [x for x in doc._model.file_store.keys() if args.iwa in x]
+        filenames = [x for x in doc._model.file_store if args.iwa in x]
         for filename in filenames:
             object_ids = [
                 id
-                for id in doc._model.objects._object_to_filename_map.keys()
+                for id in doc._model.objects._object_to_filename_map
                 if doc._model.objects._object_to_filename_map[id] == filename
             ]
             for id in sorted(object_ids):

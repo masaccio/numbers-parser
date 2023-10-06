@@ -1,3 +1,4 @@
+import contextlib
 import json
 import logging
 import os
@@ -23,10 +24,8 @@ logger = logging.getLogger(numbers_parser_name)
 def ensure_directory_exists(prefix, path):
     """Ensure that a path's directory exists."""
     parts = os.path.split(path)
-    try:
+    with contextlib.suppress(OSError):
         os.makedirs(os.path.join(*([prefix] + list(parts[:-1]))))
-    except OSError:
-        pass
 
 
 def prettify_uuids(obj):

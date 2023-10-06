@@ -85,7 +85,7 @@ class ObjectStore:
         """Copy the protobuf messages from any updated object to the cached
         version in the file store so this can be saved to a new document.
         """
-        for obj_id in self._objects.keys():
+        for obj_id in self._objects:
             copy_object_to_iwa_file(
                 self._file_store[self._object_to_filename_map[obj_id]],
                 self._objects[obj_id],

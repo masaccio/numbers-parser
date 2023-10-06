@@ -125,9 +125,8 @@ class Document:
         """Add a new style to the current document. If no style name is
         provided, the next available numbered style will be generated.
         """
-        if "name" in kwargs and kwargs["name"] is not None:
-            if kwargs["name"] in self._model.styles.keys():
-                raise IndexError(f"style '{kwargs['name']}' already exists")
+        if "name" in kwargs and kwargs["name"] is not None and kwargs["name"] in self._model.styles:
+            raise IndexError(f"style '{kwargs['name']}' already exists")
         style = Style(**kwargs)
         if style.name is None:
             style.name = self._model.custom_style_name()
@@ -171,9 +170,9 @@ class Sheet:
         from_table_id = self._tables[-1]._table_id
         return self._add_table(table_name, from_table_id, x, y, num_rows, num_cols)
 
-    def _add_table(  # noqa: PLR0913
+    def _add_table(
         self, table_name, from_table_id, x, y, num_rows, num_cols
-    ) -> object:
+    ) -> object:  # noqa: PLR0913
         if table_name is not None:
             if table_name in self._tables:
                 raise IndexError(f"table '{table_name}' already exists")
