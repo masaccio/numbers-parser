@@ -34,7 +34,6 @@ gprof2dot = "^2022.7.29"
 line-profiler = "^4.0.3"
 mock = "^5.1.0"
 psutil = "^5.9.5"
-pylama = {extras = ["toml"], version = "^8.4.1"}
 pytest = "^7.2.0"
 pytest-check = "^1.0.10"
 pytest-console-scripts = "^1.3.1"
