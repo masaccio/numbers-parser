@@ -188,3 +188,13 @@ def test_prettify_uuids():
     obj = [[1, 2, 3], ["a", "b", "c"], [uuid, uuid, uuid]]
     prettify_uuids(obj)
     assert obj[2][0] == "00000000-0000-0000-0000-000000000000"
+
+
+def test_bad_image_filenames():
+    doc = Document("tests/data/issue-69b.numbers")
+    table = doc.sheets[0].tables[0]
+    _ = table._model.objects.file_store.pop("Data/numbers_1-16.png")
+    with pytest.warns(RuntimeWarning) as record:
+        assert table.cell(0, 0).style.bg_image is None
+    assert len(record) == 1
+    assert str(record[0].message) == "Cannot find file 'numbers_1.png' in Numbers archive"

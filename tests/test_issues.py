@@ -394,8 +394,13 @@ def test_issue_69():
     assert len(table.cell(1, 0).style.bg_image.data) == 19269
     assert len(table.cell(2, 0).style.bg_image.data) == 19256
 
+    doc = Document("tests/data/issue-69.numbers")
+    table = doc.sheets[0].tables[0]
     if version_info.minor >= 11:
-        doc = Document("tests/data/issue-69.numbers")
-        table = doc.sheets[0].tables[0]
         assert table.cell(0, 0).style.bg_image.filename == "sssssss的副本.jpeg"
         assert table.cell(9, 4).style.bg_image.filename == "sssssss的副本.jpeg"
+    else:
+        with pytest.warns(RuntimeWarning) as record:
+            assert table.cell(0, 0).style.bg_image is None
+        assert len(record) == 1
+        assert str(record[0].message) == "Cannot find file 'sssssss的副本.jpeg' in Numbers archive"
