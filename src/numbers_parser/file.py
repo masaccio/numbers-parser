@@ -1,6 +1,7 @@
 import logging
 import os
 from io import BytesIO
+from sys import version_info
 from zipfile import BadZipFile, ZipFile
 
 from numbers_parser.exceptions import FileError, FileFormatError
@@ -8,6 +9,15 @@ from numbers_parser.iwafile import IWAFile, is_iwa_file
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
+
+
+def open_zipfile(file):
+    """Open Zip file with the correct filename encoding supported by current python"""
+    # Coverage is python version dependent, so one path with always fail coverage
+    if version_info.minor >= 11:  # pragma: no cover
+        return ZipFile(file, metadata_encoding="utf-8")
+    else:  # pragma: no cover
+        return ZipFile(file)
 
 
 def read_numbers_file(path, file_handler, object_handler=None):
@@ -29,7 +39,7 @@ def read_numbers_file(path, file_handler, object_handler=None):
                     file_handler(os.path.join(path, filename), blob)
     else:
         try:
-            zipf = ZipFile(path, metadata_encoding="utf-8")
+            zipf = open_zipfile(path)
         except BadZipFile:
             raise FileFormatError("Invalid Numbers file") from None
         except FileNotFoundError:
@@ -39,9 +49,7 @@ def read_numbers_file(path, file_handler, object_handler=None):
             index_zip = [f for f in zipf.namelist() if f.lower().endswith("index.zip")]
             if len(index_zip) > 0:
                 index_data = BytesIO(zipf.read(index_zip[0]))
-                get_objects_from_zip_stream(
-                    ZipFile(index_data, metadata_encoding="utf-8"), file_handler, object_handler
-                )
+                get_objects_from_zip_stream(open_zipfile(index_data), file_handler, object_handler)
             else:
                 get_objects_from_zip_stream(zipf, file_handler, object_handler)
         except BadZipFile:
@@ -60,7 +68,7 @@ def write_numbers_file(filename, file_store):
 
 def get_objects_from_zip_file(path, file_handler, object_handler):
     try:
-        zipf = ZipFile(path, metadata_encoding="utf-8")
+        zipf = open_zipfile(path)
     except BadZipFile:
         raise FileFormatError("Invalid Numbers file") from None
 
