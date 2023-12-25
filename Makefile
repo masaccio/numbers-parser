@@ -44,9 +44,6 @@ docs:
 test:
 	poetry run pytest -n logical
 
-coverage:
-	poetry run pytest --pylama --durations=5 -n logical --cov-report=html
-
 BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
 				  src/$(package_c)/generated/fontmap.py \
 				  src/$(package_c)/generated/__init__.py \
