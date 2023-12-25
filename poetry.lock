@@ -395,18 +395,6 @@ tests = ["coverage[toml] (>=5.3)", "pytest (>=4.6.0)", "pytest (>=4.6.0)", "pyte
 tests-strict = ["coverage[toml] (==5.3)", "pytest (==4.6.0)", "pytest (==4.6.0)", "pytest (==4.6.0)", "pytest (==4.6.0)", "pytest (==4.6.0)", "pytest (==6.2.5)", "pytest-cov (==2.8.1)", "pytest-cov (==2.8.1)", "pytest-cov (==2.9.0)", "pytest-cov (==3.0.0)", "ubelt (==1.3.4)", "xdoctest (==1.1.2)"]
 
 [[package]]
-name = "mccabe"
-version = "0.7.0"
-description = "McCabe checker, plugin for flake8"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e"},
-    {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
-]
-
-[[package]]
 name = "mock"
 version = "5.1.0"
 description = "Rolling backport of unittest.mock for all Pythons"
@@ -642,76 +630,6 @@ files = [
 
 [package.extras]
 test = ["enum34", "ipaddress", "mock", "pywin32", "wmi"]
-
-[[package]]
-name = "pycodestyle"
-version = "2.11.1"
-description = "Python style guide checker"
-category = "main"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pycodestyle-2.11.1-py2.py3-none-any.whl", hash = "sha256:44fe31000b2d866f2e41841b18528a505fbd7fef9017b04eff4e2648a0fadc67"},
-    {file = "pycodestyle-2.11.1.tar.gz", hash = "sha256:41ba0e7afc9752dfb53ced5489e89f8186be00e599e712660695b7a75ff2663f"},
-]
-
-[[package]]
-name = "pydocstyle"
-version = "6.3.0"
-description = "Python docstring style checker"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "pydocstyle-6.3.0-py3-none-any.whl", hash = "sha256:118762d452a49d6b05e194ef344a55822987a462831ade91ec5c06fd2169d019"},
-    {file = "pydocstyle-6.3.0.tar.gz", hash = "sha256:7ce43f0c0ac87b07494eb9c0b462c0b73e6ff276807f204d6b53edc72b7e44e1"},
-]
-
-[package.dependencies]
-snowballstemmer = ">=2.2.0"
-
-[package.extras]
-toml = ["tomli (>=1.2.3)"]
-
-[[package]]
-name = "pyflakes"
-version = "3.1.0"
-description = "passive checker of Python programs"
-category = "main"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pyflakes-3.1.0-py2.py3-none-any.whl", hash = "sha256:4132f6d49cb4dae6819e5379898f2b8cce3c5f23994194c24b77d5da2e36f774"},
-    {file = "pyflakes-3.1.0.tar.gz", hash = "sha256:a0aae034c444db0071aa077972ba4768d40c830d9539fd45bf4cd3f8f6992efc"},
-]
-
-[[package]]
-name = "pylama"
-version = "8.4.1"
-description = "Code audit tool for python"
-category = "main"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "pylama-8.4.1-py3-none-any.whl", hash = "sha256:5bbdbf5b620aba7206d688ed9fc917ecd3d73e15ec1a89647037a09fa3a86e60"},
-    {file = "pylama-8.4.1.tar.gz", hash = "sha256:2d4f7aecfb5b7466216d48610c7d6bad1c3990c29cdd392ad08259b161e486f6"},
-]
-
-[package.dependencies]
-mccabe = ">=0.7.0"
-pycodestyle = ">=2.9.1"
-pydocstyle = ">=6.1.1"
-pyflakes = ">=2.5.0"
-
-[package.extras]
-all = ["eradicate", "mypy", "pylint", "radon", "vulture"]
-eradicate = ["eradicate"]
-mypy = ["mypy"]
-pylint = ["pylint"]
-radon = ["radon"]
-tests = ["eradicate (>=2.0.0)", "mypy", "pylama-quotes", "pylint (>=2.11.1)", "pytest (>=7.1.2)", "pytest-mypy", "radon (>=5.1.0)", "toml", "types-setuptools", "types-toml", "vulture"]
-toml = ["toml (>=0.10.2)"]
-vulture = ["vulture"]
 
 [[package]]
 name = "pyproject-api"
@@ -1114,18 +1032,6 @@ files = [
 ]
 
 [[package]]
-name = "snowballstemmer"
-version = "2.2.0"
-description = "This package provides 29 stemmers for 28 languages generated from Snowball algorithms."
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
-    {file = "snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},
-]
-
-[[package]]
 name = "sortedcontainers"
 version = "2.4.0"
 description = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
@@ -1268,4 +1174,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "962d0fe2f20ac4373af6f2627cd144a0028988a616cc650d4f2085a852772b5d"
+content-hash = "e41af3d3ca73eebe388d34518980b0534875c675db07487c9d49ce29b9f2369c"
