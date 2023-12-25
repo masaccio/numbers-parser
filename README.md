@@ -253,6 +253,8 @@ with open (cell.style.bg_image.filename, "wb") as f:
     f.write(cell.style.bg_image.data)
 ```
 
+Due to a limitation in Python's [ZipFile](https://docs.python.org/3/library/zipfile.html), Python versions older than 3.11 do not support image filenames with UTF-8 characters (see [issue 69](https://github.com/masaccio/numbers-parser/issues/69)). `cell.style.bg_image` returns `None` for such files and issues a `RuntimeWarning`.
+
 ### Borders
 
 `numbers-parser` supports reading and writing cell borders, though the interface for each differs. Individual cells can have each of their four borders tested, but when drawing new borders, these are set for the table to allow for drawing borders across multiple cells. Setting the border of merged cells is not possible unless the edge of the cells is at the end of the merged region.
