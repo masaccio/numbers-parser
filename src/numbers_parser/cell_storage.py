@@ -288,10 +288,11 @@ class CellStorage(Cacheable):
 
         image_id = style.cell_properties.cell_fill.image.imagedata.identifier
         datas = self.model.objects[PACKAGE_ID].datas
-        image_filename = [x.file_name for x in datas if x.identifier == image_id][0]
+        stored_filename = [x.file_name for x in datas if x.identifier == image_id][0]
+        preferred_filename = [x.preferred_file_name for x in datas if x.identifier == image_id][0]
         all_paths = self.model.objects.file_store.keys()
-        image_pathname = [x for x in all_paths if x == f"Data/{image_filename}"][0]
-        return (self.model.objects.file_store[image_pathname], image_filename)
+        image_pathname = [x for x in all_paths if x == f"Data/{stored_filename}"][0]
+        return (self.model.objects.file_store[image_pathname], preferred_filename)
 
     def custom_format(self) -> str:
         if self.text_format_id is not None and self.type == CellType.TEXT:

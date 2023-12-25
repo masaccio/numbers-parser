@@ -217,15 +217,15 @@ def test_header_styles():
     assert all(table.cell(ref).style.bg_color == RGB(29, 177, 0) for ref in ["B2", "B6", "B10"])
     assert all(
         table.cell(ref).style.bg_color == [RGB(136, 250, 78), RGB(1, 113, 0)]
-            for ref in ["C2", "C6", "C10"]
+        for ref in ["C2", "C6", "C10"]
     )
     assert all(
-        table.cell(ref).style.bg_image.filename == "pexels-evg-kowalievska-1170986-16.jpg"
-            for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
+        table.cell(ref).style.bg_image.filename == "pexels-evg-kowalievska-1170986.jpg"
+        for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
     )
     assert all(
         len(table.cell(ref).style.bg_image.data) == 418932
-            for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
+        for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
     )
     assert table.cell("A9").style.bold
     assert table.cell("B9").style.italic and table.cell("B9").style.bold

@@ -201,13 +201,13 @@ def test_issue_43():
     assert isinstance(cell, EmptyCell)
     assert "PNG image data" in magic.from_buffer(cell.style.bg_image.data)
     assert len(cell.style.bg_image.data) == 87857
-    assert cell.style.bg_image.filename == "pasted-image-17.png"
+    assert cell.style.bg_image.filename == "pasted-image.png"
 
     cell = table.cell("B1")
     assert cell.value == "text "
     assert "TIFF image data" in magic.from_buffer(cell.style.bg_image.data)
     assert len(cell.style.bg_image.data) == 365398
-    assert cell.style.bg_image.filename == "pasted-image-19.tiff"
+    assert cell.style.bg_image.filename == "pasted-image.tiff"
 
     assert table.cell("C1").style.bg_image is None
 
@@ -380,3 +380,19 @@ def test_issue_67():
         assert doc.sheets[0].tables[0].cell(0, 0).value == "A"
 
     assert process.memory_info().rss < rss_base * 5
+
+
+def test_issue_69():
+    doc = Document("tests/data/issue-69b.numbers")
+    table = doc.sheets[0].tables[0]
+    # assert table.cell(0, 0).style.bg_image.filename == "numbers_1.png"
+    # assert table.cell(1, 0).style.bg_image.filename == "numbers_2.png"
+    # assert table.cell(2, 0).style.bg_image.filename == "numbers_3.png"
+    # assert len(table.cell(0, 0).style.bg_image.data) == 10608
+    # assert len(table.cell(1, 0).style.bg_image.data) == 19269
+    # assert len(table.cell(2, 0).style.bg_image.data) == 19256
+
+    doc = Document("tests/data/issue-69.numbers")
+    table = doc.sheets[0].tables[0]
+    assert table.cell(0, 0).style.bg_image.filename == "sssssss的副本.jpeg"
+    assert table.cell(9, 4).style.bg_image.filename == "sssssss的副本.jpeg"

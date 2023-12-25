@@ -15,7 +15,7 @@ def test_api_change():
     with pytest.warns(DeprecationWarning) as record:
         value = table.cell("A1").image_filename
     assert len(record) == 1
-    assert value == "pasted-image-17.png"
+    assert value == "pasted-image.png"
 
     with pytest.warns(DeprecationWarning) as record:
         value = table.cell("C1").image_data

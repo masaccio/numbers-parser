@@ -29,7 +29,7 @@ def read_numbers_file(path, file_handler, object_handler=None):
                     file_handler(os.path.join(path, filename), blob)
     else:
         try:
-            zipf = ZipFile(path)
+            zipf = ZipFile(path, metadata_encoding="utf-8")
         except BadZipFile:
             raise FileFormatError("Invalid Numbers file") from None
         except FileNotFoundError:
@@ -39,7 +39,9 @@ def read_numbers_file(path, file_handler, object_handler=None):
             index_zip = [f for f in zipf.namelist() if f.lower().endswith("index.zip")]
             if len(index_zip) > 0:
                 index_data = BytesIO(zipf.read(index_zip[0]))
-                get_objects_from_zip_stream(ZipFile(index_data), file_handler, object_handler)
+                get_objects_from_zip_stream(
+                    ZipFile(index_data, metadata_encoding="utf-8"), file_handler, object_handler
+                )
             else:
                 get_objects_from_zip_stream(zipf, file_handler, object_handler)
         except BadZipFile:
@@ -58,7 +60,7 @@ def write_numbers_file(filename, file_store):
 
 def get_objects_from_zip_file(path, file_handler, object_handler):
     try:
-        zipf = ZipFile(path)
+        zipf = ZipFile(path, metadata_encoding="utf-8")
     except BadZipFile:
         raise FileFormatError("Invalid Numbers file") from None
 
