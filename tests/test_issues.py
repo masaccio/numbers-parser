@@ -1,3 +1,5 @@
+from sys import version_info
+
 import magic
 import pytest
 from pendulum import datetime, duration
@@ -385,14 +387,15 @@ def test_issue_67():
 def test_issue_69():
     doc = Document("tests/data/issue-69b.numbers")
     table = doc.sheets[0].tables[0]
-    # assert table.cell(0, 0).style.bg_image.filename == "numbers_1.png"
-    # assert table.cell(1, 0).style.bg_image.filename == "numbers_2.png"
-    # assert table.cell(2, 0).style.bg_image.filename == "numbers_3.png"
-    # assert len(table.cell(0, 0).style.bg_image.data) == 10608
-    # assert len(table.cell(1, 0).style.bg_image.data) == 19269
-    # assert len(table.cell(2, 0).style.bg_image.data) == 19256
+    assert table.cell(0, 0).style.bg_image.filename == "numbers_1.png"
+    assert table.cell(1, 0).style.bg_image.filename == "numbers_2.png"
+    assert table.cell(2, 0).style.bg_image.filename == "numbers_3.png"
+    assert len(table.cell(0, 0).style.bg_image.data) == 10608
+    assert len(table.cell(1, 0).style.bg_image.data) == 19269
+    assert len(table.cell(2, 0).style.bg_image.data) == 19256
 
-    doc = Document("tests/data/issue-69.numbers")
-    table = doc.sheets[0].tables[0]
-    assert table.cell(0, 0).style.bg_image.filename == "sssssss的副本.jpeg"
-    assert table.cell(9, 4).style.bg_image.filename == "sssssss的副本.jpeg"
+    if version_info.minor >= 11:
+        doc = Document("tests/data/issue-69.numbers")
+        table = doc.sheets[0].tables[0]
+        assert table.cell(0, 0).style.bg_image.filename == "sssssss的副本.jpeg"
+        assert table.cell(9, 4).style.bg_image.filename == "sssssss的副本.jpeg"
