@@ -24,6 +24,7 @@ from numbers_parser.constants import (
     DurationStyle,
     DurationUnits,
     FormatType,
+    NegativeNumberStyle,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
@@ -439,6 +440,28 @@ class CellStorage(Cacheable):
         )
         self.date_format_id = self.model.table_format_id(self.table_id, format_archive)
 
+    def set_number_formatting(self, number_format) -> None:
+        check_number_format(number_format)
+        if "decimal_places" not in number_format:
+            decimal_places = DECIMAL_PLACES_AUTO
+        else:
+            decimal_places = number_format["decimal_places"]
+        if "negative_style" not in number_format:
+            negative_style = NegativeNumberStyle.MINUS
+        else:
+            negative_style = number_format["negative_style"]
+        if "show_thousands_separator" not in number_format:
+            show_thousands_separator = False
+        else:
+            show_thousands_separator = number_format["show_thousands_separator"]
+        format_archive = TSKArchives.FormatStructArchive(
+            format_type=FormatType.DECIMAL,
+            decimal_places=decimal_places,
+            negative_style=negative_style,
+            show_thousands_separator=show_thousands_separator,
+        )
+        self.number_format_id = self.model.table_format_id(self.table_id, format_archive)
+
 
 def unpack_decimal128(buffer: bytearray) -> float:
     exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
@@ -809,3 +832,9 @@ def check_date_time_format(format: str) -> None:
     for el in formats:
         if el not in DATETIME_FIELD_MAP:
             raise TypeError(f"Invalid format specifier '{el}' in date/time format")
+
+
+def check_number_format(format: dict) -> None:
+    for key in format:
+        if key not in ["decimal_places", "negative_style", "show_thousands_separator"]:
+            raise TypeError(f"Invalid format specifier '{key}' in number format")
