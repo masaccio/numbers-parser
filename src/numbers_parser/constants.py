@@ -4,7 +4,8 @@ from pendulum import datetime
 
 try:
     from importlib.resources import files
-except ImportError:
+# Can't cover exception using modern python
+except ImportError:  # pragma: nocover
     from importlib_resources import files
 
 DEFAULT_DOCUMENT = files("numbers_parser") / "data" / "empty.numbers"
