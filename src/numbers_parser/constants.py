@@ -1,11 +1,15 @@
-import os
 from enum import IntEnum
 
 from pendulum import datetime
-from pkg_resources import resource_filename
+
+try:
+    from importlib.resources import files
+except ImportError:
+    from importlib_resources import files
+
+DEFAULT_DOCUMENT = files("numbers_parser") / "data" / "empty.numbers"
 
 # New document defaults
-DEFAULT_DOCUMENT = resource_filename(__name__, os.path.join("data", "empty.numbers"))
 DEFAULT_COLUMN_COUNT = 8
 DEFAULT_COLUMN_WIDTH = 98.0
 DEFAULT_PRE_BNC_BYTES = "🤠".encode()  # Yes, really!
