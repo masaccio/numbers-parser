@@ -146,7 +146,7 @@ The properties of merges are tested using the following properties:
 | A1    | TextCell   | `A1`     | `False`     | (1, 1)  | `None`       | `None`        |
 | A2    | TextCell   | `A2`     | `False`     | (1, 1)  | `None`       | `None`        |
 | B1    | TextCell   | `B1`     | `True`      | (2, 1)  | `None`       | `None`        |
-| B2    | MergedCell | `None`   | `False`     | `None`  | (1, 0, 2, 0) | `"A1:A2"`     |
+| B2    | MergedCell | `None`   | `False`     | `None`  | (1, 0, 2, 0) | `"B1:B2"`     |
 
 The tuple values of the `rect` property of a `MergedCell` are also available using the properties `row_start`, `col_start`, `row_end`, and `col_end`.
 
