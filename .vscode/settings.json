@@ -5,8 +5,8 @@
         "editor.wordWrapColumn": 100,
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.codeActionsOnSave": {
-            "source.fixAll": true,
-            "source.organizeImports": true
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
         }
     },
     "black-formatter.args": [
