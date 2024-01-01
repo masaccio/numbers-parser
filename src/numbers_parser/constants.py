@@ -100,3 +100,10 @@ class FormatType(IntEnum):
     CUSTOM_TEXT = 271
     CUSTOM_DATE = 272
     CUSTOM_CURRENCY = 274
+
+
+class NegativeNumberStyle(IntEnum):
+    MINUS = 0
+    RED = 1
+    PARENTHESES = 2
+    RED_AND_PARENTHESES = 3
