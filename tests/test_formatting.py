@@ -3,6 +3,7 @@ import pytest_check as check
 from pendulum import datetime
 
 from numbers_parser import Document, EmptyCell
+from numbers_parser.constants import NegativeNumberStyle
 
 DATE_FORMAT_REF = [
     ["", "1 pm", "1:25 pm", "1:25:42 pm", "13:25", "13:25:42"],
@@ -97,6 +98,82 @@ DATE_FORMAT_REF = [
         "2023-04-01 1:25:42 pm",
         "2023-04-01 13:25",
         "2023-04-01 13:25:42",
+    ],
+]
+
+NUMBER_FORMAT_REF = [
+    [
+        "12345.012346",
+        "12345.012346",
+        "12345.012346",
+        "12345.012346",
+        "12,345.012346",
+        "12,345.012346",
+        "12,345.012346",
+        "12,345.012346",
+    ],
+    ["12345", "12345", "12345", "12345", "12,345", "12,345", "12,345", "12,345"],
+    ["12345.0", "12345.0", "12345.0", "12345.0", "12,345.0", "12,345.0", "12,345.0", "12,345.0"],
+    [
+        "12345.012",
+        "12345.012",
+        "12345.012",
+        "12345.012",
+        "12,345.012",
+        "12,345.012",
+        "12,345.012",
+        "12,345.012",
+    ],
+    [
+        "12345.01234600",
+        "12345.01234600",
+        "12345.01234600",
+        "12345.01234600",
+        "12,345.01234600",
+        "12,345.01234600",
+        "12,345.01234600",
+        "12,345.01234600",
+    ],
+    [
+        "-12345.012346",
+        "12345.012346",
+        "(12345.012346)",
+        "(12345.012346)",
+        "-12,345.012346",
+        "12,345.012346",
+        "(12,345.012346)",
+        "(12,345.012346)",
+    ],
+    ["-12345", "12345", "(12345)", "(12345)", "-12,345", "12,345", "(12,345)", "(12,345)"],
+    [
+        "-12345.0",
+        "12345.0",
+        "(12345.0)",
+        "(12345.0)",
+        "-12,345.0",
+        "12,345.0",
+        "(12,345.0)",
+        "(12,345.0)",
+    ],
+    [
+        "-12345.012",
+        "12345.012",
+        "(12345.012)",
+        "(12345.012)",
+        "-12,345.012",
+        "12,345.012",
+        "(12,345.012)",
+        "(12,345.012)",
+    ],
+    [
+        "-12345.01234600",
+        "12345.01234600",
+        "(12345.01234600)",
+        "(12345.01234600)",
+        "-12,345.01234600",
+        "12,345.01234600",
+        "(12,345.01234600)",
+        "(12,345.01234600)",
     ],
 ]
 
@@ -222,4 +299,48 @@ def test_write_date_format(configurable_save_file):
     for row_num, row in enumerate(DATE_FORMAT_REF):
         for col_num, ref_value in enumerate(row):
             check.equal(table.cell(row_num, col_num).value, ref_date)
+            check.equal(table.cell(row_num, col_num).formatted_value, ref_value)
+
+
+def test_write_numbers_format(configurable_save_file):
+    doc = Document(num_header_cols=0, num_header_rows=0, num_cols=8, num_rows=10)
+    table = doc.sheets[0].tables[0]
+
+    ref_number = 12345.012346
+    with pytest.raises(TypeError) as e:
+        table.write(0, 0, "test", formatting={"decimal_places": "XX"})
+    assert "Cannot set formatting for cells of type TextCell" in str(e)
+    with pytest.raises(TypeError) as e:
+        table.write(0, 1, ref_number, formatting={"XX": "XX"})
+    assert "Invalid format specifier 'XX' in number format" in str(e)
+    with pytest.raises(TypeError) as e:
+        table.write(0, 2, ref_number, formatting=object())
+    assert "formatting values must be a dict" in str(e)
+
+    row_num = 0
+    for value in [ref_number, -ref_number]:
+        for decimal_places in [None, 0, 1, 3, 8]:
+            col_num = 0
+            for show_thousands_separator in [False, True]:
+                for negative_style in NegativeNumberStyle:
+                    table.write(
+                        row_num,
+                        col_num,
+                        value,
+                        formatting={
+                            "decimal_places": decimal_places,
+                            "negative_style": negative_style,
+                            "show_thousands_separator": show_thousands_separator,
+                        },
+                    )
+                    col_num += 1
+            row_num += 1
+
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    for row_num, row in enumerate(NUMBER_FORMAT_REF):
+        for col_num, ref_value in enumerate(row):
+            check.equal(table.cell(row_num, col_num).value, ref_number)
             check.equal(table.cell(row_num, col_num).formatted_value, ref_value)
