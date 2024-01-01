@@ -943,7 +943,7 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-    def add_table(
+    def add_table(  # noqa: PLR0913
         self,
         sheet_id: int,
         table_name: str,
@@ -1080,7 +1080,7 @@ class _NumbersModel(Cacheable):
         )
         return table_model_id
 
-    def add_formula_owner(
+    def add_formula_owner(  # noqa: PLR0913
         self,
         table_info_id: int,
         num_rows: int,
@@ -1434,7 +1434,7 @@ class _NumbersModel(Cacheable):
         else:
             return "Custom Style 1"
 
-    def pack_cell_storage(
+    def pack_cell_storage(  # noqa: PLR0912, PLR0915
         self, table_id: int, data: List, row_num: int, col_num: int
     ) -> bytearray:
         """Create a storage buffer for a cell using v5 (modern) layout."""
@@ -1842,7 +1842,7 @@ class _NumbersModel(Cacheable):
             return cell
         return None
 
-    def set_cell_border(
+    def set_cell_border(  # noqa: PLR0913
         self, table_id: int, row_num: int, col_num: int, side: str, border_value: Border
     ):
         """Set the 2 borders adjacent to a stroke if within the table range."""
@@ -1954,7 +1954,7 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-    def add_stroke(
+    def add_stroke(  # noqa: PLR0913
         self,
         table_id: int,
         row_num: int,
