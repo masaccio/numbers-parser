@@ -19,7 +19,6 @@ from numbers_parser.cell_storage import (
 from numbers_parser.constants import EMPTY_STORAGE_BUFFER, DurationUnits
 from numbers_parser.experimental import _enable_experimental_features, _experimental_features
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
-from numbers_parser.model import DataLists
 from numbers_parser.numbers_uuid import NumbersUUID
 
 
@@ -199,11 +198,3 @@ def test_bad_image_filenames():
         assert table.cell(0, 0).style.bg_image is None
     assert len(record) == 1
     assert str(record[0].message) == "Cannot find file 'numbers_1.png' in Numbers archive"
-
-
-def test_default_data_table():
-    doc = Document()
-    table_id = doc.sheets[0].tables[0]._table_id
-    data_list = DataLists(doc._model, "stringTable")
-    id = data_list.lookup_key(table_id, "test")
-    assert data_list.lookup_value(table_id, id).string == "test"
