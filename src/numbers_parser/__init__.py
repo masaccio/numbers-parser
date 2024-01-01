@@ -23,9 +23,9 @@ import os
 import plistlib
 import warnings
 
-from numbers_parser.cell import *
-from numbers_parser.document import Document
-from numbers_parser.exceptions import *
+from numbers_parser.cell import *  # noqa: F403
+from numbers_parser.document import Document  # noqa
+from numbers_parser.exceptions import *  # noqa: F403
 
 __version__ = importlib.metadata.version("numbers-parser")
 

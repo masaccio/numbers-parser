@@ -159,7 +159,7 @@ class DataLists(Cacheable):
         self.add_table(table_id)
         return self._datalists[table_id]["by_key"][key]
 
-    def value_key(_, value):
+    def value_key(self, value):
         if isinstance(value, TSPMessages.Reference):
             return value.identifier
         elif isinstance(value, TSKArchives.FormatStructArchive):
