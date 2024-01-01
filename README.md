@@ -255,6 +255,62 @@ with open (cell.style.bg_image.filename, "wb") as f:
 
 Due to a limitation in Python's [ZipFile](https://docs.python.org/3/library/zipfile.html), Python versions older than 3.11 do not support image filenames with UTF-8 characters (see [issue 69](https://github.com/masaccio/numbers-parser/issues/69)). `cell.style.bg_image` returns `None` for such files and issues a `RuntimeWarning`.
 
+### Formatting
+
+In addition to rendering values as they are displayed in Numbers using the cell property `formatted_value`, `numbers-parser` has limited support for setting cell formats when saving files.
+
+Formats are provided to the `Table.write` method:
+
+``` python
+date = datetime(2023, 4, 1, 13, 25, 42)
+table.write(0, 0, formatting={"date_time_format": "EEEE, d MMMM yyyy"})
+```
+
+Currently only formatting of date/time values for cells of type `DateCell` is supported. Other formats will be supported in the future. Please [raise a new issue](https://github.com/masaccio/numbers-parser/issues/) to request additional format types.
+
+#### Date/time formatting
+
+`date_time_format` uses Numbers notation for date and time formatting rather than POSIX `strftime` as there are a number of extensions. Date components are specified using directives which must be separated by whitespace. Supported directives are:
+
+| Directive | Meaning                                                       | Example                |
+| --------- | ------------------------------------------------------------- | ---------------------- |
+| a         | Locale’s AM or PM                                             | am, pm                 |
+| EEEE      | Full weekday name                                             | Monday, Tuesday, ...   |
+| EEE       | Abbreviated weekday name                                      | Mon, Tue, ...          |
+| yyyy      | Year with century as a decimal number                         | 1999, 2023, etc.       |
+| yy        | Year without century as a zero-padded decimal number          | 00, 01, ... 99         |
+| y         | Year without century as a decimal number                      | 0, 1, ... 99           |
+| MMMM      | Full month name                                               | January, February, ... |
+| MMM       | Abbreviated month name                                        | Jan, Feb, ...          |
+| MM        | Month as a zero-padded decimal number                         | 01, 02, ... 12         |
+| M         | Month as a decimal number                                     | 1, 2, ... 12           |
+| d         | Day as a decimal number                                       | 1, 2, ... 31           |
+| dd        | Day as a zero-padded decimal number                           | 01, 02, ... 31         |
+| DDD       | Day of the year as a zero-padded 3-digit number               | 001 - 366              |
+| DD        | Day of the year as a minimum zero-padded 2-digit number       | 01 - 366               |
+| D         | Day of the year                                               | 1 - 366                |
+| HH        | Hour (24-hour clock) as a zero-padded decimal number          | 00, 01, ... 23         |
+| H         | Hour (24-hour clock) as a decimal number                      | 0, 1, ... 23           |
+| hh        | Hour (12-hour clock) as a zero-padded decimal number          | 01, 02, ... 12         |
+| h         | Hour (12-hour clock) as a decimal number                      | 1, 2, ... 12           |
+| k         | Hour (24-hour clock) as a decimal number to 24                | 1, 2, ... 24           |
+| kk        | Hour (24-hour clock) as a zero-padded decimal number to 24    | 01, 02, ... 24         |
+| K         | Hour (12-hour clock) as a decimal number from 0               | 0, 1, ... 11           |
+| KK        | Hour (12-hour clock) as a zero-padded decimal number from 0   | 00, 01, ... 11         |
+| mm        | Minutes as a zero-padded number                               | 00, 01, ... 59         |
+| m         | Minutes as a number                                           | 0, 1, ... 59           |
+| ss        | Seconds as a zero-padded number                               | 00, 01, ... 59         |
+| s         | Seconds as a number                                           | 0, 1, ... 59           |
+| W         | Week number in the month (first week is zero)                 | 0, 1, ... 5            |
+| ww        | Week number of the year (Monday as the first day of the week) | 0, 1, ... 53           |
+| G         | AD or BC (only AD is supported)                               | AD                     |
+| F         | How many times the day of falls in the month                  | 1, 2, ... 5            |
+| S         | Seconds to one decimal place                                  | 0 - 9                  |
+| SS        | Seconds to two decimal places                                 | 00 - 99                |
+| SSS       | Seconds to three decimal places                               | 000 - 999              |
+| SSSS      | Seconds to four decimal places                                | 0000 - 9999            |
+| SSSSS     | Seconds to fice decimal places                                | 00000 - 9999           |
+
 ### Borders
 
 `numbers-parser` supports reading and writing cell borders, though the interface for each differs. Individual cells can have each of their four borders tested, but when drawing new borders, these are set for the table to allow for drawing borders across multiple cells. Setting the border of merged cells is not possible unless the edge of the cells is at the end of the merged region.
