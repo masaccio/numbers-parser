@@ -187,7 +187,7 @@ class DataLists(Cacheable):
             key = self._datalists[table_id]["next_key"]
             self._datalists[table_id]["next_key"] += 1
             self._datalists[table_id]["datalist"].nextListID += 1
-            attrs = {"key": key, self._value_attr: value, "refcount": 1}
+            attrs = {"key": key, self._value_attr or "string": value, "refcount": 1}
             entry = TSTArchives.TableDataList.ListEntry(**attrs)
             self._datalists[table_id]["datalist"].entries.append(entry)
             self._datalists[table_id]["by_key"][key] = entry
