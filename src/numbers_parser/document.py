@@ -170,7 +170,7 @@ class Sheet:
         from_table_id = self._tables[-1]._table_id
         return self._add_table(table_name, from_table_id, x, y, num_rows, num_cols)
 
-    def _add_table(
+    def _add_table(  # noqa: PLR0913
         self, table_name, from_table_id, x, y, num_rows, num_cols
     ) -> object:  # noqa: PLR0913
         if table_name is not None:
@@ -439,7 +439,7 @@ class Table(Cacheable):
 
         return (row_num, col_num) + tuple(values)
 
-    def write(self, *args, style=None):
+    def write(self, *args, style=None, formatting=None):
         # TODO: write needs to retain/init the border
         (row_num, col_num, value) = self._validate_cell_coords(*args)
         self._data[row_num][col_num] = Cell.from_value(row_num, col_num, value)
@@ -453,6 +453,8 @@ class Table(Cacheable):
 
         if style is not None:
             self.set_cell_style(row_num, col_num, style)
+        if formatting is not None:
+            self.set_cell_formatting(row_num, col_num, formatting)
 
     def set_cell_style(self, *args):
         (row_num, col_num, style) = self._validate_cell_coords(*args)
@@ -464,6 +466,13 @@ class Table(Cacheable):
             self._data[row_num][col_num]._style = self._model.styles[style]
         else:
             raise TypeError("style must be a Style object or style name")
+
+    def set_cell_formatting(self, *args):
+        (row_num, col_num, formatting) = self._validate_cell_coords(*args)
+        if not isinstance(formatting, dict):
+            raise TypeError("formatting values must be a dict")
+
+        self._data[row_num][col_num].set_formatting(formatting)
 
     def add_row(self, num_rows=1):
         row = [
