@@ -26,6 +26,7 @@ from numbers_parser.constants import (
     FormatType,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
+from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID
@@ -431,6 +432,13 @@ class CellStorage(Cacheable):
 
         return duration_str
 
+    def set_date_time_formatting(self, date_time_format) -> None:
+        check_date_time_format(date_time_format)
+        format_archive = TSKArchives.FormatStructArchive(
+            format_type=FormatType.DATE, date_time_format=date_time_format
+        )
+        self.date_format_id = self.model.table_format_id(self.table_id, format_archive)
+
 
 def unpack_decimal128(buffer: bytearray) -> float:
     exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
@@ -794,3 +802,10 @@ def auto_units(cell_value, format):
             unit_smallest = unit_largest
 
     return unit_smallest, unit_largest
+
+
+def check_date_time_format(format: str) -> None:
+    formats = re.sub(r"[^a-zA-Z\s]", " ", format).split()
+    for el in formats:
+        if el not in DATETIME_FIELD_MAP:
+            raise TypeError(f"Invalid format specifier '{el}' in date/time format")
