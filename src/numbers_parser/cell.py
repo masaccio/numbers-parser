@@ -615,6 +615,9 @@ class NumberCell(Cell):
     def value(self) -> int:
         return self._value
 
+    def set_formatting(self, formatting: dict):
+        self._storage.set_number_formatting(formatting)
+
 
 class TextCell(Cell):
     def __init__(self, row_num: int, col_num: int, value: str):
