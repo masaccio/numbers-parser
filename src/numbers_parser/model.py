@@ -146,9 +146,8 @@ class DataLists(Cacheable):
             if entry.key > max_key:
                 max_key = entry.key
                 self._datalists[table_id]["by_key"][entry.key] = entry
-                if self._value_attr is not None:
-                    value_key = self.value_key(getattr(entry, self._value_attr))
-                    self._datalists[table_id]["by_value"][value_key] = entry.key
+                value_key = self.value_key(getattr(entry, self._value_attr))
+                self._datalists[table_id]["by_value"][value_key] = entry.key
         self._datalists[table_id]["next_key"] = max_key + 1
 
     def id(self, table_id: int) -> int:
@@ -187,7 +186,7 @@ class DataLists(Cacheable):
             key = self._datalists[table_id]["next_key"]
             self._datalists[table_id]["next_key"] += 1
             self._datalists[table_id]["datalist"].nextListID += 1
-            attrs = {"key": key, self._value_attr or "string": value, "refcount": 1}
+            attrs = {"key": key, self._value_attr: value, "refcount": 1}
             entry = TSTArchives.TableDataList.ListEntry(**attrs)
             self._datalists[table_id]["datalist"].entries.append(entry)
             self._datalists[table_id]["by_key"][key] = entry
