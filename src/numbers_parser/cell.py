@@ -486,6 +486,9 @@ class Cell(Cacheable):
         else:
             raise ValueError("Can't determine cell type from type " + type(value).__name__)
 
+    def set_formatting(self, formatting: dict):
+        raise TypeError(f"Cannot set formatting for cells of type {type(self).__name__}")
+
     def __init__(self, row_num: int, col_num: int, value):
         self._value = value
         self.row = row_num
@@ -689,6 +692,11 @@ class DateCell(Cell):
     @property
     def value(self) -> duration:
         return self._value
+
+    def set_formatting(self, formatting: dict):
+        if "date_time_format" not in formatting:
+            raise TypeError("No date_time_format specified for DateCell formatting")
+        self._storage.set_date_time_formatting(formatting["date_time_format"])
 
 
 class DurationCell(Cell):
