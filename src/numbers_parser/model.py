@@ -54,6 +54,7 @@ from numbers_parser.formula import TableFormulas
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
+from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSSArchives_pb2 as TSSArchives
@@ -146,10 +147,8 @@ class DataLists(Cacheable):
                 max_key = entry.key
                 self._datalists[table_id]["by_key"][entry.key] = entry
                 if self._value_attr is not None:
-                    value = getattr(entry, self._value_attr)
-                    if isinstance(value, TSPMessages.Reference):
-                        value = value.identifier
-                    self._datalists[table_id]["by_value"][value] = entry.key
+                    value_key = self.value_key(getattr(entry, self._value_attr))
+                    self._datalists[table_id]["by_value"][value_key] = entry.key
         self._datalists[table_id]["next_key"] = max_key + 1
 
     def id(self, table_id: int) -> int:
@@ -159,6 +158,14 @@ class DataLists(Cacheable):
         """Return the an entry in a table's datalist matching a key."""
         self.add_table(table_id)
         return self._datalists[table_id]["by_key"][key]
+
+    def value_key(_, value):
+        if isinstance(value, TSPMessages.Reference):
+            return value.identifier
+        elif isinstance(value, TSKArchives.FormatStructArchive):
+            return value.date_time_format
+        else:
+            return value
 
     def init(self, table_id: int):
         """Remove all entries from a datalist."""
@@ -175,7 +182,7 @@ class DataLists(Cacheable):
         next available key.
         """
         self.add_table(table_id)
-        value_key = value.identifier if isinstance(value, TSPMessages.Reference) else value
+        value_key = self.value_key(value)
         if value_key not in self._datalists[table_id]["by_value"]:
             key = self._datalists[table_id]["next_key"]
             self._datalists[table_id]["next_key"] += 1
@@ -209,7 +216,7 @@ class _NumbersModel(Cacheable):
         self._merge_cells = defaultdict(MergeCells)
         self._row_heights = {}
         self._col_widths = {}
-        self._table_formats = DataLists(self, "format_table")
+        self._table_formats = DataLists(self, "format_table", "format")
         self._table_styles = DataLists(self, "styleTable", "reference")
         self._table_strings = DataLists(self, "stringTable", "string")
         self._table_data = {}
@@ -342,6 +349,11 @@ class _NumbersModel(Cacheable):
     def table_format(self, table_id: int, key: int) -> str:
         """Return the format associated with a format ID for a particular table."""
         return self._table_formats.lookup_value(table_id, key).format
+
+    @cache(num_args=2)
+    def table_format_id(self, table_id: int, format) -> id:
+        """Return the table format ID for a format string, creating a new one if required."""
+        return self._table_formats.lookup_key(table_id, format)
 
     @cache(num_args=2)
     def table_style(self, table_id: int, key: int) -> str:
