@@ -54,7 +54,6 @@ from numbers_parser.formula import TableFormulas
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
-from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSSArchives_pb2 as TSSArchives
@@ -159,10 +158,8 @@ class DataLists(Cacheable):
         return self._datalists[table_id]["by_key"][key]
 
     def value_key(self, value):
-        if isinstance(value, TSPMessages.Reference):
-            return value.identifier
-        elif isinstance(value, TSKArchives.FormatStructArchive):
-            return value.date_time_format
+        if hasattr(value, "DESCRIPTOR"):
+            return repr(value)
         else:
             return value
 
@@ -192,9 +189,8 @@ class DataLists(Cacheable):
             self._datalists[table_id]["by_key"][key] = entry
             self._datalists[table_id]["by_value"][value_key] = key
         else:
-            if isinstance(value, TSPMessages.Reference):
-                value = value.identifier
-            key = self._datalists[table_id]["by_value"][value]
+            value_key = self.value_key(value)
+            key = self._datalists[table_id]["by_value"][value_key]
             self._datalists[table_id]["by_key"][key].refcount += 1
 
         return key
