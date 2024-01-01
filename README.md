@@ -309,7 +309,7 @@ Currently only formatting of date/time values for cells of type `DateCell` is su
 | SS        | Seconds to two decimal places                                 | 00 - 99                |
 | SSS       | Seconds to three decimal places                               | 000 - 999              |
 | SSSS      | Seconds to four decimal places                                | 0000 - 9999            |
-| SSSSS     | Seconds to fice decimal places                                | 00000 - 9999           |
+| SSSSS     | Seconds to five decimal places                                | 00000 - 9999           |
 
 ### Borders
 
