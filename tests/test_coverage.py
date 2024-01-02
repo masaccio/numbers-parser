@@ -16,7 +16,12 @@ from numbers_parser.cell_storage import (
     decode_number_format,
     float_to_n_digit_fraction,
 )
-from numbers_parser.constants import EMPTY_STORAGE_BUFFER, DurationUnits
+from numbers_parser.constants import (
+    DECIMAL_PLACES_AUTO,
+    EMPTY_STORAGE_BUFFER,
+    DurationUnits,
+    NegativeNumberStyle,
+)
 from numbers_parser.experimental import _enable_experimental_features, _experimental_features
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.numbers_uuid import NumbersUUID
@@ -198,3 +203,14 @@ def test_bad_image_filenames():
         assert table.cell(0, 0).style.bg_image is None
     assert len(record) == 1
     assert str(record[0].message) == "Cannot find file 'numbers_1.png' in Numbers archive"
+
+
+def test_set_number_defaults():
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+    table.write(0, 0, 0.0, formatting={})
+    num_format_id = table.cell(0, 0)._storage.num_format_id
+    format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
+    assert not format.show_thousands_separator
+    assert format.negative_style == NegativeNumberStyle.MINUS
+    assert format.decimal_places == DECIMAL_PLACES_AUTO
