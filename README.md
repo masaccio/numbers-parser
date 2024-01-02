@@ -263,10 +263,43 @@ Formats are provided to the `Table.write` method:
 
 ``` python
 date = datetime(2023, 4, 1, 13, 25, 42)
-table.write(0, 0, formatting={"date_time_format": "EEEE, d MMMM yyyy"})
+table.write(0, 0, date, formatting={"date_time_format": "EEEE, d MMMM yyyy"})
+table.write(0, 1, 1234.560, formatting={"decimal_places": 3})
 ```
 
-Currently only formatting of date/time values for cells of type `DateCell` is supported. Other formats will be supported in the future. Please [raise a new issue](https://github.com/masaccio/numbers-parser/issues/) to request additional format types.
+The following cell types are supported along with the associated formatting parameters:
+
+<!-- markdownlint-disable MD033 -->
+<table>
+    <thead>
+        <tr>
+            <th>Cell Type</th>
+            <th><code>formatting</code> parameter</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>DateCell</code></td>
+            <td><code>date_time_format</code>
+            <td>A POSIX <code>strftime</code>-like formatting string. See table #Date/time_formatting</td>
+        </tr>
+        <tr>
+            <td rowspan=3><code>NumberCell</code></td>
+            <td><code>decimal_places</code></td>
+            <td>The number of decimal places, or <code>None</code> for automatic</td>
+        </tr>
+        <tr>
+            <td><code>negative_style</code>
+            <td>How negative numbers are represented</td>
+        </tr>
+        <tr>
+            <td><code>show_thousands_separator</code>
+            <td><code>True</code> if the number should include a thousands seperator, e.g. <code>,</code></td>
+        </tr>
+    </tbody>
+</table>
+<!-- markdownlint-enable MD033 -->
 
 #### Date/time formatting
 
@@ -310,6 +343,21 @@ Currently only formatting of date/time values for cells of type `DateCell` is su
 | SSS       | Seconds to three decimal places                               | 000 - 999              |
 | SSSS      | Seconds to four decimal places                                | 0000 - 9999            |
 | SSSSS     | Seconds to five decimal places                                | 00000 - 9999           |
+
+#### Number formatting
+
+All `formatting` parameters for `NumberCell` cells are optional and formatting defaults to automatic number of decimals, standard negative numbr notation and no thousands separator.
+
+The `negative_style` must be a valid `constants.NegativeNumberStyle` enum. Supported values are:
+
+<!-- markdownlint-disable MD033 -->
+| Value                 | Examples                                  |
+| ----------------------| ----------------------------------------- |
+| `MINUS`               | -1234.560                                 |
+| `RED`                 | <span style="color:red">1234.560</span>   |
+| `PARENTHESES`         | (1234.560)                                |
+| `RED_AND_PARENTHESES` | <span style="color:red">(1234.560)</span> |
+<!-- markdownlint-enable MD033 -->
 
 ### Borders
 
