@@ -442,7 +442,7 @@ class CellStorage(Cacheable):
 
     def set_number_formatting(self, number_format) -> None:
         check_number_format(number_format)
-        if "decimal_places" not in number_format:
+        if "decimal_places" not in number_format or number_format["decimal_places"] is None:
             decimal_places = DECIMAL_PLACES_AUTO
         else:
             decimal_places = number_format["decimal_places"]
@@ -460,7 +460,7 @@ class CellStorage(Cacheable):
             negative_style=negative_style,
             show_thousands_separator=show_thousands_separator,
         )
-        self.number_format_id = self.model.table_format_id(self.table_id, format_archive)
+        self.num_format_id = self.model.table_format_id(self.table_id, format_archive)
 
 
 def unpack_decimal128(buffer: bytearray) -> float:
@@ -737,8 +737,11 @@ def format_decimal(value: float, format) -> str:
             )
         if format.show_thousands_separator:
             formatted_value = sigfig.round(formatted_value, spacer=",", spacing=3, type=str)
-            (integer, decimal) = formatted_value.split(".")
-            formatted_value = integer + "." + decimal.replace(",", "")
+            try:
+                (integer, decimal) = formatted_value.split(".")
+                formatted_value = integer + "." + decimal.replace(",", "")
+            except ValueError:
+                pass
 
     if accounting_style:
         return f"({formatted_value})"
