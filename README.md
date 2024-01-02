@@ -95,7 +95,7 @@ Cells are objects with a common base class of `Cell`. All cell types have a prop
 | ----------------- | ------------------- | ------------------------------------------- |
 | NumberCell        | `float`             |                                             |
 | TextCell          | `str`               |                                             |
-| RichTextCell      | `str`               | See [Bullets and lists](#bullets-and-lists) |
+| RichTextCell      | `str`               | See     [Bullets and lists](#bullets-and-lists) |
 | EmptyCell         | `None`              |                                             |
 | BoolCell          | `bool`              |                                             |
 | DateCell          | `pendulum.datetime` |                                             |
@@ -282,7 +282,7 @@ The following cell types are supported along with the associated formatting para
         <tr>
             <td><code>DateCell</code></td>
             <td><code>date_time_format</code>
-            <td>A POSIX <code>strftime</code>-like formatting string. See table #Date/time_formatting</td>
+            <td>A POSIX <code>strftime</code>-like formatting string. See <a href="#datetime-formatting">Date/time formatting</a> for a list of supported directives</td>
         </tr>
         <tr>
             <td rowspan=3><code>NumberCell</code></td>
