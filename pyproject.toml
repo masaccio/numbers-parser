@@ -124,5 +124,4 @@ ban-relative-imports = "all"
 
 [tool.ruff.per-file-ignores]
 "src/bootstrap/**" = ["PLR2004"]
-
 "tests/**" = ["PLR2004", "S101", "D103", "ANN201", "ANN001"]
