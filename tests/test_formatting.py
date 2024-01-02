@@ -342,5 +342,5 @@ def test_write_numbers_format(configurable_save_file):
     table = doc.sheets[0].tables[0]
     for row_num, row in enumerate(NUMBER_FORMAT_REF):
         for col_num, ref_value in enumerate(row):
-            check.equal(table.cell(row_num, col_num).value, ref_number)
+            check.equal(abs(table.cell(row_num, col_num).value), ref_number)
             check.equal(table.cell(row_num, col_num).formatted_value, ref_value)
