@@ -191,12 +191,12 @@ CURRENCY_FORMAT_REF = [
     [
         "₫12345.01",
         "CA$12345.01",
-        "SEK 12345.01",
+        "SEK 12345.01",
         "£\t12345.01",
         "£\t(12345.01)",
         "£12345.01",
-        "(£12345.01)",
-        "(£12,345.01)",
+        "£\t12345.01",
+        "£\t(12,345.01)",
     ],
 ]
 
@@ -352,6 +352,9 @@ def test_write_numbers_format(configurable_save_file):
         )
     assert len(record) == 1
     assert "Use of use_accounting_style overrules negative_style" in str(record[0])
+    with pytest.raises(TypeError) as e:
+        table.write(0, 4, ref_number, formatting={"currency_code": "XYZ"})
+    assert "Unsupported currency code 'XYZ'" in str(e)
 
     row_num = 0
     for value in [ref_number, -ref_number]:
@@ -423,7 +426,7 @@ def test_write_numbers_format(configurable_save_file):
     table.write(
         11,
         4,
-        ref_number,
+        -ref_number,
         formatting={
             "decimal_places": 2,
             "negative_style": NegativeNumberStyle.MINUS,
@@ -458,11 +461,11 @@ def test_write_numbers_format(configurable_save_file):
     table.write(
         11,
         7,
-        ref_number,
+        -ref_number,
         formatting={
             "decimal_places": 2,
             "negative_style": NegativeNumberStyle.RED_AND_PARENTHESES,
-            "show_thousands_separator": False,
+            "show_thousands_separator": True,
             "currency_code": "GBP",
             "use_accounting_style": True,
         },

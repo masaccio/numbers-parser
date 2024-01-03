@@ -27,6 +27,7 @@ from numbers_parser.constants import (
     FormatType,
     NegativeNumberStyle,
 )
+from numbers_parser.currencies import CURRENCIES, CURRENCY_SYMBOLS
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
@@ -341,6 +342,8 @@ class CellStorage(Cacheable):
                 )
         elif format.format_type == FormatType.DECIMAL:
             return format_decimal(self.d128, format)
+        elif format.format_type == FormatType.CURRENCY:
+            return format_currency(self.d128, format)
         elif format.format_type == FormatType.BOOLEAN:
             return "TRUE" if self.value else "FALSE"
         else:
@@ -483,6 +486,9 @@ class CellStorage(Cacheable):
 
         if format_type == FormatType.CURRENCY:
             self.is_currency = True
+            if number_format["currency_code"] not in CURRENCIES:
+                currency_code = number_format["currency_code"]
+                raise TypeError(f"Unsupported currency code '{currency_code}'")
             if "use_accounting_style" in number_format:
                 attrs["use_accounting_style"] = number_format["use_accounting_style"]
             else:
@@ -492,7 +498,6 @@ class CellStorage(Cacheable):
             self.is_currency = False
         format_archive = TSKArchives.FormatStructArchive(**attrs)
         self.num_format_id = self.model.table_format_id(self.table_id, format_archive)
-        # self.currency_format_id = self.num_format_id
 
 
 def unpack_decimal128(buffer: bytearray) -> float:
@@ -779,6 +784,20 @@ def format_decimal(value: float, format) -> str:
         return f"({formatted_value})"
     else:
         return formatted_value
+
+
+def format_currency(value: float, format) -> str:
+    formatted_value = format_decimal(value, format)
+    if format.currency_code in CURRENCY_SYMBOLS:
+        symbol = CURRENCY_SYMBOLS[format.currency_code]
+    else:
+        symbol = format.currency_code + " "
+    if format.use_accounting_style and value < 0:
+        return f"{symbol}\t({formatted_value[1:]})"
+    elif format.use_accounting_style:
+        return f"{symbol}\t{formatted_value}"
+    else:
+        return symbol + formatted_value
 
 
 def float_to_fraction(value: float, denominator: int) -> str:
