@@ -285,7 +285,7 @@ The following cell types are supported along with the associated formatting para
             <td>A POSIX <code>strftime</code>-like formatting string. See <a href="#datetime-formatting">Date/time formatting</a> for a list of supported directives</td>
         </tr>
         <tr>
-            <td rowspan=3><code>NumberCell</code></td>
+            <td rowspan=5><code>NumberCell</code></td>
             <td><code>decimal_places</code></td>
             <td>The number of decimal places, or <code>None</code> for automatic</td>
         </tr>
@@ -296,6 +296,14 @@ The following cell types are supported along with the associated formatting para
         <tr>
             <td><code>show_thousands_separator</code>
             <td><code>True</code> if the number should include a thousands seperator, e.g. <code>,</code></td>
+        </tr>
+        <tr>
+            <td><code>currency_code</code>
+            <td>An ISO currency code. When present, indicates that the number is formatted as a currency in Numbers rather than a plain decimal number.</td>
+        </tr>
+        <tr>
+            <td><code>use_accounting_style</code>
+            <td><code>True</code> if the currency symbol should be formatted to the left of the cell and separated from the number value by a tab. A <code>RuntimeWarning</code> is generated if this is combined with <code>negative_style</code>.</td>
         </tr>
     </tbody>
 </table>
@@ -395,7 +403,6 @@ Whilst support for writing numbers files has been stable since version 3.4.0, yo
 Current limitations to write support are:
 
 * Creating cells of type `BulletedTextCell` is not supported
-* Formats cannot be defined for `DurationCell` or `DateCell`
 * New tables are inserted with a fixed offset below the last table in a worksheet which does not take into account title or caption size
 * New sheets insert tables with formats copied from the first table in the previous sheet rather than default table formats
 

@@ -35,6 +35,7 @@ from numbers_parser.cell import (
 )
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import (
+    CURRENCY_CELL_TYPE,
     DEFAULT_COLUMN_WIDTH,
     DEFAULT_DOCUMENT,
     DEFAULT_PRE_BNC_BYTES,
@@ -1471,7 +1472,10 @@ class _NumbersModel(Cacheable):
         if isinstance(cell, NumberCell):
             flags = 1
             length += 16
-            cell_type = TSTArchives.numberCellType
+            if cell._storage.is_currency:
+                cell_type = CURRENCY_CELL_TYPE
+            else:
+                cell_type = TSTArchives.numberCellType
             value = pack_decimal128(cell.value)
         elif isinstance(cell, TextCell):
             flags = 8

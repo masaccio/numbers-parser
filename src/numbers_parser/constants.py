@@ -50,6 +50,7 @@ SECONDS_IN_WEEK = SECONDS_IN_DAY * 7
 
 # File format enumerations
 DECIMAL_PLACES_AUTO = 253
+CURRENCY_CELL_TYPE = 10
 
 
 class CellType(IntEnum):
