@@ -177,6 +177,29 @@ NUMBER_FORMAT_REF = [
     ],
 ]
 
+CURRENCY_FORMAT_REF = [
+    [
+        "A$12345.01",
+        "€12345.01",
+        "£12345.01",
+        "₹12345.01",
+        "₩12345.01",
+        "JP¥12345.01",
+        "CN¥12345.01",
+        "₪12345.01",
+    ],
+    [
+        "₫12345.01",
+        "CA$12345.01",
+        "SEK 12345.01",
+        "£\t12345.01",
+        "£\t(12345.01)",
+        "£12345.01",
+        "(£12345.01)",
+        "(£12,345.01)",
+    ],
+]
+
 DATE_FORMATS = [
     "",
     "EEEE, d MMMM yyyy",
@@ -316,6 +339,19 @@ def test_write_numbers_format(configurable_save_file):
     with pytest.raises(TypeError) as e:
         table.write(0, 2, ref_number, formatting=object())
     assert "formatting values must be a dict" in str(e)
+    with pytest.warns(RuntimeWarning) as record:
+        table.write(
+            0,
+            3,
+            ref_number,
+            formatting={
+                "negative_style": NegativeNumberStyle.MINUS,
+                "currency_code": "GBP",
+                "use_accounting_style": True,
+            },
+        )
+    assert len(record) == 1
+    assert "Use of use_accounting_style overrules negative_style" in str(record[0])
 
     row_num = 0
     for value in [ref_number, -ref_number]:
@@ -336,6 +372,102 @@ def test_write_numbers_format(configurable_save_file):
                     col_num += 1
             row_num += 1
 
+    for col_num, currency_code in enumerate(
+        [
+            "AUD",
+            "EUR",
+            "GBP",
+            "INR",
+            "KRW",
+            "JPY",
+            "CNY",
+            "ILS",
+        ]
+    ):
+        table.write(
+            10,
+            col_num,
+            ref_number,
+            formatting={
+                "decimal_places": 2,
+                "negative_style": NegativeNumberStyle.MINUS,
+                "show_thousands_separator": False,
+                "currency_code": currency_code,
+            },
+        )
+
+    for col_num, currency_code in enumerate(["VND", "CAD", "SEK"]):
+        table.write(
+            11,
+            col_num,
+            ref_number,
+            formatting={
+                "decimal_places": 2,
+                "negative_style": NegativeNumberStyle.MINUS,
+                "show_thousands_separator": False,
+                "currency_code": currency_code,
+            },
+        )
+    table.write(
+        11,
+        3,
+        ref_number,
+        formatting={
+            "decimal_places": 2,
+            "negative_style": NegativeNumberStyle.MINUS,
+            "show_thousands_separator": False,
+            "currency_code": "GBP",
+            "use_accounting_style": True,
+        },
+    )
+    table.write(
+        11,
+        4,
+        ref_number,
+        formatting={
+            "decimal_places": 2,
+            "negative_style": NegativeNumberStyle.MINUS,
+            "show_thousands_separator": False,
+            "currency_code": "GBP",
+            "use_accounting_style": True,
+        },
+    )
+    table.write(
+        11,
+        5,
+        ref_number,
+        formatting={
+            "decimal_places": 2,
+            "negative_style": NegativeNumberStyle.RED,
+            "show_thousands_separator": False,
+            "currency_code": "GBP",
+        },
+    )
+    table.write(
+        11,
+        6,
+        ref_number,
+        formatting={
+            "decimal_places": 2,
+            "negative_style": NegativeNumberStyle.PARENTHESES,
+            "show_thousands_separator": False,
+            "currency_code": "GBP",
+            "use_accounting_style": True,
+        },
+    )
+    table.write(
+        11,
+        7,
+        ref_number,
+        formatting={
+            "decimal_places": 2,
+            "negative_style": NegativeNumberStyle.RED_AND_PARENTHESES,
+            "show_thousands_separator": False,
+            "currency_code": "GBP",
+            "use_accounting_style": True,
+        },
+    )
+
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
@@ -344,3 +476,8 @@ def test_write_numbers_format(configurable_save_file):
         for col_num, ref_value in enumerate(row):
             check.equal(abs(table.cell(row_num, col_num).value), ref_number)
             check.equal(table.cell(row_num, col_num).formatted_value, ref_value)
+
+    for row_num, row in enumerate(CURRENCY_FORMAT_REF):
+        for col_num, ref_value in enumerate(row):
+            check.equal(abs(table.cell(row_num + 10, col_num).value), ref_number)
+            check.equal(table.cell(row_num + 10, col_num).formatted_value, ref_value)
