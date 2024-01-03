@@ -417,7 +417,6 @@ def test_write_numbers_format(configurable_save_file):
         ref_number,
         formatting={
             "decimal_places": 2,
-            "negative_style": NegativeNumberStyle.MINUS,
             "show_thousands_separator": False,
             "currency_code": "GBP",
             "use_accounting_style": True,
@@ -429,7 +428,6 @@ def test_write_numbers_format(configurable_save_file):
         -ref_number,
         formatting={
             "decimal_places": 2,
-            "negative_style": NegativeNumberStyle.MINUS,
             "show_thousands_separator": False,
             "currency_code": "GBP",
             "use_accounting_style": True,
@@ -452,7 +450,6 @@ def test_write_numbers_format(configurable_save_file):
         ref_number,
         formatting={
             "decimal_places": 2,
-            "negative_style": NegativeNumberStyle.PARENTHESES,
             "show_thousands_separator": False,
             "currency_code": "GBP",
             "use_accounting_style": True,
@@ -464,7 +461,6 @@ def test_write_numbers_format(configurable_save_file):
         -ref_number,
         formatting={
             "decimal_places": 2,
-            "negative_style": NegativeNumberStyle.RED_AND_PARENTHESES,
             "show_thousands_separator": True,
             "currency_code": "GBP",
             "use_accounting_style": True,
