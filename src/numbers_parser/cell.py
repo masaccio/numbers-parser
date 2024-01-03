@@ -572,7 +572,10 @@ class Cell(Cacheable):
 
     @property
     def formatted_value(self):
-        return self._storage.formatted
+        if self._storage is None:
+            return ""
+        else:
+            return self._storage.formatted
 
     @property
     def style(self):
