@@ -608,6 +608,9 @@ class Cell(Cacheable):
             stacklevel=2,
         )
 
+    def update_storage(self, storage: CellStorage) -> None:
+        self._storage = storage
+
 
 class NumberCell(Cell):
     def __init__(self, row_num: int, col_num: int, value: float):

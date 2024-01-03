@@ -443,9 +443,10 @@ class Table(Cacheable):
         # TODO: write needs to retain/init the border
         (row_num, col_num, value) = self._validate_cell_coords(*args)
         self._data[row_num][col_num] = Cell.from_value(row_num, col_num, value)
-        self._data[row_num][col_num]._storage = CellStorage(
-            self._model, self._table_id, None, row_num, col_num
-        )
+        storage = CellStorage(self._model, self._table_id, None, row_num, col_num)
+        storage.update_value(value, self._data[row_num][col_num])
+        self._data[row_num][col_num].update_storage(storage)
+
         merge_cells = self._model.merge_cells(self._table_id)
         self._data[row_num][col_num]._table_id = self._table_id
         self._data[row_num][col_num]._model = self._model

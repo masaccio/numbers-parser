@@ -480,3 +480,10 @@ def test_write_numbers_format(configurable_save_file):
         for col_num, ref_value in enumerate(row):
             check.equal(abs(table.cell(row_num + 10, col_num).value), ref_number)
             check.equal(table.cell(row_num + 10, col_num).formatted_value, ref_value)
+
+
+def test_currency_updates():
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+    table.write(0, 0, -12.50, formatting={"currency_code": "EUR", "use_accounting_style": True})
+    assert table.cell(0, 0).formatted_value == "€\t(12.5)"

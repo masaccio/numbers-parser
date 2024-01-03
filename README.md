@@ -367,6 +367,17 @@ The `negative_style` must be a valid `constants.NegativeNumberStyle` enum. Suppo
 | `RED_AND_PARENTHESES` | <span style="color:red">(1234.560)</span> |
 <!-- markdownlint-enable MD033 -->
 
+#### Currency formatting
+
+Currencies are formatted with the same parameters as numbers, but additional include a currency in `currency_code`. The following example returns `€\t(12.5)`
+
+``` python
+table.write(0, 0, -12.50, formatting={"currency_code": "EUR", "use_accounting_style": True})
+print(table.cell(0, 0).formatted_value)
+```
+
+A limited number of currencies are formatted using symbolic notation rather than an ISO code. These are defined in `numbers_parser.currencies` and match the ones chosen by Numbers. For example, US dollars are referred to as `US$` whereas Euros and British Pounds are referred to using their symbols of `€` and `£` respectively.
+
 ### Borders
 
 `numbers-parser` supports reading and writing cell borders, though the interface for each differs. Individual cells can have each of their four borders tested, but when drawing new borders, these are set for the table to allow for drawing borders across multiple cells. Setting the border of merged cells is not possible unless the edge of the cells is at the end of the merged region.

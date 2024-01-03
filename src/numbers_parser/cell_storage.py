@@ -268,6 +268,17 @@ class CellStorage(Cacheable):
             flags,
         )
 
+    def update_value(self, value, cell: object) -> None:
+        if cell._type == TSTArchives.numberCellType:
+            self.d128 = value
+            self.type = CellType.NUMBER
+        elif cell._type == TSTArchives.dateCellType:
+            self.datetime = value
+            self.type = CellType.DATE
+        elif cell._type == TSTArchives.durationCellType:
+            self.double = value
+        self.value = value
+
     @property
     def formatted(self):
         if self.duration_format_id is not None and self.double is not None:
