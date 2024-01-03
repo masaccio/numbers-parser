@@ -95,7 +95,7 @@ Cells are objects with a common base class of `Cell`. All cell types have a prop
 | ----------------- | ------------------- | ------------------------------------------- |
 | NumberCell        | `float`             |                                             |
 | TextCell          | `str`               |                                             |
-| RichTextCell      | `str`               | See     [Bullets and lists](#bullets-and-lists) |
+| RichTextCell      | `str`               | See [Bullets and lists](#bullets-and-lists) |
 | EmptyCell         | `None`              |                                             |
 | BoolCell          | `bool`              |                                             |
 | DateCell          | `pendulum.datetime` |                                             |
