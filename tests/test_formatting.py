@@ -287,11 +287,6 @@ def test_formatting_stress(pytestconfig):
             raise AssertionError()
 
 
-def test_formatting_empty_cell():
-    cell = EmptyCell(0, 0)
-    assert cell.formatted_value == ""
-
-
 def test_write_date_format(configurable_save_file):
     doc = Document(
         num_header_cols=0, num_header_rows=0, num_cols=len(TIME_FORMATS), num_rows=len(DATE_FORMATS)

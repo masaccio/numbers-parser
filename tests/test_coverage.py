@@ -3,6 +3,7 @@ import pytest
 from numbers_parser import (
     Cell,
     Document,
+    EmptyCell,
     UnsupportedError,
     UnsupportedWarning,
     xl_col_to_name,
@@ -15,6 +16,7 @@ from numbers_parser.cell_storage import (
     auto_units,
     decode_number_format,
     float_to_n_digit_fraction,
+    format_decimal,
 )
 from numbers_parser.constants import (
     DECIMAL_PLACES_AUTO,
@@ -214,3 +216,10 @@ def test_set_number_defaults():
     assert not format.show_thousands_separator
     assert format.negative_style == NegativeNumberStyle.MINUS
     assert format.decimal_places == DECIMAL_PLACES_AUTO
+
+
+def test_formatting_empty_cell():
+    cell = EmptyCell(0, 0)
+    assert cell.formatted_value == ""
+
+    assert format_decimal(None, object()) == ""

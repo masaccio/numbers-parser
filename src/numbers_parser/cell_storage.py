@@ -752,6 +752,8 @@ def decode_number_format(format, value, name):  # noqa: PLR0912
 
 
 def format_decimal(value: float, format) -> str:
+    if value is None:
+        return ""
     if value < 0 and format.negative_style == 1:
         accounting_style = False
         value = -value
