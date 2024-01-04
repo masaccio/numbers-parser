@@ -1,5 +1,25 @@
 # Numbers file format
 
+[SheetsJS has documented](https://oss.sheetjs.com/notes/iwa/#hyperlinks) some of the core file format details. These notes are additional information tracking other discoveries.
+
+## Cell formats
+
+Bytes offets 6 and 7 include other values which are important to Numbers
+
+| Offset | Notes |
+| ------ | ----- |
+| 0      | Storage version |
+| 1      | Currency cells are type=10 which is not an enum identified in the protofus protos |
+| 2-5    | Unused |
+| 6      | 0x01 is set when there is a number format ID |
+|        | 0x02 is set when there is a currency format ID |
+|        | 0x04 is set when there is a duration format ID |
+|        | 0x08 is set when there is a date format ID |
+|        | 0x80 is set when there is a string ID |
+| 7      | Some cells have 0x80 for this byte. Unclear why |
+
+This is then followed by the flags as described in the SheetsJS docs.
+
 ## Owner IDs
 
 The single `TSCE.CalculationEngineArchive` contains a number of owner ID mappings:
