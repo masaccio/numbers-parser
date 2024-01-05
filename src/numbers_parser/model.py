@@ -1551,20 +1551,23 @@ class _NumbersModel(Cacheable):
             flags |= 0x2000
             length += 4
             storage += pack("<i", cell._storage.num_format_id)
-            storage[4:6] = pack("<h", 2)
-            storage[6:8] = pack("<h", 1)
+            storage[6] |= 1
+            # storage[6:8] = pack("<h", 1)
         if cell._storage.currency_format_id is not None:
             flags |= 0x4000
             length += 4
             storage += pack("<i", cell._storage.currency_format_id)
+            storage[6] |= 2
         if cell._storage.date_format_id is not None:
             flags |= 0x8000
             length += 4
             storage += pack("<i", cell._storage.date_format_id)
+            storage[6] |= 8
         if cell._storage.duration_format_id is not None:
             flags |= 0x10000
             length += 4
             storage += pack("<i", cell._storage.duration_format_id)
+            storage[6] |= 4
         if cell._storage.text_format_id is not None:
             flags |= 0x20000
             length += 4
@@ -1573,14 +1576,13 @@ class _NumbersModel(Cacheable):
             flags |= 0x40000
             length += 4
             storage += pack("<i", cell._storage.bool_format_id)
+            storage[6] |= 0x20
+        if cell._storage.string_id is not None:
+            storage[6] |= 0x80
 
         storage[8:12] = pack("<i", flags)
         if len(storage) < 32:
             storage += bytearray(32 - length)
-
-        if cell._storage.is_currency:
-            # TODO: why is this required?
-            storage[6] = 2
 
         return storage[0:length]
 
