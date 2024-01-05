@@ -258,15 +258,30 @@ class CellStorage(Cacheable):
         else:
             raise UnsupportedError(f"Cell type ID {cell_type} is not recognised")
 
-        debug(
-            "cell@[%d,%d]: table_id=%d, type=%s, value=%s, flags=%0x",
-            row_num,
-            col_num,
-            table_id,
-            self.type.name,
-            self.value,
-            flags,
-        )
+        if logging.getLogger(__package__).level == logging.DEBUG:
+            # Guard to reduce expense of computing fields
+            fields = [
+                f"{x}=" + str(getattr(self, x)) if getattr(self, x) is not None else None
+                for x in self.__slots__
+                if x.endswith("_id")
+            ]
+            fields = ", ".join([x for x in fields if x if not None])
+            extras = unpack("<H", buffer[6:8])[0]
+            table_name = model.table_name(table_id)
+            sheet_name = model.sheet_name(model.table_id_to_sheet_id(table_id))
+            debug(
+                "%s@%s@[%d,%d]: table_id=%d, type=%s, value=%s, flags=%08x, extras=%04x, %s",
+                sheet_name,
+                table_name,
+                row_num,
+                col_num,
+                table_id,
+                self.type.name,
+                self.value,
+                flags,
+                extras,
+                fields,
+            )
 
     def update_value(self, value, cell: object) -> None:
         if cell._type == TSTArchives.numberCellType:
