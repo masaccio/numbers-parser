@@ -1578,6 +1578,10 @@ class _NumbersModel(Cacheable):
         if len(storage) < 32:
             storage += bytearray(32 - length)
 
+        if cell._storage.is_currency:
+            # TODO: why is this required?
+            storage[6] = 2
+
         return storage[0:length]
 
     @cache()
