@@ -260,15 +260,15 @@ class CellStorage(Cacheable):
 
         if logging.getLogger(__package__).level == logging.DEBUG:
             # Guard to reduce expense of computing fields
+            extras = unpack("<H", buffer[6:8])[0]
+            table_name = model.table_name(table_id)
+            sheet_name = model.sheet_name(model.table_id_to_sheet_id(table_id))
             fields = [
                 f"{x}=" + str(getattr(self, x)) if getattr(self, x) is not None else None
                 for x in self.__slots__
                 if x.endswith("_id")
             ]
             fields = ", ".join([x for x in fields if x if not None])
-            extras = unpack("<H", buffer[6:8])[0]
-            table_name = model.table_name(table_id)
-            sheet_name = model.sheet_name(model.table_id_to_sheet_id(table_id))
             debug(
                 "%s@%s@[%d,%d]: table_id=%d, type=%s, value=%s, flags=%08x, extras=%04x, %s",
                 sheet_name,
@@ -523,7 +523,10 @@ class CellStorage(Cacheable):
         else:
             self.is_currency = False
         format_archive = TSKArchives.FormatStructArchive(**attrs)
-        self.num_format_id = self.model.table_format_id(self.table_id, format_archive)
+        if self.is_currency:
+            self.currency_format_id = self.model.table_format_id(self.table_id, format_archive)
+        else:
+            self.num_format_id = self.model.table_format_id(self.table_id, format_archive)
 
 
 def unpack_decimal128(buffer: bytearray) -> float:
