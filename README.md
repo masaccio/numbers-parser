@@ -257,6 +257,8 @@ Due to a limitation in Python's [ZipFile](https://docs.python.org/3/library/zipf
 
 ### Formatting
 
+**The API for formatting will change until it nears feature completion. Expect breakage without major version changes**
+
 In addition to rendering values as they are displayed in Numbers using the cell property `formatted_value`, `numbers-parser` has limited support for setting cell formats when saving files.
 
 Formats are provided to the `Table.write` method:
