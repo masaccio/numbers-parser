@@ -15,6 +15,7 @@ Bytes offets 6 and 7 include other values which are important to Numbers
 |        | 0x02 is set when there is a currency format ID |
 |        | 0x04 is set when there is a duration format ID |
 |        | 0x08 is set when there is a date format ID |
+|        | 0x20 is set when there is a bool format ID |
 |        | 0x80 is set when there is a string ID |
 | 7      | Some cells have 0x80 for this byte. Unclear why |
 
