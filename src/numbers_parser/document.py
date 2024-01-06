@@ -1,7 +1,14 @@
 from typing import Generator, Tuple, Union
 from warnings import warn
 
-from numbers_parser.cell import Border, Cell, MergedCell, Style, xl_cell_to_rowcol
+from numbers_parser.cell import (
+    Border,
+    Cell,
+    Formatting,
+    MergedCell,
+    Style,
+    xl_cell_to_rowcol,
+)
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
@@ -564,3 +571,13 @@ class Table(Cacheable):
             raise TypeError("side must be a valid border segment")
 
         self._model.add_stroke(self._table_id, row_num, col_num, side, border_value, length)
+
+    def add_formatting(self, **kwargs) -> Formatting:
+        """Add a new format to the current document. Duplicate formats are re-used."""
+        try:
+            format_type = kwargs.pop("type")
+        except KeyError:
+            raise TypeError("No type defined for cell format") from None
+        format = Formatting(format_type, **kwargs)
+        format._format_id = self._model.format_archive(self._table_id, format_type, format)
+        return format

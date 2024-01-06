@@ -20,6 +20,8 @@ from numbers_parser.cell import (
     DateCell,
     DurationCell,
     EmptyCell,
+    Formatting,
+    FormattingType,
     HorizontalJustification,
     MergeAnchor,
     MergedCell,
@@ -35,6 +37,7 @@ from numbers_parser.cell import (
 )
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import (
+    ALLOWED_FORMATTING_PARAMETERS,
     CURRENCY_CELL_TYPE,
     DEFAULT_COLUMN_WIDTH,
     DEFAULT_DOCUMENT,
@@ -55,6 +58,7 @@ from numbers_parser.formula import TableFormulas
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
+from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSSArchives_pb2 as TSSArchives
@@ -346,9 +350,15 @@ class _NumbersModel(Cacheable):
         """Return the format associated with a format ID for a particular table."""
         return self._table_formats.lookup_value(table_id, key).format
 
-    @cache(num_args=2)
-    def table_format_id(self, table_id: int, format) -> id:
-        """Return the table format ID for a format string, creating a new one if required."""
+    # @cache(num_args=2)
+    # def table_format_id(self, table_id: int, format) -> id:
+    #     """Return the table format ID for a format string, creating a new one if required."""
+    #     return self._table_formats.lookup_key(table_id, format)
+
+    @cache()
+    def format_archive(self, table_id: int, format_type: FormattingType, format: Formatting):
+        attrs = {x: getattr(format, x) for x in ALLOWED_FORMATTING_PARAMETERS[format_type]}
+        format = TSKArchives.FormatStructArchive(**attrs)
         return self._table_formats.lookup_key(table_id, format)
 
     @cache(num_args=2)

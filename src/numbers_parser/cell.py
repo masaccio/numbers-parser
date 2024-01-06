@@ -13,16 +13,21 @@ from pendulum import instance as pendulum_instance
 
 from numbers_parser.cell_storage import CellStorage, CellType
 from numbers_parser.constants import (
+    DATETIME_FIELD_MAP,
     DEFAULT_ALIGNMENT,
     DEFAULT_BORDER_COLOR,
     DEFAULT_BORDER_STYLE,
     DEFAULT_BORDER_WIDTH,
+    DEFAULT_DATETIME_FORMAT,
     DEFAULT_FONT,
     DEFAULT_FONT_SIZE,
     DEFAULT_TEXT_INSET,
     DEFAULT_TEXT_WRAP,
     EMPTY_STORAGE_BUFFER,
     MAX_SIGNIFICANT_DIGITS,
+    FormattingType,
+    FractionAccuracy,
+    NegativeNumberStyle,
 )
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
@@ -44,6 +49,7 @@ __all__ = [
     "DurationCell",
     "EmptyCell",
     "ErrorCell",
+    "Formatting",
     "HorizontalJustification",
     "MergeAnchor",
     "MergeReference",
@@ -849,3 +855,37 @@ def xl_col_to_name(col, col_abs=False):
         col_num = int((col_num - 1) / 26)
 
     return col_abs + col_str
+
+
+@dataclass()
+class Formatting:
+    type: FormattingType = FormattingType.NUMBER
+    base_places: int = 0
+    base_use_minus_sign: bool = True
+    base: int = 10
+    currency_code: str = "GBP"
+    date_time_format: str = DEFAULT_DATETIME_FORMAT
+    decimal_places: int = 0
+    fraction_accuracy: FractionAccuracy = FractionAccuracy.THREE
+    negative_style: NegativeNumberStyle = NegativeNumberStyle.MINUS
+    show_thousands_separator: bool = False
+    use_accounting_style: bool = False
+    _format_id = None
+
+    def __post_init__(self):
+        if not isinstance(self.type, FormattingType):
+            type_name = type(self.type).__name__
+            raise TypeError(f"Invalid format type '{type_name}")
+
+        if self.use_accounting_style and self.negative_style != NegativeNumberStyle.MINUS:
+            warn(
+                "use_accounting_style overriding negative_style",
+                RuntimeWarning,
+                stacklevel=4,
+            )
+
+        if self.type == FormattingType.DATETIME:
+            formats = re.sub(r"[^a-zA-Z\s]", " ", self.date_time_format).split()
+            for el in formats:
+                if el not in DATETIME_FIELD_MAP.keys():
+                    raise TypeError(f"Invalid format specifier '{el}' in date/time format")
