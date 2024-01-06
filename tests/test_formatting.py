@@ -3,7 +3,11 @@ import pytest_check as check
 from pendulum import datetime
 
 from numbers_parser import Document, EmptyCell
-from numbers_parser.constants import NegativeNumberStyle
+from numbers_parser.constants import (
+    FormattingType,
+    FractionAccuracy,
+    NegativeNumberStyle,
+)
 
 DATE_FORMAT_REF = [
     ["", "1 pm", "1:25 pm", "1:25:42 pm", "13:25", "13:25:42"],
@@ -221,6 +225,83 @@ DATE_FORMATS = [
 
 TIME_FORMATS = ["", "h a", "h:mm a", "h:mm:ss a", "HH:mm", "HH:mm:ss"]
 
+OTHER_FORMAT_REF = [
+    ["12.34%", "-12.34%", "12.34%", "12.34%", "12.34%", "(12.34%)", "12.34%", "(12.34%)", ""],
+    [
+        "1,234.56%",
+        "-1,234.56%",
+        "1,234.56%",
+        "1,234.56%",
+        "1,234.56%",
+        "(1,234.56%)",
+        "1,234.56%",
+        "(1,234.56%)",
+        "",
+    ],
+    ["12%", "-12%", "12%", "12%", "12%", "(12%)", "12%", "(12%)", ""],
+    ["1,235%", "-1,235%", "1,235%", "1,235%", "1,235%", "(1,235%)", "1,235%", "(1,235%)", ""],
+    ["12.3%", "-12.3%", "12.3%", "12.3%", "12.3%", "(12.3%)", "12.3%", "(12.3%)", ""],
+    [
+        "1,234.6%",
+        "-1,234.6%",
+        "1,234.6%",
+        "1,234.6%",
+        "1,234.6%",
+        "(1,234.6%)",
+        "1,234.6%",
+        "(1,234.6%)",
+        "",
+    ],
+    [
+        "12.3400%",
+        "-12.3400%",
+        "12.3400%",
+        "12.3400%",
+        "12.3400%",
+        "(12.3400%)",
+        "12.3400%",
+        "(12.3400%)",
+        "",
+    ],
+    [
+        "1,234.5600%",
+        "-1,234.5600%",
+        "1,234.5600%",
+        "1,234.5600%",
+        "1,234.5600%",
+        "(1,234.5600%)",
+        "1,234.5600%",
+        "(1,234.5600%)",
+        "",
+    ],
+    ["1234", "-1234", "-1234", "00001234", "-00001234", "-00001234", "", "", ""],
+    [
+        "10011010010",
+        "-10011010010",
+        "11111111111111111111101100101110",
+        "10011010010",
+        "-10011010010",
+        "11111111111111111111101100101110",
+        "",
+        "",
+        "",
+    ],
+    ["2322", "-2322", "37777775456", "00002322", "-00002322", "37777775456", "", "", ""],
+    ["0x4D2", "-0x4D2", "-0x4D2", "0x000004D2", "-0x000004D2", "-0x000004D2", "", "", ""],
+    ["4/5", "70/87", "445/553", "1", "3/4", "6/8", "13/16", "8/10", "80/100"],
+    [
+        "1E+02",
+        "1E+03",
+        "1E+04",
+        "1E+06",
+        "1.0000E+02",
+        "1.0000E+03",
+        "1.0000E+04",
+        "1.0000E+06",
+        "",
+    ],
+]
+
 
 def test_duration_formatting():
     doc = Document("tests/data/duration_112.numbers")
@@ -295,25 +376,24 @@ def test_write_date_format(configurable_save_file):
 
     ref_date = datetime(2023, 4, 1, 13, 25, 42)
     with pytest.raises(TypeError) as e:
-        table.write(0, 0, "test", formatting={"date_time_format": "XX"})
-    assert "Cannot set formatting for cells of type TextCell" in str(e)
-    with pytest.raises(TypeError) as e:
-        table.write(0, 1, ref_date, formatting={"date_time_format": "XX"})
+        _ = table.add_formatting(type=FormattingType.DATETIME, date_time_format="XX")
     assert "Invalid format specifier 'XX' in date/time format" in str(e)
     with pytest.raises(TypeError) as e:
-        table.write(0, 2, ref_date, formatting=object())
-    assert "formatting values must be a dict" in str(e)
+        _ = table.add_formatting()
+    assert "No type defined for cell format" in str(e)
 
+    format = table.add_formatting(type=FormattingType.DATETIME, date_time_format="yyyy")
     with pytest.raises(TypeError) as e:
-        table.write(0, 0, ref_date, formatting={"xx": "XX"})
-    assert "No date_time_format specified for DateCell formatting" in str(e)
+        table.write(0, 0, "test", formatting=format)
+    assert "Cannot set formatting for cells of type TextCell" in str(e)
 
     for row_num in range(len(DATE_FORMATS)):
         for col_num in range(len(TIME_FORMATS)):
             date_time_format = " ".join([DATE_FORMATS[row_num], TIME_FORMATS[col_num]]).strip()
-            table.write(
-                row_num, col_num, ref_date, formatting={"date_time_format": date_time_format}
+            formatting = table.add_formatting(
+                type=FormattingType.DATETIME, date_time_format=date_time_format
             )
+            table.write(row_num, col_num, ref_date, formatting=formatting)
 
     doc.save(configurable_save_file)
 
@@ -480,6 +560,87 @@ def test_write_numbers_format(configurable_save_file):
         for col_num, ref_value in enumerate(row):
             check.equal(abs(table.cell(row_num + 10, col_num).value), ref_number)
             check.equal(table.cell(row_num + 10, col_num).formatted_value, ref_value)
+
+
+def test_write_mixed_number_formats(configurable_save_file):
+    doc = Document(
+        num_header_cols=0, num_header_rows=0, num_cols=len(TIME_FORMATS), num_rows=len(DATE_FORMATS)
+    )
+    table = doc.sheets[0].tables[0]
+
+    row_num = 0
+    for decimal_places in [None, 0, 1, 4]:
+        for show_thousands_separator in [False, True]:
+            if show_thousands_separator:
+                values = [12.3456, -12.3456]
+            else:
+                values = [0.1234, -0.1234]
+            col_num = 0
+            for negative_style in NegativeNumberStyle:
+                for value in values:
+                    table.write(
+                        row_num,
+                        col_num,
+                        value,
+                        formatting={
+                            "decimal_places": decimal_places,
+                            "percentage": True,
+                            "negative_style": negative_style,
+                            "show_thousands_separator": show_thousands_separator,
+                        },
+                    )
+
+    for base in [10, 2, 8, 16]:
+        col_num = 0
+        values = [1234, -1234, -1234]
+        for value_num, base_use_minus_sign in enumerate([True, True, False]):
+            for base_places in [0, 8]:
+                table.write(
+                    row_num,
+                    col_num,
+                    values[value_num],
+                    formatting={
+                        "base": base,
+                        "base_places": base_places,
+                        "base_use_minus_sign": base_use_minus_sign,
+                    },
+                )
+                col_num += 1
+        row_num += 1
+
+    ref_value = "445/553"
+    for col_num, fraction_accuracy in enumerate(FractionAccuracy):
+        table.write(
+            0,
+            col_num,
+            ref_value,
+            formatting={
+                "fraction": True,
+                "fraction_accuracy": fraction_accuracy,
+            },
+        )
+
+    col_num = 0
+    for value in [100, 1000, 10000, 100000, 1000000]:
+        for num_decimals in [0, 4]:
+            table.write(
+                0,
+                col_num,
+                value,
+                formatting={
+                    "scientific": True,
+                    "num_decimals": num_decimals,
+                },
+            )
+            col_num += 1
+
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    for row_num, row in enumerate(OTHER_FORMAT_REF):
+        for col_num, ref_value in enumerate(row):
+            check.equal(table.cell(row_num, col_num).formatted_value, ref_value)
 
 
 def test_currency_updates():
