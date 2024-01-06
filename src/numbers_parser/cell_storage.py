@@ -1,7 +1,6 @@
 import logging
 import math
 import re
-from collections import OrderedDict
 from fractions import Fraction
 from struct import unpack
 from typing import Tuple
@@ -13,6 +12,7 @@ from pendulum import datetime, duration
 from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser.constants import (
     CURRENCY_CELL_TYPE,
+    DATETIME_FIELD_MAP,
     DECIMAL_PLACES_AUTO,
     EPOCH,
     MAX_SIGNIFICANT_DIGITS,
@@ -36,47 +36,6 @@ from numbers_parser.numbers_uuid import NumbersUUID
 
 logger = logging.getLogger(numbers_parser_name)
 debug = logger.debug
-
-DATETIME_FIELD_MAP = OrderedDict(
-    [
-        ("a", lambda x: x.strftime("%p").lower()),
-        ("EEEE", "%A"),
-        ("EEE", "%a"),
-        ("yyyy", "%Y"),
-        ("yy", "%y"),
-        ("y", "%Y"),
-        ("MMMM", "%B"),
-        ("MMM", "%b"),
-        ("MM", "%m"),
-        ("M", "%-m"),
-        ("d", "%-d"),
-        ("dd", "%d"),
-        ("DDD", lambda x: str(x.day_of_year).zfill(3)),
-        ("DD", lambda x: str(x.day_of_year).zfill(2)),
-        ("D", lambda x: str(x.day_of_year).zfill(1)),
-        ("HH", "%H"),
-        ("H", "%-H"),
-        ("hh", "%I"),
-        ("h", "%-I"),
-        ("k", lambda x: str(x.hour).replace("0", "24")),
-        ("kk", lambda x: str(x.hour).replace("0", "24").zfill(2)),
-        ("K", lambda x: str(x.hour % 12)),
-        ("KK", lambda x: str(x.hour % 12).zfill(2)),
-        ("mm", lambda x: str(x.minute).zfill(2)),
-        ("m", lambda x: str(x.minute)),
-        ("ss", "%S"),
-        ("s", lambda x: str(x.second)),
-        ("W", lambda x: str(x.week_of_month - 1)),
-        ("ww", "%W"),
-        ("G", "AD"),  # TODO: support BC
-        ("F", lambda x: days_occurred_in_month(x)),
-        ("S", lambda x: str(x.microsecond).zfill(6)[0]),
-        ("SS", lambda x: str(x.microsecond).zfill(6)[0:2]),
-        ("SSS", lambda x: str(x.microsecond).zfill(6)[0:3]),
-        ("SSSS", lambda x: str(x.microsecond).zfill(6)[0:4]),
-        ("SSSSS", lambda x: str(x.microsecond).zfill(6)[0:5]),
-    ]
-)
 
 
 class CellStorage(Cacheable):
@@ -539,12 +498,6 @@ def unpack_decimal128(buffer: bytearray) -> float:
         mantissa = -mantissa
     value = mantissa * 10**exp
     return float(value)
-
-
-def days_occurred_in_month(value: datetime) -> str:
-    """Return how many times the day of the datetime value has fallen in the month."""
-    n_days = int((value - value.replace(day=1)).days / 7) + 1
-    return str(n_days)
 
 
 def decode_date_format_field(field: str, value: datetime) -> str:

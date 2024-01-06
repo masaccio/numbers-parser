@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from enum import IntEnum
 
 from pendulum import datetime
@@ -31,6 +32,9 @@ DEFAULT_TEXT_INSET = 4.0
 DEFAULT_TEXT_WRAP = True
 EMPTY_STORAGE_BUFFER = b"\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 
+# Formatting defaults
+DEFAULT_DATETIME_FORMAT = "dd MMM YYY HH:MM"
+
 # Numbers limits
 MAX_TILE_SIZE = 256
 MAX_ROW_COUNT = 1000000
@@ -51,6 +55,55 @@ SECONDS_IN_WEEK = SECONDS_IN_DAY * 7
 # File format enumerations
 DECIMAL_PLACES_AUTO = 253
 CURRENCY_CELL_TYPE = 10
+
+
+# Supported date/time directives
+def _days_occurred_in_month(value: datetime) -> str:
+    """Return how many times the day of the datetime value has fallen in the month."""
+    n_days = int((value - value.replace(day=1)).days / 7) + 1
+    return str(n_days)
+
+
+DATETIME_FIELD_MAP = OrderedDict(
+    [
+        ("a", lambda x: x.strftime("%p").lower()),
+        ("EEEE", "%A"),
+        ("EEE", "%a"),
+        ("yyyy", "%Y"),
+        ("yy", "%y"),
+        ("y", "%Y"),
+        ("MMMM", "%B"),
+        ("MMM", "%b"),
+        ("MM", "%m"),
+        ("M", "%-m"),
+        ("d", "%-d"),
+        ("dd", "%d"),
+        ("DDD", lambda x: str(x.day_of_year).zfill(3)),
+        ("DD", lambda x: str(x.day_of_year).zfill(2)),
+        ("D", lambda x: str(x.day_of_year).zfill(1)),
+        ("HH", "%H"),
+        ("H", "%-H"),
+        ("hh", "%I"),
+        ("h", "%-I"),
+        ("k", lambda x: str(x.hour).replace("0", "24")),
+        ("kk", lambda x: str(x.hour).replace("0", "24").zfill(2)),
+        ("K", lambda x: str(x.hour % 12)),
+        ("KK", lambda x: str(x.hour % 12).zfill(2)),
+        ("mm", lambda x: str(x.minute).zfill(2)),
+        ("m", lambda x: str(x.minute)),
+        ("ss", "%S"),
+        ("s", lambda x: str(x.second)),
+        ("W", lambda x: str(x.week_of_month - 1)),
+        ("ww", "%W"),
+        ("G", "AD"),  # TODO: support BC
+        ("F", lambda x: _days_occurred_in_month(x)),
+        ("S", lambda x: str(x.microsecond).zfill(6)[0]),
+        ("SS", lambda x: str(x.microsecond).zfill(6)[0:2]),
+        ("SSS", lambda x: str(x.microsecond).zfill(6)[0:3]),
+        ("SSSS", lambda x: str(x.microsecond).zfill(6)[0:4]),
+        ("SSSSS", lambda x: str(x.microsecond).zfill(6)[0:5]),
+    ]
+)
 
 
 class CellType(IntEnum):
@@ -90,6 +143,7 @@ class FormatType(IntEnum):
     DECIMAL = 256
     CURRENCY = 257
     PERCENT = 258
+    SCIENTIFIC = 259
     TEXT = 260
     DATE = 261
     FRACTION = 262
@@ -103,8 +157,47 @@ class FormatType(IntEnum):
     CUSTOM_CURRENCY = 274
 
 
+class FormattingType(IntEnum):
+    NUMBER = 1
+    CURRENCY = 1
+    PERCENTAGE = 2
+    FRACTION = 3
+    NUMERAL = 4
+    BASE = 5
+    DATETIME = 6
+
+
 class NegativeNumberStyle(IntEnum):
     MINUS = 0
     RED = 1
     PARENTHESES = 2
     RED_AND_PARENTHESES = 3
+
+
+class FractionAccuracy(IntEnum):
+    THREE = 0xFFFFFFFD
+    TWO = 0xFFFFFFFE
+    ONE = 0xFFFFFFFF
+    HALVES = 2
+    QUARTERS = 4
+    EIGTHS = 8
+    SIXTEENTHS = 16
+    TENTHS = 10
+    HUNDRETHS = 100
+
+
+ALLOWED_FORMATTING_PARAMETERS = {
+    FormattingType.NUMBER: ["decimal_places", "show_thousands_separator", "negative_style"],
+    FormattingType.CURRENCY: [
+        "decimal_places",
+        "show_thousands_separator",
+        "negative_style",
+        "use_accounting_style",
+        "currency_code",
+    ],
+    FormattingType.PERCENTAGE: ["decimal_places", "show_thousands_separator", "negative_style"],
+    FormattingType.FRACTION: ["fraction_accuracy"],
+    FormattingType.NUMERAL: [],
+    FormattingType.BASE: [],
+    FormattingType.DATETIME: ["date_time_format"],
+}
