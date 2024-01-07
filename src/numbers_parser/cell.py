@@ -893,3 +893,10 @@ class Formatting:
                 self.decimal_places = 2
             else:
                 self.decimal_places = DECIMAL_PLACES_AUTO
+
+        if (
+            self.type == FormattingType.BASE
+            and not self.base_use_minus_sign
+            and self.base not in (2, 8, 16)
+        ):
+            raise TypeError(f"base_use_minus_sign must be True for base {self.base}")
