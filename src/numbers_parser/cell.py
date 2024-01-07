@@ -869,7 +869,7 @@ class Formatting:
     def __post_init__(self):
         if not isinstance(self.type, FormattingType):
             type_name = type(self.type).__name__
-            raise TypeError(f"Invalid format type '{type_name}")
+            raise TypeError(f"Invalid format type '{type_name}'")
 
         if self.use_accounting_style and self.negative_style != NegativeNumberStyle.MINUS:
             warn(

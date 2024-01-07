@@ -449,7 +449,7 @@ class Table(Cacheable):
 
         return (row_num, col_num) + tuple(values)
 
-    def write(self, *args, style=None, formatting=None):
+    def write(self, *args, style=None):
         # TODO: write needs to retain/init the border
         (row_num, col_num, value) = self._validate_cell_coords(*args)
         self._data[row_num][col_num] = Cell.from_value(row_num, col_num, value)
@@ -464,8 +464,6 @@ class Table(Cacheable):
 
         if style is not None:
             self.set_cell_style(row_num, col_num, style)
-        if formatting is not None:
-            self.set_cell_formatting(row_num, col_num, formatting)
 
     def set_cell_style(self, *args):
         (row_num, col_num, style) = self._validate_cell_coords(*args)

@@ -4,6 +4,7 @@ from numbers_parser import (
     Cell,
     Document,
     EmptyCell,
+    Formatting,
     UnsupportedError,
     UnsupportedWarning,
     xl_col_to_name,
@@ -229,6 +230,10 @@ def test_set_number_defaults():
     format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
     assert not format.show_thousands_separator
     assert format.decimal_places == 2
+
+    with pytest.raises(TypeError) as e:
+        Formatting(type=object())
+    assert "Invalid format type 'object'" in str(e)
 
 
 def test_formatting_empty_cell():
