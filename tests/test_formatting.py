@@ -4,7 +4,6 @@ from pendulum import datetime
 
 from numbers_parser import Document, EmptyCell
 from numbers_parser.constants import (
-    FormattingType,
     FractionAccuracy,
     NegativeNumberStyle,
 )
@@ -376,24 +375,22 @@ def test_write_date_format(configurable_save_file):
 
     ref_date = datetime(2023, 4, 1, 13, 25, 42)
     with pytest.raises(TypeError) as e:
-        _ = table.add_formatting(type=FormattingType.DATETIME, date_time_format="XX")
+        table.set_cell_formatting("A1", "date", date_time_format="XX")
     assert "Invalid format specifier 'XX' in date/time format" in str(e)
     with pytest.raises(TypeError) as e:
-        _ = table.add_formatting()
+        table.set_cell_formatting("A1")
     assert "No type defined for cell format" in str(e)
 
-    format = table.add_formatting(type=FormattingType.DATETIME, date_time_format="yyyy")
+    table.write("A1", "test")
     with pytest.raises(TypeError) as e:
-        table.write(0, 0, "test", formatting=format)
+        table.set_cell_formatting("A1", "date", date_time_format="yyyy")
     assert "Cannot set formatting for cells of type TextCell" in str(e)
 
     for row_num in range(len(DATE_FORMATS)):
         for col_num in range(len(TIME_FORMATS)):
             date_time_format = " ".join([DATE_FORMATS[row_num], TIME_FORMATS[col_num]]).strip()
-            formatting = table.add_formatting(
-                type=FormattingType.DATETIME, date_time_format=date_time_format
-            )
-            table.write(row_num, col_num, ref_date, formatting=formatting)
+            table.write(row_num, col_num, ref_date)
+            table.set_cell_formatting(row_num, col_num, "date", date_time_format=date_time_format)
 
     doc.save(configurable_save_file)
 
@@ -410,30 +407,20 @@ def test_write_numbers_format(configurable_save_file):
     table = doc.sheets[0].tables[0]
 
     ref_number = 12345.012346
-    with pytest.raises(TypeError) as e:
-        table.write(0, 0, "test", formatting={"decimal_places": "XX"})
-    assert "Cannot set formatting for cells of type TextCell" in str(e)
-    with pytest.raises(TypeError) as e:
-        table.write(0, 1, ref_number, formatting={"XX": "XX"})
-    assert "Invalid format specifier 'XX' in number format" in str(e)
-    with pytest.raises(TypeError) as e:
-        table.write(0, 2, ref_number, formatting=object())
-    assert "formatting values must be a dict" in str(e)
+    table.write(0, 0, ref_number)
     with pytest.warns(RuntimeWarning) as record:
-        table.write(
+        table.set_cell_formatting(
             0,
-            3,
-            ref_number,
-            formatting={
-                "negative_style": NegativeNumberStyle.MINUS,
-                "currency_code": "GBP",
-                "use_accounting_style": True,
-            },
+            0,
+            "number",
+            negative_style=NegativeNumberStyle.MINUS,
+            currency_code="GBP",
+            use_accounting_style=True,
         )
     assert len(record) == 1
     assert "Use of use_accounting_style overrules negative_style" in str(record[0])
     with pytest.raises(TypeError) as e:
-        table.write(0, 4, ref_number, formatting={"currency_code": "XYZ"})
+        table.set_cell_formatting(0, 0, "currency", currency_code="XYZ")
     assert "Unsupported currency code 'XYZ'" in str(e)
 
     row_num = 0
@@ -442,15 +429,14 @@ def test_write_numbers_format(configurable_save_file):
             col_num = 0
             for show_thousands_separator in [False, True]:
                 for negative_style in NegativeNumberStyle:
-                    table.write(
+                    table.write(row_num, col_num, value)
+                    table.set_cell_formatting(
                         row_num,
                         col_num,
-                        value,
-                        formatting={
-                            "decimal_places": decimal_places,
-                            "negative_style": negative_style,
-                            "show_thousands_separator": show_thousands_separator,
-                        },
+                        "number",
+                        decimal_places=decimal_places,
+                        negative_style=negative_style,
+                        show_thousands_separator=show_thousands_separator,
                     )
                     col_num += 1
             row_num += 1
@@ -467,84 +453,77 @@ def test_write_numbers_format(configurable_save_file):
             "ILS",
         ]
     ):
-        table.write(
+        table.write(10, col_num, ref_number)
+        table.set_cell_formatting(
             10,
             col_num,
-            ref_number,
-            formatting={
-                "decimal_places": 2,
-                "negative_style": NegativeNumberStyle.MINUS,
-                "show_thousands_separator": False,
-                "currency_code": currency_code,
-            },
+            "currency",
+            decimal_places=2,
+            negative_style=NegativeNumberStyle.MINUS,
+            show_thousands_separator=False,
+            currency_code=currency_code,
         )
 
     for col_num, currency_code in enumerate(["VND", "CAD", "SEK"]):
-        table.write(
+        table.write(11, col_num, ref_number)
+        table.set_cell_formatting(
             11,
             col_num,
-            ref_number,
-            formatting={
-                "decimal_places": 2,
-                "negative_style": NegativeNumberStyle.MINUS,
-                "show_thousands_separator": False,
-                "currency_code": currency_code,
-            },
+            "currency",
+            decimal_places=2,
+            negative_style=NegativeNumberStyle.MINUS,
+            show_thousands_separator=False,
+            currency_code=currency_code,
         )
-    table.write(
+    table.write(11, 3, ref_number)
+    table.set_cell_formatting(
         11,
         3,
-        ref_number,
-        formatting={
-            "decimal_places": 2,
-            "show_thousands_separator": False,
-            "currency_code": "GBP",
-            "use_accounting_style": True,
-        },
+        "currency",
+        decimal_places=2,
+        show_thousands_separator=False,
+        currency_code="GBP",
+        use_accounting_style=True,
     )
-    table.write(
+    table.write(11, 4, -ref_number)
+    table.set_cell_formatting(
         11,
         4,
         -ref_number,
-        formatting={
-            "decimal_places": 2,
-            "show_thousands_separator": False,
-            "currency_code": "GBP",
-            "use_accounting_style": True,
-        },
+        decimal_places=2,
+        show_thousands_separator=False,
+        currency_code="GBP",
+        use_accounting_style=True,
     )
-    table.write(
+    table.write(11, 5, ref_number)
+    table.set_cell_formatting(
         11,
         5,
-        ref_number,
-        formatting={
-            "decimal_places": 2,
-            "negative_style": NegativeNumberStyle.RED,
-            "show_thousands_separator": False,
-            "currency_code": "GBP",
-        },
+        "currency",
+        decimal_places=2,
+        negative_style=NegativeNumberStyle.RED,
+        show_thousands_separator=False,
+        currency_code="GBP",
     )
-    table.write(
+    table.write(11, 6, ref_number)
+    table.set_cell_formatting(
         11,
         6,
-        ref_number,
-        formatting={
-            "decimal_places": 2,
-            "show_thousands_separator": False,
-            "currency_code": "GBP",
-            "use_accounting_style": True,
-        },
+        "currency",
+        decimal_places=2,
+        show_thousands_separator=False,
+        currency_code="GBP",
+        use_accounting_style=True,
     )
+    table.write(11, 7, -ref_number)
     table.write(
         11,
         7,
-        -ref_number,
-        formatting={
-            "decimal_places": 2,
-            "show_thousands_separator": True,
-            "currency_code": "GBP",
-            "use_accounting_style": True,
-        },
+        "currency",
+        decimal_places=2,
+        show_thousands_separator=True,
+        currency_code="GBP",
+        use_accounting_style=True,
     )
 
     doc.save(configurable_save_file)
@@ -578,16 +557,15 @@ def test_write_mixed_number_formats(configurable_save_file):
             col_num = 0
             for negative_style in NegativeNumberStyle:
                 for value in values:
-                    table.write(
+                    table.write(row_num, col_num, value)
+                    table.set_cell_formatting(
                         row_num,
                         col_num,
-                        value,
-                        formatting={
-                            "decimal_places": decimal_places,
-                            "percentage": True,
-                            "negative_style": negative_style,
-                            "show_thousands_separator": show_thousands_separator,
-                        },
+                        "percentage",
+                        decimal_places=decimal_places,
+                        percentage=True,
+                        negative_style=negative_style,
+                        show_thousands_separator=show_thousands_separator,
                     )
 
     for base in [10, 2, 8, 16]:
@@ -595,43 +573,28 @@ def test_write_mixed_number_formats(configurable_save_file):
         values = [1234, -1234, -1234]
         for value_num, base_use_minus_sign in enumerate([True, True, False]):
             for base_places in [0, 8]:
-                table.write(
+                table.write(row_num, col_num, values[value_num])
+                table.set_cell_formatting(
                     row_num,
                     col_num,
-                    values[value_num],
-                    formatting={
-                        "base": base,
-                        "base_places": base_places,
-                        "base_use_minus_sign": base_use_minus_sign,
-                    },
+                    "base",
+                    base=base,
+                    base_places=base_places,
+                    base_use_minus_sign=base_use_minus_sign,
                 )
                 col_num += 1
         row_num += 1
 
     ref_value = "445/553"
     for col_num, fraction_accuracy in enumerate(FractionAccuracy):
-        table.write(
-            0,
-            col_num,
-            ref_value,
-            formatting={
-                "fraction": True,
-                "fraction_accuracy": fraction_accuracy,
-            },
-        )
+        table.write(0, col_num, ref_value)
+        table.set_cell_formatting(0, col_num, "fraction", fraction_accuracy=fraction_accuracy)
 
     col_num = 0
     for value in [100, 1000, 10000, 100000, 1000000]:
-        for num_decimals in [0, 4]:
-            table.write(
-                0,
-                col_num,
-                value,
-                formatting={
-                    "scientific": True,
-                    "num_decimals": num_decimals,
-                },
-            )
+        for decimal_places in [0, 4]:
+            table.write(0, col_num, value)
+            table.set_cell_formatting(0, col_num, "scientific", decimal_places=decimal_places)
             col_num += 1
 
     doc.save(configurable_save_file)
