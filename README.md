@@ -375,6 +375,12 @@ The positional parameter after the cell reference is the type of data format to 
             <td><code>True</code> if the number should include a thousands seperator, e.g. <code>,</code></td>
             <td><code>False</code><td>
         </tr>
+        <tr>
+            <td><code>scientific</code></td>
+            <td><code>decimal_places</code></td>
+            <td>The number of decimal places, or <code>None</code> for automatic</td>
+            <td><code>0</code><td>
+        </tr>
     </tbody>
 </table>
 <!-- markdownlint-enable MD033 -->
