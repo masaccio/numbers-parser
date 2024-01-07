@@ -49,6 +49,7 @@ from numbers_parser.constants import (
     DEFAULT_TILE_SIZE,
     DOCUMENT_ID,
     EPOCH,
+    FORMAT_TYPE_MAP,
     MAX_TILE_SIZE,
     PACKAGE_ID,
 )
@@ -350,14 +351,12 @@ class _NumbersModel(Cacheable):
         """Return the format associated with a format ID for a particular table."""
         return self._table_formats.lookup_value(table_id, key).format
 
-    # @cache(num_args=2)
-    # def table_format_id(self, table_id: int, format) -> id:
-    #     """Return the table format ID for a format string, creating a new one if required."""
-    #     return self._table_formats.lookup_key(table_id, format)
-
-    @cache()
+    @cache(num_args=3)
     def format_archive(self, table_id: int, format_type: FormattingType, format: Formatting):
+        """Create a table format from a Formatting spec and return thetable format ID"""
         attrs = {x: getattr(format, x) for x in ALLOWED_FORMATTING_PARAMETERS[format_type]}
+        attrs["format_type"] = FORMAT_TYPE_MAP[format_type]
+
         format = TSKArchives.FormatStructArchive(**attrs)
         return self._table_formats.lookup_key(table_id, format)
 
