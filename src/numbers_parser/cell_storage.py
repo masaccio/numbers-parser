@@ -25,11 +25,9 @@ from numbers_parser.constants import (
     DurationStyle,
     DurationUnits,
     FormatType,
-    NegativeNumberStyle,
 )
-from numbers_parser.currencies import CURRENCIES, CURRENCY_SYMBOLS
+from numbers_parser.currencies import CURRENCY_SYMBOLS
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
-from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID
@@ -426,66 +424,13 @@ class CellStorage(Cacheable):
 
         return duration_str
 
-    def set_date_time_formatting(self, date_time_format) -> None:
-        check_date_time_format(date_time_format)
-        format_archive = TSKArchives.FormatStructArchive(
-            format_type=FormatType.DATE, date_time_format=date_time_format
-        )
-        self.date_format_id = self.model.table_format_id(self.table_id, format_archive)
-
-    def set_number_formatting(self, number_format) -> None:
-        check_number_format(number_format)
-        if "decimal_places" not in number_format or number_format["decimal_places"] is None:
-            decimal_places = DECIMAL_PLACES_AUTO
+    def _set_formatting(self, format_id: int) -> None:
+        if self.type == CellType.DATE:
+            self.date_format_id = format_id
+        elif self.is_currency:
+            self.currency_format_id = format_id
         else:
-            decimal_places = number_format["decimal_places"]
-
-        if "negative_style" not in number_format:
-            negative_style = NegativeNumberStyle.MINUS
-        elif "use_accounting_style" in number_format:
-            warn(
-                "Use of use_accounting_style overrules negative_style",
-                RuntimeWarning,
-                stacklevel=4,
-            )
-            negative_style = NegativeNumberStyle.MINUS
-        else:
-            negative_style = number_format["negative_style"]
-
-        if "show_thousands_separator" not in number_format:
-            show_thousands_separator = False
-        else:
-            show_thousands_separator = number_format["show_thousands_separator"]
-
-        if "currency_code" in number_format:
-            format_type = FormatType.CURRENCY
-        else:
-            format_type = FormatType.DECIMAL
-
-        attrs = {
-            "format_type": format_type,
-            "decimal_places": decimal_places,
-            "negative_style": negative_style,
-            "show_thousands_separator": show_thousands_separator,
-        }
-
-        if format_type == FormatType.CURRENCY:
-            self.is_currency = True
-            if number_format["currency_code"] not in CURRENCIES:
-                currency_code = number_format["currency_code"]
-                raise TypeError(f"Unsupported currency code '{currency_code}'")
-            if "use_accounting_style" in number_format:
-                attrs["use_accounting_style"] = number_format["use_accounting_style"]
-            else:
-                attrs["use_accounting_style"] = False
-            attrs["currency_code"] = number_format["currency_code"]
-        else:
-            self.is_currency = False
-        format_archive = TSKArchives.FormatStructArchive(**attrs)
-        if self.is_currency:
-            self.currency_format_id = self.model.table_format_id(self.table_id, format_archive)
-        else:
-            self.num_format_id = self.model.table_format_id(self.table_id, format_archive)
+            self.num_format_id = format_id
 
 
 def unpack_decimal128(buffer: bytearray) -> float:
@@ -863,22 +808,3 @@ def auto_units(cell_value, format):
             unit_smallest = unit_largest
 
     return unit_smallest, unit_largest
-
-
-def check_date_time_format(format: str) -> None:
-    formats = re.sub(r"[^a-zA-Z\s]", " ", format).split()
-    for el in formats:
-        if el not in DATETIME_FIELD_MAP:
-            raise TypeError(f"Invalid format specifier '{el}' in date/time format")
-
-
-def check_number_format(format: dict) -> None:
-    for key in format:
-        if key not in [
-            "decimal_places",
-            "negative_style",
-            "show_thousands_separator",
-            "currency_code",
-            "use_accounting_style",
-        ]:
-            raise TypeError(f"Invalid format specifier '{key}' in number format")
