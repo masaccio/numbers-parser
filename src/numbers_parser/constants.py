@@ -158,13 +158,13 @@ class FormatType(IntEnum):
 
 
 class FormattingType(IntEnum):
-    NUMBER = 1
-    CURRENCY = 1
-    PERCENTAGE = 2
-    FRACTION = 3
-    NUMERAL = 4
-    BASE = 5
-    DATETIME = 6
+    BASE = 1
+    CURRENCY = 2
+    DATETIME = 3
+    FRACTION = 4
+    NUMBER = 5
+    PERCENTAGE = 6
+    SCIENTIFIC = 7
 
 
 class NegativeNumberStyle(IntEnum):
@@ -187,7 +187,7 @@ class FractionAccuracy(IntEnum):
 
 
 ALLOWED_FORMATTING_PARAMETERS = {
-    FormattingType.NUMBER: ["decimal_places", "show_thousands_separator", "negative_style"],
+    FormattingType.BASE: ["base_places", "base_use_minus_sign"],
     FormattingType.CURRENCY: [
         "decimal_places",
         "show_thousands_separator",
@@ -195,9 +195,9 @@ ALLOWED_FORMATTING_PARAMETERS = {
         "use_accounting_style",
         "currency_code",
     ],
-    FormattingType.PERCENTAGE: ["decimal_places", "show_thousands_separator", "negative_style"],
-    FormattingType.FRACTION: ["fraction_accuracy"],
-    FormattingType.NUMERAL: [],
-    FormattingType.BASE: [],
     FormattingType.DATETIME: ["date_time_format"],
+    FormattingType.FRACTION: ["fraction_accuracy"],
+    FormattingType.NUMBER: ["decimal_places", "show_thousands_separator", "negative_style"],
+    FormattingType.PERCENTAGE: ["decimal_places", "show_thousands_separator", "negative_style"],
+    FormattingType.SCIENTIFIC: ["decimal_places"],
 }
