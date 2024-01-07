@@ -198,7 +198,7 @@ class FractionAccuracy(IntEnum):
 
 
 ALLOWED_FORMATTING_PARAMETERS = {
-    FormattingType.BASE: ["base_places", "base_use_minus_sign"],
+    FormattingType.BASE: ["base", "base_places", "base_use_minus_sign"],
     FormattingType.CURRENCY: [
         "decimal_places",
         "show_thousands_separator",
