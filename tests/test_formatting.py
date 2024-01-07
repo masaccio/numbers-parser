@@ -374,23 +374,33 @@ def test_write_date_format(configurable_save_file):
     table = doc.sheets[0].tables[0]
 
     ref_date = datetime(2023, 4, 1, 13, 25, 42)
+    table.write("A1", ref_date)
     with pytest.raises(TypeError) as e:
-        table.set_cell_formatting("A1", "date", date_time_format="XX")
+        table.set_cell_formatting("A1", "datetime", date_time_format="XX")
     assert "Invalid format specifier 'XX' in date/time format" in str(e)
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting("A1")
-    assert "No type defined for cell format" in str(e)
+    assert "no type defined for cell format" in str(e)
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting("A1", "invalid")
+    assert "unsuported cell format type 'invalid'" in str(e)
 
+    table.write("A1", 0.1)
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting("A1", "datetime", date_time_format="yyyy")
+    assert "cannot use date/time formatting for cells of type NumberCell" in str(e)
     table.write("A1", "test")
     with pytest.raises(TypeError) as e:
-        table.set_cell_formatting("A1", "date", date_time_format="yyyy")
-    assert "Cannot set formatting for cells of type TextCell" in str(e)
+        table.set_cell_formatting("A1", "number", date_time_format="yyyy")
+    assert "cannot set formatting for cells of type TextCell" in str(e)
 
     for row_num in range(len(DATE_FORMATS)):
         for col_num in range(len(TIME_FORMATS)):
             date_time_format = " ".join([DATE_FORMATS[row_num], TIME_FORMATS[col_num]]).strip()
             table.write(row_num, col_num, ref_date)
-            table.set_cell_formatting(row_num, col_num, "date", date_time_format=date_time_format)
+            table.set_cell_formatting(
+                row_num, col_num, "datetime", date_time_format=date_time_format
+            )
 
     doc.save(configurable_save_file)
 
@@ -412,13 +422,13 @@ def test_write_numbers_format(configurable_save_file):
         table.set_cell_formatting(
             0,
             0,
-            "number",
-            negative_style=NegativeNumberStyle.MINUS,
+            "currency",
+            negative_style=NegativeNumberStyle.RED,
             currency_code="GBP",
             use_accounting_style=True,
         )
     assert len(record) == 1
-    assert "Use of use_accounting_style overrules negative_style" in str(record[0])
+    assert str(record[0].message) == "use_accounting_style overriding negative_style"
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(0, 0, "currency", currency_code="XYZ")
     assert "Unsupported currency code 'XYZ'" in str(e)
@@ -489,7 +499,7 @@ def test_write_numbers_format(configurable_save_file):
     table.set_cell_formatting(
         11,
         4,
-        -ref_number,
+        "currency",
         decimal_places=2,
         show_thousands_separator=False,
         currency_code="GBP",
@@ -516,7 +526,7 @@ def test_write_numbers_format(configurable_save_file):
         use_accounting_style=True,
     )
     table.write(11, 7, -ref_number)
-    table.write(
+    table.set_cell_formatting(
         11,
         7,
         "currency",
@@ -563,7 +573,6 @@ def test_write_mixed_number_formats(configurable_save_file):
                         col_num,
                         "percentage",
                         decimal_places=decimal_places,
-                        percentage=True,
                         negative_style=negative_style,
                         show_thousands_separator=show_thousands_separator,
                     )
@@ -609,5 +618,8 @@ def test_write_mixed_number_formats(configurable_save_file):
 def test_currency_updates():
     doc = Document()
     table = doc.sheets[0].tables[0]
-    table.write(0, 0, -12.50, formatting={"currency_code": "EUR", "use_accounting_style": True})
+    table.write(0, 0, -12.50)
+    table.set_cell_formatting(
+        0, 0, "currency", currency_code="EUR", use_accounting_style=True, decimal_places=1
+    )
     assert table.cell(0, 0).formatted_value == "€\t(12.5)"
