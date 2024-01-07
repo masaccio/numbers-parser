@@ -546,6 +546,7 @@ def test_write_numbers_format(configurable_save_file):
             check.equal(table.cell(row_num + 10, col_num).formatted_value, ref_value)
 
 
+@pytest.mark.experimental
 def test_write_mixed_number_formats(configurable_save_file):
     doc = Document(
         num_header_cols=0, num_header_rows=0, num_cols=len(TIME_FORMATS), num_rows=len(DATE_FORMATS)
