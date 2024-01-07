@@ -891,7 +891,5 @@ class Formatting:
         if self.decimal_places is None:
             if self.type == FormattingType.CURRENCY:
                 self.decimal_places = 2
-            elif self.type == FormattingType.BASE:
-                self.decimal_places = 0
             else:
                 self.decimal_places = DECIMAL_PLACES_AUTO
