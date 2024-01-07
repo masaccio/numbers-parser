@@ -578,17 +578,17 @@ class Table(Cacheable):
 
         try:
             format_type = FormattingType[format_type.upper()]
-        except KeyError:
+        except (KeyError, AttributeError):
             raise TypeError(f"unsuported cell format type '{format_type}'") from None
 
         cell = self._data[row_num][col_num]
         if format_type == FormattingType.DATETIME and not isinstance(cell, DateCell):
             type_name = type(cell).__name__
             raise TypeError(f"cannot use date/time formatting for cells of type {type_name}")
-        elif not isinstance(cell, NumberCell):
+        elif not isinstance(cell, NumberCell) and not isinstance(cell, DateCell):
             type_name = type(cell).__name__
             raise TypeError(f"cannot set formatting for cells of type {type_name}")
 
         format = Formatting(type=format_type, **kwargs)
-        format._format_id = self._model.format_archive(self._table_id, format_type, format)
-        return format
+        format_id = self._model.format_archive(self._table_id, format_type, format)
+        cell._set_formatting(format_id)
