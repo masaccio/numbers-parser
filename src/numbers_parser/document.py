@@ -4,8 +4,10 @@ from warnings import warn
 from numbers_parser.cell import (
     Border,
     Cell,
+    DateCell,
     Formatting,
     MergedCell,
+    NumberCell,
     Style,
     xl_cell_to_rowcol,
 )
@@ -17,6 +19,7 @@ from numbers_parser.constants import (
     MAX_COL_COUNT,
     MAX_HEADER_COUNT,
     MAX_ROW_COUNT,
+    FormattingType,
 )
 from numbers_parser.containers import ItemsList
 from numbers_parser.file import write_numbers_file
@@ -475,13 +478,6 @@ class Table(Cacheable):
         else:
             raise TypeError("style must be a Style object or style name")
 
-    def set_cell_formatting(self, *args):
-        (row_num, col_num, formatting) = self._validate_cell_coords(*args)
-        if not isinstance(formatting, dict):
-            raise TypeError("formatting values must be a dict")
-
-        self._data[row_num][col_num].set_formatting(formatting)
-
     def add_row(self, num_rows=1):
         row = [
             Cell.empty_cell(self._table_id, self.num_rows - 1, col_num, self._model)
@@ -572,12 +568,27 @@ class Table(Cacheable):
 
         self._model.add_stroke(self._table_id, row_num, col_num, side, border_value, length)
 
-    def add_formatting(self, **kwargs) -> Formatting:
-        """Add a new format to the current document. Duplicate formats are re-used."""
+    def set_cell_formatting(self, *args: str, **kwargs) -> Formatting:
+        """Set the formatting for a cell."""
+        (row_num, col_num, *args) = self._validate_cell_coords(*args)
+        if len(args) == 1:
+            format_type = args[0]
+        else:
+            raise TypeError("no type defined for cell format")
+
         try:
-            format_type = kwargs.pop("type")
+            format_type = FormattingType[format_type.upper()]
         except KeyError:
-            raise TypeError("No type defined for cell format") from None
-        format = Formatting(format_type, **kwargs)
+            raise TypeError(f"unsuported cell format type '{format_type}'") from None
+
+        cell = self._data[row_num][col_num]
+        if format_type == FormattingType.DATETIME and not isinstance(cell, DateCell):
+            type_name = type(cell).__name__
+            raise TypeError(f"cannot use date/time formatting for cells of type {type_name}")
+        elif not isinstance(cell, NumberCell):
+            type_name = type(cell).__name__
+            raise TypeError(f"cannot set formatting for cells of type {type_name}")
+
+        format = Formatting(type=format_type, **kwargs)
         format._format_id = self._model.format_archive(self._table_id, format_type, format)
         return format
