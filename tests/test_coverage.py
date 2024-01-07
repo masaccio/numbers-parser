@@ -210,12 +210,25 @@ def test_bad_image_filenames():
 def test_set_number_defaults():
     doc = Document()
     table = doc.sheets[0].tables[0]
-    table.write(0, 0, 0.0, formatting={})
+    table.write(0, 0, 0.0)
+    table.set_cell_formatting(0, 0, "number")
     num_format_id = table.cell(0, 0)._storage.num_format_id
     format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
     assert not format.show_thousands_separator
     assert format.negative_style == NegativeNumberStyle.MINUS
     assert format.decimal_places == DECIMAL_PLACES_AUTO
+
+    table.set_cell_formatting(0, 0, "base")
+    num_format_id = table.cell(0, 0)._storage.num_format_id
+    format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
+    assert not format.show_thousands_separator
+    assert format.decimal_places == 0
+
+    table.set_cell_formatting(0, 0, "currency")
+    num_format_id = table.cell(0, 0)._storage.num_format_id
+    format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
+    assert not format.show_thousands_separator
+    assert format.decimal_places == 2
 
 
 def test_formatting_empty_cell():

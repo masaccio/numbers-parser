@@ -314,7 +314,7 @@ The positional parameter after the cell reference is the type of data format to 
         <tr>
             <td><code>decimal_places</code></td>
             <td>The number of decimal places, or <code>None</code> for automatic</td>
-            <td><code>0</code></td>
+            <td><code>2</code></td>
         </tr>
         <tr>
             <td><code>negative_style</code></td>
@@ -347,7 +347,7 @@ The positional parameter after the cell reference is the type of data format to 
             <td rowspan=3><code>percentage</code></td>
             <td><code>decimal_places</code></td>
             <td>The number of decimal places, or <code>None</code> for automatic</td>
-            <td><code>0</code></td>
+            <td><code>Auto</code></td>
         </tr>
         <tr>
             <td><code>negative_style</code></td>
@@ -363,7 +363,7 @@ The positional parameter after the cell reference is the type of data format to 
             <td rowspan=3><code>number</code></td>
             <td><code>decimal_places</code></td>
             <td>The number of decimal places, or <code>None</code> for automatic</td>
-            <td><code>0</code><td>
+            <td><code>Auto</code><td>
         </tr>
         <tr>
             <td><code>negative_style</code></td>
@@ -379,7 +379,7 @@ The positional parameter after the cell reference is the type of data format to 
             <td><code>scientific</code></td>
             <td><code>decimal_places</code></td>
             <td>The number of decimal places, or <code>None</code> for automatic</td>
-            <td><code>0</code><td>
+            <td><code>Auto</code><td>
         </tr>
     </tbody>
 </table>

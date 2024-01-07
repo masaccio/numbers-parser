@@ -14,6 +14,7 @@ from pendulum import instance as pendulum_instance
 from numbers_parser.cell_storage import CellStorage, CellType
 from numbers_parser.constants import (
     DATETIME_FIELD_MAP,
+    DECIMAL_PLACES_AUTO,
     DEFAULT_ALIGNMENT,
     DEFAULT_BORDER_COLOR,
     DEFAULT_BORDER_STYLE,
@@ -858,7 +859,7 @@ class Formatting:
     base: int = 10
     currency_code: str = "GBP"
     date_time_format: str = DEFAULT_DATETIME_FORMAT
-    decimal_places: int = 0
+    decimal_places: int = None
     fraction_accuracy: FractionAccuracy = FractionAccuracy.THREE
     negative_style: NegativeNumberStyle = NegativeNumberStyle.MINUS
     show_thousands_separator: bool = False
@@ -886,3 +887,11 @@ class Formatting:
         if self.type == FormattingType.CURRENCY:
             if self.currency_code not in CURRENCIES:
                 raise TypeError(f"Unsupported currency code '{self.currency_code}'")
+
+        if self.decimal_places is None:
+            if self.type == FormattingType.CURRENCY:
+                self.decimal_places = 2
+            elif self.type == FormattingType.BASE:
+                self.decimal_places = 0
+            else:
+                self.decimal_places = DECIMAL_PLACES_AUTO
