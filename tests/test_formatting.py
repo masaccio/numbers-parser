@@ -576,6 +576,8 @@ def test_write_mixed_number_formats(configurable_save_file):
                         negative_style=negative_style,
                         show_thousands_separator=show_thousands_separator,
                     )
+                    col_num += 1
+            row_num += 1
 
     for base in [10, 2, 8, 16]:
         col_num = 0
@@ -594,16 +596,18 @@ def test_write_mixed_number_formats(configurable_save_file):
                 col_num += 1
         row_num += 1
 
-    ref_value = "445/553"
+    ref_value = 445 / 553
     for col_num, fraction_accuracy in enumerate(FractionAccuracy):
-        table.write(0, col_num, ref_value)
-        table.set_cell_formatting(0, col_num, "fraction", fraction_accuracy=fraction_accuracy)
+        table.write(row_num, col_num, ref_value)
+        table.set_cell_formatting(row_num, col_num, "fraction", fraction_accuracy=fraction_accuracy)
+
+    row_num += 1
 
     col_num = 0
     for value in [100, 1000, 10000, 100000, 1000000]:
         for decimal_places in [0, 4]:
-            table.write(0, col_num, value)
-            table.set_cell_formatting(0, col_num, "scientific", decimal_places=decimal_places)
+            table.write(row_num, col_num, value)
+            table.set_cell_formatting(row_num, col_num, "scientific", decimal_places=decimal_places)
             col_num += 1
 
     doc.save(configurable_save_file)
