@@ -212,3 +212,13 @@ ALLOWED_FORMATTING_PARAMETERS = {
     FormattingType.PERCENTAGE: ["decimal_places", "show_thousands_separator", "negative_style"],
     FormattingType.SCIENTIFIC: ["decimal_places"],
 }
+
+FORMAT_TYPE_MAP = {
+    FormattingType.BASE: FormatType.BASE,
+    FormattingType.CURRENCY: FormatType.CURRENCY,
+    FormattingType.DATETIME: FormatType.DATE,
+    FormattingType.FRACTION: FormatType.FRACTION,
+    FormattingType.NUMBER: FormatType.DECIMAL,
+    FormattingType.PERCENTAGE: FormatType.PERCENT,
+    FormattingType.SCIENTIFIC: FormatType.SCIENTIFIC,
+}
