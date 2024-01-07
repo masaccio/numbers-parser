@@ -257,59 +257,129 @@ Due to a limitation in Python's [ZipFile](https://docs.python.org/3/library/zipf
 
 ### Formatting
 
-In addition to rendering values as they are displayed in Numbers using the cell property `formatted_value`, `numbers-parser` has limited support for setting cell formats when saving files.
+Numbers has two different cell formatting types: data formats and custom formats.
 
-Formats are provided to the `Table.write` method:
+Data formats are presented in Numbers in the Cell tab of the Format pane and are applied to individual cells. Like Numbers, `numbers-parsers` caches formatting information that is identical across multiple cells. Users of the `numbers-parsers` do not need to take any action for this to happen; this is handled internally by the package. Changing a data format for cell has no impact on any other cells.
+
+Custom formats are shared across a Document and can be applied to multiple cells in multiple tables. Editing a custom format changes the appearance of data in all cells that share that format.
+
+The data representation of all cells is read uding the `formatted_value` property of the `Cell` object. This property returns a `str` value identical to that displayed visually by Numbers.
+
+A limited number of currencies are formatted using symbolic notation rather than an ISO code. These are defined in `numbers_parser.currencies` and match the ones chosen by Numbers. For example, US dollars are referred to as `US$` whereas Euros and British Pounds are referred to using their symbols of `€` and `£` respectively.
+
+#### Writing Data Formats
+
+The `Table` method `set_cell_formatting()` sets the formatting for a single cell:
 
 ``` python
-date = datetime(2023, 4, 1, 13, 25, 42)
-table.write(0, 0, date, formatting={"date_time_format": "EEEE, d MMMM yyyy"})
-table.write(0, 1, 1234.560, formatting={"decimal_places": 3})
+table.set_cell_formatting("C1", "date", date_time_format="EEEE, d MMMM yyyy")
+table.set_cell_formatting(0, 4, "number", decimal_places=3, negative_style=NegativeNumberStyle.RED)
 ```
 
-The following cell types are supported along with the associated formatting parameters:
+The positional parameter after the cell reference is the type of data format to apply to the cell. Applying an incompatble data format to a cell, for example a date format to a `TextCell` or a `NumberCell` raises `TypeError` exception. Each data format has its own set of key-value pairs to configure the available parameters:
 
 <!-- markdownlint-disable MD033 -->
 <table>
     <thead>
         <tr>
-            <th>Cell Type</th>
-            <th><code>formatting</code> parameter</th>
+            <th>Data Format</th>
+            <th>Parameter</th>
             <th>Description</th>
+            <th>Default</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td><code>DateCell</code></td>
-            <td><code>date_time_format</code>
-            <td>A POSIX <code>strftime</code>-like formatting string. See <a href="#datetime-formatting">Date/time formatting</a> for a list of supported directives</td>
+            <td rowspan=3><code>base</code></td>
+            <td><code>base</code></td>
+            <td>The integer base to represent the number from 2-36.</td>
+            <td><code>10</code>
         </tr>
         <tr>
-            <td rowspan=5><code>NumberCell</code></td>
+            <td><code>base_use_minus_sign</code></td>
+            <td>If <code>True</code> use a standard minus sign, otherwise format as two's compliment (only possible for binary, octal and hexadecimal</td>
+            <td><code>True</code></td>
+        </tr>
+        <tr>
+            <td><code>base_places</code></td>
+            <td>The number of decimal places, or <code>None</code> for automatic</td>
+            <td><code>0</code></td>
+        </tr>
+        <tr>
+            <td rowspan=5><code>currency</code></td>
+            <td><code>currency_code</code></td>
+            <td>An ISO currency code, e.g. <code>GBP</code> or <code>USD</code></td>
+            <td><code>GBP</code> regardless of locale</td>
+        </tr>
+        <tr>
             <td><code>decimal_places</code></td>
             <td>The number of decimal places, or <code>None</code> for automatic</td>
+            <td><code>0</code></td>
         </tr>
         <tr>
-            <td><code>negative_style</code>
-            <td>How negative numbers are represented</td>
+            <td><code>negative_style</code></td>
+            <td>How negative numbers are represented defined by the <code>NegativeNumberStyle</code> enum</td>
+            <td><code>NegativeNumberStyle.MINUS</code></td>
         </tr>
         <tr>
-            <td><code>show_thousands_separator</code>
+            <td><code>show_thousands_separator</code></td>
             <td><code>True</code> if the number should include a thousands seperator, e.g. <code>,</code></td>
+            <td><code>False</code></td>
         </tr>
         <tr>
-            <td><code>currency_code</code>
-            <td>An ISO currency code. When present, indicates that the number is formatted as a currency in Numbers rather than a plain decimal number.</td>
-        </tr>
-        <tr>
-            <td><code>use_accounting_style</code>
+            <td><code>use_accounting_style</code></td>
             <td><code>True</code> if the currency symbol should be formatted to the left of the cell and separated from the number value by a tab. A <code>RuntimeWarning</code> is generated if this is combined with <code>negative_style</code>.</td>
+            <td><code>False</code></td>
+        </tr>
+        <tr>
+            <td><code>datetime</code></td>
+            <td><code>date_time_format</code></td>
+            <td>A POSIX <code>strftime</code>-like formatting string. See <a href="#datetime-formatting">Date/time formatting</a> for a list of supported directives</td>
+            <td><code>dd MMM YYY HH:MM</code></td>
+        </tr>
+        <tr>
+            <td><code>fraction</code></td>
+            <td><code>fraction_accuracy</code></td>
+            <td>The precision of the faction defined by the `FractionAccuracy` enum</td>
+            <td><code>FractionAccuracy.THREE</code></td>
+        </tr>
+        <tr>
+            <td rowspan=3><code>percentage</code></td>
+            <td><code>decimal_places</code></td>
+            <td>The number of decimal places, or <code>None</code> for automatic</td>
+            <td><code>0</code></td>
+        </tr>
+        <tr>
+            <td><code>negative_style</code></td>
+            <td>How negative numbers are represented defined by the <code>NegativeNumberStyle</code> enum</td>
+            <td><code>NegativeNumberStyle.MINUS</code></td>
+        </tr>
+        <tr>
+            <td><code>show_thousands_separator</code></td>
+            <td><code>True</code> if the number should include a thousands seperator, e.g. <code>,</code></td>
+            <td><code>False</code><td>
+        </tr>
+        <tr>
+            <td rowspan=3><code>number</code></td>
+            <td><code>decimal_places</code></td>
+            <td>The number of decimal places, or <code>None</code> for automatic</td>
+            <td><code>0</code><td>
+        </tr>
+        <tr>
+            <td><code>negative_style</code></td>
+            <td>How negative numbers are represented defined by the <code>NegativeNumberStyle</code> enum</td>
+            <td><code>NegativeNumberStyle.MINUS</code></td>
+        </tr>
+        <tr>
+            <td><code>show_thousands_separator</code></td>
+            <td><code>True</code> if the number should include a thousands seperator, e.g. <code>,</code></td>
+            <td><code>False</code><td>
         </tr>
     </tbody>
 </table>
 <!-- markdownlint-enable MD033 -->
 
-#### Date/time formatting
+##### Date/time formatting
 
 `date_time_format` uses Numbers notation for date and time formatting rather than POSIX `strftime` as there are a number of extensions. Date components are specified using directives which must be separated by whitespace. Supported directives are:
 
@@ -352,11 +422,9 @@ The following cell types are supported along with the associated formatting para
 | SSSS      | Seconds to four decimal places                                | 0000 - 9999            |
 | SSSSS     | Seconds to five decimal places                                | 00000 - 9999           |
 
-#### Number formatting
+##### Negative number formatting
 
-All `formatting` parameters for `NumberCell` cells are optional and formatting defaults to automatic number of decimals, standard negative numbr notation and no thousands separator.
-
-The `negative_style` must be a valid `constants.NegativeNumberStyle` enum. Supported values are:
+Where supported by a data format, `negative_style` must be a valid `NegativeNumberStyle` enum. Supported values are:
 
 <!-- markdownlint-disable MD033 -->
 | Value                 | Examples                                  |
@@ -367,16 +435,25 @@ The `negative_style` must be a valid `constants.NegativeNumberStyle` enum. Suppo
 | `RED_AND_PARENTHESES` | <span style="color:red">(1234.560)</span> |
 <!-- markdownlint-enable MD033 -->
 
-#### Currency formatting
+#### Writing Custom Formats
 
-Currencies are formatted with the same parameters as numbers, but additional include a currency in `currency_code`. The following example returns `€\t(12.5)`
+Custom formats are shared across a Document and can be applied to multiple cells in multiple tables. Editing a custom format changes the appearance of data in all cells that share that format.
 
-``` python
-table.write(0, 0, -12.50, formatting={"currency_code": "EUR", "use_accounting_style": True})
-print(table.cell(0, 0).formatted_value)
-```
+The data representation of all cells is read uding the `formatted_value` property of the `Cell` object. This property returns a `str` value identical to that displayed visually by Numbers.
 
 A limited number of currencies are formatted using symbolic notation rather than an ISO code. These are defined in `numbers_parser.currencies` and match the ones chosen by Numbers. For example, US dollars are referred to as `US$` whereas Euros and British Pounds are referred to using their symbols of `€` and `£` respectively.
+
+#### Writing Custom Data Formats
+
+Creating custom data formats will be supported in a future version of `numbers-parser`.
+<!--
+The `Document` method `add_custom_format()` creates a custom format and returns a `CustomFormatting` object. Custom formatting is applies to cells using the `Table` method `set_cell_formatting` in a similar way to data formats:
+
+``` python
+long_date = doc.add_custom_format(name="Long Date", type="date", date_time_format="EEEE, d MMMM yyyy")
+table.set_cell_formatting("C1", "custom", format=long_date)
+```
+-->
 
 ### Borders
 
