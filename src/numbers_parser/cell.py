@@ -25,6 +25,7 @@ from numbers_parser.constants import (
     DEFAULT_TEXT_INSET,
     DEFAULT_TEXT_WRAP,
     EMPTY_STORAGE_BUFFER,
+    MAX_BASE,
     MAX_SIGNIFICANT_DIGITS,
     FormattingType,
     FractionAccuracy,
@@ -900,3 +901,6 @@ class Formatting:
             and self.base not in (2, 8, 16)
         ):
             raise TypeError(f"base_use_minus_sign must be True for base {self.base}")
+
+        if self.type == FormattingType.BASE and (self.base < 2 or self.base > MAX_BASE):
+            raise TypeError("base must be in range 2-36")
