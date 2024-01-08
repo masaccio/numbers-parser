@@ -292,7 +292,7 @@ class CellStorage(Cacheable):
         else:
             return (self.model.objects.file_store[image_pathnames[0]], preferred_filename)
 
-    def custom_format(self) -> str:
+    def custom_format(self) -> str:  # noqa: PLR0911
         if self.text_format_id is not None and self.type == CellType.TEXT:
             format = self.model.table_format(self.table_id, self.text_format_id)
         elif self.currency_format_id is not None:
@@ -303,17 +303,13 @@ class CellStorage(Cacheable):
             format = self.model.table_format(self.table_id, self.bool_format_id)
         else:
             return str(self.value)
+
         if format.HasField("custom_uid"):
             format_uuid = NumbersUUID(format.custom_uid).hex
             format_map = self.model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
             if custom_format.requires_fraction_replacement:
-                accuracy = custom_format.fraction_accuracy
-                if accuracy & 0xFF000000:
-                    num_digits = 0x100000000 - accuracy
-                    formatted_value = float_to_n_digit_fraction(self.d128, num_digits)
-                else:
-                    formatted_value = float_to_fraction(self.d128, accuracy)
+                formatted_value = format_fraction(self.d128, custom_format)
             elif custom_format.format_type == FormatType.CUSTOM_TEXT:
                 formatted_value = decode_text_format(
                     custom_format,
@@ -329,6 +325,12 @@ class CellStorage(Cacheable):
             return format_currency(self.d128, format)
         elif format.format_type == FormatType.BOOLEAN:
             return "TRUE" if self.value else "FALSE"
+        elif format.format_type == FormatType.PERCENT:
+            return format_decimal(self.d128 * 100, format, percent=True)
+        elif format.format_type == FormatType.BASE:
+            return format_base(self.d128, format)
+        elif format.format_type == FormatType.FRACTION:
+            return format_fraction(self.d128, format)
         else:
             formatted_value = str(self.value)
         return formatted_value
@@ -678,7 +680,7 @@ def decode_number_format(format, value, name):  # noqa: PLR0912
     return expand_quotes(formatted_value)
 
 
-def format_decimal(value: float, format) -> str:
+def format_decimal(value: float, format, percent: bool = False) -> str:
     if value is None:
         return ""
     if value < 0 and format.negative_style == 1:
@@ -709,6 +711,9 @@ def format_decimal(value: float, format) -> str:
             except ValueError:
                 pass
 
+    if percent:
+        formatted_value += "%"
+
     if accounting_style:
         return f"({formatted_value})"
     else:
@@ -727,6 +732,28 @@ def format_currency(value: float, format) -> str:
         return f"{symbol}\t{formatted_value}"
     else:
         return symbol + formatted_value
+
+
+def format_base(value: float, format) -> str:
+    if value == 0:
+        return "0".zfill(format.base_places)
+
+    is_negative = False
+    if value < 0 and not format.base_use_minus_sign and format.base in [2, 8, 16]:
+        return str(value)
+    elif value < 0:
+        is_negative = True
+        value = abs(value)
+
+    formatted_value = []
+    while value:
+        formatted_value.append(int(value % format.base))
+        value //= format.base
+    formatted_value = "".join([str(x) for x in formatted_value[::-1]])
+    if format.base_use_minus_sign and is_negative:
+        return "-" + formatted_value.zfill(format.base_places)
+    else:
+        return formatted_value.zfill(format.base_places)
 
 
 def float_to_fraction(value: float, denominator: int) -> str:
@@ -759,6 +786,15 @@ def float_to_n_digit_fraction(value: float, max_digits: int) -> str:
     else:
         formatted_value = f"{whole} {numerator}/{denominator}"
     return formatted_value
+
+
+def format_fraction(value: float, format) -> str:
+    accuracy = format.fraction_accuracy
+    if accuracy & 0xFF000000:
+        num_digits = 0x100000000 - accuracy
+        return float_to_n_digit_fraction(value, num_digits)
+    else:
+        return float_to_fraction(value, accuracy)
 
 
 def unit_format(unit: str, value: int, style: int, abbrev: str = None):
