@@ -734,13 +734,29 @@ def format_currency(value: float, format) -> str:
         return symbol + formatted_value
 
 
+INT_TO_BASE_CHAR = [str(x) for x in range(0, 10)] + [chr(x) for x in range(ord("A"), ord("Z") + 1)]
+
+
 def format_base(value: float, format) -> str:
     if value == 0:
         return "0".zfill(format.base_places)
 
+    value = round(value)
+
     is_negative = False
-    if value < 0 and not format.base_use_minus_sign and format.base in [2, 8, 16]:
-        return str(value)
+    if not format.base_use_minus_sign and format.base in [2, 8, 16]:
+        if value < 0:
+            # Two's complement
+            num_bits = min([32, len(bin(value)[2:])])
+            value = (1 << num_bits) + value
+            if format.base == 2:
+                return bin(value)[2:]
+            elif format.base == 8:
+                return oct(value)[2:]
+            else:
+                return hex(value)[2:]
+        else:
+            value = abs(value)
     elif value < 0:
         is_negative = True
         value = abs(value)
@@ -749,24 +765,32 @@ def format_base(value: float, format) -> str:
     while value:
         formatted_value.append(int(value % format.base))
         value //= format.base
-    formatted_value = "".join([str(x) for x in formatted_value[::-1]])
-    if format.base_use_minus_sign and is_negative:
+    formatted_value = "".join([INT_TO_BASE_CHAR[x] for x in formatted_value[::-1]])
+
+    if is_negative:
         return "-" + formatted_value.zfill(format.base_places)
     else:
         return formatted_value.zfill(format.base_places)
+
+
+def format_fraction_parts_to(whole: int, numerator: int, denominator: int):
+    if numerator == 0:
+        return "0"
+    if whole > 0:
+        if numerator == denominator:
+            return str(whole + 1)
+        else:
+            return f"{whole} {numerator}/{denominator}"
+    elif numerator == denominator:
+        return "1"
+    return f"{numerator}/{denominator}"
 
 
 def float_to_fraction(value: float, denominator: int) -> str:
     """Convert a float to the nearest fraction and return as a string."""
     whole = int(value)
     numerator = round(denominator * (value - whole))
-    if numerator == 0:
-        formatted_value = "0"
-    elif whole > 0:
-        formatted_value = f"{whole} {numerator}/{denominator}"
-    else:
-        formatted_value = f"{numerator}/{denominator}"
-    return formatted_value
+    return format_fraction_parts_to(whole, numerator, denominator)
 
 
 def float_to_n_digit_fraction(value: float, max_digits: int) -> str:
@@ -779,13 +803,7 @@ def float_to_n_digit_fraction(value: float, max_digits: int) -> str:
     )
     whole = int(value)
     numerator -= whole * denominator
-    if numerator == 0:
-        formatted_value = "0"
-    elif whole == 0:
-        formatted_value = f"{numerator}/{denominator}"
-    else:
-        formatted_value = f"{whole} {numerator}/{denominator}"
-    return formatted_value
+    return format_fraction_parts_to(whole, numerator, denominator)
 
 
 def format_fraction(value: float, format) -> str:
