@@ -270,18 +270,45 @@ OTHER_FORMAT_REF = [
         "1,234.5600%",
         "(1,234.5600%)",
     ],
-    ["1234", "00001234", "-1234", "00001234"],
+    ["0", "00000000", "1234", "00001234", "-1234", "-00001234"],
     [
+        "0",
+        "00000000",
         "10011010010",
-        "-10011010010",
-        "11111111111111111111101100101110",
         "10011010010",
-        "-10011010010",
         "11111111111111111111101100101110",
+        "11111111111111111111101100101110",
+        "10000011111111111111111111111110000000",
+        "10000011111111111111111111111110000000",
+        "01111100000000000000000000000001111111",
+        "01111100000000000000000000000001111111",
     ],
-    ["2322", "00002322", "-2322", "-00002322", "37777775456", "37777775456"],
-    ["0x4D2", "0x000004D2", "-0x4D2", "-0x000004D2", "-0x4D2", "-0x000004D2"],
-    ["4/5", "70/87", "445/553", "1", "3/4", "6/8", "13/16", "8/10", "80/100"],
+    [
+        "0",
+        "00000000",
+        "2322",
+        "00002322",
+        "37777775456",
+        "37777775456",
+        "2037777777600",
+        "2037777777600",
+        "01740000000177",
+        "01740000000177",
+    ],
+    [
+        "0",
+        "00000000",
+        "4D2",
+        "000004D2",
+        "FFFFFB2E",
+        "FFFFFB2E",
+        "20FFFFFF80",
+        "20FFFFFF80",
+        "01F0000007F",
+        "010000007F",
+    ],
+    ["0", "00000000", "YA", "000000YA", "-YA", "-000000YA"],
+    ["445/553", "70/87", "4/5", "1", "3/4", "6/8", "13/16", "8/10", "80/100"],
     [
         "1E+02",
         "1.0000E+02",
@@ -580,14 +607,21 @@ def test_write_mixed_number_formats(configurable_save_file):
         table.set_cell_formatting(row_num, 0, "base", base=10, base_use_minus_sign=False)
     assert "base_use_minus_sign must be True for base 10" in str(e)
 
-    for base in [10, 2, 8, 16]:
+    for base in [10, 2, 8, 16, 36]:
         col_num = 0
-        values = [1234, -1234, -1234]
-        for value_num, base_use_minus_sign in enumerate([True, True, False]):
+        values = {
+            0: True,
+            1234: True,
+            -1234: True,
+            -1234: False,  # False formats as two's complement
+            -(0x1F0000007F + 0.6): False,
+            (0x1F0000007F + 0.1): False,
+        }
+        for value, base_use_minus_sign in zip(values.keys(), values.values()):
             for base_places in [0, 8]:
-                if base == 10 and not base_use_minus_sign:
+                if base not in [2, 8, 16] and not base_use_minus_sign:
                     continue
-                table.write(row_num, col_num, values[value_num])
+                table.write(row_num, col_num, value)
                 table.set_cell_formatting(
                     row_num,
                     col_num,
@@ -619,7 +653,8 @@ def test_write_mixed_number_formats(configurable_save_file):
     table = doc.sheets[0].tables[0]
     for row_num, row in enumerate(OTHER_FORMAT_REF):
         for col_num, ref_value in enumerate(row):
-            check.equal(table.cell(row_num, col_num).formatted_value, ref_value)
+            value = table.cell(row_num, col_num).formatted_value
+            check.equal(f"[{row_num},{col_num}]:{value}", f"[{row_num},{col_num}]:{ref_value})
 
 
 def test_currency_updates():
