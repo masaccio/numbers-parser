@@ -331,6 +331,8 @@ class CellStorage(Cacheable):
             return format_base(self.d128, format)
         elif format.format_type == FormatType.FRACTION:
             return format_fraction(self.d128, format)
+        elif format.format_type == FormatType.SCIENTIFIC:
+            return format_scientific(self.d128, format)
         else:
             formatted_value = str(self.value)
         return formatted_value
@@ -747,10 +749,14 @@ def format_base(value: float, format) -> str:
     if not format.base_use_minus_sign and format.base in [2, 8, 16]:
         if value < 0:
             # Two's complement
-            num_bits = min([32, len(bin(value)[2:])])
-            value = (1 << num_bits) + value
+            # num_bits = max([32, len(bin(value)[2:]) + 1])
+            bin_inverted = (
+                bin(abs(value))[2:].replace("1", "X").replace("0", "1").replace("X", "0")[2:]
+            )
+            value = int("1" + bin_inverted, 2) + 1
             if format.base == 2:
-                return bin(value)[2:]
+                num_bits = max([32, len(bin(value))])
+                return bin(value)[2:].rjust(num_bits, "1")
             elif format.base == 8:
                 return oct(value)[2:]
             else:
@@ -813,6 +819,11 @@ def format_fraction(value: float, format) -> str:
         return float_to_n_digit_fraction(value, num_digits)
     else:
         return float_to_fraction(value, accuracy)
+
+
+def format_scientific(value: float, format) -> str:
+    formatted_value = sigfig.round(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
+    return f"{formatted_value:.{format.decimal_places}E}"
 
 
 def unit_format(unit: str, value: int, style: int, abbrev: str = None):
