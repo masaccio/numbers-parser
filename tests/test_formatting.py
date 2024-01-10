@@ -270,7 +270,7 @@ OTHER_FORMAT_REF = [
         "1,234.5600%",
         "(1,234.5600%)",
     ],
-    ["0", "00000000", "1234", "00001234", "-1234", "-00001234"],
+    ["0", "00000000", "1234", "00001234"],
     [
         "0",
         "00000000",
@@ -278,10 +278,10 @@ OTHER_FORMAT_REF = [
         "10011010010",
         "11111111111111111111101100101110",
         "11111111111111111111101100101110",
-        "10000011111111111111111111111110000000",
-        "10000011111111111111111111111110000000",
-        "01111100000000000000000000000001111111",
-        "01111100000000000000000000000001111111",
+        "10000011111111111111111111111110000001",
+        "10000011111111111111111111111110000001",
+        "10000000000000000000000000000000000000000001",
+        "10000000000000000000000000000000000000000001",
     ],
     [
         "0",
@@ -290,10 +290,10 @@ OTHER_FORMAT_REF = [
         "00002322",
         "37777775456",
         "37777775456",
-        "2037777777600",
-        "2037777777600",
-        "01740000000177",
-        "01740000000177",
+        "2037777777601",
+        "2037777777601",
+        "200000000000001",
+        "200000000000001",
     ],
     [
         "0",
@@ -302,12 +302,12 @@ OTHER_FORMAT_REF = [
         "000004D2",
         "FFFFFB2E",
         "FFFFFB2E",
-        "20FFFFFF80",
-        "20FFFFFF80",
-        "01F0000007F",
-        "010000007F",
+        "20FFFFFF81",
+        "20FFFFFF81",
+        "80000000001",
+        "80000000001",
     ],
-    ["0", "00000000", "YA", "000000YA", "-YA", "-000000YA"],
+    ["0", "00000000", "YA", "000000YA"],
     ["445/553", "70/87", "4/5", "1", "3/4", "6/8", "13/16", "8/10", "80/100"],
     [
         "1E+02",
@@ -573,7 +573,6 @@ def test_write_numbers_format(configurable_save_file):
             check.equal(table.cell(row_num + 10, col_num).formatted_value, ref_value)
 
 
-@pytest.mark.experimental
 def test_write_mixed_number_formats(configurable_save_file):
     doc = Document(
         num_header_cols=0, num_header_rows=0, num_cols=len(TIME_FORMATS), num_rows=len(DATE_FORMATS)
@@ -614,8 +613,8 @@ def test_write_mixed_number_formats(configurable_save_file):
             1234: True,
             -1234: True,
             -1234: False,  # False formats as two's complement
-            -(0x1F0000007F + 0.6): False,
-            (0x1F0000007F + 0.1): False,
+            -(0x1F0000007F): False,
+            (-0x7FFFFFFFFFF): False,
         }
         for value, base_use_minus_sign in zip(values.keys(), values.values()):
             for base_places in [0, 8]:
@@ -654,7 +653,7 @@ def test_write_mixed_number_formats(configurable_save_file):
     for row_num, row in enumerate(OTHER_FORMAT_REF):
         for col_num, ref_value in enumerate(row):
             value = table.cell(row_num, col_num).formatted_value
-            check.equal(f"[{row_num},{col_num}]:{value}", f"[{row_num},{col_num}]:{ref_value})
+            check.equal(f"[{row_num},{col_num}]:{value}", f"[{row_num},{col_num}]:{ref_value}")
 
 
 def test_currency_updates():

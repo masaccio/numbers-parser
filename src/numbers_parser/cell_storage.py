@@ -739,6 +739,30 @@ def format_currency(value: float, format) -> str:
 INT_TO_BASE_CHAR = [str(x) for x in range(0, 10)] + [chr(x) for x in range(ord("A"), ord("Z") + 1)]
 
 
+def invert_bit_str(value: str) -> str:
+    """Invert a binary value"""
+    return "".join(["0" if b == "1" else "1" for b in value])
+
+
+def twos_complement(value: int, base: int) -> str:
+    """Calculate the twos complement of an integer with minimum 32-bit precision"""
+    if value < 0:
+        num_bits = max([32, math.ceil(math.log2(abs(value))) + 1])
+        bin_value = bin(abs(value))[2:]
+        inverted_bin_value = invert_bit_str(bin_value).rjust(num_bits, "1")
+        twos_complement_dec = int(inverted_bin_value, 2) + 1
+    else:
+        num_bits = 0
+        twos_complement_dec = value
+
+    if base == 2:
+        return bin(twos_complement_dec)[2:].rjust(num_bits, "1")
+    elif base == 8:
+        return oct(twos_complement_dec)[2:]
+    else:
+        return hex(twos_complement_dec)[2:].upper()
+
+
 def format_base(value: float, format) -> str:
     if value == 0:
         return "0".zfill(format.base_places)
@@ -748,19 +772,7 @@ def format_base(value: float, format) -> str:
     is_negative = False
     if not format.base_use_minus_sign and format.base in [2, 8, 16]:
         if value < 0:
-            # Two's complement
-            # num_bits = max([32, len(bin(value)[2:]) + 1])
-            bin_inverted = (
-                bin(abs(value))[2:].replace("1", "X").replace("0", "1").replace("X", "0")[2:]
-            )
-            value = int("1" + bin_inverted, 2) + 1
-            if format.base == 2:
-                num_bits = max([32, len(bin(value))])
-                return bin(value)[2:].rjust(num_bits, "1")
-            elif format.base == 8:
-                return oct(value)[2:]
-            else:
-                return hex(value)[2:]
+            return twos_complement(value, format.base)
         else:
             value = abs(value)
     elif value < 0:
