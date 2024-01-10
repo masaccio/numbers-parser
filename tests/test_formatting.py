@@ -579,6 +579,14 @@ def test_write_mixed_number_formats(configurable_save_file):
     )
     table = doc.sheets[0].tables[0]
 
+    table.write(0, 0, 0.0)
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting(0, 0, "base", base=1)
+    assert "base must be in range 2-36" in str(e)
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting(0, 0, "base", base=37)
+    assert "base must be in range 2-36" in str(e)
+
     row_num = 0
     for decimal_places in [None, 0, 1, 4]:
         for show_thousands_separator in [False, True]:
@@ -634,7 +642,9 @@ def test_write_mixed_number_formats(configurable_save_file):
 
     ref_value = 445 / 553
     for col_num, fraction_accuracy in enumerate(FractionAccuracy):
-        table.write(row_num, col_num, ref_value)
+        with pytest.warns(RuntimeWarning):
+            # Ignore warning about rounding the fraction
+            table.write(row_num, col_num, ref_value)
         table.set_cell_formatting(row_num, col_num, "fraction", fraction_accuracy=fraction_accuracy)
 
     row_num += 1

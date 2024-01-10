@@ -745,15 +745,11 @@ def invert_bit_str(value: str) -> str:
 
 
 def twos_complement(value: int, base: int) -> str:
-    """Calculate the twos complement of an integer with minimum 32-bit precision"""
-    if value < 0:
-        num_bits = max([32, math.ceil(math.log2(abs(value))) + 1])
-        bin_value = bin(abs(value))[2:]
-        inverted_bin_value = invert_bit_str(bin_value).rjust(num_bits, "1")
-        twos_complement_dec = int(inverted_bin_value, 2) + 1
-    else:
-        num_bits = 0
-        twos_complement_dec = value
+    """Calculate the twos complement of a negative integer with minimum 32-bit precision"""
+    num_bits = max([32, math.ceil(math.log2(abs(value))) + 1])
+    bin_value = bin(abs(value))[2:]
+    inverted_bin_value = invert_bit_str(bin_value).rjust(num_bits, "1")
+    twos_complement_dec = int(inverted_bin_value, 2) + 1
 
     if base == 2:
         return bin(twos_complement_dec)[2:].rjust(num_bits, "1")
