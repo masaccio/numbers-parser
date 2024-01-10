@@ -257,8 +257,6 @@ Due to a limitation in Python's [ZipFile](https://docs.python.org/3/library/zipf
 
 ### Formatting
 
-**WARNING: Support for data formats is under development. Check PyPI for the most recent supported version. The API changes here will be published in a future version of `numbers-parser`.**
-
 Numbers has two different cell formatting types: data formats and custom formats.
 
 Data formats are presented in Numbers in the Cell tab of the Format pane and are applied to individual cells. Like Numbers, `numbers-parsers` caches formatting information that is identical across multiple cells. Users of the `numbers-parsers` do not need to take any action for this to happen; this is handled internally by the package. Changing a data format for cell has no impact on any other cells.
