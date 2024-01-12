@@ -790,13 +790,13 @@ def format_base(value: float, format) -> str:
 
 
 def format_fraction_parts_to(whole: int, numerator: int, denominator: int):
-    if numerator == 0:
-        return "0"
     if whole > 0:
-        if numerator == denominator:
-            return str(whole + 1)
+        if numerator == 0:
+            return str(whole)
         else:
             return f"{whole} {numerator}/{denominator}"
+    elif numerator == 0:
+        return "0"
     elif numerator == denominator:
         return "1"
     return f"{numerator}/{denominator}"

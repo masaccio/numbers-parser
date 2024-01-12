@@ -308,7 +308,7 @@ OTHER_FORMAT_REF = [
         "80000000001",
     ],
     ["0", "00000000", "YA", "000000YA"],
-    ["445/553", "70/87", "4/5", "1", "3/4", "6/8", "13/16", "8/10", "80/100"],
+    ["445/553", "70/87", "4/5", "1", "3/4", "6/8", "13/16", "8/10", "80/100", "2"],
     [
         "1E+02",
         "1.0000E+02",
@@ -646,6 +646,11 @@ def test_write_mixed_number_formats(configurable_save_file):
             # Ignore warning about rounding the fraction
             table.write(row_num, col_num, ref_value)
         table.set_cell_formatting(row_num, col_num, "fraction", fraction_accuracy=fraction_accuracy)
+
+    table.write(row_num, len(FractionAccuracy), 2.0)
+    table.set_cell_formatting(
+        row_num, len(FractionAccuracy), "fraction", fraction_accuracy=FractionAccuracy.HALVES
+    )
 
     row_num += 1
 
