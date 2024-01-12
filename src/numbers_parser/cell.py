@@ -495,8 +495,8 @@ class Cell(Cacheable):
         else:
             raise ValueError("Can't determine cell type from type " + type(value).__name__)
 
-    def _set_formatting(self, format_id: int) -> None:
-        self._storage._set_formatting(format_id)
+    def _set_formatting(self, format_id: int, format_type: FormattingType) -> None:
+        self._storage._set_formatting(format_id, format_type)
 
     def __init__(self, row_num: int, col_num: int, value):
         self._value = value

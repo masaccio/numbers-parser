@@ -24,6 +24,7 @@ from numbers_parser.constants import (
     CellType,
     DurationStyle,
     DurationUnits,
+    FormattingType,
     FormatType,
 )
 from numbers_parser.currencies import CURRENCY_SYMBOLS
@@ -428,11 +429,12 @@ class CellStorage(Cacheable):
 
         return duration_str
 
-    def _set_formatting(self, format_id: int) -> None:
-        if self.type == CellType.DATE:
-            self.date_format_id = format_id
-        elif self.is_currency:
+    def _set_formatting(self, format_id: int, format_type: FormattingType) -> None:
+        if format_type == FormattingType.CURRENCY:
             self.currency_format_id = format_id
+            self.is_currency = True
+        elif format_type == FormattingType.DATETIME:
+            self.date_format_id = format_id
         else:
             self.num_format_id = format_id
 

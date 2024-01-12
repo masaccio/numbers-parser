@@ -589,4 +589,4 @@ class Table(Cacheable):
 
         format = Formatting(type=format_type, **kwargs)
         format_id = self._model.format_archive(self._table_id, format_type, format)
-        cell._set_formatting(format_id)
+        cell._set_formatting(format_id, format_type)
