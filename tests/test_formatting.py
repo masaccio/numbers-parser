@@ -308,6 +308,7 @@ OTHER_FORMAT_REF = [
         "80000000001",
     ],
     ["0", "00000000", "YA", "000000YA"],
+    ["-64", "-84", "64"],
     ["445/553", "70/87", "4/5", "1", "3/4", "6/8", "13/16", "8/10", "80/100", "2"],
     [
         "1E+02",
@@ -639,6 +640,33 @@ def test_write_mixed_number_formats(configurable_save_file):
                 )
                 col_num += 1
         row_num += 1
+
+    table.write(row_num, 0, -100)
+    table.set_cell_formatting(
+        row_num,
+        0,
+        "base",
+        base=16,
+        base_use_minus_sign=True,
+    )
+    table.write(row_num, 1, -100)
+    table.set_cell_formatting(
+        row_num,
+        1,
+        "base",
+        base=12,
+        base_use_minus_sign=True,
+    )
+    table.write(row_num, 2, 100)
+    table.set_cell_formatting(
+        row_num,
+        2,
+        "base",
+        base=16,
+        base_use_minus_sign=False,
+    )
+
+    row_num += 1
 
     ref_value = 445 / 553
     for col_num, fraction_accuracy in enumerate(FractionAccuracy):
