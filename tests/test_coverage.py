@@ -223,10 +223,10 @@ def test_set_number_defaults():
     num_format_id = table.cell(0, 0)._storage.num_format_id
     format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
     assert not format.show_thousands_separator
-    assert format.decimal_places == 0
+    assert format.base_places == 0
 
     table.set_cell_formatting(0, 0, "currency")
-    num_format_id = table.cell(0, 0)._storage.num_format_id
+    num_format_id = table.cell(0, 0)._storage.currency_format_id
     format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
     assert not format.show_thousands_separator
     assert format.decimal_places == 2
