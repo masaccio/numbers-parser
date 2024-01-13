@@ -31,7 +31,7 @@ setuptools = "^69.0.3"
 importlib-resources = "^6.1.1"
 
 [tool.poetry.group.dev.dependencies]
-black = {version = "^22.10.0", allow-prereleases = true}
+black = "*"
 gprof2dot = "^2022.7.29"
 line-profiler = "^4.0.3"
 mock = "^5.1.0"
