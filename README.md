@@ -389,44 +389,44 @@ The positional parameter after the cell reference is the type of data format to 
 
 `date_time_format` uses Numbers notation for date and time formatting rather than POSIX `strftime` as there are a number of extensions. Date components are specified using directives which must be separated by whitespace. Supported directives are:
 
-| Directive | Meaning                                                       | Example                |
-| --------- | ------------------------------------------------------------- | ---------------------- |
-| a         | Locale’s AM or PM                                             | am, pm                 |
-| EEEE      | Full weekday name                                             | Monday, Tuesday, ...   |
-| EEE       | Abbreviated weekday name                                      | Mon, Tue, ...          |
-| yyyy      | Year with century as a decimal number                         | 1999, 2023, etc.       |
-| yy        | Year without century as a zero-padded decimal number          | 00, 01, ... 99         |
-| y         | Year without century as a decimal number                      | 0, 1, ... 99           |
-| MMMM      | Full month name                                               | January, February, ... |
-| MMM       | Abbreviated month name                                        | Jan, Feb, ...          |
-| MM        | Month as a zero-padded decimal number                         | 01, 02, ... 12         |
-| M         | Month as a decimal number                                     | 1, 2, ... 12           |
-| d         | Day as a decimal number                                       | 1, 2, ... 31           |
-| dd        | Day as a zero-padded decimal number                           | 01, 02, ... 31         |
-| DDD       | Day of the year as a zero-padded 3-digit number               | 001 - 366              |
-| DD        | Day of the year as a minimum zero-padded 2-digit number       | 01 - 366               |
-| D         | Day of the year                                               | 1 - 366                |
-| HH        | Hour (24-hour clock) as a zero-padded decimal number          | 00, 01, ... 23         |
-| H         | Hour (24-hour clock) as a decimal number                      | 0, 1, ... 23           |
-| hh        | Hour (12-hour clock) as a zero-padded decimal number          | 01, 02, ... 12         |
-| h         | Hour (12-hour clock) as a decimal number                      | 1, 2, ... 12           |
-| k         | Hour (24-hour clock) as a decimal number to 24                | 1, 2, ... 24           |
-| kk        | Hour (24-hour clock) as a zero-padded decimal number to 24    | 01, 02, ... 24         |
-| K         | Hour (12-hour clock) as a decimal number from 0               | 0, 1, ... 11           |
-| KK        | Hour (12-hour clock) as a zero-padded decimal number from 0   | 00, 01, ... 11         |
-| mm        | Minutes as a zero-padded number                               | 00, 01, ... 59         |
-| m         | Minutes as a number                                           | 0, 1, ... 59           |
-| ss        | Seconds as a zero-padded number                               | 00, 01, ... 59         |
-| s         | Seconds as a number                                           | 0, 1, ... 59           |
-| W         | Week number in the month (first week is zero)                 | 0, 1, ... 5            |
-| ww        | Week number of the year (Monday as the first day of the week) | 0, 1, ... 53           |
-| G         | AD or BC (only AD is supported)                               | AD                     |
-| F         | How many times the day of falls in the month                  | 1, 2, ... 5            |
-| S         | Seconds to one decimal place                                  | 0 - 9                  |
-| SS        | Seconds to two decimal places                                 | 00 - 99                |
-| SSS       | Seconds to three decimal places                               | 000 - 999              |
-| SSSS      | Seconds to four decimal places                                | 0000 - 9999            |
-| SSSSS     | Seconds to five decimal places                                | 00000 - 9999           |
+| Directive   | Meaning                                                       | Example                |
+| ----------- | ------------------------------------------------------------- | ---------------------- |
+| `a`         | Locale’s AM or PM                                             | am, pm                 |
+| `EEEE`      | Full weekday name                                             | Monday, Tuesday, ...   |
+| `EEE`       | Abbreviated weekday name                                      | Mon, Tue, ...          |
+| `yyyy`      | Year with century as a decimal number                         | 1999, 2023, etc.       |
+| `yy`        | Year without century as a zero-padded decimal number          | 00, 01, ... 99         |
+| `y`         | Year without century as a decimal number                      | 0, 1, ... 99           |
+| `MMMM`      | Full month name                                               | January, February, ... |
+| `MMM`       | Abbreviated month name                                        | Jan, Feb, ...          |
+| `MM`        | Month as a zero-padded decimal number                         | 01, 02, ... 12         |
+| `M`         | Month as a decimal number                                     | 1, 2, ... 12           |
+| `d`         | Day as a decimal number                                       | 1, 2, ... 31           |
+| `dd`        | Day as a zero-padded decimal number                           | 01, 02, ... 31         |
+| `DDD`       | Day of the year as a zero-padded 3-digit number               | 001 - 366              |
+| `DD`        | Day of the year as a minimum zero-padded 2-digit number       | 01 - 366               |
+| `D`         | Day of the year                                               | 1 - 366                |
+| `HH`        | Hour (24-hour clock) as a zero-padded decimal number          | 00, 01, ... 23         |
+| `H`         | Hour (24-hour clock) as a decimal number                      | 0, 1, ... 23           |
+| `hh`        | Hour (12-hour clock) as a zero-padded decimal number          | 01, 02, ... 12         |
+| `h`         | Hour (12-hour clock) as a decimal number                      | 1, 2, ... 12           |
+| `k`         | Hour (24-hour clock) as a decimal number to 24                | 1, 2, ... 24           |
+| `kk`        | Hour (24-hour clock) as a zero-padded decimal number to 24    | 01, 02, ... 24         |
+| `K`         | Hour (12-hour clock) as a decimal number from 0               | 0, 1, ... 11           |
+| `KK`        | Hour (12-hour clock) as a zero-padded decimal number from 0   | 00, 01, ... 11         |
+| `mm`        | Minutes as a zero-padded number                               | 00, 01, ... 59         |
+| `m`         | Minutes as a number                                           | 0, 1, ... 59           |
+| `ss`        | Seconds as a zero-padded number                               | 00, 01, ... 59         |
+| `s`         | Seconds as a number                                           | 0, 1, ... 59           |
+| `W`         | Week number in the month (first week is zero)                 | 0, 1, ... 5            |
+| `ww`        | Week number of the year (Monday as the first day of the week) | 0, 1, ... 53           |
+| `G`         | AD or BC (only AD is supported)                               | AD                     |
+| `F`         | How many times the day of falls in the month                  | 1, 2, ... 5            |
+| `S`         | Seconds to one decimal place                                  | 0 - 9                  |
+| `SS`        | Seconds to two decimal places                                 | 00 - 99                |
+| `SSS`       | Seconds to three decimal places                               | 000 - 999              |
+| `SSSS`      | Seconds to four decimal places                                | 0000 - 9999            |
+| `SSSSS`     | Seconds to five decimal places                                | 00000 - 9999           |
 
 ##### Negative number formatting
 
@@ -441,25 +441,78 @@ Where supported by a data format, `negative_style` must be a valid `NegativeNumb
 | `RED_AND_PARENTHESES` | <span style="color:red">(1234.560)</span> |
 <!-- markdownlint-enable MD033 -->
 
-#### Writing Custom Formats
-
-Custom formats are shared across a Document and can be applied to multiple cells in multiple tables. Editing a custom format changes the appearance of data in all cells that share that format.
-
-The data representation of all cells is read uding the `formatted_value` property of the `Cell` object. This property returns a `str` value identical to that displayed visually by Numbers.
-
-A limited number of currencies are formatted using symbolic notation rather than an ISO code. These are defined in `numbers_parser.currencies` and match the ones chosen by Numbers. For example, US dollars are referred to as `US$` whereas Euros and British Pounds are referred to using their symbols of `€` and `£` respectively.
-
 #### Writing Custom Data Formats
 
-Creating custom data formats will be supported in a future version of `numbers-parser`.
-<!--
-The `Document` method `add_custom_format()` creates a custom format and returns a `CustomFormatting` object. Custom formatting is applies to cells using the `Table` method `set_cell_formatting` in a similar way to data formats:
+The `Document` method `add_custom_format()` creates a custom format and returns a `CustomFormatting` object. Custom formatting is applied to cells using the `Table` method `set_cell_formatting` in a similar way to data formats:
 
 ``` python
 long_date = doc.add_custom_format(name="Long Date", type="date", date_time_format="EEEE, d MMMM yyyy")
 table.set_cell_formatting("C1", "custom", format=long_date)
 ```
--->
+
+`add_custom_format` takes a list of key-value pairs as follows defining the format.
+
+* `name` is the name of the custom format. If no name is provided, one is generated using the scheme `Custom Format`, `Custom Format 1`, `Custom Format 2`, etc.
+* `type` is the type of format to create. Supported formats are `number`, `datetime` and `text`. If no type is provided, `add_custom_format` defaults to `number`
+
+In addition to these basic parameters, `add_custom_format` also supports the following parameters dependent upon format type:
+
+<!-- markdownlint-disable MD033 -->
+<table>
+    <thead>
+        <tr>
+            <th>Format Type</th>
+            <th>Parameter</th>
+            <th>Description</th>
+            <th>Default</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan=5><code>number</code></td>
+            <td><code>integer_format</code></td>
+            <td>How to pad integers represented defined by the <code>PaddingType</code> enum</td>
+            <td><code>PaddingType.NONE</code>
+        </tr>
+        <tr>
+            <td><code>decimal_format</code></td>
+            <td>How to pad decimals represented defined by the <code>PaddingType</code> enum</td>
+            <td><code>PaddingType.NONE</code>
+        </tr>
+        <tr>
+            <td><code>num_integers</code></td>
+            <td>The integer precision when integers are padded</td>
+            <td><code>0</code>
+        </tr>
+        <tr>
+            <td><code>num_decimals</code></td>
+            <td>The integer precision when decimals are padded</code> enum<</td>
+            <td><code>0</code>
+        </tr>
+        <tr>
+            <td><code>show_thousands_separator</code></td>
+            <td><code>True</code> if the number should include a thousands seperator, e.g. <code>,</code></td>
+            <td><code>False</code></td>
+        </tr>
+        <tr>
+            <td><code>datetime</code></td>
+            <td><code>format</code></td>
+            <td>A POSIX <code>strftime</code>-like formatting string. See <a href="#datetime-formatting">Date/time formatting</a> for a list of supported directives</td>
+            <td><code>d MMM y</code>
+        </tr>
+        <tr>
+            <td><code>text</code></td>
+            <td><code>format</code></td>
+            <td>A string format where the cell value is inserted in place of <code>%s</code>. Only one substitution is allowed by Numbers, and multiple <code>%s</code> formatting references raise a <code>TypeError</code> exception.</td>
+            <td><code>%s</code>
+        </tr>
+    </tbody>
+</table>
+<!-- markdownlint-enable MD033 -->
+
+`set_cell_formatting` accepts either a `CustomFormatting` object or the name of a custom style.
+
+A `dict` of available custom formats is returned by the `Document` property `custom_formats`. This contains key value pairs of format names and `CustomFormatting` objects. Any changes to `CustomFormatting` objects in the document are written back such that those formats are changed for all cells that use them.
 
 ### Borders
 
@@ -605,7 +658,7 @@ table.set_cell_style("C2", red_text)
 
 New styles are automatically added to the list of styles selectable in the Numbers Text pane.
 
-Cell styles can also be referred to by name in both `Table.write` and `Table.set_cell_style`. A `dict` of available styles is returned by `Document.styles`. This contains key value pairs of style names and `Style` objects. Any changes to `Style` objects in the document are written back such that those styles are changed for all cells that use them.
+Cell styles can also be referred to by name in both `Table.write` and `Table.set_cell_style`. A `dict` of available styles is returned by the `Document` property `styles`. This contains key value pairs of style names and `Style` objects. Any changes to `Style` objects in the document are written back such that those styles are changed for all cells that use them.
 
 ``` python
 doc = Document("styles.numbers")
