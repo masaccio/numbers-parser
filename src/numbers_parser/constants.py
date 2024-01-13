@@ -11,6 +11,7 @@ except ImportError:  # pragma: nocover
 
 __all__ = [
     "CellType",
+    "PaddingType",
     "CellPadding",
     "DurationStyle",
     "DurationUnits",
@@ -179,6 +180,12 @@ class FormattingType(IntEnum):
     SCIENTIFIC = 7
 
 
+class CustomFormattingType(IntEnum):
+    NUMBER = 1
+    DATETIME = 2
+    TEXT = 3
+
+
 class NegativeNumberStyle(IntEnum):
     MINUS = 0
     RED = 1
@@ -223,3 +230,9 @@ FORMAT_TYPE_MAP = {
     FormattingType.PERCENTAGE: FormatType.PERCENT,
     FormattingType.SCIENTIFIC: FormatType.SCIENTIFIC,
 }
+
+
+class PaddingType(IntEnum):
+    NONE = 0
+    ZEROS = 1
+    SPACES = 2

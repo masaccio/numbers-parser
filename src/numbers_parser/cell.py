@@ -27,9 +27,11 @@ from numbers_parser.constants import (
     EMPTY_STORAGE_BUFFER,
     MAX_BASE,
     MAX_SIGNIFICANT_DIGITS,
+    CustomFormattingType,
     FormattingType,
     FractionAccuracy,
     NegativeNumberStyle,
+    PaddingType,
 )
 from numbers_parser.currencies import CURRENCIES
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
@@ -904,3 +906,24 @@ class Formatting:
 
         if self.type == FormattingType.BASE and (self.base < 2 or self.base > MAX_BASE):
             raise TypeError("base must be in range 2-36")
+
+
+@dataclass
+class CustomFormatting:
+    type: CustomFormattingType = CustomFormattingType.NUMBER
+    name: str = None
+    integer_format: PaddingType = PaddingType.NONE
+    decimal_format: PaddingType = PaddingType.NONE
+    num_integers: int = 0
+    num_decimals: int = 0
+    show_thousands_separator: bool = False
+    format: str = "%s"
+
+    def __post_init__(self):
+        if not isinstance(self.type, CustomFormattingType):
+            type_name = type(self.type).__name__
+            raise TypeError(f"Invalid format type '{type_name}'")
+
+        if self.type == CustomFormattingType.TEXT:
+            if self.format.count("%s") > 1:
+                raise TypeError("Custom formats only allow one text substitution")
