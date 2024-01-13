@@ -2,11 +2,7 @@ import pytest
 import pytest_check as check
 from pendulum import datetime
 
-from numbers_parser import Document, EmptyCell
-from numbers_parser.constants import (
-    FractionAccuracy,
-    NegativeNumberStyle,
-)
+from numbers_parser import Document, EmptyCell, FractionAccuracy, NegativeNumberStyle, PaddingType
 
 DATE_FORMAT_REF = [
     ["", "1 pm", "1:25 pm", "1:25:42 pm", "13:25", "13:25:42"],
@@ -707,3 +703,79 @@ def test_currency_updates():
         0, 0, "currency", currency_code="EUR", use_accounting_style=True, decimal_places=1
     )
     assert table.cell(0, 0).formatted_value == "€\t(12.5)"
+
+
+def test_write_custom_formatting(configurable_save_file):
+    doc = Document("tests/data/custom-formats1.numbers")
+    custom_formats = doc.custom_formats
+    assert list(custom_formats.keys()) == ["Custom Format", "Custom Format 1"]
+    format = doc.add_custom_format()
+    assert format.name == "Custom Format 2"
+
+    doc = Document("tests/data/custom-formats2.numbers")
+    with pytest.raises(IndexError) as e:
+        format = doc.add_custom_format(name="Custom Format 1")
+    assert "'Custom Format 1' already exists" in str(e)
+    with pytest.raises(TypeError) as e:
+        format = doc.add_custom_format(type="error")
+    assert "unsuported cell format type 'ERROR'" in str(e)
+    with pytest.raises(TypeError) as e:
+        format = doc.add_custom_format(type="text", format="%s %s")
+    assert "Custom formats only allow one text substitution" in str(e)
+    format = doc.add_custom_format()
+    assert format.name == "Custom Format"
+
+    table = doc.sheets[0].tables[0]
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting(0, 0, "custom")
+    assert "no format provided for custom format" in str(e)
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting(0, 0, "custom", format=object())
+    assert "format must be a CustomFormatting object or format name" in str(e)
+
+    row_num = 0
+    table.col_width(0, 250)
+    table.col_width(1, 50)
+    table.col_width(2, 50)
+    table.col_width(3, 35)
+    table.col_width(4, 35)
+    table.col_width(5, 40)
+    table.col_width(6, 50)
+    table.col_width(7, 100)
+    table.col_width(8, 130)
+    doc.add_style(alignment=("left", "middle"), name="Left Align")
+
+    for integer_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
+        for decimal_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
+            for num_integers in [0, 1, 2, 4, 9]:
+                for num_decimals in [0, 1, 2, 4, 9]:
+                    if num_integers == 0 and num_decimals == 0:
+                        continue
+                    for show_thousands_separator in [False, True]:
+                        if num_integers == 0 and show_thousands_separator:
+                            continue
+
+                        format_name = "Fmt:"
+                        format_name += "I=" + str(num_integers) + "_" + str(integer_format) + "_"
+                        format_name += "D=" + str(num_decimals) + "_" + str(decimal_format)
+                        format_name += "_Sep" if show_thousands_separator else ""
+                        custom_format = doc.add_custom_format(
+                            type="number",
+                            name=format_name,
+                            integer_format=integer_format,
+                            decimal_format=decimal_format,
+                            num_integers=num_integers,
+                            num_decimals=num_decimals,
+                            show_thousands_separator=show_thousands_separator,
+                        )
+                        for value in [0.23, 2.34, 23.0, 2345.67]:
+                            table.write(row_num, 0, format.name, style="Left Align")
+                            table.write(row_num, 1, str(integer_format), style="Left Align")
+                            table.write(row_num, 2, str(decimal_format), style="Left Align")
+                            table.write(row_num, 3, num_integers, style="Left Align")
+                            table.write(row_num, 4, num_decimals, style="Left Align")
+                            table.write(row_num, 5, show_thousands_separator, style="Left Align")
+                            table.write(row_num, 6, value, style="Left Align")
+                            table.write(row_num, 7, value, style="Left Align")
+                            table.set_cell_formatting(row_num, 7, "custom", format=custom_format)
+                            row_num += 1

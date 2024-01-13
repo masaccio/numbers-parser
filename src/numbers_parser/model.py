@@ -17,6 +17,7 @@ from numbers_parser.cell import (
     BoolCell,
     Border,
     BorderType,
+    CustomFormatting,
     DateCell,
     DurationCell,
     EmptyCell,
@@ -27,6 +28,7 @@ from numbers_parser.cell import (
     MergedCell,
     MergeReference,
     NumberCell,
+    PaddingType,
     RichTextCell,
     Style,
     TextCell,
@@ -222,6 +224,7 @@ class _NumbersModel(Cacheable):
         self._table_strings = DataLists(self, "stringTable", "string")
         self._table_data = {}
         self._styles = None
+        self._custom_formats = None
         self._strokes = {
             "top": defaultdict(),
             "right": defaultdict(),
@@ -359,6 +362,76 @@ class _NumbersModel(Cacheable):
 
         format = TSKArchives.FormatStructArchive(**attrs)
         return self._table_formats.lookup_key(table_id, format)
+
+    def custom_decimal_format_archive(self, format: CustomFormatting) -> object:
+        integer_format = format.integer_format
+        decimal_format = format.decimal_format
+        num_integers = format.num_decimals
+        num_decimals = format.decimal_format
+        show_thousands_separator = format.show_thousands_separator
+
+        format_name = "Fmt:"
+        format_name += "I=" + str(num_integers) + "_" + str(integer_format) + "_"
+        format_name += "D=" + str(num_decimals) + "_" + str(decimal_format)
+        format_name += "_Sep" if show_thousands_separator else ""
+
+        if num_integers == 0:
+            format_string = ""
+        elif integer_format == PaddingType.NONE:
+            format_string = "#" * num_integers
+        else:
+            format_string = "0" * num_integers
+        if num_integers > 6:
+            format_string = re.sub(r"(...)(...)$", r",\1,\2", format_string)
+        elif num_integers > 3:
+            format_string = re.sub(r"(...)$", r",\1", format_string)
+        if num_decimals > 0:
+            if decimal_format == PaddingType.NONE:
+                format_string += "." + "#" * num_decimals
+            else:
+                format_string += "." + "0" * num_decimals
+
+        min_integer_width = (
+            num_integers if num_integers > 0 and integer_format != PaddingType.NONE else 0
+        )
+        num_nonspace_decimal_digits = num_decimals if decimal_format == PaddingType.ZEROS else 0
+        num_nonspace_integer_digits = num_integers if integer_format == PaddingType.ZEROS else 0
+        index_from_right_last_integer = num_decimals + 1 if num_integers > 0 else num_decimals
+        # Empirically correct:
+        if index_from_right_last_integer == 1:
+            index_from_right_last_integer = 0
+        elif index_from_right_last_integer == 0:
+            index_from_right_last_integer = 1
+        decimal_width = num_decimals if decimal_format == PaddingType.SPACES else 0
+        is_complex = "0" in format_string and (
+            min_integer_width > 0 or num_nonspace_decimal_digits == 0
+        )
+
+        custom_format = TSKArchives.CustomFormatArchive(
+            name=format_name,
+            format_type_pre_bnc=270,
+            format_type=270,
+            default_format=TSKArchives.FormatStructArchive(
+                contains_integer_token=num_integers > 0,
+                custom_format_string=format_string,
+                decimal_width=decimal_width,
+                format_type=270,
+                fraction_accuracy=0xFFFFFFFD,
+                index_from_right_last_integer=index_from_right_last_integer,
+                is_complex=is_complex,
+                min_integer_width=min_integer_width,
+                num_hash_decimal_digits=0,
+                num_nonspace_decimal_digits=num_nonspace_decimal_digits,
+                num_nonspace_integer_digits=num_nonspace_integer_digits,
+                requires_fraction_replacement=False,
+                scale_factor=1.0,
+                show_thousands_separator=show_thousands_separator and num_integers > 0,
+                total_num_decimal_digits=decimal_width,
+                use_accounting_style=False,
+            ),
+        )
+        uuid = TSPMessages.UUID()
+        return (uuid, custom_format)
 
     @cache(num_args=2)
     def table_style(self, table_id: int, key: int) -> str:
@@ -1193,7 +1266,7 @@ class _NumbersModel(Cacheable):
         return self._styles
 
     @cache(num_args=0)
-    def available_paragraph_styles(self) -> List[Style]:
+    def available_paragraph_styles(self) -> Dict[str, Style]:
         theme_id = self.objects[DOCUMENT_ID].theme.identifier
         presets = find_extension(self.objects[theme_id].super, "paragraph_style_presets")
         presets_map = {
@@ -1431,7 +1504,7 @@ class _NumbersModel(Cacheable):
         entry = self._table_styles.lookup_value(cell_storage.table_id, cell_storage.cell_style_id)
         return entry.reference.identifier
 
-    def custom_style_name(self) -> Tuple[str, str]:
+    def custom_style_name(self) -> str:
         """Find custom styles in the current document and return the next
         highest numbered style.
         """
@@ -1450,6 +1523,31 @@ class _NumbersModel(Cacheable):
             return "Custom Style " + str(custom_style_ids[-1] + 1)
         else:
             return "Custom Style 1"
+
+    @property
+    def custom_formats(self) -> Dict[str, CustomFormatting]:
+        if self._custom_formats is None:
+            custom_format_list_id = self.objects[DOCUMENT_ID].super.custom_format_list.identifier
+            self._custom_formats = {
+                x.name: x for x in self.objects[custom_format_list_id].custom_formats
+            }
+        return self._custom_formats
+
+    def custom_format_name(self) -> str:
+        """Find custom formats in the current document and return the next
+        highest numbered format.
+        """
+        current_formats = self._custom_formats.keys()
+        if "Custom Format" not in current_formats:
+            return "Custom Format"
+        current_formats = [
+            m.group(1) for x in current_formats if (m := re.fullmatch(r"Custom Format (\d+)", x))
+        ]
+        if len(current_formats) > 0:
+            last_id = int(current_formats[-1])
+            return f"Custom Format {last_id + 1}"
+        else:
+            return "Custom Format 1"
 
     def pack_cell_storage(  # noqa: PLR0912, PLR0915
         self, table_id: int, data: List, row_num: int, col_num: int

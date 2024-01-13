@@ -4,11 +4,15 @@ from warnings import warn
 from numbers_parser.cell import (
     Border,
     Cell,
+    CustomFormatting,
+    CustomFormattingType,
     DateCell,
     Formatting,
+    FormattingType,
     MergedCell,
     NumberCell,
     Style,
+    TextCell,
     xl_cell_to_rowcol,
 )
 from numbers_parser.cell_storage import CellStorage
@@ -19,7 +23,6 @@ from numbers_parser.constants import (
     MAX_COL_COUNT,
     MAX_HEADER_COUNT,
     MAX_ROW_COUNT,
-    FormattingType,
 )
 from numbers_parser.containers import ItemsList
 from numbers_parser.file import write_numbers_file
@@ -84,9 +87,14 @@ class Document:
         return self._sheets
 
     @property
-    def styles(self) -> list:
-        """Return a list of styles available in the document."""
+    def styles(self) -> dict:
+        """Return a dict of styles available in the document."""
         return self._model.styles
+
+    @property
+    def custom_formats(self) -> dict:
+        """Return a dict of custom formats available in the document."""
+        return self._model.custom_formats
 
     def save(self, filename):
         for sheet in self.sheets:
@@ -143,6 +151,29 @@ class Document:
         style._update_styles = True
         self._model.styles[style.name] = style
         return style
+
+    def add_custom_format(self, **kwargs) -> CustomFormatting:
+        """Add a new custom format to the current document. If no format name is
+        provided, the next available numbered format will be generated.
+        """
+        if (
+            "name" in kwargs
+            and kwargs["name"] is not None
+            and kwargs["name"] in self._model.custom_formats
+        ):
+            raise IndexError(f"format '{kwargs['name']}' already exists")
+
+        if "type" in kwargs:
+            format_type = kwargs["type"].upper()
+            try:
+                kwargs["type"] = CustomFormattingType[format_type]
+            except (KeyError, AttributeError):
+                raise TypeError(f"unsuported cell format type '{format_type}'") from None
+
+        custom_format = CustomFormatting(**kwargs)
+        if custom_format.name is None:
+            custom_format.name = self._model.custom_format_name()
+        return custom_format
 
 
 class Sheet:
@@ -566,7 +597,7 @@ class Table(Cacheable):
 
         self._model.add_stroke(self._table_id, row_num, col_num, side, border_value, length)
 
-    def set_cell_formatting(self, *args: str, **kwargs) -> Formatting:
+    def set_cell_formatting(self, *args: str, **kwargs) -> None:
         """Set the formatting for a cell."""
         (row_num, col_num, *args) = self._validate_cell_coords(*args)
         if len(args) == 1:
@@ -574,6 +605,40 @@ class Table(Cacheable):
         else:
             raise TypeError("no type defined for cell format")
 
+        if format_type == "custom":
+            self.set_cell_custom_format(row_num, col_num, **kwargs)
+        else:
+            self.set_cell_data_format(row_num, col_num, format_type, **kwargs)
+
+    def set_cell_custom_format(self, row_num: int, col_num: int, **kwargs) -> None:
+        if "format" not in kwargs:
+            raise TypeError("no format provided for custom format")
+
+        custom_format = kwargs["format"]
+        if isinstance(custom_format, CustomFormatting):
+            custom_format = kwargs["format"]
+        elif isinstance(custom_format, str):
+            if custom_format not in self._model.custom_formats:
+                raise IndexError(f"format '{custom_format}' does not exist")
+            custom_format = self._model.custom_formats[custom_format]
+        else:
+            raise TypeError("format must be a CustomFormatting object or format name")
+
+        cell = self._data[row_num][col_num]
+        if custom_format.type == FormattingType.DATETIME and not isinstance(cell, DateCell):
+            type_name = type(cell).__name__
+            raise TypeError(f"cannot use date/time formatting for cells of type {type_name}")
+        if custom_format.type == FormattingType.NUMBER and not isinstance(cell, NumberCell):
+            type_name = type(cell).__name__
+            raise TypeError(f"cannot use date/time formatting for cells of type {type_name}")
+        elif not isinstance(cell, TextCell):
+            type_name = type(cell).__name__
+            raise TypeError(f"cannot set formatting for cells of type {type_name}")
+
+        format_id = self._model.custom_decimal_format_archive(custom_format, format)
+        cell._set_formatting(format_id, custom_format.type)
+
+    def set_cell_data_format(self, row_num: int, col_num: int, format_type: str, **kwargs) -> None:
         try:
             format_type = FormattingType[format_type.upper()]
         except (KeyError, AttributeError):
