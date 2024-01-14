@@ -54,6 +54,7 @@ from numbers_parser.constants import (
     FORMAT_TYPE_MAP,
     MAX_TILE_SIZE,
     PACKAGE_ID,
+    FormatType,
 )
 from numbers_parser.containers import ObjectStore
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
@@ -225,6 +226,7 @@ class _NumbersModel(Cacheable):
         self._table_data = {}
         self._styles = None
         self._custom_formats = None
+        self._custom_format_ids = None
         self._strokes = {
             "top": defaultdict(),
             "right": defaultdict(),
@@ -356,24 +358,29 @@ class _NumbersModel(Cacheable):
 
     @cache(num_args=3)
     def format_archive(self, table_id: int, format_type: FormattingType, format: Formatting):
-        """Create a table format from a Formatting spec and return thetable format ID"""
+        """Create a table format from a Formatting spec and return the table format ID"""
         attrs = {x: getattr(format, x) for x in ALLOWED_FORMATTING_PARAMETERS[format_type]}
         attrs["format_type"] = FORMAT_TYPE_MAP[format_type]
 
         format = TSKArchives.FormatStructArchive(**attrs)
         return self._table_formats.lookup_key(table_id, format)
 
-    def custom_decimal_format_archive(self, format: CustomFormatting) -> object:
+    def custom_decimal_format_id(self, table_id: int, format: CustomFormatting) -> int:
+        """Look up the custom format and return the format ID for the table"""
+        format_uuid = self._custom_format_uuids[format.name]
+        custom_format = TSKArchives.FormatStructArchive(
+            format_type=FormatType.CUSTOM_NUMBER,
+            custom_uid=TSPMessages.UUID(lower=format_uuid.lower, upper=format_uuid.upper),
+        )
+        return self._table_formats.lookup_key(table_id, custom_format)
+
+    def add_custom_decimal_format_archive(self, format: CustomFormatting) -> None:
+        """Create a custom format from the format spec"""
         integer_format = format.integer_format
         decimal_format = format.decimal_format
-        num_integers = format.num_decimals
-        num_decimals = format.decimal_format
+        num_integers = format.num_integers
+        num_decimals = format.num_decimals
         show_thousands_separator = format.show_thousands_separator
-
-        format_name = "Fmt:"
-        format_name += "I=" + str(num_integers) + "_" + str(integer_format) + "_"
-        format_name += "D=" + str(num_decimals) + "_" + str(decimal_format)
-        format_name += "_Sep" if show_thousands_separator else ""
 
         if num_integers == 0:
             format_string = ""
@@ -407,15 +414,15 @@ class _NumbersModel(Cacheable):
             min_integer_width > 0 or num_nonspace_decimal_digits == 0
         )
 
-        custom_format = TSKArchives.CustomFormatArchive(
-            name=format_name,
-            format_type_pre_bnc=270,
-            format_type=270,
+        format_archive = TSKArchives.CustomFormatArchive(
+            name=format.name,
+            format_type_pre_bnc=FormatType.CUSTOM_NUMBER,
+            format_type=FormatType.CUSTOM_NUMBER,
             default_format=TSKArchives.FormatStructArchive(
                 contains_integer_token=num_integers > 0,
                 custom_format_string=format_string,
                 decimal_width=decimal_width,
-                format_type=270,
+                format_type=FormatType.CUSTOM_NUMBER,
                 fraction_accuracy=0xFFFFFFFD,
                 index_from_right_last_integer=index_from_right_last_integer,
                 is_complex=is_complex,
@@ -430,8 +437,16 @@ class _NumbersModel(Cacheable):
                 use_accounting_style=False,
             ),
         )
-        uuid = TSPMessages.UUID()
-        return (uuid, custom_format)
+
+        format_uuid = NumbersUUID().protobuf2
+        self._custom_formats[format.name] = format_archive
+        self._custom_format_uuids[format.name] = format_uuid
+
+        custom_format_list_id = self.objects[DOCUMENT_ID].super.custom_format_list.identifier
+        custom_format_list = self.objects[custom_format_list_id]
+        custom_format_list.custom_formats.append(format_archive)
+        custom_format_list.uuids.append(format_uuid)
+        return  # noqa
 
     @cache(num_args=2)
     def table_style(self, table_id: int, key: int) -> str:
@@ -1528,9 +1543,15 @@ class _NumbersModel(Cacheable):
     def custom_formats(self) -> Dict[str, CustomFormatting]:
         if self._custom_formats is None:
             custom_format_list_id = self.objects[DOCUMENT_ID].super.custom_format_list.identifier
-            self._custom_formats = {
-                x.name: x for x in self.objects[custom_format_list_id].custom_formats
-            }
+            custom_formats = self.objects[custom_format_list_id].custom_formats
+            custom_format_names = [x.name for x in custom_formats]
+            custom_format_uuids = [x for x in self.objects[custom_format_list_id].uuids]
+            self._custom_formats = {}
+            self._custom_format_uuids = {}
+            for i, format_name in enumerate(custom_format_names):
+                self._custom_formats[format_name] = custom_formats[i]
+                self._custom_format_uuids[format_name] = custom_format_uuids[i]
+
         return self._custom_formats
 
     def custom_format_name(self) -> str:

@@ -173,6 +173,7 @@ class Document:
         custom_format = CustomFormatting(**kwargs)
         if custom_format.name is None:
             custom_format.name = self._model.custom_format_name()
+        self._model.add_custom_decimal_format_archive(custom_format)
         return custom_format
 
 
@@ -625,17 +626,17 @@ class Table(Cacheable):
             raise TypeError("format must be a CustomFormatting object or format name")
 
         cell = self._data[row_num][col_num]
-        if custom_format.type == FormattingType.DATETIME and not isinstance(cell, DateCell):
+        if custom_format.type == CustomFormattingType.DATETIME and not isinstance(cell, DateCell):
             type_name = type(cell).__name__
             raise TypeError(f"cannot use date/time formatting for cells of type {type_name}")
-        if custom_format.type == FormattingType.NUMBER and not isinstance(cell, NumberCell):
+        elif custom_format.type == CustomFormattingType.NUMBER and not isinstance(cell, NumberCell):
             type_name = type(cell).__name__
             raise TypeError(f"cannot use date/time formatting for cells of type {type_name}")
-        elif not isinstance(cell, TextCell):
+        elif custom_format.type == CustomFormattingType.TEXT and not isinstance(cell, TextCell):
             type_name = type(cell).__name__
             raise TypeError(f"cannot set formatting for cells of type {type_name}")
 
-        format_id = self._model.custom_decimal_format_archive(custom_format, format)
+        format_id = self._model.custom_decimal_format_id(self._table_id, custom_format)
         cell._set_formatting(format_id, custom_format.type)
 
     def set_cell_data_format(self, row_num: int, col_num: int, format_type: str, **kwargs) -> None:

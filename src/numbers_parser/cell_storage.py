@@ -3,7 +3,7 @@ import math
 import re
 from fractions import Fraction
 from struct import unpack
-from typing import Tuple
+from typing import Tuple, Union
 from warnings import warn
 
 import sigfig
@@ -22,6 +22,7 @@ from numbers_parser.constants import (
     SECONDS_IN_WEEK,
     CellPadding,
     CellType,
+    CustomFormattingType,
     DurationStyle,
     DurationUnits,
     FormattingType,
@@ -429,11 +430,13 @@ class CellStorage(Cacheable):
 
         return duration_str
 
-    def _set_formatting(self, format_id: int, format_type: FormattingType) -> None:
+    def _set_formatting(
+        self, format_id: int, format_type: Union[FormattingType, CustomFormattingType]
+    ) -> None:
         if format_type == FormattingType.CURRENCY:
             self.currency_format_id = format_id
             self.is_currency = True
-        elif format_type == FormattingType.DATETIME:
+        elif format_type in [FormattingType.DATETIME, CustomFormattingType.DATETIME]:
             self.date_format_id = format_id
         else:
             self.num_format_id = format_id
