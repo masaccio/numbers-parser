@@ -725,6 +725,7 @@ def test_write_custom_formatting(configurable_save_file):
     format = doc.add_custom_format()
     assert format.name == "Custom Format"
 
+    doc = Document(num_header_cols=0, num_header_rows=0)
     table = doc.sheets[0].tables[0]
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(0, 0, "custom")
@@ -769,7 +770,7 @@ def test_write_custom_formatting(configurable_save_file):
                             show_thousands_separator=show_thousands_separator,
                         )
                         for value in [0.23, 2.34, 23.0, 2345.67]:
-                            table.write(row_num, 0, format.name, style="Left Align")
+                            table.write(row_num, 0, custom_format.name, style="Left Align")
                             table.write(row_num, 1, str(integer_format), style="Left Align")
                             table.write(row_num, 2, str(decimal_format), style="Left Align")
                             table.write(row_num, 3, num_integers, style="Left Align")
@@ -779,3 +780,5 @@ def test_write_custom_formatting(configurable_save_file):
                             table.write(row_num, 7, value, style="Left Align")
                             table.set_cell_formatting(row_num, 7, "custom", format=custom_format)
                             row_num += 1
+
+    doc.save(configurable_save_file)
