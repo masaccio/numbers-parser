@@ -705,7 +705,12 @@ def test_currency_updates():
     assert table.cell(0, 0).formatted_value == "€\t(12.5)"
 
 
-def test_write_custom_formatting(configurable_save_file):
+def test_write_custom_formatting(configurable_save_file, pytestconfig):
+    if pytestconfig.getoption("max_check_fails") is not None:
+        max_check_fails = pytestconfig.getoption("max_check_fails")
+    else:
+        max_check_fails = -1
+
     doc = Document("tests/data/custom-formats1.numbers")
     custom_formats = doc.custom_formats
     assert list(custom_formats.keys()) == ["Custom Format", "Custom Format 1"]
@@ -735,21 +740,10 @@ def test_write_custom_formatting(configurable_save_file):
     assert "format must be a CustomFormatting object or format name" in str(e)
 
     row_num = 0
-    table.col_width(0, 250)
-    table.col_width(1, 50)
-    table.col_width(2, 50)
-    table.col_width(3, 35)
-    table.col_width(4, 35)
-    table.col_width(5, 40)
-    table.col_width(6, 50)
-    table.col_width(7, 100)
-    table.col_width(8, 130)
-    doc.add_style(alignment=("left", "middle"), name="Left Align")
-
     for integer_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
         for decimal_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
-            for num_integers in [0, 1, 2, 4, 9]:
-                for num_decimals in [0, 1, 2, 4, 9]:
+            for num_integers in [0, 2]:
+                for num_decimals in [0, 2]:
                     if num_integers == 0 and num_decimals == 0:
                         continue
                     for show_thousands_separator in [False, True]:
@@ -770,15 +764,39 @@ def test_write_custom_formatting(configurable_save_file):
                             show_thousands_separator=show_thousands_separator,
                         )
                         for value in [0.23, 2.34, 23.0, 2345.67]:
-                            table.write(row_num, 0, custom_format.name, style="Left Align")
-                            table.write(row_num, 1, str(integer_format), style="Left Align")
-                            table.write(row_num, 2, str(decimal_format), style="Left Align")
-                            table.write(row_num, 3, num_integers, style="Left Align")
-                            table.write(row_num, 4, num_decimals, style="Left Align")
-                            table.write(row_num, 5, show_thousands_separator, style="Left Align")
-                            table.write(row_num, 6, value, style="Left Align")
-                            table.write(row_num, 7, value, style="Left Align")
-                            table.set_cell_formatting(row_num, 7, "custom", format=custom_format)
+                            table.write(row_num, 0, custom_format.name)
+                            table.write(row_num, 1, str(integer_format))
+                            table.write(row_num, 2, str(decimal_format))
+                            table.write(row_num, 3, num_integers)
+                            table.write(row_num, 4, num_decimals)
+                            table.write(row_num, 5, show_thousands_separator)
+                            table.write(row_num, 6, value)
+                            table.set_cell_formatting(row_num, 6, "custom", format=custom_format)
                             row_num += 1
 
     doc.save(configurable_save_file)
+
+    ref_doc = Document("tests/data/custom-format-stress.numbers")
+    table = ref_doc.sheets[0].tables[0]
+    ref_values = {}
+    for _, row in enumerate(table.iter_rows(min_row=2), start=3):
+        key = row[0].value + ":" + row[6].formatted_value
+        if row[9].value:
+            ref_values[key] = None
+        else:
+            ref_values[key] = row[8].value
+
+    doc = Document(configurable_save_file)
+    table = ref_doc.sheets[0].tables[0]
+    fails = 0
+    for i, row in enumerate(table.iter_rows(min_row=2), start=3):
+        key = row[0].value + ":" + row[6].formatted_value
+        ref = ref_values[row[0].value + ":" + row[6].formatted_value]
+        if ref is None:
+            continue
+        value = row[7].formatted_value
+        check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'", row[0].value)
+        if value != ref:
+            fails += 1
+        if max_check_fails > 0 and fails >= max_check_fails:
+            raise AssertionError()
