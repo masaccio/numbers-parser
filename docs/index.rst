@@ -133,6 +133,23 @@ returning a list of the cells in that row or column:
   for col in table.iter_cole(min_row=2, max_row=7):
      sum += col.value
 
+Welcome to numbers-parser's documentation!
+==========================================
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Contents:
+
+   const
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
 
 API
 ===
