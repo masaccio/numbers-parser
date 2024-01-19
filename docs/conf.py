@@ -5,6 +5,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
+    "sphinx_autodoc_typehints",
 ]
 
 templates_path = ["_templates"]
@@ -14,18 +15,17 @@ master_doc = "index"
 project = "numbers-parser"
 copyright = "Jon Connell"
 
+autodoc_typehints = "signature"
+
+autodoc_default_options = {
+    "hide_none_rtype": True,
+    "all_typevars": True,
+    "autoclass_content": "class",
+    "member-order": "bysource",
+    "members": True,
+    "show-inheritance": True,
+}
 
 sys.path.insert(0, os.path.abspath("../"))
 
-
-def skip(app, what, name, obj, would_skip, options):  # noqa: PLR0913
-    if name in ("__init__",):
-        return False
-    return would_skip
-
-
-def setup(app):
-    app.connect("autodoc-skip-member", skip)
-
-
-extensions.append("sphinx_autodoc_typehints")
+# extensions.append("sphinx_autodoc_typehints")
