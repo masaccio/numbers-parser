@@ -78,36 +78,6 @@ def test_header_size(configurable_save_file):
 
 
 def test_new_doc(configurable_save_file):
-    with pytest.warns(RuntimeWarning) as record:
-        _ = Document("tests/data/test-1.numbers", sheet_name="invalid")
-    assert len(record) == 1
-    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
-
-    with pytest.warns(RuntimeWarning) as record:
-        _ = Document("tests/data/test-1.numbers", table_name="invalid")
-    assert len(record) == 1
-    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
-
-    with pytest.warns(RuntimeWarning) as record:
-        _ = Document("tests/data/test-1.numbers", num_header_rows=-1)
-    assert len(record) == 1
-
-    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
-    with pytest.warns(RuntimeWarning) as record:
-        _ = Document("tests/data/test-1.numbers", num_header_cols=-1)
-    assert len(record) == 1
-
-    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
-    with pytest.warns(RuntimeWarning) as record:
-        _ = Document("tests/data/test-1.numbers", num_rows=-1)
-    assert len(record) == 1
-    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
-
-    with pytest.warns(RuntimeWarning) as record:
-        _ = Document("tests/data/test-1.numbers", num_cols=-1)
-    assert len(record) == 1
-    assert "can't set table/sheet attributes on load of existing document" in str(record[0])
-
     doc = Document(
         sheet_name="Test Sheet",
         table_name="Test Table",

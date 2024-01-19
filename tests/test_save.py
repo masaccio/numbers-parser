@@ -4,7 +4,6 @@ from pendulum import Duration, datetime
 from numbers_parser import Document, EmptyCell, MergedCell, NumberCell, TextCell
 from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
-    DEFAULT_NUM_HEADERS,
     DEFAULT_ROW_COUNT,
     DEFAULT_ROW_HEIGHT,
     DEFAULT_TABLE_OFFSET,
@@ -17,16 +16,16 @@ def test_empty_document(configurable_save_file):
     assert len(data) == DEFAULT_ROW_COUNT
     assert len(data[0]) == DEFAULT_COLUMN_COUNT
     assert isinstance(data[0][0], EmptyCell)
-    assert doc.sheets[0].tables[0].num_header_rows == DEFAULT_NUM_HEADERS
-    assert doc.sheets[0].tables[0].num_header_cols == DEFAULT_NUM_HEADERS
+    assert doc.sheets[0].tables[0].num_header_rows == 1
+    assert doc.sheets[0].tables[0].num_header_cols == 1
 
     doc.save(configurable_save_file)
     doc = Document(configurable_save_file)
     assert len(data) == DEFAULT_ROW_COUNT
     assert len(data[0]) == DEFAULT_COLUMN_COUNT
     assert isinstance(data[0][0], EmptyCell)
-    assert doc.sheets[0].tables[0].num_header_rows == DEFAULT_NUM_HEADERS
-    assert doc.sheets[0].tables[0].num_header_cols == DEFAULT_NUM_HEADERS
+    assert doc.sheets[0].tables[0].num_header_rows == 1
+    assert doc.sheets[0].tables[0].num_header_cols == 1
 
 
 def test_save_document(tmp_path):
