@@ -19,7 +19,7 @@ package_c := $(subst -,_,$(PACKAGE))
 all:
 	@echo "make targets:"
 	@echo "    test       - run pytest with all tests"
-	@echo "    coverage   - run pytest and generate an HTML coverage report"
+	@echo "    docs       - rebuild maekdown docs from source"
 	@echo "    profile    - run pytest and generate a profile graph"
 	@echo "    dist       - build distributions"
 	@echo "    upload     - upload package to PyPI"
@@ -32,14 +32,19 @@ dist:
 
 upload:
 	tox
-	poetry publish
+	poetry publish --build
 
 profile:
 	poetry run pytest --profile
 	poetry run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
 
-docs:
-	python3 setup.py build_sphinx
+docs: README.md
+
+docs/build/index.md: docs/index.rst
+	poetry run sphinx-build -q -a -b markdown  docs docs/build
+
+README.md: docs/build/index.md
+	cp $< $@
 
 test:
 	poetry run pytest -n logical
