@@ -2,6 +2,7 @@ import pytest
 
 from numbers_parser import (
     Cell,
+    CustomFormatting,
     Document,
     EmptyCell,
     Formatting,
@@ -233,6 +234,10 @@ def test_set_number_defaults():
 
     with pytest.raises(TypeError) as e:
         Formatting(type=object())
+    assert "Invalid format type 'object'" in str(e)
+
+    with pytest.raises(TypeError) as e:
+        CustomFormatting(type=object())
     assert "Invalid format type 'object'" in str(e)
 
 
