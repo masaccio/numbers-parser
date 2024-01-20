@@ -41,6 +41,7 @@ from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import (
     ALLOWED_FORMATTING_PARAMETERS,
     CURRENCY_CELL_TYPE,
+    CUSTOM_TEXT_PLACEHOLDER,
     DEFAULT_COLUMN_WIDTH,
     DEFAULT_DOCUMENT,
     DEFAULT_PRE_BNC_BYTES,
@@ -446,7 +447,35 @@ class _NumbersModel(Cacheable):
         custom_format_list = self.objects[custom_format_list_id]
         custom_format_list.custom_formats.append(format_archive)
         custom_format_list.uuids.append(format_uuid)
-        return  # noqa
+
+    def custom_text_format_id(self, table_id: int, format: CustomFormatting) -> int:
+        """Look up the custom format and return the format ID for the table"""
+        format_uuid = self._custom_format_uuids[format.name]
+        custom_format = TSKArchives.FormatStructArchive(
+            format_type=FormatType.CUSTOM_TEXT,
+            custom_uid=TSPMessages.UUID(lower=format_uuid.lower, upper=format_uuid.upper),
+        )
+        return self._table_formats.lookup_key(table_id, custom_format)
+
+    def add_custom_text_format_archive(self, format: CustomFormatting) -> None:
+        format_string = format.format.replace("%s", CUSTOM_TEXT_PLACEHOLDER)
+        format_archive = TSKArchives.CustomFormatArchive(
+            name=format.name,
+            format_type_pre_bnc=FormatType.CUSTOM_TEXT,
+            format_type=FormatType.CUSTOM_TEXT,
+            default_format=TSKArchives.FormatStructArchive(
+                custom_format_string=format_string,
+                format_type=FormatType.CUSTOM_NUMBER,
+            ),
+        )
+        format_uuid = NumbersUUID().protobuf2
+        self._custom_formats[format.name] = format_archive
+        self._custom_format_uuids[format.name] = format_uuid
+
+        custom_format_list_id = self.objects[DOCUMENT_ID].super.custom_format_list.identifier
+        custom_format_list = self.objects[custom_format_list_id]
+        custom_format_list.custom_formats.append(format_archive)
+        custom_format_list.uuids.append(format_uuid)
 
     @cache(num_args=2)
     def table_style(self, table_id: int, key: int) -> str:
@@ -1558,7 +1587,7 @@ class _NumbersModel(Cacheable):
         """Find custom formats in the current document and return the next
         highest numbered format.
         """
-        current_formats = self._custom_formats.keys()
+        current_formats = self.custom_formats.keys()
         if "Custom Format" not in current_formats:
             return "Custom Format"
         current_formats = [
