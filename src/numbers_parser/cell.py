@@ -50,6 +50,7 @@ __all__ = [
     "BulletedTextCell",
     "Cell",
     "CellBorder",
+    "CustomFormatting",
     "DateCell",
     "DurationCell",
     "EmptyCell",
