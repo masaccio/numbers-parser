@@ -1,4 +1,4 @@
-from typing import Generator, Tuple, Union
+from typing import Dict, Generator, List, Tuple, Union
 from warnings import warn
 
 from numbers_parser.cell import (
@@ -18,7 +18,6 @@ from numbers_parser.cell import (
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
-    DEFAULT_NUM_HEADERS,
     DEFAULT_ROW_COUNT,
     MAX_COL_COUNT,
     MAX_HEADER_COUNT,
@@ -30,50 +29,80 @@ from numbers_parser.model import _NumbersModel
 from numbers_parser.numbers_cache import Cacheable, cache
 
 
+class Sheet:
+    pass
+
+
+class Table:
+    pass
+
+
 class Document:
+    """Create an instance of a new Numbers document. If no document filename
+    is provided, a new document is created with the parameters passed to the
+    ``Document`` constructor.
+
+    :param filename: the Apple Numbers document to read
+        If ``filename`` is ``None``, an empty document is created using
+        the defaults defined by the class constructor. You can optionionally
+        override these defaults at object construction time.
+    :param sheet_name: name of the first sheet in a new document
+        Raises ``IndexError`` if the sheet name already exists in the document.
+    :param table_name: name of the first table in the first sheet of a new
+        Raises ``IndexError`` if the table name already exists in the first sheet.
+    :param num_header_rows: number of header rows in the first table of a new document
+    :param num_header_cols: number of header columns in the first table of a new document
+    :param num_rows: number of rows in the first table of a new document
+    :param num_cols: number of columns in the first table of a new document
+
+    Examples
+    ~~~~~~~~
+
+    Reading a document and examining the ``Tables`` object:
+
+    .. code:: python
+
+        >>> from numbers_parser import Document
+        >>> doc = Document("mydoc.numbers")
+        >>> doc.sheets[0].name
+        'Sheet 1'
+        >>> table = doc.sheets[0].tables[0]
+        >>> table.name
+        'Table 1'
+        ```
+
+    Creating a new document:
+
+    .. code:: python
+
+        doc = Document()
+        doc.add_sheet("New Sheet", "New Table")
+        sheet = doc.sheets["New Sheet"]
+        table = sheet.tables["New Table"]
+        table.write(1, 1, 1000)
+        table.write(1, 2, 2000)
+        table.write(1, 3, 3000)
+        doc.save("mydoc.numbers")
+    """
+
     def __init__(  # noqa: PLR0913
         self,
         filename: str = None,
-        sheet_name: str = None,
-        table_name: str = None,
-        num_header_rows: int = None,
-        num_header_cols: int = None,
-        num_rows: int = None,
-        num_cols: int = None,
+        sheet_name: str = "Sheet 1",
+        table_name: str = "Table 1",
+        num_header_rows: int = 1,
+        num_header_cols: int = 1,
+        num_rows: int = DEFAULT_ROW_COUNT,
+        num_cols: int = DEFAULT_COLUMN_COUNT,
     ):
-        if filename is not None and (
-            (sheet_name is not None)
-            or (table_name is not None)
-            or (num_header_rows is not None)
-            or (num_header_cols is not None)
-            or (num_rows is not None)
-            or (num_cols is not None)
-        ):
-            warn(
-                "can't set table/sheet attributes on load of existing document",
-                RuntimeWarning,
-                stacklevel=2,
-            )
-
         self._model = _NumbersModel(filename)
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
 
         if filename is None:
-            if sheet_name is not None:
-                self.sheets[0].name = sheet_name
+            self.sheets[0].name = sheet_name
             table = self.sheets[0].tables[0]
-            if table_name is not None:
-                table.name = table_name
-
-            if num_header_rows is None:
-                num_header_rows = DEFAULT_NUM_HEADERS
-            if num_header_cols is None:
-                num_header_cols = DEFAULT_NUM_HEADERS
-            if num_rows is None:
-                num_rows = DEFAULT_ROW_COUNT
-            if num_cols is None:
-                num_cols = DEFAULT_COLUMN_COUNT
+            table.name = table_name
 
             # Table starts as 1x1 with no headers
             table.add_row(num_rows - 1)
@@ -82,21 +111,26 @@ class Document:
             table.num_header_cols = num_header_cols
 
     @property
-    def sheets(self) -> list:
+    def sheets(self) -> List[Sheet]:
         """Return a list of all sheets in the document."""
         return self._sheets
 
     @property
-    def styles(self) -> dict:
+    def styles(self) -> Dict[str, Style]:
         """Return a dict of styles available in the document."""
         return self._model.styles
 
     @property
-    def custom_formats(self) -> dict:
+    def custom_formats(self) -> Dict[str, CustomFormatting]:
         """Return a dict of custom formats available in the document."""
         return self._model.custom_formats
 
-    def save(self, filename):
+    def save(self, filename: str) -> None:
+        """Save the document in the specified filename
+
+        :param filename: the path to save the document to
+            If the file already exists, it will be overwritten.
+        """
         for sheet in self.sheets:
             for table in sheet.tables:
                 self._model.recalculate_table_data(table._table_id, table._data)
@@ -104,13 +138,22 @@ class Document:
 
     def add_sheet(
         self,
-        sheet_name=None,
-        table_name=None,
-        num_rows=DEFAULT_ROW_COUNT,
-        num_cols=DEFAULT_COLUMN_COUNT,
+        sheet_name: str = None,
+        table_name: str = "Table 1",
+        num_rows: int = DEFAULT_ROW_COUNT,
+        num_cols: int = DEFAULT_COLUMN_COUNT,
     ) -> object:
         """Add a new sheet to the current document. If no sheet name is provided,
         the next available numbered sheet will be generated.
+
+        :param sheet_name: the name of the sheet to add to the document
+            If ``sheet_name`` is ``None``, the next available sheet name in the
+            series ``Sheet 1``, ``Sheet 2``, etc. is chosen.
+
+            Raises ``IndexError`` if the sheet name already exists in the document.
+        :param table_name: the name of the table created in the new sheet
+        :param num_rows: the number of columns in the newly created table
+        :param num_cols: the number of columns in the newly created table
         """
         if sheet_name is not None:
             if sheet_name in self._sheets:
@@ -136,8 +179,6 @@ class Document:
             )
         )
         self._sheets.append(new_sheet)
-
-        return new_sheet
 
     def add_style(self, **kwargs) -> Style:
         """Add a new style to the current document. If no style name is
@@ -173,7 +214,10 @@ class Document:
         custom_format = CustomFormatting(**kwargs)
         if custom_format.name is None:
             custom_format.name = self._model.custom_format_name()
-        self._model.add_custom_decimal_format_archive(custom_format)
+        if custom_format.type == CustomFormattingType.NUMBER:
+            self._model.add_custom_decimal_format_archive(custom_format)
+        elif custom_format.type == CustomFormattingType.TEXT:
+            self._model.add_custom_text_format_archive(custom_format)
         return custom_format
 
 
@@ -231,7 +275,7 @@ class Sheet:
         return self._tables[-1]
 
 
-class Table(Cacheable):
+class Table(Cacheable):  # noqa: F811
     def __init__(self, model, table_id):
         super().__init__()
         self._model = model
@@ -603,6 +647,8 @@ class Table(Cacheable):
         (row_num, col_num, *args) = self._validate_cell_coords(*args)
         if len(args) == 1:
             format_type = args[0]
+        elif len(args) > 1:
+            raise TypeError("too many positional arguments to set_cell_formatting")
         else:
             raise TypeError("no type defined for cell format")
 
@@ -636,7 +682,10 @@ class Table(Cacheable):
             type_name = type(cell).__name__
             raise TypeError(f"cannot set formatting for cells of type {type_name}")
 
-        format_id = self._model.custom_decimal_format_id(self._table_id, custom_format)
+        if custom_format.type == CustomFormattingType.NUMBER:
+            format_id = self._model.custom_decimal_format_id(self._table_id, custom_format)
+        elif custom_format.type == CustomFormattingType.TEXT:
+            format_id = self._model.custom_text_format_id(self._table_id, custom_format)
         cell._set_formatting(format_id, custom_format.type)
 
     def set_cell_data_format(self, row_num: int, col_num: int, format_type: str, **kwargs) -> None:
