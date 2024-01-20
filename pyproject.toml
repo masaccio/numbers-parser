@@ -49,7 +49,7 @@ python-magic = "^0.4.27"
 sphinx = "^7.2.6"
 sphinx-markdown-builder = "^0.6.6"
 sphinx-autodoc-typehints = "^1.25.2"
-pdoc = "^14.4.0"
+sphinx-toolbox = "^3.5.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
@@ -57,7 +57,6 @@ requires = ["poetry-core>=1.0.0"]
 
 [tool.coverage.run]
 branch = true
-# dynamic_context = "test_function"
 omit = ["src/numbers_parser/generated/*.py"]
 
 [tool.coverage.html]
