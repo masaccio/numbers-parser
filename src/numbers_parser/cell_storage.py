@@ -12,6 +12,7 @@ from pendulum import datetime, duration
 from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser.constants import (
     CURRENCY_CELL_TYPE,
+    CUSTOM_TEXT_PLACEHOLDER,
     DATETIME_FIELD_MAP,
     DECIMAL_PLACES_AUTO,
     EPOCH,
@@ -517,7 +518,7 @@ def decode_date_format(format, value):
 def decode_text_format(format, value: str):
     """Parse a custom date format string and return a formatted number value."""
     custom_format_string = format.custom_format_string
-    return custom_format_string.replace("\ue421", value)
+    return custom_format_string.replace(CUSTOM_TEXT_PLACEHOLDER, value)
 
 
 def expand_quotes(value: str) -> str:

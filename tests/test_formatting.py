@@ -695,7 +695,7 @@ def test_write_mixed_number_formats(configurable_save_file):
             check.equal(f"[{row_num},{col_num}]:{value}", f"[{row_num},{col_num}]:{ref_value}")
 
 
-def test_currency_updates():
+def test_currency_symbols():
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.write(0, 0, -12.50)
@@ -705,7 +705,7 @@ def test_currency_updates():
     assert table.cell(0, 0).formatted_value == "€\t(12.5)"
 
 
-def test_write_custom_formatting(configurable_save_file, pytestconfig):
+def test_write_custom_numbers(configurable_save_file, pytestconfig):
     if pytestconfig.getoption("max_check_fails") is not None:
         max_check_fails = pytestconfig.getoption("max_check_fails")
     else:
@@ -724,9 +724,6 @@ def test_write_custom_formatting(configurable_save_file, pytestconfig):
     with pytest.raises(TypeError) as e:
         format = doc.add_custom_format(type="error")
     assert "unsuported cell format type 'ERROR'" in str(e)
-    with pytest.raises(TypeError) as e:
-        format = doc.add_custom_format(type="text", format="%s %s")
-    assert "Custom formats only allow one text substitution" in str(e)
     format = doc.add_custom_format()
     assert format.name == "Custom Format"
 
@@ -800,3 +797,17 @@ def test_write_custom_formatting(configurable_save_file, pytestconfig):
             fails += 1
         if max_check_fails > 0 and fails >= max_check_fails:
             raise AssertionError()
+
+
+@pytest.mark.experimental
+def test_write_text_custom_formatting(configurable_save_file):
+    doc = Document(num_header_cols=0, num_header_rows=0)
+    string_format = doc.add_custom_format(type="text", format="before %s after")
+    table = doc.sheets[0].tables[0]
+    table.write(0, 0, "test")
+    table.set_cell_formatting(0, 0, "custom", format=string_format)
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    assert table.cell(0, 0).formatted_value == "before test after"
