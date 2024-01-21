@@ -50,6 +50,11 @@ sphinx = "^7.2.6"
 sphinx-markdown-builder = "^0.6.6"
 sphinx-autodoc-typehints = "^1.25.2"
 
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.2.6"
+sphinx-markdown-builder = "^0.6.6"
+sphinx-autodoc-typehints = "^1.25.2"
+
 [build-system]
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core>=1.0.0"]
