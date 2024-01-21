@@ -28,4 +28,5 @@
     "ruff.lint.args": [
         "--config=pyproject.toml"
     ],
+    "esbonio.sphinx.confDir": "",
 }
