@@ -141,7 +141,11 @@ containing evaluation errors of any kind `ErrorCell`.
 
 ### Cell references
 
-Data for single cells is accessed using `Table.cell()`. Cell references can be
+Data for single cells is accessed using Table.cell(). Cell references can be
+references can be either zero-offset row/column integers or an Excel/Numbers cell reference
+using a column letter and row number.
+
+Data for single cells is accessed using [`numbers_parser.Table.cell()`](#numbers_parser.Table.cell)
 references can be either zero-offset row/column integers or an Excel/Numbers cell reference
 using a column letter and row number.
 
@@ -926,7 +930,8 @@ If no format name is provided, the next available numbered format will be genera
 
 ### *class* numbers_parser.Sheet
 
-Do not instantiate directly. Sheets are created by [`Document`](#numbers_parser.Document).
+> [!CAUTION]
+> Do not instantiate directly. Sheets are created by [`Document`](#numbers_parser.Document).
 
 #### *property* tables *: List[[Table](#numbers_parser.Table)]*
 
@@ -978,7 +983,8 @@ new_table = sheet.add_table("Offset Table", x, y)
 
 ### *class* numbers_parser.Table
 
-Do not instantiate directly. Tables are created by [`Document`](#numbers_parser.Document).
+> [!CAUTION]
+> Do not instantiate directly. Tables are created by [`Document`](#numbers_parser.Document).
 
 #### *property* name *: str*
 
@@ -1078,6 +1084,7 @@ Return a single cell in the table.
 Cell references in a table can be **row-column** offsers or Excel/Numbers-style **A1**
 notation:
 
+<a id="table-cell"></a>
 ```python
 (0, 0)      # Row-column notation.
 ("A1")      # The same cell in A1 notation.

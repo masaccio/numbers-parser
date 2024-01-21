@@ -305,7 +305,10 @@ class Document:
 
 
 class Sheet:
-    """Do not instantiate directly. Sheets are created by :class:`Document`."""
+    """
+    > [!CAUTION]
+    > Do not instantiate directly. Sheets are created by :class:`Document`.
+    """
 
     def __init__(self, model, sheet_id):
         self._sheet_id = sheet_id
@@ -390,7 +393,10 @@ class Sheet:
 
 
 class Table(Cacheable):  # noqa: F811
-    """Do not instantiate directly. Tables are created by :class:`Document`."""
+    """
+    > [!CAUTION]
+    > Do not instantiate directly. Tables are created by :class:`Document`.
+    """
 
     def __init__(self, model, table_id):
         super().__init__()
@@ -543,6 +549,8 @@ class Table(Cacheable):  # noqa: F811
 
         Cell references in a table can be **row-column** offsers or Excel/Numbers-style **A1**
         notation:
+
+        .. _table_cell:
 
         .. code-block:: python
 
