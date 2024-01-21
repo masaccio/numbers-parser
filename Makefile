@@ -14,7 +14,7 @@ LLDB_PYTHON_PATH := ${shell lldb --python-path}
 PACKAGE=numbers-parser
 package_c := $(subst -,_,$(PACKAGE))
 
-.PHONY: clean veryclean test coverage profile sdist upload
+.PHONY: clean veryclean test coverage profile sdist upload docs
 
 all:
 	@echo "make targets:"
@@ -39,10 +39,11 @@ profile:
 	poetry run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
 
 docs: README.md
+	@echo > /dev/null
 
 docs/build/index.md: docs/index.rst docs/conf.py src/$(package_c)/*.py
 	@mkdir -p docs/build
-	poetry run sphinx-build -q -W -b markdown  docs docs/build
+	poetry run sphinx-build -q -b markdown  docs docs/build
 
 README.md: docs/build/index.md
 	cp $< $@
@@ -136,6 +137,6 @@ clean:
 	rm -rf src/$(package_c).egg-info
 	rm -rf coverage_html_report
 	rm -rf dist
-	rm -rf build
+	rm -rf docs/build
 	rm -rf .tox
 	rm -rf .pytest_cache

@@ -828,71 +828,6 @@ will use ``Sheet 1``, ``Sheet 2``, etc.
 
    doc.save("sheet.numbers")
 
-Table geometries
-~~~~~~~~~~~~~~~~
-
-``numbers-parser`` can query and change the position and size of tables.
-Changes made to a table's row height or column width is retained when
-files are saved.
-
-.. _-row-and-column-sizes:
-
- Row and column sizes
-^^^^^^^^^^^^^^^^^^^^^
-
-Row heights and column widths are queried and set using the
-``row_height`` and ``col_width`` methods:
-
-.. code:: python
-
-   doc = Document("sheet.numbers")
-   table = doc.sheets[0].tables[0]
-   print(f"Table size is {table.height} x {table.width}")
-   print(f"Table row 1 height is {table.row_height(0)}")
-   table.row_height(0, 40)
-   print(f"Table row 1 height is now {table.row_height(0)}")
-   print(f"Table column A width is {table.col_width(0)}")
-   table.col_width(0, 200)
-   print(f"Table column A width is {table.col_width(0)}")
-
-.. _-header-row-and-columns:
-
- Header row and columns
-^^^^^^^^^^^^^^^^^^^^^^^
-
-When new tables are created, ``numbers-parser`` follows the Numbers
-convention of creating a table with one row header and one column
-header. You can change the number of headers by modifying the
-appropriate property:
-
-.. code:: python
-
-   doc = Document("sheet.numbers")
-   table = doc.sheets[0].tables[0]
-   table.num_header_rows = 2
-   table.num_header_cols = 0
-   doc.save("saved.numbers")
-
-A zero header count will remove the headers from the table. Attempting
-to set a negative number of headers, or using more headers that rows or
-columns in the table will raise a ``ValueError`` exception.
-
-Positioning tables
-^^^^^^^^^^^^^^^^^^
-
-By default, new tables are positioned at a fixed offset below the last
-table vertically in a sheet and on the left side of the sheet. Large
-table headers and captions may result in new tables overlapping existing
-ones. The ``add_table`` method takes optional coordinates for
-positioning a table. A table's height and coordinates can also be
-queried to help aligning new tables:
-
-.. code:: python
-
-   (x, y) = sheet.table[0].coordinates
-   y += sheet.table[0].height + 200.0
-   new_table = sheet.add_table("Offset Table", x, y)
-
 Editing paragraph styles
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -950,21 +885,13 @@ API
 .. currentmodule:: numbers_parser
 
 .. autoclass:: Document
-   :no-index:
    :members:
-   :inherited-members:
 
-.. .. autoclass:: numbers_parser.document.Sheet
-   :no-index:
-   :members: name, tables, add_table
+.. autoclass:: Sheet()
+   :members:
 
-   .. autoclass:: numbers_parser.document.Table
-      :members:
-      :inherited-members:
-
-   .. autoclass:: numbers_parser.Cell
-      :members:
-      :inherited-members:
+.. autoclass:: Table()
+   :members:
 
 
 Command-line scripts

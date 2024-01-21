@@ -84,26 +84,24 @@ same name (see examples in this README).
 Reading documents:
 
 ```python
-from numbers_parser import Document
-doc = Document("my-spreadsheet.numbers")
-sheets = doc.sheets
-tables = sheets[0].tables
-rows = tables[0].rows()
+>>> from numbers_parser import Document
+>>> doc = Document("mydoc.numbers")
+>>> sheets = doc.sheets
+>>> tables = sheets[0].tables
+>>> rows = tables[0].rows()
 ```
 
-### Referring to sheets and tables
-
-Sheets and tables are iterables that can be indexed using either an
-integer index or using the name of the sheet/table:
+Sheets and tables are iterables that can be indexed using either an integer index or using the name of the sheet/table:
 
 ```python
-# list access method
-sheet_1 = doc.sheets[0]
-print("Opened sheet", sheet_1.name)
-
-# dict access method
-table_1 = sheets["Table 1"]
-print("Opened table", table_1.name)
+>>> doc.sheets[0].name
+'Sheet 1'
+>>> doc.sheets["Sheet 1"].name
+'Sheet 1'
+>>> doc.sheets[0].tables[0].name
+'Table 1'
+>>> doc.sheets[0].tables["Table 1"].name
+'Table 1'
 ```
 
 ### Accessing data
@@ -143,54 +141,9 @@ containing evaluation errors of any kind `ErrorCell`.
 
 ### Cell references
 
-Data for single cells is accessed using `Table.cell()`. Cell
-references can be either zero-offset row/column integers or an
-Excel/Numbers cell reference using a column letter and row number:
-
-```python
-doc = Document("my-spreadsheet.numbers")
-sheets = doc.sheets
-tables = sheets["Sheet 1"].tables
-table = tables["Table 1"]
-
-# row, column syntax
-print("Cell A1 contains", table.cell(0, 0))
-# Excel/Numbers-style cell references
-print("Cell C2 contains", table.cell("C2"))
-```
-
-### Merged cells
-
-`Cell.is_merged` returns `True` for any cell that is the result of
-merging rows and/or columns. Cells eliminated from the table by the
-merge can still be indexed using `Table.cell()` and are of type
-`MergedCell`.
-
-Consider this example:
-
-<!-- markdownlint-disable MD033 --><table>
-    <tr>
-        <td>A1</td>
-        <td rowspan=2>B1</td>
-    </tr>
-    <tr>
-        <td>A2</td>
-    </tr>
-</table>
-<!-- markdownlint-enable MD033 -->
-
-The properties of merges are tested using the following properties:
-
-| Cell   | Type       | `value`   | `is_merged`   | `size`   | `rect`       | `merge_range`   |
-|--------|------------|-----------|---------------|----------|--------------|-----------------|
-| A1     | TextCell   | `A1`      | `False`       | (1, 1)   | `None`       | `None`          |
-| A2     | TextCell   | `A2`      | `False`       | (1, 1)   | `None`       | `None`          |
-| B1     | TextCell   | `B1`      | `True`        | (2, 1)   | `None`       | `None`          |
-| B2     | MergedCell | `None`    | `False`       | `None`   | (1, 0, 2, 0) | `"B1:B2"`       |
-
-The tuple values of the `rect` property of a `MergedCell` are also
-available using the properties `row_start`, `col_start`,
-`row_end`, and `col_end`.
+Data for single cells is accessed using `Table.cell()`. Cell references can be
+references can be either zero-offset row/column integers or an Excel/Numbers cell reference
+using a column letter and row number.
 
 ### Row and column iterators
 
@@ -684,7 +637,7 @@ The last positional parameter specifies the length of the border and
 defaults to 1. A single call to `set_cell_border()` can set the
 borders to one or more sides of the cell as above. Like
 `Table.write()`, `set_cell_border()` supports both row/column and
-Excel-style cell references.
+Excel/Numbers-style cell references.
 
 ## Writing Numbers files
 
@@ -746,67 +699,6 @@ table.write(1, 3, 3000)
 doc.save("sheet.numbers")
 ```
 
-### Table geometries
-
-`numbers-parser` can query and change the position and size of tables.
-Changes made to a table’s row height or column width is retained when
-files are saved.
-
-<a id="row-and-column-sizes"></a>
-
-#### Row and column sizes
-
-Row heights and column widths are queried and set using the
-`row_height` and `col_width` methods:
-
-```python
-doc = Document("sheet.numbers")
-table = doc.sheets[0].tables[0]
-print(f"Table size is {table.height} x {table.width}")
-print(f"Table row 1 height is {table.row_height(0)}")
-table.row_height(0, 40)
-print(f"Table row 1 height is now {table.row_height(0)}")
-print(f"Table column A width is {table.col_width(0)}")
-table.col_width(0, 200)
-print(f"Table column A width is {table.col_width(0)}")
-```
-
-<a id="header-row-and-columns"></a>
-
-#### Header row and columns
-
-When new tables are created, `numbers-parser` follows the Numbers
-convention of creating a table with one row header and one column
-header. You can change the number of headers by modifying the
-appropriate property:
-
-```python
-doc = Document("sheet.numbers")
-table = doc.sheets[0].tables[0]
-table.num_header_rows = 2
-table.num_header_cols = 0
-doc.save("saved.numbers")
-```
-
-A zero header count will remove the headers from the table. Attempting
-to set a negative number of headers, or using more headers that rows or
-columns in the table will raise a `ValueError` exception.
-
-#### Positioning tables
-
-By default, new tables are positioned at a fixed offset below the last
-table vertically in a sheet and on the left side of the sheet. Large
-table headers and captions may result in new tables overlapping existing
-ones. The `add_table` method takes optional coordinates for
-positioning a table. A table’s height and coordinates can also be
-queried to help aligning new tables:
-
-```python
-(x, y) = sheet.table[0].coordinates
-y += sheet.table[0].height + 200.0
-new_table = sheet.add_table("Offset Table", x, y)
-```
-
 ### Editing paragraph styles
 
 Cell text styles, known as paragraph styles, are those applied by the
@@ -859,38 +751,27 @@ in turn affect the styles of all cells using that style.
 
 # API
 
-### *class* numbers_parser.Document(filename=None, sheet_name='Sheet 1', table_name='Table 1', num_header_rows=1, num_header_cols=1, num_rows=12, num_cols=8)
+### *class* numbers_parser.Document(filename: str | None = None, sheet_name: str | None = 'Sheet 1', table_name: str | None = 'Table 1', num_header_rows: int | None = 1, num_header_cols: int | None = 1, num_rows: int | None = 12, num_cols: int | None = 8)
 
-Bases: `object`
+Create an instance of a new Numbers document.
 
-Create an instance of a new Numbers document. If no document filename
-is provided, a new document is created with the parameters passed to the
-`Document` constructor.
+If `filename` is `None`, an empty document is created using the defaults
+defined by the class constructor. You can optionionally override these
+defaults at object construction time.
 
 * **Parameters:**
-  * **filename** (*str* *,* *optional*) – Apple Numbers document to read.
-    If `filename` is `None`, an empty document is created using the defaults
-    defined by the class constructor. You can optionionally override these
-    defaults at object construction time.
-  * **sheet_name** (*str* *,* *optional*) – name of the first sheet in a new document
-  * **table_name** (*str* *,* *optional*) – name of the first table in the first sheet of a new
-  * **num_header_rows** (`int`) – number of header rows in the first table of a new document.
-  * **num_header_cols** (`int`) – number of header columns in the first table of a new document.
-  * **num_rows** (`int`) – number of rows in the first table of a new document.
-  * **num_cols** (`int`) – number of columns in the first table of a new document.
-* **Type:**
-  num_header_rows: int, optional
-* **Type:**
-  num_header_cols: int, optional
-* **Type:**
-  num_rows: int, optional
-* **Type:**
-  num_cols: int, optional
+  * **filename** (`str` *optional*, default: `None`) – Apple Numbers document to read.
+  * **sheet_name** (`str` *optional*, default: `'Sheet 1'`) – Name of the first sheet in a new document
+  * **table_name** (`str` *optional*, default: `'Table 1'`) – Name of the first table in the first sheet of a new
+  * **num_header_rows** (`int` *optional*, default: `1`) – Number of header rows in the first table of a new document.
+  * **num_header_cols** (`int` *optional*, default: `1`) – Number of header columns in the first table of a new document.
+  * **num_rows** (`int` *optional*, default: `12`) – Number of rows in the first table of a new document.
+  * **num_cols** (`int` *optional*, default: `8`) – Number of columns in the first table of a new document.
 * **Raises:**
-  * **IndexError** – if the sheet name already exists in the document.
-  * **IndexError** – if the table name already exists in the first sheet.
+  * **IndexError** – If the sheet name already exists in the document.
+  * **IndexError** – If the table name already exists in the first sheet.
 
-Examples
+**Examples**
 
 Reading a document and examining the `Tables` object:
 
@@ -917,70 +798,64 @@ table.write(1, 3, 3000)
 doc.save("mydoc.numbers")
 ```
 
-#### *property* sheets *: List[Sheet]*
+#### *property* sheets *: List[[Sheet](#numbers_parser.Sheet)]*
 
-Return a list of all sheets in the document.
+A list of sheets in the document.
 
-* **Returns:**
-  List of `Sheet` objects in the document
-* **Return type:**
-  List[`Sheet`]
+* **Type:**
+  List[[`Sheet`](#numbers_parser.Sheet)]
 
 #### *property* styles *: Dict[str, Style]*
 
-Return a dict of styles available in the document.
+A dict mapping style names to to the corresponding style.
 
-* **Returns:**
-  Dict of `Style` objects in the document with the
-  style name as keys.
-* **Return type:**
-  Dict[`Style`]
+* **Type:**
+  Dict[str, `Style`]
 
 #### *property* custom_formats *: Dict[str, CustomFormatting]*
 
-Return a dict of custom formats available in the document.
+A dict mapping custom format names
+to the corresponding custom format.
 
-* **Returns:**
-  Dict of `CustomFormatting` objects in the document with the
-  format name as keys.
-* **Return type:**
-  Dict[`CustomFormatting`]
+* **Type:**
+  Dict[str, `CustomFormatting`]
 
-#### save(filename)
+#### save(filename: str)
 
-Save the document in the specified filename
+Save the document in the specified filename.
 
 * **Parameters:**
-  **filename** (`str`) – the path to save the document to
-  If the file already exists, it will be overwritten.
+  **filename** (`str`) – The path to save the document to. If the file already exists,
+  it will be overwritten.
 * **Return type:**
   `None`
 
-#### add_sheet(sheet_name=None, table_name='Table 1', num_rows=12, num_cols=8)
+#### add_sheet(sheet_name: str | None = None, table_name: str | None = 'Table 1', num_rows: int | None = 12, num_cols: int | None = 8)
 
-Add a new sheet to the current document. If no sheet name is provided,
-the next available numbered sheet will be generated.
+Add a new sheet to the current document.
+
+If no sheet name is provided, the next available numbered sheet
+will be generated in the series `Sheet 1`, `Sheet 2`, etc.
 
 * **Parameters:**
-  * **sheet_name** (*str* *,* *optional*) – the name of the sheet to add to the document
-    If `sheet_name` is `None`, the next available sheet name in the
-    series `Sheet 1`, `Sheet 2`, etc. is chosen.
-  * **table_name** (*str* *,* *optional*) – the name of the table created in the new sheet, defaults to `Table 1`
-  * **num_rows** (*int* *,* *optional*) – the number of columns in the newly created table
-  * **num_cols** (*int* *,* *optional*) – the number of columns in the newly created table
+  * **sheet_name** (`str` *optional*, default: `None`) – The name of the sheet to add to the document
+  * **table_name** (`str` *optional*, default: `'Table 1'`) – The name of the table created in the new sheet
+  * **num_rows** (`int` *optional*, default: `12`) – The number of columns in the newly created table
+  * **num_cols** (`int` *optional*, default: `8`) – The number of columns in the newly created table
 * **Raises:**
-  **IndexError** – if the sheet name already exists in the document.
+  **IndexError** – If the sheet name already exists in the document.
 * **Return type:**
   `None`
 
 #### add_style(\*\*kwargs)
 
-Add a new style to the current document. If no style name is
-provided, the next available numbered style will be generated.
+Add a new style to the current document.
+
+If no style name is provided, the next available numbered style will be generated.
 
 * **Parameters:**
-  **\*\*kwargs** – style arguments
-  Key-value pairs defining a cell style (see below)
+  * **\*\*kwargs** – style arguments
+  * **style** (*Key-value pairs defining a cell*) – 
 * **Style Keyword Arguments:**
   * *alignment* (**Alignment**): horizontal and vertical alignment of the cell
   * *bg_color* (**Union[RGB, List[RGB]]**): cell background color or list
@@ -999,7 +874,7 @@ provided, the next available numbered style will be generated.
   * *text_inset* (**float**) : text inset in points
   * *text_wrap* (**str**) : `True` if text wrapping is enabled
 * **Return type:**
-  *Style*
+  `Style`
 
 ```python
 red_text = doc.add_style(
@@ -1015,17 +890,15 @@ table.write("B2", "Red", style=red_text)
 table.set_cell_style("C2", red_text)
 ```
 
-* **Return type:**
-  `Style`
-
 #### add_custom_format(\*\*kwargs)
 
-Add a new custom format to the current document. If no format name is
-provided, the next available numbered format will be generated.
+Add a new custom format to the current document.
+
+If no format name is provided, the next available numbered format will be generated.
 
 * **Parameters:**
-  **\*\*kwargs** – style arguments
-  Key-value pairs defining a cell format (see below)
+  * **\*\*kwargs** – style arguments
+  * **format** (*Key-value pairs defining a cell*) – 
 * **Common Custom Formatting Keyword Arguments:**
   * *alignment* (**Alignment**): the horizontal and vertical alignment of the cell
   * *name* (**str**): the name of the custom format
@@ -1051,17 +924,276 @@ provided, the next available numbered format will be generated.
 * **Return type:**
   `CustomFormatting`
 
-<!-- .. autoclass:: numbers_parser.document.Sheet
-:no-index:
-:members: name, tables, add_table
+### *class* numbers_parser.Sheet
 
-.. autoclass:: numbers_parser.document.Table
-   :members:
-   :inherited-members:
+Do not instantiate directly. Sheets are created by [`Document`](#numbers_parser.Document).
 
-.. autoclass:: numbers_parser.Cell
-   :members:
-   :inherited-members: -->
+#### *property* tables *: List[[Table](#numbers_parser.Table)]*
+
+A list of tables in the sheet.
+
+* **Type:**
+  List[[`Table`](#numbers_parser.Table)]
+
+#### *property* name *: str*
+
+The name of the sheet.
+
+* **Type:**
+  str
+
+#### add_table(table_name: str | None = None, x: float | None = None, y: float | None = None, num_rows: int | None = 12, num_cols: int | None = 8)
+
+Add a new table to the current sheet.
+
+If no table name is provided, the next available numbered table
+will be generated in the series `Table 1`, `Table 2`, etc.
+
+By default, new tables are positioned at a fixed offset below the last
+table vertically in a sheet and on the left side of the sheet. Large
+table headers and captions may result in new tables overlapping existing
+ones. The `add_table` method takes optional coordinates for
+positioning a table. A table’s height and coordinates can also be
+queried to help aligning new tables:
+
+```python
+(x, y) = sheet.table[0].coordinates
+y += sheet.table[0].height + 200.0
+new_table = sheet.add_table("Offset Table", x, y)
+```
+
+* **Parameters:**
+  * **table_name** (`str` *optional*, default: `None`) – The name of the new table.
+  * **x** (`float` *optional*, default: `None`) – The x offset for the table in points.
+  * **y** (`float` *optional*, default: `None`) – The y offset for the table in points. If `None`, the table
+    is placed below the last table in the sheet.
+  * **num_rows** (`int` *optional*, default: `12`) – The number of rows for the new table.
+  * **num_cols** (`int` *optional*, default: `8`) – The number of columns for the new table.
+* **Returns:**
+  the newly created table.
+* **Return type:**
+  [`Table`](#numbers_parser.Table)
+* **Raises:**
+  **IndexError** – If the table name already exists.
+
+### *class* numbers_parser.Table
+
+Do not instantiate directly. Tables are created by [`Document`](#numbers_parser.Document).
+
+#### *property* name *: str*
+
+The table’s name.
+
+* **Type:**
+  str
+
+#### *property* table_name_enabled *: bool*
+
+`True` if the table name is visible, `False` otherwise.
+
+* **Type:**
+  bool
+
+#### *property* num_header_rows *: int*
+
+The number of header rows.
+
+* **Raises:**
+  **ValueError** – If the number of headers is negative, exceeds the number of rows in the
+      table, or exceeds Numbers maxinum number of headers (`MAX_HEADER_COUNT`).
+* **Type:**
+  int
+
+#### *property* num_header_cols *: int*
+
+The number of header columns.
+
+* **Raises:**
+  **ValueError** – If the number of headers is negative, exceeds the number of rows in the
+      table, or exceeds Numbers maxinum number of headers (`MAX_HEADER_COUNT`).
+* **Type:**
+  int
+
+#### *property* height *: int*
+
+The table’s height in points.
+
+* **Type:**
+  int
+
+#### *property* width *: int*
+
+The table’s width in points.
+
+* **Type:**
+  int
+
+#### row_height(row_num: int, height: int = None)
+
+The height of a table row in points.
+
+* **Parameters:**
+  * **row_num** (`int`) – the zero-offset row number
+  * **height** (`int`, default: `None`) – the height of the row in points. If not `None`, set the row height.
+* **Returns:**
+  The height of the table row.
+* **Return type:**
+  int
+
+#### col_width(col_num: int, width: int = None)
+
+The width of a table column in points.
+
+* **Parameters:**
+  * **col_num** (`int`) – the zero-offset column number
+  * **width** (`int`, default: `None`) – the width of the column in points. If not `None`, set the column width.
+* **Returns:**
+  The width of the table column.
+* **Return type:**
+  int
+
+#### *property* coordinates *: Tuple[float]*
+
+The table’s x, y offsets in points.
+
+* **Type:**
+  Tuple[float]
+
+#### rows(values_only: bool = False)
+
+Return all rows of cells for the Table.
+
+* **Parameters:**
+  **values_only** (`bool`, default: `False`) – if `True`, return cell values instead of `Cell` objects
+* **Returns:**
+  list of rows; each row is a list
+  : of Cell objects, or string values.
+* **Return type:**
+  Union[List[List[Cell]], List[List[str]]]
+
+#### cell(\*args)
+
+Return a single cell in the table.
+
+Cell references in a table can be **row-column** offsers or Excel/Numbers-style **A1**
+notation:
+
+```python
+(0, 0)      # Row-column notation.
+("A1")      # The same cell in A1 notation.
+```
+
+Args (row-column notation):
+: param1 (`int`): zero-indexed row number
+  param2 (`int`): zero-indexed column number
+
+Args (A1 notation):
+: param1 (`str`): a cell reference using Excel/Numbers-style A1 notation.
+
+* **Returns:**
+  A cell with the base class `Cell` or, if merged, a `MergedCell`.
+* **Return type:**
+  Union[Cell, MergedCell]
+
+**Merged cells**
+
+`Cell.is_merged` returns `True` for any cell that is the result of
+merging rows and/or columns. Cells eliminated from the table by the
+merge can still be indexed using `Table.cell()` and are of type
+`MergedCell`.
+
+Consider this example:
+
+<table>
+    <tr>
+        <td>A1</td>
+        <td rowspan=2>B1</td>
+    </tr>
+    <tr>
+        <td>A2</td>
+    </tr>
+</table>
+
+The properties of merges are tested using the following properties:
+
+| Cell   | Type       | `value`   | `is_merged`   | `size`   | `rect`       | `merge_range`   |
+|--------|------------|-----------|---------------|----------|--------------|-----------------|
+| A1     | TextCell   | `A1`      | `False`       | (1, 1)   | `None`       | `None`          |
+| A2     | TextCell   | `A2`      | `False`       | (1, 1)   | `None`       | `None`          |
+| B1     | TextCell   | `B1`      | `True`        | (2, 1)   | `None`       | `None`          |
+| B2     | MergedCell | `None`    | `False`       | `None`   | (1, 0, 2, 0) | `"B1:B2"`       |
+
+The tuple values of the `rect` property of a `MergedCell` are also
+available using the properties `row_start`, `col_start`,
+`row_end`, and `col_end`.
+
+**Example**
+
+```python
+>>> doc = Document("mydoc.numbers")
+>>> sheets = doc.sheets
+>>> tables = sheets["Sheet 1"].tables
+>>> table = tables["Table 1"]
+>>> table.cell(1,0)
+<numbers_parser.cell.TextCell object at 0x105a80a10>
+>>> table.cell(1,0).value
+'Debit'
+>>> table.cell("B2")
+<numbers_parser.cell.TextCell object at 0x105a80b90>
+>>> table.cell("B2").value
+1234.50
+```
+
+#### iter_rows(min_row: int | None = None, max_row: int | None = None, min_col: int | None = None, max_col: int | None = None, values_only: bool | None = False)
+
+Produces cells from a table, by row.
+
+Specify the iteration range using the indexes of the rows and columns.
+
+* **Parameters:**
+  * **min_row** (`int` *optional*, default: `None`) – Zero-indexed starting row number, or `0` if `None`.
+  * **max_row** (`int` *optional*, default: `None`) – Zero-indexed end row number, or all rows if `None`.
+  * **min_col** (`int` *optional*, default: `None`) – Zero-indexed starting column number or `0` if `None`.
+  * **max_col** (`int` *optional*, default: `None`) – Zero-indexed end column number, or all columns if `None`.
+  * **values_only** (`bool` *optional*, default: `False`) – return cell values rather than `Cell` objects
+* **Yields:**
+  *tuple* – `Cell` objects or string values for the row
+* **Raises:**
+  **IndexError** – If row or column values are out of range for the table
+* **Return type:**
+  `Generator`[`tuple`, `None`, `None`]
+
+#### iter_cols(min_col: int | None = None, max_col: int | None = None, min_row: int | None = None, max_row: int | None = None, values_only: bool | None = False)
+
+Produces cells from a table, by column.
+
+Specify the iteration range using the indexes of the rows and columns.
+
+* **Parameters:**
+  * **min_col** (`int` *optional*, default: `None`) – Zero-indexed starting column number or `0` if `None`.
+  * **max_col** (`int` *optional*, default: `None`) – Zero-indexed end column number, or all columns if `None`.
+  * **min_row** (`int` *optional*, default: `None`) – Zero-indexed starting row number, or `0` if `None`.
+  * **max_row** (`int` *optional*, default: `None`) – Zero-indexed end row number, or all rows if `None`.
+  * **values_only** (`bool` *optional*, default: `False`) – return cell values rather than `Cell` objects
+* **Yields:**
+  *tuple* – `Cell` objects or string values for the row
+* **Raises:**
+  **IndexError** – If row or column values are out of range for the table
+* **Return type:**
+  `Generator`[`tuple`, `None`, `None`]
+
+#### merge_cells(cell_range)
+
+Convert a cell range or list of cell ranges into merged cells.
+
+#### set_cell_formatting(\*args: str, \*\*kwargs)
+
+Set the formatting for a cell.
+
+* **Parameters:**
+  **args** (`str`) – 
+* **Return type:**
+  `None`
 
 ## Command-line scripts
 
