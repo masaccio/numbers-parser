@@ -124,17 +124,17 @@ python datatype. `numbers-parser` uses
 [pendulum](https://pendulum.eustace.io) instead of python’s builtin
 types. Available cell types are:
 
-| Cell type    | value type          | Additional properties                                                                               |
-|--------------|---------------------|-----------------------------------------------------------------------------------------------------|
-| NumberCell   | `float`             |                                                                                                     |
-| TextCell     | `str`               |                                                                                                     |
-| RichTextCell | `str`               | See <br/><br/>```<br/>`<br/>```<br/><br/>Bullets and<br/>lists<br/><br/>> <#bullets-and-lists>\`_\_ |
-| EmptyCell    | `None`              |                                                                                                     |
-| BoolCell     | `bool`              |                                                                                                     |
-| DateCell     | `pendulum.datetime` |                                                                                                     |
-| DurationCell | `pendulum.duration` |                                                                                                     |
-| ErrorCell    | `None`              |                                                                                                     |
-| MergedCell   | `None`              | See [Merged<br/>cells](#merged-cells)                                                               |
+| Cell type    | value type          | Additional properties                           |
+|--------------|---------------------|-------------------------------------------------|
+| NumberCell   | `float`             |                                                 |
+| TextCell     | `str`               |                                                 |
+| RichTextCell | `str`               | See [Bullets and<br/>lists](#bullets-and-lists) |
+| EmptyCell    | `None`              |                                                 |
+| BoolCell     | `bool`              |                                                 |
+| DateCell     | `pendulum.datetime` |                                                 |
+| DurationCell | `pendulum.duration` |                                                 |
+| ErrorCell    | `None`              |                                                 |
+| MergedCell   | `None`              | See [Merged<br/>cells](#merged-cells)           |
 
 Where cell values are not `None` the property `formatted_value`
 returns the cell value as a `str` as displayed in Numbers. Cells that
@@ -982,8 +982,9 @@ provided, the next available numbered style will be generated.
   **\*\*kwargs** – style arguments
   Key-value pairs defining a cell style (see below)
 * **Style Keyword Arguments:**
-  * *alignment* (**Alignment**): the horizontal and vertical alignment of the cell
-  * *bg_color* (**Union[RGB, List[RGB]]**): cell background color or list of values for gradients
+  * *alignment* (**Alignment**): horizontal and vertical alignment of the cell
+  * *bg_color* (**Union[RGB, List[RGB]]**): cell background color or list
+    of colors for gradients
   * *bold* (**str**) : `True` if the cell font is bold
   * *font_color* (**RGB**) : font color
   * *font_size* (**float**) : font size in points
@@ -1038,7 +1039,8 @@ provided, the next available numbered format will be generated.
   * *decimal_format* (**PaddingType**): how to pad decimals, default `PaddingType.NONE`
   * *num_integers* (**int**): integer precision when integers are padded, default 0
   * *num_decimals* (**int**): integer precision when decimals are padded, default 0
-  * *show_thousands_separator* (**bool**): `True` if the number should include a thousands seperator
+  * *show_thousands_separator* (**bool**): `True` if the number should include
+    a thousands seperator
 * **Custom Formatting Keyword Arguments for type\`\`=\`\`datetime`type``=``datetime`:**
   * *format* (**str**): a POSIX strftime-like formatting string
     See Date/time formatting for a list of supported directives, default `d MMM y`

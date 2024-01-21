@@ -226,8 +226,9 @@ class Document:
             Key-value pairs defining a cell style (see below)
 
         :Style Keyword Arguments:
-            * *alignment* (**Alignment**): the horizontal and vertical alignment of the cell
-            * *bg_color* (**Union[RGB, List[RGB]]**): cell background color or list of values for gradients
+            * *alignment* (**Alignment**): horizontal and vertical alignment of the cell
+            * *bg_color* (**Union[RGB, List[RGB]]**): cell background color or list
+              of colors for gradients
             * *bold* (**str**) : ``True`` if the cell font is bold
             * *font_color* (**RGB**) : font color
             * *font_size* (**float**) : font size in points
@@ -287,7 +288,8 @@ class Document:
             * *decimal_format* (**PaddingType**): how to pad decimals, default ``PaddingType.NONE``
             * *num_integers* (**int**): integer precision when integers are padded, default 0
             * *num_decimals* (**int**): integer precision when decimals are padded, default 0
-            * *show_thousands_separator* (**bool**): ``True`` if the number should include a thousands seperator
+            * *show_thousands_separator* (**bool**): ``True`` if the number should include
+              a thousands seperator
 
         :Custom Formatting Keyword Arguments for ``type``=``datetime``:
             * *format* (**str**): a POSIX strftime-like formatting string
