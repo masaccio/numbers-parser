@@ -753,6 +753,8 @@ in turn affect the styles of all cells using that style.
 
 ### *class* numbers_parser.Document(filename: str | None = None, sheet_name: str | None = 'Sheet 1', table_name: str | None = 'Table 1', num_header_rows: int | None = 1, num_header_cols: int | None = 1, num_rows: int | None = 12, num_cols: int | None = 8)
 
+<a id=”numbers_parser.Document”></a>
+
 Create an instance of a new Numbers document.
 
 If `filename` is `None`, an empty document is created using the defaults
@@ -1080,7 +1082,6 @@ Return a single cell in the table.
 Cell references in a table can be **row-column** offsers or Excel/Numbers-style **A1**
 notation:
 
-<a id="table-cell"></a>
 ```python
 (0, 0)      # Row-column notation.
 ("A1")      # The same cell in A1 notation.

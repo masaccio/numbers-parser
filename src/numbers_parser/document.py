@@ -40,7 +40,10 @@ class Table:
 
 
 class Document:
-    """Create an instance of a new Numbers document.
+    """
+    <a id="numbers_parser.Document"></a>
+
+    Create an instance of a new Numbers document.
 
     If ``filename`` is ``None``, an empty document is created using the defaults
     defined by the class constructor. You can optionionally override these
@@ -549,8 +552,6 @@ class Table(Cacheable):  # noqa: F811
 
         Cell references in a table can be **row-column** offsers or Excel/Numbers-style **A1**
         notation:
-
-        .. _table_cell:
 
         .. code-block:: python
 
