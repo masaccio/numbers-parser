@@ -68,13 +68,13 @@ class Document:
     :param table_name: name of the first table in the first sheet of a new
     :type table_name: str, optional
     :param num_header_rows: number of header rows in the first table of a new document.
-    :type: num_header_rows: int, optional
+    :type num_header_rows: int, optional
     :param num_header_cols: number of header columns in the first table of a new document.
-    :type: num_header_cols: int, optional
+    :type num_header_cols: int, optional
     :param num_rows: number of rows in the first table of a new document.
-    :type: num_rows: int, optional
+    :type num_rows: int, optional
     :param num_cols: number of columns in the first table of a new document.
-    :type: num_cols: int, optional
+    :type num_cols: int, optional
     :raises IndexError: if the sheet name already exists in the document.
     :raises IndexError: if the table name already exists in the first sheet.
 
