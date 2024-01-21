@@ -89,27 +89,24 @@ Reading documents:
 
 .. code:: python
 
-   from numbers_parser import Document
-   doc = Document("my-spreadsheet.numbers")
-   sheets = doc.sheets
-   tables = sheets[0].tables
-   rows = tables[0].rows()
+   >>> from numbers_parser import Document
+   >>> doc = Document("mydoc.numbers")
+   >>> sheets = doc.sheets
+   >>> tables = sheets[0].tables
+   >>> rows = tables[0].rows()
 
-Referring to sheets and tables
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Sheets and tables are iterables that can be indexed using either an
-integer index or using the name of the sheet/table:
+Sheets and tables are iterables that can be indexed using either an integer index or using the name of the sheet/table:
 
 .. code:: python
 
-   # list access method
-   sheet_1 = doc.sheets[0]
-   print("Opened sheet", sheet_1.name)
-
-   # dict access method
-   table_1 = sheets["Table 1"]
-   print("Opened table", table_1.name)
+   >>> doc.sheets[0].name
+   'Sheet 1'
+   >>> doc.sheets["Sheet 1"].name
+   'Sheet 1'
+   >>> doc.sheets[0].tables[0].name
+   'Table 1'
+   >>> doc.sheets[0].tables["Table 1"].name
+   'Table 1'
 
 Accessing data
 ~~~~~~~~~~~~~~
@@ -163,66 +160,9 @@ containing evaluation errors of any kind ``ErrorCell``.
 Cell references
 ~~~~~~~~~~~~~~~
 
-Data for single cells is accessed using ``Table.cell()``. Cell
-references can be either zero-offset row/column integers or an
-Excel/Numbers cell reference using a column letter and row number:
-
-.. code:: python
-
-   doc = Document("my-spreadsheet.numbers")
-   sheets = doc.sheets
-   tables = sheets["Sheet 1"].tables
-   table = tables["Table 1"]
-
-   # row, column syntax
-   print("Cell A1 contains", table.cell(0, 0))
-   # Excel/Numbers-style cell references
-   print("Cell C2 contains", table.cell("C2"))
-
-Merged cells
-~~~~~~~~~~~~
-
-``Cell.is_merged`` returns ``True`` for any cell that is the result of
-merging rows and/or columns. Cells eliminated from the table by the
-merge can still be indexed using ``Table.cell()`` and are of type
-``MergedCell``.
-
-Consider this example:
-
-.. raw:: html
-
-   <!-- markdownlint-disable MD033 -->
-
-.. raw:: html
-
-   <table>
-       <tr>
-           <td>A1</td>
-           <td rowspan=2>B1</td>
-       </tr>
-       <tr>
-           <td>A2</td>
-       </tr>
-   </table>
-   <!-- markdownlint-enable MD033 -->
-
-The properties of merges are tested using the following properties:
-
-+------+------------+-----------+---------------+----------+--------------+-----------------+
-| Cell | Type       | ``value`` | ``is_merged`` | ``size`` | ``rect``     | ``merge_range`` |
-+======+============+===========+===============+==========+==============+=================+
-| A1   | TextCell   | ``A1``    | ``False``     | (1, 1)   | ``None``     | ``None``        |
-+------+------------+-----------+---------------+----------+--------------+-----------------+
-| A2   | TextCell   | ``A2``    | ``False``     | (1, 1)   | ``None``     | ``None``        |
-+------+------------+-----------+---------------+----------+--------------+-----------------+
-| B1   | TextCell   | ``B1``    | ``True``      | (2, 1)   | ``None``     | ``None``        |
-+------+------------+-----------+---------------+----------+--------------+-----------------+
-| B2   | MergedCell | ``None``  | ``False``     | ``None`` | (1, 0, 2, 0) | ``"B1:B2"``     |
-+------+------------+-----------+---------------+----------+--------------+-----------------+
-
-The tuple values of the ``rect`` property of a ``MergedCell`` are also
-available using the properties ``row_start``, ``col_start``,
-``row_end``, and ``col_end``.
+Data for single cells is accessed using :func:`Table.cell`. Cell references can be
+references can be either zero-offset row/column integers or an Excel/Numbers cell reference
+using a column letter and row number.
 
 Row and column iterators
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -822,7 +762,7 @@ The last positional parameter specifies the length of the border and
 defaults to 1. A single call to ``set_cell_border()`` can set the
 borders to one or more sides of the cell as above. Like
 ``Table.write()``, ``set_cell_border()`` supports both row/column and
-Excel-style cell references.
+Excel/Numbers-style cell references.
 
 Writing Numbers files
 ---------------------
