@@ -49,7 +49,6 @@ python-magic = "^0.4.27"
 sphinx = "^7.2.6"
 sphinx-markdown-builder = "^0.6.6"
 sphinx-autodoc-typehints = "^1.25.2"
-sphinx-toolbox = "^3.5.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
