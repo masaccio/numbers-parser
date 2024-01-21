@@ -37,30 +37,52 @@ class Table:
     pass
 
 
+"""Add a new sheet to the current document. If no sheet name is provided,
+the next available numbered sheet will be generated.
+
+:param sheet_name: the name of the sheet to add to the document
+    If ``sheet_name`` is ``None``, the next available sheet name in the
+    series ``Sheet 1``, ``Sheet 2``, etc. is chosen.
+:param table_name: the name of the table created in the new sheet, defaults to ``Table 1``
+:type table_name: str, optional
+:param num_rows: the number of columns in the newly created table
+:type num_rows: int, optional
+:param num_cols: the number of columns in the newly created table
+:type num_cols: int, optional
+:raises IndexError: if the sheet name already exists in the document.
+"""
+
+
 class Document:
     """Create an instance of a new Numbers document. If no document filename
     is provided, a new document is created with the parameters passed to the
     ``Document`` constructor.
 
-    :param filename: the Apple Numbers document to read
-        If ``filename`` is ``None``, an empty document is created using
-        the defaults defined by the class constructor. You can optionionally
-        override these defaults at object construction time.
+    :param filename: Apple Numbers document to read.
+        If ``filename`` is ``None``, an empty document is created using the defaults
+        defined by the class constructor. You can optionionally override these
+        defaults at object construction time.
+    :type filename: str, optional
     :param sheet_name: name of the first sheet in a new document
-        Raises ``IndexError`` if the sheet name already exists in the document.
+    :type sheet_name: str, optional
     :param table_name: name of the first table in the first sheet of a new
-        Raises ``IndexError`` if the table name already exists in the first sheet.
-    :param num_header_rows: number of header rows in the first table of a new document
-    :param num_header_cols: number of header columns in the first table of a new document
-    :param num_rows: number of rows in the first table of a new document
-    :param num_cols: number of columns in the first table of a new document
+    :type table_name: str, optional
+    :param num_header_rows: number of header rows in the first table of a new document.
+    :type: num_header_rows: int, optional
+    :param num_header_cols: number of header columns in the first table of a new document.
+    :type: num_header_cols: int, optional
+    :param num_rows: number of rows in the first table of a new document.
+    :type: num_rows: int, optional
+    :param num_cols: number of columns in the first table of a new document.
+    :type: num_cols: int, optional
+    :raises IndexError: if the sheet name already exists in the document.
+    :raises IndexError: if the table name already exists in the first sheet.
 
     Examples
-    ~~~~~~~~
 
     Reading a document and examining the ``Tables`` object:
 
-    .. code:: python
+    .. code-block:: python
 
         >>> from numbers_parser import Document
         >>> doc = Document("mydoc.numbers")
@@ -69,11 +91,10 @@ class Document:
         >>> table = doc.sheets[0].tables[0]
         >>> table.name
         'Table 1'
-        ```
 
     Creating a new document:
 
-    .. code:: python
+    .. code-block:: python
 
         doc = Document()
         doc.add_sheet("New Sheet", "New Table")
@@ -112,17 +133,34 @@ class Document:
 
     @property
     def sheets(self) -> List[Sheet]:
-        """Return a list of all sheets in the document."""
+        """
+        Return a list of all sheets in the document.
+
+        :return: List of :class:`Sheet` objects in the document
+        :rtype: List[:class:`Sheet`]
+        """
         return self._sheets
 
     @property
     def styles(self) -> Dict[str, Style]:
-        """Return a dict of styles available in the document."""
+        """
+        Return a dict of styles available in the document.
+
+        :return: Dict of :class:`Style` objects in the document with the
+            style name as keys.
+        :rtype: Dict[:class:`Style`]
+        """
         return self._model.styles
 
     @property
     def custom_formats(self) -> Dict[str, CustomFormatting]:
-        """Return a dict of custom formats available in the document."""
+        """
+        Return a dict of custom formats available in the document.
+
+        :return: Dict of :class:`CustomFormatting` objects in the document with the
+            format name as keys.
+        :rtype: Dict[:class:`CustomFormatting`]
+        """
         return self._model.custom_formats
 
     def save(self, filename: str) -> None:
@@ -142,18 +180,21 @@ class Document:
         table_name: str = "Table 1",
         num_rows: int = DEFAULT_ROW_COUNT,
         num_cols: int = DEFAULT_COLUMN_COUNT,
-    ) -> object:
+    ) -> None:
         """Add a new sheet to the current document. If no sheet name is provided,
         the next available numbered sheet will be generated.
 
         :param sheet_name: the name of the sheet to add to the document
             If ``sheet_name`` is ``None``, the next available sheet name in the
             series ``Sheet 1``, ``Sheet 2``, etc. is chosen.
-
-            Raises ``IndexError`` if the sheet name already exists in the document.
-        :param table_name: the name of the table created in the new sheet
+        :type sheet_name: str, optional
+        :param table_name: the name of the table created in the new sheet, defaults to ``Table 1``
+        :type table_name: str, optional
         :param num_rows: the number of columns in the newly created table
+        :type num_rows: int, optional
         :param num_cols: the number of columns in the newly created table
+        :type num_cols: int, optional
+        :raises IndexError: if the sheet name already exists in the document.
         """
         if sheet_name is not None:
             if sheet_name in self._sheets:
@@ -163,9 +204,6 @@ class Document:
             while f"sheet {sheet_num}" in self._sheets:
                 sheet_num += 1
             sheet_name = f"Sheet {sheet_num}"
-
-        if table_name is None:
-            table_name = "Table 1"
 
         prev_table_id = self._sheets[-1]._tables[0]._table_id
         new_sheet_id = self._model.add_sheet(sheet_name)
@@ -181,8 +219,43 @@ class Document:
         self._sheets.append(new_sheet)
 
     def add_style(self, **kwargs) -> Style:
-        """Add a new style to the current document. If no style name is
+        r"""Add a new style to the current document. If no style name is
         provided, the next available numbered style will be generated.
+
+        :param \**kwargs: style arguments
+            Key-value pairs defining a cell style (see below)
+
+        :Style Keyword Arguments:
+            * *alignment* (**Alignment**): the horizontal and vertical alignment of the cell
+            * *bg_color* (**Union[RGB, List[RGB]]**): cell background color or list of values for gradients
+            * *bold* (**str**) : ``True`` if the cell font is bold
+            * *font_color* (**RGB**) : font color
+            * *font_size* (**float**) : font size in points
+            * *font_name* (**str**) : font name
+            * *italic* (**str**) : ``True`` if the cell font is italic
+            * *name* (**str**) : cell style
+            * *underline* (**str**) : ``True`` if the cell font is underline
+            * *strikethrough* (**str**) : ``True`` if the cell font is strikethrough
+            * *first_indent* (**float**) : first line indent in points
+            * *left_indent* (**float**) : left indent in points
+            * *right_indent* (**float**) : right indent in points
+            * *text_inset* (**float**) : text inset in points
+            * *text_wrap* (**str**) : ``True`` if text wrapping is enabled
+
+        .. code-block:: python
+
+            red_text = doc.add_style(
+                name="Red Text",
+                font_name="Lucida Grande",
+                font_color=RGB(230, 25, 25),
+                font_size=14.0,
+                bold=True,
+                italic=True,
+                alignment=Alignment("right", "top"),
+            )
+            table.write("B2", "Red", style=red_text)
+            table.set_cell_style("C2", red_text)
+
         """
         if "name" in kwargs and kwargs["name"] is not None and kwargs["name"] in self._model.styles:
             raise IndexError(f"style '{kwargs['name']}' already exists")
@@ -194,8 +267,36 @@ class Document:
         return style
 
     def add_custom_format(self, **kwargs) -> CustomFormatting:
-        """Add a new custom format to the current document. If no format name is
+        r"""Add a new custom format to the current document. If no format name is
         provided, the next available numbered format will be generated.
+
+        :param \**kwargs: style arguments
+            Key-value pairs defining a cell format (see below)
+
+        :Common Custom Formatting Keyword Arguments:
+            * *alignment* (**Alignment**): the horizontal and vertical alignment of the cell
+            * *name* (**str**): the name of the custom format
+              If no name is provided, one is generated using the scheme ``Custom Format``,
+              ``Custom Format 1``, ``Custom Format 2``, etc.
+            * *type* (**str**): the type of format to create
+              Supported formats are ``number``, ``datetime`` and ``text``. If no type is
+              provided, ``add_custom_format`` defaults to ``number``
+
+        :Custom Formatting Keyword Arguments for ``type``=``number``:
+            * *integer_format* (**PaddingType**): how to pad integers, default ``PaddingType.NONE``
+            * *decimal_format* (**PaddingType**): how to pad decimals, default ``PaddingType.NONE``
+            * *num_integers* (**int**): integer precision when integers are padded, default 0
+            * *num_decimals* (**int**): integer precision when decimals are padded, default 0
+            * *show_thousands_separator* (**bool**): ``True`` if the number should include a thousands seperator
+
+        :Custom Formatting Keyword Arguments for ``type``=``datetime``:
+            * *format* (**str**): a POSIX strftime-like formatting string
+              See Date/time formatting for a list of supported directives, default ``d MMM y``
+
+        :Custom Formatting Keyword Arguments for ``type``=``text``:
+            * *format* (**str**): string format
+              The cell value is inserted in place of %s. Only one substitution is allowed by
+              Numbers, and multiple %s formatting references raise a TypeError exception
         """
         if (
             "name" in kwargs
@@ -222,6 +323,8 @@ class Document:
 
 
 class Sheet:
+    """Do not instantiate directly. Sheets are created by ``Document``"""
+
     def __init__(self, model, sheet_id):
         self._sheet_id = sheet_id
         self._model = model
@@ -276,6 +379,8 @@ class Sheet:
 
 
 class Table(Cacheable):  # noqa: F811
+    """Do not instantiate directly. Tables are created by ``Document``"""
+
     def __init__(self, model, table_id):
         super().__init__()
         self._model = model
