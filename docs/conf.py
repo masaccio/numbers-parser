@@ -14,7 +14,7 @@ extensions = [
 templates_path = ["_templates"]
 exclude_patterns = ["build", "Thumbs.db", ".DS_Store"]
 language = "en"
-master_doc = "api"
+master_doc = "index"
 project = "numbers-parser"
 copyright = "Jon Connell"
 
