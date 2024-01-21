@@ -1,4 +1,4 @@
-from typing import Dict, Generator, List, Tuple, Union
+from typing import Dict, Generator, List, Optional, Tuple, Union
 from warnings import warn
 
 from numbers_parser.cell import (
@@ -28,6 +28,8 @@ from numbers_parser.file import write_numbers_file
 from numbers_parser.model import _NumbersModel
 from numbers_parser.numbers_cache import Cacheable, cache
 
+__all__ = ["Document", "Sheet", "Table"]
+
 
 class Sheet:
     pass
@@ -37,48 +39,36 @@ class Table:
     pass
 
 
-"""Add a new sheet to the current document. If no sheet name is provided,
-the next available numbered sheet will be generated.
-
-:param sheet_name: the name of the sheet to add to the document
-    If ``sheet_name`` is ``None``, the next available sheet name in the
-    series ``Sheet 1``, ``Sheet 2``, etc. is chosen.
-:param table_name: the name of the table created in the new sheet, defaults to ``Table 1``
-:type table_name: str, optional
-:param num_rows: the number of columns in the newly created table
-:type num_rows: int, optional
-:param num_cols: the number of columns in the newly created table
-:type num_cols: int, optional
-:raises IndexError: if the sheet name already exists in the document.
-"""
-
-
 class Document:
-    """Create an instance of a new Numbers document. If no document filename
-    is provided, a new document is created with the parameters passed to the
-    ``Document`` constructor.
+    """Create an instance of a new Numbers document.
 
-    :param filename: Apple Numbers document to read.
-        If ``filename`` is ``None``, an empty document is created using the defaults
-        defined by the class constructor. You can optionionally override these
-        defaults at object construction time.
-    :type filename: str, optional
-    :param sheet_name: name of the first sheet in a new document
-    :type sheet_name: str, optional
-    :param table_name: name of the first table in the first sheet of a new
-    :type table_name: str, optional
-    :param num_header_rows: number of header rows in the first table of a new document.
-    :type num_header_rows: int, optional
-    :param num_header_cols: number of header columns in the first table of a new document.
-    :type num_header_cols: int, optional
-    :param num_rows: number of rows in the first table of a new document.
-    :type num_rows: int, optional
-    :param num_cols: number of columns in the first table of a new document.
-    :type num_cols: int, optional
-    :raises IndexError: if the sheet name already exists in the document.
-    :raises IndexError: if the table name already exists in the first sheet.
+    If ``filename`` is ``None``, an empty document is created using the defaults
+    defined by the class constructor. You can optionionally override these
+    defaults at object construction time.
 
-    Examples
+    Args:
+        filename:
+            Apple Numbers document to read.
+        sheet_name:
+            Name of the first sheet in a new document
+        table_name:
+            Name of the first table in the first sheet of a new
+        num_header_rows:
+            Number of header rows in the first table of a new document.
+        num_header_cols:
+            Number of header columns in the first table of a new document.
+        num_rows:
+            Number of rows in the first table of a new document.
+        num_cols:
+            Number of columns in the first table of a new document.
+
+    Raises:
+        IndexError:
+            If the sheet name already exists in the document.
+        IndexError:
+            If the table name already exists in the first sheet.
+
+    **Examples**
 
     Reading a document and examining the ``Tables`` object:
 
@@ -108,13 +98,13 @@ class Document:
 
     def __init__(  # noqa: PLR0913
         self,
-        filename: str = None,
-        sheet_name: str = "Sheet 1",
-        table_name: str = "Table 1",
-        num_header_rows: int = 1,
-        num_header_cols: int = 1,
-        num_rows: int = DEFAULT_ROW_COUNT,
-        num_cols: int = DEFAULT_COLUMN_COUNT,
+        filename: Optional[str] = None,
+        sheet_name: Optional[str] = "Sheet 1",
+        table_name: Optional[str] = "Table 1",
+        num_header_rows: Optional[int] = 1,
+        num_header_cols: Optional[int] = 1,
+        num_rows: Optional[int] = DEFAULT_ROW_COUNT,
+        num_cols: Optional[int] = DEFAULT_COLUMN_COUNT,
     ):
         self._model = _NumbersModel(filename)
         refs = self._model.sheet_ids()
@@ -133,41 +123,28 @@ class Document:
 
     @property
     def sheets(self) -> List[Sheet]:
-        """
-        Return a list of all sheets in the document.
-
-        :return: List of :class:`Sheet` objects in the document
-        :rtype: List[:class:`Sheet`]
-        """
+        """List[:class:`Sheet`]: A list of sheets in the document."""
         return self._sheets
 
     @property
     def styles(self) -> Dict[str, Style]:
-        """
-        Return a dict of styles available in the document.
-
-        :return: Dict of :class:`Style` objects in the document with the
-            style name as keys.
-        :rtype: Dict[:class:`Style`]
-        """
+        """Dict[str, :class:`Style`]: A dict mapping style names to to the corresponding style."""
         return self._model.styles
 
     @property
     def custom_formats(self) -> Dict[str, CustomFormatting]:
         """
-        Return a dict of custom formats available in the document.
-
-        :return: Dict of :class:`CustomFormatting` objects in the document with the
-            format name as keys.
-        :rtype: Dict[:class:`CustomFormatting`]
+        Dict[str, :class:`CustomFormatting`]: A dict mapping custom format names
+        to the corresponding custom format.
         """
         return self._model.custom_formats
 
     def save(self, filename: str) -> None:
-        """Save the document in the specified filename
+        """Save the document in the specified filename.
 
-        :param filename: the path to save the document to
-            If the file already exists, it will be overwritten.
+        Args:
+            filename: The path to save the document to. If the file already exists,
+                it will be overwritten.
         """
         for sheet in self.sheets:
             for table in sheet.tables:
@@ -176,25 +153,24 @@ class Document:
 
     def add_sheet(
         self,
-        sheet_name: str = None,
-        table_name: str = "Table 1",
-        num_rows: int = DEFAULT_ROW_COUNT,
-        num_cols: int = DEFAULT_COLUMN_COUNT,
+        sheet_name: Optional[str] = None,
+        table_name: Optional[str] = "Table 1",
+        num_rows: Optional[int] = DEFAULT_ROW_COUNT,
+        num_cols: Optional[int] = DEFAULT_COLUMN_COUNT,
     ) -> None:
-        """Add a new sheet to the current document. If no sheet name is provided,
-        the next available numbered sheet will be generated.
+        """Add a new sheet to the current document.
 
-        :param sheet_name: the name of the sheet to add to the document
-            If ``sheet_name`` is ``None``, the next available sheet name in the
-            series ``Sheet 1``, ``Sheet 2``, etc. is chosen.
-        :type sheet_name: str, optional
-        :param table_name: the name of the table created in the new sheet, defaults to ``Table 1``
-        :type table_name: str, optional
-        :param num_rows: the number of columns in the newly created table
-        :type num_rows: int, optional
-        :param num_cols: the number of columns in the newly created table
-        :type num_cols: int, optional
-        :raises IndexError: if the sheet name already exists in the document.
+        If no sheet name is provided, the next available numbered sheet
+        will be generated in the series ``Sheet 1``, ``Sheet 2``, etc.
+
+        Args:
+            sheet_name: The name of the sheet to add to the document
+            table_name: The name of the table created in the new sheet
+            num_rows: The number of columns in the newly created table
+            num_cols: The number of columns in the newly created table
+
+        Raises:
+            IndexError: If the sheet name already exists in the document.
         """
         if sheet_name is not None:
             if sheet_name in self._sheets:
@@ -219,10 +195,12 @@ class Document:
         self._sheets.append(new_sheet)
 
     def add_style(self, **kwargs) -> Style:
-        r"""Add a new style to the current document. If no style name is
-        provided, the next available numbered style will be generated.
+        r"""Add a new style to the current document.
 
-        :param \**kwargs: style arguments
+        If no style name is provided, the next available numbered style will be generated.
+
+        Args:
+            \**kwargs: style arguments
             Key-value pairs defining a cell style (see below)
 
         :Style Keyword Arguments:
@@ -268,10 +246,12 @@ class Document:
         return style
 
     def add_custom_format(self, **kwargs) -> CustomFormatting:
-        r"""Add a new custom format to the current document. If no format name is
-        provided, the next available numbered format will be generated.
+        r"""Add a new custom format to the current document.
 
-        :param \**kwargs: style arguments
+        If no format name is provided, the next available numbered format will be generated.
+
+        Args:
+            \**kwargs: style arguments
             Key-value pairs defining a cell format (see below)
 
         :Common Custom Formatting Keyword Arguments:
@@ -325,7 +305,7 @@ class Document:
 
 
 class Sheet:
-    """Do not instantiate directly. Sheets are created by ``Document``"""
+    """Do not instantiate directly. Sheets are created by :class:`Document`."""
 
     def __init__(self, model, sheet_id):
         self._sheet_id = sheet_id
@@ -334,29 +314,45 @@ class Sheet:
         self._tables = ItemsList(self._model, refs, Table)
 
     @property
-    def tables(self):
+    def tables(self) -> List[Table]:
+        """List[:class:`Table`]: A list of tables in the sheet."""
         return self._tables
 
     @property
-    def name(self):
-        """Return the sheets name."""
+    def name(self) -> str:
+        """str: The name of the sheet."""
         return self._model.sheet_name(self._sheet_id)
 
     @name.setter
-    def name(self, value):
-        """Set the sheet's name."""
+    def name(self, value: str):
         self._model.sheet_name(self._sheet_id, value)
 
     def add_table(  # noqa: PLR0913
         self,
-        table_name=None,
-        x=None,
-        y=None,
-        num_rows=DEFAULT_ROW_COUNT,
-        num_cols=DEFAULT_COLUMN_COUNT,
-    ) -> object:
-        """Add a new table to the current sheet. If no table name is provided,
-        the next available numbered table will be generated.
+        table_name: Optional[str] = None,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+        num_rows: Optional[int] = DEFAULT_ROW_COUNT,
+        num_cols: Optional[int] = DEFAULT_COLUMN_COUNT,
+    ) -> Table:
+        """Add a new table to the current sheet.
+
+        If no table name is provided, the next available numbered table
+        will be generated in the series ``Table 1``, ``Table 2``, etc.
+
+        Args:
+            table_name: The name of the new table.
+            x: The x offset for the table in points.
+            y: The y offset for the table in points. If ``None``, the table
+                is placed below the last table in the sheet.
+            num_rows: The number of rows for the new table.
+            num_cols: The number of columns for the new table.
+
+        Returns:
+            :class:`Table`: the newly created table.
+
+        Raises:
+            IndexError: If the table name already exists.
         """
         from_table_id = self._tables[-1]._table_id
         return self._add_table(table_name, from_table_id, x, y, num_rows, num_cols)
@@ -381,7 +377,7 @@ class Sheet:
 
 
 class Table(Cacheable):  # noqa: F811
-    """Do not instantiate directly. Tables are created by ``Document``"""
+    """Do not instantiate directly. Tables are created by :class:`Document`."""
 
     def __init__(self, model, table_id):
         super().__init__()
@@ -410,30 +406,35 @@ class Table(Cacheable):  # noqa: F811
 
     @property
     def name(self) -> str:
-        """Return the table's name."""
+        """str: The table's name."""
         return self._model.table_name(self._table_id)
 
     @name.setter
     def name(self, value: str):
-        """Set the table's name."""
         self._model.table_name(self._table_id, value)
 
     @property
-    def table_name_enabled(self):
+    def table_name_enabled(self) -> bool:
+        """bool: ``True`` if the table name is visible, ``False`` otherwise."""
         return self._model.table_name_enabled(self._table_id)
 
     @table_name_enabled.setter
-    def table_name_enabled(self, enabled):
+    def table_name_enabled(self, enabled: bool):
         self._model.table_name_enabled(self._table_id, enabled)
 
     @property
     def num_header_rows(self) -> int:
-        """Return the number of header rows."""
+        """
+        int: The number of header rows.
+
+        Raises:
+            ValueError: If the number of headers is negative, exceeds the number of rows in the
+                table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).
+        """
         return self._model.num_header_rows(self._table_id)
 
     @num_header_rows.setter
     def num_header_rows(self, num_headers: int):
-        """Return the number of header rows."""
         if num_headers < 0:
             raise ValueError("Number of headers cannot be negative")
         elif num_headers > self.num_rows:
@@ -444,12 +445,17 @@ class Table(Cacheable):  # noqa: F811
 
     @property
     def num_header_cols(self) -> int:
-        """Return the number of header columns."""
+        """
+        int: The number of header columns.
+
+        Raises:
+            ValueError: If the number of headers is negative, exceeds the number of rows in the
+                table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).
+        """
         return self._model.num_header_cols(self._table_id)
 
     @num_header_cols.setter
     def num_header_cols(self, num_headers: int):
-        """Return the number of header columns."""
         if num_headers < 0:
             raise ValueError("Number of headers cannot be negative")
         elif num_headers > self.num_cols:
@@ -460,35 +466,52 @@ class Table(Cacheable):  # noqa: F811
 
     @property
     def height(self) -> int:
-        """Return the table's height in points."""
+        """int: The table's height in points."""
         return self._model.table_height(self._table_id)
 
     @property
     def width(self) -> int:
-        """Return the table's width in points."""
+        """int: The table's width in points."""
         return self._model.table_width(self._table_id)
 
     def row_height(self, row_num: int, height: int = None) -> int:
-        """Return the height of a table row. Set the height if not None."""
+        """The height of a table row in points.
+
+        Args:
+            row_num: the zero-offset row number
+            height: the height of the row in points. If not ``None``, set the row height.
+
+        Returns:
+            int: The height of the table row.
+        """
         return self._model.row_height(self._table_id, row_num, height)
 
     def col_width(self, col_num: int, width: int = None) -> int:
-        """Return the width of a table column. Set the width if not None."""
+        """The width of a table column in points.
+
+        Args:
+            col_num: the zero-offset column number
+            width: the width of the column in points. If not ``None``, set the column width.
+
+        Returns:
+            int: The width of the table column.
+        """
         return self._model.col_width(self._table_id, col_num, width)
 
     @property
     def coordinates(self) -> Tuple[float]:
-        """Return the table's x,y offsets in points."""
+        """Tuple[float]: The table's x, y offsets in points."""
         return self._model.table_coordinates(self._table_id)
 
-    def rows(self, values_only: bool = False) -> list:
+    def rows(self, values_only: bool = False) -> Union[List[List[Cell]], List[List[str]]]:
         """Return all rows of cells for the Table.
 
         Args:
-            values_only: if True, return cell values instead of Cell objects
+            values_only: if ``True``, return cell values instead of :class:`Cell` objects
 
         Returns:
-            rows: list of rows; each row is a list of Cell objects
+            Union[List[List[Cell]], List[List[str]]]: list of rows; each row is a list
+                of Cell objects, or string values.
         """
         if values_only:
             return [[cell.value for cell in row] for row in self._data]
@@ -502,6 +525,84 @@ class Table(Cacheable):  # noqa: F811
         return sorted(set(list(merge_cells)))
 
     def cell(self, *args) -> Union[Cell, MergedCell]:
+        """
+        Return a single cell in the table.
+
+        Cell references in a table can be **row-column** offsers or Excel/Numbers-style **A1**
+        notation:
+
+        .. code-block:: python
+
+            (0, 0)      # Row-column notation.
+            ("A1")      # The same cell in A1 notation.
+
+        Args (row-column notation):
+            param1 (``int``): zero-indexed row number
+            param2 (``int``): zero-indexed column number
+
+        Args (A1 notation):
+            param1 (``str``): a cell reference using Excel/Numbers-style A1 notation.
+
+        Returns:
+            Union[Cell, MergedCell]:
+                A cell with the base class :class:`Cell` or, if merged, a :class:`MergedCell`.
+
+        **Merged cells**
+
+        ``Cell.is_merged`` returns ``True`` for any cell that is the result of
+        merging rows and/or columns. Cells eliminated from the table by the
+        merge can still be indexed using ``Table.cell()`` and are of type
+        ``MergedCell``.
+
+        Consider this example:
+
+        .. raw:: html
+
+            <table>
+                <tr>
+                    <td>A1</td>
+                    <td rowspan=2>B1</td>
+                </tr>
+                <tr>
+                    <td>A2</td>
+                </tr>
+            </table>
+
+        The properties of merges are tested using the following properties:
+
+        +------+------------+-----------+---------------+----------+--------------+-----------------+
+        | Cell | Type       | ``value`` | ``is_merged`` | ``size`` | ``rect``     | ``merge_range`` |
+        +======+============+===========+===============+==========+==============+=================+
+        | A1   | TextCell   | ``A1``    | ``False``     | (1, 1)   | ``None``     | ``None``        |
+        +------+------------+-----------+---------------+----------+--------------+-----------------+
+        | A2   | TextCell   | ``A2``    | ``False``     | (1, 1)   | ``None``     | ``None``        |
+        +------+------------+-----------+---------------+----------+--------------+-----------------+
+        | B1   | TextCell   | ``B1``    | ``True``      | (2, 1)   | ``None``     | ``None``        |
+        +------+------------+-----------+---------------+----------+--------------+-----------------+
+        | B2   | MergedCell | ``None``  | ``False``     | ``None`` | (1, 0, 2, 0) | ``"B1:B2"``     |
+        +------+------------+-----------+---------------+----------+--------------+-----------------+
+
+        The tuple values of the ``rect`` property of a ``MergedCell`` are also
+        available using the properties ``row_start``, ``col_start``,
+        ``row_end``, and ``col_end``.
+
+        **Example**
+
+        .. code-block:: python
+
+            >>> doc = Document("mydoc.numbers")
+            >>> sheets = doc.sheets
+            >>> tables = sheets["Sheet 1"].tables
+            >>> table = tables["Table 1"]
+            >>> table.cell(1,0)
+            <numbers_parser.cell.TextCell object at 0x105a80a10>
+            >>> table.cell(1,0).value
+            'Debit'
+            >>> table.cell("B2")
+            <numbers_parser.cell.TextCell object at 0x105a80b90>
+            >>> table.cell("B2").value
+            1234.50
+        """  # noqa: E501
         if isinstance(args[0], str):
             (row_num, col_num) = xl_cell_to_rowcol(args[0])
         elif len(args) != 2:
@@ -518,27 +619,29 @@ class Table(Cacheable):  # noqa: F811
 
     def iter_rows(  # noqa: PLR0913
         self,
-        min_row: int = None,
-        max_row: int = None,
-        min_col: int = None,
-        max_col: int = None,
-        values_only: bool = False,
+        min_row: Optional[int] = None,
+        max_row: Optional[int] = None,
+        min_col: Optional[int] = None,
+        max_col: Optional[int] = None,
+        values_only: Optional[bool] = False,
     ) -> Generator[tuple, None, None]:
-        """Produces cells from a table, by row. Specify the iteration range using
-        the indexes of the rows and columns.
+        """Produces cells from a table, by row.
+
+        Specify the iteration range using the indexes of the rows and columns.
 
         Args:
-            min_row: smallest row index (zero indexed)
-            max_row: largest row (zero indexed)
-            min_col: smallest row index (zero indexed)
-            max_col: largest row (zero indexed)
-            values_only: return cell values rather than Cell objects
+            min_row: Zero-indexed starting row number, or ``0`` if ``None``.
+            max_row: Zero-indexed end row number, or all rows if ``None``.
+            min_col: Zero-indexed starting column number or ``0`` if ``None``.
+            max_col: Zero-indexed end column number, or all columns if ``None``.
+            values_only: return cell values rather than :class:`Cell` objects
 
-        Returns:
-            generator: tuple of cells
+        Yields:
+            tuple: :class:`Cell` objects or string values for the row
 
         Raises:
-            IndexError: row or column values are out of range for the table
+            IndexError:
+                If row or column values are out of range for the table
         """
         min_row = min_row or 0
         max_row = max_row or self.num_rows - 1
@@ -563,27 +666,29 @@ class Table(Cacheable):  # noqa: F811
 
     def iter_cols(  # noqa: PLR0913
         self,
-        min_col: int = None,
-        max_col: int = None,
-        min_row: int = None,
-        max_row: int = None,
-        values_only: bool = False,
+        min_col: Optional[int] = None,
+        max_col: Optional[int] = None,
+        min_row: Optional[int] = None,
+        max_row: Optional[int] = None,
+        values_only: Optional[bool] = False,
     ) -> Generator[tuple, None, None]:
-        """Produces cells from a table, by column. Specify the iteration range using
-        the indexes of the rows and columns.
+        """Produces cells from a table, by column.
+
+        Specify the iteration range using the indexes of the rows and columns.
 
         Args:
-            min_col: smallest row index (zero indexed)
-            max_col: largest row (zero indexed)
-            min_row: smallest row index (zero indexed)
-            max_row: largest row (zero indexed)
-            values_only: return cell values rather than Cell objects
+            min_col: Zero-indexed starting column number or ``0`` if ``None``.
+            max_col: Zero-indexed end column number, or all columns if ``None``.
+            min_row: Zero-indexed starting row number, or ``0`` if ``None``.
+            max_row: Zero-indexed end row number, or all rows if ``None``.
+            values_only: return cell values rather than :class:`Cell` objects
 
-        Returns:
-            generator: tuple of cells
+        Yields:
+            tuple: :class:`Cell` objects or string values for the row
 
         Raises:
-            IndexError: row or column values are out of range for the table
+            IndexError:
+                If row or column values are out of range for the table
         """
         min_row = min_row or 0
         max_row = max_row or self.num_rows - 1
@@ -607,9 +712,6 @@ class Table(Cacheable):  # noqa: F811
                 yield tuple(row[col_num] for row in rows[min_row : max_row + 1])
 
     def _validate_cell_coords(self, *args):
-        """Check first arguments are value cell references and pad
-        the table with empty cells if outside current bounds.
-        """
         if isinstance(args[0], str):
             (row_num, col_num) = xl_cell_to_rowcol(args[0])
             values = args[1:]
