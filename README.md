@@ -141,10 +141,6 @@ containing evaluation errors of any kind `ErrorCell`.
 
 ### Cell references
 
-Data for single cells is accessed using Table.cell(). Cell references can be
-references can be either zero-offset row/column integers or an Excel/Numbers cell reference
-using a column letter and row number.
-
 Data for single cells is accessed using [`numbers_parser.Table.cell()`](#numbers_parser.Table.cell)
 references can be either zero-offset row/column integers or an Excel/Numbers cell reference
 using a column letter and row number.
