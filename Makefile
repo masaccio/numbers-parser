@@ -38,12 +38,13 @@ profile:
 	poetry run pytest --profile
 	poetry run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
 
-docs: docs/README.md
+docs: README.md
 
 docs/build/index.md: docs/index.rst docs/conf.py src/$(package_c)/*.py
+	@mkdir -p docs/build
 	poetry run sphinx-build -q -a -b markdown  docs docs/build
 
-docs/README.md: docs/build/index.md
+README.md: docs/build/index.md
 	cp $< $@
 
 test:
@@ -57,7 +58,7 @@ BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
 
 bootstrap: $(BOOTSTRAP_FILES)
 
-ENTITLEMENTS = src/bootstrap/entitlements.xml
+ENTITLEMENTS = src/build/entitlements.xml
 
 .bootstrap/Numbers.unsigned.app: $(ENTITLEMENTS)
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobuf mapping from Numbers"$$(tput init)
@@ -72,12 +73,12 @@ ENTITLEMENTS = src/bootstrap/entitlements.xml
 .bootstrap/mapping.json: .bootstrap/Numbers.unsigned.app
 	@mkdir -p .bootstrap
 	PYTHONPATH=${LLDB_PYTHON_PATH}:src xcrun python3 \
-		src/bootstrap/extract_mapping.py \
+		src/build/extract_mapping.py \
 		.bootstrap/Numbers.unsigned.app/Contents/MacOS/Numbers $@
 
 .bootstrap/mapping.py: .bootstrap/mapping.json
 	@mkdir -p $(dir $@)
-	python3 src/bootstrap/generate_mapping.py $< $@
+	python3 src/build/generate_mapping.py $< $@
 
 src/$(package_c)/generated/functionmap.py: .bootstrap/functionmap.py
 	@mkdir -p $(dir $@)
@@ -91,17 +92,17 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 .bootstrap/functionmap.py:
 	@echo $$(tput setaf 2)"Bootstrap: extracting function names from Numbers"$$(tput init)
 	@mkdir -p .bootstrap
-	poetry run python3 src/bootstrap/extract_functions.py $(TST_TABLES) $@
+	poetry run python3 src/build/extract_functions.py $(TST_TABLES) $@
 
 .bootstrap/fontmap.py:
 	@echo $$(tput setaf 2)"Bootstrap: generating font name map"$$(tput init)
 	@mkdir -p .bootstrap
-	poetry run python3 src/bootstrap/generate_fontmap.py $@
+	poetry run python3 src/build/generate_fontmap.py $@
 
 .bootstrap/protos/TNArchives.proto:
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobufs from Numbers"$$(tput init)
-	PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp python3 src/bootstrap/protodump.py $(NUMBERS) .bootstrap/protos
-	poetry run python3 src/bootstrap/rename_proto_files.py .bootstrap/protos
+	PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp python3 src/build/protodump.py $(NUMBERS) .bootstrap/protos
+	poetry run python3 src/build/rename_proto_files.py .bootstrap/protos
 
 src/$(package_c)/mapping.py: .bootstrap/mapping.py
 	cp $< $@
@@ -123,7 +124,7 @@ src/protos/TNArchives.proto: .bootstrap/protos/TNArchives.proto
 
 src/$(package_c)/generated/__init__.py: src/$(package_c)/generated/TNArchives_pb2.py
 	@echo $$(tput setaf 2)"Bootstrap: patching paths in generated protobuf files"$$(tput init)
-	python3 src/bootstrap/replace_paths.py src/$(package_c)/generated/T*.py
+	python3 src/build/replace_paths.py src/$(package_c)/generated/T*.py
 	touch $@
 
 veryclean:

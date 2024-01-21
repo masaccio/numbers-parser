@@ -24,7 +24,9 @@ src/*.egg-info
 # Testing
 .tox
 .venv
-build
+
+# Docs
+docs/build
 
 # Local
 *.ignore
