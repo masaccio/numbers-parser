@@ -28,5 +28,6 @@
     "ruff.lint.args": [
         "--config=pyproject.toml"
     ],
+    "markdownlint.ignore": [ "README.md" ],
     "esbonio.sphinx.confDir": "",
 }
