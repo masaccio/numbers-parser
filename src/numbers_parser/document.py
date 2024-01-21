@@ -167,10 +167,14 @@ class Document:
         will be generated in the series ``Sheet 1``, ``Sheet 2``, etc.
 
         Args:
-            sheet_name: The name of the sheet to add to the document
-            table_name: The name of the table created in the new sheet
-            num_rows: The number of columns in the newly created table
-            num_cols: The number of columns in the newly created table
+            sheet_name:
+                The name of the sheet to add to the document
+            table_name:
+                The name of the table created in the new sheet
+            num_rows:
+                The number of columns in the newly created table
+            num_cols:
+                The number of columns in the newly created table
 
         Raises:
             IndexError: If the sheet name already exists in the document.
@@ -206,37 +210,35 @@ class Document:
             \**kwargs: style arguments
             Key-value pairs defining a cell style (see below)
 
-        :Style Keyword Arguments:
-            * **alignment** (``Alignment``, *optional*, default=``Alignment(DEFAULT_ALIGNMENT)``):
-                Horizontal and vertical alignment of the cell
-            * **bg_color** (``Union[RGB, List[RGB]]``, *optional*, default: ``RGB(0, 0, 0)``):
-                Cell background color or list of colors for gradients
-            * **bold** (``bool``, *optional*, default: ``False``):
-                ``True`` if the cell font is bold
-            * **font_color** (``RGB``, *optional*, default: ``RGB(0, 0, 0)``):
-                Font color
-            * **font_size** (``float``, *optional*, default: ``DEFAULT_FONT_SIZE``):
-                Font size in points
-            * **font_name** (``str``, *optional*, default: ``DEFAULT_FONT_SIZE``):
-                Font name
-            * **italic** (``bool``, *optional*, default: ``False``):
-                ``True`` if the cell font is italic
-            * **name** (``str``, *optional*):
-                cell style
-            * **underline** (``bool``, *optional*, default: ``False``):
-                ``True`` if the cell font is underline
-            * **strikethrough** (``bool``, *optional*, default: ``False``):
-                ``True`` if the cell font is strikethrough
-            * **first_indent** (``float``, *optional*, default: ``0.0``):
-                First line indent in points
-            * **left_indent** (``float``, *optional*, default: ``0.0``):
-                Left indent in points
-            * **right_indent** (``float``, *optional*, default: ``0.0``):
-                Right indent in points
-            * **text_inset** (``float``, *optional*, default: DEFAULT_TEXT_INSET):
-                Text inset in points
-            * **text_wrap** (``str``, *optional*, default: ``True``):
-                ``True`` if text wrapping is enabled
+        Raises:
+            TypeError: If ``font_size`` is not a ``float``, ``font_name`` is not a ``str``,
+            or if any of the ``bool`` parameters are invalid.
+
+        :Keywords:
+            * **alignment** (``Alignment``, *optional*, default=``Alignment("auto", "top")``) – Horizontal and vertical alignment of the cell
+            * **bg_color** (``Union[RGB, List[RGB]]``, *optional*, default: ``RGB(0, 0, 0)``) – Cell
+              background color or list of colors for gradients
+            * **bold** (``bool``, *optional*, default: ``False``) – ``True`` if the cell
+              font is bold
+            * **font_color** (``RGB``, *optional*, default: ``RGB(0, 0, 0)``) – Font color
+            * **font_size** (``float``, *optional*, default: ``DEFAULT_FONT_SIZE``) – Font
+              size in points
+            * **font_name** (``str``, *optional*, default: ``DEFAULT_FONT_SIZE``) – Font name
+            * **italic** (``bool``, *optional*, default: ``False``) – ``True`` if the cell
+              font is italic
+            * **name** (``str``, *optional*) – Cell style name
+            * **underline** (``bool``, *optional*, default: ``False``) – ``True`` if the
+              cell font is underline
+            * **strikethrough** (``bool``, *optional*, default: ``False``) – ``True`` if
+              the cell font is strikethrough
+            * **first_indent** (``float``, *optional*, default: ``0.0``) – First line
+              indent in points
+            * **left_indent** (``float``, *optional*, default: ``0.0``) – Left indent in points
+            * **right_indent** (``float``, *optional*, default: ``0.0``) – Right indent in points
+            * **text_inset** (``float``, *optional*, default: DEFAULT_TEXT_INSET) – Text inset
+              in points
+            * **text_wrap** (``str``, *optional*, default: ``True``) – ``True`` if text
+              wrapping is enabled
 
         .. code-block:: python
 
@@ -251,8 +253,7 @@ class Document:
             )
             table.write("B2", "Red", style=red_text)
             table.set_cell_style("C2", red_text)
-
-        """
+        """  # noqa: E501
         if "name" in kwargs and kwargs["name"] is not None and kwargs["name"] in self._model.styles:
             raise IndexError(f"style '{kwargs['name']}' already exists")
         style = Style(**kwargs)
@@ -268,35 +269,48 @@ class Document:
         If no format name is provided, the next available numbered format will be generated.
 
         Args:
-            \**kwargs: style arguments
-            Key-value pairs defining a cell format (see below)
+            \**kwargs: Custom formatting arguments
+            Key-value pairs defining a custom cell format (see table below).
 
-        :Common Custom Formatting Keyword Arguments:
-            * *alignment* (**Alignment**): the horizontal and vertical alignment of the cell
-            * *name* (**str**): the name of the custom format
-              If no name is provided, one is generated using the scheme ``Custom Format``,
-              ``Custom Format 1``, ``Custom Format 2``, etc.
-            * *type* (**str**): the type of format to create
-              Supported formats are ``number``, ``datetime`` and ``text``. If no type is
-              provided, ``add_custom_format`` defaults to ``number``
+        **Custom Formatting Keyword Arguments**
 
-        :Number Custom Formatting Keyword Arguments:
-            * *integer_format* (**PaddingType**): how to pad integers, default ``PaddingType.NONE``
-            * *decimal_format* (**PaddingType**): how to pad decimals, default ``PaddingType.NONE``
-            * *num_integers* (**int**): integer precision when integers are padded, default 0
-            * *num_decimals* (**int**): integer precision when decimals are padded, default 0
-            * *show_thousands_separator* (**bool**): ``True`` if the number should include
-              a thousands seperator
+        All custom formatting styles share a name and a type, described in the **Common**
+        parameters in the following table. Additional key-value pairs configure the format
+        depending upon the value of ``kwargs["type"]``.
 
-        :Datetime Custom Formatting Keyword Arguments:
-            * *format* (``str``, *optional*, default: ``"d MMM y"``):
-                A POSIX strftime-like formatting string.
+        Supported values for ``kwargs["type"]`` are:
 
-        :Text Custom Formatting Keyword Arguments:
-            * *format* (``str``, *optional*, default: ``"%s"``) - string format
+            * ``"datetime"``: A date and time value with custom formatting.
+            * ``"number"``: A decimal number.
+            * ``"text"``: A simple text string.
+
+        :Common Keys:
+            * **name** (``str``) – The name of the custom format. If no name is provided,
+              one is generated using the scheme ``Custom Format``, ``Custom Format 1``, ``Custom Format 2``, etc.
+            * **type** (``str``, *optional*, default: ``number``) – The type of format to
+              create Supported formats are ``number``, ``datetime`` and ``text``.
+
+        :``"number"``:
+            * **integer_format** (``PaddingType``, *optional*, default: ``PaddingType.NONE``) – How
+              to pad integers.
+            * **decimal_format** (``PaddingType``, *optional*, default: ``PaddingType.NONE``) – How
+              to pad decimals.
+            * **num_integers** (``int``, *optional*, default: ``0``) – Integer precision
+              when integers are padded.
+            * **num_decimals** (``int``, *optional*, default: ``0``) – Integer precision
+              when decimals are padded.
+            * **show_thousands_separator** (``bool``, *optional*, default: ``False``) – ``True``
+              if the number should include a thousands seperator.
+
+        :``"datetime"``:
+            * **format** (``str``, *optional*, default: ``"d MMM y"``) – A POSIX strftime-like
+              formatting string of `Numbers date/time directives <#datetime-formats>`_.
+
+        :``"text"``:
+            * **format** (``str``, *optional*, default: ``"%s"``) – Text format.
               The cell value is inserted in place of %s. Only one substitution is allowed by
               Numbers, and multiple %s formatting references raise a TypeError exception
-        """
+        """  # noqa: E501
         if (
             "name" in kwargs
             and kwargs["name"] is not None
@@ -323,8 +337,8 @@ class Document:
 
 class Sheet:
     """
-    > [!CAUTION]
-    > Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+    .. NOTE::
+       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, model, sheet_id):
@@ -411,8 +425,8 @@ class Sheet:
 
 class Table(Cacheable):  # noqa: F811
     """
-    > [!CAUTION]
-    > Do not instantiate directly. Tables are created by :py:class:`~numbers_parser.Document`.
+    .. NOTE::
+       Do not instantiate directly. Tables are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, model, table_id):
@@ -893,22 +907,12 @@ class Table(Cacheable):  # noqa: F811
 
         Cell references can be **row-column** offsers or Excel/Numbers-style **A1** notation.
 
-        Args:
-            \*args:
-                positional arguments for cell reference and data format type (see below)
-            \**kwargs:
-                Key-value pairs defining a formatting options for each data format (see below).
+        All formatting styles share a name and a type, described in the **Common**
+        parameters in the following table. Additional key-value pairs configure the format
+        depending upon the value of ``kwargs["type"]``.
 
-        :Args (row-column notation):
-            * **param1** (``int``): Zero-indexed row number.
-            * **param2** (``int``): Zero-indexed column number.
-            * **param3** (``str``): Data format type for the cell (see "data formats" below).
+        Supported values for kwargs["type"] are:
 
-        :Args (A1 notation):
-            * **param1** (``str``): A cell reference using Excel/Numbers-style A1 notation.
-            * **param2** (``str``): Data format type for the cell (see "data formats" below).
-
-        :Data formats:
             * ``"base"``: A number base in the range 2-36.
             * ``"currency"``: A decimal formatted with a currency symbol.
             * ``"datetime"``: A date and time value with custom formatting.
@@ -917,31 +921,56 @@ class Table(Cacheable):  # noqa: F811
             * ``"number"``: A decimal number.
             * ``"scientific"``: A decimal number with scientific notation.
 
-        :Base Keyword Arguments:
-            * **base_use_minus_sign** (``int``, *optional*, default: ``10``):
-                The integer base to represent the number from 2-36.
-            * **base_use_minus_sign** (``bool``, *optional*, default: ``True``):
-                If ``True```` use a standard minus sign, otherwise format as two's compliment
-                (only possible for binary, octal and hexadecimal.
-            * **base_places** (``int``, *optional*, default: ``0``):
-                The number of decimal places, or ``None`` for automatic.
-        :Currency Keyword Arguments:
-            * **currency** (``str``, *optional*, default: ``"GBP"``):
-               An ISO currency code, e.g. ``"GBP"`` or ``"USD"``.
-            * **decimal_places** (``int``, *optional*, default: ``2``):
-               The number of decimal places, or ``None`` for automatic.
-            * **negative_style** (``NegativeNumberStyle``, *optional*, default: ``NegativeNumberStyle.MINUS``):
-                How negative numbers are represented.
-            * **show_thousands_separator** (``bool``, *optional*, default: ``False``):
-               ``True`` if the number should include a thousands seperator, e.g. ``,``
-            * **use_accounting_style** (``bool``, *optional*, default: ``False``):
-               ``True`` if the currency symbol should be formatted to the left of the cell and
-               separated from the number value by a tab.
+        Args:
+            \*args:
+                positional arguments for cell reference and data format type (see below)
+            \**kwargs:
+                Key-value pairs defining a formatting options for each data format (see below).
 
-        Warnings:
+        Warns:
             RuntimeWarning:
                 If ``use_accounting_style`` is used with any ``negative_style`` other than
                 ``NegativeNumberStyle.MINUS``.
+
+        :Args (row-column):
+            * **param1** (``int``): Zero-indexed row number.
+            * **param2** (``int``): Zero-indexed column number.
+            * **param3** (``str``): Data format type for the cell (see "data formats" below).
+
+        :Args (A1):
+            * **param1** (``str``): A cell reference using Excel/Numbers-style A1 notation.
+            * **param2** (``str``): Data format type for the cell (see "data formats" below).
+
+        **Formatting Keyword Arguments**
+
+        :Common keys:
+            * **name** (``str``) – The name of the custom format. If no name is provided,
+              one is generated using the scheme ``Custom Format``, ``Custom Format 1``, ``Custom Format 2``, etc.
+            * **type** (``str``, *optional*, default: ``number``) – The type of format to
+              create Supported formats are ``number``, ``datetime`` and ``text``.
+
+        :``"base"``:
+            * **base_use_minus_sign** (``int``, *optional*, default: ``10``) – The integer
+              base to represent the number from 2-36.
+            * **base_use_minus_sign** (``bool``, *optional*, default: ``True``) – If ``True``
+              use a standard minus sign, otherwise format as two's compliment (only
+              possible for binary, octal and hexadecimal.
+            * **base_places** (``int``, *optional*, default: ``0``) – The number of
+              decimal places, or ``None`` for automatic.
+
+        :``"currency"``:
+            * **currency** (``str``, *optional*, default: ``"GBP"``) – An ISO currency
+              code, e.g. ``"GBP"`` or ``"USD"``.
+            * **decimal_places** (``int``, *optional*, default: ``2``) – The number of
+              decimal places, or ``None`` for automatic.
+            * **negative_style** (``NegativeNumberStyle``, *optional*, default: ``NegativeNumberStyle.MINUS``) – How negative numbers are represented.
+              See `Negative number formats <#negative-formats>`_.
+            * **show_thousands_separator** (``bool``, *optional*, default: ``False``) – ``True``
+              if the number should include a thousands seperator, e.g. ``,``
+            * **use_accounting_style** (``bool``, *optional*, default: ``False``) –  ``True``
+              if the currency symbol should be formatted to the left of the cell and
+              separated from the number value by a tab.
+
 
         **Example**
 
@@ -950,7 +979,7 @@ class Table(Cacheable):  # noqa: F811
             >>> table.set_cell_formatting("C1", "date", date_time_format="EEEE, d MMMM yyyy")
             >>> table.set_cell_formatting(0, 4, "number", decimal_places=3, negative_style=NegativeNumberStyle.RED)
 
-        """
+        """  # noqa: E501
         (row_num, col_num, *args) = self._validate_cell_coords(*args)
         if len(args) == 1:
             format_type = args[0]

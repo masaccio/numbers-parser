@@ -38,13 +38,17 @@ profile:
 	poetry run pytest --profile
 	poetry run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
 
-docs: README.md
+docs: docs/build/api.html
 	@echo > /dev/null
 
 docs/build/index.md: docs/index.rst docs/conf.py src/$(package_c)/*.py
 	@mkdir -p docs/build
 	poetry run sphinx-build -q -b markdown  docs docs/build
+
+docs/build/api.html: docs/api.rst docs/conf.py src/$(package_c)/*.py
+	@mkdir -p docs/build
 	poetry run sphinx-build -q -b html  docs docs/build
+
 
 README.md: docs/build/index.md
 	cp $< $@
