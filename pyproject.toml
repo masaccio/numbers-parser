@@ -54,6 +54,7 @@ sphinx-autodoc-typehints = "^1.25.2"
 sphinx = "^7.2.6"
 sphinx-markdown-builder = "^0.6.6"
 sphinx-autodoc-typehints = "^1.25.2"
+sphinx-rtd-theme = "^2.0.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

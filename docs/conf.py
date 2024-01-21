@@ -8,6 +8,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
     "sphinx_autodoc_typehints",
+    "sphinx_rtd_theme",
 ]
 
 templates_path = ["_templates"]
@@ -40,6 +41,8 @@ simplify_optional_unions = False
 always_document_param_types = True
 typehints_defaults = "comma"
 typehints_formatter = format_optional
+
+html_theme = "sphinx_rtd_theme"
 
 autodoc_default_options = {
     "member-order": "bysource",
