@@ -859,22 +859,36 @@ If no style name is provided, the next available numbered style will be generate
   * **\*\*kwargs** – style arguments
   * **style** (*Key-value pairs defining a cell*) – 
 * **Style Keyword Arguments:**
-  * *alignment* (**Alignment**): horizontal and vertical alignment of the cell
-  * *bg_color* (**Union[RGB, List[RGB]]**): cell background color or list
-    of colors for gradients
-  * *bold* (**str**) : `True` if the cell font is bold
-  * *font_color* (**RGB**) : font color
-  * *font_size* (**float**) : font size in points
-  * *font_name* (**str**) : font name
-  * *italic* (**str**) : `True` if the cell font is italic
-  * *name* (**str**) : cell style
-  * *underline* (**str**) : `True` if the cell font is underline
-  * *strikethrough* (**str**) : `True` if the cell font is strikethrough
-  * *first_indent* (**float**) : first line indent in points
-  * *left_indent* (**float**) : left indent in points
-  * *right_indent* (**float**) : right indent in points
-  * *text_inset* (**float**) : text inset in points
-  * *text_wrap* (**str**) : `True` if text wrapping is enabled
+  * **alignment** (`Alignment`, *optional*, default=\`\`Alignment(DEFAULT_ALIGNMENT)\`\`):
+    : Horizontal and vertical alignment of the cell
+  * **bg_color** (`Union[RGB, List[RGB]]`, *optional*, default: `RGB(0, 0, 0)`):
+    : Cell background color or list of colors for gradients
+  * **bold** (`bool`, *optional*, default: `False`):
+    : `True` if the cell font is bold
+  * **font_color** (`RGB`, *optional*, default: `RGB(0, 0, 0)`):
+    : Font color
+  * **font_size** (`float`, *optional*, default: `DEFAULT_FONT_SIZE`):
+    : Font size in points
+  * **font_name** (`str`, *optional*, default: `DEFAULT_FONT_SIZE`):
+    : Font name
+  * **italic** (`bool`, *optional*, default: `False`):
+    : `True` if the cell font is italic
+  * **name** (`str`, *optional*):
+    : cell style
+  * **underline** (`bool`, *optional*, default: `False`):
+    : `True` if the cell font is underline
+  * **strikethrough** (`bool`, *optional*, default: `False`):
+    : `True` if the cell font is strikethrough
+  * **first_indent** (`float`, *optional*, default: `0.0`):
+    : First line indent in points
+  * **left_indent** (`float`, *optional*, default: `0.0`):
+    : Left indent in points
+  * **right_indent** (`float`, *optional*, default: `0.0`):
+    : Right indent in points
+  * **text_inset** (`float`, *optional*, default: DEFAULT_TEXT_INSET):
+    : Text inset in points
+  * **text_wrap** (`str`, *optional*, default: `True`):
+    : `True` if text wrapping is enabled
 * **Return type:**
   `Style`
 
@@ -909,18 +923,18 @@ If no format name is provided, the next available numbered format will be genera
   * *type* (**str**): the type of format to create
     Supported formats are `number`, `datetime` and `text`. If no type is
     provided, `add_custom_format` defaults to `number`
-* **Custom Formatting Keyword Arguments for type\`\`=\`\`number`type``=``number`:**
+* **Number Custom Formatting Keyword Arguments:**
   * *integer_format* (**PaddingType**): how to pad integers, default `PaddingType.NONE`
   * *decimal_format* (**PaddingType**): how to pad decimals, default `PaddingType.NONE`
   * *num_integers* (**int**): integer precision when integers are padded, default 0
   * *num_decimals* (**int**): integer precision when decimals are padded, default 0
   * *show_thousands_separator* (**bool**): `True` if the number should include
     a thousands seperator
-* **Custom Formatting Keyword Arguments for type\`\`=\`\`datetime`type``=``datetime`:**
-  * *format* (**str**): a POSIX strftime-like formatting string
-    See Date/time formatting for a list of supported directives, default `d MMM y`
-* **Custom Formatting Keyword Arguments for type\`\`=\`\`text`type``=``text`:**
-  * *format* (**str**): string format
+* **Datetime Custom Formatting Keyword Arguments:**
+  * *format* (`str`, *optional*, default: `"d MMM y"`):
+    : A POSIX strftime-like formatting string.
+* **Text Custom Formatting Keyword Arguments:**
+  * *format* (`str`, *optional*, default: `"%s"`) - string format
     The cell value is inserted in place of %s. Only one substitution is allowed by
     Numbers, and multiple %s formatting references raise a TypeError exception
 * **Return type:**
@@ -1192,12 +1206,62 @@ Convert a cell range or list of cell ranges into merged cells.
 
 #### set_cell_formatting(\*args: str, \*\*kwargs)
 
-Set the formatting for a cell.
+Set the data format for a cell.
+
+Cell references can be **row-column** offsers or Excel/Numbers-style **A1** notation.
 
 * **Parameters:**
-  **args** (`str`) – 
+  * **\*args** (`str`) – positional arguments for cell reference and data format type (see below)
+  * **\*\*kwargs** – Key-value pairs defining a formatting options for each data format (see below).
+* **Args (row-column notation):**
+  * **param1** (`int`): Zero-indexed row number.
+  * **param2** (`int`): Zero-indexed column number.
+  * **param3** (`str`): Data format type for the cell (see “data formats” below).
+* **Args (A1 notation):**
+  * **param1** (`str`): A cell reference using Excel/Numbers-style A1 notation.
+  * **param2** (`str`): Data format type for the cell (see “data formats” below).
+* **Data formats:**
+  * `"base"`: A number base in the range 2-36.
+  * `"currency"`: A decimal formatted with a currency symbol.
+  * `"datetime"`: A date and time value with custom formatting.
+  * `"fraction"`: A number formatted as the nearest fraction.
+  * `"percentage"`: A number formatted as a percentage
+  * `"number"`: A decimal number.
+  * `"scientific"`: A decimal number with scientific notation.
+* **Base Keyword Arguments:**
+  * **base_use_minus_sign** (`int`, *optional*, default: `10`):
+    : The integer base to represent the number from 2-36.
+  * **base_use_minus_sign** (`bool`, *optional*, default: `True`):
+    : If `True``` use a standard minus sign, otherwise format as two’s compliment
+      (only possible for binary, octal and hexadecimal.
+  * **base_places** (`int`, *optional*, default: `0`):
+    : The number of decimal places, or `None` for automatic.
+* **Currency Keyword Arguments:**
+  * **currency** (`str`, *optional*, default: `"GBP"`):
+    : An ISO currency code, e.g. `"GBP"` or `"USD"`.
+  * **decimal_places** (`int`, *optional*, default: `2`):
+    : The number of decimal places, or `None` for automatic.
+  * **negative_style** (`NegativeNumberStyle`, *optional*, default: `NegativeNumberStyle.MINUS`):
+    : How negative numbers are represented.
+  * **show_thousands_separator** (`bool`, *optional*, default: `False`):
+    : `True` if the number should include a thousands seperator, e.g. `,`
+  * **use_accounting_style** (`bool`, *optional*, default: `False`):
+    : `True` if the currency symbol should be formatted to the left of the cell and
+      separated from the number value by a tab.
 * **Return type:**
   `None`
+
+#### WARNING
+RuntimeWarning:
+: If `use_accounting_style` is used with any `negative_style` other than
+  `NegativeNumberStyle.MINUS`.
+
+**Example**
+
+```python
+>>> table.set_cell_formatting("C1", "date", date_time_format="EEEE, d MMMM yyyy")
+>>> table.set_cell_formatting(0, 4, "number", decimal_places=3, negative_style=NegativeNumberStyle.RED)
+```
 
 ## Command-line scripts
 
