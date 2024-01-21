@@ -310,7 +310,7 @@ class Document:
 class Sheet:
     """
     > [!CAUTION]
-    > Do not instantiate directly. Sheets are created by :class:`Document`.
+    > Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, model, sheet_id):
@@ -398,7 +398,7 @@ class Sheet:
 class Table(Cacheable):  # noqa: F811
     """
     > [!CAUTION]
-    > Do not instantiate directly. Tables are created by :class:`Document`.
+    > Do not instantiate directly. Tables are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, model, table_id):
