@@ -340,6 +340,19 @@ class Sheet:
         If no table name is provided, the next available numbered table
         will be generated in the series ``Table 1``, ``Table 2``, etc.
 
+        By default, new tables are positioned at a fixed offset below the last
+        table vertically in a sheet and on the left side of the sheet. Large
+        table headers and captions may result in new tables overlapping existing
+        ones. The ``add_table`` method takes optional coordinates for
+        positioning a table. A table's height and coordinates can also be
+        queried to help aligning new tables:
+
+        .. code:: python
+
+            (x, y) = sheet.table[0].coordinates
+            y += sheet.table[0].height + 200.0
+            new_table = sheet.add_table("Offset Table", x, y)
+
         Args:
             table_name: The name of the new table.
             x: The x offset for the table in points.
