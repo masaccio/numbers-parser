@@ -25,7 +25,7 @@ import warnings
 
 from numbers_parser.cell import *  # noqa: F403
 from numbers_parser.constants import *  # noqa: F403
-from numbers_parser.document import Document  # noqa
+from numbers_parser.document import *  # noqa: F403
 from numbers_parser.exceptions import *  # noqa: F403
 
 __version__ = importlib.metadata.version("numbers-parser")
