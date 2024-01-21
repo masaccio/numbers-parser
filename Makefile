@@ -44,6 +44,7 @@ docs: README.md
 docs/build/index.md: docs/index.rst docs/conf.py src/$(package_c)/*.py
 	@mkdir -p docs/build
 	poetry run sphinx-build -q -b markdown  docs docs/build
+	poetry run sphinx-build -q -b html  docs docs/build
 
 README.md: docs/build/index.md
 	cp $< $@
