@@ -53,26 +53,25 @@ The `numbers-parser` API is documented at [Read The Docs](https://numbers-parser
 
 Reading documents:
 
-``` python
-from numbers_parser import Document
-doc = Document("my-spreadsheet.numbers")
-sheets = doc.sheets
-tables = sheets[0].tables
-rows = tables[0].rows()
+```python
+>>> from numbers_parser import Document
+>>> doc = Document("mydoc.numbers")
+>>> sheets = doc.sheets
+>>> tables = sheets[0].tables
+>>> rows = tables[0].rows()
 ```
-
-### Referring to sheets and tables
 
 Sheets and tables are iterables that can be indexed using either an integer index or using the name of the sheet/table:
 
-``` python
-# list access method
-sheet_1 = doc.sheets[0]
-print("Opened sheet", sheet_1.name)
-
-# dict access method
-table_1 = sheets["Table 1"]
-print("Opened table", table_1.name)
+```python
+>>> doc.sheets[0].name
+'Sheet 1'
+>>> doc.sheets["Sheet 1"].name
+'Sheet 1'
+>>> doc.sheets[0].tables[0].name
+'Table 1'
+>>> doc.sheets[0].tables["Table 1"].name
+'Table 1'
 ```
 
 ### Accessing data
