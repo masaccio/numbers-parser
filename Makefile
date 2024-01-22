@@ -38,13 +38,11 @@ profile:
 	poetry run pytest --profile
 	poetry run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
 
+docs: docs/build/index.html
+
 docs/build/index.html: docs/index.rst docs/conf.py src/$(package_c)/*.py
 	@mkdir -p docs/build
 	poetry run sphinx-build -q -b html  docs docs/build
-
-
-README.md: docs/build/index.md
-	cp $< $@
 
 test:
 	poetry run pytest -n logical
