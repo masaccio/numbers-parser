@@ -6,9 +6,10 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
-    "sphinx.ext.autosectionlabel",
+    # "sphinx.ext.autosectionlabel",
     "sphinx_autodoc_typehints",
     "sphinx_rtd_theme",
+    "enum_tools.autoenum",
 ]
 
 templates_path = ["_templates"]
@@ -36,7 +37,7 @@ def format_optional(annotation, config):
 # sphinx_autodoc_typehints options
 autodoc_typehints = "both"
 typehints_use_signature = True
-typehints_use_signature_return = True
+typehints_use_signature_return = False
 simplify_optional_unions = False
 always_document_param_types = True
 typehints_defaults = "comma"

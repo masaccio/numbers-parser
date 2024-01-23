@@ -1,3 +1,14 @@
+.. raw:: html
+
+   <style>
+   .red {
+      color:red;
+   }
+   </style>
+
+.. role:: red
+
+
 numbers-parser API
 ==================
 
@@ -162,13 +173,19 @@ whitespace. Supported directives are:
 Negative Number Formats
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Where supported by a data format, `negative_style` must be a valid `NegativeNumberStyle` enum. Supported values are:
 
-======================= ==========
+.. currentmodule:: numbers_parser
+
+.. autoenum:: NegativeNumberStyle
+    :members:
+
+**Example**
+
+======================= =================
 Value                   Examples
-======================= ==========
+======================= =================
 ``MINUS``               -1234.560
-``RED``                 1234.560
+``RED``                 :red:`1234.560`
 ``PARENTHESES``         (1234.560)
-``RED_AND_PARENTHESES`` (1234.560)
-======================= ==========
+``RED_AND_PARENTHESES`` :red:`(1234.560)`
+======================= =================

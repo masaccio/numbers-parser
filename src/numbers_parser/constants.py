@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from enum import IntEnum
 
+import enum_tools.documentation
 from pendulum import datetime
 
 try:
@@ -186,11 +187,16 @@ class CustomFormattingType(IntEnum):
     TEXT = 3
 
 
+@enum_tools.documentation.document_enum
 class NegativeNumberStyle(IntEnum):
     MINUS = 0
+    """Negative numbers use a simple minus sign."""
     RED = 1
+    """Negative numbers are red with no minus sign."""
     PARENTHESES = 2
+    """Negative numbers are in parentheses with no minus sign."""
     RED_AND_PARENTHESES = 3
+    """Negative numbers are red and in parentheses with no minus sign."""
 
 
 class FractionAccuracy(IntEnum):
