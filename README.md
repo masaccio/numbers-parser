@@ -74,86 +74,48 @@ Sheets and tables are iterables that can be indexed using either an integer inde
 'Table 1'
 ```
 
-### Accessing data
-
 `Table` objects have a `rows` method which contains a nested list with an entry for each row of the table. Each row is itself a list of the column values.
 
 ``` python
-data = sheets["Table 1"].rows()
-print("Cell A1 contains", data[0][0])
-print("Cell C2 contains", data[2][1])
+
+>>> data = sheets["Sheet 1"].tables["Table 1"].rows()
+>>> data[0][0]
+<numbers_parser.cell.EmptyCell object at 0x1022b5710>
+>>> data[1][0]
+<numbers_parser.cell.TextCell object at 0x101eb6790>
+>>> data[1][0].value
+'Debit'
 ```
 
-Cells are objects with a common base class of `Cell`. All cell types have a property `value` which returns the contents of the cell in as a  python datatype. `numbers-parser` uses [pendulum](https://pendulum.eustace.io) instead of python's builtin types. Available cell types are:
+### Cell Data
 
-| Cell type         | value type          | Additional properties                       |
-| ----------------- | ------------------- | ------------------------------------------- |
-| NumberCell        | `float`             |                                             |
-| TextCell          | `str`               |                                             |
-| RichTextCell      | `str`               | See [Bullets and lists](#bullets-and-lists) |
-| EmptyCell         | `None`              |                                             |
-| BoolCell          | `bool`              |                                             |
-| DateCell          | `pendulum.datetime` |                                             |
-| DurationCell      | `pendulum.duration` |                                             |
-| ErrorCell         | `None`              |                                             |
-| MergedCell        | `None`              | See [Merged cells](#merged-cells)           |
+Cells are objects with a common base class of `Cell`. All cell types have a property `value` which returns the contents of the cell as a  python datatype. `numbers-parser` uses [pendulum](https://pendulum.eustace.io) instead of python's builtin types. Available cell types are:
 
-Where cell values are not `None` the property `formatted_value` returns the cell value as a `str` as displayed in Numbers. Cells that have no values in a table are represented as `EmptyCell` and cells containing evaluation errors of any kind `ErrorCell`.
+| Cell type    | value type          | Additional properties                       |
+| -------------| ------------------- | ------------------------------------------- |
+| NumberCell   | `float`             |                                             |
+| TextCell     | `str`               |                                             |
+| RichTextCell | `str`               | See [Bullets and lists](#bullets-and-lists) |
+| EmptyCell    | `None`              |                                             |
+| BoolCell     | `bool`              |                                             |
+| DateCell     | `pendulum.datetime` |                                             |
+| DurationCell | `pendulum.duration` |                                             |
+| ErrorCell    | `None`              |                                             |
+| MergedCell   | `None`              | See [Merged cells](#https://numbers-parser.readthedocs.io/en/latest/#table-cell-merged-cells) |
 
-### Cell references
-
-Data for single cells is accessed using `Table.cell()`. Cell references can be either zero-offset row/column integers or an Excel/Numbers cell reference using a column letter and row number:
+Cell references can be either zero-offset row/column integers or an Excel/Numbers A1 notation. Where cell values are not `None` the property `formatted_value` returns the cell value as a `str` as displayed in Numbers. Cells that have no values in a table are represented as `EmptyCell` and cells containing evaluation errors of any kind `ErrorCell`.
 
 ``` python
-doc = Document("my-spreadsheet.numbers")
-sheets = doc.sheets
-tables = sheets["Sheet 1"].tables
-table = tables["Table 1"]
-
-# row, column syntax
-print("Cell A1 contains", table.cell(0, 0))
-# Excel/Numbers-style cell references
-print("Cell C2 contains", table.cell("C2"))
-```
-
-### Merged cells
-
-`Cell.is_merged` returns `True` for any cell that is the result of merging rows and/or columns. Cells eliminated from the table by the merge can still be indexed using `Table.cell()` and are of type `MergedCell`.
-
-Consider this example:
-
-<!-- markdownlint-disable MD033 -->
-<table>
-    <tr>
-        <td>A1</td>
-        <td rowspan=2>B1</td>
-    </tr>
-    <tr>
-        <td>A2</td>
-    </tr>
-</table>
-<!-- markdownlint-enable MD033 -->
-
-The properties of merges are tested using the following properties:
-
-| Cell  | Type       | `value`  | `is_merged` | `size`  | `rect`       | `merge_range` |
-| ----- | ---------- | -------- | ----------- | ------- | ------------ | ------------- |
-| A1    | TextCell   | `A1`     | `False`     | (1, 1)  | `None`       | `None`        |
-| A2    | TextCell   | `A2`     | `False`     | (1, 1)  | `None`       | `None`        |
-| B1    | TextCell   | `B1`     | `True`      | (2, 1)  | `None`       | `None`        |
-| B2    | MergedCell | `None`   | `False`     | `None`  | (1, 0, 2, 0) | `"B1:B2"`     |
-
-The tuple values of the `rect` property of a `MergedCell` are also available using the properties `row_start`, `col_start`, `row_end`, and `col_end`.
-
-### Row and column iterators
-
-Tables have iterators for row-wise and column-wise iteration with each iterator returning a list of the cells in that row or column
-
-``` python
-for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
-    sum += row
-for col in table.iter_cols(min_row=2, max_row=7):
-    sum += col.value
+>>> table.cell(1,0)
+<numbers_parser.cell.TextCell object at 0x1019ade50>
+>>> table.cell(1,0).value
+'Debit'
+>>> table.cell("B2")
+<numbers_parser.cell.NumberCell object at 0x103a99790>
+>>> table.cell("B2").value
+1234.5
+>>> table.cell("B2").formatted_value
+'£1,234.50'
 ```
 
 ### Formulas
