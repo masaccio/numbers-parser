@@ -41,8 +41,6 @@ class Table:
 
 class Document:
     """
-    <a id="numbers_parser.Document"></a>
-
     Create an instance of a new Numbers document.
 
     If ``filename`` is ``None``, an empty document is created using the defaults
