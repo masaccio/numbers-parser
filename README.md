@@ -118,10 +118,6 @@ Cell references can be either zero-offset row/column integers or an Excel/Number
 '£1,234.50'
 ```
 
-### Formulas
-
-Formula evaluation relies on Numbers storing current values which should usually be the case. In cells containing a formula, `value` returns the computed value of the formula. The formula itself is available using the `formula` property.
-
 ### Pandas
 
 Since the return value of `rows()` is a list of lists, you can pass this directly to pandas. Assuming you have a Numbers table with a single header which contains the names of the pandas series you want to create you can construct a pandas dataframe using:
@@ -384,19 +380,6 @@ The positional parameter after the cell reference is the type of data format to 
 | `SSS`       | Seconds to three decimal places                               | 000 - 999              |
 | `SSSS`      | Seconds to four decimal places                                | 0000 - 9999            |
 | `SSSSS`     | Seconds to five decimal places                                | 00000 - 9999           |
-
-##### Negative number formatting
-
-Where supported by a data format, `negative_style` must be a valid `NegativeNumberStyle` enum. Supported values are:
-
-<!-- markdownlint-disable MD033 -->
-| Value                 | Examples                                  |
-| ----------------------| ----------------------------------------- |
-| `MINUS`               | -1234.560                                 |
-| `RED`                 | <span style="color:red">1234.560</span>   |
-| `PARENTHESES`         | (1234.560)                                |
-| `RED_AND_PARENTHESES` | <span style="color:red">(1234.560)</span> |
-<!-- markdownlint-enable MD033 -->
 
 #### Writing Custom Data Formats
 

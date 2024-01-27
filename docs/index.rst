@@ -15,24 +15,20 @@ numbers-parser API
 Changes in version 4.0
 ~~~~~~~~~~~~~~~~~~~~~~
 
-To better partition cell styles, background image data which was
-supported in earlier versions through the methods ``image_data`` and
-``image_filename`` is now part of the new ``cell_style`` property. Using
-the deprecated methods ``image_data`` and ``image_filename`` will issue
-a ``DeprecationWarning`` if used.The legacy methods will be removed in a
+To better partition cell styles, background image data which was supported in earlier versions
+through the methods ``image_data`` and ``image_filename`` is now part of the new
+``cell_style`` property. Using the deprecated methods ``image_data`` and ``image_filename`` 
+will issue a ``DeprecationWarning`` if used.The legacy methods will be removed in a
 future version of numbers-parser.
 
-``NumberCell`` cell values are now limited to 15 significant figures to
-match the implementation of floating point numbers in Apple Numbers. For
-example, the value ``1234567890123456`` is rounded to
-``1234567890123460`` in the same way as in Numbers. Previously, using
-native ``float`` with no checking resulted in rounding errors in
-unpacking internal numbers. Attempting to write a number with too many
-significant digits results in a ``RuntimeWarning``.
+:class:`NumberCell` cell values limited to 15 significant figures to match the implementation
+of floating point numbers in Apple Numbers. For example, the value ``1234567890123456``
+is rounded to ``1234567890123460`` in the same way as in Numbers. Previously, using
+native ``float`` with no checking resulted in rounding errors in unpacking internal numbers.
+Attempting to write a number with too many significant digits results in a ``RuntimeWarning``.
 
-The previously deprecated methods ``Document.sheets()`` and
-``Sheet.tables()`` are now only available using the properties of the
-same name (see examples in this README).
+The previously deprecated methods ``Document.sheets()`` and ```Sheet.tables()`` are now only
+available using the properties of the same name (see examples in this README).
 
 API
 ~~~
@@ -48,6 +44,66 @@ API
 .. autoclass:: Table()
    :members:
 
+.. autoclass:: Cell()
+   :no-undoc-members:
+   :members:
+
+.. _table_cell_merged_cells:
+
+.. autoclass:: MergedCell()
+   :no-undoc-members:
+   :members:
+
+``Cell.is_merged`` returns ``True`` for any cell that is the result of
+merging rows and/or columns. Cells eliminated from the table by the
+merge can still be indexed using ``Table.cell()`` and are of type
+``MergedCell``.
+
+.. raw:: html
+
+   <table border="1">
+         <tr>
+            <td style="padding:10px">A1</td>
+            <td style="padding:10px" rowspan=2>B1</td>
+         </tr>
+         <tr>
+            <td style="padding:10px">A2</td>
+         </tr>
+   </table>
+
+The properties of merges are tested using the following properties:
+
++------+------------+-----------+---------------+----------+--------------+-----------------+
+| Cell | Type       | ``value`` | ``is_merged`` | ``size`` | ``rect``     | ``merge_range`` |
++======+============+===========+===============+==========+==============+=================+
+| A1   | TextCell   | ``A1``    | ``False``     | (1, 1)   | ``None``     | ``None``        |
++------+------------+-----------+---------------+----------+--------------+-----------------+
+| A2   | TextCell   | ``A2``    | ``False``     | (1, 1)   | ``None``     | ``None``        |
++------+------------+-----------+---------------+----------+--------------+-----------------+
+| B1   | TextCell   | ``B1``    | ``True``      | (2, 1)   | ``None``     | ``None``        |
++------+------------+-----------+---------------+----------+--------------+-----------------+
+| B2   | MergedCell | ``None``  | ``False``     | ``None`` | (1, 0, 2, 0) | ``"B1:B2"``     |
++------+------------+-----------+---------------+----------+--------------+-----------------+
+
+The tuple values of the ``rect`` property of a ``MergedCell`` are also
+available using the properties ``row_start``, ``col_start``,
+``row_end``, and ``col_end``.
+
+.. autoclass:: RichTextCell()
+   :show-inheritance:
+   :no-undoc-members:
+   :members:
+
+
+.. autoclass:: Style
+   :members:
+
+.. _negative_formats:
+
+.. autoenum:: NegativeNumberStyle
+    :members:
+    
+
 .. _datetime_formats:
 
 Date/time Formatting
@@ -60,7 +116,7 @@ whitespace. Supported directives are:
 +-----------+---------------------------+------------------------+
 | Directive | Meaning                   | Example                |
 +===========+===========================+========================+
-| ``a``     | Locale’s AM or PM         | am, pm                 |
+| ``a``     | Locale's AM or PM         | am, pm                 |
 +-----------+---------------------------+------------------------+
 | ``EEEE``  | Full weekday name         | Monday, Tuesday, ...   |
 +-----------+---------------------------+------------------------+
@@ -166,26 +222,3 @@ whitespace. Supported directives are:
 | ``SSSSS`` | Seconds to five decimal   | 00000 - 9999           |
 |           | places                    |                        |
 +-----------+---------------------------+------------------------+
-
-
-.. _negative_formats:
-
-Negative Number Formats
-~~~~~~~~~~~~~~~~~~~~~~~
-
-
-.. currentmodule:: numbers_parser
-
-.. autoenum:: NegativeNumberStyle
-    :members:
-
-**Example**
-
-======================= =================
-Value                   Examples
-======================= =================
-``MINUS``               -1234.560
-``RED``                 :red:`1234.560`
-``PARENTHESES``         (1234.560)
-``RED_AND_PARENTHESES`` :red:`(1234.560)`
-======================= =================
