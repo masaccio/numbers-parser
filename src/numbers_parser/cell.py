@@ -144,8 +144,49 @@ RGB = namedtuple("RGB", ["r", "g", "b"])
 
 @dataclass
 class Style:
-    alignment: Alignment = DEFAULT_ALIGNMENT_CLASS
-    bg_image: object = None
+    """
+    A named document style that can be applied to cells.
+
+    Parameters
+    ----------
+    alignment: Alignment, optional, default: Alignment("auto", "top")
+        Horizontal and vertical alignment of the cell
+    bg_color: RGB | List[RGB], optional, default: RGB(0, 0, 0)
+        Background color or list of colors for gradients
+    bold: bool, optional, default: False
+        ``True`` if the cell font is bold
+    font_color: RGB, optional, default: RGB(0, 0, 0)) – Font color
+    font_size: float, optional, default: DEFAULT_FONT_SIZE
+        Font size in points
+    font_name: str, optional, default: DEFAULT_FONT_SIZE
+        Font name
+    italic: bool, optional, default: False
+        ``True`` if the cell font is italic
+    name: str, optional
+        Style name
+    underline: bool, optional, default: False) – True if the
+        cell font is underline
+    strikethrough: bool, optional, default: False) – True if
+        the cell font is strikethrough
+    first_indent: float, optional, default: 0.0) – First line
+        indent in points
+    left_indent: float, optional, default: 0.0
+        Left indent in points
+    right_indent: float, optional, default: 0.0
+        Right indent in points
+    text_inset: float, optional, default: DEFAULT_TEXT_INSET
+        Text inset in points
+    text_wrap: str, optional, default: True
+        ``True`` if text wrapping is enabled
+
+    Raises
+    ------
+    TypeError:
+        If arguments do not match the specified type or for objects have invalid arguments
+    """
+
+    alignment: Alignment = DEFAULT_ALIGNMENT_CLASS  # : horizontal and vertical alignment
+    bg_image: object = None  # : backgroung image
     bg_color: Union[RGB, List[RGB]] = None
     font_color: RGB = RGB(0, 0, 0)
     font_size: float = DEFAULT_FONT_SIZE
@@ -421,6 +462,11 @@ class MergeAnchor:
 
 
 class Cell(Cacheable):
+    """
+    .. NOTE::
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Table`.
+    """
+
     @classmethod
     def empty_cell(cls, table_id: int, row_num: int, col_num: int, model: object):
         cell = EmptyCell(row_num, col_num)
@@ -565,13 +611,26 @@ class Cell(Cacheable):
             return None
 
     @property
-    def is_formula(self):
+    def is_formula(self) -> bool:
+        """bool: ``True`` if the cell contains a formula."""
         table_formulas = self._model.table_formulas(self._table_id)
         return table_formulas.is_formula(self.row, self.col)
 
     @property
     @cache(num_args=0)
-    def formula(self):
+    def formula(self) -> str:
+        """
+        str: The formula in a cell.
+
+        Formula evaluation relies on Numbers storing current values which should
+        usually be the case. In cells containing a formula, :py:meth:`numbers_parser.Cell.value`
+        returns computed value of the formula.
+
+        Returns:
+            str:
+                The text of the foruma in a cell, or `None` if there is no formula
+                present in a cell.
+        """
         if self._formula_key is not None:
             table_formulas = self._model.table_formulas(self._table_id)
             return table_formulas.formula(self._formula_key, self.row, self.col)
@@ -579,18 +638,25 @@ class Cell(Cacheable):
             return None
 
     @property
-    def bullets(self) -> str:
+    def bullets(self) -> None:
         return None
 
     @property
-    def formatted_value(self):
+    def formatted_value(self) -> str:
+        """str: The formatted value of the cell as it appears in Numbers."""
         if self._storage is None:
             return ""
         else:
             return self._storage.formatted
 
     @property
-    def style(self):
+    def style(self) -> Union[Style, None]:
+        """Style | None: The :class:`Style` associated with the cell or ``None``.
+
+        Warns:
+            UnsupportedWarning: On assignment; use
+                :py:meth:`numbers_parser.Table.set_cell_style` instead.
+        """
         if self._storage is None:
             self._storage = CellStorage(
                 self._model, self._table_id, EMPTY_STORAGE_BUFFER, self.row, self.col
@@ -608,7 +674,13 @@ class Cell(Cacheable):
         )
 
     @property
-    def border(self):
+    def border(self) -> Union[CellBorder, None]:
+        """CellBorder| None: The :class:`CellBorder` associated with the cell or ``None``.
+
+        Warns:
+            UnsupportedWarning: On assignment; use
+                :py:meth:`numbers_parser.Table.set_cell_border` instead.
+        """
         self._model.extract_strokes(self._table_id)
         return self._border
 
@@ -625,6 +697,11 @@ class Cell(Cacheable):
 
 
 class NumberCell(Cell):
+    """
+    .. NOTE::
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Table`.
+    """
+
     def __init__(self, row_num: int, col_num: int, value: float):
         self._type = TSTArchives.numberCellType
         super().__init__(row_num, col_num, value)
@@ -645,6 +722,11 @@ class TextCell(Cell):
 
 
 class RichTextCell(Cell):
+    """
+    .. NOTE::
+       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+    """
+
     def __init__(self, row_num: int, col_num: int, value):
         self._type = TSTArchives.automaticCellType
         super().__init__(row_num, col_num, value["text"])
@@ -664,11 +746,13 @@ class RichTextCell(Cell):
         return self._value
 
     @property
-    def bullets(self) -> str:
+    def bullets(self) -> List[str]:
+        """List[str]: A list of the text bullets in the cell."""
         return self._bullets
 
     @property
     def formatted_bullets(self) -> str:
+        """str: The bullets as a formatted multi-line string."""
         return self._formatted_bullets
 
     @property
@@ -682,6 +766,11 @@ class BulletedTextCell(RichTextCell):
 
 
 class EmptyCell(Cell):
+    """
+    .. NOTE::
+       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+    """
+
     def __init__(self, row_num: int, col_num: int):
         super().__init__(row_num, col_num, None)
         self._type = None
@@ -692,6 +781,11 @@ class EmptyCell(Cell):
 
 
 class BoolCell(Cell):
+    """
+    .. NOTE::
+       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+    """
+
     def __init__(self, row_num: int, col_num: int, value: bool):
         self._type = TSTArchives.boolCellType
         self._value = value
@@ -703,6 +797,11 @@ class BoolCell(Cell):
 
 
 class DateCell(Cell):
+    """
+    .. NOTE::
+       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+    """
+
     def __init__(self, row_num: int, col_num: int, value: DateTime):
         self._type = TSTArchives.dateCellType
         super().__init__(row_num, col_num, value)
@@ -723,6 +822,11 @@ class DurationCell(Cell):
 
 
 class ErrorCell(Cell):
+    """
+    .. NOTE::
+       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+    """
+
     def __init__(self, row_num: int, col_num: int):
         self._type = TSTArchives.formulaErrorCellType
         super().__init__(row_num, col_num, None)
@@ -733,6 +837,11 @@ class ErrorCell(Cell):
 
 
 class MergedCell(Cell):
+    """
+    .. NOTE::
+       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+    """
+
     def __init__(self, row_num: int, col_num: int):
         super().__init__(row_num, col_num, None)
 

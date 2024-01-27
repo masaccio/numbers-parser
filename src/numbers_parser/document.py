@@ -1,4 +1,4 @@
-from typing import Dict, Generator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 from warnings import warn
 
 from numbers_parser.cell import (
@@ -49,29 +49,32 @@ class Document:
     defined by the class constructor. You can optionionally override these
     defaults at object construction time.
 
-    Args:
-        filename:
-            Apple Numbers document to read.
-        sheet_name:
-            Name of the first sheet in a new document
-        table_name:
-            Name of the first table in the first sheet of a new
-        num_header_rows:
-            Number of header rows in the first table of a new document.
-        num_header_cols:
-            Number of header columns in the first table of a new document.
-        num_rows:
-            Number of rows in the first table of a new document.
-        num_cols:
-            Number of columns in the first table of a new document.
+    Parameters
+    ----------
+    filename: str, optional
+        Apple Numbers document to read.
+    sheet_name: *str*, *optional*, *default*: ``Sheet 1``
+        Name of the first sheet in a new document
+    table_name: *str*, *optional*, *default*: ``Table 1``
+        Name of the first table in the first sheet of a new
+    num_header_rows: int, optional, default: 1
+        Number of header rows in the first table of a new document.
+    num_header_cols: int, optional, default: 1
+        Number of header columns in the first table of a new document.
+    num_rows: int, optional, default: 12
+        Number of rows in the first table of a new document.
+    num_cols: int, optional, default: 8
+        Number of columns in the first table of a new document.
 
-    Raises:
-        IndexError:
-            If the sheet name already exists in the document.
-        IndexError:
-            If the table name already exists in the first sheet.
+    Raises
+    ------
+    IndexError:
+        If the sheet name already exists in the document.
+    IndexError:
+        If the table name already exists in the first sheet.
 
-    **Examples**
+    Examples
+    --------
 
     Reading a document and examining the ``Tables`` object:
 
@@ -145,9 +148,11 @@ class Document:
     def save(self, filename: str) -> None:
         """Save the document in the specified filename.
 
-        Args:
-            filename: The path to save the document to. If the file already exists,
-                it will be overwritten.
+        Parameters
+        ----------
+        filename: str
+            The path to save the document to. If the file already exists,
+            it will be overwritten.
         """
         for sheet in self.sheets:
             for table in sheet.tables:
@@ -166,15 +171,16 @@ class Document:
         If no sheet name is provided, the next available numbered sheet
         will be generated in the series ``Sheet 1``, ``Sheet 2``, etc.
 
-        Args:
-            sheet_name:
-                The name of the sheet to add to the document
-            table_name:
-                The name of the table created in the new sheet
-            num_rows:
-                The number of columns in the newly created table
-            num_cols:
-                The number of columns in the newly created table
+        Parameters
+        ----------
+        sheet_name: str, optional
+            The name of the sheet to add to the document
+        table_name: *str*, *optional*, *default*: ``Table 1``
+            The name of the table created in the new sheet
+        num_rows: int, optional, default: 12
+            The number of columns in the newly created table
+        num_cols: int, optional, default: 8
+            The number of columns in the newly created table
 
         Raises:
             IndexError: If the sheet name already exists in the document.
@@ -206,39 +212,19 @@ class Document:
 
         If no style name is provided, the next available numbered style will be generated.
 
-        Args:
-            \**kwargs: style arguments
-            Key-value pairs defining a cell style (see below)
+        Parameters
+        ----------
+        kwargs: dict, optional
+            Key-value pairs to pass to the :class:`Style` constructor
 
-        Raises:
-            TypeError: If ``font_size`` is not a ``float``, ``font_name`` is not a ``str``,
+        Raises
+        ------
+        TypeError:
+            If ``font_size`` is not a ``float``, ``font_name`` is not a ``str``,
             or if any of the ``bool`` parameters are invalid.
 
-        :Keywords:
-            * **alignment** (``Alignment``, *optional*, default=``Alignment("auto", "top")``) – Horizontal and vertical alignment of the cell
-            * **bg_color** (``Union[RGB, List[RGB]]``, *optional*, default: ``RGB(0, 0, 0)``) – Cell
-              background color or list of colors for gradients
-            * **bold** (``bool``, *optional*, default: ``False``) – ``True`` if the cell
-              font is bold
-            * **font_color** (``RGB``, *optional*, default: ``RGB(0, 0, 0)``) – Font color
-            * **font_size** (``float``, *optional*, default: ``DEFAULT_FONT_SIZE``) – Font
-              size in points
-            * **font_name** (``str``, *optional*, default: ``DEFAULT_FONT_SIZE``) – Font name
-            * **italic** (``bool``, *optional*, default: ``False``) – ``True`` if the cell
-              font is italic
-            * **name** (``str``, *optional*) – Cell style name
-            * **underline** (``bool``, *optional*, default: ``False``) – ``True`` if the
-              cell font is underline
-            * **strikethrough** (``bool``, *optional*, default: ``False``) – ``True`` if
-              the cell font is strikethrough
-            * **first_indent** (``float``, *optional*, default: ``0.0``) – First line
-              indent in points
-            * **left_indent** (``float``, *optional*, default: ``0.0``) – Left indent in points
-            * **right_indent** (``float``, *optional*, default: ``0.0``) – Right indent in points
-            * **text_inset** (``float``, *optional*, default: DEFAULT_TEXT_INSET) – Text inset
-              in points
-            * **text_wrap** (``str``, *optional*, default: ``True``) – ``True`` if text
-              wrapping is enabled
+        Example
+        -------
 
         .. code-block:: python
 
@@ -266,19 +252,10 @@ class Document:
     def add_custom_format(self, **kwargs) -> CustomFormatting:
         r"""Add a new custom format to the current document.
 
-        If no format name is provided, the next available numbered format will be generated.
-
-        Args:
-            \**kwargs: Custom formatting arguments
-            Key-value pairs defining a custom cell format (see table below).
-
-        **Custom Formatting Keyword Arguments**
-
         All custom formatting styles share a name and a type, described in the **Common**
         parameters in the following table. Additional key-value pairs configure the format
-        depending upon the value of ``kwargs["type"]``.
-
-        Supported values for ``kwargs["type"]`` are:
+        depending upon the value of ``kwargs["type"]``. Supported values for
+        ``kwargs["type"]`` are:
 
             * ``"datetime"``: A date and time value with custom formatting.
             * ``"number"``: A decimal number.
@@ -310,6 +287,17 @@ class Document:
             * **format** (``str``, *optional*, default: ``"%s"``) – Text format.
               The cell value is inserted in place of %s. Only one substitution is allowed by
               Numbers, and multiple %s formatting references raise a TypeError exception
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            long_date = doc.add_custom_format(
+                name="Long Date",
+                type="date",
+                date_time_format="EEEE, d MMMM yyyy")
+            table.set_cell_formatting("C1", "custom", format=long_date)
         """  # noqa: E501
         if (
             "name" in kwargs
@@ -387,18 +375,26 @@ class Sheet:
             y += sheet.table[0].height + 200.0
             new_table = sheet.add_table("Offset Table", x, y)
 
-        Args:
-            table_name: The name of the new table.
-            x: The x offset for the table in points.
-            y: The y offset for the table in points. If ``None``, the table
-                is placed below the last table in the sheet.
-            num_rows: The number of rows for the new table.
-            num_cols: The number of columns for the new table.
+        Parameters
+        ----------
+        table_name: str, optional
+            The name of the new table.
+        x: float, optional
+            The x offset for the table in points.
+        y: float, optional
+            The y offset for the table in points.
+        num_rows: int, optional, default: 12
+            The number of rows for the new table.
+        num_cols: int, optional, default: 10
+            The number of columns for the new table.
 
-        Returns:
-            :class:`Table`: the newly created table.
+        Returns
+        -------
+        Table
+            The newly created table.
 
-        Raises:
+        Raises
+        ------
             IndexError: If the table name already exists.
         """
         from_table_id = self._tables[-1]._table_id
@@ -477,9 +473,11 @@ class Table(Cacheable):  # noqa: F811
         """
         int: The number of header rows.
 
-        Raises:
-            ValueError: If the number of headers is negative, exceeds the number of rows in the
-                table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).
+        Raises
+        ------
+        ValueError:
+            If the number of headers is negative, exceeds the number of rows in the
+            table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).
         """
         return self._model.num_header_rows(self._table_id)
 
@@ -498,9 +496,11 @@ class Table(Cacheable):  # noqa: F811
         """
         int: The number of header columns.
 
-        Raises:
-            ValueError: If the number of headers is negative, exceeds the number of rows in the
-                table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).
+        Raises
+        ------
+        ValueError:
+            If the number of headers is negative, exceeds the number of rows in the
+            table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).
         """
         return self._model.num_header_cols(self._table_id)
 
@@ -527,24 +527,34 @@ class Table(Cacheable):  # noqa: F811
     def row_height(self, row_num: int, height: int = None) -> int:
         """The height of a table row in points.
 
-        Args:
-            row_num: the zero-offset row number
-            height: the height of the row in points. If not ``None``, set the row height.
+        Parameters
+        ----------
+        row_num: int
+            The row number (zero indexed).
+        height: int
+            The height of the row in points. If not ``None``, set the row height.
 
-        Returns:
-            int: The height of the table row.
+        Returns
+        -------
+        int:
+            The height of the table row.
         """
         return self._model.row_height(self._table_id, row_num, height)
 
     def col_width(self, col_num: int, width: int = None) -> int:
         """The width of a table column in points.
 
-        Args:
-            col_num: the zero-offset column number
-            width: the width of the column in points. If not ``None``, set the column width.
+        Parameters
+        ----------
+        col_num: int
+            The column number (zero indexed).
+        width: int
+            The width of the column in points. If not ``None``, set the column width.
 
-        Returns:
-            int: The width of the table column.
+        Returns
+        -------
+        int:
+            The width of the table column.
         """
         return self._model.col_width(self._table_id, col_num, width)
 
@@ -556,12 +566,15 @@ class Table(Cacheable):  # noqa: F811
     def rows(self, values_only: bool = False) -> Union[List[List[Cell]], List[List[str]]]:
         """Return all rows of cells for the Table.
 
-        Args:
-            values_only: if ``True``, return cell values instead of :class:`Cell` objects
+        Parameters
+        ----------
+        values_only:
+            If ``True``, return cell values instead of :class:`Cell` objects
 
-        Returns:
-            Union[List[List[Cell]], List[List[str]]]: list of rows; each row is a list
-                of Cell objects, or string values.
+        Returns
+        -------
+        List[List[Cell]] | List[List[str]]:
+            List of rows; each row is a list of :class:`Cell` objects, or string values.
         """
         if values_only:
             return [[cell.value for cell in row] for row in self._data]
@@ -578,65 +591,28 @@ class Table(Cacheable):  # noqa: F811
         """
         Return a single cell in the table.
 
-        Cell references in a table can be **row-column** offsers or Excel/Numbers-style **A1**
-        notation:
+        The ``cell()`` method supports two forms of notation to designate the position
+        of cells: **Row-column** notation and **A1** notation:
 
         .. code-block:: python
 
             (0, 0)      # Row-column notation.
             ("A1")      # The same cell in A1 notation.
 
-        Args (row-column notation):
-            param1 (``int``): zero-indexed row number
-            param2 (``int``): zero-indexed column number
+        Parameters
+        ----------
+        param1: int
+            The row number (zero indexed).
+        param2: int
+            The column number (zero indexed).
 
-        Args (A1 notation):
-            param1 (``str``): a cell reference using Excel/Numbers-style A1 notation.
+        Returns
+        -------
+        Cell | MergedCell:
+            A cell with the base class :class:`Cell` or, if merged, a :class:`MergedCell`.
 
-        Returns:
-            Union[Cell, MergedCell]:
-                A cell with the base class :class:`Cell` or, if merged, a :class:`MergedCell`.
-
-        **Merged cells**
-
-        ``Cell.is_merged`` returns ``True`` for any cell that is the result of
-        merging rows and/or columns. Cells eliminated from the table by the
-        merge can still be indexed using ``Table.cell()`` and are of type
-        ``MergedCell``.
-
-        Consider this example:
-
-        .. raw:: html
-
-            <table>
-                <tr>
-                    <td>A1</td>
-                    <td rowspan=2>B1</td>
-                </tr>
-                <tr>
-                    <td>A2</td>
-                </tr>
-            </table>
-
-        The properties of merges are tested using the following properties:
-
-        +------+------------+-----------+---------------+----------+--------------+-----------------+
-        | Cell | Type       | ``value`` | ``is_merged`` | ``size`` | ``rect``     | ``merge_range`` |
-        +======+============+===========+===============+==========+==============+=================+
-        | A1   | TextCell   | ``A1``    | ``False``     | (1, 1)   | ``None``     | ``None``        |
-        +------+------------+-----------+---------------+----------+--------------+-----------------+
-        | A2   | TextCell   | ``A2``    | ``False``     | (1, 1)   | ``None``     | ``None``        |
-        +------+------------+-----------+---------------+----------+--------------+-----------------+
-        | B1   | TextCell   | ``B1``    | ``True``      | (2, 1)   | ``None``     | ``None``        |
-        +------+------------+-----------+---------------+----------+--------------+-----------------+
-        | B2   | MergedCell | ``None``  | ``False``     | ``None`` | (1, 0, 2, 0) | ``"B1:B2"``     |
-        +------+------------+-----------+---------------+----------+--------------+-----------------+
-
-        The tuple values of the ``rect`` property of a ``MergedCell`` are also
-        available using the properties ``row_start``, ``col_start``,
-        ``row_end``, and ``col_end``.
-
-        **Example**
+        Example
+        -------
 
         .. code-block:: python
 
@@ -674,24 +650,41 @@ class Table(Cacheable):  # noqa: F811
         min_col: Optional[int] = None,
         max_col: Optional[int] = None,
         values_only: Optional[bool] = False,
-    ) -> Generator[tuple, None, None]:
+    ) -> Iterator[Union[Tuple[Cell], Tuple[str]]]:
         """Produces cells from a table, by row.
 
         Specify the iteration range using the indexes of the rows and columns.
 
-        Args:
-            min_row: Zero-indexed starting row number, or ``0`` if ``None``.
-            max_row: Zero-indexed end row number, or all rows if ``None``.
-            min_col: Zero-indexed starting column number or ``0`` if ``None``.
-            max_col: Zero-indexed end column number, or all columns if ``None``.
-            values_only: return cell values rather than :class:`Cell` objects
+        Parameters
+        ----------
+        min_row: int, optional
+            Starting row number (zero indexed), or ``0`` if ``None``.
+        max_row: int, optional
+            End row number (zero indexed), or all rows if ``None``.
+        min_col: int, optional
+            Starting column number (zero indexed) or ``0`` if ``None``.
+        max_col: int, optional
+            End column number (zero indexed), or all columns if ``None``.
+        values_only: bool, optional
+            If ``True``, yield cell values rather than :class:`Cell` objects
 
-        Yields:
-            tuple: :class:`Cell` objects or string values for the row
+        Yields
+        ------
+        Tuple[Cell] | Tuple[str]:
+            :class:`Cell` objects or string values for the row
 
-        Raises:
-            IndexError:
-                If row or column values are out of range for the table
+        Raises
+        ------
+        IndexError:
+            If row or column values are out of range for the table
+
+        Example
+        =======
+
+        .. code:: python
+
+            for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
+                sum += row
         """
         min_row = min_row or 0
         max_row = max_row or self.num_rows - 1
@@ -721,24 +714,41 @@ class Table(Cacheable):  # noqa: F811
         min_row: Optional[int] = None,
         max_row: Optional[int] = None,
         values_only: Optional[bool] = False,
-    ) -> Generator[tuple, None, None]:
+    ) -> Iterator[Union[Tuple[Cell], Tuple[str]]]:
         """Produces cells from a table, by column.
 
         Specify the iteration range using the indexes of the rows and columns.
 
-        Args:
-            min_col: Zero-indexed starting column number or ``0`` if ``None``.
-            max_col: Zero-indexed end column number, or all columns if ``None``.
-            min_row: Zero-indexed starting row number, or ``0`` if ``None``.
-            max_row: Zero-indexed end row number, or all rows if ``None``.
-            values_only: return cell values rather than :class:`Cell` objects
+        Parameters
+        ----------
+        min_col: int, optional
+            Starting column number (zero indexed) or ``0`` if ``None``.
+        max_col: int, optional
+            End column number (zero indexed), or all columns if ``None``.
+        min_row: int, optional
+            Starting row number (zero indexed), or ``0`` if ``None``.
+        max_row: int, optional
+            End row number (zero indexed), or all rows if ``None``.
+        values_only: bool, optional
+            If ``True``, yield cell values rather than :class:`Cell` objects.
 
-        Yields:
-            tuple: :class:`Cell` objects or string values for the row
+        Yields
+        ------
+        Tuple[Cell] | Tuple[str]:
+            :class:`Cell` objects or string values for the row
 
-        Raises:
-            IndexError:
-                If row or column values are out of range for the table
+        Raises
+        ------
+        IndexError:
+            If row or column values are out of range for the table
+
+        Example
+        =======
+
+        .. code:: python
+
+            for col in table.iter_cols(min_row=2, max_row=7):
+                sum += col.value
         """
         min_row = min_row or 0
         max_row = max_row or self.num_rows - 1
@@ -909,9 +919,8 @@ class Table(Cacheable):  # noqa: F811
 
         All formatting styles share a name and a type, described in the **Common**
         parameters in the following table. Additional key-value pairs configure the format
-        depending upon the value of ``kwargs["type"]``.
-
-        Supported values for kwargs["type"] are:
+        depending upon the value of ``kwargs["type"]``. Supported values for
+        ``kwargs["type"]`` are:
 
             * ``"base"``: A number base in the range 2-36.
             * ``"currency"``: A decimal formatted with a currency symbol.
@@ -921,20 +930,22 @@ class Table(Cacheable):  # noqa: F811
             * ``"number"``: A decimal number.
             * ``"scientific"``: A decimal number with scientific notation.
 
-        Args:
-            \*args:
-                positional arguments for cell reference and data format type (see below)
-            \**kwargs:
-                Key-value pairs defining a formatting options for each data format (see below).
+        Parameters
+        ----------
+        args: list, optional
+            Positional arguments for cell reference and data format type (see below)
+        kwargs: dict, optional
+            Key-value pairs defining a formatting options for each data format (see below).
 
-        Warns:
-            RuntimeWarning:
-                If ``use_accounting_style`` is used with any ``negative_style`` other than
-                ``NegativeNumberStyle.MINUS``.
+        Warns
+        -----
+        RuntimeWarning:
+            If ``use_accounting_style`` is used with any ``negative_style`` other than
+            ``NegativeNumberStyle.MINUS``.
 
         :Args (row-column):
-            * **param1** (``int``): Zero-indexed row number.
-            * **param2** (``int``): Zero-indexed column number.
+            * **param1** (``int``): The row number (zero indexed).
+            * **param2** (``int``): The column number (zero indexed).
             * **param3** (``str``): Data format type for the cell (see "data formats" below).
 
         :Args (A1):
