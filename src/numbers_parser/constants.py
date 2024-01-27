@@ -189,6 +189,13 @@ class CustomFormattingType(IntEnum):
 
 @enum_tools.documentation.document_enum
 class NegativeNumberStyle(IntEnum):
+    """
+    How negative numbers are formatted.
+
+    This enum is used in cell data formats and cell custom formats using the
+    `negative_style` keyword argument.
+    """
+
     MINUS = 0
     """Negative numbers use a simple minus sign."""
     RED = 1
