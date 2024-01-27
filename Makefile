@@ -38,7 +38,10 @@ profile:
 	poetry run pytest --profile
 	poetry run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
 
-docs: docs/build/index.html
+docs: docs/build docs/build/index.html
+
+docs/build:
+	mkdir -p docs/build
 
 docs/build/index.html: docs/index.rst docs/conf.py src/$(package_c)/*.py
 	@mkdir -p docs/build
