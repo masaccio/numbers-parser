@@ -29,5 +29,7 @@
         "--config=pyproject.toml"
     ],
     "markdownlint.ignore": [ "README.md" ],
-    "esbonio.sphinx.confDir": "",
+    "esbonio.sphinx.buildDir" : "${workspaceFolder}/docs/build/html",
+    "esbonio.sphinx.confDir"  : "${workspaceFolder}/docs",
+    "esbonio.sphinx.srcDir"   : "${workspaceFolder}/docs"
 }
