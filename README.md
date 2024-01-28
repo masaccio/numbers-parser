@@ -49,7 +49,7 @@ C:\Users\Jon>pip install C:\Users\Jon\Downloads\python_snappy-0.6.1-cp311-cp311-
 
 The `numbers-parser` API is documented at [Read The Docs](https://numbers-parser.readthedocs.io/en/latest/). Some of the content in this README will be moved into the API docs in future updates.
 
-## Usage
+## Reading Numbers Documents
 
 Reading documents:
 
@@ -118,7 +118,7 @@ Cell references can be either zero-offset row/column integers or an Excel/Number
 '£1,234.50'
 ```
 
-### Panda Support
+### Pandas Support
 
 Since the return value of `rows()` is a list of lists, you can pass this directly to pandas. Assuming you have a Numbers table with a single header which contains the names of the pandas series you want to create you can construct a pandas dataframe using:
 
@@ -132,7 +132,35 @@ data = tables[0].rows(values_only=True)
 df = pd.DataFrame(data[1:], columns=data[0])
 ```
 
-### Styles
+## Writing Numbers Documents
+
+Whilst support for writing numbers files has been stable since version 3.4.0, you are highly recommended not to overwrite working Numbers files and instead save data to a new file.
+
+Cell values are written using [Table.write()](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Table.write) and `numbers-parser` will automatically create empty rows and columns for any cell references that are out of range of the current table.
+
+``` python
+doc = Document("write.numbers")
+sheets = doc.sheets
+tables = sheets[0].tables
+table = tables[0]
+table.write(1, 1, "This is new text")
+table.write("B7", datetime(2020, 12, 25))
+doc.save("new-sheet.numbers")
+```
+
+Additional tables and worksheets can be added to a `Document` before saving using [Document.add_sheet()](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Document.add_sheet) and [Sheet.add_table()](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Sheet.add_table) respectively:
+
+```python
+doc = Document()
+doc.add_sheet("New Sheet", "New Table")
+sheet = doc.sheets["New Sheet"]
+table = sheet.tables["New Table"]
+table.write(1, 1, 1000)
+table.write(1, 2, 2000)
+table.write(1, 3, 3000)
+doc.save("sheet.numbers")
+```
+## Styles
 
 `numbers_parser` currently only supports paragraph styles and cell styles. The following paragraph styles are supported:
 
@@ -143,443 +171,39 @@ df = pd.DataFrame(data[1:], columns=data[0])
 * cell background color
 * cell indents (first line, left, right, and text inset)
 
-Table styles that allow new tables to adopt a style across the whole table are not planned.
+Numbers conflates style attributes that can be stored in paragraph styles (the style menu in the text panel) with the settings that are available on the Style tab of the Text panel. Some attributes in Numbers are not applied to new cells when a style is applied. To keep the API simple, `numbers-parser` packs all styling into a single [Style](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Style) object. When a document is saved, the attributes not stored in a paragraph style are applied to each cell that includes it. 
 
-Numbers conflates style attributes that can be stored in paragraph styles (the style menu in the text panel) with the settings that are available on the Style tab of the Text panel. Some attributes in Numbers are not applied to new cells when a style is applied. To keep the API simple, `numbers-parser` packs all styling into a single `Style` object. When a document is saved, the attributes not stored in a paragraph style are applied to each cell that includes it. Attributes behaving in this way are currently `Cell.alignment.vertical` and `Cell.style.text_inset`. The cell background color `Cell.style.bg_color` also behaves this way, though this is in line with the separation in Numbers.
+Styles are read from cells using the [Cell.style](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Cell.style) propert and you can add new styles with [Document.add_style](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Document.add_style).
 
-#### Reading styles
+Since `Style` objects are shared, changing `Cell.style.font_size` will have the effect of changing the font size for that style and will in turn affect the styles of all cells using that style.
 
-The cell method `style` returns a `Style` object containing all the style information for that cell. Cells with identical style settings contain references to a single style object.
-
-Cell style attributes can be returned using a number of methods:
-
-* `Cell.style.alignment`: the horizontal and vertical alignment of the cell as an `Alignment` names tuple
-* `Cell.style.bg_color`: cell background color as an `RGB` named tuple, or a list of `RGB` values for gradients
-* `Cell.style.bold`: `True` if the cell font is bold
-* `Cell.style.font_color`: font color as an `RGB` named tuple
-* `Cell.style.font_size`: font size in points (`float`)
-* `Cell.style.font_name`: font name (`str`)
-* `Cell.style.italic`: `True` if the cell font is italic
-* `Cell.style.name`: cell style (`str`)
-* `Cell.style.underline`: `True` if the cell font is underline
-* `Cell.style.strikethrough`: `True` if the cell font is strikethrough
-* `Cell.style.first_indent`: first line indent in points (`float`)
-* `Cell.style.left_indent`: left indent in points (`float`)
-* `Cell.style.right_indent`: right indent in points (`float`)
-* `Cell.style.text_inset`: text inset in points (`float`)
-* `Cell.style.text_wrap`: `True` if text wrapping is enabled (default for new cells)
-
-#### Cell images
-
-The methods `style.bg_image.filename` and `style.bg_image.data` return data about the image used for a cell's background, where set. If a cell has no background image, `style.bg_image`  is `None`.
-
-``` python
-cell = table.cell("B1")
-with open (cell.style.bg_image.filename, "wb") as f:
-    f.write(cell.style.bg_image.data)
-```
-
-Due to a limitation in Python's [ZipFile](https://docs.python.org/3/library/zipfile.html), Python versions older than 3.11 do not support image filenames with UTF-8 characters (see [issue 69](https://github.com/masaccio/numbers-parser/issues/69)). `cell.style.bg_image` returns `None` for such files and issues a `RuntimeWarning`.
-
-### Formatting
+## Cell Data Formatting
 
 Numbers has two different cell formatting types: data formats and custom formats.
 
-Data formats are presented in Numbers in the Cell tab of the Format pane and are applied to individual cells. Like Numbers, `numbers-parsers` caches formatting information that is identical across multiple cells. Users of the `numbers-parsers` do not need to take any action for this to happen; this is handled internally by the package. Changing a data format for cell has no impact on any other cells.
+Data formats are presented in Numbers in the Cell tab of the Format pane and are applied to individual cells. Like Numbers, `numbers-parsers` caches formatting information that is identical across multiple cells. You do not need to take any action for this to happen; this is handled internally by the package. Changing a data format for cell has no impact on any other cells.
 
-Custom formats are shared across a Document and can be applied to multiple cells in multiple tables. Editing a custom format changes the appearance of data in all cells that share that format.
-
-The data representation of all cells is read uding the `formatted_value` property of the `Cell` object. This property returns a `str` value identical to that displayed visually by Numbers.
-
-A limited number of currencies are formatted using symbolic notation rather than an ISO code. These are defined in `numbers_parser.currencies` and match the ones chosen by Numbers. For example, US dollars are referred to as `US$` whereas Euros and British Pounds are referred to using their symbols of `€` and `£` respectively.
-
-#### Writing Data Formats
-
-The `Table` method `set_cell_formatting()` sets the formatting for a single cell:
+Cell formats are changed using [Table.set_cell_formatting](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Table.set_cell_formatting):
 
 ``` python
 table.set_cell_formatting("C1", "date", date_time_format="EEEE, d MMMM yyyy")
 table.set_cell_formatting(0, 4, "number", decimal_places=3, negative_style=NegativeNumberStyle.RED)
 ```
 
-The positional parameter after the cell reference is the type of data format to apply to the cell. Applying an incompatble data format to a cell, for example a date format to a `TextCell` or a `NumberCell` raises `TypeError` exception. Each data format has its own set of key-value pairs to configure the available parameters:
-
-<!-- markdownlint-disable MD033 -->
-<table>
-    <thead>
-        <tr>
-            <th>Data Format</th>
-            <th>Parameter</th>
-            <th>Description</th>
-            <th>Default</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td rowspan=3><code>base</code></td>
-            <td><code>base</code></td>
-            <td>The integer base to represent the number from 2-36.</td>
-            <td><code>10</code>
-        </tr>
-        <tr>
-            <td><code>base_use_minus_sign</code></td>
-            <td>If <code>True</code> use a standard minus sign, otherwise format as two's compliment (only possible for binary, octal and hexadecimal</td>
-            <td><code>True</code></td>
-        </tr>
-        <tr>
-            <td><code>base_places</code></td>
-            <td>The number of decimal places, or <code>None</code> for automatic</td>
-            <td><code>0</code></td>
-        </tr>
-        <tr>
-            <td rowspan=5><code>currency</code></td>
-            <td><code>currency_code</code></td>
-            <td>An ISO currency code, e.g. <code>GBP</code> or <code>USD</code></td>
-            <td><code>GBP</code> regardless of locale</td>
-        </tr>
-        <tr>
-            <td><code>decimal_places</code></td>
-            <td>The number of decimal places, or <code>None</code> for automatic</td>
-            <td><code>2</code></td>
-        </tr>
-        <tr>
-            <td><code>negative_style</code></td>
-            <td>How negative numbers are represented defined by the <code>NegativeNumberStyle</code> enum</td>
-            <td><code>NegativeNumberStyle.MINUS</code></td>
-        </tr>
-        <tr>
-            <td><code>show_thousands_separator</code></td>
-            <td><code>True</code> if the number should include a thousands seperator, e.g. <code>,</code></td>
-            <td><code>False</code></td>
-        </tr>
-        <tr>
-            <td><code>use_accounting_style</code></td>
-            <td><code>True</code> if the currency symbol should be formatted to the left of the cell and separated from the number value by a tab. A <code>RuntimeWarning</code> is generated if this is combined with <code>negative_style</code>.</td>
-            <td><code>False</code></td>
-        </tr>
-        <tr>
-            <td><code>datetime</code></td>
-            <td><code>date_time_format</code></td>
-            <td>A POSIX <code>strftime</code>-like formatting string. See <a href="#datetime-formatting">Date/time formatting</a> for a list of supported directives</td>
-            <td><code>dd MMM YYY HH:MM</code></td>
-        </tr>
-        <tr>
-            <td><code>fraction</code></td>
-            <td><code>fraction_accuracy</code></td>
-            <td>The precision of the faction defined by the `FractionAccuracy` enum</td>
-            <td><code>FractionAccuracy.THREE</code></td>
-        </tr>
-        <tr>
-            <td rowspan=3><code>percentage</code></td>
-            <td><code>decimal_places</code></td>
-            <td>The number of decimal places, or <code>None</code> for automatic</td>
-            <td><code>Auto</code></td>
-        </tr>
-        <tr>
-            <td><code>negative_style</code></td>
-            <td>How negative numbers are represented defined by the <code>NegativeNumberStyle</code> enum</td>
-            <td><code>NegativeNumberStyle.MINUS</code></td>
-        </tr>
-        <tr>
-            <td><code>show_thousands_separator</code></td>
-            <td><code>True</code> if the number should include a thousands seperator, e.g. <code>,</code></td>
-            <td><code>False</code><td>
-        </tr>
-        <tr>
-            <td rowspan=3><code>number</code></td>
-            <td><code>decimal_places</code></td>
-            <td>The number of decimal places, or <code>None</code> for automatic</td>
-            <td><code>Auto</code><td>
-        </tr>
-        <tr>
-            <td><code>negative_style</code></td>
-            <td>How negative numbers are represented defined by the <code>NegativeNumberStyle</code> enum</td>
-            <td><code>NegativeNumberStyle.MINUS</code></td>
-        </tr>
-        <tr>
-            <td><code>show_thousands_separator</code></td>
-            <td><code>True</code> if the number should include a thousands seperator, e.g. <code>,</code></td>
-            <td><code>False</code><td>
-        </tr>
-        <tr>
-            <td><code>scientific</code></td>
-            <td><code>decimal_places</code></td>
-            <td>The number of decimal places, or <code>None</code> for automatic</td>
-            <td><code>Auto</code><td>
-        </tr>
-    </tbody>
-</table>
-<!-- markdownlint-enable MD033 -->
-
-##### Date/time formatting
-
-`date_time_format` uses Numbers notation for date and time formatting rather than POSIX `strftime` as there are a number of extensions. Date components are specified using directives which must be separated by whitespace. Supported directives are:
-
-| Directive   | Meaning                                                       | Example                |
-| ----------- | ------------------------------------------------------------- | ---------------------- |
-| `a`         | Locale’s AM or PM                                             | am, pm                 |
-| `EEEE`      | Full weekday name                                             | Monday, Tuesday, ...   |
-| `EEE`       | Abbreviated weekday name                                      | Mon, Tue, ...          |
-| `yyyy`      | Year with century as a decimal number                         | 1999, 2023, etc.       |
-| `yy`        | Year without century as a zero-padded decimal number          | 00, 01, ... 99         |
-| `y`         | Year without century as a decimal number                      | 0, 1, ... 99           |
-| `MMMM`      | Full month name                                               | January, February, ... |
-| `MMM`       | Abbreviated month name                                        | Jan, Feb, ...          |
-| `MM`        | Month as a zero-padded decimal number                         | 01, 02, ... 12         |
-| `M`         | Month as a decimal number                                     | 1, 2, ... 12           |
-| `d`         | Day as a decimal number                                       | 1, 2, ... 31           |
-| `dd`        | Day as a zero-padded decimal number                           | 01, 02, ... 31         |
-| `DDD`       | Day of the year as a zero-padded 3-digit number               | 001 - 366              |
-| `DD`        | Day of the year as a minimum zero-padded 2-digit number       | 01 - 366               |
-| `D`         | Day of the year                                               | 1 - 366                |
-| `HH`        | Hour (24-hour clock) as a zero-padded decimal number          | 00, 01, ... 23         |
-| `H`         | Hour (24-hour clock) as a decimal number                      | 0, 1, ... 23           |
-| `hh`        | Hour (12-hour clock) as a zero-padded decimal number          | 01, 02, ... 12         |
-| `h`         | Hour (12-hour clock) as a decimal number                      | 1, 2, ... 12           |
-| `k`         | Hour (24-hour clock) as a decimal number to 24                | 1, 2, ... 24           |
-| `kk`        | Hour (24-hour clock) as a zero-padded decimal number to 24    | 01, 02, ... 24         |
-| `K`         | Hour (12-hour clock) as a decimal number from 0               | 0, 1, ... 11           |
-| `KK`        | Hour (12-hour clock) as a zero-padded decimal number from 0   | 00, 01, ... 11         |
-| `mm`        | Minutes as a zero-padded number                               | 00, 01, ... 59         |
-| `m`         | Minutes as a number                                           | 0, 1, ... 59           |
-| `ss`        | Seconds as a zero-padded number                               | 00, 01, ... 59         |
-| `s`         | Seconds as a number                                           | 0, 1, ... 59           |
-| `W`         | Week number in the month (first week is zero)                 | 0, 1, ... 5            |
-| `ww`        | Week number of the year (Monday as the first day of the week) | 0, 1, ... 53           |
-| `G`         | AD or BC (only AD is supported)                               | AD                     |
-| `F`         | How many times the day of falls in the month                  | 1, 2, ... 5            |
-| `S`         | Seconds to one decimal place                                  | 0 - 9                  |
-| `SS`        | Seconds to two decimal places                                 | 00 - 99                |
-| `SSS`       | Seconds to three decimal places                               | 000 - 999              |
-| `SSSS`      | Seconds to four decimal places                                | 0000 - 9999            |
-| `SSSSS`     | Seconds to five decimal places                                | 00000 - 9999           |
-
-#### Writing Custom Data Formats
-
-The `Document` method `add_custom_format()` creates a custom format and returns a `CustomFormatting` object. Custom formatting is applied to cells using the `Table` method `set_cell_formatting` in a similar way to data formats:
+Custom formats are shared across a Document and can be applied to multiple cells in multiple tables. Editing a custom format changes the appearance of data in all cells that share that format. You must first add a custom format to the document using [Document.add_custom_format](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Document.add_custom_format) before assigning it to cells using [Table.set_cell_formatting](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Table.set_cell_formatting):
 
 ``` python
 long_date = doc.add_custom_format(name="Long Date", type="date", date_time_format="EEEE, d MMMM yyyy")
 table.set_cell_formatting("C1", "custom", format=long_date)
 ```
 
-`add_custom_format` takes a list of key-value pairs as follows defining the format.
+A limited number of currencies are formatted using symbolic notation rather than an ISO code. These are defined in `numbers_parser.currencies` and match the ones chosen by Numbers. For example, US dollars are referred to as `US$` whereas Euros and British Pounds are referred to using their symbols of `€` and `£` respectively.
 
-* `name` is the name of the custom format. If no name is provided, one is generated using the scheme `Custom Format`, `Custom Format 1`, `Custom Format 2`, etc.
-* `type` is the type of format to create. Supported formats are `number`, `datetime` and `text`. If no type is provided, `add_custom_format` defaults to `number`
-
-In addition to these basic parameters, `add_custom_format` also supports the following parameters dependent upon format type:
-
-<!-- markdownlint-disable MD033 -->
-<table>
-    <thead>
-        <tr>
-            <th>Format Type</th>
-            <th>Parameter</th>
-            <th>Description</th>
-            <th>Default</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td rowspan=5><code>number</code></td>
-            <td><code>integer_format</code></td>
-            <td>How to pad integers represented defined by the <code>PaddingType</code> enum</td>
-            <td><code>PaddingType.NONE</code>
-        </tr>
-        <tr>
-            <td><code>decimal_format</code></td>
-            <td>How to pad decimals represented defined by the <code>PaddingType</code> enum</td>
-            <td><code>PaddingType.NONE</code>
-        </tr>
-        <tr>
-            <td><code>num_integers</code></td>
-            <td>The integer precision when integers are padded</td>
-            <td><code>0</code>
-        </tr>
-        <tr>
-            <td><code>num_decimals</code></td>
-            <td>The integer precision when decimals are padded</code> enum<</td>
-            <td><code>0</code>
-        </tr>
-        <tr>
-            <td><code>show_thousands_separator</code></td>
-            <td><code>True</code> if the number should include a thousands seperator, e.g. <code>,</code></td>
-            <td><code>False</code></td>
-        </tr>
-        <tr>
-            <td><code>datetime</code></td>
-            <td><code>format</code></td>
-            <td>A POSIX <code>strftime</code>-like formatting string. See <a href="#datetime-formatting">Date/time formatting</a> for a list of supported directives</td>
-            <td><code>d MMM y</code>
-        </tr>
-        <tr>
-            <td><code>text</code></td>
-            <td><code>format</code></td>
-            <td>A string format where the cell value is inserted in place of <code>%s</code>. Only one substitution is allowed by Numbers, and multiple <code>%s</code> formatting references raise a <code>TypeError</code> exception.</td>
-            <td><code>%s</code>
-        </tr>
-    </tbody>
-</table>
-<!-- markdownlint-enable MD033 -->
-
-`set_cell_formatting` accepts either a `CustomFormatting` object or the name of a custom style.
-
-A `dict` of available custom formats is returned by the `Document` property `custom_formats`. This contains key value pairs of format names and `CustomFormatting` objects. Any changes to `CustomFormatting` objects in the document are written back such that those formats are changed for all cells that use them.
-
-### Borders
+## Borders
 
 `numbers-parser` supports reading and writing cell borders, though the interface for each differs. Individual cells can have each of their four borders tested, but when drawing new borders, these are set for the table to allow for drawing borders across multiple cells. Setting the border of merged cells is not possible unless the edge of the cells is at the end of the merged region.
 
-Borders are represented using the `Border` class that can be initialized with line width, color and line style:
-
-``` python
-border = Border(4.0, RGB(0, 162, 255), "solid"))
-```
-
-Valid values for the line `style` parameter are `"solid"`, `"dashes"`, `"dots"` and `"none"`.
-
-#### Reading Cell Borders
-
-Cells have a property `border` which itself has the properties `top`, `right`, `bottom` and `left`, each of which is a `Border` class representing the line type for that cell. Cells with no border set at all, and merged cells which are inside the range of the merge return `None` for these cells. The absence of a specified border is different from no border in Numbers which is a valid `Border` class with `style="none"`.
-
-#### Writing Cell Borders
-
-The `Table` method `set_cell_border()` sets the border for a cell edge or a range of cells:
-
-``` python
-table.set_cell_border("C1", ["top", "left"], Border(0.0, RGB(0, 0, 0), "none"))
-table.set_cell_border(0, 4, "right", Border(1.0, RGB(0, 0, 0), "solid"), 3)
-```
-
-The last positional parameter specifies the length of the border and defaults to 1. A single call to `set_cell_border()` can set the borders to one or more sides of the cell as above. Like `Table.write()`, `set_cell_border()` supports both row/column and Excel-style cell references.
-
-## Writing Numbers files
-
-Whilst support for writing numbers files has been stable since version 3.4.0, you are highly recommended not to overwrite working Numbers files and instead save data to a new file.
-
-### Limitations
-
-Current limitations to write support are:
-
-* Creating cells of type `BulletedTextCell` is not supported
-* New tables are inserted with a fixed offset below the last table in a worksheet which does not take into account title or caption size
-* New sheets insert tables with formats copied from the first table in the previous sheet rather than default table formats
-
-### Cell values
-
-`numbers-parser` will automatically empty rows and columns for any cell references that are out of range of the current table. The `write` method accepts the same cell numbering notation as `cell` plus an additional argument representing the new cell value. The type of the new value will be used to determine the cell type.
-
-``` python
-doc = Document("old-sheet.numbers")
-sheets = doc.sheets
-tables = sheets[0].tables
-table = tables[0]
-table.write(1, 1, "This is new text")
-table.write("B7", datetime(2020, 12, 25))
-doc.save("new-sheet.numbers")
-```
-
-Sheet names and table names can be changed by assigning a new value to the `name` of each:
-
-```python
-sheets[0].name = "My new sheet"
-tables[0].name = "Edited table"
-````
-
-### Adding tables and sheets
-
-Additional tables and worksheets can be added to a `Document` before saving. If no sheet name or table name is supplied, `numbers-parser` will use `Sheet 1`, `Sheet 2`, etc.
-
-```python
-doc = Document()
-doc.add_sheet("New Sheet", "New Table")
-sheet = doc.sheets["New Sheet"]
-table = sheet.tables["New Table"]
-table.write(1, 1, 1000)
-table.write(1, 2, 2000)
-table.write(1, 3, 3000)
-
-doc.save("sheet.numbers")
-```
-
-### Table geometries
-
-`numbers-parser` can query and change the position and size of tables. Changes made to a table's row height or column width is retained when files are saved.
-
-####  Row and column sizes
-
-Row heights and column widths are queried and set using the `row_height` and `col_width` methods:
-
-```python
-doc = Document("sheet.numbers")
-table = doc.sheets[0].tables[0]
-print(f"Table size is {table.height} x {table.width}")
-print(f"Table row 1 height is {table.row_height(0)}")
-table.row_height(0, 40)
-print(f"Table row 1 height is now {table.row_height(0)}")
-print(f"Table column A width is {table.col_width(0)}")
-table.col_width(0, 200)
-print(f"Table column A width is {table.col_width(0)}")
-```
-
-####  Header row and columns
-
-When new tables are created, `numbers-parser` follows the Numbers convention of creating a table with one row header and one column header. You can change the number of headers by modifying the appropriate property:
-
-```python
-doc = Document("sheet.numbers")
-table = doc.sheets[0].tables[0]
-table.num_header_rows = 2
-table.num_header_cols = 0
-doc.save("saved.numbers")
-```
-
-A zero header count will remove the headers from the table. Attempting to set a negative number of headers, or using more headers that rows or columns in the table will raise a `ValueError` exception.
-
-#### Positioning tables
-
-By default, new tables are positioned at a fixed offset below the last table vertically in a sheet and on the left side of the sheet. Large table headers and captions may result in new tables overlapping existing ones. The `add_table` method takes optional coordinates for positioning a table. A table's height and coordinates can also be queried to help aligning new tables:
-
-```python
-(x, y) = sheet.table[0].coordinates
-y += sheet.table[0].height + 200.0
-new_table = sheet.add_table("Offset Table", x, y)
-```
-
-### Editing paragraph styles
-
-Cell text styles, known as paragraph styles, are those applied by the Text tab in Numbers Format pane. To simplify the API, when writing documents, it is not possible to make ad hoc changes to cells without assigning an existing style or creating a new one. This differs to the Numbers interface where cells can have modified styles on a per cell basis. Such styles are read correctly when reading Numbers files.
-
-Character styles, which allow formatting changes within cells such as "This is **bold** text" are not supported.
-
-Styles are created using the `Document`'s `add_style` method, and can be applied to cells either as part of a `write` or using `set_cell_style`:
-
-``` python
-red_text = doc.add_style(
-    name="Red Text",
-    font_name="Lucida Grande",
-    font_color=RGB(230, 25, 25),
-    font_size=14.0,
-    bold=True,
-    italic=True,
-    alignment=Alignment("right", "top"),
-)
-table.write("B2", "Red", style=red_text)
-table.set_cell_style("C2", red_text)
-```
-
-New styles are automatically added to the list of styles selectable in the Numbers Text pane.
-
-Cell styles can also be referred to by name in both `Table.write` and `Table.set_cell_style`. A `dict` of available styles is returned by the `Document` property `styles`. This contains key value pairs of style names and `Style` objects. Any changes to `Style` objects in the document are written back such that those styles are changed for all cells that use them.
-
-``` python
-doc = Document("styles.numbers")
-styles = doc.styles
-styles["Title"].font_size = 20.0
-```
-
-Since `Style` objects are shared, changing `Cell.style.font_size` will have the effect of changing the font size for that style and will in turn affect the styles of all cells using that style.
+Borders are represented using the [Border](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Border) class that can be initialized with line width, color and line style. The current state of a cell border is read using the [Cell.border](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Cell.border) property. The [Table.set_cell_border](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Table.set_cell_border) sets the border for a cell edge or a range of cells.
 
 ## Command-line scripts
 
@@ -608,6 +232,19 @@ optional arguments:
 ```
 
 Note: `--formatting` will return different capitalization for 12-hour times due to differences between Numbers' representation of these dates and `datetime.strftime`. Numbers in English locales displays 12-hour times with 'am' and 'pm', but `datetime.strftime` on macOS at least cannot return lower-case versions of AM/PM.
+
+## Limitations
+
+Current known limitations of `numbers-parser` are:
+
+* Formulas cannot be written to a document
+* Table styles that allow new tables to adopt a style across the whole table are not planned.
+* Creating cells of type `BulletedTextCell` is not supported
+* New tables are inserted with a fixed offset below the last table in a worksheet which does not take into account title or caption size
+* New sheets insert tables with formats copied from the first table in the previous sheet rather than default table formats
+* Creating custom cell formats and cell data formats is experimental and not all formats are supported. See [Table.set_cell_formatting](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Table.set_cell_formatting) for more details.
+* Due to a limitation in Python's [ZipFile](https://docs.python.org/3/library/zipfile.html), Python versions older than 3.11 do not support image filenames with UTF-8 characters (see [issue 69](https://github.com/masaccio/numbers-parser/issues/69)). [Cell.style.bg_image](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Style) returns `None` for such files and issues a `RuntimeWarning`.
+
 
 ## Numbers File Formats
 
