@@ -70,6 +70,7 @@ merge can still be indexed using ``Table.cell()`` and are of type
             <td style="padding:10px">A2</td>
          </tr>
    </table>
+   <br>
 
 The properties of merges are tested using the following properties:
 
@@ -222,3 +223,14 @@ whitespace. Supported directives are:
 | ``SSSSS`` | Seconds to five decimal   | 00000 - 9999           |
 |           | places                    |                        |
 +-----------+---------------------------+------------------------+
+
+Cell reference functions
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: xl_cell_to_rowcol
+
+.. autofunction:: xl_range
+
+.. autofunction:: xl_rowcol_to_cell
+
+.. autofunction:: xl_col_to_name

@@ -144,7 +144,8 @@ class Document:
         return self._model.custom_formats
 
     def save(self, filename: str) -> None:
-        """Save the document in the specified filename.
+        """
+        Save the document in the specified filename.
 
         Parameters
         ----------
@@ -164,7 +165,8 @@ class Document:
         num_rows: Optional[int] = DEFAULT_ROW_COUNT,
         num_cols: Optional[int] = DEFAULT_COLUMN_COUNT,
     ) -> None:
-        """Add a new sheet to the current document.
+        """
+        Add a new sheet to the current document.
 
         If no sheet name is provided, the next available numbered sheet
         will be generated in the series ``Sheet 1``, ``Sheet 2``, etc.
@@ -206,7 +208,8 @@ class Document:
         self._sheets.append(new_sheet)
 
     def add_style(self, **kwargs) -> Style:
-        r"""Add a new style to the current document.
+        r"""
+        Add a new style to the current document.
 
         If no style name is provided, the next available numbered style will be generated.
 
@@ -248,7 +251,8 @@ class Document:
         return style
 
     def add_custom_format(self, **kwargs) -> CustomFormatting:
-        r"""Add a new custom format to the current document.
+        r"""
+        Add a new custom format to the current document.
 
         All custom formatting styles share a name and a type, described in the **Common**
         parameters in the following table. Additional key-value pairs configure the format
@@ -523,7 +527,8 @@ class Table(Cacheable):  # noqa: F811
         return self._model.table_width(self._table_id)
 
     def row_height(self, row: int, height: int = None) -> int:
-        """The height of a table row in points.
+        """
+        The height of a table row in points.
 
         Parameters
         ----------

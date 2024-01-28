@@ -551,7 +551,7 @@ class Cell(Cacheable):
         self._value = value
         self.row = row
         self.col = col
-        self.is_bulleted = False
+        self._is_bulleted = False
         self._formula_key = None
         self._storage = None
         self._style = None
@@ -638,7 +638,38 @@ class Cell(Cacheable):
             return None
 
     @property
-    def bullets(self) -> None:
+    def is_bulleted(self) -> bool:
+        """bool: ``True`` if the cell contains text bullets."""
+        return self._is_bulleted
+
+    @property
+    def bullets(self) -> Union[List[str], None]:
+        r"""
+        List[str] | None: The bullets in a cell, or ``None``
+
+        Cells that contain bulleted or numbered lists are identified
+        by :py:attr:`numbers_parser.Cell.is_bulleted`. For these cells,
+        :py:attr:`numbers_parser.Cell.value` returns the whole cell contents.
+        Bullets can also be extracted into a list of paragraphs cell without the
+        bullet or numbering character. Newlines are not included in the
+        bullet list.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            doc = Document("bullets.numbers")
+            sheets = doc.sheets
+            tables = sheets[0].tables
+            table = tables[0]
+            if not table.cell(0, 1).is_bulleted:
+                print(table.cell(0, 1).value)
+            else:
+                bullets = ["* " + s for s in table.cell(0, 1).bullets]
+                print("\n".join(bullets))
+                    return None
+        """
         return None
 
     @property
@@ -739,7 +770,7 @@ class RichTextCell(Cell):
                 else value["bullets"][i]
                 for i in range(len(self._bullets))
             ]
-            self.is_bulleted = True
+            self._is_bulleted = True
 
     @property
     def value(self) -> str:
@@ -756,7 +787,24 @@ class RichTextCell(Cell):
         return self._formatted_bullets
 
     @property
-    def hyperlinks(self) -> List[Tuple]:
+    def hyperlinks(self) -> Union[List[Tuple], None]:
+        """
+        List[Tuple] | None: the hyperlinks in a cell or ``None``
+
+        Numbers does not support hyperlinks to cells within a spreadsheet, but does
+        allow embedding links in cells. When cells contain hyperlinks,
+        `numbers_parser` returns the text version of the cell. The `hyperlinks` property
+        of cells where :py:attr:`numbers_parser.Cell.is_bulleted` is ``True`` is a
+        list of text and URL tuples.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            cell = table.cell(0, 0)
+            (text, url) = cell.hyperlinks[0]
+        """
         return self._hyperlinks
 
 
@@ -856,11 +904,18 @@ range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
 
 
 def xl_cell_to_rowcol(cell_str: str) -> tuple:
-    """Convert a cell reference in A1 notation to a zero indexed row and column.
-    Args:
-        cell_str:  A1 style string.
-    Returns:
-        row, col: Zero indexed cell row and column indices.
+    """
+    Convert a cell reference in A1 notation to a zero indexed row and column.
+
+    Parameters
+    ----------
+    cell_str:  str
+        A1 notation cell reference
+
+    Returns
+    -------
+    row, col: int, int
+        Cell row and column numbers (zero indexed).
     """
     if not cell_str:
         return 0, 0
@@ -887,13 +942,23 @@ def xl_cell_to_rowcol(cell_str: str) -> tuple:
 
 
 def xl_range(first_row, first_col, last_row, last_col):
-    """Convert zero indexed row and col cell references to a A1:B1 range string.
-    Args:
-       first_row: The first cell row.    Int.
-       first_col: The first cell column. Int.
-       last_row:  The last cell row.     Int.
-       last_col:  The last cell column.  Int.
-    Returns:
+    """
+    Convert zero indexed row and col cell references to a A1:B1 range string.
+
+    Parameters
+    ----------
+    first_row: int
+        The first cell row.
+    first_col: int
+        The first cell column.
+    last_row: int
+        The last cell row.
+    last_col: int
+        The last cell column.
+
+    Returns
+    -------
+    str:
         A1:B1 style range string.
     """
     range1 = xl_rowcol_to_cell(first_row, first_col)
@@ -906,13 +971,23 @@ def xl_range(first_row, first_col, last_row, last_col):
 
 
 def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
-    """Convert a zero indexed row and column cell reference to a A1 style string.
-    Args:
-       row:     The cell row.    Int.
-       col:     The cell column. Int.
-       row_abs: Optional flag to make the row absolute.    Bool.
-       col_abs: Optional flag to make the column absolute. Bool.
-    Returns:
+    """
+    Convert a zero indexed row and column cell reference to a A1 style string.
+
+    Parameters
+    ----------
+    row: int
+         The cell row.
+    col: int
+        The cell column.
+    row_abs: bool
+        If ``True``, make the row absolute.
+    col_abs: bool
+        If ``True``, make the column absolute.
+
+    Returns
+    -------
+    str:
         A1 style string.
     """
     if row < 0:
@@ -930,7 +1005,9 @@ def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
 
 
 def xl_col_to_name(col, col_abs=False):
-    """Convert a zero indexed column cell reference to a string.
+    """
+    Convert a zero indexed column cell reference to a string.
+
     Parameters
     ----------
     col: int

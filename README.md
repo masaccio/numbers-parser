@@ -118,7 +118,7 @@ Cell references can be either zero-offset row/column integers or an Excel/Number
 '£1,234.50'
 ```
 
-### Pandas
+### Panda Support
 
 Since the return value of `rows()` is a list of lists, you can pass this directly to pandas. Assuming you have a Numbers table with a single header which contains the names of the pandas series you want to create you can construct a pandas dataframe using:
 
@@ -130,33 +130,6 @@ sheets = doc.sheets
 tables = sheets[0].tables
 data = tables[0].rows(values_only=True)
 df = pd.DataFrame(data[1:], columns=data[0])
-```
-
-### Bullets and lists
-
-Cells that contain bulleted or numbered lists can be identified by the `is_bulleted` property. Data from such cells is returned using the `value` property as with other cells, but can additionally extracted using the `bullets` property. `bullets` returns a list of the paragraphs in the cell without the bullet or numbering character. Newlines are not included when bullet lists are extracted using `bullets`.
-
-``` python
-doc = Document("bullets.numbers")
-sheets = doc.sheets
-tables = sheets[0].tables
-table = tables[0]
-if not table.cell(0, 1).is_bulleted:
-    print(table.cell(0, 1).value)
-else:
-    bullets = ["* " + s for s in table.cell(0, 1).bullets]
-    print("\n".join(bullets))
-```
-
-Bulleted and numbered data can also be extracted with the bullet or number characters present in the text for each line in the cell in the same way as above but using the `formatted_bullets` property. A single space is inserted between the bullet character and the text string and in the case of bullets, this will be the Unicode character seen in Numbers, for example `"• some text"`.
-
-### Hyperlinks
-
-Numbers does not support hyperlinks to cells within a spreadsheet, but does allow embedding links in cells. When cells contain hyperlinks, `numbers_parser` returns the text version of the cell. The `hyperlinks` property of cells where `is_bulleted` is `True` is a list of text and URL tuples:
-
-``` python
-cell = table.cell(0, 0)
-(text, url) = cell.hyperlinks[0]
 ```
 
 ### Styles
