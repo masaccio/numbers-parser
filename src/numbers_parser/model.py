@@ -96,11 +96,11 @@ class MergeCells:
     def __init__(self):
         self._references = defaultdict(lambda: False)
 
-    def add_reference(self, row_num: int, col_num: int, rect: Tuple):
-        self._references[(row_num, col_num)] = MergeReference(*rect)
+    def add_reference(self, row: int, col: int, rect: Tuple):
+        self._references[(row, col)] = MergeReference(*rect)
 
-    def add_anchor(self, row_num: int, col_num: int, size: Tuple):
-        self._references[(row_num, col_num)] = MergeAnchor(size)
+    def add_anchor(self, row: int, col: int, size: Tuple):
+        self._references[(row, col)] = MergeAnchor(size)
 
     def is_merge_reference(self, row_col: Tuple) -> bool:
         return isinstance(self._references[row_col], MergeReference)
@@ -607,10 +607,10 @@ class _NumbersModel(Cacheable):
                     col_start = rect.origin.column
                     col_end = col_start + rect.size.num_columns - 1
                     size = (row_end - row_start + 1, col_end - col_start + 1)
-                    for row_num in range(row_start, row_end + 1):
-                        for col_num in range(col_start, col_end + 1):
+                    for row in range(row_start, row_end + 1):
+                        for col in range(col_start, col_end + 1):
                             self._merge_cells[table_id].add_reference(
-                                row_num, col_num, (row_start, col_start, row_end, col_end)
+                                row, col, (row_start, col_start, row_end, col_end)
                             )
                     self._merge_cells[table_id].add_anchor(row_start, col_start, size)
 
@@ -630,10 +630,10 @@ class _NumbersModel(Cacheable):
             )
             row_end = row_start + num_rows - 1
             col_end = col_start + num_columns - 1
-            for row_num in range(row_start, row_end + 1):
-                for col_num in range(col_start, col_end + 1):
+            for row in range(row_start, row_end + 1):
+                for col in range(col_start, col_end + 1):
                     self._merge_cells[table_id].add_reference(
-                        row_num, col_num, (row_start, col_start, row_end, col_end)
+                        row, col, (row_start, col_start, row_end, col_end)
                     )
             self._merge_cells[table_id].add_anchor(row_start, col_start, (num_rows, num_columns))
 
@@ -653,7 +653,7 @@ class _NumbersModel(Cacheable):
                 if table_uuid == self.table_base_id(table_id):
                     return table_id
 
-    def node_to_ref(self, this_table_id: int, row_num: int, col_num: int, node):
+    def node_to_ref(self, this_table_id: int, row: int, col: int, node):
         if node.HasField("AST_cross_table_reference_extra_info"):
             table_uuid = NumbersUUID(node.AST_cross_table_reference_extra_info.table_id).hex
             other_table_id = self.table_uuids_to_id(table_uuid)
@@ -670,36 +670,34 @@ class _NumbersModel(Cacheable):
                 other_table_name = f"{other_sheet_name}::" + other_table_name
 
         if node.HasField("AST_colon_tract"):
-            return self.tract_to_row_col_ref(node, other_table_name, row_num, col_num)
+            return self.tract_to_row_col_ref(node, other_table_name, row, col)
         elif node.HasField("AST_row") and not node.HasField("AST_column"):
-            return node_to_row_ref(node, other_table_name, row_num)
+            return node_to_row_ref(node, other_table_name, row)
         elif node.HasField("AST_column") and not node.HasField("AST_row"):
-            return node_to_col_ref(node, other_table_name, col_num)
+            return node_to_col_ref(node, other_table_name, col)
         else:
-            return node_to_row_col_ref(node, other_table_name, row_num, col_num)
+            return node_to_row_col_ref(node, other_table_name, row, col)
 
-    def tract_to_row_col_ref(
-        self, node: object, table_name: str, row_num: int, col_num: int
-    ) -> str:
+    def tract_to_row_col_ref(self, node: object, table_name: str, row: int, col: int) -> str:
         if node.AST_sticky_bits.begin_row_is_absolute:
             row_begin = node.AST_colon_tract.absolute_row[0].range_begin
         else:
-            row_begin = row_num + node.AST_colon_tract.relative_row[0].range_begin
+            row_begin = row + node.AST_colon_tract.relative_row[0].range_begin
 
         if node.AST_sticky_bits.end_row_is_absolute:
             row_end = range_end(node.AST_colon_tract.absolute_row[0])
         else:
-            row_end = row_num + range_end(node.AST_colon_tract.relative_row[0])
+            row_end = row + range_end(node.AST_colon_tract.relative_row[0])
 
         if node.AST_sticky_bits.begin_column_is_absolute:
             col_begin = node.AST_colon_tract.absolute_column[0].range_begin
         else:
-            col_begin = col_num + node.AST_colon_tract.relative_column[0].range_begin
+            col_begin = col + node.AST_colon_tract.relative_column[0].range_begin
 
         if node.AST_sticky_bits.end_column_is_absolute:
             col_end = range_end(node.AST_colon_tract.absolute_column[0])
         else:
-            col_end = col_num + range_end(node.AST_colon_tract.relative_column[0])
+            col_end = col + range_end(node.AST_colon_tract.relative_column[0])
 
         begin_ref = xl_rowcol_to_cell(
             row_begin,
@@ -745,29 +743,29 @@ class _NumbersModel(Cacheable):
         return buffers
 
     @cache(num_args=3)
-    def storage_buffer(self, table_id: int, row_num: int, col_num: int) -> bytes:
-        row_offset = self.row_storage_map(table_id)[row_num]
+    def storage_buffer(self, table_id: int, row: int, col: int) -> bytes:
+        row_offset = self.row_storage_map(table_id)[row]
         if row_offset is None:
             return None
         storage_buffers = self.storage_buffers(table_id)
         if row_offset >= len(storage_buffers):
             return None
-        if col_num >= len(storage_buffers[row_offset]):
+        if col >= len(storage_buffers[row_offset]):
             return None
-        return storage_buffers[row_offset][col_num]
+        return storage_buffers[row_offset][col]
 
     def recalculate_row_headers(self, table_id: int, data: List):
         base_data_store = self.objects[table_id].base_data_store
         buckets = self.objects[base_data_store.rowHeaders.buckets[0].identifier]
         clear_field_container(buckets.headers)
-        for row_num in range(len(data)):
-            if table_id in self._row_heights and row_num in self._row_heights[table_id]:
-                height = self._row_heights[table_id][row_num]
+        for row in range(len(data)):
+            if table_id in self._row_heights and row in self._row_heights[table_id]:
+                height = self._row_heights[table_id][row]
             else:
                 height = 0.0
             header = TSTArchives.HeaderStorageBucket.Header(
-                index=row_num,
-                numberOfCells=len(data[row_num]),
+                index=row,
+                numberOfCells=len(data[row]),
                 size=height,
                 hidingState=0,
             )
@@ -775,8 +773,8 @@ class _NumbersModel(Cacheable):
 
     def recalculate_column_headers(self, table_id: int, data: List):
         current_column_widths = {}
-        for col_num in range(self.number_of_columns(table_id)):
-            current_column_widths[col_num] = self.col_width(table_id, col_num)
+        for col in range(self.number_of_columns(table_id)):
+            current_column_widths[col] = self.col_width(table_id, col)
 
         base_data_store = self.objects[table_id].base_data_store
         buckets = self.objects[base_data_store.columnHeaders.identifier]
@@ -784,14 +782,14 @@ class _NumbersModel(Cacheable):
         # Transpose data to get columns
         col_data = [list(x) for x in zip(*data)]
 
-        for col_num, col in enumerate(col_data):
-            num_rows = len(col) - sum([isinstance(x, MergedCell) for x in col])
-            if table_id in self._col_widths and col_num in self._col_widths[table_id]:
-                width = self._col_widths[table_id][col_num]
+        for col, cells in enumerate(col_data):
+            num_rows = len(cells) - sum([isinstance(x, MergedCell) for x in cells])
+            if table_id in self._col_widths and col in self._col_widths[table_id]:
+                width = self._col_widths[table_id][col]
             else:
-                width = current_column_widths[col_num]
+                width = current_column_widths[col]
             header = TSTArchives.HeaderStorageBucket.Header(
-                index=col_num, numberOfCells=num_rows, size=width, hidingState=0
+                index=col, numberOfCells=num_rows, size=width, hidingState=0
             )
             buckets.headers.append(header)
 
@@ -816,23 +814,23 @@ class _NumbersModel(Cacheable):
         base_data_store.merge_region_map.CopyFrom(TSPMessages.Reference(identifier=merge_map_id))
 
     def recalculate_row_info(
-        self, table_id: int, data: List, tile_row_offset: int, row_num: int
+        self, table_id: int, data: List, tile_row_offset: int, row: int
     ) -> TSTArchives.TileRowInfo:
         row_info = TSTArchives.TileRowInfo()
         row_info.storage_version = 5
-        row_info.tile_row_index = row_num - tile_row_offset
+        row_info.tile_row_index = row - tile_row_offset
         row_info.cell_count = 0
         cell_storage = b""
 
         offsets = [-1] * len(data[0])
         current_offset = 0
 
-        for col_num in range(len(data[row_num])):
-            buffer = self.pack_cell_storage(table_id, data, row_num, col_num)
+        for col in range(len(data[row])):
+            buffer = self.pack_cell_storage(table_id, data, row, col)
             if buffer is not None:
                 cell_storage += buffer
                 # Always use wide offsets
-                offsets[col_num] = current_offset >> 2
+                offsets[col] = current_offset >> 2
                 current_offset += len(buffer)
 
                 row_info.cell_count += 1
@@ -934,8 +932,8 @@ class _NumbersModel(Cacheable):
             tile_id, tile = self.objects.create_object_from_dict(
                 "Index/Tables/Tile-{}", tile_dict, TSTArchives.Tile
             )
-            for row_num in range(row_start, row_end):
-                row_info = self.recalculate_row_info(table_id, data, row_start, row_num)
+            for row in range(row_start, row_end):
+                row_info = self.recalculate_row_info(table_id, data, row_start, row)
                 tile.rowInfos.append(row_info)
 
             tile_ref = TSTArchives.TileStorage.Tile()
@@ -975,23 +973,23 @@ class _NumbersModel(Cacheable):
                 height += table_model.default_row_height
         return round(height)
 
-    def row_height(self, table_id: int, row_num: int, height: int = None) -> int:
+    def row_height(self, table_id: int, row: int, height: int = None) -> int:
         if height is not None:
             if table_id not in self._row_heights:
                 self._row_heights[table_id] = {}
-            self._row_heights[table_id][row_num] = height
+            self._row_heights[table_id][row] = height
             return height
 
-        if table_id in self._row_heights and row_num in self._row_heights[table_id]:
-            return self._row_heights[table_id][row_num]
+        if table_id in self._row_heights and row in self._row_heights[table_id]:
+            return self._row_heights[table_id][row]
 
         table_model = self.objects[table_id]
         bds = self.objects[table_id].base_data_store
         bucket_id = bds.rowHeaders.buckets[0].identifier
         buckets = self.objects[bucket_id].headers
         bucket_map = {x.index: x for x in buckets}
-        if row_num in bucket_map and bucket_map[row_num].size != 0.0:
-            return round(bucket_map[row_num].size)
+        if row in bucket_map and bucket_map[row].size != 0.0:
+            return round(bucket_map[row].size)
         else:
             return round(table_model.default_row_height)
 
@@ -1011,23 +1009,23 @@ class _NumbersModel(Cacheable):
                 width += table_model.default_column_width
         return round(width)
 
-    def col_width(self, table_id: int, col_num: int, width: int = None) -> int:
+    def col_width(self, table_id: int, col: int, width: int = None) -> int:
         if width is not None:
             if table_id not in self._col_widths:
                 self._col_widths[table_id] = {}
-            self._col_widths[table_id][col_num] = width
+            self._col_widths[table_id][col] = width
             return width
 
-        if table_id in self._col_widths and col_num in self._col_widths[table_id]:
-            return self._col_widths[table_id][col_num]
+        if table_id in self._col_widths and col in self._col_widths[table_id]:
+            return self._col_widths[table_id][col]
 
         table_model = self.objects[table_id]
         bds = self.objects[table_id].base_data_store
         bucket_id = bds.columnHeaders.identifier
         buckets = self.objects[bucket_id].headers
         bucket_map = {x.index: x for x in buckets}
-        if col_num in bucket_map and bucket_map[col_num].size != 0.0:
-            return round(bucket_map[col_num].size)
+        if col in bucket_map and bucket_map[col].size != 0.0:
+            return round(bucket_map[col].size)
         else:
             return round(table_model.default_column_width)
 
@@ -1172,10 +1170,7 @@ class _NumbersModel(Cacheable):
             )
         )
 
-        data = [
-            [EmptyCell(row_num, col_num) for col_num in range(num_cols)]
-            for row_num in range(num_rows)
-        ]
+        data = [[EmptyCell(row, col) for col in range(num_cols)] for row in range(num_rows)]
 
         row_headers_id, _ = self.objects.create_object_from_dict(
             "Index/Tables/HeaderStorageBucket-{}",
@@ -1463,8 +1458,8 @@ class _NumbersModel(Cacheable):
         have changes that require a cell style.
         """
         cell_styles = {}
-        for _, row in enumerate(data):
-            for _, cell in enumerate(row):
+        for _, cells in enumerate(data):
+            for _, cell in enumerate(cells):
                 if cell._style is not None and cell._style._update_cell_style:
                     fingerprint = (
                         str(cell.style.alignment.vertical)
@@ -1600,10 +1595,10 @@ class _NumbersModel(Cacheable):
             return "Custom Format 1"
 
     def pack_cell_storage(  # noqa: PLR0912, PLR0915
-        self, table_id: int, data: List, row_num: int, col_num: int
+        self, table_id: int, data: List, row: int, col: int
     ) -> bytearray:
         """Create a storage buffer for a cell using v5 (modern) layout."""
-        cell = data[row_num][col_num]
+        cell = data[row][col]
         if cell._style is not None:
             if cell._style._text_style_obj_id is not None:
                 cell._storage.text_style_id = self._table_styles.lookup_key(
@@ -1673,7 +1668,7 @@ class _NumbersModel(Cacheable):
             data_type = type(cell).__name__
             table_name = self.table_name(table_id)
             warn(
-                f"@{table_name}:[{row_num},{col_num}]: unsupported data type {data_type} for save",
+                f"@{table_name}:[{row},{col}]: unsupported data type {data_type} for save",
                 UnsupportedWarning,
                 stacklevel=1,
             )
@@ -1748,12 +1743,12 @@ class _NumbersModel(Cacheable):
         return TableFormulas(self, table_id)
 
     @cache(num_args=3)
-    def table_cell_decode(self, table_id: int, row_num: int, col_num: int) -> Dict:
-        buffer = self.storage_buffer(table_id, row_num, col_num)
+    def table_cell_decode(self, table_id: int, row: int, col: int) -> Dict:
+        buffer = self.storage_buffer(table_id, row, col)
         if buffer is None:
             return None
 
-        return CellStorage(self, table_id, buffer, row_num, col_num)
+        return CellStorage(self, table_id, buffer, row, col)
 
     @cache(num_args=2)
     def table_rich_text(self, table_id: int, string_key: int) -> Dict:
@@ -1854,14 +1849,14 @@ class _NumbersModel(Cacheable):
             return self.table_style(cell_storage.table_id, cell_storage.text_style_id)
 
         table_model = self.objects[cell_storage.table_id]
-        if cell_storage.row_num in range(table_model.number_of_header_rows):
+        if cell_storage.row in range(table_model.number_of_header_rows):
             return self.objects[table_model.header_row_text_style.identifier]
-        elif cell_storage.col_num in range(table_model.number_of_header_columns):
+        elif cell_storage.col in range(table_model.number_of_header_columns):
             return self.objects[table_model.header_column_text_style.identifier]
         elif table_model.number_of_footer_rows > 0:
             start_row_num = table_model.number_of_rows - table_model.number_of_footer_rows
             end_row_num = start_row_num + table_model.number_of_footer_rows
-            if cell_storage.row_num in range(start_row_num, end_row_num):
+            if cell_storage.row in range(start_row_num, end_row_num):
                 return self.objects[table_model.footer_row_text_style.identifier]
         return self.objects[table_model.body_text_style.identifier]
 
@@ -1994,19 +1989,19 @@ class _NumbersModel(Cacheable):
         else:
             return "none"
 
-    def cell_for_stroke(self, table_id: int, side: str, row_num: int, col_num: int) -> object:
+    def cell_for_stroke(self, table_id: int, side: str, row: int, col: int) -> object:
         data = self._table_data[table_id]
-        if row_num < 0 or col_num < 0:
+        if row < 0 or col < 0:
             return None
-        if row_num >= len(data) or col_num >= len(data[row_num]):
+        if row >= len(data) or col >= len(data[row]):
             return None
-        cell = self._table_data[table_id][row_num][col_num]
+        cell = self._table_data[table_id][row][col]
         if isinstance(cell, MergedCell):
             if (
-                (side == "top" and row_num == cell.row_start)
-                or (side == "right" and col_num == cell.col_end)
-                or (side == "bottom" and row_num == cell.row_end)
-                or (side == "left" and col_num == cell.col_start)
+                (side == "top" and row == cell.row_start)
+                or (side == "right" and col == cell.col_end)
+                or (side == "bottom" and row == cell.row_end)
+                or (side == "left" and col == cell.col_start)
             ):
                 return cell
         elif cell.is_merged:
@@ -2017,28 +2012,28 @@ class _NumbersModel(Cacheable):
         return None
 
     def set_cell_border(  # noqa: PLR0913
-        self, table_id: int, row_num: int, col_num: int, side: str, border_value: Border
+        self, table_id: int, row: int, col: int, side: str, border_value: Border
     ):
         """Set the 2 borders adjacent to a stroke if within the table range."""
         if side == "top":
-            if (cell := self.cell_for_stroke(table_id, "top", row_num, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "top", row, col)) is not None:
                 cell._border.top = border_value
-            if (cell := self.cell_for_stroke(table_id, "bottom", row_num - 1, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "bottom", row - 1, col)) is not None:
                 cell._border.bottom = border_value
         elif side == "right":
-            if (cell := self.cell_for_stroke(table_id, "right", row_num, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "right", row, col)) is not None:
                 cell._border.right = border_value
-            if (cell := self.cell_for_stroke(table_id, "left", row_num, col_num + 1)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "left", row, col + 1)) is not None:
                 cell._border.left = border_value
         elif side == "bottom":
-            if (cell := self.cell_for_stroke(table_id, "bottom", row_num, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "bottom", row, col)) is not None:
                 cell._border.bottom = border_value
-            if (cell := self.cell_for_stroke(table_id, "top", row_num + 1, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "top", row + 1, col)) is not None:
                 cell._border.top = border_value
         else:  # left border
-            if (cell := self.cell_for_stroke(table_id, "left", row_num, col_num)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "left", row, col)) is not None:
                 cell._border.left = border_value
-            if (cell := self.cell_for_stroke(table_id, "right", row_num, col_num - 1)) is not None:
+            if (cell := self.cell_for_stroke(table_id, "right", row, col - 1)) is not None:
                 cell._border.right = border_value
 
     def extract_strokes_in_layers(self, table_id: int, layer_ids: List, side: str):
@@ -2054,13 +2049,13 @@ class _NumbersModel(Cacheable):
                 if side in ["top", "bottom"]:
                     start_row = stroke_layer.row_column_index
                     start_column = stroke_run.origin
-                    for col_num in range(start_column, start_column + stroke_run.length):
-                        self.set_cell_border(table_id, start_row, col_num, side, border_value)
+                    for col in range(start_column, start_column + stroke_run.length):
+                        self.set_cell_border(table_id, start_row, col, side, border_value)
                 else:
                     start_row = stroke_run.origin
                     start_column = stroke_layer.row_column_index
-                    for row_num in range(start_row, start_row + stroke_run.length):
-                        self.set_cell_border(table_id, row_num, start_column, side, border_value)
+                    for row in range(start_row, start_row + stroke_run.length):
+                        self.set_cell_border(table_id, row, start_column, side, border_value)
 
     @cache()
     def extract_strokes(self, table_id: int):
@@ -2131,8 +2126,8 @@ class _NumbersModel(Cacheable):
     def add_stroke(  # noqa: PLR0913
         self,
         table_id: int,
-        row_num: int,
-        col_num: int,
+        row: int,
+        col: int,
         side: str,
         border_value: Border,
         length: int,
@@ -2146,20 +2141,20 @@ class _NumbersModel(Cacheable):
 
         if side == "top":
             layer_ids = sidecar_obj.top_row_stroke_layers
-            row_column_index = row_num
-            origin = col_num
+            row_column_index = row
+            origin = col
         elif side == "right":
             layer_ids = sidecar_obj.right_column_stroke_layers
-            row_column_index = col_num
-            origin = row_num
+            row_column_index = col
+            origin = row
         elif side == "bottom":
             layer_ids = sidecar_obj.bottom_row_stroke_layers
-            row_column_index = row_num
-            origin = col_num
+            row_column_index = row
+            origin = col
         else:  # left border
             layer_ids = sidecar_obj.left_column_stroke_layers
-            row_column_index = col_num
-            origin = row_num
+            row_column_index = col
+            origin = row
 
         stroke_layer = None
         for layer_id in layer_ids:
@@ -2228,8 +2223,8 @@ def formatted_number(number_type, index):
     return bullet_char
 
 
-def node_to_col_ref(node: object, table_name: str, col_num: int) -> str:
-    col = node.AST_column.column if node.AST_column.absolute else col_num + node.AST_column.column
+def node_to_col_ref(node: object, table_name: str, col: int) -> str:
+    col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
 
     col_name = xl_col_to_name(col, node.AST_column.absolute)
     if table_name is not None:
@@ -2238,8 +2233,8 @@ def node_to_col_ref(node: object, table_name: str, col_num: int) -> str:
         return col_name
 
 
-def node_to_row_ref(node: object, table_name: str, row_num: int) -> str:
-    row = node.AST_row.row if node.AST_row.absolute else row_num + node.AST_row.row
+def node_to_row_ref(node: object, table_name: str, row: int) -> str:
+    row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
 
     row_name = f"${row+1}" if node.AST_row.absolute else f"{row+1}"
     if table_name is not None:
@@ -2248,9 +2243,9 @@ def node_to_row_ref(node: object, table_name: str, row_num: int) -> str:
         return f"{row_name}:{row_name}"
 
 
-def node_to_row_col_ref(node: object, table_name: str, row_num: int, col_num: int) -> str:
-    row = node.AST_row.row if node.AST_row.absolute else row_num + node.AST_row.row
-    col = node.AST_column.column if node.AST_column.absolute else col_num + node.AST_column.column
+def node_to_row_col_ref(node: object, table_name: str, row: int, col: int) -> str:
+    row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
+    col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
 
     ref = xl_rowcol_to_cell(
         row,
@@ -2283,23 +2278,23 @@ def get_storage_buffers_for_row(
         offsets = [o * 4 for o in offsets]
 
     data = []
-    for col_num in range(num_cols):
-        if col_num >= len(offsets):
+    for col in range(num_cols):
+        if col >= len(offsets):
             break
 
-        start = offsets[col_num]
+        start = offsets[col]
         if start < 0:
             data.append(None)
             continue
 
-        if col_num == (len(offsets) - 1):
+        if col == (len(offsets) - 1):
             end = len(storage_buffer)
         else:
             end = None
             # Find next positive offset
-            for i, x in enumerate(offsets[col_num + 1 :]):
+            for i, x in enumerate(offsets[col + 1 :]):
                 if x >= 0:
-                    end = offsets[col_num + i + 1]
+                    end = offsets[col + i + 1]
                     break
             if end is None:
                 end = len(storage_buffer)

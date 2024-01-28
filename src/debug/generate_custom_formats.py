@@ -169,13 +169,13 @@ def custom_format(
     return (uuid, custom_format)
 
 
-def write_formula_key(table, row_num, col_num, id):
-    table.cell(row_num, col_num)._storage.formula_id = id
+def write_formula_key(table, row, col, id):
+    table.cell(row, col)._storage.formula_id = id
 
 
-def write_format_key(table, row_num, col_num, id):
-    table.cell(row_num, col_num)._storage.suggest_id = 1
-    table.cell(row_num, col_num)._storage.num_format_id = id
+def write_format_key(table, row, col, id):
+    table.cell(row, col)._storage.suggest_id = 1
+    table.cell(row, col)._storage.num_format_id = id
 
 
 doc = Document("tests/data/custom-format-stress-template.numbers")
@@ -199,7 +199,7 @@ test_formula_key = table.cell("H2")._storage.formula_id
 check_formula_key = table.cell("I2")._storage.formula_id
 check_format_id = table.cell(1, 2)._storage.num_format_id
 
-row_num = 2
+row = 2
 for integer_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
     for decimal_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
         for num_integers in [0, 1, 2, 4, 9]:
@@ -224,20 +224,20 @@ for integer_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
 
                     # for value in [0.23, 0.2345678901234, 2.34, 23.0, 2345.67, 23456790123.34]:
                     for value in [0.23, 2.34, 23.0, 2345.67]:
-                        table.write(row_num, 0, format.name, style="Left Align")
-                        table.write(row_num, 1, str(integer_format), style="Left Align")
-                        table.write(row_num, 2, str(decimal_format), style="Left Align")
-                        table.write(row_num, 3, num_integers, style="Left Align")
-                        table.write(row_num, 4, num_decimals, style="Left Align")
-                        table.write(row_num, 5, show_thousands_separator, style="Left Align")
-                        table.write(row_num, 6, value, style="Left Align")
-                        table.write(row_num, 7, value, style="Left Align")
-                        write_format_key(table, row_num, 7, format_id)
-                        write_formula_key(table, row_num, 7, test_formula_key)
-                        table.write(row_num, 8, "0.0", style="Left Align")
-                        write_format_key(table, row_num, 8, check_format_id)
-                        write_formula_key(table, row_num, 8, check_formula_key)
-                        row_num += 1
+                        table.write(row, 0, format.name, style="Left Align")
+                        table.write(row, 1, str(integer_format), style="Left Align")
+                        table.write(row, 2, str(decimal_format), style="Left Align")
+                        table.write(row, 3, num_integers, style="Left Align")
+                        table.write(row, 4, num_decimals, style="Left Align")
+                        table.write(row, 5, show_thousands_separator, style="Left Align")
+                        table.write(row, 6, value, style="Left Align")
+                        table.write(row, 7, value, style="Left Align")
+                        write_format_key(table, row, 7, format_id)
+                        write_formula_key(table, row, 7, test_formula_key)
+                        table.write(row, 8, "0.0", style="Left Align")
+                        write_format_key(table, row, 8, check_format_id)
+                        write_formula_key(table, row, 8, check_formula_key)
+                        row += 1
 
 doc.save("tests/data/custom-format-stress.numbers")
 print("Saved to tests/data/custom-format-stress.numbers")

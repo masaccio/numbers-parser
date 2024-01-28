@@ -31,23 +31,23 @@ TABLE_2_FORMULAS = [
 
 
 def compare_tables(table, ref):
-    for row_num in range(table.num_rows):
-        for col_num in range(table.num_cols):
-            if ref[row_num][col_num] is None:
+    for row in range(table.num_rows):
+        for col in range(table.num_cols):
+            if ref[row][col] is None:
                 check.is_none(
-                    table.cell(row_num, col_num).formula,
-                    f"!existsy@[{row_num},{col_num}]",
+                    table.cell(row, col).formula,
+                    f"!existsy@[{row},{col}]",
                 )
             else:
-                check.is_true(table.cell(row_num, col_num).is_formula)
+                check.is_true(table.cell(row, col).is_formula)
                 check.is_not_none(
-                    table.cell(row_num, col_num).formula,
-                    f"exists@[{row_num},{col_num}]",
+                    table.cell(row, col).formula,
+                    f"exists@[{row},{col}]",
                 )
                 check.equal(
-                    table.cell(row_num, col_num).formula,
-                    ref[row_num][col_num],
-                    f"formula@[{row_num},{col_num}]",
+                    table.cell(row, col).formula,
+                    ref[row][col],
+                    f"formula@[{row},{col}]",
                 )
 
 

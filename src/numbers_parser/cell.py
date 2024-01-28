@@ -468,47 +468,47 @@ class Cell(Cacheable):
     """
 
     @classmethod
-    def empty_cell(cls, table_id: int, row_num: int, col_num: int, model: object):
-        cell = EmptyCell(row_num, col_num)
+    def empty_cell(cls, table_id: int, row: int, col: int, model: object):
+        cell = EmptyCell(row, col)
         cell._model = model
         cell._table_id = table_id
         merge_cells = model.merge_cells(table_id)
-        cell._set_merge(merge_cells.get((row_num, col_num)))
+        cell._set_merge(merge_cells.get((row, col)))
 
         return cell
 
     @classmethod
-    def merged_cell(cls, table_id: int, row_num: int, col_num: int, model: object):
-        cell = MergedCell(row_num, col_num)
+    def merged_cell(cls, table_id: int, row: int, col: int, model: object):
+        cell = MergedCell(row, col)
         cell._model = model
         cell._table_id = table_id
         merge_cells = model.merge_cells(table_id)
-        cell._set_merge(merge_cells.get((row_num, col_num)))
+        cell._set_merge(merge_cells.get((row, col)))
         return cell
 
     @classmethod
     def from_storage(cls, cell_storage: CellStorage):
         if cell_storage.type == CellType.EMPTY:
-            cell = EmptyCell(cell_storage.row_num, cell_storage.col_num)
+            cell = EmptyCell(cell_storage.row, cell_storage.col)
         elif cell_storage.type == CellType.NUMBER:
-            cell = NumberCell(cell_storage.row_num, cell_storage.col_num, cell_storage.value)
+            cell = NumberCell(cell_storage.row, cell_storage.col, cell_storage.value)
         elif cell_storage.type == CellType.TEXT:
-            cell = TextCell(cell_storage.row_num, cell_storage.col_num, cell_storage.value)
+            cell = TextCell(cell_storage.row, cell_storage.col, cell_storage.value)
         elif cell_storage.type == CellType.DATE:
-            cell = DateCell(cell_storage.row_num, cell_storage.col_num, cell_storage.value)
+            cell = DateCell(cell_storage.row, cell_storage.col, cell_storage.value)
         elif cell_storage.type == CellType.BOOL:
-            cell = BoolCell(cell_storage.row_num, cell_storage.col_num, cell_storage.value)
+            cell = BoolCell(cell_storage.row, cell_storage.col, cell_storage.value)
         elif cell_storage.type == CellType.DURATION:
             value = duration(seconds=cell_storage.value)
-            cell = DurationCell(cell_storage.row_num, cell_storage.col_num, value)
+            cell = DurationCell(cell_storage.row, cell_storage.col, value)
         elif cell_storage.type == CellType.ERROR:
-            cell = ErrorCell(cell_storage.row_num, cell_storage.col_num)
+            cell = ErrorCell(cell_storage.row, cell_storage.col)
         elif cell_storage.type == CellType.RICH_TEXT:
-            cell = RichTextCell(cell_storage.row_num, cell_storage.col_num, cell_storage.value)
+            cell = RichTextCell(cell_storage.row, cell_storage.col, cell_storage.value)
         else:
             raise UnsupportedError(
                 f"Unsupported cell type {cell_storage.type} "
-                + f"@:({cell_storage.row_num},{cell_storage.col_num})"
+                + f"@:({cell_storage.row},{cell_storage.col})"
             )
 
         cell._table_id = cell_storage.table_id
@@ -516,18 +516,18 @@ class Cell(Cacheable):
         cell._storage = cell_storage
         cell._formula_key = cell_storage.formula_id
         merge_cells = cell_storage.model.merge_cells(cell_storage.table_id)
-        cell._set_merge(merge_cells.get((cell_storage.row_num, cell_storage.col_num)))
+        cell._set_merge(merge_cells.get((cell_storage.row, cell_storage.col)))
         return cell
 
     @classmethod
-    def from_value(cls, row_num: int, col_num: int, value):
+    def from_value(cls, row: int, col: int, value):
         # TODO: write needs to retain/init the border
         if isinstance(value, str):
-            return TextCell(row_num, col_num, value)
+            return TextCell(row, col, value)
         elif isinstance(value, bool):
-            return BoolCell(row_num, col_num, value)
+            return BoolCell(row, col, value)
         elif isinstance(value, int):
-            return NumberCell(row_num, col_num, value)
+            return NumberCell(row, col, value)
         elif isinstance(value, float):
             rounded_value = sigfig.round(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
             if rounded_value != value:
@@ -536,21 +536,21 @@ class Cell(Cacheable):
                     RuntimeWarning,
                     stacklevel=2,
                 )
-            return NumberCell(row_num, col_num, rounded_value)
+            return NumberCell(row, col, rounded_value)
         elif isinstance(value, (DateTime, builtin_datetime)):
-            return DateCell(row_num, col_num, pendulum_instance(value))
+            return DateCell(row, col, pendulum_instance(value))
         elif isinstance(value, (Duration, builtin_timedelta)):
-            return DurationCell(row_num, col_num, value)
+            return DurationCell(row, col, value)
         else:
             raise ValueError("Can't determine cell type from type " + type(value).__name__)
 
     def _set_formatting(self, format_id: int, format_type: FormattingType) -> None:
         self._storage._set_formatting(format_id, format_type)
 
-    def __init__(self, row_num: int, col_num: int, value):
+    def __init__(self, row: int, col: int, value):
         self._value = value
-        self.row = row_num
-        self.col = col_num
+        self.row = row
+        self.col = col
         self.is_bulleted = False
         self._formula_key = None
         self._storage = None
@@ -702,9 +702,9 @@ class NumberCell(Cell):
        Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Table`.
     """
 
-    def __init__(self, row_num: int, col_num: int, value: float):
+    def __init__(self, row: int, col: int, value: float):
         self._type = TSTArchives.numberCellType
-        super().__init__(row_num, col_num, value)
+        super().__init__(row, col, value)
 
     @property
     def value(self) -> int:
@@ -712,9 +712,9 @@ class NumberCell(Cell):
 
 
 class TextCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value: str):
+    def __init__(self, row: int, col: int, value: str):
         self._type = TSTArchives.textCellType
-        super().__init__(row_num, col_num, value)
+        super().__init__(row, col, value)
 
     @property
     def value(self) -> str:
@@ -727,9 +727,9 @@ class RichTextCell(Cell):
        Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
     """
 
-    def __init__(self, row_num: int, col_num: int, value):
+    def __init__(self, row: int, col: int, value):
         self._type = TSTArchives.automaticCellType
-        super().__init__(row_num, col_num, value["text"])
+        super().__init__(row, col, value["text"])
         self._bullets = value["bullets"]
         self._hyperlinks = value["hyperlinks"]
         if value["bulleted"]:
@@ -771,8 +771,8 @@ class EmptyCell(Cell):
        Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
     """
 
-    def __init__(self, row_num: int, col_num: int):
-        super().__init__(row_num, col_num, None)
+    def __init__(self, row: int, col: int):
+        super().__init__(row, col, None)
         self._type = None
 
     @property
@@ -786,10 +786,10 @@ class BoolCell(Cell):
        Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
     """
 
-    def __init__(self, row_num: int, col_num: int, value: bool):
+    def __init__(self, row: int, col: int, value: bool):
         self._type = TSTArchives.boolCellType
         self._value = value
-        super().__init__(row_num, col_num, value)
+        super().__init__(row, col, value)
 
     @property
     def value(self) -> bool:
@@ -802,9 +802,9 @@ class DateCell(Cell):
        Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
     """
 
-    def __init__(self, row_num: int, col_num: int, value: DateTime):
+    def __init__(self, row: int, col: int, value: DateTime):
         self._type = TSTArchives.dateCellType
-        super().__init__(row_num, col_num, value)
+        super().__init__(row, col, value)
 
     @property
     def value(self) -> duration:
@@ -812,9 +812,9 @@ class DateCell(Cell):
 
 
 class DurationCell(Cell):
-    def __init__(self, row_num: int, col_num: int, value: Duration):
+    def __init__(self, row: int, col: int, value: Duration):
         self._type = TSTArchives.durationCellType
-        super().__init__(row_num, col_num, value)
+        super().__init__(row, col, value)
 
     @property
     def value(self) -> duration:
@@ -827,9 +827,9 @@ class ErrorCell(Cell):
        Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
     """
 
-    def __init__(self, row_num: int, col_num: int):
+    def __init__(self, row: int, col: int):
         self._type = TSTArchives.formulaErrorCellType
-        super().__init__(row_num, col_num, None)
+        super().__init__(row, col, None)
 
     @property
     def value(self):
@@ -842,8 +842,8 @@ class MergedCell(Cell):
        Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
     """
 
-    def __init__(self, row_num: int, col_num: int):
-        super().__init__(row_num, col_num, None)
+    def __init__(self, row: int, col: int):
+        super().__init__(row, col, None)
 
     @property
     def value(self):
@@ -931,23 +931,26 @@ def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
 
 def xl_col_to_name(col, col_abs=False):
     """Convert a zero indexed column cell reference to a string.
-    Args:
-       col:     The cell column. Int.
-       col_abs: Optional flag to make the column absolute. Bool.
+    Parameters
+    ----------
+    col: int
+        The column number (zero indexed).
+    col_abs: bool, default: False
+        If ``True``, make the column absolute.
     Returns:
-        Column style string.
+        str:
+            Column in A1 notation.
     """
-    col_num = col
-    if col_num < 0:
-        raise IndexError(f"column reference {col_num} below zero")
+    if col < 0:
+        raise IndexError(f"column reference {col} below zero")
 
-    col_num += 1  # Change to 1-index.
+    col += 1  # Change to 1-index.
     col_str = ""
     col_abs = "$" if col_abs else ""
 
-    while col_num:
+    while col:
         # Set remainder from 1 .. 26
-        remainder = col_num % 26
+        remainder = col % 26
 
         if remainder == 0:
             remainder = 26
@@ -959,7 +962,7 @@ def xl_col_to_name(col, col_abs=False):
         col_str = col_letter + col_str
 
         # Get the next order of magnitude.
-        col_num = int((col_num - 1) / 26)
+        col = int((col - 1) / 26)
 
     return col_abs + col_str
 

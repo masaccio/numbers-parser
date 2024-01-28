@@ -217,9 +217,9 @@ def test_issue_43():
 def test_issue_44(script_runner):
     doc = Document("tests/data/issue-44.numbers")
     table = doc.sheets[0].tables[0]
-    for row_num, ref in enumerate(ISSUE_44_REF):
-        assert table.cell(row_num, 0).formatted_value == ref[0]
-        assert table.cell(row_num, 1).formatted_value == ref[1]
+    for row, ref in enumerate(ISSUE_44_REF):
+        assert table.cell(row, 0).formatted_value == ref[0]
+        assert table.cell(row, 1).formatted_value == ref[1]
 
     ret = script_runner.run(
         ["cat-numbers", "--brief", "--formatting", "tests/data/issue-44.numbers"],
@@ -228,10 +228,10 @@ def test_issue_44(script_runner):
     assert ret.stderr == ""
     assert ret.success
     lines = ret.stdout.split("\r\n")
-    for row_num, ref in enumerate(ISSUE_44_REF):
+    for row, ref in enumerate(ISSUE_44_REF):
         # Remove " escapes
         ref_str = ",".join([x.replace('"', "") for x in ref])
-        test_str = lines[row_num].replace('"', "")
+        test_str = lines[row].replace('"', "")
         assert test_str == ref_str
 
 
@@ -241,7 +241,7 @@ def test_issue_49(configurable_save_file):
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
-    test_values = [int(table.cell(row_num, 1).value) for row_num in range(1, 6)]
+    test_values = [int(table.cell(row, 1).value) for row in range(1, 6)]
     assert test_values == [100, 50, 0, -50, -100]
 
 
@@ -291,9 +291,9 @@ def test_issue_54():
     assert doc.sheets[0].tables[0].cell(4, 2).formula == "SUM(Sheet 2::Table 1::C1:C2)"
 
     table = doc.sheets[1].tables[0]
-    for col_num in range(9):
-        assert table.cell(4, col_num).formula == table.cell(5, col_num).value
-        assert table.cell(6, col_num).formula == table.cell(7, col_num).value
+    for col in range(9):
+        assert table.cell(4, col).formula == table.cell(5, col).value
+        assert table.cell(6, col).formula == table.cell(7, col).value
 
 
 def test_issue_56(tmp_path):
@@ -346,8 +346,8 @@ def test_issue_60(configurable_multi_save_file):
     test_2_doc = Document(test_2_filename)
     test_table_2 = test_2_doc.sheets[0].tables[0]
 
-    for row_num, row in enumerate(table.iter_rows()):
-        for col_num, cell in enumerate(row):
+    for row, cells in enumerate(table.iter_rows()):
+        for col, cell in enumerate(cells):
             for attr in [
                 "alignment",
                 "bg_image",
@@ -362,8 +362,8 @@ def test_issue_60(configurable_multi_save_file):
                 "name",
             ]:
                 ref = getattr(cell.style, attr)
-                assert getattr(test_table_1.cell(row_num, col_num).style, attr) == ref
-                assert getattr(test_table_2.cell(row_num, col_num).style, attr) == ref
+                assert getattr(test_table_1.cell(row, col).style, attr) == ref
+                assert getattr(test_table_2.cell(row, col).style, attr) == ref
 
 
 def test_issue_66():

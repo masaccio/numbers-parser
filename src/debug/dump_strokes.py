@@ -22,15 +22,15 @@ def dump_strokes_for_layer(objects, model, layer_ids, side):
             if side in ["top", "bottom"]:
                 start_row = stroke_layer.row_column_index
                 start_column = stroke_run.origin
-                for col_num in range(start_column, start_column + stroke_run.length):
-                    ref = xl_range(start_row, col_num, start_row, col_num)
-                    print(f"{side}: {ref}[{start_row},{col_num}]: {border_value}")
+                for col in range(start_column, start_column + stroke_run.length):
+                    ref = xl_range(start_row, col, start_row, col)
+                    print(f"{side}: {ref}[{start_row},{col}]: {border_value}")
             else:
                 start_row = stroke_run.origin
                 start_column = stroke_layer.row_column_index
-                for row_num in range(start_row, start_row + stroke_run.length):
-                    ref = xl_range(row_num, start_column, row_num, start_column)
-                    print(f"{side}: {ref}[{row_num},{start_column}]: {border_value}")
+                for row in range(start_row, start_row + stroke_run.length):
+                    ref = xl_range(row, start_column, row, start_column)
+                    print(f"{side}: {ref}[{row},{start_column}]: {border_value}")
 
 
 def dump_strokesfor_doc(doc):

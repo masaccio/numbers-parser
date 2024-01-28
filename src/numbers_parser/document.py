@@ -435,18 +435,18 @@ class Table(Cacheable):  # noqa: F811
         self._model.set_table_data(table_id, self._data)
         merge_cells = self._model.merge_cells(table_id)
 
-        for row_num in range(self.num_rows):
+        for row in range(self.num_rows):
             self._data.append([])
-            for col_num in range(self.num_cols):
-                cell_storage = model.table_cell_decode(table_id, row_num, col_num)
+            for col in range(self.num_cols):
+                cell_storage = model.table_cell_decode(table_id, row, col)
                 if cell_storage is None:
-                    if merge_cells.is_merge_reference((row_num, col_num)):
-                        cell = Cell.merged_cell(table_id, row_num, col_num, model)
+                    if merge_cells.is_merge_reference((row, col)):
+                        cell = Cell.merged_cell(table_id, row, col, model)
                     else:
-                        cell = Cell.empty_cell(table_id, row_num, col_num, model)
+                        cell = Cell.empty_cell(table_id, row, col, model)
                 else:
                     cell = Cell.from_storage(cell_storage)
-                self._data[row_num].append(cell)
+                self._data[row].append(cell)
 
     @property
     def name(self) -> str:
@@ -522,12 +522,12 @@ class Table(Cacheable):  # noqa: F811
         """int: The table's width in points."""
         return self._model.table_width(self._table_id)
 
-    def row_height(self, row_num: int, height: int = None) -> int:
+    def row_height(self, row: int, height: int = None) -> int:
         """The height of a table row in points.
 
         Parameters
         ----------
-        row_num: int
+        row: int
             The row number (zero indexed).
         height: int
             The height of the row in points. If not ``None``, set the row height.
@@ -537,14 +537,14 @@ class Table(Cacheable):  # noqa: F811
         int:
             The height of the table row.
         """
-        return self._model.row_height(self._table_id, row_num, height)
+        return self._model.row_height(self._table_id, row, height)
 
-    def col_width(self, col_num: int, width: int = None) -> int:
+    def col_width(self, col: int, width: int = None) -> int:
         """The width of a table column in points.
 
         Parameters
         ----------
-        col_num: int
+        col: int
             The column number (zero indexed).
         width: int
             The width of the column in points. If not ``None``, set the column width.
@@ -554,7 +554,7 @@ class Table(Cacheable):  # noqa: F811
         int:
             The width of the table column.
         """
-        return self._model.col_width(self._table_id, col_num, width)
+        return self._model.col_width(self._table_id, col, width)
 
     @property
     def coordinates(self) -> Tuple[float]:
@@ -628,18 +628,18 @@ class Table(Cacheable):  # noqa: F811
             1234.50
         """  # noqa: E501
         if isinstance(args[0], str):
-            (row_num, col_num) = xl_cell_to_rowcol(args[0])
+            (row, col) = xl_cell_to_rowcol(args[0])
         elif len(args) != 2:
             raise IndexError("invalid cell reference " + str(args))
         else:
-            (row_num, col_num) = args
+            (row, col) = args
 
-        if row_num >= self.num_rows or row_num < 0:
-            raise IndexError(f"row {row_num} out of range")
-        if col_num >= self.num_cols or col_num < 0:
-            raise IndexError(f"column {col_num} out of range")
+        if row >= self.num_rows or row < 0:
+            raise IndexError(f"row {row} out of range")
+        if col >= self.num_cols or col < 0:
+            raise IndexError(f"column {col} out of range")
 
-        return self._data[row_num][col_num]
+        return self._data[row][col]
 
     def iter_rows(  # noqa: PLR0913
         self,
@@ -699,11 +699,11 @@ class Table(Cacheable):  # noqa: F811
             raise IndexError(f"column {max_col} out of range")
 
         rows = self.rows()
-        for row_num in range(min_row, max_row + 1):
+        for row in range(min_row, max_row + 1):
             if values_only:
-                yield tuple(cell.value for cell in rows[row_num][min_col : max_col + 1])
+                yield tuple(cell.value for cell in rows[row][min_col : max_col + 1])
             else:
-                yield tuple(rows[row_num][min_col : max_col + 1])
+                yield tuple(rows[row][min_col : max_col + 1])
 
     def iter_cols(  # noqa: PLR0913
         self,
@@ -763,66 +763,66 @@ class Table(Cacheable):  # noqa: F811
             raise IndexError(f"column {max_col} out of range")
 
         rows = self.rows()
-        for col_num in range(min_col, max_col + 1):
+        for col in range(min_col, max_col + 1):
             if values_only:
-                yield tuple(row[col_num].value for row in rows[min_row : max_row + 1])
+                yield tuple(row[col].value for row in rows[min_row : max_row + 1])
             else:
-                yield tuple(row[col_num] for row in rows[min_row : max_row + 1])
+                yield tuple(row[col] for row in rows[min_row : max_row + 1])
 
     def _validate_cell_coords(self, *args):
         if isinstance(args[0], str):
-            (row_num, col_num) = xl_cell_to_rowcol(args[0])
+            (row, col) = xl_cell_to_rowcol(args[0])
             values = args[1:]
         elif len(args) < 2:
             raise IndexError("invalid cell reference " + str(args))
         else:
-            (row_num, col_num) = args[0:2]
+            (row, col) = args[0:2]
             values = args[2:]
 
-        if row_num >= MAX_ROW_COUNT:
-            raise IndexError(f"{row_num} exceeds maximum row {MAX_ROW_COUNT-1}")
-        if col_num >= MAX_COL_COUNT:
-            raise IndexError(f"{col_num} exceeds maximum column {MAX_COL_COUNT-1}")
+        if row >= MAX_ROW_COUNT:
+            raise IndexError(f"{row} exceeds maximum row {MAX_ROW_COUNT-1}")
+        if col >= MAX_COL_COUNT:
+            raise IndexError(f"{col} exceeds maximum column {MAX_COL_COUNT-1}")
 
-        for _ in range(self.num_rows, row_num + 1):
+        for _ in range(self.num_rows, row + 1):
             self.add_row()
 
-        for _ in range(self.num_cols, col_num + 1):
+        for _ in range(self.num_cols, col + 1):
             self.add_column()
 
-        return (row_num, col_num) + tuple(values)
+        return (row, col) + tuple(values)
 
     def write(self, *args, style=None):
         # TODO: write needs to retain/init the border
-        (row_num, col_num, value) = self._validate_cell_coords(*args)
-        self._data[row_num][col_num] = Cell.from_value(row_num, col_num, value)
-        storage = CellStorage(self._model, self._table_id, None, row_num, col_num)
-        storage.update_value(value, self._data[row_num][col_num])
-        self._data[row_num][col_num].update_storage(storage)
+        (row, col, value) = self._validate_cell_coords(*args)
+        self._data[row][col] = Cell.from_value(row, col, value)
+        storage = CellStorage(self._model, self._table_id, None, row, col)
+        storage.update_value(value, self._data[row][col])
+        self._data[row][col].update_storage(storage)
 
         merge_cells = self._model.merge_cells(self._table_id)
-        self._data[row_num][col_num]._table_id = self._table_id
-        self._data[row_num][col_num]._model = self._model
-        self._data[row_num][col_num]._set_merge(merge_cells.get((row_num, col_num)))
+        self._data[row][col]._table_id = self._table_id
+        self._data[row][col]._model = self._model
+        self._data[row][col]._set_merge(merge_cells.get((row, col)))
 
         if style is not None:
-            self.set_cell_style(row_num, col_num, style)
+            self.set_cell_style(row, col, style)
 
     def set_cell_style(self, *args):
-        (row_num, col_num, style) = self._validate_cell_coords(*args)
+        (row, col, style) = self._validate_cell_coords(*args)
         if isinstance(style, Style):
-            self._data[row_num][col_num]._style = style
+            self._data[row][col]._style = style
         elif isinstance(style, str):
             if style not in self._model.styles:
                 raise IndexError(f"style '{style}' does not exist")
-            self._data[row_num][col_num]._style = self._model.styles[style]
+            self._data[row][col]._style = self._model.styles[style]
         else:
             raise TypeError("style must be a Style object or style name")
 
     def add_row(self, num_rows=1):
         row = [
-            Cell.empty_cell(self._table_id, self.num_rows - 1, col_num, self._model)
-            for col_num in range(self.num_cols)
+            Cell.empty_cell(self._table_id, self.num_rows - 1, col, self._model)
+            for col in range(self.num_cols)
         ]
         for _ in range(num_rows):
             self._data.append(row.copy())
@@ -831,9 +831,9 @@ class Table(Cacheable):  # noqa: F811
 
     def add_column(self, num_cols=1):
         for _ in range(num_cols):
-            for row_num in range(self.num_rows):
-                self._data[row_num].append(
-                    Cell.empty_cell(self._table_id, row_num, self.num_cols - 1, self._model)
+            for row in range(self.num_rows):
+                self._data[row].append(
+                    Cell.empty_cell(self._table_id, row, self.num_cols - 1, self._model)
                 )
             self.num_cols += 1
             self._model.number_of_columns(self._table_id, self.num_cols)
@@ -852,19 +852,17 @@ class Table(Cacheable):  # noqa: F811
 
             merge_cells = self._model.merge_cells(self._table_id)
             merge_cells.add_anchor(row_start, col_start, (num_rows, num_cols))
-            for row_num in range(row_start + 1, row_end + 1):
-                for col_num in range(col_start + 1, col_end + 1):
-                    self._data[row_num][col_num] = MergedCell(row_num, col_num)
-                    merge_cells.add_reference(
-                        row_num, col_num, (row_start, col_start, row_end, col_end)
-                    )
+            for row in range(row_start + 1, row_end + 1):
+                for col in range(col_start + 1, col_end + 1):
+                    self._data[row][col] = MergedCell(row, col)
+                    merge_cells.add_reference(row, col, (row_start, col_start, row_end, col_end))
 
-            for row_num, row in enumerate(self._data):
-                for col_num, cell in enumerate(row):
-                    cell._set_merge(merge_cells.get((row_num, col_num)))
+            for row, cells in enumerate(self._data):
+                for col, cell in enumerate(cells):
+                    cell._set_merge(merge_cells.get((row, col)))
 
     def set_cell_border(self, *args):
-        (row_num, col_num, *args) = self._validate_cell_coords(*args)
+        (row, col, *args) = self._validate_cell_coords(*args)
         if len(args) == 2:
             (side, border_value) = args
             length = 1
@@ -881,12 +879,12 @@ class Table(Cacheable):  # noqa: F811
 
         if isinstance(side, list):
             for s in side:
-                self.set_cell_border(row_num, col_num, s, border_value, length)
+                self.set_cell_border(row, col, s, border_value, length)
             return
 
-        if self._data[row_num][col_num].is_merged and side in ["bottom", "right"]:
+        if self._data[row][col].is_merged and side in ["bottom", "right"]:
             warn(
-                f"cell [{row_num},{col_num}] is merged; {side} border not set",
+                f"cell [{row},{col}] is merged; {side} border not set",
                 RuntimeWarning,
                 stacklevel=2,
             )
@@ -895,19 +893,15 @@ class Table(Cacheable):  # noqa: F811
         self._model.extract_strokes(self._table_id)
 
         if side in ["top", "bottom"]:
-            for border_col_num in range(col_num, col_num + length):
-                self._model.set_cell_border(
-                    self._table_id, row_num, border_col_num, side, border_value
-                )
+            for border_col_num in range(col, col + length):
+                self._model.set_cell_border(self._table_id, row, border_col_num, side, border_value)
         elif side in ["left", "right"]:
-            for border_row_num in range(row_num, row_num + length):
-                self._model.set_cell_border(
-                    self._table_id, border_row_num, col_num, side, border_value
-                )
+            for border_row_num in range(row, row + length):
+                self._model.set_cell_border(self._table_id, border_row_num, col, side, border_value)
         else:
             raise TypeError("side must be a valid border segment")
 
-        self._model.add_stroke(self._table_id, row_num, col_num, side, border_value, length)
+        self._model.add_stroke(self._table_id, row, col, side, border_value, length)
 
     def set_cell_formatting(self, *args: str, **kwargs) -> None:
         r"""
@@ -989,7 +983,7 @@ class Table(Cacheable):  # noqa: F811
             >>> table.set_cell_formatting(0, 4, "number", decimal_places=3, negative_style=NegativeNumberStyle.RED)
 
         """  # noqa: E501
-        (row_num, col_num, *args) = self._validate_cell_coords(*args)
+        (row, col, *args) = self._validate_cell_coords(*args)
         if len(args) == 1:
             format_type = args[0]
         elif len(args) > 1:
@@ -998,11 +992,11 @@ class Table(Cacheable):  # noqa: F811
             raise TypeError("no type defined for cell format")
 
         if format_type == "custom":
-            self.set_cell_custom_format(row_num, col_num, **kwargs)
+            self.set_cell_custom_format(row, col, **kwargs)
         else:
-            self.set_cell_data_format(row_num, col_num, format_type, **kwargs)
+            self.set_cell_data_format(row, col, format_type, **kwargs)
 
-    def set_cell_custom_format(self, row_num: int, col_num: int, **kwargs) -> None:
+    def set_cell_custom_format(self, row: int, col: int, **kwargs) -> None:
         if "format" not in kwargs:
             raise TypeError("no format provided for custom format")
 
@@ -1016,7 +1010,7 @@ class Table(Cacheable):  # noqa: F811
         else:
             raise TypeError("format must be a CustomFormatting object or format name")
 
-        cell = self._data[row_num][col_num]
+        cell = self._data[row][col]
         if custom_format.type == CustomFormattingType.DATETIME and not isinstance(cell, DateCell):
             type_name = type(cell).__name__
             raise TypeError(f"cannot use date/time formatting for cells of type {type_name}")
@@ -1033,13 +1027,13 @@ class Table(Cacheable):  # noqa: F811
             format_id = self._model.custom_text_format_id(self._table_id, custom_format)
         cell._set_formatting(format_id, custom_format.type)
 
-    def set_cell_data_format(self, row_num: int, col_num: int, format_type: str, **kwargs) -> None:
+    def set_cell_data_format(self, row: int, col: int, format_type: str, **kwargs) -> None:
         try:
             format_type = FormattingType[format_type.upper()]
         except (KeyError, AttributeError):
             raise TypeError(f"unsuported cell format type '{format_type}'") from None
 
-        cell = self._data[row_num][col_num]
+        cell = self._data[row][col]
         if format_type == FormattingType.DATETIME and not isinstance(cell, DateCell):
             type_name = type(cell).__name__
             raise TypeError(f"cannot use date/time formatting for cells of type {type_name}")

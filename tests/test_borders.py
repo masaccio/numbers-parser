@@ -110,20 +110,20 @@ def run_border_tests(filename):
         assert len(record) == 1
         assert "cell border values cannot be set" in str(record[0])
 
-        for row_num, row in enumerate(table.iter_rows()):
-            for col_num, cell in enumerate(row):
+        for row, cells in enumerate(table.iter_rows()):
+            for col, cell in enumerate(cells):
                 if not cell.value or isinstance(cell, MergedCell):
                     continue
                 tests = unpack_test_string(cell.value)
                 if cell.is_merged:
                     valid = []
-                    row_start = row_num
-                    row_end = row_num + cell.size[0] - 1
-                    col_start = col_num
-                    col_end = col_num + cell.size[1] - 1
+                    row_start = row
+                    row_end = row + cell.size[0] - 1
+                    col_start = col
+                    col_end = col + cell.size[1] - 1
                     offset = 0
                     for merge_row_num in range(row_start, row_end + 1):
-                        merge_cell = table.cell(merge_row_num, col_num)
+                        merge_cell = table.cell(merge_row_num, col)
                         valid.append(check_border(merge_cell, "left", tests["left"][offset]))
                         merge_cell = table.cell(merge_row_num, col_end)
                         valid.append(check_border(merge_cell, "right", tests["right"][offset]))
@@ -131,7 +131,7 @@ def run_border_tests(filename):
 
                     offset = 0
                     for merge_col_num in range(col_start, col_end + 1):
-                        merge_cell = table.cell(row_num, merge_col_num)
+                        merge_cell = table.cell(row, merge_col_num)
                         valid.append(check_border(merge_cell, "top", tests["top"][offset]))
                         merge_cell = table.cell(row_end, merge_col_num)
                         valid.append(check_border(merge_cell, "bottom", tests["bottom"][offset]))
@@ -279,8 +279,8 @@ def test_extra_borders(configurable_save_file):
         (18, 0, "right", 2, dots_border),
     ]
     for coord in coords:
-        (row_num, col_num, side, length, border) = coord
-        table.set_cell_border(row_num, col_num, side, border, length)
+        (row, col, side, length, border) = coord
+        table.set_cell_border(row, col, side, border, length)
 
     doc.save(configurable_save_file)
 
@@ -289,9 +289,9 @@ def test_extra_borders(configurable_save_file):
     new_doc = Document(configurable_save_file)
     table = new_doc.sheets[0].tables[0]
     for coord in coords:
-        (row_num, col_num, side, length, border) = coord
+        (row, col, side, length, border) = coord
         for _ in range(length):
-            assert getattr(table.cell(row_num, col_num).border, side) == border
+            assert getattr(table.cell(row, col).border, side) == border
 
 
 @pytest.mark.experimental
@@ -303,20 +303,20 @@ def test_resave_borders(configurable_save_file):
     for sheet_name in ["Borders"]:
         table = doc.sheets[sheet_name].tables[0]
 
-        for row_num, row in enumerate(table.iter_rows()):
-            for col_num, cell in enumerate(row):
+        for row, row in enumerate(table.iter_rows()):
+            for col, cell in enumerate(row):
                 if not cell.value or isinstance(cell, MergedCell):
                     continue
                 tests = unpack_test_string(cell.value)
                 (test_string, new_tests, borders) = invert_tests(tests)
-                table.write(row_num, col_num, test_string, style=style)
+                table.write(row, col, test_string, style=style)
                 for i, side in enumerate(tests):
                     if cell.is_merged:
                         length = cell.size[0] if side in ["left", "right"] else cell.size[1]
                     else:
                         length = 1
                     if borders[i] is not None:
-                        table.set_cell_border(row_num, col_num, side, borders[i], length)
+                        table.set_cell_border(row, col, side, borders[i], length)
 
     doc.save(configurable_save_file)
     run_border_tests(configurable_save_file)

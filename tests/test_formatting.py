@@ -325,10 +325,10 @@ def test_duration_formatting():
     doc = Document("tests/data/duration_112.numbers")
     for sheet in doc.sheets:
         table = sheet.tables[0]
-        for row in table.iter_rows(min_row=1):
-            if not isinstance(row[13], EmptyCell):
-                duration = row[6].formatted_value
-                ref = row[13].value
+        for cells in table.iter_rows(min_row=1):
+            if not isinstance(cells[13], EmptyCell):
+                duration = cells[6].formatted_value
+                ref = cells[13].value
                 check.equal(duration, ref)
 
 
@@ -336,12 +336,12 @@ def test_date_formatting():
     doc = Document("tests/data/date_formats.numbers")
     for sheet in doc.sheets:
         table = sheet.tables[0]
-        for row in table.iter_rows(min_row=1):
-            if isinstance(row[6], EmptyCell):
-                assert isinstance(row[7], EmptyCell)
+        for cells in table.iter_rows(min_row=1):
+            if isinstance(cells[6], EmptyCell):
+                assert isinstance(cells[7], EmptyCell)
             else:
-                date = row[6].formatted_value
-                ref = row[7].value
+                date = cells[6].formatted_value
+                ref = cells[7].value
                 check.equal(date, ref)
 
 
@@ -413,22 +413,20 @@ def test_write_date_format(configurable_save_file):
         table.set_cell_formatting("A1", "number", date_time_format="yyyy")
     assert "cannot set formatting for cells of type TextCell" in str(e)
 
-    for row_num in range(len(DATE_FORMATS)):
-        for col_num in range(len(TIME_FORMATS)):
-            date_time_format = " ".join([DATE_FORMATS[row_num], TIME_FORMATS[col_num]]).strip()
-            table.write(row_num, col_num, ref_date)
-            table.set_cell_formatting(
-                row_num, col_num, "datetime", date_time_format=date_time_format
-            )
+    for row in range(len(DATE_FORMATS)):
+        for col in range(len(TIME_FORMATS)):
+            date_time_format = " ".join([DATE_FORMATS[row], TIME_FORMATS[col]]).strip()
+            table.write(row, col, ref_date)
+            table.set_cell_formatting(row, col, "datetime", date_time_format=date_time_format)
 
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
-    for row_num, row in enumerate(DATE_FORMAT_REF):
-        for col_num, ref_value in enumerate(row):
-            check.equal(table.cell(row_num, col_num).value, ref_date)
-            check.equal(table.cell(row_num, col_num).formatted_value, ref_value)
+    for row, cells in enumerate(DATE_FORMAT_REF):
+        for col, ref_value in enumerate(cells):
+            check.equal(table.cell(row, col).value, ref_date)
+            check.equal(table.cell(row, col).formatted_value, ref_value)
 
 
 def test_write_numbers_format(configurable_save_file):
@@ -452,25 +450,25 @@ def test_write_numbers_format(configurable_save_file):
         table.set_cell_formatting(0, 0, "currency", currency_code="XYZ")
     assert "Unsupported currency code 'XYZ'" in str(e)
 
-    row_num = 0
+    row = 0
     for value in [ref_number, -ref_number]:
         for decimal_places in [None, 0, 1, 3, 8]:
-            col_num = 0
+            col = 0
             for show_thousands_separator in [False, True]:
                 for negative_style in NegativeNumberStyle:
-                    table.write(row_num, col_num, value)
+                    table.write(row, col, value)
                     table.set_cell_formatting(
-                        row_num,
-                        col_num,
+                        row,
+                        col,
                         "number",
                         decimal_places=decimal_places,
                         negative_style=negative_style,
                         show_thousands_separator=show_thousands_separator,
                     )
-                    col_num += 1
-            row_num += 1
+                    col += 1
+            row += 1
 
-    for col_num, currency_code in enumerate(
+    for col, currency_code in enumerate(
         [
             "AUD",
             "EUR",
@@ -482,10 +480,10 @@ def test_write_numbers_format(configurable_save_file):
             "ILS",
         ]
     ):
-        table.write(10, col_num, ref_number)
+        table.write(10, col, ref_number)
         table.set_cell_formatting(
             10,
-            col_num,
+            col,
             "currency",
             decimal_places=2,
             negative_style=NegativeNumberStyle.MINUS,
@@ -493,11 +491,11 @@ def test_write_numbers_format(configurable_save_file):
             currency_code=currency_code,
         )
 
-    for col_num, currency_code in enumerate(["VND", "CAD", "SEK"]):
-        table.write(11, col_num, ref_number)
+    for col, currency_code in enumerate(["VND", "CAD", "SEK"]):
+        table.write(11, col, ref_number)
         table.set_cell_formatting(
             11,
-            col_num,
+            col,
             "currency",
             decimal_places=2,
             negative_style=NegativeNumberStyle.MINUS,
@@ -559,15 +557,15 @@ def test_write_numbers_format(configurable_save_file):
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
-    for row_num, row in enumerate(NUMBER_FORMAT_REF):
-        for col_num, ref_value in enumerate(row):
-            check.equal(abs(table.cell(row_num, col_num).value), ref_number)
-            check.equal(table.cell(row_num, col_num).formatted_value, ref_value)
+    for row, cells in enumerate(NUMBER_FORMAT_REF):
+        for col, ref_value in enumerate(cells):
+            check.equal(abs(table.cell(row, col).value), ref_number)
+            check.equal(table.cell(row, col).formatted_value, ref_value)
 
-    for row_num, row in enumerate(CURRENCY_FORMAT_REF):
-        for col_num, ref_value in enumerate(row):
-            check.equal(abs(table.cell(row_num + 10, col_num).value), ref_number)
-            check.equal(table.cell(row_num + 10, col_num).formatted_value, ref_value)
+    for row, cells in enumerate(CURRENCY_FORMAT_REF):
+        for col, ref_value in enumerate(cells):
+            check.equal(abs(table.cell(row + 10, col).value), ref_number)
+            check.equal(table.cell(row + 10, col).formatted_value, ref_value)
 
 
 def test_write_mixed_number_formats(configurable_save_file):
@@ -584,35 +582,35 @@ def test_write_mixed_number_formats(configurable_save_file):
         table.set_cell_formatting(0, 0, "base", base=37)
     assert "base must be in range 2-36" in str(e)
 
-    row_num = 0
+    row = 0
     for decimal_places in [None, 0, 1, 4]:
         for show_thousands_separator in [False, True]:
             if show_thousands_separator:
                 values = [12.3456, -12.3456]
             else:
                 values = [0.1234, -0.1234]
-            col_num = 0
+            col = 0
             for negative_style in NegativeNumberStyle:
                 for value in values:
-                    table.write(row_num, col_num, value)
+                    table.write(row, col, value)
                     table.set_cell_formatting(
-                        row_num,
-                        col_num,
+                        row,
+                        col,
                         "percentage",
                         decimal_places=decimal_places,
                         negative_style=negative_style,
                         show_thousands_separator=show_thousands_separator,
                     )
-                    col_num += 1
-            row_num += 1
+                    col += 1
+            row += 1
 
     with pytest.raises(TypeError) as e:
-        table.write(row_num, 0, -1234)
-        table.set_cell_formatting(row_num, 0, "base", base=10, base_use_minus_sign=False)
+        table.write(row, 0, -1234)
+        table.set_cell_formatting(row, 0, "base", base=10, base_use_minus_sign=False)
     assert "base_use_minus_sign must be True for base 10" in str(e)
 
     for base in [10, 2, 8, 16, 36]:
-        col_num = 0
+        col = 0
         values = {
             0: True,
             1234: True,
@@ -625,74 +623,74 @@ def test_write_mixed_number_formats(configurable_save_file):
             for base_places in [0, 8]:
                 if base not in [2, 8, 16] and not base_use_minus_sign:
                     continue
-                table.write(row_num, col_num, value)
+                table.write(row, col, value)
                 table.set_cell_formatting(
-                    row_num,
-                    col_num,
+                    row,
+                    col,
                     "base",
                     base=base,
                     base_places=base_places,
                     base_use_minus_sign=base_use_minus_sign,
                 )
-                col_num += 1
-        row_num += 1
+                col += 1
+        row += 1
 
-    table.write(row_num, 0, -100)
+    table.write(row, 0, -100)
     table.set_cell_formatting(
-        row_num,
+        row,
         0,
         "base",
         base=16,
         base_use_minus_sign=True,
     )
-    table.write(row_num, 1, -100)
+    table.write(row, 1, -100)
     table.set_cell_formatting(
-        row_num,
+        row,
         1,
         "base",
         base=12,
         base_use_minus_sign=True,
     )
-    table.write(row_num, 2, 100)
+    table.write(row, 2, 100)
     table.set_cell_formatting(
-        row_num,
+        row,
         2,
         "base",
         base=16,
         base_use_minus_sign=False,
     )
 
-    row_num += 1
+    row += 1
 
     ref_value = 445 / 553
-    for col_num, fraction_accuracy in enumerate(FractionAccuracy):
+    for col, fraction_accuracy in enumerate(FractionAccuracy):
         with pytest.warns(RuntimeWarning):
             # Ignore warning about rounding the fraction
-            table.write(row_num, col_num, ref_value)
-        table.set_cell_formatting(row_num, col_num, "fraction", fraction_accuracy=fraction_accuracy)
+            table.write(row, col, ref_value)
+        table.set_cell_formatting(row, col, "fraction", fraction_accuracy=fraction_accuracy)
 
-    table.write(row_num, len(FractionAccuracy), 2.0)
+    table.write(row, len(FractionAccuracy), 2.0)
     table.set_cell_formatting(
-        row_num, len(FractionAccuracy), "fraction", fraction_accuracy=FractionAccuracy.HALVES
+        row, len(FractionAccuracy), "fraction", fraction_accuracy=FractionAccuracy.HALVES
     )
 
-    row_num += 1
+    row += 1
 
-    col_num = 0
+    col = 0
     for value in [100, 1000, 10000, 100000, 1000000]:
         for decimal_places in [0, 4]:
-            table.write(row_num, col_num, value)
-            table.set_cell_formatting(row_num, col_num, "scientific", decimal_places=decimal_places)
-            col_num += 1
+            table.write(row, col, value)
+            table.set_cell_formatting(row, col, "scientific", decimal_places=decimal_places)
+            col += 1
 
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
-    for row_num, row in enumerate(OTHER_FORMAT_REF):
-        for col_num, ref_value in enumerate(row):
-            value = table.cell(row_num, col_num).formatted_value
-            check.equal(f"[{row_num},{col_num}]:{value}", f"[{row_num},{col_num}]:{ref_value}")
+    for row, cells in enumerate(OTHER_FORMAT_REF):
+        for col, ref_value in enumerate(cells):
+            value = table.cell(row, col).formatted_value
+            check.equal(f"[{row},{col}]:{value}", f"[{row},{col}]:{ref_value}")
 
 
 def test_currency_symbols():
@@ -736,7 +734,7 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
         table.set_cell_formatting(0, 0, "custom", format=object())
     assert "format must be a CustomFormatting object or format name" in str(e)
 
-    row_num = 0
+    row = 0
     for integer_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
         for decimal_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
             for num_integers in [0, 2]:
@@ -761,38 +759,38 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
                             show_thousands_separator=show_thousands_separator,
                         )
                         for value in [0.23, 2.34, 23.0, 2345.67]:
-                            table.write(row_num, 0, custom_format.name)
-                            table.write(row_num, 1, str(integer_format))
-                            table.write(row_num, 2, str(decimal_format))
-                            table.write(row_num, 3, num_integers)
-                            table.write(row_num, 4, num_decimals)
-                            table.write(row_num, 5, show_thousands_separator)
-                            table.write(row_num, 6, value)
-                            table.set_cell_formatting(row_num, 6, "custom", format=custom_format)
-                            row_num += 1
+                            table.write(row, 0, custom_format.name)
+                            table.write(row, 1, str(integer_format))
+                            table.write(row, 2, str(decimal_format))
+                            table.write(row, 3, num_integers)
+                            table.write(row, 4, num_decimals)
+                            table.write(row, 5, show_thousands_separator)
+                            table.write(row, 6, value)
+                            table.set_cell_formatting(row, 6, "custom", format=custom_format)
+                            row += 1
 
     doc.save(configurable_save_file)
 
     ref_doc = Document("tests/data/custom-format-stress.numbers")
     table = ref_doc.sheets[0].tables[0]
     ref_values = {}
-    for _, row in enumerate(table.iter_rows(min_row=2), start=3):
-        key = row[0].value + ":" + row[6].formatted_value
-        if row[9].value:
+    for _, cells in enumerate(table.iter_rows(min_row=2), start=3):
+        key = cells[0].value + ":" + cells[6].formatted_value
+        if cells[9].value:
             ref_values[key] = None
         else:
-            ref_values[key] = row[8].value
+            ref_values[key] = cells[8].value
 
     doc = Document(configurable_save_file)
     table = ref_doc.sheets[0].tables[0]
     fails = 0
-    for i, row in enumerate(table.iter_rows(min_row=2), start=3):
-        key = row[0].value + ":" + row[6].formatted_value
-        ref = ref_values[row[0].value + ":" + row[6].formatted_value]
+    for i, cells in enumerate(table.iter_rows(min_row=2), start=3):
+        key = cells[0].value + ":" + cells[6].formatted_value
+        ref = ref_values[cells[0].value + ":" + cells[6].formatted_value]
         if ref is None:
             continue
-        value = row[7].formatted_value
-        check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'", row[0].value)
+        value = cells[7].formatted_value
+        check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'", cells[0].value)
         if value != ref:
             fails += 1
         if max_check_fails > 0 and fails >= max_check_fails:

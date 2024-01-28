@@ -46,8 +46,8 @@ class CellStorage(Cacheable):
         "datetime",
         "model",
         "table_id",
-        "row_num",
-        "col_num",
+        "row",
+        "col",
         "value",
         "type",
         "d128",
@@ -77,13 +77,13 @@ class CellStorage(Cacheable):
 
     # @profile
     def __init__(  # noqa: PLR0912, PLR0913, PLR0915
-        self, model: object, table_id: int, buffer, row_num, col_num
+        self, model: object, table_id: int, buffer, row, col
     ):
         self.buffer = buffer
         self.model = model
         self.table_id = table_id
-        self.row_num = row_num
-        self.col_num = col_num
+        self.row = row
+        self.col = col
 
         self.d128 = None
         self.double = None
@@ -233,8 +233,8 @@ class CellStorage(Cacheable):
                 "%s@%s@[%d,%d]: table_id=%d, type=%s, value=%s, flags=%08x, extras=%04x, %s",
                 sheet_name,
                 table_name,
-                row_num,
-                col_num,
+                row,
+                col,
                 table_id,
                 self.type.name,
                 self.value,

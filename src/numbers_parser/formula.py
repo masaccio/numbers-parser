@@ -9,12 +9,12 @@ from numbers_parser.generated.functionmap import FUNCTION_MAP
 
 
 class Formula(list):
-    def __init__(self, model, table_id, row_num, col_num):
+    def __init__(self, model, table_id, row, col):
         self._stack = []
         self._model = model
         self._table_id = table_id
-        self.row = row_num
-        self.col = col_num
+        self.row = row
+        self.col = col
 
     def __str__(self):
         return "".join(reversed(self._stack))
@@ -181,8 +181,8 @@ class Formula(list):
         self.push(f"{arg1}-{arg2}")
 
     def xref(self, *args):
-        (row_num, col_num, node) = args
-        self.push(self._model.node_to_ref(self._table_id, row_num, col_num, node))
+        (row, col, node) = args
+        self.push(self._model.node_to_ref(self._table_id, row, col, node))
 
 
 NODE_FUNCTION_MAP = {
@@ -279,18 +279,18 @@ class TableFormulas:
     def is_formula(self, row, col):
         return (row, col) in self._model.formula_cell_ranges(self._table_id)
 
-    def formula(self, formula_key, row_num, col_num):
+    def formula(self, formula_key, row, col):
         all_formulas = self._model.formula_ast(self._table_id)
         if formula_key not in all_formulas:
             table_name = self._model.table_name(self._table_id)
             warnings.warn(
-                f"{table_name}@[{row_num},{col_num}]: key #{formula_key} not found",
+                f"{table_name}@[{row},{col}]: key #{formula_key} not found",
                 UnsupportedWarning,
                 stacklevel=2,
             )
             return "INVALID_KEY!(" + str(formula_key) + ")"
 
-        formula = Formula(self._model, self._table_id, row_num, col_num)
+        formula = Formula(self._model, self._table_id, row, col)
         for node in all_formulas[formula_key]:
             node_type = self._formula_type_lookup[node.AST_node_type]
             if node_type == "REFERENCE_ERROR_WITH_UIDS":
@@ -298,14 +298,14 @@ class TableFormulas:
             elif node_type not in NODE_FUNCTION_MAP:
                 table_name = self._model.table_name(self._table_id)
                 warnings.warn(
-                    f"{table_name}@[{row_num},{col_num}]: node type {node_type} is unsupported",
+                    f"{table_name}@[{row},{col}]: node type {node_type} is unsupported",
                     UnsupportedWarning,
                     stacklevel=2,
                 )
                 pass
             elif NODE_FUNCTION_MAP[node_type] is not None:
                 func = getattr(formula, NODE_FUNCTION_MAP[node_type])
-                func(row_num, col_num, node)
+                func(row, col, node)
 
         return str(formula)
 
