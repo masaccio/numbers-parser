@@ -206,16 +206,33 @@ class NegativeNumberStyle(IntEnum):
     """Negative numbers are red and in parentheses with no minus sign."""
 
 
+@enum_tools.documentation.document_enum
 class FractionAccuracy(IntEnum):
+    """
+    How fractions are formatted.
+
+    This enum is used in cell data formats and cell custom formats using the
+    `fraction_accuracy` keyword argument.
+    """
+
     THREE = 0xFFFFFFFD
+    """Fractions are formatted with up to 3 digits in the denominator."""
     TWO = 0xFFFFFFFE
+    """Fractions are formatted with up to 2 digits in the denominator."""
     ONE = 0xFFFFFFFF
+    """Fractions are formatted with up to 1 digit in the denominator."""
     HALVES = 2
+    """Fractions are formatted to the nearest half."""
     QUARTERS = 4
+    """Fractions are formatted to the nearest quarter."""
     EIGTHS = 8
+    """Fractions are formatted to the nearest eighth."""
     SIXTEENTHS = 16
+    """Fractions are formatted to the nearest sixteenth."""
     TENTHS = 10
+    """Fractions are formatted to the nearest tenth."""
     HUNDRETHS = 100
+    """Fractions are formatted to the nearest hundredth."""
 
 
 ALLOWED_FORMATTING_PARAMETERS = {

@@ -103,7 +103,11 @@ available using the properties ``row_start``, ``col_start``,
 
 .. autoenum:: NegativeNumberStyle
     :members:
-    
+
+.. _fraction_formats:
+
+.. autoenum:: FractionAccuracy
+    :members:
 
 .. _datetime_formats:
 
