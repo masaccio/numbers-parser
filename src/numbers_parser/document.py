@@ -914,6 +914,24 @@ class Table(Cacheable):  # noqa: F811
 
         Cell references can be **row-column** offsers or Excel/Numbers-style **A1** notation.
 
+        :Parameters:
+            * **args** (*list*, *optional*) – Positional arguments for cell reference and data format type (see below)
+            * **kwargs** (*dict*, *optional*) - Key-value pairs defining a formatting options for each data format (see below).
+
+        :Args (row-column):
+            * **param1** (``int``): The row number (zero indexed).
+            * **param2** (``int``): The column number (zero indexed).
+            * **param3** (``str``): Data format type for the cell (see "data formats" below).
+
+        :Args (A1):
+            * **param1** (``str``): A cell reference using Excel/Numbers-style A1 notation.
+            * **param2** (``str``): Data format type for the cell (see "data formats" below).
+
+        :Warns:
+            * **RuntimeWarning** -
+                If ``use_accounting_style`` is used with
+                any ``negative_style`` other than ``NegativeNumberStyle.MINUS``.
+
         All formatting styles share a name and a type, described in the **Common**
         parameters in the following table. Additional key-value pairs configure the format
         depending upon the value of ``kwargs["type"]``. Supported values for
@@ -955,16 +973,16 @@ class Table(Cacheable):  # noqa: F811
               if the currency symbol should be formatted to the left of the cell and
               separated from the number value by a tab.
 
-        :``datetime``:
+        :``"datetime"``:
             * **date_time_format** (``str``, *optional*, default: ``"dd MMM YYY HH:MM"``) – A POSIX
                strftime-like formatting string of `Numbers date/time
                directives <#datetime-formats>`_.
 
-        :``fraction``:
+        :``"fraction"``:
             * **fraction_accuracy** (``FractionAccuracy``, *optional*, default: ``FractionAccuracy.THREE`` – The
                 precision of the faction.
 
-        :``percentage``:
+        :``"percentage"``:
             * **decimal_places** (``float``, *optional*, default: ``None``) –  number of
               decimal places, or ``None`` for automatic.
             * **negative_style** (``NegativeNumberStyle``, *optional*, default: ``NegativeNumberStyle.MINUS``) – How negative numbers are represented.
@@ -972,31 +990,9 @@ class Table(Cacheable):  # noqa: F811
             * **show_thousands_separator** (``bool``, *optional*, default: ``False``) – ``True``
               if the number should include a thousands seperator, e.g. ``,``
 
-        :``scientific``:
-            * **decimal_places** (``float``, *optional*, default: ``None``) –  number of
+        :``"scientific"``:
+            * **decimal_places** (``float``, *optional*, default: ``None``) – number of
               decimal places, or ``None`` for automatic.
-
-        Parameters
-        ----------
-        args: list, optional
-            Positional arguments for cell reference and data format type (see below)
-        kwargs: dict, optional
-            Key-value pairs defining a formatting options for each data format (see below).
-
-        Warns
-        -----
-        RuntimeWarning:
-            If ``use_accounting_style`` is used with any ``negative_style`` other than
-            ``NegativeNumberStyle.MINUS``.
-
-        :Args (row-column):
-            * **param1** (``int``): The row number (zero indexed).
-            * **param2** (``int``): The column number (zero indexed).
-            * **param3** (``str``): Data format type for the cell (see "data formats" below).
-
-        :Args (A1):
-            * **param1** (``str``): A cell reference using Excel/Numbers-style A1 notation.
-            * **param2** (``str``): Data format type for the cell (see "data formats" below).
 
         **Example**
 
