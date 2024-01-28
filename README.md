@@ -47,7 +47,7 @@ C:\Users\Jon>pip install C:\Users\Jon\Downloads\python_snappy-0.6.1-cp311-cp311-
 
 ## API
 
-The `numbers-parser` API is documented at [Read The Docs](https://numbers-parser.readthedocs.io/en/latest/). Some of the content in this README will be moved into the API docs in future updates.
+The `numbers-parser` API is documented at [Read The Docs](https://numbers-parser.readthedocs.io/en/latest/).
 
 ## Reading Numbers Documents
 
