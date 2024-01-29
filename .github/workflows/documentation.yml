@@ -18,12 +18,12 @@ jobs:
           poetry install --with docs
       - name: Sphinx build
         run: |
-          poetry run pshinx-build -b html docs docs/build
+          poetry run sphinx-build -b html docs docs/build
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         with:
-          publish_branch: gh-pages
+          publish_branch: main
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/build/
           force_orphan: true
