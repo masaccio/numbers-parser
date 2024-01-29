@@ -47,7 +47,7 @@ C:\Users\Jon>pip install C:\Users\Jon\Downloads\python_snappy-0.6.1-cp311-cp311-
 
 ## API
 
-The `numbers-parser` API is documented at [Read The Docs](https://numbers-parser.readthedocs.io/en/latest/).
+The `numbers-parser` API is documented at [Read The Docs](https://masaccio.github.io/numbers-parser/).
 
 ## Reading Numbers Documents
 
@@ -101,7 +101,7 @@ Cells are objects with a common base class of `Cell`. All cell types have a prop
 | DateCell     | `pendulum.datetime` |                                             |
 | DurationCell | `pendulum.duration` |                                             |
 | ErrorCell    | `None`              |                                             |
-| MergedCell   | `None`              | See [Merged cells](#https://numbers-parser.readthedocs.io/en/latest/#table-cell-merged-cells) |
+| MergedCell   | `None`              | See [Merged cells](https://masaccio.github.io/numbers-parser/#table-cell-merged-cells) |
 
 Cell references can be either zero-offset row/column integers or an Excel/Numbers A1 notation. Where cell values are not `None` the property `formatted_value` returns the cell value as a `str` as displayed in Numbers. Cells that have no values in a table are represented as `EmptyCell` and cells containing evaluation errors of any kind `ErrorCell`.
 
@@ -136,7 +136,7 @@ df = pd.DataFrame(data[1:], columns=data[0])
 
 Whilst support for writing numbers files has been stable since version 3.4.0, you are highly recommended not to overwrite working Numbers files and instead save data to a new file.
 
-Cell values are written using [Table.write()](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Table.write) and `numbers-parser` will automatically create empty rows and columns for any cell references that are out of range of the current table.
+Cell values are written using [Table.write()](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.write) and `numbers-parser` will automatically create empty rows and columns for any cell references that are out of range of the current table.
 
 ``` python
 doc = Document("write.numbers")
@@ -148,7 +148,7 @@ table.write("B7", datetime(2020, 12, 25))
 doc.save("new-sheet.numbers")
 ```
 
-Additional tables and worksheets can be added to a `Document` before saving using [Document.add_sheet()](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Document.add_sheet) and [Sheet.add_table()](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Sheet.add_table) respectively:
+Additional tables and worksheets can be added to a `Document` before saving using [Document.add_sheet()](https://masaccio.github.io/numbers-parser/#numbers_parser.Document.add_sheet) and [Sheet.add_table()](https://masaccio.github.io/numbers-parser/#numbers_parser.Sheet.add_table) respectively:
 
 ```python
 doc = Document()
@@ -171,9 +171,9 @@ doc.save("sheet.numbers")
 * cell background color
 * cell indents (first line, left, right, and text inset)
 
-Numbers conflates style attributes that can be stored in paragraph styles (the style menu in the text panel) with the settings that are available on the Style tab of the Text panel. Some attributes in Numbers are not applied to new cells when a style is applied. To keep the API simple, `numbers-parser` packs all styling into a single [Style](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Style) object. When a document is saved, the attributes not stored in a paragraph style are applied to each cell that includes it. 
+Numbers conflates style attributes that can be stored in paragraph styles (the style menu in the text panel) with the settings that are available on the Style tab of the Text panel. Some attributes in Numbers are not applied to new cells when a style is applied. To keep the API simple, `numbers-parser` packs all styling into a single [Style](https://masaccio.github.io/numbers-parser/#numbers_parser.Style) object. When a document is saved, the attributes not stored in a paragraph style are applied to each cell that includes it. 
 
-Styles are read from cells using the [Cell.style](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Cell.style) propert and you can add new styles with [Document.add_style](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Document.add_style).
+Styles are read from cells using the [Cell.style](https://masaccio.github.io/numbers-parser/#numbers_parser.Cell.style) propert and you can add new styles with [Document.add_style](https://masaccio.github.io/numbers-parser/#numbers_parser.Document.add_style).
 
 Since `Style` objects are shared, changing `Cell.style.font_size` will have the effect of changing the font size for that style and will in turn affect the styles of all cells using that style.
 
@@ -183,14 +183,14 @@ Numbers has two different cell formatting types: data formats and custom formats
 
 Data formats are presented in Numbers in the Cell tab of the Format pane and are applied to individual cells. Like Numbers, `numbers-parsers` caches formatting information that is identical across multiple cells. You do not need to take any action for this to happen; this is handled internally by the package. Changing a data format for cell has no impact on any other cells.
 
-Cell formats are changed using [Table.set_cell_formatting](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Table.set_cell_formatting):
+Cell formats are changed using [Table.set_cell_formatting](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_formatting):
 
 ``` python
 table.set_cell_formatting("C1", "date", date_time_format="EEEE, d MMMM yyyy")
 table.set_cell_formatting(0, 4, "number", decimal_places=3, negative_style=NegativeNumberStyle.RED)
 ```
 
-Custom formats are shared across a Document and can be applied to multiple cells in multiple tables. Editing a custom format changes the appearance of data in all cells that share that format. You must first add a custom format to the document using [Document.add_custom_format](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Document.add_custom_format) before assigning it to cells using [Table.set_cell_formatting](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Table.set_cell_formatting):
+Custom formats are shared across a Document and can be applied to multiple cells in multiple tables. Editing a custom format changes the appearance of data in all cells that share that format. You must first add a custom format to the document using [Document.add_custom_format](https://masaccio.github.io/numbers-parser/#numbers_parser.Document.add_custom_format) before assigning it to cells using [Table.set_cell_formatting](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_formatting):
 
 ``` python
 long_date = doc.add_custom_format(name="Long Date", type="date", date_time_format="EEEE, d MMMM yyyy")
@@ -203,7 +203,7 @@ A limited number of currencies are formatted using symbolic notation rather than
 
 `numbers-parser` supports reading and writing cell borders, though the interface for each differs. Individual cells can have each of their four borders tested, but when drawing new borders, these are set for the table to allow for drawing borders across multiple cells. Setting the border of merged cells is not possible unless the edge of the cells is at the end of the merged region.
 
-Borders are represented using the [Border](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Border) class that can be initialized with line width, color and line style. The current state of a cell border is read using the [Cell.border](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Cell.border) property. The [Table.set_cell_border](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Table.set_cell_border) sets the border for a cell edge or a range of cells.
+Borders are represented using the [Border](https://masaccio.github.io/numbers-parser/#numbers_parser.Border) class that can be initialized with line width, color and line style. The current state of a cell border is read using the [Cell.border](https://masaccio.github.io/numbers-parser/#numbers_parser.Cell.border) property. The [Table.set_cell_border](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_border) sets the border for a cell edge or a range of cells.
 
 ## Command-line scripts
 
@@ -242,8 +242,8 @@ Current known limitations of `numbers-parser` are:
 * Creating cells of type `BulletedTextCell` is not supported
 * New tables are inserted with a fixed offset below the last table in a worksheet which does not take into account title or caption size
 * New sheets insert tables with formats copied from the first table in the previous sheet rather than default table formats
-* Creating custom cell formats and cell data formats is experimental and not all formats are supported. See [Table.set_cell_formatting](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Table.set_cell_formatting) for more details.
-* Due to a limitation in Python's [ZipFile](https://docs.python.org/3/library/zipfile.html), Python versions older than 3.11 do not support image filenames with UTF-8 characters (see [issue 69](https://github.com/masaccio/numbers-parser/issues/69)). [Cell.style.bg_image](https://numbers-parser.readthedocs.io/en/latest/#numbers_parser.Style) returns `None` for such files and issues a `RuntimeWarning`.
+* Creating custom cell formats and cell data formats is experimental and not all formats are supported. See [Table.set_cell_formatting](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_formatting) for more details.
+* Due to a limitation in Python's [ZipFile](https://docs.python.org/3/library/zipfile.html), Python versions older than 3.11 do not support image filenames with UTF-8 characters (see [issue 69](https://github.com/masaccio/numbers-parser/issues/69)). [Cell.style.bg_image](https://masaccio.github.io/numbers-parser/#numbers_parser.Style) returns `None` for such files and issues a `RuntimeWarning`.
 
 
 ## Numbers File Formats
