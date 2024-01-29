@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-python@v3
       - name: Install dependencies
         run: |
+            sudo apt-get -y install libsnappy-dev
             pip install poetry
             poetry install --with docs
       - name: Sphinx build
