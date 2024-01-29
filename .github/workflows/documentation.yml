@@ -1,0 +1,29 @@
+name: documentation
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: write
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - name: Install dependencies
+        run: |
+          sudo apt-get -y install libsnappy-dev
+          pip install poetry
+          poetry install --with docs
+      - name: Sphinx build
+        run: |
+          poetry run pshinx-build -b html docs docs/build
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/build/
+          force_orphan: true
