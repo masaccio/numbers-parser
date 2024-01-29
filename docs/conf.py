@@ -5,7 +5,8 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
-    "sphinx_rtd_theme",
+    "sphinxawesome_theme",
+    "sphinxawesome_theme.highlighting",
     "enum_tools.autoenum",
 ]
 
@@ -23,6 +24,7 @@ napoleon_include_special_with_doc = False
 napoleon_use_admonition_for_examples = True
 napoleon_use_admonition_for_notes = True
 
-html_theme = "sphinx_rtd_theme"
+html_permalinks_icon = "<span>#</span>"
+html_theme = "sphinxawesome_theme"
 
 sys.path.insert(0, os.path.abspath("../"))

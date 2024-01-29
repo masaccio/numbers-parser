@@ -1736,25 +1736,6 @@ pygments = "*"
 Sphinx = ">=7.0.0,<8.0.0"
 
 [[package]]
-name = "sphinx-rtd-theme"
-version = "2.0.0"
-description = "Read the Docs theme for Sphinx"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "sphinx_rtd_theme-2.0.0-py2.py3-none-any.whl", hash = "sha256:ec93d0856dc280cf3aee9a4c9807c60e027c7f7b461b77aeffed682e68f0e586"},
-    {file = "sphinx_rtd_theme-2.0.0.tar.gz", hash = "sha256:bd5d7b80622406762073a04ef8fadc5f9151261563d47027de09910ce03afe6b"},
-]
-
-[package.dependencies]
-docutils = "<0.21"
-sphinx = ">=5,<8"
-sphinxcontrib-jquery = ">=4,<5"
-
-[package.extras]
-dev = ["bump2version", "sphinxcontrib-httpdomain", "transifex-client", "wheel"]
-
-[[package]]
 name = "sphinx-tabs"
 version = "3.4.5"
 description = "Tabbed views for Sphinx"
@@ -1809,6 +1790,21 @@ all = ["coincidence (>=0.4.3)", "pygments (>=2.7.4,<=2.13.0)"]
 testing = ["coincidence (>=0.4.3)", "pygments (>=2.7.4,<=2.13.0)"]
 
 [[package]]
+name = "sphinxawesome-theme"
+version = "5.1.0"
+description = "An awesome theme for the Sphinx documentation generator"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "sphinxawesome_theme-5.1.0-py3-none-any.whl", hash = "sha256:8eee609f7b9e45773516fc52e7b587a94f29d80571449670b540d82f23a6eadf"},
+    {file = "sphinxawesome_theme-5.1.0.tar.gz", hash = "sha256:bcf07f149f211244d921a596940956e576248760e48526f67ee62191c6d3a058"},
+]
+
+[package.dependencies]
+beautifulsoup4 = ">=4.9.1,<5.0.0"
+sphinx = {version = ">=7.2,<7.3", markers = "python_version >= \"3.9\" and python_full_version <= \"3.12.0\""}
+
+[[package]]
 name = "sphinxcontrib-applehelp"
 version = "1.0.8"
 description = "sphinxcontrib-applehelp is a Sphinx extension which outputs Apple help books"
@@ -1855,20 +1851,6 @@ files = [
 lint = ["docutils-stubs", "flake8", "mypy"]
 standalone = ["Sphinx (>=5)"]
 test = ["html5lib", "pytest"]
-
-[[package]]
-name = "sphinxcontrib-jquery"
-version = "4.1"
-description = "Extension to include jQuery on newer Sphinx releases"
-optional = false
-python-versions = ">=2.7"
-files = [
-    {file = "sphinxcontrib-jquery-4.1.tar.gz", hash = "sha256:1620739f04e36a2c779f1a131a2dfd49b2fd07351bf1968ced074365933abc7a"},
-    {file = "sphinxcontrib_jquery-4.1-py2.py3-none-any.whl", hash = "sha256:f936030d7d0147dd026a4f2b5a57343d233f1fc7b363f68b3d4f1cb0993878ae"},
-]
-
-[package.dependencies]
-Sphinx = ">=1.8"
 
 [[package]]
 name = "sphinxcontrib-jsmath"
@@ -2080,4 +2062,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "17249084281af98ec5f245b2d82ded64293c22c68f822e57977910f4bd49d584"
+content-hash = "a049ca6906d5dbe3cc86ac507bc5f1c79bf077ba6be1b00d670959b7d4ffdc4f"

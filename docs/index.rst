@@ -8,6 +8,9 @@
 
 .. role:: red
 
+.. role:: python(code)
+  :language: python
+  :class: highlight
 
 numbers-parser API
 ==================
@@ -98,6 +101,9 @@ available using the properties ``row_start``, ``col_start``,
 
 .. autoclass:: Style
    :members:
+
+Enumerations
+~~~~~~~~~~~~
 
 .. _negative_formats:
 
