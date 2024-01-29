@@ -1,0 +1,17 @@
+compact-json
+enum-tools
+importlib-resources
+pendulum
+protobuf
+python-dateutil
+python-snappy
+regex
+roman
+setuptools
+sigfig
+six
+sortedcontainers
+sphinx
+sphinx_toolbox
+sphinxawesome-theme
+wcwidth
