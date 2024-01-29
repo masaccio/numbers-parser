@@ -47,7 +47,7 @@ C:\Users\Jon>pip install C:\Users\Jon\Downloads\python_snappy-0.6.1-cp311-cp311-
 
 ## API
 
-The `numbers-parser` API is documented at [Read The Docs](https://masaccio.github.io/numbers-parser/).
+For details information on the `numbers-parser` API including extensive examples, please visit the [API reference documentation](https://masaccio.github.io/numbers-parser/).
 
 ## Reading Numbers Documents
 
