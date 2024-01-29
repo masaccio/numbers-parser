@@ -1,8 +1,12 @@
 name: Deploy Sphinx documentation to Pages
 
 on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [master] # branch to trigger deployment
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   pages:
@@ -14,10 +18,5 @@ jobs:
       pages: write
       id-token: write
     steps:
-    - name: Install dependencies
-      run: |
-        sudo apt-get -y install libsnappy-dev
-        pip install poetry
-        poetry install --with docs
     - id: deployment
       uses: sphinx-notes/pages@v3
