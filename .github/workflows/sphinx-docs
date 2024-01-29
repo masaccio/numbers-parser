@@ -1,0 +1,23 @@
+name: Deploy Sphinx documentation to Pages
+
+on:
+  push:
+    branches: [master] # branch to trigger deployment
+
+jobs:
+  pages:
+    runs-on: ubuntu-20.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get -y install libsnappy-dev
+        pip install poetry
+        poetry install --with docs
+    - id: deployment
+      uses: sphinx-notes/pages@v3
