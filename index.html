@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+
+<html :class="{'dark': darkMode === 'dark' || (darkMode === 'system' &amp;&amp; window.matchMedia('(prefers-color-scheme: dark)').matches)}" class="scroll-smooth" data-content_root="./" lang="en" x-data="{ darkMode: localStorage.getItem('darkMode') || localStorage.setItem('darkMode', 'system'), activeSection: '' }" x-init="$watch('darkMode', val =&gt; localStorage.setItem('darkMode', val))">
+<head>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta charset="utf-8"/>
+<meta content="white" media="(prefers-color-scheme: light)" name="theme-color"/>
+<meta content="black" metia="(prefers-color-scheme: dark)" name="theme-color"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>numbers-parser API | numbers-parser  documentation</title>
+<meta content="numbers-parser API | numbers-parser  documentation" property="og:title"/>
+<meta content="numbers-parser API | numbers-parser  documentation" name="twitter:title"/>
+<link href="_static/pygments.css?v=8d216cef" rel="stylesheet" type="text/css"/>
+<link href="_static/theme.css?v=cede9724" rel="stylesheet" type="text/css"/>
+<link href="search.html" rel="search" title="Search"/>
+<link href="genindex.html" rel="index" title="Index"/>
+<script>
+    <!-- Prevent Flash of wrong theme -->
+      const userPreference = localStorage.getItem('darkMode');
+      let mode;
+      if (userPreference === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        mode = 'dark';
+        document.documentElement.classList.add('dark');
+      } else {
+        mode = 'light';
+      }
+      if (!userPreference) {localStorage.setItem('darkMode', mode)}
+    </script>
+</head>
+<body :class="{ 'overflow-hidden': showSidebar }" class="min-h-screen font-sans antialiased bg-background text-foreground" x-data="{ showSidebar: false }">
+<div @click.self="showSidebar = false" class="fixed inset-0 z-50 overflow-hidden bg-background/80 backdrop-blur-sm md:hidden" x-cloak="" x-show="showSidebar"></div><div class="relative flex flex-col min-h-screen" id="page"><a class="absolute top-0 left-0 z-[100] block bg-background p-4 text-xl transition -translate-x-full opacity-0 focus:translate-x-0 focus:opacity-100" href="#content">
+      Skip to content
+    </a><header class="sticky top-0 z-40 w-full border-b shadow-sm border-border supports-backdrop-blur:bg-background/60 bg-background/95 backdrop-blur"><div class="container flex items-center h-14">
+<div class="hidden mr-4 md:flex">
+<a class="flex items-center mr-6" href="#"><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">numbers-parser  documentation</span>
+</a></div><button @click="showSidebar = true" class="inline-flex items-center justify-center h-10 px-0 py-2 mr-2 text-base font-medium transition-colors rounded-md hover:text-accent-foreground hover:bg-transparent md:hidden" type="button">
+<svg aria-hidden="true" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M152.587 825.087q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440Zm0-203.587q-19.152 0-32.326-13.174T107.087 576q0-19.152 13.174-32.326t32.326-13.174h320q19.152 0 32.326 13.174T518.087 576q0 19.152-13.174 32.326T472.587 621.5h-320Zm0-203.587q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440ZM708.913 576l112.174 112.174q12.674 12.674 12.674 31.826t-12.674 31.826Q808.413 764.5 789.261 764.5t-31.826-12.674l-144-144Q600 594.391 600 576t13.435-31.826l144-144q12.674-12.674 31.826-12.674t31.826 12.674q12.674 12.674 12.674 31.826t-12.674 31.826L708.913 576Z"></path>
+</svg>
+<span class="sr-only">Toggle navigation menu</span>
+</button>
+<div class="flex items-center justify-between flex-1 space-x-2 sm:space-x-4 md:justify-end">
+<div class="flex-1 w-full md:w-auto md:flex-none"><form @keydown.k.window.meta="$refs.search.focus()" action="search.html" class="relative flex items-center group" id="searchbox" method="get">
+<input aria-label="Search the docs" class="inline-flex items-center font-medium transition-colors bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background border border-input hover:bg-accent focus:bg-accent hover:text-accent-foreground focus:text-accent-foreground hover:placeholder-accent-foreground py-2 px-4 relative h-9 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64" id="search-input" name="q" placeholder="Search ..." type="search" x-ref="search"/>
+<kbd class="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none text-muted-foreground items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex group-hover:bg-accent group-hover:text-accent-foreground">
+<span class="text-xs">⌘</span>
+    K
+  </kbd>
+</form>
+</div>
+<nav class="flex items-center space-x-1">
+<button @click="darkMode = darkMode === 'light' ? 'dark' : 'light'" class="relative inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground h-9 w-9" type="button">
+<svg class="absolute transition-all scale-100 rotate-0 dark:-rotate-90 dark:scale-0" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 685q45.456 0 77.228-31.772Q589 621.456 589 576q0-45.456-31.772-77.228Q525.456 467 480 467q-45.456 0-77.228 31.772Q371 530.544 371 576q0 45.456 31.772 77.228Q434.544 685 480 685Zm0 91q-83 0-141.5-58.5T280 576q0-83 58.5-141.5T480 376q83 0 141.5 58.5T680 576q0 83-58.5 141.5T480 776ZM80 621.5q-19.152 0-32.326-13.174T34.5 576q0-19.152 13.174-32.326T80 530.5h80q19.152 0 32.326 13.174T205.5 576q0 19.152-13.174 32.326T160 621.5H80Zm720 0q-19.152 0-32.326-13.174T754.5 576q0-19.152 13.174-32.326T800 530.5h80q19.152 0 32.326 13.174T925.5 576q0 19.152-13.174 32.326T880 621.5h-80Zm-320-320q-19.152 0-32.326-13.174T434.5 256v-80q0-19.152 13.174-32.326T480 130.5q19.152 0 32.326 13.174T525.5 176v80q0 19.152-13.174 32.326T480 301.5Zm0 720q-19.152 0-32.326-13.17Q434.5 995.152 434.5 976v-80q0-19.152 13.174-32.326T480 850.5q19.152 0 32.326 13.174T525.5 896v80q0 19.152-13.174 32.33-13.174 13.17-32.326 13.17ZM222.174 382.065l-43-42Q165.5 327.391 166 308.239t13.174-33.065q13.435-13.674 32.587-13.674t32.065 13.674l42.239 43q12.674 13.435 12.555 31.706-.12 18.272-12.555 31.946-12.674 13.674-31.445 13.413-18.772-.261-32.446-13.174Zm494 494.761-42.239-43q-12.674-13.435-12.674-32.087t12.674-31.565Q686.609 756.5 705.38 757q18.772.5 32.446 13.174l43 41.761Q794.5 824.609 794 843.761t-13.174 33.065Q767.391 890.5 748.239 890.5t-32.065-13.674Zm-42-494.761Q660.5 369.391 661 350.62q.5-18.772 13.174-32.446l41.761-43Q728.609 261.5 747.761 262t33.065 13.174q13.674 13.435 13.674 32.587t-13.674 32.065l-43 42.239q-13.435 12.674-31.706 12.555-18.272-.12-31.946-12.555Zm-495 494.761Q165.5 863.391 165.5 844.239t13.674-32.065l43-42.239q13.435-12.674 32.087-12.674t31.565 12.674Q299.5 782.609 299 801.38q-.5 18.772-13.174 32.446l-41.761 43Q231.391 890.5 212.239 890t-33.065-13.174ZM480 576Z"></path>
+</svg>
+<svg class="absolute transition-all scale-0 rotate-90 dark:rotate-0 dark:scale-100" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 936q-151 0-255.5-104.5T120 576q0-138 90-239.5T440 218q25-3 39 18t-1 44q-17 26-25.5 55t-8.5 61q0 90 63 153t153 63q31 0 61.5-9t54.5-25q21-14 43-1.5t19 39.5q-14 138-117.5 229T480 936Zm0-80q88 0 158-48.5T740 681q-20 5-40 8t-40 3q-123 0-209.5-86.5T364 396q0-20 3-40t8-40q-78 32-126.5 102T200 576q0 116 82 198t198 82Zm-10-270Z"></path>
+</svg>
+</button>
+</nav>
+</div>
+</div>
+</header>
+<div class="flex-1"><div class="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10"><aside :aria-hidden="!showSidebar" :class="{ 'translate-x-0': showSidebar }" class="fixed inset-y-0 left-0 md:top-14 z-50 md:z-30 bg-background md:bg-transparent transition-all duration-100 -translate-x-full md:translate-x-0 ml-0 p-6 md:p-0 md:-ml-2 md:h-[calc(100vh-3.5rem)] w-5/6 md:w-full shrink-0 overflow-y-auto border-r border-border md:sticky" id="left-sidebar">
+<a class="!justify-start text-sm md:!hidden bg-background" href="#"><span class="font-bold text-clip whitespace-nowrap">numbers-parser  documentation</span>
+</a>
+<div class="relative overflow-hidden md:overflow-auto my-4 md:my-0 h-[calc(100vh-8rem)] md:h-auto">
+<div class="overflow-y-auto h-full w-full relative pr-6"><nav class="table w-full min-w-full my-6 lg:my-8">
+</nav>
+</div>
+</div>
+<button @click="showSidebar = false" class="absolute md:hidden right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100" type="button">
+<svg class="h-4 w-4" fill="currentColor" height="24" stroke="none" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 632 284 828q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536 576l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480 632Z"></path>
+</svg>
+</button>
+</aside>
+<main class="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_300px]">
+<div class="w-full min-w-0 mx-auto">
+<div id="content" role="main">
+<style>
+.red {
+   color:red;
+}
+</style><section id="numbers-parser-api">
+<h1>numbers-parser API<a class="headerlink" href="#numbers-parser-api" title="Link to this heading"><span>#</span></a></h1>
+<section id="changes-in-version-4-0">
+<h2>Changes in version 4.0<a class="headerlink" href="#changes-in-version-4-0" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#changes-in-version-4-0'"><span>#</span></a></h2>
+<p>To better partition cell styles, background image data which was supported in earlier versions
+through the methods <code class="docutils literal notranslate"><span class="pre">image_data</span></code> and <code class="docutils literal notranslate"><span class="pre">image_filename</span></code> is now part of the new
+<code class="docutils literal notranslate"><span class="pre">cell_style</span></code> property. Using the deprecated methods <code class="docutils literal notranslate"><span class="pre">image_data</span></code> and <code class="docutils literal notranslate"><span class="pre">image_filename</span></code>
+will issue a <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> if used.The legacy methods will be removed in a
+future version of numbers-parser.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">NumberCell</span></code> cell values limited to 15 significant figures to match the implementation
+of floating point numbers in Apple Numbers. For example, the value <code class="docutils literal notranslate"><span class="pre">1234567890123456</span></code>
+is rounded to <code class="docutils literal notranslate"><span class="pre">1234567890123460</span></code> in the same way as in Numbers. Previously, using
+native <code class="docutils literal notranslate"><span class="pre">float</span></code> with no checking resulted in rounding errors in unpacking internal numbers.
+Attempting to write a number with too many significant digits results in a <code class="docutils literal notranslate"><span class="pre">RuntimeWarning</span></code>.</p>
+<p>The previously deprecated methods <code class="docutils literal notranslate"><span class="pre">Document.sheets()</span></code> and <code class="docutils literal notranslate"><span class="pre">`Sheet.tables()</span></code> are now only
+available using the properties of the same name (see examples in this README).</p>
+</section>
+<section id="api">
+<h2>API<a class="headerlink" href="#api" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#api'"><span>#</span></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="numbers_parser.Document">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">Document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Sheet</span> <span class="pre">1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Table</span> <span class="pre">1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_header_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_header_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/numbers_parser/document.html#Document"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Document" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Document'"><span>#</span></a></dt>
+<dd><p>Create an instance of a new Numbers document.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">filename</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, an empty document is created using the defaults
+defined by the class constructor. You can optionionally override these
+defaults at object construction time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em><em>, </em><em>optional</em>) – Apple Numbers document to read.</p></li>
+<li><p><strong>sheet_name</strong> (<em>str</em>, <em>optional</em>, <em>default</em>: <code class="docutils literal notranslate"><span class="pre">Sheet</span> <span class="pre">1</span></code>) – Name of the first sheet in a new document</p></li>
+<li><p><strong>table_name</strong> (<em>str</em>, <em>optional</em>, <em>default</em>: <code class="docutils literal notranslate"><span class="pre">Table</span> <span class="pre">1</span></code>) – Name of the first table in the first sheet of a new</p></li>
+<li><p><strong>num_header_rows</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: 1</em>) – Number of header rows in the first table of a new document.</p></li>
+<li><p><strong>num_header_cols</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: 1</em>) – Number of header columns in the first table of a new document.</p></li>
+<li><p><strong>num_rows</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: 12</em>) – Number of rows in the first table of a new document.</p></li>
+<li><p><strong>num_cols</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: 8</em>) – Number of columns in the first table of a new document.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>IndexError:</strong> – If the sheet name already exists in the document.</p></li>
+<li><p><strong>IndexError:</strong> – If the table name already exists in the first sheet.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<p>Reading a document and examining the <code class="docutils literal notranslate"><span class="pre">Tables</span></code> object:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numbers_parser</span> <span class="kn">import</span> <span class="n">Document</span>
+</span><span id="line-2"><span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="p">(</span><span class="s2">"mydoc.numbers"</span><span class="p">)</span>
+</span><span id="line-3"><span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">sheets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+</span><span id="line-4"><span class="go">'Sheet 1'</span>
+</span><span id="line-5"><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">sheets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="line-6"><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">name</span>
+</span><span id="line-7"><span class="go">'Table 1'</span>
+</span></code></pre></div>
+</div>
+<p>Creating a new document:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="p">()</span>
+</span><span id="line-2"><span class="n">doc</span><span class="o">.</span><span class="n">add_sheet</span><span class="p">(</span><span class="s2">"New Sheet"</span><span class="p">,</span> <span class="s2">"New Table"</span><span class="p">)</span>
+</span><span id="line-3"><span class="n">sheet</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">sheets</span><span class="p">[</span><span class="s2">"New Sheet"</span><span class="p">]</span>
+</span><span id="line-4"><span class="n">table</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="s2">"New Table"</span><span class="p">]</span>
+</span><span id="line-5"><span class="n">table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+</span><span id="line-6"><span class="n">table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span>
+</span><span id="line-7"><span class="n">table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)</span>
+</span><span id="line-8"><span class="n">doc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"mydoc.numbers"</span><span class="p">)</span>
+</span></code></pre></div>
+</div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Document.add_custom_format">
+<span class="sig-name descname"><span class="pre">add_custom_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">CustomFormatting</span></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Document.add_custom_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Document.add_custom_format" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Document.add_custom_format'"><span>#</span></a></dt>
+<dd><p>Add a new custom format to the current document.</p>
+<p>All custom formatting styles share a name and a type, described in the <strong>Common</strong>
+parameters in the following table. Additional key-value pairs configure the format
+depending upon the value of <code class="docutils literal notranslate"><span class="pre">kwargs["type"]</span></code>. Supported values for
+<code class="docutils literal notranslate"><span class="pre">kwargs["type"]</span></code> are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">"datetime"</span></code>: A date and time value with custom formatting.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">"number"</span></code>: A decimal number.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">"text"</span></code>: A simple text string.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Common Keys<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – The name of the custom format. If no name is provided,
+one is generated using the scheme <code class="docutils literal notranslate"><span class="pre">Custom</span> <span class="pre">Format</span></code>, <code class="docutils literal notranslate"><span class="pre">Custom</span> <span class="pre">Format</span> <span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">Custom</span> <span class="pre">Format</span> <span class="pre">2</span></code>, etc.</p></li>
+<li><p><strong>type</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">number</span></code>) – The type of format to
+create Supported formats are <code class="docutils literal notranslate"><span class="pre">number</span></code>, <code class="docutils literal notranslate"><span class="pre">datetime</span></code> and <code class="docutils literal notranslate"><span class="pre">text</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">“number”<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>integer_format</strong> (<code class="docutils literal notranslate"><span class="pre">PaddingType</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">PaddingType.NONE</span></code>) – How
+to pad integers.</p></li>
+<li><p><strong>decimal_format</strong> (<code class="docutils literal notranslate"><span class="pre">PaddingType</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">PaddingType.NONE</span></code>) – How
+to pad decimals.</p></li>
+<li><p><strong>num_integers</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">0</span></code>) – Integer precision
+when integers are padded.</p></li>
+<li><p><strong>num_decimals</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">0</span></code>) – Integer precision
+when decimals are padded.</p></li>
+<li><p><strong>show_thousands_separator</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – <code class="docutils literal notranslate"><span class="pre">True</span></code>
+if the number should include a thousands seperator.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">“datetime”<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>format</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">"d</span> <span class="pre">MMM</span> <span class="pre">y"</span></code>) – A POSIX strftime-like
+formatting string of <a class="reference external" href="#datetime-formats">Numbers date/time directives</a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">“text”<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>format</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">"%s"</span></code>) – Text format.
+The cell value is inserted in place of %s. Only one substitution is allowed by
+Numbers, and multiple %s formatting references raise a TypeError exception</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="n">long_date</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_custom_format</span><span class="p">(</span>
+</span><span id="line-2">    <span class="n">name</span><span class="o">=</span><span class="s2">"Long Date"</span><span class="p">,</span>
+</span><span id="line-3">    <span class="nb">type</span><span class="o">=</span><span class="s2">"date"</span><span class="p">,</span>
+</span><span id="line-4">    <span class="n">date_time_format</span><span class="o">=</span><span class="s2">"EEEE, d MMMM yyyy"</span><span class="p">)</span>
+</span><span id="line-5"><span class="n">table</span><span class="o">.</span><span class="n">set_cell_formatting</span><span class="p">(</span><span class="s2">"C1"</span><span class="p">,</span> <span class="s2">"custom"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">long_date</span><span class="p">)</span>
+</span></code></pre></div>
+</div>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Document.add_sheet">
+<span class="sig-name descname"><span class="pre">add_sheet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sheet_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Table</span> <span class="pre">1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Document.add_sheet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Document.add_sheet" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Document.add_sheet'"><span>#</span></a></dt>
+<dd><p>Add a new sheet to the current document.</p>
+<p>If no sheet name is provided, the next available numbered sheet
+will be generated in the series <code class="docutils literal notranslate"><span class="pre">Sheet</span> <span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">Sheet</span> <span class="pre">2</span></code>, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sheet_name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the sheet to add to the document</p></li>
+<li><p><strong>table_name</strong> (<em>str</em>, <em>optional</em>, <em>default</em>: <code class="docutils literal notranslate"><span class="pre">Table</span> <span class="pre">1</span></code>) – The name of the table created in the new sheet</p></li>
+<li><p><strong>num_rows</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: 12</em>) – The number of columns in the newly created table</p></li>
+<li><p><strong>num_cols</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: 8</em>) – The number of columns in the newly created table</p></li>
+<li><p><strong>Raises</strong> – IndexError: If the sheet name already exists in the document.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Document.add_style">
+<span class="sig-name descname"><span class="pre">add_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#numbers_parser.Style" title="numbers_parser.cell.Style"><span class="pre">Style</span></a></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Document.add_style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Document.add_style" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Document.add_style'"><span>#</span></a></dt>
+<dd><p>Add a new style to the current document.</p>
+<p>If no style name is provided, the next available numbered style will be generated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Key-value pairs to pass to the <a class="reference internal" href="#numbers_parser.Style" title="numbers_parser.Style"><code class="xref py py-class docutils literal notranslate"><span class="pre">Style</span></code></a> constructor</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError:</strong> – If <code class="docutils literal notranslate"><span class="pre">font_size</span></code> is not a <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">font_name</span></code> is not a <code class="docutils literal notranslate"><span class="pre">str</span></code>,
+    or if any of the <code class="docutils literal notranslate"><span class="pre">bool</span></code> parameters are invalid.</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="n">red_text</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">add_style</span><span class="p">(</span>
+</span><span id="line-2">    <span class="n">name</span><span class="o">=</span><span class="s2">"Red Text"</span><span class="p">,</span>
+</span><span id="line-3">    <span class="n">font_name</span><span class="o">=</span><span class="s2">"Lucida Grande"</span><span class="p">,</span>
+</span><span id="line-4">    <span class="n">font_color</span><span class="o">=</span><span class="n">RGB</span><span class="p">(</span><span class="mi">230</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span>
+</span><span id="line-5">    <span class="n">font_size</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span>
+</span><span id="line-6">    <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="line-7">    <span class="n">italic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="line-8">    <span class="n">alignment</span><span class="o">=</span><span class="n">Alignment</span><span class="p">(</span><span class="s2">"right"</span><span class="p">,</span> <span class="s2">"top"</span><span class="p">),</span>
+</span><span id="line-9"><span class="p">)</span>
+</span><span id="line-10"><span class="n">table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">"B2"</span><span class="p">,</span> <span class="s2">"Red"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">red_text</span><span class="p">)</span>
+</span><span id="line-11"><span class="n">table</span><span class="o">.</span><span class="n">set_cell_style</span><span class="p">(</span><span class="s2">"C2"</span><span class="p">,</span> <span class="n">red_text</span><span class="p">)</span>
+</span></code></pre></div>
+</div>
+</div>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Document.custom_formats">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">custom_formats</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CustomFormatting</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#numbers_parser.Document.custom_formats" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Document.custom_formats'"><span>#</span></a></dt>
+<dd><p>A dict mapping custom format names
+to the corresponding custom format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, <code class="xref py py-class docutils literal notranslate"><span class="pre">CustomFormatting</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Document.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Document.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Document.save" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Document.save'"><span>#</span></a></dt>
+<dd><p>Save the document in the specified filename.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – The path to save the document to. If the file already exists,
+it will be overwritten.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Document.sheets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sheets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#numbers_parser.Sheet" title="numbers_parser.document.Sheet"><span class="pre">Sheet</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#numbers_parser.Document.sheets" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Document.sheets'"><span>#</span></a></dt>
+<dd><p>A list of sheets in the document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="#numbers_parser.Sheet" title="numbers_parser.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sheet</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Document.styles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">styles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#numbers_parser.Style" title="numbers_parser.cell.Style"><span class="pre">Style</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#numbers_parser.Document.styles" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Document.styles'"><span>#</span></a></dt>
+<dd><p>A dict mapping style names to to the corresponding style.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, <a class="reference internal" href="#numbers_parser.Style" title="numbers_parser.Style"><code class="xref py py-class docutils literal notranslate"><span class="pre">Style</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="numbers_parser.Sheet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">Sheet</span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Sheet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Sheet" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Sheet'"><span>#</span></a></dt>
+<dd><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do not instantiate directly. Sheets are created by <a class="reference internal" href="#numbers_parser.Document" title="numbers_parser.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Sheet.add_table">
+<span class="sig-name descname"><span class="pre">add_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#numbers_parser.Table" title="numbers_parser.document.Table"><span class="pre">Table</span></a></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Sheet.add_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Sheet.add_table" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Sheet.add_table'"><span>#</span></a></dt>
+<dd><p>Add a new table to the current sheet.</p>
+<p>If no table name is provided, the next available numbered table
+will be generated in the series <code class="docutils literal notranslate"><span class="pre">Table</span> <span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">Table</span> <span class="pre">2</span></code>, etc.</p>
+<p>By default, new tables are positioned at a fixed offset below the last
+table vertically in a sheet and on the left side of the sheet. Large
+table headers and captions may result in new tables overlapping existing
+ones. The <code class="docutils literal notranslate"><span class="pre">add_table</span></code> method takes optional coordinates for
+positioning a table. A table’s height and coordinates can also be
+queried to help aligning new tables:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">table</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coordinates</span>
+</span><span id="line-2"><span class="n">y</span> <span class="o">+=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">table</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">height</span> <span class="o">+</span> <span class="mf">200.0</span>
+</span><span id="line-3"><span class="n">new_table</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span><span class="s2">"Offset Table"</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</span></code></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>table_name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the new table.</p></li>
+<li><p><strong>x</strong> (<em>float</em><em>, </em><em>optional</em>) – The x offset for the table in points.</p></li>
+<li><p><strong>y</strong> (<em>float</em><em>, </em><em>optional</em>) – The y offset for the table in points.</p></li>
+<li><p><strong>num_rows</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: 12</em>) – The number of rows for the new table.</p></li>
+<li><p><strong>num_cols</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: 10</em>) – The number of columns for the new table.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The newly created table.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#numbers_parser.Table" title="numbers_parser.Table">Table</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>IndexError</strong> – If the table name already exists.:</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Sheet.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#numbers_parser.Sheet.name" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Sheet.name'"><span>#</span></a></dt>
+<dd><p>The name of the sheet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Sheet.tables">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tables</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#numbers_parser.Table" title="numbers_parser.document.Table"><span class="pre">Table</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#numbers_parser.Sheet.tables" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Sheet.tables'"><span>#</span></a></dt>
+<dd><p>A list of tables in the sheet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="#numbers_parser.Table" title="numbers_parser.Table"><code class="xref py py-class docutils literal notranslate"><span class="pre">Table</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="numbers_parser.Table">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">Table</span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Table" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table'"><span>#</span></a></dt>
+<dd><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do not instantiate directly. Tables are created by <a class="reference internal" href="#numbers_parser.Document" title="numbers_parser.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Table.cell">
+<span class="sig-name descname"><span class="pre">cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.cell.Cell"><span class="pre">Cell</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#numbers_parser.MergedCell" title="numbers_parser.cell.MergedCell"><span class="pre">MergedCell</span></a></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Table.cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Table.cell" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.cell'"><span>#</span></a></dt>
+<dd><p>Return a single cell in the table.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">cell()</span></code> method supports two forms of notation to designate the position
+of cells: <strong>Row-column</strong> notation and <strong>A1</strong> notation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>      <span class="c1"># Row-column notation.</span>
+</span><span id="line-2"><span class="p">(</span><span class="s2">"A1"</span><span class="p">)</span>      <span class="c1"># The same cell in A1 notation.</span>
+</span></code></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>param1</strong> (<em>int</em>) – The row number (zero indexed).</p></li>
+<li><p><strong>param2</strong> (<em>int</em>) – The column number (zero indexed).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A cell with the base class <a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cell</span></code></a> or, if merged, a <a class="reference internal" href="#numbers_parser.MergedCell" title="numbers_parser.MergedCell"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergedCell</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.Cell">Cell</a> | <a class="reference internal" href="#numbers_parser.MergedCell" title="numbers_parser.MergedCell">MergedCell</a></p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="p">(</span><span class="s2">"mydoc.numbers"</span><span class="p">)</span>
+</span><span id="line-2"><span class="gp">&gt;&gt;&gt; </span><span class="n">sheets</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">sheets</span>
+</span><span id="line-3"><span class="gp">&gt;&gt;&gt; </span><span class="n">tables</span> <span class="o">=</span> <span class="n">sheets</span><span class="p">[</span><span class="s2">"Sheet 1"</span><span class="p">]</span><span class="o">.</span><span class="n">tables</span>
+</span><span id="line-4"><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="s2">"Table 1"</span><span class="p">]</span>
+</span><span id="line-5"><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="line-6"><span class="go">&lt;numbers_parser.cell.TextCell object at 0x105a80a10&gt;</span>
+</span><span id="line-7"><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+</span><span id="line-8"><span class="go">'Debit'</span>
+</span><span id="line-9"><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="s2">"B2"</span><span class="p">)</span>
+</span><span id="line-10"><span class="go">&lt;numbers_parser.cell.TextCell object at 0x105a80b90&gt;</span>
+</span><span id="line-11"><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="s2">"B2"</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+</span><span id="line-12"><span class="go">1234.50</span>
+</span></code></pre></div>
+</div>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Table.col_width">
+<span class="sig-name descname"><span class="pre">col_width</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Table.col_width"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Table.col_width" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.col_width'"><span>#</span></a></dt>
+<dd><p>The width of a table column in points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>col</strong> (<em>int</em>) – The column number (zero indexed).</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – The width of the column in points. If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, set the column width.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The width of the table column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Table.coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coordinates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#numbers_parser.Table.coordinates" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.coordinates'"><span>#</span></a></dt>
+<dd><p>The table’s x, y offsets in points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[float]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Table.height">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">height</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#numbers_parser.Table.height" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.height'"><span>#</span></a></dt>
+<dd><p>The table’s height in points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Table.iter_cols">
+<span class="sig-name descname"><span class="pre">iter_cols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.cell.Cell"><span class="pre">Cell</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Table.iter_cols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Table.iter_cols" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.iter_cols'"><span>#</span></a></dt>
+<dd><p>Produces cells from a table, by column.</p>
+<p>Specify the iteration range using the indexes of the rows and columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_col</strong> (<em>int</em><em>, </em><em>optional</em>) – Starting column number (zero indexed) or <code class="docutils literal notranslate"><span class="pre">0</span></code> if <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>max_col</strong> (<em>int</em><em>, </em><em>optional</em>) – End column number (zero indexed), or all columns if <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>min_row</strong> (<em>int</em><em>, </em><em>optional</em>) – Starting row number (zero indexed), or <code class="docutils literal notranslate"><span class="pre">0</span></code> if <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>max_row</strong> (<em>int</em><em>, </em><em>optional</em>) – End row number (zero indexed), or all rows if <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>values_only</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, yield cell values rather than <a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cell</span></code></a> objects.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tuple[Cell] | Tuple[str]</em> – <a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cell</span></code></a> objects or string values for the row</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>IndexError:</strong> – If row or column values are out of range for the table</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">iter_cols</span><span class="p">(</span><span class="n">min_row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_row</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
+</span><span id="line-2">    <span class="nb">sum</span> <span class="o">+=</span> <span class="n">col</span><span class="o">.</span><span class="n">value</span>
+</span></code></pre></div>
+</div>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Table.iter_rows">
+<span class="sig-name descname"><span class="pre">iter_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.cell.Cell"><span class="pre">Cell</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Table.iter_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Table.iter_rows" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.iter_rows'"><span>#</span></a></dt>
+<dd><p>Produces cells from a table, by row.</p>
+<p>Specify the iteration range using the indexes of the rows and columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_row</strong> (<em>int</em><em>, </em><em>optional</em>) – Starting row number (zero indexed), or <code class="docutils literal notranslate"><span class="pre">0</span></code> if <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>max_row</strong> (<em>int</em><em>, </em><em>optional</em>) – End row number (zero indexed), or all rows if <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>min_col</strong> (<em>int</em><em>, </em><em>optional</em>) – Starting column number (zero indexed) or <code class="docutils literal notranslate"><span class="pre">0</span></code> if <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>max_col</strong> (<em>int</em><em>, </em><em>optional</em>) – End column number (zero indexed), or all columns if <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>values_only</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, yield cell values rather than <a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cell</span></code></a> objects</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Tuple[Cell] | Tuple[str]</em> – <a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cell</span></code></a> objects or string values for the row</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>IndexError:</strong> – If row or column values are out of range for the table</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">iter_rows</span><span class="p">(</span><span class="n">min_row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_row</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">values_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+</span><span id="line-2">    <span class="nb">sum</span> <span class="o">+=</span> <span class="n">row</span>
+</span></code></pre></div>
+</div>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Table.merge_cells">
+<span class="sig-name descname"><span class="pre">merge_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_range</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/numbers_parser/document.html#Table.merge_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Table.merge_cells" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.merge_cells'"><span>#</span></a></dt>
+<dd><p>Convert a cell range or list of cell ranges into merged cells.</p>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Table.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#numbers_parser.Table.name" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.name'"><span>#</span></a></dt>
+<dd><p>The table’s name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Table.num_header_cols">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_header_cols</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#numbers_parser.Table.num_header_cols" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.num_header_cols'"><span>#</span></a></dt>
+<dd><p>The number of header columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError:</strong> – If the number of headers is negative, exceeds the number of rows in the
+    table, or exceeds Numbers maxinum number of headers (<code class="docutils literal notranslate"><span class="pre">MAX_HEADER_COUNT</span></code>).</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Table.num_header_rows">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_header_rows</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#numbers_parser.Table.num_header_rows" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.num_header_rows'"><span>#</span></a></dt>
+<dd><p>The number of header rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError:</strong> – If the number of headers is negative, exceeds the number of rows in the
+    table, or exceeds Numbers maxinum number of headers (<code class="docutils literal notranslate"><span class="pre">MAX_HEADER_COUNT</span></code>).</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Table.row_height">
+<span class="sig-name descname"><span class="pre">row_height</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Table.row_height"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Table.row_height" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.row_height'"><span>#</span></a></dt>
+<dd><p>The height of a table row in points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row</strong> (<em>int</em>) – The row number (zero indexed).</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – The height of the row in points. If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, set the row height.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The height of the table row.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Table.rows">
+<span class="sig-name descname"><span class="pre">rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.cell.Cell"><span class="pre">Cell</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Table.rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Table.rows" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.rows'"><span>#</span></a></dt>
+<dd><p>Return all rows of cells for the Table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values_only</strong> – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return cell values instead of <a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cell</span></code></a> objects</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of rows; each row is a list of <a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cell</span></code></a> objects, or string values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[List[<a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.Cell">Cell</a>]] | List[List[str]]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="numbers_parser.Table.set_cell_formatting">
+<span class="sig-name descname"><span class="pre">set_cell_formatting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/numbers_parser/document.html#Table.set_cell_formatting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Table.set_cell_formatting" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.set_cell_formatting'"><span>#</span></a></dt>
+<dd><p>Set the data format for a cell.</p>
+<p>Cell references can be <strong>row-column</strong> offsers or Excel/Numbers-style <strong>A1</strong> notation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>list</em>, <em>optional</em>) – Positional arguments for cell reference and data format type (see below)</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>, <em>optional</em>) - Key-value pairs defining a formatting options for each data format (see below).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Args (row-column)<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>param1</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>): The row number (zero indexed).</p></li>
+<li><p><strong>param2</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>): The column number (zero indexed).</p></li>
+<li><p><strong>param3</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>): Data format type for the cell (see “data formats” below).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Args (A1)<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>param1</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>): A cell reference using Excel/Numbers-style A1 notation.</p></li>
+<li><p><strong>param2</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>): Data format type for the cell (see “data formats” below).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><dl class="simple">
+<dt><strong>RuntimeWarning</strong> -</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">use_accounting_style</span></code> is used with
+any <code class="docutils literal notranslate"><span class="pre">negative_style</span></code> other than <code class="docutils literal notranslate"><span class="pre">NegativeNumberStyle.MINUS</span></code>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<p>All formatting styles share a name and a type, described in the <strong>Common</strong>
+parameters in the following table. Additional key-value pairs configure the format
+depending upon the value of <code class="docutils literal notranslate"><span class="pre">kwargs["type"]</span></code>. Supported values for
+<code class="docutils literal notranslate"><span class="pre">kwargs["type"]</span></code> are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">"base"</span></code>: A number base in the range 2-36.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">"currency"</span></code>: A decimal formatted with a currency symbol.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">"datetime"</span></code>: A date and time value with custom formatting.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">"fraction"</span></code>: A number formatted as the nearest fraction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">"percentage"</span></code>: A number formatted as a percentage</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">"number"</span></code>: A decimal number.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">"scientific"</span></code>: A decimal number with scientific notation.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Common keys<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – The name of the custom format. If no name is provided,
+one is generated using the scheme <code class="docutils literal notranslate"><span class="pre">Custom</span> <span class="pre">Format</span></code>, <code class="docutils literal notranslate"><span class="pre">Custom</span> <span class="pre">Format</span> <span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">Custom</span> <span class="pre">Format</span> <span class="pre">2</span></code>, etc.</p></li>
+<li><p><strong>type</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">number</span></code>) – The type of format to
+create Supported formats are <code class="docutils literal notranslate"><span class="pre">number</span></code>, <code class="docutils literal notranslate"><span class="pre">datetime</span></code> and <code class="docutils literal notranslate"><span class="pre">text</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">“base”<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>base_use_minus_sign</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">10</span></code>) – The integer
+base to represent the number from 2-36.</p></li>
+<li><p><strong>base_use_minus_sign</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">True</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>
+use a standard minus sign, otherwise format as two’s compliment (only
+possible for binary, octal and hexadecimal.</p></li>
+<li><p><strong>base_places</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">0</span></code>) – The number of
+decimal places, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for automatic.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">“currency”<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>currency</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">"GBP"</span></code>) – An ISO currency
+code, e.g. <code class="docutils literal notranslate"><span class="pre">"GBP"</span></code> or <code class="docutils literal notranslate"><span class="pre">"USD"</span></code>.</p></li>
+<li><p><strong>decimal_places</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">2</span></code>) – The number of
+decimal places, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for automatic.</p></li>
+<li><p><strong>negative_style</strong> (<code class="docutils literal notranslate"><span class="pre">NegativeNumberStyle</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">NegativeNumberStyle.MINUS</span></code>) – How negative numbers are represented.
+See <a class="reference external" href="#negative-formats">Negative number formats</a>.</p></li>
+<li><p><strong>show_thousands_separator</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – <code class="docutils literal notranslate"><span class="pre">True</span></code>
+if the number should include a thousands seperator, e.g. <code class="docutils literal notranslate"><span class="pre">,</span></code></p></li>
+<li><p><strong>use_accounting_style</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) –  <code class="docutils literal notranslate"><span class="pre">True</span></code>
+if the currency symbol should be formatted to the left of the cell and
+separated from the number value by a tab.</p></li>
+</ul>
+</dd>
+<dt class="field-even">“datetime”<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><dl class="simple">
+<dt><strong>date_time_format</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">"dd</span> <span class="pre">MMM</span> <span class="pre">YYY</span> <span class="pre">HH:MM"</span></code>) – A POSIX</dt><dd><p>strftime-like formatting string of <a class="reference external" href="#datetime-formats">Numbers date/time
+directives</a>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt class="field-odd">“fraction”<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><dl class="simple">
+<dt><strong>fraction_accuracy</strong> (<code class="docutils literal notranslate"><span class="pre">FractionAccuracy</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">FractionAccuracy.THREE</span></code> – The</dt><dd><p>precision of the faction.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt class="field-even">“percentage”<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>decimal_places</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) –  number of
+decimal places, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for automatic.</p></li>
+<li><p><strong>negative_style</strong> (<code class="docutils literal notranslate"><span class="pre">NegativeNumberStyle</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">NegativeNumberStyle.MINUS</span></code>) – How negative numbers are represented.
+See <a class="reference external" href="#negative-formats">Negative number formats</a>.</p></li>
+<li><p><strong>show_thousands_separator</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – <code class="docutils literal notranslate"><span class="pre">True</span></code>
+if the number should include a thousands seperator, e.g. <code class="docutils literal notranslate"><span class="pre">,</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-odd">“scientific”<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decimal_places</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>, <em>optional</em>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – number of
+decimal places, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for automatic.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">set_cell_formatting</span><span class="p">(</span><span class="s2">"C1"</span><span class="p">,</span> <span class="s2">"date"</span><span class="p">,</span> <span class="n">date_time_format</span><span class="o">=</span><span class="s2">"EEEE, d MMMM yyyy"</span><span class="p">)</span>
+</span><span id="line-2"><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">set_cell_formatting</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">"number"</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">negative_style</span><span class="o">=</span><span class="n">NegativeNumberStyle</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+</span></code></pre></div>
+</div>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Table.table_name_enabled">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_name_enabled</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#numbers_parser.Table.table_name_enabled" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.table_name_enabled'"><span>#</span></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the table name is visible, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Table.width">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">width</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#numbers_parser.Table.width" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Table.width'"><span>#</span></a></dt>
+<dd><p>The table’s width in points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="numbers_parser.Cell">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">Cell</span></span><a class="reference internal" href="_modules/numbers_parser/cell.html#Cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Cell" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Cell'"><span>#</span></a></dt>
+<dd><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do not instantiate directly. Cells are created by <a class="reference internal" href="#numbers_parser.Table" title="numbers_parser.Table"><code class="xref py py-class docutils literal notranslate"><span class="pre">Table</span></code></a>.</p>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Cell.border">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">border</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">CellBorder</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#numbers_parser.Cell.border" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Cell.border'"><span>#</span></a></dt>
+<dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">CellBorder</span></code> associated with the cell or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<dl class="simple">
+<dt>Warns:</dt><dd><dl class="simple">
+<dt>UnsupportedWarning: On assignment; use</dt><dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">numbers_parser.Table.set_cell_border()</span></code> instead.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CellBorder| None</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Cell.bullets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bullets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#numbers_parser.Cell.bullets" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Cell.bullets'"><span>#</span></a></dt>
+<dd><p>The bullets in a cell, or <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<p>Cells that contain bulleted or numbered lists are identified
+by <a class="reference internal" href="#numbers_parser.Cell.is_bulleted" title="numbers_parser.Cell.is_bulleted"><code class="xref py py-attr docutils literal notranslate"><span class="pre">numbers_parser.Cell.is_bulleted</span></code></a>. For these cells,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">numbers_parser.Cell.value</span></code> returns the whole cell contents.
+Bullets can also be extracted into a list of paragraphs cell without the
+bullet or numbering character. Newlines are not included in the
+bullet list.</p>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="p">(</span><span class="s2">"bullets.numbers"</span><span class="p">)</span>
+</span><span id="line-2"><span class="n">sheets</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">sheets</span>
+</span><span id="line-3"><span class="n">tables</span> <span class="o">=</span> <span class="n">sheets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tables</span>
+</span><span id="line-4"><span class="n">table</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="line-5"><span class="k">if</span> <span class="ow">not</span> <span class="n">table</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">is_bulleted</span><span class="p">:</span>
+</span><span id="line-6">    <span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</span><span id="line-7"><span class="k">else</span><span class="p">:</span>
+</span><span id="line-8">    <span class="n">bullets</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"* "</span> <span class="o">+</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">bullets</span><span class="p">]</span>
+</span><span id="line-9">    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bullets</span><span class="p">))</span>
+</span><span id="line-10">        <span class="k">return</span> <span class="kc">None</span>
+</span></code></pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[str] | None</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Cell.formatted_value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">formatted_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#numbers_parser.Cell.formatted_value" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Cell.formatted_value'"><span>#</span></a></dt>
+<dd><p>The formatted value of the cell as it appears in Numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Cell.is_bulleted">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_bulleted</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#numbers_parser.Cell.is_bulleted" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Cell.is_bulleted'"><span>#</span></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the cell contains text bullets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Cell.is_formula">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_formula</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#numbers_parser.Cell.is_formula" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Cell.is_formula'"><span>#</span></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the cell contains a formula.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.Cell.style">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">style</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#numbers_parser.Style" title="numbers_parser.cell.Style"><span class="pre">Style</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#numbers_parser.Cell.style" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Cell.style'"><span>#</span></a></dt>
+<dd><p>The <a class="reference internal" href="#numbers_parser.Style" title="numbers_parser.Style"><code class="xref py py-class docutils literal notranslate"><span class="pre">Style</span></code></a> associated with the cell or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<dl class="simple">
+<dt>Warns:</dt><dd><dl class="simple">
+<dt>UnsupportedWarning: On assignment; use</dt><dd><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">numbers_parser.Table.set_cell_style()</span></code> instead.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#numbers_parser.Style" title="numbers_parser.Style">Style</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class" id="table-cell-merged-cells">
+<dt class="sig sig-object py" id="numbers_parser.MergedCell">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">MergedCell</span></span><a class="reference internal" href="_modules/numbers_parser/cell.html#MergedCell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.MergedCell" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.MergedCell'"><span>#</span></a></dt>
+<dd><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do not instantiate directly. Sheets are created by <a class="reference internal" href="#numbers_parser.Document" title="numbers_parser.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>.</p>
+</div>
+</dd></dl>
+<p><code class="docutils literal notranslate"><span class="pre">Cell.is_merged</span></code> returns <code class="docutils literal notranslate"><span class="pre">True</span></code> for any cell that is the result of
+merging rows and/or columns. Cells eliminated from the table by the
+merge can still be indexed using <code class="docutils literal notranslate"><span class="pre">Table.cell()</span></code> and are of type
+<code class="docutils literal notranslate"><span class="pre">MergedCell</span></code>.</p>
+<table border="1">
+<tr>
+<td style="padding:10px">A1</td>
+<td rowspan="2" style="padding:10px">B1</td>
+</tr>
+<tr>
+<td style="padding:10px">A2</td>
+</tr>
+</table>
+<br/><p>The properties of merges are tested using the following properties:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Cell</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">value</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">is_merged</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">size</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">rect</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">merge_range</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A1</p></td>
+<td><p>TextCell</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">A1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>(1, 1)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>A2</p></td>
+<td><p>TextCell</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">A2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>(1, 1)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>B1</p></td>
+<td><p>TextCell</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">B1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>(2, 1)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>B2</p></td>
+<td><p>MergedCell</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>(1, 0, 2, 0)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">"B1:B2"</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>The tuple values of the <code class="docutils literal notranslate"><span class="pre">rect</span></code> property of a <code class="docutils literal notranslate"><span class="pre">MergedCell</span></code> are also
+available using the properties <code class="docutils literal notranslate"><span class="pre">row_start</span></code>, <code class="docutils literal notranslate"><span class="pre">col_start</span></code>,
+<code class="docutils literal notranslate"><span class="pre">row_end</span></code>, and <code class="docutils literal notranslate"><span class="pre">col_end</span></code>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="numbers_parser.RichTextCell">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">RichTextCell</span></span><a class="reference internal" href="_modules/numbers_parser/cell.html#RichTextCell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.RichTextCell" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.RichTextCell'"><span>#</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#numbers_parser.Cell" title="numbers_parser.cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cell</span></code></a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do not instantiate directly. Sheets are created by <a class="reference internal" href="#numbers_parser.Document" title="numbers_parser.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>.</p>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.RichTextCell.bullets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bullets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#numbers_parser.RichTextCell.bullets" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.RichTextCell.bullets'"><span>#</span></a></dt>
+<dd><p>A list of the text bullets in the cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.RichTextCell.formatted_bullets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">formatted_bullets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#numbers_parser.RichTextCell.formatted_bullets" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.RichTextCell.formatted_bullets'"><span>#</span></a></dt>
+<dd><p>The bullets as a formatted multi-line string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="numbers_parser.RichTextCell.hyperlinks">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyperlinks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#numbers_parser.RichTextCell.hyperlinks" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.RichTextCell.hyperlinks'"><span>#</span></a></dt>
+<dd><p>the hyperlinks in a cell or <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<p>Numbers does not support hyperlinks to cells within a spreadsheet, but does
+allow embedding links in cells. When cells contain hyperlinks,
+<cite>numbers_parser</cite> returns the text version of the cell. The <cite>hyperlinks</cite> property
+of cells where <a class="reference internal" href="#numbers_parser.Cell.is_bulleted" title="numbers_parser.Cell.is_bulleted"><code class="xref py py-attr docutils literal notranslate"><span class="pre">numbers_parser.Cell.is_bulleted</span></code></a> is <code class="docutils literal notranslate"><span class="pre">True</span></code> is a
+list of text and URL tuples.</p>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="n">cell</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</span><span id="line-2"><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">hyperlinks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span></code></pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Tuple] | None</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="numbers_parser.Style">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">Style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alignment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Alignment</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(HorizontalJustification.AUTO,</span> <span class="pre">VerticalJustification.TOP)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RGB</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">RGB</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RGB</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">11.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Helvetica</span> <span class="pre">Neue'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">italic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strikethrough</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">underline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_indent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_indent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_indent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_inset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_wrap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_text_style_obj_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cell_style_obj_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_update_cell_style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_update_text_style</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/numbers_parser/cell.html#Style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.Style" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.Style'"><span>#</span></a></dt>
+<dd><p>A named document style that can be applied to cells.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alignment</strong> (<em>Alignment</em><em>, </em><em>optional</em><em>, </em><em>default: Alignment</em><em>(</em><em>"auto"</em><em>, </em><em>"top"</em><em>)</em>) – Horizontal and vertical alignment of the cell</p></li>
+<li><p><strong>bg_color</strong> (<em>RGB</em><em> | </em><em>List</em><em>[</em><em>RGB</em><em>]</em><em>, </em><em>optional</em><em>, </em><em>default: RGB</em><em>(</em><em>0</em><em>, </em><em>0</em><em>, </em><em>0</em><em>)</em>) – Background color or list of colors for gradients</p></li>
+<li><p><strong>bold</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default: False</em>) – <code class="docutils literal notranslate"><span class="pre">True</span></code> if the cell font is bold</p></li>
+<li><p><strong>font_color</strong> (<em>RGB</em><em>, </em><em>optional</em><em>, </em><em>default: RGB</em><em>(</em><em>0</em><em>, </em><em>0</em><em>, </em><em>0</em><em>)</em><em>) </em><em>– Font color</em>) – </p></li>
+<li><p><strong>font_size</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default: DEFAULT_FONT_SIZE</em>) – Font size in points</p></li>
+<li><p><strong>font_name</strong> (<em>str</em><em>, </em><em>optional</em><em>, </em><em>default: DEFAULT_FONT_SIZE</em>) – Font name</p></li>
+<li><p><strong>italic</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default: False</em>) – <code class="docutils literal notranslate"><span class="pre">True</span></code> if the cell font is italic</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Style name</p></li>
+<li><p><strong>underline</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default: False</em><em>) </em><em>– True if the</em>) – cell font is underline</p></li>
+<li><p><strong>strikethrough</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default: False</em><em>) </em><em>– True if</em>) – the cell font is strikethrough</p></li>
+<li><p><strong>first_indent</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default: 0.0</em><em>) </em><em>– First line</em>) – indent in points</p></li>
+<li><p><strong>left_indent</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default: 0.0</em>) – Left indent in points</p></li>
+<li><p><strong>right_indent</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default: 0.0</em>) – Right indent in points</p></li>
+<li><p><strong>text_inset</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>default: DEFAULT_TEXT_INSET</em>) – Text inset in points</p></li>
+<li><p><strong>text_wrap</strong> (<em>str</em><em>, </em><em>optional</em><em>, </em><em>default: True</em>) – <code class="docutils literal notranslate"><span class="pre">True</span></code> if text wrapping is enabled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError:</strong> – If arguments do not match the specified type or for objects have invalid arguments</p>
+</dd>
+</dl>
+</dd></dl>
+</section>
+<section id="enumerations">
+<h2>Enumerations<a class="headerlink" href="#enumerations" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#enumerations'"><span>#</span></a></h2>
+<dl class="py class enum" id="negative-formats">
+<dt class="sig sig-object py" id="numbers_parser.NegativeNumberStyle">
+<em class="property"><span class="pre">enum</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">NegativeNumberStyle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/numbers_parser/constants.html#NegativeNumberStyle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.NegativeNumberStyle" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.NegativeNumberStyle'"><span>#</span></a></dt>
+<dd><p>How negative numbers are formatted.</p>
+<p>This enum is used in cell data formats and cell custom formats using the
+<cite>negative_style</cite> keyword argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Member Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+<p>Valid values are as follows:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.NegativeNumberStyle.MINUS">
+<span class="sig-name descname"><span class="pre">MINUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NegativeNumberStyle.MINUS:</span> <span class="pre">0&gt;</span></em><a class="headerlink" href="#numbers_parser.NegativeNumberStyle.MINUS" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.NegativeNumberStyle.MINUS'"><span>#</span></a></dt>
+<dd><p>Negative numbers use a simple minus sign.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.NegativeNumberStyle.RED">
+<span class="sig-name descname"><span class="pre">RED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NegativeNumberStyle.RED:</span> <span class="pre">1&gt;</span></em><a class="headerlink" href="#numbers_parser.NegativeNumberStyle.RED" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.NegativeNumberStyle.RED'"><span>#</span></a></dt>
+<dd><p>Negative numbers are red with no minus sign.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.NegativeNumberStyle.PARENTHESES">
+<span class="sig-name descname"><span class="pre">PARENTHESES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NegativeNumberStyle.PARENTHESES:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#numbers_parser.NegativeNumberStyle.PARENTHESES" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.NegativeNumberStyle.PARENTHESES'"><span>#</span></a></dt>
+<dd><p>Negative numbers are in parentheses with no minus sign.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.NegativeNumberStyle.RED_AND_PARENTHESES">
+<span class="sig-name descname"><span class="pre">RED_AND_PARENTHESES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;NegativeNumberStyle.RED_AND_PARENTHESES:</span> <span class="pre">3&gt;</span></em><a class="headerlink" href="#numbers_parser.NegativeNumberStyle.RED_AND_PARENTHESES" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.NegativeNumberStyle.RED_AND_PARENTHESES'"><span>#</span></a></dt>
+<dd><p>Negative numbers are red and in parentheses with no minus sign.</p>
+</dd></dl>
+</dd></dl>
+<dl class="py class enum" id="fraction-formats">
+<dt class="sig sig-object py" id="numbers_parser.FractionAccuracy">
+<em class="property"><span class="pre">enum</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">FractionAccuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/numbers_parser/constants.html#FractionAccuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.FractionAccuracy" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.FractionAccuracy'"><span>#</span></a></dt>
+<dd><p>How fractions are formatted.</p>
+<p>This enum is used in cell data formats and cell custom formats using the
+<cite>fraction_accuracy</cite> keyword argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Member Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+<p>Valid values are as follows:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.FractionAccuracy.THREE">
+<span class="sig-name descname"><span class="pre">THREE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FractionAccuracy.THREE:</span> <span class="pre">4294967293&gt;</span></em><a class="headerlink" href="#numbers_parser.FractionAccuracy.THREE" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.FractionAccuracy.THREE'"><span>#</span></a></dt>
+<dd><p>Fractions are formatted with up to 3 digits in the denominator.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.FractionAccuracy.TWO">
+<span class="sig-name descname"><span class="pre">TWO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FractionAccuracy.TWO:</span> <span class="pre">4294967294&gt;</span></em><a class="headerlink" href="#numbers_parser.FractionAccuracy.TWO" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.FractionAccuracy.TWO'"><span>#</span></a></dt>
+<dd><p>Fractions are formatted with up to 2 digits in the denominator.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.FractionAccuracy.ONE">
+<span class="sig-name descname"><span class="pre">ONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FractionAccuracy.ONE:</span> <span class="pre">4294967295&gt;</span></em><a class="headerlink" href="#numbers_parser.FractionAccuracy.ONE" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.FractionAccuracy.ONE'"><span>#</span></a></dt>
+<dd><p>Fractions are formatted with up to 1 digit in the denominator.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.FractionAccuracy.HALVES">
+<span class="sig-name descname"><span class="pre">HALVES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FractionAccuracy.HALVES:</span> <span class="pre">2&gt;</span></em><a class="headerlink" href="#numbers_parser.FractionAccuracy.HALVES" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.FractionAccuracy.HALVES'"><span>#</span></a></dt>
+<dd><p>Fractions are formatted to the nearest half.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.FractionAccuracy.QUARTERS">
+<span class="sig-name descname"><span class="pre">QUARTERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FractionAccuracy.QUARTERS:</span> <span class="pre">4&gt;</span></em><a class="headerlink" href="#numbers_parser.FractionAccuracy.QUARTERS" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.FractionAccuracy.QUARTERS'"><span>#</span></a></dt>
+<dd><p>Fractions are formatted to the nearest quarter.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.FractionAccuracy.EIGTHS">
+<span class="sig-name descname"><span class="pre">EIGTHS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FractionAccuracy.EIGTHS:</span> <span class="pre">8&gt;</span></em><a class="headerlink" href="#numbers_parser.FractionAccuracy.EIGTHS" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.FractionAccuracy.EIGTHS'"><span>#</span></a></dt>
+<dd><p>Fractions are formatted to the nearest eighth.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.FractionAccuracy.SIXTEENTHS">
+<span class="sig-name descname"><span class="pre">SIXTEENTHS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FractionAccuracy.SIXTEENTHS:</span> <span class="pre">16&gt;</span></em><a class="headerlink" href="#numbers_parser.FractionAccuracy.SIXTEENTHS" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.FractionAccuracy.SIXTEENTHS'"><span>#</span></a></dt>
+<dd><p>Fractions are formatted to the nearest sixteenth.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.FractionAccuracy.TENTHS">
+<span class="sig-name descname"><span class="pre">TENTHS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FractionAccuracy.TENTHS:</span> <span class="pre">10&gt;</span></em><a class="headerlink" href="#numbers_parser.FractionAccuracy.TENTHS" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.FractionAccuracy.TENTHS'"><span>#</span></a></dt>
+<dd><p>Fractions are formatted to the nearest tenth.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="numbers_parser.FractionAccuracy.HUNDRETHS">
+<span class="sig-name descname"><span class="pre">HUNDRETHS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;FractionAccuracy.HUNDRETHS:</span> <span class="pre">100&gt;</span></em><a class="headerlink" href="#numbers_parser.FractionAccuracy.HUNDRETHS" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.FractionAccuracy.HUNDRETHS'"><span>#</span></a></dt>
+<dd><p>Fractions are formatted to the nearest hundredth.</p>
+</dd></dl>
+</dd></dl>
+</section>
+<section id="date-time-formatting">
+<span id="datetime-formats"></span><h2>Date/time Formatting<a class="headerlink" href="#date-time-formatting" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#date-time-formatting'"><span>#</span></a></h2>
+<p>Date/time formats use Numbers notation rather than POSIX <code class="docutils literal notranslate"><span class="pre">strftime</span></code> as there are a number
+of extensions. Date components are specified using directives which must be separated by
+whitespace. Supported directives are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Directive</p></th>
+<th class="head"><p>Meaning</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">a</span></code></p></td>
+<td><p>Locale’s AM or PM</p></td>
+<td><p>am, pm</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EEEE</span></code></p></td>
+<td><p>Full weekday name</p></td>
+<td><p>Monday, Tuesday, …</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EEE</span></code></p></td>
+<td><p>Abbreviated weekday name</p></td>
+<td><p>Mon, Tue, …</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">yyyy</span></code></p></td>
+<td><p>Year with century as a
+decimal number</p></td>
+<td><p>1999, 2023, etc.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">yy</span></code></p></td>
+<td><p>Year without century as a
+zero-padded decimal
+number</p></td>
+<td><p>00, 01, … 99</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">y</span></code></p></td>
+<td><p>Year without century as a
+decimal number</p></td>
+<td><p>0, 1, … 99</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MMMM</span></code></p></td>
+<td><p>Full month name</p></td>
+<td><p>January, February, …</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MMM</span></code></p></td>
+<td><p>Abbreviated month name</p></td>
+<td><p>Jan, Feb, …</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MM</span></code></p></td>
+<td><p>Month as a zero-padded
+decimal number</p></td>
+<td><p>01, 02, … 12</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p>Month as a decimal number</p></td>
+<td><p>1, 2, … 12</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">d</span></code></p></td>
+<td><p>Day as a decimal number</p></td>
+<td><p>1, 2, … 31</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dd</span></code></p></td>
+<td><p>Day as a zero-padded
+decimal number</p></td>
+<td><p>01, 02, … 31</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DDD</span></code></p></td>
+<td><p>Day of the year as a
+zero-padded 3-digit
+number</p></td>
+<td><p>001 - 366</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DD</span></code></p></td>
+<td><p>Day of the year as a
+minimum zero-padded
+2-digit number</p></td>
+<td><p>01 - 366</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">D</span></code></p></td>
+<td><p>Day of the year</p></td>
+<td><p>1 - 366</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">HH</span></code></p></td>
+<td><p>Hour (24-hour clock) as a
+zero-padded decimal
+number</p></td>
+<td><p>00, 01, … 23</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">H</span></code></p></td>
+<td><p>Hour (24-hour clock) as a
+decimal number</p></td>
+<td><p>0, 1, … 23</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hh</span></code></p></td>
+<td><p>Hour (12-hour clock) as a
+zero-padded decimal
+number</p></td>
+<td><p>01, 02, … 12</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">h</span></code></p></td>
+<td><p>Hour (12-hour clock) as a
+decimal number</p></td>
+<td><p>1, 2, … 12</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">k</span></code></p></td>
+<td><p>Hour (24-hour clock) as a
+decimal number to 24</p></td>
+<td><p>1, 2, … 24</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kk</span></code></p></td>
+<td><p>Hour (24-hour clock) as a
+zero-padded decimal
+number to 24</p></td>
+<td><p>01, 02, … 24</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">K</span></code></p></td>
+<td><p>Hour (12-hour clock) as a
+decimal number from 0</p></td>
+<td><p>0, 1, … 11</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">KK</span></code></p></td>
+<td><p>Hour (12-hour clock) as a
+zero-padded decimal
+number from 0</p></td>
+<td><p>00, 01, … 11</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mm</span></code></p></td>
+<td><p>Minutes as a zero-padded
+number</p></td>
+<td><p>00, 01, … 59</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">m</span></code></p></td>
+<td><p>Minutes as a number</p></td>
+<td><p>0, 1, … 59</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ss</span></code></p></td>
+<td><p>Seconds as a zero-padded
+number</p></td>
+<td><p>00, 01, … 59</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">s</span></code></p></td>
+<td><p>Seconds as a number</p></td>
+<td><p>0, 1, … 59</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">W</span></code></p></td>
+<td><p>Week number in the month
+(first week is zero)</p></td>
+<td><p>0, 1, … 5</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ww</span></code></p></td>
+<td><p>Week number of the year
+(Monday as the first day
+of the week)</p></td>
+<td><p>0, 1, … 53</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">G</span></code></p></td>
+<td><p>AD or BC (only AD is
+supported)</p></td>
+<td><p>AD</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">F</span></code></p></td>
+<td><p>How many times the day of
+falls in the month</p></td>
+<td><p>1, 2, … 5</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">S</span></code></p></td>
+<td><p>Seconds to one decimal
+place</p></td>
+<td><p>0 - 9</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SS</span></code></p></td>
+<td><p>Seconds to two decimal
+places</p></td>
+<td><p>00 - 99</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SSS</span></code></p></td>
+<td><p>Seconds to three decimal
+places</p></td>
+<td><p>000 - 999</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SSSS</span></code></p></td>
+<td><p>Seconds to four decimal
+places</p></td>
+<td><p>0000 - 9999</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SSSSS</span></code></p></td>
+<td><p>Seconds to five decimal
+places</p></td>
+<td><p>00000 - 9999</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="cell-reference-functions">
+<h2>Cell reference functions<a class="headerlink" href="#cell-reference-functions" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#cell-reference-functions'"><span>#</span></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="numbers_parser.xl_cell_to_rowcol">
+<span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">xl_cell_to_rowcol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/numbers_parser/cell.html#xl_cell_to_rowcol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.xl_cell_to_rowcol" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.xl_cell_to_rowcol'"><span>#</span></a></dt>
+<dd><p>Convert a cell reference in A1 notation to a zero indexed row and column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cell_str</strong> (<em>str</em>) – A1 notation cell reference</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>row, col</strong> – Cell row and column numbers (zero indexed).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int, int</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="numbers_parser.xl_range">
+<span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">xl_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_col</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/numbers_parser/cell.html#xl_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.xl_range" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.xl_range'"><span>#</span></a></dt>
+<dd><p>Convert zero indexed row and col cell references to a A1:B1 range string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>first_row</strong> (<em>int</em>) – The first cell row.</p></li>
+<li><p><strong>first_col</strong> (<em>int</em>) – The first cell column.</p></li>
+<li><p><strong>last_row</strong> (<em>int</em>) – The last cell row.</p></li>
+<li><p><strong>last_col</strong> (<em>int</em>) – The last cell column.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A1:B1 style range string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="numbers_parser.xl_rowcol_to_cell">
+<span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">xl_rowcol_to_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_abs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_abs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/numbers_parser/cell.html#xl_rowcol_to_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.xl_rowcol_to_cell" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.xl_rowcol_to_cell'"><span>#</span></a></dt>
+<dd><p>Convert a zero indexed row and column cell reference to a A1 style string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row</strong> (<em>int</em>) – The cell row.</p></li>
+<li><p><strong>col</strong> (<em>int</em>) – The cell column.</p></li>
+<li><p><strong>row_abs</strong> (<em>bool</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, make the row absolute.</p></li>
+<li><p><strong>col_abs</strong> (<em>bool</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, make the column absolute.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A1 style string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="numbers_parser.xl_col_to_name">
+<span class="sig-prename descclassname"><span class="pre">numbers_parser.</span></span><span class="sig-name descname"><span class="pre">xl_col_to_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_abs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/numbers_parser/cell.html#xl_col_to_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numbers_parser.xl_col_to_name" title="Link to this definition" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#numbers_parser.xl_col_to_name'"><span>#</span></a></dt>
+<dd><p>Convert a zero indexed column cell reference to a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>col</strong> (<em>int</em>) – The column number (zero indexed).</p></li>
+<li><p><strong>col_abs</strong> (<em>bool</em><em>, </em><em>default: False</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, make the column absolute.</p></li>
+<li><p><strong>Returns</strong> – <dl class="simple">
+<dt>str:</dt><dd><p>Column in A1 notation.</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</section>
+</section>
+</div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
+<div class="sticky top-16 -mt-10 max-h-[calc(var(100vh)-5rem)] overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
+<ul>
+<li><a :data-current="activeSection === '#changes-in-version-4-0'" class="reference internal" href="#changes-in-version-4-0">Changes in version 4.0</a></li>
+<li><a :data-current="activeSection === '#api'" class="reference internal" href="#api">API</a><ul>
+<li><a :data-current="activeSection === '#numbers_parser.Document'" class="reference internal" href="#numbers_parser.Document"><code class="docutils literal notranslate"><span class="pre">Document</span></code></a><ul>
+<li><a :data-current="activeSection === '#numbers_parser.Document.add_custom_format'" class="reference internal" href="#numbers_parser.Document.add_custom_format"><code class="docutils literal notranslate"><span class="pre">Document.add_custom_format()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Document.add_sheet'" class="reference internal" href="#numbers_parser.Document.add_sheet"><code class="docutils literal notranslate"><span class="pre">Document.add_sheet()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Document.add_style'" class="reference internal" href="#numbers_parser.Document.add_style"><code class="docutils literal notranslate"><span class="pre">Document.add_style()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Document.custom_formats'" class="reference internal" href="#numbers_parser.Document.custom_formats"><code class="docutils literal notranslate"><span class="pre">Document.custom_formats</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Document.save'" class="reference internal" href="#numbers_parser.Document.save"><code class="docutils literal notranslate"><span class="pre">Document.save()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Document.sheets'" class="reference internal" href="#numbers_parser.Document.sheets"><code class="docutils literal notranslate"><span class="pre">Document.sheets</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Document.styles'" class="reference internal" href="#numbers_parser.Document.styles"><code class="docutils literal notranslate"><span class="pre">Document.styles</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#numbers_parser.Sheet'" class="reference internal" href="#numbers_parser.Sheet"><code class="docutils literal notranslate"><span class="pre">Sheet</span></code></a><ul>
+<li><a :data-current="activeSection === '#numbers_parser.Sheet.add_table'" class="reference internal" href="#numbers_parser.Sheet.add_table"><code class="docutils literal notranslate"><span class="pre">Sheet.add_table()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Sheet.name'" class="reference internal" href="#numbers_parser.Sheet.name"><code class="docutils literal notranslate"><span class="pre">Sheet.name</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Sheet.tables'" class="reference internal" href="#numbers_parser.Sheet.tables"><code class="docutils literal notranslate"><span class="pre">Sheet.tables</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#numbers_parser.Table'" class="reference internal" href="#numbers_parser.Table"><code class="docutils literal notranslate"><span class="pre">Table</span></code></a><ul>
+<li><a :data-current="activeSection === '#numbers_parser.Table.cell'" class="reference internal" href="#numbers_parser.Table.cell"><code class="docutils literal notranslate"><span class="pre">Table.cell()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.col_width'" class="reference internal" href="#numbers_parser.Table.col_width"><code class="docutils literal notranslate"><span class="pre">Table.col_width()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.coordinates'" class="reference internal" href="#numbers_parser.Table.coordinates"><code class="docutils literal notranslate"><span class="pre">Table.coordinates</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.height'" class="reference internal" href="#numbers_parser.Table.height"><code class="docutils literal notranslate"><span class="pre">Table.height</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.iter_cols'" class="reference internal" href="#numbers_parser.Table.iter_cols"><code class="docutils literal notranslate"><span class="pre">Table.iter_cols()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.iter_rows'" class="reference internal" href="#numbers_parser.Table.iter_rows"><code class="docutils literal notranslate"><span class="pre">Table.iter_rows()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.merge_cells'" class="reference internal" href="#numbers_parser.Table.merge_cells"><code class="docutils literal notranslate"><span class="pre">Table.merge_cells()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.name'" class="reference internal" href="#numbers_parser.Table.name"><code class="docutils literal notranslate"><span class="pre">Table.name</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.num_header_cols'" class="reference internal" href="#numbers_parser.Table.num_header_cols"><code class="docutils literal notranslate"><span class="pre">Table.num_header_cols</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.num_header_rows'" class="reference internal" href="#numbers_parser.Table.num_header_rows"><code class="docutils literal notranslate"><span class="pre">Table.num_header_rows</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.row_height'" class="reference internal" href="#numbers_parser.Table.row_height"><code class="docutils literal notranslate"><span class="pre">Table.row_height()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.rows'" class="reference internal" href="#numbers_parser.Table.rows"><code class="docutils literal notranslate"><span class="pre">Table.rows()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.set_cell_formatting'" class="reference internal" href="#numbers_parser.Table.set_cell_formatting"><code class="docutils literal notranslate"><span class="pre">Table.set_cell_formatting()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.table_name_enabled'" class="reference internal" href="#numbers_parser.Table.table_name_enabled"><code class="docutils literal notranslate"><span class="pre">Table.table_name_enabled</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Table.width'" class="reference internal" href="#numbers_parser.Table.width"><code class="docutils literal notranslate"><span class="pre">Table.width</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#numbers_parser.Cell'" class="reference internal" href="#numbers_parser.Cell"><code class="docutils literal notranslate"><span class="pre">Cell</span></code></a><ul>
+<li><a :data-current="activeSection === '#numbers_parser.Cell.border'" class="reference internal" href="#numbers_parser.Cell.border"><code class="docutils literal notranslate"><span class="pre">Cell.border</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Cell.bullets'" class="reference internal" href="#numbers_parser.Cell.bullets"><code class="docutils literal notranslate"><span class="pre">Cell.bullets</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Cell.formatted_value'" class="reference internal" href="#numbers_parser.Cell.formatted_value"><code class="docutils literal notranslate"><span class="pre">Cell.formatted_value</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Cell.is_bulleted'" class="reference internal" href="#numbers_parser.Cell.is_bulleted"><code class="docutils literal notranslate"><span class="pre">Cell.is_bulleted</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Cell.is_formula'" class="reference internal" href="#numbers_parser.Cell.is_formula"><code class="docutils literal notranslate"><span class="pre">Cell.is_formula</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.Cell.style'" class="reference internal" href="#numbers_parser.Cell.style"><code class="docutils literal notranslate"><span class="pre">Cell.style</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#numbers_parser.MergedCell'" class="reference internal" href="#numbers_parser.MergedCell"><code class="docutils literal notranslate"><span class="pre">MergedCell</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.RichTextCell'" class="reference internal" href="#numbers_parser.RichTextCell"><code class="docutils literal notranslate"><span class="pre">RichTextCell</span></code></a><ul>
+<li><a :data-current="activeSection === '#numbers_parser.RichTextCell.bullets'" class="reference internal" href="#numbers_parser.RichTextCell.bullets"><code class="docutils literal notranslate"><span class="pre">RichTextCell.bullets</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.RichTextCell.formatted_bullets'" class="reference internal" href="#numbers_parser.RichTextCell.formatted_bullets"><code class="docutils literal notranslate"><span class="pre">RichTextCell.formatted_bullets</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.RichTextCell.hyperlinks'" class="reference internal" href="#numbers_parser.RichTextCell.hyperlinks"><code class="docutils literal notranslate"><span class="pre">RichTextCell.hyperlinks</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#numbers_parser.Style'" class="reference internal" href="#numbers_parser.Style"><code class="docutils literal notranslate"><span class="pre">Style</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#enumerations'" class="reference internal" href="#enumerations">Enumerations</a><ul>
+<li><a :data-current="activeSection === '#numbers_parser.NegativeNumberStyle'" class="reference internal" href="#numbers_parser.NegativeNumberStyle"><code class="docutils literal notranslate"><span class="pre">NegativeNumberStyle</span></code></a><ul>
+<li><a :data-current="activeSection === '#numbers_parser.NegativeNumberStyle.MINUS'" class="reference internal" href="#numbers_parser.NegativeNumberStyle.MINUS"><code class="docutils literal notranslate"><span class="pre">NegativeNumberStyle.MINUS</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.NegativeNumberStyle.RED'" class="reference internal" href="#numbers_parser.NegativeNumberStyle.RED"><code class="docutils literal notranslate"><span class="pre">NegativeNumberStyle.RED</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.NegativeNumberStyle.PARENTHESES'" class="reference internal" href="#numbers_parser.NegativeNumberStyle.PARENTHESES"><code class="docutils literal notranslate"><span class="pre">NegativeNumberStyle.PARENTHESES</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.NegativeNumberStyle.RED_AND_PARENTHESES'" class="reference internal" href="#numbers_parser.NegativeNumberStyle.RED_AND_PARENTHESES"><code class="docutils literal notranslate"><span class="pre">NegativeNumberStyle.RED_AND_PARENTHESES</span></code></a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#numbers_parser.FractionAccuracy'" class="reference internal" href="#numbers_parser.FractionAccuracy"><code class="docutils literal notranslate"><span class="pre">FractionAccuracy</span></code></a><ul>
+<li><a :data-current="activeSection === '#numbers_parser.FractionAccuracy.THREE'" class="reference internal" href="#numbers_parser.FractionAccuracy.THREE"><code class="docutils literal notranslate"><span class="pre">FractionAccuracy.THREE</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.FractionAccuracy.TWO'" class="reference internal" href="#numbers_parser.FractionAccuracy.TWO"><code class="docutils literal notranslate"><span class="pre">FractionAccuracy.TWO</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.FractionAccuracy.ONE'" class="reference internal" href="#numbers_parser.FractionAccuracy.ONE"><code class="docutils literal notranslate"><span class="pre">FractionAccuracy.ONE</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.FractionAccuracy.HALVES'" class="reference internal" href="#numbers_parser.FractionAccuracy.HALVES"><code class="docutils literal notranslate"><span class="pre">FractionAccuracy.HALVES</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.FractionAccuracy.QUARTERS'" class="reference internal" href="#numbers_parser.FractionAccuracy.QUARTERS"><code class="docutils literal notranslate"><span class="pre">FractionAccuracy.QUARTERS</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.FractionAccuracy.EIGTHS'" class="reference internal" href="#numbers_parser.FractionAccuracy.EIGTHS"><code class="docutils literal notranslate"><span class="pre">FractionAccuracy.EIGTHS</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.FractionAccuracy.SIXTEENTHS'" class="reference internal" href="#numbers_parser.FractionAccuracy.SIXTEENTHS"><code class="docutils literal notranslate"><span class="pre">FractionAccuracy.SIXTEENTHS</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.FractionAccuracy.TENTHS'" class="reference internal" href="#numbers_parser.FractionAccuracy.TENTHS"><code class="docutils literal notranslate"><span class="pre">FractionAccuracy.TENTHS</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.FractionAccuracy.HUNDRETHS'" class="reference internal" href="#numbers_parser.FractionAccuracy.HUNDRETHS"><code class="docutils literal notranslate"><span class="pre">FractionAccuracy.HUNDRETHS</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#date-time-formatting'" class="reference internal" href="#date-time-formatting">Date/time Formatting</a></li>
+<li><a :data-current="activeSection === '#cell-reference-functions'" class="reference internal" href="#cell-reference-functions">Cell reference functions</a><ul>
+<li><a :data-current="activeSection === '#numbers_parser.xl_cell_to_rowcol'" class="reference internal" href="#numbers_parser.xl_cell_to_rowcol"><code class="docutils literal notranslate"><span class="pre">xl_cell_to_rowcol()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.xl_range'" class="reference internal" href="#numbers_parser.xl_range"><code class="docutils literal notranslate"><span class="pre">xl_range()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.xl_rowcol_to_cell'" class="reference internal" href="#numbers_parser.xl_rowcol_to_cell"><code class="docutils literal notranslate"><span class="pre">xl_rowcol_to_cell()</span></code></a></li>
+<li><a :data-current="activeSection === '#numbers_parser.xl_col_to_name'" class="reference internal" href="#numbers_parser.xl_col_to_name"><code class="docutils literal notranslate"><span class="pre">xl_col_to_name()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside>
+</main>
+</div>
+</div><footer class="py-6 border-t border-border md:py-0">
+<div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+<div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
+<p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© Jon Connell Built with <a class="font-medium underline underline-offset-4" href="https://www.sphinx-doc.org" rel="noreferrer">Sphinx 7.2.6</a></p>
+</div>
+</div>
+</footer>
+</div>
+<script src="_static/documentation_options.js?v=5929fcd5"></script>
+<script src="_static/doctools.js?v=888ff710"></script>
+<script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+<script defer="defer" src="_static/theme.js?v=e8bd915e"></script>
+</body>
+</html>

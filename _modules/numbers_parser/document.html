@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en"
+      data-content_root="../../"
+      x-data="{ darkMode: localStorage.getItem('darkMode') || localStorage.setItem('darkMode', 'system'), activeSection: '' }"
+      x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))"
+      class="scroll-smooth"
+      :class="{'dark': darkMode === 'dark' || (darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)}"
+>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="white" />
+  <meta name="theme-color" metia="(prefers-color-scheme: dark)" content="black" />
+  
+    <title>numbers_parser.document | numbers-parser  documentation</title>
+    <meta property="og:title" content="numbers_parser.document | numbers-parser  documentation" />
+    <meta name="twitter:title" content="numbers_parser.document | numbers-parser  documentation" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8d216cef" />
+      <link rel="stylesheet" type="text/css" href="../../_static/theme.css?v=cede9724" />
+        <link rel="search" title="Search" href="../../search.html" />
+        <link rel="index" title="Index" href="../../genindex.html" />
+
+    <script>
+    <!-- Prevent Flash of wrong theme -->
+      const userPreference = localStorage.getItem('darkMode');
+      let mode;
+      if (userPreference === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        mode = 'dark';
+        document.documentElement.classList.add('dark');
+      } else {
+        mode = 'light';
+      }
+      if (!userPreference) {localStorage.setItem('darkMode', mode)}
+    </script>
+</head>
+<body x-data="{ showSidebar: false }" class="min-h-screen font-sans antialiased bg-background text-foreground" :class="{ 'overflow-hidden': showSidebar }">
+    <div x-cloak x-show="showSidebar" class="fixed inset-0 z-50 overflow-hidden bg-background/80 backdrop-blur-sm md:hidden" @click.self="showSidebar = false"></div><div id="page" class="relative flex flex-col min-h-screen"><a href="#content" class="absolute top-0 left-0 z-[100] block bg-background p-4 text-xl transition -translate-x-full opacity-0 focus:translate-x-0 focus:opacity-100">
+      Skip to content
+    </a><header
+  class="sticky top-0 z-40 w-full border-b shadow-sm border-border supports-backdrop-blur:bg-background/60 bg-background/95 backdrop-blur"><div class="container flex items-center h-14">
+    <div class="hidden mr-4 md:flex">
+      <a href="../../index.html" class="flex items-center mr-6"><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">numbers-parser  documentation</span>
+      </a></div><button
+      class="inline-flex items-center justify-center h-10 px-0 py-2 mr-2 text-base font-medium transition-colors rounded-md hover:text-accent-foreground hover:bg-transparent md:hidden"
+      type="button" @click="showSidebar = true">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 96 960 960" aria-hidden="true"
+        fill="currentColor">
+        <path
+          d="M152.587 825.087q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440Zm0-203.587q-19.152 0-32.326-13.174T107.087 576q0-19.152 13.174-32.326t32.326-13.174h320q19.152 0 32.326 13.174T518.087 576q0 19.152-13.174 32.326T472.587 621.5h-320Zm0-203.587q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440ZM708.913 576l112.174 112.174q12.674 12.674 12.674 31.826t-12.674 31.826Q808.413 764.5 789.261 764.5t-31.826-12.674l-144-144Q600 594.391 600 576t13.435-31.826l144-144q12.674-12.674 31.826-12.674t31.826 12.674q12.674 12.674 12.674 31.826t-12.674 31.826L708.913 576Z" />
+      </svg>
+      <span class="sr-only">Toggle navigation menu</span>
+    </button>
+    <div class="flex items-center justify-between flex-1 space-x-2 sm:space-x-4 md:justify-end">
+      <div class="flex-1 w-full md:w-auto md:flex-none"><form id="searchbox"
+      action="../../search.html"
+      method="get"
+      class="relative flex items-center group"
+      @keydown.k.window.meta="$refs.search.focus()">
+  <input x-ref="search"
+          name="q"
+          id="search-input"
+          type="search"
+          aria-label="Search the docs"
+          placeholder="Search ..."
+          class="inline-flex items-center font-medium transition-colors bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background border border-input hover:bg-accent focus:bg-accent hover:text-accent-foreground focus:text-accent-foreground hover:placeholder-accent-foreground py-2 px-4 relative h-9 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64" />
+  <kbd class="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none text-muted-foreground items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex group-hover:bg-accent group-hover:text-accent-foreground">
+    <span class="text-xs">⌘</span>
+    K
+  </kbd>
+</form>
+      </div>
+      <nav class="flex items-center space-x-1">
+        <button @click="darkMode = darkMode === 'light' ? 'dark' : 'light'"
+          class="relative inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground h-9 w-9"
+          type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 96 960 960" fill="currentColor"
+            class="absolute transition-all scale-100 rotate-0 dark:-rotate-90 dark:scale-0">
+            <path
+              d="M480 685q45.456 0 77.228-31.772Q589 621.456 589 576q0-45.456-31.772-77.228Q525.456 467 480 467q-45.456 0-77.228 31.772Q371 530.544 371 576q0 45.456 31.772 77.228Q434.544 685 480 685Zm0 91q-83 0-141.5-58.5T280 576q0-83 58.5-141.5T480 376q83 0 141.5 58.5T680 576q0 83-58.5 141.5T480 776ZM80 621.5q-19.152 0-32.326-13.174T34.5 576q0-19.152 13.174-32.326T80 530.5h80q19.152 0 32.326 13.174T205.5 576q0 19.152-13.174 32.326T160 621.5H80Zm720 0q-19.152 0-32.326-13.174T754.5 576q0-19.152 13.174-32.326T800 530.5h80q19.152 0 32.326 13.174T925.5 576q0 19.152-13.174 32.326T880 621.5h-80Zm-320-320q-19.152 0-32.326-13.174T434.5 256v-80q0-19.152 13.174-32.326T480 130.5q19.152 0 32.326 13.174T525.5 176v80q0 19.152-13.174 32.326T480 301.5Zm0 720q-19.152 0-32.326-13.17Q434.5 995.152 434.5 976v-80q0-19.152 13.174-32.326T480 850.5q19.152 0 32.326 13.174T525.5 896v80q0 19.152-13.174 32.33-13.174 13.17-32.326 13.17ZM222.174 382.065l-43-42Q165.5 327.391 166 308.239t13.174-33.065q13.435-13.674 32.587-13.674t32.065 13.674l42.239 43q12.674 13.435 12.555 31.706-.12 18.272-12.555 31.946-12.674 13.674-31.445 13.413-18.772-.261-32.446-13.174Zm494 494.761-42.239-43q-12.674-13.435-12.674-32.087t12.674-31.565Q686.609 756.5 705.38 757q18.772.5 32.446 13.174l43 41.761Q794.5 824.609 794 843.761t-13.174 33.065Q767.391 890.5 748.239 890.5t-32.065-13.674Zm-42-494.761Q660.5 369.391 661 350.62q.5-18.772 13.174-32.446l41.761-43Q728.609 261.5 747.761 262t33.065 13.174q13.674 13.435 13.674 32.587t-13.674 32.065l-43 42.239q-13.435 12.674-31.706 12.555-18.272-.12-31.946-12.555Zm-495 494.761Q165.5 863.391 165.5 844.239t13.674-32.065l43-42.239q13.435-12.674 32.087-12.674t31.565 12.674Q299.5 782.609 299 801.38q-.5 18.772-13.174 32.446l-41.761 43Q231.391 890.5 212.239 890t-33.065-13.174ZM480 576Z" />
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 96 960 960" fill="currentColor"
+            class="absolute transition-all scale-0 rotate-90 dark:rotate-0 dark:scale-100">
+            <path
+              d="M480 936q-151 0-255.5-104.5T120 576q0-138 90-239.5T440 218q25-3 39 18t-1 44q-17 26-25.5 55t-8.5 61q0 90 63 153t153 63q31 0 61.5-9t54.5-25q21-14 43-1.5t19 39.5q-14 138-117.5 229T480 936Zm0-80q88 0 158-48.5T740 681q-20 5-40 8t-40 3q-123 0-209.5-86.5T364 396q0-20 3-40t8-40q-78 32-126.5 102T200 576q0 116 82 198t198 82Zm-10-270Z" />
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </div>
+</header>
+
+    <div class="flex-1"><div class="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10"><aside id="left-sidebar"
+  class="fixed inset-y-0 left-0 md:top-14 z-50 md:z-30 bg-background md:bg-transparent transition-all duration-100 -translate-x-full md:translate-x-0 ml-0 p-6 md:p-0 md:-ml-2 md:h-[calc(100vh-3.5rem)] w-5/6 md:w-full shrink-0 overflow-y-auto border-r border-border md:sticky"
+  :aria-hidden="!showSidebar" :class="{ 'translate-x-0': showSidebar }">
+
+    <a href="../../index.html" class="!justify-start text-sm md:!hidden bg-background"><span class="font-bold text-clip whitespace-nowrap">numbers-parser  documentation</span>
+    </a>
+
+    <div class="relative overflow-hidden md:overflow-auto my-4 md:my-0 h-[calc(100vh-8rem)] md:h-auto">
+      <div class="overflow-y-auto h-full w-full relative pr-6"><nav class="table w-full min-w-full my-6 lg:my-8">
+  
+</nav>
+      </div>
+    </div>
+    <button type="button" @click="showSidebar = false"
+      class="absolute md:hidden right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 96 960 960" fill="currentColor"
+        stroke="none" class="h-4 w-4">
+        <path
+          d="M480 632 284 828q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536 576l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480 632Z" />
+      </svg>
+    </button>
+  </aside>
+        <main class="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_300px]">
+<div class="w-full min-w-0 mx-auto">
+<nav aria-label="breadcrumbs"
+     class="flex items-center mb-4 space-x-1 text-sm text-muted-foreground">
+  <a class="overflow-hidden text-ellipsis whitespace-nowrap hover:text-foreground"
+     href="../../index.html">
+    <span class="hidden md:inline">numbers-parser  documentation</span>
+    <svg xmlns="http://www.w3.org/2000/svg"
+         height="18"
+         width="18"
+         viewBox="0 96 960 960"
+         aria-label="Home"
+         fill="currentColor"
+         stroke="none"
+         class="md:hidden">
+      <path d="M240 856h120V616h240v240h120V496L480 316 240 496v360Zm-80 80V456l320-240 320 240v480H520V696h-80v240H160Zm320-350Z" />
+    </svg>
+  </a>
+  
+<div class="mr-1">/</div><a class="hover:text-foreground overflow-hidden text-ellipsis whitespace-nowrap"
+       href="../index.html">Module code</a>
+    
+<div class="mr-1">/</div><span aria-current="page"
+        class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">numbers_parser.document</span>
+</nav>
+
+    <div id="content" role="main">
+      <h1>Source code for numbers_parser.document</h1><div class="highlight"><pre>
+<span></span><code><span id="line-1"><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+</span><span id="line-2"><span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+</span><span id="line-3">
+</span><span id="line-4"><span class="kn">from</span> <span class="nn">numbers_parser.cell</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="line-5">    <span class="n">Border</span><span class="p">,</span>
+</span><span id="line-6">    <span class="n">Cell</span><span class="p">,</span>
+</span><span id="line-7">    <span class="n">CustomFormatting</span><span class="p">,</span>
+</span><span id="line-8">    <span class="n">CustomFormattingType</span><span class="p">,</span>
+</span><span id="line-9">    <span class="n">DateCell</span><span class="p">,</span>
+</span><span id="line-10">    <span class="n">Formatting</span><span class="p">,</span>
+</span><span id="line-11">    <span class="n">FormattingType</span><span class="p">,</span>
+</span><span id="line-12">    <span class="n">MergedCell</span><span class="p">,</span>
+</span><span id="line-13">    <span class="n">NumberCell</span><span class="p">,</span>
+</span><span id="line-14">    <span class="n">Style</span><span class="p">,</span>
+</span><span id="line-15">    <span class="n">TextCell</span><span class="p">,</span>
+</span><span id="line-16">    <span class="n">xl_cell_to_rowcol</span><span class="p">,</span>
+</span><span id="line-17"><span class="p">)</span>
+</span><span id="line-18"><span class="kn">from</span> <span class="nn">numbers_parser.cell_storage</span> <span class="kn">import</span> <span class="n">CellStorage</span>
+</span><span id="line-19"><span class="kn">from</span> <span class="nn">numbers_parser.constants</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="line-20">    <span class="n">DEFAULT_COLUMN_COUNT</span><span class="p">,</span>
+</span><span id="line-21">    <span class="n">DEFAULT_ROW_COUNT</span><span class="p">,</span>
+</span><span id="line-22">    <span class="n">MAX_COL_COUNT</span><span class="p">,</span>
+</span><span id="line-23">    <span class="n">MAX_HEADER_COUNT</span><span class="p">,</span>
+</span><span id="line-24">    <span class="n">MAX_ROW_COUNT</span><span class="p">,</span>
+</span><span id="line-25"><span class="p">)</span>
+</span><span id="line-26"><span class="kn">from</span> <span class="nn">numbers_parser.containers</span> <span class="kn">import</span> <span class="n">ItemsList</span>
+</span><span id="line-27"><span class="kn">from</span> <span class="nn">numbers_parser.file</span> <span class="kn">import</span> <span class="n">write_numbers_file</span>
+</span><span id="line-28"><span class="kn">from</span> <span class="nn">numbers_parser.model</span> <span class="kn">import</span> <span class="n">_NumbersModel</span>
+</span><span id="line-29"><span class="kn">from</span> <span class="nn">numbers_parser.numbers_cache</span> <span class="kn">import</span> <span class="n">Cacheable</span><span class="p">,</span> <span class="n">cache</span>
+</span><span id="line-30">
+</span><span id="line-31"><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Document&quot;</span><span class="p">,</span> <span class="s2">&quot;Sheet&quot;</span><span class="p">,</span> <span class="s2">&quot;Table&quot;</span><span class="p">]</span>
+</span><span id="line-32">
+</span><span id="line-33">
+</span><span id="line-34"><span class="k">class</span> <span class="nc">Sheet</span><span class="p">:</span>
+</span><span id="line-35">    <span class="k">pass</span>
+</span><span id="line-36">
+</span><span id="line-37">
+</span><span id="line-38"><span class="k">class</span> <span class="nc">Table</span><span class="p">:</span>
+</span><span id="line-39">    <span class="k">pass</span>
+</span><span id="line-40">
+</span><span id="line-41">
+<div class="viewcode-block" id="Document">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Document">[docs]</a>
+</span><span id="line-42"><span class="k">class</span> <span class="nc">Document</span><span class="p">:</span>
+</span><span id="line-43"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-44"><span class="sd">    Create an instance of a new Numbers document.</span>
+</span><span id="line-45">
+</span><span id="line-46"><span class="sd">    If ``filename`` is ``None``, an empty document is created using the defaults</span>
+</span><span id="line-47"><span class="sd">    defined by the class constructor. You can optionionally override these</span>
+</span><span id="line-48"><span class="sd">    defaults at object construction time.</span>
+</span><span id="line-49">
+</span><span id="line-50"><span class="sd">    Parameters</span>
+</span><span id="line-51"><span class="sd">    ----------</span>
+</span><span id="line-52"><span class="sd">    filename: str, optional</span>
+</span><span id="line-53"><span class="sd">        Apple Numbers document to read.</span>
+</span><span id="line-54"><span class="sd">    sheet_name: *str*, *optional*, *default*: ``Sheet 1``</span>
+</span><span id="line-55"><span class="sd">        Name of the first sheet in a new document</span>
+</span><span id="line-56"><span class="sd">    table_name: *str*, *optional*, *default*: ``Table 1``</span>
+</span><span id="line-57"><span class="sd">        Name of the first table in the first sheet of a new</span>
+</span><span id="line-58"><span class="sd">    num_header_rows: int, optional, default: 1</span>
+</span><span id="line-59"><span class="sd">        Number of header rows in the first table of a new document.</span>
+</span><span id="line-60"><span class="sd">    num_header_cols: int, optional, default: 1</span>
+</span><span id="line-61"><span class="sd">        Number of header columns in the first table of a new document.</span>
+</span><span id="line-62"><span class="sd">    num_rows: int, optional, default: 12</span>
+</span><span id="line-63"><span class="sd">        Number of rows in the first table of a new document.</span>
+</span><span id="line-64"><span class="sd">    num_cols: int, optional, default: 8</span>
+</span><span id="line-65"><span class="sd">        Number of columns in the first table of a new document.</span>
+</span><span id="line-66">
+</span><span id="line-67"><span class="sd">    Raises</span>
+</span><span id="line-68"><span class="sd">    ------</span>
+</span><span id="line-69"><span class="sd">    IndexError:</span>
+</span><span id="line-70"><span class="sd">        If the sheet name already exists in the document.</span>
+</span><span id="line-71"><span class="sd">    IndexError:</span>
+</span><span id="line-72"><span class="sd">        If the table name already exists in the first sheet.</span>
+</span><span id="line-73">
+</span><span id="line-74"><span class="sd">    Examples</span>
+</span><span id="line-75"><span class="sd">    --------</span>
+</span><span id="line-76">
+</span><span id="line-77"><span class="sd">    Reading a document and examining the ``Tables`` object:</span>
+</span><span id="line-78">
+</span><span id="line-79"><span class="sd">    .. code-block:: python</span>
+</span><span id="line-80">
+</span><span id="line-81"><span class="sd">        &gt;&gt;&gt; from numbers_parser import Document</span>
+</span><span id="line-82"><span class="sd">        &gt;&gt;&gt; doc = Document(&quot;mydoc.numbers&quot;)</span>
+</span><span id="line-83"><span class="sd">        &gt;&gt;&gt; doc.sheets[0].name</span>
+</span><span id="line-84"><span class="sd">        &#39;Sheet 1&#39;</span>
+</span><span id="line-85"><span class="sd">        &gt;&gt;&gt; table = doc.sheets[0].tables[0]</span>
+</span><span id="line-86"><span class="sd">        &gt;&gt;&gt; table.name</span>
+</span><span id="line-87"><span class="sd">        &#39;Table 1&#39;</span>
+</span><span id="line-88">
+</span><span id="line-89"><span class="sd">    Creating a new document:</span>
+</span><span id="line-90">
+</span><span id="line-91"><span class="sd">    .. code-block:: python</span>
+</span><span id="line-92">
+</span><span id="line-93"><span class="sd">        doc = Document()</span>
+</span><span id="line-94"><span class="sd">        doc.add_sheet(&quot;New Sheet&quot;, &quot;New Table&quot;)</span>
+</span><span id="line-95"><span class="sd">        sheet = doc.sheets[&quot;New Sheet&quot;]</span>
+</span><span id="line-96"><span class="sd">        table = sheet.tables[&quot;New Table&quot;]</span>
+</span><span id="line-97"><span class="sd">        table.write(1, 1, 1000)</span>
+</span><span id="line-98"><span class="sd">        table.write(1, 2, 2000)</span>
+</span><span id="line-99"><span class="sd">        table.write(1, 3, 3000)</span>
+</span><span id="line-100"><span class="sd">        doc.save(&quot;mydoc.numbers&quot;)</span>
+</span><span id="line-101"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-102">
+</span><span id="line-103">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># noqa: PLR0913</span>
+</span><span id="line-104">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-105">        <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-106">        <span class="n">sheet_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Sheet 1&quot;</span><span class="p">,</span>
+</span><span id="line-107">        <span class="n">table_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Table 1&quot;</span><span class="p">,</span>
+</span><span id="line-108">        <span class="n">num_header_rows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="line-109">        <span class="n">num_header_cols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="line-110">        <span class="n">num_rows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_ROW_COUNT</span><span class="p">,</span>
+</span><span id="line-111">        <span class="n">num_cols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_COLUMN_COUNT</span><span class="p">,</span>
+</span><span id="line-112">    <span class="p">):</span>
+</span><span id="line-113">        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">_NumbersModel</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</span><span id="line-114">        <span class="n">refs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">sheet_ids</span><span class="p">()</span>
+</span><span id="line-115">        <span class="bp">self</span><span class="o">.</span><span class="n">_sheets</span> <span class="o">=</span> <span class="n">ItemsList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span> <span class="n">refs</span><span class="p">,</span> <span class="n">Sheet</span><span class="p">)</span>
+</span><span id="line-116">
+</span><span id="line-117">        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-118">            <span class="bp">self</span><span class="o">.</span><span class="n">sheets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">sheet_name</span>
+</span><span id="line-119">            <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="line-120">            <span class="n">table</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">table_name</span>
+</span><span id="line-121">
+</span><span id="line-122">            <span class="c1"># Table starts as 1x1 with no headers</span>
+</span><span id="line-123">            <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="n">num_rows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="line-124">            <span class="n">table</span><span class="o">.</span><span class="n">num_header_rows</span> <span class="o">=</span> <span class="n">num_header_rows</span>
+</span><span id="line-125">            <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="n">num_cols</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="line-126">            <span class="n">table</span><span class="o">.</span><span class="n">num_header_cols</span> <span class="o">=</span> <span class="n">num_header_cols</span>
+</span><span id="line-127">
+</span><span id="line-128">    <span class="nd">@property</span>
+</span><span id="line-129">    <span class="k">def</span> <span class="nf">sheets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Sheet</span><span class="p">]:</span>
+</span><span id="line-130"><span class="w">        </span><span class="sd">&quot;&quot;&quot;List[:class:`Sheet`]: A list of sheets in the document.&quot;&quot;&quot;</span>
+</span><span id="line-131">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sheets</span>
+</span><span id="line-132">
+</span><span id="line-133">    <span class="nd">@property</span>
+</span><span id="line-134">    <span class="k">def</span> <span class="nf">styles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Style</span><span class="p">]:</span>
+</span><span id="line-135"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Dict[str, :class:`Style`]: A dict mapping style names to to the corresponding style.&quot;&quot;&quot;</span>
+</span><span id="line-136">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">styles</span>
+</span><span id="line-137">
+</span><span id="line-138">    <span class="nd">@property</span>
+</span><span id="line-139">    <span class="k">def</span> <span class="nf">custom_formats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CustomFormatting</span><span class="p">]:</span>
+</span><span id="line-140"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-141"><span class="sd">        Dict[str, :class:`CustomFormatting`]: A dict mapping custom format names</span>
+</span><span id="line-142"><span class="sd">        to the corresponding custom format.</span>
+</span><span id="line-143"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-144">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">custom_formats</span>
+</span><span id="line-145">
+<div class="viewcode-block" id="Document.save">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Document.save">[docs]</a>
+</span><span id="line-146">    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-147"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-148"><span class="sd">        Save the document in the specified filename.</span>
+</span><span id="line-149">
+</span><span id="line-150"><span class="sd">        Parameters</span>
+</span><span id="line-151"><span class="sd">        ----------</span>
+</span><span id="line-152"><span class="sd">        filename: str</span>
+</span><span id="line-153"><span class="sd">            The path to save the document to. If the file already exists,</span>
+</span><span id="line-154"><span class="sd">            it will be overwritten.</span>
+</span><span id="line-155"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-156">        <span class="k">for</span> <span class="n">sheet</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheets</span><span class="p">:</span>
+</span><span id="line-157">            <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+</span><span id="line-158">                <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">recalculate_table_data</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+</span><span id="line-159">        <span class="n">write_numbers_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">file_store</span><span class="p">)</span></div>
+
+</span><span id="line-160">
+<div class="viewcode-block" id="Document.add_sheet">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Document.add_sheet">[docs]</a>
+</span><span id="line-161">    <span class="k">def</span> <span class="nf">add_sheet</span><span class="p">(</span>
+</span><span id="line-162">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-163">        <span class="n">sheet_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-164">        <span class="n">table_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Table 1&quot;</span><span class="p">,</span>
+</span><span id="line-165">        <span class="n">num_rows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_ROW_COUNT</span><span class="p">,</span>
+</span><span id="line-166">        <span class="n">num_cols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_COLUMN_COUNT</span><span class="p">,</span>
+</span><span id="line-167">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-168"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-169"><span class="sd">        Add a new sheet to the current document.</span>
+</span><span id="line-170">
+</span><span id="line-171"><span class="sd">        If no sheet name is provided, the next available numbered sheet</span>
+</span><span id="line-172"><span class="sd">        will be generated in the series ``Sheet 1``, ``Sheet 2``, etc.</span>
+</span><span id="line-173">
+</span><span id="line-174"><span class="sd">        Parameters</span>
+</span><span id="line-175"><span class="sd">        ----------</span>
+</span><span id="line-176"><span class="sd">        sheet_name: str, optional</span>
+</span><span id="line-177"><span class="sd">            The name of the sheet to add to the document</span>
+</span><span id="line-178"><span class="sd">        table_name: *str*, *optional*, *default*: ``Table 1``</span>
+</span><span id="line-179"><span class="sd">            The name of the table created in the new sheet</span>
+</span><span id="line-180"><span class="sd">        num_rows: int, optional, default: 12</span>
+</span><span id="line-181"><span class="sd">            The number of columns in the newly created table</span>
+</span><span id="line-182"><span class="sd">        num_cols: int, optional, default: 8</span>
+</span><span id="line-183"><span class="sd">            The number of columns in the newly created table</span>
+</span><span id="line-184">
+</span><span id="line-185"><span class="sd">        Raises:</span>
+</span><span id="line-186"><span class="sd">            IndexError: If the sheet name already exists in the document.</span>
+</span><span id="line-187"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-188">        <span class="k">if</span> <span class="n">sheet_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-189">            <span class="k">if</span> <span class="n">sheet_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sheets</span><span class="p">:</span>
+</span><span id="line-190">                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sheet &#39;</span><span class="si">{</span><span class="n">sheet_name</span><span class="si">}</span><span class="s2">&#39; already exists&quot;</span><span class="p">)</span>
+</span><span id="line-191">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-192">            <span class="n">sheet_num</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span id="line-193">            <span class="k">while</span> <span class="sa">f</span><span class="s2">&quot;sheet </span><span class="si">{</span><span class="n">sheet_num</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sheets</span><span class="p">:</span>
+</span><span id="line-194">                <span class="n">sheet_num</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="line-195">            <span class="n">sheet_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Sheet </span><span class="si">{</span><span class="n">sheet_num</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="line-196">
+</span><span id="line-197">        <span class="n">prev_table_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sheets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">_tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_table_id</span>
+</span><span id="line-198">        <span class="n">new_sheet_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">add_sheet</span><span class="p">(</span><span class="n">sheet_name</span><span class="p">)</span>
+</span><span id="line-199">        <span class="n">new_sheet</span> <span class="o">=</span> <span class="n">Sheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span> <span class="n">new_sheet_id</span><span class="p">)</span>
+</span><span id="line-200">        <span class="n">new_sheet</span><span class="o">.</span><span class="n">_tables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span id="line-201">            <span class="n">Table</span><span class="p">(</span>
+</span><span id="line-202">                <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span>
+</span><span id="line-203">                <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span>
+</span><span id="line-204">                    <span class="n">new_sheet_id</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">prev_table_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">num_rows</span><span class="p">,</span> <span class="n">num_cols</span>
+</span><span id="line-205">                <span class="p">),</span>
+</span><span id="line-206">            <span class="p">)</span>
+</span><span id="line-207">        <span class="p">)</span>
+</span><span id="line-208">        <span class="bp">self</span><span class="o">.</span><span class="n">_sheets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_sheet</span><span class="p">)</span></div>
+
+</span><span id="line-209">
+<div class="viewcode-block" id="Document.add_style">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Document.add_style">[docs]</a>
+</span><span id="line-210">    <span class="k">def</span> <span class="nf">add_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Style</span><span class="p">:</span>
+</span><span id="line-211"><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-212"><span class="sd">        Add a new style to the current document.</span>
+</span><span id="line-213">
+</span><span id="line-214"><span class="sd">        If no style name is provided, the next available numbered style will be generated.</span>
+</span><span id="line-215">
+</span><span id="line-216"><span class="sd">        Parameters</span>
+</span><span id="line-217"><span class="sd">        ----------</span>
+</span><span id="line-218"><span class="sd">        kwargs: dict, optional</span>
+</span><span id="line-219"><span class="sd">            Key-value pairs to pass to the :class:`Style` constructor</span>
+</span><span id="line-220">
+</span><span id="line-221"><span class="sd">        Raises</span>
+</span><span id="line-222"><span class="sd">        ------</span>
+</span><span id="line-223"><span class="sd">        TypeError:</span>
+</span><span id="line-224"><span class="sd">            If ``font_size`` is not a ``float``, ``font_name`` is not a ``str``,</span>
+</span><span id="line-225"><span class="sd">            or if any of the ``bool`` parameters are invalid.</span>
+</span><span id="line-226">
+</span><span id="line-227"><span class="sd">        Example</span>
+</span><span id="line-228"><span class="sd">        -------</span>
+</span><span id="line-229">
+</span><span id="line-230"><span class="sd">        .. code-block:: python</span>
+</span><span id="line-231">
+</span><span id="line-232"><span class="sd">            red_text = doc.add_style(</span>
+</span><span id="line-233"><span class="sd">                name=&quot;Red Text&quot;,</span>
+</span><span id="line-234"><span class="sd">                font_name=&quot;Lucida Grande&quot;,</span>
+</span><span id="line-235"><span class="sd">                font_color=RGB(230, 25, 25),</span>
+</span><span id="line-236"><span class="sd">                font_size=14.0,</span>
+</span><span id="line-237"><span class="sd">                bold=True,</span>
+</span><span id="line-238"><span class="sd">                italic=True,</span>
+</span><span id="line-239"><span class="sd">                alignment=Alignment(&quot;right&quot;, &quot;top&quot;),</span>
+</span><span id="line-240"><span class="sd">            )</span>
+</span><span id="line-241"><span class="sd">            table.write(&quot;B2&quot;, &quot;Red&quot;, style=red_text)</span>
+</span><span id="line-242"><span class="sd">            table.set_cell_style(&quot;C2&quot;, red_text)</span>
+</span><span id="line-243"><span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+</span><span id="line-244">        <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">styles</span><span class="p">:</span>
+</span><span id="line-245">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;style &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; already exists&quot;</span><span class="p">)</span>
+</span><span id="line-246">        <span class="n">style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-247">        <span class="k">if</span> <span class="n">style</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-248">            <span class="n">style</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">custom_style_name</span><span class="p">()</span>
+</span><span id="line-249">        <span class="n">style</span><span class="o">.</span><span class="n">_update_styles</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="line-250">        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">styles</span><span class="p">[</span><span class="n">style</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">style</span>
+</span><span id="line-251">        <span class="k">return</span> <span class="n">style</span></div>
+
+</span><span id="line-252">
+<div class="viewcode-block" id="Document.add_custom_format">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Document.add_custom_format">[docs]</a>
+</span><span id="line-253">    <span class="k">def</span> <span class="nf">add_custom_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CustomFormatting</span><span class="p">:</span>
+</span><span id="line-254"><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-255"><span class="sd">        Add a new custom format to the current document.</span>
+</span><span id="line-256">
+</span><span id="line-257"><span class="sd">        All custom formatting styles share a name and a type, described in the **Common**</span>
+</span><span id="line-258"><span class="sd">        parameters in the following table. Additional key-value pairs configure the format</span>
+</span><span id="line-259"><span class="sd">        depending upon the value of ``kwargs[&quot;type&quot;]``. Supported values for</span>
+</span><span id="line-260"><span class="sd">        ``kwargs[&quot;type&quot;]`` are:</span>
+</span><span id="line-261">
+</span><span id="line-262"><span class="sd">            * ``&quot;datetime&quot;``: A date and time value with custom formatting.</span>
+</span><span id="line-263"><span class="sd">            * ``&quot;number&quot;``: A decimal number.</span>
+</span><span id="line-264"><span class="sd">            * ``&quot;text&quot;``: A simple text string.</span>
+</span><span id="line-265">
+</span><span id="line-266"><span class="sd">        :Common Keys:</span>
+</span><span id="line-267"><span class="sd">            * **name** (``str``) – The name of the custom format. If no name is provided,</span>
+</span><span id="line-268"><span class="sd">              one is generated using the scheme ``Custom Format``, ``Custom Format 1``, ``Custom Format 2``, etc.</span>
+</span><span id="line-269"><span class="sd">            * **type** (``str``, *optional*, default: ``number``) – The type of format to</span>
+</span><span id="line-270"><span class="sd">              create Supported formats are ``number``, ``datetime`` and ``text``.</span>
+</span><span id="line-271">
+</span><span id="line-272"><span class="sd">        :``&quot;number&quot;``:</span>
+</span><span id="line-273"><span class="sd">            * **integer_format** (``PaddingType``, *optional*, default: ``PaddingType.NONE``) – How</span>
+</span><span id="line-274"><span class="sd">              to pad integers.</span>
+</span><span id="line-275"><span class="sd">            * **decimal_format** (``PaddingType``, *optional*, default: ``PaddingType.NONE``) – How</span>
+</span><span id="line-276"><span class="sd">              to pad decimals.</span>
+</span><span id="line-277"><span class="sd">            * **num_integers** (``int``, *optional*, default: ``0``) – Integer precision</span>
+</span><span id="line-278"><span class="sd">              when integers are padded.</span>
+</span><span id="line-279"><span class="sd">            * **num_decimals** (``int``, *optional*, default: ``0``) – Integer precision</span>
+</span><span id="line-280"><span class="sd">              when decimals are padded.</span>
+</span><span id="line-281"><span class="sd">            * **show_thousands_separator** (``bool``, *optional*, default: ``False``) – ``True``</span>
+</span><span id="line-282"><span class="sd">              if the number should include a thousands seperator.</span>
+</span><span id="line-283">
+</span><span id="line-284"><span class="sd">        :``&quot;datetime&quot;``:</span>
+</span><span id="line-285"><span class="sd">            * **format** (``str``, *optional*, default: ``&quot;d MMM y&quot;``) – A POSIX strftime-like</span>
+</span><span id="line-286"><span class="sd">              formatting string of `Numbers date/time directives &lt;#datetime-formats&gt;`_.</span>
+</span><span id="line-287">
+</span><span id="line-288"><span class="sd">        :``&quot;text&quot;``:</span>
+</span><span id="line-289"><span class="sd">            * **format** (``str``, *optional*, default: ``&quot;%s&quot;``) – Text format.</span>
+</span><span id="line-290"><span class="sd">              The cell value is inserted in place of %s. Only one substitution is allowed by</span>
+</span><span id="line-291"><span class="sd">              Numbers, and multiple %s formatting references raise a TypeError exception</span>
+</span><span id="line-292">
+</span><span id="line-293"><span class="sd">        Example</span>
+</span><span id="line-294"><span class="sd">        -------</span>
+</span><span id="line-295">
+</span><span id="line-296"><span class="sd">        .. code-block:: python</span>
+</span><span id="line-297">
+</span><span id="line-298"><span class="sd">            long_date = doc.add_custom_format(</span>
+</span><span id="line-299"><span class="sd">                name=&quot;Long Date&quot;,</span>
+</span><span id="line-300"><span class="sd">                type=&quot;date&quot;,</span>
+</span><span id="line-301"><span class="sd">                date_time_format=&quot;EEEE, d MMMM yyyy&quot;)</span>
+</span><span id="line-302"><span class="sd">            table.set_cell_formatting(&quot;C1&quot;, &quot;custom&quot;, format=long_date)</span>
+</span><span id="line-303"><span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+</span><span id="line-304">        <span class="k">if</span> <span class="p">(</span>
+</span><span id="line-305">            <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span>
+</span><span id="line-306">            <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span id="line-307">            <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">custom_formats</span>
+</span><span id="line-308">        <span class="p">):</span>
+</span><span id="line-309">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;format &#39;</span><span class="si">{</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; already exists&quot;</span><span class="p">)</span>
+</span><span id="line-310">
+</span><span id="line-311">        <span class="k">if</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+</span><span id="line-312">            <span class="n">format_type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+</span><span id="line-313">            <span class="k">try</span><span class="p">:</span>
+</span><span id="line-314">                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CustomFormattingType</span><span class="p">[</span><span class="n">format_type</span><span class="p">]</span>
+</span><span id="line-315">            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+</span><span id="line-316">                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unsuported cell format type &#39;</span><span class="si">{</span><span class="n">format_type</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
+</span><span id="line-317">
+</span><span id="line-318">        <span class="n">custom_format</span> <span class="o">=</span> <span class="n">CustomFormatting</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-319">        <span class="k">if</span> <span class="n">custom_format</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-320">            <span class="n">custom_format</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">custom_format_name</span><span class="p">()</span>
+</span><span id="line-321">        <span class="k">if</span> <span class="n">custom_format</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">CustomFormattingType</span><span class="o">.</span><span class="n">NUMBER</span><span class="p">:</span>
+</span><span id="line-322">            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">add_custom_decimal_format_archive</span><span class="p">(</span><span class="n">custom_format</span><span class="p">)</span>
+</span><span id="line-323">        <span class="k">elif</span> <span class="n">custom_format</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">CustomFormattingType</span><span class="o">.</span><span class="n">TEXT</span><span class="p">:</span>
+</span><span id="line-324">            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">add_custom_text_format_archive</span><span class="p">(</span><span class="n">custom_format</span><span class="p">)</span>
+</span><span id="line-325">        <span class="k">return</span> <span class="n">custom_format</span></div>
+</div>
+
+</span><span id="line-326">
+</span><span id="line-327">
+<div class="viewcode-block" id="Sheet">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Sheet">[docs]</a>
+</span><span id="line-328"><span class="k">class</span> <span class="nc">Sheet</span><span class="p">:</span>
+</span><span id="line-329"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-330"><span class="sd">    .. NOTE::</span>
+</span><span id="line-331"><span class="sd">       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.</span>
+</span><span id="line-332"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-333">
+</span><span id="line-334">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">sheet_id</span><span class="p">):</span>
+</span><span id="line-335">        <span class="bp">self</span><span class="o">.</span><span class="n">_sheet_id</span> <span class="o">=</span> <span class="n">sheet_id</span>
+</span><span id="line-336">        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
+</span><span id="line-337">        <span class="n">refs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">table_ids</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet_id</span><span class="p">)</span>
+</span><span id="line-338">        <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span> <span class="o">=</span> <span class="n">ItemsList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span> <span class="n">refs</span><span class="p">,</span> <span class="n">Table</span><span class="p">)</span>
+</span><span id="line-339">
+</span><span id="line-340">    <span class="nd">@property</span>
+</span><span id="line-341">    <span class="k">def</span> <span class="nf">tables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Table</span><span class="p">]:</span>
+</span><span id="line-342"><span class="w">        </span><span class="sd">&quot;&quot;&quot;List[:class:`Table`]: A list of tables in the sheet.&quot;&quot;&quot;</span>
+</span><span id="line-343">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span>
+</span><span id="line-344">
+</span><span id="line-345">    <span class="nd">@property</span>
+</span><span id="line-346">    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-347"><span class="w">        </span><span class="sd">&quot;&quot;&quot;str: The name of the sheet.&quot;&quot;&quot;</span>
+</span><span id="line-348">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">sheet_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet_id</span><span class="p">)</span>
+</span><span id="line-349">
+</span><span id="line-350">    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+</span><span id="line-351">    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-352">        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">sheet_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sheet_id</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</span><span id="line-353">
+<div class="viewcode-block" id="Sheet.add_table">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Sheet.add_table">[docs]</a>
+</span><span id="line-354">    <span class="k">def</span> <span class="nf">add_table</span><span class="p">(</span>  <span class="c1"># noqa: PLR0913</span>
+</span><span id="line-355">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-356">        <span class="n">table_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-357">        <span class="n">x</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-358">        <span class="n">y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-359">        <span class="n">num_rows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_ROW_COUNT</span><span class="p">,</span>
+</span><span id="line-360">        <span class="n">num_cols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_COLUMN_COUNT</span><span class="p">,</span>
+</span><span id="line-361">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Table</span><span class="p">:</span>
+</span><span id="line-362"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new table to the current sheet.</span>
+</span><span id="line-363">
+</span><span id="line-364"><span class="sd">        If no table name is provided, the next available numbered table</span>
+</span><span id="line-365"><span class="sd">        will be generated in the series ``Table 1``, ``Table 2``, etc.</span>
+</span><span id="line-366">
+</span><span id="line-367"><span class="sd">        By default, new tables are positioned at a fixed offset below the last</span>
+</span><span id="line-368"><span class="sd">        table vertically in a sheet and on the left side of the sheet. Large</span>
+</span><span id="line-369"><span class="sd">        table headers and captions may result in new tables overlapping existing</span>
+</span><span id="line-370"><span class="sd">        ones. The ``add_table`` method takes optional coordinates for</span>
+</span><span id="line-371"><span class="sd">        positioning a table. A table&#39;s height and coordinates can also be</span>
+</span><span id="line-372"><span class="sd">        queried to help aligning new tables:</span>
+</span><span id="line-373">
+</span><span id="line-374"><span class="sd">        .. code:: python</span>
+</span><span id="line-375">
+</span><span id="line-376"><span class="sd">            (x, y) = sheet.table[0].coordinates</span>
+</span><span id="line-377"><span class="sd">            y += sheet.table[0].height + 200.0</span>
+</span><span id="line-378"><span class="sd">            new_table = sheet.add_table(&quot;Offset Table&quot;, x, y)</span>
+</span><span id="line-379">
+</span><span id="line-380"><span class="sd">        Parameters</span>
+</span><span id="line-381"><span class="sd">        ----------</span>
+</span><span id="line-382"><span class="sd">        table_name: str, optional</span>
+</span><span id="line-383"><span class="sd">            The name of the new table.</span>
+</span><span id="line-384"><span class="sd">        x: float, optional</span>
+</span><span id="line-385"><span class="sd">            The x offset for the table in points.</span>
+</span><span id="line-386"><span class="sd">        y: float, optional</span>
+</span><span id="line-387"><span class="sd">            The y offset for the table in points.</span>
+</span><span id="line-388"><span class="sd">        num_rows: int, optional, default: 12</span>
+</span><span id="line-389"><span class="sd">            The number of rows for the new table.</span>
+</span><span id="line-390"><span class="sd">        num_cols: int, optional, default: 10</span>
+</span><span id="line-391"><span class="sd">            The number of columns for the new table.</span>
+</span><span id="line-392">
+</span><span id="line-393"><span class="sd">        Returns</span>
+</span><span id="line-394"><span class="sd">        -------</span>
+</span><span id="line-395"><span class="sd">        Table</span>
+</span><span id="line-396"><span class="sd">            The newly created table.</span>
+</span><span id="line-397">
+</span><span id="line-398"><span class="sd">        Raises</span>
+</span><span id="line-399"><span class="sd">        ------</span>
+</span><span id="line-400"><span class="sd">            IndexError: If the table name already exists.</span>
+</span><span id="line-401"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-402">        <span class="n">from_table_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">_table_id</span>
+</span><span id="line-403">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_table</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">from_table_id</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_rows</span><span class="p">,</span> <span class="n">num_cols</span><span class="p">)</span></div>
+
+</span><span id="line-404">
+</span><span id="line-405">    <span class="k">def</span> <span class="nf">_add_table</span><span class="p">(</span>  <span class="c1"># noqa: PLR0913</span>
+</span><span id="line-406">        <span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">from_table_id</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_rows</span><span class="p">,</span> <span class="n">num_cols</span>
+</span><span id="line-407">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>  <span class="c1"># noqa: PLR0913</span>
+</span><span id="line-408">        <span class="k">if</span> <span class="n">table_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-409">            <span class="k">if</span> <span class="n">table_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span><span class="p">:</span>
+</span><span id="line-410">                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;table &#39;</span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span><span class="s2">&#39; already exists&quot;</span><span class="p">)</span>
+</span><span id="line-411">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-412">            <span class="n">table_num</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span id="line-413">            <span class="k">while</span> <span class="sa">f</span><span class="s2">&quot;table </span><span class="si">{</span><span class="n">table_num</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span><span class="p">:</span>
+</span><span id="line-414">                <span class="n">table_num</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="line-415">            <span class="n">table_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Table </span><span class="si">{</span><span class="n">table_num</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="line-416">
+</span><span id="line-417">        <span class="n">new_table_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span>
+</span><span id="line-418">            <span class="bp">self</span><span class="o">.</span><span class="n">_sheet_id</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">from_table_id</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num_rows</span><span class="p">,</span> <span class="n">num_cols</span>
+</span><span id="line-419">        <span class="p">)</span>
+</span><span id="line-420">        <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span> <span class="n">new_table_id</span><span class="p">))</span>
+</span><span id="line-421">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+</span><span id="line-422">
+</span><span id="line-423">
+<div class="viewcode-block" id="Table">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Table">[docs]</a>
+</span><span id="line-424"><span class="k">class</span> <span class="nc">Table</span><span class="p">(</span><span class="n">Cacheable</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
+</span><span id="line-425"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-426"><span class="sd">    .. NOTE::</span>
+</span><span id="line-427"><span class="sd">       Do not instantiate directly. Tables are created by :py:class:`~numbers_parser.Document`.</span>
+</span><span id="line-428"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="line-429">
+</span><span id="line-430">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">table_id</span><span class="p">):</span>
+</span><span id="line-431">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+</span><span id="line-432">        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
+</span><span id="line-433">        <span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span> <span class="o">=</span> <span class="n">table_id</span>
+</span><span id="line-434">        <span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">number_of_rows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-435">        <span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">number_of_columns</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-436">        <span class="c1"># Cache all data now to facilite write(). Performance impact</span>
+</span><span id="line-437">        <span class="c1"># of computing all cells is minimal compared to file IO</span>
+</span><span id="line-438">        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-439">        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">set_table_data</span><span class="p">(</span><span class="n">table_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+</span><span id="line-440">        <span class="n">merge_cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">merge_cells</span><span class="p">(</span><span class="n">table_id</span><span class="p">)</span>
+</span><span id="line-441">
+</span><span id="line-442">        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span><span class="p">):</span>
+</span><span id="line-443">            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+</span><span id="line-444">            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span><span class="p">):</span>
+</span><span id="line-445">                <span class="n">cell_storage</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">table_cell_decode</span><span class="p">(</span><span class="n">table_id</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+</span><span id="line-446">                <span class="k">if</span> <span class="n">cell_storage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-447">                    <span class="k">if</span> <span class="n">merge_cells</span><span class="o">.</span><span class="n">is_merge_reference</span><span class="p">((</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)):</span>
+</span><span id="line-448">                        <span class="n">cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="o">.</span><span class="n">merged_cell</span><span class="p">(</span><span class="n">table_id</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</span><span id="line-449">                    <span class="k">else</span><span class="p">:</span>
+</span><span id="line-450">                        <span class="n">cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="o">.</span><span class="n">empty_cell</span><span class="p">(</span><span class="n">table_id</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</span><span id="line-451">                <span class="k">else</span><span class="p">:</span>
+</span><span id="line-452">                    <span class="n">cell</span> <span class="o">=</span> <span class="n">Cell</span><span class="o">.</span><span class="n">from_storage</span><span class="p">(</span><span class="n">cell_storage</span><span class="p">)</span>
+</span><span id="line-453">                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+</span><span id="line-454">
+</span><span id="line-455">    <span class="nd">@property</span>
+</span><span id="line-456">    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-457"><span class="w">        </span><span class="sd">&quot;&quot;&quot;str: The table&#39;s name.&quot;&quot;&quot;</span>
+</span><span id="line-458">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">table_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-459">
+</span><span id="line-460">    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+</span><span id="line-461">    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-462">        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">table_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</span><span id="line-463">
+</span><span id="line-464">    <span class="nd">@property</span>
+</span><span id="line-465">    <span class="k">def</span> <span class="nf">table_name_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="line-466"><span class="w">        </span><span class="sd">&quot;&quot;&quot;bool: ``True`` if the table name is visible, ``False`` otherwise.&quot;&quot;&quot;</span>
+</span><span id="line-467">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">table_name_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-468">
+</span><span id="line-469">    <span class="nd">@table_name_enabled</span><span class="o">.</span><span class="n">setter</span>
+</span><span id="line-470">    <span class="k">def</span> <span class="nf">table_name_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+</span><span id="line-471">        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">table_name_enabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">enabled</span><span class="p">)</span>
+</span><span id="line-472">
+</span><span id="line-473">    <span class="nd">@property</span>
+</span><span id="line-474">    <span class="k">def</span> <span class="nf">num_header_rows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-475"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-476"><span class="sd">        int: The number of header rows.</span>
+</span><span id="line-477">
+</span><span id="line-478"><span class="sd">        Raises</span>
+</span><span id="line-479"><span class="sd">        ------</span>
+</span><span id="line-480"><span class="sd">        ValueError:</span>
+</span><span id="line-481"><span class="sd">            If the number of headers is negative, exceeds the number of rows in the</span>
+</span><span id="line-482"><span class="sd">            table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).</span>
+</span><span id="line-483"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-484">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">num_header_rows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-485">
+</span><span id="line-486">    <span class="nd">@num_header_rows</span><span class="o">.</span><span class="n">setter</span>
+</span><span id="line-487">    <span class="k">def</span> <span class="nf">num_header_rows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_headers</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span><span id="line-488">        <span class="k">if</span> <span class="n">num_headers</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-489">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of headers cannot be negative&quot;</span><span class="p">)</span>
+</span><span id="line-490">        <span class="k">elif</span> <span class="n">num_headers</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span><span class="p">:</span>
+</span><span id="line-491">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of headers cannot exceed the number of rows&quot;</span><span class="p">)</span>
+</span><span id="line-492">        <span class="k">elif</span> <span class="n">num_headers</span> <span class="o">&gt;</span> <span class="n">MAX_HEADER_COUNT</span><span class="p">:</span>
+</span><span id="line-493">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of headers cannot exceed </span><span class="si">{</span><span class="n">MAX_HEADER_COUNT</span><span class="si">}</span><span class="s2"> rows&quot;</span><span class="p">)</span>
+</span><span id="line-494">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">num_header_rows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">num_headers</span><span class="p">)</span>
+</span><span id="line-495">
+</span><span id="line-496">    <span class="nd">@property</span>
+</span><span id="line-497">    <span class="k">def</span> <span class="nf">num_header_cols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-498"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-499"><span class="sd">        int: The number of header columns.</span>
+</span><span id="line-500">
+</span><span id="line-501"><span class="sd">        Raises</span>
+</span><span id="line-502"><span class="sd">        ------</span>
+</span><span id="line-503"><span class="sd">        ValueError:</span>
+</span><span id="line-504"><span class="sd">            If the number of headers is negative, exceeds the number of rows in the</span>
+</span><span id="line-505"><span class="sd">            table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).</span>
+</span><span id="line-506"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-507">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">num_header_cols</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-508">
+</span><span id="line-509">    <span class="nd">@num_header_cols</span><span class="o">.</span><span class="n">setter</span>
+</span><span id="line-510">    <span class="k">def</span> <span class="nf">num_header_cols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_headers</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+</span><span id="line-511">        <span class="k">if</span> <span class="n">num_headers</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-512">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of headers cannot be negative&quot;</span><span class="p">)</span>
+</span><span id="line-513">        <span class="k">elif</span> <span class="n">num_headers</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span><span class="p">:</span>
+</span><span id="line-514">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of headers cannot exceed the number of columns&quot;</span><span class="p">)</span>
+</span><span id="line-515">        <span class="k">elif</span> <span class="n">num_headers</span> <span class="o">&gt;</span> <span class="n">MAX_HEADER_COUNT</span><span class="p">:</span>
+</span><span id="line-516">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of headers cannot exceed </span><span class="si">{</span><span class="n">MAX_HEADER_COUNT</span><span class="si">}</span><span class="s2"> columns&quot;</span><span class="p">)</span>
+</span><span id="line-517">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">num_header_cols</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">num_headers</span><span class="p">)</span>
+</span><span id="line-518">
+</span><span id="line-519">    <span class="nd">@property</span>
+</span><span id="line-520">    <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-521"><span class="w">        </span><span class="sd">&quot;&quot;&quot;int: The table&#39;s height in points.&quot;&quot;&quot;</span>
+</span><span id="line-522">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">table_height</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-523">
+</span><span id="line-524">    <span class="nd">@property</span>
+</span><span id="line-525">    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-526"><span class="w">        </span><span class="sd">&quot;&quot;&quot;int: The table&#39;s width in points.&quot;&quot;&quot;</span>
+</span><span id="line-527">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">table_width</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-528">
+<div class="viewcode-block" id="Table.row_height">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Table.row_height">[docs]</a>
+</span><span id="line-529">    <span class="k">def</span> <span class="nf">row_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-530"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-531"><span class="sd">        The height of a table row in points.</span>
+</span><span id="line-532">
+</span><span id="line-533"><span class="sd">        Parameters</span>
+</span><span id="line-534"><span class="sd">        ----------</span>
+</span><span id="line-535"><span class="sd">        row: int</span>
+</span><span id="line-536"><span class="sd">            The row number (zero indexed).</span>
+</span><span id="line-537"><span class="sd">        height: int</span>
+</span><span id="line-538"><span class="sd">            The height of the row in points. If not ``None``, set the row height.</span>
+</span><span id="line-539">
+</span><span id="line-540"><span class="sd">        Returns</span>
+</span><span id="line-541"><span class="sd">        -------</span>
+</span><span id="line-542"><span class="sd">        int:</span>
+</span><span id="line-543"><span class="sd">            The height of the table row.</span>
+</span><span id="line-544"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-545">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">row_height</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span></div>
+
+</span><span id="line-546">
+<div class="viewcode-block" id="Table.col_width">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Table.col_width">[docs]</a>
+</span><span id="line-547">    <span class="k">def</span> <span class="nf">col_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-548"><span class="w">        </span><span class="sd">&quot;&quot;&quot;The width of a table column in points.</span>
+</span><span id="line-549">
+</span><span id="line-550"><span class="sd">        Parameters</span>
+</span><span id="line-551"><span class="sd">        ----------</span>
+</span><span id="line-552"><span class="sd">        col: int</span>
+</span><span id="line-553"><span class="sd">            The column number (zero indexed).</span>
+</span><span id="line-554"><span class="sd">        width: int</span>
+</span><span id="line-555"><span class="sd">            The width of the column in points. If not ``None``, set the column width.</span>
+</span><span id="line-556">
+</span><span id="line-557"><span class="sd">        Returns</span>
+</span><span id="line-558"><span class="sd">        -------</span>
+</span><span id="line-559"><span class="sd">        int:</span>
+</span><span id="line-560"><span class="sd">            The width of the table column.</span>
+</span><span id="line-561"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-562">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">col_width</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span></div>
+
+</span><span id="line-563">
+</span><span id="line-564">    <span class="nd">@property</span>
+</span><span id="line-565">    <span class="k">def</span> <span class="nf">coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+</span><span id="line-566"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Tuple[float]: The table&#39;s x, y offsets in points.&quot;&quot;&quot;</span>
+</span><span id="line-567">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">table_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-568">
+<div class="viewcode-block" id="Table.rows">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Table.rows">[docs]</a>
+</span><span id="line-569">    <span class="k">def</span> <span class="nf">rows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Cell</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+</span><span id="line-570"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return all rows of cells for the Table.</span>
+</span><span id="line-571">
+</span><span id="line-572"><span class="sd">        Parameters</span>
+</span><span id="line-573"><span class="sd">        ----------</span>
+</span><span id="line-574"><span class="sd">        values_only:</span>
+</span><span id="line-575"><span class="sd">            If ``True``, return cell values instead of :class:`Cell` objects</span>
+</span><span id="line-576">
+</span><span id="line-577"><span class="sd">        Returns</span>
+</span><span id="line-578"><span class="sd">        -------</span>
+</span><span id="line-579"><span class="sd">        List[List[Cell]] | List[List[str]]:</span>
+</span><span id="line-580"><span class="sd">            List of rows; each row is a list of :class:`Cell` objects, or string values.</span>
+</span><span id="line-581"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-582">        <span class="k">if</span> <span class="n">values_only</span><span class="p">:</span>
+</span><span id="line-583">            <span class="k">return</span> <span class="p">[[</span><span class="n">cell</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">]</span>
+</span><span id="line-584">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-585">            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div>
+
+</span><span id="line-586">
+</span><span id="line-587">    <span class="nd">@property</span>
+</span><span id="line-588">    <span class="nd">@cache</span><span class="p">(</span><span class="n">num_args</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="line-589">    <span class="k">def</span> <span class="nf">merge_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+</span><span id="line-590">        <span class="n">merge_cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">merge_cells</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span><span class="o">.</span><span class="n">merge_cell_names</span><span class="p">()</span>
+</span><span id="line-591">        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">merge_cells</span><span class="p">)))</span>
+</span><span id="line-592">
+<div class="viewcode-block" id="Table.cell">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Table.cell">[docs]</a>
+</span><span id="line-593">    <span class="k">def</span> <span class="nf">cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Cell</span><span class="p">,</span> <span class="n">MergedCell</span><span class="p">]:</span>
+</span><span id="line-594"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-595"><span class="sd">        Return a single cell in the table.</span>
+</span><span id="line-596">
+</span><span id="line-597"><span class="sd">        The ``cell()`` method supports two forms of notation to designate the position</span>
+</span><span id="line-598"><span class="sd">        of cells: **Row-column** notation and **A1** notation:</span>
+</span><span id="line-599">
+</span><span id="line-600"><span class="sd">        .. code-block:: python</span>
+</span><span id="line-601">
+</span><span id="line-602"><span class="sd">            (0, 0)      # Row-column notation.</span>
+</span><span id="line-603"><span class="sd">            (&quot;A1&quot;)      # The same cell in A1 notation.</span>
+</span><span id="line-604">
+</span><span id="line-605"><span class="sd">        Parameters</span>
+</span><span id="line-606"><span class="sd">        ----------</span>
+</span><span id="line-607"><span class="sd">        param1: int</span>
+</span><span id="line-608"><span class="sd">            The row number (zero indexed).</span>
+</span><span id="line-609"><span class="sd">        param2: int</span>
+</span><span id="line-610"><span class="sd">            The column number (zero indexed).</span>
+</span><span id="line-611">
+</span><span id="line-612"><span class="sd">        Returns</span>
+</span><span id="line-613"><span class="sd">        -------</span>
+</span><span id="line-614"><span class="sd">        Cell | MergedCell:</span>
+</span><span id="line-615"><span class="sd">            A cell with the base class :class:`Cell` or, if merged, a :class:`MergedCell`.</span>
+</span><span id="line-616">
+</span><span id="line-617"><span class="sd">        Example</span>
+</span><span id="line-618"><span class="sd">        -------</span>
+</span><span id="line-619">
+</span><span id="line-620"><span class="sd">        .. code-block:: python</span>
+</span><span id="line-621">
+</span><span id="line-622"><span class="sd">            &gt;&gt;&gt; doc = Document(&quot;mydoc.numbers&quot;)</span>
+</span><span id="line-623"><span class="sd">            &gt;&gt;&gt; sheets = doc.sheets</span>
+</span><span id="line-624"><span class="sd">            &gt;&gt;&gt; tables = sheets[&quot;Sheet 1&quot;].tables</span>
+</span><span id="line-625"><span class="sd">            &gt;&gt;&gt; table = tables[&quot;Table 1&quot;]</span>
+</span><span id="line-626"><span class="sd">            &gt;&gt;&gt; table.cell(1,0)</span>
+</span><span id="line-627"><span class="sd">            &lt;numbers_parser.cell.TextCell object at 0x105a80a10&gt;</span>
+</span><span id="line-628"><span class="sd">            &gt;&gt;&gt; table.cell(1,0).value</span>
+</span><span id="line-629"><span class="sd">            &#39;Debit&#39;</span>
+</span><span id="line-630"><span class="sd">            &gt;&gt;&gt; table.cell(&quot;B2&quot;)</span>
+</span><span id="line-631"><span class="sd">            &lt;numbers_parser.cell.TextCell object at 0x105a80b90&gt;</span>
+</span><span id="line-632"><span class="sd">            &gt;&gt;&gt; table.cell(&quot;B2&quot;).value</span>
+</span><span id="line-633"><span class="sd">            1234.50</span>
+</span><span id="line-634"><span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+</span><span id="line-635">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-636">            <span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="o">=</span> <span class="n">xl_cell_to_rowcol</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span id="line-637">        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+</span><span id="line-638">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;invalid cell reference &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
+</span><span id="line-639">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-640">            <span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="o">=</span> <span class="n">args</span>
+</span><span id="line-641">
+</span><span id="line-642">        <span class="k">if</span> <span class="n">row</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span> <span class="ow">or</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-643">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;row </span><span class="si">{</span><span class="n">row</span><span class="si">}</span><span class="s2"> out of range&quot;</span><span class="p">)</span>
+</span><span id="line-644">        <span class="k">if</span> <span class="n">col</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span> <span class="ow">or</span> <span class="n">col</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-645">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;column </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> out of range&quot;</span><span class="p">)</span>
+</span><span id="line-646">
+</span><span id="line-647">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span></div>
+
+</span><span id="line-648">
+<div class="viewcode-block" id="Table.iter_rows">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Table.iter_rows">[docs]</a>
+</span><span id="line-649">    <span class="k">def</span> <span class="nf">iter_rows</span><span class="p">(</span>  <span class="c1"># noqa: PLR0913</span>
+</span><span id="line-650">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-651">        <span class="n">min_row</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-652">        <span class="n">max_row</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-653">        <span class="n">min_col</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-654">        <span class="n">max_col</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-655">        <span class="n">values_only</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="line-656">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Cell</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+</span><span id="line-657"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Produces cells from a table, by row.</span>
+</span><span id="line-658">
+</span><span id="line-659"><span class="sd">        Specify the iteration range using the indexes of the rows and columns.</span>
+</span><span id="line-660">
+</span><span id="line-661"><span class="sd">        Parameters</span>
+</span><span id="line-662"><span class="sd">        ----------</span>
+</span><span id="line-663"><span class="sd">        min_row: int, optional</span>
+</span><span id="line-664"><span class="sd">            Starting row number (zero indexed), or ``0`` if ``None``.</span>
+</span><span id="line-665"><span class="sd">        max_row: int, optional</span>
+</span><span id="line-666"><span class="sd">            End row number (zero indexed), or all rows if ``None``.</span>
+</span><span id="line-667"><span class="sd">        min_col: int, optional</span>
+</span><span id="line-668"><span class="sd">            Starting column number (zero indexed) or ``0`` if ``None``.</span>
+</span><span id="line-669"><span class="sd">        max_col: int, optional</span>
+</span><span id="line-670"><span class="sd">            End column number (zero indexed), or all columns if ``None``.</span>
+</span><span id="line-671"><span class="sd">        values_only: bool, optional</span>
+</span><span id="line-672"><span class="sd">            If ``True``, yield cell values rather than :class:`Cell` objects</span>
+</span><span id="line-673">
+</span><span id="line-674"><span class="sd">        Yields</span>
+</span><span id="line-675"><span class="sd">        ------</span>
+</span><span id="line-676"><span class="sd">        Tuple[Cell] | Tuple[str]:</span>
+</span><span id="line-677"><span class="sd">            :class:`Cell` objects or string values for the row</span>
+</span><span id="line-678">
+</span><span id="line-679"><span class="sd">        Raises</span>
+</span><span id="line-680"><span class="sd">        ------</span>
+</span><span id="line-681"><span class="sd">        IndexError:</span>
+</span><span id="line-682"><span class="sd">            If row or column values are out of range for the table</span>
+</span><span id="line-683">
+</span><span id="line-684"><span class="sd">        Example</span>
+</span><span id="line-685"><span class="sd">        =======</span>
+</span><span id="line-686">
+</span><span id="line-687"><span class="sd">        .. code:: python</span>
+</span><span id="line-688">
+</span><span id="line-689"><span class="sd">            for row in table.iter_rows(min_row=2, max_row=7, values_only=True):</span>
+</span><span id="line-690"><span class="sd">                sum += row</span>
+</span><span id="line-691"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-692">        <span class="n">min_row</span> <span class="o">=</span> <span class="n">min_row</span> <span class="ow">or</span> <span class="mi">0</span>
+</span><span id="line-693">        <span class="n">max_row</span> <span class="o">=</span> <span class="n">max_row</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span> <span class="o">-</span> <span class="mi">1</span>
+</span><span id="line-694">        <span class="n">min_col</span> <span class="o">=</span> <span class="n">min_col</span> <span class="ow">or</span> <span class="mi">0</span>
+</span><span id="line-695">        <span class="n">max_col</span> <span class="o">=</span> <span class="n">max_col</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span> <span class="o">-</span> <span class="mi">1</span>
+</span><span id="line-696">
+</span><span id="line-697">        <span class="k">if</span> <span class="n">min_row</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-698">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;row </span><span class="si">{</span><span class="n">min_row</span><span class="si">}</span><span class="s2"> out of range&quot;</span><span class="p">)</span>
+</span><span id="line-699">        <span class="k">if</span> <span class="n">max_row</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span><span class="p">:</span>
+</span><span id="line-700">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;row </span><span class="si">{</span><span class="n">max_row</span><span class="si">}</span><span class="s2"> out of range&quot;</span><span class="p">)</span>
+</span><span id="line-701">        <span class="k">if</span> <span class="n">min_col</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-702">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;column </span><span class="si">{</span><span class="n">min_col</span><span class="si">}</span><span class="s2"> out of range&quot;</span><span class="p">)</span>
+</span><span id="line-703">        <span class="k">if</span> <span class="n">max_col</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span><span class="p">:</span>
+</span><span id="line-704">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;column </span><span class="si">{</span><span class="n">max_col</span><span class="si">}</span><span class="s2"> out of range&quot;</span><span class="p">)</span>
+</span><span id="line-705">
+</span><span id="line-706">        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">()</span>
+</span><span id="line-707">        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">min_row</span><span class="p">,</span> <span class="n">max_row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+</span><span id="line-708">            <span class="k">if</span> <span class="n">values_only</span><span class="p">:</span>
+</span><span id="line-709">                <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">min_col</span> <span class="p">:</span> <span class="n">max_col</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+</span><span id="line-710">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-711">                <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">min_col</span> <span class="p">:</span> <span class="n">max_col</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span></div>
+
+</span><span id="line-712">
+<div class="viewcode-block" id="Table.iter_cols">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Table.iter_cols">[docs]</a>
+</span><span id="line-713">    <span class="k">def</span> <span class="nf">iter_cols</span><span class="p">(</span>  <span class="c1"># noqa: PLR0913</span>
+</span><span id="line-714">        <span class="bp">self</span><span class="p">,</span>
+</span><span id="line-715">        <span class="n">min_col</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-716">        <span class="n">max_col</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-717">        <span class="n">min_row</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-718">        <span class="n">max_row</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-719">        <span class="n">values_only</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="line-720">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Cell</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+</span><span id="line-721"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Produces cells from a table, by column.</span>
+</span><span id="line-722">
+</span><span id="line-723"><span class="sd">        Specify the iteration range using the indexes of the rows and columns.</span>
+</span><span id="line-724">
+</span><span id="line-725"><span class="sd">        Parameters</span>
+</span><span id="line-726"><span class="sd">        ----------</span>
+</span><span id="line-727"><span class="sd">        min_col: int, optional</span>
+</span><span id="line-728"><span class="sd">            Starting column number (zero indexed) or ``0`` if ``None``.</span>
+</span><span id="line-729"><span class="sd">        max_col: int, optional</span>
+</span><span id="line-730"><span class="sd">            End column number (zero indexed), or all columns if ``None``.</span>
+</span><span id="line-731"><span class="sd">        min_row: int, optional</span>
+</span><span id="line-732"><span class="sd">            Starting row number (zero indexed), or ``0`` if ``None``.</span>
+</span><span id="line-733"><span class="sd">        max_row: int, optional</span>
+</span><span id="line-734"><span class="sd">            End row number (zero indexed), or all rows if ``None``.</span>
+</span><span id="line-735"><span class="sd">        values_only: bool, optional</span>
+</span><span id="line-736"><span class="sd">            If ``True``, yield cell values rather than :class:`Cell` objects.</span>
+</span><span id="line-737">
+</span><span id="line-738"><span class="sd">        Yields</span>
+</span><span id="line-739"><span class="sd">        ------</span>
+</span><span id="line-740"><span class="sd">        Tuple[Cell] | Tuple[str]:</span>
+</span><span id="line-741"><span class="sd">            :class:`Cell` objects or string values for the row</span>
+</span><span id="line-742">
+</span><span id="line-743"><span class="sd">        Raises</span>
+</span><span id="line-744"><span class="sd">        ------</span>
+</span><span id="line-745"><span class="sd">        IndexError:</span>
+</span><span id="line-746"><span class="sd">            If row or column values are out of range for the table</span>
+</span><span id="line-747">
+</span><span id="line-748"><span class="sd">        Example</span>
+</span><span id="line-749"><span class="sd">        =======</span>
+</span><span id="line-750">
+</span><span id="line-751"><span class="sd">        .. code:: python</span>
+</span><span id="line-752">
+</span><span id="line-753"><span class="sd">            for col in table.iter_cols(min_row=2, max_row=7):</span>
+</span><span id="line-754"><span class="sd">                sum += col.value</span>
+</span><span id="line-755"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span id="line-756">        <span class="n">min_row</span> <span class="o">=</span> <span class="n">min_row</span> <span class="ow">or</span> <span class="mi">0</span>
+</span><span id="line-757">        <span class="n">max_row</span> <span class="o">=</span> <span class="n">max_row</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span> <span class="o">-</span> <span class="mi">1</span>
+</span><span id="line-758">        <span class="n">min_col</span> <span class="o">=</span> <span class="n">min_col</span> <span class="ow">or</span> <span class="mi">0</span>
+</span><span id="line-759">        <span class="n">max_col</span> <span class="o">=</span> <span class="n">max_col</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span> <span class="o">-</span> <span class="mi">1</span>
+</span><span id="line-760">
+</span><span id="line-761">        <span class="k">if</span> <span class="n">min_row</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-762">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;row </span><span class="si">{</span><span class="n">min_row</span><span class="si">}</span><span class="s2"> out of range&quot;</span><span class="p">)</span>
+</span><span id="line-763">        <span class="k">if</span> <span class="n">max_row</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span><span class="p">:</span>
+</span><span id="line-764">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;row </span><span class="si">{</span><span class="n">max_row</span><span class="si">}</span><span class="s2"> out of range&quot;</span><span class="p">)</span>
+</span><span id="line-765">        <span class="k">if</span> <span class="n">min_col</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="line-766">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;column </span><span class="si">{</span><span class="n">min_col</span><span class="si">}</span><span class="s2"> out of range&quot;</span><span class="p">)</span>
+</span><span id="line-767">        <span class="k">if</span> <span class="n">max_col</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span><span class="p">:</span>
+</span><span id="line-768">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;column </span><span class="si">{</span><span class="n">max_col</span><span class="si">}</span><span class="s2"> out of range&quot;</span><span class="p">)</span>
+</span><span id="line-769">
+</span><span id="line-770">        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">()</span>
+</span><span id="line-771">        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">min_col</span><span class="p">,</span> <span class="n">max_col</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+</span><span id="line-772">            <span class="k">if</span> <span class="n">values_only</span><span class="p">:</span>
+</span><span id="line-773">                <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">[</span><span class="n">min_row</span> <span class="p">:</span> <span class="n">max_row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+</span><span id="line-774">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-775">                <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">[</span><span class="n">min_row</span> <span class="p">:</span> <span class="n">max_row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span></div>
+
+</span><span id="line-776">
+</span><span id="line-777">    <span class="k">def</span> <span class="nf">_validate_cell_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+</span><span id="line-778">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-779">            <span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="o">=</span> <span class="n">xl_cell_to_rowcol</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span id="line-780">            <span class="n">values</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+</span><span id="line-781">        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+</span><span id="line-782">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;invalid cell reference &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
+</span><span id="line-783">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-784">            <span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+</span><span id="line-785">            <span class="n">values</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+</span><span id="line-786">
+</span><span id="line-787">        <span class="k">if</span> <span class="n">row</span> <span class="o">&gt;=</span> <span class="n">MAX_ROW_COUNT</span><span class="p">:</span>
+</span><span id="line-788">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">row</span><span class="si">}</span><span class="s2"> exceeds maximum row </span><span class="si">{</span><span class="n">MAX_ROW_COUNT</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-789">        <span class="k">if</span> <span class="n">col</span> <span class="o">&gt;=</span> <span class="n">MAX_COL_COUNT</span><span class="p">:</span>
+</span><span id="line-790">            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> exceeds maximum column </span><span class="si">{</span><span class="n">MAX_COL_COUNT</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-791">
+</span><span id="line-792">        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span><span class="p">,</span> <span class="n">row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+</span><span id="line-793">            <span class="bp">self</span><span class="o">.</span><span class="n">add_row</span><span class="p">()</span>
+</span><span id="line-794">
+</span><span id="line-795">        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span><span class="p">,</span> <span class="n">col</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+</span><span id="line-796">            <span class="bp">self</span><span class="o">.</span><span class="n">add_column</span><span class="p">()</span>
+</span><span id="line-797">
+</span><span id="line-798">        <span class="k">return</span> <span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+</span><span id="line-799">
+</span><span id="line-800">    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="line-801">        <span class="c1"># TODO: write needs to retain/init the border</span>
+</span><span id="line-802">        <span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_cell_coords</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span id="line-803">        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">Cell</span><span class="o">.</span><span class="n">from_value</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</span><span id="line-804">        <span class="n">storage</span> <span class="o">=</span> <span class="n">CellStorage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+</span><span id="line-805">        <span class="n">storage</span><span class="o">.</span><span class="n">update_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">])</span>
+</span><span id="line-806">        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">update_storage</span><span class="p">(</span><span class="n">storage</span><span class="p">)</span>
+</span><span id="line-807">
+</span><span id="line-808">        <span class="n">merge_cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">merge_cells</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-809">        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">_table_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span>
+</span><span id="line-810">        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span>
+</span><span id="line-811">        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">_set_merge</span><span class="p">(</span><span class="n">merge_cells</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)))</span>
+</span><span id="line-812">
+</span><span id="line-813">        <span class="k">if</span> <span class="n">style</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-814">            <span class="bp">self</span><span class="o">.</span><span class="n">set_cell_style</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+</span><span id="line-815">
+</span><span id="line-816">    <span class="k">def</span> <span class="nf">set_cell_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+</span><span id="line-817">        <span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_cell_coords</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span id="line-818">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">style</span><span class="p">,</span> <span class="n">Style</span><span class="p">):</span>
+</span><span id="line-819">            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">_style</span> <span class="o">=</span> <span class="n">style</span>
+</span><span id="line-820">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">style</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-821">            <span class="k">if</span> <span class="n">style</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">styles</span><span class="p">:</span>
+</span><span id="line-822">                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;style &#39;</span><span class="si">{</span><span class="n">style</span><span class="si">}</span><span class="s2">&#39; does not exist&quot;</span><span class="p">)</span>
+</span><span id="line-823">            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">_style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">styles</span><span class="p">[</span><span class="n">style</span><span class="p">]</span>
+</span><span id="line-824">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-825">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;style must be a Style object or style name&quot;</span><span class="p">)</span>
+</span><span id="line-826">
+</span><span id="line-827">    <span class="k">def</span> <span class="nf">add_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_rows</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span id="line-828">        <span class="n">row</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="line-829">            <span class="n">Cell</span><span class="o">.</span><span class="n">empty_cell</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">)</span>
+</span><span id="line-830">            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span><span class="p">)</span>
+</span><span id="line-831">        <span class="p">]</span>
+</span><span id="line-832">        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rows</span><span class="p">):</span>
+</span><span id="line-833">            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+</span><span id="line-834">            <span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="line-835">            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">number_of_rows</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span><span class="p">)</span>
+</span><span id="line-836">
+</span><span id="line-837">    <span class="k">def</span> <span class="nf">add_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_cols</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span id="line-838">        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_cols</span><span class="p">):</span>
+</span><span id="line-839">            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_rows</span><span class="p">):</span>
+</span><span id="line-840">                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span id="line-841">                    <span class="n">Cell</span><span class="o">.</span><span class="n">empty_cell</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">)</span>
+</span><span id="line-842">                <span class="p">)</span>
+</span><span id="line-843">            <span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="line-844">            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">number_of_columns</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cols</span><span class="p">)</span>
+</span><span id="line-845">
+<div class="viewcode-block" id="Table.merge_cells">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Table.merge_cells">[docs]</a>
+</span><span id="line-846">    <span class="k">def</span> <span class="nf">merge_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell_range</span><span class="p">):</span>
+</span><span id="line-847"><span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a cell range or list of cell ranges into merged cells.&quot;&quot;&quot;</span>
+</span><span id="line-848">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell_range</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span id="line-849">            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cell_range</span><span class="p">:</span>
+</span><span id="line-850">                <span class="bp">self</span><span class="o">.</span><span class="n">merge_cells</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span id="line-851">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-852">            <span class="p">(</span><span class="n">start_cell_ref</span><span class="p">,</span> <span class="n">end_cell_ref</span><span class="p">)</span> <span class="o">=</span> <span class="n">cell_range</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+</span><span id="line-853">            <span class="p">(</span><span class="n">row_start</span><span class="p">,</span> <span class="n">col_start</span><span class="p">)</span> <span class="o">=</span> <span class="n">xl_cell_to_rowcol</span><span class="p">(</span><span class="n">start_cell_ref</span><span class="p">)</span>
+</span><span id="line-854">            <span class="p">(</span><span class="n">row_end</span><span class="p">,</span> <span class="n">col_end</span><span class="p">)</span> <span class="o">=</span> <span class="n">xl_cell_to_rowcol</span><span class="p">(</span><span class="n">end_cell_ref</span><span class="p">)</span>
+</span><span id="line-855">            <span class="n">num_rows</span> <span class="o">=</span> <span class="n">row_end</span> <span class="o">-</span> <span class="n">row_start</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span id="line-856">            <span class="n">num_cols</span> <span class="o">=</span> <span class="n">col_end</span> <span class="o">-</span> <span class="n">col_start</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span id="line-857">
+</span><span id="line-858">            <span class="n">merge_cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">merge_cells</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-859">            <span class="n">merge_cells</span><span class="o">.</span><span class="n">add_anchor</span><span class="p">(</span><span class="n">row_start</span><span class="p">,</span> <span class="n">col_start</span><span class="p">,</span> <span class="p">(</span><span class="n">num_rows</span><span class="p">,</span> <span class="n">num_cols</span><span class="p">))</span>
+</span><span id="line-860">            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">row_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">row_end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+</span><span id="line-861">                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">col_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">col_end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+</span><span id="line-862">                    <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">MergedCell</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+</span><span id="line-863">                    <span class="n">merge_cells</span><span class="o">.</span><span class="n">add_reference</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">row_start</span><span class="p">,</span> <span class="n">col_start</span><span class="p">,</span> <span class="n">row_end</span><span class="p">,</span> <span class="n">col_end</span><span class="p">))</span>
+</span><span id="line-864">
+</span><span id="line-865">            <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">cells</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">):</span>
+</span><span id="line-866">                <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">cell</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
+</span><span id="line-867">                    <span class="n">cell</span><span class="o">.</span><span class="n">_set_merge</span><span class="p">(</span><span class="n">merge_cells</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)))</span></div>
+
+</span><span id="line-868">
+</span><span id="line-869">    <span class="k">def</span> <span class="nf">set_cell_border</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+</span><span id="line-870">        <span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_cell_coords</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span id="line-871">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+</span><span id="line-872">            <span class="p">(</span><span class="n">side</span><span class="p">,</span> <span class="n">border_value</span><span class="p">)</span> <span class="o">=</span> <span class="n">args</span>
+</span><span id="line-873">            <span class="n">length</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span id="line-874">        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+</span><span id="line-875">            <span class="p">(</span><span class="n">side</span><span class="p">,</span> <span class="n">border_value</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span> <span class="o">=</span> <span class="n">args</span>
+</span><span id="line-876">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-877">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;invalid number of arguments to border_value()&quot;</span><span class="p">)</span>
+</span><span id="line-878">
+</span><span id="line-879">        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">border_value</span><span class="p">,</span> <span class="n">Border</span><span class="p">):</span>
+</span><span id="line-880">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;border value must be a Border object&quot;</span><span class="p">)</span>
+</span><span id="line-881">
+</span><span id="line-882">        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+</span><span id="line-883">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;border length must be an int&quot;</span><span class="p">)</span>
+</span><span id="line-884">
+</span><span id="line-885">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">side</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span id="line-886">            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">side</span><span class="p">:</span>
+</span><span id="line-887">                <span class="bp">self</span><span class="o">.</span><span class="n">set_cell_border</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">border_value</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+</span><span id="line-888">            <span class="k">return</span>
+</span><span id="line-889">
+</span><span id="line-890">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">is_merged</span> <span class="ow">and</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">]:</span>
+</span><span id="line-891">            <span class="n">warn</span><span class="p">(</span>
+</span><span id="line-892">                <span class="sa">f</span><span class="s2">&quot;cell [</span><span class="si">{</span><span class="n">row</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">] is merged; </span><span class="si">{</span><span class="n">side</span><span class="si">}</span><span class="s2"> border not set&quot;</span><span class="p">,</span>
+</span><span id="line-893">                <span class="ne">RuntimeWarning</span><span class="p">,</span>
+</span><span id="line-894">                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+</span><span id="line-895">            <span class="p">)</span>
+</span><span id="line-896">            <span class="k">return</span>
+</span><span id="line-897">
+</span><span id="line-898">        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">extract_strokes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">)</span>
+</span><span id="line-899">
+</span><span id="line-900">        <span class="k">if</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;bottom&quot;</span><span class="p">]:</span>
+</span><span id="line-901">            <span class="k">for</span> <span class="n">border_col_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">col</span> <span class="o">+</span> <span class="n">length</span><span class="p">):</span>
+</span><span id="line-902">                <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">set_cell_border</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">border_col_num</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="n">border_value</span><span class="p">)</span>
+</span><span id="line-903">        <span class="k">elif</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">]:</span>
+</span><span id="line-904">            <span class="k">for</span> <span class="n">border_row_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">row</span> <span class="o">+</span> <span class="n">length</span><span class="p">):</span>
+</span><span id="line-905">                <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">set_cell_border</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">border_row_num</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="n">border_value</span><span class="p">)</span>
+</span><span id="line-906">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-907">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;side must be a valid border segment&quot;</span><span class="p">)</span>
+</span><span id="line-908">
+</span><span id="line-909">        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">add_stroke</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="n">border_value</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+</span><span id="line-910">
+<div class="viewcode-block" id="Table.set_cell_formatting">
+<a class="viewcode-back" href="../../index.html#numbers_parser.Table.set_cell_formatting">[docs]</a>
+</span><span id="line-911">    <span class="k">def</span> <span class="nf">set_cell_formatting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-912"><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="line-913"><span class="sd">        Set the data format for a cell.</span>
+</span><span id="line-914">
+</span><span id="line-915"><span class="sd">        Cell references can be **row-column** offsers or Excel/Numbers-style **A1** notation.</span>
+</span><span id="line-916">
+</span><span id="line-917"><span class="sd">        :Parameters:</span>
+</span><span id="line-918"><span class="sd">            * **args** (*list*, *optional*) – Positional arguments for cell reference and data format type (see below)</span>
+</span><span id="line-919"><span class="sd">            * **kwargs** (*dict*, *optional*) - Key-value pairs defining a formatting options for each data format (see below).</span>
+</span><span id="line-920">
+</span><span id="line-921"><span class="sd">        :Args (row-column):</span>
+</span><span id="line-922"><span class="sd">            * **param1** (``int``): The row number (zero indexed).</span>
+</span><span id="line-923"><span class="sd">            * **param2** (``int``): The column number (zero indexed).</span>
+</span><span id="line-924"><span class="sd">            * **param3** (``str``): Data format type for the cell (see &quot;data formats&quot; below).</span>
+</span><span id="line-925">
+</span><span id="line-926"><span class="sd">        :Args (A1):</span>
+</span><span id="line-927"><span class="sd">            * **param1** (``str``): A cell reference using Excel/Numbers-style A1 notation.</span>
+</span><span id="line-928"><span class="sd">            * **param2** (``str``): Data format type for the cell (see &quot;data formats&quot; below).</span>
+</span><span id="line-929">
+</span><span id="line-930"><span class="sd">        :Warns:</span>
+</span><span id="line-931"><span class="sd">            * **RuntimeWarning** -</span>
+</span><span id="line-932"><span class="sd">                If ``use_accounting_style`` is used with</span>
+</span><span id="line-933"><span class="sd">                any ``negative_style`` other than ``NegativeNumberStyle.MINUS``.</span>
+</span><span id="line-934">
+</span><span id="line-935"><span class="sd">        All formatting styles share a name and a type, described in the **Common**</span>
+</span><span id="line-936"><span class="sd">        parameters in the following table. Additional key-value pairs configure the format</span>
+</span><span id="line-937"><span class="sd">        depending upon the value of ``kwargs[&quot;type&quot;]``. Supported values for</span>
+</span><span id="line-938"><span class="sd">        ``kwargs[&quot;type&quot;]`` are:</span>
+</span><span id="line-939">
+</span><span id="line-940"><span class="sd">            * ``&quot;base&quot;``: A number base in the range 2-36.</span>
+</span><span id="line-941"><span class="sd">            * ``&quot;currency&quot;``: A decimal formatted with a currency symbol.</span>
+</span><span id="line-942"><span class="sd">            * ``&quot;datetime&quot;``: A date and time value with custom formatting.</span>
+</span><span id="line-943"><span class="sd">            * ``&quot;fraction&quot;``: A number formatted as the nearest fraction.</span>
+</span><span id="line-944"><span class="sd">            * ``&quot;percentage&quot;``: A number formatted as a percentage</span>
+</span><span id="line-945"><span class="sd">            * ``&quot;number&quot;``: A decimal number.</span>
+</span><span id="line-946"><span class="sd">            * ``&quot;scientific&quot;``: A decimal number with scientific notation.</span>
+</span><span id="line-947">
+</span><span id="line-948"><span class="sd">        :Common keys:</span>
+</span><span id="line-949"><span class="sd">            * **name** (``str``) – The name of the custom format. If no name is provided,</span>
+</span><span id="line-950"><span class="sd">              one is generated using the scheme ``Custom Format``, ``Custom Format 1``, ``Custom Format 2``, etc.</span>
+</span><span id="line-951"><span class="sd">            * **type** (``str``, *optional*, default: ``number``) – The type of format to</span>
+</span><span id="line-952"><span class="sd">              create Supported formats are ``number``, ``datetime`` and ``text``.</span>
+</span><span id="line-953">
+</span><span id="line-954"><span class="sd">        :``&quot;base&quot;``:</span>
+</span><span id="line-955"><span class="sd">            * **base_use_minus_sign** (``int``, *optional*, default: ``10``) – The integer</span>
+</span><span id="line-956"><span class="sd">              base to represent the number from 2-36.</span>
+</span><span id="line-957"><span class="sd">            * **base_use_minus_sign** (``bool``, *optional*, default: ``True``) – If ``True``</span>
+</span><span id="line-958"><span class="sd">              use a standard minus sign, otherwise format as two&#39;s compliment (only</span>
+</span><span id="line-959"><span class="sd">              possible for binary, octal and hexadecimal.</span>
+</span><span id="line-960"><span class="sd">            * **base_places** (``int``, *optional*, default: ``0``) – The number of</span>
+</span><span id="line-961"><span class="sd">              decimal places, or ``None`` for automatic.</span>
+</span><span id="line-962">
+</span><span id="line-963"><span class="sd">        :``&quot;currency&quot;``:</span>
+</span><span id="line-964"><span class="sd">            * **currency** (``str``, *optional*, default: ``&quot;GBP&quot;``) – An ISO currency</span>
+</span><span id="line-965"><span class="sd">              code, e.g. ``&quot;GBP&quot;`` or ``&quot;USD&quot;``.</span>
+</span><span id="line-966"><span class="sd">            * **decimal_places** (``int``, *optional*, default: ``2``) – The number of</span>
+</span><span id="line-967"><span class="sd">              decimal places, or ``None`` for automatic.</span>
+</span><span id="line-968"><span class="sd">            * **negative_style** (``NegativeNumberStyle``, *optional*, default: ``NegativeNumberStyle.MINUS``) – How negative numbers are represented.</span>
+</span><span id="line-969"><span class="sd">              See `Negative number formats &lt;#negative-formats&gt;`_.</span>
+</span><span id="line-970"><span class="sd">            * **show_thousands_separator** (``bool``, *optional*, default: ``False``) – ``True``</span>
+</span><span id="line-971"><span class="sd">              if the number should include a thousands seperator, e.g. ``,``</span>
+</span><span id="line-972"><span class="sd">            * **use_accounting_style** (``bool``, *optional*, default: ``False``) –  ``True``</span>
+</span><span id="line-973"><span class="sd">              if the currency symbol should be formatted to the left of the cell and</span>
+</span><span id="line-974"><span class="sd">              separated from the number value by a tab.</span>
+</span><span id="line-975">
+</span><span id="line-976"><span class="sd">        :``&quot;datetime&quot;``:</span>
+</span><span id="line-977"><span class="sd">            * **date_time_format** (``str``, *optional*, default: ``&quot;dd MMM YYY HH:MM&quot;``) – A POSIX</span>
+</span><span id="line-978"><span class="sd">               strftime-like formatting string of `Numbers date/time</span>
+</span><span id="line-979"><span class="sd">               directives &lt;#datetime-formats&gt;`_.</span>
+</span><span id="line-980">
+</span><span id="line-981"><span class="sd">        :``&quot;fraction&quot;``:</span>
+</span><span id="line-982"><span class="sd">            * **fraction_accuracy** (``FractionAccuracy``, *optional*, default: ``FractionAccuracy.THREE`` – The</span>
+</span><span id="line-983"><span class="sd">                precision of the faction.</span>
+</span><span id="line-984">
+</span><span id="line-985"><span class="sd">        :``&quot;percentage&quot;``:</span>
+</span><span id="line-986"><span class="sd">            * **decimal_places** (``float``, *optional*, default: ``None``) –  number of</span>
+</span><span id="line-987"><span class="sd">              decimal places, or ``None`` for automatic.</span>
+</span><span id="line-988"><span class="sd">            * **negative_style** (``NegativeNumberStyle``, *optional*, default: ``NegativeNumberStyle.MINUS``) – How negative numbers are represented.</span>
+</span><span id="line-989"><span class="sd">              See `Negative number formats &lt;#negative-formats&gt;`_.</span>
+</span><span id="line-990"><span class="sd">            * **show_thousands_separator** (``bool``, *optional*, default: ``False``) – ``True``</span>
+</span><span id="line-991"><span class="sd">              if the number should include a thousands seperator, e.g. ``,``</span>
+</span><span id="line-992">
+</span><span id="line-993"><span class="sd">        :``&quot;scientific&quot;``:</span>
+</span><span id="line-994"><span class="sd">            * **decimal_places** (``float``, *optional*, default: ``None``) – number of</span>
+</span><span id="line-995"><span class="sd">              decimal places, or ``None`` for automatic.</span>
+</span><span id="line-996">
+</span><span id="line-997"><span class="sd">        **Example**</span>
+</span><span id="line-998">
+</span><span id="line-999"><span class="sd">        .. code:: python</span>
+</span><span id="line-1000">
+</span><span id="line-1001"><span class="sd">            &gt;&gt;&gt; table.set_cell_formatting(&quot;C1&quot;, &quot;date&quot;, date_time_format=&quot;EEEE, d MMMM yyyy&quot;)</span>
+</span><span id="line-1002"><span class="sd">            &gt;&gt;&gt; table.set_cell_formatting(0, 4, &quot;number&quot;, decimal_places=3, negative_style=NegativeNumberStyle.RED)</span>
+</span><span id="line-1003">
+</span><span id="line-1004"><span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+</span><span id="line-1005">        <span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_cell_coords</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span id="line-1006">        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="line-1007">            <span class="n">format_type</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="line-1008">        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="line-1009">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;too many positional arguments to set_cell_formatting&quot;</span><span class="p">)</span>
+</span><span id="line-1010">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-1011">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;no type defined for cell format&quot;</span><span class="p">)</span>
+</span><span id="line-1012">
+</span><span id="line-1013">        <span class="k">if</span> <span class="n">format_type</span> <span class="o">==</span> <span class="s2">&quot;custom&quot;</span><span class="p">:</span>
+</span><span id="line-1014">            <span class="bp">self</span><span class="o">.</span><span class="n">set_cell_custom_format</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-1015">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-1016">            <span class="bp">self</span><span class="o">.</span><span class="n">set_cell_data_format</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">format_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+</span><span id="line-1017">
+</span><span id="line-1018">    <span class="k">def</span> <span class="nf">set_cell_custom_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-1019">        <span class="k">if</span> <span class="s2">&quot;format&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+</span><span id="line-1020">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;no format provided for custom format&quot;</span><span class="p">)</span>
+</span><span id="line-1021">
+</span><span id="line-1022">        <span class="n">custom_format</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>
+</span><span id="line-1023">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">custom_format</span><span class="p">,</span> <span class="n">CustomFormatting</span><span class="p">):</span>
+</span><span id="line-1024">            <span class="n">custom_format</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>
+</span><span id="line-1025">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">custom_format</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-1026">            <span class="k">if</span> <span class="n">custom_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">custom_formats</span><span class="p">:</span>
+</span><span id="line-1027">                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;format &#39;</span><span class="si">{</span><span class="n">custom_format</span><span class="si">}</span><span class="s2">&#39; does not exist&quot;</span><span class="p">)</span>
+</span><span id="line-1028">            <span class="n">custom_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">custom_formats</span><span class="p">[</span><span class="n">custom_format</span><span class="p">]</span>
+</span><span id="line-1029">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-1030">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;format must be a CustomFormatting object or format name&quot;</span><span class="p">)</span>
+</span><span id="line-1031">
+</span><span id="line-1032">        <span class="n">cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span>
+</span><span id="line-1033">        <span class="k">if</span> <span class="n">custom_format</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">CustomFormattingType</span><span class="o">.</span><span class="n">DATETIME</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">DateCell</span><span class="p">):</span>
+</span><span id="line-1034">            <span class="n">type_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+</span><span id="line-1035">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cannot use date/time formatting for cells of type </span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-1036">        <span class="k">elif</span> <span class="n">custom_format</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">CustomFormattingType</span><span class="o">.</span><span class="n">NUMBER</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">NumberCell</span><span class="p">):</span>
+</span><span id="line-1037">            <span class="n">type_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+</span><span id="line-1038">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cannot use date/time formatting for cells of type </span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-1039">        <span class="k">elif</span> <span class="n">custom_format</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">CustomFormattingType</span><span class="o">.</span><span class="n">TEXT</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">TextCell</span><span class="p">):</span>
+</span><span id="line-1040">            <span class="n">type_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+</span><span id="line-1041">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cannot set formatting for cells of type </span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-1042">
+</span><span id="line-1043">        <span class="k">if</span> <span class="n">custom_format</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">CustomFormattingType</span><span class="o">.</span><span class="n">NUMBER</span><span class="p">:</span>
+</span><span id="line-1044">            <span class="n">format_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">custom_decimal_format_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">custom_format</span><span class="p">)</span>
+</span><span id="line-1045">        <span class="k">elif</span> <span class="n">custom_format</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">CustomFormattingType</span><span class="o">.</span><span class="n">TEXT</span><span class="p">:</span>
+</span><span id="line-1046">            <span class="n">format_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">custom_text_format_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">custom_format</span><span class="p">)</span>
+</span><span id="line-1047">        <span class="n">cell</span><span class="o">.</span><span class="n">_set_formatting</span><span class="p">(</span><span class="n">format_id</span><span class="p">,</span> <span class="n">custom_format</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+</span><span id="line-1048">
+</span><span id="line-1049">    <span class="k">def</span> <span class="nf">set_cell_data_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">format_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-1050">        <span class="k">try</span><span class="p">:</span>
+</span><span id="line-1051">            <span class="n">format_type</span> <span class="o">=</span> <span class="n">FormattingType</span><span class="p">[</span><span class="n">format_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
+</span><span id="line-1052">        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+</span><span id="line-1053">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unsuported cell format type &#39;</span><span class="si">{</span><span class="n">format_type</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
+</span><span id="line-1054">
+</span><span id="line-1055">        <span class="n">cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span>
+</span><span id="line-1056">        <span class="k">if</span> <span class="n">format_type</span> <span class="o">==</span> <span class="n">FormattingType</span><span class="o">.</span><span class="n">DATETIME</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">DateCell</span><span class="p">):</span>
+</span><span id="line-1057">            <span class="n">type_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+</span><span id="line-1058">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cannot use date/time formatting for cells of type </span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-1059">        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">NumberCell</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">DateCell</span><span class="p">):</span>
+</span><span id="line-1060">            <span class="n">type_name</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+</span><span id="line-1061">            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cannot set formatting for cells of type </span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="line-1062">
+</span><span id="line-1063">        <span class="nb">format</span> <span class="o">=</span> <span class="n">Formatting</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">format_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-1064">        <span class="n">format_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">format_archive</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_table_id</span><span class="p">,</span> <span class="n">format_type</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span>
+</span><span id="line-1065">        <span class="n">cell</span><span class="o">.</span><span class="n">_set_formatting</span><span class="p">(</span><span class="n">format_id</span><span class="p">,</span> <span class="n">format_type</span><span class="p">)</span></div>
+
+</span></code></pre></div>
+    </div></div>
+        </main>
+      </div>
+    </div><footer class="py-6 border-t border-border md:py-0">
+    <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+      <div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
+        <p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© Jon Connell&nbsp;Built with <a class="font-medium underline underline-offset-4"
+    href="https://www.sphinx-doc.org"
+    rel="noreferrer">Sphinx 7.2.6</a></p>
+</div>
+</div>
+</footer>
+  </div>
+  
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script defer="defer" src="../../_static/theme.js?v=e8bd915e"></script>
+  
+</body>
+</html>
