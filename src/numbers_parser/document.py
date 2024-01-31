@@ -863,24 +863,22 @@ class Table(Cacheable):  # noqa: F811
         if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
             raise IndexError("Row number not in range for table")
 
+        if start_row is None:
+            start_row = self.num_rows
+        self.num_rows += num_rows
+        self._model.number_of_rows(self._table_id, self.num_rows)
+
         row = [
             Cell.empty_cell(self._table_id, self.num_rows - 1, col, self._model)
             for col in range(self.num_cols)
         ]
         rows = [row.copy() for _ in range(num_rows)]
-        if start_row is None:
-            self._data.extend(rows)
-            start_row = self.num_rows - 1
-        else:
-            self._data[start_row:start_row] = rows
+        self._data[start_row:start_row] = rows
 
         if default is not None:
             for row in range(start_row, start_row + num_rows):
                 for col in range(self.num_cols):
                     self.write(row, col, default)
-
-        self.num_rows += num_rows
-        self._model.number_of_rows(self._table_id, self.num_rows)
 
     def add_column(
         self,
@@ -919,25 +917,20 @@ class Table(Cacheable):  # noqa: F811
         if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
             raise IndexError("Column number not in range for table")
 
+        if start_col is None:
+            start_col = self.num_cols
+        self.num_cols += num_cols
+        self._model.number_of_columns(self._table_id, self.num_cols)
+
         for row in range(self.num_rows):
             cols = [
                 Cell.empty_cell(self._table_id, row, col, self._model) for col in range(num_cols)
             ]
-            if start_col is None:
-                self._data[row].extend(cols)
-            else:
-                self._data[row][start_col:start_col] = cols
+            self._data[row][start_col:start_col] = cols
 
             if default is not None:
-                if start_col is None:
-                    for col in range(self.num_cols - 1, self.num_cols - 1 + num_cols):
-                        self.write(row, col, default)
-                else:
-                    for col in range(start_col, start_col + num_cols):
-                        self.write(row, col, default)
-
-        self.num_cols += num_cols
-        self._model.number_of_columns(self._table_id, self.num_cols)
+                for col in range(start_col, start_col + num_cols):
+                    self.write(row, col, default)
 
     def delete_row(
         self,

@@ -241,6 +241,10 @@ def test_edit_table_rows_columns(configurable_save_file):
     table.add_column(start_col=10, num_cols=2)
     table.delete_row(start_row=6, num_rows=2)
     table.delete_column(start_col=6, num_cols=2)
+    table.delete_row(num_rows=2)
+    table.delete_column(num_cols=2)
+    table.add_row(default=1.234)
+    table.add_column(default=5.678)
     doc.save(configurable_save_file)
 
     ref_values = []
@@ -256,8 +260,13 @@ def test_edit_table_rows_columns(configurable_save_file):
     for row, _ in enumerate(ref_values):
         ref_values[row][10:10] = ["", ""]
     del ref_values[6:8]
+    del ref_values[-2:]
     for row, _ in enumerate(ref_values):
         del ref_values[row][6:8]
+        del ref_values[row][-2:]
+    ref_values.append(["1.234" for _ in ref_values[0]])
+    for row, _ in enumerate(ref_values):
+        ref_values[row].append("5.678")
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
