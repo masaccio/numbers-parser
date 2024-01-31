@@ -196,3 +196,75 @@ def test_save_formats(configurable_save_file):
     assert table.cell("A2").value == 123.45
     assert table.cell("A3").value == Duration(days=5)
     assert table.cell("A4").value == datetime(2000, 12, 1)
+
+
+def test_edit_table_rows_columns(configurable_save_file):
+    doc = Document(num_cols=12, num_rows=12, num_header_cols=0, num_header_rows=0)
+    table = doc.sheets[0].tables[0]
+
+    with pytest.raises(IndexError) as e:
+        table.delete_row(start_row=12)
+    assert "Row number not in range for table" in str(e)
+    with pytest.raises(IndexError) as e:
+        table.delete_row(start_row=-1)
+    assert "Row number not in range for table" in str(e)
+    with pytest.raises(IndexError) as e:
+        table.delete_column(start_col=12)
+    assert "Column number not in range for table" in str(e)
+    with pytest.raises(IndexError) as e:
+        table.delete_column(start_col=-1)
+    assert "Column number not in range for table" in str(e)
+
+    with pytest.raises(IndexError) as e:
+        table.add_row(start_row=12)
+    assert "Row number not in range for table" in str(e)
+    with pytest.raises(IndexError) as e:
+        table.add_row(start_row=-1)
+    assert "Row number not in range for table" in str(e)
+    with pytest.raises(IndexError) as e:
+        table.add_column(start_col=12)
+    assert "Column number not in range for table" in str(e)
+    with pytest.raises(IndexError) as e:
+        table.add_column(start_col=-1)
+    assert "Column number not in range for table" in str(e)
+
+    for row, cells in enumerate(table.iter_rows()):
+        for col, _ in enumerate(cells):
+            table.write(row, col, f"cell[{row},{col}]")
+
+    table.add_row(start_row=1, num_rows=3, default="new_row")
+    table.add_column(start_col=1, num_cols=3, default="new_col")
+    table.add_row(start_row=10, num_rows=2)
+    table.add_column(start_col=10, num_cols=2)
+    table.delete_row(start_row=6, num_rows=2)
+    table.delete_column(start_col=6, num_cols=2)
+    doc.save(configurable_save_file)
+
+    ref_values = []
+    for row in range(0, 12):
+        ref_values.append([])
+        for col in range(0, 12):
+            ref_values[row].append(f"cell[{row},{col}]")
+
+    ref_values.insert(1, ["new_row" for _ in range(0, 10)])
+    ref_values.insert(2, ["new_row" for _ in range(0, 10)])
+    ref_values.insert(3, ["new_row" for _ in range(0, 10)])
+    for col in range(1, 3):
+        for row, _ in enumerate(ref_values):
+            ref_values[row].insert(col, "new_col")
+    ref_values.insert(10, ["" for _ in range(0, 10)])
+    ref_values.insert(11, ["" for _ in range(0, 10)])
+    for col in range(10, 12):
+        for row, _ in enumerate(ref_values):
+            ref_values[row].insert(col, "")
+    del ref_values[6]
+    del ref_values[6]
+    for row, _ in enumerate(ref_values):
+        del ref_values[row][6]
+        del ref_values[row][6]
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    for row, cells in enumerate(table.iter_rows()):
+        for col, _ in enumerate(cells):
+            assert table.cell(row, col).value == ref_values[row][col]

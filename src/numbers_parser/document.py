@@ -1,6 +1,8 @@
 from typing import Dict, Iterator, List, Optional, Tuple, Union
 from warnings import warn
 
+from pendulum import DateTime, Duration
+
 from numbers_parser.cell import (
     Border,
     Cell,
@@ -824,24 +826,189 @@ class Table(Cacheable):  # noqa: F811
         else:
             raise TypeError("style must be a Style object or style name")
 
-    def add_row(self, num_rows=1):
+    def add_row(
+        self,
+        num_rows: Optional[int] = 1,
+        start_row: Optional[Union[int, None]] = None,
+        default: Optional[Union[str, int, float, bool, DateTime, Duration]] = None,
+    ) -> None:
+        """
+        Add or insert rows to the table.
+
+        Parameters
+        ----------
+        num_rows: int, optional, default: 1
+            The number of rows to add to the table.
+        start_row: int, optional, default: None
+            The start row number (zero indexed), or ``None`` to add a row to
+            the end of the table.
+        default: str | int | float | bool | DateTime | Duration, optional, default: None
+            The default value for cells. Supported values are those supported by
+            :py:meth:`numbers_parser.Table.write` which will determine the new
+            cell type.
+
+        Warns
+        -----
+        RuntimeWarning:
+            If the default value is a float that is rounded to the maximum number
+            of supported digits.
+
+        Raises
+        ------
+        IndexError:
+            If the start_row is out of range for the table.
+        ValueError:
+            If the default value is unsupported by :py:meth:`numbers_parser.Table.write`.
+        """
+        if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
+            raise IndexError("Row number not in range for table")
+
         row = [
             Cell.empty_cell(self._table_id, self.num_rows - 1, col, self._model)
             for col in range(self.num_cols)
         ]
-        for _ in range(num_rows):
-            self._data.append(row.copy())
-            self.num_rows += 1
-            self._model.number_of_rows(self._table_id, self.num_rows)
+        rows = [row.copy() for _ in range(num_rows)]
+        if start_row is None:
+            self._data.extend(rows)
+            start_row = self.num_rows - 1
+        else:
+            self._data[start_row:start_row] = rows
 
-    def add_column(self, num_cols=1):
-        for _ in range(num_cols):
-            for row in range(self.num_rows):
-                self._data[row].append(
-                    Cell.empty_cell(self._table_id, row, self.num_cols - 1, self._model)
-                )
-            self.num_cols += 1
-            self._model.number_of_columns(self._table_id, self.num_cols)
+        if default is not None:
+            for row in range(start_row, start_row + num_rows):
+                for col in range(self.num_cols):
+                    self.write(row, col, default)
+
+        self.num_rows += num_rows
+        self._model.number_of_rows(self._table_id, self.num_rows)
+
+    def add_column(
+        self,
+        num_cols: Optional[int] = 1,
+        start_col: Optional[Union[int, None]] = None,
+        default: Optional[Union[str, int, float, bool, DateTime, Duration]] = None,
+    ) -> None:
+        """
+        Add or insert columns to the table.
+
+        Parameters
+        ----------
+        num_cols: int, optional, default: 1
+            The number of columns to add to the table.
+        start_col: int, optional, default: None
+            The start column number (zero indexed), or ``None`` to add a column to
+            the end of the table.
+        default: str | int | float | bool | DateTime | Duration, optional, default: None
+            The default value for cells. Supported values are those supported by
+            :py:meth:`numbers_parser.Table.write` which will determine the new
+            cell type.
+
+        Warns
+        -----
+        RuntimeWarning:
+            If the default value is a float that is rounded to the maximum number
+            of supported digits.
+
+        Raises
+        ------
+        IndexError:
+            If the start_col is out of range for the table.
+        ValueError:
+            If the default value is unsupported by :py:meth:`numbers_parser.Table.write`.
+        """
+        if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
+            raise IndexError("Column number not in range for table")
+
+        for row in range(self.num_rows):
+            cols = [
+                Cell.empty_cell(self._table_id, row, col, self._model) for col in range(num_cols)
+            ]
+            if start_col is None:
+                self._data[row].extend(cols)
+            else:
+                self._data[row][start_col:start_col] = cols
+
+            if default is not None:
+                if start_col is None:
+                    for col in range(self.num_cols - 1, self.num_cols - 1 + num_cols):
+                        self.write(row, col, default)
+                else:
+                    for col in range(start_col, start_col + num_cols):
+                        self.write(row, col, default)
+
+        self.num_cols += num_cols
+        self._model.number_of_columns(self._table_id, self.num_cols)
+
+    def delete_row(
+        self,
+        num_rows: Optional[int] = 1,
+        start_row: Optional[Union[int, None]] = None,
+    ) -> None:
+        """
+        Delete rows from the table.
+
+        Parameters
+        ----------
+        num_rows: int, optional, default: 1
+            The number of rows to add to the table.
+        start_row: int, optional, default: None
+            The start row number (zero indexed), or ``None`` to delete rows
+            from the end of the table.
+
+        Warns
+        -----
+        RuntimeWarning:
+            If the default value is a float that is rounded to the maximum number
+            of supported digits.
+
+        Raises
+        ------
+        IndexError:
+            If the start_row is out of range for the table.
+        """
+        if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
+            raise IndexError("Row number not in range for table")
+
+        if start_row is not None:
+            del self._data[start_row : start_row + num_rows]
+        else:
+            del self._data[-num_rows:]
+
+        self.num_rows -= num_rows
+        self._model.number_of_rows(self._table_id, self.num_rows)
+
+    def delete_column(
+        self,
+        num_cols: Optional[int] = 1,
+        start_col: Optional[Union[int, None]] = None,
+    ) -> None:
+        """
+        Add or delete columns columns from the table.
+
+        Parameters
+        ----------
+        num_cols: int, optional, default: 1
+            The number of columns to add to the table.
+        start_col: int, optional, default: None
+            The start column number (zero indexed), or ``None`` to add delete columns
+            from the end of the table.
+
+        Raises
+        ------
+        IndexError:
+            If the start_col is out of range for the table.
+        """
+        if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
+            raise IndexError("Column number not in range for table")
+
+        for row in range(self.num_rows):
+            if start_col is not None:
+                del self._data[row][start_col : start_col + num_cols]
+            else:
+                del self._data[row][-num_cols:]
+
+        self.num_cols -= num_cols
+        self._model.number_of_columns(self._table_id, self.num_cols)
 
     def merge_cells(self, cell_range):
         """Convert a cell range or list of cell ranges into merged cells."""
