@@ -213,7 +213,8 @@ class Document:
         r"""
         Add a new style to the current document.
 
-        If no style name is provided, the next available numbered style will be generated.
+        If no style name is provided, the next available numbered style
+        will be generated in the series ``Custom Style 1``, ``Custom Style 2``, etc.
 
         Parameters
         ----------
@@ -588,7 +589,21 @@ class Table(Cacheable):  # noqa: F811
 
     @property
     @cache(num_args=0)
-    def merge_ranges(self) -> list:
+    def merge_ranges(self) -> List[str]:
+        """List[str]: The merge ranges of cells in A1 notation.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            >>> table.merge_ranges
+            ['A4:A10']
+            >>> table.cell("A4")
+            <numbers_parser.cell.TextCell object at 0x1035f4a90>
+            >>> table.cell("A5")
+            <numbers_parser.cell.MergedCell object at 0x1035f5310>
+        """
         merge_cells = self._model.merge_cells(self._table_id).merge_cell_names()
         return sorted(set(list(merge_cells)))
 
@@ -684,7 +699,7 @@ class Table(Cacheable):  # noqa: F811
             If row or column values are out of range for the table
 
         Example
-        =======
+        -------
 
         .. code:: python
 
@@ -799,7 +814,56 @@ class Table(Cacheable):  # noqa: F811
 
         return (row, col) + tuple(values)
 
-    def write(self, *args, style=None):
+    def write(self, *args, style: Optional[Union[Style, str, None]] = None) -> None:
+        """
+        Write a value to a cell and update the style/cell type.
+
+        The ``write()`` method supports two forms of notation to designate the position
+        of cells: **Row-column** notation and **A1** notation:
+
+        .. code-block:: python
+
+            (0, 0)      # Row-column notation.
+            ("A1")      # The same cell in A1 notation.
+
+        Parameters
+        ----------
+
+        param1: int
+            The row number (zero indexed)
+        param2: int
+            The column number (zero indexed)
+        param3: str | int | float | bool | DateTime | Duration
+            The value to write to the cell. The generated cell type
+
+        Warns
+        -----
+        RuntimeWarning:
+            If the default value is a float that is rounded to the maximum number
+            of supported digits.
+
+        Raises
+        ------
+        IndexError:
+            If the style name cannot be foiund in the document.
+        TypeError:
+            If the style parameter is an invalid type.
+        ValueError:
+            If the cell type cannot be determined from the type of `param3`.
+
+        Example
+        -------
+
+        .. code:: python
+
+            doc = Document("write.numbers")
+            sheets = doc.sheets
+            tables = sheets[0].tables
+            table = tables[0]
+            table.write(1, 1, "This is new text")
+            table.write("B7", datetime(2020, 12, 25))
+            doc.save("new-sheet.numbers")
+        """
         # TODO: write needs to retain/init the border
         (row, col, value) = self._validate_cell_coords(*args)
         self._data[row][col] = Cell.from_value(row, col, value)
@@ -1154,7 +1218,7 @@ class Table(Cacheable):  # noqa: F811
             * **decimal_places** (``float``, *optional*, default: ``None``) – number of
               decimal places, or ``None`` for automatic.
 
-        **Example**
+        Example
 
         .. code:: python
 
