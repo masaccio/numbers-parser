@@ -144,22 +144,22 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "cachecontrol"
-version = "0.13.1"
+version = "0.14.0"
 description = "httplib2 caching for requests"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "cachecontrol-0.13.1-py3-none-any.whl", hash = "sha256:95dedbec849f46dda3137866dc28b9d133fc9af55f5b805ab1291833e4457aa4"},
-    {file = "cachecontrol-0.13.1.tar.gz", hash = "sha256:f012366b79d2243a6118309ce73151bf52a38d4a5dac8ea57f09bd29087e506b"},
+    {file = "cachecontrol-0.14.0-py3-none-any.whl", hash = "sha256:f5bf3f0620c38db2e5122c0726bdebb0d16869de966ea6a2befe92470b740ea0"},
+    {file = "cachecontrol-0.14.0.tar.gz", hash = "sha256:7db1195b41c81f8274a7bbd97c956f44e8348265a1bc7641c37dfebc39f0c938"},
 ]
 
 [package.dependencies]
 filelock = {version = ">=3.8.0", optional = true, markers = "extra == \"filecache\""}
-msgpack = ">=0.5.2"
+msgpack = ">=0.5.2,<2.0.0"
 requests = ">=2.16.0"
 
 [package.extras]
-dev = ["CacheControl[filecache,redis]", "black", "build", "cherrypy", "mypy", "pytest", "pytest-cov", "sphinx", "tox", "types-redis", "types-requests"]
+dev = ["CacheControl[filecache,redis]", "black", "build", "cherrypy", "furo", "mypy", "pytest", "pytest-cov", "sphinx", "sphinx-copybutton", "tox", "types-redis", "types-requests"]
 filecache = ["filelock (>=3.8.0)"]
 redis = ["redis (>=2.10.5)"]
 
@@ -176,13 +176,13 @@ files = [
 
 [[package]]
 name = "certifi"
-version = "2023.11.17"
+version = "2024.2.2"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "certifi-2023.11.17-py3-none-any.whl", hash = "sha256:e036ab49d5b79556f99cfc2d9320b34cfbe5be05c5871b51de9329f0603b0474"},
-    {file = "certifi-2023.11.17.tar.gz", hash = "sha256:9b469f3a900bf28dc19b8cfbf8019bf47f7fdd1a65a1d4ffb98fc14166beb4d1"},
+    {file = "certifi-2024.2.2-py3-none-any.whl", hash = "sha256:dc383c07b76109f368f6106eee2b593b04a011ea4d55f652c6ca24a754d1cdd1"},
+    {file = "certifi-2024.2.2.tar.gz", hash = "sha256:0569859f95fc761b18b45ef421b1290a0f65f147e92a1e5eb3e635f9a5e4e66f"},
 ]
 
 [[package]]
@@ -1701,6 +1701,20 @@ jinja2 = ">=2.10"
 markupsafe = ">=1"
 
 [[package]]
+name = "sphinx-nefertiti"
+version = "0.2.1"
+description = "The Nefertiti for Sphinx theme."
+optional = false
+python-versions = "*"
+files = [
+    {file = "sphinx-nefertiti-0.2.1.tar.gz", hash = "sha256:2d4654fed26ebed77b6b47fc4fc5848e327c23a9e95422dbc15d5779b86fe211"},
+    {file = "sphinx_nefertiti-0.2.1-py3-none-any.whl", hash = "sha256:8200b710baf438e8baa0929bfd9e1e86acd86020b0ce974b023bf874d8360b96"},
+]
+
+[package.dependencies]
+sphinx = ">=6,<8"
+
+[[package]]
 name = "sphinx-prompt"
 version = "1.8.0"
 description = "Sphinx directive to add unselectable prompt"
@@ -1769,21 +1783,6 @@ typing-extensions = ">=3.7.4.3,<3.10.0.1 || >3.10.0.1"
 [package.extras]
 all = ["coincidence (>=0.4.3)", "pygments (>=2.7.4,<=2.13.0)"]
 testing = ["coincidence (>=0.4.3)", "pygments (>=2.7.4,<=2.13.0)"]
-
-[[package]]
-name = "sphinxawesome-theme"
-version = "5.1.0"
-description = "An awesome theme for the Sphinx documentation generator"
-optional = false
-python-versions = ">=3.8,<4.0"
-files = [
-    {file = "sphinxawesome_theme-5.1.0-py3-none-any.whl", hash = "sha256:8eee609f7b9e45773516fc52e7b587a94f29d80571449670b540d82f23a6eadf"},
-    {file = "sphinxawesome_theme-5.1.0.tar.gz", hash = "sha256:bcf07f149f211244d921a596940956e576248760e48526f67ee62191c6d3a058"},
-]
-
-[package.dependencies]
-beautifulsoup4 = ">=4.9.1,<5.0.0"
-sphinx = {version = ">=7.2,<7.3", markers = "python_version >= \"3.9\" and python_full_version <= \"3.12.0\""}
 
 [[package]]
 name = "sphinxcontrib-applehelp"
@@ -2044,4 +2043,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "30d7e2ae99eb3467faec75fcc20d65ff98225c5355285cfc7f02c442c1b24fd3"
+content-hash = "c7782633bdc70ef2f5598a15ca26506c9bae06f828f81de72724dbb09a094ef2"

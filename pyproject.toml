@@ -46,13 +46,12 @@ ruff = "^0.0.292"
 termcolor = "^2.2.0"
 tox = "^4.11.4"
 python-magic = "^0.4.27"
-sphinx = "^7.2.6"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.2.6"
 enum-tools = "^0.11.0"
-sphinxawesome-theme = "^5.1.0"
 sphinx-toolbox = "^3.5.0"
+sphinx-nefertiti = "^0.2.1"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
