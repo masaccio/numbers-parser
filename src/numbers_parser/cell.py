@@ -464,7 +464,7 @@ class MergeAnchor:
 class Cell(Cacheable):
     """
     .. NOTE::
-       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Table`.
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
     @classmethod
@@ -730,7 +730,7 @@ class Cell(Cacheable):
 class NumberCell(Cell):
     """
     .. NOTE::
-       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Table`.
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, row: int, col: int, value: float):
@@ -755,7 +755,7 @@ class TextCell(Cell):
 class RichTextCell(Cell):
     """
     .. NOTE::
-       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, row: int, col: int, value):
@@ -816,7 +816,7 @@ class BulletedTextCell(RichTextCell):
 class EmptyCell(Cell):
     """
     .. NOTE::
-       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, row: int, col: int):
@@ -831,7 +831,7 @@ class EmptyCell(Cell):
 class BoolCell(Cell):
     """
     .. NOTE::
-       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, row: int, col: int, value: bool):
@@ -847,7 +847,7 @@ class BoolCell(Cell):
 class DateCell(Cell):
     """
     .. NOTE::
-       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, row: int, col: int, value: DateTime):
@@ -872,7 +872,7 @@ class DurationCell(Cell):
 class ErrorCell(Cell):
     """
     .. NOTE::
-       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, row: int, col: int):
@@ -887,7 +887,7 @@ class ErrorCell(Cell):
 class MergedCell(Cell):
     """
     .. NOTE::
-       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, row: int, col: int):
