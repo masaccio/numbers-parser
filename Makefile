@@ -38,12 +38,18 @@ profile:
 	poetry run pytest --profile
 	poetry run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
 
-docs: docs/build docs/build/index.html
+DOCS_SOURCES = $(shell find docs -name \*.rst) \
+			   docs/conf.py \
+			   src/$(package_c)/*.py \
+			   docs/build/_static/custom.css
 
-docs/build:
-	mkdir -p docs/build
+docs: docs/build/index.html
 
-docs/build/index.html: docs/index.rst docs/conf.py src/$(package_c)/*.py
+docs/build/_static/custom.css: docs/custom.css
+	mkdir -p docs/build/_static
+	cp $< $@
+
+docs/build/index.html: $(DOCS_SOURCES)
 	@mkdir -p docs/build
 	poetry run sphinx-build -q -b html  docs docs/build
 
