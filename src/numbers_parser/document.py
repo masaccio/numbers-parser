@@ -72,34 +72,6 @@ class Document:
         If the sheet name already exists in the document.
     IndexError:
         If the table name already exists in the first sheet.
-
-    Examples
-    --------
-
-    Reading a document and examining the ``Tables`` object:
-
-    .. code-block:: python
-
-        >>> from numbers_parser import Document
-        >>> doc = Document("mydoc.numbers")
-        >>> doc.sheets[0].name
-        'Sheet 1'
-        >>> table = doc.sheets[0].tables[0]
-        >>> table.name
-        'Table 1'
-
-    Creating a new document:
-
-    .. code-block:: python
-
-        doc = Document()
-        doc.add_sheet("New Sheet", "New Table")
-        sheet = doc.sheets["New Sheet"]
-        table = sheet.tables["New Table"]
-        table.write(1, 1, 1000)
-        table.write(1, 2, 2000)
-        table.write(1, 3, 3000)
-        doc.save("mydoc.numbers")
     """
 
     def __init__(  # noqa: PLR0913
