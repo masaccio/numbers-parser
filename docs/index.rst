@@ -65,6 +65,13 @@ with earlier versions of Python.
 
    .. include:: installation.rst
    .. include:: quick-start.rst
+
+   API
+   ---
+
+   For more examples and details of all available classes and methods,
+   see the `full API docs <https://masaccio.github.io/numbers-parser/>`__.
+
    .. include:: cli.rst
 
 License
