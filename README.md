@@ -275,6 +275,11 @@ property. The
 [Table.set_cell_border](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_border)
 sets the border for a cell edge or a range of cells.
 
+## API
+
+For more examples and details of all available classes and methods,
+see the [full API docs](https://masaccio.github.io/numbers-parser/).
+
 ## Command-line scripts
 
 When installed from [PyPI](https://pypi.org/project/numbers-parser/),
