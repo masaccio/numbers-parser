@@ -1,7 +1,5 @@
-:hidetoc: 1
-
 Command-line scripts
-####################
+--------------------
 
 When installed from `PyPI <https://pypi.org/project/numbers-parser/>`__,
 a command-like script ``cat-numbers`` is installed in Python’s scripts

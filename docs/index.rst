@@ -42,11 +42,14 @@ with earlier versions of Python.
      :includehidden:
 
      quick-start
-     api/installation
-     api/cli
+     installation
+     cli
+     limitations
+
+  API Reference
+  =============
 
   .. toctree::
-     :caption: API
      :name: apitoc
      :maxdepth: 2
 
@@ -60,6 +63,12 @@ with earlier versions of Python.
 
 .. only:: MarkdownDocs
 
-   .. include:: api/installation.rst
+   .. include:: installation.rst
    .. include:: quick-start.rst
+   .. include:: cli.rst
 
+License
+=======
+
+All code in this repository is licensed under the `MIT
+License <https://github.com/masaccio/numbers-parser/blob/master/LICENSE.rst>`__

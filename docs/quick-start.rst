@@ -1,5 +1,3 @@
-:hidetoc: 1
-
 Quick Start
 ===========
 
@@ -248,73 +246,3 @@ current state of a cell border is read using the
 property. The
 `Table.set_cell_border <https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_border>`__
 sets the border for a cell edge or a range of cells.
-
-Command-line scripts
-====================
-
-When installed from `PyPI <https://pypi.org/project/numbers-parser/>`__,
-a command-like script ``cat-numbers`` is installed in Python’s scripts
-folder. This script dumps Numbers spreadsheets into Excel-compatible CSV
-format, iterating through all the spreadsheets passed on the
-command-line.
-
-.. code:: text
-
-   usage: cat-numbers [-h] [-T | -S | -b] [-V] [--debug] [--formulas]
-                      [--formatting] [-s SHEET] [-t TABLE] [document ...]
-
-   Export data from Apple Numbers spreadsheet tables
-
-   positional arguments:
-     document                 Document(s) to export
-
-   optional arguments:
-     -h, --help               show this help message and exit
-     -T, --list-tables        List the names of tables and exit
-     -S, --list-sheets        List the names of sheets and exit
-     -b, --brief              Don't prefix data rows with name of sheet/table (default: false)
-     -V, --version
-     --debug                  Enable debug output
-     --formulas               Dump formulas instead of formula results
-     --formatting             Dump formatted cells (durations) as they appear in Numbers
-     -s SHEET, --sheet SHEET  Names of sheet(s) to include in export
-     -t TABLE, --table TABLE  Names of table(s) to include in export
-
-Note: ``--formatting`` will return different capitalization for 12-hour
-times due to differences between Numbers’ representation of these dates
-and ``datetime.strftime``. Numbers in English locales displays 12-hour
-times with ‘am’ and ‘pm’, but ``datetime.strftime`` on macOS at least
-cannot return lower-case versions of AM/PM.
-
-Limitations
-===========
-
-Current known limitations of ``numbers-parser`` are:
-
--  Formulas cannot be written to a document
--  Table styles that allow new tables to adopt a style across the whole
-   table are not planned.
--  Creating cells of type ``BulletedTextCell`` is not supported
--  New tables are inserted with a fixed offset below the last table in a
-   worksheet which does not take into account title or caption size
--  New sheets insert tables with formats copied from the first table in
-   the previous sheet rather than default table formats
--  Creating custom cell formats and cell data formats is experimental
-   and not all formats are supported. See
-   `Table.set_cell_formatting <https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_formatting>`__
-   for more details.
--  Due to a limitation in Python's
-   `ZipFile <https://docs.python.org/3/library/zipfile.html>`__, Python
-   versions older than 3.11 do not support image filenames with UTF-8
-   characters (see `issue
-   69 <https://github.com/masaccio/numbers-parser/issues/69>`__).
-   `Cell.style.bg_image <https://masaccio.github.io/numbers-parser/#numbers_parser.Style>`__
-   returns ``None`` for such files and issues a ``RuntimeWarning``.
-- Pivot tables are unsupported, but re-saving a document is believed to work. Saving a document with a pivot table issues a `UnsupportedWarning`.
-
-
-License
-=======
-
-All code in this repository is licensed under the `MIT
-License <https://github.com/masaccio/numbers-parser/blob/master/LICENSE.rst>`__
