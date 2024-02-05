@@ -31,9 +31,11 @@ jobs:
       - name: Check in new README
         run: |
           cp docs/build/index.md README.md
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git diff-index --quiet HEAD || git commit -m 'Updating README' README.md
+          if ! git diff-index --quiet HEAD; then
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git commit -m 'Updating README' README.md
+          fi
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
