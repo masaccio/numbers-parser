@@ -1,4 +1,4 @@
-name: Build README.mg
+name: Build README
 
 on:
   push:
