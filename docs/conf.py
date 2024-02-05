@@ -44,15 +44,15 @@ html_theme_options = {
     # "show_colorset_choices": True,
 }
 
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon",
+    "enum_tools.autoenum",
+]
+
 
 def setup_extensions(app, docname, source):
-    extensions = [
-        "sphinx.ext.autodoc",
-        "sphinx.ext.viewcode",
-        "sphinx.ext.napoleon",
-        "enum_tools.autoenum",
-    ]
-
     if app.builder.name == "html":
         extensions.append("sphinx_nefertiti")
 
