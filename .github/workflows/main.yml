@@ -1,0 +1,28 @@
+name: Build README.mg
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+      OS: ubuntu-latest
+      PYTHON: '3.11'
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        sudo apt-get -y install libsnappy-dev
+        pip install poetry
+        poetry install --with docs
+    - name: Test with pytest
+      run: |
+        poetry run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
