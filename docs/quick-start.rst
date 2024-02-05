@@ -1,7 +1,7 @@
 :hidetoc: 1
 
-Reading Numbers Documents
--------------------------
+Quick Start
+===========
 
 Reading documents:
 
@@ -42,7 +42,8 @@ the column values.
    >>> data[1][0].value
    'Debit'
 
-### Cell Data
+Cell Data
+^^^^^^^^^
 
 Cells are objects with a common base class of ``Cell``. All cell types
 have a property ``value`` which returns the contents of the cell as a
@@ -100,7 +101,7 @@ any kind ``ErrorCell``.
    '£1,234.50'
 
 Pandas Support
-~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^
 
 Since the return value of ``rows()`` is a list of lists, you can pass
 this directly to pandas. Assuming you have a Numbers table with a single
@@ -118,7 +119,7 @@ you can construct a pandas dataframe using:
    df = pd.DataFrame(data[1:], columns=data[0])
 
 Writing Numbers Documents
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Whilst support for writing numbers files has been stable since version
 3.4.0, you are highly recommended not to overwrite working Numbers files
@@ -158,7 +159,7 @@ respectively:
    doc.save("sheet.numbers")
 
 Styles
-------
+^^^^^^
 
 ``numbers_parser`` currently only supports paragraph styles and cell
 styles. The following paragraph styles are supported:
@@ -189,7 +190,7 @@ will have the effect of changing the font size for that style and will
 in turn affect the styles of all cells using that style.
 
 Cell Data Formatting
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 Numbers has two different cell formatting types: data formats and custom
 formats.
@@ -230,7 +231,7 @@ Pounds are referred to using their symbols of ``€`` and ``£``
 respectively.
 
 Borders
--------
+^^^^^^^
 
 ``numbers-parser`` supports reading and writing cell borders, though the
 interface for each differs. Individual cells can have each of their four
@@ -249,7 +250,7 @@ property. The
 sets the border for a cell edge or a range of cells.
 
 Command-line scripts
---------------------
+====================
 
 When installed from `PyPI <https://pypi.org/project/numbers-parser/>`__,
 a command-like script ``cat-numbers`` is installed in Python’s scripts
@@ -286,7 +287,7 @@ times with ‘am’ and ‘pm’, but ``datetime.strftime`` on macOS at least
 cannot return lower-case versions of AM/PM.
 
 Limitations
------------
+===========
 
 Current known limitations of ``numbers-parser`` are:
 
@@ -302,26 +303,18 @@ Current known limitations of ``numbers-parser`` are:
    and not all formats are supported. See
    `Table.set_cell_formatting <https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_formatting>`__
    for more details.
--  Due to a limitation in Python’s
+-  Due to a limitation in Python's
    `ZipFile <https://docs.python.org/3/library/zipfile.html>`__, Python
    versions older than 3.11 do not support image filenames with UTF-8
    characters (see `issue
    69 <https://github.com/masaccio/numbers-parser/issues/69>`__).
    `Cell.style.bg_image <https://masaccio.github.io/numbers-parser/#numbers_parser.Style>`__
    returns ``None`` for such files and issues a ``RuntimeWarning``.
+- Pivot tables are unsupported, but re-saving a document is believed to work. Saving a document with a pivot table issues a `UnsupportedWarning`.
 
 
 License
--------
+=======
 
 All code in this repository is licensed under the `MIT
 License <https://github.com/masaccio/numbers-parser/blob/master/LICENSE.rst>`__
-
-.. |build:| image:: https://github.com/masaccio/numbers-parser/actions/workflows/run-all-tests.yml/badge.svg
-   :target: https://github.com/masaccio/numbers-parser/actions/workflows/run-all-tests.yml
-.. |image1| image:: https://github.com/masaccio/numbers-parser/actions/workflows/codeql.yml/badge.svg
-   :target: https://github.com/masaccio/numbers-parser/actions/workflows/codeql.yml
-.. |codecov| image:: https://codecov.io/gh/masaccio/numbers-parser/branch/main/graph/badge.svg?token=EKIUFGT05E
-   :target: https://codecov.io/gh/masaccio/numbers-parser
-.. |PyPI version| image:: https://badge.fury.io/py/numbers-parser.svg
-   :target: https://badge.fury.io/py/numbers-parser
