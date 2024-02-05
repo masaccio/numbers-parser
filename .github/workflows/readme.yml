@@ -26,3 +26,6 @@ jobs:
     - name: Test with pytest
       run: |
         poetry run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
+        cp docs/build/index.md README.md
+        git commit -m 'Updating README' README.md
+        git push
