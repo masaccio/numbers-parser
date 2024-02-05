@@ -5,27 +5,36 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+    jobs:
+      job1:
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    env:
-      OS: ubuntu-latest
-      PYTHON: '3.11'
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        sudo apt-get -y install libsnappy-dev
-        pip install poetry
-        poetry install --with docs
-    - name: Test with pytest
-      run: |
-        poetry run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
-        cp docs/build/index.md README.md
-        git commit -m 'Updating README' README.md
-        git push
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@master
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          sudo apt-get -y install libsnappy-dev
+          pip install poetry
+          poetry install --with docs
+      - name: Built README with Sphinx
+        run: |
+          poetry run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
+      - name: Check in new README
+        run: |
+          cp docs/build/index.md README.md
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -m 'Updating README' README.md
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          force_with_lease: true
