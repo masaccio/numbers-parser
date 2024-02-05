@@ -1050,6 +1050,11 @@ class _NumbersModel(Cacheable):
             table_info.super.geometry.position.y,
         )
 
+    def is_a_pivot_table(self, table_id: int) -> bool:
+        """Table is a pivot table."""
+        table_info = self.objects[self.table_info_id(table_id)]
+        return table_info.is_a_pivot_table
+
     def last_table_offset(self, sheet_id):
         """Y offset of the last table in a sheet."""
         table_id = self.table_ids(sheet_id)[-1]

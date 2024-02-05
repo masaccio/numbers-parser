@@ -5,7 +5,7 @@ import pytest
 from pendulum import datetime, duration
 from psutil import Process
 
-from numbers_parser import Document, EmptyCell, ErrorCell
+from numbers_parser import Document, EmptyCell, ErrorCell, UnsupportedWarning
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"
@@ -404,3 +404,10 @@ def test_issue_69():
             assert table.cell(0, 0).style.bg_image is None
         assert len(record) == 1
         assert str(record[0].message) == "Cannot find file 'sssssss的副本.jpeg' in Numbers archive"
+
+
+def test_issue_73(configurable_save_file):
+    doc = Document("tests/data/issue-73.numbers")
+    with pytest.warns(UnsupportedWarning) as record:
+        doc.save(configurable_save_file)
+    assert str(record[0].message) == "Not modifying pivot table 'Table 1 Pivot'"

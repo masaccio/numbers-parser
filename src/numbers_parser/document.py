@@ -15,6 +15,7 @@ from numbers_parser.cell import (
     NumberCell,
     Style,
     TextCell,
+    UnsupportedWarning,
     xl_cell_to_rowcol,
 )
 from numbers_parser.cell_storage import CellStorage
@@ -129,7 +130,15 @@ class Document:
         """
         for sheet in self.sheets:
             for table in sheet.tables:
-                self._model.recalculate_table_data(table._table_id, table._data)
+                if self._model.is_a_pivot_table(table._table_id):
+                    table_name = self._model.table_name(table._table_id)
+                    warn(
+                        f"Not modifying pivot table '{table_name}'",
+                        UnsupportedWarning,
+                        stacklevel=2,
+                    )
+                else:
+                    self._model.recalculate_table_data(table._table_id, table._data)
         write_numbers_file(filename, self._model.file_store)
 
     def add_sheet(
