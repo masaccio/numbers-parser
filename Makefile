@@ -52,7 +52,7 @@ docs/build/_static/custom.css: docs/custom.css
 docs/build/index.html: $(DOCS_SOURCES)
 	@mkdir -p docs/build
 	poetry run sphinx-build -q -b html -t HtmlDocs docs docs/build
-	poetry run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build
+	poetry run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
 
 test:
 	poetry run pytest -n logical
