@@ -73,6 +73,7 @@ with earlier versions of Python.
    see the `full API docs <https://masaccio.github.io/numbers-parser/>`__.
 
    .. include:: cli.rst
+   .. include:: limitations.rst
 
 License
 =======
