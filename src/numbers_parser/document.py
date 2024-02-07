@@ -305,7 +305,7 @@ class Document:
         if custom_format.type == CustomFormattingType.NUMBER:
             self._model.add_custom_decimal_format_archive(custom_format)
         elif custom_format.type == CustomFormattingType.DATETIME:
-            self._model.add_custom_text_format_archive(custom_format)
+            self._model.add_custom_datetime_format_archive(custom_format)
         else:
             self._model.add_custom_text_format_archive(custom_format)
         return custom_format
