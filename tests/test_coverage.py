@@ -1,4 +1,5 @@
 import pytest
+from pendulum import datetime
 
 from numbers_parser import (
     Cell,
@@ -246,3 +247,23 @@ def test_formatting_empty_cell():
     assert cell.formatted_value == ""
 
     assert format_decimal(None, object()) == ""
+
+
+def test_custom_format_from_archive(configurable_save_file):
+    doc = Document()
+    doc.add_custom_format(type="datetime", name="date_format")
+    doc.add_custom_format(type="text", name="text_format")
+    doc.add_custom_format(type="number", name="number_format")
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    table.write(0, 0, datetime(2022, 1, 1))
+    table.write(0, 1, "test")
+    table.write(0, 2, 1.0)
+    table.set_cell_formatting(0, 0, "custom", format="date_format")
+    table.set_cell_formatting(0, 1, "custom", format="text_format")
+    table.set_cell_formatting(0, 2, "custom", format="number_format")
+    assert table.cell(0, 0)._storage.date_format_id == 1
+    assert table.cell(0, 1)._storage.text_format_id == 2
+    assert table.cell(0, 2)._storage.num_format_id == 3

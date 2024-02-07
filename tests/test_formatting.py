@@ -818,6 +818,11 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
 
 def test_write_text_custom_formatting(configurable_save_file):
     doc = Document(num_header_cols=0, num_header_rows=0)
+
+    with pytest.raises(TypeError) as e:
+        _ = doc.add_custom_format(type="text", format="before %s %s after")
+    assert "Custom formats only allow one text substitution" in str(e)
+
     string_format = doc.add_custom_format(type="text", format="before %s after")
     table = doc.sheets[0].tables[0]
     table.write(0, 0, "test")
