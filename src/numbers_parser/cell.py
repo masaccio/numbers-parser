@@ -29,6 +29,7 @@ from numbers_parser.constants import (
     MAX_SIGNIFICANT_DIGITS,
     CustomFormattingType,
     FormattingType,
+    FormatType,
     FractionAccuracy,
     NegativeNumberStyle,
     PaddingType,
@@ -765,9 +766,11 @@ class RichTextCell(Cell):
         self._hyperlinks = value["hyperlinks"]
         if value["bulleted"]:
             self._formatted_bullets = [
-                value["bullet_chars"][i] + " " + value["bullets"][i]
-                if value["bullet_chars"][i] is not None
-                else value["bullets"][i]
+                (
+                    value["bullet_chars"][i] + " " + value["bullets"][i]
+                    if value["bullet_chars"][i] is not None
+                    else value["bullets"][i]
+                )
                 for i in range(len(self._bullets))
             ]
             self._is_bulleted = True
@@ -1117,3 +1120,14 @@ class CustomFormatting:
         if self.type == CustomFormattingType.TEXT:
             if self.format.count("%s") > 1:
                 raise TypeError("Custom formats only allow one text substitution")
+
+    @classmethod
+    def from_archive(cls, archive: object):
+        if archive.format_type == FormatType.CUSTOM_DATE:
+            format_type = CustomFormattingType.DATETIME
+        elif archive.format_type == FormatType.CUSTOM_NUMBER:
+            format_type = CustomFormattingType.NUMBER
+        else:
+            format_type = CustomFormattingType.TEXT
+
+        return CustomFormatting(name=archive.name, type=format_type)
