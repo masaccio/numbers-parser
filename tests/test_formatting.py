@@ -836,10 +836,10 @@ def test_write_datetime_custom_formatting(configurable_save_file):
     table.write(0, 0, datetime(2023, 4, 1, 13, 25, 42))
     table.write(0, 1, datetime(2023, 4, 2, 13, 25, 42))
     table.set_cell_formatting(0, 0, "custom", format=string_format)
-    table.set_cell_formatting(0, 0, "custom", format=string_format.name)
+    table.set_cell_formatting(0, 1, "custom", format=string_format.name)
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
     assert table.cell(0, 0).formatted_value == "01 April, 2023"
-    assert table.cell(0, 0).formatted_value == "02 April, 2023"
+    assert table.cell(0, 1).formatted_value == "02 April, 2023"
