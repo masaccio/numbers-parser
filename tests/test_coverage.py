@@ -7,6 +7,7 @@ from numbers_parser import (
     Document,
     EmptyCell,
     Formatting,
+    PaddingType,
     UnsupportedError,
     UnsupportedWarning,
     xl_col_to_name,
@@ -254,16 +255,29 @@ def test_custom_format_from_archive(configurable_save_file):
     doc.add_custom_format(type="datetime", name="date_format")
     doc.add_custom_format(type="text", name="text_format")
     doc.add_custom_format(type="number", name="number_format")
-    doc.save(configurable_save_file)
-
-    doc = Document(configurable_save_file)
+    doc.add_custom_format(
+        type="number", name="number_format_1", num_integers=4, integer_format=PaddingType.ZEROS
+    )
+    doc.add_custom_format(
+        type="number", name="number_format_2", num_integers=7, integer_format=PaddingType.ZEROS
+    )
     table = doc.sheets[0].tables[0]
     table.write(0, 0, datetime(2022, 1, 1))
     table.write(0, 1, "test")
     table.write(0, 2, 1.0)
+    table.write(0, 3, 1.0)
+    table.write(0, 4, 1.0)
+    table.set_cell_formatting(0, 3, "custom", format="number_format_1")
+    table.set_cell_formatting(0, 4, "custom", format="number_format_2")
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
     table.set_cell_formatting(0, 0, "custom", format="date_format")
     table.set_cell_formatting(0, 1, "custom", format="text_format")
     table.set_cell_formatting(0, 2, "custom", format="number_format")
-    assert table.cell(0, 0)._storage.date_format_id == 1
-    assert table.cell(0, 1)._storage.text_format_id == 2
-    assert table.cell(0, 2)._storage.num_format_id == 3
+    assert table.cell(0, 0)._storage.date_format_id == 3
+    assert table.cell(0, 1)._storage.text_format_id == 4
+    assert table.cell(0, 2)._storage.num_format_id == 5
+    assert table.cell(0, 3).formatted_value == "0001"
+    assert table.cell(0, 4).formatted_value == "0000001"
