@@ -439,6 +439,8 @@ class CellStorage(Cacheable):
             self.is_currency = True
         elif format_type in [FormattingType.DATETIME, CustomFormattingType.DATETIME]:
             self.date_format_id = format_id
+        elif format_type == CustomFormattingType.TEXT:
+            self.text_format_id = format_id
         else:
             self.num_format_id = format_id
 

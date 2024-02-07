@@ -182,9 +182,9 @@ class FormattingType(IntEnum):
 
 
 class CustomFormattingType(IntEnum):
-    NUMBER = 1
-    DATETIME = 2
-    TEXT = 3
+    NUMBER = 101
+    DATETIME = 102
+    TEXT = 103
 
 
 @enum_tools.documentation.document_enum
@@ -259,6 +259,12 @@ FORMAT_TYPE_MAP = {
     FormattingType.NUMBER: FormatType.DECIMAL,
     FormattingType.PERCENTAGE: FormatType.PERCENT,
     FormattingType.SCIENTIFIC: FormatType.SCIENTIFIC,
+}
+
+CUSTOM_FORMAT_TYPE_MAP = {
+    CustomFormattingType.NUMBER: FormatType.CUSTOM_NUMBER,
+    CustomFormattingType.DATETIME: FormatType.CUSTOM_DATE,
+    CustomFormattingType.TEXT: FormatType.CUSTOM_TEXT,
 }
 
 

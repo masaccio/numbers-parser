@@ -403,6 +403,9 @@ def test_write_date_format(configurable_save_file):
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting("A1", "invalid")
     assert "unsuported cell format type 'invalid'" in str(e)
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting(0, 0, "datetime", "invalid")
+    assert "too many positional arguments to set_cell_formatting" in str(e)
 
     table.write("A1", 0.1)
     with pytest.raises(TypeError) as e:
@@ -733,6 +736,22 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(0, 0, "custom", format=object())
     assert "format must be a CustomFormatting object or format name" in str(e)
+    with pytest.raises(IndexError) as e:
+        table.set_cell_formatting(0, 0, "custom", format="invalid")
+    assert "format 'invalid' does not exist" in str(e)
+
+    table.write(2, 0, datetime(2022, 1, 1))
+    table.write(2, 1, "test")
+    table.write(2, 2, 1.0)
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting(2, 0, "custom", format=doc.add_custom_format(type="number"))
+    assert "cannot use number formatting for cells of type DateCell" in str(e)
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting(2, 1, "custom", format=doc.add_custom_format(type="datetime"))
+    assert "cannot use date/time formatting for cells of type TextCell" in str(e)
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting(2, 2, "custom", format=doc.add_custom_format(type="text"))
+    assert "cannot use text formatting for cells of type NumberCell" in str(e)
 
     row = 0
     for integer_format in [PaddingType.NONE, PaddingType.ZEROS, PaddingType.SPACES]:
@@ -797,7 +816,6 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
             raise AssertionError()
 
 
-@pytest.mark.experimental
 def test_write_text_custom_formatting(configurable_save_file):
     doc = Document(num_header_cols=0, num_header_rows=0)
     string_format = doc.add_custom_format(type="text", format="before %s after")
@@ -809,3 +827,19 @@ def test_write_text_custom_formatting(configurable_save_file):
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
     assert table.cell(0, 0).formatted_value == "before test after"
+
+
+def test_write_datetime_custom_formatting(configurable_save_file):
+    doc = Document(num_header_cols=0, num_header_rows=0)
+    string_format = doc.add_custom_format(type="datetime", format="dd MMMM, yyyy")
+    table = doc.sheets[0].tables[0]
+    table.write(0, 0, datetime(2023, 4, 1, 13, 25, 42))
+    table.write(0, 1, datetime(2023, 4, 2, 13, 25, 42))
+    table.set_cell_formatting(0, 0, "custom", format=string_format)
+    table.set_cell_formatting(0, 0, "custom", format=string_format.name)
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    assert table.cell(0, 0).formatted_value == "01 April, 2023"
+    assert table.cell(0, 0).formatted_value == "02 April, 2023"
