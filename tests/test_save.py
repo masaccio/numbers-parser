@@ -60,6 +60,13 @@ def test_save_merges(configurable_save_file):
     table.write("F4", "")
     table.merge_cells("B2:C2")
     table.merge_cells(["B5:E5", "D2:F4"])
+    assert table.cell("B2").is_merged
+    assert table.cell("B2").size == (1, 2)
+    assert table.cell("B5").is_merged
+    assert table.cell("B5").size == (1, 4)
+    assert table.cell("D2").is_merged
+    assert table.cell("D2").size == (3, 3)
+    assert table.merge_ranges == ["B2:C2", "B5:E5", "D2:F4"]
 
     doc.save(configurable_save_file)
 

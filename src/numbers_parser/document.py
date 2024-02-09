@@ -17,6 +17,7 @@ from numbers_parser.cell import (
     TextCell,
     UnsupportedWarning,
     xl_cell_to_rowcol,
+    xl_range,
 )
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import (
@@ -29,7 +30,7 @@ from numbers_parser.constants import (
 from numbers_parser.containers import ItemsList
 from numbers_parser.file import write_numbers_file
 from numbers_parser.model import _NumbersModel
-from numbers_parser.numbers_cache import Cacheable, cache
+from numbers_parser.numbers_cache import Cacheable
 
 __all__ = ["Document", "Sheet", "Table"]
 
@@ -571,7 +572,6 @@ class Table(Cacheable):  # noqa: F811
             return self._data
 
     @property
-    @cache(num_args=0)
     def merge_ranges(self) -> List[str]:
         """List[str]: The merge ranges of cells in A1 notation.
 
@@ -587,8 +587,13 @@ class Table(Cacheable):  # noqa: F811
             >>> table.cell("A5")
             <numbers_parser.cell.MergedCell object at 0x1035f5310>
         """
-        merge_cells = self._model.merge_cells(self._table_id).merge_cell_names()
-        return sorted(set(list(merge_cells)))
+        merge_cells = set()
+        for row, cells in enumerate(self._data):
+            for col, cell in enumerate(cells):
+                if cell.is_merged:
+                    size = cell.size
+                    merge_cells.add(xl_range(row, col, row + size[0] - 1, col + size[1] - 1))
+        return sorted(list(merge_cells))
 
     def cell(self, *args) -> Union[Cell, MergedCell]:
         """
@@ -1050,8 +1055,27 @@ class Table(Cacheable):  # noqa: F811
         self.num_cols -= num_cols
         self._model.number_of_columns(self._table_id, self.num_cols)
 
-    def merge_cells(self, cell_range):
-        """Convert a cell range or list of cell ranges into merged cells."""
+    def merge_cells(self, cell_range: Union[str, List[str]]) -> None:
+        """
+        Convert a cell range or list of cell ranges into merged cells.
+
+        Parameters
+        ----------
+        cell_range: str | List[str]
+            Cell range(s) to merge in A1 notation
+
+        Example
+        --------
+        .. code:: python
+
+            >>> table.cell("B2")
+            <numbers_parser.cell.TextCell object at 0x102c0d390>
+            >>> table.cell("B2").is_merged
+            False
+            >>> table.merge_cells("B2:C2")
+            >>> table.cell("B2").is_merged
+            True
+        """
         if isinstance(cell_range, list):
             for x in cell_range:
                 self.merge_cells(x)
