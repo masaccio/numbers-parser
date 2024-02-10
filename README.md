@@ -51,7 +51,7 @@ version for your installation. For example for python 3.11:
 C:\Users\Jon>pip install C:\Users\Jon\Downloads\python_snappy-0.6.1-cp311-cp311-win_amd64.whl
 ```
 
-### Quick Start
+## Quick Start
 
 Reading documents:
 
@@ -91,7 +91,7 @@ the column values.
 'Debit'
 ```
 
-#### Cell Data
+### Cell Data
 
 Cells are objects with a common base class of `Cell`. All cell types
 have a property `value` which returns the contents of the cell as a
@@ -131,7 +131,7 @@ any kind `ErrorCell`.
 '£1,234.50'
 ```
 
-#### Pandas Support
+### Pandas Support
 
 Since the return value of `rows()` is a list of lists, you can pass
 this directly to pandas. Assuming you have a Numbers table with a single
@@ -148,7 +148,7 @@ data = tables[0].rows(values_only=True)
 df = pd.DataFrame(data[1:], columns=data[0])
 ```
 
-#### Writing Numbers Documents
+### Writing Numbers Documents
 
 Whilst support for writing numbers files has been stable since version
 3.4.0, you are highly recommended not to overwrite working Numbers files
@@ -187,7 +187,7 @@ table.write(1, 3, 3000)
 doc.save("sheet.numbers")
 ```
 
-#### Styles
+### Styles
 
 `numbers_parser` currently only supports paragraph styles and cell
 styles. The following paragraph styles are supported:
@@ -217,7 +217,7 @@ Since `Style` objects are shared, changing `Cell.style.font_size`
 will have the effect of changing the font size for that style and will
 in turn affect the styles of all cells using that style.
 
-#### Cell Data Formatting
+### Cell Data Formatting
 
 Numbers has two different cell formatting types: data formats and custom
 formats.
@@ -233,8 +233,18 @@ Cell formats are changed using
 [Table.set_cell_formatting](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_formatting):
 
 ```python
-table.set_cell_formatting("C1", "date", date_time_format="EEEE, d MMMM yyyy")
-table.set_cell_formatting(0, 4, "number", decimal_places=3, negative_style=NegativeNumberStyle.RED)
+table.set_cell_formatting(
+   "C1",
+   "date",
+   date_time_format="EEEE, d MMMM yyyy"
+)
+table.set_cell_formatting(
+   0,
+   4,
+   "number",
+   decimal_places=3,
+   negative_style=NegativeNumberStyle.RED
+)
 ```
 
 Custom formats are shared across a Document and can be applied to
@@ -246,7 +256,11 @@ before assigning it to cells using
 [Table.set_cell_formatting](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_formatting):
 
 ```python
-long_date = doc.add_custom_format(name="Long Date", type="date", date_time_format="EEEE, d MMMM yyyy")
+long_date = doc.add_custom_format(
+   name="Long Date",
+   type="date",
+   date_time_format="EEEE, d MMMM yyyy"
+)
 table.set_cell_formatting("C1", "custom", format=long_date)
 ```
 
@@ -257,7 +271,7 @@ example, US dollars are referred to as `US$` whereas Euros and British
 Pounds are referred to using their symbols of `€` and `£`
 respectively.
 
-#### Borders
+### Borders
 
 `numbers-parser` supports reading and writing cell borders, though the
 interface for each differs. Individual cells can have each of their four
@@ -289,25 +303,30 @@ format, iterating through all the spreadsheets passed on the
 command-line.
 
 ```text
-usage: cat-numbers [-h] [-T | -S | -b] [-V] [--debug] [--formulas]
-                   [--formatting] [-s SHEET] [-t TABLE] [document ...]
+usage: cat-numbers [-h] [-T | -S | -b] [-V] [--formulas] [--formatting]
+                  [-s SHEET] [-t TABLE] [--debug]
+                  [document ...]
 
 Export data from Apple Numbers spreadsheet tables
 
 positional arguments:
-  document                 Document(s) to export
+  document              Document(s) to export
 
-optional arguments:
-  -h, --help               show this help message and exit
-  -T, --list-tables        List the names of tables and exit
-  -S, --list-sheets        List the names of sheets and exit
-  -b, --brief              Don't prefix data rows with name of sheet/table (default: false)
+options:
+  -h, --help            show this help message and exit
+  -T, --list-tables     List the names of tables and exit
+  -S, --list-sheets     List the names of sheets and exit
+  -b, --brief           Don't prefix data rows with name of sheet/table
+                        (default: false)
   -V, --version
-  --debug                  Enable debug output
-  --formulas               Dump formulas instead of formula results
-  --formatting             Dump formatted cells (durations) as they appear in Numbers
-  -s SHEET, --sheet SHEET  Names of sheet(s) to include in export
-  -t TABLE, --table TABLE  Names of table(s) to include in export
+  --formulas            Dump formulas instead of formula results
+  --formatting          Dump formatted cells (durations) as they appear
+                        in Numbers
+  -s SHEET, --sheet SHEET
+                        Names of sheet(s) to include in export
+  -t TABLE, --table TABLE
+                        Names of table(s) to include in export
+  --debug               Enable debug logging
 ```
 
 Note: `--formatting` will return different capitalization for 12-hour
@@ -328,10 +347,6 @@ Current known limitations of `numbers-parser` are:
   worksheet which does not take into account title or caption size
 - New sheets insert tables with formats copied from the first table in
   the previous sheet rather than default table formats
-- Creating custom cell formats and cell data formats is experimental
-  and not all formats are supported. See
-  [Table.set_cell_formatting](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_formatting)
-  for more details.
 - Due to a limitation in Python’s
   [ZipFile](https://docs.python.org/3/library/zipfile.html), Python
   versions older than 3.11 do not support image filenames with UTF-8
