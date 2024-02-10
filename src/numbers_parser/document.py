@@ -453,6 +453,14 @@ class Table(Cacheable):  # noqa: F811
         """
         int: The number of header rows.
 
+        Example
+        -------
+
+        .. code-block:: python
+
+            # Add an extra header row
+            table.num_header_rows += 1
+
         Raises
         ------
         ValueError:
@@ -475,6 +483,14 @@ class Table(Cacheable):  # noqa: F811
     def num_header_cols(self) -> int:
         """
         int: The number of header columns.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            # Add an extra header column
+            table.num_header_cols += 1
 
         Raises
         ------
