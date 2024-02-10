@@ -49,7 +49,11 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "enum_tools.autoenum",
+    "sphinx_copybutton",
 ]
+
+copybutton_prompt_text = ">>> "
+copybutton_line_continuation_character = "\\"
 
 
 def setup_extensions(app, docname, source):

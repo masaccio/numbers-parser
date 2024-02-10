@@ -1456,13 +1456,13 @@ files = [
 
 [[package]]
 name = "ruamel-yaml"
-version = "0.18.5"
+version = "0.18.6"
 description = "ruamel.yaml is a YAML parser/emitter that supports roundtrip preservation of comments, seq/map flow style, and map key order"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "ruamel.yaml-0.18.5-py3-none-any.whl", hash = "sha256:a013ac02f99a69cdd6277d9664689eb1acba07069f912823177c5eced21a6ada"},
-    {file = "ruamel.yaml-0.18.5.tar.gz", hash = "sha256:61917e3a35a569c1133a8f772e1226961bf5a1198bea7e23f06a0841dea1ab0e"},
+    {file = "ruamel.yaml-0.18.6-py3-none-any.whl", hash = "sha256:57b53ba33def16c4f3d807c0ccbc00f8a6081827e81ba2491691b76882d0c636"},
+    {file = "ruamel.yaml-0.18.6.tar.gz", hash = "sha256:8b27e6a217e786c6fbe5634d8f3f11bc63e0f80f6a5890f28863d9c45aac311b"},
 ]
 
 [package.dependencies]
@@ -1668,13 +1668,13 @@ test = ["cython (>=3.0)", "filelock", "html5lib", "pytest (>=4.6)", "setuptools 
 
 [[package]]
 name = "sphinx-autodoc-typehints"
-version = "1.25.3"
+version = "2.0.0"
 description = "Type hints (PEP 484) support for the Sphinx autodoc extension"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "sphinx_autodoc_typehints-1.25.3-py3-none-any.whl", hash = "sha256:d3da7fa9a9761eff6ff09f8b1956ae3090a2d4f4ad54aebcade8e458d6340835"},
-    {file = "sphinx_autodoc_typehints-1.25.3.tar.gz", hash = "sha256:70db10b391acf4e772019765991d2de0ff30ec0899b9ba137706dc0b3c4835e0"},
+    {file = "sphinx_autodoc_typehints-2.0.0-py3-none-any.whl", hash = "sha256:12c0e161f6fe191c2cdfd8fa3caea271f5387d9fbc67ebcd6f4f1f24ce880993"},
+    {file = "sphinx_autodoc_typehints-2.0.0.tar.gz", hash = "sha256:7f2cdac2e70fd9787926b6e9e541cd4ded1e838d2b46fda2a1bb0a75ec5b7f3a"},
 ]
 
 [package.dependencies]
@@ -1684,6 +1684,24 @@ sphinx = ">=7.1.2"
 docs = ["furo (>=2023.9.10)"]
 numpy = ["nptyping (>=2.5)"]
 testing = ["covdefaults (>=2.3)", "coverage (>=7.3.2)", "diff-cover (>=8.0.1)", "pytest (>=7.4.3)", "pytest-cov (>=4.1)", "sphobjinv (>=2.3.1)", "typing-extensions (>=4.8)"]
+
+[[package]]
+name = "sphinx-copybutton"
+version = "0.5.2"
+description = "Add a copy button to each of your code cells."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "sphinx-copybutton-0.5.2.tar.gz", hash = "sha256:4cf17c82fb9646d1bc9ca92ac280813a3b605d8c421225fd9913154103ee1fbd"},
+    {file = "sphinx_copybutton-0.5.2-py3-none-any.whl", hash = "sha256:fb543fd386d917746c9a2c50360c7905b605726b9355cd26e9974857afeae06e"},
+]
+
+[package.dependencies]
+sphinx = ">=1.8"
+
+[package.extras]
+code-style = ["pre-commit (==2.12.1)"]
+rtd = ["ipython", "myst-nb", "sphinx", "sphinx-book-theme", "sphinx-examples"]
 
 [[package]]
 name = "sphinx-jinja2-compat"
@@ -2062,4 +2080,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "42f73247db7a955ef81b28c08dd880bd6c5b7119d9297c3314667dfd1715265a"
+content-hash = "3e69e1225efebaaf34bfa4b2342cd6415c279ca525afe84a0f2a8ae1fd325492"

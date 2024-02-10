@@ -12,6 +12,7 @@ sigfig
 six
 sortedcontainers
 sphinx
+sphinx_copybutton
 sphinx_toolbox
 sphinx_nefertiti
 wcwidth
