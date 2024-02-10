@@ -27,14 +27,16 @@ For Intel Macs:
 
 ```bash
 brew install snappy python3
-CPPFLAGS="-I/usr/local/include -L/usr/local/lib" python3 -m pip install python-snappy
+CPPFLAGS="-I/usr/local/include -L/usr/local/lib" \
+python3 -m pip install python-snappy
 ```
 
 For Apple Silicon Macs:
 
 ```bash
 brew install snappy python3
-CPPFLAGS="-I/opt/homebrew/include -L/opt/homebrew/lib" python3 -m pip install python-snappy
+CPPFLAGS="-I/opt/homebrew/include -L/opt/homebrew/lib" \
+python3 -m pip install python-snappy
 ```
 
 For Linux (your package manager may be different):
@@ -48,7 +50,7 @@ binary libraries compiled by [Christoph Gohlke](https://www.lfd.uci.edu/~gohlke/
 version for your installation. For example for python 3.11:
 
 ```text
-C:\Users\Jon>pip install C:\Users\Jon\Downloads\python_snappy-0.6.1-cp311-cp311-win_amd64.whl
+pip install python_snappy-0.6.1-cp311-cp311-win_amd64.whl
 ```
 
 ## Quick Start
