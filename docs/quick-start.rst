@@ -1,5 +1,5 @@
 Quick Start
-===========
+-----------
 
 Reading documents:
 
@@ -205,8 +205,18 @@ Cell formats are changed using
 
 .. code:: python
 
-   table.set_cell_formatting("C1", "date", date_time_format="EEEE, d MMMM yyyy")
-   table.set_cell_formatting(0, 4, "number", decimal_places=3, negative_style=NegativeNumberStyle.RED)
+   table.set_cell_formatting(
+      "C1", 
+      "date", 
+      date_time_format="EEEE, d MMMM yyyy"
+   )
+   table.set_cell_formatting(
+      0,
+      4,
+      "number", 
+      decimal_places=3, 
+      negative_style=NegativeNumberStyle.RED
+   )
 
 Custom formats are shared across a Document and can be applied to
 multiple cells in multiple tables. Editing a custom format changes the
@@ -218,7 +228,11 @@ before assigning it to cells using
 
 .. code:: python
 
-   long_date = doc.add_custom_format(name="Long Date", type="date", date_time_format="EEEE, d MMMM yyyy")
+   long_date = doc.add_custom_format(
+      name="Long Date", 
+      type="date", 
+      date_time_format="EEEE, d MMMM yyyy"
+   )
    table.set_cell_formatting("C1", "custom", format=long_date)
 
 A limited number of currencies are formatted using symbolic notation

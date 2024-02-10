@@ -9,25 +9,30 @@ command-line.
 
 .. code:: text
 
-   usage: cat-numbers [-h] [-T | -S | -b] [-V] [--debug] [--formulas]
-                      [--formatting] [-s SHEET] [-t TABLE] [document ...]
+    usage: cat-numbers [-h] [-T | -S | -b] [-V] [--formulas] [--formatting]
+                      [-s SHEET] [-t TABLE] [--debug]
+                      [document ...]
 
-   Export data from Apple Numbers spreadsheet tables
+    Export data from Apple Numbers spreadsheet tables
 
-   positional arguments:
-     document                 Document(s) to export
+    positional arguments:
+      document              Document(s) to export
 
-   optional arguments:
-     -h, --help               show this help message and exit
-     -T, --list-tables        List the names of tables and exit
-     -S, --list-sheets        List the names of sheets and exit
-     -b, --brief              Don't prefix data rows with name of sheet/table (default: false)
-     -V, --version
-     --debug                  Enable debug output
-     --formulas               Dump formulas instead of formula results
-     --formatting             Dump formatted cells (durations) as they appear in Numbers
-     -s SHEET, --sheet SHEET  Names of sheet(s) to include in export
-     -t TABLE, --table TABLE  Names of table(s) to include in export
+    options:
+      -h, --help            show this help message and exit
+      -T, --list-tables     List the names of tables and exit
+      -S, --list-sheets     List the names of sheets and exit
+      -b, --brief           Don't prefix data rows with name of sheet/table
+                            (default: false)
+      -V, --version
+      --formulas            Dump formulas instead of formula results
+      --formatting          Dump formatted cells (durations) as they appear
+                            in Numbers
+      -s SHEET, --sheet SHEET
+                            Names of sheet(s) to include in export
+      -t TABLE, --table TABLE
+                            Names of table(s) to include in export
+      --debug               Enable debug logging
 
 Note: ``--formatting`` will return different capitalization for 12-hour
 times due to differences between Numbers’ representation of these dates

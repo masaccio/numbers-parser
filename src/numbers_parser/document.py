@@ -283,7 +283,8 @@ class Document:
             long_date = doc.add_custom_format(
                 name="Long Date",
                 type="date",
-                date_time_format="EEEE, d MMMM yyyy")
+                date_time_format="EEEE, d MMMM yyyy"
+            )
             table.set_cell_formatting("C1", "custom", format=long_date)
         """  # noqa: E501
         if (
@@ -516,6 +517,11 @@ class Table(Cacheable):  # noqa: F811
     def row_height(self, row: int, height: int = None) -> int:
         """
         The height of a table row in points.
+
+        .. code-block:: python
+
+            # Double the row's height
+            _ = table.row_height(4, table.row_height(4) * 2)
 
         Parameters
         ----------
