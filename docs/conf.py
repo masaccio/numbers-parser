@@ -5,6 +5,14 @@ from numbers_parser import _get_version
 
 sys.path.insert(0, os.path.abspath("../"))
 
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon",
+    "enum_tools.autoenum",
+    "sphinx_copybutton",
+]
+# Standard Sphinx configuration
 templates_path = ["_templates"]
 exclude_patterns = ["build", "Thumbs.db", ".DS_Store"]
 language = "en"
@@ -25,9 +33,8 @@ html_style = ["custom.css", "nftt-pygments.min.css"]
 pygments_style = "pastie"
 pygments_dark_style = "dracula"
 html_theme_options = {
-    # "documentation_font": "Open Sans",
-    # "monospace_font": "Ubuntu Mono",
-    # "monospace_font_size": "1.1rem",
+    "monospace_font": "Ubuntu Mono",
+    "monospace_font_size": "1.1rem",
     # "logo": "docs/logo.svg",
     # "logo_alt": "numbers-parser",
     "repository_url": "https://github.com/masaccio/numbers-parser",
@@ -44,14 +51,7 @@ html_theme_options = {
     # "show_colorset_choices": True,
 }
 
-extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
-    "enum_tools.autoenum",
-    "sphinx_copybutton",
-]
-
+# sphinx_copybutton optionsA
 copybutton_prompt_text = ">>> "
 copybutton_line_continuation_character = "\\"
 
