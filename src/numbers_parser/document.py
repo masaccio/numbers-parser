@@ -314,11 +314,6 @@ class Document:
 
 
 class Sheet:
-    """
-    .. NOTE::
-       Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
-    """
-
     def __init__(self, model, sheet_id):
         self._sheet_id = sheet_id
         self._model = model
@@ -410,11 +405,6 @@ class Sheet:
 
 
 class Table(Cacheable):  # noqa: F811
-    """
-    .. NOTE::
-       Do not instantiate directly. Tables are created by :py:class:`~numbers_parser.Document`.
-    """
-
     def __init__(self, model, table_id):
         super().__init__()
         self._model = model

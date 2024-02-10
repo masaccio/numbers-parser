@@ -54,6 +54,8 @@ with earlier versions of Python.
      :maxdepth: 2
 
      api/document
+     api/sheet
+     api/table
      api/cells
      api/datetime
      api/cellrefs

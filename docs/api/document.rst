@@ -1,7 +1,7 @@
 :hidetoc: 1
 
-Top-level Classes
-#################
+Document Class
+##############
 
 .. currentmodule:: numbers_parser
 
@@ -32,20 +32,6 @@ A new document is created when :class:`Document` is constructed without a filena
    table.write(1, 3, 3000)
    doc.save("mydoc.numbers")
 
-Document Class
-~~~~~~~~~~~~~~
-
 .. autoclass:: Document
    :members:
 
-Sheet Class
-~~~~~~~~~~~
-
-.. autoclass:: Sheet()
-   :members:
-
-Table Class
-~~~~~~~~~~~
-
-.. autoclass:: Table()
-   :members:
