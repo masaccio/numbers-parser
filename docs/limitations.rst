@@ -11,10 +11,6 @@ Current known limitations of ``numbers-parser`` are:
    worksheet which does not take into account title or caption size
 -  New sheets insert tables with formats copied from the first table in
    the previous sheet rather than default table formats
--  Creating custom cell formats and cell data formats is experimental
-   and not all formats are supported. See
-   `Table.set_cell_formatting <https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_formatting>`__
-   for more details.
 -  Due to a limitation in Python's
    `ZipFile <https://docs.python.org/3/library/zipfile.html>`__, Python
    versions older than 3.11 do not support image filenames with UTF-8
