@@ -101,17 +101,17 @@ python datatype. `numbers-parser` uses
 [pendulum](https://pendulum.eustace.io) instead of python’s builtin
 types. Available cell types are:
 
-| Cell type         | value type               | Additional properties                                                                           |
-|-------------------|--------------------------|-------------------------------------------------------------------------------------------------|
-| N<br/>umberCell   | `float`                  |                                                                                                 |
-| TextCell          | `str`                    |                                                                                                 |
-| Ric<br/>hTextCell | `str`                    | See [Bullets and<br/>lists](#bullets-and-lists)                                                 |
-| EmptyCell         | `None`                   |                                                                                                 |
-| BoolCell          | `bool`                   |                                                                                                 |
-| DateCell          | `pend<br/>ulum.datetime` |                                                                                                 |
-| Dur<br/>ationCell | `pend<br/>ulum.duration` |                                                                                                 |
-| ErrorCell         | `None`                   |                                                                                                 |
-| M<br/>ergedCell   | `None`                   | See [Merged<br/>c<br/>ells](https://masaccio.github.io/numbers-parser/#table-cell-merged-cells) |
+| Cell type    | value type          | Additional properties                                                                                  |
+|--------------|---------------------|--------------------------------------------------------------------------------------------------------|
+| NumberCell   | `float`             |                                                                                                        |
+| TextCell     | `str`               |                                                                                                        |
+| RichTextCell | `str`               | See [Rich text](https://masaccio.github.io/numbers-parser/api/cells.html#numbers_parser.RichTextCell)  |
+| EmptyCell    | `None`              |                                                                                                        |
+| BoolCell     | `bool`              |                                                                                                        |
+| DateCell     | `pendulum.datetime` |                                                                                                        |
+| DurationCell | `pendulum.duration` |                                                                                                        |
+| ErrorCell    | `None`              |                                                                                                        |
+| MergedCell   | `None`              | See [Merged cells](https://masaccio.github.io/numbers-parser/api/cells.html#numbers_parser.MergedCell) |
 
 Cell references can be either zero-offset row/column integers or an
 Excel/Numbers A1 notation. Where cell values are not `None` the
