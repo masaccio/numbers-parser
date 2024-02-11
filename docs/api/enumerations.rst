@@ -15,4 +15,5 @@ Enumerations
 .. autoenum:: FractionAccuracy
     :members:
 
-.. _datetime_formats:
+.. autoenum:: PaddingType
+    :members:

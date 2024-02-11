@@ -268,7 +268,13 @@ CUSTOM_FORMAT_TYPE_MAP = {
 }
 
 
+@enum_tools.documentation.document_enum
 class PaddingType(IntEnum):
+    """How integers and decimals are padded in custom number formats"""
+
     NONE = 0
+    """No number padding."""
     ZEROS = 1
+    """Pad integers with leading spaces and decimals with trailing spaces."""
     SPACES = 2
+    """Pad integers with leading zeroes and decimals with trailing zeroes."""
