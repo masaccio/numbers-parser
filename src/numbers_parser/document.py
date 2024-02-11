@@ -198,20 +198,6 @@ class Document:
         If no style name is provided, the next available numbered style
         will be generated in the series ``Custom Style 1``, ``Custom Style 2``, etc.
 
-        Parameters
-        ----------
-        kwargs: dict, optional
-            Key-value pairs to pass to the :class:`Style` constructor
-
-        Raises
-        ------
-        TypeError:
-            If ``font_size`` is not a ``float``, ``font_name`` is not a ``str``,
-            or if any of the ``bool`` parameters are invalid.
-
-        Example
-        -------
-
         .. code-block:: python
 
             red_text = doc.add_style(
@@ -225,6 +211,17 @@ class Document:
             )
             table.write("B2", "Red", style=red_text)
             table.set_cell_style("C2", red_text)
+
+        Parameters
+        ----------
+        kwargs: dict, optional
+            Key-value pairs to pass to the :py:class:`~numbers_parser.Style` constructor.
+
+        Raises
+        ------
+        TypeError:
+            If ``font_size`` is not a ``float``, ``font_name`` is not a ``str``,
+            or if any of the ``bool`` parameters are invalid.
         """  # noqa: E501
         if "name" in kwargs and kwargs["name"] is not None and kwargs["name"] in self._model.styles:
             raise IndexError(f"style '{kwargs['name']}' already exists")
@@ -239,20 +236,28 @@ class Document:
         r"""
         Add a new custom format to the current document.
 
+        .. code-block:: python
+
+            long_date = doc.add_custom_format(
+                name="Long Date",
+                type="date",
+                date_time_format="EEEE, d MMMM yyyy"
+            )
+            table.set_cell_formatting("C1", "custom", format=long_date)
+
         All custom formatting styles share a name and a type, described in the **Common**
         parameters in the following table. Additional key-value pairs configure the format
-        depending upon the value of ``kwargs["type"]``. Supported values for
-        ``kwargs["type"]`` are:
+        depending upon the value of ``kwargs["type"]``.
 
-            * ``"datetime"``: A date and time value with custom formatting.
-            * ``"number"``: A decimal number.
-            * ``"text"``: A simple text string.
-
-        :Common Keys:
+        :Common Args:
             * **name** (``str``) – The name of the custom format. If no name is provided,
               one is generated using the scheme ``Custom Format``, ``Custom Format 1``, ``Custom Format 2``, etc.
             * **type** (``str``, *optional*, default: ``number``) – The type of format to
-              create Supported formats are ``number``, ``datetime`` and ``text``.
+              create:
+
+              * ``"datetime"``: A date and time value with custom formatting.
+              * ``"number"``: A decimal number.
+              * ``"text"``: A simple text string.
 
         :``"number"``:
             * **integer_format** (``PaddingType``, *optional*, default: ``PaddingType.NONE``) – How
@@ -274,18 +279,6 @@ class Document:
             * **format** (``str``, *optional*, default: ``"%s"``) – Text format.
               The cell value is inserted in place of %s. Only one substitution is allowed by
               Numbers, and multiple %s formatting references raise a TypeError exception
-
-        Example
-        -------
-
-        .. code-block:: python
-
-            long_date = doc.add_custom_format(
-                name="Long Date",
-                type="date",
-                date_time_format="EEEE, d MMMM yyyy"
-            )
-            table.set_cell_formatting("C1", "custom", format=long_date)
         """  # noqa: E501
         if (
             "name" in kwargs
@@ -1177,22 +1170,21 @@ class Table(Cacheable):  # noqa: F811
 
         All formatting styles share a name and a type, described in the **Common**
         parameters in the following table. Additional key-value pairs configure the format
-        depending upon the value of ``kwargs["type"]``. Supported values for
-        ``kwargs["type"]`` are:
+        depending upon the value of ``kwargs["type"]``.
 
-            * ``"base"``: A number base in the range 2-36.
-            * ``"currency"``: A decimal formatted with a currency symbol.
-            * ``"datetime"``: A date and time value with custom formatting.
-            * ``"fraction"``: A number formatted as the nearest fraction.
-            * ``"percentage"``: A number formatted as a percentage
-            * ``"number"``: A decimal number.
-            * ``"scientific"``: A decimal number with scientific notation.
-
-        :Common keys:
+        :Common Args:
             * **name** (``str``) – The name of the custom format. If no name is provided,
               one is generated using the scheme ``Custom Format``, ``Custom Format 1``, ``Custom Format 2``, etc.
             * **type** (``str``, *optional*, default: ``number``) – The type of format to
-              create Supported formats are ``number``, ``datetime`` and ``text``.
+              create:
+
+              * ``"base"``: A number base in the range 2-36.
+              * ``"currency"``: A decimal formatted with a currency symbol.
+              * ``"datetime"``: A date and time value with custom formatting.
+              * ``"fraction"``: A number formatted as the nearest fraction.
+              * ``"percentage"``: A number formatted as a percentage
+              * ``"number"``: A decimal number.
+              * ``"scientific"``: A decimal number with scientific notation.
 
         :``"base"``:
             * **base_use_minus_sign** (``int``, *optional*, default: ``10``) – The integer
@@ -1208,7 +1200,7 @@ class Table(Cacheable):  # noqa: F811
               code, e.g. ``"GBP"`` or ``"USD"``.
             * **decimal_places** (``int``, *optional*, default: ``2``) – The number of
               decimal places, or ``None`` for automatic.
-            * **negative_style** (``NegativeNumberStyle``, *optional*, default: ``NegativeNumberStyle.MINUS``) – How negative numbers are represented.
+            * **negative_style** (:py:class:`~numbers_parser.NegativeNumberStyle`, *optional*, default: ``NegativeNumberStyle.MINUS``) – How negative numbers are represented.
               See `Negative number formats <#negative-formats>`_.
             * **show_thousands_separator** (``bool``, *optional*, default: ``False``) – ``True``
               if the number should include a thousands seperator, e.g. ``,``
@@ -1222,13 +1214,13 @@ class Table(Cacheable):  # noqa: F811
                directives <#datetime-formats>`_.
 
         :``"fraction"``:
-            * **fraction_accuracy** (``FractionAccuracy``, *optional*, default: ``FractionAccuracy.THREE`` – The
+            * **fraction_accuracy** (:py:class:`~numbers_parser.FractionAccuracy`, *optional*, default: ``FractionAccuracy.THREE`` – The
                 precision of the faction.
 
         :``"percentage"``:
             * **decimal_places** (``float``, *optional*, default: ``None``) –  number of
               decimal places, or ``None`` for automatic.
-            * **negative_style** (``NegativeNumberStyle``, *optional*, default: ``NegativeNumberStyle.MINUS``) – How negative numbers are represented.
+            * **negative_style** (:py:class:`~numbers_parser.NegativeNumberStyle`, *optional*, default: ``NegativeNumberStyle.MINUS``) – How negative numbers are represented.
               See `Negative number formats <#negative-formats>`_.
             * **show_thousands_separator** (``bool``, *optional*, default: ``False``) – ``True``
               if the number should include a thousands seperator, e.g. ``,``
