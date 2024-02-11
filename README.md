@@ -206,18 +206,14 @@ styles (the style menu in the text panel) with the settings that are
 available on the Style tab of the Text panel. Some attributes in Numbers
 are not applied to new cells when a style is applied. To keep the API
 simple, `numbers-parser` packs all styling into a single
-[Style](https://masaccio.github.io/numbers-parser/#numbers_parser.Style)
+[Style](https://masaccio.github.io/numbers-parser/api/style.html)
 object. When a document is saved, the attributes not stored in a
 paragraph style are applied to each cell that includes it.
 
 Styles are read from cells using the
-[Cell.style](https://masaccio.github.io/numbers-parser/#numbers_parser.Cell.style)
-propert and you can add new styles with
-[Document.add_style](https://masaccio.github.io/numbers-parser/#numbers_parser.Document.add_style).
-
-Since `Style` objects are shared, changing `Cell.style.font_size`
-will have the effect of changing the font size for that style and will
-in turn affect the styles of all cells using that style.
+[Cell.style](https://masaccio.github.io/numbers-parser/api/cells.html#numbers_parser.Cell.style)
+property and you can add new styles with
+[Document.add_style](https://masaccio.github.io/numbers-parser/api/document.html#numbers_parser.Document.add_style).
 
 ### Cell Data Formatting
 
