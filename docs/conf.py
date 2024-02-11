@@ -24,7 +24,7 @@ copyright = "Copyright Jon Connell under MIT license"
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 napoleon_include_special_with_doc = False
-napoleon_use_admonition_for_examples = True
+# napoleon_use_admonition_for_examples = True
 napoleon_use_admonition_for_notes = True
 
 # sphinx_nefertiti options
