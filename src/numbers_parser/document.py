@@ -1246,11 +1246,11 @@ class Table(Cacheable):  # noqa: F811
             raise TypeError("no type defined for cell format")
 
         if format_type == "custom":
-            self.set_cell_custom_format(row, col, **kwargs)
+            self._set_cell_custom_format(row, col, **kwargs)
         else:
-            self.set_cell_data_format(row, col, format_type, **kwargs)
+            self._set_cell_data_format(row, col, format_type, **kwargs)
 
-    def set_cell_custom_format(self, row: int, col: int, **kwargs) -> None:
+    def _set_cell_custom_format(self, row: int, col: int, **kwargs) -> None:
         if "format" not in kwargs:
             raise TypeError("no format provided for custom format")
 
@@ -1278,7 +1278,7 @@ class Table(Cacheable):  # noqa: F811
         format_id = self._model.custom_format_id(self._table_id, custom_format)
         cell._set_formatting(format_id, custom_format.type)
 
-    def set_cell_data_format(self, row: int, col: int, format_type: str, **kwargs) -> None:
+    def _set_cell_data_format(self, row: int, col: int, format_type: str, **kwargs) -> None:
         try:
             format_type = FormattingType[format_type.upper()]
         except (KeyError, AttributeError):

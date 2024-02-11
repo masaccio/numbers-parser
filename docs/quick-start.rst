@@ -77,8 +77,6 @@ types. Available cell types are:
 |               |                       | #numbers_parser.MergedCell>`__  |
 +---------------+-----------------------+---------------------------------+
 
-
-
 Cell references can be either zero-offset row/column integers or an
 Excel/Numbers A1 notation. Where cell values are not ``None`` the
 property ``formatted_value`` returns the cell value as a ``str`` as
@@ -180,12 +178,24 @@ simple, ``numbers-parser`` packs all styling into a single
 object. When a document is saved, the attributes not stored in a
 paragraph style are applied to each cell that includes it.
 
-
 Styles are read from cells using the
 `Cell.style <https://masaccio.github.io/numbers-parser/api/cells.html#numbers_parser.Cell.style>`__
 property and you can add new styles with
 `Document.add_style <https://masaccio.github.io/numbers-parser/api/document.html#numbers_parser.Document.add_style>`__.
 
+.. code:: python
+
+   red_text = doc.add_style(
+       name="Red Text",
+       font_name="Lucida Grande",
+       font_color=RGB(230, 25, 25),
+       font_size=14.0,
+       bold=True,
+       italic=True,
+       alignment=Alignment("right", "top"),
+   )
+   table.write("B2", "Red", style=red_text)
+   table.set_cell_style("C2", red_text)
 
 Cell Data Formatting
 ^^^^^^^^^^^^^^^^^^^^

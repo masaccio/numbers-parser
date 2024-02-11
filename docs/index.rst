@@ -59,6 +59,7 @@ with earlier versions of Python.
      api/cells
      api/datetime
      api/style
+     api/border
      api/cellrefs
      api/enumerations
      api/development

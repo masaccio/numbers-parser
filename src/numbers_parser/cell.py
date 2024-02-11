@@ -333,6 +333,36 @@ class BorderType(IntEnum):
 
 
 class Border:
+    """
+    Create a cell border to use with the :py:class:`~numbers_parser.Table` method
+    :py:meth:`~numbers_parser.Table.set_cell_border`.
+
+    .. code-block:: python
+
+        border_style = Border(8.0, RGB(29, 177, 0)
+        table.set_cell_border("B6", "left", border_style, "solid"), 3)
+        table.set_cell_border(6, 1, "right", border_style, "dashes"))
+
+    Parameters
+    ----------
+    width: float, optional, default: 0.35
+        Number of rows in the first table of a new document.
+    color: RGB, optional, default: RGB(0, 0, 0)
+        The line color for the border if present
+    style: BorderType, optional, default: ``None``
+        The type of border to create or ``None`` if there is no border defined. Valid
+        border types are:
+
+        * ``"solid"``: a solid line
+        * ``"dashes"``: a dashed line
+        * ``"dots"``: a dotted line
+
+    Raises
+    ------
+    TypeError:
+        If the width is not a float, or the border type is invalid.
+    """
+
     def __init__(
         self,
         width: float = DEFAULT_BORDER_WIDTH,
