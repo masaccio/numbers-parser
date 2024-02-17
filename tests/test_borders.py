@@ -320,7 +320,7 @@ def test_resave_borders(configurable_save_file):
                     if cell.is_merged:
                         length = cell.size[0] if side in ["left", "right"] else cell.size[1]
                         if side == "bottom":
-                            row_offset = cell.size[0]
+                            row_offset = cell.size[0] - 1
                     else:
                         length = 1
                     if borders[i] is not None:
