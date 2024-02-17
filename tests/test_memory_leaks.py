@@ -7,7 +7,7 @@ NUM_DOCS = 10
 
 
 @pytest.mark.experimental
-def test_mempoy_leaks():
+def test_mempory_leaks():
     """Memory leak test (see issue-67)."""
     process = Process()
 
