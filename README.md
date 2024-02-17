@@ -215,6 +215,20 @@ Styles are read from cells using the
 property and you can add new styles with
 [Document.add_style](https://masaccio.github.io/numbers-parser/api/document.html#numbers_parser.Document.add_style).
 
+```python
+red_text = doc.add_style(
+    name="Red Text",
+    font_name="Lucida Grande",
+    font_color=RGB(230, 25, 25),
+    font_size=14.0,
+    bold=True,
+    italic=True,
+    alignment=Alignment("right", "top"),
+)
+table.write("B2", "Red", style=red_text)
+table.set_cell_style("C2", red_text)
+```
+
 ### Cell Data Formatting
 
 Numbers has two different cell formatting types: data formats and custom
