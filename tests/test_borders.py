@@ -299,7 +299,6 @@ def test_extra_borders(configurable_save_file):
             assert getattr(table.cell(row, col).border, side) == border
 
 
-# @pytest.mark.experimental
 def test_resave_borders(configurable_save_file):
     doc = Document("tests/data/test-styles.numbers")
 
