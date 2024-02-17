@@ -170,38 +170,43 @@ def test_edit_borders(configurable_save_file):
     sheet = doc.sheets[0]
     table = sheet.tables[0]
 
-    table.set_cell_border("B6", "left", Border(8.0, RGB(29, 177, 0), "solid"), 3)
-    table.set_cell_border(6, 1, "right", Border(5.0, RGB(29, 177, 0), "dashes"))
-    table.merge_cells(["C3:F4", "C10:F11"])
+    table.set_cell_border("B7", "left", Border(8.0, RGB(29, 177, 0), "solid"), 3)
+    table.set_cell_border(7, 1, "right", Border(5.0, RGB(29, 177, 0), "dashes"))
+    table.merge_cells("C3:F5")
 
     with pytest.warns(RuntimeWarning) as record:
-        table.set_cell_border("C3", ALL_BORDERS, Border(3.0, RGB(0, 162, 255), "dots"))
-    assert len(record) == 2
-    assert "cell [2,2] is merged; right border not set" in str(record[0])
-    assert "cell [2,2] is merged; bottom border not set" in str(record[1])
+        table.set_cell_border("C3", ALL_BORDERS, Border())
+        table.set_cell_border("D4", ALL_BORDERS, Border())
+    assert len(record) == 6
+    assert "right edge of [2,2] is merged; border not set" in str(record[0])
+    assert "bottom edge of [2,2] is merged; border not set" in str(record[1])
+    assert "top edge of [3,3] is merged; border not set" in str(record[2])
+    assert "right edge of [3,3] is merged; border not set" in str(record[3])
+    assert "bottom edge of [3,3] is merged; border not set" in str(record[4])
+    assert "left edge of [3,3] is merged; border not set" in str(record[5])
 
-    table.set_cell_border("C4", "bottom", Border(4.0, RGB(29, 177, 0), "solid"))
-    table.set_cell_border("D4", "bottom", Border(4.0, RGB(0, 0, 0), "solid"))
-    table.set_cell_border("E4", "bottom", Border(4.0, RGB(0, 162, 255), "solid"))
-    table.set_cell_border("F4", "bottom", Border(4.0, RGB(212, 24, 118), "solid"))
+    table.set_cell_border("C5", "bottom", Border(4.0, RGB(29, 177, 0), "solid"))
+    table.set_cell_border("D5", "bottom", Border(4.0, RGB(0, 0, 0), "solid"))
+    table.set_cell_border("E5", "bottom", Border(4.0, RGB(0, 162, 255), "solid"))
+    table.set_cell_border("F5", "bottom", Border(4.0, RGB(212, 24, 118), "solid"))
 
     doc.save(configurable_save_file)
 
     new_doc = Document(configurable_save_file)
     sheet = new_doc.sheets[0]
     table = sheet.tables[0]
-    assert table.cell("B6").border.left == Border(8.0, RGB(29, 177, 0), "solid")
-    assert table.cell("B7").border.right == Border(5.0, RGB(29, 177, 0), "dashes")
+    assert table.cell("B7").border.left == Border(8.0, RGB(29, 177, 0), "solid")
+    assert table.cell("B8").border.right == Border(5.0, RGB(29, 177, 0), "dashes")
 
     for merge_ref in ["C4", "D4", "E4", "F4"]:
         assert table.cell(merge_ref).border.top is None
     for merge_ref in ["C4", "D4", "E4"]:
         assert table.cell(merge_ref).border.right is None
 
-    assert table.cell("C4").border.bottom == Border(4.0, RGB(29, 177, 0), "solid")
-    assert table.cell("D4").border.bottom == Border(4.0, RGB(0, 0, 0), "solid")
-    assert table.cell("E4").border.bottom == Border(4.0, RGB(0, 162, 255), "solid")
-    assert table.cell("F4").border.bottom == Border(4.0, RGB(212, 24, 118), "solid")
+    assert table.cell("C5").border.bottom == Border(4.0, RGB(29, 177, 0), "solid")
+    assert table.cell("D5").border.bottom == Border(4.0, RGB(0, 0, 0), "solid")
+    assert table.cell("E5").border.bottom == Border(4.0, RGB(0, 162, 255), "solid")
+    assert table.cell("F5").border.bottom == Border(4.0, RGB(212, 24, 118), "solid")
 
 
 def invert_border_test(test):
@@ -294,7 +299,7 @@ def test_extra_borders(configurable_save_file):
             assert getattr(table.cell(row, col).border, side) == border
 
 
-@pytest.mark.experimental
+# @pytest.mark.experimental
 def test_resave_borders(configurable_save_file):
     doc = Document("tests/data/test-styles.numbers")
 
@@ -303,20 +308,23 @@ def test_resave_borders(configurable_save_file):
     for sheet_name in ["Borders"]:
         table = doc.sheets[sheet_name].tables[0]
 
-        for row, row in enumerate(table.iter_rows()):
-            for col, cell in enumerate(row):
-                if not cell.value or isinstance(cell, MergedCell):
+        for row, cells in enumerate(table.iter_rows()):
+            for col, cell in enumerate(cells):
+                if not cell.value:
                     continue
                 tests = unpack_test_string(cell.value)
                 (test_string, new_tests, borders) = invert_tests(tests)
                 table.write(row, col, test_string, style=style)
                 for i, side in enumerate(tests):
+                    row_offset = 0
                     if cell.is_merged:
                         length = cell.size[0] if side in ["left", "right"] else cell.size[1]
+                        if side == "bottom":
+                            row_offset = cell.size[0]
                     else:
                         length = 1
                     if borders[i] is not None:
-                        table.set_cell_border(row, col, side, borders[i], length)
+                        table.set_cell_border(row + row_offset, col, side, borders[i], length)
 
     doc.save(configurable_save_file)
     run_border_tests(configurable_save_file)
