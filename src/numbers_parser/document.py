@@ -1123,9 +1123,24 @@ class Table(Cacheable):  # noqa: F811
                 self.set_cell_border(row, col, s, border_value, length)
             return
 
-        if self._data[row][col].is_merged and side in ["bottom", "right"]:
+        cell = self._data[row][col]
+        if cell.is_merged and (
+            (side == "right" and cell.size[1] > 1) or (side == "bottom" and cell.size[0] > 1)
+        ):
             warn(
-                f"cell [{row},{col}] is merged; {side} border not set",
+                f"{side} edge of [{row},{col}] is merged; border not set",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            return
+        elif isinstance(cell, MergedCell) and (
+            (side == "top" and cell.row_start < row)
+            or (side == "right" and cell.col_end > col)
+            or (side == "bottom" and cell.row_end > row)
+            or (side == "left" and cell.col_start < col)
+        ):
+            warn(
+                f"{side} edge of [{row},{col}] is merged; border not set",
                 RuntimeWarning,
                 stacklevel=2,
             )
