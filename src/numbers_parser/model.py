@@ -34,7 +34,6 @@ from numbers_parser.cell import (
     TextCell,
     VerticalJustification,
     xl_col_to_name,
-    xl_range,
     xl_rowcol_to_cell,
 )
 from numbers_parser.cell_storage import CellStorage
@@ -117,11 +116,6 @@ class MergeCells:
 
     def rect(self, row_col: Tuple) -> Tuple:
         return self._references[row_col].rect
-
-    def merge_cell_names(self):
-        return [
-            xl_range(*v.rect) for k, v in self._references.items() if self.is_merge_reference(k)
-        ]
 
     def merge_cells(self):
         return [k for k, v in self._references.items() if self.is_merge_anchor(k)]
