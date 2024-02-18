@@ -74,7 +74,7 @@ with earlier versions of Python.
    ---
 
    For more examples and details of all available classes and methods,
-   see the `full API docs <https://masaccio.github.io/numbers-parser/>`__.
+   see the :pages:`full API docs <>`.
 
    .. include:: cli.rst
    .. include:: limitations.rst
@@ -82,5 +82,4 @@ with earlier versions of Python.
 License
 =======
 
-All code in this repository is licensed under the `MIT
-License <https://github.com/masaccio/numbers-parser/blob/master/LICENSE.rst>`__
+All code in this repository is licensed under the :github:`MIT License <blob/master/LICENSE.rst>`.

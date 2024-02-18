@@ -5,10 +5,14 @@ from numbers_parser import _get_version
 
 sys.path.insert(0, os.path.abspath("../"))
 
+GITHUB = "https://github.com/masaccio/numbers-parser"
+PAGES = "https://masaccio.github.io/numbers-parser"
+
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
+    "sphinx.ext.extlinks",
     "enum_tools.autoenum",
     "sphinx_copybutton",
 ]
@@ -35,25 +39,28 @@ pygments_dark_style = "dracula"
 html_theme_options = {
     "monospace_font": "Ubuntu Mono",
     "monospace_font_size": "1.1rem",
-    # "logo": "docs/logo.svg",
-    # "logo_alt": "numbers-parser",
-    "repository_url": "https://github.com/masaccio/numbers-parser",
+    "repository_url": GITHUB,
     "repository_name": "masaccio/numbers-parser",
     "current_version": _get_version(),
     "footer_links": ",".join(
         [
-            "Documentation|https://masaccio.github.io/numbers-parser/",
-            "Package|https://pypi.org/project/numbers-parser/",
-            "Repository|https://github.com/masaccio/numbers-parser",
-            "Issues|https://github.com/masaccio/numbers-parser/issues",
+            f"Documentation|{PAGES}",
+            f"Package|{GITHUB}",
+            f"Repository|{GITHUB}",
+            f"Issues|{GITHUB}/issues",
         ]
     ),
     # "show_colorset_choices": True,
 }
 
-# sphinx_copybutton optionsA
+# sphinx_copybutton options
 copybutton_prompt_text = ">>> "
 copybutton_line_continuation_character = "\\"
+
+extlinks = {
+    "github": (f"{GITHUB}/%s", None),
+    "pages": (f"{PAGES}/%s", None),
+}
 
 
 def setup_extensions(app, docname, source):
