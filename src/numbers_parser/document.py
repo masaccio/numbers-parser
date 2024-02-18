@@ -1103,6 +1103,48 @@ class Table(Cacheable):  # noqa: F811
                     cell._set_merge(merge_cells.get((row, col)))
 
     def set_cell_border(self, *args):
+        """
+        Set the borders for a cell.
+
+        Cell references can be row-column offsers or Excel/Numbers-style A1 notation. Borders
+        can be applied to multiple sides of a cell by passing a list of sides. The name(s)
+        of the side(s) must be one of ``"top"``, ``"right"``, ``"bottom"`` or ``"left"``.
+
+        Numbers supports different border styles for each cell within a merged cell range
+        for those cells that are on the outer part of the merge. ``numbers-parser`` will
+        ignore attempts to set these invisible cell edges and issue a ``RuntimeWarning``.
+
+        .. code-block:: python
+
+            # Dashed line for B7's right border
+            table.set_cell_border(6, 1, "right", Border(5.0, RGB(29, 177, 0), "dashes"))
+            # Solid line starting at B7's left border and running for 3 rows
+            table.set_cell_border("B7", "left", Border(8.0, RGB(29, 177, 0), "solid"), 3)
+
+        :Args (row-column):
+            * **param1** (*int*): The row number (zero indexed).
+            * **param2** (*int*): The column number (zero indexed).
+            * **param3** (*str | List[str]*): Which side(s) of the cell to apply the border to.
+            * **param4** (:py:class:`Border`): The border to add.
+            * **param5** (*int*, *optinal*, default: 1): The length of the stroke to add.
+
+        :Args (A1):
+            * **param1** (*str*): A cell reference using Excel/Numbers-style A1 notation.
+            * **param2** (*str | List[str]*): Which side(s) of the cell to apply the border to.
+            * **param3** (:py:class:`Border`): The border to add.
+            * **param4** (*int*, *optional*, default: 1): The length of the stroke to add.
+
+        Raises
+        ------
+        TypeError:
+            If an invalid number of arguments is passed or if the types of the arguments
+            are invalid.
+
+        Warns
+        -----
+        RuntimeWarning:
+            If any of the sides to which the border is applied have been merged.
+        """  # noqa: E501
         (row, col, *args) = self._validate_cell_coords(*args)
         if len(args) == 2:
             (side, border_value) = args
@@ -1165,18 +1207,33 @@ class Table(Cacheable):  # noqa: F811
 
         Cell references can be **row-column** offsers or Excel/Numbers-style **A1** notation.
 
+        .. code:: python
+
+            table.set_cell_formatting(
+                "C1",
+                "date",
+                date_time_format="EEEE, d MMMM yyyy"
+            )
+            table.set_cell_formatting(
+                0,
+                4,
+                "number",
+                decimal_places=3,
+                negative_style=NegativeNumberStyle.RED
+            )
+
         :Parameters:
             * **args** (*list*, *optional*) – Positional arguments for cell reference and data format type (see below)
             * **kwargs** (*dict*, *optional*) - Key-value pairs defining a formatting options for each data format (see below).
 
         :Args (row-column):
-            * **param1** (``int``): The row number (zero indexed).
-            * **param2** (``int``): The column number (zero indexed).
-            * **param3** (``str``): Data format type for the cell (see "data formats" below).
+            * **param1** (*int*): The row number (zero indexed).
+            * **param2** (*int*): The column number (zero indexed).
+            * **param3** (*str*): Data format type for the cell (see "data formats" below).
 
         :Args (A1):
-            * **param1** (``str``): A cell reference using Excel/Numbers-style A1 notation.
-            * **param2** (``str``): Data format type for the cell (see "data formats" below).
+            * **param1** (*str*): A cell reference using Excel/Numbers-style A1 notation.
+            * **param2** (*str*): Data format type for the cell (see "data formats" below).
 
         :Warns:
             * **RuntimeWarning** -
@@ -1188,9 +1245,9 @@ class Table(Cacheable):  # noqa: F811
         depending upon the value of ``kwargs["type"]``.
 
         :Common Args:
-            * **name** (``str``) – The name of the custom format. If no name is provided,
+            * **name** (*str*) – The name of the custom format. If no name is provided,
               one is generated using the scheme ``Custom Format``, ``Custom Format 1``, ``Custom Format 2``, etc.
-            * **type** (``str``, *optional*, default: ``number``) – The type of format to
+            * **type** (*str, optional, default: number*) – The type of format to
               create:
 
               * ``"base"``: A number base in the range 2-36.
@@ -1202,55 +1259,47 @@ class Table(Cacheable):  # noqa: F811
               * ``"scientific"``: A decimal number with scientific notation.
 
         :``"base"``:
-            * **base_use_minus_sign** (``int``, *optional*, default: ``10``) – The integer
+            * **base_use_minus_sign** (*int, optional, default: 10*) – The integer
               base to represent the number from 2-36.
-            * **base_use_minus_sign** (``bool``, *optional*, default: ``True``) – If ``True``
+            * **base_use_minus_sign** (*bool, optional, default: True*) – If ``True``
               use a standard minus sign, otherwise format as two's compliment (only
               possible for binary, octal and hexadecimal.
-            * **base_places** (``int``, *optional*, default: ``0``) – The number of
+            * **base_places** (*int, optional, default: 0*) – The number of
               decimal places, or ``None`` for automatic.
 
         :``"currency"``:
-            * **currency** (``str``, *optional*, default: ``"GBP"``) – An ISO currency
+            * **currency** (*str, optional, default: "GBP"*) – An ISO currency
               code, e.g. ``"GBP"`` or ``"USD"``.
-            * **decimal_places** (``int``, *optional*, default: ``2``) – The number of
+            * **decimal_places** (*int, optional, default: 2*) – The number of
               decimal places, or ``None`` for automatic.
-            * **negative_style** (:py:class:`~numbers_parser.NegativeNumberStyle`, *optional*, default: ``NegativeNumberStyle.MINUS``) – How negative numbers are represented.
+            * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) – How negative numbers are represented.
               See `Negative number formats <#negative-formats>`_.
-            * **show_thousands_separator** (``bool``, *optional*, default: ``False``) – ``True``
+            * **show_thousands_separator** (*bool, optional, default: False*) – ``True``
               if the number should include a thousands seperator, e.g. ``,``
-            * **use_accounting_style** (``bool``, *optional*, default: ``False``) –  ``True``
+            * **use_accounting_style** (*bool, optional, default: False*) –  ``True``
               if the currency symbol should be formatted to the left of the cell and
               separated from the number value by a tab.
 
         :``"datetime"``:
-            * **date_time_format** (``str``, *optional*, default: ``"dd MMM YYY HH:MM"``) – A POSIX
+            * **date_time_format** (*str, optional, default: "dd MMM YYY HH:MM"*) – A POSIX
                strftime-like formatting string of `Numbers date/time
                directives <#datetime-formats>`_.
 
         :``"fraction"``:
-            * **fraction_accuracy** (:py:class:`~numbers_parser.FractionAccuracy`, *optional*, default: ``FractionAccuracy.THREE`` – The
+            * **fraction_accuracy** (*:py:class:`~numbers_parser.FractionAccuracy`, optional, default: FractionAccuracy.THREE* – The
                 precision of the faction.
 
         :``"percentage"``:
-            * **decimal_places** (``float``, *optional*, default: ``None``) –  number of
+            * **decimal_places** (*float, optional, default: None*) –  number of
               decimal places, or ``None`` for automatic.
-            * **negative_style** (:py:class:`~numbers_parser.NegativeNumberStyle`, *optional*, default: ``NegativeNumberStyle.MINUS``) – How negative numbers are represented.
+            * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) – How negative numbers are represented.
               See `Negative number formats <#negative-formats>`_.
-            * **show_thousands_separator** (``bool``, *optional*, default: ``False``) – ``True``
+            * **show_thousands_separator** (*bool, optional, default: False*) – ``True``
               if the number should include a thousands seperator, e.g. ``,``
 
         :``"scientific"``:
-            * **decimal_places** (``float``, *optional*, default: ``None``) – number of
+            * **decimal_places** (*float, optional, default: None*) – number of
               decimal places, or ``None`` for automatic.
-
-        Example
-
-        .. code:: python
-
-            >>> table.set_cell_formatting("C1", "date", date_time_format="EEEE, d MMMM yyyy")
-            >>> table.set_cell_formatting(0, 4, "number", decimal_places=3, negative_style=NegativeNumberStyle.RED)
-
         """  # noqa: E501
         (row, col, *args) = self._validate_cell_coords(*args)
         if len(args) == 1:
