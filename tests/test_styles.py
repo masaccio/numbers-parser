@@ -6,6 +6,7 @@ from pytest_check import check
 from numbers_parser import (
     RGB,
     Alignment,
+    BackgroundImage,
     Document,
     HorizontalJustification,
     Style,
@@ -416,3 +417,28 @@ def test_empty_styles(configurable_save_file):
                 assert new_table.cell(5, 5).style.name == "Red Text"
             else:
                 assert new_table.cell(row, col).style.name == body_style
+
+
+def test_add_bg_image(configurable_save_file):
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+    image_filename = "tests/data/cat.jpg"
+    image_data = open(image_filename, mode="rb").read()
+    bg_image = BackgroundImage(image_data, image_filename)
+    cats_bg_style = doc.add_style(name="Cats", bg_image=bg_image)
+
+    with pytest.raises(TypeError) as e:
+        _ = doc.add_style(name="Cats2", bg_image=object())
+    assert "bg_image must be a BackgroundImage object" in str(e)
+    with pytest.raises(IndexError) as e:
+        _ = doc.add_style(name="Cats3", bg_image=BackgroundImage(image_data, image_filename))
+    assert "cat.jpg: image already exists in document" in str(e)
+
+    table.write(0, 0, "❤️ cats", style=cats_bg_style)
+    table.write(0, 1, "Still ❤️ cats", style=cats_bg_style)
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    assert table.cell(0, 0).style.bg_image.filename == "cat.jpg"
+    assert table.cell(0, 1).style.bg_image.filename == "cat.jpg"

@@ -9,3 +9,6 @@ Style Class
 
 .. autoclass:: Style()
    :members:
+
+.. autoclass:: BackgroundImage()
+   :members:

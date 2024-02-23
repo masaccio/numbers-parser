@@ -1,11 +1,12 @@
 ``numbers_parser`` currently only supports paragraph styles and cell
-styles. The following paragraph styles are supported:
+styles. The following styles are supported:
 
 -  font attributes: bold, italic, underline, strikethrough
 -  font selection and size
 -  text foreground color
 -  horizontal and vertical alignment
 -  cell background color
+-  cell background images
 -  cell indents (first line, left, right, and text inset)
 
 Numbers conflates style attributes that can be stored in paragraph

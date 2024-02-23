@@ -4,6 +4,7 @@ from warnings import warn
 from pendulum import DateTime, Duration
 
 from numbers_parser.cell import (
+    BackgroundImage,
     Border,
     Cell,
     CustomFormatting,
@@ -221,10 +222,17 @@ class Document:
         ------
         TypeError:
             If ``font_size`` is not a ``float``, ``font_name`` is not a ``str``,
+            ``bg_image`` is not a :py:class:`~numbers_parser.BackgroundImage`,
             or if any of the ``bool`` parameters are invalid.
         """  # noqa: E501
         if "name" in kwargs and kwargs["name"] is not None and kwargs["name"] in self._model.styles:
             raise IndexError(f"style '{kwargs['name']}' already exists")
+
+        if "bg_image" in kwargs and kwargs["bg_image"] is not None:
+            if not isinstance(kwargs["bg_image"], BackgroundImage):
+                raise TypeError("bg_image must be a BackgroundImage object")
+            self._model.store_image((kwargs["bg_image"].data), kwargs["bg_image"].filename)
+
         style = Style(**kwargs)
         if style.name is None:
             style.name = self._model.custom_style_name()

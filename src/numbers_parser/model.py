@@ -2,6 +2,7 @@ import math
 import re
 from array import array
 from collections import defaultdict
+from hashlib import sha1
 from struct import pack
 from typing import Dict, List, Tuple, Union
 from warnings import warn
@@ -1476,12 +1477,35 @@ class _NumbersModel(Cacheable):
                             + str(cell.style.bg_color.g)
                             + str(cell.style.bg_color.b)
                         )
+                    if cell._style.bg_image is not None:
+                        fingerprint += cell._style.bg_image.filename
                     if fingerprint not in cell_styles:
                         cell_styles[fingerprint] = self.add_cell_style(cell._style)
                     cell._style._cell_style_obj_id = cell_styles[fingerprint]
 
     def add_cell_style(self, style: Style) -> int:
-        if style.bg_color is not None:
+        if style.bg_image is not None:
+            datas = self.objects[PACKAGE_ID].datas
+            image_id = self.next_image_identifier()
+            datas.append(
+                TSPArchiveMessages.DataInfo(
+                    identifier=image_id,
+                    digest=sha1(style.bg_image.data).digest(),
+                    preferred_file_name=style.bg_image.filename,
+                    file_name=style.bg_image.filename,
+                    materialized_length=len(style.bg_image.data),
+                )
+            )
+            color_attrs = {
+                "cell_fill": {
+                    "image": {
+                        "technique": "ScaleToFill",
+                        "imagedata": {"identifier": image_id},
+                        "interpretsUntaggedImageDataAsGeneric": False,
+                    }
+                }
+            }
+        elif style.bg_color is not None:
             color_attrs = {
                 "cell_fill": {
                     "color": {
@@ -1530,6 +1554,7 @@ class _NumbersModel(Cacheable):
                 style=TSPMessages.Reference(identifier=cell_style_id),
             )
         )
+
         return cell_style_id
 
     def text_style_object_id(self, cell_storage) -> int:
@@ -2202,6 +2227,19 @@ class _NumbersModel(Cacheable):
             )
             stroke_layer.stroke_runs.append(self.create_stroke(origin, length, border_value))
             layer_ids.append(TSPMessages.Reference(identifier=stroke_layer_id))
+
+    def store_image(self, data: bytes, filename: str) -> None:
+        """Store image data in the file store."""
+        stored_filename = f"Data/{filename}"
+        if stored_filename in self.objects.file_store:
+            raise IndexError(f"{filename}: image already exists in document")
+        self.objects.file_store[stored_filename] = data
+
+    def next_image_identifier(self):
+        datas = self.objects[PACKAGE_ID].datas
+        image_ids = [x.identifier for x in datas]
+        # datas never appears to be an empty list (default themes include images)
+        return max(image_ids) + 1
 
 
 def rgb(obj) -> RGB:

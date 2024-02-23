@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime as builtin_datetime
 from datetime import timedelta as builtin_timedelta
 from enum import IntEnum
+from os.path import basename
 from typing import Any, List, Tuple, Union
 from warnings import warn
 
@@ -75,18 +76,39 @@ __all__ = [
 
 
 class BackgroundImage:
-    def __init__(self, image_data: bytes = None, filename: str = None):
-        self._data = image_data
-        self._filename = filename
+    """
+    A named document style that can be applied to cells.
+
+    .. code-block:: python
+
+        fh = open("cats.png", mode="rb")
+        image_data = fh.read()
+        cats_bg = doc.add_style(
+            name="Cats",
+            bg_image=BackgroundImage(image_data, "cats.png")
+        )
+        table.write(0, 0, "❤️ cats", style=cats_bg)
+
+    Parameters
+    ----------
+    data: bytes
+        Raw image data for a cell background image.
+    filename: str
+        Path to the image file.
+    """
+
+    def __init__(self, data: bytes = None, filename: str = None):
+        self._data = data
+        self._filename = basename(filename)
 
     @property
     def data(self) -> bytes:
-        """The background image as byts for a cell, or None if no image."""
+        """bytes: The background image as bytes for a cell, or None if no image."""
         return self._data
 
     @property
     def filename(self) -> str:
-        """The image filename for a cell, or None if no image."""
+        """str: The image filename for a cell, or None if no image."""
         return self._filename
 
 
@@ -184,6 +206,8 @@ class Style:
     ------
     TypeError:
         If arguments do not match the specified type or for objects have invalid arguments
+    IndexError:
+        If an image filename already exists in document
     """
 
     alignment: Alignment = DEFAULT_ALIGNMENT_CLASS  # : horizontal and vertical alignment
@@ -230,6 +254,7 @@ class Style:
         return [
             "alignment",
             "bg_color",
+            "bg_image",
             "first_indent",
             "left_indent",
             "right_indent",
