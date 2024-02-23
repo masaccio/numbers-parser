@@ -89,6 +89,10 @@ class BackgroundImage:
         )
         table.write(0, 0, "❤️ cats", style=cats_bg)
 
+    Currently only standard image files and not 'advanced' image fills are
+    supported. Tiling and scaling is not reported back and cannot be changed
+    when saving new cells.
+
     Parameters
     ----------
     data: bytes
@@ -730,7 +734,32 @@ class Cell(Cacheable):
 
     @property
     def formatted_value(self) -> str:
-        """str: The formatted value of the cell as it appears in Numbers."""
+        """
+        str: The formatted value of the cell as it appears in Numbers.
+
+        Interactive elements are converted into a suitable text format where
+        supported, or as their number values where there is no suitable
+        visual representation. Currently supported mappings are:
+
+        * Checkboxes are U+2610 (Ballow Box) or U+2611 (Ballot Box with Check)
+        * Ratings are their star value represented using (U+2605) (Black Star)
+
+        .. code-block:: python
+
+            >>> table = doc.sheets[0].tables[0]
+            >>> table.cell(0,0).value
+            False
+            >>> table.cell(0,0).formatted_value
+            '☐'
+            >>> table.cell(0,1).value
+            True
+            >>> table.cell(0,1).formatted_value
+            '☑'
+            >>> table.cell(1,1).value
+            3.0
+            >>> table.cell(1,1).formatted_value
+            '★★★'
+        """
         if self._storage is None:
             return ""
         else:

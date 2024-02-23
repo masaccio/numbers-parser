@@ -44,8 +44,11 @@ DEFAULT_TEXT_INSET = 4.0
 DEFAULT_TEXT_WRAP = True
 EMPTY_STORAGE_BUFFER = b"\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 
-# Formatting defaults
+# Formatting values and defaults
 DEFAULT_DATETIME_FORMAT = "dd MMM YYY HH:MM"
+CHECKBOX_FALSE_VALUE = "☐"
+CHECKBOX_TRUE_VALUE = "☑"
+STAR_RATING_VALUE = "★"
 
 # Numbers limits
 MAX_TILE_SIZE = 256

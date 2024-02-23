@@ -3,6 +3,7 @@ import pytest_check as check
 from pendulum import datetime
 
 from numbers_parser import Document, EmptyCell, FractionAccuracy, NegativeNumberStyle, PaddingType
+from numbers_parser.constants import CHECKBOX_FALSE_VALUE, CHECKBOX_TRUE_VALUE, STAR_RATING_VALUE
 
 DATE_FORMAT_REF = [
     ["", "1 pm", "1:25 pm", "1:25:42 pm", "13:25", "13:25:42"],
@@ -848,3 +849,19 @@ def test_write_datetime_custom_formatting(configurable_save_file):
     table = doc.sheets[0].tables[0]
     assert table.cell(0, 0).formatted_value == "01 April, 2023"
     assert table.cell(0, 1).formatted_value == "02 April, 2023"
+
+
+def test_interactive_formats(configurable_save_file):
+    doc = Document("tests/data/test-actions.numbers")
+    table = doc.sheets[0].tables[0]
+    assert table.cell(0, 0).value is False
+    assert table.cell(0, 0).formatted_value == CHECKBOX_FALSE_VALUE
+    assert table.cell(0, 1).value is True
+    assert table.cell(0, 1).formatted_value == CHECKBOX_TRUE_VALUE
+
+    assert table.cell(1, 0).value == 0.0
+    assert table.cell(1, 0).formatted_value == ""
+    assert table.cell(1, 1).value == 3.0
+    assert table.cell(1, 1).formatted_value == STAR_RATING_VALUE * 3
+    assert table.cell(1, 2).value == 5.0
+    assert table.cell(1, 2).formatted_value == STAR_RATING_VALUE * 5

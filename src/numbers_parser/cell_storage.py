@@ -11,6 +11,8 @@ from pendulum import datetime, duration
 
 from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser.constants import (
+    CHECKBOX_FALSE_VALUE,
+    CHECKBOX_TRUE_VALUE,
     CURRENCY_CELL_TYPE,
     CUSTOM_TEXT_PLACEHOLDER,
     DATETIME_FIELD_MAP,
@@ -21,6 +23,7 @@ from numbers_parser.constants import (
     SECONDS_IN_DAY,
     SECONDS_IN_HOUR,
     SECONDS_IN_WEEK,
+    STAR_RATING_VALUE,
     CellPadding,
     CellType,
     CustomFormattingType,
@@ -300,12 +303,14 @@ class CellStorage(Cacheable):
             format = self.model.table_format(self.table_id, self.text_format_id)
         elif self.currency_format_id is not None:
             format = self.model.table_format(self.table_id, self.currency_format_id)
+        elif self.bool_format_id is not None and self.type == CellType.BOOL:
+            format = self.model.table_format(self.table_id, self.bool_format_id)
         elif self.num_format_id is not None:
             format = self.model.table_format(self.table_id, self.num_format_id)
-        elif self.bool_format_id is not None:
-            format = self.model.table_format(self.table_id, self.bool_format_id)
         else:
             return str(self.value)
+
+        debug("custom_format: @[%d,%d]: format_type=%s, ", self.row, self.col, format.format_type)
 
         if format.HasField("custom_uid"):
             format_uuid = NumbersUUID(format.custom_uid).hex
@@ -336,6 +341,10 @@ class CellStorage(Cacheable):
             return format_fraction(self.d128, format)
         elif format.format_type == FormatType.SCIENTIFIC:
             return format_scientific(self.d128, format)
+        elif format.format_type == FormatType.CHECKBOX:
+            return CHECKBOX_TRUE_VALUE if self.value else CHECKBOX_FALSE_VALUE
+        elif format.format_type == FormatType.RATING:
+            return STAR_RATING_VALUE * int(self.d128)
         else:
             formatted_value = str(self.value)
         return formatted_value
@@ -362,6 +371,14 @@ class CellStorage(Cacheable):
 
     def duration_format(self) -> str:
         format = self.model.table_format(self.table_id, self.duration_format_id)
+        debug(
+            "duration_format: @[%d,%d]: table_id=%d, duration_format_id=%d, duration_style=%s",
+            self.row,
+            self.col,
+            self.table_id,
+            self.duration_format_id,
+            format.duration_style,
+        )
 
         duration_style = format.duration_style
         unit_largest = format.duration_unit_largest
