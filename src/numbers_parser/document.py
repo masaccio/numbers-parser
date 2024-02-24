@@ -9,21 +9,20 @@ from numbers_parser.cell import (
     Cell,
     CustomFormatting,
     CustomFormattingType,
-    DateCell,
     Formatting,
     FormattingType,
     MergedCell,
-    NumberCell,
     Style,
-    TextCell,
     UnsupportedWarning,
     xl_cell_to_rowcol,
     xl_range,
 )
 from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import (
+    CUSTOM_FORMATTING_ALLOWED_CELLS,
     DEFAULT_COLUMN_COUNT,
     DEFAULT_ROW_COUNT,
+    FORMATTING_ALLOWED_CELLS,
     MAX_COL_COUNT,
     MAX_HEADER_COUNT,
     MAX_ROW_COUNT,
@@ -822,20 +821,28 @@ class Table(Cacheable):  # noqa: F811
         The ``write()`` method supports two forms of notation to designate the position
         of cells: **Row-column** notation and **A1** notation:
 
-        .. code-block:: python
+        .. code:: python
 
-            (0, 0)      # Row-column notation.
-            ("A1")      # The same cell in A1 notation.
+            doc = Document("write.numbers")
+            sheets = doc.sheets
+            tables = sheets[0].tables
+            table = tables[0]
+            table.write(1, 1, "This is new text")
+            table.write("B7", datetime(2020, 12, 25))
+            doc.save("new-sheet.numbers")
 
         Parameters
         ----------
 
-        param1: int
+        row: int
             The row number (zero indexed)
-        param2: int
+        col: int
             The column number (zero indexed)
-        param3: str | int | float | bool | DateTime | Duration
-            The value to write to the cell. The generated cell type
+        value: str | int | float | bool | DateTime | Duration
+            The value to write to the cell. The generated cell type is automatically
+            created based on the type of ``value``.
+        style: Style | str | None
+            The name of a document custom style or a :py:class:`~numbers_parser.cell.Style` object.
 
         Warns
         -----
@@ -851,19 +858,6 @@ class Table(Cacheable):  # noqa: F811
             If the style parameter is an invalid type.
         ValueError:
             If the cell type cannot be determined from the type of `param3`.
-
-        Example
-        -------
-
-        .. code:: python
-
-            doc = Document("write.numbers")
-            sheets = doc.sheets
-            tables = sheets[0].tables
-            table = tables[0]
-            table.write(1, 1, "This is new text")
-            table.write("B7", datetime(2020, 12, 25))
-            doc.save("new-sheet.numbers")
         """
         # TODO: write needs to retain/init the border
         (row, col, value) = self._validate_cell_coords(*args)
@@ -1243,10 +1237,15 @@ class Table(Cacheable):  # noqa: F811
             * **param1** (*str*): A cell reference using Excel/Numbers-style A1 notation.
             * **param2** (*str*): Data format type for the cell (see "data formats" below).
 
+        :Raises:
+            * **TypeError** -
+                If a tickbox is chosen for anything other than ``bool`` values.
+
         :Warns:
             * **RuntimeWarning** -
                 If ``use_accounting_style`` is used with
-                any ``negative_style`` other than ``NegativeNumberStyle.MINUS``.
+                any ``negative_style`` other than ``NegativeNumberStyle.MINUS``, or
+                if a rating is out of range 0 to 5 (rating is clamped to these values).
 
         All formatting styles share a name and a type, described in the **Common**
         parameters in the following table. Additional key-value pairs configure the format
@@ -1265,6 +1264,11 @@ class Table(Cacheable):  # noqa: F811
               * ``"percentage"``: A number formatted as a percentage
               * ``"number"``: A decimal number.
               * ``"scientific"``: A decimal number with scientific notation.
+              * ``"tickbox"``: A checkbox (bool values only).
+              * ``"rating"``: A star rating from 0 to 5.
+              * ``"slider"``: A range slider.
+              * ``"stepper"``: An up/down value stepper.
+              * ``"popup"``: A menu of options.
 
         :``"base"``:
             * **base_use_minus_sign** (*int, optional, default: 10*) – The integer
@@ -1308,6 +1312,27 @@ class Table(Cacheable):  # noqa: F811
         :``"scientific"``:
             * **decimal_places** (*float, optional, default: None*) – number of
               decimal places, or ``None`` for automatic.
+
+        :``"tickbox"``:
+            * No additional parameters defined.
+
+        :``"rating"``:
+            * No additional parameters defined.
+
+        ``"slider"``:
+            * **decimal_places** (*float, optional, default: None*) – number of
+              decimal places, or ``None`` for automatic.
+        `"stepper"``:
+            * **decimal_places** (*float, optional, default: None*) – number of
+              decimal places, or ``None`` for automatic.
+
+        `"popup"``: A menu of options.
+            * **values** (*List[str], optional, default: None*) – number of
+              decimal places, or ``None`` for automatic.
+            * **allow_none** (*bool, optional, default: True*) - If ``True``
+              include a blank value in the list
+
+
         """  # noqa: E501
         (row, col, *args) = self._validate_cell_coords(*args)
         if len(args) == 1:
@@ -1337,32 +1362,28 @@ class Table(Cacheable):  # noqa: F811
             raise TypeError("format must be a CustomFormatting object or format name")
 
         cell = self._data[row][col]
-        if custom_format.type == CustomFormattingType.DATETIME and not isinstance(cell, DateCell):
-            type_name = type(cell).__name__
-            raise TypeError(f"cannot use date/time formatting for cells of type {type_name}")
-        elif custom_format.type == CustomFormattingType.NUMBER and not isinstance(cell, NumberCell):
-            type_name = type(cell).__name__
-            raise TypeError(f"cannot use number formatting for cells of type {type_name}")
-        elif custom_format.type == CustomFormattingType.TEXT and not isinstance(cell, TextCell):
-            type_name = type(cell).__name__
-            raise TypeError(f"cannot use text formatting for cells of type {type_name}")
+        type_name = type(cell).__name__
+        format_type_name = custom_format.type.name.lower()
+        if type_name not in CUSTOM_FORMATTING_ALLOWED_CELLS[format_type_name]:
+            raise TypeError(
+                f"cannot use {format_type_name} formatting for cells of type {type_name}"
+            )
 
         format_id = self._model.custom_format_id(self._table_id, custom_format)
         cell._set_formatting(format_id, custom_format.type)
 
-    def _set_cell_data_format(self, row: int, col: int, format_type: str, **kwargs) -> None:
+    def _set_cell_data_format(self, row: int, col: int, format_type_name: str, **kwargs) -> None:
         try:
-            format_type = FormattingType[format_type.upper()]
+            format_type = FormattingType[format_type_name.upper()]
         except (KeyError, AttributeError):
-            raise TypeError(f"unsuported cell format type '{format_type}'") from None
+            raise TypeError(f"unsuported cell format type '{format_type_name}'") from None
 
         cell = self._data[row][col]
-        if format_type == FormattingType.DATETIME and not isinstance(cell, DateCell):
-            type_name = type(cell).__name__
-            raise TypeError(f"cannot use date/time formatting for cells of type {type_name}")
-        elif not isinstance(cell, NumberCell) and not isinstance(cell, DateCell):
-            type_name = type(cell).__name__
-            raise TypeError(f"cannot set formatting for cells of type {type_name}")
+        type_name = type(cell).__name__
+        if type_name not in FORMATTING_ALLOWED_CELLS[format_type_name]:
+            raise TypeError(
+                f"cannot use {format_type_name} formatting for cells of type {type_name}"
+            )
 
         format = Formatting(type=format_type, **kwargs)
         format_id = self._model.format_archive(self._table_id, format_type, format)

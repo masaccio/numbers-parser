@@ -63,7 +63,7 @@ class CellStorage(Cacheable):
         # "cond_style_id",
         # "cond_rule_style_id",
         "formula_id",
-        # "control_id",
+        "control_id",
         "formula_error_id",
         "suggest_id",
         "num_format_id",
@@ -98,7 +98,7 @@ class CellStorage(Cacheable):
         # self.cond_style_id = None
         # self.cond_rule_style_id = None
         self.formula_id = None
-        # self.control_id = None
+        self.control_id = None
         self.formula_error_id = None
         self.suggest_id = None
         self.num_format_id = None
@@ -151,9 +151,9 @@ class CellStorage(Cacheable):
         if flags & 0x200:
             self.formula_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
-        # if flags & 0x400:
-        #     self.control_id = unpack("<i", buffer[offset : offset + 4])[0]
-        #     offset += 4
+        if flags & 0x400:
+            self.control_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
         # if flags & 0x800:
         #     self.formula_error_id = unpack("<i", buffer[offset : offset + 4])[0]
         #     offset += 4
@@ -161,7 +161,7 @@ class CellStorage(Cacheable):
             self.suggest_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
         # Skip unused flags
-        offset += 4 * bin(flags & 0xD00).count("1")
+        offset += 4 * bin(flags & 0x900).count("1")
         #
         if flags & 0x2000:
             self.num_format_id = unpack("<i", buffer[offset : offset + 4])[0]
@@ -454,6 +454,12 @@ class CellStorage(Cacheable):
         if format_type == FormattingType.CURRENCY:
             self.currency_format_id = format_id
             self.is_currency = True
+        elif format_type == FormattingType.TICKBOX:
+            self.bool_format_id = format_id
+            self.control_id = self.model.control_cell_id(self.table_id, format_id)
+        elif format_type == FormattingType.RATING:
+            self.num_format_id = format_id
+            self.control_id = self.model.control_cell_id(self.table_id, format_id)
         elif format_type in [FormattingType.DATETIME, CustomFormattingType.DATETIME]:
             self.date_format_id = format_id
         elif format_type == CustomFormattingType.TEXT:

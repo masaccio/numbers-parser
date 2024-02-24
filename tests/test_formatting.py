@@ -411,11 +411,11 @@ def test_write_date_format(configurable_save_file):
     table.write("A1", 0.1)
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting("A1", "datetime", date_time_format="yyyy")
-    assert "cannot use date/time formatting for cells of type NumberCell" in str(e)
+    assert "cannot use datetime formatting for cells of type NumberCell" in str(e)
     table.write("A1", "test")
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting("A1", "number", date_time_format="yyyy")
-    assert "cannot set formatting for cells of type TextCell" in str(e)
+    assert "cannot use number formatting for cells of type TextCell" in str(e)
 
     for row in range(len(DATE_FORMATS)):
         for col in range(len(TIME_FORMATS)):
@@ -749,7 +749,7 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
     assert "cannot use number formatting for cells of type DateCell" in str(e)
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(2, 1, "custom", format=doc.add_custom_format(type="datetime"))
-    assert "cannot use date/time formatting for cells of type TextCell" in str(e)
+    assert "cannot use datetime formatting for cells of type TextCell" in str(e)
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(2, 2, "custom", format=doc.add_custom_format(type="text"))
     assert "cannot use text formatting for cells of type NumberCell" in str(e)
@@ -851,8 +851,8 @@ def test_write_datetime_custom_formatting(configurable_save_file):
     assert table.cell(0, 1).formatted_value == "02 April, 2023"
 
 
-def test_interactive_formats(configurable_save_file):
-    doc = Document("tests/data/test-actions.numbers")
+def run_test_interactive_formats(filename):
+    doc = Document(filename)
     table = doc.sheets[0].tables[0]
     assert table.cell(0, 0).value is False
     assert table.cell(0, 0).formatted_value == CHECKBOX_FALSE_VALUE
@@ -865,3 +865,27 @@ def test_interactive_formats(configurable_save_file):
     assert table.cell(1, 1).formatted_value == STAR_RATING_VALUE * 3
     assert table.cell(1, 2).value == 5.0
     assert table.cell(1, 2).formatted_value == STAR_RATING_VALUE * 5
+
+
+def test_interactive_formats(configurable_save_file):
+    run_test_interactive_formats("tests/data/test-actions.numbers")
+
+
+def test_write_interactive_formats(configurable_save_file):
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+
+    table.write(0, 0, False)
+    table.write(0, 1, True)
+    table.set_cell_formatting(0, 0, "tickbox")
+    table.set_cell_formatting(0, 1, "tickbox")
+
+    table.write(1, 0, 0.0)
+    table.write(1, 1, 3.0)
+    table.write(1, 2, 5.0)
+    for col in range(0, 3):
+        table.set_cell_formatting(1, col, "rating")
+
+    doc.save(configurable_save_file)
+
+    run_test_interactive_formats(configurable_save_file)

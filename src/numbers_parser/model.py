@@ -56,6 +56,7 @@ from numbers_parser.constants import (
     FORMAT_TYPE_MAP,
     MAX_TILE_SIZE,
     PACKAGE_ID,
+    CellInteractionType,
     FormatType,
 )
 from numbers_parser.containers import ObjectStore
@@ -220,6 +221,7 @@ class _NumbersModel(Cacheable):
         self._table_formats = DataLists(self, "format_table", "format")
         self._table_styles = DataLists(self, "styleTable", "reference")
         self._table_strings = DataLists(self, "stringTable", "string")
+        self._control_specs = DataLists(self, "control_cell_spec_table", "cell_spec")
         self._table_data = {}
         self._styles = None
         self._custom_formats = None
@@ -1723,6 +1725,10 @@ class _NumbersModel(Cacheable):
             flags |= 0x200
             length += 4
             storage += pack("<i", cell._storage.formula_id)
+        if cell._storage.control_id is not None:
+            flags |= 0x400
+            length += 4
+            storage += pack("<i", cell._storage.control_id)
         if cell._storage.suggest_id is not None:
             flags |= 0x1000
             length += 4
@@ -2236,10 +2242,37 @@ class _NumbersModel(Cacheable):
         self.objects.file_store[stored_filename] = data
 
     def next_image_identifier(self):
+        """Return the next available ID in the list of images in the document."""
         datas = self.objects[PACKAGE_ID].datas
         image_ids = [x.identifier for x in datas]
         # datas never appears to be an empty list (default themes include images)
         return max(image_ids) + 1
+
+    # def find_matching_control_cell_spec(
+    #     self, table_id: int, cell_spec: TSTArchives.CellSpecArchive
+    # ) -> TSTArchives.TableDataList.ListEntry:
+    #     base_data_store = self.objects[table_id].base_data_store
+    #     control_cell_spec_table = self.objects[base_data_store.control_cell_spec_table.identifier]
+    #     for entry in control_cell_spec_table.entries:
+    #         if entry.cell_spec == cell_spec:
+    #             return entry
+    #     return None
+
+    def control_cell_id(self, table_id: int, format_id: int) -> int:
+        """Return the control cell ID for a format. Create a new one if none available."""
+        format_archive = self._table_formats.lookup_value(table_id, format_id)
+        # base_data_store = self.objects[table_id].base_data_store
+        # self.objects[base_data_store.control_cell_spec_table.identifier]
+        if format_archive.format.format_type == FormatType.CHECKBOX:
+            cell_spec = TSTArchives.CellSpecArchive(interaction_type=CellInteractionType.TOGGLE)
+        elif format_archive.format.format_type == FormatType.RATING:
+            cell_spec = TSTArchives.CellSpecArchive(
+                interaction_type=CellInteractionType.RATING,
+                range_control_min=0.0,
+                range_control_max=5.0,
+                range_control_inc=1.0,
+            )
+        return self._control_specs.lookup_key(table_id, cell_spec)
 
 
 def rgb(obj) -> RGB:
