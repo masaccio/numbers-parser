@@ -7,6 +7,7 @@ from numbers_parser.cell import (
     BackgroundImage,
     Border,
     Cell,
+    ControlFormattingType,
     CustomFormatting,
     CustomFormattingType,
     Formatting,
@@ -22,6 +23,7 @@ from numbers_parser.constants import (
     CUSTOM_FORMATTING_ALLOWED_CELLS,
     DEFAULT_COLUMN_COUNT,
     DEFAULT_ROW_COUNT,
+    FORMATTING_ACTION_CELLS,
     FORMATTING_ALLOWED_CELLS,
     MAX_COL_COUNT,
     MAX_HEADER_COUNT,
@@ -1386,5 +1388,30 @@ class Table(Cacheable):  # noqa: F811
             )
 
         format = Formatting(type=format_type, **kwargs)
-        format_id = self._model.format_archive(self._table_id, format_type, format)
-        cell._set_formatting(format_id, format_type)
+        if format_type_name in FORMATTING_ACTION_CELLS:
+            control_id = self._model.control_cell_archive(self._table_id, format_type, format)
+        else:
+            control_id = None
+
+        is_currency = True if format_type == FormattingType.CURRENCY else False
+        if format_type_name in ["slider", "stepper"]:
+            if "control_format" in kwargs:
+                try:
+                    control_format = kwargs["control_format"].name
+                    number_format_type = FormattingType[control_format]
+                    is_currency = (
+                        True
+                        if kwargs["control_format"] == ControlFormattingType.CURRENCY
+                        else False
+                    )
+                except (KeyError, AttributeError):
+                    raise TypeError(
+                        "unsupported number format '{control_format}' for format_type_name"
+                    ) from None
+            else:
+                number_format_type = FormattingType.NUMBER
+            format_id = self._model.format_archive(self._table_id, number_format_type, format)
+        else:
+            format_id = self._model.format_archive(self._table_id, format_type, format)
+
+        cell._set_formatting(format_id, format_type, control_id, is_currency=is_currency)

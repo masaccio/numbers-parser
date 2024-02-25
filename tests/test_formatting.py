@@ -2,7 +2,14 @@ import pytest
 import pytest_check as check
 from pendulum import datetime
 
-from numbers_parser import Document, EmptyCell, FractionAccuracy, NegativeNumberStyle, PaddingType
+from numbers_parser import (
+    ControlFormattingType,
+    Document,
+    EmptyCell,
+    FractionAccuracy,
+    NegativeNumberStyle,
+    PaddingType,
+)
 from numbers_parser.constants import CHECKBOX_FALSE_VALUE, CHECKBOX_TRUE_VALUE, STAR_RATING_VALUE
 
 DATE_FORMAT_REF = [
@@ -885,6 +892,35 @@ def test_write_interactive_formats(configurable_save_file):
     table.write(1, 2, 5.0)
     for col in range(0, 3):
         table.set_cell_formatting(1, col, "rating")
+
+    table.write(2, 0, 20.0)
+    table.set_cell_formatting(2, 0, "slider")
+    table.write(2, 1, 36.7)
+    table.set_cell_formatting(
+        2,
+        1,
+        "slider",
+        maximum=50.0,
+        increment=0.1,
+        decimal_places=2,
+        control_format=ControlFormattingType.FRACTION,
+        fraction_accuracy=FractionAccuracy.SIXTEENTHS,
+    )
+    table.write(2, 2, 3430.0)
+    table.set_cell_formatting(
+        2,
+        2,
+        "slider",
+        minimum=-10000,
+        maximum=10000,
+        increment=10,
+        decimal_places=0,
+        show_thousands_separator=True,
+        use_accounting_style=True,
+        control_format=ControlFormattingType.CURRENCY,
+    )
+    # table.write(4, 0, "Unknown")
+    # table.set_cell_formatting(4, 0, "popup", values=["Cat", "Dog", "Rabbit"], allow_none=True)
 
     doc.save(configurable_save_file)
 

@@ -20,6 +20,7 @@ __all__ = [
     "FormattingType",
     "NegativeNumberStyle",
     "FractionAccuracy",
+    "ControlFormattingType",
 ]
 
 DEFAULT_DOCUMENT = files("numbers_parser") / "data" / "empty.numbers"
@@ -189,6 +190,15 @@ class FormattingType(IntEnum):
     POPUP = 12
 
 
+class ControlFormattingType(IntEnum):
+    BASE = 1
+    CURRENCY = 2
+    FRACTION = 4
+    NUMBER = 5
+    PERCENTAGE = 6
+    SCIENTIFIC = 7
+
+
 FORMATTING_ALLOWED_CELLS = {
     "base": ["NumberCell"],
     "currency": ["NumberCell"],
@@ -196,13 +206,15 @@ FORMATTING_ALLOWED_CELLS = {
     "fraction": ["NumberCell"],
     "number": ["NumberCell"],
     "percentage": ["NumberCell"],
-    "scientific": ["NumberCell"],
-    "tickbox": ["BoolCell"],
+    "popup": ["TextCell"],
     "rating": ["NumberCell"],
+    "scientific": ["NumberCell"],
     "slider": ["NumberCell"],
     "stepper": ["NumberCell"],
-    "popup": ["NumberCell"],
+    "tickbox": ["BoolCell"],
 }
+
+FORMATTING_ACTION_CELLS = ["popup", "slider", "stepper"]
 
 
 class CustomFormattingType(IntEnum):
@@ -267,36 +279,44 @@ class FractionAccuracy(IntEnum):
 
 
 ALLOWED_FORMATTING_PARAMETERS = {
-    FormattingType.BASE: ["base", "base_places", "base_use_minus_sign"],
+    FormattingType.BASE: [
+        "base",
+        "base_places",
+        "base_use_minus_sign",
+    ],
     FormattingType.CURRENCY: [
-        "decimal_places",
-        "show_thousands_separator",
-        "negative_style",
-        "use_accounting_style",
         "currency_code",
+        "decimal_places",
+        "negative_style",
+        "show_thousands_separator",
+        "use_accounting_style",
     ],
     FormattingType.DATETIME: ["date_time_format"],
     FormattingType.FRACTION: ["fraction_accuracy"],
-    FormattingType.NUMBER: ["decimal_places", "show_thousands_separator", "negative_style"],
-    FormattingType.PERCENTAGE: ["decimal_places", "show_thousands_separator", "negative_style"],
+    FormattingType.NUMBER: [
+        "decimal_places",
+        "show_thousands_separator",
+        "negative_style",
+    ],
+    FormattingType.PERCENTAGE: [
+        "decimal_places",
+        "show_thousands_separator",
+        "negative_style",
+    ],
     FormattingType.SCIENTIFIC: ["decimal_places"],
     FormattingType.POPUP: ["values", "allow_none"],
     FormattingType.RATING: [],
     FormattingType.SLIDER: [
-        "min",
-        "max",
+        "control_format",
         "increment",
-        "decimal_places",
-        "show_thousands_separator",
-        "negative_style",
+        "maximum",
+        "minimum",
     ],
     FormattingType.STEPPER: [
-        "min",
-        "max",
+        "control_format",
         "increment",
-        "decimal_places",
-        "show_thousands_separator",
-        "negative_style",
+        "maximum",
+        "minimum",
     ],
     FormattingType.TICKBOX: [],
 }
@@ -308,11 +328,11 @@ FORMAT_TYPE_MAP = {
     FormattingType.FRACTION: FormatType.FRACTION,
     FormattingType.NUMBER: FormatType.DECIMAL,
     FormattingType.PERCENTAGE: FormatType.PERCENT,
-    FormattingType.POPUP: None,
+    FormattingType.POPUP: FormatType.TEXT,
     FormattingType.RATING: FormatType.RATING,
     FormattingType.SCIENTIFIC: FormatType.SCIENTIFIC,
-    FormattingType.SLIDER: None,
-    FormattingType.STEPPER: None,
+    FormattingType.SLIDER: FormatType.DECIMAL,
+    FormattingType.STEPPER: FormatType.DECIMAL,
     FormattingType.TICKBOX: FormatType.CHECKBOX,
 }
 
@@ -320,6 +340,25 @@ CUSTOM_FORMAT_TYPE_MAP = {
     CustomFormattingType.NUMBER: FormatType.CUSTOM_NUMBER,
     CustomFormattingType.DATETIME: FormatType.CUSTOM_DATE,
     CustomFormattingType.TEXT: FormatType.CUSTOM_TEXT,
+}
+
+
+class CellInteractionType(IntEnum):
+    VALUE_EDITING = 0
+    FORMULA_EDITING = 1
+    STOCK = 2
+    CATEGORY_SUMMARY = 3
+    STEPPER = 4
+    SLIDER = 5
+    RATING = 6
+    POPUP = 7
+    TOGGLE = 8
+
+
+CONTROL_CELL_TYPE_MAP = {
+    FormattingType.POPUP: CellInteractionType.POPUP,
+    FormattingType.SLIDER: CellInteractionType.SLIDER,
+    FormattingType.STEPPER: CellInteractionType.STEPPER,
 }
 
 
@@ -333,15 +372,3 @@ class PaddingType(IntEnum):
     """Pad integers with leading spaces and decimals with trailing spaces."""
     SPACES = 2
     """Pad integers with leading zeroes and decimals with trailing zeroes."""
-
-
-class CellInteractionType(IntEnum):
-    VALUE_EDITING = 0
-    FORMULA_EDITING = 1
-    STOCK = 2
-    CATEGORY_SUMMARY = 3
-    STEPPER = 4
-    SLIDER = 5
-    RATING = 6
-    POPUP = 7
-    TOGGLE = 8

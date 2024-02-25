@@ -1,6 +1,6 @@
 import re
 from collections import namedtuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime as builtin_datetime
 from datetime import timedelta as builtin_timedelta
 from enum import IntEnum
@@ -28,6 +28,7 @@ from numbers_parser.constants import (
     EMPTY_STORAGE_BUFFER,
     MAX_BASE,
     MAX_SIGNIFICANT_DIGITS,
+    ControlFormattingType,
     CustomFormattingType,
     FormattingType,
     FormatType,
@@ -302,8 +303,8 @@ class Style:
         if not isinstance(self.font_name, str):
             raise TypeError("font name must be a string")
 
-        for field in ["bold", "italic", "underline", "strikethrough"]:
-            if not isinstance(getattr(self, field), bool):
+        for attr in ["bold", "italic", "underline", "strikethrough"]:
+            if not isinstance(getattr(self, attr), bool):
                 raise TypeError(f"{field} argument must be boolean")
 
     def __setattr__(self, name: str, value: Any) -> None:
@@ -604,8 +605,14 @@ class Cell(Cacheable):
         else:
             raise ValueError("Can't determine cell type from type " + type(value).__name__)
 
-    def _set_formatting(self, format_id: int, format_type: FormattingType) -> None:
-        self._storage._set_formatting(format_id, format_type)
+    def _set_formatting(
+        self,
+        format_id: int,
+        format_type: FormattingType,
+        control_id: int,
+        is_currency: bool = False,
+    ) -> None:
+        self._storage._set_formatting(format_id, format_type, control_id, is_currency)
 
     def __init__(self, row: int, col: int, value):
         self._value = value
@@ -1133,17 +1140,23 @@ def xl_col_to_name(col, col_abs=False):
 
 @dataclass()
 class Formatting:
-    type: FormattingType = FormattingType.NUMBER
+    allow_none: bool = False
     base_places: int = 0
     base_use_minus_sign: bool = True
     base: int = 10
+    control_format: ControlFormattingType = ControlFormattingType.NUMBER
     currency_code: str = "GBP"
     date_time_format: str = DEFAULT_DATETIME_FORMAT
     decimal_places: int = None
     fraction_accuracy: FractionAccuracy = FractionAccuracy.THREE
+    increment: float = 1.0
+    maximum: float = 100.0
+    minimum: float = 1.0
     negative_style: NegativeNumberStyle = NegativeNumberStyle.MINUS
     show_thousands_separator: bool = False
+    type: FormattingType = FormattingType.NUMBER
     use_accounting_style: bool = False
+    values: List[str] = field(default_factory=lambda: ["Item 1"])
     _format_id = None
 
     def __post_init__(self):

@@ -449,17 +449,30 @@ class CellStorage(Cacheable):
         return duration_str
 
     def _set_formatting(
-        self, format_id: int, format_type: Union[FormattingType, CustomFormattingType]
+        self,
+        format_id: int,
+        format_type: Union[FormattingType, CustomFormattingType],
+        control_id: int,
+        is_currency: bool = False,
     ) -> None:
+        self.is_currency = is_currency
         if format_type == FormattingType.CURRENCY:
             self.currency_format_id = format_id
-            self.is_currency = True
         elif format_type == FormattingType.TICKBOX:
             self.bool_format_id = format_id
-            self.control_id = self.model.control_cell_id(self.table_id, format_id)
+            self.control_id = control_id
         elif format_type == FormattingType.RATING:
             self.num_format_id = format_id
-            self.control_id = self.model.control_cell_id(self.table_id, format_id)
+            self.control_id = control_id
+        elif format_type in [FormattingType.SLIDER, FormattingType.STEPPER]:
+            if is_currency:
+                self.currency_format_id = format_id
+            else:
+                self.num_format_id = format_id
+            self.control_id = control_id
+        elif format_type == FormattingType.POPUP:
+            self.text_format_id = format_id
+            self.control_id = control_id
         elif format_type in [FormattingType.DATETIME, CustomFormattingType.DATETIME]:
             self.date_format_id = format_id
         elif format_type == CustomFormattingType.TEXT:
