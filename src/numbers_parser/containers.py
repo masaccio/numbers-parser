@@ -59,7 +59,7 @@ class ObjectStore:
         self._objects[PACKAGE_ID].last_object_identifier = self._max_id
         return self._max_id
 
-    def create_object_from_dict(self, iwa_file: str, object_dict: dict, cls: object):
+    def create_object_from_dict(self, iwa_file: str, object_dict: dict, cls: object, append=False):
         """Create a new object and store the associated IWA segment. Return the
         message ID for the object and the newly created object. If the IWA
         file cannot be found, it will be created.
@@ -70,7 +70,7 @@ class ObjectStore:
         new_id = self.new_message_id()
         iwa_segment = create_iwa_segment(new_id, cls, object_dict)
 
-        if iwa_pathname is None:
+        if iwa_pathname is None and not append:
             iwa_pathname = iwa_file.format(new_id) + ".iwa"
             chunks = {"chunks": [{"archives": [iwa_segment.to_dict()]}]}
             self._file_store[iwa_pathname] = IWAFile.from_dict(chunks)
