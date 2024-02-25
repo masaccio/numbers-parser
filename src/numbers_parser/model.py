@@ -365,6 +365,35 @@ class _NumbersModel(Cacheable):
         format = TSKArchives.FormatStructArchive(**attrs)
         return self._table_formats.lookup_key(table_id, format)
 
+    def cell_popup_model(self, format: Formatting):
+        tsce_items = [{"cell_value_type": "NIL_TYPE"}]
+        for item in format.popup_values:
+            if isinstance(item, str):
+                tsce_items.append(
+                    {
+                        "cell_value_type": "STRING_TYPE",
+                        "string_value": {
+                            "value": item,
+                            "format": {"format_type": FormatType.TEXT},
+                        },
+                    }
+                )
+            else:
+                tsce_items.append(
+                    {
+                        "cell_value_type": "NUMBER_TYPW",
+                        "string_value": {
+                            "value": item,
+                            "format": {"format_type": FormatType.DECIMAL},
+                        },
+                    }
+                )
+        popup_menu_id, _ = self.objects.create_object_from_dict(
+            "Index/Tables/DataList-{}", {"tsce_item": tsce_items}, TSTArchives.PopUpMenuModel
+        )
+        self.add_component_metadata(popup_menu_id, "CalculationEngine", "Tables/DataList-{}")
+        return popup_menu_id
+
     def control_cell_archive(self, table_id: int, format_type: FormattingType, format: Formatting):
         """Create control cell archive from a Formatting spec and return the table format ID"""
         if format_type == FormattingType.TICKBOX:
@@ -382,6 +411,13 @@ class _NumbersModel(Cacheable):
                 range_control_min=format.minimum,
                 range_control_max=format.maximum,
                 range_control_inc=format.increment,
+            )
+        else:  # POPUP
+            popup_id = self.cell_popup_model(format)
+            cell_spec = TSTArchives.CellSpecArchive(
+                interaction_type=CellInteractionType.POPUP,
+                chooser_control_popup_model=TSPMessages.Reference(identifier=popup_id),
+                chooser_control_start_w_first=not (format.allow_none),
             )
         return self._control_specs.lookup_key(table_id, cell_spec)
 
