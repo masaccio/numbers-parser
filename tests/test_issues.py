@@ -400,6 +400,14 @@ def test_issue_73(configurable_save_file):
     assert str(record[0].message) == "Not modifying pivot table 'Table 1 Pivot'"
 
 
+def test_issue_74(configurable_save_file):
+    doc = Document("tests/data/test-issue-74.numbers")
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    assert doc.sheets[0].tables[0].cell(0, 1)._storage.control_id is not None
+
+
 def test_issue_76(configurable_save_file):
     doc = Document("tests/data/test-5.numbers")
     doc.save(configurable_save_file)

@@ -1739,7 +1739,9 @@ class _NumbersModel(Cacheable):
             cell_type = TSTArchives.durationCellType
             value = value = pack("<d", float(cell.value.total_seconds()))
         elif isinstance(cell, EmptyCell):
-            if cell._style is not None:
+            if cell._style is not None or (
+                cell._storage is not None and cell._storage.control_id is not None
+            ):
                 flags = 0
                 cell_type = TSTArchives.emptyCellValueType
                 value = b""
