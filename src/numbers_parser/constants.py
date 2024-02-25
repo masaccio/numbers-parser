@@ -188,6 +188,7 @@ class FormattingType(IntEnum):
     SLIDER = 10
     STEPPER = 11
     POPUP = 12
+    TEXT = 13
 
 
 class ControlFormattingType(IntEnum):
@@ -214,7 +215,7 @@ FORMATTING_ALLOWED_CELLS = {
     "tickbox": ["BoolCell"],
 }
 
-FORMATTING_ACTION_CELLS = ["popup", "slider", "stepper"]
+FORMATTING_ACTION_CELLS = ["tickbox", "rating", "popup", "slider", "stepper"]
 
 
 class CustomFormattingType(IntEnum):
@@ -304,7 +305,7 @@ ALLOWED_FORMATTING_PARAMETERS = {
         "negative_style",
     ],
     FormattingType.SCIENTIFIC: ["decimal_places"],
-    FormattingType.POPUP: ["values", "allow_none"],
+    FormattingType.POPUP: ["popup_values", "allow_none"],
     FormattingType.RATING: [],
     FormattingType.SLIDER: [
         "control_format",
@@ -319,6 +320,7 @@ ALLOWED_FORMATTING_PARAMETERS = {
         "minimum",
     ],
     FormattingType.TICKBOX: [],
+    FormattingType.TEXT: [],
 }
 
 FORMAT_TYPE_MAP = {
@@ -334,6 +336,7 @@ FORMAT_TYPE_MAP = {
     FormattingType.SLIDER: FormatType.DECIMAL,
     FormattingType.STEPPER: FormatType.DECIMAL,
     FormattingType.TICKBOX: FormatType.CHECKBOX,
+    FormattingType.TEXT: FormatType.TEXT,
 }
 
 CUSTOM_FORMAT_TYPE_MAP = {

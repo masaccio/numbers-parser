@@ -919,8 +919,8 @@ def test_write_interactive_formats(configurable_save_file):
         use_accounting_style=True,
         control_format=ControlFormattingType.CURRENCY,
     )
-    # table.write(4, 0, "Unknown")
-    # table.set_cell_formatting(4, 0, "popup", values=["Cat", "Dog", "Rabbit"], allow_none=True)
+    table.write(3, 0, "Dog")
+    table.set_cell_formatting(3, 0, "popup", popup_values=["Cat", "Dog", "Rabbit"], allow_none=True)
 
     doc.save(configurable_save_file)
 
