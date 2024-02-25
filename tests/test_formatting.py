@@ -920,7 +920,9 @@ def test_write_interactive_formats(configurable_save_file):
         control_format=ControlFormattingType.CURRENCY,
     )
     table.write(3, 0, "Dog")
+    table.write(3, 1, 100.0)
     table.set_cell_formatting(3, 0, "popup", popup_values=["Cat", "Dog", "Rabbit"], allow_none=True)
+    table.set_cell_formatting(3, 1, "popup", popup_values=[100.0, "Two hundred", 300])
 
     doc.save(configurable_save_file)
 

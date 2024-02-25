@@ -382,7 +382,7 @@ class _NumbersModel(Cacheable):
                 tsce_items.append(
                     {
                         "cell_value_type": "NUMBER_TYPE",
-                        "string_value": {
+                        "number_value": {
                             "value": item,
                             "format": {"format_type": FormatType.DECIMAL},
                         },
@@ -415,7 +415,7 @@ class _NumbersModel(Cacheable):
                 range_control_inc=format.increment,
             )
         else:  # POPUP
-            popup_id = self.cell_popup_model(self._table_formats.id(table_id), format)
+            popup_id = self.cell_popup_model(self._control_specs.id(table_id), format)
             cell_spec = TSTArchives.CellSpecArchive(
                 interaction_type=CellInteractionType.POPUP,
                 chooser_control_popup_model=TSPMessages.Reference(identifier=popup_id),

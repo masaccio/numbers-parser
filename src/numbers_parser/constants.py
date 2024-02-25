@@ -207,7 +207,7 @@ FORMATTING_ALLOWED_CELLS = {
     "fraction": ["NumberCell"],
     "number": ["NumberCell"],
     "percentage": ["NumberCell"],
-    "popup": ["TextCell"],
+    "popup": ["NumberCell", "TextCell"],
     "rating": ["NumberCell"],
     "scientific": ["NumberCell"],
     "slider": ["NumberCell"],
