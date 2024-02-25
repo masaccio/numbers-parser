@@ -365,7 +365,7 @@ class _NumbersModel(Cacheable):
         format = TSKArchives.FormatStructArchive(**attrs)
         return self._table_formats.lookup_key(table_id, format)
 
-    def cell_popup_model(self, format: Formatting):
+    def cell_popup_model(self, parent_id: int, format: Formatting):
         tsce_items = [{"cell_value_type": "NIL_TYPE"}]
         for item in format.popup_values:
             if isinstance(item, str):
@@ -381,7 +381,7 @@ class _NumbersModel(Cacheable):
             else:
                 tsce_items.append(
                     {
-                        "cell_value_type": "NUMBER_TYPW",
+                        "cell_value_type": "NUMBER_TYPE",
                         "string_value": {
                             "value": item,
                             "format": {"format_type": FormatType.DECIMAL},
@@ -389,9 +389,11 @@ class _NumbersModel(Cacheable):
                     }
                 )
         popup_menu_id, _ = self.objects.create_object_from_dict(
-            "Index/Tables/DataList-{}", {"tsce_item": tsce_items}, TSTArchives.PopUpMenuModel
+            f"Index/Tables/DataList-{parent_id}",
+            {"tsce_item": tsce_items},
+            TSTArchives.PopUpMenuModel,
+            True,
         )
-        self.add_component_metadata(popup_menu_id, "CalculationEngine", "Tables/DataList-{}")
         return popup_menu_id
 
     def control_cell_archive(self, table_id: int, format_type: FormattingType, format: Formatting):
@@ -413,7 +415,7 @@ class _NumbersModel(Cacheable):
                 range_control_inc=format.increment,
             )
         else:  # POPUP
-            popup_id = self.cell_popup_model(format)
+            popup_id = self.cell_popup_model(self._table_formats.id(table_id), format)
             cell_spec = TSTArchives.CellSpecArchive(
                 interaction_type=CellInteractionType.POPUP,
                 chooser_control_popup_model=TSPMessages.Reference(identifier=popup_id),
