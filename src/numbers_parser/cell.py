@@ -305,7 +305,7 @@ class Style:
 
         for attr in ["bold", "italic", "underline", "strikethrough"]:
             if not isinstance(getattr(self, attr), bool):
-                raise TypeError(f"{field} argument must be boolean")
+                raise TypeError(f"{attr} argument must be boolean")
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Detect changes to cell styles and flag the style for
@@ -609,10 +609,10 @@ class Cell(Cacheable):
         self,
         format_id: int,
         format_type: FormattingType,
-        control_id: int,
+        control_id: int = None,
         is_currency: bool = False,
     ) -> None:
-        self._storage._set_formatting(format_id, format_type, control_id, is_currency)
+        self._storage.set_formatting(format_id, format_type, control_id, is_currency)
 
     def __init__(self, row: int, col: int, value):
         self._value = value
@@ -1152,11 +1152,11 @@ class Formatting:
     increment: float = 1.0
     maximum: float = 100.0
     minimum: float = 1.0
+    popup_values: List[str] = field(default_factory=lambda: ["Item 1"])
     negative_style: NegativeNumberStyle = NegativeNumberStyle.MINUS
     show_thousands_separator: bool = False
     type: FormattingType = FormattingType.NUMBER
     use_accounting_style: bool = False
-    values: List[str] = field(default_factory=lambda: ["Item 1"])
     _format_id = None
 
     def __post_init__(self):
