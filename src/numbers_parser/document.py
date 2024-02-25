@@ -14,6 +14,7 @@ from numbers_parser.cell import (
     FormattingType,
     MergedCell,
     Style,
+    TextCell,
     UnsupportedWarning,
     xl_cell_to_rowcol,
     xl_range,
@@ -1321,18 +1322,33 @@ class Table(Cacheable):  # noqa: F811
         :``"rating"``:
             * No additional parameters defined.
 
-        ``"slider"``:
-            * **decimal_places** (*float, optional, default: None*) – number of
-              decimal places, or ``None`` for automatic.
-        `"stepper"``:
-            * **decimal_places** (*float, optional, default: None*) – number of
-              decimal places, or ``None`` for automatic.
+        :``"slider"``:
+            * **control_format** (*ControlFormattingType, optional, default: ControlFormattingType.NUMBER*) - the format
+                of the data in the slider. Valid options are ``"base"``, ``"currency"``,
+                ``"datetime"``, ``"fraction"``, ``"percentage"``, ``"number"``,
+                or ``"scientific". Each format allows additional parameters identical to those
+                available for the formats themselves. For example, a slider using fractions
+                is configured with ``fraction_accuracy``.
+            * **increment** (*float, optional, default: 1*) - the slider's minimum value
+            * **maximum** (*float, optional, default: 100*) - the slider's maximum value
+            * **minimum** (*float, optional, default: 1*) - increment value for the slider
 
-        `"popup"``: A menu of options.
-            * **values** (*List[str], optional, default: None*) – number of
-              decimal places, or ``None`` for automatic.
+        :`"stepper"``:
+            * **control_format** (*ControlFormattingType, optional, default: ControlFormattingType.NUMBER*) - the format
+                of the data in the stepper. Valid options are ``"base"``, ``"currency"``,
+                ``"datetime"``, ``"fraction"``, ``"percentage"``, ``"number"``,
+                or ``"scientific"``. Each format allows additional parameters identical to those
+                available for the formats themselves. For example, a stepper using fractions
+                is configured with ``fraction_accuracy``.
+            * **increment** (*float, optional, default: 1*) - the stepper's minimum value
+            * **maximum** (*float, optional, default: 100*) - the stepper's maximum value
+            * **minimum** (*float, optional, default: 1*) - increment value for the stepper
+
+        :`"popup"``:
+            * **popup_values** (*List[str|int|float], optional, default: None*) – values
+                for the popup menu
             * **allow_none** (*bool, optional, default: True*) - If ``True``
-              include a blank value in the list
+                include a blank value in the list
 
 
         """  # noqa: E501
@@ -1411,6 +1427,9 @@ class Table(Cacheable):  # noqa: F811
             else:
                 number_format_type = FormattingType.NUMBER
             format_id = self._model.format_archive(self._table_id, number_format_type, format)
+        elif format_type_name == "popup":
+            popup_format_type = FormattingType.TEXT if isinstance(cell, TextCell) else True
+            format_id = self._model.format_archive(self._table_id, popup_format_type, format)
         else:
             format_id = self._model.format_archive(self._table_id, format_type, format)
 
