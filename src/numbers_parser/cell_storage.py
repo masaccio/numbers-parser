@@ -448,11 +448,11 @@ class CellStorage(Cacheable):
 
         return duration_str
 
-    def _set_formatting(
+    def set_formatting(
         self,
         format_id: int,
         format_type: Union[FormattingType, CustomFormattingType],
-        control_id: int,
+        control_id: int = None,
         is_currency: bool = False,
     ) -> None:
         self.is_currency = is_currency
@@ -475,7 +475,7 @@ class CellStorage(Cacheable):
             self.control_id = control_id
         elif format_type in [FormattingType.DATETIME, CustomFormattingType.DATETIME]:
             self.date_format_id = format_id
-        elif format_type == CustomFormattingType.TEXT:
+        elif format_type in [FormattingType.TEXT, CustomFormattingType.TEXT]:
             self.text_format_id = format_id
         else:
             self.num_format_id = format_id
