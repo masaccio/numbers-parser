@@ -924,6 +924,14 @@ def test_write_interactive_formats(configurable_save_file):
     table.set_cell_formatting(3, 0, "popup", popup_values=["Cat", "Dog", "Rabbit"], allow_none=True)
     table.set_cell_formatting(3, 1, "popup", popup_values=[100.0, "Two hundred", 300])
 
+    with pytest.raises(IndexError) as e:
+        table.set_cell_formatting(3, 0, "popup", popup_values=["unknown"])
+    assert "current cell value 'Dog' does not match any popup values" in str(e)
+
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting(2, 2, "stepper", control_format="unknown")
+    assert "unsupported number format 'unknown' for stepper" in str(e)
+
     doc.save(configurable_save_file)
 
     run_test_interactive_formats(configurable_save_file)

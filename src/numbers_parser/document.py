@@ -1243,6 +1243,8 @@ class Table(Cacheable):  # noqa: F811
         :Raises:
             * **TypeError** -
                 If a tickbox is chosen for anything other than ``bool`` values.
+            * **IndexError** -
+                If the current cell value does not match a list of popup items.
 
         :Warns:
             * **RuntimeWarning** -
@@ -1421,13 +1423,19 @@ class Table(Cacheable):  # noqa: F811
                         else False
                     )
                 except (KeyError, AttributeError):
+                    control_format = kwargs["control_format"]
                     raise TypeError(
-                        "unsupported number format '{control_format}' for format_type_name"
+                        f"unsupported number format '{control_format}' for {format_type_name}"
                     ) from None
             else:
                 number_format_type = FormattingType.NUMBER
             format_id = self._model.format_archive(self._table_id, number_format_type, format)
         elif format_type_name == "popup":
+            if cell.value not in format.popup_values:
+                raise IndexError(
+                    f"current cell value '{cell.value}' does not match any popup values"
+                )
+
             popup_format_type = FormattingType.TEXT if isinstance(cell, TextCell) else True
             format_id = self._model.format_archive(self._table_id, popup_format_type, format)
         else:
