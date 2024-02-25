@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from io import BytesIO
 from sys import version_info
 from zipfile import BadZipFile, ZipFile
@@ -32,11 +33,15 @@ def read_numbers_file(path, file_handler, object_handler=None):
                     read_numbers_file(filepath, file_handler, object_handler)
                 else:
                     f = open(filepath, "rb")
-                    if filename.endswith(".iwa"):
-                        blob = f.read()
-                        extract_iwa_archives(blob, filepath, file_handler, object_handler)
                     blob = f.read()
-                    file_handler(os.path.join(path, filename), blob)
+                    if filename.endswith(".iwa"):
+                        package_filepath = re.sub(r".*\.numbers/*", "", filepath)
+                        extract_iwa_archives(blob, package_filepath, file_handler, object_handler)
+                    else:
+                        package_filepath = os.path.join(
+                            re.sub(r".*\.numbers/*", "", path), filename
+                        )
+                        file_handler(package_filepath, blob)
     else:
         try:
             zipf = open_zipfile(path)

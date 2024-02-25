@@ -398,3 +398,12 @@ def test_issue_73(configurable_save_file):
     with pytest.warns(UnsupportedWarning) as record:
         doc.save(configurable_save_file)
     assert str(record[0].message) == "Not modifying pivot table 'Table 1 Pivot'"
+
+
+def test_issue_76(configurable_save_file):
+    doc = Document("tests/data/test-5.numbers")
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    assert "Metadata/Properties.plist" in doc._model.objects._file_store
+    assert doc._model.objects._file_store["Metadata/Properties.plist"][0:6] == b"bplist"
