@@ -157,8 +157,8 @@ Whilst support for writing numbers files has been stable since version
 and instead save data to a new file.
 
 Cell values are written using
-[Table.write()](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.write)
-and `numbers-parser` will automatically create empty rows and columns
+[Table.write()](https://masaccio.github.io/numbers-parser/api/table.html#numbers_parser.Table.write) and
+`numbers-parser` will automatically create empty rows and columns
 for any cell references that are out of range of the current table.
 
 ```python
@@ -171,12 +171,9 @@ table.write("B7", datetime(2020, 12, 25))
 doc.save("new-sheet.numbers")
 ```
 
-Additional tables and worksheets can be added to a `Document` before
-saving using
-[Document.add_sheet()](https://masaccio.github.io/numbers-parser/#numbers_parser.Document.add_sheet)
-and
-[Sheet.add_table()](https://masaccio.github.io/numbers-parser/#numbers_parser.Sheet.add_table)
-respectively:
+Additional tables and worksheets can be added to a `Document` before saving using
+[Document.add_sheet()](https://masaccio.github.io/numbers-parser/api/document.html#numbers_parser.Document.add_sheet) and
+[Sheet.add_table()](https://masaccio.github.io/numbers-parser/api/sheet.html#numbers_parser.Sheet.add_table) respectively:
 
 ```python
 doc = Document()
@@ -204,15 +201,15 @@ styles. The following paragraph styles are supported:
 Numbers conflates style attributes that can be stored in paragraph
 styles (the style menu in the text panel) with the settings that are
 available on the Style tab of the Text panel. Some attributes in Numbers
-are not applied to new cells when a style is applied. To keep the API
-simple, `numbers-parser` packs all styling into a single
-[Style](https://masaccio.github.io/numbers-parser/api/style.html)
-object. When a document is saved, the attributes not stored in a
-paragraph style are applied to each cell that includes it.
+are not applied to new cells when a style is applied.
+
+To keep the API simple, `numbers-parser` packs all styling into a single
+[Style](https://masaccio.github.io/numbers-parser/api/style.html) object. When a document is saved, the attributes
+not stored in a paragraph style are applied to each cell that includes it.
 
 Styles are read from cells using the
-[Cell.style](https://masaccio.github.io/numbers-parser/api/cells.html#numbers_parser.Cell.style)
-property and you can add new styles with
+[Cell.style](https://masaccio.github.io/numbers-parser/api/cells.html#numbers_parser.Cell.style) property and you can
+add new styles with
 [Document.add_style](https://masaccio.github.io/numbers-parser/api/document.html#numbers_parser.Document.add_style).
 
 ```python
@@ -242,7 +239,7 @@ internally by the package. Changing a data format for cell has no impact
 on any other cells.
 
 Cell formats are changed using
-[Table.set_cell_formatting](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_formatting):
+[Table.set_cell_formatting()](https://masaccio.github.io/numbers-parser/api/table.html#numbers_parser.Table.set_cell_formatting):
 
 ```python
 table.set_cell_formatting(
@@ -263,9 +260,9 @@ Custom formats are shared across a Document and can be applied to
 multiple cells in multiple tables. Editing a custom format changes the
 appearance of data in all cells that share that format. You must first
 add a custom format to the document using
-[Document.add_custom_format](https://masaccio.github.io/numbers-parser/#numbers_parser.Document.add_custom_format)
+[Document.add_custom_format()](https://masaccio.github.io/numbers-parser/api/document.html#numbers_parser.Document.add_custom_format)
 before assigning it to cells using
-[Table.set_cell_formatting](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_formatting):
+[Table.set_cell_formatting()](https://masaccio.github.io/numbers-parser/api/table.html#numbers_parser.Table.set_cell_formatting):
 
 ```python
 long_date = doc.add_custom_format(
@@ -292,13 +289,11 @@ table to allow for drawing borders across multiple cells. Setting the
 border of merged cells is not possible unless the edge of the cells is
 at the end of the merged region.
 
-Borders are represented using the
-[Border](https://masaccio.github.io/numbers-parser/#numbers_parser.Border)
-class that can be initialized with line width, color and line style. The
+Borders are represented using the [Border](https://masaccio.github.io/numbers-parser/api/border.html) class
+that can be initialized with line width, color and line style. The
 current state of a cell border is read using the
-[Cell.border](https://masaccio.github.io/numbers-parser/#numbers_parser.Cell.border)
-property. The
-[Table.set_cell_border](https://masaccio.github.io/numbers-parser/#numbers_parser.Table.set_cell_border)
+[Cell.border](https://masaccio.github.io/numbers-parser/api/cells.html#numbers_parser.Cell.border) property
+and [Table.set_cell_border()](https://masaccio.github.io/numbers-parser/api/table.html#numbers_parser.Table.set_cell_border)
 sets the border for a cell edge or a range of cells.
 
 ## API
@@ -370,5 +365,4 @@ Current known limitations of `numbers-parser` are:
 
 ## License
 
-All code in this repository is licensed under the [MIT
-License](https://github.com/masaccio/numbers-parser/blob/master/LICENSE.rst)
+All code in this repository is licensed under the [MIT License](https://github.com/masaccio/numbers-parser/blob/master/LICENSE.rst).
