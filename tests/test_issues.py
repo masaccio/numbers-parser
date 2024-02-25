@@ -408,6 +408,16 @@ def test_issue_74(configurable_save_file):
     assert doc.sheets[0].tables[0].cell(0, 1)._storage.control_id is not None
 
 
+def test_issue_75(configurable_save_file):
+    doc = Document("tests/data/test-issue-75.numbers")
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    assert all([table.cell(1, col).style.bg_image.filename == "cat.jpg" for col in range(1, 6)])
+    assert all([table.cell(2, col).style.bg_image.filename == "cat.jpg" for col in range(1, 6)])
+
+
 def test_issue_76(configurable_save_file):
     doc = Document("tests/data/test-issue-76.numbers")
     doc.save(configurable_save_file)
