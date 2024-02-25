@@ -1226,6 +1226,13 @@ class Table(Cacheable):  # noqa: F811
                 decimal_places=3,
                 negative_style=NegativeNumberStyle.RED
             )
+            table.set_cell_formatting(
+                3,
+                0,
+                "popup",
+                popup_values=["Cat", "Dog", "Rabbit"],
+                allow_none=True
+            )
 
         :Parameters:
             * **args** (*list*, *optional*) – Positional arguments for cell reference and data format type (see below)
