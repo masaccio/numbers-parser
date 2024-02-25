@@ -24,24 +24,23 @@ def open_zipfile(file):
 def read_numbers_file(path, file_handler, object_handler=None):
     debug("read_numbers_file: path=%s", path)
     if os.path.isdir(path):
-        if os.path.isfile(os.path.join(path, "Index.zip")):
-            get_objects_from_zip_file(os.path.join(path, "Index.zip"), file_handler, object_handler)
-        else:
-            for filename in os.listdir(path):
-                filepath = os.path.join(path, filename)
-                if os.path.isdir(filepath):
-                    read_numbers_file(filepath, file_handler, object_handler)
+        for filename in os.listdir(path):
+            filepath = os.path.join(path, filename)
+            if os.path.isdir(filepath):
+                read_numbers_file(filepath, file_handler, object_handler)
+            elif filename.endswith("Index.zip"):
+                get_objects_from_zip_file(
+                    os.path.join(path, "Index.zip"), file_handler, object_handler
+                )
+            else:
+                f = open(filepath, "rb")
+                blob = f.read()
+                if filename.endswith(".iwa"):
+                    package_filepath = re.sub(r".*\.numbers/*", "", filepath)
+                    extract_iwa_archives(blob, package_filepath, file_handler, object_handler)
                 else:
-                    f = open(filepath, "rb")
-                    blob = f.read()
-                    if filename.endswith(".iwa"):
-                        package_filepath = re.sub(r".*\.numbers/*", "", filepath)
-                        extract_iwa_archives(blob, package_filepath, file_handler, object_handler)
-                    else:
-                        package_filepath = os.path.join(
-                            re.sub(r".*\.numbers/*", "", path), filename
-                        )
-                        file_handler(package_filepath, blob)
+                    package_filepath = os.path.join(re.sub(r".*\.numbers/*", "", path), filename)
+                    file_handler(package_filepath, blob)
     else:
         try:
             zipf = open_zipfile(path)

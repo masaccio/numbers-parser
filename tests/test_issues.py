@@ -409,7 +409,7 @@ def test_issue_74(configurable_save_file):
 
 
 def test_issue_76(configurable_save_file):
-    doc = Document("tests/data/test-5.numbers")
+    doc = Document("tests/data/test-issue-76.numbers")
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
