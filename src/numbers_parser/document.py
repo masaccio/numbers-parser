@@ -57,7 +57,7 @@ class Document:
 
     Parameters
     ----------
-    filename: str | PosixPath, optional
+    filename: str | Path, optional
         Apple Numbers document to read.
     sheet_name: *str*, *optional*, *default*: ``Sheet 1``
         Name of the first sheet in a new document
@@ -82,7 +82,7 @@ class Document:
 
     def __init__(  # noqa: PLR0913
         self,
-        filename: Optional[str] = None,
+        filename: Optional[Union[str, Path]] = None,
         sheet_name: Optional[str] = "Sheet 1",
         table_name: Optional[str] = "Table 1",
         num_header_rows: Optional[int] = 1,
@@ -123,13 +123,13 @@ class Document:
         """
         return self._model.custom_formats
 
-    def save(self, filename: str, package: bool = False) -> None:
+    def save(self, filename: Union[str, Path], package: bool = False) -> None:
         """
         Save the document in the specified filename.
 
         Parameters
         ----------
-        filename: str | PosixPath
+        filename: str | Path
             The path to save the document to. If the file already exists,
             it will be overwritten.
         package: bool, optional, default: False
