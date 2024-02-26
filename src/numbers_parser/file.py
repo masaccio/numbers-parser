@@ -42,7 +42,7 @@ def test_document_version(filepath: str, no_warn=False) -> None:
             doc_version = doc_properties["fileFormatVersion"]
             if not no_warn and doc_version not in _SUPPORTED_NUMBERS_VERSIONS:
                 warnings.warn(f"unsupported version {doc_version}", RuntimeWarning, stacklevel=2)
-    except OSError:
+    except (OSError, plistlib.InvalidFileException):
         raise FileFormatError("invalid Numbers document (missing files)") from None
 
 
@@ -99,6 +99,8 @@ def write_numbers_file(filepath: Path, file_store: List[object], package: bool):
             raise FileFormatError("cannot overwrite Numbers document file with package")
         else:
             filepath.mkdir()
+
+        # OSError possible exception; allow it to propagate up
         zipf = ZipFile(filepath / "Index.zip", "w")
         for blob_path, blob in file_store.items():
             if isinstance(blob, IWAFile):
@@ -111,6 +113,7 @@ def write_numbers_file(filepath: Path, file_store: List[object], package: bool):
                     fh.write(blob)
         zipf.close()
     else:
+        # OSError possible exception; allow it to propagate up
         zipf = ZipFile(filepath, "w")
 
         for filepath, blob in file_store.items():
