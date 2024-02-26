@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Tuple, Union
 from warnings import warn
 
@@ -56,7 +57,7 @@ class Document:
 
     Parameters
     ----------
-    filename: str, optional
+    filename: str | PosixPath, optional
         Apple Numbers document to read.
     sheet_name: *str*, *optional*, *default*: ``Sheet 1``
         Name of the first sheet in a new document
@@ -89,7 +90,7 @@ class Document:
         num_rows: Optional[int] = DEFAULT_ROW_COUNT,
         num_cols: Optional[int] = DEFAULT_COLUMN_COUNT,
     ):
-        self._model = _NumbersModel(filename)
+        self._model = _NumbersModel(None if filename is None else Path(filename))
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
 
@@ -128,7 +129,7 @@ class Document:
 
         Parameters
         ----------
-        filename: str
+        filename: str | PosixPath
             The path to save the document to. If the file already exists,
             it will be overwritten.
         package: bool, optional, default: False
@@ -152,7 +153,7 @@ class Document:
                     )
                 else:
                     self._model.recalculate_table_data(table._table_id, table._data)
-        write_numbers_file(filename, self._model.file_store, package)
+        write_numbers_file(Path(filename), self._model.file_store, package)
 
     def add_sheet(
         self,
