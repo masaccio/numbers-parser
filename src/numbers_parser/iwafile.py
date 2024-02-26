@@ -130,13 +130,13 @@ class ProtobufPatch:
         return message_to_dict(self.data)
 
     @classmethod
-    def FromString(cls, message_info, proto_klass, data):
+    def FromString(cls, message_info, proto_klass, data):  # noqa: N802
         # Note versus Peter Sobot's implementation: we can ignore some of
         # the unimplemented patching of Protobufs. Specifically deserializing
         # when len(diff_field_path) > 1 or when fields_to_remove is present.
         return cls(proto_klass.FromString(data))
 
-    def SerializeToString(self):
+    def SerializeToString(self):  # noqa: N802
         return self.data.SerializePartialToString()
 
 
