@@ -78,6 +78,8 @@ CUSTOM_TEXT_PLACEHOLDER = "\ue421"
 _SUPPORTED_NUMBERS_VERSIONS = [
     "10.3",
     "11.0",
+    "11.0.1",
+    "11.0.2",
     "11.0.3",
     "11.1",
     "11.2",
