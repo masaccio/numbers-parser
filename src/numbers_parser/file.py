@@ -5,7 +5,7 @@ import re
 import warnings
 from io import BytesIO
 from sys import version_info
-from typing import TextIO
+from typing import List
 from zipfile import BadZipFile, ZipFile
 
 from numbers_parser.constants import _SUPPORTED_NUMBERS_VERSIONS
@@ -25,25 +25,23 @@ def open_zipfile(file):
         return ZipFile(file)
 
 
-def test_document_version(fp: TextIO, path: str) -> None:
-    doc_properties = plistlib.load(fp)
-    doc_version = doc_properties["fileFormatVersion"]
-    if doc_version not in _SUPPORTED_NUMBERS_VERSIONS:
-        warnings.warn(f"{path}: unsupported version {doc_version}", RuntimeWarning, stacklevel=2)
+def test_document_version(path: str, no_warn=False) -> None:
+    properties_plist = os.path.join(path, "Metadata/Properties.plist")
+    try:
+        with open(properties_plist, "rb") as fp:
+            doc_properties = plistlib.load(fp)
+            doc_version = doc_properties["fileFormatVersion"]
+            if not no_warn and doc_version not in _SUPPORTED_NUMBERS_VERSIONS:
+                warnings.warn(f"unsupported version {doc_version}", RuntimeWarning, stacklevel=2)
+    except OSError:
+        raise FileFormatError("invalid Numbers document (missing files)") from None
 
 
 def read_numbers_file(path, file_handler, object_handler=None):
     if os.path.isdir(path):
         if not path.endswith(".numbers"):
             raise FileFormatError("invalid Numbers document (not a .numbers directory)")
-
-        properties_plist = os.path.join(path, "Metadata/Properties.plist")
-        try:
-            fp = open(properties_plist, "rb")
-        except OSError:
-            raise FileFormatError("invalid Numbers document (missing files)") from None
-        test_document_version(fp, path)
-        fp.close()
+        test_document_version(path)
 
     read_numbers_file_contents(path, file_handler, object_handler)
 
@@ -85,14 +83,37 @@ def read_numbers_file_contents(path, file_handler, object_handler=None):
             raise FileFormatError("invalid Numbers document") from None
 
 
-def write_numbers_file(filename, file_store):
-    zipf = ZipFile(filename, "w")
-    for filename, blob in file_store.items():
-        if isinstance(blob, IWAFile):
-            zipf.writestr(filename, blob.to_buffer())
+def write_numbers_file(filepath: str, file_store: List[object], package: bool):
+    if package:
+        if os.path.isdir(filepath):
+            if not filepath.endswith(".numbers"):
+                raise FileFormatError("invalid Numbers document (not a .numbers directory)")
+            files = os.listdir(filepath)
+            if "Index.zip" not in files and "Metadata" not in filepath:
+                raise FileFormatError("folder is not a numbers package")
+            test_document_version(filepath, no_warn=True)
         else:
-            zipf.writestr(filename, blob)
-    zipf.close()
+            os.mkdir(filepath)
+        zipf = ZipFile(os.path.join(filepath, "Index.zip"), "w")
+        for blob_path, blob in file_store.items():
+            if isinstance(blob, IWAFile):
+                zipf.writestr(blob_path, blob.to_buffer())
+            else:
+                parent_dir = os.path.join(filepath, os.path.dirname(blob_path))
+                if parent_dir and not os.path.isdir(parent_dir):
+                    os.mkdir(os.path.join(filepath, parent_dir))
+                with open(os.path.join(filepath, blob_path), "wb") as fh:
+                    fh.write(blob)
+        zipf.close()
+    else:
+        zipf = ZipFile(filepath, "w")
+
+        for filepath, blob in file_store.items():
+            if isinstance(blob, IWAFile):
+                zipf.writestr(filepath, blob.to_buffer())
+            else:
+                zipf.writestr(filepath, blob)
+        zipf.close()
 
 
 def get_objects_from_zip_file(path, file_handler, object_handler):
