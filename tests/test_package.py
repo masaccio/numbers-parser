@@ -1,6 +1,6 @@
 import pytest
 
-from numbers_parser import Document, FileFormatError
+from numbers_parser import RGB, Document, FileFormatError
 
 
 def test_invalid_packages():
@@ -32,17 +32,14 @@ def test_invalid_packages():
 
 
 def test_package_save(configurable_save_file):
-    doc = Document()
-    table = doc.sheets[0].tables[0]
-    table.write(0, 0, "Dog")
-    table.write(0, 1, "Cat")
-    table.write(1, 0, "Rat")
-    table.write(1, 1, "Snake")
+    doc = Document("tests/data/test-package.numbers")
     doc.save(configurable_save_file, package=True)
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
-    assert table.cell(0, 0).value == "Dog"
+    assert table.cell(0, 0).style.bg_image.filename == "cat.jpg"
     assert table.cell(0, 1).value == "Cat"
-    assert table.cell(1, 0).value == "Rat"
-    assert table.cell(1, 1).value == "Snake"
+    style = table.cell(1, 1).style
+    assert style.font_color == RGB(255, 255, 255)
+    assert style.bg_color == RGB(238, 34, 12)
+    assert style.bold
