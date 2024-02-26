@@ -19,10 +19,15 @@ debug = logger.debug
 def open_zipfile(filepath: Path):
     """Open Zip file with the correct filename encoding supported by current python"""
     # Coverage is python version dependent, so one path with always fail coverage
-    if version_info.minor >= 11:  # pragma: no cover
-        return ZipFile(filepath, metadata_encoding="utf-8")
-    else:  # pragma: no cover
-        return ZipFile(filepath)
+    try:
+        if version_info.minor >= 11:  # pragma: no cover
+            return ZipFile(filepath, metadata_encoding="utf-8")
+        else:  # pragma: no cover
+            return ZipFile(filepath)
+    except BadZipFile:
+        raise FileFormatError("invalid Numbers document") from None
+    except FileNotFoundError:
+        raise FileError("no such file or directory") from None
 
 
 def test_document_version(filepath: str, no_warn=False) -> None:
@@ -67,11 +72,7 @@ def read_numbers_file_contents(
             if sub_filepath.is_dir():
                 read_numbers_file_contents(sub_filepath, file_handler, object_handler)
             elif sub_filepath.name.lower() == "index.zip":
-                try:
-                    zipf = open_zipfile(sub_filepath)
-                except BadZipFile:
-                    raise FileFormatError("invalid Numbers document") from None
-
+                zipf = open_zipfile(sub_filepath)
                 get_objects_from_zip_stream(zipf, file_handler, object_handler)
             else:
                 with sub_filepath.open(mode="rb") as fh:
@@ -82,17 +83,8 @@ def read_numbers_file_contents(
                     else:
                         file_handler(package_filename, blob)
     else:
-        try:
-            zipf = open_zipfile(filepath)
-        except BadZipFile:
-            raise FileFormatError("invalid Numbers document") from None
-        except FileNotFoundError:
-            raise FileError("no such file or directory") from None
-
-        try:
-            get_objects_from_zip_stream(zipf, file_handler, object_handler)
-        except BadZipFile:
-            raise FileFormatError("invalid Numbers document") from None
+        zipf = open_zipfile(filepath)
+        get_objects_from_zip_stream(zipf, file_handler, object_handler)
 
 
 def write_numbers_file(filepath: Path, file_store: List[object], package: bool):
