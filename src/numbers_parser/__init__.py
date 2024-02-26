@@ -32,19 +32,6 @@ __version__ = importlib.metadata.version("numbers-parser")
 
 _DEFAULT_NUMBERS_INSTALL_PATH = "/Applications/Numbers.app"
 _VERSION_PLIST_PATH = "Contents/version.plist"
-_SUPPORTED_NUMBERS_VERSIONS = [
-    "10.3",
-    "11.0",
-    "11.1",
-    "11.2",
-    "12.0",
-    "12.1",
-    "12.2",
-    "12.2.1",
-    "13.0",
-    "13.1",
-    "13.2",
-]
 
 
 def _get_version():
@@ -58,6 +45,9 @@ def _check_installed_numbers_version():
         return None
     version_dict = plistlib.load(fp)
     installed_version = version_dict["CFBundleShortVersionString"]
+
+    from numbers_parser.constants import _SUPPORTED_NUMBERS_VERSIONS
+
     if installed_version not in _SUPPORTED_NUMBERS_VERSIONS:
         warnings.warn(
             f"Numbers version {installed_version} not tested with this version", stacklevel=2

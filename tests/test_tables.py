@@ -42,10 +42,10 @@ EMPTY_ROWS_REF = [
 def test_file_exceptions():
     with pytest.raises(FileError) as e:
         _ = Document("tests/data/test-1.not-found")
-    assert str(e.value) == "No such file or directory"
+    assert str(e.value) == "no such file or directory"
     with pytest.raises(FileFormatError) as e:
         _ = Document("tests/conftest.py")
-    assert str(e.value) == "Invalid Numbers file"
+    assert str(e.value) == "invalid Numbers document"
 
 
 def test_sheet_exceptions():

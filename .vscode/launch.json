@@ -6,9 +6,17 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "purpose": ["debug-test"],
+            "purpose": [
+                "debug-test"
+            ],
             "console": "integratedTerminal",
-            "env": {"PYTEST_ADDOPTS": "--no-cov"}, 
+            "env": {
+                "PYTEST_ADDOPTS": "--no-cov",
+                "PYDEVD_DISABLE_FILE_VALIDATION": "1",
+            },
+            "pythonArgs": [
+                "-Xfrozen_modules=off"
+            ],
             "justMyCode": true
         },
         {
@@ -17,7 +25,13 @@
             "request": "launch",
             "module": "pytest",
             "console": "integratedTerminal",
-            "env": {"PYTEST_ADDOPTS": "--no-cov"}, 
+            "env": {
+                "PYTEST_ADDOPTS": "--no-cov",
+                "PYDEVD_DISABLE_FILE_VALIDATION": "1",
+            },
+            "pythonArgs": [
+                "-Xfrozen_modules=off"
+            ],
             "justMyCode": true,
             "args": [
                 "${file}"

@@ -74,6 +74,24 @@ DECIMAL_PLACES_AUTO = 253
 CURRENCY_CELL_TYPE = 10
 CUSTOM_TEXT_PLACEHOLDER = "\ue421"
 
+# Supported versions
+_SUPPORTED_NUMBERS_VERSIONS = [
+    "10.3",
+    "11.0",
+    "11.0.3",
+    "11.1",
+    "11.2",
+    "12.0",
+    "12.1",
+    "12.2",
+    "12.2.1",
+    "13.0",
+    "13.1",
+    "13.1.2",
+    "13.2",
+    "13.2.1",
+]
+
 
 # Supported date/time directives
 def _days_occurred_in_month(value: datetime) -> str:

@@ -263,20 +263,20 @@ def test_errors(script_runner):
 
     ret = script_runner.run(["cat-numbers", "tests/data/badzipfile.numbers"], print_result=False)
     assert not ret.success
-    assert "tests/data/badzipfile.numbers: Invalid Numbers file" in ret.stderr
+    assert "tests/data/badzipfile.numbers: invalid Numbers document" in ret.stderr
     assert ret.stdout == ""
 
     ret = script_runner.run(["cat-numbers", "tests/data/badindexzip.numbers"], print_result=False)
     assert not ret.success
-    assert "tests/data/badindexzip.numbers: Invalid Numbers file" in ret.stderr
+    assert "tests/data/badindexzip.numbers: invalid Numbers document" in ret.stderr
     assert ret.stdout == ""
 
     ret = script_runner.run(["cat-numbers", "tests/data/badindexzip2.numbers"], print_result=False)
     assert not ret.success
-    assert "tests/data/badindexzip2.numbers: Invalid Numbers file" in ret.stderr
+    assert "tests/data/badindexzip2.numbers: invalid Numbers document" in ret.stderr
     assert ret.stdout == ""
 
     ret = script_runner.run(["cat-numbers", "invalid.numbers"], print_result=False)
     assert not ret.success
-    assert "invalid.numbers: No such file or directory" in ret.stderr
+    assert "invalid.numbers: no such file or directory" in ret.stderr
     assert ret.stdout == ""
