@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from array import array
 from base64 import b64decode
 from binascii import hexlify
+from pathlib import Path
 
 import regex
 from compact_json import Formatter
@@ -68,7 +69,7 @@ def prettify_cell_storage(obj):
 
 
 def process_file(filename, blob, output_dir, args):
-    filename = regex.sub(r".*\.numbers/", "", filename)
+    filename = regex.sub(r".*\.numbers/", "", str(filename))
     ensure_directory_exists(output_dir, filename)
     target_path = os.path.join(output_dir, filename)
     if isinstance(blob, IWAFile):
@@ -134,7 +135,7 @@ def main():
             output_dir = args.output or document.replace(".numbers", "")
             try:
                 read_numbers_file(
-                    document,
+                    Path(document),
                     file_handler=lambda filename, blob, output_dir=output_dir: process_file(
                         filename, blob, output_dir, args
                     ),

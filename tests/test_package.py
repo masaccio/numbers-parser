@@ -3,7 +3,7 @@ import pytest
 from numbers_parser import RGB, Document, FileFormatError
 
 
-def test_invalid_packages():
+def test_invalid_packages(configurable_save_file):
     with pytest.raises(FileFormatError) as e:
         _ = Document("tests/data/invalid.numberz")
     assert "invalid Numbers document (not a .numbers directory)" in str(e)
@@ -19,7 +19,7 @@ def test_invalid_packages():
 
     doc = Document()
     with pytest.raises(FileFormatError) as e:
-        _ = Document("tests/data/invalid.numberz")
+        _ = doc.save("tests/data/invalid.numberz", package=True)
     assert "invalid Numbers document (not a .numbers directory)" in str(e)
 
     with pytest.raises(FileFormatError) as e:
@@ -29,6 +29,11 @@ def test_invalid_packages():
     with pytest.raises(FileFormatError) as e:
         doc.save("tests/data/invalid-props.numbers", package=True)
     assert "invalid Numbers document (missing files)" in str(e)
+
+    with pytest.raises(FileFormatError) as e:
+        doc.save(configurable_save_file)
+        doc.save(configurable_save_file, package=True)
+    assert "cannot overwrite Numbers document file with package" in str(e)
 
 
 def test_package_save(configurable_save_file):
