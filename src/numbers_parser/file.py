@@ -58,12 +58,21 @@ def read_numbers_file(filepath: Path, file_handler: Callable, object_handler: Ca
 def read_numbers_file_contents(
     filepath: Path, file_handler: Callable, object_handler: Callable = None
 ):
+    """
+    Read a Numbers file and iterate through all files and directories
+    storing the files blobs and objects though the supplies callbacks.
+    """
     if filepath.is_dir():
         for sub_filepath in filepath.iterdir():
             if sub_filepath.is_dir():
                 read_numbers_file_contents(sub_filepath, file_handler, object_handler)
-            elif sub_filepath.name == "Index.zip":
-                get_objects_from_zip_file(sub_filepath, file_handler, object_handler)
+            elif sub_filepath.name.lower() == "index.zip":
+                try:
+                    zipf = open_zipfile(sub_filepath)
+                except BadZipFile:
+                    raise FileFormatError("invalid Numbers document") from None
+
+                get_objects_from_zip_stream(zipf, file_handler, object_handler)
             else:
                 with sub_filepath.open(mode="rb") as fh:
                     blob = fh.read()
@@ -81,12 +90,7 @@ def read_numbers_file_contents(
             raise FileError("no such file or directory") from None
 
         try:
-            index_zip = [f for f in zipf.namelist() if f.lower().endswith("index.zip")]
-            if len(index_zip) > 0:
-                index_data = BytesIO(zipf.read(index_zip[0]))
-                get_objects_from_zip_stream(open_zipfile(index_data), file_handler, object_handler)
-            else:
-                get_objects_from_zip_stream(zipf, file_handler, object_handler)
+            get_objects_from_zip_stream(zipf, file_handler, object_handler)
         except BadZipFile:
             raise FileFormatError("invalid Numbers document") from None
 
@@ -125,22 +129,15 @@ def write_numbers_file(filepath: Path, file_store: List[object], package: bool):
         zipf.close()
 
 
-def get_objects_from_zip_file(filepath: Path, file_handler: Callable, object_handler: Callable):
-    try:
-        zipf = open_zipfile(filepath)
-    except BadZipFile:
-        raise FileFormatError("invalid Numbers document") from None
-
-    get_objects_from_zip_stream(zipf, file_handler, object_handler)
-
-
 def get_objects_from_zip_stream(zipf, file_handler, object_handler):
     for filename in zipf.namelist():
-        if filename.endswith(".iwa"):
-            blob = zipf.read(filename)
+        blob = zipf.read(filename)
+        if filename.lower().endswith("index.zip"):
+            index_data = BytesIO(blob)
+            get_objects_from_zip_stream(open_zipfile(index_data), file_handler, object_handler)
+        elif filename.endswith(".iwa"):
             extract_iwa_archives(blob, filename, file_handler, object_handler)
         else:
-            blob = zipf.read(filename)
             file_handler(filename, blob)
 
 
