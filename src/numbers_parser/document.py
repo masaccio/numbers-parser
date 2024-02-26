@@ -122,7 +122,7 @@ class Document:
         """
         return self._model.custom_formats
 
-    def save(self, filename: str) -> None:
+    def save(self, filename: str, package: bool = False) -> None:
         """
         Save the document in the specified filename.
 
@@ -131,6 +131,15 @@ class Document:
         filename: str
             The path to save the document to. If the file already exists,
             it will be overwritten.
+        package: bool, optional, default: False
+            If ``True``, create a package format document (a folder) instead
+            of a single file
+
+        Raises
+        ------
+        FileFormatError:
+            If attempting to write a package into a folder that is not an
+            existing Numbers document.
         """
         for sheet in self.sheets:
             for table in sheet.tables:
@@ -143,7 +152,7 @@ class Document:
                     )
                 else:
                     self._model.recalculate_table_data(table._table_id, table._data)
-        write_numbers_file(filename, self._model.file_store)
+        write_numbers_file(filename, self._model.file_store, package)
 
     def add_sheet(
         self,
