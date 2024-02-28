@@ -21,6 +21,7 @@ be extracted. Styles are not supported.
 import importlib.metadata
 import os
 import plistlib
+import re
 import warnings
 
 from numbers_parser.cell import *  # noqa: F403
@@ -48,6 +49,7 @@ def _check_installed_numbers_version():
 
     from numbers_parser.constants import SUPPORTED_NUMBERS_VERSIONS
 
+    installed_version = re.sub(r"(\d+)\.(\d+)\.\d+", r"\1.\2", installed_version)
     if installed_version not in SUPPORTED_NUMBERS_VERSIONS:
         warnings.warn(
             f"Numbers version {installed_version} not tested with this version", stacklevel=2
