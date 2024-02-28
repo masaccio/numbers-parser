@@ -15,7 +15,7 @@ def test_invalid_packages(configurable_save_file):
     with pytest.warns(RuntimeWarning) as record:
         _ = Document("tests/data/invalid-ver.numbers")
     # assert len(record) == 1
-    assert "unsupported version 99.9" in str(record[0])
+    assert "unsupported version '99.9'" in str(record[0])
 
     doc = Document()
     with pytest.raises(FileFormatError) as e:

@@ -61,22 +61,29 @@ class IWork:
         """
         if self._is_package:
             properties_filename = self._filepath / "Metadata/Properties.plist"
-            try:
-                with open(properties_filename, "rb") as fh:
-                    properties_plist = fh.read()
-            except OSError:
+            build_filename = self._filepath / "Metadata/BuildVersionHistory.plist"
+            if not properties_filename.exists() or not build_filename.exists():
                 raise FileFormatError("invalid Numbers document (missing files)") from None
+            with open(properties_filename, "rb") as fh:
+                properties_plist = fh.read()
         else:
-            try:
-                properties_plist = self._zipf.read("Metadata/Properties.plist")
-            except KeyError:
+            metadata = [
+                x.filename
+                for x in self._zipf.filelist
+                if x.filename.endswith(
+                    ("Metadata/Properties.plist", "Metadata/BuildVersionHistory.plist")
+                )
+            ]
+            if len(metadata) != 2:
                 raise FileFormatError("invalid Numbers document (missing files)") from None
+            properties_plist = self._zipf.read(sorted(metadata)[1])
 
         try:
             doc_properties = plistlib.loads(properties_plist)
             doc_version = doc_properties["fileFormatVersion"]
         except plistlib.InvalidFileException:
-            raise FileFormatError("invalid Numbers document (corrupt files)") from None
+            doc_version = ""
+            warn("can't read Numbers version from document", RuntimeWarning, stacklevel=2)
         return doc_version
 
     def open(self, filepath: Path) -> None:
@@ -109,7 +116,7 @@ class IWork:
 
         doc_version = self.document_version
         if not self._handler.allowed_version(doc_version):
-            warn(f"unsupported version {doc_version}", RuntimeWarning, stacklevel=2)
+            warn(f"unsupported version '{doc_version}'", RuntimeWarning, stacklevel=2)
 
         if filepath.is_dir():
             self._read_objects_from_package(self._filepath)

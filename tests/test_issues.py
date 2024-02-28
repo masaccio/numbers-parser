@@ -128,7 +128,11 @@ def test_issue_14():
 
 
 def test_issue_17():
-    doc = Document("tests/data/issue-17.numbers")
+    with pytest.warns(RuntimeWarning) as record:
+        doc = Document("tests/data/issue-17.numbers")
+    assert len(record) == 2
+    assert "can't read Numbers version from document" in str(record[0].message)
+    assert "unsupported version ''" in str(record[1].message)
     sheets = doc.sheets
     table = sheets[0].tables[0]
     assert table.cell(0, 0).value == 123.0
@@ -137,7 +141,11 @@ def test_issue_17():
 
 
 def test_issue_18():
-    doc = Document("tests/data/issue-18.numbers")
+    with pytest.warns(RuntimeWarning) as record:
+        doc = Document("tests/data/issue-18.numbers")
+    assert len(record) == 2
+    assert "can't read Numbers version from document" in str(record[0].message)
+    assert "unsupported version ''" in str(record[1].message)
     sheets = doc.sheets
     table = sheets[0].tables[0]
     assert table.merge_ranges == ["B3:D3"]

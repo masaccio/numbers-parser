@@ -1,4 +1,5 @@
 import math
+import re
 from pathlib import Path
 
 from numbers_parser.constants import PACKAGE_ID, SUPPORTED_NUMBERS_VERSIONS
@@ -65,6 +66,7 @@ class ObjectStore(IWorkHandler):
 
     def allowed_version(self, version: str) -> bool:
         """bool: Return ``True`` if the document version is allowed."""
+        version = re.sub(r"(\d+)\.(\d+)\.\d+", r"\1.\2", version)
         return True if version in SUPPORTED_NUMBERS_VERSIONS else False
 
     def new_message_id(self):
