@@ -188,4 +188,4 @@ def test_debug(script_runner, tmp_path):
     )
     assert ret.success
     rows = ret.stderr.strip().splitlines()
-    assert "DEBUG:numbers_parser.file:read_numbers_file:" in rows[0]
+    assert "DEBUG:numbers_parser.iwork:open: filename=" in rows[0]

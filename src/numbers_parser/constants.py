@@ -75,13 +75,14 @@ CURRENCY_CELL_TYPE = 10
 CUSTOM_TEXT_PLACEHOLDER = "\ue421"
 
 # Supported versions
-_SUPPORTED_NUMBERS_VERSIONS = [
+SUPPORTED_NUMBERS_VERSIONS = [
     "10.3",
     "11.0",
     "11.0.1",
     "11.0.2",
     "11.0.3",
     "11.1",
+    "11.1.2",
     "11.2",
     "12.0",
     "12.1",

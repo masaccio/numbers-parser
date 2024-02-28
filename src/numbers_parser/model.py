@@ -3,6 +3,7 @@ import re
 from array import array
 from collections import defaultdict
 from hashlib import sha1
+from pathlib import Path
 from struct import pack
 from typing import Dict, List, Tuple, Union
 from warnings import warn
@@ -211,10 +212,10 @@ class _NumbersModel(Cacheable):
     Not to be used in application code.
     """
 
-    def __init__(self, filename):
-        if filename is None:
-            filename = DEFAULT_DOCUMENT
-        self.objects = ObjectStore(filename)
+    def __init__(self, filepath: Path):
+        if filepath is None:
+            filepath = Path(DEFAULT_DOCUMENT)
+        self.objects = ObjectStore(filepath)
         self._merge_cells = defaultdict(MergeCells)
         self._row_heights = {}
         self._col_widths = {}
@@ -233,6 +234,9 @@ class _NumbersModel(Cacheable):
             "bottom": defaultdict(),
             "left": defaultdict(),
         }
+
+    def save(self, filepath: Path, package: bool) -> None:
+        self.objects.save(filepath, package)
 
     @property
     def file_store(self):

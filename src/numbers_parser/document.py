@@ -32,7 +32,6 @@ from numbers_parser.constants import (
     MAX_ROW_COUNT,
 )
 from numbers_parser.containers import ItemsList
-from numbers_parser.file import write_numbers_file
 from numbers_parser.model import _NumbersModel
 from numbers_parser.numbers_cache import Cacheable
 
@@ -153,7 +152,7 @@ class Document:
                     )
                 else:
                     self._model.recalculate_table_data(table._table_id, table._data)
-        write_numbers_file(Path(filename), self._model.file_store, package)
+        self._model.save(Path(filename), package)
 
     def add_sheet(
         self,

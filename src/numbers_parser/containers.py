@@ -1,8 +1,9 @@
 import math
+from pathlib import Path
 
-from numbers_parser.constants import PACKAGE_ID
-from numbers_parser.file import read_numbers_file
+from numbers_parser.constants import PACKAGE_ID, SUPPORTED_NUMBERS_VERSIONS
 from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
+from numbers_parser.iwork import IWork, IWorkHandler
 
 
 class ItemsList:
@@ -36,22 +37,35 @@ class ItemsList:
         self._items.append(item)
 
 
-class ObjectStore:
-    def __init__(self, path: str) -> int:
+class ObjectStore(IWorkHandler):
+    def __init__(self, filepath: Path) -> int:
         self._objects = {}
         self._file_store = {}
         self._object_to_filename_map = {}
         self._dirty = {}
-        read_numbers_file(
-            path,
-            file_handler=lambda filename, blob: self._store_file(filename, blob),
-            object_handler=lambda identifier, obj, filename: self._store_object(
-                identifier, obj, filename
-            ),
-        )
+        self._iwork = IWork(handler=self)
+        self._iwork.open(filepath)
         # TODO: why not just use the next available ID, i.e. without the offset?
         self._max_id = max(self._objects.keys())
         self._max_id = math.ceil(self._max_id / 1000000) * 1000000
+
+    def save(self, filepath: Path, package: bool) -> None:
+        self._iwork.save(filepath, self._file_store, package)
+
+    def store_object(self, filename: str, identifier: int, archive: object) -> None:
+        self._objects[identifier] = archive
+        self._object_to_filename_map[identifier] = filename
+
+    def store_file(self, filename: str, blob: bytes) -> None:
+        self._file_store[filename] = blob
+
+    def allowed_format(self, extension: str) -> bool:
+        """bool: Return ``True`` if the filename extension is supported by the handler."""
+        return True if extension == ".numbers" else False
+
+    def allowed_version(self, version: str) -> bool:
+        """bool: Return ``True`` if the document version is allowed."""
+        return True if version in SUPPORTED_NUMBERS_VERSIONS else False
 
     def new_message_id(self):
         """Return the next available message ID for object creation."""
@@ -91,13 +105,6 @@ class ObjectStore:
                 self._objects[obj_id],
                 obj_id,
             )
-
-    def _store_object(self, identifier, obj, filename):
-        self._objects[identifier] = obj
-        self._object_to_filename_map[identifier] = filename
-
-    def _store_file(self, filename, blob):
-        self._file_store[filename] = blob
 
     @property
     def file_store(self):

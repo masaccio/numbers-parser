@@ -14,7 +14,6 @@ from numbers_parser import (
     xl_range,
     xl_rowcol_to_cell,
 )
-from numbers_parser._unpack_numbers import prettify_uuids
 from numbers_parser.cell_storage import (
     CellStorage,
     auto_units,
@@ -192,13 +191,6 @@ def test_experimental():
     assert _experimental_features()
     _enable_experimental_features(False)
     assert not _experimental_features()
-
-
-def test_prettify_uuids():
-    uuid = {"upper": 0, "lower": 0}
-    obj = [[1, 2, 3], ["a", "b", "c"], [uuid, uuid, uuid]]
-    prettify_uuids(obj)
-    assert obj[2][0] == "00000000-0000-0000-0000-000000000000"
 
 
 def test_bad_image_filenames():

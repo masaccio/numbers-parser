@@ -45,7 +45,7 @@ def test_file_exceptions():
     assert str(e.value) == "no such file or directory"
     with pytest.raises(FileFormatError) as e:
         _ = Document("tests/conftest.py")
-    assert str(e.value) == "invalid Numbers document"
+    assert str(e.value) == "invalid Numbers document (not a .numbers package/file)"
 
 
 def test_sheet_exceptions():
