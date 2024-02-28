@@ -2,6 +2,7 @@ import contextlib
 import json
 import logging
 import os
+import re
 import sys
 from argparse import ArgumentParser
 from array import array
@@ -113,6 +114,7 @@ class NumbersUnpacker(IWorkHandler):
 
     def allowed_version(self, version: str) -> bool:
         """bool: Return ``True`` if the document version is allowed."""
+        version = re.sub(r"(\d+)\.(\d+)\.\d+", r"\1.\2", version)
         return True if version in SUPPORTED_NUMBERS_VERSIONS else False
 
 
