@@ -238,10 +238,6 @@ class _NumbersModel(Cacheable):
     def save(self, filepath: Path, package: bool) -> None:
         self.objects.save(filepath, package)
 
-    @property
-    def file_store(self):
-        return self.objects.file_store
-
     def find_refs(self, ref: str) -> list:
         return self.objects.find_refs(ref)
 
