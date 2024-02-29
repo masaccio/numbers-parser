@@ -27,11 +27,11 @@ logger = logging.getLogger(numbers_parser_name)
 
 @dataclass
 class NumbersUnpacker(IWorkHandler):
-    hex_uuids: bool
-    pretty_storage: bool
-    pretty: bool
-    compact_json: bool
-    output_dir: str
+    hex_uuids: bool = False
+    pretty_storage: bool = False
+    pretty: bool = False
+    compact_json: bool = False
+    output_dir: str = None
 
     def store_file(self, filename: str, blob: bytes) -> None:
         """Store a profobuf archive."""

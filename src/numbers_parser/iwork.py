@@ -17,23 +17,23 @@ debug = logger.debug
 
 class IWorkHandler:
     def __init__(self):
-        pass
+        pass  # pragma: nocover
 
     def store_file(self, filename: str, blob: bytes) -> None:
         """Store a profobuf archive."""
-        pass
+        pass  # pragma: nocover
 
     def store_object(self, filename: str, identifier: int, archive: object) -> None:
         """Store a binary blob of data from the iWork package."""
-        pass
+        pass  # pragma: nocover
 
     def allowed_format(self, extension: str) -> bool:
         """bool: Return ``True`` if the filename extension is supported by the handler."""
-        pass
+        pass  # pragma: nocover
 
     def allowed_version(self, version: str) -> bool:
         """bool: Return ``True`` if the document version is allowed."""
-        pass
+        pass  # pragma: nocover
 
 
 class IWork:
@@ -76,7 +76,7 @@ class IWork:
             ]
             if len(metadata) != 2:
                 raise FileFormatError("invalid Numbers document (missing files)") from None
-            properties_plist = self._zipf.read(sorted(metadata)[1])
+            properties_plist = self._zipf.read(sorted(metadata)[-1])
 
         try:
             doc_properties = plistlib.loads(properties_plist)
@@ -127,11 +127,12 @@ class IWork:
         if package:
             if filepath.is_dir():
                 if not filepath.suffix == ".numbers":
-                    raise FileFormatError("invalid Numbers document (not a .numbers directory)")
+                    raise FileFormatError("invalid Numbers document (not a Numbers package)")
                 if not (filepath / "Index.zip").is_file():
                     raise FileFormatError("folder is not a numbers package")
                 # Test existing document is valid
-                _ = self.document_version()
+                self._is_package = True
+                _ = self.document_version
             elif filepath.is_file():
                 raise FileFormatError("cannot overwrite Numbers document file with package")
             else:
@@ -170,8 +171,6 @@ class IWork:
                 return ZipFile(filepath)
         except BadZipFile:
             raise FileFormatError("invalid Numbers document") from None
-        except FileNotFoundError:
-            raise FileError("no such file or directory") from None
 
     def _read_objects_from_package(self, filepath: Path) -> None:
         """

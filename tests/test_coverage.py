@@ -14,6 +14,7 @@ from numbers_parser import (
     xl_range,
     xl_rowcol_to_cell,
 )
+from numbers_parser._unpack_numbers import NumbersUnpacker
 from numbers_parser.cell_storage import (
     CellStorage,
     auto_units,
@@ -149,6 +150,13 @@ def test_formatting_exceptions():
         _ = cell.formatted_value
     assert len(record) == 1
     assert "Can't parse format string 'XX'" in str(record[0])
+
+
+def test_pretty_uuids():
+    obj = [[1, 2, 3], [4, 5, 6]]
+    unpacker = NumbersUnpacker()
+    unpacker.prettify_uuids(obj)
+    assert str(obj) == "[[1, 2, 3], [4, 5, 6]]"
 
 
 def test_range_exceptions():
