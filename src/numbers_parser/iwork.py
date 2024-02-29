@@ -82,6 +82,7 @@ class IWork:
             doc_properties = plistlib.loads(properties_plist)
             doc_version = doc_properties["fileFormatVersion"]
         except plistlib.InvalidFileException:
+            # Numbers allows malformed Properties.plist but not missing files
             doc_version = ""
             warn("can't read Numbers version from document", RuntimeWarning, stacklevel=2)
         return doc_version

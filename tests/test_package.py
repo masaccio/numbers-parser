@@ -21,6 +21,10 @@ def test_invalid_packages(configurable_save_file):
     # assert len(record) == 1
     assert "unsupported version '99.9'" in str(record[0])
 
+    with pytest.raises(FileFormatError) as e:
+        _ = Document("tests/data/invalid-missing.numbers")
+    assert "invalid Numbers document (missing files)" in str(e)
+
     doc = Document()
     with pytest.raises(FileFormatError) as e:
         _ = doc.save("tests/data/invalid.numberz", package=True)
