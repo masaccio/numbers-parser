@@ -1280,6 +1280,7 @@ class Table(Cacheable):  # noqa: F811
 
               * ``"base"``: A number base in the range 2-36.
               * ``"currency"``: A decimal formatted with a currency symbol.
+              * ``"custom"``: A named custom cell format that is applied to multiple cells.
               * ``"datetime"``: A date and time value with custom formatting.
               * ``"fraction"``: A number formatted as the nearest fraction.
               * ``"percentage"``: A number formatted as a percentage
@@ -1299,6 +1300,11 @@ class Table(Cacheable):  # noqa: F811
               possible for binary, octal and hexadecimal.
             * **base_places** (*int, optional, default: 0*) – The number of
               decimal places, or ``None`` for automatic.
+
+        :``"custom"``:
+            * **format** (*str | CustomFormating*) – The name of a custom
+                formatin the document or a :py:class:`~numbers_parser.CustomFormatting`
+                object.
 
         :``"currency"``:
             * **currency** (*str, optional, default: "GBP"*) – An ISO currency
@@ -1447,7 +1453,9 @@ class Table(Cacheable):  # noqa: F811
                 number_format_type = FormattingType.NUMBER
             format_id = self._model.format_archive(self._table_id, number_format_type, format)
         elif format_type_name == "popup":
-            if cell.value not in format.popup_values:
+            if cell.value == "" and not format.allow_none:
+                raise IndexError("none value not allowed for popup")
+            elif cell.value != "" and cell.value not in format.popup_values:
                 raise IndexError(
                     f"current cell value '{cell.value}' does not match any popup values"
                 )
