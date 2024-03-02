@@ -110,6 +110,11 @@ class Document:
         return self._sheets
 
     @property
+    def default_table(self) -> Table:
+        """Table: return the first table of the first sheet in the document."""
+        return self.sheets[0].tables[0]
+
+    @property
     def styles(self) -> Dict[str, Style]:
         """Dict[str, :class:`Style`]: A dict mapping style names to to the corresponding style."""
         return self._model.styles

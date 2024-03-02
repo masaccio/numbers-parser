@@ -121,3 +121,8 @@ def test_empty_rows():
     tables = sheets[0].tables
     table = tables[0]
     assert table.rows(values_only=True) == EMPTY_ROWS_REF
+
+
+def test_default_table():
+    doc = Document()
+    assert doc.default_table.name == "Table 1"

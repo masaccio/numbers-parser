@@ -753,7 +753,7 @@ class Cell(Cacheable):
 
         .. code-block:: python
 
-            >>> table = doc.sheets[0].tables[0]
+            >>> table = doc.default_table
             >>> table.cell(0,0).value
             False
             >>> table.cell(0,0).formatted_value
