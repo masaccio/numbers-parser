@@ -408,12 +408,20 @@ def test_issue_73(configurable_save_file):
     assert str(record[0].message) == "Not modifying pivot table 'Table 1 Pivot'"
 
 
-def test_issue_74(configurable_save_file):
+def test_issue_74_1(configurable_save_file):
     doc = Document("tests/data/test-issue-74.numbers")
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
     assert doc.sheets[0].tables[0].cell(0, 1)._storage.control_id is not None
+
+
+def test_issue_74_2():
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+
+    table.write(1, 0, "Dog")
+    table.set_cell_formatting(1, 0, "popup", popup_values=["Cat", "Dog", "Rabbit"], allow_none=True)
 
 
 def test_issue_75(configurable_save_file):

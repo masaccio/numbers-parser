@@ -158,6 +158,7 @@ class DataLists(Cacheable):
         self._datalists[table_id]["next_key"] = max_key + 1
 
     def id(self, table_id: int) -> int:
+        self.add_table(table_id)
         return self._datalists[table_id]["id"]
 
     def lookup_value(self, table_id: int, key: int):

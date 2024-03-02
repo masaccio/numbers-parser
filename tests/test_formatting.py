@@ -921,8 +921,14 @@ def test_write_interactive_formats(configurable_save_file):
     )
     table.write(3, 0, "Dog")
     table.write(3, 1, 100.0)
+    table.write(3, 2, "")
+    table.write(3, 3, "")
     table.set_cell_formatting(3, 0, "popup", popup_values=["Cat", "Dog", "Rabbit"], allow_none=True)
     table.set_cell_formatting(3, 1, "popup", popup_values=[100.0, "Two hundred", 300])
+    table.set_cell_formatting(3, 2, "popup", popup_values=["Cat", "Dog", "Rabbit"], allow_none=True)
+    with pytest.raises(IndexError) as e:
+        table.set_cell_formatting(3, 3, "popup", popup_values=["Cat", "Dog", "Rabbit"])
+    assert "none value not allowed for popup" in str(e)
 
     with pytest.raises(IndexError) as e:
         table.set_cell_formatting(3, 0, "popup", popup_values=["unknown"])
