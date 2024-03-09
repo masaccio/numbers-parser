@@ -345,24 +345,27 @@ cannot return lower-case versions of AM/PM.
 
 ## Limitations
 
-Current known limitations of `numbers-parser` are:
+Current known limitations of `numbers-parser` which may be implemented in the future are:
 
-- Formulas cannot be written to a document
 - Table styles that allow new tables to adopt a style across the whole
-  table are not planned.
+  table are not suppported
 - Creating cells of type `BulletedTextCell` is not supported
 - New tables are inserted with a fixed offset below the last table in a
   worksheet which does not take into account title or caption size
+- Formulas cannot be written to a document
+- Pivot tables are unsupported and saving a document with a pivot table issues
+  a UnsupportedWarning.
+
+The following limitations are expected to always remain:
+
 - New sheets insert tables with formats copied from the first table in
   the previous sheet rather than default table formats
 - Due to a limitation in Python’s
   [ZipFile](https://docs.python.org/3/library/zipfile.html), Python
-  versions older than 3.11 do not support image filenames with UTF-8
-  characters (see [issue
-  69](https://github.com/masaccio/numbers-parser/issues/69)).
-  [Cell.style.bg_image](https://masaccio.github.io/numbers-parser/#numbers_parser.Style)
-  returns `None` for such files and issues a `RuntimeWarning`.
-- Pivot tables are unsupported, but re-saving a document is believed to work. Saving a document with a pivot table issues a UnsupportedWarning.
+  versions older than 3.11 do not support image filenames with UTF-8 characters
+  [Cell.add_style.bg_image()](https://masaccio.github.io/numbers-parser/api/sheet.html#numbers_parser.Style) returns
+  `None` for such files and issues a `RuntimeWarning`
+  (see [issue 69](https://github.com/masaccio/numbers-parser/ssues/69) for details).
 
 ## License
 
