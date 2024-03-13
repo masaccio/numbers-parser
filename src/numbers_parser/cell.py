@@ -833,7 +833,7 @@ class Cell(CellStorageFlags, Cacheable):
         flags = unpack("<i", buffer[8:12])[0]
 
         if flags & 0x1:
-            d128 = unpack_decimal128(buffer[offset : offset + 16])
+            d128 = _unpack_decimal128(buffer[offset : offset + 16])
             offset += 16
         if flags & 0x2:
             double = unpack("<d", buffer[offset : offset + 8])[0]
@@ -1004,7 +1004,7 @@ class Cell(CellStorageFlags, Cacheable):
                 cell_type = CURRENCY_CELL_TYPE
             else:
                 cell_type = TSTArchives.numberCellType
-            value = pack_decimal128(self.value)
+            value = _pack_decimal128(self.value)
         elif isinstance(self, TextCell):
             flags = 8
             length += 4
@@ -1167,30 +1167,30 @@ class Cell(CellStorageFlags, Cacheable):
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
             if custom_format.requires_fraction_replacement:
-                formatted_value = format_fraction(self._d128, custom_format)
+                formatted_value = _format_fraction(self._d128, custom_format)
             elif custom_format.format_type == FormatType.CUSTOM_TEXT:
-                formatted_value = decode_text_format(
+                formatted_value = _decode_text_format(
                     custom_format,
                     self._model.table_string(self._table_id, self._string_id),
                 )
             else:
-                formatted_value = decode_number_format(
+                formatted_value = _decode_number_format(
                     custom_format, self._d128, format_map[format_uuid].name
                 )
         elif format.format_type == FormatType.DECIMAL:
-            return format_decimal(self._d128, format)
+            return _format_decimal(self._d128, format)
         elif format.format_type == FormatType.CURRENCY:
-            return format_currency(self._d128, format)
+            return _format_currency(self._d128, format)
         elif format.format_type == FormatType.BOOLEAN:
             return "TRUE" if self.value else "FALSE"
         elif format.format_type == FormatType.PERCENT:
-            return format_decimal(self._d128 * 100, format, percent=True)
+            return _format_decimal(self._d128 * 100, format, percent=True)
         elif format.format_type == FormatType.BASE:
-            return format_base(self._d128, format)
+            return _format_base(self._d128, format)
         elif format.format_type == FormatType.FRACTION:
-            return format_fraction(self._d128, format)
+            return _format_fraction(self._d128, format)
         elif format.format_type == FormatType.SCIENTIFIC:
-            return format_scientific(self._d128, format)
+            return _format_scientific(self._d128, format)
         elif format.format_type == FormatType.CHECKBOX:
             return CHECKBOX_TRUE_VALUE if self.value else CHECKBOX_FALSE_VALUE
         elif format.format_type == FormatType.RATING:
@@ -1207,7 +1207,7 @@ class Cell(CellStorageFlags, Cacheable):
             custom_format = format_map[format_uuid].default_format
             custom_format_string = custom_format.custom_format_string
             if custom_format.format_type == FormatType.CUSTOM_DATE:
-                formatted_value = decode_date_format(custom_format_string, self._datetime)
+                formatted_value = _decode_date_format(custom_format_string, self._datetime)
             else:
                 warn(
                     f"Unexpected custom format type {custom_format.format_type}",
@@ -1216,7 +1216,7 @@ class Cell(CellStorageFlags, Cacheable):
                 )
                 return ""
         else:
-            formatted_value = decode_date_format(format.date_time_format, self._datetime)
+            formatted_value = _decode_date_format(format.date_time_format, self._datetime)
         return formatted_value
 
     def _duration_format(self) -> str:
@@ -1234,7 +1234,7 @@ class Cell(CellStorageFlags, Cacheable):
         unit_largest = format.duration_unit_largest
         unit_smallest = format.duration_unit_smallest
         if format.use_automatic_duration_units:
-            unit_smallest, unit_largest = auto_units(self._double, format)
+            unit_smallest, unit_largest = _auto_units(self._double, format)
 
         d = self._double
         dd = int(self._double)
@@ -1250,19 +1250,19 @@ class Cell(CellStorageFlags, Cacheable):
             dd = int(d / SECONDS_IN_WEEK)
             if unit_smallest != DurationUnits.WEEK:
                 d -= SECONDS_IN_WEEK * dd
-            dstr.append(str(dd) + unit_format("week", dd, duration_style))
+            dstr.append(str(dd) + _unit_format("week", dd, duration_style))
 
         if unit_in_range(unit_largest, unit_smallest, DurationUnits.DAY):
             dd = int(d / SECONDS_IN_DAY)
             if unit_smallest > DurationUnits.DAY:
                 d -= SECONDS_IN_DAY * dd
-            dstr.append(str(dd) + unit_format("day", dd, duration_style))
+            dstr.append(str(dd) + _unit_format("day", dd, duration_style))
 
         if unit_in_range(unit_largest, unit_smallest, DurationUnits.HOUR):
             dd = int(d / SECONDS_IN_HOUR)
             if unit_smallest > DurationUnits.HOUR:
                 d -= SECONDS_IN_HOUR * dd
-            dstr.append(str(dd) + unit_format("hour", dd, duration_style))
+            dstr.append(str(dd) + _unit_format("hour", dd, duration_style))
 
         if unit_in_range(unit_largest, unit_smallest, DurationUnits.MINUTE):
             dd = int(d / 60)
@@ -1272,7 +1272,7 @@ class Cell(CellStorageFlags, Cacheable):
                 pad = pad_digits(dd, unit_smallest, unit_largest, DurationUnits.MINUTE)
                 dstr.append(("" if pad else "0") + str(dd))
             else:
-                dstr.append(str(dd) + unit_format("minute", dd, duration_style))
+                dstr.append(str(dd) + _unit_format("minute", dd, duration_style))
 
         if unit_in_range(unit_largest, unit_smallest, DurationUnits.SECOND):
             dd = int(d)
@@ -1282,7 +1282,7 @@ class Cell(CellStorageFlags, Cacheable):
                 pad = pad_digits(dd, unit_smallest, unit_largest, DurationUnits.SECOND)
                 dstr.append(("" if pad else "0") + str(dd))
             else:
-                dstr.append(str(dd) + unit_format("second", dd, duration_style))
+                dstr.append(str(dd) + _unit_format("second", dd, duration_style))
 
         if unit_smallest >= DurationUnits.MILLISECOND:
             dd = int(round(1000 * d))
@@ -1291,7 +1291,7 @@ class Cell(CellStorageFlags, Cacheable):
                 padding = "" if dd >= 100 else padding
                 dstr.append(f"{padding}{dd}")
             else:
-                dstr.append(str(dd) + unit_format("millisecond", dd, duration_style, "ms"))
+                dstr.append(str(dd) + _unit_format("millisecond", dd, duration_style, "ms"))
         duration_str = (":" if duration_style == 0 else " ").join(dstr)
         if duration_style == DurationStyle.COMPACT:
             duration_str = re.sub(r":(\d\d\d)$", r".\1", duration_str)
@@ -1509,7 +1509,24 @@ class MergedCell(Cell):
         return None
 
 
-def unpack_decimal128(buffer: bytearray) -> float:
+def _pack_decimal128(value: float) -> bytearray:
+    buffer = bytearray(16)
+    exp = math.floor(math.log10(math.e) * math.log(abs(value))) if value != 0.0 else 0
+    exp += 0x1820 - 16
+    mantissa = abs(int(value / math.pow(10, exp - 0x1820)))
+    buffer[15] |= exp >> 7
+    buffer[14] |= (exp & 0x7F) << 1
+    i = 0
+    while mantissa >= 1:
+        buffer[i] = mantissa & 0xFF
+        i += 1
+        mantissa = int(mantissa / 256)
+    if value < 0:
+        buffer[15] |= 0x80
+    return buffer
+
+
+def _unpack_decimal128(buffer: bytearray) -> float:
     exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
     mantissa = buffer[14] & 1
     for i in range(13, -1, -1):
@@ -1521,7 +1538,7 @@ def unpack_decimal128(buffer: bytearray) -> float:
     return float(value)
 
 
-def decode_date_format_field(field: str, value: datetime) -> str:
+def _decode_date_format_field(field: str, value: datetime) -> str:
     if field in DATETIME_FIELD_MAP:
         s = DATETIME_FIELD_MAP[field]
         if callable(s):
@@ -1533,7 +1550,7 @@ def decode_date_format_field(field: str, value: datetime) -> str:
         return ""
 
 
-def decode_date_format(format, value):
+def _decode_date_format(format, value):
     """Parse a custom date format string and return a formatted datetime value."""
     chars = [*format]
     index = 0
@@ -1556,7 +1573,7 @@ def decode_date_format(format, value):
             else:
                 in_string = True
                 if in_field:
-                    result += decode_date_format_field(field, value)
+                    result += _decode_date_format_field(field, value)
                     in_field = False
                 index += 1
         elif in_string:
@@ -1564,7 +1581,7 @@ def decode_date_format(format, value):
             index += 1
         elif not current_char.isalpha():
             if in_field:
-                result += decode_date_format_field(field, value)
+                result += _decode_date_format_field(field, value)
                 in_field = False
             result += current_char
             index += 1
@@ -1576,35 +1593,18 @@ def decode_date_format(format, value):
             field = current_char
             index += 1
     if in_field:
-        result += decode_date_format_field(field, value)
+        result += _decode_date_format_field(field, value)
 
     return result
 
 
-def pack_decimal128(value: float) -> bytearray:
-    buffer = bytearray(16)
-    exp = math.floor(math.log10(math.e) * math.log(abs(value))) if value != 0.0 else 0
-    exp += 0x1820 - 16
-    mantissa = abs(int(value / math.pow(10, exp - 0x1820)))
-    buffer[15] |= exp >> 7
-    buffer[14] |= (exp & 0x7F) << 1
-    i = 0
-    while mantissa >= 1:
-        buffer[i] = mantissa & 0xFF
-        i += 1
-        mantissa = int(mantissa / 256)
-    if value < 0:
-        buffer[15] |= 0x80
-    return buffer
-
-
-def decode_text_format(format, value: str):
+def _decode_text_format(format, value: str):
     """Parse a custom date format string and return a formatted number value."""
     custom_format_string = format.custom_format_string
     return custom_format_string.replace(CUSTOM_TEXT_PLACEHOLDER, value)
 
 
-def expand_quotes(value: str) -> str:
+def _expand_quotes(value: str) -> str:
     chars = [*value]
     index = 0
     in_string = False
@@ -1630,7 +1630,7 @@ def expand_quotes(value: str) -> str:
     return formatted_value
 
 
-def decode_number_format(format, value, name):  # noqa: PLR0912
+def _decode_number_format(format, value, name):  # noqa: PLR0912
     """Parse a custom date format string and return a formatted number value."""
     custom_format_string = format.custom_format_string
     value *= format.scale_factor
@@ -1665,7 +1665,7 @@ def decode_number_format(format, value, name):  # noqa: PLR0912
         # Scientific notation
         formatted_value = f"{value:.{len(dec_part) - 4}E}"
         formatted_value = custom_format_string.replace(format_spec, formatted_value)
-        return expand_quotes(formatted_value)
+        return _expand_quotes(formatted_value)
 
     num_decimals = len(dec_part)
     if num_decimals > 0:
@@ -1768,10 +1768,10 @@ def decode_number_format(format, value, name):  # noqa: PLR0912
             formatted_value += "." + str(decimal)[2:]
 
     formatted_value = custom_format_string.replace(format_spec, formatted_value)
-    return expand_quotes(formatted_value)
+    return _expand_quotes(formatted_value)
 
 
-def format_decimal(value: float, format, percent: bool = False) -> str:
+def _format_decimal(value: float, format, percent: bool = False) -> str:
     if value is None:
         return ""
     if value < 0 and format.negative_style == 1:
@@ -1811,8 +1811,8 @@ def format_decimal(value: float, format, percent: bool = False) -> str:
         return formatted_value
 
 
-def format_currency(value: float, format) -> str:
-    formatted_value = format_decimal(value, format)
+def _format_currency(value: float, format) -> str:
+    formatted_value = _format_decimal(value, format)
     if format.currency_code in CURRENCY_SYMBOLS:
         symbol = CURRENCY_SYMBOLS[format.currency_code]
     else:
@@ -1828,16 +1828,16 @@ def format_currency(value: float, format) -> str:
 INT_TO_BASE_CHAR = [str(x) for x in range(0, 10)] + [chr(x) for x in range(ord("A"), ord("Z") + 1)]
 
 
-def invert_bit_str(value: str) -> str:
+def _invert_bit_str(value: str) -> str:
     """Invert a binary value"""
     return "".join(["0" if b == "1" else "1" for b in value])
 
 
-def twos_complement(value: int, base: int) -> str:
+def _twos_complement(value: int, base: int) -> str:
     """Calculate the twos complement of a negative integer with minimum 32-bit precision"""
     num_bits = max([32, math.ceil(math.log2(abs(value))) + 1])
     bin_value = bin(abs(value))[2:]
-    inverted_bin_value = invert_bit_str(bin_value).rjust(num_bits, "1")
+    inverted_bin_value = _invert_bit_str(bin_value).rjust(num_bits, "1")
     twos_complement_dec = int(inverted_bin_value, 2) + 1
 
     if base == 2:
@@ -1848,7 +1848,7 @@ def twos_complement(value: int, base: int) -> str:
         return hex(twos_complement_dec)[2:].upper()
 
 
-def format_base(value: float, format) -> str:
+def _format_base(value: float, format) -> str:
     if value == 0:
         return "0".zfill(format.base_places)
 
@@ -1857,7 +1857,7 @@ def format_base(value: float, format) -> str:
     is_negative = False
     if not format.base_use_minus_sign and format.base in [2, 8, 16]:
         if value < 0:
-            return twos_complement(value, format.base)
+            return _twos_complement(value, format.base)
         else:
             value = abs(value)
     elif value < 0:
@@ -1876,7 +1876,7 @@ def format_base(value: float, format) -> str:
         return formatted_value.zfill(format.base_places)
 
 
-def format_fraction_parts_to(whole: int, numerator: int, denominator: int):
+def _format_fraction_parts_to(whole: int, numerator: int, denominator: int):
     if whole > 0:
         if numerator == 0:
             return str(whole)
@@ -1889,14 +1889,14 @@ def format_fraction_parts_to(whole: int, numerator: int, denominator: int):
     return f"{numerator}/{denominator}"
 
 
-def float_to_fraction(value: float, denominator: int) -> str:
+def _float_to_fraction(value: float, denominator: int) -> str:
     """Convert a float to the nearest fraction and return as a string."""
     whole = int(value)
     numerator = round(denominator * (value - whole))
-    return format_fraction_parts_to(whole, numerator, denominator)
+    return _format_fraction_parts_to(whole, numerator, denominator)
 
 
-def float_to_n_digit_fraction(value: float, max_digits: int) -> str:
+def _float_to_n_digit_fraction(value: float, max_digits: int) -> str:
     """Convert a float to a fraction of a maxinum number of digits
     and return as a string.
     """
@@ -1906,24 +1906,24 @@ def float_to_n_digit_fraction(value: float, max_digits: int) -> str:
     )
     whole = int(value)
     numerator -= whole * denominator
-    return format_fraction_parts_to(whole, numerator, denominator)
+    return _format_fraction_parts_to(whole, numerator, denominator)
 
 
-def format_fraction(value: float, format) -> str:
+def _format_fraction(value: float, format) -> str:
     accuracy = format.fraction_accuracy
     if accuracy & 0xFF000000:
         num_digits = 0x100000000 - accuracy
-        return float_to_n_digit_fraction(value, num_digits)
+        return _float_to_n_digit_fraction(value, num_digits)
     else:
-        return float_to_fraction(value, accuracy)
+        return _float_to_fraction(value, accuracy)
 
 
-def format_scientific(value: float, format) -> str:
+def _format_scientific(value: float, format) -> str:
     formatted_value = sigfig.round(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
     return f"{formatted_value:.{format.decimal_places}E}"
 
 
-def unit_format(unit: str, value: int, style: int, abbrev: str = None):
+def _unit_format(unit: str, value: int, style: int, abbrev: str = None):
     plural = "" if value == 1 else "s"
     if abbrev is None:
         abbrev = unit[0]
@@ -1935,7 +1935,7 @@ def unit_format(unit: str, value: int, style: int, abbrev: str = None):
         return f" {unit}" + plural
 
 
-def auto_units(cell_value, format):
+def _auto_units(cell_value, format):
     unit_largest = format.duration_unit_largest
     unit_smallest = format.duration_unit_smallest
 
