@@ -51,13 +51,13 @@ def test_cell_storage(tmp_path):
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
     buffer[1] = 255
     with pytest.raises(UnsupportedError) as e:
-        _ = Cell.from_storage(table_id, 0, 0, buffer, model)
+        _ = _table_id, 0, 0, buffer, model)
     assert "Cell type ID 255 is not recognised" in str(e)
 
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
     buffer[0] = 4
     with pytest.raises(UnsupportedError) as e:
-        _ = Cell.from_storage(table_id, 0, 0, buffer, model)
+        _ = Cell._from_storage(table_id, 0, 0, buffer, model)
     assert "Cell storage version 4 is unsupported" in str(e)
 
     class DummyCell(Cell):
@@ -289,4 +289,4 @@ def test_invalid_format():
     doc = Document("tests/data/test-1.numbers")
     cell = doc.default_table.cell(1, 1)
     cell._text_format_id = None
-    assert cell.custom_format() == cell.value
+    assert cell._custom_format() == cell.value

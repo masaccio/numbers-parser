@@ -878,7 +878,7 @@ class _NumbersModel(Cacheable):
         current_offset = 0
 
         for col in range(len(data[row])):
-            buffer = data[row][col].to_buffer()
+            buffer = data[row][col]._to_buffer()
             if buffer is not None:
                 cell_storage += buffer
                 # Always use wide offsets
@@ -1241,7 +1241,7 @@ class _NumbersModel(Cacheable):
         )
 
         data = [
-            [Cell.empty_cell(table_model_id, row, col, self) for col in range(num_cols)]
+            [Cell._empty_cell(table_model_id, row, col, self) for col in range(num_cols)]
             for row in range(num_rows)
         ]
         self.recalculate_table_data(table_model_id, data)

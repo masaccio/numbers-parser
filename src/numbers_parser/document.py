@@ -437,13 +437,13 @@ class Table(Cacheable):  # noqa: F811
             self._data.append([])
             for col in range(self.num_cols):
                 if merge_cells.is_merge_reference((row, col)):
-                    cell = Cell.merged_cell(table_id, row, col, model)
+                    cell = Cell._merged_cell(table_id, row, col, model)
                 else:
                     buffer = self._model.storage_buffer(table_id, row, col)
                     if buffer is None:
-                        cell = Cell.empty_cell(table_id, row, col, model)
+                        cell = Cell._empty_cell(table_id, row, col, model)
                     else:
-                        cell = Cell.from_storage(table_id, row, col, buffer, model)
+                        cell = Cell._from_storage(table_id, row, col, buffer, model)
                 self._data[row].append(cell)
 
     @property
@@ -877,7 +877,7 @@ class Table(Cacheable):  # noqa: F811
         """
         # TODO: write needs to retain/init the border
         (row, col, value) = self._validate_cell_coords(*args)
-        self._data[row][col] = Cell.from_value(row, col, value)
+        self._data[row][col] = Cell._from_value(row, col, value)
         self._data[row][col]._update_value(value, self._data[row][col])
 
         merge_cells = self._model.merge_cells(self._table_id)
@@ -942,7 +942,7 @@ class Table(Cacheable):  # noqa: F811
         self._model.number_of_rows(self._table_id, self.num_rows)
 
         row = [
-            Cell.empty_cell(self._table_id, self.num_rows - 1, col, self._model)
+            Cell._empty_cell(self._table_id, self.num_rows - 1, col, self._model)
             for col in range(self.num_cols)
         ]
         rows = [row.copy() for _ in range(num_rows)]
@@ -997,7 +997,7 @@ class Table(Cacheable):  # noqa: F811
 
         for row in range(self.num_rows):
             cols = [
-                Cell.empty_cell(self._table_id, row, col, self._model) for col in range(num_cols)
+                Cell._empty_cell(self._table_id, row, col, self._model) for col in range(num_cols)
             ]
             self._data[row][start_col:start_col] = cols
 
@@ -1111,7 +1111,7 @@ class Table(Cacheable):  # noqa: F811
             merge_cells.add_anchor(row_start, col_start, (num_rows, num_cols))
             for row in range(row_start + 1, row_end + 1):
                 for col in range(col_start + 1, col_end + 1):
-                    self._data[row][col] = Cell.merged_cell(self._table_id, row, col, self._model)
+                    self._data[row][col] = Cell._merged_cell(self._table_id, row, col, self._model)
                     merge_cells.add_reference(row, col, (row_start, col_start, row_end, col_end))
 
             for row, cells in enumerate(self._data):

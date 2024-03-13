@@ -607,12 +607,181 @@ class Cell(CellStorageFlags, Cacheable):
         cell_str = ", ".join([cell_str, super().__str__()])
         return cell_str
 
-    @classmethod
-    def empty_cell(cls, table_id: int, row: int, col: int, model: object):
-        return Cell.from_storage(table_id, row, col, EMPTY_STORAGE_BUFFER, model)
+    @property
+    def image_filename(self):
+        warn(
+            "image_filename is deprecated and will be removed in the future. "
+            + "Please use the style property",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        if self.style is not None and self.style.bg_image is not None:
+            return self.style.bg_image.filename
+        else:
+            return None
+
+    @property
+    def image_data(self):
+        warn(
+            "image_data is deprecated and will be removed in the future. "
+            + "Please use the style property",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        if self.style is not None and self.style.bg_image is not None:
+            return self.style.bg_image.data
+        else:
+            return None
+
+    @property
+    def is_formula(self) -> bool:
+        """bool: ``True`` if the cell contains a formula."""
+        table_formulas = self._model.table_formulas(self._table_id)
+        return table_formulas.is_formula(self.row, self.col)
+
+    @property
+    @cache(num_args=0)
+    def formula(self) -> str:
+        """
+        str: The formula in a cell.
+
+        Formula evaluation relies on Numbers storing current values which should
+        usually be the case. In cells containing a formula, :py:meth:`numbers_parser.Cell.value`
+        returns computed value of the formula.
+
+        Returns:
+            str:
+                The text of the foruma in a cell, or `None` if there is no formula
+                present in a cell.
+        """
+        if self._formula_id is not None:
+            table_formulas = self._model.table_formulas(self._table_id)
+            return table_formulas.formula(self._formula_id, self.row, self.col)
+        else:
+            return None
+
+    @property
+    def is_bulleted(self) -> bool:
+        """bool: ``True`` if the cell contains text bullets."""
+        return self._is_bulleted
+
+    @property
+    def bullets(self) -> Union[List[str], None]:
+        r"""
+        List[str] | None: The bullets in a cell, or ``None``
+
+        Cells that contain bulleted or numbered lists are identified
+        by :py:attr:`numbers_parser.Cell.is_bulleted`. For these cells,
+        :py:attr:`numbers_parser.Cell.value` returns the whole cell contents.
+        Bullets can also be extracted into a list of paragraphs cell without the
+        bullet or numbering character. Newlines are not included in the
+        bullet list.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            doc = Document("bullets.numbers")
+            sheets = doc.sheets
+            tables = sheets[0].tables
+            table = tables[0]
+            if not table.cell(0, 1).is_bulleted:
+                print(table.cell(0, 1).value)
+            else:
+                bullets = ["* " + s for s in table.cell(0, 1).bullets]
+                print("\n".join(bullets))
+                    return None
+        """
+        return None
+
+    @property
+    def formatted_value(self) -> str:
+        """
+        str: The formatted value of the cell as it appears in Numbers.
+
+        Interactive elements are converted into a suitable text format where
+        supported, or as their number values where there is no suitable
+        visual representation. Currently supported mappings are:
+
+        * Checkboxes are U+2610 (Ballow Box) or U+2611 (Ballot Box with Check)
+        * Ratings are their star value represented using (U+2605) (Black Star)
+
+        .. code-block:: python
+
+            >>> table = doc.default_table
+            >>> table.cell(0,0).value
+            False
+            >>> table.cell(0,0).formatted_value
+            '☐'
+            >>> table.cell(0,1).value
+            True
+            >>> table.cell(0,1).formatted_value
+            '☑'
+            >>> table.cell(1,1).value
+            3.0
+            >>> table.cell(1,1).formatted_value
+            '★★★'
+        """
+        if self._duration_format_id is not None and self._double is not None:
+            return self._duration_format()
+        elif self._date_format_id is not None and self._seconds is not None:
+            return self._date_format()
+        elif (
+            self._text_format_id is not None
+            or self._num_format_id is not None
+            or self._currency_format_id is not None
+            or self._bool_format_id is not None
+        ):
+            return self._custom_format()
+        else:
+            return str(self.value)
+
+    @property
+    def style(self) -> Union[Style, None]:
+        """Style | None: The :class:`Style` associated with the cell or ``None``.
+
+        Warns:
+            UnsupportedWarning: On assignment; use
+                :py:meth:`numbers_parser.Table.set_cell_style` instead.
+        """
+        if self._style is None:
+            self._style = Style.from_storage(self, self._model)
+        return self._style
+
+    @style.setter
+    def style(self, _):
+        warn(
+            "cell style cannot be set; use Table.set_cell_style() instead",
+            UnsupportedWarning,
+            stacklevel=2,
+        )
+
+    @property
+    def border(self) -> Union[CellBorder, None]:
+        """CellBorder| None: The :class:`CellBorder` associated with the cell or ``None``.
+
+        Warns:
+            UnsupportedWarning: On assignment; use
+                :py:meth:`numbers_parser.Table.set_cell_border` instead.
+        """
+        self._model.extract_strokes(self._table_id)
+        return self._border
+
+    @border.setter
+    def border(self, _):
+        warn(
+            "cell border values cannot be set; use Table.set_cell_border() instead",
+            UnsupportedWarning,
+            stacklevel=2,
+        )
 
     @classmethod
-    def merged_cell(cls, table_id: int, row: int, col: int, model: object):
+    def _empty_cell(cls, table_id: int, row: int, col: int, model: object):
+        return Cell._from_storage(table_id, row, col, EMPTY_STORAGE_BUFFER, model)
+
+    @classmethod
+    def _merged_cell(cls, table_id: int, row: int, col: int, model: object):
         cell = MergedCell(row, col)
         cell._model = model
         cell._table_id = table_id
@@ -621,7 +790,7 @@ class Cell(CellStorageFlags, Cacheable):
         return cell
 
     @classmethod
-    def from_value(cls, row: int, col: int, value):
+    def _from_value(cls, row: int, col: int, value):
         # TODO: write needs to retain/init the border
         if isinstance(value, str):
             cell = TextCell(row, col, value)
@@ -648,7 +817,7 @@ class Cell(CellStorageFlags, Cacheable):
         return cell
 
     @classmethod
-    def from_storage(  # noqa: PLR0913, PLR0915, PLR0912
+    def _from_storage(  # noqa: PLR0913, PLR0915, PLR0912
         cls, table_id: int, row: int, col: int, buffer: bytearray, model: object
     ) -> None:
         d128 = None
@@ -804,176 +973,7 @@ class Cell(CellStorageFlags, Cacheable):
             self.rect = None
             self._border = CellBorder()
 
-    @property
-    def image_filename(self):
-        warn(
-            "image_filename is deprecated and will be removed in the future. "
-            + "Please use the style property",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if self.style is not None and self.style.bg_image is not None:
-            return self.style.bg_image.filename
-        else:
-            return None
-
-    @property
-    def image_data(self):
-        warn(
-            "image_data is deprecated and will be removed in the future. "
-            + "Please use the style property",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if self.style is not None and self.style.bg_image is not None:
-            return self.style.bg_image.data
-        else:
-            return None
-
-    @property
-    def is_formula(self) -> bool:
-        """bool: ``True`` if the cell contains a formula."""
-        table_formulas = self._model.table_formulas(self._table_id)
-        return table_formulas.is_formula(self.row, self.col)
-
-    @property
-    @cache(num_args=0)
-    def formula(self) -> str:
-        """
-        str: The formula in a cell.
-
-        Formula evaluation relies on Numbers storing current values which should
-        usually be the case. In cells containing a formula, :py:meth:`numbers_parser.Cell.value`
-        returns computed value of the formula.
-
-        Returns:
-            str:
-                The text of the foruma in a cell, or `None` if there is no formula
-                present in a cell.
-        """
-        if self._formula_id is not None:
-            table_formulas = self._model.table_formulas(self._table_id)
-            return table_formulas.formula(self._formula_id, self.row, self.col)
-        else:
-            return None
-
-    @property
-    def is_bulleted(self) -> bool:
-        """bool: ``True`` if the cell contains text bullets."""
-        return self._is_bulleted
-
-    @property
-    def bullets(self) -> Union[List[str], None]:
-        r"""
-        List[str] | None: The bullets in a cell, or ``None``
-
-        Cells that contain bulleted or numbered lists are identified
-        by :py:attr:`numbers_parser.Cell.is_bulleted`. For these cells,
-        :py:attr:`numbers_parser.Cell.value` returns the whole cell contents.
-        Bullets can also be extracted into a list of paragraphs cell without the
-        bullet or numbering character. Newlines are not included in the
-        bullet list.
-
-        Example
-        -------
-
-        .. code-block:: python
-
-            doc = Document("bullets.numbers")
-            sheets = doc.sheets
-            tables = sheets[0].tables
-            table = tables[0]
-            if not table.cell(0, 1).is_bulleted:
-                print(table.cell(0, 1).value)
-            else:
-                bullets = ["* " + s for s in table.cell(0, 1).bullets]
-                print("\n".join(bullets))
-                    return None
-        """
-        return None
-
-    @property
-    def formatted_value(self) -> str:
-        """
-        str: The formatted value of the cell as it appears in Numbers.
-
-        Interactive elements are converted into a suitable text format where
-        supported, or as their number values where there is no suitable
-        visual representation. Currently supported mappings are:
-
-        * Checkboxes are U+2610 (Ballow Box) or U+2611 (Ballot Box with Check)
-        * Ratings are their star value represented using (U+2605) (Black Star)
-
-        .. code-block:: python
-
-            >>> table = doc.default_table
-            >>> table.cell(0,0).value
-            False
-            >>> table.cell(0,0).formatted_value
-            '☐'
-            >>> table.cell(0,1).value
-            True
-            >>> table.cell(0,1).formatted_value
-            '☑'
-            >>> table.cell(1,1).value
-            3.0
-            >>> table.cell(1,1).formatted_value
-            '★★★'
-        """
-        if self._duration_format_id is not None and self._double is not None:
-            return self.duration_format()
-        elif self._date_format_id is not None and self._seconds is not None:
-            return self.date_format()
-        elif (
-            self._text_format_id is not None
-            or self._num_format_id is not None
-            or self._currency_format_id is not None
-            or self._bool_format_id is not None
-        ):
-            return self.custom_format()
-        else:
-            return str(self.value)
-
-    @property
-    def style(self) -> Union[Style, None]:
-        """Style | None: The :class:`Style` associated with the cell or ``None``.
-
-        Warns:
-            UnsupportedWarning: On assignment; use
-                :py:meth:`numbers_parser.Table.set_cell_style` instead.
-        """
-        if self._style is None:
-            self._style = Style.from_storage(self, self._model)
-        return self._style
-
-    @style.setter
-    def style(self, _):
-        warn(
-            "cell style cannot be set; use Table.set_cell_style() instead",
-            UnsupportedWarning,
-            stacklevel=2,
-        )
-
-    @property
-    def border(self) -> Union[CellBorder, None]:
-        """CellBorder| None: The :class:`CellBorder` associated with the cell or ``None``.
-
-        Warns:
-            UnsupportedWarning: On assignment; use
-                :py:meth:`numbers_parser.Table.set_cell_border` instead.
-        """
-        self._model.extract_strokes(self._table_id)
-        return self._border
-
-    @border.setter
-    def border(self, _):
-        warn(
-            "cell border values cannot be set; use Table.set_cell_border() instead",
-            UnsupportedWarning,
-            stacklevel=2,
-        )
-
-    def to_buffer(self) -> bytearray:  # noqa: PLR0912, PLR0915
+    def _to_buffer(self) -> bytearray:  # noqa: PLR0912, PLR0915
         """Create a storage buffer for a cell using v5 (modern) layout."""
         if self._style is not None:
             if self._style._text_style_obj_id is not None:
@@ -1148,7 +1148,7 @@ class Cell(CellStorageFlags, Cacheable):
         else:
             return (self._model.objects.file_store[image_pathnames[0]], preferred_filename)
 
-    def custom_format(self) -> str:  # noqa: PLR0911
+    def _custom_format(self) -> str:  # noqa: PLR0911
         if self._text_format_id is not None and self._type == CellType.TEXT:
             format = self._model.table_format(self._table_id, self._text_format_id)
         elif self._currency_format_id is not None:
@@ -1199,7 +1199,7 @@ class Cell(CellStorageFlags, Cacheable):
             formatted_value = str(self.value)
         return formatted_value
 
-    def date_format(self) -> str:
+    def _date_format(self) -> str:
         format = self._model.table_format(self._table_id, self._date_format_id)
         if format.HasField("custom_uid"):
             format_uuid = NumbersUUID(format.custom_uid).hex
@@ -1219,7 +1219,7 @@ class Cell(CellStorageFlags, Cacheable):
             formatted_value = decode_date_format(format.date_time_format, self._datetime)
         return formatted_value
 
-    def duration_format(self) -> str:
+    def _duration_format(self) -> str:
         format = self._model.table_format(self._table_id, self._duration_format_id)
         debug(
             "duration_format: @[%d,%d]: table_id=%d, duration_format_id=%d, duration_style=%s",
