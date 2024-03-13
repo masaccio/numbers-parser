@@ -413,7 +413,7 @@ def test_issue_74_1(configurable_save_file):
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
-    assert doc.sheets[0].tables[0].cell(0, 1)._storage.control_id is not None
+    assert doc.sheets[0].tables[0].cell(0, 1)._control_id is not None
 
 
 def test_issue_74_2():
@@ -441,3 +441,10 @@ def test_issue_76(configurable_save_file):
     doc = Document(configurable_save_file)
     assert "Metadata/Properties.plist" in doc._model.objects._file_store
     assert doc._model.objects._file_store["Metadata/Properties.plist"][0:6] == b"bplist"
+
+
+def test_issue_77():
+    doc = Document("tests/data/issue-77.numbers")
+    sheet = doc.sheets[0]
+    assert sheet.tables[0].merge_ranges == ["C1:D2"]
+    assert sheet.tables[1].merge_ranges == ["C1:D2"]
