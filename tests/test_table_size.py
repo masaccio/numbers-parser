@@ -76,6 +76,9 @@ def test_header_size(configurable_save_file):
     assert table.num_header_rows == 2
     assert table.num_header_cols == 2
 
+    assert int(table.coordinates[0]) == 0
+    assert int(table.coordinates[1]) == 0
+
 
 def test_new_doc(configurable_save_file):
     doc = Document(
