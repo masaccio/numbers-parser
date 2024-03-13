@@ -336,7 +336,7 @@ def test_duration_formatting():
         for cells in table.iter_rows(min_row=1):
             if not isinstance(cells[13], EmptyCell):
                 duration = cells[6].formatted_value
-                ref = cells[13].value
+                ref = cells[13].formatted_value
                 check.equal(duration, ref)
 
 
