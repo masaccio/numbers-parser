@@ -17,6 +17,7 @@
     "python.testing.unittestEnabled": false,
     "python.testing.pytestArgs": [
         "--experimental",
+        "--no-cov",
         "-o",
         "log_cli=True",
         "--log-cli-level=ERROR",
