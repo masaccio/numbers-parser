@@ -16,10 +16,10 @@ from numbers_parser import (
 from numbers_parser._unpack_numbers import NumbersUnpacker
 from numbers_parser.cell import (
     DurationUnits,
-    auto_units,
-    decode_number_format,
-    float_to_n_digit_fraction,
-    format_decimal,
+    _auto_units,
+    _decode_number_format,
+    _float_to_n_digit_fraction,
+    _format_decimal,
 )
 from numbers_parser.constants import (
     DECIMAL_PLACES_AUTO,
@@ -51,7 +51,7 @@ def test_cell_storage(tmp_path):
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
     buffer[1] = 255
     with pytest.raises(UnsupportedError) as e:
-        _ = _table_id, 0, 0, buffer, model)
+        _ = Cell._from_storage(table_id, 0, 0, buffer, model)
     assert "Cell type ID 255 is not recognised" in str(e)
 
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
@@ -73,7 +73,7 @@ def test_cell_storage(tmp_path):
     assert len(record) == 1
     assert "unsupported data type DummyCell" in str(record[0])
 
-    assert float_to_n_digit_fraction(0.0, 1) == "0"
+    assert _float_to_n_digit_fraction(0.0, 1) == "0"
 
     format = TSKArchives.FormatStructArchive(
         format_type=268,
@@ -82,7 +82,7 @@ def test_cell_storage(tmp_path):
         duration_unit_smallest=0,
         use_automatic_duration_units=True,
     )
-    assert auto_units(60 * 60 * 24 * 7.0, format) == (DurationUnits.WEEK, DurationUnits.WEEK)
+    assert _auto_units(60 * 60 * 24 * 7.0, format) == (DurationUnits.WEEK, DurationUnits.WEEK)
 
     format = TSKArchives.FormatStructArchive(
         format_type=270,
@@ -102,10 +102,10 @@ def test_cell_storage(tmp_path):
         is_complex=False,
         contains_integer_token=False,
     )
-    assert decode_number_format(format, 0.1, "test") == "    .1"
+    assert _decode_number_format(format, 0.1, "test") == "    .1"
 
     format.custom_format_string = "0.##"
-    assert decode_number_format(format, 1.0, "test") == "1"
+    assert _decode_number_format(format, 1.0, "test") == "1"
 
     with pytest.raises(UnsupportedError) as e:
         _ = Document("tests/data/pre-bnc.numbers")
@@ -240,7 +240,7 @@ def test_set_number_defaults():
 def test_formatting_empty_cell():
     doc = Document()
     assert doc.default_table.cell(0, 0).formatted_value == ""
-    assert format_decimal(None, object()) == ""
+    assert _format_decimal(None, object()) == ""
 
 
 def test_custom_format_from_archive(configurable_save_file):
