@@ -99,7 +99,7 @@ def test_exceptions(configurable_save_file):
     assert str(record[0].message) == "Table 1@[0,1]: node type VIEW_TRACT_REF_NODE is unsupported"
 
     doc = Document("tests/data/simple-func.numbers")
-    doc.sheets[0].tables[0].cell(0, 1)._formula_key = 999
+    doc.sheets[0].tables[0].cell(0, 1)._formula_id = 999
     with pytest.warns(UnsupportedWarning) as record:
         _ = doc.sheets[0].tables[0].cell(0, 1).formula
 

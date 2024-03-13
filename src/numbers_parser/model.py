@@ -1,4 +1,3 @@
-import math
 import re
 from array import array
 from collections import defaultdict
@@ -6,7 +5,6 @@ from hashlib import sha1
 from pathlib import Path
 from struct import pack
 from typing import Dict, List, Tuple, Union
-from warnings import warn
 
 from numbers_parser.bullets import (
     BULLET_CONVERSION,
@@ -16,32 +14,24 @@ from numbers_parser.bullets import (
 from numbers_parser.cell import (
     RGB,
     Alignment,
-    BoolCell,
     Border,
     BorderType,
+    Cell,
     CustomFormatting,
-    DateCell,
-    DurationCell,
-    EmptyCell,
     Formatting,
     FormattingType,
     HorizontalJustification,
     MergeAnchor,
     MergedCell,
     MergeReference,
-    NumberCell,
     PaddingType,
-    RichTextCell,
     Style,
-    TextCell,
     VerticalJustification,
     xl_col_to_name,
     xl_rowcol_to_cell,
 )
-from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import (
     ALLOWED_FORMATTING_PARAMETERS,
-    CURRENCY_CELL_TYPE,
     CUSTOM_FORMAT_TYPE_MAP,
     CUSTOM_TEXT_PLACEHOLDER,
     DEFAULT_COLUMN_WIDTH,
@@ -53,15 +43,15 @@ from numbers_parser.constants import (
     DEFAULT_TEXT_WRAP,
     DEFAULT_TILE_SIZE,
     DOCUMENT_ID,
-    EPOCH,
     FORMAT_TYPE_MAP,
     MAX_TILE_SIZE,
     PACKAGE_ID,
     CellInteractionType,
     FormatType,
+    OwnerKind,
 )
 from numbers_parser.containers import ObjectStore
-from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
+from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.formula import TableFormulas
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
@@ -603,6 +593,7 @@ class _NumbersModel(Cacheable):
         formula_owner_ids = self.find_refs("FormulaOwnerDependenciesArchive")
         for dependency_id in formula_owner_ids:  # pragma: no branch
             obj = self.objects[dependency_id]
+            # if obj.owner_kind == OwnerKind.HAUNTED_OWNER:
             if obj.HasField("base_owner_uid") and obj.HasField(
                 "formula_owner_uid"
             ):  # pragma: no branch
@@ -653,17 +644,20 @@ class _NumbersModel(Cacheable):
         owner_id_map = self.owner_id_map()
         table_base_id = self.table_base_id(table_id)
 
-        range_table_ids = self.find_refs("RangePrecedentsTileArchive")
-        for range_id in range_table_ids:
-            o = self.objects[range_id]
-            to_owner_id = o.to_owner_id
-            if owner_id_map[to_owner_id] == table_base_id:
-                for from_to_range in o.from_to_range:
-                    rect = from_to_range.refers_to_rect
-                    row_start = rect.origin.row
-                    row_end = row_start + rect.size.num_rows - 1
-                    col_start = rect.origin.column
-                    col_end = col_start + rect.size.num_columns - 1
+        formula_table_ids = self.find_refs("FormulaOwnerDependenciesArchive")
+        for formula_id in formula_table_ids:
+            dependencies = self.objects[formula_id]
+            if dependencies.owner_kind != OwnerKind.MERGE_OWNER:
+                continue
+            for record in dependencies.range_dependencies.back_dependency:
+                to_owner_id = record.internal_range_reference.owner_id
+                if owner_id_map[to_owner_id] == table_base_id:
+                    record_range = record.internal_range_reference.range
+                    row_start = record_range.top_left_row
+                    row_end = record_range.bottom_right_row
+                    col_start = record_range.top_left_column
+                    col_end = record_range.bottom_right_column
+
                     size = (row_end - row_start + 1, col_end - col_start + 1)
                     for row in range(row_start, row_end + 1):
                         for col in range(col_start, col_end + 1):
@@ -884,7 +878,7 @@ class _NumbersModel(Cacheable):
         current_offset = 0
 
         for col in range(len(data[row])):
-            buffer = self.pack_cell_storage(table_id, data, row, col)
+            buffer = data[row][col].to_buffer()
             if buffer is not None:
                 cell_storage += buffer
                 # Always use wide offsets
@@ -1233,8 +1227,6 @@ class _NumbersModel(Cacheable):
             )
         )
 
-        data = [[EmptyCell(row, col) for col in range(num_cols)] for row in range(num_rows)]
-
         row_headers_id, _ = self.objects.create_object_from_dict(
             "Index/Tables/HeaderStorageBucket-{}",
             {"bucketHashFunction": 1},
@@ -1248,6 +1240,10 @@ class _NumbersModel(Cacheable):
             TSPMessages.Reference(identifier=row_headers_id)
         )
 
+        data = [
+            [Cell.empty_cell(table_model_id, row, col, self) for col in range(num_cols)]
+            for row in range(num_rows)
+        ]
         self.recalculate_table_data(table_model_id, data)
 
         table_info_id, table_info = self.objects.create_object_from_dict(
@@ -1618,16 +1614,16 @@ class _NumbersModel(Cacheable):
 
         return cell_style_id
 
-    def text_style_object_id(self, cell_storage) -> int:
-        if cell_storage.text_style_id is None:
+    def text_style_object_id(self, cell: Cell) -> int:
+        if cell._text_style_id is None:
             return None
-        entry = self._table_styles.lookup_value(cell_storage.table_id, cell_storage.text_style_id)
+        entry = self._table_styles.lookup_value(cell._table_id, cell._text_style_id)
         return entry.reference.identifier
 
-    def cell_style_object_id(self, cell_storage) -> int:
-        if cell_storage.cell_style_id is None:
+    def cell_style_object_id(self, cell: Cell) -> int:
+        if cell._cell_style_id is None:
             return None
-        entry = self._table_styles.lookup_value(cell_storage.table_id, cell_storage.cell_style_id)
+        entry = self._table_styles.lookup_value(cell._table_id, cell._cell_style_id)
         return entry.reference.identifier
 
     def custom_style_name(self) -> str:
@@ -1683,165 +1679,9 @@ class _NumbersModel(Cacheable):
         else:
             return "Custom Format 1"
 
-    def pack_cell_storage(  # noqa: PLR0912, PLR0915
-        self, table_id: int, data: List, row: int, col: int
-    ) -> bytearray:
-        """Create a storage buffer for a cell using v5 (modern) layout."""
-        cell = data[row][col]
-        if cell._style is not None:
-            if cell._style._text_style_obj_id is not None:
-                cell._storage.text_style_id = self._table_styles.lookup_key(
-                    cell._table_id,
-                    TSPMessages.Reference(identifier=cell._style._text_style_obj_id),
-                )
-                self.add_component_reference(
-                    cell._style._text_style_obj_id,
-                    parent_id=self._table_styles.id(cell._table_id),
-                )
-
-            if cell._style._cell_style_obj_id is not None:
-                cell._storage.cell_style_id = self._table_styles.lookup_key(
-                    cell._table_id,
-                    TSPMessages.Reference(identifier=cell._style._cell_style_obj_id),
-                )
-                self.add_component_reference(
-                    cell._style._cell_style_obj_id,
-                    parent_id=self._table_styles.id(cell._table_id),
-                )
-
-        length = 12
-        if isinstance(cell, NumberCell):
-            flags = 1
-            length += 16
-            if cell._storage.is_currency:
-                cell_type = CURRENCY_CELL_TYPE
-            else:
-                cell_type = TSTArchives.numberCellType
-            value = pack_decimal128(cell.value)
-        elif isinstance(cell, TextCell):
-            flags = 8
-            length += 4
-            cell_type = TSTArchives.textCellType
-            value = pack("<i", self.table_string_key(table_id, cell.value))
-        elif isinstance(cell, DateCell):
-            flags = 4
-            length += 8
-            cell_type = TSTArchives.dateCellType
-            date_delta = cell.value - EPOCH
-            value = pack("<d", float(date_delta.total_seconds()))
-        elif isinstance(cell, BoolCell):
-            flags = 2
-            length += 8
-            cell_type = TSTArchives.boolCellType
-            value = pack("<d", float(cell.value))
-        elif isinstance(cell, DurationCell):
-            flags = 2
-            length += 8
-            cell_type = TSTArchives.durationCellType
-            value = value = pack("<d", float(cell.value.total_seconds()))
-        elif isinstance(cell, EmptyCell):
-            if cell._style is not None or cell._storage is not None:
-                flags = 0
-                cell_type = TSTArchives.emptyCellValueType
-                value = b""
-            else:
-                return None
-        elif isinstance(cell, MergedCell):
-            return None
-        elif isinstance(cell, RichTextCell):
-            flags = 0
-            length += 4
-            cell_type = TSTArchives.automaticCellType
-            value = pack("<i", cell._storage.rich_id)
-        else:
-            data_type = type(cell).__name__
-            table_name = self.table_name(table_id)
-            warn(
-                f"@{table_name}:[{row},{col}]: unsupported data type {data_type} for save",
-                UnsupportedWarning,
-                stacklevel=1,
-            )
-            return None
-
-        storage = bytearray(12)
-        storage[0] = 5
-        storage[1] = cell_type
-        storage += value
-
-        if cell._storage.rich_id is not None:
-            flags |= 0x10
-            length += 4
-            storage += pack("<i", cell._storage.rich_id)
-        if cell._storage.cell_style_id is not None:
-            flags |= 0x20
-            length += 4
-            storage += pack("<i", cell._storage.cell_style_id)
-        if cell._storage.text_style_id is not None:
-            flags |= 0x40
-            length += 4
-            storage += pack("<i", cell._storage.text_style_id)
-        if cell._storage.formula_id is not None:
-            flags |= 0x200
-            length += 4
-            storage += pack("<i", cell._storage.formula_id)
-        if cell._storage.control_id is not None:
-            flags |= 0x400
-            length += 4
-            storage += pack("<i", cell._storage.control_id)
-        if cell._storage.suggest_id is not None:
-            flags |= 0x1000
-            length += 4
-            storage += pack("<i", cell._storage.suggest_id)
-        if cell._storage.num_format_id is not None:
-            flags |= 0x2000
-            length += 4
-            storage += pack("<i", cell._storage.num_format_id)
-            storage[6] |= 1
-            # storage[6:8] = pack("<h", 1)
-        if cell._storage.currency_format_id is not None:
-            flags |= 0x4000
-            length += 4
-            storage += pack("<i", cell._storage.currency_format_id)
-            storage[6] |= 2
-        if cell._storage.date_format_id is not None:
-            flags |= 0x8000
-            length += 4
-            storage += pack("<i", cell._storage.date_format_id)
-            storage[6] |= 8
-        if cell._storage.duration_format_id is not None:
-            flags |= 0x10000
-            length += 4
-            storage += pack("<i", cell._storage.duration_format_id)
-            storage[6] |= 4
-        if cell._storage.text_format_id is not None:
-            flags |= 0x20000
-            length += 4
-            storage += pack("<i", cell._storage.text_format_id)
-        if cell._storage.bool_format_id is not None:
-            flags |= 0x40000
-            length += 4
-            storage += pack("<i", cell._storage.bool_format_id)
-            storage[6] |= 0x20
-        if cell._storage.string_id is not None:
-            storage[6] |= 0x80
-
-        storage[8:12] = pack("<i", flags)
-        if len(storage) < 32:
-            storage += bytearray(32 - length)
-
-        return storage[0:length]
-
     @cache()
     def table_formulas(self, table_id: int):
         return TableFormulas(self, table_id)
-
-    @cache(num_args=3)
-    def table_cell_decode(self, table_id: int, row: int, col: int) -> Dict:
-        buffer = self.storage_buffer(table_id, row, col)
-        if buffer is None:
-            return None
-
-        return CellStorage(self, table_id, buffer, row, col)
 
     @cache(num_args=2)
     def table_rich_text(self, table_id: int, string_key: int) -> Dict:
@@ -1934,41 +1774,41 @@ class _NumbersModel(Cacheable):
                     "hyperlinks": hyperlinks,
                 }
 
-    def cell_text_style(self, cell_storage: object) -> object:
+    def cell_text_style(self, cell: Cell) -> object:
         """Return the text style object for the cell or, if none
         is defined, the default header, footer or body style.
         """
-        if cell_storage.text_style_id is not None:
-            return self.table_style(cell_storage.table_id, cell_storage.text_style_id)
+        if cell._text_style_id is not None:
+            return self.table_style(cell._table_id, cell._text_style_id)
 
-        table_model = self.objects[cell_storage.table_id]
-        if cell_storage.row in range(table_model.number_of_header_rows):
+        table_model = self.objects[cell._table_id]
+        if cell.row in range(table_model.number_of_header_rows):
             return self.objects[table_model.header_row_text_style.identifier]
-        elif cell_storage.col in range(table_model.number_of_header_columns):
+        elif cell.col in range(table_model.number_of_header_columns):
             return self.objects[table_model.header_column_text_style.identifier]
         elif table_model.number_of_footer_rows > 0:
             start_row_num = table_model.number_of_rows - table_model.number_of_footer_rows
             end_row_num = start_row_num + table_model.number_of_footer_rows
-            if cell_storage.row in range(start_row_num, end_row_num):
+            if cell.row in range(start_row_num, end_row_num):
                 return self.objects[table_model.footer_row_text_style.identifier]
         return self.objects[table_model.body_text_style.identifier]
 
-    def cell_alignment(self, cell_storage: object) -> Alignment:
-        style = self.cell_text_style(cell_storage)
+    def cell_alignment(self, cell: Cell) -> Alignment:
+        style = self.cell_text_style(cell)
         horizontal = HorizontalJustification(self.para_property(style, "alignment"))
 
-        if cell_storage.cell_style_id is None:
+        if cell._cell_style_id is None:
             vertical = VerticalJustification.TOP
         else:
-            style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
+            style = self.table_style(cell._table_id, cell._cell_style_id)
             vertical = VerticalJustification(self.cell_property(style, "vertical_alignment"))
         return Alignment(horizontal, vertical)
 
-    def cell_bg_color(self, cell_storage: object) -> Union[Tuple, List[Tuple]]:
-        if cell_storage.cell_style_id is None:
+    def cell_bg_color(self, cell: Cell) -> Union[Tuple, List[Tuple]]:
+        if cell._cell_style_id is None:
             return None
 
-        style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
+        style = self.table_style(cell._table_id, cell._cell_style_id)
         cell_properties = style.cell_properties.cell_fill
 
         if cell_properties.HasField("color"):
@@ -2006,67 +1846,67 @@ class _NumbersModel(Cacheable):
         else:
             return getattr(style.cell_properties, field)
 
-    def cell_is_bold(self, obj: object) -> bool:
-        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+    def cell_is_bold(self, obj: Union[Cell, object]) -> bool:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.char_property(style, "bold")
 
-    def cell_is_italic(self, obj: object) -> bool:
-        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+    def cell_is_italic(self, obj: Union[Cell, object]) -> bool:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.char_property(style, "italic")
 
-    def cell_is_underline(self, obj: object) -> bool:
-        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+    def cell_is_underline(self, obj: Union[Cell, object]) -> bool:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         underline = self.char_property(style, "underline")
         return underline != CharacterStyle.UnderlineType.kNoUnderline
 
-    def cell_is_strikethrough(self, obj: object) -> bool:
-        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+    def cell_is_strikethrough(self, obj: Union[Cell, object]) -> bool:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         strikethru = self.char_property(style, "strikethru")
         return strikethru != CharacterStyle.StrikethruType.kNoStrikethru
 
-    def cell_style_name(self, obj: object) -> bool:
-        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+    def cell_style_name(self, obj: Union[Cell, object]) -> bool:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return style.super.name
 
-    def cell_font_color(self, obj: object) -> Tuple:
-        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+    def cell_font_color(self, obj: Union[Cell, object]) -> Tuple:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return rgb(self.char_property(style, "font_color"))
 
-    def cell_font_size(self, obj: object) -> float:
-        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+    def cell_font_size(self, obj: Union[Cell, object]) -> float:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.char_property(style, "font_size")
 
-    def cell_font_name(self, obj: object) -> str:
-        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+    def cell_font_name(self, obj: Union[Cell, object]) -> str:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         font_name = self.char_property(style, "font_name")
         return FONT_NAME_TO_FAMILY[font_name]
 
-    def cell_first_indent(self, obj: object) -> float:
-        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+    def cell_first_indent(self, obj: Union[Cell, object]) -> float:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.para_property(style, "first_line_indent")
 
-    def cell_left_indent(self, obj: object) -> float:
-        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+    def cell_left_indent(self, obj: Union[Cell, object]) -> float:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.para_property(style, "left_indent")
 
-    def cell_right_indent(self, obj: object) -> float:
-        style = self.cell_text_style(obj) if isinstance(obj, CellStorage) else obj
+    def cell_right_indent(self, obj: Union[Cell, object]) -> float:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.para_property(style, "right_indent")
 
-    def cell_text_inset(self, cell_storage: CellStorage) -> float:
-        if cell_storage.cell_style_id is None:
+    def cell_text_inset(self, cell: Cell) -> float:
+        if cell._cell_style_id is None:
             return DEFAULT_TEXT_INSET
         else:
-            style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
+            style = self.table_style(cell._table_id, cell._cell_style_id)
             padding = self.cell_property(style, "padding")
             # Padding is always identical (only one UI setting)
             return padding.left
 
-    def cell_text_wrap(self, cell_storage: CellStorage) -> float:
-        if cell_storage.cell_style_id is None:
+    def cell_text_wrap(self, cell: Cell) -> float:
+        if cell._cell_style_id is None:
             return DEFAULT_TEXT_WRAP
         else:
-            style = self.table_style(cell_storage.table_id, cell_storage.cell_style_id)
+            style = self.table_style(cell._table_id, cell._cell_style_id)
             return self.cell_property(style, "text_wrap")
 
     def stroke_type(self, stroke_run: object) -> str:
@@ -2416,23 +2256,6 @@ def clear_field_container(obj):
     """
     while len(obj) > 0:
         _ = obj.pop()
-
-
-def pack_decimal128(value: float) -> bytearray:
-    buffer = bytearray(16)
-    exp = math.floor(math.log10(math.e) * math.log(abs(value))) if value != 0.0 else 0
-    exp += 0x1820 - 16
-    mantissa = abs(int(value / math.pow(10, exp - 0x1820)))
-    buffer[15] |= exp >> 7
-    buffer[14] |= (exp & 0x7F) << 1
-    i = 0
-    while mantissa >= 1:
-        buffer[i] = mantissa & 0xFF
-        i += 1
-        mantissa = int(mantissa / 256)
-    if value < 0:
-        buffer[15] |= 0x80
-    return buffer
 
 
 def field_references(obj: object) -> dict:

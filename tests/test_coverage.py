@@ -5,7 +5,6 @@ from numbers_parser import (
     Cell,
     CustomFormatting,
     Document,
-    EmptyCell,
     Formatting,
     PaddingType,
     UnsupportedError,
@@ -15,8 +14,8 @@ from numbers_parser import (
     xl_rowcol_to_cell,
 )
 from numbers_parser._unpack_numbers import NumbersUnpacker
-from numbers_parser.cell_storage import (
-    CellStorage,
+from numbers_parser.cell import (
+    DurationUnits,
     auto_units,
     decode_number_format,
     float_to_n_digit_fraction,
@@ -25,7 +24,6 @@ from numbers_parser.cell_storage import (
 from numbers_parser.constants import (
     DECIMAL_PLACES_AUTO,
     EMPTY_STORAGE_BUFFER,
-    DurationUnits,
     NegativeNumberStyle,
 )
 from numbers_parser.experimental import _enable_experimental_features, _experimental_features
@@ -46,26 +44,20 @@ def test_ranges():
 
 def test_cell_storage(tmp_path):
     doc = Document()
-    table = doc.sheets[0].tables[0]
+    doc.sheets[0].tables[0]
 
+    model = doc.default_table._model
+    table_id = doc.default_table._table_id
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
     buffer[1] = 255
     with pytest.raises(UnsupportedError) as e:
-        storage = CellStorage(doc._model, table._table_id, bytes(buffer), 0, 0)
-        _ = Cell.from_storage(storage)
+        _ = Cell.from_storage(table_id, 0, 0, buffer, model)
     assert "Cell type ID 255 is not recognised" in str(e)
-
-    buffer = bytearray(EMPTY_STORAGE_BUFFER)
-    with pytest.raises(UnsupportedError) as e:
-        storage = CellStorage(doc._model, table._table_id, bytes(buffer), 0, 0)
-        storage.type = 255
-        _ = Cell.from_storage(storage)
-    assert "Unsupported cell type 255 @:(0,0)" in str(e)
 
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
     buffer[0] = 4
     with pytest.raises(UnsupportedError) as e:
-        storage = CellStorage(doc._model, table._table_id, bytes(buffer), 0, 0)
+        _ = Cell.from_storage(table_id, 0, 0, buffer, model)
     assert "Cell storage version 4 is unsupported" in str(e)
 
     class DummyCell(Cell):
@@ -73,6 +65,8 @@ def test_cell_storage(tmp_path):
 
     doc = Document()
     doc.sheets[0].tables[0]._data[0][0] = DummyCell(0, 0, None)
+    doc.sheets[0].tables[0]._data[0][0]._model = doc._model
+    doc.sheets[0].tables[0]._data[0][0]._table_id = doc.sheets[0].tables[0]._table_id
     new_filename = tmp_path / "new.numbers"
     with pytest.warns(UnsupportedWarning) as record:
         doc.save(new_filename)
@@ -122,7 +116,7 @@ def test_formatting_exceptions():
     doc = Document("tests/data/test-custom-formats.numbers")
 
     cell = doc.sheets[0].tables[0].cell("B4")
-    format = doc._model.table_format(cell._table_id, cell._storage.date_format_id)
+    format = doc._model.table_format(cell._table_id, cell._date_format_id)
     format_uuid = NumbersUUID(format.custom_uid).hex
     format_map = doc._model.custom_format_map()
     custom_format = format_map[format_uuid].default_format
@@ -141,7 +135,7 @@ def test_formatting_exceptions():
     assert "Unsupported field code 'ZZ'" in str(record[0])
 
     cell = doc.sheets["Numbers"].tables[0].cell("C38")
-    format = doc._model.table_format(cell._table_id, cell._storage.num_format_id)
+    format = doc._model.table_format(cell._table_id, cell._num_format_id)
     format_uuid = NumbersUUID(format.custom_uid).hex
     format_map = doc._model.custom_format_map()
     custom_format = format_map[format_uuid].default_format
@@ -216,20 +210,20 @@ def test_set_number_defaults():
     table = doc.sheets[0].tables[0]
     table.write(0, 0, 0.0)
     table.set_cell_formatting(0, 0, "number")
-    num_format_id = table.cell(0, 0)._storage.num_format_id
+    num_format_id = table.cell(0, 0)._num_format_id
     format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
     assert not format.show_thousands_separator
     assert format.negative_style == NegativeNumberStyle.MINUS
     assert format.decimal_places == DECIMAL_PLACES_AUTO
 
     table.set_cell_formatting(0, 0, "base")
-    num_format_id = table.cell(0, 0)._storage.num_format_id
+    num_format_id = table.cell(0, 0)._num_format_id
     format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
     assert not format.show_thousands_separator
     assert format.base_places == 0
 
     table.set_cell_formatting(0, 0, "currency")
-    num_format_id = table.cell(0, 0)._storage.currency_format_id
+    num_format_id = table.cell(0, 0)._currency_format_id
     format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
     assert not format.show_thousands_separator
     assert format.decimal_places == 2
@@ -244,9 +238,8 @@ def test_set_number_defaults():
 
 
 def test_formatting_empty_cell():
-    cell = EmptyCell(0, 0)
-    assert cell.formatted_value == ""
-
+    doc = Document()
+    assert doc.default_table.cell(0, 0).formatted_value == ""
     assert format_decimal(None, object()) == ""
 
 
@@ -276,8 +269,24 @@ def test_custom_format_from_archive(configurable_save_file):
     table.set_cell_formatting(0, 0, "custom", format="date_format")
     table.set_cell_formatting(0, 1, "custom", format="text_format")
     table.set_cell_formatting(0, 2, "custom", format="number_format")
-    assert table.cell(0, 0)._storage.date_format_id == 3
-    assert table.cell(0, 1)._storage.text_format_id == 4
-    assert table.cell(0, 2)._storage.num_format_id == 5
+    assert table.cell(0, 0)._date_format_id == 3
+    assert table.cell(0, 1)._text_format_id == 4
+    assert table.cell(0, 2)._num_format_id == 5
     assert table.cell(0, 3).formatted_value == "0001"
     assert table.cell(0, 4).formatted_value == "0000001"
+
+
+def test_cell_repr():
+    doc = Document("tests/data/test-1.numbers")
+    cell = doc.default_table.cell(1, 1)
+    assert str(cell) == (
+        "ZZZ_Sheet_1@ZZZ_Table_1[1,1]:table_id=874482, type=TEXT, value=YYY_1_1, "
+        "flags=00021008, extras=0000, string_id=4, suggest_id=5, text_format_id=1"
+    )
+
+
+def test_invalid_format():
+    doc = Document("tests/data/test-1.numbers")
+    cell = doc.default_table.cell(1, 1)
+    cell._text_format_id = None
+    assert cell.custom_format() == cell.value

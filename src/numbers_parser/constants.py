@@ -147,6 +147,8 @@ class CellType(IntEnum):
     DURATION = 6
     ERROR = 7
     RICH_TEXT = 8
+    CURRENCY = 101
+    MERGED = 102
 
 
 class CellPadding(IntEnum):
@@ -212,6 +214,12 @@ class ControlFormattingType(IntEnum):
     NUMBER = 5
     PERCENTAGE = 6
     SCIENTIFIC = 7
+
+
+class OwnerKind(IntEnum):
+    TABLE_MODEL = 1
+    MERGE_OWNER = 5
+    HAUNTED_OWNER = 35
 
 
 FORMATTING_ALLOWED_CELLS = {

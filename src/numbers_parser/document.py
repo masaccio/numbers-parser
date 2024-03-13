@@ -20,7 +20,6 @@ from numbers_parser.cell import (
     xl_cell_to_rowcol,
     xl_range,
 )
-from numbers_parser.cell_storage import CellStorage
 from numbers_parser.constants import (
     CUSTOM_FORMATTING_ALLOWED_CELLS,
     DEFAULT_COLUMN_COUNT,
@@ -437,14 +436,14 @@ class Table(Cacheable):  # noqa: F811
         for row in range(self.num_rows):
             self._data.append([])
             for col in range(self.num_cols):
-                cell_storage = model.table_cell_decode(table_id, row, col)
-                if cell_storage is None:
-                    if merge_cells.is_merge_reference((row, col)):
-                        cell = Cell.merged_cell(table_id, row, col, model)
-                    else:
-                        cell = Cell.empty_cell(table_id, row, col, model)
+                if merge_cells.is_merge_reference((row, col)):
+                    cell = Cell.merged_cell(table_id, row, col, model)
                 else:
-                    cell = Cell.from_storage(cell_storage)
+                    buffer = self._model.storage_buffer(table_id, row, col)
+                    if buffer is None:
+                        cell = Cell.empty_cell(table_id, row, col, model)
+                    else:
+                        cell = Cell.from_storage(table_id, row, col, buffer, model)
                 self._data[row].append(cell)
 
     @property
@@ -879,9 +878,7 @@ class Table(Cacheable):  # noqa: F811
         # TODO: write needs to retain/init the border
         (row, col, value) = self._validate_cell_coords(*args)
         self._data[row][col] = Cell.from_value(row, col, value)
-        storage = CellStorage(self._model, self._table_id, None, row, col)
-        storage.update_value(value, self._data[row][col])
-        self._data[row][col].update_storage(storage)
+        self._data[row][col]._update_value(value, self._data[row][col])
 
         merge_cells = self._model.merge_cells(self._table_id)
         self._data[row][col]._table_id = self._table_id
@@ -1114,7 +1111,7 @@ class Table(Cacheable):  # noqa: F811
             merge_cells.add_anchor(row_start, col_start, (num_rows, num_cols))
             for row in range(row_start + 1, row_end + 1):
                 for col in range(col_start + 1, col_end + 1):
-                    self._data[row][col] = MergedCell(row, col)
+                    self._data[row][col] = Cell.merged_cell(self._table_id, row, col, self._model)
                     merge_cells.add_reference(row, col, (row_start, col_start, row_end, col_end))
 
             for row, cells in enumerate(self._data):

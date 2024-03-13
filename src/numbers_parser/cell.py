@@ -1,19 +1,29 @@
+import logging
+import math
 import re
 from collections import namedtuple
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from datetime import datetime as builtin_datetime
 from datetime import timedelta as builtin_timedelta
 from enum import IntEnum
+from fractions import Fraction
 from os.path import basename
+from struct import pack, unpack
 from typing import Any, List, Tuple, Union
 from warnings import warn
 
 import sigfig
-from pendulum import DateTime, Duration, duration
+from pendulum import DateTime, Duration, datetime, duration
 from pendulum import instance as pendulum_instance
 
-from numbers_parser.cell_storage import CellStorage, CellType
+from numbers_parser import __name__ as numbers_parser_name
+
+# from numbers_parser.cell_storage import CellStorage, CellType
 from numbers_parser.constants import (
+    CHECKBOX_FALSE_VALUE,
+    CHECKBOX_TRUE_VALUE,
+    CURRENCY_CELL_TYPE,
+    CUSTOM_TEXT_PLACEHOLDER,
     DATETIME_FIELD_MAP,
     DECIMAL_PLACES_AUTO,
     DEFAULT_ALIGNMENT,
@@ -26,23 +36,39 @@ from numbers_parser.constants import (
     DEFAULT_TEXT_INSET,
     DEFAULT_TEXT_WRAP,
     EMPTY_STORAGE_BUFFER,
+    EPOCH,
     MAX_BASE,
     MAX_SIGNIFICANT_DIGITS,
+    PACKAGE_ID,
+    SECONDS_IN_DAY,
+    SECONDS_IN_HOUR,
+    SECONDS_IN_WEEK,
+    STAR_RATING_VALUE,
+    CellPadding,
+    CellType,
     ControlFormattingType,
     CustomFormattingType,
+    DurationStyle,
+    DurationUnits,
     FormattingType,
     FormatType,
     FractionAccuracy,
     NegativeNumberStyle,
     PaddingType,
 )
-from numbers_parser.currencies import CURRENCIES
+from numbers_parser.currencies import CURRENCIES, CURRENCY_SYMBOLS
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
+from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
     ParagraphStylePropertiesArchive as ParagraphStyle,
 )
 from numbers_parser.numbers_cache import Cacheable, cache
+from numbers_parser.numbers_uuid import NumbersUUID
+
+logger = logging.getLogger(numbers_parser_name)
+debug = logger.debug
+
 
 __all__ = [
     "Alignment",
@@ -268,30 +294,30 @@ class Style:
         ]
 
     @classmethod
-    def from_storage(cls, cell_storage: object, model: object):
-        if cell_storage.image_data is not None:
-            bg_image = BackgroundImage(*cell_storage.image_data)
+    def from_storage(cls, cell: object, model: object):
+        if cell._image_data is not None:
+            bg_image = BackgroundImage(*cell._image_data)
         else:
             bg_image = None
         return Style(
-            alignment=model.cell_alignment(cell_storage),
+            alignment=model.cell_alignment(cell),
             bg_image=bg_image,
-            bg_color=model.cell_bg_color(cell_storage),
-            font_color=model.cell_font_color(cell_storage),
-            font_size=model.cell_font_size(cell_storage),
-            font_name=model.cell_font_name(cell_storage),
-            bold=model.cell_is_bold(cell_storage),
-            italic=model.cell_is_italic(cell_storage),
-            strikethrough=model.cell_is_strikethrough(cell_storage),
-            underline=model.cell_is_underline(cell_storage),
-            name=model.cell_style_name(cell_storage),
-            first_indent=model.cell_first_indent(cell_storage),
-            left_indent=model.cell_left_indent(cell_storage),
-            right_indent=model.cell_right_indent(cell_storage),
-            text_inset=model.cell_text_inset(cell_storage),
-            text_wrap=model.cell_text_wrap(cell_storage),
-            _text_style_obj_id=model.text_style_object_id(cell_storage),
-            _cell_style_obj_id=model.cell_style_object_id(cell_storage),
+            bg_color=model.cell_bg_color(cell),
+            font_color=model.cell_font_color(cell),
+            font_size=model.cell_font_size(cell),
+            font_name=model.cell_font_name(cell),
+            bold=model.cell_is_bold(cell),
+            italic=model.cell_is_italic(cell),
+            strikethrough=model.cell_is_strikethrough(cell),
+            underline=model.cell_is_underline(cell),
+            name=model.cell_style_name(cell),
+            first_indent=model.cell_first_indent(cell),
+            left_indent=model.cell_left_indent(cell),
+            right_indent=model.cell_right_indent(cell),
+            text_inset=model.cell_text_inset(cell),
+            text_wrap=model.cell_text_wrap(cell),
+            _text_style_obj_id=model.text_style_object_id(cell),
+            _cell_style_obj_id=model.cell_style_object_id(cell),
         )
 
     def __post_init__(self):
@@ -420,7 +446,7 @@ class Border:
 
         self._order = _order
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         style_name = BorderType(self.style).name.lower()
         return f"Border(width={self.width}, color={self.color}, style={style_name})"
 
@@ -522,21 +548,68 @@ class MergeAnchor:
         self.size = size
 
 
-class Cell(Cacheable):
+@dataclass
+class CellStorageFlags:
+    _string_id: int = None
+    _rich_id: int = None
+    _cell_style_id: int = None
+    _text_style_id: int = None
+    # _cond_style_id: int = None
+    # _cond_rule_style_id: int = None
+    _formula_id: int = None
+    _control_id: int = None
+    _formula_error_id: int = None
+    _suggest_id: int = None
+    _num_format_id: int = None
+    _currency_format_id: int = None
+    _date_format_id: int = None
+    _duration_format_id: int = None
+    _text_format_id: int = None
+    _bool_format_id: int = None
+    # _comment_id: int = None
+    # _import_warning_id: int = None
+
+    def __str__(self) -> str:
+        fields = [
+            f"{k[1:]}={v}" for k, v in asdict(self).items() if k.endswith("_id") and v is not None
+        ]
+        fields = ", ".join([x for x in fields if x if not None])
+        return fields
+
+    def flags(self):
+        return [x.name for x in fields(self)]
+
+
+class Cell(CellStorageFlags, Cacheable):
     """
     .. NOTE::
        Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
+    def __init__(self, row: int, col: int, value):
+        self._value = value
+        self.row = row
+        self.col = col
+        self._is_bulleted = False
+        self._storage = None
+        self._style = None
+        self._d128 = None
+        self._double = None
+        self._seconds = None
+        super().__init__()
+
+    def __str__(self):
+        table_name = self._model.table_name(self._table_id)
+        sheet_name = self._model.sheet_name(self._model.table_id_to_sheet_id(self._table_id))
+        cell_str = f"{sheet_name}@{table_name}[{self.row},{self.col}]:"
+        cell_str += f"table_id={self._table_id}, type={self._type.name}, "
+        cell_str += f"value={self._value}, flags={self._flags:08x}, extras={self._extras:04x}"
+        cell_str = ", ".join([cell_str, super().__str__()])
+        return cell_str
+
     @classmethod
     def empty_cell(cls, table_id: int, row: int, col: int, model: object):
-        cell = EmptyCell(row, col)
-        cell._model = model
-        cell._table_id = table_id
-        merge_cells = model.merge_cells(table_id)
-        cell._set_merge(merge_cells.get((row, col)))
-
-        return cell
+        return Cell.from_storage(table_id, row, col, EMPTY_STORAGE_BUFFER, model)
 
     @classmethod
     def merged_cell(cls, table_id: int, row: int, col: int, model: object):
@@ -548,47 +621,14 @@ class Cell(Cacheable):
         return cell
 
     @classmethod
-    def from_storage(cls, cell_storage: CellStorage):
-        if cell_storage.type == CellType.EMPTY:
-            cell = EmptyCell(cell_storage.row, cell_storage.col)
-        elif cell_storage.type == CellType.NUMBER:
-            cell = NumberCell(cell_storage.row, cell_storage.col, cell_storage.value)
-        elif cell_storage.type == CellType.TEXT:
-            cell = TextCell(cell_storage.row, cell_storage.col, cell_storage.value)
-        elif cell_storage.type == CellType.DATE:
-            cell = DateCell(cell_storage.row, cell_storage.col, cell_storage.value)
-        elif cell_storage.type == CellType.BOOL:
-            cell = BoolCell(cell_storage.row, cell_storage.col, cell_storage.value)
-        elif cell_storage.type == CellType.DURATION:
-            value = duration(seconds=cell_storage.value)
-            cell = DurationCell(cell_storage.row, cell_storage.col, value)
-        elif cell_storage.type == CellType.ERROR:
-            cell = ErrorCell(cell_storage.row, cell_storage.col)
-        elif cell_storage.type == CellType.RICH_TEXT:
-            cell = RichTextCell(cell_storage.row, cell_storage.col, cell_storage.value)
-        else:
-            raise UnsupportedError(
-                f"Unsupported cell type {cell_storage.type} "
-                + f"@:({cell_storage.row},{cell_storage.col})"
-            )
-
-        cell._table_id = cell_storage.table_id
-        cell._model = cell_storage.model
-        cell._storage = cell_storage
-        cell._formula_key = cell_storage.formula_id
-        merge_cells = cell_storage.model.merge_cells(cell_storage.table_id)
-        cell._set_merge(merge_cells.get((cell_storage.row, cell_storage.col)))
-        return cell
-
-    @classmethod
     def from_value(cls, row: int, col: int, value):
         # TODO: write needs to retain/init the border
         if isinstance(value, str):
-            return TextCell(row, col, value)
+            cell = TextCell(row, col, value)
         elif isinstance(value, bool):
-            return BoolCell(row, col, value)
+            cell = BoolCell(row, col, value)
         elif isinstance(value, int):
-            return NumberCell(row, col, value)
+            cell = NumberCell(row, col, value)
         elif isinstance(value, float):
             rounded_value = sigfig.round(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
             if rounded_value != value:
@@ -597,31 +637,144 @@ class Cell(Cacheable):
                     RuntimeWarning,
                     stacklevel=2,
                 )
-            return NumberCell(row, col, rounded_value)
+            cell = NumberCell(row, col, rounded_value)
         elif isinstance(value, (DateTime, builtin_datetime)):
-            return DateCell(row, col, pendulum_instance(value))
+            cell = DateCell(row, col, pendulum_instance(value))
         elif isinstance(value, (Duration, builtin_timedelta)):
-            return DurationCell(row, col, value)
+            cell = DurationCell(row, col, value)
         else:
             raise ValueError("Can't determine cell type from type " + type(value).__name__)
 
-    def _set_formatting(
-        self,
-        format_id: int,
-        format_type: FormattingType,
-        control_id: int = None,
-        is_currency: bool = False,
-    ) -> None:
-        self._storage.set_formatting(format_id, format_type, control_id, is_currency)
+        return cell
 
-    def __init__(self, row: int, col: int, value):
-        self._value = value
-        self.row = row
-        self.col = col
-        self._is_bulleted = False
-        self._formula_key = None
-        self._storage = None
-        self._style = None
+    @classmethod
+    def from_storage(  # noqa: PLR0913, PLR0915, PLR0912
+        cls, table_id: int, row: int, col: int, buffer: bytearray, model: object
+    ) -> None:
+        d128 = None
+        double = None
+        seconds = None
+
+        version = buffer[0]
+        if version != 5:
+            raise UnsupportedError(f"Cell storage version {version} is unsupported")
+
+        offset = 12
+        storage_flags = CellStorageFlags()
+        flags = unpack("<i", buffer[8:12])[0]
+
+        if flags & 0x1:
+            d128 = unpack_decimal128(buffer[offset : offset + 16])
+            offset += 16
+        if flags & 0x2:
+            double = unpack("<d", buffer[offset : offset + 8])[0]
+            offset += 8
+        if flags & 0x4:
+            seconds = unpack("<d", buffer[offset : offset + 8])[0]
+            offset += 8
+        if flags & 0x8:
+            storage_flags._string_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x10:
+            storage_flags._rich_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x20:
+            storage_flags._cell_style_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x40:
+            storage_flags._text_style_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x80:
+            # storage_flags._cond_style_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        # if flags & 0x100:
+        #     storage_flags._cond_rule_style_id = unpack("<i", buffer[offset : offset + 4])[0]
+        #     offset += 4
+        if flags & 0x200:
+            storage_flags._formula_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x400:
+            storage_flags._control_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        # if flags & 0x800:
+        #     storage_flags._formula_error_id = unpack("<i", buffer[offset : offset + 4])[0]
+        #     offset += 4
+        if flags & 0x1000:
+            storage_flags._suggest_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        # Skip unused flags
+        offset += 4 * bin(flags & 0x900).count("1")
+        #
+        if flags & 0x2000:
+            storage_flags._num_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x4000:
+            storage_flags._currency_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x8000:
+            storage_flags._date_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x10000:
+            storage_flags._duration_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x20000:
+            storage_flags._text_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        if flags & 0x40000:
+            storage_flags._bool_format_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
+        # if flags & 0x80000:
+        #     cstorage_flags._omment_id = unpack("<i", buffer[offset : offset + 4])[0]
+        #     offset += 4
+        # if flags & 0x100000:
+        #     storage_flags._import_warning_id = unpack("<i", buffer[offset : offset + 4])[0]
+        #     offset += 4
+
+        cell_type = buffer[1]
+        if cell_type == TSTArchives.genericCellType:
+            cell = EmptyCell(row, col)
+        elif cell_type == TSTArchives.numberCellType:
+            cell = NumberCell(row, col, d128)
+        elif cell_type == TSTArchives.textCellType:
+            cell = TextCell(row, col, model.table_string(table_id, storage_flags._string_id))
+        elif cell_type == TSTArchives.dateCellType:
+            cell = DateCell(row, col, EPOCH + duration(seconds=seconds))
+            cell._datetime = cell._value
+        elif cell_type == TSTArchives.boolCellType:
+            cell = BoolCell(row, col, double > 0.0)
+        elif cell_type == TSTArchives.durationCellType:
+            cell = DurationCell(row, col, duration(seconds=double))
+        elif cell_type == TSTArchives.formulaErrorCellType:
+            cell = ErrorCell(row, col)
+        elif cell_type == TSTArchives.automaticCellType:
+            cell = RichTextCell(row, col, model.table_rich_text(table_id, storage_flags._rich_id))
+        elif cell_type == CURRENCY_CELL_TYPE:
+            cell = NumberCell(row, col, d128, cell_type=CellType.CURRENCY)
+        else:
+            raise UnsupportedError(f"Cell type ID {cell_type} is not recognised")
+
+        cell._copy_flags(storage_flags)
+        cell._buffer = buffer
+        cell._model = model
+        cell._table_id = table_id
+        cell._d128 = d128
+        cell._double = double
+        cell._seconds = seconds
+        cell._extras = unpack("<H", buffer[6:8])[0]
+        cell._flags = flags
+
+        merge_cells = model.merge_cells(table_id)
+        cell._set_merge(merge_cells.get((row, col)))
+
+        if logging.getLogger(__package__).level == logging.DEBUG:
+            # Guard to reduce expense of computing fields
+            debug(str(cell))
+
+        return cell
+
+    def _copy_flags(self, storage_flags: CellStorageFlags):
+        for flag in storage_flags.flags():
+            setattr(self, flag, getattr(storage_flags, flag))
 
     def _set_merge(self, merge_ref):
         if isinstance(merge_ref, MergeAnchor):
@@ -698,9 +851,9 @@ class Cell(Cacheable):
                 The text of the foruma in a cell, or `None` if there is no formula
                 present in a cell.
         """
-        if self._formula_key is not None:
+        if self._formula_id is not None:
             table_formulas = self._model.table_formulas(self._table_id)
-            return table_formulas.formula(self._formula_key, self.row, self.col)
+            return table_formulas.formula(self._formula_id, self.row, self.col)
         else:
             return None
 
@@ -767,10 +920,19 @@ class Cell(Cacheable):
             >>> table.cell(1,1).formatted_value
             '★★★'
         """
-        if self._storage is None:
-            return ""
+        if self._duration_format_id is not None and self._double is not None:
+            return self.duration_format()
+        elif self._date_format_id is not None and self._seconds is not None:
+            return self.date_format()
+        elif (
+            self._text_format_id is not None
+            or self._num_format_id is not None
+            or self._currency_format_id is not None
+            or self._bool_format_id is not None
+        ):
+            return self.custom_format()
         else:
-            return self._storage.formatted
+            return str(self.value)
 
     @property
     def style(self) -> Union[Style, None]:
@@ -780,12 +942,8 @@ class Cell(Cacheable):
             UnsupportedWarning: On assignment; use
                 :py:meth:`numbers_parser.Table.set_cell_style` instead.
         """
-        if self._storage is None:
-            self._storage = CellStorage(
-                self._model, self._table_id, EMPTY_STORAGE_BUFFER, self.row, self.col
-            )
         if self._style is None:
-            self._style = Style.from_storage(self._storage, self._model)
+            self._style = Style.from_storage(self, self._model)
         return self._style
 
     @style.setter
@@ -815,8 +973,362 @@ class Cell(Cacheable):
             stacklevel=2,
         )
 
-    def update_storage(self, storage: CellStorage) -> None:
-        self._storage = storage
+    def to_buffer(self) -> bytearray:  # noqa: PLR0912, PLR0915
+        """Create a storage buffer for a cell using v5 (modern) layout."""
+        if self._style is not None:
+            if self._style._text_style_obj_id is not None:
+                self._text_style_id = self._model._table_styles.lookup_key(
+                    self._table_id,
+                    TSPMessages.Reference(identifier=self._style._text_style_obj_id),
+                )
+                self._model.add_component_reference(
+                    self._style._text_style_obj_id,
+                    parent_id=self._model._table_styles.id(self._table_id),
+                )
+
+            if self._style._cell_style_obj_id is not None:
+                self._cell_style_id = self._model._table_styles.lookup_key(
+                    self._table_id,
+                    TSPMessages.Reference(identifier=self._style._cell_style_obj_id),
+                )
+                self._model.add_component_reference(
+                    self._style._cell_style_obj_id,
+                    parent_id=self._model._table_styles.id(self._table_id),
+                )
+
+        length = 12
+        if isinstance(self, NumberCell):
+            flags = 1
+            length += 16
+            if self._type == CellType.CURRENCY:
+                cell_type = CURRENCY_CELL_TYPE
+            else:
+                cell_type = TSTArchives.numberCellType
+            value = pack_decimal128(self.value)
+        elif isinstance(self, TextCell):
+            flags = 8
+            length += 4
+            cell_type = TSTArchives.textCellType
+            value = pack("<i", self._model.table_string_key(self._table_id, self.value))
+        elif isinstance(self, DateCell):
+            flags = 4
+            length += 8
+            cell_type = TSTArchives.dateCellType
+            date_delta = self._value.astimezone() - EPOCH
+            value = pack("<d", float(date_delta.total_seconds()))
+        elif isinstance(self, BoolCell):
+            flags = 2
+            length += 8
+            cell_type = TSTArchives.boolCellType
+            value = pack("<d", float(self.value))
+        elif isinstance(self, DurationCell):
+            flags = 2
+            length += 8
+            cell_type = TSTArchives.durationCellType
+            value = value = pack("<d", float(self.value.total_seconds()))
+        elif isinstance(self, EmptyCell):
+            flags = 0
+            cell_type = TSTArchives.emptyCellValueType
+            value = b""
+        elif isinstance(self, MergedCell):
+            return None
+        elif isinstance(self, RichTextCell):
+            flags = 0
+            length += 4
+            cell_type = TSTArchives.automaticCellType
+            value = pack("<i", self._rich_id)
+        else:
+            data_type = type(self).__name__
+            table_name = self._model.table_name(self._table_id)
+            table_ref = f"@{table_name}:[{self.row},{self.col}]"
+            warn(
+                f"{table_ref}: unsupported data type {data_type} for save",
+                UnsupportedWarning,
+                stacklevel=1,
+            )
+            return None
+
+        storage = bytearray(12)
+        storage[0] = 5
+        storage[1] = cell_type
+        storage += value
+
+        if self._rich_id is not None:
+            flags |= 0x10
+            length += 4
+            storage += pack("<i", self._rich_id)
+        if self._cell_style_id is not None:
+            flags |= 0x20
+            length += 4
+            storage += pack("<i", self._cell_style_id)
+        if self._text_style_id is not None:
+            flags |= 0x40
+            length += 4
+            storage += pack("<i", self._text_style_id)
+        if self._formula_id is not None:
+            flags |= 0x200
+            length += 4
+            storage += pack("<i", self._formula_id)
+        if self._control_id is not None:
+            flags |= 0x400
+            length += 4
+            storage += pack("<i", self._control_id)
+        if self._suggest_id is not None:
+            flags |= 0x1000
+            length += 4
+            storage += pack("<i", self._suggest_id)
+        if self._num_format_id is not None:
+            flags |= 0x2000
+            length += 4
+            storage += pack("<i", self._num_format_id)
+            storage[6] |= 1
+            # storage[6:8] = pack("<h", 1)
+        if self._currency_format_id is not None:
+            flags |= 0x4000
+            length += 4
+            storage += pack("<i", self._currency_format_id)
+            storage[6] |= 2
+        if self._date_format_id is not None:
+            flags |= 0x8000
+            length += 4
+            storage += pack("<i", self._date_format_id)
+            storage[6] |= 8
+        if self._duration_format_id is not None:
+            flags |= 0x10000
+            length += 4
+            storage += pack("<i", self._duration_format_id)
+            storage[6] |= 4
+        if self._text_format_id is not None:
+            flags |= 0x20000
+            length += 4
+            storage += pack("<i", self._text_format_id)
+        if self._bool_format_id is not None:
+            flags |= 0x40000
+            length += 4
+            storage += pack("<i", self._bool_format_id)
+            storage[6] |= 0x20
+        if self._string_id is not None:
+            storage[6] |= 0x80
+
+        storage[8:12] = pack("<i", flags)
+        if len(storage) < 32:
+            storage += bytearray(32 - length)
+
+        return storage[0:length]
+
+    def _update_value(self, value, cell: object) -> None:
+        if cell._type == CellType.NUMBER:
+            self._d128 = value
+        elif cell._type == CellType.DATE:
+            self._datetime = value
+        self._value = value
+
+    @property
+    @cache(num_args=0)
+    def _image_data(self) -> Tuple[bytes, str]:
+        """Return the background image data for a cell or None if no image."""
+        if self._cell_style_id is None:
+            return None
+        style = self._model.table_style(self._table_id, self._cell_style_id)
+        if not style.cell_properties.cell_fill.HasField("image"):
+            return None
+
+        image_id = style.cell_properties.cell_fill.image.imagedata.identifier
+        datas = self._model.objects[PACKAGE_ID].datas
+        stored_filename = [x.file_name for x in datas if x.identifier == image_id][0]
+        preferred_filename = [x.preferred_file_name for x in datas if x.identifier == image_id][0]
+        all_paths = self._model.objects.file_store.keys()
+        image_pathnames = [x for x in all_paths if x == f"Data/{stored_filename}"]
+        if len(image_pathnames) == 0:
+            warn(
+                f"Cannot find file '{preferred_filename}' in Numbers archive",
+                RuntimeWarning,
+                stacklevel=3,
+            )
+        else:
+            return (self._model.objects.file_store[image_pathnames[0]], preferred_filename)
+
+    def custom_format(self) -> str:  # noqa: PLR0911
+        if self._text_format_id is not None and self._type == CellType.TEXT:
+            format = self._model.table_format(self._table_id, self._text_format_id)
+        elif self._currency_format_id is not None:
+            format = self._model.table_format(self._table_id, self._currency_format_id)
+        elif self._bool_format_id is not None and self._type == CellType.BOOL:
+            format = self._model.table_format(self._table_id, self._bool_format_id)
+        elif self._num_format_id is not None:
+            format = self._model.table_format(self._table_id, self._num_format_id)
+        else:
+            return str(self.value)
+
+        debug("custom_format: @[%d,%d]: format_type=%s, ", self.row, self.col, format.format_type)
+
+        if format.HasField("custom_uid"):
+            format_uuid = NumbersUUID(format.custom_uid).hex
+            format_map = self._model.custom_format_map()
+            custom_format = format_map[format_uuid].default_format
+            if custom_format.requires_fraction_replacement:
+                formatted_value = format_fraction(self._d128, custom_format)
+            elif custom_format.format_type == FormatType.CUSTOM_TEXT:
+                formatted_value = decode_text_format(
+                    custom_format,
+                    self._model.table_string(self._table_id, self._string_id),
+                )
+            else:
+                formatted_value = decode_number_format(
+                    custom_format, self._d128, format_map[format_uuid].name
+                )
+        elif format.format_type == FormatType.DECIMAL:
+            return format_decimal(self._d128, format)
+        elif format.format_type == FormatType.CURRENCY:
+            return format_currency(self._d128, format)
+        elif format.format_type == FormatType.BOOLEAN:
+            return "TRUE" if self.value else "FALSE"
+        elif format.format_type == FormatType.PERCENT:
+            return format_decimal(self._d128 * 100, format, percent=True)
+        elif format.format_type == FormatType.BASE:
+            return format_base(self._d128, format)
+        elif format.format_type == FormatType.FRACTION:
+            return format_fraction(self._d128, format)
+        elif format.format_type == FormatType.SCIENTIFIC:
+            return format_scientific(self._d128, format)
+        elif format.format_type == FormatType.CHECKBOX:
+            return CHECKBOX_TRUE_VALUE if self.value else CHECKBOX_FALSE_VALUE
+        elif format.format_type == FormatType.RATING:
+            return STAR_RATING_VALUE * int(self._d128)
+        else:
+            formatted_value = str(self.value)
+        return formatted_value
+
+    def date_format(self) -> str:
+        format = self._model.table_format(self._table_id, self._date_format_id)
+        if format.HasField("custom_uid"):
+            format_uuid = NumbersUUID(format.custom_uid).hex
+            format_map = self._model.custom_format_map()
+            custom_format = format_map[format_uuid].default_format
+            custom_format_string = custom_format.custom_format_string
+            if custom_format.format_type == FormatType.CUSTOM_DATE:
+                formatted_value = decode_date_format(custom_format_string, self._datetime)
+            else:
+                warn(
+                    f"Unexpected custom format type {custom_format.format_type}",
+                    UnsupportedWarning,
+                    stacklevel=3,
+                )
+                return ""
+        else:
+            formatted_value = decode_date_format(format.date_time_format, self._datetime)
+        return formatted_value
+
+    def duration_format(self) -> str:
+        format = self._model.table_format(self._table_id, self._duration_format_id)
+        debug(
+            "duration_format: @[%d,%d]: table_id=%d, duration_format_id=%d, duration_style=%s",
+            self.row,
+            self.col,
+            self._table_id,
+            self._duration_format_id,
+            format.duration_style,
+        )
+
+        duration_style = format.duration_style
+        unit_largest = format.duration_unit_largest
+        unit_smallest = format.duration_unit_smallest
+        if format.use_automatic_duration_units:
+            unit_smallest, unit_largest = auto_units(self._double, format)
+
+        d = self._double
+        dd = int(self._double)
+        dstr = []
+
+        def unit_in_range(largest, smallest, unit_type):
+            return largest <= unit_type and smallest >= unit_type
+
+        def pad_digits(d, largest, smallest, unit_type):
+            return (largest == unit_type and smallest == unit_type) or d >= 10
+
+        if unit_largest == DurationUnits.WEEK:
+            dd = int(d / SECONDS_IN_WEEK)
+            if unit_smallest != DurationUnits.WEEK:
+                d -= SECONDS_IN_WEEK * dd
+            dstr.append(str(dd) + unit_format("week", dd, duration_style))
+
+        if unit_in_range(unit_largest, unit_smallest, DurationUnits.DAY):
+            dd = int(d / SECONDS_IN_DAY)
+            if unit_smallest > DurationUnits.DAY:
+                d -= SECONDS_IN_DAY * dd
+            dstr.append(str(dd) + unit_format("day", dd, duration_style))
+
+        if unit_in_range(unit_largest, unit_smallest, DurationUnits.HOUR):
+            dd = int(d / SECONDS_IN_HOUR)
+            if unit_smallest > DurationUnits.HOUR:
+                d -= SECONDS_IN_HOUR * dd
+            dstr.append(str(dd) + unit_format("hour", dd, duration_style))
+
+        if unit_in_range(unit_largest, unit_smallest, DurationUnits.MINUTE):
+            dd = int(d / 60)
+            if unit_smallest > DurationUnits.MINUTE:
+                d -= 60 * dd
+            if duration_style == DurationStyle.COMPACT:
+                pad = pad_digits(dd, unit_smallest, unit_largest, DurationUnits.MINUTE)
+                dstr.append(("" if pad else "0") + str(dd))
+            else:
+                dstr.append(str(dd) + unit_format("minute", dd, duration_style))
+
+        if unit_in_range(unit_largest, unit_smallest, DurationUnits.SECOND):
+            dd = int(d)
+            if unit_smallest > DurationUnits.SECOND:
+                d -= dd
+            if duration_style == DurationStyle.COMPACT:
+                pad = pad_digits(dd, unit_smallest, unit_largest, DurationUnits.SECOND)
+                dstr.append(("" if pad else "0") + str(dd))
+            else:
+                dstr.append(str(dd) + unit_format("second", dd, duration_style))
+
+        if unit_smallest >= DurationUnits.MILLISECOND:
+            dd = int(round(1000 * d))
+            if duration_style == DurationStyle.COMPACT:
+                padding = "0" if dd >= 10 else "00"
+                padding = "" if dd >= 100 else padding
+                dstr.append(f"{padding}{dd}")
+            else:
+                dstr.append(str(dd) + unit_format("millisecond", dd, duration_style, "ms"))
+        duration_str = (":" if duration_style == 0 else " ").join(dstr)
+        if duration_style == DurationStyle.COMPACT:
+            duration_str = re.sub(r":(\d\d\d)$", r".\1", duration_str)
+
+        return duration_str
+
+    def _set_formatting(
+        self,
+        format_id: int,
+        format_type: Union[FormattingType, CustomFormattingType],
+        control_id: int = None,
+        is_currency: bool = False,
+    ) -> None:
+        self._is_currency = is_currency
+        if format_type == FormattingType.CURRENCY:
+            self._currency_format_id = format_id
+        elif format_type == FormattingType.TICKBOX:
+            self._bool_format_id = format_id
+            self._control_id = control_id
+        elif format_type == FormattingType.RATING:
+            self._num_format_id = format_id
+            self._control_id = control_id
+        elif format_type in [FormattingType.SLIDER, FormattingType.STEPPER]:
+            if is_currency:
+                self._currency_format_id = format_id
+            else:
+                self._num_format_id = format_id
+            self._control_id = control_id
+        elif format_type == FormattingType.POPUP:
+            self._text_format_id = format_id
+            self._control_id = control_id
+        elif format_type in [FormattingType.DATETIME, CustomFormattingType.DATETIME]:
+            self._date_format_id = format_id
+        elif format_type in [FormattingType.TEXT, CustomFormattingType.TEXT]:
+            self._text_format_id = format_id
+        else:
+            self._num_format_id = format_id
 
 
 class NumberCell(Cell):
@@ -825,8 +1337,8 @@ class NumberCell(Cell):
        Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
-    def __init__(self, row: int, col: int, value: float):
-        self._type = TSTArchives.numberCellType
+    def __init__(self, row: int, col: int, value: float, cell_type=CellType.NUMBER):
+        self._type = cell_type
         super().__init__(row, col, value)
 
     @property
@@ -836,7 +1348,7 @@ class NumberCell(Cell):
 
 class TextCell(Cell):
     def __init__(self, row: int, col: int, value: str):
-        self._type = TSTArchives.textCellType
+        self._type = CellType.TEXT
         super().__init__(row, col, value)
 
     @property
@@ -851,8 +1363,8 @@ class RichTextCell(Cell):
     """
 
     def __init__(self, row: int, col: int, value):
-        self._type = TSTArchives.automaticCellType
         super().__init__(row, col, value["text"])
+        self._type = CellType.RICH_TEXT
         self._bullets = value["bullets"]
         self._hyperlinks = value["hyperlinks"]
         if value["bulleted"]:
@@ -915,11 +1427,15 @@ class EmptyCell(Cell):
 
     def __init__(self, row: int, col: int):
         super().__init__(row, col, None)
-        self._type = None
+        self._type = CellType.EMPTY
 
     @property
     def value(self):
         return None
+
+    @property
+    def formatted_value(self):
+        return ""
 
 
 class BoolCell(Cell):
@@ -929,9 +1445,9 @@ class BoolCell(Cell):
     """
 
     def __init__(self, row: int, col: int, value: bool):
-        self._type = TSTArchives.boolCellType
-        self._value = value
         super().__init__(row, col, value)
+        self._type = CellType.BOOL
+        self._value = value
 
     @property
     def value(self) -> bool:
@@ -945,18 +1461,18 @@ class DateCell(Cell):
     """
 
     def __init__(self, row: int, col: int, value: DateTime):
-        self._type = TSTArchives.dateCellType
         super().__init__(row, col, value)
+        self._type = CellType.DATE
 
     @property
-    def value(self) -> duration:
+    def value(self) -> datetime:
         return self._value
 
 
 class DurationCell(Cell):
     def __init__(self, row: int, col: int, value: Duration):
-        self._type = TSTArchives.durationCellType
         super().__init__(row, col, value)
+        self._type = CellType.DURATION
 
     @property
     def value(self) -> duration:
@@ -970,8 +1486,8 @@ class ErrorCell(Cell):
     """
 
     def __init__(self, row: int, col: int):
-        self._type = TSTArchives.formulaErrorCellType
         super().__init__(row, col, None)
+        self._type = CellType.ERROR
 
     @property
     def value(self):
@@ -986,10 +1502,474 @@ class MergedCell(Cell):
 
     def __init__(self, row: int, col: int):
         super().__init__(row, col, None)
+        self._type = CellType.MERGED
 
     @property
     def value(self):
         return None
+
+
+def unpack_decimal128(buffer: bytearray) -> float:
+    exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
+    mantissa = buffer[14] & 1
+    for i in range(13, -1, -1):
+        mantissa = mantissa * 256 + buffer[i]
+    sign = 1 if buffer[15] & 0x80 else 0
+    if sign == 1:
+        mantissa = -mantissa
+    value = mantissa * 10**exp
+    return float(value)
+
+
+def decode_date_format_field(field: str, value: datetime) -> str:
+    if field in DATETIME_FIELD_MAP:
+        s = DATETIME_FIELD_MAP[field]
+        if callable(s):
+            return s(value)
+        else:
+            return value.strftime(s)
+    else:
+        warn(f"Unsupported field code '{field}'", UnsupportedWarning, stacklevel=4)
+        return ""
+
+
+def decode_date_format(format, value):
+    """Parse a custom date format string and return a formatted datetime value."""
+    chars = [*format]
+    index = 0
+    in_string = False
+    in_field = False
+    result = ""
+    field = ""
+    while index < len(chars):
+        current_char = chars[index]
+        next_char = chars[index + 1] if index < len(chars) - 1 else None
+        if current_char == "'":
+            if next_char is None:
+                break
+            elif chars[index + 1] == "'":
+                result += "'"
+                index += 2
+            elif in_string:
+                in_string = False
+                index += 1
+            else:
+                in_string = True
+                if in_field:
+                    result += decode_date_format_field(field, value)
+                    in_field = False
+                index += 1
+        elif in_string:
+            result += current_char
+            index += 1
+        elif not current_char.isalpha():
+            if in_field:
+                result += decode_date_format_field(field, value)
+                in_field = False
+            result += current_char
+            index += 1
+        elif in_field:
+            field += current_char
+            index += 1
+        else:
+            in_field = True
+            field = current_char
+            index += 1
+    if in_field:
+        result += decode_date_format_field(field, value)
+
+    return result
+
+
+def pack_decimal128(value: float) -> bytearray:
+    buffer = bytearray(16)
+    exp = math.floor(math.log10(math.e) * math.log(abs(value))) if value != 0.0 else 0
+    exp += 0x1820 - 16
+    mantissa = abs(int(value / math.pow(10, exp - 0x1820)))
+    buffer[15] |= exp >> 7
+    buffer[14] |= (exp & 0x7F) << 1
+    i = 0
+    while mantissa >= 1:
+        buffer[i] = mantissa & 0xFF
+        i += 1
+        mantissa = int(mantissa / 256)
+    if value < 0:
+        buffer[15] |= 0x80
+    return buffer
+
+
+def decode_text_format(format, value: str):
+    """Parse a custom date format string and return a formatted number value."""
+    custom_format_string = format.custom_format_string
+    return custom_format_string.replace(CUSTOM_TEXT_PLACEHOLDER, value)
+
+
+def expand_quotes(value: str) -> str:
+    chars = [*value]
+    index = 0
+    in_string = False
+    formatted_value = ""
+    while index < len(chars):
+        current_char = chars[index]
+        next_char = chars[index + 1] if index < len(chars) - 1 else None
+        if current_char == "'":
+            if next_char is None:
+                break
+            elif chars[index + 1] == "'":
+                formatted_value += "'"
+                index += 2
+            elif in_string:
+                in_string = False
+                index += 1
+            else:
+                in_string = True
+                index += 1
+        else:
+            formatted_value += current_char
+            index += 1
+    return formatted_value
+
+
+def decode_number_format(format, value, name):  # noqa: PLR0912
+    """Parse a custom date format string and return a formatted number value."""
+    custom_format_string = format.custom_format_string
+    value *= format.scale_factor
+    if "%" in custom_format_string and format.scale_factor == 1.0:
+        # Per cent scale has 100x but % does not
+        value *= 100.0
+
+    if format.currency_code != "":
+        # Replace currency code with symbol and no-break space
+        custom_format_string = custom_format_string.replace(
+            "\u00a4", format.currency_code + "\u00a0"
+        )
+
+    if (match := re.search(r"([#0.,]+(E[+]\d+)?)", custom_format_string)) is None:
+        warn(
+            f"Can't parse format string '{custom_format_string}'; skipping",
+            UnsupportedWarning,
+            stacklevel=1,
+        )
+        return custom_format_string
+    format_spec = match.group(1)
+    scientific_spec = match.group(2)
+
+    if format_spec[0] == ".":
+        (int_part, dec_part) = ("", format_spec[1:])
+    elif "." in custom_format_string:
+        (int_part, dec_part) = format_spec.split(".")
+    else:
+        (int_part, dec_part) = (format_spec, "")
+
+    if scientific_spec is not None:
+        # Scientific notation
+        formatted_value = f"{value:.{len(dec_part) - 4}E}"
+        formatted_value = custom_format_string.replace(format_spec, formatted_value)
+        return expand_quotes(formatted_value)
+
+    num_decimals = len(dec_part)
+    if num_decimals > 0:
+        if dec_part[0] == "#":
+            dec_pad = None
+        elif format.num_nonspace_decimal_digits > 0:
+            dec_pad = CellPadding.ZERO
+        else:
+            dec_pad = CellPadding.SPACE
+    else:
+        dec_pad = None
+    dec_width = num_decimals
+
+    (integer, decimal) = str(float(value)).split(".")
+    if num_decimals > 0:
+        integer = int(integer)
+        decimal = round(float(f"0.{decimal}"), num_decimals)
+    else:
+        integer = round(value)
+        decimal = float(f"0.{decimal}")
+
+    num_integers = len(int_part.replace(",", ""))
+    if not format.show_thousands_separator:
+        int_part = int_part.replace(",", "")
+    if num_integers > 0:
+        if int_part[0] == "#":
+            int_pad = None
+            int_width = len(int_part)
+        elif format.num_nonspace_integer_digits > 0:
+            int_pad = CellPadding.ZERO
+            if format.show_thousands_separator:
+                num_commas = int(math.floor(math.log10(integer)) / 3) if integer != 0 else 0
+                num_commas = max([num_commas, int((num_integers - 1) / 3)])
+                int_width = num_integers + num_commas
+            else:
+                int_width = num_integers
+        else:
+            int_pad = CellPadding.SPACE
+            int_width = len(int_part)
+    else:
+        int_pad = None
+        int_width = num_integers
+
+    # value_1 = str(value).split(".")[0]
+    # value_2 = sigfig.round(str(value).split(".")[1], sigfig=MAX_SIGNIFICANT_DIGITS, warn=False)
+    # int_pad_space_as_zero = (
+    #     num_integers > 0
+    #     and num_decimals > 0
+    #     and int_pad == CellPadding.SPACE
+    #     and dec_pad is None
+    #     and num_integers > len(value_1)
+    #     and num_decimals > len(value_2)
+    # )
+    int_pad_space_as_zero = False
+
+    # Formatting integer zero:
+    #   Blank (padded if needed) if int_pad is SPACE and no decimals
+    #   No leading zero if:
+    #     int_pad is NONE, dec_pad is SPACE
+    #     int_pad is SPACE, dec_pad is SPACE
+    #     int_pad is SPACE, dec_pad is ZERO
+    #     int_pad is SPACE, dec_pad is NONE if num decimals < decimals length
+    if integer == 0 and int_pad == CellPadding.SPACE and num_decimals == 0:
+        formatted_value = "".rjust(int_width)
+    elif integer == 0 and int_pad is None and dec_pad == CellPadding.SPACE:
+        formatted_value = ""
+    elif integer == 0 and int_pad == CellPadding.SPACE and dec_pad is not None:
+        formatted_value = "".rjust(int_width)
+    elif (
+        integer == 0
+        and int_pad == CellPadding.SPACE
+        and dec_pad is None
+        and len(str(decimal)) > num_decimals
+    ):
+        formatted_value = "".rjust(int_width)
+    elif int_pad_space_as_zero or int_pad == CellPadding.ZERO:
+        if format.show_thousands_separator:
+            formatted_value = f"{integer:0{int_width},}"
+        else:
+            formatted_value = f"{integer:0{int_width}}"
+    elif int_pad == CellPadding.SPACE:
+        if format.show_thousands_separator:
+            formatted_value = f"{integer:,}".rjust(int_width)
+        else:
+            formatted_value = str(integer).rjust(int_width)
+    elif format.show_thousands_separator:
+        formatted_value = f"{integer:,}"
+    else:
+        formatted_value = str(integer)
+
+    if num_decimals:
+        if dec_pad == CellPadding.ZERO or (dec_pad == CellPadding.SPACE and num_integers == 0):
+            formatted_value += "." + f"{decimal:,.{dec_width}f}"[2:]
+        elif dec_pad == CellPadding.SPACE and decimal == 0 and num_integers > 0:
+            formatted_value += ".".ljust(dec_width + 1)
+        elif dec_pad == CellPadding.SPACE:
+            decimal_str = str(decimal)[2:]
+            formatted_value += "." + decimal_str.ljust(dec_width)
+        elif decimal or num_integers == 0:
+            formatted_value += "." + str(decimal)[2:]
+
+    formatted_value = custom_format_string.replace(format_spec, formatted_value)
+    return expand_quotes(formatted_value)
+
+
+def format_decimal(value: float, format, percent: bool = False) -> str:
+    if value is None:
+        return ""
+    if value < 0 and format.negative_style == 1:
+        accounting_style = False
+        value = -value
+    elif value < 0 and format.negative_style >= 2:
+        accounting_style = True
+        value = -value
+    else:
+        accounting_style = False
+    thousands = "," if format.show_thousands_separator else ""
+
+    if value.is_integer() and format.decimal_places >= DECIMAL_PLACES_AUTO:
+        formatted_value = f"{int(value):{thousands}}"
+    else:
+        if format.decimal_places >= DECIMAL_PLACES_AUTO:
+            formatted_value = str(sigfig.round(value, MAX_SIGNIFICANT_DIGITS, warn=False))
+        else:
+            formatted_value = sigfig.round(value, MAX_SIGNIFICANT_DIGITS, type=str, warn=False)
+            formatted_value = sigfig.round(
+                formatted_value, decimals=format.decimal_places, type=str
+            )
+        if format.show_thousands_separator:
+            formatted_value = sigfig.round(formatted_value, spacer=",", spacing=3, type=str)
+            try:
+                (integer, decimal) = formatted_value.split(".")
+                formatted_value = integer + "." + decimal.replace(",", "")
+            except ValueError:
+                pass
+
+    if percent:
+        formatted_value += "%"
+
+    if accounting_style:
+        return f"({formatted_value})"
+    else:
+        return formatted_value
+
+
+def format_currency(value: float, format) -> str:
+    formatted_value = format_decimal(value, format)
+    if format.currency_code in CURRENCY_SYMBOLS:
+        symbol = CURRENCY_SYMBOLS[format.currency_code]
+    else:
+        symbol = format.currency_code + " "
+    if format.use_accounting_style and value < 0:
+        return f"{symbol}\t({formatted_value[1:]})"
+    elif format.use_accounting_style:
+        return f"{symbol}\t{formatted_value}"
+    else:
+        return symbol + formatted_value
+
+
+INT_TO_BASE_CHAR = [str(x) for x in range(0, 10)] + [chr(x) for x in range(ord("A"), ord("Z") + 1)]
+
+
+def invert_bit_str(value: str) -> str:
+    """Invert a binary value"""
+    return "".join(["0" if b == "1" else "1" for b in value])
+
+
+def twos_complement(value: int, base: int) -> str:
+    """Calculate the twos complement of a negative integer with minimum 32-bit precision"""
+    num_bits = max([32, math.ceil(math.log2(abs(value))) + 1])
+    bin_value = bin(abs(value))[2:]
+    inverted_bin_value = invert_bit_str(bin_value).rjust(num_bits, "1")
+    twos_complement_dec = int(inverted_bin_value, 2) + 1
+
+    if base == 2:
+        return bin(twos_complement_dec)[2:].rjust(num_bits, "1")
+    elif base == 8:
+        return oct(twos_complement_dec)[2:]
+    else:
+        return hex(twos_complement_dec)[2:].upper()
+
+
+def format_base(value: float, format) -> str:
+    if value == 0:
+        return "0".zfill(format.base_places)
+
+    value = round(value)
+
+    is_negative = False
+    if not format.base_use_minus_sign and format.base in [2, 8, 16]:
+        if value < 0:
+            return twos_complement(value, format.base)
+        else:
+            value = abs(value)
+    elif value < 0:
+        is_negative = True
+        value = abs(value)
+
+    formatted_value = []
+    while value:
+        formatted_value.append(int(value % format.base))
+        value //= format.base
+    formatted_value = "".join([INT_TO_BASE_CHAR[x] for x in formatted_value[::-1]])
+
+    if is_negative:
+        return "-" + formatted_value.zfill(format.base_places)
+    else:
+        return formatted_value.zfill(format.base_places)
+
+
+def format_fraction_parts_to(whole: int, numerator: int, denominator: int):
+    if whole > 0:
+        if numerator == 0:
+            return str(whole)
+        else:
+            return f"{whole} {numerator}/{denominator}"
+    elif numerator == 0:
+        return "0"
+    elif numerator == denominator:
+        return "1"
+    return f"{numerator}/{denominator}"
+
+
+def float_to_fraction(value: float, denominator: int) -> str:
+    """Convert a float to the nearest fraction and return as a string."""
+    whole = int(value)
+    numerator = round(denominator * (value - whole))
+    return format_fraction_parts_to(whole, numerator, denominator)
+
+
+def float_to_n_digit_fraction(value: float, max_digits: int) -> str:
+    """Convert a float to a fraction of a maxinum number of digits
+    and return as a string.
+    """
+    max_denominator = 10**max_digits - 1
+    (numerator, denominator) = (
+        Fraction.from_float(value).limit_denominator(max_denominator).as_integer_ratio()
+    )
+    whole = int(value)
+    numerator -= whole * denominator
+    return format_fraction_parts_to(whole, numerator, denominator)
+
+
+def format_fraction(value: float, format) -> str:
+    accuracy = format.fraction_accuracy
+    if accuracy & 0xFF000000:
+        num_digits = 0x100000000 - accuracy
+        return float_to_n_digit_fraction(value, num_digits)
+    else:
+        return float_to_fraction(value, accuracy)
+
+
+def format_scientific(value: float, format) -> str:
+    formatted_value = sigfig.round(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
+    return f"{formatted_value:.{format.decimal_places}E}"
+
+
+def unit_format(unit: str, value: int, style: int, abbrev: str = None):
+    plural = "" if value == 1 else "s"
+    if abbrev is None:
+        abbrev = unit[0]
+    if style == DurationStyle.COMPACT:
+        return ""
+    elif style == DurationStyle.SHORT:
+        return f"{abbrev}"
+    else:
+        return f" {unit}" + plural
+
+
+def auto_units(cell_value, format):
+    unit_largest = format.duration_unit_largest
+    unit_smallest = format.duration_unit_smallest
+
+    if cell_value == 0:
+        unit_largest = DurationUnits.DAY
+        unit_smallest = DurationUnits.DAY
+    else:
+        if cell_value >= SECONDS_IN_WEEK:
+            unit_largest = DurationUnits.WEEK
+        elif cell_value >= SECONDS_IN_DAY:
+            unit_largest = DurationUnits.DAY
+        elif cell_value >= SECONDS_IN_HOUR:
+            unit_largest = DurationUnits.HOUR
+        elif cell_value >= 60:
+            unit_largest = DurationUnits.MINUTE
+        elif cell_value >= 1:
+            unit_largest = DurationUnits.SECOND
+        else:
+            unit_largest = DurationUnits.MILLISECOND
+
+        if math.floor(cell_value) != cell_value:
+            unit_smallest = DurationUnits.MILLISECOND
+        elif cell_value % 60:
+            unit_smallest = DurationUnits.SECOND
+        elif cell_value % SECONDS_IN_HOUR:
+            unit_smallest = DurationUnits.MINUTE
+        elif cell_value % SECONDS_IN_DAY:
+            unit_smallest = DurationUnits.HOUR
+        elif cell_value % SECONDS_IN_WEEK:
+            unit_smallest = DurationUnits.DAY
+        if unit_smallest < unit_largest:
+            unit_smallest = unit_largest
+
+    return unit_smallest, unit_largest
 
 
 # Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
