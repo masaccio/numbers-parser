@@ -115,9 +115,6 @@ class MergeCells:
     def merge_cells(self):
         return [k for k, v in self._references.items() if self.is_merge_anchor(k)]
 
-    def __len__(self):
-        return len(self._references.keys())
-
 
 class DataLists(Cacheable):
     """Model for TST.DataList with caching and key generation for new values."""
