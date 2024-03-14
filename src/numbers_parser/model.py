@@ -849,8 +849,6 @@ class _NumbersModel(Cacheable):
 
     def recalculate_merged_cells(self, table_id: int):
         merge_cells = self.merge_cells(table_id)
-        if len(merge_cells) == 0:
-            return
 
         merge_map_id, merge_map = self.objects.create_object_from_dict(
             "CalculationEngine", {}, TSTArchives.MergeRegionMapArchive
