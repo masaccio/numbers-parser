@@ -215,6 +215,7 @@ class _NumbersModel(Cacheable):
         self._control_specs = DataLists(self, "control_cell_spec_table", "cell_spec")
         self._table_data = {}
         self._styles = None
+        self._images = {}
         self._custom_formats = None
         self._custom_format_archives = None
         self._custom_format_ids = None
@@ -1539,17 +1540,22 @@ class _NumbersModel(Cacheable):
 
     def add_cell_style(self, style: Style) -> int:
         if style.bg_image is not None:
-            datas = self.objects[PACKAGE_ID].datas
-            image_id = self.next_image_identifier()
-            datas.append(
-                TSPArchiveMessages.DataInfo(
-                    identifier=image_id,
-                    digest=sha1(style.bg_image.data).digest(),
-                    preferred_file_name=style.bg_image.filename,
-                    file_name=style.bg_image.filename,
-                    materialized_length=len(style.bg_image.data),
+            digest = sha1(style.bg_image.data).digest()
+            if digest in self._images:
+                image_id = self._images[digest]
+            else:
+                datas = self.objects[PACKAGE_ID].datas
+                image_id = self.next_image_identifier()
+                datas.append(
+                    TSPArchiveMessages.DataInfo(
+                        identifier=image_id,
+                        digest=digest,
+                        preferred_file_name=style.bg_image.filename,
+                        file_name=style.bg_image.filename,
+                        materialized_length=len(style.bg_image.data),
+                    )
                 )
-            )
+                self._images[digest] = image_id
             color_attrs = {
                 "cell_fill": {
                     "image": {

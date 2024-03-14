@@ -7,6 +7,7 @@ from datetime import datetime as builtin_datetime
 from datetime import timedelta as builtin_timedelta
 from enum import IntEnum
 from fractions import Fraction
+from hashlib import sha1
 from os.path import basename
 from struct import pack, unpack
 from typing import Any, List, Tuple, Union
@@ -1139,6 +1140,7 @@ class Cell(CellStorageFlags, Cacheable):
         preferred_filename = [x.preferred_file_name for x in datas if x.identifier == image_id][0]
         all_paths = self._model.objects.file_store.keys()
         image_pathnames = [x for x in all_paths if x == f"Data/{stored_filename}"]
+
         if len(image_pathnames) == 0:
             warn(
                 f"Cannot find file '{preferred_filename}' in Numbers archive",
@@ -1146,7 +1148,12 @@ class Cell(CellStorageFlags, Cacheable):
                 stacklevel=3,
             )
         else:
-            return (self._model.objects.file_store[image_pathnames[0]], preferred_filename)
+            image_data = self._model.objects.file_store[image_pathnames[0]]
+            digest = sha1(image_data).digest()
+            if digest not in self._model._images:
+                self._model._images[digest] = image_id
+
+            return (image_data, preferred_filename)
 
     def _custom_format(self) -> str:  # noqa: PLR0911
         if self._text_format_id is not None and self._type == CellType.TEXT:

@@ -4,7 +4,7 @@ import magic
 import pytest
 from pendulum import datetime, duration
 
-from numbers_parser import Document, EmptyCell, ErrorCell, UnsupportedWarning
+from numbers_parser import BackgroundImage, Document, EmptyCell, ErrorCell, UnsupportedWarning
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"
@@ -448,3 +448,26 @@ def test_issue_77():
     sheet = doc.sheets[0]
     assert sheet.tables[0].merge_ranges == ["C1:D2"]
     assert sheet.tables[1].merge_ranges == ["C1:D2"]
+
+
+def test_issue_78(configurable_save_file):
+    doc = Document()
+    doc.sheets[0].add_table()
+    table1 = doc.sheets[0].tables[0]
+    table2 = doc.sheets[0].tables[1]
+
+    image_filename = "tests/data/cat.jpg"
+    image_data = open(image_filename, mode="rb").read()
+    bg_image = BackgroundImage(image_data, image_filename)
+    cats_bg_style = doc.add_style(bg_image=bg_image)
+
+    table1.write(0, 0, "cats", style=cats_bg_style)
+    table2.write(0, 0, "cats", style=cats_bg_style)
+
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    assert (
+        doc.sheets[0].tables[0].cell(0, 0).style.bg_image.data
+        == doc.sheets[0].tables[1].cell(0, 0).style.bg_image.data
+    )
