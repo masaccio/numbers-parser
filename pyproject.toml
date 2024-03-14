@@ -75,7 +75,7 @@ addopts = "--cov=src/numbers_parser --cov-report=html --cov-report=term-missing:
 legacy_tox_ini = """
 [tox]
 isolated_build = true
-envlist = py38, py39, py310, py311, py312
+envlist = py39, py310, py311, py312
 [testenv]
 deps =
   pytest
