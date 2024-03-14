@@ -21,7 +21,7 @@ unpack-numbers = "numbers_parser._unpack_numbers:main"
 [tool.poetry.dependencies]
 compact-json = "^1.1.3"
 pendulum = "^3.0"
-protobuf = "^4.21.1"
+protobuf = "*"
 python = ">=3.9,<4.0"
 python-snappy = "^0.6.1"
 regex = "^2022.9.13"
