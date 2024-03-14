@@ -96,34 +96,21 @@ class MergeCells:
         self._references[(row, col)] = MergeAnchor(size)
 
     def is_merge_reference(self, row_col: Tuple) -> bool:
-        if row_col not in self._references:
-            return False
-        else:
-            return isinstance(self._references[row_col], MergeReference)
+        # defaultdict will default this to False for missing entries
+        return isinstance(self._references[row_col], MergeReference)
 
     def is_merge_anchor(self, row_col: Tuple) -> bool:
-        if row_col not in self._references:
-            return False
-        else:
-            return isinstance(self._references[row_col], MergeAnchor)
+        # defaultdict will default this to False for missing entries
+        return isinstance(self._references[row_col], MergeAnchor)
 
     def get(self, row_col: Tuple) -> Union[MergeAnchor, MergeReference]:
-        if row_col not in self._references:
-            return None
-        else:
-            return self._references[row_col]
+        return self._references[row_col]
 
     def size(self, row_col: Tuple) -> Tuple:
-        if row_col not in self._references:
-            return (0, 0)
-        else:
-            return self._references[row_col].size
+        return self._references[row_col].size
 
     def rect(self, row_col: Tuple) -> Tuple:
-        if row_col not in self._references:
-            return (0, 0)
-        else:
-            return self._references[row_col].rect
+        return self._references[row_col].rect
 
     def merge_cells(self):
         return [k for k, v in self._references.items() if self.is_merge_anchor(k)]
