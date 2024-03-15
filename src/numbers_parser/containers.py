@@ -115,6 +115,9 @@ class ObjectStore(IWorkHandler):
     def __getitem__(self, key: str):
         return self._objects[key]
 
+    def __contains__(self, key: str):
+        return key in self._objects
+
     def __len__(self) -> int:
         return len(self._objects)
 

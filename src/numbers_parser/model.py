@@ -237,7 +237,10 @@ class _NumbersModel(Cacheable):
 
     def sheet_name(self, sheet_id, value=None):
         if value is None:
-            return self.objects[sheet_id].name
+            if sheet_id not in self.objects:
+                return None
+            else:
+                return self.objects[sheet_id].name
         else:
             self.objects[sheet_id].name = value
 
