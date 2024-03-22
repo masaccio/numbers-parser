@@ -4,7 +4,7 @@ import magic
 import pytest
 from pendulum import datetime, duration
 
-from numbers_parser import BackgroundImage, Document, EmptyCell, ErrorCell, UnsupportedWarning
+from numbers_parser import RGB, BackgroundImage, Document, EmptyCell, ErrorCell, UnsupportedWarning
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"
@@ -474,3 +474,20 @@ def test_issue_78(configurable_save_file):
 
     # Coverage for Github debug log guard
     assert doc._model.sheet_name(99999999) is None
+
+
+def test_issue_79(configurable_save_file):
+    doc = Document("tests/data/test-issue-79.numbers")
+    doc.add_style(name="Changed Cells", bold=True)
+    doc.add_style(name="Retained Cells", font_color=RGB(255, 0, 0))
+    table = doc.default_table
+    table.set_cell_style(1, 0, "Retained Cells")
+    table.set_cell_style(1, 1, "Retained Cells")
+    for row in range(2, 12):
+        table.write(row, 0, table.cell(1, 0).value, style="Changed Cells")
+        table.write(row, 1, table.cell(1, 1).value, style="Changed Cells")
+    doc.save(configurable_save_file)
+    doc = Document(configurable_save_file)
+    table = doc.default_table
+    assert all([table.cell(row, 0).value == table.cell(1, 0).value for row in range(2, 12)])
+    assert all([table.cell(row, 1).value == table.cell(1, 1).value for row in range(2, 12)])
