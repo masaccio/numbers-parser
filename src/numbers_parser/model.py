@@ -136,12 +136,14 @@ class DataLists(Cacheable):
         self._datalists[table_id] = {}
         self._datalists[table_id]["by_key"] = {}
         self._datalists[table_id]["by_value"] = {}
+        self._datalists[table_id]["key_index"] = {}
         self._datalists[table_id]["datalist"] = datalist
         self._datalists[table_id]["id"] = datalist_id
-        for entry in datalist.entries:
+        for i, entry in enumerate(datalist.entries):
             if entry.key > max_key:
                 max_key = entry.key
                 self._datalists[table_id]["by_key"][entry.key] = entry
+                self._datalists[table_id]["key_index"][entry.key] = i
                 value_key = self.value_key(getattr(entry, self._value_attr))
                 self._datalists[table_id]["by_value"][value_key] = entry.key
         self._datalists[table_id]["next_key"] = max_key + 1
@@ -166,6 +168,7 @@ class DataLists(Cacheable):
         self.add_table(table_id)
         self._datalists[table_id]["by_key"] = {}
         self._datalists[table_id]["by_value"] = {}
+        self._datalists[table_id]["key_index"] = {}
         self._datalists[table_id]["next_key"] = 1
         self._datalists[table_id]["datalist"].nextListID = 1
         clear_field_container(self._datalists[table_id]["datalist"].entries)
@@ -185,11 +188,15 @@ class DataLists(Cacheable):
             entry = TSTArchives.TableDataList.ListEntry(**attrs)
             self._datalists[table_id]["datalist"].entries.append(entry)
             self._datalists[table_id]["by_key"][key] = entry
+            self._datalists[table_id]["key_index"][key] = (
+                len(self._datalists[table_id]["datalist"].entries) - 1
+            )
             self._datalists[table_id]["by_value"][value_key] = key
         else:
             value_key = self.value_key(value)
             key = self._datalists[table_id]["by_value"][value_key]
-            self._datalists[table_id]["by_key"][key].refcount += 1
+            index = self._datalists[table_id]["key_index"][key]
+            self._datalists[table_id]["datalist"].entries[index].refcount += 1
 
         return key
 
