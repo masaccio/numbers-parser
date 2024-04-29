@@ -4,12 +4,5 @@
 <dict>
     <key>com.apple.security.get-task-allow</key>
     <true/>
-    <key>com.apple.developer.icloud-services</key>
-    <array>
-      <string>CloudKit</string>
-      <string>CloudDocuments</string>
-    </array>
-    <key>com.apple.application-identifier</key>
-    <string>89MSM6L32H.com.github.numbers-parser</string>
 </dict>
 </plist>
