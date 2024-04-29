@@ -1,10 +1,9 @@
-# Change this to the name of a code-signing certificate. A self-signed
-# certificate is suitable for this.
-IDENTITY=Jonathan Connell
-#
+# Apple developer certificate for re-signing
+IDENTITY := $(shell security find-identity -v -p codesigning | head -n 1 | python3 -c 'import sys; print(sys.stdin.read().split("\"")[1])')
+
 # Change this to the location of the proto-dump executable
 PROTOC=/usr/local/bin/protoc
-#
+
 # Location of the Numbers application
 NUMBERS=/Applications/Numbers.app
 
@@ -139,6 +138,7 @@ veryclean:
 	make clean
 	rm -rf .bootstrap
 	rm -rf src/$(package_c)/generated
+	rm -rf $(TMP_NUMBERS_APP)
 
 clean:
 	rm -rf src/$(package_c).egg-info
