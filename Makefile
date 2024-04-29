@@ -85,7 +85,7 @@ ENTITLEMENTS = src/build/entitlements.xml
 
 .bootstrap/mapping.py: .bootstrap/mapping.json
 	@mkdir -p $(dir $@)
-	python3 src/build/generate_mapping.py $< $@
+	poetry run python3 src/build/generate_mapping.py $< $@
 
 src/$(package_c)/generated/functionmap.py: .bootstrap/functionmap.py
 	@mkdir -p $(dir $@)
@@ -108,7 +108,7 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 
 .bootstrap/protos/TNArchives.proto:
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobufs from Numbers"$$(tput init)
-	PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=cpp python3 src/build/protodump.py $(NUMBERS) .bootstrap/protos
+	poetry run python3 src/build/protodump.py $(NUMBERS) .bootstrap/protos
 	poetry run python3 src/build/rename_proto_files.py .bootstrap/protos
 
 src/$(package_c)/mapping.py: .bootstrap/mapping.py
@@ -131,7 +131,7 @@ src/protos/TNArchives.proto: .bootstrap/protos/TNArchives.proto
 
 src/$(package_c)/generated/__init__.py: src/$(package_c)/generated/TNArchives_pb2.py
 	@echo $$(tput setaf 2)"Bootstrap: patching paths in generated protobuf files"$$(tput init)
-	python3 src/build/replace_paths.py src/$(package_c)/generated/T*.py
+	poetry run python3 src/build/replace_paths.py src/$(package_c)/generated/T*.py
 	touch $@
 
 veryclean:
