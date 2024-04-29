@@ -49,6 +49,9 @@ tox = "^4.11.4"
 python-magic = "^0.4.27"
 tqdm = "^4.66.2"
 
+[tool.poetry.group.docs]
+optional = true
+
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.2.6"
 enum-tools = "^0.11.0"
@@ -56,6 +59,14 @@ sphinx-toolbox = "^3.5.0"
 sphinx-nefertiti = "^0.2.1"
 sphinx-markdown-builder = "^0.6.6"
 sphinx-copybutton = "^0.5.2"
+
+[tool.poetry.group.bootstrap]
+optional = true
+
+[tool.poetry.group.bootstrap.dependencies]
+pyobjc-core = ">=10.2"
+pyobjc-framework-Cocoa = ">=10.2"
+py2app = ">=0.28"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
