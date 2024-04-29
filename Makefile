@@ -66,8 +66,9 @@ BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
 bootstrap: $(BOOTSTRAP_FILES)
 
 ENTITLEMENTS = src/build/entitlements.xml
+TMP_NUMBERS_APP = /tmp/Numbers.unsigned.app
 
-.bootstrap/Numbers.unsigned.app: $(ENTITLEMENTS)
+$(TMP_NUMBERS_APP): $(ENTITLEMENTS)
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobuf mapping from Numbers"$$(tput init)
 	@mkdir -p .bootstrap
 	rm -rf $@
@@ -77,11 +78,11 @@ ENTITLEMENTS = src/build/entitlements.xml
 	codesign --entitlements $(ENTITLEMENTS) --sign "${IDENTITY}" $@
 	codesign --verify $@
 
-.bootstrap/mapping.json: .bootstrap/Numbers.unsigned.app
+.bootstrap/mapping.json: $(TMP_NUMBERS_APP)
 	@mkdir -p .bootstrap
 	PYTHONPATH=${LLDB_PYTHON_PATH}:src xcrun python3 \
 		src/build/extract_mapping.py \
-		.bootstrap/Numbers.unsigned.app/Contents/MacOS/Numbers $@
+		$(TMP_NUMBERS_APP)/Contents/MacOS/Numbers $@
 
 .bootstrap/mapping.py: .bootstrap/mapping.json
 	@mkdir -p $(dir $@)
