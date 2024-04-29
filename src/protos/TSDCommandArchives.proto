@@ -13,12 +13,10 @@ enum CommentCommandVariant {
   EditReply = 2;
   DeleteReply = 3;
 }
-
 enum CaptionOrTitleKind {
   Caption = 1;
   Title = 2;
 }
-
 message UndoObjectArchive {
   optional .TSP.Reference stylesheet = 2;
   repeated .TSP.Reference objects = 1;
@@ -157,6 +155,11 @@ message BaseStyleSetValueCommandArchive {
 }
 
 message MovieSetValueCommandArchive {
+  enum LoopOption {
+    None = 0;
+    Repeat = 1;
+    BackAndForth = 2;
+  }
   message PropertyValue {
     optional double starttime = 1;
     optional double endtime = 2;
@@ -168,11 +171,7 @@ message MovieSetValueCommandArchive {
     optional .TSP.DataReference media = 8;
     optional bool playsAcrossSlides = 9;
   }
-  enum LoopOption {
-    None = 0;
-    Repeat = 1;
-    BackAndForth = 2;
-  }
+
   required .TSD.InfoCommandArchive super = 1;
   optional int32 property = 2;
   optional .TSD.MovieSetValueCommandArchive.PropertyValue value = 3;
@@ -463,4 +462,3 @@ message SetCaptionOrTitleVisibilityCommandArchive {
   optional bool hidden = 3;
   optional bool was_hidden = 4;
 }
-

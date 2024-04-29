@@ -21,7 +21,6 @@ enum CellType {
   formulaErrorCellType = 8;
   automaticCellType = 9;
 }
-
 enum CellValueType {
   emptyCellValueType = 0;
   numberCellValueType = 1;
@@ -34,13 +33,11 @@ enum CellValueType {
   richTextCellType = 8;
   currencyCellValueType = 9;
 }
-
 enum TableDimensionArchive {
   dimensionNeither = -1;
   dimensionRow = 0;
   dimensionColumn = 1;
 }
-
 enum SelectionTypeArchive {
   deprecatedCellSelectionType = 0;
   rowSelectionType = 1;
@@ -51,26 +48,22 @@ enum SelectionTypeArchive {
   regionSelectionType = 6;
   noSelectionType = 7;
 }
-
 enum FillDirectionArchive {
   kTSTFillDownArchive = 1;
   kTSTFillUpArchive = 2;
   kTSTFillRightArchive = 3;
   kTSTFillLeftArchive = 4;
 }
-
 enum MergeActionArchive {
   mergeActionInsert = 1;
   mergeActionRemove = 2;
   mergeActionShrink = 3;
   mergeActionGrow = 4;
 }
-
 enum HideShowActionArchive {
   hideShowActionHide = 0;
   hideShowActionShow = 1;
 }
-
 message CellID {
   required fixed32 packedData = 1;
   optional .TSCE.CellCoordinateArchive expanded_coord = 2;
@@ -146,19 +139,13 @@ message TileStorage {
     required uint32 tileid = 1;
     required .TSP.Reference tile = 2;
   }
+
   repeated .TST.TileStorage.Tile tiles = 1;
   optional uint32 tile_size = 2;
   optional bool should_use_wide_rows = 3;
 }
 
 message PopUpMenuModel {
-  message CellValue {
-    required .TST.PopUpMenuModel.CellValueType cell_value_type = 1;
-    optional .TSCE.BooleanCellValueArchive boolean_value = 2;
-    optional .TSCE.DateCellValueArchive date_value = 3;
-    optional .TSCE.NumberCellValueArchive number_value = 4;
-    optional .TSCE.StringCellValueArchive string_value = 5;
-  }
   enum CellValueType {
     NIL_TYPE = 1;
     BOOLEAN_TYPE = 2;
@@ -166,17 +153,19 @@ message PopUpMenuModel {
     NUMBER_TYPE = 4;
     STRING_TYPE = 5;
   }
+  message CellValue {
+    required .TST.PopUpMenuModel.CellValueType cell_value_type = 1;
+    optional .TSCE.BooleanCellValueArchive boolean_value = 2;
+    optional .TSCE.DateCellValueArchive date_value = 3;
+    optional .TSCE.NumberCellValueArchive number_value = 4;
+    optional .TSCE.StringCellValueArchive string_value = 5;
+  }
+
   repeated .TST.PopUpMenuModel.CellValue item = 1 [deprecated = true];
   repeated .TSCE.CellValueArchive tsce_item = 2;
 }
 
 message ImportWarningSetArchive {
-  message FormulaImportWarning {
-    required .TST.ImportWarningSetArchive.FormulaWarningType formula_warning_type = 1;
-    optional string original_formula = 2;
-    optional string supplementary_text = 3;
-    optional int32 formula_warning_type_int = 4;
-  }
   enum FormulaWarningType {
     THREE_D_REFERENCE = 1;
     ARRAYED_FORMULA = 2;
@@ -194,6 +183,13 @@ message ImportWarningSetArchive {
     TRANSPOSED_WITH_ISSUES = 14;
     TRANSPOSED_WITH_ISSUES_UNCHANGED = 15;
   }
+  message FormulaImportWarning {
+    required .TST.ImportWarningSetArchive.FormulaWarningType formula_warning_type = 1;
+    optional string original_formula = 2;
+    optional string supplementary_text = 3;
+    optional int32 formula_warning_type_int = 4;
+  }
+
   optional .TST.ImportWarningSetArchive.FormulaImportWarning formula_import_warning = 1;
   optional bool cond_format_above_avg_equal_avg = 2 [default = false];
   optional bool cond_format_above_avg_std_dev = 3 [default = false];
@@ -223,21 +219,6 @@ message ImportWarningSetByCellRefArchive {
 }
 
 message TableDataList {
-  message ListEntry {
-    required uint32 key = 1;
-    required uint32 refcount = 2;
-    optional string string = 3 [(.TSP.field_options) = {
-      metadata_type: Text
-    }];
-    optional .TSP.Reference reference = 4;
-    optional .TSCE.FormulaArchive formula = 5;
-    optional .TSK.FormatStructArchive format = 6;
-    optional .TSK.CustomFormatArchive custom_format = 8;
-    optional .TSP.Reference rich_text_payload = 9;
-    optional .TSP.Reference comment_storage = 10;
-    optional .TST.ImportWarningSetArchive import_warning_set = 11;
-    optional .TST.CellSpecArchive cell_spec = 12;
-  }
   enum ListType {
     STRING = 1;
     FORMAT = 2;
@@ -252,6 +233,20 @@ message TableDataList {
     IMPORT_WARNING = 11;
     CONTROL_CELL_SPEC = 12;
   }
+  message ListEntry {
+    required uint32 key = 1;
+    required uint32 refcount = 2;
+    optional string string = 3;
+    optional .TSP.Reference reference = 4;
+    optional .TSCE.FormulaArchive formula = 5;
+    optional .TSK.FormatStructArchive format = 6;
+    optional .TSK.CustomFormatArchive custom_format = 8;
+    optional .TSP.Reference rich_text_payload = 9;
+    optional .TSP.Reference comment_storage = 10;
+    optional .TST.ImportWarningSetArchive import_warning_set = 11;
+    optional .TST.CellSpecArchive cell_spec = 12;
+  }
+
   required .TST.TableDataList.ListType listType = 1;
   required uint32 nextListID = 2;
   repeated .TST.TableDataList.ListEntry entries = 3;
@@ -270,6 +265,7 @@ message TableRBTree {
     required uint32 key = 1;
     required uint32 value = 2;
   }
+
   repeated .TST.TableRBTree.Node nodes = 1;
 }
 
@@ -282,6 +278,7 @@ message HeaderStorageBucket {
     optional .TSP.Reference cell_style = 5;
     optional .TSP.Reference text_style = 6;
   }
+
   required uint32 bucketHashFunction = 1;
   repeated .TST.HeaderStorageBucket.Header headers = 2;
 }
@@ -392,10 +389,15 @@ message TableGroupSortOrderUIDArchive {
     optional .TSP.UUID column_uid = 2;
     optional .TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive.Direction direction = 3;
   }
+
   repeated .TST.TableGroupSortOrderUIDArchive.GroupSortRuleUIDArchive group_sort_rules = 1;
 }
 
 message TableSortOrderArchive {
+  enum SortType {
+    entire_table = 0;
+    row_range = 1;
+  }
   message SortRuleArchive {
     enum Direction {
       ascending = 0;
@@ -404,15 +406,16 @@ message TableSortOrderArchive {
     required uint32 index = 1;
     required .TST.TableSortOrderArchive.SortRuleArchive.Direction direction = 2;
   }
-  enum SortType {
-    entire_table = 0;
-    row_range = 1;
-  }
+
   required .TST.TableSortOrderArchive.SortType type = 1;
   repeated .TST.TableSortOrderArchive.SortRuleArchive rules = 2;
 }
 
 message TableSortOrderUIDArchive {
+  enum SortType {
+    entire_table = 0;
+    row_range = 1;
+  }
   message SortRuleArchive {
     enum Direction {
       ascending = 0;
@@ -421,10 +424,7 @@ message TableSortOrderUIDArchive {
     required .TSP.UUID column_uid = 1;
     required .TST.TableSortOrderUIDArchive.SortRuleArchive.Direction direction = 2;
   }
-  enum SortType {
-    entire_table = 0;
-    row_range = 1;
-  }
+
   required .TST.TableSortOrderUIDArchive.SortType type = 1;
   repeated .TST.TableSortOrderUIDArchive.SortRuleArchive rules = 2;
 }
@@ -474,9 +474,7 @@ message TableModelArchive {
   optional .TSP.Reference provider = 5;
   required uint32 number_of_rows = 6;
   required uint32 number_of_columns = 7;
-  required string table_name = 8 [(.TSP.field_options) = {
-    metadata_type: Table
-  }];
+  required string table_name = 8;
   optional bool table_name_enabled = 22;
   optional double table_name_height = 33;
   optional bool table_name_border_enabled = 37;
@@ -593,6 +591,7 @@ message StrokeLayerArchive {
     optional .TSD.StrokeArchive stroke = 3;
     optional uint32 order = 4;
   }
+
   optional uint32 row_column_index = 1;
   repeated .TST.StrokeLayerArchive.StrokeRunArchive stroke_runs = 2;
 }
@@ -661,6 +660,7 @@ message CellListArchive {
   message OptionalCell {
     optional .TST.Cell cell = 1;
   }
+
   repeated .TST.CellListArchive.OptionalCell cells = 1;
   optional uint32 trailing_empty_cell_count = 2;
 }
@@ -678,6 +678,7 @@ message ConcurrentCellListArchive {
   message OptionalCell {
     optional .TST.Cell cell = 1;
   }
+
   repeated .TST.ConcurrentCellListArchive.OptionalCell cells = 1;
   optional .TSP.UUIDRectArchive cell_uid_range = 2;
   optional .TST.CellRange cell_range = 3;
@@ -748,6 +749,7 @@ message HierarchicalCellDiffMapArchive {
     required .TSP.IndexSet column_index_set = 1;
     repeated .TST.CellDiffArchive cell_diff_list = 2;
   }
+
   required int32 num_row_rules = 1;
   required int32 num_column_rules = 2;
   repeated .TSP.UUID row_header_uids = 3;
@@ -769,6 +771,7 @@ message DoubleStyleMapArchive {
     required .TSP.Reference old_style = 2;
     required .TSP.Reference new_style = 3;
   }
+
   required uint32 capacity = 1;
   required uint32 count = 2;
   repeated .TST.DoubleStyleMapArchive.DoubleStyleMapEntryArchive cell_map_entry = 3;
@@ -780,6 +783,7 @@ message StyleTableMapArchive {
     required .TSP.Reference old_style = 2;
     required .TSP.Reference new_style = 3;
   }
+
   required uint32 capacity = 1;
   required uint32 count = 2;
   repeated .TST.StyleTableMapArchive.StyleTableMapEntryArchive map_entry = 3;
@@ -902,14 +906,17 @@ message ConditionalStyleSetArchive {
     required .TSP.Reference cell_style = 2;
     required .TSP.Reference text_style = 3;
   }
+
   message ConditionalStyleRule {
     optional .TST.FormulaPredicateArchive predicate = 1;
     required .TSP.Reference cell_style = 2;
     required .TSP.Reference text_style = 3;
   }
+
   message ConditionalStyleRules {
     repeated .TST.ConditionalStyleSetArchive.ConditionalStyleRule rule = 1;
   }
+
   required uint32 ruleCount = 1;
   repeated .TST.ConditionalStyleSetArchive.ConditionalStyleRulePrePivot rules_prepivot = 2;
   optional .TST.ConditionalStyleSetArchive.ConditionalStyleRules rules = 3;
@@ -934,21 +941,23 @@ message UniqueIndexArchive {
     required string string_value = 1;
     repeated .TSP.UUID row_uids = 2;
   }
+
   required .TSP.UUID column_uid = 1;
   repeated .TST.UniqueIndexArchive.UniqueIndexEntryArchive unique_entries = 2;
 }
 
 message HiddenStateExtentArchive {
+  enum RowOrColumnDirection {
+    ColumnDirection = 0;
+    RowDirection = 1;
+  }
   message RowOrColumnState {
     required .TSP.UUID row_or_column_uid = 1;
     optional bool user_hidden = 2;
     optional bool filtered = 3;
     optional bool pivot_hidden = 4;
   }
-  enum RowOrColumnDirection {
-    ColumnDirection = 0;
-    RowDirection = 1;
-  }
+
   required .TSP.UUID hidden_state_extent_uid = 1;
   repeated .TST.HiddenStateExtentArchive.RowOrColumnState base_hidden_states = 2;
   required .TST.HiddenStateExtentArchive.RowOrColumnDirection row_or_column_direction = 3;
@@ -1135,6 +1144,7 @@ message FormulaStoreArchive {
     required uint32 formula_index = 1;
     required .TSCE.FormulaArchive formula = 2;
   }
+
   required uint32 next_formula_index = 2;
   repeated .TST.FormulaStoreArchive.FormulaStorePair formulas = 3;
 }
@@ -1211,20 +1221,24 @@ message GroupByArchive {
     optional .TST.AccumulatorArchive accum = 2;
     repeated .TST.GroupByArchive.AggNodeArchive child = 3;
   }
+
   message AggregatorArchive {
     required .TSP.UUID column_uid = 1;
     optional .TST.GroupByArchive.AggNodeArchive agg_node = 2;
   }
+
   message GroupNodeArchive {
     message FormatManagerArchive {
       message RowSetArchive {
         repeated .TSP.UUID row_uids = 1;
       }
+
       optional .TSCE.CellValueArchive cell_value = 1;
       repeated .TSK.FormatStructArchive formats = 2;
       repeated .TST.GroupByArchive.GroupNodeArchive.FormatManagerArchive.RowSetArchive row_sets = 3;
       repeated .TSCE.IndexSetArchive row_uid_lookup_sets = 4;
     }
+
     required .TSP.UUID group_uid = 1;
     repeated .TST.GroupByArchive.GroupNodeArchive child = 3;
     repeated .TSP.UUID row_uid = 4;
@@ -1235,6 +1249,7 @@ message GroupByArchive {
     optional .TSCE.IndexSetArchive row_lookup_uids = 9;
     repeated .TSP.Reference child_ref = 10;
   }
+
   required .TSP.UUID group_by_uid = 1;
   repeated .TST.GroupColumnArchive group_column = 2;
   optional .TST.GroupByArchive.GroupNodeArchive group_node_root = 3;
@@ -1383,6 +1398,7 @@ message SummaryCellVendorArchive {
     required .TSP.UUID columnUID = 2;
     required .TST.Cell cell = 3;
   }
+
   required .TSP.Reference table_info = 1;
   repeated .TST.SummaryCellVendorArchive.SummaryCellEntry entries = 2;
 }
@@ -1402,6 +1418,7 @@ message HeaderNameMgrTileArchive {
     required .TSCE.CellCoordinateArchive name_precedent = 2;
     optional .TSCE.UidCellRefSetArchive uses_of_name_fragment = 3;
   }
+
   required string first_fragment = 1;
   required string last_fragment = 2;
   repeated .TST.HeaderNameMgrTileArchive.NameFragmentArchive name_frag_entries = 3;
@@ -1417,6 +1434,7 @@ message HeaderNameMgrArchive {
     repeated .TSP.UUID update_header_row_uids = 7;
     repeated .TSP.UUID update_header_column_uids = 8;
   }
+
   required .TSP.UUID owner_uid = 1;
   optional .TSP.UUID nrm_owner_uid = 2;
   repeated .TST.HeaderNameMgrArchive.PerTableArchive per_tables = 3;
@@ -1453,4 +1471,3 @@ extend .TSS.CommandPropertyEntryArchive {
   optional .TST.CommentStorageWrapperArchive comment_storage = 504;
   optional .TST.CellSpecArchive cell_spec = 505;
 }
-

@@ -19,4 +19,3 @@ message DrawableZOrderListArchive {
   repeated .TSP.UUID drawable_id_list = 2;
   optional bool drawable_id_list_undefined = 3;
 }
-

@@ -16,23 +16,19 @@ enum GalleryInfoCaptionMode {
   GalleryInfoCaptionModePerImage = 1;
   GalleryInfoCaptionModeAllImages = 2;
 }
-
 enum GalleryInfoProperty {
   GalleryInfoCaptionProperty = 0;
 }
-
 enum GalleryCaptionMode {
   GalleryCaptionModeNone = 0;
   GalleryCaptionModePerImage = 1;
   GalleryCaptionModeAllImages = 2;
 }
-
 enum GalleryItemProperty {
   GalleryItemPropertyImageData = 0;
   GalleryItemPropertyThumbnailImageData = 1;
   GalleryItemPropertyAccessibilityDescription = 2;
 }
-
 message DocumentArchive {
   required .TSK.DocumentArchive super = 1;
   repeated .TSWP.TextPresetDisplayItemArchive text_preset_display_items = 2;
@@ -72,6 +68,7 @@ message ShortcutControllerArchive {
     required string shortcut = 1;
     required .TSP.Reference style = 2;
   }
+
   repeated .TSA.ShortcutControllerArchive.ShortcutMapEntry entries = 1;
 }
 
@@ -158,6 +155,7 @@ message GalleryInfoSetValueCommandArchive {
   message PropertyValue {
     optional .TSA.GalleryInfoCaptionMode caption_mode = 1;
   }
+
   required .TSK.CommandArchive super = 1;
   optional .TSP.UUIDPath info_id_path = 2;
   optional .TSA.GalleryInfoProperty property = 3;
@@ -230,6 +228,7 @@ message GalleryItemSetValueCommand {
     optional .TSP.DataReference image_data = 1;
     optional string accessibility_description = 2;
   }
+
   required .TSK.CommandArchive super = 1;
   optional .TSP.UUIDPath item_id_path = 2;
   optional .TSA.GalleryItemProperty property = 3;
@@ -246,9 +245,7 @@ message CollaboratorGalleryItemCursor {
 }
 
 message WebVideoInfo {
-  optional string url = 1 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string url = 1;
   optional .TSP.DataReference poster_image_data = 2;
   optional .TSD.Attribution attribution = 3;
   extend .TSD.ImageArchive {
@@ -302,18 +299,18 @@ message Object3DInfoCommandArchive {
 }
 
 message Object3DInfoSetValueCommandArchive {
-  message PropertyValue {
-    optional bool plays_animations = 4;
-    optional float opacity = 10;
-  }
   enum Property {
     PlaysAnimations = 3;
     Opacity = 9;
   }
+  message PropertyValue {
+    optional bool plays_animations = 4;
+    optional float opacity = 10;
+  }
+
   required .TSK.CommandArchive super = 1;
   required .TSP.UUIDPath object_3d_info_id_path = 2;
   required .TSA.Object3DInfoSetValueCommandArchive.Property property = 3;
   optional .TSA.Object3DInfoSetValueCommandArchive.PropertyValue value = 4;
   optional .TSA.Object3DInfoSetValueCommandArchive.PropertyValue old_value = 5;
 }
-

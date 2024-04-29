@@ -8,37 +8,31 @@ enum TextureTilingMode {
   textureTilingModeNone = 0;
   textureTilingModeTallest = 1;
 }
-
 enum TextureTilingFace {
   textureTilingFaceAll = 0;
   textureTilingFaceTopAndBottom = 1;
   textureTilingFaceSide = 2;
 }
-
 enum TextureTilingWrap {
   textureTilingWrapProjected = 0;
   textureTilingWrapFaceWrap = 1;
 }
-
 enum TextureTilingXPosition {
   textureTilingXPositionLeft = 0;
   textureTilingXPositionCenter = 1;
   textureTilingXPositionRight = 2;
 }
-
 enum TextureTilingYPosition {
   textureTilingYPositionTop = 0;
   textureTilingYPositionMiddle = 1;
   textureTilingYPositionBottom = 2;
 }
-
 enum TextureTilingContinuity {
   textureTilingContinuityNone = 0;
   textureTilingContinuityGlobal = 1;
   textureTilingContinuitySeries = 2;
   textureTilingContinuityJittered = 3;
 }
-
 enum FillPropertyType {
   fillPropertyTypeUndefined = 0;
   fillPropertyTypeArea = 1;
@@ -47,7 +41,6 @@ enum FillPropertyType {
   fillPropertyTypeLine = 4;
   fillPropertyTypePie = 5;
 }
-
 message Chart3DEnvironmentPackageArchive {
   repeated .TSCH.Chart3DEnvironmentMaterialArchive materials = 1;
 }
@@ -186,4 +179,3 @@ message Chart3DVectorArchive {
 extend .TSD.FillArchive {
   optional .TSCH.Chart3DFillArchive fill3d = 100;
 }
-

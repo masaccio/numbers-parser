@@ -49,4 +49,3 @@ message VerifyTransformHistoryWithServerCommandArchive {
   required int32 sequence_start = 2;
   required int32 sequence_end = 3;
 }
-

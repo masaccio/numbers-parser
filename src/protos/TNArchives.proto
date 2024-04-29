@@ -15,12 +15,10 @@ enum PageOrder {
   PageOrderTopToBottom = 0;
   PageOrderLeftToRight = 1;
 }
-
 enum PageLayoutDirection {
   PageLayoutDirectionLeftToRight = 0;
   PageLayoutDirectionRightToLeft = 1;
 }
-
 message SheetUIStateArchive {
   required float view_scale = 1;
   required .TSP.Point scroll_position = 2;
@@ -126,9 +124,7 @@ message PlaceholderArchive {
 }
 
 message SheetArchive {
-  required string name = 1 [(.TSP.field_options) = {
-    metadata_type: Sheet
-  }];
+  required string name = 1;
   repeated .TSP.Reference drawable_infos = 2;
   optional bool in_portrait_page_orientation = 3;
   optional bool show_repeating_headers = 4 [deprecated = true];
@@ -208,4 +204,3 @@ message ChartSelectionArchive {
 message FormCommandActivityBehaviorArchive {
   required .TSK.CommandActivityBehaviorArchive super = 1;
 }
-

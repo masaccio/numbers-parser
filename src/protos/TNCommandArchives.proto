@@ -296,4 +296,3 @@ message CommandInducedSheetChangeArchive {
   required .TSK.CommandArchive super = 1;
   repeated .TN.SheetChangeSheetNameArchive sheet_changes = 2;
 }
-

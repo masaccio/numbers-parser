@@ -82,9 +82,7 @@ message TableStylePropertiesArchive {
   optional bool table_hr_divider_visible = 43;
   optional bool table_footer_divider_visible = 44;
   optional int32 OBSOLETE_master_font_size = 40;
-  optional string master_font_family = 41 [(.TSP.field_options) = {
-    metadata_type: Font
-  }];
+  optional string master_font_family = 41;
   optional .TSWP.WritingDirectionType writing_direction = 45;
   optional .TSD.StrokeArchive header_row_separator_stroke = 46;
   optional .TSD.StrokeArchive header_row_border_stroke = 47;
@@ -152,4 +150,3 @@ message ThemePresetsArchive {
     optional .TST.ThemePresetsArchive extension = 200;
   }
 }
-

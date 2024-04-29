@@ -17,30 +17,26 @@ enum SelectionType {
   SelectionType_Visual = 7;
   SelectionType_Logical = 8;
 }
-
 enum StyleInsertionBehavior {
   StyleInsertionBehavior_NoGrow = 0;
   StyleInsertionBehavior_GrowLeft = 1;
   StyleInsertionBehavior_GrowRight = 2;
 }
-
 enum CaretAffinity {
   CaretAffinity_Start = 0;
   CaretAffinity_End = 1;
 }
-
 enum WritingDirectionType {
   kWritingDirectionNatural = -1;
   kWritingDirectionLeftToRight = 0;
   kWritingDirectionRightToLeft = 1;
 }
-
 message SelectionArchive {
   required .TSWP.SelectionType deprecated_type = 1 [deprecated = true];
   required .TSP.Range visual_definition_range = 2;
   required .TSWP.StyleInsertionBehavior styleInsertionBehavior = 3;
   required .TSWP.CaretAffinity caretAffinity = 4;
-  required .TSP.Range smart_field_range = 5;
+  required .TSP.Range smart_field_range = 5 [deprecated = true];
   optional bool leading_edge = 6;
   optional uint32 leading_char_index = 7;
   optional .TSWP.SelectionType type = 8;
@@ -52,16 +48,16 @@ message ObjectAttributeTable {
     required uint32 character_index = 1;
     optional .TSP.Reference object = 2;
   }
+
   repeated .TSWP.ObjectAttributeTable.ObjectAttribute entries = 1;
 }
 
 message StringAttributeTable {
   message StringAttribute {
     required uint32 character_index = 1;
-    optional string object = 2 [(.TSP.field_options) = {
-      metadata_type: Text
-    }];
+    optional string object = 2;
   }
+
   repeated .TSWP.StringAttributeTable.StringAttribute entries = 1;
 }
 
@@ -71,6 +67,7 @@ message ParaDataAttributeTable {
     required uint32 first = 2;
     required uint32 second = 3;
   }
+
   repeated .TSWP.ParaDataAttributeTable.ParaDataAttribute entries = 1;
 }
 
@@ -79,6 +76,7 @@ message OverlappingFieldAttributeTable {
     required .TSP.Range range = 1;
     required .TSP.Reference field = 2;
   }
+
   repeated .TSWP.OverlappingFieldAttributeTable.OverlappingFieldAttribute entries = 1;
 }
 
@@ -96,9 +94,7 @@ message StorageArchive {
   }
   optional .TSWP.StorageArchive.KindType kind = 1 [default = TEXTBOX];
   optional .TSP.Reference style_sheet = 2;
-  repeated string text = 3 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  repeated string text = 3;
   optional bool has_itext = 4 [default = false];
   optional bool in_document = 10 [default = false];
   optional .TSWP.ObjectAttributeTable table_para_style = 5;
@@ -173,9 +169,7 @@ message CharacterStylePropertiesArchive {
   optional bool italic = 2;
   optional float font_size = 3;
   optional bool font_name_null = 4;
-  optional string font_name = 5 [(.TSP.field_options) = {
-    metadata_type: Font
-  }];
+  optional string font_name = 5;
   optional bool font_color_null = 6;
   optional .TSP.Color font_color = 7;
   optional bool language_null = 8;
@@ -338,16 +332,6 @@ message ParagraphStyleArchive {
 }
 
 message ListStyleArchive {
-  message LabelGeometry {
-    optional float scale = 1 [default = 1];
-    optional float baseline_offset = 2 [default = 0];
-    optional bool scale_with_text = 3 [default = true];
-  }
-  message LabelImage {
-    optional .TSP.DataReference image = 3;
-    optional bool image_null = 2;
-    optional .TSP.Reference database_image = 1;
-  }
   enum LabelType {
     kNone = 0;
     kImage = 1;
@@ -421,6 +405,18 @@ message ListStyleArchive {
     kHebrewBiblicalDoubleParenKind = 63;
     kHebrewBiblicalRightParenKind = 64;
   }
+  message LabelGeometry {
+    optional float scale = 1 [default = 1];
+    optional float baseline_offset = 2 [default = 0];
+    optional bool scale_with_text = 3 [default = true];
+  }
+
+  message LabelImage {
+    optional .TSP.DataReference image = 3;
+    optional bool image_null = 2;
+    optional .TSP.Reference database_image = 1;
+  }
+
   required .TSS.StyleArchive super = 1;
   optional uint32 override_count = 10 [default = 0];
   repeated .TSWP.ListStyleArchive.LabelType label_types = 11;
@@ -451,14 +447,17 @@ message ColumnsArchive {
     optional uint32 count = 1;
     optional float gap = 2;
   }
+
   message NonEqualColumnsArchive {
     message GapWidthArchive {
       required float gap = 1;
       required float width = 2;
     }
+
     required float first = 1;
     repeated .TSWP.ColumnsArchive.NonEqualColumnsArchive.GapWidthArchive following = 2;
   }
+
   optional .TSWP.ColumnsArchive.EqualColumnsArchive equal_columns = 1;
   optional .TSWP.ColumnsArchive.NonEqualColumnsArchive non_equal_columns = 2;
 }
@@ -559,6 +558,7 @@ message TOCSettingsArchive {
     optional .TSP.Reference toc_entry_style = 2;
     optional bool show_in_toc = 3;
   }
+
   optional string toc_name = 1;
   optional uint32 toc_scope = 2;
   repeated .TSWP.TOCSettingsArchive.TOCEntryData entries = 3;
@@ -577,96 +577,6 @@ message TOCEntryInstanceArchive {
 }
 
 message UndoTransaction {
-  message GenericTransaction {
-    required uint32 value1 = 1;
-    required uint32 value2 = 2;
-    required uint32 value3 = 3;
-  }
-  message TextTransaction {
-    required uint32 insert_location = 1;
-    required uint32 insert_length = 2;
-    optional string string_to_delete = 3;
-  }
-  message CharIndexTransaction {
-    required uint32 char_index = 1;
-    required uint32 count = 2;
-    optional .TSP.Reference object = 3;
-  }
-  message ReplaceCharIndexTransaction {
-    required uint32 attribute_index = 1;
-    required uint32 char_index = 2;
-  }
-  message AttributeIndexTransaction {
-    required uint32 attribute_index = 1;
-    required uint32 char_index = 2;
-    optional .TSP.Reference object = 3;
-    optional string string = 4;
-  }
-  message InsertAttributeTransaction {
-    required uint32 attribute_index = 1;
-    required uint32 attribute_count = 2;
-    optional .TSP.Reference object = 3;
-    optional string string = 4;
-  }
-  message InsertNilTransaction {
-    required uint32 attribute_index = 1;
-    required uint32 attribute_count = 2;
-  }
-  message CharDeltaTransaction {
-    required uint32 char_index = 1;
-    required uint32 attribute_index = 2;
-    required sint32 char_delta = 3;
-  }
-  message ParagraphDataTransaction {
-    required uint32 attribute_index = 1;
-    required uint32 first = 2;
-    required uint32 second = 3;
-    required uint32 char_index = 4;
-  }
-  message ObjectDOLCTransaction {
-    required uint32 flags = 1;
-    optional .TSP.Reference object = 2;
-  }
-  message CTDateTransaction {
-    required uint32 attribute_index = 1;
-    optional .TSP.Date date = 2;
-  }
-  message UnionTransaction {
-    required .TSWP.UndoTransaction.UndoKind kind = 1;
-    optional uint32 table = 2;
-    optional .TSWP.UndoTransaction.GenericTransaction generic = 5;
-    optional .TSWP.UndoTransaction.TextTransaction text = 6;
-    optional .TSWP.UndoTransaction.CharIndexTransaction char_index = 7;
-    optional .TSWP.UndoTransaction.ReplaceCharIndexTransaction replace_char_index = 8;
-    optional .TSWP.UndoTransaction.AttributeIndexTransaction attribute_index = 9;
-    optional .TSWP.UndoTransaction.InsertNilTransaction insert_nil = 10;
-    optional .TSWP.UndoTransaction.InsertAttributeTransaction insert_attribute = 11;
-    optional .TSWP.UndoTransaction.CharDeltaTransaction char_delta = 12;
-    optional .TSWP.UndoTransaction.ParagraphDataTransaction paragraph_data = 13;
-    optional .TSWP.UndoTransaction.ObjectDOLCTransaction object_dolc = 14;
-    optional .TSWP.UndoTransaction.CTDateTransaction ct_date = 15;
-  }
-  message StorageAction {
-    required .TSWP.UndoTransaction.ActionKind kind = 1;
-    optional uint32 flags = 2;
-    optional uint32 table = 3;
-    optional .TSP.Range range = 4;
-    optional string string = 5;
-    optional .TSP.Reference object = 6;
-    optional .TSP.Date date = 7;
-    optional uint32 paragraph_level = 8;
-    optional uint32 paragraph_flags = 9;
-    optional uint32 paragraph_value = 10;
-    optional int32 placement_index = 11;
-    optional string placement_uuid_path = 12;
-    optional .TSP.Reference undo_object = 13;
-  }
-  message StorageActionGroup {
-    required .TSWP.UndoTransaction.ActionGroupKind kind = 1;
-    repeated .TSWP.UndoTransaction.StorageAction forward_actions = 3;
-    repeated .TSWP.UndoTransaction.StorageAction inverse_forward_actions = 4;
-    repeated .TSWP.UndoTransaction.StorageAction inverse_detail_actions = 6;
-  }
   enum UndoKind {
     REPLACE_TEXT = 1;
     INSERT_ATTRIBUTE = 2;
@@ -689,6 +599,110 @@ message UndoTransaction {
     ACTION_GROUP_TEXT = 1;
     ACTION_GROUP_ATTRIBUTE = 2;
   }
+  message GenericTransaction {
+    required uint32 value1 = 1;
+    required uint32 value2 = 2;
+    required uint32 value3 = 3;
+  }
+
+  message TextTransaction {
+    required uint32 insert_location = 1;
+    required uint32 insert_length = 2;
+    optional string string_to_delete = 3;
+  }
+
+  message CharIndexTransaction {
+    required uint32 char_index = 1;
+    required uint32 count = 2;
+    optional .TSP.Reference object = 3;
+  }
+
+  message ReplaceCharIndexTransaction {
+    required uint32 attribute_index = 1;
+    required uint32 char_index = 2;
+  }
+
+  message AttributeIndexTransaction {
+    required uint32 attribute_index = 1;
+    required uint32 char_index = 2;
+    optional .TSP.Reference object = 3;
+    optional string string = 4;
+  }
+
+  message InsertAttributeTransaction {
+    required uint32 attribute_index = 1;
+    required uint32 attribute_count = 2;
+    optional .TSP.Reference object = 3;
+    optional string string = 4;
+  }
+
+  message InsertNilTransaction {
+    required uint32 attribute_index = 1;
+    required uint32 attribute_count = 2;
+  }
+
+  message CharDeltaTransaction {
+    required uint32 char_index = 1;
+    required uint32 attribute_index = 2;
+    required sint32 char_delta = 3;
+  }
+
+  message ParagraphDataTransaction {
+    required uint32 attribute_index = 1;
+    required uint32 first = 2;
+    required uint32 second = 3;
+    required uint32 char_index = 4;
+  }
+
+  message ObjectDOLCTransaction {
+    required uint32 flags = 1;
+    optional .TSP.Reference object = 2;
+  }
+
+  message CTDateTransaction {
+    required uint32 attribute_index = 1;
+    optional .TSP.Date date = 2;
+  }
+
+  message UnionTransaction {
+    required .TSWP.UndoTransaction.UndoKind kind = 1;
+    optional uint32 table = 2;
+    optional .TSWP.UndoTransaction.GenericTransaction generic = 5;
+    optional .TSWP.UndoTransaction.TextTransaction text = 6;
+    optional .TSWP.UndoTransaction.CharIndexTransaction char_index = 7;
+    optional .TSWP.UndoTransaction.ReplaceCharIndexTransaction replace_char_index = 8;
+    optional .TSWP.UndoTransaction.AttributeIndexTransaction attribute_index = 9;
+    optional .TSWP.UndoTransaction.InsertNilTransaction insert_nil = 10;
+    optional .TSWP.UndoTransaction.InsertAttributeTransaction insert_attribute = 11;
+    optional .TSWP.UndoTransaction.CharDeltaTransaction char_delta = 12;
+    optional .TSWP.UndoTransaction.ParagraphDataTransaction paragraph_data = 13;
+    optional .TSWP.UndoTransaction.ObjectDOLCTransaction object_dolc = 14;
+    optional .TSWP.UndoTransaction.CTDateTransaction ct_date = 15;
+  }
+
+  message StorageAction {
+    required .TSWP.UndoTransaction.ActionKind kind = 1;
+    optional uint32 flags = 2;
+    optional uint32 table = 3;
+    optional .TSP.Range range = 4;
+    optional string string = 5;
+    optional .TSP.Reference object = 6;
+    optional .TSP.Date date = 7;
+    optional uint32 paragraph_level = 8;
+    optional uint32 paragraph_flags = 9;
+    optional uint32 paragraph_value = 10;
+    optional int32 placement_index = 11;
+    optional string placement_uuid_path = 12;
+    optional .TSP.Reference undo_object = 13;
+  }
+
+  message StorageActionGroup {
+    required .TSWP.UndoTransaction.ActionGroupKind kind = 1;
+    repeated .TSWP.UndoTransaction.StorageAction forward_actions = 3;
+    repeated .TSWP.UndoTransaction.StorageAction inverse_forward_actions = 4;
+    repeated .TSWP.UndoTransaction.StorageAction inverse_detail_actions = 6;
+  }
+
   repeated .TSWP.UndoTransaction.UnionTransaction entries = 1;
   repeated .TSWP.UndoTransaction.StorageActionGroup group_entries = 2;
   optional uint32 flags = 3;
@@ -745,12 +759,8 @@ message TextualAttachmentArchive {
 
 message TSWPTOCPageNumberAttachmentArchive {
   optional .TSWP.TextualAttachmentArchive super = 1;
-  optional string page_number = 2 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
-  optional string bookmark_name = 3 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string page_number = 2;
+  optional string bookmark_name = 3;
 }
 
 message UIGraphicalAttachment {
@@ -771,9 +781,7 @@ message TOCAttachmentArchive {
 message FootnoteReferenceAttachmentArchive {
   optional .TSWP.TextualAttachmentArchive super = 1;
   optional .TSP.Reference contained_storage = 2;
-  optional string custom_mark_string = 3 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string custom_mark_string = 3;
 }
 
 message NumberAttachmentArchive {
@@ -789,27 +797,19 @@ message SmartFieldArchive {
 
 message HyperlinkFieldArchive {
   optional .TSWP.SmartFieldArchive super = 1;
-  optional string url_ref = 2 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string url_ref = 2;
 }
 
 message PlaceholderSmartFieldArchive {
   optional .TSWP.SmartFieldArchive super = 1;
   optional bool localizable = 2;
-  optional string script_tag = 3 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string script_tag = 3;
 }
 
 message UnsupportedHyperlinkFieldArchive {
   optional .TSWP.PlaceholderSmartFieldArchive super = 1;
-  optional string url_ref = 2 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
-  optional string url_original_ref = 3 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string url_ref = 2;
+  optional string url_original_ref = 3;
 }
 
 message BibliographySmartFieldArchive {
@@ -823,24 +823,12 @@ message CitationRecordArchive {
   optional string endnote_xml = 1;
   optional bool hide_author_names = 2;
   optional bool hide_year = 3;
-  optional string page_range = 4 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
-  optional string prefix = 5 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
-  optional string suffix = 6 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
-  optional string authors_string = 7 [(.TSP.field_options) = {
-    metadata_type: Author
-  }];
-  optional string title = 8 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
-  optional string year = 9 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string page_range = 4;
+  optional string prefix = 5;
+  optional string suffix = 6;
+  optional string authors_string = 7;
+  optional string title = 8;
+  optional string year = 9;
   optional string type = 10;
 }
 
@@ -876,9 +864,7 @@ message DateTimeSmartFieldArchive {
 
 message BookmarkFieldArchive {
   optional .TSWP.SmartFieldArchive super = 1;
-  optional string name = 2 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string name = 2;
   optional uint32 ranged = 3;
   optional uint32 hidden = 4;
 }
@@ -915,21 +901,18 @@ message MergeSmartFieldArchive {
 
 message TOCSmartFieldArchive {
   message TOCEntry {
-    optional string bookmark_name = 1 [(.TSP.field_options) = {
-      metadata_type: Text
-    }];
+    optional string bookmark_name = 1;
     optional .TSP.Reference target_style = 2;
     optional .TSP.Range range = 3;
   }
+
   optional .TSWP.PlaceholderSmartFieldArchive super = 1;
   repeated .TSWP.TOCSmartFieldArchive.TOCEntry toc_entries = 2;
 }
 
 message RubyFieldArchive {
   optional .TSWP.SmartFieldArchive super = 1;
-  optional string ruby_text = 2 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string ruby_text = 2;
 }
 
 message TateChuYokoFieldArchive {
@@ -1025,4 +1008,3 @@ message CollaboratorTextCursorSubselectionArchive {
 extend .TSS.CommandPropertyEntryArchive {
   optional .TSWP.PaddingArchive padding = 100;
 }
-

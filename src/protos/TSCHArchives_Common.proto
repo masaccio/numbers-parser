@@ -37,7 +37,6 @@ enum ChartType {
   donutChartType3D = 26;
   radarChartType2D = 27;
 }
-
 enum AxisType {
   axis_type_unknown = 0;
   axis_type_x = 1;
@@ -47,19 +46,16 @@ enum AxisType {
   axis_type_polar_radius = 5;
   axis_type_polar_angle = 6;
 }
-
 enum ScatterFormat {
   scatter_format_unknown = 0;
   scatter_format_separate_x = 1;
   scatter_format_shared_x = 2;
 }
-
 enum SeriesDirection {
   series_direction_unknown = 0;
   series_direction_by_row = 1;
   series_direction_by_column = 2;
 }
-
 enum NumberValueType {
   numberValueTypeDecimal = 0;
   numberValueTypeCurrency = 1;
@@ -69,7 +65,6 @@ enum NumberValueType {
   numberValueTypeBase = 5;
   numberValueTypeUnknown = -999;
 }
-
 enum NegativeNumberStyle {
   negativeNumberStyleMinus = 0;
   negativeNumberStyleRed = 1;
@@ -77,7 +72,6 @@ enum NegativeNumberStyle {
   negativeNumberStyleRedAndParentheses = 3;
   negativeNumberStyleNone = 4;
 }
-
 enum FractionAccuracy {
   fractionAccuracyConflicting = 0;
   fractionAccuracyUpToOneDigit = -1;
@@ -90,7 +84,6 @@ enum FractionAccuracy {
   fractionAccuracyTenths = 10;
   fractionAccuracyHundredths = 100;
 }
-
 message RectArchive {
   required .TSP.Point origin = 1;
   required .TSP.Size size = 2;
@@ -172,4 +165,3 @@ message ReferenceLineNonStyleArchive {
   optional .TSS.StyleArchive super = 1;
   extensions 10000 to 536870911;
 }
-

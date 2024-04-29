@@ -7,4 +7,3 @@ message SheetStylePropertyChangeSetArchive {
   optional .TSDSOS.SpecFillArchive fill = 1;
   optional bool fill_undefined = 2;
 }
-

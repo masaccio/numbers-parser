@@ -53,6 +53,7 @@ message ChartGridArchive {
   message ValueRow {
     repeated double value = 1;
   }
+
   required int32 direction = 1;
   repeated string row_name = 2;
   repeated string column_name = 3;
@@ -411,4 +412,3 @@ message ChartSeriesNonStyleArchive {
   optional bool tschchartseriesbubbleshownegativedata = 216;
   optional float tschchartseriesbubbleadjustmentscale = 217;
 }
-

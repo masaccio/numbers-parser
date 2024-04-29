@@ -14,4 +14,3 @@ message InducedVerifyDocumentWithServerCommandArchive {
 message InducedVerifyDrawableZOrdersWithServerCommandArchive {
   required .TSASOS.InducedVerifyDrawableZOrdersWithServerCommandArchive super = 1;
 }
-

@@ -10,7 +10,6 @@ enum ValueType {
   FloatType = 2;
   DoubleType = 3;
 }
-
 enum PropertyType {
   InvalidPropertyType = 1;
   NullPropertyType = 2;
@@ -20,7 +19,6 @@ enum PropertyType {
   NSStringPropertyType = 6;
   TSPObjectPropertyType = 7;
 }
-
 message StyleArchive {
   optional string name = 1;
   optional string style_identifier = 2;
@@ -34,15 +32,18 @@ message StylesheetArchive {
     required string identifier = 1;
     required .TSP.Reference style = 2;
   }
+
   message StyleChildrenEntry {
     required .TSP.Reference parent = 1;
     repeated .TSP.Reference children = 2;
   }
+
   message VersionedStyles {
     repeated .TSP.Reference styles = 1;
     repeated .TSS.StylesheetArchive.IdentifiedStyleEntry identifier_to_style_map = 2;
     repeated .TSS.StylesheetArchive.StyleChildrenEntry parent_to_children_style_map = 3;
   }
+
   repeated .TSP.Reference styles = 1;
   repeated .TSS.StylesheetArchive.IdentifiedStyleEntry identifier_to_style_map = 2;
   optional .TSP.Reference parent = 3;
@@ -61,6 +62,7 @@ message StylesheetArchive {
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_13_0 = 16;
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_13_1 = 17;
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_13_2 = 18;
+  optional .TSS.StylesheetArchive.VersionedStyles styles_for_14_0 = 19;
 }
 
 message ThemeArchive {
@@ -150,7 +152,7 @@ message CommandPropertyEntryArchive {
   optional double double_value = 5;
   optional string string_value = 6;
   optional .TSP.Reference tsp_reference = 7;
-  extensions 8 to 2000;
+  extensions 8 to 2001;
 }
 
 message CommandPropertyMapArchive {
@@ -160,4 +162,3 @@ message CommandPropertyMapArchive {
 extend .TSS.CommandPropertyEntryArchive {
   optional .TSP.Color color = 8;
 }
-

@@ -17,7 +17,6 @@ enum TableArea {
   TableAreaHeaderColumn = 3;
   TableAreaFooterRow = 4;
 }
-
 enum TableAreaTransition {
   TableAreaTransitionHeaderRowToBody = 1;
   TableAreaTransitionBodyToHeaderRow = 2;
@@ -26,7 +25,6 @@ enum TableAreaTransition {
   TableAreaTransitionHeaderColumnToBody = 5;
   TableAreaTransitionBodyToHeaderColumn = 6;
 }
-
 enum ColumnRowBundleItemTypeEnum {
   ColumnRowTypeAnchor = 0;
   ColumnRowTypeHeaderRow = 1;
@@ -35,7 +33,6 @@ enum ColumnRowBundleItemTypeEnum {
   ColumnRowTypeHeaderColumn = 4;
   ColumnRowTypeBodyColumn = 5;
 }
-
 message TableCommandArchive {
   required .TSK.CommandArchive super = 1;
   required .TSP.UUIDPath table_info_id_path = 2;
@@ -845,6 +842,7 @@ message CommandRewritePencilAnnotationFormulasArchive {
     required uint64 index = 1;
     required .TSP.Reference annotation = 2;
   }
+
   required .TST.TableCommandArchive super = 1;
   required .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
   required .TSCE.FormulasForUndoArchive formulas_to_rewrite = 3;
@@ -939,4 +937,3 @@ message CommandExtendTableIDHistoryArchive {
   required .TST.FormulaRewriteSpecArchive rewrite_spec = 2;
   optional .TSCE.RewriteTableUIDInfoArchive table_uid_history_rollback = 3;
 }
-

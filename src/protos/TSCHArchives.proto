@@ -120,15 +120,13 @@ message ChartGridArchive {
       required string uniqueId = 1;
       required uint32 index = 2;
     }
+
     repeated .TSCH.ChartGridArchive.ChartGridRowColumnIdMap.Entry row_id_map = 1;
     repeated .TSCH.ChartGridArchive.ChartGridRowColumnIdMap.Entry column_id_map = 2;
   }
-  repeated string row_name = 1 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
-  repeated string column_name = 2 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+
+  repeated string row_name = 1;
+  repeated string column_name = 2;
   repeated .TSCH.GridRow grid_row = 3;
   optional .TSCH.ChartGridArchive.ChartGridRowColumnIdMap idMap = 4;
 }
@@ -322,41 +320,30 @@ message CachedDataFormatterPersistableStyleObjects {
 extend .TSCH.ChartArchive {
   optional bool scene3d_settings_constant_depth = 10002;
   optional string last_applied_fill_set_lookup_string = 10004;
+  optional .TSCH.ChartReferenceLinesArchive reference_lines = 10005;
 }
-
 extend .TSCH.ChartStyleArchive {
   optional bool chart_supports_series_summary_labels = 10001;
 }
-
 extend .TSCH.ChartSeriesStyleArchive {
   optional bool series_supports_donut = 10001;
   optional bool series_supports_radar = 10002;
 }
-
 extend .TSCH.ChartSeriesNonStyleArchive {
   optional bool series_supports_custom_number_format = 10001;
   optional bool series_supports_custom_date_format = 10002;
   optional bool series_supports_callout_lines = 10003;
 }
-
 extend .TSCH.ChartAxisStyleArchive {
   optional bool axis_supports_radar = 10001;
 }
-
 extend .TSCH.ChartAxisNonStyleArchive {
   optional bool axis_supports_custom_number_format = 10001;
   optional bool axis_supports_custom_date_format = 10002;
 }
-
-extend .TSCH.ChartArchive {
-  optional .TSCH.ChartReferenceLinesArchive reference_lines = 10005;
-}
-
 extend .TSCH.ChartStylePreset {
   optional .TSCH.ChartPresetReferenceLineStylesArchive preset_reference_line_styles = 10000;
 }
-
 extend .TSCH.PropertyValueStorageContainerArchive {
   optional .TSCH.PropertyValueStorageContainerReferenceLinesArchive property_value_storage_container_reference_lines = 10000;
 }
-

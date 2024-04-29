@@ -10,7 +10,6 @@ enum LineJoin {
   RoundJoin = 1;
   BevelJoin = 2;
 }
-
 message EdgeInsetsArchive {
   required float top = 1;
   required float left = 2;
@@ -76,21 +75,23 @@ message ConnectionLinePathSourceArchive {
 }
 
 message EditableBezierPathSourceArchive {
+  enum NodeType {
+    sharp = 1;
+    bezier = 2;
+    smooth = 3;
+  }
   message Node {
     required .TSP.Point inControlPoint = 1;
     required .TSP.Point nodePoint = 2;
     required .TSP.Point outControlPoint = 3;
     required .TSD.EditableBezierPathSourceArchive.NodeType type = 4;
   }
+
   message Subpath {
     repeated .TSD.EditableBezierPathSourceArchive.Node nodes = 1;
     required bool closed = 2;
   }
-  enum NodeType {
-    sharp = 1;
-    bezier = 2;
-    smooth = 3;
-  }
+
   repeated .TSD.EditableBezierPathSourceArchive.Subpath subpaths = 1;
   optional .TSP.Size naturalSize = 2;
 }
@@ -119,15 +120,16 @@ message TransformGradientArchive {
 }
 
 message GradientArchive {
+  enum GradientType {
+    Linear = 0;
+    Radial = 1;
+  }
   message GradientStop {
     optional .TSP.Color color = 1;
     optional float fraction = 2;
     optional float inflection = 3;
   }
-  enum GradientType {
-    Linear = 0;
-    Radial = 1;
-  }
+
   optional .TSD.GradientArchive.GradientType type = 1;
   repeated .TSD.GradientArchive.GradientStop stops = 2;
   optional float opacity = 3;
@@ -237,12 +239,12 @@ message DropShadowArchive {
 }
 
 message ContactShadowArchive {
-  optional float height = 2 [default = 0.2];
+  optional float height = 2 [default = 0.200000003];
   optional float offset = 4 [default = 0];
 }
 
 message CurvedShadowArchive {
-  optional float curve = 1 [default = 0.6];
+  optional float curve = 1 [default = 0.600000024];
 }
 
 message ReflectionArchive {
@@ -322,15 +324,11 @@ message DrawableArchive {
   optional .TSD.GeometryArchive geometry = 1;
   optional .TSP.Reference parent = 2;
   optional .TSD.ExteriorTextWrapArchive exterior_text_wrap = 3;
-  optional string hyperlink_url = 4 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string hyperlink_url = 4;
   optional bool locked = 5;
   optional .TSP.Reference comment = 6;
   optional bool aspect_ratio_locked = 7;
-  optional string accessibility_description = 8 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string accessibility_description = 8;
   repeated .TSP.Reference pencil_annotations = 9;
   optional .TSP.Reference title = 10;
   optional .TSP.Reference caption = 11;
@@ -407,7 +405,7 @@ message ImageArchive {
   optional .TSD.Attribution attribution = 20;
   optional bool should_trace_pdf_content = 21;
   optional bool background_removed = 22;
-  extensions 100 to 999;
+  extensions 100 to 1000;
 }
 
 message MaskArchive {
@@ -433,12 +431,8 @@ message MovieArchive {
   required .TSD.DrawableArchive super = 1;
   optional .TSP.DataReference movieData = 14;
   optional .TSP.DataReference importedAuxiliaryMovieData = 22;
-  optional string imported_auxiliary_movie_data_original_filename = 25 [(.TSP.field_options) = {
-    metadata_type: Media
-  }];
-  optional string movieRemoteURL = 17 [(.TSP.field_options) = {
-    metadata_type: Media
-  }];
+  optional string imported_auxiliary_movie_data_original_filename = 25;
+  optional string movieRemoteURL = 17;
   optional float startTime = 3;
   optional float endTime = 4;
   optional float posterTime = 5;
@@ -464,7 +458,7 @@ message MovieArchive {
   optional .TSD.Attribution attribution = 26;
   optional .TSD.MovieFingerprint fingerprint = 29;
   optional bool is_live_video = 30 [default = false];
-  extensions 100 to 999;
+  extensions 100 to 1000;
 }
 
 message ExteriorTextWrapArchive {
@@ -566,9 +560,7 @@ message InfoHyperlinkSelectionArchive {
 }
 
 message CommentStorageArchive {
-  optional string text = 1 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  optional string text = 1;
   optional .TSP.Date creation_date = 2;
   optional .TSP.Reference author = 3;
   repeated .TSP.Reference replies = 4;
@@ -713,4 +705,3 @@ extend .TSS.CommandPropertyEntryArchive {
   optional .TSD.FillArchive fill = 200;
   optional .TSD.StrokeArchive stroke = 201;
 }
-

@@ -25,4 +25,3 @@ message DatabaseImageDataArchive {
   required .TSP.DatabaseDataArchive super = 1;
   required .TSP.DatabaseImageDataArchive.ImageType type = 2;
 }
-

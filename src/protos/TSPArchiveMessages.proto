@@ -88,6 +88,7 @@ message ComponentDataReference {
     required uint64 object_identifier = 1;
     required uint32 count = 2;
   }
+
   required uint64 data_identifier = 1;
   repeated .TSP.ComponentDataReference.ObjectReference object_reference_list = 2;
 }
@@ -144,9 +145,7 @@ message DataInfo {
   }
   required uint64 identifier = 1;
   required bytes digest = 2;
-  required string preferred_file_name = 3 [(.TSP.field_options) = {
-    metadata_type: Media
-  }];
+  required string preferred_file_name = 3;
   optional string file_name = 4;
   optional string document_resource_locator = 5;
   optional bytes source_bookmark_data = 6;
@@ -170,6 +169,7 @@ message DataMetadataMap {
     required uint64 data_identifier = 1;
     required .TSP.Reference data_metadata = 2;
   }
+
   repeated .TSP.DataMetadataMap.DataMetadataMapEntry data_metadata_entries = 1;
 }
 
@@ -213,6 +213,7 @@ message ObjectSerializationDirectory {
     required uint64 offset = 2;
     required uint64 size = 3;
   }
+
   repeated .TSP.ObjectSerializationDirectory.Entry entries = 1;
 }
 
@@ -243,7 +244,7 @@ message SupportMetadata {
     optional bool is_remote_data_ever = 6 [default = false];
     optional int32 revision_sequence_for_acknowledged_by_server = 7 [default = 0];
   }
+
   optional bool is_in_collaboration_mode = 1;
   repeated .TSP.SupportMetadata.DataCollaborationProperties data_collaboration_properties = 2;
 }
-

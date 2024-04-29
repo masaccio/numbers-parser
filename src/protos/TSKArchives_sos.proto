@@ -19,4 +19,3 @@ message RemoveAuthorIdentifiersCommandArchive {
 message ResetActivityStreamCommandArchive {
   required .TSK.CommandArchive super = 1;
 }
-

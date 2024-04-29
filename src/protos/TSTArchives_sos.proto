@@ -156,4 +156,3 @@ message TableStylePropertyChangeSetArchive {
   optional .TSDSOS.SpecStrokeArchive footer_row_pivot_group_vertical_stroke = 125;
   optional bool footer_row_pivot_group_vertical_stroke_undefined = 126;
 }
-

@@ -43,6 +43,7 @@ message IndexSetArchive {
     required int32 range_begin = 1;
     optional int32 range_end = 2;
   }
+
   repeated .TSCE.IndexSetArchive.IndexSetEntry entries = 1;
 }
 
@@ -51,6 +52,7 @@ message CellCoordSetArchive {
     required uint32 column = 1;
     required .TSCE.IndexSetArchive row_set = 2;
   }
+
   repeated .TSCE.CellCoordSetArchive.ColumnEntry column_entries = 1;
 }
 
@@ -59,6 +61,7 @@ message InternalCellRefSetArchive {
     required uint32 owner_id = 1;
     required .TSCE.CellCoordSetArchive coord_set = 2;
   }
+
   repeated .TSCE.InternalCellRefSetArchive.OwnerEntry owner_entries = 1;
 }
 
@@ -77,6 +80,7 @@ message CellRefSetArchive {
     required .TSP.UUID owner_uid = 1;
     required .TSCE.CellCoordSetArchive coord_set = 2;
   }
+
   repeated .TSCE.CellRefSetArchive.OwnerEntry owner_entries = 1;
 }
 
@@ -85,6 +89,7 @@ message UidCoordSetArchive {
     required .TSP.UUID column = 1;
     repeated .TSP.UUID row_set = 2;
   }
+
   repeated .TSCE.UidCoordSetArchive.ColumnEntry column_entries = 1;
 }
 
@@ -93,6 +98,7 @@ message UidCellRefSetArchive {
     required .TSP.UUID owner_uid = 1;
     required .TSCE.UidCoordSetArchive coord_set = 2;
   }
+
   repeated .TSCE.UidCellRefSetArchive.OwnerEntry owner_entries = 1;
 }
 
@@ -110,10 +116,12 @@ message CoordMapperArchive {
     required uint32 base_column_or_row = 1;
     required uint32 view_column_or_row = 2;
   }
+
   message SummaryToViewEntry {
     required uint32 summary_column_or_row = 1;
     required uint32 view_column_or_row = 2;
   }
+
   required .TSP.UUID table_uid = 1;
   optional .TSCE.IndexSetArchive summary_rows_set = 2;
   optional .TSCE.IndexSetArchive summary_columns_set = 3;
@@ -275,6 +283,7 @@ message RangePrecedentsTileArchive {
     required .TSCE.CellCoordinateArchive from_coord = 1;
     required .TSCE.CellRectArchive refers_to_rect = 2;
   }
+
   required uint32 to_owner_id = 1;
   repeated .TSCE.RangePrecedentsTileArchive.FromToRangeArchive from_to_range = 2;
 }
@@ -284,20 +293,22 @@ message RangeDependenciesTiledArchive {
 }
 
 message SpanningDependenciesArchive {
+  enum RangeContext {
+    DEFAULT = 0;
+    INCLUDE_HEADERS = 1;
+  }
   message ReferringColumnToLocalCells {
     required uint32 column = 1;
     required .TSCE.SpanningDependenciesArchive.RangeContext range_context = 2;
     repeated .TSCE.CellCoordinateArchive cell_coordinate = 3;
   }
+
   message ReferringColumnToRemoteCells {
     required uint32 column = 1;
     required .TSCE.SpanningDependenciesArchive.RangeContext range_context = 2;
     repeated .TSCE.InternalCellReferenceArchive internal_cell_reference = 3;
   }
-  enum RangeContext {
-    DEFAULT = 0;
-    INCLUDE_HEADERS = 1;
-  }
+
   repeated uint32 column = 1;
   repeated .TSCE.SpanningDependenciesArchive.RangeContext range_context = 2;
   repeated .TSCE.CellReferenceArchive cell = 3;
@@ -308,23 +319,26 @@ message SpanningDependenciesArchive {
 }
 
 message SpanningDependenciesExpandedArchive {
+  enum RangeContext {
+    DEFAULT = 0;
+    INCLUDE_HEADERS = 1;
+  }
   message ExtentRange {
     required uint32 extent_begin = 1;
     optional uint32 extent_end = 2;
   }
+
   message ExtentRangeWithTableWithContext {
     required uint32 owner_id = 1;
     required .TSCE.SpanningDependenciesExpandedArchive.RangeContext range_context = 2;
     repeated .TSCE.SpanningDependenciesExpandedArchive.ExtentRange ranges = 3;
   }
+
   message CellCoordRefersToExtents {
     required .TSCE.CellCoordinateArchive coordinate = 1;
     repeated .TSCE.SpanningDependenciesExpandedArchive.ExtentRangeWithTableWithContext ranges_by_table_context = 2;
   }
-  enum RangeContext {
-    DEFAULT = 0;
-    INCLUDE_HEADERS = 1;
-  }
+
   repeated .TSCE.SpanningDependenciesExpandedArchive.CellCoordRefersToExtents coord_refers_to_spans = 1;
   optional .TSCE.RangeCoordinateArchive total_range_for_table = 2;
   optional .TSCE.RangeCoordinateArchive body_range_for_table = 3;
@@ -339,11 +353,6 @@ message WholeOwnerDependenciesExpandedArchive {
 }
 
 message CellErrorsArchive {
-  message ErrorForCell {
-    required .TSCE.CellCoordinateArchive coordinate = 1;
-    required .TSCE.CellErrorsArchive.ErrorFlavor error_flavor = 2;
-    optional .TSCE.InternalCellReferenceArchive err_due_to_cell = 3;
-  }
   enum ErrorFlavor {
     NONE = 0;
     ERROR = 1;
@@ -351,6 +360,12 @@ message CellErrorsArchive {
     CIRCULAR_REF_ERROR = 3;
     UNSUPPORTED_FUNCTION_ERROR = 4;
   }
+  message ErrorForCell {
+    required .TSCE.CellCoordinateArchive coordinate = 1;
+    required .TSCE.CellErrorsArchive.ErrorFlavor error_flavor = 2;
+    optional .TSCE.InternalCellReferenceArchive err_due_to_cell = 3;
+  }
+
   repeated .TSCE.CellErrorsArchive.ErrorForCell errors = 1;
 }
 
@@ -359,14 +374,17 @@ message UuidReferencesArchive {
     required .TSP.UUID owner_uuid = 1;
     optional .TSCE.CellCoordSetArchive coord_set = 2;
   }
+
   message UuidRef {
     required .TSP.UUID uuid = 1;
     optional .TSCE.CellCoordSetArchive coord_set = 2;
   }
+
   message TableWithUuidRef {
     required .TSP.UUID owner_uuid = 1;
     repeated .TSCE.UuidReferencesArchive.UuidRef uuid_refs = 2;
   }
+
   repeated .TSCE.UuidReferencesArchive.TableRef table_refs = 1;
   repeated .TSCE.UuidReferencesArchive.TableWithUuidRef table_uuid_refs = 2;
 }
@@ -411,6 +429,7 @@ message OwnerIDMapArchive {
     required uint32 internal_owner_id = 1;
     required .TSP.CFUUIDArchive owner_id = 2;
   }
+
   repeated .TSCE.OwnerIDMapArchive.OwnerIDMapArchiveEntry map_entry = 1;
   repeated uint32 unregistered_internal_owner_id = 2;
 }
@@ -440,6 +459,7 @@ message RemoteDataValueMapArchive {
     required .TSCE.RemoteDataSpecifierArchive specifier = 1;
     required .TSCE.CellValueArchive value = 2;
   }
+
   repeated .TSCE.RemoteDataValueMapArchive.RemoteDataMapEntry entry = 1;
 }
 
@@ -448,6 +468,7 @@ message StockArchive {
     required uint32 attribute = 1;
     required string value = 2;
   }
+
   required string symbol = 1;
   optional double date = 2;
   repeated .TSCE.StockArchive.AttributeEntry attribute = 3;
@@ -479,6 +500,7 @@ message UuidSetStoreArchive {
     repeated .TSP.UUID uuid = 1;
     required uint32 index_of_set = 2;
   }
+
   repeated .TSCE.UuidSetStoreArchive.UuidSet uuidSet = 1;
 }
 
@@ -488,6 +510,7 @@ message UuidReferenceMapArchive {
     repeated .TSCE.InternalCellReferenceArchive cell_ref = 2;
     optional .TSCE.InternalCellRefSetArchive cell_refs = 3;
   }
+
   repeated .TSCE.UuidReferenceMapArchive.CellRefsForUuid cell_refs_for_uuid = 1;
 }
 
@@ -496,10 +519,12 @@ message GroupByNodeMapArchive {
     required .TSP.UUID group_node_uid = 1;
     optional .TSCE.InternalCellRefSetArchive cell_refs = 3;
   }
+
   message GroupNodesForGroupBy {
     required .TSP.UUID group_by_uid = 1;
     repeated .TSCE.GroupByNodeMapArchive.CellRefsForGroupNode refs_for_group_node = 2;
   }
+
   repeated .TSCE.GroupByNodeMapArchive.GroupNodesForGroupBy refs_for_group_by = 1;
 }
 
@@ -539,6 +564,7 @@ message CategoryReferenceArchive {
   message CatRefUidList {
     repeated .TSP.UUID uid = 1;
   }
+
   required .TSP.UUID group_by_uid = 1;
   required .TSP.UUID column_uid = 2;
   required uint32 aggregate_type = 3;
@@ -555,137 +581,6 @@ message CategoryReferenceArchive {
 }
 
 message ASTNodeArrayArchive {
-  message ASTLocalCellReferenceNodeArchive {
-    required uint32 row_handle = 1;
-    required uint32 column_handle = 2;
-    required uint32 row_is_sticky = 3;
-    required uint32 column_is_sticky = 4;
-  }
-  message ASTCrossTableCellReferenceNodeArchive {
-    required uint32 row_handle = 1;
-    required uint32 column_handle = 2;
-    required uint32 row_is_sticky = 3;
-    required uint32 column_is_sticky = 4;
-    required .TSP.CFUUIDArchive table_id = 5;
-    optional string AST_reference_whitespace_after_sheet_name = 6;
-    optional string AST_reference_whitespace_before_table_name = 7;
-    optional string AST_reference_whitespace_after_table_name = 8;
-    optional string AST_reference_whitespace_before_cell_address = 9;
-  }
-  message ASTColumnCoordinateArchive {
-    required sint32 column = 1;
-    optional bool absolute = 2 [default = false];
-  }
-  message ASTRowCoordinateArchive {
-    required sint32 row = 1;
-    optional bool absolute = 2 [default = false];
-  }
-  message ASTUidList {
-    repeated .TSP.UUID uid = 1;
-  }
-  message ASTUidTract {
-    required .TSCE.ASTNodeArrayArchive.ASTUidList columnUids = 1;
-    required .TSCE.ASTNodeArrayArchive.ASTUidList rowUids = 2;
-    optional bool is_range_ref = 3;
-    optional .TSCE.ASTNodeArrayArchive.ASTUidTractPurpose purpose = 4;
-    optional bool preserve_rectangular = 5 [default = true];
-  }
-  message ASTStickyBits {
-    required bool begin_row_is_absolute = 1;
-    required bool begin_column_is_absolute = 2;
-    required bool end_row_is_absolute = 3;
-    required bool end_column_is_absolute = 4;
-  }
-  message ASTUidTractList {
-    repeated .TSCE.ASTNodeArrayArchive.ASTUidTract tract = 1;
-    required .TSCE.ASTNodeArrayArchive.ASTStickyBits sticky_bits = 2;
-  }
-  message ASTUidCoordinateArchive {
-    required .TSP.UUID column_uid = 1;
-    required .TSP.UUID row_uid = 2;
-    required bool column_absolute = 3;
-    required bool row_absolute = 4;
-  }
-  message ASTCategoryLevels {
-    required uint32 AST_column_group_level = 1;
-    required uint32 AST_row_group_level = 2;
-    optional uint32 AST_agg_index_level = 3;
-  }
-  message ASTCategoryReferenceArchive {
-    required .TSCE.CategoryReferenceArchive category_ref = 1;
-  }
-  message ASTColonTractArchive {
-    message ASTColonTractRelativeRangeArchive {
-      required int32 range_begin = 1;
-      optional int32 range_end = 2;
-    }
-    message ASTColonTractAbsoluteRangeArchive {
-      required uint32 range_begin = 1;
-      optional uint32 range_end = 2;
-    }
-    repeated .TSCE.ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive relative_column = 1;
-    repeated .TSCE.ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive relative_row = 2;
-    repeated .TSCE.ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractAbsoluteRangeArchive absolute_column = 3;
-    repeated .TSCE.ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractAbsoluteRangeArchive absolute_row = 4;
-    optional bool preserve_rectangular = 5 [default = true];
-  }
-  message ASTCrossTableReferenceExtraInfoArchive {
-    required .TSP.CFUUIDArchive table_id = 1;
-    optional string AST_reference_whitespace_after_sheet_name = 2;
-    optional string AST_reference_whitespace_before_table_name = 3;
-    optional string AST_reference_whitespace_after_table_name = 4;
-    optional string AST_reference_whitespace_before_cell_address = 5;
-  }
-  message ASTLetNodeWhitespace {
-    optional string AST_let_whitespace_after_let = 1;
-    optional string AST_let_whitespace_after_identifier = 2;
-    optional string AST_let_whitespace_after_equals = 3;
-    optional string AST_let_whitespace_after_delimiter = 4;
-  }
-  message ASTNodeArchive {
-    required .TSCE.ASTNodeArrayArchive.ASTNodeType AST_node_type = 1;
-    optional uint32 AST_function_node_index = 2;
-    optional uint32 AST_function_node_numArgs = 3;
-    optional double AST_number_node_number = 4;
-    optional bool AST_boolean_node_boolean = 5;
-    optional string AST_string_node_string = 6;
-    optional double AST_date_node_dateNum = 7;
-    optional bool AST_date_node_suppress_date_format = 19;
-    optional bool AST_date_node_suppress_time_format = 20;
-    optional string AST_date_node_date_time_format = 21;
-    optional double AST_duration_node_unitNum = 8;
-    optional int32 AST_duration_node_unit = 9;
-    optional uint32 AST_duration_node_style = 22;
-    optional uint32 AST_duration_node_duration_unit_largest = 23;
-    optional uint32 AST_duration_node_duration_unit_smallest = 24;
-    optional bool AST_duration_node_use_automatic_units = 29;
-    optional bool AST_token_node_boolean = 10;
-    optional uint32 AST_array_node_numCol = 11;
-    optional uint32 AST_array_node_numRow = 12;
-    optional uint32 AST_list_node_numArgs = 13;
-    optional .TSCE.ASTNodeArrayArchive AST_thunk_node_array = 14;
-    optional .TSCE.ASTNodeArrayArchive.ASTLocalCellReferenceNodeArchive AST_local_cell_reference_node_reference = 15;
-    optional .TSCE.ASTNodeArrayArchive.ASTCrossTableCellReferenceNodeArchive AST_cross_table_cell_reference_node_reference = 16;
-    optional string AST_unknown_function_node_string = 17;
-    optional uint32 AST_unknown_function_node_numArgs = 18;
-    optional string AST_whitespace = 25;
-    optional .TSCE.ASTNodeArrayArchive.ASTColumnCoordinateArchive AST_column = 26;
-    optional .TSCE.ASTNodeArrayArchive.ASTRowCoordinateArchive AST_row = 27;
-    optional .TSCE.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive AST_cross_table_reference_extra_info = 28;
-    optional .TSCE.ASTNodeArrayArchive.ASTUidCoordinateArchive AST_uid_coordinate = 30;
-    optional .TSCE.ASTNodeArrayArchive.ASTStickyBits AST_sticky_bits = 33;
-    optional .TSCE.ASTNodeArrayArchive.ASTStickyBits AST_frozen_sticky_bits = 41;
-    optional string AST_let_identifier = 34;
-    optional .TSCE.ASTNodeArrayArchive AST_let_e2 = 35;
-    optional .TSCE.ASTNodeArrayArchive.ASTLetNodeWhitespace AST_let_whitespace = 36;
-    optional uint32 AST_symbol = 37;
-    optional .TSCE.ASTNodeArrayArchive.ASTUidTractList AST_tract_list = 38;
-    optional .TSCE.ASTNodeArrayArchive.ASTCategoryReferenceArchive AST_category_ref = 39;
-    optional .TSCE.ASTNodeArrayArchive.ASTColonTractArchive AST_colon_tract = 40;
-    optional uint64 AST_number_node_decimal_low = 42;
-    optional uint64 AST_number_node_decimal_high = 43;
-    optional .TSCE.ASTNodeArrayArchive.ASTCategoryLevels AST_category_levels = 44;
-  }
   enum ASTNodeType {
     ADDITION_NODE = 1;
     SUBTRACTION_NODE = 2;
@@ -748,6 +643,154 @@ message ASTNodeArrayArchive {
     FULLTUPLE_AGGREGATE_RULE_UID = 8;
     FULLTUPLE_ROW_COLUMN_RULE_VALUE_PAIRS = 9;
   }
+  message ASTLocalCellReferenceNodeArchive {
+    required uint32 row_handle = 1;
+    required uint32 column_handle = 2;
+    required uint32 row_is_sticky = 3;
+    required uint32 column_is_sticky = 4;
+  }
+
+  message ASTCrossTableCellReferenceNodeArchive {
+    required uint32 row_handle = 1;
+    required uint32 column_handle = 2;
+    required uint32 row_is_sticky = 3;
+    required uint32 column_is_sticky = 4;
+    required .TSP.CFUUIDArchive table_id = 5;
+    optional string AST_reference_whitespace_after_sheet_name = 6;
+    optional string AST_reference_whitespace_before_table_name = 7;
+    optional string AST_reference_whitespace_after_table_name = 8;
+    optional string AST_reference_whitespace_before_cell_address = 9;
+  }
+
+  message ASTColumnCoordinateArchive {
+    required sint32 column = 1;
+    optional bool absolute = 2 [default = false];
+  }
+
+  message ASTRowCoordinateArchive {
+    required sint32 row = 1;
+    optional bool absolute = 2 [default = false];
+  }
+
+  message ASTUidList {
+    repeated .TSP.UUID uid = 1;
+  }
+
+  message ASTUidTract {
+    required .TSCE.ASTNodeArrayArchive.ASTUidList columnUids = 1;
+    required .TSCE.ASTNodeArrayArchive.ASTUidList rowUids = 2;
+    optional bool is_range_ref = 3;
+    optional .TSCE.ASTNodeArrayArchive.ASTUidTractPurpose purpose = 4;
+    optional bool preserve_rectangular = 5 [default = true];
+  }
+
+  message ASTStickyBits {
+    required bool begin_row_is_absolute = 1;
+    required bool begin_column_is_absolute = 2;
+    required bool end_row_is_absolute = 3;
+    required bool end_column_is_absolute = 4;
+  }
+
+  message ASTUidTractList {
+    repeated .TSCE.ASTNodeArrayArchive.ASTUidTract tract = 1;
+    required .TSCE.ASTNodeArrayArchive.ASTStickyBits sticky_bits = 2;
+  }
+
+  message ASTUidCoordinateArchive {
+    required .TSP.UUID column_uid = 1;
+    required .TSP.UUID row_uid = 2;
+    required bool column_absolute = 3;
+    required bool row_absolute = 4;
+  }
+
+  message ASTCategoryLevels {
+    required uint32 AST_column_group_level = 1;
+    required uint32 AST_row_group_level = 2;
+    optional uint32 AST_agg_index_level = 3;
+  }
+
+  message ASTCategoryReferenceArchive {
+    required .TSCE.CategoryReferenceArchive category_ref = 1;
+  }
+
+  message ASTColonTractArchive {
+    message ASTColonTractRelativeRangeArchive {
+      required int32 range_begin = 1;
+      optional int32 range_end = 2;
+    }
+
+    message ASTColonTractAbsoluteRangeArchive {
+      required uint32 range_begin = 1;
+      optional uint32 range_end = 2;
+    }
+
+    repeated .TSCE.ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive relative_column = 1;
+    repeated .TSCE.ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive relative_row = 2;
+    repeated .TSCE.ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractAbsoluteRangeArchive absolute_column = 3;
+    repeated .TSCE.ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractAbsoluteRangeArchive absolute_row = 4;
+    optional bool preserve_rectangular = 5 [default = true];
+  }
+
+  message ASTCrossTableReferenceExtraInfoArchive {
+    required .TSP.CFUUIDArchive table_id = 1;
+    optional string AST_reference_whitespace_after_sheet_name = 2;
+    optional string AST_reference_whitespace_before_table_name = 3;
+    optional string AST_reference_whitespace_after_table_name = 4;
+    optional string AST_reference_whitespace_before_cell_address = 5;
+  }
+
+  message ASTLetNodeWhitespace {
+    optional string AST_let_whitespace_after_let = 1;
+    optional string AST_let_whitespace_after_identifier = 2;
+    optional string AST_let_whitespace_after_equals = 3;
+    optional string AST_let_whitespace_after_delimiter = 4;
+  }
+
+  message ASTNodeArchive {
+    required .TSCE.ASTNodeArrayArchive.ASTNodeType AST_node_type = 1;
+    optional uint32 AST_function_node_index = 2;
+    optional uint32 AST_function_node_numArgs = 3;
+    optional double AST_number_node_number = 4;
+    optional bool AST_boolean_node_boolean = 5;
+    optional string AST_string_node_string = 6;
+    optional double AST_date_node_dateNum = 7;
+    optional bool AST_date_node_suppress_date_format = 19;
+    optional bool AST_date_node_suppress_time_format = 20;
+    optional string AST_date_node_date_time_format = 21;
+    optional double AST_duration_node_unitNum = 8;
+    optional int32 AST_duration_node_unit = 9;
+    optional uint32 AST_duration_node_style = 22;
+    optional uint32 AST_duration_node_duration_unit_largest = 23;
+    optional uint32 AST_duration_node_duration_unit_smallest = 24;
+    optional bool AST_duration_node_use_automatic_units = 29;
+    optional bool AST_token_node_boolean = 10;
+    optional uint32 AST_array_node_numCol = 11;
+    optional uint32 AST_array_node_numRow = 12;
+    optional uint32 AST_list_node_numArgs = 13;
+    optional .TSCE.ASTNodeArrayArchive AST_thunk_node_array = 14;
+    optional .TSCE.ASTNodeArrayArchive.ASTLocalCellReferenceNodeArchive AST_local_cell_reference_node_reference = 15;
+    optional .TSCE.ASTNodeArrayArchive.ASTCrossTableCellReferenceNodeArchive AST_cross_table_cell_reference_node_reference = 16;
+    optional string AST_unknown_function_node_string = 17;
+    optional uint32 AST_unknown_function_node_numArgs = 18;
+    optional string AST_whitespace = 25;
+    optional .TSCE.ASTNodeArrayArchive.ASTColumnCoordinateArchive AST_column = 26;
+    optional .TSCE.ASTNodeArrayArchive.ASTRowCoordinateArchive AST_row = 27;
+    optional .TSCE.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive AST_cross_table_reference_extra_info = 28;
+    optional .TSCE.ASTNodeArrayArchive.ASTUidCoordinateArchive AST_uid_coordinate = 30;
+    optional .TSCE.ASTNodeArrayArchive.ASTStickyBits AST_sticky_bits = 33;
+    optional .TSCE.ASTNodeArrayArchive.ASTStickyBits AST_frozen_sticky_bits = 41;
+    optional string AST_let_identifier = 34;
+    optional .TSCE.ASTNodeArrayArchive AST_let_e2 = 35;
+    optional .TSCE.ASTNodeArrayArchive.ASTLetNodeWhitespace AST_let_whitespace = 36;
+    optional uint32 AST_symbol = 37;
+    optional .TSCE.ASTNodeArrayArchive.ASTUidTractList AST_tract_list = 38;
+    optional .TSCE.ASTNodeArrayArchive.ASTCategoryReferenceArchive AST_category_ref = 39;
+    optional .TSCE.ASTNodeArrayArchive.ASTColonTractArchive AST_colon_tract = 40;
+    optional uint64 AST_number_node_decimal_low = 42;
+    optional uint64 AST_number_node_decimal_high = 43;
+    optional .TSCE.ASTNodeArrayArchive.ASTCategoryLevels AST_category_levels = 44;
+  }
+
   repeated .TSCE.ASTNodeArrayArchive.ASTNodeArchive AST_node = 1;
 }
 
@@ -840,14 +883,11 @@ message RewriteTableUIDInfoArchive {
     required .TSP.UUID prev_table_uid = 1;
     required .TSP.UUID new_table_uid = 2;
   }
+
   repeated .TSCE.RewriteTableUIDInfoArchive.TableUIDMapEntryArchive table_uid_map = 1;
 }
 
 message GroupByChangeArchive {
-  message GroupingColumnChangeArchive {
-    required uint32 old_level = 1;
-    required uint32 new_level = 2;
-  }
   enum ChangeType {
     NONE = 0;
     GROUP_VALUE_CHANGE = 1;
@@ -857,6 +897,11 @@ message GroupByChangeArchive {
     PROMOTE = 5;
     DEMOTE = 6;
   }
+  message GroupingColumnChangeArchive {
+    required uint32 old_level = 1;
+    required uint32 new_level = 2;
+  }
+
   required .TSCE.GroupByChangeArchive.ChangeType change_type = 1;
   required .TSP.UUID group_by_uid = 2;
   optional uint32 previous_level = 3;
@@ -877,6 +922,7 @@ message IndexedUidsArchive {
     required .TSP.UUID uid_for_index = 1;
     required uint32 index_for_uid = 2;
   }
+
   repeated .TSCE.IndexedUidsArchive.IndexedUid uids = 1;
 }
 
@@ -1016,9 +1062,7 @@ message NumberCellValueArchive {
 }
 
 message StringCellValueArchive {
-  required string value = 1 [(.TSP.field_options) = {
-    metadata_type: Text
-  }];
+  required string value = 1;
   required .TSK.FormatStructArchive format = 2;
   optional bool format_is_implicit = 3 [deprecated = true];
   optional bool format_is_explicit = 4 [default = false];
@@ -1048,4 +1092,3 @@ message CellValueArchive {
   optional .TSCE.StringCellValueArchive string_value = 5;
   optional .TSCE.ErrorCellValueArchive error_value = 6;
 }
-

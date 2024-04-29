@@ -89,4 +89,3 @@ message MediaStylePropertyChangeSetArchive {
   optional .TSDSOS.SpecReflectionArchive reflection = 7;
   optional bool reflection_undefined = 8;
 }
-

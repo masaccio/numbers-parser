@@ -8,7 +8,6 @@ enum StructuredTextImportType {
   ImportType_DELIMITED = 1;
   ImportType_FIXEDWIDTH = 2;
 }
-
 message TreeNode {
   optional string name = 1;
   repeated .TSP.Reference children = 2;
@@ -47,6 +46,7 @@ message CollaborationCommandHistory {
     optional .TSP.Reference items_array = 1;
     repeated .TSP.Reference transformer_entries = 2;
   }
+
   optional .TSP.UUID local_identifier = 1;
   optional .TSK.CollaborationCommandHistory.ItemList undo_items = 2;
   optional .TSK.CollaborationCommandHistory.ItemList redo_items = 3;
@@ -94,6 +94,7 @@ message FormattingSymbolsArchive {
     required string code = 1;
     required string symbol = 2;
   }
+
   optional string version = 1;
   optional string calendar = 2;
   optional string numbering_system = 3;
@@ -268,7 +269,7 @@ message FormatStructArchive {
   optional bool uses_plus_sign = 43;
   optional string bool_true_string = 44;
   optional string bool_false_string = 45;
-  extensions 10000 to 19999;
+  extensions 10000 to 20000;
 }
 
 message CustomFormatArchive {
@@ -278,6 +279,7 @@ message CustomFormatArchive {
     required .TSK.FormatStructArchive condition_format = 3;
     optional double condition_value_dbl = 4;
   }
+
   required string name = 1;
   required uint32 format_type_pre_bnc = 2;
   required .TSK.FormatStructArchive default_format = 3;
@@ -291,9 +293,7 @@ message CustomFormatListArchive {
 }
 
 message AnnotationAuthorArchive {
-  optional string name = 1 [(.TSP.field_options) = {
-    metadata_type: Author
-  }];
+  optional string name = 1;
   optional .TSP.Color color = 2;
   optional string public_id = 3;
   optional bool is_public_author = 4;
@@ -497,6 +497,7 @@ message CollaborationDocumentSessionState {
     required .TSP.UUID command_identifier = 1;
     repeated .TSP.Reference acknowledgement_observers = 2;
   }
+
   repeated string collaborator_ids = 1;
   repeated .TSP.Reference rsvp_command_queue_items = 3;
   repeated .TSP.Reference collaborator_cursor_transformer_entries = 4;
@@ -596,6 +597,7 @@ message DataReferenceRecord {
     required .TSP.DataReference referenced_data = 2;
     required uint32 reference_count = 3;
   }
+
   repeated .TSK.DataReferenceRecord.ContainerUUIDToReferencedDataPair added_container_uuid_to_referenced_data_pairs = 1;
   repeated .TSK.DataReferenceRecord.ContainerUUIDToReferencedDataPair removed_container_uuid_to_referenced_data_pairs = 2;
   repeated .TSP.DataReference unbounded_referenced_datas = 3;
@@ -615,6 +617,7 @@ message AssetUploadStatusCommandArchive {
     optional string digest = 1;
     optional .TSP.DataUploadStatus upload_status = 2;
   }
+
   required .TSK.CommandArchive super = 1;
   repeated .TSK.AssetUploadStatusCommandArchive.AssetUploadStatusInfo info_list = 2;
 }
@@ -640,7 +643,7 @@ message PencilAnnotationUIState {
 
 message CollaboratorCursorArchive {
   optional .TSP.UUIDPath id_path = 1;
-  extensions 100 to 999;
+  extensions 100 to 1000;
 }
 
 message ActivityStreamArchive {
@@ -752,7 +755,7 @@ message ActivityCursorCollectionPersistenceWrapperArchive {
 }
 
 message ActivityNavigationInfoArchive {
-  extensions 100 to 999;
+  extensions 100 to 1000;
 }
 
 message CommentActivityNavigationInfoArchive {
@@ -769,18 +772,22 @@ message ActivityAuthorCacheArchive {
     required .TSP.UUID identifier = 1;
     required string share_participant_id = 2;
   }
+
   message PublicIDCache {
     required .TSP.UUID identifier = 1;
     required string public_identifier = 2;
   }
+
   message IndexCache {
     required .TSP.UUID identifier = 1;
     required uint64 author_index = 2;
   }
+
   message FirstJoinCache {
     required .TSP.UUID identifier = 1;
     optional .TSP.Date first_join_date = 2;
   }
+
   repeated .TSK.ActivityAuthorCacheArchive.ShareParticipantIDCache share_participant_id_cache = 1;
   repeated .TSK.ActivityAuthorCacheArchive.PublicIDCache fallback_public_id_cache = 3;
   repeated .TSK.ActivityAuthorCacheArchive.IndexCache index_cache = 4;
@@ -806,6 +813,7 @@ message ActivityNotificationParticipantCacheArchive {
     required .TSP.UUID unique_identifier = 1;
     required uint32 attempts = 2;
   }
+
   repeated .TSP.Reference notification_items = 1;
   optional .TSP.Date last_edit_notification_item_sent_date = 2;
   repeated .TSK.ActivityNotificationParticipantCacheArchive.UniqueIdentifierAndAttempts sender_failed_to_enqueue_attempts = 3;
@@ -839,10 +847,12 @@ message ActivityStreamActivityCounterArchive {
     optional int32 action_type = 1;
     optional uint32 count = 2;
   }
+
   message CursorTypeCounter {
     optional int32 cursor_type = 1;
     optional uint32 count = 2;
   }
+
   repeated .TSK.ActivityStreamActivityCounterArchive.ActionTypeCounter action_type_counter = 1;
   repeated .TSK.ActivityStreamActivityCounterArchive.CursorTypeCounter cursor_type_counter = 2;
 }
@@ -852,7 +862,7 @@ message ActivityStreamRemovedAuthorAuditorPendingStateArchive {
     required .TSP.Date date_to_audit = 1;
     required int32 type = 2;
   }
+
   repeated .TSP.UUID current_author_identifiers = 1;
   repeated .TSK.ActivityStreamRemovedAuthorAuditorPendingStateArchive.DateToAuditAndType dates_to_audit = 3;
 }
-

@@ -19,7 +19,6 @@ enum StyleOwnerType {
   chart_series = 4;
   reference_line = 5;
 }
-
 enum StyleSwapType {
   chart_style = 1;
   chart_non_style = 2;
@@ -37,13 +36,11 @@ enum StyleSwapType {
   reference_line_non_style = 14;
   reference_line_theme_style = 15;
 }
-
 enum ApplyPresetBehavior {
   remove_overrides = 1;
   preserve_overrides = 2;
   preserve_appearance = 3;
 }
-
 message StyleOwnerPath {
   repeated .TSP.UUID uuids = 1;
 }
@@ -90,20 +87,24 @@ message CommandMutatePropertiesArchive {
       optional .TSCH.Generated.ChartSeriesGenericPropertyMapArchive series_map = 5;
       optional .TSCH.Generated.ReferenceLineGenericPropertyMapArchive reference_line_map = 6;
     }
+
     optional .TSCH.StyleOwnerPath style_owner_path = 1;
     optional .TSCH.CommandMutatePropertiesArchive.GenericPropertyDeltaMap.GenericMapUnion forward_map = 2;
     optional .TSCH.CommandMutatePropertiesArchive.GenericPropertyDeltaMap.GenericMapUnion reverse_map = 3;
   }
+
   message ParagraphStyleDeltaMap {
     message ParagraphStylePropertyMapArchive {
       optional .TSWP.CharacterStylePropertiesArchive char_properties = 1;
       optional .TSWP.ParagraphStylePropertiesArchive para_properties = 2;
     }
+
     optional .TSCH.StyleOwnerPath style_owner_path = 1;
     optional uint32 paragraph_style_index_property = 2;
     optional .TSCH.CommandMutatePropertiesArchive.ParagraphStyleDeltaMap.ParagraphStylePropertyMapArchive forward_map = 3;
     optional .TSCH.CommandMutatePropertiesArchive.ParagraphStyleDeltaMap.ParagraphStylePropertyMapArchive reverse_map = 4;
   }
+
   required .TSCH.ChartCommandArchive super = 1;
   optional .TSP.Reference rollback_cmd = 2;
   repeated .TSCH.CommandMutatePropertiesArchive.GenericPropertyDeltaMap generic_property_delta_maps = 3;
@@ -122,16 +123,19 @@ message CommandSetFontFamilyArchive {
     optional .TSCH.StyleSwapType swap_type = 1;
     optional uint32 index = 2;
   }
+
   message SemanticParagraphStyleMutationMap {
     message ParagraphStylePropertyMapArchive {
       optional .TSWP.CharacterStylePropertiesArchive char_properties = 1;
       optional .TSWP.ParagraphStylePropertiesArchive para_properties = 2;
     }
+
     optional .TSCH.CommandSetFontFamilyArchive.StyleSemanticTag style_semantic_tag = 1;
     optional uint32 paragraph_style_index_property = 2;
     optional .TSCH.CommandSetFontFamilyArchive.SemanticParagraphStyleMutationMap.ParagraphStylePropertyMapArchive forward_map = 3;
     optional .TSCH.CommandSetFontFamilyArchive.SemanticParagraphStyleMutationMap.ParagraphStylePropertyMapArchive reverse_map = 4;
   }
+
   required .TSCH.ChartCommandArchive super = 1;
   optional .TSP.Reference rollback_cmd = 2;
   optional string new_font_family = 3;
@@ -333,6 +337,7 @@ message CommandReplaceThemePresetArchive {
     required .TSP.Reference style = 1;
     required string identifier = 2;
   }
+
   required .TSK.CommandArchive super = 1;
   required .TSP.Reference theme = 2;
   optional .TSP.Reference old_preset = 3;
@@ -352,6 +357,7 @@ message CommandReplaceCustomFormatArchive {
     optional uint32 format_object_property = 3;
     optional .TSK.FormatStructArchive format_object = 4;
   }
+
   required .TSCH.ChartCommandArchive super = 1;
   optional .TSP.Reference rollback_cmd = 2;
   optional .TSK.FormatStructArchive old_format_object = 3;
@@ -433,4 +439,3 @@ message ChartSubselectionTransformerArchive {
 message CDESelectionTransformerArchive {
   optional .TSP.Reference cde_selection = 1;
 }
-

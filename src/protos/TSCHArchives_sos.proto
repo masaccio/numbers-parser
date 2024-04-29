@@ -822,4 +822,3 @@ message ChartStylePropertyChangeSetArchive {
   optional .TSSSOS.SpecIntegerArchive default_title_paragraph_style_index = 55;
   optional bool default_title_paragraph_style_index_undefined = 56;
 }
-

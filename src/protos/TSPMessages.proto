@@ -11,7 +11,6 @@ enum DataUploadStatus {
   DataUploadStatus_DocumentMayExceedDocumentSizeLimit = 4;
   DataUploadStatus_Expired = 5;
 }
-
 enum SpotlightMetadataType {
   None = 0;
   Text = 1;
@@ -22,7 +21,6 @@ enum SpotlightMetadataType {
   Chart = 6;
   Media = 7;
 }
-
 message Reference {
   required uint64 identifier = 1;
   optional int32 deprecated_type = 2;
@@ -38,6 +36,7 @@ message SparseReferenceArray {
     required uint32 index = 1;
     required .TSP.Reference reference = 2;
   }
+
   required uint32 count = 1;
   repeated .TSP.SparseReferenceArray.Entry entries = 2;
 }
@@ -100,10 +99,6 @@ message Color {
 }
 
 message Path {
-  message Element {
-    required .TSP.Path.ElementType type = 1;
-    repeated .TSP.Point points = 2;
-  }
   enum ElementType {
     moveTo = 1;
     lineTo = 2;
@@ -111,6 +106,11 @@ message Path {
     curveTo = 4;
     closeSubpath = 5;
   }
+  message Element {
+    required .TSP.Path.ElementType type = 1;
+    repeated .TSP.Point points = 2;
+  }
+
   repeated .TSP.Path.Element elements = 1;
 }
 
@@ -119,6 +119,7 @@ message ReferenceDictionary {
     required .TSP.Reference key = 1;
     required .TSP.Reference value = 2;
   }
+
   repeated .TSP.ReferenceDictionary.Entry entries = 1;
 }
 
@@ -164,6 +165,7 @@ message SparseUUIDArray {
     required uint32 index = 1;
     required .TSP.UUID uuid = 2;
   }
+
   required uint32 count = 1;
   repeated .TSP.SparseUUIDArray.Entry entries = 2;
 }
@@ -177,6 +179,7 @@ message SparseUUIDPathArray {
     required uint32 index = 1;
     required .TSP.UUIDPath uuid_path = 2;
   }
+
   required uint32 count = 1;
   repeated .TSP.SparseUUIDPathArray.Entry entries = 2;
 }
@@ -193,6 +196,7 @@ message PasteboardObject {
   repeated .TSP.Reference presets = 10;
   repeated .TSP.Reference top_level_objects = 11;
   optional .TSP.Reference native_content_description = 12;
+  repeated .TSP.Range text_ranges = 13;
 }
 
 message ObjectCollection {
@@ -223,6 +227,7 @@ message LargeStringArraySegment {
   message OptionalElement {
     optional string element = 1;
   }
+
   optional .TSP.LargeArraySegment large_array_segment = 1;
   repeated .TSP.LargeStringArraySegment.OptionalElement elements = 2;
 }
@@ -281,4 +286,3 @@ message FieldOptions {
 extend .google.protobuf.FieldOptions {
   optional .TSP.FieldOptions field_options = 51234;
 }
-

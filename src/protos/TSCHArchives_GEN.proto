@@ -79,9 +79,7 @@ message ChartNonStyleArchive {
   optional .TSK.FormatStructArchive tschchartinfodefaultsummarylabelnumberformat = 32;
   optional int32 tschchartinfodefaultsummarylabelnumberformattype = 31;
   optional bool tschchartinfodefaultsummarylabelshowlabels = 30;
-  optional string tschchartinfodefaulttitle = 23 [(.TSP.field_options) = {
-    metadata_type: Chart
-  }];
+  optional string tschchartinfodefaulttitle = 23;
   extend .TSCH.ChartNonStyleArchive {
     optional .TSCH.Generated.ChartNonStyleArchive current = 10000;
   }
@@ -177,12 +175,8 @@ message ChartAxisNonStyleArchive {
   optional bool tschchartaxismultidatashowserieslabels = 19;
   optional bool tschchartaxiscategoryshowtitle = 13;
   optional bool tschchartaxisvalueshowtitle = 14;
-  optional string tschchartaxiscategorytitle = 15 [(.TSP.field_options) = {
-    metadata_type: Chart
-  }];
-  optional string tschchartaxisvaluetitle = 16 [(.TSP.field_options) = {
-    metadata_type: Chart
-  }];
+  optional string tschchartaxiscategorytitle = 15;
+  optional string tschchartaxisvaluetitle = 16;
   optional .TSCH.ChartsNSNumberDoubleArchive tschchartaxisdefaultusermax = 17;
   optional .TSCH.ChartsNSNumberDoubleArchive tschchartaxisdefaultusermin = 18;
   extend .TSCH.ChartAxisNonStyleArchive {
@@ -643,4 +637,3 @@ message ReferenceLineGenericPropertyMapArchive {
   optional int32 tschreferencelinetype = 9;
   optional int32 tschreferencelinevaluelabelparagraphstyleindex = 10;
 }
-
