@@ -26,13 +26,23 @@ debugger = lldb.SBDebugger.Create()
 debugger.SetAsync(False)
 target = debugger.CreateTargetWithFileAndArch(exe, None)
 
-# Note: original script also created breakpoints on _handleAEOpenEvent
-# but that is too early in Numbers 12.1
-target.BreakpointCreateByName("-[NSApplication _sendFinishLaunchingNotification]")
-target.BreakpointCreateByName("-[NSApplication _crashOnException:]")
+# # Note: original script also created breakpoints on _handleAEOpenEvent
+# # but that is too early in Numbers 12.1
+# target.BreakpointCreateByName("-[NSApplication _sendFinishLaunchingNotification]")
+# target.BreakpointCreateByName("-[NSApplication _crashOnException:]")
 
-# Note: original script skipped [CKContainer containerWithIdentifier:]
-target.BreakpointCreateByRegex("CloudKit")
+# # Note: original script skipped [CKContainer containerWithIdentifier:]
+# target.BreakpointCreateByRegex("CloudKit")
+
+target.BreakpointCreateByName("_sendFinishLaunchingNotification")
+target.BreakpointCreateByName("_handleAEOpenEvent:")
+# To get around the fact that we don't have iCloud entitlements when running re-signed code,
+# let's break in the CloudKit code and early exit the function before it can raise an exception:
+target.BreakpointCreateByName("[CKContainer containerWithIdentifier:]")
+# In later Keynote versions, 'containerWithIdentifier' isn't called directly, but we can break on similar methods:
+# Note: this __lldb_unnamed_symbol hack was determined by painstaking experimentation. It will break again for sure.
+target.BreakpointCreateByRegex("___lldb_unnamed_symbol[0-9]+", "CloudKit")
+
 
 process = target.LaunchSimple(None, None, os.getcwd())
 if not process:
