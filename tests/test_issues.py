@@ -474,3 +474,9 @@ def test_issue_78(configurable_save_file):
 
     # Coverage for Github debug log guard
     assert doc._model.sheet_name(99999999) is None
+
+
+@pytest.mark.experimental
+def test_issue_80():
+    doc = Document("tests/data/issue-80.numbers")
+    assert doc.default_table.cell("B8").value == "AB"
