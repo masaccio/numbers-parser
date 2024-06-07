@@ -480,3 +480,12 @@ def test_issue_78(configurable_save_file):
 def test_issue_80():
     doc = Document("tests/data/issue-80.numbers")
     assert doc.default_table.cell("B8").value == "AB"
+
+
+def test_issue_83():
+    doc = Document()
+    table = doc.default_table
+    table.write(0, 0, "test")
+    with pytest.raises(TypeError) as e:
+        table.set_cell_formatting(0, 0, "text")
+    assert "unsuported cell format type 'text'" in str(e)
