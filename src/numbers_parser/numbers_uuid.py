@@ -5,7 +5,7 @@ from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 
 
 class NumbersUUID(UUID):
-    def __init__(self, uuid=None):
+    def __init__(self, uuid=None) -> None:
         if uuid is None:
             super().__init__(int=uuid1().int)
         elif isinstance(uuid, int):
@@ -33,9 +33,11 @@ class NumbersUUID(UUID):
                 uuid_int = int(uuid["upper"]) << 64 | int(uuid["lower"])
                 super().__init__(int=uuid_int)
             else:
-                raise UnsupportedError("Unsupported UUID dict structure")
+                msg = "Unsupported UUID dict structure"
+                raise UnsupportedError(msg)
         else:
-            raise UnsupportedError(f"Unsupported UUID init type {type(uuid).__name__}")
+            msg = f"Unsupported UUID init type {type(uuid).__name__}"
+            raise UnsupportedError(msg)
 
     @property
     def dict2(self) -> dict:
@@ -69,5 +71,5 @@ class NumbersUUID(UUID):
         uuid_w1 = (self.int >> 32) & 0xFFFFFFFF
         uuid_w0 = self.int & 0xFFFFFFFF
         return TSPMessages.CFUUIDArchive(
-            uuid_w3=uuid_w3, uuid_w2=uuid_w2, uuid_w1=uuid_w1, uuid_w0=uuid_w0
+            uuid_w3=uuid_w3, uuid_w2=uuid_w2, uuid_w1=uuid_w1, uuid_w0=uuid_w0,
         )

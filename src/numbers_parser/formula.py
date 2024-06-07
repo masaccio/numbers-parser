@@ -9,14 +9,14 @@ from numbers_parser.generated.functionmap import FUNCTION_MAP
 
 
 class Formula(list):
-    def __init__(self, model, table_id, row, col):
+    def __init__(self, model, table_id, row, col) -> None:
         self._stack = []
         self._model = model
         self._table_id = table_id
         self.row = row
         self.col = col
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "".join(reversed(self._stack))
 
     def pop(self) -> str:
@@ -268,7 +268,7 @@ NODE_FUNCTION_MAP = {
 
 
 class TableFormulas:
-    def __init__(self, model, table_id):
+    def __init__(self, model, table_id) -> None:
         self._model = model
         self._table_id = table_id
         self._formula_type_lookup = {
@@ -302,7 +302,6 @@ class TableFormulas:
                     UnsupportedWarning,
                     stacklevel=2,
                 )
-                pass
             elif NODE_FUNCTION_MAP[node_type] is not None:
                 func = getattr(formula, NODE_FUNCTION_MAP[node_type])
                 func(row, col, node)

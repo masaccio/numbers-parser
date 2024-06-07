@@ -15,7 +15,7 @@ logger = logging.getLogger(numbers_parser_name)
 
 def command_line_parser():
     parser = argparse.ArgumentParser(
-        description="Export data from Apple Numbers spreadsheet tables"
+        description="Export data from Apple Numbers spreadsheet tables",
     )
     commands = parser.add_mutually_exclusive_group()
     commands.add_argument(
@@ -49,15 +49,15 @@ def command_line_parser():
         help="Dump formatted cells (durations) as they appear in Numbers",
     )
     parser.add_argument(
-        "-s", "--sheet", action="append", help="Names of sheet(s) to include in export"
+        "-s", "--sheet", action="append", help="Names of sheet(s) to include in export",
     )
     parser.add_argument(
-        "-t", "--table", action="append", help="Names of table(s) to include in export"
+        "-t", "--table", action="append", help="Names of table(s) to include in export",
     )
     parser.add_argument("document", nargs="*", help="Document(s) to export")
     parser.add_argument("--debug", default=False, action="store_true", help="Enable debug logging")
     parser.add_argument(
-        "--experimental", default=False, action="store_true", help=argparse.SUPPRESS
+        "--experimental", default=False, action="store_true", help=argparse.SUPPRESS,
     )
     return parser
 

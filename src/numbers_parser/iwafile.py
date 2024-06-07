@@ -21,7 +21,7 @@ debug = logger.debug
 
 
 class IWAFile:
-    def __init__(self, chunks, filename=None):
+    def __init__(self, chunks, filename=None) -> None:
         self.chunks = chunks
         self.filename = filename
 
@@ -59,7 +59,7 @@ class IWAFile:
 
 
 class IWACompressedChunk:
-    def __init__(self, archives):
+    def __init__(self, archives) -> None:
         self.archives = archives
 
     def __eq__(self, other):
@@ -73,7 +73,7 @@ class IWACompressedChunk:
             first_byte = header[0]
             if first_byte != 0x00:
                 raise ValueError(  # pragma: no cover
-                    "IWA chunk does not start with 0x00! (found %x)" % first_byte
+                    "IWA chunk does not start with 0x00! (found %x)" % first_byte,
                 )
 
             length = unpack("<I", bytes(header[1:]) + b"\x00")[0]
@@ -112,18 +112,18 @@ class IWACompressedChunk:
             payloads.append(snappy.compress(uncompressed[:65536]))
             uncompressed = uncompressed[65536:]
         return b"".join(
-            [b"\x00" + struct.pack("<I", len(payload))[:3] + payload for payload in payloads]
+            [b"\x00" + struct.pack("<I", len(payload))[:3] + payload for payload in payloads],
         )
 
 
 class ProtobufPatch:
-    def __init__(self, data):
+    def __init__(self, data) -> None:
         self.data = data
 
     def __eq__(self, other):
         return self.data == other.data  # pragma: no cover
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.data}>"  # pragma: no cover
 
     def to_dict(self):
@@ -141,14 +141,14 @@ class ProtobufPatch:
 
 
 class IWAArchiveSegment:
-    def __init__(self, header, objects):
+    def __init__(self, header, objects) -> None:
         self.header = header
         self.objects = objects
 
     def __eq__(self, other):
         return self.header == other.header and self.objects == other.objects  # pragma: no cover
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         self_str = repr(self.objects).replace("\n", " ").replace("  ", " ")
         return f"<{self.__class__.__name__} identifier={self.header.identifier} objects={self_str}>"
 
@@ -156,8 +156,9 @@ class IWAArchiveSegment:
     def from_buffer(cls, buf, filename=None):
         archive_info, payload = get_archive_info_and_remainder(buf)
         if not repr(archive_info):
+            msg = "Segment doesn't seem to start with an ArchiveInfo!"
             raise ValueError(
-                "Segment doesn't seem to start with an ArchiveInfo!"
+                msg,
             )  # pragma: no cover
 
         payloads = []
@@ -176,7 +177,7 @@ class IWAArchiveSegment:
                     klass = ID_NAME_MAP[message_info.type]
             except KeyError:  # pragma: no cover
                 raise NotImplementedError(
-                    "Don't know how to parse Protobuf message type " + str(message_info.type)
+                    "Don't know how to parse Protobuf message type " + str(message_info.type),
                 ) from None
             try:
                 message_payload = payload[n : n + message_info.length]
@@ -187,7 +188,7 @@ class IWAArchiveSegment:
             except Exception as e:  # pragma: no cover
                 raise ValueError(
                     "Failed to deserialize %s payload of length %d: %s"
-                    % (klass, message_info.length, e)
+                    % (klass, message_info.length, e),
                 ) from None
             payloads.append(output)
             n += message_info.length
@@ -218,14 +219,13 @@ class IWAArchiveSegment:
                 if object_length != provided_length:
                     message_info.length = object_length
             except EncodeError as e:  # pragma: no cover
+                msg = "Failed to encode object: {}\nObject: '{}'\nMessage info: {}".format(e, repr(obj), message_info)
                 raise ValueError(
-                    "Failed to encode object: {}\nObject: '{}'\nMessage info: {}".format(
-                        e, repr(obj), message_info
-                    )
+                    msg,
                 ) from None
         return b"".join(
             [_VarintBytes(self.header.ByteSize()), self.header.SerializeToString()]
-            + [obj.SerializeToString() for obj in self.objects]
+            + [obj.SerializeToString() for obj in self.objects],
         )
 
 
@@ -275,7 +275,7 @@ def create_iwa_segment(id: int, cls: object, object_dict: dict) -> object:
             {
                 "type": type_id,
                 "version": [1, 0, 5],
-            }
+            },
         ],
     }
     object_dict["_pbtype"] = full_name

@@ -16,30 +16,29 @@ debug = logger.debug
 
 
 class IWorkHandler:
-    def __init__(self):
+    def __init__(self) -> None:
         pass  # pragma: nocover
 
     def store_file(self, filename: str, blob: bytes) -> None:
         """Store a profobuf archive."""
-        pass  # pragma: nocover
+        # pragma: nocover
 
     def store_object(self, filename: str, identifier: int, archive: object) -> None:
         """Store a binary blob of data from the iWork package."""
-        pass  # pragma: nocover
+        # pragma: nocover
 
     def allowed_format(self, extension: str) -> bool:
         """bool: Return ``True`` if the filename extension is supported by the handler."""
-        pass  # pragma: nocover
+        # pragma: nocover
 
     def allowed_version(self, version: str) -> bool:
         """bool: Return ``True`` if the document version is allowed."""
-        pass  # pragma: nocover
+        # pragma: nocover
 
 
 class IWork:
-    def __init__(self, handler: IWorkHandler = None):
-        """
-        Create an IWork document handler that can read and write iWork documents
+    def __init__(self, handler: IWorkHandler = None) -> None:
+        """Create an IWork document handler that can read and write iWork documents.
 
         Parameters
         ----------
@@ -51,8 +50,7 @@ class IWork:
 
     @property
     def document_version(self) -> str:
-        """
-        str: the version of the iWork document.
+        """str: the version of the iWork document.
 
         Raises
         ------
@@ -63,7 +61,8 @@ class IWork:
             properties_filename = self._filepath / "Metadata/Properties.plist"
             build_filename = self._filepath / "Metadata/BuildVersionHistory.plist"
             if not properties_filename.exists() or not build_filename.exists():
-                raise FileFormatError("invalid Numbers document (missing files)") from None
+                msg = "invalid Numbers document (missing files)"
+                raise FileFormatError(msg) from None
             with open(properties_filename, "rb") as fh:
                 properties_plist = fh.read()
         else:
@@ -71,11 +70,12 @@ class IWork:
                 x.filename
                 for x in self._zipf.filelist
                 if x.filename.endswith(
-                    ("Metadata/Properties.plist", "Metadata/BuildVersionHistory.plist")
+                    ("Metadata/Properties.plist", "Metadata/BuildVersionHistory.plist"),
                 )
             ]
             if len(metadata) != 2:
-                raise FileFormatError("invalid Numbers document (missing files)") from None
+                msg = "invalid Numbers document (missing files)"
+                raise FileFormatError(msg) from None
             properties_plist = self._zipf.read(sorted(metadata)[-1])
 
         try:
@@ -88,15 +88,14 @@ class IWork:
         return doc_version
 
     def open(self, filepath: Path) -> None:
-        """
-        Open an iWork file and read in the files and archives contained in it.
+        """Open an iWork file and read in the files and archives contained in it.
 
-        Raises
+        Raises:
         ------
         FileFormatError
             If any errors occur extracting data from the archive
 
-        Warns
+        Warns:
         -----
         RuntimeWarning
             If the version of the document is one that the IWork blob handler
@@ -105,9 +104,11 @@ class IWork:
         debug("open: filename=%s", filepath)
         self._filepath = filepath
         if not filepath.exists():
-            raise FileError("no such file or directory")
+            msg = "no such file or directory"
+            raise FileError(msg)
         if not self._handler.allowed_format(filepath.suffix):
-            raise FileFormatError("invalid Numbers document (not a .numbers package/file)")
+            msg = "invalid Numbers document (not a .numbers package/file)"
+            raise FileFormatError(msg)
 
         if filepath.is_dir():
             self._is_package = True
@@ -127,15 +128,18 @@ class IWork:
     def save(self, filepath: Path, file_store: Dict[str, object], package: bool):
         if package:
             if filepath.is_dir():
-                if not filepath.suffix == ".numbers":
-                    raise FileFormatError("invalid Numbers document (not a Numbers package)")
+                if filepath.suffix != ".numbers":
+                    msg = "invalid Numbers document (not a Numbers package)"
+                    raise FileFormatError(msg)
                 if not (filepath / "Index.zip").is_file():
-                    raise FileFormatError("folder is not a numbers package")
+                    msg = "folder is not a numbers package"
+                    raise FileFormatError(msg)
                 # Test existing document is valid
                 self._is_package = True
                 _ = self.document_version
             elif filepath.is_file():
-                raise FileFormatError("cannot overwrite Numbers document file with package")
+                msg = "cannot overwrite Numbers document file with package"
+                raise FileFormatError(msg)
             else:
                 filepath.mkdir()
 
@@ -163,7 +167,7 @@ class IWork:
             zipf.close()
 
     def _open_zipfile(self, filepath: Path):
-        """Open Zip file with the correct filename encoding supported by current python"""
+        """Open Zip file with the correct filename encoding supported by current python."""
         # Coverage is python version dependent, so one path with always fail coverage
         try:
             if version_info.minor >= 11:  # pragma: no cover
@@ -171,11 +175,11 @@ class IWork:
             else:  # pragma: no cover
                 return ZipFile(filepath)
         except BadZipFile:
-            raise FileFormatError("invalid Numbers document") from None
+            msg = "invalid Numbers document"
+            raise FileFormatError(msg) from None
 
     def _read_objects_from_package(self, filepath: Path) -> None:
-        """
-        Read a Numbers package and iterate through all files and directories
+        """Read a Numbers package and iterate through all files and directories
         storing the files blobs and objects though the supplies callbacks.
         """
         for sub_filepath in filepath.iterdir():
@@ -201,12 +205,14 @@ class IWork:
 
     def _store_blob(self, filename: str, blob: bytes) -> None:
         """If blob is an IWA archive, store each archive using the file handler and, if
-        specified, unpack the archives into the object handler."""
+        specified, unpack the archives into the object handler.
+        """
         if filename.endswith(".iwa") and is_iwa_file(blob):
             try:
                 iwaf = IWAFile.from_buffer(blob, filename)
             except Exception as e:
-                raise FileFormatError(f"{filename}: invalid IWA file {filename}") from e
+                msg = f"{filename}: invalid IWA file {filename}"
+                raise FileFormatError(msg) from e
 
             # Data from Numbers always has just one chunk. Some archives
             # have multiple objects though they appear not to contain

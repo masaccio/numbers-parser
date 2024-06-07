@@ -8,7 +8,7 @@ from numbers_parser.iwork import IWork, IWorkHandler
 
 
 class ItemsList:
-    def __init__(self, model, refs, item_class):
+    def __init__(self, model, refs, item_class) -> None:
         self._item_name = item_class.__name__.lower()
         self._items = [item_class(model, id) for id in refs]
 
@@ -17,21 +17,24 @@ class ItemsList:
             if key < 0:
                 key += len(self._items)
             if key >= len(self._items):
-                raise IndexError(f"index {key} out of range")
+                msg = f"index {key} out of range"
+                raise IndexError(msg)
             return self._items[key]
         elif isinstance(key, str):
             for item in self._items:
                 if item.name == key:
                     return item
-            raise KeyError(f"no {self._item_name} named '{key}'")
+            msg = f"no {self._item_name} named '{key}'"
+            raise KeyError(msg)
         else:
             t = type(key).__name__
-            raise LookupError(f"invalid index type {t}")
+            msg = f"invalid index type {t}"
+            raise LookupError(msg)
 
     def __len__(self) -> int:
         return len(self._items)
 
-    def __contains__(self, key):
+    def __contains__(self, key) -> bool:
         return key.lower() in [x.name.lower() for x in self._items]
 
     def append(self, item):
@@ -62,12 +65,12 @@ class ObjectStore(IWorkHandler):
 
     def allowed_format(self, extension: str) -> bool:
         """bool: Return ``True`` if the filename extension is supported by the handler."""
-        return True if extension == ".numbers" else False
+        return extension == ".numbers"
 
     def allowed_version(self, version: str) -> bool:
         """bool: Return ``True`` if the document version is allowed."""
         version = re.sub(r"(\d+)\.(\d+)\.\d+", r"\1.\2", version)
-        return True if version in SUPPORTED_NUMBERS_VERSIONS else False
+        return version in SUPPORTED_NUMBERS_VERSIONS
 
     def new_message_id(self):
         """Return the next available message ID for object creation."""
@@ -115,7 +118,7 @@ class ObjectStore(IWorkHandler):
     def __getitem__(self, key: str):
         return self._objects[key]
 
-    def __contains__(self, key: str):
+    def __contains__(self, key: str) -> bool:
         return key in self._objects
 
     def __len__(self) -> int:

@@ -46,8 +46,7 @@ class Table:
 
 
 class Document:
-    """
-    Create an instance of a new Numbers document.
+    """Create an instance of a new Numbers document.
 
     If ``filename`` is ``None``, an empty document is created using the defaults
     defined by the class constructor. You can optionionally override these
@@ -87,7 +86,7 @@ class Document:
         num_header_cols: Optional[int] = 1,
         num_rows: Optional[int] = DEFAULT_ROW_COUNT,
         num_cols: Optional[int] = DEFAULT_COLUMN_COUNT,
-    ):
+    ) -> None:
         self._model = _NumbersModel(None if filename is None else Path(filename))
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
@@ -120,15 +119,13 @@ class Document:
 
     @property
     def custom_formats(self) -> Dict[str, CustomFormatting]:
-        """
-        Dict[str, :class:`CustomFormatting`]: A dict mapping custom format names
+        """Dict[str, :class:`CustomFormatting`]: A dict mapping custom format names
         to the corresponding custom format.
         """
         return self._model.custom_formats
 
     def save(self, filename: Union[str, Path], package: bool = False) -> None:
-        """
-        Save the document in the specified filename.
+        """Save the document in the specified filename.
 
         Parameters
         ----------
@@ -165,8 +162,7 @@ class Document:
         num_rows: Optional[int] = DEFAULT_ROW_COUNT,
         num_cols: Optional[int] = DEFAULT_COLUMN_COUNT,
     ) -> None:
-        """
-        Add a new sheet to the current document.
+        """Add a new sheet to the current document.
 
         If no sheet name is provided, the next available numbered sheet
         will be generated in the series ``Sheet 1``, ``Sheet 2``, etc.
@@ -182,12 +178,14 @@ class Document:
         num_cols: int, optional, default: 8
             The number of columns in the newly created table
 
-        Raises:
+        Raises
+        ------
             IndexError: If the sheet name already exists in the document.
         """
         if sheet_name is not None:
             if sheet_name in self._sheets:
-                raise IndexError(f"sheet '{sheet_name}' already exists")
+                msg = f"sheet '{sheet_name}' already exists"
+                raise IndexError(msg)
         else:
             sheet_num = 1
             while f"sheet {sheet_num}" in self._sheets:
@@ -201,15 +199,20 @@ class Document:
             Table(
                 self._model,
                 self._model.add_table(
-                    new_sheet_id, table_name, prev_table_id, 0, 0, num_rows, num_cols
+                    new_sheet_id,
+                    table_name,
+                    prev_table_id,
+                    0,
+                    0,
+                    num_rows,
+                    num_cols,
                 ),
-            )
+            ),
         )
         self._sheets.append(new_sheet)
 
     def add_style(self, **kwargs) -> Style:
-        r"""
-        Add a new style to the current document.
+        r"""Add a new style to the current document.
 
         If no style name is provided, the next available numbered style
         will be generated in the series ``Custom Style 1``, ``Custom Style 2``, etc.
@@ -239,13 +242,15 @@ class Document:
             If ``font_size`` is not a ``float``, ``font_name`` is not a ``str``,
             ``bg_image`` is not a :py:class:`~numbers_parser.BackgroundImage`,
             or if any of the ``bool`` parameters are invalid.
-        """  # noqa: E501
+        """
         if "name" in kwargs and kwargs["name"] is not None and kwargs["name"] in self._model.styles:
-            raise IndexError(f"style '{kwargs['name']}' already exists")
+            msg = f"style '{kwargs['name']}' already exists"
+            raise IndexError(msg)
 
         if "bg_image" in kwargs and kwargs["bg_image"] is not None:
             if not isinstance(kwargs["bg_image"], BackgroundImage):
-                raise TypeError("bg_image must be a BackgroundImage object")
+                msg = "bg_image must be a BackgroundImage object"
+                raise TypeError(msg)
             self._model.store_image((kwargs["bg_image"].data), kwargs["bg_image"].filename)
 
         style = Style(**kwargs)
@@ -256,8 +261,7 @@ class Document:
         return style
 
     def add_custom_format(self, **kwargs) -> CustomFormatting:
-        r"""
-        Add a new custom format to the current document.
+        r"""Add a new custom format to the current document.
 
         .. code-block:: python
 
@@ -308,14 +312,16 @@ class Document:
             and kwargs["name"] is not None
             and kwargs["name"] in self._model.custom_formats
         ):
-            raise IndexError(f"format '{kwargs['name']}' already exists")
+            msg = f"format '{kwargs['name']}' already exists"
+            raise IndexError(msg)
 
         if "type" in kwargs:
             format_type = kwargs["type"].upper()
             try:
                 kwargs["type"] = CustomFormattingType[format_type]
             except (KeyError, AttributeError):
-                raise TypeError(f"unsuported cell format type '{format_type}'") from None
+                msg = f"unsuported cell format type '{format_type}'"
+                raise TypeError(msg) from None
 
         custom_format = CustomFormatting(**kwargs)
         if custom_format.name is None:
@@ -330,7 +336,7 @@ class Document:
 
 
 class Sheet:
-    def __init__(self, model, sheet_id):
+    def __init__(self, model, sheet_id) -> None:
         self._sheet_id = sheet_id
         self._model = model
         refs = self._model.table_ids(self._sheet_id)
@@ -402,11 +408,18 @@ class Sheet:
         return self._add_table(table_name, from_table_id, x, y, num_rows, num_cols)
 
     def _add_table(  # noqa: PLR0913
-        self, table_name, from_table_id, x, y, num_rows, num_cols
-    ) -> object:  # noqa: PLR0913
+        self,
+        table_name,
+        from_table_id,
+        x,
+        y,
+        num_rows,
+        num_cols,
+    ) -> object:
         if table_name is not None:
             if table_name in self._tables:
-                raise IndexError(f"table '{table_name}' already exists")
+                msg = f"table '{table_name}' already exists"
+                raise IndexError(msg)
         else:
             table_num = 1
             while f"table {table_num}" in self._tables:
@@ -414,14 +427,20 @@ class Sheet:
             table_name = f"Table {table_num}"
 
         new_table_id = self._model.add_table(
-            self._sheet_id, table_name, from_table_id, x, y, num_rows, num_cols
+            self._sheet_id,
+            table_name,
+            from_table_id,
+            x,
+            y,
+            num_rows,
+            num_cols,
         )
         self._tables.append(Table(self._model, new_table_id))
         return self._tables[-1]
 
 
-class Table(Cacheable):  # noqa: F811
-    def __init__(self, model, table_id):
+class Table(Cacheable):
+    def __init__(self, model, table_id) -> None:
         super().__init__()
         self._model = model
         self._table_id = table_id
@@ -466,18 +485,16 @@ class Table(Cacheable):  # noqa: F811
 
     @property
     def num_header_rows(self) -> int:
-        """
-        int: The number of header rows.
+        """int: The number of header rows.
 
-        Example
+        Example:
         -------
-
         .. code-block:: python
 
             # Add an extra header row
             table.num_header_rows += 1
 
-        Raises
+        Raises:
         ------
         ValueError:
             If the number of headers is negative, exceeds the number of rows in the
@@ -488,27 +505,28 @@ class Table(Cacheable):  # noqa: F811
     @num_header_rows.setter
     def num_header_rows(self, num_headers: int):
         if num_headers < 0:
-            raise ValueError("Number of headers cannot be negative")
+            msg = "Number of headers cannot be negative"
+            raise ValueError(msg)
         elif num_headers > self.num_rows:
-            raise ValueError("Number of headers cannot exceed the number of rows")
+            msg = "Number of headers cannot exceed the number of rows"
+            raise ValueError(msg)
         elif num_headers > MAX_HEADER_COUNT:
-            raise ValueError(f"Number of headers cannot exceed {MAX_HEADER_COUNT} rows")
+            msg = f"Number of headers cannot exceed {MAX_HEADER_COUNT} rows"
+            raise ValueError(msg)
         return self._model.num_header_rows(self._table_id, num_headers)
 
     @property
     def num_header_cols(self) -> int:
-        """
-        int: The number of header columns.
+        """int: The number of header columns.
 
-        Example
+        Example:
         -------
-
         .. code-block:: python
 
             # Add an extra header column
             table.num_header_cols += 1
 
-        Raises
+        Raises:
         ------
         ValueError:
             If the number of headers is negative, exceeds the number of rows in the
@@ -519,11 +537,14 @@ class Table(Cacheable):  # noqa: F811
     @num_header_cols.setter
     def num_header_cols(self, num_headers: int):
         if num_headers < 0:
-            raise ValueError("Number of headers cannot be negative")
+            msg = "Number of headers cannot be negative"
+            raise ValueError(msg)
         elif num_headers > self.num_cols:
-            raise ValueError("Number of headers cannot exceed the number of columns")
+            msg = "Number of headers cannot exceed the number of columns"
+            raise ValueError(msg)
         elif num_headers > MAX_HEADER_COUNT:
-            raise ValueError(f"Number of headers cannot exceed {MAX_HEADER_COUNT} columns")
+            msg = f"Number of headers cannot exceed {MAX_HEADER_COUNT} columns"
+            raise ValueError(msg)
         return self._model.num_header_cols(self._table_id, num_headers)
 
     @property
@@ -536,9 +557,8 @@ class Table(Cacheable):  # noqa: F811
         """int: The table's width in points."""
         return self._model.table_width(self._table_id)
 
-    def row_height(self, row: int, height: int = None) -> int:
-        """
-        The height of a table row in points.
+    def row_height(self, row: int, height: Optional[int] = None) -> int:
+        """The height of a table row in points.
 
         .. code-block:: python
 
@@ -559,7 +579,7 @@ class Table(Cacheable):  # noqa: F811
         """
         return self._model.row_height(self._table_id, row, height)
 
-    def col_width(self, col: int, width: int = None) -> int:
+    def col_width(self, col: int, width: Optional[int] = None) -> int:
         """The width of a table column in points.
 
         Parameters
@@ -603,9 +623,8 @@ class Table(Cacheable):  # noqa: F811
     def merge_ranges(self) -> List[str]:
         """List[str]: The merge ranges of cells in A1 notation.
 
-        Example
+        Example:
         -------
-
         .. code-block:: python
 
             >>> table.merge_ranges
@@ -621,11 +640,10 @@ class Table(Cacheable):  # noqa: F811
                 if cell.is_merged:
                     size = cell.size
                     merge_cells.add(xl_range(row, col, row + size[0] - 1, col + size[1] - 1))
-        return sorted(list(merge_cells))
+        return sorted(merge_cells)
 
     def cell(self, *args) -> Union[Cell, MergedCell]:
-        """
-        Return a single cell in the table.
+        """Return a single cell in the table.
 
         The ``cell()`` method supports two forms of notation to designate the position
         of cells: **Row-column** notation and **A1** notation:
@@ -664,7 +682,7 @@ class Table(Cacheable):  # noqa: F811
             <numbers_parser.cell.TextCell object at 0x105a80b90>
             >>> table.cell("B2").value
             1234.50
-        """  # noqa: E501
+        """
         if isinstance(args[0], str):
             (row, col) = xl_cell_to_rowcol(args[0])
         elif len(args) != 2:
@@ -673,9 +691,11 @@ class Table(Cacheable):  # noqa: F811
             (row, col) = args
 
         if row >= self.num_rows or row < 0:
-            raise IndexError(f"row {row} out of range")
+            msg = f"row {row} out of range"
+            raise IndexError(msg)
         if col >= self.num_cols or col < 0:
-            raise IndexError(f"column {col} out of range")
+            msg = f"column {col} out of range"
+            raise IndexError(msg)
 
         return self._data[row][col]
 
@@ -728,13 +748,17 @@ class Table(Cacheable):  # noqa: F811
         max_col = max_col or self.num_cols - 1
 
         if min_row < 0:
-            raise IndexError(f"row {min_row} out of range")
+            msg = f"row {min_row} out of range"
+            raise IndexError(msg)
         if max_row > self.num_rows:
-            raise IndexError(f"row {max_row} out of range")
+            msg = f"row {max_row} out of range"
+            raise IndexError(msg)
         if min_col < 0:
-            raise IndexError(f"column {min_col} out of range")
+            msg = f"column {min_col} out of range"
+            raise IndexError(msg)
         if max_col > self.num_cols:
-            raise IndexError(f"column {max_col} out of range")
+            msg = f"column {max_col} out of range"
+            raise IndexError(msg)
 
         rows = self.rows()
         for row in range(min_row, max_row + 1):
@@ -792,13 +816,17 @@ class Table(Cacheable):  # noqa: F811
         max_col = max_col or self.num_cols - 1
 
         if min_row < 0:
-            raise IndexError(f"row {min_row} out of range")
+            msg = f"row {min_row} out of range"
+            raise IndexError(msg)
         if max_row > self.num_rows:
-            raise IndexError(f"row {max_row} out of range")
+            msg = f"row {max_row} out of range"
+            raise IndexError(msg)
         if min_col < 0:
-            raise IndexError(f"column {min_col} out of range")
+            msg = f"column {min_col} out of range"
+            raise IndexError(msg)
         if max_col > self.num_cols:
-            raise IndexError(f"column {max_col} out of range")
+            msg = f"column {max_col} out of range"
+            raise IndexError(msg)
 
         rows = self.rows()
         for col in range(min_col, max_col + 1):
@@ -818,9 +846,11 @@ class Table(Cacheable):  # noqa: F811
             values = args[2:]
 
         if row >= MAX_ROW_COUNT:
-            raise IndexError(f"{row} exceeds maximum row {MAX_ROW_COUNT-1}")
+            msg = f"{row} exceeds maximum row {MAX_ROW_COUNT - 1}"
+            raise IndexError(msg)
         if col >= MAX_COL_COUNT:
-            raise IndexError(f"{col} exceeds maximum column {MAX_COL_COUNT-1}")
+            msg = f"{col} exceeds maximum column {MAX_COL_COUNT - 1}"
+            raise IndexError(msg)
 
         for _ in range(self.num_rows, row + 1):
             self.add_row()
@@ -828,11 +858,10 @@ class Table(Cacheable):  # noqa: F811
         for _ in range(self.num_cols, col + 1):
             self.add_column()
 
-        return (row, col) + tuple(values)
+        return (row, col, *tuple(values))
 
     def write(self, *args, style: Optional[Union[Style, str, None]] = None) -> None:
-        """
-        Write a value to a cell and update the style/cell type.
+        """Write a value to a cell and update the style/cell type.
 
         The ``write()`` method supports two forms of notation to designate the position
         of cells: **Row-column** notation and **A1** notation:
@@ -849,7 +878,6 @@ class Table(Cacheable):  # noqa: F811
 
         Parameters
         ----------
-
         row: int
             The row number (zero indexed)
         col: int
@@ -894,10 +922,12 @@ class Table(Cacheable):  # noqa: F811
             self._data[row][col]._style = style
         elif isinstance(style, str):
             if style not in self._model.styles:
-                raise IndexError(f"style '{style}' does not exist")
+                msg = f"style '{style}' does not exist"
+                raise IndexError(msg)
             self._data[row][col]._style = self._model.styles[style]
         else:
-            raise TypeError("style must be a Style object or style name")
+            msg = "style must be a Style object or style name"
+            raise TypeError(msg)
 
     def add_row(
         self,
@@ -905,8 +935,7 @@ class Table(Cacheable):  # noqa: F811
         start_row: Optional[Union[int, None]] = None,
         default: Optional[Union[str, int, float, bool, DateTime, Duration]] = None,
     ) -> None:
-        """
-        Add or insert rows to the table.
+        """Add or insert rows to the table.
 
         Parameters
         ----------
@@ -934,7 +963,8 @@ class Table(Cacheable):  # noqa: F811
             If the default value is unsupported by :py:meth:`numbers_parser.Table.write`.
         """
         if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
-            raise IndexError("Row number not in range for table")
+            msg = "Row number not in range for table"
+            raise IndexError(msg)
 
         if start_row is None:
             start_row = self.num_rows
@@ -959,8 +989,7 @@ class Table(Cacheable):  # noqa: F811
         start_col: Optional[Union[int, None]] = None,
         default: Optional[Union[str, int, float, bool, DateTime, Duration]] = None,
     ) -> None:
-        """
-        Add or insert columns to the table.
+        """Add or insert columns to the table.
 
         Parameters
         ----------
@@ -988,7 +1017,8 @@ class Table(Cacheable):  # noqa: F811
             If the default value is unsupported by :py:meth:`numbers_parser.Table.write`.
         """
         if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
-            raise IndexError("Column number not in range for table")
+            msg = "Column number not in range for table"
+            raise IndexError(msg)
 
         if start_col is None:
             start_col = self.num_cols
@@ -1010,8 +1040,7 @@ class Table(Cacheable):  # noqa: F811
         num_rows: Optional[int] = 1,
         start_row: Optional[Union[int, None]] = None,
     ) -> None:
-        """
-        Delete rows from the table.
+        """Delete rows from the table.
 
         Parameters
         ----------
@@ -1033,7 +1062,8 @@ class Table(Cacheable):  # noqa: F811
             If the start_row is out of range for the table.
         """
         if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
-            raise IndexError("Row number not in range for table")
+            msg = "Row number not in range for table"
+            raise IndexError(msg)
 
         if start_row is not None:
             del self._data[start_row : start_row + num_rows]
@@ -1048,8 +1078,7 @@ class Table(Cacheable):  # noqa: F811
         num_cols: Optional[int] = 1,
         start_col: Optional[Union[int, None]] = None,
     ) -> None:
-        """
-        Add or delete columns columns from the table.
+        """Add or delete columns columns from the table.
 
         Parameters
         ----------
@@ -1065,7 +1094,8 @@ class Table(Cacheable):  # noqa: F811
             If the start_col is out of range for the table.
         """
         if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
-            raise IndexError("Column number not in range for table")
+            msg = "Column number not in range for table"
+            raise IndexError(msg)
 
         for row in range(self.num_rows):
             if start_col is not None:
@@ -1077,8 +1107,7 @@ class Table(Cacheable):  # noqa: F811
         self._model.number_of_columns(self._table_id, self.num_cols)
 
     def merge_cells(self, cell_range: Union[str, List[str]]) -> None:
-        """
-        Convert a cell range or list of cell ranges into merged cells.
+        """Convert a cell range or list of cell ranges into merged cells.
 
         Parameters
         ----------
@@ -1119,8 +1148,7 @@ class Table(Cacheable):  # noqa: F811
                     cell._set_merge(merge_cells.get((row, col)))
 
     def set_cell_border(self, *args):
-        """
-        Set the borders for a cell.
+        """Set the borders for a cell.
 
         Cell references can be row-column offsers or Excel/Numbers-style A1 notation. Borders
         can be applied to multiple sides of a cell by passing a list of sides. The name(s)
@@ -1150,17 +1178,17 @@ class Table(Cacheable):  # noqa: F811
             * **param3** (:py:class:`Border`): The border to add.
             * **param4** (*int*, *optional*, default: 1): The length of the stroke to add.
 
-        Raises
+        Raises:
         ------
         TypeError:
             If an invalid number of arguments is passed or if the types of the arguments
             are invalid.
 
-        Warns
+        Warns:
         -----
         RuntimeWarning:
             If any of the sides to which the border is applied have been merged.
-        """  # noqa: E501
+        """
         (row, col, *args) = self._validate_cell_coords(*args)
         if len(args) == 2:
             (side, border_value) = args
@@ -1168,13 +1196,16 @@ class Table(Cacheable):  # noqa: F811
         elif len(args) == 3:
             (side, border_value, length) = args
         else:
-            raise TypeError("invalid number of arguments to border_value()")
+            msg = "invalid number of arguments to border_value()"
+            raise TypeError(msg)
 
         if not isinstance(border_value, Border):
-            raise TypeError("border value must be a Border object")
+            msg = "border value must be a Border object"
+            raise TypeError(msg)
 
         if not isinstance(length, int):
-            raise TypeError("border length must be an int")
+            msg = "border length must be an int"
+            raise TypeError(msg)
 
         if isinstance(side, list):
             for s in side:
@@ -1213,13 +1244,13 @@ class Table(Cacheable):  # noqa: F811
             for border_row_num in range(row, row + length):
                 self._model.set_cell_border(self._table_id, border_row_num, col, side, border_value)
         else:
-            raise TypeError("side must be a valid border segment")
+            msg = "side must be a valid border segment"
+            raise TypeError(msg)
 
         self._model.add_stroke(self._table_id, row, col, side, border_value, length)
 
     def set_cell_formatting(self, *args: str, **kwargs) -> None:
-        r"""
-        Set the data format for a cell.
+        r"""Set the data format for a cell.
 
         Cell references can be **row-column** offsers or Excel/Numbers-style **A1** notation.
 
@@ -1382,9 +1413,11 @@ class Table(Cacheable):  # noqa: F811
         if len(args) == 1:
             format_type = args[0]
         elif len(args) > 1:
-            raise TypeError("too many positional arguments to set_cell_formatting")
+            msg = "too many positional arguments to set_cell_formatting"
+            raise TypeError(msg)
         else:
-            raise TypeError("no type defined for cell format")
+            msg = "no type defined for cell format"
+            raise TypeError(msg)
 
         if format_type == "custom":
             self._set_cell_custom_format(row, col, **kwargs)
@@ -1393,24 +1426,28 @@ class Table(Cacheable):  # noqa: F811
 
     def _set_cell_custom_format(self, row: int, col: int, **kwargs) -> None:
         if "format" not in kwargs:
-            raise TypeError("no format provided for custom format")
+            msg = "no format provided for custom format"
+            raise TypeError(msg)
 
         custom_format = kwargs["format"]
         if isinstance(custom_format, CustomFormatting):
             custom_format = kwargs["format"]
         elif isinstance(custom_format, str):
             if custom_format not in self._model.custom_formats:
-                raise IndexError(f"format '{custom_format}' does not exist")
+                msg = f"format '{custom_format}' does not exist"
+                raise IndexError(msg)
             custom_format = self._model.custom_formats[custom_format]
         else:
-            raise TypeError("format must be a CustomFormatting object or format name")
+            msg = "format must be a CustomFormatting object or format name"
+            raise TypeError(msg)
 
         cell = self._data[row][col]
         type_name = type(cell).__name__
         format_type_name = custom_format.type.name.lower()
         if type_name not in CUSTOM_FORMATTING_ALLOWED_CELLS[format_type_name]:
+            msg = f"cannot use {format_type_name} formatting for cells of type {type_name}"
             raise TypeError(
-                f"cannot use {format_type_name} formatting for cells of type {type_name}"
+                msg,
             )
 
         format_id = self._model.custom_format_id(self._table_id, custom_format)
@@ -1419,14 +1456,17 @@ class Table(Cacheable):  # noqa: F811
     def _set_cell_data_format(self, row: int, col: int, format_type_name: str, **kwargs) -> None:
         try:
             format_type = FormattingType[format_type_name.upper()]
+            _ = FORMATTING_ALLOWED_CELLS[format_type_name]
         except (KeyError, AttributeError):
-            raise TypeError(f"unsuported cell format type '{format_type_name}'") from None
+            msg = f"unsuported cell format type '{format_type_name}'"
+            raise TypeError(msg) from None
 
         cell = self._data[row][col]
         type_name = type(cell).__name__
         if type_name not in FORMATTING_ALLOWED_CELLS[format_type_name]:
+            msg = f"cannot use {format_type_name} formatting for cells of type {type_name}"
             raise TypeError(
-                f"cannot use {format_type_name} formatting for cells of type {type_name}"
+                msg,
             )
 
         format = Formatting(type=format_type, **kwargs)
@@ -1435,31 +1475,30 @@ class Table(Cacheable):  # noqa: F811
         else:
             control_id = None
 
-        is_currency = True if format_type == FormattingType.CURRENCY else False
+        is_currency = format_type == FormattingType.CURRENCY
         if format_type_name in ["slider", "stepper"]:
             if "control_format" in kwargs:
                 try:
                     control_format = kwargs["control_format"].name
                     number_format_type = FormattingType[control_format]
-                    is_currency = (
-                        True
-                        if kwargs["control_format"] == ControlFormattingType.CURRENCY
-                        else False
-                    )
+                    is_currency = kwargs["control_format"] == ControlFormattingType.CURRENCY
                 except (KeyError, AttributeError):
                     control_format = kwargs["control_format"]
+                    msg = f"unsupported number format '{control_format}' for {format_type_name}"
                     raise TypeError(
-                        f"unsupported number format '{control_format}' for {format_type_name}"
+                        msg,
                     ) from None
             else:
                 number_format_type = FormattingType.NUMBER
             format_id = self._model.format_archive(self._table_id, number_format_type, format)
         elif format_type_name == "popup":
             if cell.value == "" and not format.allow_none:
-                raise IndexError("none value not allowed for popup")
+                msg = "none value not allowed for popup"
+                raise IndexError(msg)
             elif cell.value != "" and cell.value not in format.popup_values:
+                msg = f"current cell value '{cell.value}' does not match any popup values"
                 raise IndexError(
-                    f"current cell value '{cell.value}' does not match any popup values"
+                    msg,
                 )
 
             popup_format_type = FormattingType.TEXT if isinstance(cell, TextCell) else True

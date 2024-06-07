@@ -69,7 +69,7 @@ class NumbersUnpacker(IWorkHandler):
         """Ensure that a path's directory exists."""
         parts = os.path.split(path)
         with contextlib.suppress(OSError):
-            os.makedirs(os.path.join(*([self.output_dir] + list(parts[:-1]))))
+            os.makedirs(os.path.join(*([self.output_dir, *list(parts[:-1])])))
 
     def prettify_uuids(self, obj: object):
         if isinstance(obj, dict):
@@ -110,12 +110,12 @@ class NumbersUnpacker(IWorkHandler):
 
     def allowed_format(self, extension: str) -> bool:
         """bool: Return ``True`` if the filename extension is supported by the handler."""
-        return True if extension == ".numbers" else False
+        return extension == ".numbers"
 
     def allowed_version(self, version: str) -> bool:
         """bool: Return ``True`` if the document version is allowed."""
         version = re.sub(r"(\d+)\.(\d+)\.\d+", r"\1.\2", version)
-        return True if version in SUPPORTED_NUMBERS_VERSIONS else False
+        return version in SUPPORTED_NUMBERS_VERSIONS
 
 
 def main():
@@ -125,7 +125,7 @@ def main():
     parser.add_argument("--hex-uuids", action="store_true", help="print UUIDs as hex")
     parser.add_argument("--pretty-storage", action="store_true", help="pretty print cell storage")
     parser.add_argument(
-        "--compact-json", action="store_true", help="Format JSON compactly as possible"
+        "--compact-json", action="store_true", help="Format JSON compactly as possible",
     )
     parser.add_argument("--pretty", action="store_true", help="Enable all prettifying options")
     parser.add_argument("--output", "-o", help="directory name to unpack into")
@@ -159,7 +159,7 @@ def main():
                         pretty_storage=args.pretty_storage,
                         compact_json=args.compact_json,
                         output_dir=args.output,
-                    )
+                    ),
                 )
                 iwork.open(Path(document))
             except (FileFormatError, FileError) as e:
