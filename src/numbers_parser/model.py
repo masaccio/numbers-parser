@@ -676,7 +676,9 @@ class _NumbersModel(Cacheable):
                     for row in range(row_start, row_end + 1):
                         for col in range(col_start, col_end + 1):
                             self._merge_cells[table_id].add_reference(
-                                row, col, (row_start, col_start, row_end, col_end),
+                                row,
+                                col,
+                                (row_start, col_start, row_end, col_end),
                             )
                     self._merge_cells[table_id].add_anchor(row_start, col_start, size)
 
@@ -699,7 +701,9 @@ class _NumbersModel(Cacheable):
             for row in range(row_start, row_end + 1):
                 for col in range(col_start, col_end + 1):
                     self._merge_cells[table_id].add_reference(
-                        row, col, (row_start, col_start, row_end, col_end),
+                        row,
+                        col,
+                        (row_start, col_start, row_end, col_end),
                     )
             self._merge_cells[table_id].add_anchor(row_start, col_start, (num_rows, num_columns))
 
@@ -711,7 +715,6 @@ class _NumbersModel(Cacheable):
         for sheet_id in self.sheet_ids():  # pragma: no branch
             if table_id in self.table_ids(sheet_id):
                 return sheet_id
-        return None
 
     @cache()
     def table_uuids_to_id(self, table_uuid) -> int:
@@ -719,7 +722,6 @@ class _NumbersModel(Cacheable):
             for table_id in self.table_ids(sheet_id):
                 if table_uuid == self.table_base_id(table_id):
                     return table_id
-        return None
 
     def node_to_ref(self, this_table_id: int, row: int, col: int, node):
         if node.HasField("AST_cross_table_reference_extra_info"):
@@ -858,7 +860,10 @@ class _NumbersModel(Cacheable):
             else:
                 width = current_column_widths[col]
             header = TSTArchives.HeaderStorageBucket.Header(
-                index=col, numberOfCells=num_rows, size=width, hidingState=0,
+                index=col,
+                numberOfCells=num_rows,
+                size=width,
+                hidingState=0,
             )
             buckets.headers.append(header)
 
@@ -866,7 +871,9 @@ class _NumbersModel(Cacheable):
         merge_cells = self.merge_cells(table_id)
 
         merge_map_id, merge_map = self.objects.create_object_from_dict(
-            "CalculationEngine", {}, TSTArchives.MergeRegionMapArchive,
+            "CalculationEngine",
+            {},
+            TSTArchives.MergeRegionMapArchive,
         )
 
         merge_cells = self.merge_cells(table_id)
@@ -881,7 +888,11 @@ class _NumbersModel(Cacheable):
         base_data_store.merge_region_map.CopyFrom(TSPMessages.Reference(identifier=merge_map_id))
 
     def recalculate_row_info(
-        self, table_id: int, data: List, tile_row_offset: int, row: int,
+        self,
+        table_id: int,
+        data: List,
+        tile_row_offset: int,
+        row: int,
     ) -> TSTArchives.TileRowInfo:
         row_info = TSTArchives.TileRowInfo()
         row_info.storage_version = 5
@@ -997,7 +1008,9 @@ class _NumbersModel(Cacheable):
                 "should_use_wide_rows": True,
             }
             tile_id, tile = self.objects.create_object_from_dict(
-                "Index/Tables/Tile-{}", tile_dict, TSTArchives.Tile,
+                "Index/Tables/Tile-{}",
+                tile_dict,
+                TSTArchives.Tile,
             )
             for row in range(row_start, row_end):
                 row_info = self.recalculate_row_info(table_id, data, row_start, row)
@@ -1129,7 +1142,7 @@ class _NumbersModel(Cacheable):
             self.objects[self.table_info_id(x)].super.geometry.position.y
             for x in self.table_ids(sheet_id)
             if x == table_id
-        )
+        )  # pragma: nocover (issue-1333)
 
         return self.table_height(table_id) + y_offset
 
@@ -1192,7 +1205,9 @@ class _NumbersModel(Cacheable):
             TSTArchives.HeaderStorageBucket,
         )
         self.add_component_metadata(
-            column_headers_id, "CalculationEngine", "Tables/HeaderStorageBucket-{}",
+            column_headers_id,
+            "CalculationEngine",
+            "Tables/HeaderStorageBucket-{}",
         )
 
         style_table_id, _ = self.objects.create_object_from_dict(
@@ -1208,7 +1223,9 @@ class _NumbersModel(Cacheable):
             TSTArchives.TableDataList,
         )
         self.add_component_metadata(
-            formula_table_id, "CalculationEngine", "Tables/TableDataList-{}",
+            formula_table_id,
+            "CalculationEngine",
+            "Tables/TableDataList-{}",
         )
 
         format_table_pre_bnc_id, _ = self.objects.create_object_from_dict(
@@ -1236,7 +1253,8 @@ class _NumbersModel(Cacheable):
                 rowTileTree=TSTArchives.TableRBTree(),
                 columnTileTree=TSTArchives.TableRBTree(),
                 tiles=TSTArchives.TileStorage(
-                    tile_size=DEFAULT_TILE_SIZE, should_use_wide_rows=True,
+                    tile_size=DEFAULT_TILE_SIZE,
+                    should_use_wide_rows=True,
                 ),
                 **data_store_refs,
             ),
@@ -1249,7 +1267,9 @@ class _NumbersModel(Cacheable):
         )
 
         self.add_component_metadata(
-            row_headers_id, "CalculationEngine", "Tables/HeaderStorageBucket-{}",
+            row_headers_id,
+            "CalculationEngine",
+            "Tables/HeaderStorageBucket-{}",
         )
         table_model.base_data_store.rowHeaders.buckets.append(
             TSPMessages.Reference(identifier=row_headers_id),
@@ -1356,14 +1376,17 @@ class _NumbersModel(Cacheable):
         )
         owner_id_map.append(
             TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
-                internal_owner_id=next_owner_id, owner_id=formula_owner_uuid.protobuf4,
+                internal_owner_id=next_owner_id,
+                owner_id=formula_owner_uuid.protobuf4,
             ),
         )
 
     def add_sheet(self, sheet_name: str) -> int:
         """Add a new sheet with a copy of a table from another sheet."""
         sheet_id, _ = self.objects.create_object_from_dict(
-            "Document", {"name": sheet_name}, TNArchives.SheetArchive,
+            "Document",
+            {"name": sheet_name},
+            TNArchives.SheetArchive,
         )
 
         self.add_component_reference(sheet_id, "CalculationEngine", DOCUMENT_ID, is_weak=True)
@@ -1793,7 +1816,6 @@ class _NumbersModel(Cacheable):
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,
                 }
-        return None
 
     def cell_text_style(self, cell: Cell) -> object:
         """Return the text style object for the cell or, if none
@@ -1967,7 +1989,12 @@ class _NumbersModel(Cacheable):
         return None
 
     def set_cell_border(  # noqa: PLR0913
-        self, table_id: int, row: int, col: int, side: str, border_value: Border,
+        self,
+        table_id: int,
+        row: int,
+        col: int,
+        side: str,
+        border_value: Border,
     ):
         """Set the 2 borders adjacent to a stroke if within the table range."""
         if side == "top":
@@ -2230,7 +2257,10 @@ def node_to_row_col_ref(node: object, table_name: str, row: int, col: int) -> st
 
 
 def get_storage_buffers_for_row(
-    storage_buffer: bytes, offsets: list, num_cols: int, has_wide_offsets: bool,
+    storage_buffer: bytes,
+    offsets: list,
+    num_cols: int,
+    has_wide_offsets: bool,
 ) -> List[bytes]:
     """Extract storage buffers for each cell in a table row.
 
