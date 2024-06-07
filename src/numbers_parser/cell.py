@@ -820,7 +820,12 @@ class Cell(CellStorageFlags, Cacheable):
 
     @classmethod
     def _from_storage(  # noqa: PLR0913, PLR0912
-        cls, table_id: int, row: int, col: int, buffer: bytearray, model: object,
+        cls,
+        table_id: int,
+        row: int,
+        col: int,
+        buffer: bytearray,
+        model: object,
     ) -> None:
         d128 = None
         double = None
@@ -1029,7 +1034,7 @@ class Cell(CellStorageFlags, Cacheable):
             flags = 2
             length += 8
             cell_type = TSTArchives.durationCellType
-            value = value = pack("<d", float(self.value.total_seconds()))
+            value = pack("<d", float(self.value.total_seconds()))
         elif isinstance(self, EmptyCell):
             flags = 0
             cell_type = TSTArchives.emptyCellValueType
@@ -1139,8 +1144,12 @@ class Cell(CellStorageFlags, Cacheable):
 
         image_id = style.cell_properties.cell_fill.image.imagedata.identifier
         datas = self._model.objects[PACKAGE_ID].datas
-        stored_filename = next(x.file_name for x in datas if x.identifier == image_id)
-        preferred_filename = next(x.preferred_file_name for x in datas if x.identifier == image_id)
+        stored_filename = next(
+            x.file_name for x in datas if x.identifier == image_id
+        )  # pragma: nocover (issue-1333)
+        preferred_filename = next(
+            x.preferred_file_name for x in datas if x.identifier == image_id
+        )  # pragma: nocover (issue-1333)
         all_paths = self._model.objects.file_store.keys()
         image_pathnames = [x for x in all_paths if x == f"Data/{stored_filename}"]
 
@@ -1186,7 +1195,9 @@ class Cell(CellStorageFlags, Cacheable):
                 )
             else:
                 formatted_value = _decode_number_format(
-                    custom_format, self._d128, format_map[format_uuid].name,
+                    custom_format,
+                    self._d128,
+                    format_map[format_uuid].name,
                 )
         elif format.format_type == FormatType.DECIMAL:
             return _format_decimal(self._d128, format)
@@ -1643,7 +1654,8 @@ def _decode_number_format(format, value, name):  # noqa: PLR0912
     if format.currency_code != "":
         # Replace currency code with symbol and no-break space
         custom_format_string = custom_format_string.replace(
-            "\u00a4", format.currency_code + "\u00a0",
+            "\u00a4",
+            format.currency_code + "\u00a0",
         )
 
     if (match := re.search(r"([#0.,]+(E[+]\d+)?)", custom_format_string)) is None:
@@ -1794,7 +1806,9 @@ def _format_decimal(value: float, format, percent: bool = False) -> str:
         else:
             formatted_value = sigfig.round(value, MAX_SIGNIFICANT_DIGITS, type=str, warn=False)
             formatted_value = sigfig.round(
-                formatted_value, decimals=format.decimal_places, type=str,
+                formatted_value,
+                decimals=format.decimal_places,
+                type=str,
             )
         if format.show_thousands_separator:
             formatted_value = sigfig.round(formatted_value, spacer=",", spacing=3, type=str)
