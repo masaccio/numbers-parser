@@ -586,11 +586,10 @@ class CellStorageFlags:
 
 
 class Cell(CellStorageFlags, Cacheable):
-    # fmt: skip
     """.. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """
+          Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """  # fmt: skip
 
     def __init__(self, row: int, col: int, value) -> None:
         self._value = value
@@ -1357,8 +1356,9 @@ class Cell(CellStorageFlags, Cacheable):
 
 class NumberCell(Cell):
     """.. NOTE::
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """
+
+          Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """  # fmt: skip
 
     def __init__(self, row: int, col: int, value: float, cell_type=CellType.NUMBER) -> None:
         self._type = cell_type
@@ -1382,8 +1382,8 @@ class TextCell(Cell):
 class RichTextCell(Cell):
     """.. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """
+          Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """  # fmt: skip
 
     def __init__(self, row: int, col: int, value) -> None:
         super().__init__(row, col, value["text"])
@@ -1442,8 +1442,9 @@ class BulletedTextCell(RichTextCell):
 
 class EmptyCell(Cell):
     """.. NOTE::
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """
+
+          Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """  # fmt: skip
 
     def __init__(self, row: int, col: int) -> None:
         super().__init__(row, col, None)
@@ -1460,8 +1461,9 @@ class EmptyCell(Cell):
 
 class BoolCell(Cell):
     """.. NOTE::
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """
+
+          Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """  # fmt: skip
 
     def __init__(self, row: int, col: int, value: bool) -> None:
         super().__init__(row, col, value)
@@ -1475,8 +1477,9 @@ class BoolCell(Cell):
 
 class DateCell(Cell):
     """.. NOTE::
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """
+
+          Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """  # fmt: skip
 
     def __init__(self, row: int, col: int, value: DateTime) -> None:
         super().__init__(row, col, value)
@@ -1500,8 +1503,8 @@ class DurationCell(Cell):
 class ErrorCell(Cell):
     """.. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """
+          Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """  # fmt: skip
 
     def __init__(self, row: int, col: int) -> None:
         super().__init__(row, col, None)
@@ -1515,8 +1518,8 @@ class ErrorCell(Cell):
 class MergedCell(Cell):
     """.. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """
+          Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """  # fmt: skip
 
     def __init__(self, row: int, col: int) -> None:
         super().__init__(row, col, None)

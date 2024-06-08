@@ -22,6 +22,7 @@ and can be indexed using either list style or dict style indexes:
    'Table 1'
 
 .. NOTE::
+
    Do not instantiate directly. Tables are created by :py:class:`~numbers_parser.Document`.
 
 .. autoclass:: Table()
