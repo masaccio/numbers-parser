@@ -90,12 +90,12 @@ class IWork:
     def open(self, filepath: Path) -> None:
         """Open an iWork file and read in the files and archives contained in it.
 
-        Raises:
+        Raises
         ------
         FileFormatError
             If any errors occur extracting data from the archive
 
-        Warns:
+        Warns
         -----
         RuntimeWarning
             If the version of the document is one that the IWork blob handler

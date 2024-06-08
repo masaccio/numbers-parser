@@ -21,6 +21,7 @@ and can be indexed using either list style or dict style indexes:
    'Sheet 1'
 
 .. NOTE::
+
    Do not instantiate directly. Sheets are created by :py:class:`~numbers_parser.Document`.
 
 .. autoclass:: Sheet()

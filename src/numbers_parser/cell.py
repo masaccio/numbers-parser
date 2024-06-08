@@ -586,7 +586,9 @@ class CellStorageFlags:
 
 
 class Cell(CellStorageFlags, Cacheable):
+    # fmt: skip
     """.. NOTE::
+
     Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
@@ -679,7 +681,7 @@ class Cell(CellStorageFlags, Cacheable):
         bullet or numbering character. Newlines are not included in the
         bullet list.
 
-        Example:
+        Example
         -------
         .. code-block:: python
 
@@ -741,7 +743,7 @@ class Cell(CellStorageFlags, Cacheable):
     def style(self) -> Union[Style, None]:
         """Style | None: The :class:`Style` associated with the cell or ``None``.
 
-        Warns:
+        Warns
         -----
             UnsupportedWarning: On assignment; use
                 :py:meth:`numbers_parser.Table.set_cell_style` instead.
@@ -762,7 +764,7 @@ class Cell(CellStorageFlags, Cacheable):
     def border(self) -> Union[CellBorder, None]:
         """CellBorder| None: The :class:`CellBorder` associated with the cell or ``None``.
 
-        Warns:
+        Warns
         -----
             UnsupportedWarning: On assignment; use
                 :py:meth:`numbers_parser.Table.set_cell_border` instead.
@@ -1379,6 +1381,7 @@ class TextCell(Cell):
 
 class RichTextCell(Cell):
     """.. NOTE::
+
     Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
@@ -1422,7 +1425,7 @@ class RichTextCell(Cell):
         of cells where :py:attr:`numbers_parser.Cell.is_bulleted` is ``True`` is a
         list of text and URL tuples.
 
-        Example:
+        Example
         -------
         .. code-block:: python
 
@@ -1496,6 +1499,7 @@ class DurationCell(Cell):
 
 class ErrorCell(Cell):
     """.. NOTE::
+
     Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
@@ -1510,6 +1514,7 @@ class ErrorCell(Cell):
 
 class MergedCell(Cell):
     """.. NOTE::
+
     Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
