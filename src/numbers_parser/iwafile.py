@@ -13,8 +13,8 @@ from google.protobuf.json_format import MessageToDict, ParseDict
 from google.protobuf.message import EncodeError
 
 from numbers_parser.exceptions import NotImplementedError
+from numbers_parser.generated.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_ID_MAP
 from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
-from numbers_parser.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_ID_MAP
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
@@ -219,7 +219,7 @@ class IWAArchiveSegment:
                 if object_length != provided_length:
                     message_info.length = object_length
             except EncodeError as e:  # pragma: no cover
-                msg = "Failed to encode object: {}\nObject: '{}'\nMessage info: {}".format(e, repr(obj), message_info)
+                msg = f"Failed to encode object: {e}\nObject: '{repr(obj)}'\nMessage info: {message_info}"
                 raise ValueError(
                     msg,
                 ) from None

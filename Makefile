@@ -59,7 +59,7 @@ test:
 BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
 				  src/$(package_c)/generated/fontmap.py \
 				  src/$(package_c)/generated/__init__.py \
-				  src/$(package_c)/mapping.py \
+				  src/$(package_c)/generated/mapping.py \
 				  src/protos/TNArchives.proto
 
 bootstrap: $(BOOTSTRAP_FILES)
@@ -111,7 +111,7 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 	poetry run python3 src/build/protodump.py $(NUMBERS) .bootstrap/protos
 	poetry run python3 src/build/rename_proto_files.py .bootstrap/protos
 
-src/$(package_c)/mapping.py: .bootstrap/mapping.py
+src/$(package_c)/generated/mapping.py: .bootstrap/mapping.py
 	cp $< $@
 
 src/$(package_c)/generated/TNArchives_pb2.py: .bootstrap/protos/TNArchives.proto
