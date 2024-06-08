@@ -108,10 +108,11 @@ profile = "black"
 exclude = [
   # Machine-generated files
   ".bootstrap/*",
+  ".tox/*",
+  ".vscode/*",
   "src/numbers_parser/generated/*",
   # Third-party files not to lint
   "src/debug/lldbutil.py", # Tox
-  ".tox/*",
 ]
 fix = true
 ignore = [
