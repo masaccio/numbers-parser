@@ -126,3 +126,48 @@ def test_empty_rows():
 def test_default_table():
     doc = Document()
     assert doc.default_table.name == "Table 1"
+
+
+def table_titles_test_tunner(doc):
+    for table in doc.sheets[0].tables:
+        test_type = table.cell(0, 0).value
+        assert table.name == test_type
+
+        if "no title" in test_type:
+            assert not table.table_name_enabled
+        else:
+            assert table.table_name_enabled
+
+        if "no caption" in test_type:
+            assert not table.caption_enabled
+            assert table.caption == "caption"
+        else:
+            assert table.caption_enabled
+            assert table.caption == "test: caption"
+
+
+def test_table_titles(configurable_save_file):
+    doc = Document("tests/data/test-titles.numbers")
+    table_titles_test_tunner(doc)
+
+    for table in doc.sheets[0].tables:
+        table.table_name_enabled = not table.table_name_enabled
+        table.caption_enabled = not table.caption_enabled
+        new_test_type = "test: "
+        if table.table_name_enabled:
+            new_test_type += "title, "
+        else:
+            new_test_type += "no title, "
+        if table.caption_enabled:
+            table.caption = "test: caption"
+            new_test_type += "caption"
+        else:
+            new_test_type += "no caption"
+            table.caption = "caption"
+
+        table.name = new_test_type
+        table.write(0, 0, new_test_type)
+    doc.save(configurable_save_file)
+
+    new_doc = Document(configurable_save_file)
+    table_titles_test_tunner(new_doc)

@@ -341,6 +341,23 @@ class _NumbersModel(Cacheable):
         else:
             return self.objects[table_id].table_name_enabled
 
+    def caption_enabled(self, table_id: int, enabled: Optional[bool] = None) -> bool | None:
+        table_info = self.objects[self.table_info_id(table_id)]
+        if enabled is not None:
+            table_info.super.caption_hidden = not enabled
+        else:
+            return not table_info.super.caption_hidden
+
+    def caption_text(self, table_id: int, caption: str = None) -> str | None:
+        table_info = self.objects[self.table_info_id(table_id)]
+        caption_info_id = table_info.super.caption.identifier
+        caption_storage_id = self.objects[caption_info_id].super.owned_storage.identifier
+        caption_text = self.objects[caption_storage_id].text
+        if caption is not None:
+            caption_text[0] = caption
+        else:
+            return caption_text[0]
+
     @cache()
     def table_tiles(self, table_id):
         bds = self.objects[table_id].base_data_store

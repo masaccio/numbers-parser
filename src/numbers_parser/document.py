@@ -484,6 +484,24 @@ class Table(Cacheable):
         self._model.table_name_enabled(self._table_id, enabled)
 
     @property
+    def caption_enabled(self) -> int:
+        """bool: ``True`` if the table caption is visible, ``False`` otherwise."""
+        return self._model.caption_enabled(self._table_id)
+
+    @caption_enabled.setter
+    def caption_enabled(self, enabled: bool) -> None:
+        self._model.caption_enabled(self._table_id, enabled)
+
+    @property
+    def caption(self) -> str:
+        """str: The table's caption text."""
+        return self._model.caption_text(self._table_id)
+
+    @caption.setter
+    def caption(self, caption: str) -> None:
+        self._model.caption_text(self._table_id, caption)
+
+    @property
     def num_header_rows(self) -> int:
         """int: The number of header rows.
 

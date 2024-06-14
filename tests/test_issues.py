@@ -489,3 +489,32 @@ def test_issue_83():
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(0, 0, "text")
     assert "unsuported cell format type 'text'" in str(e)
+
+
+# def test_issue_85():
+#     doc = Document()
+#     table = doc.default_table
+#     doc.save("test0.numbers")
+
+#     assert table.num_rows == DEFAULT_ROW_COUNT
+#     assert table.num_cols == DEFAULT_COLUMN_COUNT
+#     assert table.height == DEFAULT_ROW_COUNT * DEFAULT_ROW_HEIGHT
+#     assert table.width == DEFAULT_COLUMN_COUNT * DEFAULT_COLUMN_WIDTH
+
+#     table.add_row()
+#     table.add_column()
+#     doc.save("test1.numbers")
+
+#     assert table.num_rows == DEFAULT_ROW_COUNT
+#     assert table.num_cols == DEFAULT_COLUMN_COUNT
+#     assert table.height == (DEFAULT_ROW_COUNT + 1) * DEFAULT_ROW_HEIGHT
+#     assert table.width == (DEFAULT_COLUMN_COUNT + 1) * DEFAULT_COLUMN_WIDTH
+#     doc.save("test1.numbers")
+
+#     table.write(25, 25, "TEST")
+#     doc.save("test2.numbers")
+
+#     assert table.num_rows == DEFAULT_ROW_COUNT
+#     assert table.num_cols == DEFAULT_COLUMN_COUNT
+#     assert table.height == 26 * DEFAULT_ROW_HEIGHT
+#     assert table.width == 26 * DEFAULT_COLUMN_WIDTH

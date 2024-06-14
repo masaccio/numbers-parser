@@ -399,9 +399,9 @@ class Border:
 
     .. code-block:: python
 
-        border_style = Border(8.0, RGB(29, 177, 0)
-        table.set_cell_border("B6", "left", border_style, "solid"), 3)
-        table.set_cell_border(6, 1, "right", border_style, "dashes"))
+        border_style = Border(8.0, RGB(29, 177, 0), "solid")
+        table.set_cell_border("B6", "left", border_style, 3)
+        table.set_cell_border(6, 1, "right", border_style)
 
     Parameters
     ----------
