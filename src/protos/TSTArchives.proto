@@ -3,6 +3,7 @@ syntax = "proto2";
 import "TSPMessages.proto";
 import "TSDArchives.proto";
 import "TSKArchives.proto";
+import "TSCKArchives.proto";
 import "TSSArchives.proto";
 import "TSCEArchives.proto";
 import "TSWPArchives.proto";
@@ -1459,7 +1460,7 @@ message CollaboratorTableCursorSubselectionArchive {
   optional .TST.CellUIDListArchive cell_uid_list = 1;
   optional .TST.SelectionTypeArchive selection_type = 3;
   repeated .TSP.UUID row_column_uid_list = 4;
-  extend .TSK.CollaboratorCursorArchive {
+  extend .TSCK.CollaboratorCursorArchive {
     optional .TST.CollaboratorTableCursorSubselectionArchive table_cursor_subselection = 200;
   }
 }

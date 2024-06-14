@@ -14,6 +14,7 @@ _sym_db = _symbol_database.Default()
 import numbers_parser.generated.TSDArchives_pb2 as TSDArchives__pb2
 import numbers_parser.generated.TSDCommandArchives_pb2 as TSDCommandArchives__pb2
 import numbers_parser.generated.TSKArchives_pb2 as TSKArchives__pb2
+import numbers_parser.generated.TSCKArchives_pb2 as TSCKArchives__pb2
 import numbers_parser.generated.TSPMessages_pb2 as TSPMessages__pb2
 import numbers_parser.generated.TSWPArchives_pb2 as TSWPArchives__pb2
 import numbers_parser.generated.TSWPCommandArchives_pb2 as TSWPCommandArchives__pb2
@@ -22,102 +23,102 @@ import numbers_parser.generated.TSTArchives_pb2 as TSTArchives__pb2
 import numbers_parser.generated.TSCEArchives_pb2 as TSCEArchives__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11TSAArchives.proto\x12\x03TSA\x1a\x11TSDArchives.proto\x1a\x18TSDCommandArchives.proto\x1a\x11TSKArchives.proto\x1a\x11TSPMessages.proto\x1a\x12TSWPArchives.proto\x1a\x19TSWPCommandArchives.proto\x1a\x11TSSArchives.proto\x1a\x11TSTArchives.proto\x1a\x12TSCEArchives.proto\"\xc5\x05\n\x0f\x44ocumentArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSK.DocumentArchive\x12\x45\n\x19text_preset_display_items\x18\x02 \x03(\x0b\x32\".TSWP.TextPresetDisplayItemArchive\x12\x19\n\x11\x64ocument_language\x18\x03 \x01(\t\x12*\n\x12\x63\x61lculation_engine\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\"\n\nview_state\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x66unction_browser_state\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n\x19tables_custom_format_list\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n!needs_media_compatibility_upgrade\x18\x08 \x01(\x08\x12\x1b\n\x13template_identifier\x18\t \x01(\t\x12+\n\x13shortcut_controller\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x61nnotation_cache_deprecated\x18\x0b \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12\x63ustom_format_list\x18\x0c \x01(\x0b\x32\x0e.TSP.Reference\x12\x35\n\x1d\x61nnotation_cache_deprecated_2\x18\r \x01(\x0b\x32\x0e.TSP.Reference\x12:\n2collaborative_media_compatibility_upgrade_did_fail\x18\x0e \x01(\x08\x12\x14\n\x0c\x63\x61n_use_hevc\x18\x0f \x01(\x08\x12\x19\n\x11is_content_source\x18\x10 \x01(\x08\"\x84\x01\n\x1b\x46unctionBrowserStateArchive\x12\x18\n\x10recent_functions\x18\x01 \x03(\r\x12\x16\n\x0e\x62\x61\x63k_functions\x18\x02 \x03(\r\x12\x19\n\x11\x66orward_functions\x18\x03 \x03(\r\x12\x18\n\x10\x63urrent_function\x18\x04 \x01(\r\"\xb7\x01\n\x13ThemePresetsArchive\x12-\n\x15\x63\x61ption_style_presets\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18svg_import_style_presets\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference2?\n\textension\x12\x11.TSS.ThemeArchive\x18\xd2\x01 \x01(\x0b\x32\x18.TSA.ThemePresetsArchive\"\xa2\x01\n\x19ShortcutControllerArchive\x12@\n\x07\x65ntries\x18\x01 \x03(\x0b\x32/.TSA.ShortcutControllerArchive.ShortcutMapEntry\x1a\x43\n\x10ShortcutMapEntry\x12\x10\n\x08shortcut\x18\x01 \x02(\t\x12\x1d\n\x05style\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\"\x96\x01\n\x1dPropagatePresetCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12-\n\x15preset_change_command\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\x1a\x61lways_preserve_appearance\x18\x03 \x02(\x08\"\xae\x01\n\x16ShortcutCommandArchive\x12\"\n\x05super\x18\x01 \x01(\x0b\x32\x13.TSK.CommandArchive\x12!\n\told_style\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12!\n\tnew_style\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x14\n\x0cold_shortcut\x18\x04 \x01(\t\x12\x14\n\x0cnew_shortcut\x18\x05 \x01(\t\"\x9a\x01\n\x1d\x41\x64\x64\x43ustomFormatCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12/\n\rcustom_format\x18\x02 \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12$\n\x11\x63ustom_format_key\x18\x03 \x01(\x0b\x32\t.TSP.UUID\"\xd2\x01\n UpdateCustomFormatCommandArchive\x12\"\n\x05super\x18\x01 \x01(\x0b\x32\x13.TSK.CommandArchive\x12/\n\rcustom_format\x18\x02 \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12\x33\n\x11old_custom_format\x18\x03 \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12$\n\x11\x63ustom_format_key\x18\x04 \x01(\x0b\x32\t.TSP.UUID\"\xd4\x01\n!ReplaceCustomFormatCommandArchive\x12\"\n\x05super\x18\x01 \x01(\x0b\x32\x13.TSK.CommandArchive\x12/\n\rcustom_format\x18\x02 \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12$\n\x11\x63ustom_format_key\x18\x03 \x01(\x0b\x32\t.TSP.UUID\x12\x34\n\x12replacement_format\x18\x04 \x01(\x0b\x32\x18.TSK.FormatStructArchive\"\xd8\x02\n,NeedsMediaCompatibilityUpgradeCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12)\n!needs_media_compatibility_upgrade\x18\x02 \x01(\x08\x12-\n%old_needs_media_compatibility_upgrade\x18\x03 \x01(\x08\x12:\n2collaborative_media_compatibility_upgrade_did_fail\x18\x04 \x01(\x08\x12>\n6old_collaborative_media_compatibility_upgrade_did_fail\x18\x05 \x01(\x08\x12\x14\n\x0c\x63\x61n_use_hevc\x18\x06 \x01(\x08\x12\x18\n\x10old_can_use_hevc\x18\x07 \x01(\x08\"\xf4\x01\n\"ChangeDocumentLocaleCommandArchive\x12\"\n\x05super\x18\x01 \x01(\x0b\x32\x13.TSK.CommandArchive\x12\x15\n\rold_locale_id\x18\x02 \x01(\t\x12\x15\n\rnew_locale_id\x18\x03 \x01(\t\x12=\n\x16old_formatting_symbols\x18\x04 \x01(\x0b\x32\x1d.TSK.FormattingSymbolsArchive\x12=\n\x16new_formatting_symbols\x18\x05 \x01(\x0b\x32\x1d.TSK.FormattingSymbolsArchive\"\xa9\x02\n,InducedVerifyObjectsWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12!\n\x0eobject_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12 \n\x18object_id_list_undefined\x18\x03 \x01(\x08\x12\'\n\x1fserver_object_s_o_s_string_list\x18\x04 \x03(\t\x12\x31\n)server_object_s_o_s_string_list_undefined\x18\x05 \x01(\x08\x12\x16\n\x0epending_recalc\x18\x06 \x02(\x08\x12\x1c\n\x14remote_data_sync_key\x18\x07 \x02(\x01\"\xd5\x01\n5InducedVerifyTransformHistoryWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x44\n server_operation_storage_entries\x18\x02 \x03(\x0b\x32\x1a.TSK.OperationStorageEntry\x12\x32\n*server_operation_storage_entries_undefined\x18\x03 \x01(\x08\"a\n$StyleUpdatePropertyMapCommandArchive\x12\x39\n\x05super\x18\x01 \x01(\x0b\x32*.TSWP.StyleUpdatePropertyMapCommandArchive\"\xba\x01\n\x1eRemoteDataChangeCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x32\n\tvalue_map\x18\x02 \x02(\x0b\x32\x1f.TSCE.RemoteDataValueMapArchive\x12\"\n\x06quotes\x18\x03 \x03(\x0b\x32\x12.TSCE.StockArchive\x12\x1c\n\x14remote_data_sync_key\x18\x04 \x02(\x01\"\xea\x02\n!GalleryInfoSetValueCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12#\n\x0cinfo_id_path\x18\x02 \x01(\x0b\x32\r.TSP.UUIDPath\x12*\n\x08property\x18\x03 \x01(\x0e\x32\x18.TSA.GalleryInfoProperty\x12\x43\n\x05value\x18\x04 \x01(\x0b\x32\x34.TSA.GalleryInfoSetValueCommandArchive.PropertyValue\x12G\n\told_value\x18\x05 \x01(\x0b\x32\x34.TSA.GalleryInfoSetValueCommandArchive.PropertyValue\x1a\x42\n\rPropertyValue\x12\x31\n\x0c\x63\x61ption_mode\x18\x01 \x01(\x0e\x32\x1b.TSA.GalleryInfoCaptionMode\"\x80\x01\n$GalleryInfoInsertItemsCommandArchive\x12\x39\n\x05super\x18\x01 \x02(\x0b\x32*.TSD.ContainerInsertChildrenCommandArchive\x12\x1d\n\x05items\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\"a\n$GalleryInfoRemoveItemsCommandArchive\x12\x39\n\x05super\x18\x01 \x02(\x0b\x32*.TSD.ContainerRemoveChildrenCommandArchive\"\xc9\x01\n\x1dGalleryItemSetGeometryCommand\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12#\n\x0citem_id_path\x18\x02 \x01(\x0b\x32\r.TSP.UUIDPath\x12\x1a\n\x06offset\x18\x03 \x01(\x0b\x32\n.TSP.Point\x12\x10\n\x05scale\x18\x04 \x01(\x02:\x01\x31\x12\x1e\n\nold_offset\x18\x05 \x01(\x0b\x32\n.TSP.Point\x12\x11\n\told_scale\x18\x06 \x01(\x02\"\x83\x03\n\x0bGalleryItem\x12\x1a\n\x06offset\x18\x01 \x01(\x0b\x32\n.TSP.Point\x12\r\n\x05scale\x18\x02 \x01(\x02\x12&\n\nimage_data\x18\x03 \x01(\x0b\x32\x12.TSP.DataReference\x12\x30\n\x14thumbnail_image_data\x18\x04 \x01(\x0b\x32\x12.TSP.DataReference\x12\x37\n\x11image_adjustments\x18\x05 \x01(\x0b\x32\x1c.TSD.ImageAdjustmentsArchive\x12/\n\x13\x61\x64justed_image_data\x18\x06 \x01(\x0b\x32\x12.TSP.DataReference\x12\x39\n\x1dthumbnail_adjusted_image_data\x18\x07 \x01(\x0b\x32\x12.TSP.DataReference\x12\'\n\x0f\x63\x61ption_storage\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\x12!\n\x19\x61\x63\x63\x65ssibility_description\x18\t \x01(\t\"\xc0\x01\n\x0bGalleryInfo\x12\x1d\n\x05items\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12-\n\x0c\x63\x61ption_mode\x18\x02 \x01(\x0e\x32\x17.TSA.GalleryCaptionMode\x12\'\n\x0f\x63\x61ption_storage\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference2:\n\x0cgallery_info\x12\x11.TSD.ImageArchive\x18\xc8\x01 \x01(\x0b\x32\x10.TSA.GalleryInfo\"\xb2\x01\n\x1bGallerySelectionTransformer\x12\x37\n\x05super\x18\x01 \x02(\x0b\x32(.TSD.DrawableSelectionTransformerArchive\x12(\n\x11gallery_uuid_path\x18\x02 \x01(\x0b\x32\r.TSP.UUIDPath\x12\x30\n\x19\x63\x61ption_storage_uuid_path\x18\x03 \x01(\x0b\x32\r.TSP.UUIDPath\"]\n\x14GalleryItemSelection\x12&\n\x0e\x64isplayed_item\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x05items\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\"\x9b\x01\n\x1fGalleryItemSelectionTransformer\x12\x46\n\x12transformer_helper\x18\x01 \x01(\x0b\x32*.TSA.GalleryItemSelectionTransformerHelper\x12\x30\n\x19\x63\x61ption_storage_uuid_path\x18\x02 \x01(\x0b\x32\r.TSP.UUIDPath\"\x80\x01\n%GalleryItemSelectionTransformerHelper\x12/\n\x18\x64isplayed_item_uuid_path\x18\x01 \x01(\x0b\x32\r.TSP.UUIDPath\x12&\n\x0fitem_uuid_paths\x18\x02 \x03(\x0b\x32\r.TSP.UUIDPath\"\xed\x02\n\x1aGalleryItemSetValueCommand\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12#\n\x0citem_id_path\x18\x02 \x01(\x0b\x32\r.TSP.UUIDPath\x12*\n\x08property\x18\x03 \x01(\x0e\x32\x18.TSA.GalleryItemProperty\x12<\n\x05value\x18\x04 \x01(\x0b\x32-.TSA.GalleryItemSetValueCommand.PropertyValue\x12@\n\told_value\x18\x05 \x01(\x0b\x32-.TSA.GalleryItemSetValueCommand.PropertyValue\x1aZ\n\rPropertyValue\x12&\n\nimage_data\x18\x01 \x01(\x0b\x32\x12.TSP.DataReference\x12!\n\x19\x61\x63\x63\x65ssibility_description\x18\x02 \x01(\t\"\xc4\x01\n\x1d\x43ollaboratorGalleryItemCursor\x12$\n\x11\x64isplayed_item_id\x18\x01 \x01(\x0b\x32\t.TSP.UUID\x12\x1b\n\x08item_ids\x18\x02 \x03(\x0b\x32\t.TSP.UUID2`\n\x13gallery_item_cursor\x12\x1e.TSK.CollaboratorCursorArchive\x18\x90\x03 \x01(\x0b\x32\".TSA.CollaboratorGalleryItemCursor\"\xb0\x01\n\x0cWebVideoInfo\x12\x0b\n\x03url\x18\x01 \x01(\t\x12-\n\x11poster_image_data\x18\x02 \x01(\x0b\x32\x12.TSP.DataReference\x12%\n\x0b\x61ttribution\x18\x03 \x01(\x0b\x32\x10.TSD.Attribution2=\n\x0eweb_video_info\x12\x11.TSD.ImageArchive\x18\xac\x02 \x01(\x0b\x32\x11.TSA.WebVideoInfo\"\\\n\x17\x43\x61ptionPlacementArchive\x12\x1f\n\x17\x63\x61ption_anchor_location\x18\x01 \x01(\x05\x12 \n\x18\x64rawable_anchor_location\x18\x02 \x01(\x05\"\x8e\x01\n\x12\x43\x61ptionInfoArchive\x12%\n\x05super\x18\x01 \x02(\x0b\x32\x16.TSWP.ShapeInfoArchive\x12!\n\tplacement\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\rchildInfoKind\x18\x03 \x01(\x0e\x32\x17.TSD.CaptionOrTitleKind\"\xca\x01\n\x1cTitlePlacementCommandArchive\x12&\n\x05super\x18\x01 \x02(\x0b\x32\x17.TSD.InfoCommandArchive\x12\x38\n\x17placing_child_info_kind\x18\x02 \x01(\x0e\x32\x17.TSD.CaptionOrTitleKind\x12!\n\tplacement\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rold_placement\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\"\xbc\x02\n\x0cObject3DInfo\x12\'\n\x0bobject_data\x18\x01 \x01(\x0b\x32\x12.TSP.DataReference\x12\x18\n\x10plays_animations\x18\x02 \x01(\x08\x12\x1b\n\x06pose3d\x18\x03 \x01(\x0b\x32\x0b.TSP.Pose3D\x12\x1f\n\x0c\x62oundingRect\x18\x04 \x01(\x0b\x32\t.TSP.Rect\x12\x30\n\x14thumbnail_image_data\x18\x05 \x01(\x0b\x32\x12.TSP.DataReference\x12\x1b\n\x13\x65mbedded_animations\x18\x06 \x01(\x08\x12\x1d\n\ntracedPath\x18\x07 \x01(\x0b\x32\t.TSP.Path2=\n\x0eobject_3D_info\x12\x11.TSD.MovieArchive\x18\xc8\x01 \x01(\x0b\x32\x11.TSA.Object3DInfo\"\xb3\x03\n\x1aObject3DInfoCommandArchive\x12&\n\x05super\x18\x01 \x02(\x0b\x32\x17.TSD.InfoCommandArchive\x12\x1c\n\x04info\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12#\n\x0cinfo_id_path\x18\x03 \x01(\x0b\x32\r.TSP.UUIDPath\x12\x30\n\x14thumbnail_image_data\x18\x04 \x01(\x0b\x32\x12.TSP.DataReference\x12\x34\n\x18old_thumbnail_image_data\x18\x05 \x01(\x0b\x32\x12.TSP.DataReference\x12\x1b\n\x06pose3d\x18\x06 \x01(\x0b\x32\x0b.TSP.Pose3D\x12\x1f\n\nold_pose3d\x18\x07 \x01(\x0b\x32\x0b.TSP.Pose3D\x12\x1f\n\x0c\x62oundingRect\x18\x08 \x01(\x0b\x32\t.TSP.Rect\x12\"\n\x0foldBoundingRect\x18\t \x01(\x0b\x32\t.TSP.Rect\x12\x1d\n\ntracedPath\x18\n \x01(\x0b\x32\t.TSP.Path\x12 \n\roldTracedPath\x18\x0b \x01(\x0b\x32\t.TSP.Path\"\xb5\x03\n\"Object3DInfoSetValueCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12-\n\x16object_3d_info_id_path\x18\x02 \x02(\x0b\x32\r.TSP.UUIDPath\x12\x42\n\x08property\x18\x03 \x02(\x0e\x32\x30.TSA.Object3DInfoSetValueCommandArchive.Property\x12\x44\n\x05value\x18\x04 \x01(\x0b\x32\x35.TSA.Object3DInfoSetValueCommandArchive.PropertyValue\x12H\n\told_value\x18\x05 \x01(\x0b\x32\x35.TSA.Object3DInfoSetValueCommandArchive.PropertyValue\x1a:\n\rPropertyValue\x12\x18\n\x10plays_animations\x18\x04 \x01(\x08\x12\x0f\n\x07opacity\x18\n \x01(\x02\",\n\x08Property\x12\x13\n\x0fPlaysAnimations\x10\x03\x12\x0b\n\x07Opacity\x10\t*\x81\x01\n\x16GalleryInfoCaptionMode\x12\x1e\n\x1aGalleryInfoCaptionModeNone\x10\x00\x12\"\n\x1eGalleryInfoCaptionModePerImage\x10\x01\x12#\n\x1fGalleryInfoCaptionModeAllImages\x10\x02*5\n\x13GalleryInfoProperty\x12\x1e\n\x1aGalleryInfoCaptionProperty\x10\x00*q\n\x12GalleryCaptionMode\x12\x1a\n\x16GalleryCaptionModeNone\x10\x00\x12\x1e\n\x1aGalleryCaptionModePerImage\x10\x01\x12\x1f\n\x1bGalleryCaptionModeAllImages\x10\x02*\x93\x01\n\x13GalleryItemProperty\x12 \n\x1cGalleryItemPropertyImageData\x10\x00\x12)\n%GalleryItemPropertyThumbnailImageData\x10\x01\x12/\n+GalleryItemPropertyAccessibilityDescription\x10\x02')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11TSAArchives.proto\x12\x03TSA\x1a\x11TSDArchives.proto\x1a\x18TSDCommandArchives.proto\x1a\x11TSKArchives.proto\x1a\x12TSCKArchives.proto\x1a\x11TSPMessages.proto\x1a\x12TSWPArchives.proto\x1a\x19TSWPCommandArchives.proto\x1a\x11TSSArchives.proto\x1a\x11TSTArchives.proto\x1a\x12TSCEArchives.proto\"\xc5\x05\n\x0f\x44ocumentArchive\x12#\n\x05super\x18\x01 \x02(\x0b\x32\x14.TSK.DocumentArchive\x12\x45\n\x19text_preset_display_items\x18\x02 \x03(\x0b\x32\".TSWP.TextPresetDisplayItemArchive\x12\x19\n\x11\x64ocument_language\x18\x03 \x01(\t\x12*\n\x12\x63\x61lculation_engine\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\x12\"\n\nview_state\x18\x05 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\x16\x66unction_browser_state\x18\x06 \x01(\x0b\x32\x0e.TSP.Reference\x12\x31\n\x19tables_custom_format_list\x18\x07 \x01(\x0b\x32\x0e.TSP.Reference\x12)\n!needs_media_compatibility_upgrade\x18\x08 \x01(\x08\x12\x1b\n\x13template_identifier\x18\t \x01(\t\x12+\n\x13shortcut_controller\x18\n \x01(\x0b\x32\x0e.TSP.Reference\x12\x33\n\x1b\x61nnotation_cache_deprecated\x18\x0b \x01(\x0b\x32\x0e.TSP.Reference\x12*\n\x12\x63ustom_format_list\x18\x0c \x01(\x0b\x32\x0e.TSP.Reference\x12\x35\n\x1d\x61nnotation_cache_deprecated_2\x18\r \x01(\x0b\x32\x0e.TSP.Reference\x12:\n2collaborative_media_compatibility_upgrade_did_fail\x18\x0e \x01(\x08\x12\x14\n\x0c\x63\x61n_use_hevc\x18\x0f \x01(\x08\x12\x19\n\x11is_content_source\x18\x10 \x01(\x08\"\x84\x01\n\x1b\x46unctionBrowserStateArchive\x12\x18\n\x10recent_functions\x18\x01 \x03(\r\x12\x16\n\x0e\x62\x61\x63k_functions\x18\x02 \x03(\r\x12\x19\n\x11\x66orward_functions\x18\x03 \x03(\r\x12\x18\n\x10\x63urrent_function\x18\x04 \x01(\r\"\xb7\x01\n\x13ThemePresetsArchive\x12-\n\x15\x63\x61ption_style_presets\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12\x30\n\x18svg_import_style_presets\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference2?\n\textension\x12\x11.TSS.ThemeArchive\x18\xd2\x01 \x01(\x0b\x32\x18.TSA.ThemePresetsArchive\"\xa2\x01\n\x19ShortcutControllerArchive\x12@\n\x07\x65ntries\x18\x01 \x03(\x0b\x32/.TSA.ShortcutControllerArchive.ShortcutMapEntry\x1a\x43\n\x10ShortcutMapEntry\x12\x10\n\x08shortcut\x18\x01 \x02(\t\x12\x1d\n\x05style\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\"\x96\x01\n\x1dPropagatePresetCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12-\n\x15preset_change_command\x18\x02 \x02(\x0b\x32\x0e.TSP.Reference\x12\"\n\x1a\x61lways_preserve_appearance\x18\x03 \x02(\x08\"\xae\x01\n\x16ShortcutCommandArchive\x12\"\n\x05super\x18\x01 \x01(\x0b\x32\x13.TSK.CommandArchive\x12!\n\told_style\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12!\n\tnew_style\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12\x14\n\x0cold_shortcut\x18\x04 \x01(\t\x12\x14\n\x0cnew_shortcut\x18\x05 \x01(\t\"\x9a\x01\n\x1d\x41\x64\x64\x43ustomFormatCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12/\n\rcustom_format\x18\x02 \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12$\n\x11\x63ustom_format_key\x18\x03 \x01(\x0b\x32\t.TSP.UUID\"\xd2\x01\n UpdateCustomFormatCommandArchive\x12\"\n\x05super\x18\x01 \x01(\x0b\x32\x13.TSK.CommandArchive\x12/\n\rcustom_format\x18\x02 \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12\x33\n\x11old_custom_format\x18\x03 \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12$\n\x11\x63ustom_format_key\x18\x04 \x01(\x0b\x32\t.TSP.UUID\"\xd4\x01\n!ReplaceCustomFormatCommandArchive\x12\"\n\x05super\x18\x01 \x01(\x0b\x32\x13.TSK.CommandArchive\x12/\n\rcustom_format\x18\x02 \x01(\x0b\x32\x18.TSK.CustomFormatArchive\x12$\n\x11\x63ustom_format_key\x18\x03 \x01(\x0b\x32\t.TSP.UUID\x12\x34\n\x12replacement_format\x18\x04 \x01(\x0b\x32\x18.TSK.FormatStructArchive\"\xd8\x02\n,NeedsMediaCompatibilityUpgradeCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12)\n!needs_media_compatibility_upgrade\x18\x02 \x01(\x08\x12-\n%old_needs_media_compatibility_upgrade\x18\x03 \x01(\x08\x12:\n2collaborative_media_compatibility_upgrade_did_fail\x18\x04 \x01(\x08\x12>\n6old_collaborative_media_compatibility_upgrade_did_fail\x18\x05 \x01(\x08\x12\x14\n\x0c\x63\x61n_use_hevc\x18\x06 \x01(\x08\x12\x18\n\x10old_can_use_hevc\x18\x07 \x01(\x08\"\xf4\x01\n\"ChangeDocumentLocaleCommandArchive\x12\"\n\x05super\x18\x01 \x01(\x0b\x32\x13.TSK.CommandArchive\x12\x15\n\rold_locale_id\x18\x02 \x01(\t\x12\x15\n\rnew_locale_id\x18\x03 \x01(\t\x12=\n\x16old_formatting_symbols\x18\x04 \x01(\x0b\x32\x1d.TSK.FormattingSymbolsArchive\x12=\n\x16new_formatting_symbols\x18\x05 \x01(\x0b\x32\x1d.TSK.FormattingSymbolsArchive\"\xa9\x02\n,InducedVerifyObjectsWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12!\n\x0eobject_id_list\x18\x02 \x03(\x0b\x32\t.TSP.UUID\x12 \n\x18object_id_list_undefined\x18\x03 \x01(\x08\x12\'\n\x1fserver_object_s_o_s_string_list\x18\x04 \x03(\t\x12\x31\n)server_object_s_o_s_string_list_undefined\x18\x05 \x01(\x08\x12\x16\n\x0epending_recalc\x18\x06 \x02(\x08\x12\x1c\n\x14remote_data_sync_key\x18\x07 \x02(\x01\"\xd5\x01\n5InducedVerifyTransformHistoryWithServerCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x44\n server_operation_storage_entries\x18\x02 \x03(\x0b\x32\x1a.TSK.OperationStorageEntry\x12\x32\n*server_operation_storage_entries_undefined\x18\x03 \x01(\x08\"a\n$StyleUpdatePropertyMapCommandArchive\x12\x39\n\x05super\x18\x01 \x01(\x0b\x32*.TSWP.StyleUpdatePropertyMapCommandArchive\"\xba\x01\n\x1eRemoteDataChangeCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12\x32\n\tvalue_map\x18\x02 \x02(\x0b\x32\x1f.TSCE.RemoteDataValueMapArchive\x12\"\n\x06quotes\x18\x03 \x03(\x0b\x32\x12.TSCE.StockArchive\x12\x1c\n\x14remote_data_sync_key\x18\x04 \x02(\x01\"\xea\x02\n!GalleryInfoSetValueCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12#\n\x0cinfo_id_path\x18\x02 \x01(\x0b\x32\r.TSP.UUIDPath\x12*\n\x08property\x18\x03 \x01(\x0e\x32\x18.TSA.GalleryInfoProperty\x12\x43\n\x05value\x18\x04 \x01(\x0b\x32\x34.TSA.GalleryInfoSetValueCommandArchive.PropertyValue\x12G\n\told_value\x18\x05 \x01(\x0b\x32\x34.TSA.GalleryInfoSetValueCommandArchive.PropertyValue\x1a\x42\n\rPropertyValue\x12\x31\n\x0c\x63\x61ption_mode\x18\x01 \x01(\x0e\x32\x1b.TSA.GalleryInfoCaptionMode\"\x80\x01\n$GalleryInfoInsertItemsCommandArchive\x12\x39\n\x05super\x18\x01 \x02(\x0b\x32*.TSD.ContainerInsertChildrenCommandArchive\x12\x1d\n\x05items\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\"a\n$GalleryInfoRemoveItemsCommandArchive\x12\x39\n\x05super\x18\x01 \x02(\x0b\x32*.TSD.ContainerRemoveChildrenCommandArchive\"\xc9\x01\n\x1dGalleryItemSetGeometryCommand\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12#\n\x0citem_id_path\x18\x02 \x01(\x0b\x32\r.TSP.UUIDPath\x12\x1a\n\x06offset\x18\x03 \x01(\x0b\x32\n.TSP.Point\x12\x10\n\x05scale\x18\x04 \x01(\x02:\x01\x31\x12\x1e\n\nold_offset\x18\x05 \x01(\x0b\x32\n.TSP.Point\x12\x11\n\told_scale\x18\x06 \x01(\x02\"\x83\x03\n\x0bGalleryItem\x12\x1a\n\x06offset\x18\x01 \x01(\x0b\x32\n.TSP.Point\x12\r\n\x05scale\x18\x02 \x01(\x02\x12&\n\nimage_data\x18\x03 \x01(\x0b\x32\x12.TSP.DataReference\x12\x30\n\x14thumbnail_image_data\x18\x04 \x01(\x0b\x32\x12.TSP.DataReference\x12\x37\n\x11image_adjustments\x18\x05 \x01(\x0b\x32\x1c.TSD.ImageAdjustmentsArchive\x12/\n\x13\x61\x64justed_image_data\x18\x06 \x01(\x0b\x32\x12.TSP.DataReference\x12\x39\n\x1dthumbnail_adjusted_image_data\x18\x07 \x01(\x0b\x32\x12.TSP.DataReference\x12\'\n\x0f\x63\x61ption_storage\x18\x08 \x01(\x0b\x32\x0e.TSP.Reference\x12!\n\x19\x61\x63\x63\x65ssibility_description\x18\t \x01(\t\"\xc0\x01\n\x0bGalleryInfo\x12\x1d\n\x05items\x18\x01 \x03(\x0b\x32\x0e.TSP.Reference\x12-\n\x0c\x63\x61ption_mode\x18\x02 \x01(\x0e\x32\x17.TSA.GalleryCaptionMode\x12\'\n\x0f\x63\x61ption_storage\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference2:\n\x0cgallery_info\x12\x11.TSD.ImageArchive\x18\xc8\x01 \x01(\x0b\x32\x10.TSA.GalleryInfo\"\xb2\x01\n\x1bGallerySelectionTransformer\x12\x37\n\x05super\x18\x01 \x02(\x0b\x32(.TSD.DrawableSelectionTransformerArchive\x12(\n\x11gallery_uuid_path\x18\x02 \x01(\x0b\x32\r.TSP.UUIDPath\x12\x30\n\x19\x63\x61ption_storage_uuid_path\x18\x03 \x01(\x0b\x32\r.TSP.UUIDPath\"]\n\x14GalleryItemSelection\x12&\n\x0e\x64isplayed_item\x18\x01 \x01(\x0b\x32\x0e.TSP.Reference\x12\x1d\n\x05items\x18\x02 \x03(\x0b\x32\x0e.TSP.Reference\"\x9b\x01\n\x1fGalleryItemSelectionTransformer\x12\x46\n\x12transformer_helper\x18\x01 \x01(\x0b\x32*.TSA.GalleryItemSelectionTransformerHelper\x12\x30\n\x19\x63\x61ption_storage_uuid_path\x18\x02 \x01(\x0b\x32\r.TSP.UUIDPath\"\x80\x01\n%GalleryItemSelectionTransformerHelper\x12/\n\x18\x64isplayed_item_uuid_path\x18\x01 \x01(\x0b\x32\r.TSP.UUIDPath\x12&\n\x0fitem_uuid_paths\x18\x02 \x03(\x0b\x32\r.TSP.UUIDPath\"\xed\x02\n\x1aGalleryItemSetValueCommand\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12#\n\x0citem_id_path\x18\x02 \x01(\x0b\x32\r.TSP.UUIDPath\x12*\n\x08property\x18\x03 \x01(\x0e\x32\x18.TSA.GalleryItemProperty\x12<\n\x05value\x18\x04 \x01(\x0b\x32-.TSA.GalleryItemSetValueCommand.PropertyValue\x12@\n\told_value\x18\x05 \x01(\x0b\x32-.TSA.GalleryItemSetValueCommand.PropertyValue\x1aZ\n\rPropertyValue\x12&\n\nimage_data\x18\x01 \x01(\x0b\x32\x12.TSP.DataReference\x12!\n\x19\x61\x63\x63\x65ssibility_description\x18\x02 \x01(\t\"\xc5\x01\n\x1d\x43ollaboratorGalleryItemCursor\x12$\n\x11\x64isplayed_item_id\x18\x01 \x01(\x0b\x32\t.TSP.UUID\x12\x1b\n\x08item_ids\x18\x02 \x03(\x0b\x32\t.TSP.UUID2a\n\x13gallery_item_cursor\x12\x1f.TSCK.CollaboratorCursorArchive\x18\x90\x03 \x01(\x0b\x32\".TSA.CollaboratorGalleryItemCursor\"\xb0\x01\n\x0cWebVideoInfo\x12\x0b\n\x03url\x18\x01 \x01(\t\x12-\n\x11poster_image_data\x18\x02 \x01(\x0b\x32\x12.TSP.DataReference\x12%\n\x0b\x61ttribution\x18\x03 \x01(\x0b\x32\x10.TSD.Attribution2=\n\x0eweb_video_info\x12\x11.TSD.ImageArchive\x18\xac\x02 \x01(\x0b\x32\x11.TSA.WebVideoInfo\"\\\n\x17\x43\x61ptionPlacementArchive\x12\x1f\n\x17\x63\x61ption_anchor_location\x18\x01 \x01(\x05\x12 \n\x18\x64rawable_anchor_location\x18\x02 \x01(\x05\"\x8e\x01\n\x12\x43\x61ptionInfoArchive\x12%\n\x05super\x18\x01 \x02(\x0b\x32\x16.TSWP.ShapeInfoArchive\x12!\n\tplacement\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12.\n\rchildInfoKind\x18\x03 \x01(\x0e\x32\x17.TSD.CaptionOrTitleKind\"\xca\x01\n\x1cTitlePlacementCommandArchive\x12&\n\x05super\x18\x01 \x02(\x0b\x32\x17.TSD.InfoCommandArchive\x12\x38\n\x17placing_child_info_kind\x18\x02 \x01(\x0e\x32\x17.TSD.CaptionOrTitleKind\x12!\n\tplacement\x18\x03 \x01(\x0b\x32\x0e.TSP.Reference\x12%\n\rold_placement\x18\x04 \x01(\x0b\x32\x0e.TSP.Reference\"\xbc\x02\n\x0cObject3DInfo\x12\'\n\x0bobject_data\x18\x01 \x01(\x0b\x32\x12.TSP.DataReference\x12\x18\n\x10plays_animations\x18\x02 \x01(\x08\x12\x1b\n\x06pose3d\x18\x03 \x01(\x0b\x32\x0b.TSP.Pose3D\x12\x1f\n\x0c\x62oundingRect\x18\x04 \x01(\x0b\x32\t.TSP.Rect\x12\x30\n\x14thumbnail_image_data\x18\x05 \x01(\x0b\x32\x12.TSP.DataReference\x12\x1b\n\x13\x65mbedded_animations\x18\x06 \x01(\x08\x12\x1d\n\ntracedPath\x18\x07 \x01(\x0b\x32\t.TSP.Path2=\n\x0eobject_3D_info\x12\x11.TSD.MovieArchive\x18\xc8\x01 \x01(\x0b\x32\x11.TSA.Object3DInfo\"\xb3\x03\n\x1aObject3DInfoCommandArchive\x12&\n\x05super\x18\x01 \x02(\x0b\x32\x17.TSD.InfoCommandArchive\x12\x1c\n\x04info\x18\x02 \x01(\x0b\x32\x0e.TSP.Reference\x12#\n\x0cinfo_id_path\x18\x03 \x01(\x0b\x32\r.TSP.UUIDPath\x12\x30\n\x14thumbnail_image_data\x18\x04 \x01(\x0b\x32\x12.TSP.DataReference\x12\x34\n\x18old_thumbnail_image_data\x18\x05 \x01(\x0b\x32\x12.TSP.DataReference\x12\x1b\n\x06pose3d\x18\x06 \x01(\x0b\x32\x0b.TSP.Pose3D\x12\x1f\n\nold_pose3d\x18\x07 \x01(\x0b\x32\x0b.TSP.Pose3D\x12\x1f\n\x0c\x62oundingRect\x18\x08 \x01(\x0b\x32\t.TSP.Rect\x12\"\n\x0foldBoundingRect\x18\t \x01(\x0b\x32\t.TSP.Rect\x12\x1d\n\ntracedPath\x18\n \x01(\x0b\x32\t.TSP.Path\x12 \n\roldTracedPath\x18\x0b \x01(\x0b\x32\t.TSP.Path\"\xb5\x03\n\"Object3DInfoSetValueCommandArchive\x12\"\n\x05super\x18\x01 \x02(\x0b\x32\x13.TSK.CommandArchive\x12-\n\x16object_3d_info_id_path\x18\x02 \x02(\x0b\x32\r.TSP.UUIDPath\x12\x42\n\x08property\x18\x03 \x02(\x0e\x32\x30.TSA.Object3DInfoSetValueCommandArchive.Property\x12\x44\n\x05value\x18\x04 \x01(\x0b\x32\x35.TSA.Object3DInfoSetValueCommandArchive.PropertyValue\x12H\n\told_value\x18\x05 \x01(\x0b\x32\x35.TSA.Object3DInfoSetValueCommandArchive.PropertyValue\x1a:\n\rPropertyValue\x12\x18\n\x10plays_animations\x18\x04 \x01(\x08\x12\x0f\n\x07opacity\x18\n \x01(\x02\",\n\x08Property\x12\x13\n\x0fPlaysAnimations\x10\x03\x12\x0b\n\x07Opacity\x10\t*\x81\x01\n\x16GalleryInfoCaptionMode\x12\x1e\n\x1aGalleryInfoCaptionModeNone\x10\x00\x12\"\n\x1eGalleryInfoCaptionModePerImage\x10\x01\x12#\n\x1fGalleryInfoCaptionModeAllImages\x10\x02*5\n\x13GalleryInfoProperty\x12\x1e\n\x1aGalleryInfoCaptionProperty\x10\x00*q\n\x12GalleryCaptionMode\x12\x1a\n\x16GalleryCaptionModeNone\x10\x00\x12\x1e\n\x1aGalleryCaptionModePerImage\x10\x01\x12\x1f\n\x1bGalleryCaptionModeAllImages\x10\x02*\x93\x01\n\x13GalleryItemProperty\x12 \n\x1cGalleryItemPropertyImageData\x10\x00\x12)\n%GalleryItemPropertyThumbnailImageData\x10\x01\x12/\n+GalleryItemPropertyAccessibilityDescription\x10\x02')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'TSAArchives_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
   TSSArchives__pb2.ThemeArchive.RegisterExtension(_THEMEPRESETSARCHIVE.extensions_by_name['extension'])
   TSDArchives__pb2.ImageArchive.RegisterExtension(_GALLERYINFO.extensions_by_name['gallery_info'])
-  TSKArchives__pb2.CollaboratorCursorArchive.RegisterExtension(_COLLABORATORGALLERYITEMCURSOR.extensions_by_name['gallery_item_cursor'])
+  TSCKArchives__pb2.CollaboratorCursorArchive.RegisterExtension(_COLLABORATORGALLERYITEMCURSOR.extensions_by_name['gallery_item_cursor'])
   TSDArchives__pb2.ImageArchive.RegisterExtension(_WEBVIDEOINFO.extensions_by_name['web_video_info'])
   TSDArchives__pb2.MovieArchive.RegisterExtension(_OBJECT3DINFO.extensions_by_name['object_3D_info'])
 
   DESCRIPTOR._options = None
-  _GALLERYINFOCAPTIONMODE._serialized_start=8062
-  _GALLERYINFOCAPTIONMODE._serialized_end=8191
-  _GALLERYINFOPROPERTY._serialized_start=8193
-  _GALLERYINFOPROPERTY._serialized_end=8246
-  _GALLERYCAPTIONMODE._serialized_start=8248
-  _GALLERYCAPTIONMODE._serialized_end=8361
-  _GALLERYITEMPROPERTY._serialized_start=8364
-  _GALLERYITEMPROPERTY._serialized_end=8511
-  _DOCUMENTARCHIVE._serialized_start=215
-  _DOCUMENTARCHIVE._serialized_end=924
-  _FUNCTIONBROWSERSTATEARCHIVE._serialized_start=927
-  _FUNCTIONBROWSERSTATEARCHIVE._serialized_end=1059
-  _THEMEPRESETSARCHIVE._serialized_start=1062
-  _THEMEPRESETSARCHIVE._serialized_end=1245
-  _SHORTCUTCONTROLLERARCHIVE._serialized_start=1248
-  _SHORTCUTCONTROLLERARCHIVE._serialized_end=1410
-  _SHORTCUTCONTROLLERARCHIVE_SHORTCUTMAPENTRY._serialized_start=1343
-  _SHORTCUTCONTROLLERARCHIVE_SHORTCUTMAPENTRY._serialized_end=1410
-  _PROPAGATEPRESETCOMMANDARCHIVE._serialized_start=1413
-  _PROPAGATEPRESETCOMMANDARCHIVE._serialized_end=1563
-  _SHORTCUTCOMMANDARCHIVE._serialized_start=1566
-  _SHORTCUTCOMMANDARCHIVE._serialized_end=1740
-  _ADDCUSTOMFORMATCOMMANDARCHIVE._serialized_start=1743
-  _ADDCUSTOMFORMATCOMMANDARCHIVE._serialized_end=1897
-  _UPDATECUSTOMFORMATCOMMANDARCHIVE._serialized_start=1900
-  _UPDATECUSTOMFORMATCOMMANDARCHIVE._serialized_end=2110
-  _REPLACECUSTOMFORMATCOMMANDARCHIVE._serialized_start=2113
-  _REPLACECUSTOMFORMATCOMMANDARCHIVE._serialized_end=2325
-  _NEEDSMEDIACOMPATIBILITYUPGRADECOMMANDARCHIVE._serialized_start=2328
-  _NEEDSMEDIACOMPATIBILITYUPGRADECOMMANDARCHIVE._serialized_end=2672
-  _CHANGEDOCUMENTLOCALECOMMANDARCHIVE._serialized_start=2675
-  _CHANGEDOCUMENTLOCALECOMMANDARCHIVE._serialized_end=2919
-  _INDUCEDVERIFYOBJECTSWITHSERVERCOMMANDARCHIVE._serialized_start=2922
-  _INDUCEDVERIFYOBJECTSWITHSERVERCOMMANDARCHIVE._serialized_end=3219
-  _INDUCEDVERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE._serialized_start=3222
-  _INDUCEDVERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE._serialized_end=3435
-  _STYLEUPDATEPROPERTYMAPCOMMANDARCHIVE._serialized_start=3437
-  _STYLEUPDATEPROPERTYMAPCOMMANDARCHIVE._serialized_end=3534
-  _REMOTEDATACHANGECOMMANDARCHIVE._serialized_start=3537
-  _REMOTEDATACHANGECOMMANDARCHIVE._serialized_end=3723
-  _GALLERYINFOSETVALUECOMMANDARCHIVE._serialized_start=3726
-  _GALLERYINFOSETVALUECOMMANDARCHIVE._serialized_end=4088
-  _GALLERYINFOSETVALUECOMMANDARCHIVE_PROPERTYVALUE._serialized_start=4022
-  _GALLERYINFOSETVALUECOMMANDARCHIVE_PROPERTYVALUE._serialized_end=4088
-  _GALLERYINFOINSERTITEMSCOMMANDARCHIVE._serialized_start=4091
-  _GALLERYINFOINSERTITEMSCOMMANDARCHIVE._serialized_end=4219
-  _GALLERYINFOREMOVEITEMSCOMMANDARCHIVE._serialized_start=4221
-  _GALLERYINFOREMOVEITEMSCOMMANDARCHIVE._serialized_end=4318
-  _GALLERYITEMSETGEOMETRYCOMMAND._serialized_start=4321
-  _GALLERYITEMSETGEOMETRYCOMMAND._serialized_end=4522
-  _GALLERYITEM._serialized_start=4525
-  _GALLERYITEM._serialized_end=4912
-  _GALLERYINFO._serialized_start=4915
-  _GALLERYINFO._serialized_end=5107
-  _GALLERYSELECTIONTRANSFORMER._serialized_start=5110
-  _GALLERYSELECTIONTRANSFORMER._serialized_end=5288
-  _GALLERYITEMSELECTION._serialized_start=5290
-  _GALLERYITEMSELECTION._serialized_end=5383
-  _GALLERYITEMSELECTIONTRANSFORMER._serialized_start=5386
-  _GALLERYITEMSELECTIONTRANSFORMER._serialized_end=5541
-  _GALLERYITEMSELECTIONTRANSFORMERHELPER._serialized_start=5544
-  _GALLERYITEMSELECTIONTRANSFORMERHELPER._serialized_end=5672
-  _GALLERYITEMSETVALUECOMMAND._serialized_start=5675
-  _GALLERYITEMSETVALUECOMMAND._serialized_end=6040
-  _GALLERYITEMSETVALUECOMMAND_PROPERTYVALUE._serialized_start=5950
-  _GALLERYITEMSETVALUECOMMAND_PROPERTYVALUE._serialized_end=6040
-  _COLLABORATORGALLERYITEMCURSOR._serialized_start=6043
-  _COLLABORATORGALLERYITEMCURSOR._serialized_end=6239
-  _WEBVIDEOINFO._serialized_start=6242
-  _WEBVIDEOINFO._serialized_end=6418
-  _CAPTIONPLACEMENTARCHIVE._serialized_start=6420
-  _CAPTIONPLACEMENTARCHIVE._serialized_end=6512
-  _CAPTIONINFOARCHIVE._serialized_start=6515
-  _CAPTIONINFOARCHIVE._serialized_end=6657
-  _TITLEPLACEMENTCOMMANDARCHIVE._serialized_start=6660
-  _TITLEPLACEMENTCOMMANDARCHIVE._serialized_end=6862
-  _OBJECT3DINFO._serialized_start=6865
-  _OBJECT3DINFO._serialized_end=7181
-  _OBJECT3DINFOCOMMANDARCHIVE._serialized_start=7184
-  _OBJECT3DINFOCOMMANDARCHIVE._serialized_end=7619
-  _OBJECT3DINFOSETVALUECOMMANDARCHIVE._serialized_start=7622
-  _OBJECT3DINFOSETVALUECOMMANDARCHIVE._serialized_end=8059
-  _OBJECT3DINFOSETVALUECOMMANDARCHIVE_PROPERTYVALUE._serialized_start=7955
-  _OBJECT3DINFOSETVALUECOMMANDARCHIVE_PROPERTYVALUE._serialized_end=8013
-  _OBJECT3DINFOSETVALUECOMMANDARCHIVE_PROPERTY._serialized_start=8015
-  _OBJECT3DINFOSETVALUECOMMANDARCHIVE_PROPERTY._serialized_end=8059
+  _GALLERYINFOCAPTIONMODE._serialized_start=8083
+  _GALLERYINFOCAPTIONMODE._serialized_end=8212
+  _GALLERYINFOPROPERTY._serialized_start=8214
+  _GALLERYINFOPROPERTY._serialized_end=8267
+  _GALLERYCAPTIONMODE._serialized_start=8269
+  _GALLERYCAPTIONMODE._serialized_end=8382
+  _GALLERYITEMPROPERTY._serialized_start=8385
+  _GALLERYITEMPROPERTY._serialized_end=8532
+  _DOCUMENTARCHIVE._serialized_start=235
+  _DOCUMENTARCHIVE._serialized_end=944
+  _FUNCTIONBROWSERSTATEARCHIVE._serialized_start=947
+  _FUNCTIONBROWSERSTATEARCHIVE._serialized_end=1079
+  _THEMEPRESETSARCHIVE._serialized_start=1082
+  _THEMEPRESETSARCHIVE._serialized_end=1265
+  _SHORTCUTCONTROLLERARCHIVE._serialized_start=1268
+  _SHORTCUTCONTROLLERARCHIVE._serialized_end=1430
+  _SHORTCUTCONTROLLERARCHIVE_SHORTCUTMAPENTRY._serialized_start=1363
+  _SHORTCUTCONTROLLERARCHIVE_SHORTCUTMAPENTRY._serialized_end=1430
+  _PROPAGATEPRESETCOMMANDARCHIVE._serialized_start=1433
+  _PROPAGATEPRESETCOMMANDARCHIVE._serialized_end=1583
+  _SHORTCUTCOMMANDARCHIVE._serialized_start=1586
+  _SHORTCUTCOMMANDARCHIVE._serialized_end=1760
+  _ADDCUSTOMFORMATCOMMANDARCHIVE._serialized_start=1763
+  _ADDCUSTOMFORMATCOMMANDARCHIVE._serialized_end=1917
+  _UPDATECUSTOMFORMATCOMMANDARCHIVE._serialized_start=1920
+  _UPDATECUSTOMFORMATCOMMANDARCHIVE._serialized_end=2130
+  _REPLACECUSTOMFORMATCOMMANDARCHIVE._serialized_start=2133
+  _REPLACECUSTOMFORMATCOMMANDARCHIVE._serialized_end=2345
+  _NEEDSMEDIACOMPATIBILITYUPGRADECOMMANDARCHIVE._serialized_start=2348
+  _NEEDSMEDIACOMPATIBILITYUPGRADECOMMANDARCHIVE._serialized_end=2692
+  _CHANGEDOCUMENTLOCALECOMMANDARCHIVE._serialized_start=2695
+  _CHANGEDOCUMENTLOCALECOMMANDARCHIVE._serialized_end=2939
+  _INDUCEDVERIFYOBJECTSWITHSERVERCOMMANDARCHIVE._serialized_start=2942
+  _INDUCEDVERIFYOBJECTSWITHSERVERCOMMANDARCHIVE._serialized_end=3239
+  _INDUCEDVERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE._serialized_start=3242
+  _INDUCEDVERIFYTRANSFORMHISTORYWITHSERVERCOMMANDARCHIVE._serialized_end=3455
+  _STYLEUPDATEPROPERTYMAPCOMMANDARCHIVE._serialized_start=3457
+  _STYLEUPDATEPROPERTYMAPCOMMANDARCHIVE._serialized_end=3554
+  _REMOTEDATACHANGECOMMANDARCHIVE._serialized_start=3557
+  _REMOTEDATACHANGECOMMANDARCHIVE._serialized_end=3743
+  _GALLERYINFOSETVALUECOMMANDARCHIVE._serialized_start=3746
+  _GALLERYINFOSETVALUECOMMANDARCHIVE._serialized_end=4108
+  _GALLERYINFOSETVALUECOMMANDARCHIVE_PROPERTYVALUE._serialized_start=4042
+  _GALLERYINFOSETVALUECOMMANDARCHIVE_PROPERTYVALUE._serialized_end=4108
+  _GALLERYINFOINSERTITEMSCOMMANDARCHIVE._serialized_start=4111
+  _GALLERYINFOINSERTITEMSCOMMANDARCHIVE._serialized_end=4239
+  _GALLERYINFOREMOVEITEMSCOMMANDARCHIVE._serialized_start=4241
+  _GALLERYINFOREMOVEITEMSCOMMANDARCHIVE._serialized_end=4338
+  _GALLERYITEMSETGEOMETRYCOMMAND._serialized_start=4341
+  _GALLERYITEMSETGEOMETRYCOMMAND._serialized_end=4542
+  _GALLERYITEM._serialized_start=4545
+  _GALLERYITEM._serialized_end=4932
+  _GALLERYINFO._serialized_start=4935
+  _GALLERYINFO._serialized_end=5127
+  _GALLERYSELECTIONTRANSFORMER._serialized_start=5130
+  _GALLERYSELECTIONTRANSFORMER._serialized_end=5308
+  _GALLERYITEMSELECTION._serialized_start=5310
+  _GALLERYITEMSELECTION._serialized_end=5403
+  _GALLERYITEMSELECTIONTRANSFORMER._serialized_start=5406
+  _GALLERYITEMSELECTIONTRANSFORMER._serialized_end=5561
+  _GALLERYITEMSELECTIONTRANSFORMERHELPER._serialized_start=5564
+  _GALLERYITEMSELECTIONTRANSFORMERHELPER._serialized_end=5692
+  _GALLERYITEMSETVALUECOMMAND._serialized_start=5695
+  _GALLERYITEMSETVALUECOMMAND._serialized_end=6060
+  _GALLERYITEMSETVALUECOMMAND_PROPERTYVALUE._serialized_start=5970
+  _GALLERYITEMSETVALUECOMMAND_PROPERTYVALUE._serialized_end=6060
+  _COLLABORATORGALLERYITEMCURSOR._serialized_start=6063
+  _COLLABORATORGALLERYITEMCURSOR._serialized_end=6260
+  _WEBVIDEOINFO._serialized_start=6263
+  _WEBVIDEOINFO._serialized_end=6439
+  _CAPTIONPLACEMENTARCHIVE._serialized_start=6441
+  _CAPTIONPLACEMENTARCHIVE._serialized_end=6533
+  _CAPTIONINFOARCHIVE._serialized_start=6536
+  _CAPTIONINFOARCHIVE._serialized_end=6678
+  _TITLEPLACEMENTCOMMANDARCHIVE._serialized_start=6681
+  _TITLEPLACEMENTCOMMANDARCHIVE._serialized_end=6883
+  _OBJECT3DINFO._serialized_start=6886
+  _OBJECT3DINFO._serialized_end=7202
+  _OBJECT3DINFOCOMMANDARCHIVE._serialized_start=7205
+  _OBJECT3DINFOCOMMANDARCHIVE._serialized_end=7640
+  _OBJECT3DINFOSETVALUECOMMANDARCHIVE._serialized_start=7643
+  _OBJECT3DINFOSETVALUECOMMANDARCHIVE._serialized_end=8080
+  _OBJECT3DINFOSETVALUECOMMANDARCHIVE_PROPERTYVALUE._serialized_start=7976
+  _OBJECT3DINFOSETVALUECOMMANDARCHIVE_PROPERTYVALUE._serialized_end=8034
+  _OBJECT3DINFOSETVALUECOMMANDARCHIVE_PROPERTY._serialized_start=8036
+  _OBJECT3DINFOSETVALUECOMMANDARCHIVE_PROPERTY._serialized_end=8080
 # @@protoc_insertion_point(module_scope)

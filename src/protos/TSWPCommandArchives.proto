@@ -5,6 +5,7 @@ import "TSSArchives.proto";
 import "TSDArchives.proto";
 import "TSDCommandArchives.proto";
 import "TSKArchives.proto";
+import "TSCKArchives.proto";
 import "TSWPArchives.proto";
 import "TSWPArchives_sos.proto";
 package TSWP;
@@ -399,15 +400,15 @@ message TextCommentReplyCommandArchive {
 
 message ContainedObjectsCommandArchive {
   message AddBehaviorArgs {
-    repeated .TSK.AddIdOperationArgs args_list = 1;
+    repeated .TSCK.AddIdOperationArgs args_list = 1;
   }
 
   message RemoveBehaviorArgs {
-    repeated .TSK.RemoveIdOperationArgs args_list = 1;
+    repeated .TSCK.RemoveIdOperationArgs args_list = 1;
   }
 
   message RearrangeBehaviorArgs {
-    repeated .TSK.RearrangeIdOperationArgs args_list = 1;
+    repeated .TSCK.RearrangeIdOperationArgs args_list = 1;
   }
 
   required .TSK.CommandArchive super = 1;

@@ -2,6 +2,7 @@ syntax = "proto2";
 
 import "TSPMessages.proto";
 import "TSKArchives.proto";
+import "TSCKArchives.proto";
 import "TSCHArchives.proto";
 import "TSCHCommandArchives.proto";
 import "TSCEArchives.proto";
@@ -27,7 +28,7 @@ message CommandSheetInsertDrawablesArchive {
   required .TSK.CommandArchive super = 1;
   required .TSP.UUID sheet_id = 2;
   repeated .TSP.Reference drawables = 3;
-  repeated .TSK.AddIdOperationArgs args_list = 4;
+  repeated .TSCK.AddIdOperationArgs args_list = 4;
   optional bool forPaste = 5;
   repeated .TSP.UUID custom_format_keys = 6;
   optional .TSP.Reference drawable_undo_object = 7;
@@ -40,7 +41,7 @@ message CommandSheetInsertDrawablesArchive {
 message CommandSheetRemoveDrawablesArchive {
   required .TSK.CommandArchive super = 1;
   required .TSP.UUID sheet_id = 2;
-  repeated .TSK.RemoveIdOperationArgs args_list = 3;
+  repeated .TSCK.RemoveIdOperationArgs args_list = 3;
   repeated .TSP.Reference drawables = 4;
   repeated .TSP.UUID chart_entity_uid_for_backing_tables = 6;
   repeated .TSP.UUID backing_table_uids = 7;
@@ -49,12 +50,12 @@ message CommandSheetRemoveDrawablesArchive {
 message CommandSheetMoveDrawableZOrderArchive {
   required .TSK.CommandArchive super = 1;
   required .TSP.UUID sheet_id = 2;
-  repeated .TSK.RearrangeIdOperationArgs args_list = 3;
+  repeated .TSCK.RearrangeIdOperationArgs args_list = 3;
 }
 
 message CommandDocumentInsertSheetArchive {
   required .TSK.CommandArchive super = 1;
-  repeated .TSK.AddIdOperationArgs argsList = 2;
+  repeated .TSCK.AddIdOperationArgs argsList = 2;
   repeated .TSP.Reference sheets = 3;
   optional bool allowSameSheetNameAsForms = 4;
   repeated .TSP.UUID custom_format_keys = 5;
@@ -65,7 +66,7 @@ message CommandDocumentInsertSheetArchive {
 
 message CommandDocumentRemoveSheetArchive {
   required .TSK.CommandArchive super = 1;
-  repeated .TSK.RemoveIdOperationArgs argsList = 2;
+  repeated .TSCK.RemoveIdOperationArgs argsList = 2;
   repeated .TSP.Reference sheets = 3;
   required string rescueId = 4;
   repeated .TN.UUIDSheetUIStateDictionaryArchive sheet_uistates = 5;
@@ -73,7 +74,7 @@ message CommandDocumentRemoveSheetArchive {
 }
 
 message CommandDocumentReorderSheetArchive {
-  repeated .TSK.RearrangeIdOperationArgs argsList = 1;
+  repeated .TSCK.RearrangeIdOperationArgs argsList = 1;
   required .TSK.CommandArchive super = 2;
 }
 

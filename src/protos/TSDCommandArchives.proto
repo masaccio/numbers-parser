@@ -2,6 +2,7 @@ syntax = "proto2";
 
 import "TSPMessages.proto";
 import "TSKArchives.proto";
+import "TSCKArchives.proto";
 import "TSSArchives.proto";
 import "TSDArchives.proto";
 import "TSDArchives_sos.proto";
@@ -39,7 +40,7 @@ message UngroupGroupCommandArchive {
 message ContainerRemoveChildrenCommandArchive {
   required .TSK.CommandArchive super = 1;
   optional .TSP.UUIDPath container_id_path = 2;
-  repeated .TSK.RemoveIdOperationArgs args_list = 3;
+  repeated .TSCK.RemoveIdOperationArgs args_list = 3;
   repeated .TSP.Reference children = 4;
 }
 
@@ -51,7 +52,7 @@ message ContainerInsertChildrenCommandArchive {
   required .TSK.CommandArchive super = 1;
   optional .TSP.UUIDPath container_id_path = 2;
   repeated .TSP.Reference children = 3;
-  repeated .TSK.AddIdOperationArgs args_list = 4;
+  repeated .TSCK.AddIdOperationArgs args_list = 4;
   repeated .TSP.UUID custom_format_keys = 5;
   optional .TSP.Reference undo_object = 6;
 }
@@ -64,7 +65,7 @@ message ContainerInsertDrawablesCommandArchive {
 message ContainerReorderChildrenCommandArchive {
   required .TSK.CommandArchive super = 1;
   optional .TSP.UUIDPath container_id_path = 2;
-  repeated .TSK.RearrangeIdOperationArgs args_list = 3;
+  repeated .TSCK.RearrangeIdOperationArgs args_list = 3;
 }
 
 message GroupUngroupInformativeCommandArchive {

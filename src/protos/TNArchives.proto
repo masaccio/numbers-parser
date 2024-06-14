@@ -2,6 +2,7 @@ syntax = "proto2";
 
 import "TSPMessages.proto";
 import "TSKArchives.proto";
+import "TSCKArchives.proto";
 import "TSCHArchives.proto";
 import "TSCEArchives.proto";
 import "TSSArchives.proto";
@@ -202,5 +203,5 @@ message ChartSelectionArchive {
 }
 
 message FormCommandActivityBehaviorArchive {
-  required .TSK.CommandActivityBehaviorArchive super = 1;
+  required .TSCK.CommandActivityBehaviorArchive super = 1;
 }

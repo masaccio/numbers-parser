@@ -3,6 +3,7 @@ syntax = "proto2";
 import "TSDArchives.proto";
 import "TSDCommandArchives.proto";
 import "TSKArchives.proto";
+import "TSCKArchives.proto";
 import "TSPMessages.proto";
 import "TSWPArchives.proto";
 import "TSWPCommandArchives.proto";
@@ -239,7 +240,7 @@ message GalleryItemSetValueCommand {
 message CollaboratorGalleryItemCursor {
   optional .TSP.UUID displayed_item_id = 1;
   repeated .TSP.UUID item_ids = 2;
-  extend .TSK.CollaboratorCursorArchive {
+  extend .TSCK.CollaboratorCursorArchive {
     optional .TSA.CollaboratorGalleryItemCursor gallery_item_cursor = 400;
   }
 }

@@ -4,10 +4,11 @@ import "TSPMessages.proto";
 import "TSSArchives.proto";
 import "TSDArchives.proto";
 import "TSKArchives.proto";
+import "TSCKArchives.proto";
 package TSWP;
 
 enum SelectionType {
-  SelectionType_Normal = 0;
+  SelectionType_Normal_DEPRECATED = 0;
   SelectionType_ListLabel = 1;
   SelectionType_ListTopic = 2;
   SelectionType_Replace = 3;
@@ -1000,7 +1001,7 @@ message DropCapStyleArchive {
 
 message CollaboratorTextCursorSubselectionArchive {
   optional .TSWP.SelectionArchive text_selection = 1;
-  extend .TSK.CollaboratorCursorArchive {
+  extend .TSCK.CollaboratorCursorArchive {
     optional .TSWP.CollaboratorTextCursorSubselectionArchive text_cursor_subselection = 100;
   }
 }

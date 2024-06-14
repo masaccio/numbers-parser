@@ -55,9 +55,9 @@ appreciated).
 
 ``make bootstrap`` requires
 `PyObjC <https://pypi.org/project/pyobjc/>`__ to generate font maps, but
-this dependency is excluded from Poetry to ensure that tests can run on
-non-Mac OSes. You can run ``poetry run pip install PyObjC`` to get the
-required packages.
+this dependency is excluded from default Poetry installs to ensure that tests
+can run on non-Mac OSes. You can run ``poetry install --with bootstrap`` to get
+the required packages.
 
 Credits
 -------

@@ -2,6 +2,7 @@ syntax = "proto2";
 
 import "TSPMessages.proto";
 import "TSKArchives.proto";
+import "TSCKArchives.proto";
 import "TSDArchives.proto";
 import "TSSArchives.proto";
 import "TSCHArchives_Common.proto";
@@ -286,14 +287,14 @@ message CollaboratorCDECursorSubselectionArchive {
   optional int32 row_length = 2;
   optional int32 column_location = 3;
   optional int32 column_length = 4;
-  extend .TSK.CollaboratorCursorArchive {
+  extend .TSCK.CollaboratorCursorArchive {
     optional .TSCH.CollaboratorCDECursorSubselectionArchive cde_cursor_subselection = 300;
   }
 }
 
 message CollaboratorChartTitleCursorSubselectionArchive {
   optional bool chart_title_selected = 1;
-  extend .TSK.CollaboratorCursorArchive {
+  extend .TSCK.CollaboratorCursorArchive {
     optional .TSCH.CollaboratorChartTitleCursorSubselectionArchive chart_title_cursor_subselection = 301;
   }
 }
