@@ -308,25 +308,6 @@ class _NumbersModel(Cacheable):
             self.objects[table_id].number_of_columns = num_cols
         return self.objects[table_id].number_of_columns
 
-    @cache()
-    def col_storage_map(self, table_id: int):
-        # The base data store contains a reference to columnHeaders
-        # which is an ordered list that identfies which offset to use
-        # to index storage buffers for each column.
-        #
-        #  {
-        #      "hiding_state": 0,
-        #      "index": 0,
-        #      "number_of_cells": 3,
-        #      "size": 0.0
-        #  },
-        col_bucket_map = {i: None for i in range(self.objects[table_id].number_of_columns)}
-        bds = self.objects[table_id].base_data_store
-        buckets = self.objects[bds.columnHeaders.identifier].headers
-        for i, bucket in enumerate(buckets):
-            col_bucket_map[bucket.index] = i
-        return col_bucket_map
-
     def table_name(self, table_id, value=None):
         if value is None:
             return self.objects[table_id].table_name
@@ -1056,18 +1037,9 @@ class _NumbersModel(Cacheable):
 
     def table_height(self, table_id: int) -> int:
         """Return the height of a table in points."""
-        table_model = self.objects[table_id]
-        bds = self.objects[table_id].base_data_store
-        buckets = self.objects[bds.rowHeaders.buckets[0].identifier].headers
-
         height = 0.0
-        for i, row in self.row_storage_map(table_id).items():
-            if table_id in self._row_heights and i in self._row_heights[table_id]:
-                height += self._row_heights[table_id][i]
-            elif row is not None and buckets[i].size != 0.0:
-                height += buckets[i].size
-            else:
-                height += table_model.default_row_height
+        for row in range(self.number_of_rows(table_id)):
+            height += self.row_height(table_id, row)
         return round(height)
 
     def row_height(self, table_id: int, row: int, height: Optional[int] = None) -> int:
@@ -1092,18 +1064,9 @@ class _NumbersModel(Cacheable):
 
     def table_width(self, table_id: int) -> int:
         """Return the width of a table in points."""
-        table_model = self.objects[table_id]
-        bds = self.objects[table_id].base_data_store
-        buckets = self.objects[bds.columnHeaders.identifier].headers
-
         width = 0.0
-        for i, col in self.col_storage_map(table_id).items():
-            if table_id in self._col_widths and i in self._col_widths[table_id]:
-                width += self._col_widths[table_id][i]
-            elif col is not None and buckets[i].size != 0.0:
-                width += buckets[i].size
-            else:
-                width += table_model.default_column_width
+        for row in range(self.number_of_columns(table_id)):
+            width += self.col_width(table_id, row)
         return round(width)
 
     def col_width(self, table_id: int, col: int, width: Optional[int] = None) -> int:

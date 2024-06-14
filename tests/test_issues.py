@@ -5,6 +5,12 @@ import pytest
 from pendulum import datetime, duration
 
 from numbers_parser import BackgroundImage, Document, EmptyCell, ErrorCell, UnsupportedWarning
+from numbers_parser.constants import (
+    DEFAULT_COLUMN_COUNT,
+    DEFAULT_COLUMN_WIDTH,
+    DEFAULT_ROW_COUNT,
+    DEFAULT_ROW_HEIGHT,
+)
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"
@@ -491,30 +497,30 @@ def test_issue_83():
     assert "unsuported cell format type 'text'" in str(e)
 
 
-# def test_issue_85():
-#     doc = Document()
-#     table = doc.default_table
-#     doc.save("test0.numbers")
+def test_issue_85():
+    doc = Document()
+    table = doc.default_table
+    doc.save("test0.numbers")
 
-#     assert table.num_rows == DEFAULT_ROW_COUNT
-#     assert table.num_cols == DEFAULT_COLUMN_COUNT
-#     assert table.height == DEFAULT_ROW_COUNT * DEFAULT_ROW_HEIGHT
-#     assert table.width == DEFAULT_COLUMN_COUNT * DEFAULT_COLUMN_WIDTH
+    assert table.num_rows == DEFAULT_ROW_COUNT
+    assert table.num_cols == DEFAULT_COLUMN_COUNT
+    assert table.height == DEFAULT_ROW_COUNT * DEFAULT_ROW_HEIGHT
+    assert table.width == DEFAULT_COLUMN_COUNT * DEFAULT_COLUMN_WIDTH
 
-#     table.add_row()
-#     table.add_column()
-#     doc.save("test1.numbers")
+    table.add_row()
+    table.add_column()
+    doc.save("test1.numbers")
 
-#     assert table.num_rows == DEFAULT_ROW_COUNT
-#     assert table.num_cols == DEFAULT_COLUMN_COUNT
-#     assert table.height == (DEFAULT_ROW_COUNT + 1) * DEFAULT_ROW_HEIGHT
-#     assert table.width == (DEFAULT_COLUMN_COUNT + 1) * DEFAULT_COLUMN_WIDTH
-#     doc.save("test1.numbers")
+    assert table.num_rows == DEFAULT_ROW_COUNT + 1
+    assert table.num_cols == DEFAULT_COLUMN_COUNT + 1
+    assert table.height == (DEFAULT_ROW_COUNT + 1) * DEFAULT_ROW_HEIGHT
+    assert table.width == (DEFAULT_COLUMN_COUNT + 1) * DEFAULT_COLUMN_WIDTH
+    doc.save("test1.numbers")
 
-#     table.write(25, 25, "TEST")
-#     doc.save("test2.numbers")
+    table.write(25, 25, "TEST")
+    doc.save("test2.numbers")
 
-#     assert table.num_rows == DEFAULT_ROW_COUNT
-#     assert table.num_cols == DEFAULT_COLUMN_COUNT
-#     assert table.height == 26 * DEFAULT_ROW_HEIGHT
-#     assert table.width == 26 * DEFAULT_COLUMN_WIDTH
+    assert table.num_rows == 26
+    assert table.num_cols == 26
+    assert table.height == 26 * DEFAULT_ROW_HEIGHT
+    assert table.width == 26 * DEFAULT_COLUMN_WIDTH
