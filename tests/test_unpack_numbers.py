@@ -1,5 +1,6 @@
 import json
 import sys
+from pathlib import Path
 
 import magic
 import pytest
@@ -189,3 +190,20 @@ def test_debug(script_runner, tmp_path):
     assert ret.success
     rows = ret.stderr.strip().splitlines()
     assert "DEBUG:numbers_parser.iwork:open: filename=" in rows[0]
+
+
+@pytest.mark.script_launch_mode("subprocess")
+def test_default_output_dir(script_runner, tmp_path):
+    tmp_file = tmp_path / "test-1.numbers"
+    src_file = Path("tests/data/test-1.numbers")
+    tmp_file.write_bytes(src_file.read_bytes())
+
+    ret = script_runner.run(
+        ["unpack-numbers", tmp_file],
+        print_result=False,
+    )
+
+    assert ret.success
+    assert ret.stdout == ""
+    assert ret.stderr == ""
+    assert Path.exists(tmp_path / "test-1/Metadata/Properties.plist")
