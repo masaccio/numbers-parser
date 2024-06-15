@@ -125,7 +125,9 @@ def main():
     parser.add_argument("--hex-uuids", action="store_true", help="print UUIDs as hex")
     parser.add_argument("--pretty-storage", action="store_true", help="pretty print cell storage")
     parser.add_argument(
-        "--compact-json", action="store_true", help="Format JSON compactly as possible",
+        "--compact-json",
+        action="store_true",
+        help="Format JSON compactly as possible",
     )
     parser.add_argument("--pretty", action="store_true", help="Enable all prettifying options")
     parser.add_argument("--output", "-o", help="directory name to unpack into")
@@ -150,7 +152,7 @@ def main():
         else:
             logger.setLevel("ERROR")
         for document in args.document:
-            args.output or document.replace(".numbers", "")
+            output_dir = args.output or document.replace(".numbers", "")
             try:
                 iwork = IWork(
                     handler=NumbersUnpacker(
@@ -158,7 +160,7 @@ def main():
                         pretty=args.pretty,
                         pretty_storage=args.pretty_storage,
                         compact_json=args.compact_json,
-                        output_dir=args.output,
+                        output_dir=output_dir,
                     ),
                 )
                 iwork.open(Path(document))
