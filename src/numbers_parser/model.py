@@ -1315,11 +1315,11 @@ class _NumbersModel(Cacheable):
             TSPMessages.Reference(identifier=row_headers_id),
         )
 
-        data = [
+        self._table_data[table_model_id] = [
             [Cell._empty_cell(table_model_id, row, col, self) for col in range(num_cols)]
             for row in range(num_rows)
         ]
-        self.recalculate_table_data(table_model_id, data)
+        self.recalculate_table_data(table_model_id, self._table_data[table_model_id])
 
         table_info_id, table_info = self.objects.create_object_from_dict(
             "CalculationEngine",
