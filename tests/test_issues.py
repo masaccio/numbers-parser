@@ -534,15 +534,21 @@ def test_issue_85():
     table0 = sheet.tables[0]
 
     assert table0.row_height(0) == 20.0
-    for row in range(table0.num_rows):
-        for col in range(table0.num_cols):
+    assert table0.row_height(2) == 20.0
+    assert table0.col_width(0) == 98.0
+    assert table0.col_width(1) == 98.0
+
+    for row in range(0, table0.num_rows, 2):
+        for col in range(0, table0.num_cols, 2):
             border_style = Border(1 + (2.0 * col), RGB(29, 177, 0), "solid")
+            table0.set_cell_border(row, col, "top", border_style)
+            table0.set_cell_border(row, col, "left", border_style)
             table0.set_cell_border(row, col, "bottom", border_style)
             table0.set_cell_border(row, col, "right", border_style)
 
-    assert table0.row_height(0) == 23.0
-    assert table0.row_height(1) == 27.0
-    assert table0.col_width(0) == 98.0
-    assert table0.col_width(1) == 100
-    assert table0.col_width(2) == 102
-    assert table0.col_width(3) == 104
+    assert table0.row_height(0) == 25.0
+    assert table0.row_height(3) == 22.0
+    assert table0.col_width(0) == 99.0
+    assert table0.col_width(1) == 101
+    assert table0.col_width(2) == 103
+    assert table0.col_width(3) == 100
