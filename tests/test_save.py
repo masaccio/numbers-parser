@@ -54,6 +54,8 @@ def test_save_merges(configurable_save_file):
     table = sheets[0].tables[0]
     table.add_column(2)
     table.add_row(3)
+    assert table.cell(table.num_rows - 1, table.num_cols - 1).row == table.num_rows - 1
+    assert table.cell(table.num_rows - 1, table.num_cols - 1).col == table.num_cols - 1
     table.write("B2", "merge_1")
     table.write("B5", "merge_2")
     table.write("D2", "merge_3")
@@ -242,16 +244,70 @@ def test_edit_table_rows_columns(configurable_save_file):
         for col, _ in enumerate(cells):
             table.write(row, col, f"cell[{row},{col}]")
 
-    table.add_row(start_row=1, num_rows=3, default="new_row")
-    table.add_column(start_col=1, num_cols=3, default="new_col")
-    table.add_row(start_row=10, num_rows=2)
-    table.add_column(start_col=10, num_cols=2)
-    table.delete_row(start_row=6, num_rows=2)
-    table.delete_column(start_col=6, num_cols=2)
-    table.delete_row(num_rows=2)
-    table.delete_column(num_cols=2)
-    table.add_row(default=1.234)
-    table.add_column(default=5.678)
+    table_num_rows = table.num_rows
+    table_num_cols = table.num_cols
+
+    def check_cell_cords(table: object):
+        for row in range(table.num_rows):
+            for col in range(table.num_cols):
+                assert table.cell(row, col).row == row
+                assert table.cell(row, col).col == col
+
+    def add_row(
+        table: object,
+        table_num_rows: int,
+        num_rows: int = 1,
+        start_row: int = 1,
+        default: object = None,
+    ) -> int:
+        table.add_row(num_rows, start_row, default)
+        table_num_rows += num_rows
+        assert table.num_rows == table_num_rows
+        check_cell_cords(table)
+        return table_num_rows
+
+    def add_column(
+        table: object,
+        table_num_cols: int,
+        num_cols: int = 1,
+        start_col: int = 1,
+        default: object = None,
+    ) -> int:
+        table.add_column(num_cols, start_col, default)
+        table_num_cols += num_cols
+        assert table.num_cols == table_num_cols
+        check_cell_cords(table)
+        return table_num_cols
+
+    def delete_row(
+        table: object, table_num_rows: int, num_rows: int = 1, start_row: int = None
+    ) -> int:
+        table.delete_row(num_rows, start_row)
+        table_num_rows -= num_rows
+        assert table.num_rows == table_num_rows
+        check_cell_cords(table)
+        return table_num_rows
+
+    def delete_column(
+        table: object, table_num_cols: int, num_cols: int = 1, start_col: int = None
+    ) -> int:
+        table.delete_column(num_cols, start_col)
+        table_num_cols -= num_cols
+        assert table.num_cols == table_num_cols
+        check_cell_cords(table)
+        return table_num_cols
+
+    table_num_rows = add_row(table, table_num_rows, start_row=1, num_rows=3, default="new_row")
+    table_num_cols = add_column(table, table_num_cols, start_col=1, num_cols=3, default="new_col")
+    table_num_rows = add_row(table, table_num_rows, start_row=10, num_rows=2)
+    table_num_cols = add_column(table, table_num_cols, start_col=10, num_cols=2)
+    table_num_rows = delete_row(table, table_num_rows, start_row=6, num_rows=2)
+    table_num_cols = delete_column(table, table_num_cols, start_col=6, num_cols=2)
+    table_num_rows = delete_row(table, table_num_rows, num_rows=2)
+    table_num_cols = delete_column(table, table_num_cols, num_cols=2)
+    table_num_rows = add_row(table, table_num_rows, default=1.234)
+    table_num_cols = add_column(table, table_num_cols, default=5.678)
+
     doc.save(configurable_save_file)
 
     ref_values = []
