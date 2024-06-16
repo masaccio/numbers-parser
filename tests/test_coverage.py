@@ -3,6 +3,7 @@ from pendulum import datetime
 
 from numbers_parser import (
     Cell,
+    CellBorder,
     CustomFormatting,
     Document,
     Formatting,
@@ -61,7 +62,9 @@ def test_cell_storage(tmp_path):
     assert "Cell storage version 4 is unsupported" in str(e)
 
     class DummyCell(Cell):
-        pass
+        def __init__(self, *args):
+            super().__init__(*args)
+            self._border = CellBorder()
 
     doc = Document()
     doc.sheets[0].tables[0]._data[0][0] = DummyCell(0, 0, None)
