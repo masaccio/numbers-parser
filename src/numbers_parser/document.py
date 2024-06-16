@@ -989,11 +989,14 @@ class Table(Cacheable):
         self.num_rows += num_rows
         self._model.number_of_rows(self._table_id, self.num_rows)
 
-        row = [
-            Cell._empty_cell(self._table_id, self.num_rows - 1, col, self._model)
-            for col in range(self.num_cols)
-        ]
-        rows = [row.copy() for _ in range(num_rows)]
+        rows = []
+        for row in range(start_row, self.num_rows):
+            rows.append(
+                [
+                    Cell._empty_cell(self._table_id, row, col, self._model)
+                    for col in range(self.num_cols)
+                ]
+            )
         self._data[start_row:start_row] = rows
 
         if default is not None:
@@ -1045,7 +1048,8 @@ class Table(Cacheable):
 
         for row in range(self.num_rows):
             cols = [
-                Cell._empty_cell(self._table_id, row, col, self._model) for col in range(num_cols)
+                Cell._empty_cell(self._table_id, row, start_col + col, self._model)
+                for col in range(num_cols)
             ]
             self._data[row][start_col:start_col] = cols
 
