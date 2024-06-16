@@ -998,6 +998,10 @@ class Table(Cacheable):
                 ]
             )
         self._data[start_row:start_row] = rows
+        for row in range(start_row, num_rows):
+            for col in range(self.num_cols):
+                self._data[row][col].row = row
+                self._data[row][col].col = col
 
         if default is not None:
             for row in range(start_row, start_row + num_rows):
@@ -1053,6 +1057,9 @@ class Table(Cacheable):
             ]
             self._data[row][start_col:start_col] = cols
 
+            for col in range(len(self._data[row])):
+                self._data[row][col].col = col
+
             if default is not None:
                 for col in range(start_col, start_col + num_cols):
                     self.write(row, col, default)
@@ -1095,6 +1102,12 @@ class Table(Cacheable):
         self.num_rows -= num_rows
         self._model.number_of_rows(self._table_id, self.num_rows)
 
+        if start_row is not None:
+            for row in range(start_row, self.num_rows):
+                for col in range(self.num_cols):
+                    self._data[row][col].row = row
+                    self._data[row][col].col = col
+
     def delete_column(
         self,
         num_cols: Optional[int] = 1,
@@ -1124,6 +1137,8 @@ class Table(Cacheable):
                 del self._data[row][start_col : start_col + num_cols]
             else:
                 del self._data[row][-num_cols:]
+            for col in range(len(self._data[row])):
+                self._data[row][col].col = col
 
         self.num_cols -= num_cols
         self._model.number_of_columns(self._table_id, self.num_cols)
