@@ -1082,7 +1082,11 @@ class _NumbersModel(Cacheable):
         )
         height += max_top_border / 2
         height += max_bottom_border / 2
-        return floor(height)
+
+        if table_id not in self._row_heights:
+            self._row_heights[table_id] = {}
+        self._row_heights[table_id][row] = floor(height)
+        return self._row_heights[table_id][row]
 
     def table_width(self, table_id: int) -> int:
         """Return the width of a table in points."""
@@ -1130,7 +1134,11 @@ class _NumbersModel(Cacheable):
         )
         width += max_left_border / 2
         width += max_right_border / 2
-        return floor(width)
+
+        if table_id not in self._col_widths:
+            self._col_widths[table_id] = {}
+        self._col_widths[table_id][col] = floor(width)
+        return self._col_widths[table_id][col]
 
     def num_header_rows(self, table_id: int, num_headers: Optional[int] = None) -> int:
         """Return/set the number of header rows."""
@@ -2043,8 +2051,8 @@ class _NumbersModel(Cacheable):
             if (cell := self.cell_for_stroke(table_id, "bottom", row - 1, col)) is not None:
                 cell._border.bottom = border_value
             if table_id in self._row_heights:
-                self._row_heights[table_id][row]
-                self._row_heights[table_id][row - 1]
+                self._row_heights[table_id].pop(row, None)
+                self._row_heights[table_id].pop(row - 1, None)
         elif side == "right":
             if (cell := self.cell_for_stroke(table_id, "right", row, col)) is not None:
                 cell._border.right = border_value
