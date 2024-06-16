@@ -2,6 +2,7 @@ import re
 from array import array
 from collections import defaultdict
 from hashlib import sha1
+from math import floor
 from pathlib import Path
 from struct import pack
 from typing import Dict, List, Optional, Tuple, Union
@@ -1040,7 +1041,7 @@ class _NumbersModel(Cacheable):
         height = 0.0
         for row in range(self.number_of_rows(table_id)):
             height += self.row_height(table_id, row)
-        return round(height)
+        return floor(height)
 
     def row_height(self, table_id: int, row: int, height: Optional[int] = None) -> int:
         if height is not None:
@@ -1058,9 +1059,30 @@ class _NumbersModel(Cacheable):
         buckets = self.objects[bucket_id].headers
         bucket_map = {x.index: x for x in buckets}
         if row in bucket_map and bucket_map[row].size != 0.0:
-            return round(bucket_map[row].size)
+            height = round(bucket_map[row].size)
         else:
-            return round(table_model.default_row_height)
+            height = round(table_model.default_row_height)
+
+        data = self._table_data[table_id]
+        max_top_border = max(
+            [0.0]
+            + [
+                data[row][col].border.top.width
+                for col in range(len(data[row]))
+                if data[row][col].border.top is not None
+            ]
+        )
+        max_bottom_border = max(
+            [0.0]
+            + [
+                data[row][col].border.bottom.width
+                for col in range(len(data[row]))
+                if data[row][col].border.bottom is not None
+            ]
+        )
+        height += max_top_border / 2
+        height += max_bottom_border / 2
+        return floor(height)
 
     def table_width(self, table_id: int) -> int:
         """Return the width of a table in points."""
@@ -1085,9 +1107,30 @@ class _NumbersModel(Cacheable):
         buckets = self.objects[bucket_id].headers
         bucket_map = {x.index: x for x in buckets}
         if col in bucket_map and bucket_map[col].size != 0.0:
-            return round(bucket_map[col].size)
+            width = round(bucket_map[col].size)
         else:
-            return round(table_model.default_column_width)
+            width = round(table_model.default_column_width)
+
+        data = self._table_data[table_id]
+        max_left_border = max(
+            [0.0]
+            + [
+                data[row][col].border.left.width
+                for row in range(len(data))
+                if data[row][col].border.left is not None
+            ]
+        )
+        max_right_border = max(
+            [0.0]
+            + [
+                data[row][col].border.right.width
+                for row in range(len(data))
+                if data[row][col].border.right is not None
+            ]
+        )
+        width += max_left_border / 2
+        width += max_right_border / 2
+        return floor(width)
 
     def num_header_rows(self, table_id: int, num_headers: Optional[int] = None) -> int:
         """Return/set the number of header rows."""
@@ -1189,6 +1232,23 @@ class _NumbersModel(Cacheable):
             "CalculationEngine",
             "Tables/HeaderStorageBucket-{}",
         )
+
+        # caption_storage_id, caption_storage = self.objects.create_object_from_dict(
+        #     "CalculationEngine",
+        #     {"text": ["TEST Caption"]},
+        #     TSWPArchives.StorageArchive,
+        # )
+        # caption_info_id, caption_info = self.objects.create_object_from_dict(
+        #     "CalculationEngine",
+        #     {},
+        #     TSAArchives.CaptionInfoArchive,
+        # )
+        # caption_info.super.MergeFrom(TSWPArchives.ShapeInfoArchive())
+        # caption_info.super.super.MergeFrom(TSDArchives.ShapeArchive())
+        # caption_info.super.super.super.MergeFrom(TSDArchives.DrawableArchive())
+        # caption_info.super.owned_storage.MergeFrom(
+        #     TSPMessages.Reference(identifier=caption_storage_id)
+        # )
 
         style_table_id, _ = self.objects.create_object_from_dict(
             "Index/Tables/DataList-{}",
@@ -1982,21 +2042,33 @@ class _NumbersModel(Cacheable):
                 cell._border.top = border_value
             if (cell := self.cell_for_stroke(table_id, "bottom", row - 1, col)) is not None:
                 cell._border.bottom = border_value
+            if table_id in self._row_heights:
+                self._row_heights[table_id][row]
+                self._row_heights[table_id][row - 1]
         elif side == "right":
             if (cell := self.cell_for_stroke(table_id, "right", row, col)) is not None:
                 cell._border.right = border_value
             if (cell := self.cell_for_stroke(table_id, "left", row, col + 1)) is not None:
                 cell._border.left = border_value
+            if table_id in self._col_widths:
+                self._col_widths[table_id].pop(col, None)
+                self._col_widths[table_id].pop(col + 1, None)
         elif side == "bottom":
             if (cell := self.cell_for_stroke(table_id, "bottom", row, col)) is not None:
                 cell._border.bottom = border_value
             if (cell := self.cell_for_stroke(table_id, "top", row + 1, col)) is not None:
                 cell._border.top = border_value
+            if table_id in self._row_heights:
+                self._row_heights[table_id].pop(row, None)
+                self._row_heights[table_id].pop(row + 1, None)
         else:  # left border
             if (cell := self.cell_for_stroke(table_id, "left", row, col)) is not None:
                 cell._border.left = border_value
             if (cell := self.cell_for_stroke(table_id, "right", row, col - 1)) is not None:
                 cell._border.right = border_value
+            if table_id in self._col_widths:
+                self._col_widths[table_id].pop(col, None)
+                self._col_widths[table_id].pop(col - 1, None)
 
     def extract_strokes_in_layers(self, table_id: int, layer_ids: List, side: str):
         for layer_id in layer_ids:

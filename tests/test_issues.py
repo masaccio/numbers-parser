@@ -4,7 +4,15 @@ import magic
 import pytest
 from pendulum import datetime, duration
 
-from numbers_parser import BackgroundImage, Document, EmptyCell, ErrorCell, UnsupportedWarning
+from numbers_parser import (
+    RGB,
+    BackgroundImage,
+    Border,
+    Document,
+    EmptyCell,
+    ErrorCell,
+    UnsupportedWarning,
+)
 from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
     DEFAULT_COLUMN_WIDTH,
@@ -500,7 +508,6 @@ def test_issue_83():
 def test_issue_85():
     doc = Document()
     table = doc.default_table
-    doc.save("test0.numbers")
 
     assert table.num_rows == DEFAULT_ROW_COUNT
     assert table.num_cols == DEFAULT_COLUMN_COUNT
@@ -509,18 +516,33 @@ def test_issue_85():
 
     table.add_row()
     table.add_column()
-    doc.save("test1.numbers")
 
     assert table.num_rows == DEFAULT_ROW_COUNT + 1
     assert table.num_cols == DEFAULT_COLUMN_COUNT + 1
     assert table.height == (DEFAULT_ROW_COUNT + 1) * DEFAULT_ROW_HEIGHT
     assert table.width == (DEFAULT_COLUMN_COUNT + 1) * DEFAULT_COLUMN_WIDTH
-    doc.save("test1.numbers")
 
     table.write(25, 25, "TEST")
-    doc.save("test2.numbers")
 
     assert table.num_rows == 26
     assert table.num_cols == 26
     assert table.height == 26 * DEFAULT_ROW_HEIGHT
     assert table.width == 26 * DEFAULT_COLUMN_WIDTH
+
+    doc = Document(num_cols=4, num_rows=4)
+    sheet = doc.sheets[0]
+    table0 = sheet.tables[0]
+
+    assert table0.row_height(0) == 20.0
+    for row in range(table0.num_rows):
+        for col in range(table0.num_cols):
+            border_style = Border(1 + (2.0 * col), RGB(29, 177, 0), "solid")
+            table0.set_cell_border(row, col, "bottom", border_style)
+            table0.set_cell_border(row, col, "right", border_style)
+
+    assert table0.row_height(0) == 23.0
+    assert table0.row_height(1) == 27.0
+    assert table0.col_width(0) == 98.0
+    assert table0.col_width(1) == 100
+    assert table0.col_width(2) == 102
+    assert table0.col_width(3) == 104
