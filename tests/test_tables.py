@@ -167,6 +167,11 @@ def test_table_titles(configurable_save_file):
 
         table.name = new_test_type
         table.write(0, 0, new_test_type)
+
+        # new_table = doc.sheets[0].add_table()
+        # new_table.caption = "new caption"
+        # table.caption_enabled = True
+
     doc.save(configurable_save_file)
 
     new_doc = Document(configurable_save_file)
