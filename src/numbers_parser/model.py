@@ -854,10 +854,7 @@ class _NumbersModel(Cacheable):
 
         for col, cells in enumerate(col_data):
             num_rows = len(cells) - sum([isinstance(x, MergedCell) for x in cells])
-            if table_id in self._col_widths and col in self._col_widths[table_id]:
-                width = self._col_widths[table_id][col]
-            else:
-                width = current_column_widths[col]
+            width = current_column_widths[col]
             header = TSTArchives.HeaderStorageBucket.Header(
                 index=col,
                 numberOfCells=num_rows,
