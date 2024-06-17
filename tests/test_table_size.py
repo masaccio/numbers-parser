@@ -6,20 +6,24 @@ from numbers_parser import Document
 def test_row_col_sizes(configurable_save_file):
     doc = Document("tests/data/test-1.numbers")
     table = doc.sheets[0].tables[0]
-    assert table.height == 100
-    assert table.width == 294
+
+    # Do first to check cache init happens
+    table.row_height(4, 40)
+    table.col_width(2, 200)
+
+    assert table.height == 120
+    assert table.width == 396
     assert table.row_height(0) == 20
-    assert table.row_height(table.num_rows - 1) == 20
+    assert table.row_height(table.num_rows - 1) == 40
     assert table.col_width(0) == 98
-    assert table.col_width(table.num_cols - 1) == 98
+    assert table.col_width(table.num_cols - 1) == 200
 
     table.row_height(2, 40)
     assert table.row_height(2) == 40
     table.row_height(3, 10)
     table.col_width(0, 50)
-    table.col_width(2, 200)
     assert table.width == 348
-    assert table.height == 110
+    assert table.height == 130
 
     doc.save(configurable_save_file)
 
@@ -28,9 +32,10 @@ def test_row_col_sizes(configurable_save_file):
     assert table.row_height(0) == 20
     assert table.row_height(2) == 40
     assert table.row_height(3) == 10
+    assert table.row_height(4) == 40
     assert table.col_width(0) == 50
     assert table.col_width(2) == 200
-    assert table.height == 110
+    assert table.height == 130
     assert table.width == 348
 
 
