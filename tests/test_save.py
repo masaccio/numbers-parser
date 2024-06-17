@@ -250,6 +250,8 @@ def test_edit_table_rows_columns(configurable_save_file):
     def check_cell_cords(table: object):
         for row in range(table.num_rows):
             for col in range(table.num_cols):
+                if table.cell(row, col).row != row or table.cell(row, col).col != col:
+                    pass
                 assert table.cell(row, col).row == row
                 assert table.cell(row, col).col == col
 
@@ -257,7 +259,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         table: object,
         table_num_rows: int,
         num_rows: int = 1,
-        start_row: int = 1,
+        start_row: int = None,
         default: object = None,
     ) -> int:
         table.add_row(num_rows, start_row, default)
@@ -270,7 +272,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         table: object,
         table_num_cols: int,
         num_cols: int = 1,
-        start_col: int = 1,
+        start_col: int = None,
         default: object = None,
     ) -> int:
         table.add_column(num_cols, start_col, default)

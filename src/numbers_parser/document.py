@@ -990,7 +990,7 @@ class Table(Cacheable):
         self._model.number_of_rows(self._table_id, self.num_rows)
 
         rows = []
-        for row in range(start_row, self.num_rows):
+        for row in range(start_row, start_row + num_rows):
             rows.append(
                 [
                     Cell._empty_cell(self._table_id, row, col, self._model)
@@ -998,7 +998,8 @@ class Table(Cacheable):
                 ]
             )
         self._data[start_row:start_row] = rows
-        for row in range(start_row, num_rows):
+
+        for row in range(start_row, self.num_rows):
             for col in range(self.num_cols):
                 self._data[row][col].row = row
                 self._data[row][col].col = col
