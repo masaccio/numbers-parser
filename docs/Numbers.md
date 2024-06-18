@@ -1,6 +1,6 @@
 # Numbers file format
 
-[SheetsJS has documented](https://oss.sheetjs.com/notes/iwa/#hyperlinks) some of the core file format details. These notes are additional information tracking other discoveries.
+[SheetsJS has documented](https://oss.sheetjs.com/notes/iwa/) some of the core file format details. These notes are additional information tracking other discoveries.
 
 ## Cell formats
 
@@ -189,3 +189,35 @@ Each row and column coordinate has a pair of UUIDs for the row and column which 
 * `TST.HeaderNameMgrArchive.per_tables[].header_column_uids`
 * `TST.ColumnRowUIDMapArchive.sorted_column_uids`
 * `TST.ColumnRowUIDMapArchive.sorted_row_uids`
+
+## Captions
+
+`TSWP.StorageArchive` contains the text for the caption along with references to paragraph styles. The caption is stored in an array in the `text` property. The `TSWP.StorageArchive` is not referenced in `Metadata.json` aside from in the `object_uuid_map_entries`.
+
+`TSA.CaptionInfoArchive` references the `TSWP.StorageArchive` via a reference called `owned_storage` but through the following structure. Other `super` references are required:
+
+``` proto
+message CaptionInfoArchive {
+  required .TSWP.ShapeInfoArchive super = 1;
+  optional .TSP.Reference placement = 2;
+  optional .TSD.CaptionOrTitleKind childInfoKind = 3;
+}
+
+message ShapeInfoArchive {
+  required .TSD.ShapeArchive super = 1;
+  optional .TSP.Reference deprecated_storage = 2 [deprecated = true];
+  optional .TSP.Reference text_flow = 3;
+  optional .TSP.Reference owned_storage = 4;
+  optional bool is_text_box = 6;
+}
+
+message ShapeArchive {
+  required .TSD.DrawableArchive super = 1;
+  optional .TSP.Reference style = 2;
+  optional .TSD.PathSourceArchive pathsource = 3;
+  optional .TSD.LineEndArchive head_line_end = 4 [deprecated = true];
+  optional .TSD.LineEndArchive tail_line_end = 5 [deprecated = true];
+  optional float strokePatternOffsetDistance = 6;
+}
+```
+
