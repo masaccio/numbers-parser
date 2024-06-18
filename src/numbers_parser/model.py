@@ -1248,12 +1248,33 @@ class _NumbersModel(Cacheable):
         #     {},
         #     TSAArchives.CaptionInfoArchive,
         # )
-        # caption_info.super.MergeFrom(TSWPArchives.ShapeInfoArchive())
-        # caption_info.super.super.MergeFrom(TSDArchives.ShapeArchive())
-        # caption_info.super.super.super.MergeFrom(TSDArchives.DrawableArchive())
+        # # caption_info.super.MergeFrom(TSWPArchives.ShapeInfoArchive())
+        # # caption_info.super.super.MergeFrom(TSDArchives.ShapeArchive())
+        # # caption_info.super.super.super.MergeFrom(TSDArchives.DrawableArchive())
+        # from_table_info = self.objects[self.table_info_id(from_table_id)]
+        # from_caption_info = self.objects[from_table_info.super.caption.identifier]
+        # caption_info.super.CopyFrom(from_caption_info.super)
+        # caption_info.super.super.CopyFrom(from_caption_info.super.super)
+        # caption_info.super.super.super.CopyFrom(from_caption_info.super.super.super)
+        # caption_info.super.deprecated_storage.MergeFrom(
+        #     TSPMessages.Reference(identifier=caption_storage_id)
+        # )
         # caption_info.super.owned_storage.MergeFrom(
         #     TSPMessages.Reference(identifier=caption_storage_id)
         # )
+
+        # TST.TableModelArchive.stroke_sidecar -> TST.StrokeSidecarArchive
+        # TST.StrokeSidecarArchive
+        #    top_row_stroke_layers -> [TST.StrokeLayerArchive]
+        #    left_row_stroke_layers -> [TST.StrokeLayerArchive]
+        #    right_row_stroke_layers -> [TST.StrokeLayerArchive]
+        #    bottom_row_stroke_layers -> [TST.StrokeLayerArchive]
+        sidecar_id, _ = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {"max_order": 1, "column_count": 0, "row_count": 0},
+            TSTArchives.StrokeSidecarArchive,
+        )
+        table_model.stroke_sidecar.MergeFrom(TSPMessages.Reference(identifier=sidecar_id))
 
         style_table_id, _ = self.objects.create_object_from_dict(
             "Index/Tables/DataList-{}",
@@ -1333,6 +1354,10 @@ class _NumbersModel(Cacheable):
         )
         table_info.tableModel.MergeFrom(TSPMessages.Reference(identifier=table_model_id))
         table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
+        # caption_info.super.super.super.parent.MergeFrom(
+        #     TSPMessages.Reference(identifier=table_info_id)
+        # )
+        # table_info.super.caption.MergeFrom(TSPMessages.Reference(identifier=caption_info_id))
         self.add_component_reference(table_info_id, "Document", self.calc_engine_id())
 
         self.add_formula_owner(
