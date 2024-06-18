@@ -141,6 +141,9 @@ def table_titles_test_tunner(doc):
         if "no caption" in test_type:
             assert not table.caption_enabled
             assert table.caption == "caption"
+        elif test_type == "new table":
+            assert table.caption_enabled
+            assert table.caption == "new caption"
         else:
             assert table.caption_enabled
             assert table.caption == "test: caption"
@@ -168,9 +171,10 @@ def test_table_titles(configurable_save_file):
         table.name = new_test_type
         table.write(0, 0, new_test_type)
 
-    # new_table = doc.sheets[0].add_table()
-    # new_table.caption = "new caption"
-    # table.caption_enabled = True
+    new_table = doc.sheets[0].add_table(table_name="new table", x=0, y=650)
+    new_table.caption = "new caption"
+    new_table.write(0, 0, "new table")
+    table.caption_enabled = True
 
     doc.save(configurable_save_file)
 

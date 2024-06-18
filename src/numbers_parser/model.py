@@ -55,6 +55,7 @@ from numbers_parser.containers import ObjectStore
 from numbers_parser.exceptions import UnsupportedError
 from numbers_parser.formula import TableFormulas
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
+from numbers_parser.generated import TSAArchives_pb2 as TSAArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
@@ -1238,37 +1239,29 @@ class _NumbersModel(Cacheable):
             "Tables/HeaderStorageBucket-{}",
         )
 
-        # caption_storage_id, caption_storage = self.objects.create_object_from_dict(
-        #     "CalculationEngine",
-        #     {"text": ["TEST Caption"]},
-        #     TSWPArchives.StorageArchive,
-        # )
-        # caption_info_id, caption_info = self.objects.create_object_from_dict(
-        #     "CalculationEngine",
-        #     {},
-        #     TSAArchives.CaptionInfoArchive,
-        # )
-        # # caption_info.super.MergeFrom(TSWPArchives.ShapeInfoArchive())
-        # # caption_info.super.super.MergeFrom(TSDArchives.ShapeArchive())
-        # # caption_info.super.super.super.MergeFrom(TSDArchives.DrawableArchive())
-        # from_table_info = self.objects[self.table_info_id(from_table_id)]
-        # from_caption_info = self.objects[from_table_info.super.caption.identifier]
-        # caption_info.super.CopyFrom(from_caption_info.super)
-        # caption_info.super.super.CopyFrom(from_caption_info.super.super)
-        # caption_info.super.super.super.CopyFrom(from_caption_info.super.super.super)
-        # caption_info.super.deprecated_storage.MergeFrom(
-        #     TSPMessages.Reference(identifier=caption_storage_id)
-        # )
-        # caption_info.super.owned_storage.MergeFrom(
-        #     TSPMessages.Reference(identifier=caption_storage_id)
-        # )
+        from_table_info = self.objects[self.table_info_id(from_table_id)]
+        from_caption_info = self.objects[from_table_info.super.caption.identifier]
+        caption_storage_id, caption_storage = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {"text": ["TEST Caption"]},
+            TSWPArchives.StorageArchive,
+        )
+        caption_storage.MergeFrom(self.objects[from_caption_info.super.owned_storage.identifier])
+        caption_info_id, caption_info = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {},
+            TSAArchives.CaptionInfoArchive,
+        )
+        caption_info.super.CopyFrom(from_caption_info.super)
+        caption_info.super.super.CopyFrom(from_caption_info.super.super)
+        caption_info.super.super.super.CopyFrom(from_caption_info.super.super.super)
+        caption_info.super.deprecated_storage.MergeFrom(
+            TSPMessages.Reference(identifier=caption_storage_id)
+        )
+        caption_info.super.owned_storage.MergeFrom(
+            TSPMessages.Reference(identifier=caption_storage_id)
+        )
 
-        # TST.TableModelArchive.stroke_sidecar -> TST.StrokeSidecarArchive
-        # TST.StrokeSidecarArchive
-        #    top_row_stroke_layers -> [TST.StrokeLayerArchive]
-        #    left_row_stroke_layers -> [TST.StrokeLayerArchive]
-        #    right_row_stroke_layers -> [TST.StrokeLayerArchive]
-        #    bottom_row_stroke_layers -> [TST.StrokeLayerArchive]
         sidecar_id, _ = self.objects.create_object_from_dict(
             "CalculationEngine",
             {"max_order": 1, "column_count": 0, "row_count": 0},
@@ -1354,10 +1347,10 @@ class _NumbersModel(Cacheable):
         )
         table_info.tableModel.MergeFrom(TSPMessages.Reference(identifier=table_model_id))
         table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
-        # caption_info.super.super.super.parent.MergeFrom(
-        #     TSPMessages.Reference(identifier=table_info_id)
-        # )
-        # table_info.super.caption.MergeFrom(TSPMessages.Reference(identifier=caption_info_id))
+        caption_info.super.super.super.parent.MergeFrom(
+            TSPMessages.Reference(identifier=table_info_id)
+        )
+        table_info.super.caption.MergeFrom(TSPMessages.Reference(identifier=caption_info_id))
         self.add_component_reference(table_info_id, "Document", self.calc_engine_id())
 
         self.add_formula_owner(
