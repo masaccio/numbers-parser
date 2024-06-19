@@ -1243,7 +1243,7 @@ class _NumbersModel(Cacheable):
         from_caption_info = self.objects[from_table_info.super.caption.identifier]
         caption_storage_id, caption_storage = self.objects.create_object_from_dict(
             "CalculationEngine",
-            {"text": ["TEST Caption"]},
+            {"text": ["Caption"]},
             TSWPArchives.StorageArchive,
         )
         caption_storage.MergeFrom(self.objects[from_caption_info.super.owned_storage.identifier])
