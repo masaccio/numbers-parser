@@ -219,5 +219,44 @@ message ShapeArchive {
   optional .TSD.LineEndArchive tail_line_end = 5 [deprecated = true];
   optional float strokePatternOffsetDistance = 6;
 }
-```
 
+message StorageArchive {
+  enum KindType {
+    BODY = 0;
+    HEADER = 1;
+    FOOTNOTE = 2;
+    TEXTBOX = 3;
+    NOTE = 4;
+    CELL = 5;
+    UNCLASSIFIED = 6;
+    TABLEOFCONTENTS = 7;
+    UNDEFINED = 8;
+  }
+  optional .TSWP.StorageArchive.KindType kind = 1 [default = TEXTBOX];
+  optional .TSP.Reference style_sheet = 2;
+  repeated string text = 3;
+  optional bool has_itext = 4 [default = false];
+  optional bool in_document = 10 [default = false];
+  optional .TSWP.ObjectAttributeTable table_para_style = 5;
+  optional .TSWP.ParaDataAttributeTable table_para_data = 6;
+  optional .TSWP.ObjectAttributeTable table_list_style = 7;
+  optional .TSWP.ObjectAttributeTable table_char_style = 8;
+  optional .TSWP.ObjectAttributeTable table_attachment = 9;
+  optional .TSWP.ObjectAttributeTable table_smartfield = 11;
+  optional .TSWP.ObjectAttributeTable table_layout_style = 12;
+  optional .TSWP.ParaDataAttributeTable table_para_starts = 14;
+  optional .TSWP.ObjectAttributeTable table_bookmark = 15;
+  optional .TSWP.ObjectAttributeTable table_footnote = 16;
+  optional .TSWP.ObjectAttributeTable table_section = 17;
+  optional .TSWP.ObjectAttributeTable table_rubyfield = 18;
+  optional .TSWP.StringAttributeTable table_language = 19;
+  optional .TSWP.StringAttributeTable table_dictation = 20;
+  optional .TSWP.ObjectAttributeTable table_insertion = 21;
+  optional .TSWP.ObjectAttributeTable table_deletion = 22;
+  optional .TSWP.ObjectAttributeTable table_highlight = 23;
+  optional .TSWP.ParaDataAttributeTable table_para_bidi = 24;
+  optional .TSWP.OverlappingFieldAttributeTable table_overlapping_highlight = 25;
+  optional .TSWP.OverlappingFieldAttributeTable table_pencil_annotation = 26;
+  optional .TSWP.ObjectAttributeTable table_tatechuyoko = 27;
+  optional .TSWP.ObjectAttributeTable table_drop_cap_style = 28;
+}```
