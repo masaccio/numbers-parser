@@ -331,10 +331,140 @@ class _NumbersModel(Cacheable):
         else:
             return not table_info.super.caption_hidden
 
+    def captions_style_id(self):
+        stylesheet = self.objects[self.find_refs("StylesheetArchive")[0]]
+        caption_styles = [
+            x for x in stylesheet.identifier_to_style_map if "Caption" in x.identifier
+        ]
+        return caption_styles[0].style.identifier
+
+    def caption_paragraph_style_id(self):
+        style_map = {
+            id: self.objects[id]
+            for id in self.find_refs("ParagraphStyleArchive")
+            if "Caption" in self.objects[id].super.name
+        }
+        return list(style_map.keys())[0]
+
+    @cache(num_args=0)
+    def stylesheet_id(self):
+        return self.find_refs("StylesheetArchive")[0]
+
+    def set_reference(self, obj: object, id: int):
+        obj.MergeFrom(TSPMessages.Reference(identifier=id))
+
+    def create_path_source_archive(self, table_id):
+        return TSDArchives.PathSourceArchive(
+            horizontalFlip=False,
+            verticalFlip=False,
+            bezier_path_source=TSDArchives.BezierPathSourceArchive(
+                naturalSize=TSPMessages.Size(width=self.table_width(table_id), height=0.0),
+                path=TSPMessages.Path(
+                    elements=[
+                        TSPMessages.Path.Element(
+                            type=TSPMessages.Path.ElementType.moveTo,
+                            points=[TSPMessages.Point(x=0.0, y=0.0)],
+                        ),
+                        TSPMessages.Path.Element(
+                            type=TSPMessages.Path.ElementType.lineTo,
+                            points=[TSPMessages.Point(x=100.0, y=0.0)],
+                        ),
+                        TSPMessages.Path.Element(
+                            type=TSPMessages.Path.ElementType.lineTo,
+                            points=[TSPMessages.Point(x=100.0, y=100.0)],
+                        ),
+                        TSPMessages.Path.Element(
+                            type=TSPMessages.Path.ElementType.lineTo,
+                            points=[TSPMessages.Point(x=0.0, y=100.0)],
+                        ),
+                        TSPMessages.Path.Element(
+                            type=TSPMessages.Path.ElementType.closeSubpath,
+                        ),
+                        TSPMessages.Path.Element(
+                            type=TSPMessages.Path.ElementType.moveTo,
+                            points=[TSPMessages.Point(x=0.0, y=0.0)],
+                        ),
+                    ]
+                ),
+            ),
+        )
+
+    def create_caption_archive(self, table_id):
+        table_info_id = self.table_info_id(table_id)
+        table_info = self.objects[table_info_id]
+        caption_placement_id, _ = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {
+                "caption_anchor_location": 1,
+                "drawable_anchor_location": 7,
+            },
+            TSAArchives.CaptionPlacementArchive,
+        )
+        caption_info_id, caption_info = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {"childInfoKind": "Caption", "placement": {"identifier": caption_placement_id}},
+            TSAArchives.CaptionInfoArchive,
+        )
+        storage_id, storage = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {
+                "text": ["Caption"],
+                "in_document": True,
+                "style_sheet": {"identifier": self.stylesheet_id()},
+                "table_para_style": {
+                    "entries": [
+                        {
+                            "character_index": 0,
+                            "object": {"identifier": self.caption_paragraph_style_id()},
+                        }
+                    ]
+                },
+                "table_para_starts": {"entries": [{"character_index": 0, "first": 0, "second": 0}]},
+                "table_para_bidi": {"entries": [{"character_index": 0, "first": 0, "second": 0}]},
+                "table_drop_cap_style": {"entries": [{"character_index": 0}]},
+            },
+            TSWPArchives.StorageArchive,
+        )
+        for object_id in [storage_id, self.captions_style_id(), self.caption_paragraph_style_id()]:
+            self.add_component_reference(
+                object_id, location="CalculationEngine", component_id=self.stylesheet_id()
+            )
+        caption_info.super.MergeFrom(
+            TSWPArchives.ShapeInfoArchive(
+                is_text_box=True,
+                owned_storage=TSPMessages.Reference(identifier=storage_id),
+                deprecated_storage=TSPMessages.Reference(identifier=storage_id),
+                super=TSDArchives.ShapeArchive(
+                    super=self.create_drawable(table_info_id, 0, 0, flags=1),
+                    style={"identifier": self.captions_style_id()},
+                    strokePatternOffsetDistance=0.0,
+                    pathsource=self.create_path_source_archive(table_id),
+                ),
+            )
+        )
+
+        self.set_reference(table_info.super.caption, caption_info_id)
+        component = self.metadata_component(self.calc_engine_id())
+        component.object_uuid_map_entries.append(
+            TSPArchiveMessages.ObjectUUIDMapEntry(
+                identifier=caption_info_id, uuid=NumbersUUID().protobuf2
+            )
+        )
+
     def caption_text(self, table_id: int, caption: str = None) -> str:
         table_info = self.objects[self.table_info_id(table_id)]
         caption_info_id = table_info.super.caption.identifier
-        caption_storage_id = self.objects[caption_info_id].super.owned_storage.identifier
+        caption_archive = self.objects[caption_info_id]
+
+        if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":
+            if caption is None:
+                return "Caption"
+            else:
+                self.create_caption_archive(table_id)
+                caption_info_id = table_info.super.caption.identifier
+                caption_archive = self.objects[caption_info_id]
+
+        caption_storage_id = caption_archive.super.owned_storage.identifier
         caption_text = self.objects[caption_storage_id].text
         if caption is not None:
             caption_text[0] = caption
@@ -882,7 +1012,7 @@ class _NumbersModel(Cacheable):
             merge_map.cell_range.append(cell_range)
 
         base_data_store = self.objects[table_id].base_data_store
-        base_data_store.merge_region_map.CopyFrom(TSPMessages.Reference(identifier=merge_map_id))
+        self.set_reference(base_data_store.merge_region_map, merge_map_id)
 
     def recalculate_row_info(
         self,
@@ -943,19 +1073,19 @@ class _NumbersModel(Cacheable):
             save_token=1,
         )
         self.objects[PACKAGE_ID].components.append(component_info)
-        self.add_component_reference(object_id, parent)
+        self.add_component_reference(object_id, location=parent)
 
     def add_component_reference(
         self,
         object_id: int,
         location: Optional[str] = None,
-        parent_id: Optional[int] = None,
+        component_id: Optional[int] = None,
         is_weak: bool = False,
     ):
         """Add an external reference to an object in a metadata component."""
-        component = self.metadata_component(location or parent_id)
-        if parent_id is not None:
-            params = {"object_identifier": object_id, "component_identifier": parent_id}
+        component = self.metadata_component(location or component_id)
+        if component_id is not None:
+            params = {"object_identifier": object_id, "component_identifier": component_id}
         else:
             params = {"component_identifier": object_id}
         if is_weak:
@@ -1175,7 +1305,15 @@ class _NumbersModel(Cacheable):
 
         return self.table_height(table_id) + y_offset
 
-    def create_drawable(self, sheet_id: int, x: float, y: float) -> object:
+    def create_drawable(
+        self,
+        sheet_id: int,
+        x: float,
+        y: float,
+        flags: int = 3,
+        height: float = 231.0,
+        width: float = 494.0,
+    ) -> object:
         """Create a DrawableArchive for a new table in a sheet."""
         table_x = x if x is not None else 0.0
         table_y = y if y is not None else self.last_table_offset(sheet_id) + DEFAULT_TABLE_OFFSET
@@ -1183,9 +1321,9 @@ class _NumbersModel(Cacheable):
             parent=TSPMessages.Reference(identifier=sheet_id),
             geometry=TSDArchives.GeometryArchive(
                 angle=0.0,
-                flags=3,
+                flags=flags,
                 position=TSPMessages.Point(x=table_x, y=table_y),
-                size=TSPMessages.Size(height=231.0, width=494.0),
+                size=TSPMessages.Size(height=height, width=width),
             ),
         )
 
@@ -1255,19 +1393,14 @@ class _NumbersModel(Cacheable):
         caption_info.super.CopyFrom(from_caption_info.super)
         caption_info.super.super.CopyFrom(from_caption_info.super.super)
         caption_info.super.super.super.CopyFrom(from_caption_info.super.super.super)
-        caption_info.super.deprecated_storage.MergeFrom(
-            TSPMessages.Reference(identifier=caption_storage_id)
-        )
-        caption_info.super.owned_storage.MergeFrom(
-            TSPMessages.Reference(identifier=caption_storage_id)
-        )
-
+        self.set_reference(caption_info.super.deprecated_storage, caption_storage_id)
+        self.set_reference(caption_info.super.owned_storage, caption_storage_id)
         sidecar_id, _ = self.objects.create_object_from_dict(
             "CalculationEngine",
             {"max_order": 1, "column_count": 0, "row_count": 0},
             TSTArchives.StrokeSidecarArchive,
         )
-        table_model.stroke_sidecar.MergeFrom(TSPMessages.Reference(identifier=sidecar_id))
+        self.set_reference(table_model.stroke_sidecar, sidecar_id)
 
         style_table_id, _ = self.objects.create_object_from_dict(
             "Index/Tables/DataList-{}",
@@ -1351,7 +1484,9 @@ class _NumbersModel(Cacheable):
             TSPMessages.Reference(identifier=table_info_id)
         )
         table_info.super.caption.MergeFrom(TSPMessages.Reference(identifier=caption_info_id))
-        self.add_component_reference(table_info_id, "Document", self.calc_engine_id())
+        self.add_component_reference(
+            table_info_id, location="Document", component_id=self.calc_engine_id()
+        )
 
         self.add_formula_owner(
             table_info_id,
@@ -1452,7 +1587,9 @@ class _NumbersModel(Cacheable):
             TNArchives.SheetArchive,
         )
 
-        self.add_component_reference(sheet_id, "CalculationEngine", DOCUMENT_ID, is_weak=True)
+        self.add_component_reference(
+            sheet_id, location="CalculationEngine", component_id=DOCUMENT_ID, is_weak=True
+        )
 
         self.objects[DOCUMENT_ID].sheets.append(TSPMessages.Reference(identifier=sheet_id))
 

@@ -993,7 +993,7 @@ class Cell(CellStorageFlags, Cacheable):
                 )
                 self._model.add_component_reference(
                     self._style._text_style_obj_id,
-                    parent_id=self._model._table_styles.id(self._table_id),
+                    component_id=self._model._table_styles.id(self._table_id),
                 )
 
             if self._style._cell_style_obj_id is not None:
@@ -1003,7 +1003,7 @@ class Cell(CellStorageFlags, Cacheable):
                 )
                 self._model.add_component_reference(
                     self._style._cell_style_obj_id,
-                    parent_id=self._model._table_styles.id(self._table_id),
+                    component_id=self._model._table_styles.id(self._table_id),
                 )
 
         length = 12
