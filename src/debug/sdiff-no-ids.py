@@ -26,6 +26,12 @@ for line in proc.stdout.splitlines():
         left_side_no_numbers = re.sub(r"\b(\d+)\b", lambda x: "X" * len(x.group(0)), left_side)
         right_side_no_numbers = re.sub(r"\b(\d+)\b", lambda x: "X" * len(x.group(0)), right_side)
         if left_side_no_numbers[0 : len(right_side_no_numbers)] == right_side_no_numbers:
+            left_side = re.sub(
+                r"\b(\d+)\b", lambda x: Fore.GREEN + x.group(0) + Fore.RESET, left_side
+            )
+            right_side = re.sub(
+                r"\b(\d+)\b", lambda x: Fore.GREEN + x.group(0) + Fore.RESET, right_side
+            )
             print(left_side, space.replace("|", "~"), right_side)
             continue
 
@@ -51,26 +57,5 @@ for line in proc.stdout.splitlines():
         left_side_colored += Style.RESET_ALL
         right_side_colored += Style.RESET_ALL
         print(left_side_colored + space + right_side_colored)
-
-        # for (my $ii = 0; $ii < length($s1); $ii++) {
-        #     if ($ii > length($s2)) {
-        #       $colour_s1 .= substr($s1, $ii);
-        #       last;
-        #     }
-        #     if (substr($s1, $ii, 1) eq substr($s2, $ii, 1) and $colour_on) {
-        #       $colour_s1 .= RESET;
-        #       $colour_s2 .= RESET;
-        #       $colour_on = 0;
-        #     } elsif (substr($s1, $ii, 1) ne substr($s2, $ii, 1) and not $colour_on) {
-        #       $colour_s1 .= BOLD.RED;
-        #       $colour_s2 .= BOLD.RED;
-        #       $colour_on = 1;
-        #     }
-        #     $colour_s1 .= substr($s1, $ii, 1);
-        #     $colour_s2 .= substr($s2, $ii, 1);
-        # }
-        # $colour_s1 .= RESET;
-        # $colour_s2 .= RESET;
-        # print $colour_s1, $sp, $colour_s2, "\n";
     else:
         print(line)
