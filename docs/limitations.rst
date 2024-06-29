@@ -8,9 +8,12 @@ Current known limitations of ``numbers-parser`` which may be implemented in the 
 - Creating cells of type ``BulletedTextCell`` is not supported
 - New tables are inserted with a fixed offset below the last table in a
   worksheet which does not take into account title or caption size
+- Captions can be created and edited as of `numbers-parser` version 4.12, but cannot
+  be styled. New captions adopt the first caption style available in the current
+  document
 - Formulas cannot be written to a document
 - Pivot tables are unsupported and saving a document with a pivot table issues
-  a `UnsupportedWarning`.
+  a `UnsupportedWarning` (see :github:`issue 73 <issues/73>` for details).  
 
 The following limitations are expected to always remain:
 
@@ -21,4 +24,6 @@ The following limitations are expected to always remain:
   versions older than 3.11 do not support image filenames with UTF-8 characters
   :pages:`Cell.add_style.bg_image() <api/sheet.html#numbers_parser.Style>` returns
   ``None`` for such files and issues a ``RuntimeWarning``
-  (see :github:`issue 69 <ssues/69>` for details).  
+  (see :github:`issue 69 <issues/69>` for details).  
+- Password-encrypted documents cannot be opened. You must first re-save without
+  a password to read (see :github:`issue 88 <issues/88>` for details).  
