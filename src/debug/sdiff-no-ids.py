@@ -10,7 +10,11 @@ if "GNU diffutils" not in diff_version.decode():
     print("Unsupported diff utility (expected GNU diffutils)", file=stderr)
     exit(1)
 
-diff_width = get_terminal_size().columns - 5
+try:
+    diff_width = get_terminal_size().columns - 5
+except OSError:
+    diff_width = 160
+
 args = ["diff", "--side-by-side", f"--width={diff_width}"] + argv[1:]
 proc = subprocess.run(args, capture_output=True, encoding="utf8", check=False)
 if proc.stderr:
