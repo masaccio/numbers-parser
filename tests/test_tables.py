@@ -128,7 +128,7 @@ def test_default_table():
     assert doc.default_table.name == "Table 1"
 
 
-def table_titles_test_tunner(doc):
+def table_titles_test_runner(doc):
     for table in doc.sheets[0].tables:
         test_type = table.cell(0, 0).value
         assert table.name == test_type
@@ -151,7 +151,7 @@ def table_titles_test_tunner(doc):
 
 def test_table_titles(configurable_save_file):
     doc = Document("tests/data/test-titles.numbers")
-    table_titles_test_tunner(doc)
+    table_titles_test_runner(doc)
 
     for table in doc.sheets[0].tables:
         table.table_name_enabled = not table.table_name_enabled
@@ -174,12 +174,12 @@ def test_table_titles(configurable_save_file):
     new_table = doc.sheets[0].add_table(table_name="new table", x=0, y=650)
     new_table.caption = "new caption"
     new_table.write(0, 0, "new table")
-    table.caption_enabled = True
+    new_table.caption_enabled = True
 
     doc.save(configurable_save_file)
 
     new_doc = Document(configurable_save_file)
-    table_titles_test_tunner(new_doc)
+    table_titles_test_runner(new_doc)
 
 
 def test_stub_captions(configurable_save_file):
