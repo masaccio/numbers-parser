@@ -329,6 +329,10 @@ class _NumbersModel(Cacheable):
         if enabled is not None:
             table_info.super.caption_hidden = not enabled
         else:
+            caption_info_id = table_info.super.caption.identifier
+            caption_archive = self.objects[caption_info_id]
+            if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":
+                return False
             return not table_info.super.caption_hidden
 
     def find_style_id(self, style_substr: str):
@@ -482,6 +486,8 @@ class _NumbersModel(Cacheable):
         if caption is not None:
             clear_field_container(self.objects[caption_storage_id].text)
             self.objects[caption_storage_id].text.append(caption)
+        elif len(self.objects[caption_storage_id].text) == 0:
+            return "Caption"
         else:
             return self.objects[caption_storage_id].text[0]
 
@@ -1481,6 +1487,7 @@ class _NumbersModel(Cacheable):
             table_info_id, location="Document", component_id=self.calc_engine_id()
         )
         self.create_caption_archive(table_model_id)
+        self.caption_enabled(table_model_id, False)
 
         self.add_formula_owner(
             table_info_id,
