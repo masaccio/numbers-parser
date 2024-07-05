@@ -185,9 +185,10 @@ def test_parse_error(script_runner) -> None:
         ["csv2numbers", "tests/data/error.csv"],
         print_result=False,
     )
-    assert "Error tokenizing data" in ret.stderr
+    assert "unexpected end of data" in ret.stderr
 
 
+@pytest.mark.script_launch_mode("inprocess")
 def test_transforms_format_1(script_runner, tmp_path) -> None:
     """Test conversion with transformation."""
     csv_path = str(tmp_path / "format-1.csv")
@@ -218,6 +219,7 @@ def test_transforms_format_1(script_runner, tmp_path) -> None:
     assert table.cell(6, 2).value == 30.99
 
 
+@pytest.mark.script_launch_mode("inprocess")
 def test_transforms_format_2(script_runner, tmp_path) -> None:
     """Test conversion with transformation."""
     csv_path = str(tmp_path / "format-2.csv")
@@ -250,6 +252,7 @@ def test_transforms_format_2(script_runner, tmp_path) -> None:
     assert str(table.cell(3, 0).value) == "2003-02-04 00:00:00+00:00"
 
 
+@pytest.mark.script_launch_mode("inprocess")
 def test_transforms_format_3(script_runner, tmp_path) -> None:
     """Test conversion with transformation."""
     csv_path = str(tmp_path / "format-3.csv")
@@ -309,7 +312,7 @@ def test_transforms_lookup(script_runner, tmp_path) -> None:
     doc = Document(str(numbers_path))
     table = doc.sheets[0].tables[0]
     categories = [table.cell(row_num, 3).value for row_num in range(table.num_rows)]
-    assert categories == ["Category", "Groceries", "Fuel", "Clothes", None, "Flowers"]
+    assert categories == ["Category", "Groceries", "Fuel", "Clothes", "", "Flowers"]
 
     cls = Transformer("XX", "YY")
     with pytest.raises(NotImplementedError):
