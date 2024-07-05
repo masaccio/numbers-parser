@@ -185,7 +185,7 @@ def test_parse_error(script_runner) -> None:
         ["csv2numbers", "tests/data/error.csv"],
         print_result=False,
     )
-    assert "unexpected end of data" in ret.stderr
+    assert "tests/data/error.csv@2: unexpected end of data" in ret.stderr
 
 
 @pytest.mark.script_launch_mode("inprocess")
