@@ -125,7 +125,7 @@ class Converter:
             if transform.dest not in self.header:
                 self.header.append(transform.dest)
 
-    def __del__(self: Converter) -> None:
+    def save(self: Converter) -> None:
         """Write dataframe transctions to a Numbers file."""
         doc = Document(num_rows=2, num_cols=2)
         table = doc.sheets[0].tables[0]
@@ -405,6 +405,7 @@ def main() -> None:
             converter.transform_columns(args.transform)
             converter.rename_columns(args.rename)
             converter.delete_columns(args.delete)
+            converter.save()
     except RuntimeError as e:
         print(e, file=stderr)
         exit(1)
