@@ -12,11 +12,12 @@ name = "numbers-parser"
 packages = [{include = "numbers_parser", from = "src"}]
 readme = "README.md"
 repository = "https://github.com/masaccio/numbers-parser"
-version = "4.12.2"
+version = "4.13.0"
 
 [tool.poetry.scripts]
 cat-numbers = "numbers_parser._cat_numbers:main"
 unpack-numbers = "numbers_parser._unpack_numbers:main"
+csv2numbers = "numbers_parser._csv2numbers:main"
 
 [tool.poetry.dependencies]
 compact-json = "^1.1.3"
