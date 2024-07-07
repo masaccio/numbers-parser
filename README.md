@@ -46,11 +46,11 @@ sudo apt-get -y install libsnappy-dev
 ```
 
 On Windows, you will need to either arrange for snappy to be found for VSC++ or you can install python
-binary libraries compiled by [Christoph Gohlke](https://www.lfd.uci.edu/~gohlke/pythonlibs/#python-snappy). You must select the correct python
-version for your installation. For example for python 3.11:
+[pre-compiled binary libraries](https://github.com/cgohlke/win_arm64-wheels/) which are only available
+for Windows on Arm. There appear to be no x86 pre-compiled packages for Windows.
 
 ```text
-pip install python_snappy-0.6.1-cp311-cp311-win_amd64.whl
+pip install python_snappy-0.6.1-cp312-cp312-win_arm64.whl
 ```
 
 ## Quick Start
