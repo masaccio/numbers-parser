@@ -46,6 +46,24 @@ def test_defaults(script_runner, tmp_path) -> None:
     assert table.cell(3, 1).value == "GROCERY STORE        LONDON"
 
 
+@pytest.mark.script_launch_mode("inprocess")
+def test_defaults_no_header(script_runner, tmp_path) -> None:
+    """Test conversion with no options."""
+    csv_path = str(tmp_path / "format-1.csv")
+    shutil.copy("tests/data/format-1.csv", csv_path)
+
+    ret = script_runner.run(["csv2numbers", "--no-header", csv_path], print_result=False)
+    assert ret.stdout == ""
+    assert ret.stderr == ""
+    assert ret.success
+    numbers_path = Path(csv_path).with_suffix(".numbers")
+
+    assert numbers_path.exists()
+    doc = Document(str(numbers_path))
+    table = doc.sheets[0].tables[0]
+    assert table.cell(3, 1).value == "GROCERY STORE        LONDON"
+
+
 @pytest.mark.script_launch_mode("subprocess")
 def test_errors(script_runner) -> None:
     """Test error detection in command line."""
