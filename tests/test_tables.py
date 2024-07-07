@@ -186,6 +186,7 @@ def test_stub_captions(configurable_save_file):
     doc = Document("tests/data/test-1.numbers")
     table0 = doc.sheets[0].tables[0]
     assert table0.caption == "Caption"
+    assert not table0.caption_enabled
     table0.caption_enabled = True
     table0.caption = "New Caption"
     doc.save(configurable_save_file)
