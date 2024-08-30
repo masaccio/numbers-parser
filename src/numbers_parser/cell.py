@@ -1329,6 +1329,8 @@ class Cell(CellStorageFlags, Cacheable):
         is_currency: bool = False,
     ) -> None:
         self._is_currency = is_currency
+        if is_currency:
+            self._type = CellType.CURRENCY
         if format_type == FormattingType.CURRENCY:
             self._currency_format_id = format_id
         elif format_type == FormattingType.TICKBOX:
