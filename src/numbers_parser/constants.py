@@ -88,6 +88,7 @@ SUPPORTED_NUMBERS_VERSIONS = [
     "13.2",
     "14.0",
     "14.1",
+    "14.2",
 ]
 
 
