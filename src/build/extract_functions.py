@@ -4,13 +4,22 @@ from subprocess import PIPE, Popen
 
 # Code pattern in AArch64:
 #
-# 2824749   ac2c0c:   a8 28 80 52 mov w8, #325
-# 2824750   ac2c10:   e8 13 00 79 strh    w8, [sp, #8]
-# 2824751   ac2c14:   f7 03 00 f9 str x23, [sp]
-# 2824752   ac2c18:   e2 50 00 d0 adrp    x2, 2590 ; 0x14e0000
-# 2824753   ac2c1c:   42 00 3b 91 add x2, x2, #3776 ; Objc cfstring ref: @"GETPIVOTDATA"
+#         mov     w8, #325
+#         strh    w8, [sp, #8]
+#         str     x23, [sp]
+#         adrp    x2, 2590 ; 0x14e0000
+#         add     x2, x2, #3776 ; Objc cfstring ref: @"GETPIVOTDATA"
 #
-# TSCEFunction_GETPIVOTDATA::evaluateWithContext(
+# TSCEFunction_GETPIVOTDATA::evaluateWithContext(...
+
+# Additional required code pattern in AArch64 for Numbers 14.2:
+#
+#         mov     w0, #319
+#         bl      TSCEFormulaCreationMagic::function_3arg(...
+#         ;
+#         ; Approx. 20 lines
+#         ;
+# TSCEFormulaCreationMagic::TEXTBETWEEN(...
 
 if len(sys.argv) != 3:
     print(f"Usage: {sys.argv[0]} framework-file output.py", file=sys.stderr)
@@ -19,55 +28,77 @@ if len(sys.argv) != 3:
 framework = sys.argv[1]
 output_map = sys.argv[2]
 
-objdump = Popen(
-    [
-        "objdump",
-        "--disassemble",
-        "--macho",
-        "--objc-meta-data",
-        framework,
-    ],
-    stdout=PIPE,
-)
-cxxfilt = Popen(["c++filt"], stdin=objdump.stdout, stdout=PIPE)
-objdump.stdout.close()
-disassembly = cxxfilt.communicate()[0]
+if framework.endswith(".s"):
+    with open(framework, "rb") as fh:
+        disassembly = fh.readlines()
+else:
+    objdump = Popen(
+        [
+            "objdump",
+            "--disassemble",
+            "--no-addresses",
+            "--no-print-imm-hex",
+            "--no-show-raw-insn",
+            "--macho",
+            "--objc-meta-data",
+            framework,
+        ],
+        stdout=PIPE,
+    )
+    cxxfilt = Popen(["c++filt"], stdin=objdump.stdout, stdout=PIPE)
+    objdump.stdout.close()
+    disassembly = str(cxxfilt.communicate()[0]).split("\\n")
 
 arg = None
 line_count = 0
 tsce_functions = {}
-cstring_refs = {}
+function_refs = {}
 
-for line in str(disassembly).split("\\n"):
+previous_line = ""
+for line in disassembly:
     line = str(line).replace("\\t", " ")  # noqa: PLW2901
     if m := re.search(r"mov *w8, #(\d+)", line):
         arg = m.group(1)
+        line_count = 0
         continue
 
     if arg is not None:
         line_count += 1
-        if line_count > 8:
+        if line_count > 30:
             arg = None
             line_count = 0
 
     if m := re.search(r'x2, x2.*Objc cfstring ref: @"([A-Z0-9\.]+)"', line):
         if arg is not None and line_count <= 8:
-            cstring_refs[m.group(1)] = arg
+            func = m.group(1).replace("_", ".")
+            print(f"Found cstring {func} = {arg}")
+            function_refs[func] = arg
             arg = None
             line_count = 0
+    elif m := re.search(r"bl *TSCEFormulaCreationMagic::function_3arg\(", line):
+        if m := re.search(r"mov *w0, #(\d+)", previous_line):
+            arg = m.group(1)
+            line_count = 0
+    elif (m := re.search(r"TSCEFormulaCreationMagic::(\w+)\(", line)) and arg is not None:
+        func = m.group(1).replace("_", ".")
+        print(f"Found TSCEFormulaCreationMagic {func} = {arg}")
+        function_refs[func] = arg
+        arg = None
+        line_count = 0
+    elif m := re.search(r"TSCEFunction_(\w+)::evaluateWithContext", line):
+        func = m.group(1).replace("_", ".")
+        print(f"Found TSCEFunction {func}")
+        tsce_functions[func] = True
 
-    if m := re.search(r"TSCEFunction_(\w+)::", line):
-        tsce_functions[m.group(1)] = True
+    previous_line = line
 
+function_refs = dict(sorted(function_refs.items(), key=lambda x: int(x[1])))
 with open(output_map, "w") as fh:
     fh.write("FUNCTION_MAP = {\n")
-    if "ABS" not in cstring_refs:
+    if "ABS" not in function_refs:
         fh.write('    1: "ABS",\n')
-    for func, id in cstring_refs.items():
-        func_c = func.replace(".", "_")
-        if func_c in tsce_functions:
+    for func, id in function_refs.items():
+        if func in tsce_functions:
             fh.write(f'    {id}: "{func}",\n')
-        else:
-            fh.write(f"    # {func_c} {func}\n")
 
     fh.write("}\n")
