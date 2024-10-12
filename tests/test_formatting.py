@@ -1,6 +1,7 @@
+from datetime import datetime
+
 import pytest
 import pytest_check as check
-from pendulum import datetime
 
 from numbers_parser import (
     ControlFormattingType,

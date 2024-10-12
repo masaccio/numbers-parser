@@ -1,5 +1,6 @@
+from datetime import datetime
+
 import pytest
-from pendulum import datetime
 
 from numbers_parser import (
     Cell,

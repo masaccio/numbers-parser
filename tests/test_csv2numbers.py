@@ -233,7 +233,7 @@ def test_transforms_format_1(script_runner, tmp_path) -> None:
     doc = Document(str(numbers_path))
     table = doc.sheets[0].tables[0]
     assert table.cell(1, 1).value == "FLOWERS INC. 202-5551234"
-    assert str(table.cell(2, 0).value) == "2008-04-02 00:00:00+00:00"
+    assert str(table.cell(2, 0).value) == "2008-04-02 00:00:00"
     assert table.cell(6, 2).value == 30.99
 
 
@@ -267,7 +267,7 @@ def test_transforms_format_2(script_runner, tmp_path) -> None:
     assert table.cell(0, 3).value == "Withdrawn"
     assert table.cell(1, 3).value == 1.4
     assert table.cell(3, 2).value == 10.0
-    assert str(table.cell(3, 0).value) == "2003-02-04 00:00:00+00:00"
+    assert str(table.cell(3, 0).value) == "2003-02-04 00:00:00"
 
 
 @pytest.mark.script_launch_mode("inprocess")
@@ -300,7 +300,7 @@ def test_transforms_format_3(script_runner, tmp_path) -> None:
     doc = Document(str(numbers_path))
     table = doc.sheets[0].tables[0]
     assert table.cell(5, 1).value == "AutoShop.com"
-    assert str(table.cell(7, 0).value) == "2023-09-26 00:00:00+00:00"
+    assert str(table.cell(7, 0).value) == "2023-09-26 00:00:00"
     assert table.cell(0, 1).value == "Transaction"
     assert table.cell(0, 2).value == "Amount"
     assert table.cell(7, 2).value == -1283.72

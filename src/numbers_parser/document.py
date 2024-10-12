@@ -1,8 +1,7 @@
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Tuple, Union
 from warnings import warn
-
-from pendulum import DateTime, Duration
 
 from numbers_parser.cell import (
     BackgroundImage,
@@ -951,7 +950,7 @@ class Table(Cacheable):
         self,
         num_rows: Optional[int] = 1,
         start_row: Optional[Union[int, None]] = None,
-        default: Optional[Union[str, int, float, bool, DateTime, Duration]] = None,
+        default: Optional[Union[str, int, float, bool, datetime, timedelta]] = None,
     ) -> None:
         """Add or insert rows to the table.
 
@@ -1013,7 +1012,7 @@ class Table(Cacheable):
         self,
         num_cols: Optional[int] = 1,
         start_col: Optional[Union[int, None]] = None,
-        default: Optional[Union[str, int, float, bool, DateTime, Duration]] = None,
+        default: Optional[Union[str, int, float, bool, datetime, timedelta]] = None,
     ) -> None:
         """Add or insert columns to the table.
 

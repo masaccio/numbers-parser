@@ -1,7 +1,6 @@
 compact-json
 enum-tools
 importlib-resources
-pendulum
 protobuf
 python-dateutil
 python-snappy

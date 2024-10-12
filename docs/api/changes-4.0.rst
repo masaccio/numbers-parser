@@ -17,3 +17,6 @@ Attempting to write a number with too many significant digits results in a ``Run
 
 The previously deprecated methods ``Document.sheets()`` and ```Sheet.tables()`` are now only
 available using the properties of the same name (see examples in this README).
+
+From version 4.15, a number of dependencies have been removed to simplify installation and
+to remove some large dependencies such as Rust for Pendulum.

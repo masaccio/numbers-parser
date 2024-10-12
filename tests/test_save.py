@@ -1,5 +1,6 @@
+from datetime import datetime, timedelta
+
 import pytest
-from pendulum import Duration, datetime
 
 from numbers_parser import Document, EmptyCell, MergedCell, NumberCell, TextCell
 from numbers_parser.constants import (
@@ -146,10 +147,10 @@ def test_create_sheet(configurable_save_file):
     table = sheets[1].tables[0]
     assert table.name == "New Table"
 
-    assert type(table.cell(0, 1)) == TextCell
+    assert isinstance(table.cell(0, 1), TextCell)
     assert table.cell(0, 1).value == "Column 1"
-    assert type(table.cell(0, 1)) == TextCell
-    assert type(table.cell(1, 3)) == NumberCell
+    assert isinstance(table.cell(0, 1), TextCell)
+    assert isinstance(table.cell(1, 3), NumberCell)
     assert table.cell(1, 3).value == 3000
 
 
@@ -203,7 +204,7 @@ def test_save_formats(configurable_save_file):
     table = doc.sheets[0].tables[0]
     assert table.cell("A1").value
     assert table.cell("A2").value == 123.45
-    assert table.cell("A3").value == Duration(days=5)
+    assert table.cell("A3").value == timedelta(days=5)
     assert table.cell("A4").value == datetime(2000, 12, 1)
 
 

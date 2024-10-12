@@ -1,4 +1,4 @@
-from pendulum import datetime
+from datetime import datetime
 
 from numbers_parser import Document
 

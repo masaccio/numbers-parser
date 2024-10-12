@@ -3,8 +3,7 @@ import math
 import re
 from collections import namedtuple
 from dataclasses import asdict, dataclass, field, fields
-from datetime import datetime as builtin_datetime
-from datetime import timedelta as builtin_timedelta
+from datetime import datetime, timedelta
 from enum import IntEnum
 from fractions import Fraction
 from hashlib import sha1
@@ -14,8 +13,6 @@ from typing import Any, List, Optional, Tuple, Union
 from warnings import warn
 
 import sigfig
-from pendulum import DateTime, Duration, datetime, duration
-from pendulum import instance as pendulum_instance
 
 from numbers_parser import __name__ as numbers_parser_name
 
@@ -810,9 +807,9 @@ class Cell(CellStorageFlags, Cacheable):
                     stacklevel=2,
                 )
             cell = NumberCell(row, col, rounded_value)
-        elif isinstance(value, (DateTime, builtin_datetime)):
-            cell = DateCell(row, col, pendulum_instance(value))
-        elif isinstance(value, (Duration, builtin_timedelta)):
+        elif isinstance(value, datetime):
+            cell = DateCell(row, col, value)
+        elif isinstance(value, timedelta):
             cell = DurationCell(row, col, value)
         else:
             raise ValueError("Can't determine cell type from type " + type(value).__name__)
@@ -882,7 +879,6 @@ class Cell(CellStorageFlags, Cacheable):
             offset += 4
         # Skip unused flags
         offset += 4 * bin(flags & 0x900).count("1")
-        #
         if flags & 0x2000:
             storage_flags._num_format_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
@@ -916,12 +912,12 @@ class Cell(CellStorageFlags, Cacheable):
         elif cell_type == TSTArchives.textCellType:
             cell = TextCell(row, col, model.table_string(table_id, storage_flags._string_id))
         elif cell_type == TSTArchives.dateCellType:
-            cell = DateCell(row, col, EPOCH + duration(seconds=seconds))
+            cell = DateCell(row, col, EPOCH + timedelta(seconds=seconds))
             cell._datetime = cell._value
         elif cell_type == TSTArchives.boolCellType:
             cell = BoolCell(row, col, double > 0.0)
         elif cell_type == TSTArchives.durationCellType:
-            cell = DurationCell(row, col, duration(seconds=double))
+            cell = DurationCell(row, col, timedelta(seconds=double))
         elif cell_type == TSTArchives.formulaErrorCellType:
             cell = ErrorCell(row, col)
         elif cell_type == TSTArchives.automaticCellType:
@@ -1024,7 +1020,11 @@ class Cell(CellStorageFlags, Cacheable):
             flags = 4
             length += 8
             cell_type = TSTArchives.dateCellType
-            date_delta = self._value.astimezone() - EPOCH
+            # date_delta = self._value.astimezone() - EPOCH
+            if self._value.tzinfo is None:
+                date_delta = self._value - EPOCH
+            else:
+                date_delta = self._value - EPOCH.astimezone(self._value.tzinfo)
             value = pack("<d", float(date_delta.total_seconds()))
         elif isinstance(self, BoolCell):
             flags = 2
@@ -1483,7 +1483,7 @@ class DateCell(Cell):
           Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """  # fmt: skip
 
-    def __init__(self, row: int, col: int, value: DateTime) -> None:
+    def __init__(self, row: int, col: int, value: datetime) -> None:
         super().__init__(row, col, value)
         self._type = CellType.DATE
 
@@ -1493,12 +1493,12 @@ class DateCell(Cell):
 
 
 class DurationCell(Cell):
-    def __init__(self, row: int, col: int, value: Duration) -> None:
+    def __init__(self, row: int, col: int, value: timedelta) -> None:
         super().__init__(row, col, value)
         self._type = CellType.DURATION
 
     @property
-    def value(self) -> duration:
+    def value(self) -> timedelta:
         return self._value
 
 
@@ -1992,8 +1992,7 @@ def _auto_units(cell_value, format):
             unit_smallest = DurationUnits.HOUR
         elif cell_value % SECONDS_IN_WEEK:
             unit_smallest = DurationUnits.DAY
-        if unit_smallest < unit_largest:
-            unit_smallest = unit_largest
+        unit_smallest = max(unit_smallest, unit_largest)
 
     return unit_smallest, unit_largest
 

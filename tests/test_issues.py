@@ -1,8 +1,8 @@
+from datetime import datetime, timedelta
 from sys import version_info
 
 import magic
 import pytest
-from pendulum import datetime, duration
 
 from numbers_parser import (
     RGB,
@@ -42,10 +42,10 @@ ISSUE_10_REF = [
     1234.56,
     "123",
     datetime(2021, 4, 3, 0, 0, 0),
-    duration(days=4, hours=2, minutes=3),
-    duration(days=5, hours=4, minutes=3, seconds=20),
-    duration(hours=4, minutes=3, seconds=2, milliseconds=10),
-    duration(weeks=12, hours=5),
+    timedelta(days=4, hours=2, minutes=3),
+    timedelta(days=5, hours=4, minutes=3, seconds=20),
+    timedelta(hours=4, minutes=3, seconds=2, milliseconds=10),
+    timedelta(weeks=12, hours=5),
     True,  # Checkbox
     3,
     50,
@@ -191,7 +191,7 @@ def test_issue_37():
 def test_issue_42(script_runner):
     doc = Document("tests/data/issue-42.numbers")
     table = doc.sheets[0].tables[0]
-    assert type(table.cell(6, 1)) == ErrorCell
+    assert isinstance(table.cell(6, 1), ErrorCell)
     assert table.cell(3, 1).formula == "#REF!×A4:A6"
     assert table.cell(4, 1).formula == "#REF!×A5:A6"
 

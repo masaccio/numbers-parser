@@ -1,8 +1,9 @@
 from collections import OrderedDict
+from datetime import datetime
 from enum import IntEnum
+from math import ceil
 
 import enum_tools.documentation
-from pendulum import datetime
 
 try:
     from importlib.resources import files
@@ -99,6 +100,16 @@ def _days_occurred_in_month(value: datetime) -> str:
     return str(n_days)
 
 
+def _day_of_year(value: datetime) -> int:
+    """Return the day number in a year for a datetime."""
+    return value.timetuple().tm_yday
+
+
+def _week_of_month(value: datetime) -> int:
+    """Return the week number in a month for a datetime."""
+    return int(ceil((value.day + value.replace(day=1).weekday()) / 7.0))
+
+
 DATETIME_FIELD_MAP = OrderedDict(
     [
         ("a", lambda x: x.strftime("%p").lower()),
@@ -113,9 +124,9 @@ DATETIME_FIELD_MAP = OrderedDict(
         ("M", "%-m"),
         ("d", "%-d"),
         ("dd", "%d"),
-        ("DDD", lambda x: str(x.day_of_year).zfill(3)),
-        ("DD", lambda x: str(x.day_of_year).zfill(2)),
-        ("D", lambda x: str(x.day_of_year).zfill(1)),
+        ("DDD", lambda x: str(_day_of_year(x)).zfill(3)),
+        ("DD", lambda x: str(_day_of_year(x)).zfill(2)),
+        ("D", lambda x: str(_day_of_year(x)).zfill(1)),
         ("HH", "%H"),
         ("H", "%-H"),
         ("hh", "%I"),
@@ -128,7 +139,7 @@ DATETIME_FIELD_MAP = OrderedDict(
         ("m", lambda x: str(x.minute)),
         ("ss", "%S"),
         ("s", lambda x: str(x.second)),
-        ("W", lambda x: str(x.week_of_month - 1)),
+        ("W", lambda x: str(_week_of_month(x) - 1)),
         ("ww", "%W"),
         ("G", "AD"),  # TODO: support BC
         ("F", lambda x: _days_occurred_in_month(x)),
