@@ -33,6 +33,7 @@ class Converter:
     no_header: bool = False
     reverse: bool = False
     whitespace: bool = None
+    encoding: str = "utf-8"
 
     def __post_init__(self: Converter) -> None:
         """Parse CSV file with Pandas and return a dataframe."""
@@ -45,7 +46,7 @@ class Converter:
             dialect = csv.excel
             dialect.strict = True
             lineno = 1
-            with open(self.input_filename) as csvfile:
+            with open(self.input_filename, encoding=self.encoding) as csvfile:
                 csvreader = csv.reader(csvfile, dialect=dialect)
                 if self.no_header:
                     self.header = None
@@ -334,6 +335,12 @@ def command_line_parser() -> argparse.ArgumentParser:
         help="dates are represented day first in the CSV file (default: false)",
     )
     parser.add_argument(
+        "--encoding",
+        required=False,
+        default="utf-8",
+        help="python-style text encoding of the CSV file (default: utf-8)",
+    )
+    parser.add_argument(
         "--date",
         metavar="COLUMNS",
         type=parse_columns,
@@ -400,6 +407,7 @@ def main() -> None:
                 date_columns=args.date,
                 input_filename=input_filename,
                 output_filename=output_filename,
+                encoding=args.encoding,
             )
 
             converter.transform_columns(args.transform)
