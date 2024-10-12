@@ -1,5 +1,4 @@
-from roman import toRoman
-
+from numbers_parser.constants import to_roman
 from numbers_parser.generated.TSWPArchives_pb2 import ListStyleArchive
 
 BULLET_PREFIXES = {
@@ -24,12 +23,12 @@ BULLET_CONVERSION = {
     ListStyleArchive.kNumericDecimal: lambda x: str(x + 1),
     ListStyleArchive.kNumericDoubleParen: lambda x: str(x + 1),
     ListStyleArchive.kNumericRightParen: lambda x: str(x + 1),
-    ListStyleArchive.kRomanUpperDecimal: lambda x: toRoman(x + 1),
-    ListStyleArchive.kRomanUpperDoubleParen: lambda x: toRoman(x + 1),
-    ListStyleArchive.kRomanUpperRightParen: lambda x: toRoman(x + 1),
-    ListStyleArchive.kRomanLowerDecimal: lambda x: toRoman(x + 1).lower(),
-    ListStyleArchive.kRomanLowerDoubleParen: lambda x: toRoman(x + 1).lower(),
-    ListStyleArchive.kRomanLowerRightParen: lambda x: toRoman(x + 1).lower(),
+    ListStyleArchive.kRomanUpperDecimal: lambda x: to_roman(x + 1),
+    ListStyleArchive.kRomanUpperDoubleParen: lambda x: to_roman(x + 1),
+    ListStyleArchive.kRomanUpperRightParen: lambda x: to_roman(x + 1),
+    ListStyleArchive.kRomanLowerDecimal: lambda x: to_roman(x + 1).lower(),
+    ListStyleArchive.kRomanLowerDoubleParen: lambda x: to_roman(x + 1).lower(),
+    ListStyleArchive.kRomanLowerRightParen: lambda x: to_roman(x + 1).lower(),
     ListStyleArchive.kAlphaUpperDecimal: lambda x: chr(x + 65),
     ListStyleArchive.kAlphaUpperDoubleParen: lambda x: chr(x + 65),
     ListStyleArchive.kAlphaUpperRightParen: lambda x: chr(x + 65),

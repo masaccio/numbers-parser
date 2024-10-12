@@ -22,6 +22,7 @@ __all__ = [
     "NegativeNumberStyle",
     "FractionAccuracy",
     "ControlFormattingType",
+    "to_roman",
 ]
 
 DEFAULT_DOCUMENT = files("numbers_parser") / "data" / "empty.numbers"
@@ -409,3 +410,35 @@ class PaddingType(IntEnum):
     """Pad integers with leading spaces and decimals with trailing spaces."""
     SPACES = 2
     """Pad integers with leading zeroes and decimals with trailing zeroes."""
+
+
+ROMAN_NUMERALS = {
+    "M": 1000,
+    "CM": 900,
+    "D": 500,
+    "CD": 400,
+    "C": 100,
+    "XC": 90,
+    "L": 50,
+    "XL": 40,
+    "X": 10,
+    "IX": 9,
+    "V": 5,
+    "IV": 4,
+    "I": 1,
+}
+
+
+def to_roman(value: int) -> str:
+    if value == 0:
+        return ""
+
+    if value >= 4000 or value < 0:
+        raise ValueError("Number out of range for Roman numerals")
+
+    result = ""
+    for k, v in ROMAN_NUMERALS.items():
+        while value >= v:
+            result += k
+            value -= v
+    return result

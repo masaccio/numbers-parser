@@ -5,7 +5,6 @@ protobuf
 python-dateutil
 python-snappy
 regex
-roman
 setuptools
 sigfig
 six
