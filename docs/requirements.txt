@@ -4,7 +4,6 @@ importlib-resources
 protobuf
 python-dateutil
 python-snappy
-regex
 setuptools
 sigfig
 six

@@ -11,7 +11,6 @@ from binascii import hexlify
 from dataclasses import dataclass
 from pathlib import Path
 
-import regex
 from compact_json import Formatter
 
 from numbers_parser import __name__ as numbers_parser_name
@@ -35,7 +34,7 @@ class NumbersUnpacker(IWorkHandler):
 
     def store_file(self, filename: str, blob: bytes) -> None:
         """Store a profobuf archive."""
-        filename = regex.sub(r".*\.numbers/", "", str(filename))
+        filename = re.sub(r".*\.numbers/", "", str(filename))
         self.ensure_directory_exists(filename)
         target_path = os.path.join(self.output_dir, filename)
         if isinstance(blob, IWAFile):
@@ -102,7 +101,7 @@ class NumbersUnpacker(IWorkHandler):
                 elif k in ["cell_offsets", k == "cell_offsets_pre_bnc"]:
                     offsets = array("h", b64decode(obj[k])).tolist()
                     obj[k] = ",".join([str(x) for x in offsets])
-                    obj[k] = regex.sub(r"(?:,-1)+$", ",[...]", obj[k])
+                    obj[k] = re.sub(r"(?:,-1)+$", ",[...]", obj[k])
         else:  # list
             for v in obj:
                 if isinstance(v, (dict, list)):
