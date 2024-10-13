@@ -37,7 +37,8 @@ def _check_installed_numbers_version():
     installed_version = re.sub(r"(\d+)\.(\d+)\.\d+", r"\1.\2", installed_version)
     if installed_version not in SUPPORTED_NUMBERS_VERSIONS:
         warnings.warn(
-            f"Numbers version {installed_version} not tested with this version", stacklevel=2,
+            f"Numbers version {installed_version} not tested with this version",
+            stacklevel=2,
         )
     fp.close()
     return installed_version

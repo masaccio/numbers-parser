@@ -1,7 +1,7 @@
 import pytest
 import roman
 
-from numbers_parser import to_roman
+from numbers_parser.roman import to_roman
 
 
 def test_roman():
@@ -15,4 +15,4 @@ def test_roman():
         _ = to_roman(-1)
     assert "Number out of range for Roman numerals" in str(e)
 
-    assert to_roman(0) == ""
+    assert to_roman(0) == "N"

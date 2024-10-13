@@ -1,5 +1,5 @@
-from numbers_parser.constants import to_roman
 from numbers_parser.generated.TSWPArchives_pb2 import ListStyleArchive
+from numbers_parser.roman import to_roman
 
 BULLET_PREFIXES = {
     ListStyleArchive.kNumericDecimal: "",
