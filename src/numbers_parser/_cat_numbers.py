@@ -3,7 +3,7 @@ import csv
 import logging
 import sys
 
-import sigfig
+from sigfig import round as sigfig
 
 from numbers_parser import Document, ErrorCell, FileError, FileFormatError, NumberCell, _get_version
 from numbers_parser import __name__ as numbers_parser_name
@@ -49,15 +49,24 @@ def command_line_parser():
         help="Dump formatted cells (durations) as they appear in Numbers",
     )
     parser.add_argument(
-        "-s", "--sheet", action="append", help="Names of sheet(s) to include in export",
+        "-s",
+        "--sheet",
+        action="append",
+        help="Names of sheet(s) to include in export",
     )
     parser.add_argument(
-        "-t", "--table", action="append", help="Names of table(s) to include in export",
+        "-t",
+        "--table",
+        action="append",
+        help="Names of table(s) to include in export",
     )
     parser.add_argument("document", nargs="*", help="Document(s) to export")
     parser.add_argument("--debug", default=False, action="store_true", help="Enable debug logging")
     parser.add_argument(
-        "--experimental", default=False, action="store_true", help=argparse.SUPPRESS,
+        "--experimental",
+        default=False,
+        action="store_true",
+        help=argparse.SUPPRESS,
     )
     return parser
 
@@ -81,7 +90,7 @@ def cell_as_string(args, cell):
     elif args.formatting and cell.formatted_value is not None:
         return cell.formatted_value
     elif isinstance(cell, NumberCell):
-        return sigfig.round(cell.value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
+        return sigfig(cell.value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
     elif cell.value is None:
         return ""
     else:

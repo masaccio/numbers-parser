@@ -12,11 +12,9 @@ from struct import pack, unpack
 from typing import Any, List, Optional, Tuple, Union
 from warnings import warn
 
-import sigfig
+from sigfig import round as sigfig
 
 from numbers_parser import __name__ as numbers_parser_name
-
-# from numbers_parser.cell_storage import CellStorage, CellType
 from numbers_parser.constants import (
     CHECKBOX_FALSE_VALUE,
     CHECKBOX_TRUE_VALUE,
@@ -799,7 +797,7 @@ class Cell(CellStorageFlags, Cacheable):
         elif isinstance(value, int):
             cell = NumberCell(row, col, value)
         elif isinstance(value, float):
-            rounded_value = sigfig.round(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
+            rounded_value = sigfig(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
             if rounded_value != value:
                 warn(
                     f"'{value}' rounded to {MAX_SIGNIFICANT_DIGITS} significant digits",
@@ -1734,7 +1732,7 @@ def _decode_number_format(format, value, name):  # noqa: PLR0912
         int_width = num_integers
 
     # value_1 = str(value).split(".")[0]
-    # value_2 = sigfig.round(str(value).split(".")[1], sigfig=MAX_SIGNIFICANT_DIGITS, warn=False)
+    # value_2 = sigfig(str(value).split(".")[1], sigfig=MAX_SIGNIFICANT_DIGITS, warn=False)
     # int_pad_space_as_zero = (
     #     num_integers > 0
     #     and num_decimals > 0
@@ -1812,16 +1810,16 @@ def _format_decimal(value: float, format, percent: bool = False) -> str:
         formatted_value = f"{int(value):{thousands}}"
     else:
         if format.decimal_places >= DECIMAL_PLACES_AUTO:
-            formatted_value = str(sigfig.round(value, MAX_SIGNIFICANT_DIGITS, warn=False))
+            formatted_value = str(sigfig(value, MAX_SIGNIFICANT_DIGITS, warn=False))
         else:
-            formatted_value = sigfig.round(value, MAX_SIGNIFICANT_DIGITS, type=str, warn=False)
-            formatted_value = sigfig.round(
+            formatted_value = sigfig(value, MAX_SIGNIFICANT_DIGITS, type=str, warn=False)
+            formatted_value = sigfig(
                 formatted_value,
                 decimals=format.decimal_places,
                 type=str,
             )
         if format.show_thousands_separator:
-            formatted_value = sigfig.round(formatted_value, spacer=",", spacing=3, type=str)
+            formatted_value = sigfig(formatted_value, spacer=",", spacing=3, type=str)
             try:
                 (integer, decimal) = formatted_value.split(".")
                 formatted_value = integer + "." + decimal.replace(",", "")
@@ -1945,7 +1943,7 @@ def _format_fraction(value: float, format) -> str:
 
 
 def _format_scientific(value: float, format) -> str:
-    formatted_value = sigfig.round(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
+    formatted_value = sigfig(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
     return f"{formatted_value:.{format.decimal_places}E}"
 
 
