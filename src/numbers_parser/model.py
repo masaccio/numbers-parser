@@ -5,7 +5,7 @@ from hashlib import sha1
 from math import floor
 from pathlib import Path
 from struct import pack
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 
 from numbers_parser.bullets import (
     BULLET_CONVERSION,
@@ -91,27 +91,27 @@ class MergeCells:
     def __init__(self) -> None:
         self._references = defaultdict(lambda: False)
 
-    def add_reference(self, row: int, col: int, rect: Tuple):
+    def add_reference(self, row: int, col: int, rect: tuple) -> None:
         self._references[(row, col)] = MergeReference(*rect)
 
-    def add_anchor(self, row: int, col: int, size: Tuple):
+    def add_anchor(self, row: int, col: int, size: tuple) -> None:
         self._references[(row, col)] = MergeAnchor(size)
 
-    def is_merge_reference(self, row_col: Tuple) -> bool:
+    def is_merge_reference(self, row_col: tuple) -> bool:
         # defaultdict will default this to False for missing entries
         return isinstance(self._references[row_col], MergeReference)
 
-    def is_merge_anchor(self, row_col: Tuple) -> bool:
+    def is_merge_anchor(self, row_col: tuple) -> bool:
         # defaultdict will default this to False for missing entries
         return isinstance(self._references[row_col], MergeAnchor)
 
-    def get(self, row_col: Tuple) -> Union[MergeAnchor, MergeReference]:
+    def get(self, row_col: tuple) -> Union[MergeAnchor, MergeReference]:
         return self._references[row_col]
 
-    def size(self, row_col: Tuple) -> Tuple:
+    def size(self, row_col: tuple) -> tuple:
         return self._references[row_col].size
 
-    def rect(self, row_col: Tuple) -> Tuple:
+    def rect(self, row_col: tuple) -> tuple:
         return self._references[row_col].rect
 
     def merge_cells(self):
@@ -128,7 +128,7 @@ class DataLists(Cacheable):
         self._datalist_name = datalist_name
 
     @cache()
-    def add_table(self, table_id: int):
+    def add_table(self, table_id: int) -> None:
         """Cache a new datalist for a table if not already seen."""
         base_data_store = self._model.objects[table_id].base_data_store
         datalist_id = getattr(base_data_store, self._datalist_name).identifier
@@ -164,7 +164,7 @@ class DataLists(Cacheable):
             return repr(value)
         return value
 
-    def init(self, table_id: int):
+    def init(self, table_id: int) -> None:
         """Remove all entries from a datalist."""
         self.add_table(table_id)
         self._datalists[table_id]["by_key"] = {}
@@ -251,7 +251,7 @@ class _NumbersModel(Cacheable):
         self.objects[sheet_id].name = value
         return None
 
-    def set_table_data(self, table_id: int, data: List):
+    def set_table_data(self, table_id: int, data: list) -> None:
         self._table_data[table_id] = data
 
     # Don't cache: new tables can be added at runtime
@@ -323,12 +323,12 @@ class _NumbersModel(Cacheable):
         table_info = self.objects[self.table_info_id(table_id)]
         if enabled is not None:
             table_info.super.caption_hidden = not enabled
-        else:
-            caption_info_id = table_info.super.caption.identifier
-            caption_archive = self.objects[caption_info_id]
-            if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":
-                return False
-            return not table_info.super.caption_hidden
+            return None
+        caption_info_id = table_info.super.caption.identifier
+        caption_archive = self.objects[caption_info_id]
+        if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":
+            return False
+        return not table_info.super.caption_hidden
 
     def find_style_id(self, style_substr: str):
         stylesheet = self.objects[self.stylesheet_id()]
@@ -343,13 +343,13 @@ class _NumbersModel(Cacheable):
             for id in self.find_refs("ParagraphStyleArchive")
             if "Caption" in self.objects[id].super.name
         }
-        return list(style_map.keys())[0]
+        return next(iter(style_map.keys()))
 
     @cache(num_args=0)
     def stylesheet_id(self):
         return self.find_refs("StylesheetArchive")[0]
 
-    def set_reference(self, obj: object, id: int):
+    def set_reference(self, obj: object, id: int) -> None:
         obj.MergeFrom(TSPMessages.Reference(identifier=id))
 
     def create_path_source_archive(self, table_id):
@@ -389,7 +389,7 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-    def create_caption_archive(self, table_id):
+    def create_caption_archive(self, table_id) -> None:
         table_info_id = self.table_info_id(table_id)
         table_info = self.objects[table_info_id]
         caption_placement_id, _ = self.objects.create_object_from_dict(
@@ -464,7 +464,7 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-    def caption_text(self, table_id: int, caption: str = None) -> str:
+    def caption_text(self, table_id: int, caption: Optional[str] = None) -> str:
         table_info = self.objects[self.table_info_id(table_id)]
         caption_info_id = table_info.super.caption.identifier
         caption_archive = self.objects[caption_info_id]
@@ -480,10 +480,10 @@ class _NumbersModel(Cacheable):
         if caption is not None:
             clear_field_container(self.objects[caption_storage_id].text)
             self.objects[caption_storage_id].text.append(caption)
-        elif len(self.objects[caption_storage_id].text) == 0:
+            return None
+        if len(self.objects[caption_storage_id].text) == 0:
             return "Caption"
-        else:
-            return self.objects[caption_storage_id].text[0]
+        return self.objects[caption_storage_id].text[0]
 
     @cache()
     def table_tiles(self, table_id):
@@ -693,7 +693,7 @@ class _NumbersModel(Cacheable):
         """Return the string associated with a string ID for a particular table."""
         return self._table_strings.lookup_value(table_id, key).string
 
-    def init_table_strings(self, table_id: int):
+    def init_table_strings(self, table_id: int) -> None:
         """Cache table strings reference and delete all existing keys/values."""
         self._table_strings.init(table_id)
 
@@ -794,7 +794,7 @@ class _NumbersModel(Cacheable):
         return self.objects[ce_id]
 
     @cache()
-    def calculate_merge_cell_ranges(self, table_id):
+    def calculate_merge_cell_ranges(self, table_id) -> None:
         """Exract all the merge cell ranges for the Table."""
         # https://github.com/masaccio/numbers-parser/blob/main/doc/Numbers.md#merge-ranges
         owner_id_map = self.owner_id_map()
@@ -857,6 +857,7 @@ class _NumbersModel(Cacheable):
         for sheet_id in self.sheet_ids():  # pragma: no branch
             if table_id in self.table_ids(sheet_id):
                 return sheet_id
+        return None
 
     @cache()
     def table_uuids_to_id(self, table_uuid) -> int:
@@ -864,6 +865,7 @@ class _NumbersModel(Cacheable):
             for table_id in self.table_ids(sheet_id):
                 if table_uuid == self.table_base_id(table_id):
                     return table_id
+        return None
 
     def node_to_ref(self, this_table_id: int, row: int, col: int, node):
         if node.HasField("AST_cross_table_reference_extra_info"):
@@ -937,7 +939,7 @@ class _NumbersModel(Cacheable):
         return formulas
 
     @cache()
-    def storage_buffers(self, table_id: int) -> List:
+    def storage_buffers(self, table_id: int) -> list:
         buffers = []
         for tile in self.table_tiles(table_id):
             if not tile.last_saved_in_BNC:
@@ -965,7 +967,7 @@ class _NumbersModel(Cacheable):
             return None
         return storage_buffers[row_offset][col]
 
-    def recalculate_row_headers(self, table_id: int, data: List):
+    def recalculate_row_headers(self, table_id: int, data: list) -> None:
         base_data_store = self.objects[table_id].base_data_store
         buckets = self.objects[base_data_store.rowHeaders.buckets[0].identifier]
         clear_field_container(buckets.headers)
@@ -982,7 +984,7 @@ class _NumbersModel(Cacheable):
             )
             buckets.headers.append(header)
 
-    def recalculate_column_headers(self, table_id: int, data: List):
+    def recalculate_column_headers(self, table_id: int, data: list) -> None:
         current_column_widths = {}
         for col in range(self.number_of_columns(table_id)):
             current_column_widths[col] = self.col_width(table_id, col)
@@ -1004,7 +1006,7 @@ class _NumbersModel(Cacheable):
             )
             buckets.headers.append(header)
 
-    def recalculate_merged_cells(self, table_id: int):
+    def recalculate_merged_cells(self, table_id: int) -> None:
         merge_cells = self.merge_cells(table_id)
 
         merge_map_id, merge_map = self.objects.create_object_from_dict(
@@ -1027,7 +1029,7 @@ class _NumbersModel(Cacheable):
     def recalculate_row_info(
         self,
         table_id: int,
-        data: List,
+        data: list,
         tile_row_offset: int,
         row: int,
     ) -> TSTArchives.TileRowInfo:
@@ -1069,7 +1071,7 @@ class _NumbersModel(Cacheable):
             component_ids = [id for id, c in component_map.items() if c.identifier == reference]
         return component_map[component_ids[0]]
 
-    def add_component_metadata(self, object_id: int, parent: str, locator: str):
+    def add_component_metadata(self, object_id: int, parent: str, locator: str) -> None:
         """Add a new ComponentInfo record to the parent object in the document metadata."""
         locator = locator.format(object_id)
         preferred_locator = re.sub(r"\-\d+.*", "", locator)
@@ -1091,7 +1093,7 @@ class _NumbersModel(Cacheable):
         location: Optional[str] = None,
         component_id: Optional[int] = None,
         is_weak: bool = False,
-    ):
+    ) -> None:
         """Add an external reference to an object in a metadata component."""
         component = self.metadata_component(location or component_id)
         if component_id is not None:
@@ -1104,7 +1106,7 @@ class _NumbersModel(Cacheable):
             TSPArchiveMessages.ComponentExternalReference(**params),
         )
 
-    def recalculate_table_data(self, table_id: int, data: List):
+    def recalculate_table_data(self, table_id: int, data: list) -> None:
         table_model = self.objects[table_id]
         table_model.number_of_rows = len(data)
         table_model.number_of_columns = len(data[0])
@@ -1292,7 +1294,7 @@ class _NumbersModel(Cacheable):
             table_model.number_of_header_columns = num_headers
         return table_model.number_of_header_columns
 
-    def table_coordinates(self, table_id: int) -> Tuple[float]:
+    def table_coordinates(self, table_id: int) -> tuple[float]:
         table_info = self.objects[self.table_info_id(table_id)]
         return (
             table_info.super.geometry.position.x,
@@ -1499,7 +1501,7 @@ class _NumbersModel(Cacheable):
         num_cols: int,
         number_of_header_rows: int,
         number_of_header_columns: int,
-    ):
+    ) -> None:
         """Create a FormulaOwnerDependenciesArchive that references a TableInfoArchive
         so that cross-references to cells in this table will work.
         """
@@ -1593,7 +1595,7 @@ class _NumbersModel(Cacheable):
         return self._styles
 
     @cache(num_args=0)
-    def available_paragraph_styles(self) -> Dict[str, Style]:
+    def available_paragraph_styles(self) -> dict[str, Style]:
         theme_id = self.objects[DOCUMENT_ID].theme.identifier
         presets = find_extension(self.objects[theme_id].super, "paragraph_style_presets")
         presets_map = {
@@ -1697,7 +1699,7 @@ class _NumbersModel(Cacheable):
         self._styles[style.name] = style
         return para_style_id
 
-    def update_paragraph_style(self, style: Style):
+    def update_paragraph_style(self, style: Style) -> None:
         if style.underline:
             underline = CharacterStyle.UnderlineType.kSingleUnderline
         else:
@@ -1724,7 +1726,7 @@ class _NumbersModel(Cacheable):
         style_obj.para_properties.left_indent = style.left_indent
         style_obj.para_properties.right_indent = style.right_indent
 
-    def update_paragraph_styles(self):
+    def update_paragraph_styles(self) -> None:
         """Create new paragraph style archives for any new styles that
         have been created for this document.
         """
@@ -1741,7 +1743,7 @@ class _NumbersModel(Cacheable):
         for style in updated_styles:
             self.update_paragraph_style(style)
 
-    def update_cell_styles(self, table_id: int, data: List):
+    def update_cell_styles(self, table_id: int, data: list) -> None:
         """Create new cell style archives for any cells whose styles
         have changes that require a cell style.
         """
@@ -1880,7 +1882,7 @@ class _NumbersModel(Cacheable):
         return "Custom Style 1"
 
     @property
-    def custom_formats(self) -> Dict[str, CustomFormatting]:
+    def custom_formats(self) -> dict[str, CustomFormatting]:
         if self._custom_formats is None:
             custom_format_list_id = self.objects[DOCUMENT_ID].super.custom_format_list.identifier
             custom_formats = self.objects[custom_format_list_id].custom_formats
@@ -1916,7 +1918,7 @@ class _NumbersModel(Cacheable):
         return TableFormulas(self, table_id)
 
     @cache(num_args=2)
-    def table_rich_text(self, table_id: int, string_key: int) -> Dict:
+    def table_rich_text(self, table_id: int, string_key: int) -> dict:
         """Extract bullets and hyperlinks from a rich text data cell."""
         # The table model base data store contains a richTextTable field
         # which is a reference to a TST.TableDataList. The TableDataList
@@ -2005,6 +2007,7 @@ class _NumbersModel(Cacheable):
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,
                 }
+        return None
 
     def cell_text_style(self, cell: Cell) -> object:
         """Return the text style object for the cell or, if none
@@ -2036,7 +2039,7 @@ class _NumbersModel(Cacheable):
             vertical = VerticalJustification(self.cell_property(style, "vertical_alignment"))
         return Alignment(horizontal, vertical)
 
-    def cell_bg_color(self, cell: Cell) -> Union[Tuple, List[Tuple]]:
+    def cell_bg_color(self, cell: Cell) -> Union[tuple, list[tuple]]:
         if cell._cell_style_id is None:
             return None
 
@@ -2098,7 +2101,7 @@ class _NumbersModel(Cacheable):
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return style.super.name
 
-    def cell_font_color(self, obj: Union[Cell, object]) -> Tuple:
+    def cell_font_color(self, obj: Union[Cell, object]) -> tuple:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return rgb(self.char_property(style, "font_color"))
 
@@ -2177,7 +2180,7 @@ class _NumbersModel(Cacheable):
         col: int,
         side: str,
         border_value: Border,
-    ):
+    ) -> None:
         """Set the 2 borders adjacent to a stroke if within the table range."""
         if side == "top":
             if (cell := self.cell_for_stroke(table_id, "top", row, col)) is not None:
@@ -2212,7 +2215,7 @@ class _NumbersModel(Cacheable):
                 self._col_widths[table_id].pop(col, None)
                 self._col_widths[table_id].pop(col - 1, None)
 
-    def extract_strokes_in_layers(self, table_id: int, layer_ids: List, side: str):
+    def extract_strokes_in_layers(self, table_id: int, layer_ids: list, side: str) -> None:
         for layer_id in layer_ids:
             stroke_layer = self.objects[layer_id.identifier]
             for stroke_run in stroke_layer.stroke_runs:
@@ -2234,7 +2237,7 @@ class _NumbersModel(Cacheable):
                         self.set_cell_border(table_id, row, start_column, side, border_value)
 
     @cache()
-    def extract_strokes(self, table_id: int):
+    def extract_strokes(self, table_id: int) -> None:
         table_obj = self.objects[table_id]
         sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]
         self.extract_strokes_in_layers(table_id, sidecar_obj.top_row_stroke_layers, "top")
@@ -2307,7 +2310,7 @@ class _NumbersModel(Cacheable):
         side: str,
         border_value: Border,
         length: int,
-    ):
+    ) -> None:
         table_obj = self.objects[table_id]
         sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]
         sidecar_obj.max_order += 1
@@ -2451,7 +2454,7 @@ def get_storage_buffers_for_row(
     offsets: list,
     num_cols: int,
     has_wide_offsets: bool,
-) -> List[bytes]:
+) -> list[bytes]:
     """Extract storage buffers for each cell in a table row.
 
     Args:
@@ -2496,7 +2499,7 @@ def get_storage_buffers_for_row(
     return data
 
 
-def clear_field_container(obj):
+def clear_field_container(obj) -> None:
     """Remove all entries from a protobuf RepeatedCompositeFieldContainer
     in a portable fashion.
     """

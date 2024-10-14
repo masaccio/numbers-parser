@@ -4,7 +4,8 @@ def to_roman(value: int) -> str:
         return "N"
 
     if value < 1 or value > 3999:
-        raise ValueError("Number out of range for Roman numerals")
+        msg = "Number out of range for Roman numerals"
+        raise ValueError(msg)
 
     roman_map = {
         1000: "M",

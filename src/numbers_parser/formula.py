@@ -27,14 +27,14 @@ class Formula(list):
             values += (self._stack.pop(),)
         return values
 
-    def push(self, val: str):
+    def push(self, val: str) -> None:
         self._stack.append(val)
 
-    def add(self, *args):
+    def add(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}+{arg2}")
 
-    def array(self, *args):
+    def array(self, *args) -> None:
         node = args[2]
         num_rows = node.AST_array_node_numRow
         num_cols = node.AST_array_node_numCol
@@ -53,36 +53,36 @@ class Formula(list):
             args = ";".join(reversed(rows))
             self.push(f"{{{args}}}")
 
-    def boolean(self, *args):
+    def boolean(self, *args) -> None:
         node = args[2]
         if node.HasField("AST_token_node_boolean"):
             self.push(str(node.AST_token_node_boolean).upper())
         else:
             self.push(str(node.AST_boolean_node_boolean).upper())
 
-    def concat(self, *args):
+    def concat(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}&{arg2}")
 
-    def date(self, *args):
+    def date(self, *args) -> None:
         # Date literals exported as DATE()
         node = args[2]
         dt = datetime(2001, 1, 1) + timedelta(seconds=node.AST_date_node_dateNum)
         self.push(f"DATE({dt.year},{dt.month},{dt.day})")
 
-    def div(self, *args):
+    def div(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}÷{arg2}")
 
-    def empty(self, *args):
+    def empty(self, *args) -> None:
         self.push("")
 
-    def equals(self, *args):
+    def equals(self, *args) -> None:
         # Arguments appear to be reversed
         arg1, arg2 = self.popn(2)
         self.push(f"{arg2}={arg1}")
 
-    def function(self, *args):
+    def function(self, *args) -> None:
         node = args[2]
         num_args = node.AST_function_node_numArgs
         node_index = node.AST_function_node_index
@@ -110,41 +110,41 @@ class Formula(list):
         args = ",".join(reversed(args))
         self.push(f"{func_name}({args})")
 
-    def greater_than(self, *args):
+    def greater_than(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}>{arg2}")
 
-    def greater_than_or_equal(self, *args):
+    def greater_than_or_equal(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}≥{arg2}")
 
-    def less_than(self, *args):
+    def less_than(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}<{arg2}")
 
-    def less_than_or_equal(self, *args):
+    def less_than_or_equal(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}≤{arg2}")
 
-    def list(self, *args):
+    def list(self, *args) -> None:
         node = args[2]
         args = self.popn(node.AST_list_node_numArgs)
         args = ",".join(reversed(args))
         self.push(f"({args})")
 
-    def mul(self, *args):
+    def mul(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}×{arg2}")
 
-    def negate(self, *args):
+    def negate(self, *args) -> None:
         arg1 = self.pop()
         self.push(f"-{arg1}")
 
-    def not_equals(self, *args):
+    def not_equals(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}≠{arg2}")
 
-    def number(self, *args):
+    def number(self, *args) -> None:
         node = args[2]
         if node.AST_number_node_decimal_high == 0x3040000000000000:
             # Integer: don't use decimals
@@ -152,15 +152,15 @@ class Formula(list):
         else:
             self.push(number_to_str(node.AST_number_node_number))
 
-    def percent(self, *args):
+    def percent(self, *args) -> None:
         arg1 = self.pop()
         self.push(f"{arg1}%")
 
-    def power(self, *args):
+    def power(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}^{arg2}")
 
-    def range(self, *args):
+    def range(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         func_range = "(" in arg1 or "(" in arg2
         if "::" in arg1 and not func_range:
@@ -171,15 +171,15 @@ class Formula(list):
         else:
             self.push(f"{arg1}:{arg2}")
 
-    def string(self, *args):
+    def string(self, *args) -> None:
         node = args[2]
         self.push('"' + node.AST_string_node_string + '"')
 
-    def sub(self, *args):
+    def sub(self, *args) -> None:
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}-{arg2}")
 
-    def xref(self, *args):
+    def xref(self, *args) -> None:
         (row, col, node) = args
         self.push(self._model.node_to_ref(self._table_id, row, col, node))
 

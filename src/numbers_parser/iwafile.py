@@ -4,7 +4,6 @@ import logging
 import struct
 from functools import partial
 from struct import unpack
-from typing import List
 
 import snappy
 from google.protobuf.internal.decoder import _DecodeVarint32
@@ -70,8 +69,9 @@ class IWACompressedChunk:
 
             first_byte = header[0]
             if first_byte != 0x00:
+                msg = f"IWA chunk does not start with 0x00! (found {first_byte:x})"
                 raise ValueError(  # pragma: no cover
-                    "IWA chunk does not start with 0x00! (found %x)" % first_byte,
+                    msg,
                 )
 
             length = unpack("<I", bytes(header[1:]) + b"\x00")[0]
@@ -282,7 +282,7 @@ def create_iwa_segment(id: int, cls: object, object_dict: dict) -> object:
     return IWAArchiveSegment.from_dict(archive_dict)
 
 
-def find_references(obj, references=list):
+def find_references(obj, references=list) -> None:
     if not hasattr(obj, "DESCRIPTOR"):
         return
     if type(obj).__name__ == "Reference":
@@ -299,7 +299,7 @@ def find_references(obj, references=list):
             find_references(field, references)
 
 
-def copy_object_to_iwa_file(iwa_file: IWAFile, obj: object, obj_id: int):
+def copy_object_to_iwa_file(iwa_file: IWAFile, obj: object, obj_id: int) -> None:
     for archive in iwa_file.chunks[0].archives:
         if archive.header.identifier == obj_id:
             archive.objects[0].CopyFrom(obj)
@@ -329,7 +329,7 @@ def is_iwa_file(data):
     return length == data_length
 
 
-def extensions(obj) -> List[object]:
+def extensions(obj) -> list[object]:
     return [obj.Extensions[field] for field, _ in obj.ListFields() if field.is_extension]
 
 

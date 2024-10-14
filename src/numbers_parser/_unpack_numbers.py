@@ -64,13 +64,13 @@ class NumbersUnpacker(IWorkHandler):
             with open(target_path, "wb") as out:
                 out.write(blob)
 
-    def ensure_directory_exists(self, path: str):
+    def ensure_directory_exists(self, path: str) -> None:
         """Ensure that a path's directory exists."""
         parts = os.path.split(path)
         with contextlib.suppress(OSError):
             os.makedirs(os.path.join(*([self.output_dir, *list(parts[:-1])])))
 
-    def prettify_uuids(self, obj: object):
+    def prettify_uuids(self, obj: object) -> None:
         if isinstance(obj, dict):
             for k, v in obj.items():
                 if isinstance(v, dict):
@@ -90,7 +90,7 @@ class NumbersUnpacker(IWorkHandler):
                 elif isinstance(v, list):
                     self.prettify_uuids(v)
 
-    def prettify_cell_storage(self, obj: object):
+    def prettify_cell_storage(self, obj: object) -> None:
         if isinstance(obj, dict):
             for k, v in obj.items():
                 if isinstance(v, (dict, list)):
@@ -117,7 +117,7 @@ class NumbersUnpacker(IWorkHandler):
         return version in SUPPORTED_NUMBERS_VERSIONS
 
 
-def main():
+def main() -> None:
     parser = ArgumentParser()
     parser.add_argument("document", help="Apple Numbers file(s)", nargs="*")
     parser.add_argument("-V", "--version", action="store_true")

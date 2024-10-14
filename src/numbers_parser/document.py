@@ -1,7 +1,7 @@
 from collections.abc import Iterator
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 from warnings import warn
 
 from numbers_parser.cell import (
@@ -104,7 +104,7 @@ class Document:
             table.num_header_cols = num_header_cols
 
     @property
-    def sheets(self) -> List[Sheet]:
+    def sheets(self) -> list[Sheet]:
         """List[:class:`Sheet`]: A list of sheets in the document."""
         return self._sheets
 
@@ -114,12 +114,12 @@ class Document:
         return self.sheets[0].tables[0]
 
     @property
-    def styles(self) -> Dict[str, Style]:
+    def styles(self) -> dict[str, Style]:
         """Dict[str, :class:`Style`]: A dict mapping style names to to the corresponding style."""
         return self._model.styles
 
     @property
-    def custom_formats(self) -> Dict[str, CustomFormatting]:
+    def custom_formats(self) -> dict[str, CustomFormatting]:
         """Dict[str, :class:`CustomFormatting`]: A dict mapping custom format names
         to the corresponding custom format.
         """
@@ -347,7 +347,7 @@ class Sheet:
         self._tables = ItemsList(self._model, refs, Table)
 
     @property
-    def tables(self) -> List[Table]:
+    def tables(self) -> list[Table]:
         """List[:class:`Table`]: A list of tables in the sheet."""
         return self._tables
 
@@ -357,7 +357,7 @@ class Sheet:
         return self._model.sheet_name(self._sheet_id)
 
     @name.setter
-    def name(self, value: str):
+    def name(self, value: str) -> None:
         self._model.sheet_name(self._sheet_id, value)
 
     def add_table(
@@ -476,7 +476,7 @@ class Table(Cacheable):
         return self._model.table_name(self._table_id)
 
     @name.setter
-    def name(self, value: str):
+    def name(self, value: str) -> None:
         self._model.table_name(self._table_id, value)
 
     @property
@@ -485,7 +485,7 @@ class Table(Cacheable):
         return self._model.table_name_enabled(self._table_id)
 
     @table_name_enabled.setter
-    def table_name_enabled(self, enabled: bool):
+    def table_name_enabled(self, enabled: bool) -> None:
         self._model.table_name_enabled(self._table_id, enabled)
 
     @property
@@ -624,11 +624,11 @@ class Table(Cacheable):
         return self._model.col_width(self._table_id, col, width)
 
     @property
-    def coordinates(self) -> Tuple[float]:
+    def coordinates(self) -> tuple[float]:
         """Tuple[float]: The table's x, y offsets in points."""
         return self._model.table_coordinates(self._table_id)
 
-    def rows(self, values_only: bool = False) -> Union[List[List[Cell]], List[List[str]]]:
+    def rows(self, values_only: bool = False) -> Union[list[list[Cell]], list[list[str]]]:
         """Return all rows of cells for the Table.
 
         Parameters
@@ -647,7 +647,7 @@ class Table(Cacheable):
         return self._data
 
     @property
-    def merge_ranges(self) -> List[str]:
+    def merge_ranges(self) -> list[str]:
         """List[str]: The merge ranges of cells in A1 notation.
 
         Example:
@@ -735,7 +735,7 @@ class Table(Cacheable):
         min_col: Optional[int] = None,
         max_col: Optional[int] = None,
         values_only: Optional[bool] = False,
-    ) -> Iterator[Union[Tuple[Cell], Tuple[str]]]:
+    ) -> Iterator[Union[tuple[Cell], tuple[str]]]:
         """Produces cells from a table, by row.
 
         Specify the iteration range using the indexes of the rows and columns.
@@ -804,7 +804,7 @@ class Table(Cacheable):
         min_row: Optional[int] = None,
         max_row: Optional[int] = None,
         values_only: Optional[bool] = False,
-    ) -> Iterator[Union[Tuple[Cell], Tuple[str]]]:
+    ) -> Iterator[Union[tuple[Cell], tuple[str]]]:
         """Produces cells from a table, by column.
 
         Specify the iteration range using the indexes of the rows and columns.
@@ -948,7 +948,7 @@ class Table(Cacheable):
         if style is not None:
             self.set_cell_style(row, col, style)
 
-    def set_cell_style(self, *args):
+    def set_cell_style(self, *args) -> None:
         (row, col, style) = self._validate_cell_coords(*args)
         if isinstance(style, Style):
             self._data[row][col]._style = style
@@ -1162,7 +1162,7 @@ class Table(Cacheable):
         self.num_cols -= num_cols
         self._model.number_of_columns(self._table_id, self.num_cols)
 
-    def merge_cells(self, cell_range: Union[str, List[str]]) -> None:
+    def merge_cells(self, cell_range: Union[str, list[str]]) -> None:
         """Convert a cell range or list of cell ranges into merged cells.
 
         Parameters
@@ -1204,7 +1204,7 @@ class Table(Cacheable):
                 for col, cell in enumerate(cells):
                     cell._set_merge(merge_cells.get((row, col)))
 
-    def set_cell_border(self, *args):
+    def set_cell_border(self, *args) -> None:
         """Set the borders for a cell.
 
         Cell references can be row-column offsers or Excel/Numbers-style A1 notation. Borders

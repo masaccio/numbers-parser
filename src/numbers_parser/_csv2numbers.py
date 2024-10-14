@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import csv
 import re
 from dataclasses import dataclass
@@ -68,18 +69,18 @@ class Converter:
         """Parse a date string and return a datetime."""
         return parse(x, dayfirst=self.day_first).replace(tzinfo=timezone.utc)
 
-    def _transform_data(self):
+    def _transform_data(self) -> None:
         """Apply type transformations to the data based in current configuration."""
         # Convert data rows to dicts. csv.DictReader is not enough as we support CSV
         # files with no header.
         if self.no_header:
-            self.header = [x for x in range(len(self.data[0]))]
-        self.data = [{k: v for k, v in dict(zip(self.header, row)).items()} for row in self.data]
+            self.header = list(range(len(self.data[0])))
+        self.data = [dict(dict(zip(self.header, row)).items()) for row in self.data]
 
         if self.reverse:
             self.data = list(reversed(self.data))
         if self.date_columns is not None:
-            is_date_column = {x: True if x in self.date_columns else False for x in self.header}
+            is_date_column = {x: x in self.date_columns for x in self.header}
         for row in self.data:
             for k, v in row.items():
                 if self.whitespace:
@@ -88,17 +89,15 @@ class Converter:
                     row[k] = self._parse_date(v)
                 else:
                     # Attempt to coerce value into float
-                    try:
+                    with contextlib.suppress(ValueError):
                         row[k] = float(v.replace(",", ""))
-                    except ValueError:
-                        pass
 
     def rename_columns(self: Converter, mapper: dict) -> None:
         """Rename columns using column map."""
         if mapper is None:
             return
         self.no_header = False
-        self.header = [mapper[x] if x in mapper else x for x in self.header]
+        self.header = [mapper.get(x, x) for x in self.header]
 
     def delete_columns(self: Converter, columns: list) -> None:
         """Delete columns from the data."""
@@ -131,10 +130,7 @@ class Converter:
         doc = Document(num_rows=2, num_cols=2)
         table = doc.sheets[0].tables[0]
 
-        if self.no_header:
-            data = []
-        else:
-            data = [self.header]
+        data = [] if self.no_header else [self.header]
         data += [row.values() for row in self.data]
 
         for row_num, row in enumerate(data):

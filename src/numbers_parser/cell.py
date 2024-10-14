@@ -9,7 +9,7 @@ from fractions import Fraction
 from hashlib import sha1
 from os.path import basename
 from struct import pack, unpack
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 from warnings import warn
 
 from sigfig import round as sigfig
@@ -241,7 +241,7 @@ class Style:
 
     alignment: Alignment = DEFAULT_ALIGNMENT_CLASS  # : horizontal and vertical alignment
     bg_image: object = None  # : backgroung image
-    bg_color: Union[RGB, List[RGB]] = None
+    bg_color: Union[RGB, list[RGB]] = None
     font_color: RGB = RGB(0, 0, 0)
     font_size: float = DEFAULT_FONT_SIZE
     font_name: str = DEFAULT_FONT
@@ -484,7 +484,7 @@ class CellBorder:
         return self._top
 
     @top.setter
-    def top(self, value):
+    def top(self, value) -> None:
         if self._top is None or value._order > self.top._order:
             self._top = value
 
@@ -495,7 +495,7 @@ class CellBorder:
         return self._right
 
     @right.setter
-    def right(self, value):
+    def right(self, value) -> None:
         if self._right is None or value._order > self._right._order:
             self._right = value
 
@@ -506,7 +506,7 @@ class CellBorder:
         return self._bottom
 
     @bottom.setter
-    def bottom(self, value):
+    def bottom(self, value) -> None:
         if self._bottom is None or value._order > self._bottom._order:
             self._bottom = value
 
@@ -517,7 +517,7 @@ class CellBorder:
         return self._left
 
     @left.setter
-    def left(self, value):
+    def left(self, value) -> None:
         if self._left is None or value._order > self._left._order:
             self._left = value
 
@@ -532,7 +532,7 @@ class MergeReference:
 class MergeAnchor:
     """Cell reference for the merged cell."""
 
-    def __init__(self, size: Tuple) -> None:
+    def __init__(self, size: tuple) -> None:
         self.size = size
 
 
@@ -650,7 +650,7 @@ class Cell(CellStorageFlags, Cacheable):
         return self._is_bulleted
 
     @property
-    def bullets(self) -> Union[List[str], None]:
+    def bullets(self) -> Union[list[str], None]:
         r"""List[str] | None: The bullets in a cell, or ``None``.
 
         Cells that contain bulleted or numbered lists are identified
@@ -733,7 +733,7 @@ class Cell(CellStorageFlags, Cacheable):
         return self._style
 
     @style.setter
-    def style(self, _):
+    def style(self, _) -> None:
         warn(
             "cell style cannot be set; use Table.set_cell_style() instead",
             UnsupportedWarning,
@@ -754,7 +754,7 @@ class Cell(CellStorageFlags, Cacheable):
         return self._border
 
     @border.setter
-    def border(self, _):
+    def border(self, _) -> None:
         warn(
             "cell border values cannot be set; use Table.set_cell_border() instead",
             UnsupportedWarning,
@@ -932,11 +932,11 @@ class Cell(CellStorageFlags, Cacheable):
 
         return cell
 
-    def _copy_flags(self, storage_flags: CellStorageFlags):
+    def _copy_flags(self, storage_flags: CellStorageFlags) -> None:
         for flag in storage_flags.flags():
             setattr(self, flag, getattr(storage_flags, flag))
 
-    def _set_merge(self, merge_ref):
+    def _set_merge(self, merge_ref) -> None:
         if isinstance(merge_ref, MergeAnchor):
             self.is_merged = True
             self.size = merge_ref.size
@@ -1120,7 +1120,7 @@ class Cell(CellStorageFlags, Cacheable):
 
     @property
     @cache(num_args=0)
-    def _image_data(self) -> Tuple[bytes, str]:
+    def _image_data(self) -> tuple[bytes, str]:
         """Return the background image data for a cell or None if no image."""
         if self._cell_style_id is None:
             return None
@@ -1392,7 +1392,7 @@ class RichTextCell(Cell):
         return self._value
 
     @property
-    def bullets(self) -> List[str]:
+    def bullets(self) -> list[str]:
         """List[str]: A list of the text bullets in the cell."""
         return self._bullets
 
@@ -1402,7 +1402,7 @@ class RichTextCell(Cell):
         return self._formatted_bullets
 
     @property
-    def hyperlinks(self) -> Union[List[Tuple], None]:
+    def hyperlinks(self) -> Union[list[tuple], None]:
         """List[Tuple] | None: the hyperlinks in a cell or ``None``.
 
         Numbers does not support hyperlinks to cells within a spreadsheet, but does
@@ -1438,11 +1438,11 @@ class EmptyCell(Cell):
         self._type = CellType.EMPTY
 
     @property
-    def value(self):
+    def value(self) -> None:
         return None
 
     @property
-    def formatted_value(self):
+    def formatted_value(self) -> str:
         return ""
 
 
@@ -1498,7 +1498,7 @@ class ErrorCell(Cell):
         self._type = CellType.ERROR
 
     @property
-    def value(self):
+    def value(self) -> None:
         return None
 
 
@@ -1513,7 +1513,7 @@ class MergedCell(Cell):
         self._type = CellType.MERGED
 
     @property
-    def value(self):
+    def value(self) -> None:
         return None
 
 
@@ -2135,7 +2135,7 @@ class Formatting:
     increment: float = 1.0
     maximum: float = 100.0
     minimum: float = 1.0
-    popup_values: List[str] = field(default_factory=lambda: ["Item 1"])
+    popup_values: list[str] = field(default_factory=lambda: ["Item 1"])
     negative_style: NegativeNumberStyle = NegativeNumberStyle.MINUS
     show_thousands_separator: bool = False
     type: FormattingType = FormattingType.NUMBER
@@ -2163,7 +2163,8 @@ class Formatting:
                     raise TypeError(msg)
 
         if self.type == FormattingType.CURRENCY and self.currency_code not in CURRENCIES:
-            raise TypeError(f"Unsupported currency code '{self.currency_code}'")
+            msg = f"Unsupported currency code '{self.currency_code}'"
+            raise TypeError(msg)
 
         if self.decimal_places is None:
             if self.type == FormattingType.CURRENCY:
@@ -2202,7 +2203,8 @@ class CustomFormatting:
             raise TypeError(msg)
 
         if self.type == CustomFormattingType.TEXT and self.format.count("%s") > 1:
-            raise TypeError("Custom formats only allow one text substitution")
+            msg = "Custom formats only allow one text substitution"
+            raise TypeError(msg)
 
     @classmethod
     def from_archive(cls, archive: object):

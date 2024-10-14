@@ -36,7 +36,7 @@ class ItemsList:
     def __contains__(self, key) -> bool:
         return key.lower() in [x.name.lower() for x in self._items]
 
-    def append(self, item):
+    def append(self, item) -> None:
         self._items.append(item)
 
 
@@ -99,7 +99,7 @@ class ObjectStore(IWorkHandler):
         self._object_to_filename_map[new_id] = iwa_pathname
         return new_id, self._objects[new_id]
 
-    def update_object_file_store(self):
+    def update_object_file_store(self) -> None:
         """Copy the protobuf messages from any updated object to the cached
         version in the file store so this can be saved to a new document.
         """

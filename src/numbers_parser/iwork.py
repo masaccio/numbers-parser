@@ -4,7 +4,6 @@ import re
 from io import BytesIO
 from pathlib import Path
 from sys import version_info
-from typing import Dict
 from warnings import warn
 from zipfile import BadZipFile, ZipFile
 
@@ -128,7 +127,7 @@ class IWork:
         else:
             self._read_objects_from_zipfile(self._zipf)
 
-    def save(self, filepath: Path, file_store: Dict[str, object], package: bool):
+    def save(self, filepath: Path, file_store: dict[str, object], package: bool) -> None:
         if package:
             if filepath.is_dir():
                 if filepath.suffix != ".numbers":

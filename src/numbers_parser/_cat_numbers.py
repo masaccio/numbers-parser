@@ -71,12 +71,12 @@ def command_line_parser():
     return parser
 
 
-def print_sheet_names(filename):
+def print_sheet_names(filename) -> None:
     for sheet in Document(filename).sheets:
         print(f"{filename}: {sheet.name}")
 
 
-def print_table_names(filename):
+def print_table_names(filename) -> None:
     for sheet in Document(filename).sheets:
         for table in sheet.tables:
             print(f"{filename}: {sheet.name}: {table.name}")
@@ -96,7 +96,7 @@ def cell_as_string(args, cell):
     return str(cell.value)
 
 
-def print_table(args, filename):
+def print_table(args, filename) -> None:
     writer = csv.writer(sys.stdout, dialect="excel")
     for sheet in Document(filename).sheets:
         if args.sheet is not None and sheet.name not in args.sheet:
@@ -111,7 +111,7 @@ def print_table(args, filename):
                 writer.writerow(cells)
 
 
-def main():
+def main() -> None:
     parser = command_line_parser()
     args = parser.parse_args()
 
