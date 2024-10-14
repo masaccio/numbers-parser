@@ -1,7 +1,7 @@
-from collections.abc import Iterator
-from datetime import datetime, timedelta
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Optional, Union
+from typing import TYPE_CHECKING
 from warnings import warn
 
 from numbers_parser.cell import (
@@ -34,15 +34,19 @@ from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
 from numbers_parser.numbers_cache import Cacheable
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from datetime import datetime, timedelta
+
 __all__ = ["Document", "Sheet", "Table"]
 
 
-class Sheet:
-    pass
+# class Sheet:
+#     pass
 
 
-class Table:
-    pass
+# class Table:
+#     pass
 
 
 class Document:
@@ -78,15 +82,15 @@ class Document:
 
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
-        filename: Optional[Union[str, Path]] = None,
-        sheet_name: Optional[str] = "Sheet 1",
-        table_name: Optional[str] = "Table 1",
-        num_header_rows: Optional[int] = 1,
-        num_header_cols: Optional[int] = 1,
-        num_rows: Optional[int] = DEFAULT_ROW_COUNT,
-        num_cols: Optional[int] = DEFAULT_COLUMN_COUNT,
+        filename: str | Path | None = None,
+        sheet_name: str | None = "Sheet 1",
+        table_name: str | None = "Table 1",
+        num_header_rows: int | None = 1,
+        num_header_cols: int | None = 1,
+        num_rows: int | None = DEFAULT_ROW_COUNT,
+        num_cols: int | None = DEFAULT_COLUMN_COUNT,
     ) -> None:
         self._model = _NumbersModel(None if filename is None else Path(filename))
         refs = self._model.sheet_ids()
@@ -125,7 +129,7 @@ class Document:
         """
         return self._model.custom_formats
 
-    def save(self, filename: Union[str, Path], package: bool = False) -> None:
+    def save(self, filename: str | Path, package: bool = False) -> None:
         """Save the document in the specified filename.
 
         Parameters
@@ -159,10 +163,10 @@ class Document:
 
     def add_sheet(
         self,
-        sheet_name: Optional[str] = None,
-        table_name: Optional[str] = "Table 1",
-        num_rows: Optional[int] = DEFAULT_ROW_COUNT,
-        num_cols: Optional[int] = DEFAULT_COLUMN_COUNT,
+        sheet_name: str | None = None,
+        table_name: str | None = "Table 1",
+        num_rows: int | None = DEFAULT_ROW_COUNT,
+        num_cols: int | None = DEFAULT_COLUMN_COUNT,
     ) -> None:
         """Add a new sheet to the current document.
 
@@ -281,9 +285,9 @@ class Document:
         depending upon the value of ``kwargs["type"]``.
 
         :Common Args:
-            * **name** (``str``) – The name of the custom format. If no name is provided,
+            * **name** (``str``) - The name of the custom format. If no name is provided,
               one is generated using the scheme ``Custom Format``, ``Custom Format 1``, ``Custom Format 2``, etc.
-            * **type** (``str``, *optional*, default: ``number``) – The type of format to
+            * **type** (``str``, *optional*, default: ``number``) - The type of format to
               create:
 
               * ``"datetime"``: A date and time value with custom formatting.
@@ -291,26 +295,26 @@ class Document:
               * ``"text"``: A simple text string.
 
         :``"number"``:
-            * **integer_format** (``PaddingType``, *optional*, default: ``PaddingType.NONE``) – How
+            * **integer_format** (``PaddingType``, *optional*, default: ``PaddingType.NONE``) - How
               to pad integers.
-            * **decimal_format** (``PaddingType``, *optional*, default: ``PaddingType.NONE``) – How
+            * **decimal_format** (``PaddingType``, *optional*, default: ``PaddingType.NONE``) - How
               to pad decimals.
-            * **num_integers** (``int``, *optional*, default: ``0``) – Integer precision
+            * **num_integers** (``int``, *optional*, default: ``0``) - Integer precision
               when integers are padded.
-            * **num_decimals** (``int``, *optional*, default: ``0``) – Integer precision
+            * **num_decimals** (``int``, *optional*, default: ``0``) - Integer precision
               when decimals are padded.
-            * **show_thousands_separator** (``bool``, *optional*, default: ``False``) – ``True``
+            * **show_thousands_separator** (``bool``, *optional*, default: ``False``) - ``True``
               if the number should include a thousands seperator.
 
         :``"datetime"``:
-            * **format** (``str``, *optional*, default: ``"d MMM y"``) – A POSIX strftime-like
+            * **format** (``str``, *optional*, default: ``"d MMM y"``) - A POSIX strftime-like
               formatting string of `Numbers date/time directives <#datetime-formats>`_.
 
         :``"text"``:
-            * **format** (``str``, *optional*, default: ``"%s"``) – Text format.
+            * **format** (``str``, *optional*, default: ``"%s"``) - Text format.
               The cell value is inserted in place of %s. Only one substitution is allowed by
               Numbers, and multiple %s formatting references raise a TypeError exception
-        """  # noqa: E501
+        """
         if (
             "name" in kwargs
             and kwargs["name"] is not None
@@ -362,11 +366,11 @@ class Sheet:
 
     def add_table(
         self,
-        table_name: Optional[str] = None,
-        x: Optional[float] = None,
-        y: Optional[float] = None,
-        num_rows: Optional[int] = DEFAULT_ROW_COUNT,
-        num_cols: Optional[int] = DEFAULT_COLUMN_COUNT,
+        table_name: str | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        num_rows: int | None = DEFAULT_ROW_COUNT,
+        num_cols: int | None = DEFAULT_COLUMN_COUNT,
     ) -> Table:
         """Add a new table to the current sheet.
 
@@ -412,7 +416,7 @@ class Sheet:
         from_table_id = self._tables[-1]._table_id
         return self._add_table(table_name, from_table_id, x, y, num_rows, num_cols)
 
-    def _add_table(  # noqa: PLR0913
+    def _add_table(
         self,
         table_name,
         from_table_id,
@@ -582,7 +586,7 @@ class Table(Cacheable):
         """int: The table's width in points."""
         return self._model.table_width(self._table_id)
 
-    def row_height(self, row: int, height: Optional[int] = None) -> int:
+    def row_height(self, row: int, height: int | None = None) -> int:
         """The height of a table row in points.
 
         .. code-block:: python
@@ -605,7 +609,7 @@ class Table(Cacheable):
         """
         return self._model.row_height(self._table_id, row, height)
 
-    def col_width(self, col: int, width: Optional[int] = None) -> int:
+    def col_width(self, col: int, width: int | None = None) -> int:
         """The width of a table column in points.
 
         Parameters
@@ -628,7 +632,7 @@ class Table(Cacheable):
         """Tuple[float]: The table's x, y offsets in points."""
         return self._model.table_coordinates(self._table_id)
 
-    def rows(self, values_only: bool = False) -> Union[list[list[Cell]], list[list[str]]]:
+    def rows(self, values_only: bool = False) -> list[list[Cell]] | list[list[str]]:
         """Return all rows of cells for the Table.
 
         Parameters
@@ -670,7 +674,7 @@ class Table(Cacheable):
                     merge_cells.add(xl_range(row, col, row + size[0] - 1, col + size[1] - 1))
         return sorted(merge_cells)
 
-    def cell(self, *args) -> Union[Cell, MergedCell]:
+    def cell(self, *args) -> Cell | MergedCell:
         """Return a single cell in the table.
 
         The ``cell()`` method supports two forms of notation to designate the position
@@ -730,12 +734,12 @@ class Table(Cacheable):
 
     def iter_rows(
         self,
-        min_row: Optional[int] = None,
-        max_row: Optional[int] = None,
-        min_col: Optional[int] = None,
-        max_col: Optional[int] = None,
-        values_only: Optional[bool] = False,
-    ) -> Iterator[Union[tuple[Cell], tuple[str]]]:
+        min_row: int | None = None,
+        max_row: int | None = None,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        values_only: bool | None = False,
+    ) -> Iterator[tuple[Cell] | tuple[str]]:
         """Produces cells from a table, by row.
 
         Specify the iteration range using the indexes of the rows and columns.
@@ -799,12 +803,12 @@ class Table(Cacheable):
 
     def iter_cols(
         self,
-        min_col: Optional[int] = None,
-        max_col: Optional[int] = None,
-        min_row: Optional[int] = None,
-        max_row: Optional[int] = None,
-        values_only: Optional[bool] = False,
-    ) -> Iterator[Union[tuple[Cell], tuple[str]]]:
+        min_col: int | None = None,
+        max_col: int | None = None,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        values_only: bool | None = False,
+    ) -> Iterator[tuple[Cell] | tuple[str]]:
         """Produces cells from a table, by column.
 
         Specify the iteration range using the indexes of the rows and columns.
@@ -891,7 +895,7 @@ class Table(Cacheable):
 
         return (row, col, *tuple(values))
 
-    def write(self, *args, style: Optional[Union[Style, str, None]] = None) -> None:
+    def write(self, *args, style: Style | str | None = None) -> None:
         """Write a value to a cell and update the style/cell type.
 
         The ``write()`` method supports two forms of notation to designate the position
@@ -963,9 +967,9 @@ class Table(Cacheable):
 
     def add_row(
         self,
-        num_rows: Optional[int] = 1,
-        start_row: Optional[Union[int, None]] = None,
-        default: Optional[Union[str, int, float, bool, datetime, timedelta]] = None,
+        num_rows: int | None = 1,
+        start_row: int | None = None,
+        default: str | float | bool | datetime | timedelta | None = None,
     ) -> None:
         """Add or insert rows to the table.
 
@@ -1026,9 +1030,9 @@ class Table(Cacheable):
 
     def add_column(
         self,
-        num_cols: Optional[int] = 1,
-        start_col: Optional[Union[int, None]] = None,
-        default: Optional[Union[str, int, float, bool, datetime, timedelta]] = None,
+        num_cols: int | None = 1,
+        start_col: int | None = None,
+        default: str | float | bool | datetime | timedelta | None = None,
     ) -> None:
         """Add or insert columns to the table.
 
@@ -1083,8 +1087,8 @@ class Table(Cacheable):
 
     def delete_row(
         self,
-        num_rows: Optional[int] = 1,
-        start_row: Optional[Union[int, None]] = None,
+        num_rows: int | None = 1,
+        start_row: int | None = None,
     ) -> None:
         """Delete rows from the table.
 
@@ -1128,8 +1132,8 @@ class Table(Cacheable):
 
     def delete_column(
         self,
-        num_cols: Optional[int] = 1,
-        start_col: Optional[Union[int, None]] = None,
+        num_cols: int | None = 1,
+        start_col: int | None = None,
     ) -> None:
         """Add or delete columns columns from the table.
 
@@ -1162,7 +1166,7 @@ class Table(Cacheable):
         self.num_cols -= num_cols
         self._model.number_of_columns(self._table_id, self.num_cols)
 
-    def merge_cells(self, cell_range: Union[str, list[str]]) -> None:
+    def merge_cells(self, cell_range: str | list[str]) -> None:
         """Convert a cell range or list of cell ranges into merged cells.
 
         Parameters
@@ -1271,13 +1275,16 @@ class Table(Cacheable):
             return
 
         cell = self._data[row][col]
-        if cell.is_merged and (
-            (side == "right" and cell.size[1] > 1) or (side == "bottom" and cell.size[0] > 1)
-        ) or isinstance(cell, MergedCell) and (
-            (side == "top" and cell.row_start < row)
-            or (side == "right" and cell.col_end > col)
-            or (side == "bottom" and cell.row_end > row)
-            or (side == "left" and cell.col_start < col)
+        if (
+            cell.is_merged
+            and ((side == "right" and cell.size[1] > 1) or (side == "bottom" and cell.size[0] > 1))
+            or isinstance(cell, MergedCell)
+            and (
+                (side == "top" and cell.row_start < row)
+                or (side == "right" and cell.col_end > col)
+                or (side == "bottom" and cell.row_end > row)
+                or (side == "left" and cell.col_start < col)
+            )
         ):
             warn(
                 f"{side} edge of [{row},{col}] is merged; border not set",
@@ -1328,7 +1335,7 @@ class Table(Cacheable):
             )
 
         :Parameters:
-            * **args** (*list*, *optional*) – Positional arguments for cell reference and data format type (see below)
+            * **args** (*list*, *optional*) - Positional arguments for cell reference and data format type (see below)
             * **kwargs** (*dict*, *optional*) - Key-value pairs defining a formatting options for each data format (see below).
 
         :Args (row-column):
@@ -1357,9 +1364,9 @@ class Table(Cacheable):
         depending upon the value of ``kwargs["type"]``.
 
         :Common Args:
-            * **name** (*str*) – The name of the custom format. If no name is provided,
+            * **name** (*str*) - The name of the custom format. If no name is provided,
               one is generated using the scheme ``Custom Format``, ``Custom Format 1``, ``Custom Format 2``, etc.
-            * **type** (*str, optional, default: number*) – The type of format to
+            * **type** (*str, optional, default: number*) - The type of format to
               create:
 
               * ``"base"``: A number base in the range 2-36.
@@ -1377,51 +1384,51 @@ class Table(Cacheable):
               * ``"popup"``: A menu of options.
 
         :``"base"``:
-            * **base_use_minus_sign** (*int, optional, default: 10*) – The integer
+            * **base_use_minus_sign** (*int, optional, default: 10*) - The integer
               base to represent the number from 2-36.
-            * **base_use_minus_sign** (*bool, optional, default: True*) – If ``True``
+            * **base_use_minus_sign** (*bool, optional, default: True*) - If ``True``
               use a standard minus sign, otherwise format as two's compliment (only
               possible for binary, octal and hexadecimal.
-            * **base_places** (*int, optional, default: 0*) – The number of
+            * **base_places** (*int, optional, default: 0*) - The number of
               decimal places, or ``None`` for automatic.
 
         :``"custom"``:
-            * **format** (*str | CustomFormating*) – The name of a custom
+            * **format** (*str | CustomFormating*) - The name of a custom
                 formatin the document or a :py:class:`~numbers_parser.CustomFormatting`
                 object.
 
         :``"currency"``:
-            * **currency** (*str, optional, default: "GBP"*) – An ISO currency
+            * **currency** (*str, optional, default: "GBP"*) - An ISO currency
               code, e.g. ``"GBP"`` or ``"USD"``.
-            * **decimal_places** (*int, optional, default: 2*) – The number of
+            * **decimal_places** (*int, optional, default: 2*) - The number of
               decimal places, or ``None`` for automatic.
-            * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) – How negative numbers are represented.
+            * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) - How negative numbers are represented.
               See `Negative number formats <#negative-formats>`_.
-            * **show_thousands_separator** (*bool, optional, default: False*) – ``True``
+            * **show_thousands_separator** (*bool, optional, default: False*) - ``True``
               if the number should include a thousands seperator, e.g. ``,``
-            * **use_accounting_style** (*bool, optional, default: False*) –  ``True``
+            * **use_accounting_style** (*bool, optional, default: False*) -  ``True``
               if the currency symbol should be formatted to the left of the cell and
               separated from the number value by a tab.
 
         :``"datetime"``:
-            * **date_time_format** (*str, optional, default: "dd MMM YYY HH:MM"*) – A POSIX
+            * **date_time_format** (*str, optional, default: "dd MMM YYY HH:MM"*) - A POSIX
                strftime-like formatting string of `Numbers date/time
                directives <#datetime-formats>`_.
 
         :``"fraction"``:
-            * **fraction_accuracy** (*:py:class:`~numbers_parser.FractionAccuracy`, optional, default: FractionAccuracy.THREE* – The
+            * **fraction_accuracy** (*:py:class:`~numbers_parser.FractionAccuracy`, optional, default: FractionAccuracy.THREE* - The
                 precision of the faction.
 
         :``"percentage"``:
-            * **decimal_places** (*float, optional, default: None*) –  number of
+            * **decimal_places** (*float, optional, default: None*) -  number of
               decimal places, or ``None`` for automatic.
-            * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) – How negative numbers are represented.
+            * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) - How negative numbers are represented.
               See `Negative number formats <#negative-formats>`_.
-            * **show_thousands_separator** (*bool, optional, default: False*) – ``True``
+            * **show_thousands_separator** (*bool, optional, default: False*) - ``True``
               if the number should include a thousands seperator, e.g. ``,``
 
         :``"scientific"``:
-            * **decimal_places** (*float, optional, default: None*) – number of
+            * **decimal_places** (*float, optional, default: None*) - number of
               decimal places, or ``None`` for automatic.
 
         :``"tickbox"``:
@@ -1453,13 +1460,13 @@ class Table(Cacheable):
             * **minimum** (*float, optional, default: 1*) - increment value for the stepper
 
         :`"popup"``:
-            * **popup_values** (*List[str|int|float], optional, default: None*) – values
+            * **popup_values** (*List[str|int|float], optional, default: None*) - values
                 for the popup menu
             * **allow_none** (*bool, optional, default: True*) - If ``True``
                 include a blank value in the list
 
 
-        """  # noqa: E501
+        """
         (row, col, *args) = self._validate_cell_coords(*args)
         if len(args) == 1:
             format_type = args[0]

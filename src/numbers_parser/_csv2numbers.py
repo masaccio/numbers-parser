@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from sys import exit, stderr
-from typing import NamedTuple, Tuple  # noqa: F401
+from typing import NamedTuple
 
 from dateutil.parser import parse
 
@@ -138,7 +138,10 @@ class Converter:
                 table.write(row_num, col_num, value)
                 if isinstance(value, datetime):
                     table.set_cell_formatting(
-                        row_num, col_num, "datetime", date_time_format="d MMM yyyy",
+                        row_num,
+                        col_num,
+                        "datetime",
+                        date_time_format="d MMM yyyy",
                     )
 
         doc.save(self.output_filename)

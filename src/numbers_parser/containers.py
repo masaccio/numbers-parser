@@ -10,7 +10,7 @@ from numbers_parser.iwork import IWork, IWorkHandler
 class ItemsList:
     def __init__(self, model, refs, item_class) -> None:
         self._item_name = item_class.__name__.lower()
-        self._items = [item_class(model, id) for id in refs]
+        self._items = [item_class(model, x) for x in refs]
 
     def __getitem__(self, key: int):
         if isinstance(key, int):

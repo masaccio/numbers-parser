@@ -65,7 +65,7 @@ DOCUMENT_ID = 1
 PACKAGE_ID = 2
 
 # System constants
-EPOCH = datetime(2001, 1, 1)
+EPOCH = datetime(2001, 1, 1)  # noqa: DTZ001
 SECONDS_IN_HOUR = 60 * 60
 SECONDS_IN_DAY = SECONDS_IN_HOUR * 24
 SECONDS_IN_WEEK = SECONDS_IN_DAY * 7

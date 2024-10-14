@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from array import array
 from collections import defaultdict
@@ -5,7 +7,6 @@ from hashlib import sha1
 from math import floor
 from pathlib import Path
 from struct import pack
-from typing import Optional, Union
 
 from numbers_parser.bullets import (
     BULLET_CONVERSION,
@@ -105,7 +106,7 @@ class MergeCells:
         # defaultdict will default this to False for missing entries
         return isinstance(self._references[row_col], MergeAnchor)
 
-    def get(self, row_col: tuple) -> Union[MergeAnchor, MergeReference]:
+    def get(self, row_col: tuple) -> MergeAnchor | MergeReference:
         return self._references[row_col]
 
     def size(self, row_col: tuple) -> tuple:
@@ -121,7 +122,7 @@ class MergeCells:
 class DataLists(Cacheable):
     """Model for TST.DataList with caching and key generation for new values."""
 
-    def __init__(self, model: object, datalist_name: str, value_attr: Optional[str] = None) -> None:
+    def __init__(self, model: object, datalist_name: str, value_attr: str | None = None) -> None:
         self._model = model
         self._datalists = {}
         self._value_attr = value_attr
@@ -313,13 +314,13 @@ class _NumbersModel(Cacheable):
         self.objects[table_id].table_name = value
         return None
 
-    def table_name_enabled(self, table_id: int, enabled: Optional[bool] = None):
+    def table_name_enabled(self, table_id: int, enabled: bool | None = None):
         if enabled is not None:
             self.objects[table_id].table_name_enabled = enabled
             return None
         return self.objects[table_id].table_name_enabled
 
-    def caption_enabled(self, table_id: int, enabled: Optional[bool] = None) -> bool:
+    def caption_enabled(self, table_id: int, enabled: bool | None = None) -> bool:
         table_info = self.objects[self.table_info_id(table_id)]
         if enabled is not None:
             table_info.super.caption_hidden = not enabled
@@ -339,9 +340,9 @@ class _NumbersModel(Cacheable):
 
     def caption_paragraph_style_id(self):
         style_map = {
-            id: self.objects[id]
-            for id in self.find_refs("ParagraphStyleArchive")
-            if "Caption" in self.objects[id].super.name
+            x: self.objects[x]
+            for x in self.find_refs("ParagraphStyleArchive")
+            if "Caption" in self.objects[x].super.name
         }
         return next(iter(style_map.keys()))
 
@@ -349,8 +350,8 @@ class _NumbersModel(Cacheable):
     def stylesheet_id(self):
         return self.find_refs("StylesheetArchive")[0]
 
-    def set_reference(self, obj: object, id: int) -> None:
-        obj.MergeFrom(TSPMessages.Reference(identifier=id))
+    def set_reference(self, obj: object, ref_id: int) -> None:
+        obj.MergeFrom(TSPMessages.Reference(identifier=ref_id))
 
     def create_path_source_archive(self, table_id):
         box_size = 100.0
@@ -440,7 +441,9 @@ class _NumbersModel(Cacheable):
             self.caption_paragraph_style_id(),
         ]:
             self.add_component_reference(
-                object_id, location="CalculationEngine", component_id=self.stylesheet_id(),
+                object_id,
+                location="CalculationEngine",
+                component_id=self.stylesheet_id(),
             )
         caption_info.super.MergeFrom(
             TSWPArchives.ShapeInfoArchive(
@@ -460,11 +463,12 @@ class _NumbersModel(Cacheable):
         component = self.metadata_component(self.calc_engine_id())
         component.object_uuid_map_entries.append(
             TSPArchiveMessages.ObjectUUIDMapEntry(
-                identifier=caption_info_id, uuid=NumbersUUID().protobuf2,
+                identifier=caption_info_id,
+                uuid=NumbersUUID().protobuf2,
             ),
         )
 
-    def caption_text(self, table_id: int, caption: Optional[str] = None) -> str:
+    def caption_text(self, table_id: int, caption: str | None = None) -> str:
         table_info = self.objects[self.table_info_id(table_id)]
         caption_info_id = table_info.super.caption.identifier
         caption_archive = self.objects[caption_info_id]
@@ -1060,15 +1064,15 @@ class _NumbersModel(Cacheable):
         return row_info
 
     @cache()
-    def metadata_component(self, reference: Optional[Union[str, int]] = None) -> int:
+    def metadata_component(self, reference: str | int | None = None) -> int:
         """Return the ID of an object in the document metadata given it's name or ID."""
         component_map = {c.identifier: c for c in self.objects[PACKAGE_ID].components}
         if isinstance(reference, str):
             component_ids = [
-                id for id, c in component_map.items() if c.preferred_locator == reference
+                x for x, c in component_map.items() if c.preferred_locator == reference
             ]
         else:
-            component_ids = [id for id, c in component_map.items() if c.identifier == reference]
+            component_ids = [x for x, c in component_map.items() if c.identifier == reference]
         return component_map[component_ids[0]]
 
     def add_component_metadata(self, object_id: int, parent: str, locator: str) -> None:
@@ -1090,8 +1094,8 @@ class _NumbersModel(Cacheable):
     def add_component_reference(
         self,
         object_id: int,
-        location: Optional[str] = None,
-        component_id: Optional[int] = None,
+        location: str | None = None,
+        component_id: int | None = None,
         is_weak: bool = False,
     ) -> None:
         """Add an external reference to an object in a metadata component."""
@@ -1183,7 +1187,7 @@ class _NumbersModel(Cacheable):
             height += self.row_height(table_id, row)
         return floor(height)
 
-    def row_height(self, table_id: int, row: int, height: Optional[int] = None) -> int:
+    def row_height(self, table_id: int, row: int, height: int | None = None) -> int:
         if height is not None:
             if table_id not in self._row_heights:
                 self._row_heights[table_id] = {}
@@ -1235,7 +1239,7 @@ class _NumbersModel(Cacheable):
             width += self.col_width(table_id, row)
         return round(width)
 
-    def col_width(self, table_id: int, col: int, width: Optional[int] = None) -> int:
+    def col_width(self, table_id: int, col: int, width: int | None = None) -> int:
         if width is not None:
             if table_id not in self._col_widths:
                 self._col_widths[table_id] = {}
@@ -1280,14 +1284,14 @@ class _NumbersModel(Cacheable):
         self._col_widths[table_id][col] = floor(width)
         return self._col_widths[table_id][col]
 
-    def num_header_rows(self, table_id: int, num_headers: Optional[int] = None) -> int:
+    def num_header_rows(self, table_id: int, num_headers: int | None = None) -> int:
         """Return/set the number of header rows."""
         table_model = self.objects[table_id]
         if num_headers is not None:
             table_model.number_of_header_rows = num_headers
         return table_model.number_of_header_rows
 
-    def num_header_cols(self, table_id: int, num_headers: Optional[int] = None) -> int:
+    def num_header_cols(self, table_id: int, num_headers: int | None = None) -> int:
         """Return/set the number of header columns."""
         table_model = self.objects[table_id]
         if num_headers is not None:
@@ -1339,7 +1343,7 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-    def add_table(  # noqa: PLR0913
+    def add_table(
         self,
         sheet_id: int,
         table_name: str,
@@ -1476,7 +1480,9 @@ class _NumbersModel(Cacheable):
         table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
 
         self.add_component_reference(
-            table_info_id, location="Document", component_id=self.calc_engine_id(),
+            table_info_id,
+            location="Document",
+            component_id=self.calc_engine_id(),
         )
         self.create_caption_archive(table_model_id)
         self.caption_enabled(table_model_id, False)
@@ -1581,7 +1587,10 @@ class _NumbersModel(Cacheable):
         )
 
         self.add_component_reference(
-            sheet_id, location="CalculationEngine", component_id=DOCUMENT_ID, is_weak=True,
+            sheet_id,
+            location="CalculationEngine",
+            component_id=DOCUMENT_ID,
+            is_weak=True,
         )
 
         self.objects[DOCUMENT_ID].sheets.append(TSPMessages.Reference(identifier=sheet_id))
@@ -1773,7 +1782,7 @@ class _NumbersModel(Cacheable):
 
     def add_cell_style(self, style: Style) -> int:
         if style.bg_image is not None:
-            digest = sha1(style.bg_image.data).digest()
+            digest = sha1(style.bg_image.data).digest()  # noqa: S324
             if digest in self._images:
                 image_id = self._images[digest]
             else:
@@ -2039,7 +2048,7 @@ class _NumbersModel(Cacheable):
             vertical = VerticalJustification(self.cell_property(style, "vertical_alignment"))
         return Alignment(horizontal, vertical)
 
-    def cell_bg_color(self, cell: Cell) -> Union[tuple, list[tuple]]:
+    def cell_bg_color(self, cell: Cell) -> tuple | list[tuple]:
         if cell._cell_style_id is None:
             return None
 
@@ -2079,50 +2088,50 @@ class _NumbersModel(Cacheable):
             return getattr(parent.cell_properties, field)
         return getattr(style.cell_properties, field)
 
-    def cell_is_bold(self, obj: Union[Cell, object]) -> bool:
+    def cell_is_bold(self, obj: Cell | object) -> bool:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.char_property(style, "bold")
 
-    def cell_is_italic(self, obj: Union[Cell, object]) -> bool:
+    def cell_is_italic(self, obj: Cell | object) -> bool:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.char_property(style, "italic")
 
-    def cell_is_underline(self, obj: Union[Cell, object]) -> bool:
+    def cell_is_underline(self, obj: Cell | object) -> bool:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         underline = self.char_property(style, "underline")
         return underline != CharacterStyle.UnderlineType.kNoUnderline
 
-    def cell_is_strikethrough(self, obj: Union[Cell, object]) -> bool:
+    def cell_is_strikethrough(self, obj: Cell | object) -> bool:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         strikethru = self.char_property(style, "strikethru")
         return strikethru != CharacterStyle.StrikethruType.kNoStrikethru
 
-    def cell_style_name(self, obj: Union[Cell, object]) -> bool:
+    def cell_style_name(self, obj: Cell | object) -> bool:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return style.super.name
 
-    def cell_font_color(self, obj: Union[Cell, object]) -> tuple:
+    def cell_font_color(self, obj: Cell | object) -> tuple:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return rgb(self.char_property(style, "font_color"))
 
-    def cell_font_size(self, obj: Union[Cell, object]) -> float:
+    def cell_font_size(self, obj: Cell | object) -> float:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.char_property(style, "font_size")
 
-    def cell_font_name(self, obj: Union[Cell, object]) -> str:
+    def cell_font_name(self, obj: Cell | object) -> str:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         font_name = self.char_property(style, "font_name")
         return FONT_NAME_TO_FAMILY[font_name]
 
-    def cell_first_indent(self, obj: Union[Cell, object]) -> float:
+    def cell_first_indent(self, obj: Cell | object) -> float:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.para_property(style, "first_line_indent")
 
-    def cell_left_indent(self, obj: Union[Cell, object]) -> float:
+    def cell_left_indent(self, obj: Cell | object) -> float:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.para_property(style, "left_indent")
 
-    def cell_right_indent(self, obj: Union[Cell, object]) -> float:
+    def cell_right_indent(self, obj: Cell | object) -> float:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.para_property(style, "right_indent")
 
@@ -2302,7 +2311,7 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-    def add_stroke(  # noqa: PLR0913
+    def add_stroke(
         self,
         table_id: int,
         row: int,
@@ -2512,5 +2521,5 @@ def field_references(obj: object) -> dict:
     return {
         x[0].name: {"identifier": getattr(obj, x[0].name).identifier}
         for x in obj.ListFields()
-        if type(getattr(obj, x[0].name)) == TSPMessages.Reference
+        if isinstance(getattr(obj, x[0].name), TSPMessages.Reference)
     }

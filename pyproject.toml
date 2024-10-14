@@ -96,6 +96,7 @@ deps =
   pytest-xdist
   python-magic
   psutil
+  roman
 commands =
   pytest tests/ --import-mode importlib -n logical --no-cov
 """
@@ -108,28 +109,63 @@ exclude = [
   # Machine-generated files
   ".bootstrap/*",
   ".tox/*",
-  ".vscode/*",
+  "*.pyi",
+  ".vscode/extensions/*",
   "src/numbers_parser/generated/*",
   # Third-party files not to lint
-  "src/debug/lldbutil.py", # Tox
+  "src/debug/lldbutil.py",
 ]
 fix = true
 ignore = [
-  "PLR2004", # Allow constant values
+  # "PLR2004", # Allow constant values
   "T201", # Allow print()
+  # To fix:
+  "ANN001", #Missing type annotation
+  "ANN002", #Missing type annotation
+  "ANN003", #Missing type annotation
+  "ANN201", #Missing return type annotation
+  "ANN202", #Missing return type annotation
+  "ANN204", #Missing return type annotation
+  "ANN205", #Missing return type annotation
+  "ANN206", #Missing return type annotation
+  "ANN401", #Dynamically typed expressions
+  "ARG001", #Unused function argument
+  "ARG002", #Unused method argument
+  "ARG003", #Unused class method argument
+  "BLE001", #Do not catch blind exception
+  "C901", #code too complex
+  "D100", #Missing docstring
+  "D101", #Missing docstring
+  "D102", #Missing docstring
+  "D103", #Missing docstring
+  "D105", #Missing docstring
+  "D107", #Missing docstring
+  "D205", # Blank line - conflicts with black
+  "D210", #No whitespaces allowed surrounding docstring text
+  "D400", #First line should end with a period
+  "D401", #First line of docstring should be in imperative mood
+  "D415", #First line should end with a period, question mark, or exclamation point
+  "E501", #Line too long
+  "ERA001", #Found commented-out code
+  "FBT001", #Boolean-typed positional argument in function definition
+  "FBT002", #Boolean default positional argument in function definition
+  "FBT003", #Boolean positional value in function call
+  "FIX002", #Line contains TODO, consider resolving the issue
+  "ISC003", #Explicitly concatenated string should be implicitly concatenated
+  "PERF401", #Use a list comprehension to create a transformed list
+  "PLR0913", #Too many arguments
+  "PLR2004", #Magic value used
+  "PLW0603", #Using the global statement
+  "RUF001", #String contains ambiguous
+  "RUF002", #Docstring contains ambiguous
+  "RUF003", #Comment contains ambiguous
+  "SIM115", #Use a context manager for opening files
+  "SLF001", #Private member accessed
+  "TD002", # TODO author
+  "TD003", # TODO author
 ]
 line-length = 100
-select = [ "ALL",
-  # Pyflakes including bugbears
-  # "F",
-  # "B", # Pycodestyle
-  # "E",
-  # "W", # isort
-  # "I", # PEP naming
-  # "N", # pyupgrade
-  # "UP", # Pylama
-  # "PL",
-]
+select = [ "ALL" ]
 src = ["src", "tests"]
 target-version = "py39"
 unfixable = [

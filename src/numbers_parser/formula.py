@@ -67,7 +67,7 @@ class Formula(list):
     def date(self, *args) -> None:
         # Date literals exported as DATE()
         node = args[2]
-        dt = datetime(2001, 1, 1) + timedelta(seconds=node.AST_date_node_dateNum)
+        dt = datetime(2001, 1, 1) + timedelta(seconds=node.AST_date_node_dateNum)  # noqa: DTZ001
         self.push(f"DATE({dt.year},{dt.month},{dt.day})")
 
     def div(self, *args) -> None:

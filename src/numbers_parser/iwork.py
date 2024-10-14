@@ -161,18 +161,18 @@ class IWork:
             # OSError possible exception; allow it to propagate up
             zipf = ZipFile(filepath, "w")
 
-            for filepath, blob in file_store.items():
+            for filepath_in_zip, blob in file_store.items():
                 if isinstance(blob, IWAFile):
-                    zipf.writestr(filepath, blob.to_buffer())
+                    zipf.writestr(filepath_in_zip, blob.to_buffer())
                 else:
-                    zipf.writestr(filepath, blob)
+                    zipf.writestr(filepath_in_zip, blob)
             zipf.close()
 
     def _open_zipfile(self, filepath: Path):
         """Open Zip file with the correct filename encoding supported by current python."""
         # Coverage is python version dependent, so one path with always fail coverage
         try:
-            if version_info.minor >= 11:  # pragma: no cover
+            if version_info >= (3, 11):  # pragma: no cover
                 return ZipFile(filepath, metadata_encoding="utf-8")
             # pragma: no cover
             return ZipFile(filepath)
