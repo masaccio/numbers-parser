@@ -674,7 +674,7 @@ class Table(Cacheable):
                     merge_cells.add(xl_range(row, col, row + size[0] - 1, col + size[1] - 1))
         return sorted(merge_cells)
 
-    def cell(self, *args) -> Cell | MergedCell:
+    def cell(self, *args) -> Cell | MergedCell:  # noqa: D417
         """Return a single cell in the table.
 
         The ``cell()`` method supports two forms of notation to designate the position
@@ -895,7 +895,7 @@ class Table(Cacheable):
 
         return (row, col, *tuple(values))
 
-    def write(self, *args, style: Style | str | None = None) -> None:
+    def write(self, *args, style: Style | str | None = None) -> None:  # noqa: D417
         """Write a value to a cell and update the style/cell type.
 
         The ``write()`` method supports two forms of notation to designate the position

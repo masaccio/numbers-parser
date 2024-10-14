@@ -155,6 +155,10 @@ ignore = [
   "PLR0913", #Too many arguments
   "PLR2004", #Magic value used
   "PLW0603", #Using the global statement
+  "PTH103", # Use of os.makedirs()
+  "PTH118", # Use of os.path.join()
+  "PTH119", # Use of os.path.basename()
+  "PTH123", # Use of open()
   "RUF001", #String contains ambiguous
   "RUF002", #Docstring contains ambiguous
   "RUF003", #Comment contains ambiguous

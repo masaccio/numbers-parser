@@ -216,8 +216,10 @@ class IWAArchiveSegment:
                 provided_length = message_info.length
                 if object_length != provided_length:
                     message_info.length = object_length
-            except EncodeError as e:  # pragma: no cover
-                msg = f"Failed to encode object: {e}\nObject: '{obj!r}'\nMessage info: {message_info}"
+            except EncodeError as e:  # pragma: no cover  # noqa: PERF203
+                msg = (
+                    f"Failed to encode object: {e}\nObject: '{obj!r}'\nMessage info: {message_info}"
+                )
                 raise ValueError(
                     msg,
                 ) from None
@@ -263,12 +265,12 @@ def get_archive_info_and_remainder(buf):
     return ArchiveInfo.FromString(msg_buf), buf[n:]
 
 
-def create_iwa_segment(id: int, cls: object, object_dict: dict) -> object:
+def create_iwa_segment(obj_id: int, cls: object, object_dict: dict) -> object:
     full_name = cls.DESCRIPTOR.full_name
     type_id = NAME_ID_MAP[full_name]
     header = {
         "_pbtype": "TSP.ArchiveInfo",
-        "identifier": str(id),
+        "identifier": str(obj_id),
         "message_infos": [
             {
                 "type": type_id,
