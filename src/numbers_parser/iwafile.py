@@ -38,8 +38,7 @@ class IWAFile:
         except Exception as e:  # pragma: no cover
             if filename:
                 raise ValueError("Failed to deserialize " + filename) from e
-            else:
-                raise
+            raise
 
     @classmethod
     def from_dict(cls, _dict):
@@ -51,8 +50,7 @@ class IWAFile:
         except Exception as e:  # pragma: no cover
             if self.filename:
                 raise ValueError("Failed to serialize " + self.filename) from e
-            else:
-                raise
+            raise
 
     def to_buffer(self):
         return b"".join([chunk.to_buffer() for chunk in self.chunks])
@@ -219,7 +217,7 @@ class IWAArchiveSegment:
                 if object_length != provided_length:
                     message_info.length = object_length
             except EncodeError as e:  # pragma: no cover
-                msg = f"Failed to encode object: {e}\nObject: '{repr(obj)}'\nMessage info: {message_info}"
+                msg = f"Failed to encode object: {e}\nObject: '{obj!r}'\nMessage info: {message_info}"
                 raise ValueError(
                     msg,
                 ) from None
@@ -287,7 +285,7 @@ def create_iwa_segment(id: int, cls: object, object_dict: dict) -> object:
 def find_references(obj, references=list):
     if not hasattr(obj, "DESCRIPTOR"):
         return
-    elif type(obj).__name__ == "Reference":
+    if type(obj).__name__ == "Reference":
         references.append(obj.identifier)
         return
     for field_desc in obj.ListFields():

@@ -318,7 +318,5 @@ def number_to_str(v: int) -> str:
         zeroes = "0" * (abs(int(exp)) - 1)
         if int(exp) > 0:
             return f"{number}{zeroes}"
-        else:
-            return f"0.{zeroes}{number}"
-    else:
-        return v_str
+        return f"0.{zeroes}{number}"
+    return v_str

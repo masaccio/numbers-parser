@@ -21,10 +21,9 @@ def cache(num_args=1):
             key = ".".join([str(args[x]) for x in range(num_args)])
             if key in self._cache[method]:
                 return self._cache[method][key]
-            else:
-                value = func(self, *args, **kwargs)
-                self._cache[method][key] = value
-                return value
+            value = func(self, *args, **kwargs)
+            self._cache[method][key] = value
+            return value
 
         def inner_no_args(self):
             method = func.__name__
@@ -34,7 +33,6 @@ def cache(num_args=1):
 
         if num_args == 0:
             return inner_no_args
-        else:
-            return inner_multi_args
+        return inner_multi_args
 
     return cache_decorator

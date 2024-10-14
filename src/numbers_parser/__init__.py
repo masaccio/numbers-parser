@@ -1,4 +1,4 @@
-__doc__ = """Parse and extract data from Apple Numbers spreadsheets"""
+"""Parse and extract data from Apple Numbers spreadsheets."""
 
 import importlib.metadata
 import os
@@ -20,11 +20,11 @@ _DEFAULT_NUMBERS_INSTALL_PATH = "/Applications/Numbers.app"
 _VERSION_PLIST_PATH = "Contents/version.plist"
 
 
-def _get_version():
+def _get_version() -> str:
     return __version__
 
 
-def _check_installed_numbers_version():
+def _check_installed_numbers_version() -> str:
     try:
         fp = open(os.path.join(_DEFAULT_NUMBERS_INSTALL_PATH, _VERSION_PLIST_PATH), "rb")
     except OSError:

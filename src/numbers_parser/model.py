@@ -162,8 +162,7 @@ class DataLists(Cacheable):
     def value_key(self, value):
         if hasattr(value, "DESCRIPTOR"):
             return repr(value)
-        else:
-            return value
+        return value
 
     def init(self, table_id: int):
         """Remove all entries from a datalist."""
@@ -248,11 +247,9 @@ class _NumbersModel(Cacheable):
         if value is None:
             if sheet_id not in self.objects:
                 return None
-            else:
-                return self.objects[sheet_id].name
-        else:
-            self.objects[sheet_id].name = value
-            return None
+            return self.objects[sheet_id].name
+        self.objects[sheet_id].name = value
+        return None
 
     def set_table_data(self, table_id: int, data: List):
         self._table_data[table_id] = data
@@ -313,16 +310,14 @@ class _NumbersModel(Cacheable):
     def table_name(self, table_id, value=None):
         if value is None:
             return self.objects[table_id].table_name
-        else:
-            self.objects[table_id].table_name = value
-            return None
+        self.objects[table_id].table_name = value
+        return None
 
     def table_name_enabled(self, table_id: int, enabled: Optional[bool] = None):
         if enabled is not None:
             self.objects[table_id].table_name_enabled = enabled
             return None
-        else:
-            return self.objects[table_id].table_name_enabled
+        return self.objects[table_id].table_name_enabled
 
     def caption_enabled(self, table_id: int, enabled: Optional[bool] = None) -> bool:
         table_info = self.objects[self.table_info_id(table_id)]
@@ -389,7 +384,7 @@ class _NumbersModel(Cacheable):
                             type=TSPMessages.Path.ElementType.moveTo,
                             points=[TSPMessages.Point(x=0.0, y=0.0)],
                         ),
-                    ]
+                    ],
                 ),
             ),
         )
@@ -421,16 +416,16 @@ class _NumbersModel(Cacheable):
                         {
                             "character_index": 0,
                             "object": {"identifier": self.caption_paragraph_style_id()},
-                        }
-                    ]
+                        },
+                    ],
                 },
                 "table_list_style": {
                     "entries": [
                         {
                             "character_index": 0,
                             "object": {"identifier": self.find_style_id("liststyle")},
-                        }
-                    ]
+                        },
+                    ],
                 },
                 "table_para_starts": {"entries": [{"character_index": 0, "first": 0, "second": 0}]},
                 "table_para_bidi": {"entries": [{"character_index": 0, "first": 0, "second": 0}]},
@@ -445,7 +440,7 @@ class _NumbersModel(Cacheable):
             self.caption_paragraph_style_id(),
         ]:
             self.add_component_reference(
-                object_id, location="CalculationEngine", component_id=self.stylesheet_id()
+                object_id, location="CalculationEngine", component_id=self.stylesheet_id(),
             )
         caption_info.super.MergeFrom(
             TSWPArchives.ShapeInfoArchive(
@@ -458,15 +453,15 @@ class _NumbersModel(Cacheable):
                     strokePatternOffsetDistance=0.0,
                     pathsource=self.create_path_source_archive(table_id),
                 ),
-            )
+            ),
         )
 
         self.set_reference(table_info.super.caption, caption_info_id)
         component = self.metadata_component(self.calc_engine_id())
         component.object_uuid_map_entries.append(
             TSPArchiveMessages.ObjectUUIDMapEntry(
-                identifier=caption_info_id, uuid=NumbersUUID().protobuf2
-            )
+                identifier=caption_info_id, uuid=NumbersUUID().protobuf2,
+            ),
         )
 
     def caption_text(self, table_id: int, caption: str = None) -> str:
@@ -477,10 +472,9 @@ class _NumbersModel(Cacheable):
         if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":
             if caption is None:
                 return "Caption"
-            else:
-                self.create_caption_archive(table_id)
-                caption_info_id = table_info.super.caption.identifier
-                caption_archive = self.objects[caption_info_id]
+            self.create_caption_archive(table_id)
+            caption_info_id = table_info.super.caption.identifier
+            caption_archive = self.objects[caption_info_id]
 
         caption_storage_id = caption_archive.super.owned_storage.identifier
         if caption is not None:
@@ -789,8 +783,7 @@ class _NumbersModel(Cacheable):
         ce_id = self.find_refs("CalculationEngineArchive")
         if len(ce_id) == 0:
             return 0
-        else:
-            return ce_id[0]
+        return ce_id[0]
 
     @cache(num_args=0)
     def calc_engine(self):
@@ -798,8 +791,7 @@ class _NumbersModel(Cacheable):
         ce_id = self.calc_engine_id()
         if ce_id == 0:
             return None
-        else:
-            return self.objects[ce_id]
+        return self.objects[ce_id]
 
     @cache()
     def calculate_merge_cell_ranges(self, table_id):
@@ -891,12 +883,11 @@ class _NumbersModel(Cacheable):
 
         if node.HasField("AST_colon_tract"):
             return self.tract_to_row_col_ref(node, other_table_name, row, col)
-        elif node.HasField("AST_row") and not node.HasField("AST_column"):
+        if node.HasField("AST_row") and not node.HasField("AST_column"):
             return node_to_row_ref(node, other_table_name, row)
-        elif node.HasField("AST_column") and not node.HasField("AST_row"):
+        if node.HasField("AST_column") and not node.HasField("AST_row"):
             return node_to_col_ref(node, other_table_name, col)
-        else:
-            return node_to_row_col_ref(node, other_table_name, row, col)
+        return node_to_row_col_ref(node, other_table_name, row, col)
 
     def tract_to_row_col_ref(self, node: object, table_name: str, row: int, col: int) -> str:
         if node.AST_sticky_bits.begin_row_is_absolute:
@@ -933,8 +924,7 @@ class _NumbersModel(Cacheable):
         )
         if table_name is not None:
             return f"{table_name}::{begin_ref}:{end_ref}"
-        else:
-            return f"{begin_ref}:{end_ref}"
+        return f"{begin_ref}:{end_ref}"
 
     @cache()
     def formula_ast(self, table_id: int):
@@ -1218,7 +1208,7 @@ class _NumbersModel(Cacheable):
                 data[row][col].border.top.width
                 for col in range(len(data[row]))
                 if data[row][col].border.top is not None
-            ]
+            ],
         )
         max_bottom_border = max(
             [0.0]
@@ -1226,7 +1216,7 @@ class _NumbersModel(Cacheable):
                 data[row][col].border.bottom.width
                 for col in range(len(data[row]))
                 if data[row][col].border.bottom is not None
-            ]
+            ],
         )
         height += max_top_border / 2
         height += max_bottom_border / 2
@@ -1270,7 +1260,7 @@ class _NumbersModel(Cacheable):
                 data[row][col].border.left.width
                 for row in range(len(data))
                 if data[row][col].border.left is not None
-            ]
+            ],
         )
         max_right_border = max(
             [0.0]
@@ -1278,7 +1268,7 @@ class _NumbersModel(Cacheable):
                 data[row][col].border.right.width
                 for row in range(len(data))
                 if data[row][col].border.right is not None
-            ]
+            ],
         )
         width += max_left_border / 2
         width += max_right_border / 2
@@ -1484,7 +1474,7 @@ class _NumbersModel(Cacheable):
         table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
 
         self.add_component_reference(
-            table_info_id, location="Document", component_id=self.calc_engine_id()
+            table_info_id, location="Document", component_id=self.calc_engine_id(),
         )
         self.create_caption_archive(table_model_id)
         self.caption_enabled(table_model_id, False)
@@ -1502,7 +1492,7 @@ class _NumbersModel(Cacheable):
         )
         return table_model_id
 
-    def add_formula_owner(  # noqa: PLR0913
+    def add_formula_owner(
         self,
         table_info_id: int,
         num_rows: int,
@@ -1589,7 +1579,7 @@ class _NumbersModel(Cacheable):
         )
 
         self.add_component_reference(
-            sheet_id, location="CalculationEngine", component_id=DOCUMENT_ID, is_weak=True
+            sheet_id, location="CalculationEngine", component_id=DOCUMENT_ID, is_weak=True,
         )
 
         self.objects[DOCUMENT_ID].sheets.append(TSPMessages.Reference(identifier=sheet_id))
@@ -1887,8 +1877,7 @@ class _NumbersModel(Cacheable):
             offset = len("Custom Style ")
             custom_style_ids = [int(x[offset:]) for x in custom_styles]
             return "Custom Style " + str(custom_style_ids[-1] + 1)
-        else:
-            return "Custom Style 1"
+        return "Custom Style 1"
 
     @property
     def custom_formats(self) -> Dict[str, CustomFormatting]:
@@ -1920,8 +1909,7 @@ class _NumbersModel(Cacheable):
         if len(current_formats) > 0:
             last_id = int(current_formats[-1])
             return f"Custom Format {last_id + 1}"
-        else:
-            return "Custom Format 1"
+        return "Custom Format 1"
 
     @cache()
     def table_formulas(self, table_id: int):
@@ -2028,9 +2016,9 @@ class _NumbersModel(Cacheable):
         table_model = self.objects[cell._table_id]
         if cell.row in range(table_model.number_of_header_rows):
             return self.objects[table_model.header_row_text_style.identifier]
-        elif cell.col in range(table_model.number_of_header_columns):
+        if cell.col in range(table_model.number_of_header_columns):
             return self.objects[table_model.header_column_text_style.identifier]
-        elif table_model.number_of_footer_rows > 0:
+        if table_model.number_of_footer_rows > 0:
             start_row_num = table_model.number_of_rows - table_model.number_of_footer_rows
             end_row_num = start_row_num + table_model.number_of_footer_rows
             if cell.row in range(start_row_num, end_row_num):
@@ -2057,7 +2045,7 @@ class _NumbersModel(Cacheable):
 
         if cell_properties.HasField("color"):
             return rgb(cell_properties.color)
-        elif cell_properties.HasField("gradient"):
+        if cell_properties.HasField("gradient"):
             return [(rgb(s.color)) for s in cell_properties.gradient.stops]
         return None
 
@@ -2068,8 +2056,7 @@ class _NumbersModel(Cacheable):
         if not style.char_properties.HasField(field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.char_properties, field)
-        else:
-            return getattr(style.char_properties, field)
+        return getattr(style.char_properties, field)
 
     def para_property(self, style: object, field: str) -> float:
         """Return a para_property field from a style if present
@@ -2078,8 +2065,7 @@ class _NumbersModel(Cacheable):
         if not style.para_properties.HasField(field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.para_properties, field)
-        else:
-            return getattr(style.para_properties, field)
+        return getattr(style.para_properties, field)
 
     def cell_property(self, style: object, field: str) -> float:
         """Return a cell_property field from a style if present
@@ -2088,8 +2074,7 @@ class _NumbersModel(Cacheable):
         if not style.cell_properties.HasField(field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.cell_properties, field)
-        else:
-            return getattr(style.cell_properties, field)
+        return getattr(style.cell_properties, field)
 
     def cell_is_bold(self, obj: Union[Cell, object]) -> bool:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
@@ -2141,31 +2126,27 @@ class _NumbersModel(Cacheable):
     def cell_text_inset(self, cell: Cell) -> float:
         if cell._cell_style_id is None:
             return DEFAULT_TEXT_INSET
-        else:
-            style = self.table_style(cell._table_id, cell._cell_style_id)
-            padding = self.cell_property(style, "padding")
-            # Padding is always identical (only one UI setting)
-            return padding.left
+        style = self.table_style(cell._table_id, cell._cell_style_id)
+        padding = self.cell_property(style, "padding")
+        # Padding is always identical (only one UI setting)
+        return padding.left
 
     def cell_text_wrap(self, cell: Cell) -> float:
         if cell._cell_style_id is None:
             return DEFAULT_TEXT_WRAP
-        else:
-            style = self.table_style(cell._table_id, cell._cell_style_id)
-            return self.cell_property(style, "text_wrap")
+        style = self.table_style(cell._table_id, cell._cell_style_id)
+        return self.cell_property(style, "text_wrap")
 
     def stroke_type(self, stroke_run: object) -> str:
         """Return the stroke type for a stroke run."""
         stroke_type = stroke_run.stroke.pattern.type
         if stroke_type == StrokePattern.StrokePatternType.TSDSolidPattern:
             return "solid"
-        elif stroke_type == StrokePattern.StrokePatternType.TSDPattern:
+        if stroke_type == StrokePattern.StrokePatternType.TSDPattern:
             if stroke_run.stroke.pattern.pattern[0] < 1.0:
                 return "dots"
-            else:
-                return "dashes"
-        else:
-            return "none"
+            return "dashes"
+        return "none"
 
     def cell_for_stroke(self, table_id: int, side: str, row: int, col: int) -> object:
         data = self._table_data[table_id]
@@ -2189,7 +2170,7 @@ class _NumbersModel(Cacheable):
             return cell
         return None
 
-    def set_cell_border(  # noqa: PLR0913
+    def set_cell_border(
         self,
         table_id: int,
         row: int,
@@ -2420,8 +2401,7 @@ def range_end(obj):
     """Select end range for a IndexSetArchive.IndexSetEntry."""
     if obj.HasField("range_end"):
         return obj.range_end
-    else:
-        return obj.range_begin
+    return obj.range_begin
 
 
 def formatted_number(number_type, index):
@@ -2439,8 +2419,7 @@ def node_to_col_ref(node: object, table_name: str, col: int) -> str:
     col_name = xl_col_to_name(col, node.AST_column.absolute)
     if table_name is not None:
         return f"{table_name}::{col_name}"
-    else:
-        return col_name
+    return col_name
 
 
 def node_to_row_ref(node: object, table_name: str, row: int) -> str:
@@ -2449,8 +2428,7 @@ def node_to_row_ref(node: object, table_name: str, row: int) -> str:
     row_name = f"${row+1}" if node.AST_row.absolute else f"{row+1}"
     if table_name is not None:
         return f"{table_name}::{row_name}:{row_name}"
-    else:
-        return f"{row_name}:{row_name}"
+    return f"{row_name}:{row_name}"
 
 
 def node_to_row_col_ref(node: object, table_name: str, row: int, col: int) -> str:
@@ -2465,8 +2443,7 @@ def node_to_row_col_ref(node: object, table_name: str, row: int, col: int) -> st
     )
     if table_name is not None:
         return f"{table_name}::{ref}"
-    else:
-        return ref
+    return ref
 
 
 def get_storage_buffers_for_row(
@@ -2487,6 +2464,7 @@ def get_storage_buffers_for_row(
     Returns:
     -------
          data: list of bytes for each cell in a row, or None if empty
+
     """
     offsets = array("h", offsets).tolist()
     if has_wide_offsets:

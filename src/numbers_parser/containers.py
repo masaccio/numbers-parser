@@ -20,16 +20,15 @@ class ItemsList:
                 msg = f"index {key} out of range"
                 raise IndexError(msg)
             return self._items[key]
-        elif isinstance(key, str):
+        if isinstance(key, str):
             for item in self._items:
                 if item.name == key:
                     return item
             msg = f"no {self._item_name} named '{key}'"
             raise KeyError(msg)
-        else:
-            t = type(key).__name__
-            msg = f"invalid index type {t}"
-            raise LookupError(msg)
+        t = type(key).__name__
+        msg = f"invalid index type {t}"
+        raise LookupError(msg)
 
     def __len__(self) -> int:
         return len(self._items)

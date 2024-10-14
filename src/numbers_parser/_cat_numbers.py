@@ -85,16 +85,15 @@ def print_table_names(filename):
 def cell_as_string(args, cell):
     if isinstance(cell, ErrorCell) and not (args.formulas):
         return "#REF!"
-    elif args.formulas and cell.formula is not None:
+    if args.formulas and cell.formula is not None:
         return cell.formula
-    elif args.formatting and cell.formatted_value is not None:
+    if args.formatting and cell.formatted_value is not None:
         return cell.formatted_value
-    elif isinstance(cell, NumberCell):
+    if isinstance(cell, NumberCell):
         return sigfig(cell.value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
-    elif cell.value is None:
+    if cell.value is None:
         return ""
-    else:
-        return str(cell.value)
+    return str(cell.value)
 
 
 def print_table(args, filename):

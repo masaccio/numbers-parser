@@ -1,6 +1,7 @@
+from collections.abc import Iterator
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 from warnings import warn
 
 from numbers_parser.cell import (
@@ -74,6 +75,7 @@ class Document:
         If the sheet name already exists in the document.
     IndexError:
         If the table name already exists in the first sheet.
+
     """
 
     def __init__(  # noqa: PLR0913
@@ -140,6 +142,7 @@ class Document:
         FileFormatError:
             If attempting to write a package into a folder that is not an
             existing Numbers document.
+
         """
         for sheet in self.sheets:
             for table in sheet.tables:
@@ -180,6 +183,7 @@ class Document:
         Raises
         ------
             IndexError: If the sheet name already exists in the document.
+
         """
         if sheet_name is not None:
             if sheet_name in self._sheets:
@@ -241,6 +245,7 @@ class Document:
             If ``font_size`` is not a ``float``, ``font_name`` is not a ``str``,
             ``bg_image`` is not a :py:class:`~numbers_parser.BackgroundImage`,
             or if any of the ``bool`` parameters are invalid.
+
         """
         if "name" in kwargs and kwargs["name"] is not None and kwargs["name"] in self._model.styles:
             msg = f"style '{kwargs['name']}' already exists"
@@ -355,7 +360,7 @@ class Sheet:
     def name(self, value: str):
         self._model.sheet_name(self._sheet_id, value)
 
-    def add_table(  # noqa: PLR0913
+    def add_table(
         self,
         table_name: Optional[str] = None,
         x: Optional[float] = None,
@@ -402,6 +407,7 @@ class Sheet:
         Raises
         ------
             IndexError: If the table name already exists.
+
         """
         from_table_id = self._tables[-1]._table_id
         return self._add_table(table_name, from_table_id, x, y, num_rows, num_cols)
@@ -504,18 +510,19 @@ class Table(Cacheable):
     def num_header_rows(self) -> int:
         """int: The number of header rows.
 
-        Example
+        Example:
         -------
         .. code-block:: python
 
             # Add an extra header row
             table.num_header_rows += 1
 
-        Raises
+        Raises:
         ------
         ValueError:
             If the number of headers is negative, exceeds the number of rows in the
             table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).
+
         """
         return self._model.num_header_rows(self._table_id)
 
@@ -524,10 +531,10 @@ class Table(Cacheable):
         if num_headers < 0:
             msg = "Number of headers cannot be negative"
             raise ValueError(msg)
-        elif num_headers > self.num_rows:
+        if num_headers > self.num_rows:
             msg = "Number of headers cannot exceed the number of rows"
             raise ValueError(msg)
-        elif num_headers > MAX_HEADER_COUNT:
+        if num_headers > MAX_HEADER_COUNT:
             msg = f"Number of headers cannot exceed {MAX_HEADER_COUNT} rows"
             raise ValueError(msg)
         return self._model.num_header_rows(self._table_id, num_headers)
@@ -536,18 +543,19 @@ class Table(Cacheable):
     def num_header_cols(self) -> int:
         """int: The number of header columns.
 
-        Example
+        Example:
         -------
         .. code-block:: python
 
             # Add an extra header column
             table.num_header_cols += 1
 
-        Raises
+        Raises:
         ------
         ValueError:
             If the number of headers is negative, exceeds the number of rows in the
             table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).
+
         """
         return self._model.num_header_cols(self._table_id)
 
@@ -556,10 +564,10 @@ class Table(Cacheable):
         if num_headers < 0:
             msg = "Number of headers cannot be negative"
             raise ValueError(msg)
-        elif num_headers > self.num_cols:
+        if num_headers > self.num_cols:
             msg = "Number of headers cannot exceed the number of columns"
             raise ValueError(msg)
-        elif num_headers > MAX_HEADER_COUNT:
+        if num_headers > MAX_HEADER_COUNT:
             msg = f"Number of headers cannot exceed {MAX_HEADER_COUNT} columns"
             raise ValueError(msg)
         return self._model.num_header_cols(self._table_id, num_headers)
@@ -593,6 +601,7 @@ class Table(Cacheable):
         -------
         int:
             The height of the table row.
+
         """
         return self._model.row_height(self._table_id, row, height)
 
@@ -610,6 +619,7 @@ class Table(Cacheable):
         -------
         int:
             The width of the table column.
+
         """
         return self._model.col_width(self._table_id, col, width)
 
@@ -630,17 +640,17 @@ class Table(Cacheable):
         -------
         List[List[Cell]] | List[List[str]]:
             List of rows; each row is a list of :class:`Cell` objects, or string values.
+
         """
         if values_only:
             return [[cell.value for cell in row] for row in self._data]
-        else:
-            return self._data
+        return self._data
 
     @property
     def merge_ranges(self) -> List[str]:
         """List[str]: The merge ranges of cells in A1 notation.
 
-        Example
+        Example:
         -------
         .. code-block:: python
 
@@ -650,6 +660,7 @@ class Table(Cacheable):
             <numbers_parser.cell.TextCell object at 0x1035f4a90>
             >>> table.cell("A5")
             <numbers_parser.cell.MergedCell object at 0x1035f5310>
+
         """
         merge_cells = set()
         for row, cells in enumerate(self._data):
@@ -699,6 +710,7 @@ class Table(Cacheable):
             <numbers_parser.cell.TextCell object at 0x105a80b90>
             >>> table.cell("B2").value
             1234.50
+
         """
         if isinstance(args[0], str):
             (row, col) = xl_cell_to_rowcol(args[0])
@@ -716,7 +728,7 @@ class Table(Cacheable):
 
         return self._data[row][col]
 
-    def iter_rows(  # noqa: PLR0913
+    def iter_rows(
         self,
         min_row: Optional[int] = None,
         max_row: Optional[int] = None,
@@ -758,6 +770,7 @@ class Table(Cacheable):
 
             for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
                 sum += row
+
         """
         min_row = min_row or 0
         max_row = max_row or self.num_rows - 1
@@ -784,7 +797,7 @@ class Table(Cacheable):
             else:
                 yield tuple(rows[row][min_col : max_col + 1])
 
-    def iter_cols(  # noqa: PLR0913
+    def iter_cols(
         self,
         min_col: Optional[int] = None,
         max_col: Optional[int] = None,
@@ -826,6 +839,7 @@ class Table(Cacheable):
 
             for col in table.iter_cols(min_row=2, max_row=7):
                 sum += col.value
+
         """
         min_row = min_row or 0
         max_row = max_row or self.num_rows - 1
@@ -919,6 +933,7 @@ class Table(Cacheable):
             If the style parameter is an invalid type.
         ValueError:
             If the cell type cannot be determined from the type of `param3`.
+
         """
         # TODO: write needs to retain/init the border
         (row, col, value) = self._validate_cell_coords(*args)
@@ -978,6 +993,7 @@ class Table(Cacheable):
             If the start_row is out of range for the table.
         ValueError:
             If the default value is unsupported by :py:meth:`numbers_parser.Table.write`.
+
         """
         if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
             msg = "Row number not in range for table"
@@ -994,7 +1010,7 @@ class Table(Cacheable):
                 [
                     Cell._empty_cell(self._table_id, row, col, self._model)
                     for col in range(self.num_cols)
-                ]
+                ],
             )
         self._data[start_row:start_row] = rows
 
@@ -1040,6 +1056,7 @@ class Table(Cacheable):
             If the start_col is out of range for the table.
         ValueError:
             If the default value is unsupported by :py:meth:`numbers_parser.Table.write`.
+
         """
         if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
             msg = "Column number not in range for table"
@@ -1089,6 +1106,7 @@ class Table(Cacheable):
         ------
         IndexError:
             If the start_row is out of range for the table.
+
         """
         if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
             msg = "Row number not in range for table"
@@ -1127,6 +1145,7 @@ class Table(Cacheable):
         ------
         IndexError:
             If the start_col is out of range for the table.
+
         """
         if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
             msg = "Column number not in range for table"
@@ -1162,6 +1181,7 @@ class Table(Cacheable):
             >>> table.merge_cells("B2:C2")
             >>> table.cell("B2").is_merged
             True
+
         """
         if isinstance(cell_range, list):
             for x in cell_range:
@@ -1215,16 +1235,17 @@ class Table(Cacheable):
             * **param3** (:py:class:`Border`): The border to add.
             * **param4** (*int*, *optional*, default: 1): The length of the stroke to add.
 
-        Raises
+        Raises:
         ------
         TypeError:
             If an invalid number of arguments is passed or if the types of the arguments
             are invalid.
 
-        Warns
+        Warns:
         -----
         RuntimeWarning:
             If any of the sides to which the border is applied have been merged.
+
         """
         (row, col, *args) = self._validate_cell_coords(*args)
         if len(args) == 2:
@@ -1252,14 +1273,7 @@ class Table(Cacheable):
         cell = self._data[row][col]
         if cell.is_merged and (
             (side == "right" and cell.size[1] > 1) or (side == "bottom" and cell.size[0] > 1)
-        ):
-            warn(
-                f"{side} edge of [{row},{col}] is merged; border not set",
-                RuntimeWarning,
-                stacklevel=2,
-            )
-            return
-        elif isinstance(cell, MergedCell) and (
+        ) or isinstance(cell, MergedCell) and (
             (side == "top" and cell.row_start < row)
             or (side == "right" and cell.col_end > col)
             or (side == "bottom" and cell.row_end > row)
@@ -1532,7 +1546,7 @@ class Table(Cacheable):
             if cell.value == "" and not format.allow_none:
                 msg = "none value not allowed for popup"
                 raise IndexError(msg)
-            elif cell.value != "" and cell.value not in format.popup_values:
+            if cell.value != "" and cell.value not in format.popup_values:
                 msg = f"current cell value '{cell.value}' does not match any popup values"
                 raise IndexError(
                     msg,

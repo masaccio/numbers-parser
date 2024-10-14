@@ -142,7 +142,7 @@ class Converter:
                 table.write(row_num, col_num, value)
                 if isinstance(value, datetime):
                     table.set_cell_formatting(
-                        row_num, col_num, "datetime", date_time_format="d MMM yyyy"
+                        row_num, col_num, "datetime", date_time_format="d MMM yyyy",
                     )
 
         doc.save(self.output_filename)

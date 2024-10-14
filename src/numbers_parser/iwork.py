@@ -45,6 +45,7 @@ class IWork:
         handler: IWorkHandler, optional
             The handler that is called to store objects and files and to check
             versions and supported document formats.
+
         """
         self._handler = handler
 
@@ -56,6 +57,7 @@ class IWork:
         ------
         FileFormatError:
             If document version cannot be read from the document.
+
         """
         if self._is_package:
             properties_filename = self._filepath / "Metadata/Properties.plist"
@@ -90,16 +92,17 @@ class IWork:
     def open(self, filepath: Path) -> None:
         """Open an iWork file and read in the files and archives contained in it.
 
-        Raises
+        Raises:
         ------
         FileFormatError
             If any errors occur extracting data from the archive
 
-        Warns
+        Warns:
         -----
         RuntimeWarning
             If the version of the document is one that the IWork blob handler
             reports is unsupported.
+
         """
         debug("open: filename=%s", filepath)
         self._filepath = filepath
@@ -172,8 +175,8 @@ class IWork:
         try:
             if version_info.minor >= 11:  # pragma: no cover
                 return ZipFile(filepath, metadata_encoding="utf-8")
-            else:  # pragma: no cover
-                return ZipFile(filepath)
+            # pragma: no cover
+            return ZipFile(filepath)
         except BadZipFile:
             msg = "invalid Numbers document"
             raise FileFormatError(msg) from None

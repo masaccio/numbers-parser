@@ -116,21 +116,22 @@ exclude = [
 fix = true
 ignore = [
   "PLR2004", # Allow constant values
+  "T201", # Allow print()
 ]
 line-length = 100
-select = [
+select = [ "ALL",
   # Pyflakes including bugbears
-  "F",
-  "B", # Pycodestyle
-  "E",
-  "W", # isort
-  "I", # PEP naming
-  "N", # pyupgrade
-  "UP", # Pylama
-  "PL",
+  # "F",
+  # "B", # Pycodestyle
+  # "E",
+  # "W", # isort
+  # "I", # PEP naming
+  # "N", # pyupgrade
+  # "UP", # Pylama
+  # "PL",
 ]
 src = ["src", "tests"]
-target-version = "py38"
+target-version = "py39"
 unfixable = [
   "ERA", # do not autoremove commented out code
 ]
