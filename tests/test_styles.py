@@ -84,7 +84,7 @@ STYLE_DEFAULTS = {
 
 def check_style(style, **kwargs):
     matches = []
-    for attr, _ in STYLE_DEFAULTS.items():
+    for attr in STYLE_DEFAULTS:
         ref = kwargs[attr] if attr in kwargs else STYLE_DEFAULTS[attr]
         matches.append(check.equal(getattr(style, attr), ref))
     return all(matches)
@@ -93,7 +93,7 @@ def check_style(style, **kwargs):
 def decode_style_attrs(attrs):
     if "," in attrs:
         return dict(ChainMap(*[decode_style_attrs(x) for x in attrs.split(",")]))
-    elif "=" in attrs:
+    if "=" in attrs:
         (attr, ref) = attrs.split("=")
         if isinstance(ref, str):
             if "color" in attr:
@@ -104,8 +104,7 @@ def decode_style_attrs(attrs):
                 ref = eval(ref)
 
         return {attr: ref}
-    else:
-        return {attrs: True}
+    return {attrs: True}
 
 
 def invert_style_attrs(attrs):
@@ -229,7 +228,8 @@ def test_header_styles():
         for ref in ["D2", "E2", "B7", "C7", "D10", "E10"]
     )
     assert table.cell("A9").style.bold
-    assert table.cell("B9").style.italic and table.cell("B9").style.bold
+    assert table.cell("B9").style.italic
+    assert table.cell("B9").style.bold
     assert table.cell("C9").style.underline
     assert table.cell("D9").style.strikethrough
     assert not table.cell("E9").style.bold

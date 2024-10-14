@@ -1,5 +1,4 @@
-"""
-Super hacky script to parse compiled Protobuf definitions out of one or more binary files in a directory tree.
+"""Super hacky script to parse compiled Protobuf definitions out of one or more binary files in a directory tree.
 
 Requires `pip install 'protobuf>=3.20.0rc1'`.
 Example usage:
@@ -10,57 +9,56 @@ Inspired by Sean Patrick O'Brien (@obriensp)'s 2013 "proto-dump": https://github
 """
 
 import sys
-from pathlib import Path
-from tqdm import tqdm
-from typing import List
 from collections import defaultdict
+from pathlib import Path
 
-from google.protobuf.internal.decoder import _DecodeVarint, SkipField
 from google.protobuf import descriptor_pb2
 from google.protobuf.descriptor_pool import DescriptorPool
+from google.protobuf.internal.decoder import SkipField, _DecodeVarint
 from google.protobuf.message import DecodeError
-
+from tqdm import tqdm
 
 PROTO_TYPES = {
-  1: 'double',
-  2: 'float',
-  3: 'int64',
-  4: 'uint64',
-  5: 'int32',
-  6: 'fixed64',
-  7: 'fixed32',
-  8: 'bool',
-  9: 'string',
-  12: 'bytes',
-  13: 'uint32',
-  15: 'sfixed32',
-  16: 'sfixed64',
-  17: 'sint32',
-  18: 'sint64',
+  1: "double",
+  2: "float",
+  3: "int64",
+  4: "uint64",
+  5: "int32",
+  6: "fixed64",
+  7: "fixed32",
+  8: "bool",
+  9: "string",
+  12: "bytes",
+  13: "uint32",
+  15: "sfixed32",
+  16: "sfixed64",
+  17: "sint32",
+  18: "sint64",
 }
 
 def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
     if len(fds.file) != 1:
-        raise NotImplementedError("Only one file per fds.")
+        msg = "Only one file per fds."
+        raise NotImplementedError(msg)
     f = fds.file[0]
     lines = [
-        "syntax = \"proto2\";",
-        ""
+        'syntax = "proto2";',
+        "",
     ]
 
     for dependency in f.dependency:
         lines.append(f'import "{dependency}";')
 
-    lines.append(f'package {f.package};')
+    lines.append(f"package {f.package};")
     lines.append("")
 
-    def generate_enum_lines(f, lines: List[str], indent: int = 0):
+    def generate_enum_lines(f, lines: list[str], indent: int = 0):
         prefix = "  " * indent
         for enum in f.enum_type:
-            lines.append(prefix + f"enum {enum.name} " + '{')
+            lines.append(prefix + f"enum {enum.name} " + "{")
             for value in enum.value:
                 lines.append(prefix + f"  {value.name} = {value.number};")
-            lines.append(prefix + '}')
+            lines.append(prefix + "}")
 
 
     def generate_field_line(field, in_oneof: bool = False) -> str:
@@ -73,18 +71,20 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
         elif field.label == 3:
             line.append("repeated")
         else:
-            raise NotImplementedError("Unknown field label type!")
+            msg = "Unknown field label type!"
+            raise NotImplementedError(msg)
 
         if field.type in PROTO_TYPES:
             line.append(PROTO_TYPES[field.type])
-        elif field.type == 11 or field.type == 14: # MESSAGE
+        elif field.type in (11, 14): # MESSAGE
             line.append(field.type_name)
         else:
-            raise NotImplementedError(f"Unknown field type {field.type}!")
+            msg = f"Unknown field type {field.type}!"
+            raise NotImplementedError(msg)
 
         line.append(field.name)
         line.append("=")
-        line.append(str(field.number));
+        line.append(str(field.number))
         options = []
         if field.default_value:
             options.append(f"default = {field.default_value}")
@@ -98,7 +98,7 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
             line.append(f"[{', '.join(options)}]")
         return f"  {' '.join(line)};"
 
-    def generate_extension_lines(message, lines: List[str], indent: int = 0):
+    def generate_extension_lines(message, lines: list[str], indent: int = 0):
         prefix = "  " * indent
         extensions_grouped_by_extendee = defaultdict(list)
         for extension in message.extension:
@@ -109,15 +109,15 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
                 lines.append(prefix + generate_field_line(extension))
             lines.append(prefix + "}")
 
-    def generate_message_lines(f, lines: List[str], indent: int = 0):
+    def generate_message_lines(f, lines: list[str], indent: int = 0):
         prefix = "  " * indent
 
-        submessages = f.message_type if hasattr(f, 'message_type') else f.nested_type
+        submessages = f.message_type if hasattr(f, "message_type") else f.nested_type
 
         for message in submessages:
             # if message.name == "ContainedObjectsCommandArchive":
             #     breakpoint()
-            lines.append(prefix + f"message {message.name} " + '{')
+            lines.append(prefix + f"message {message.name} " + "{")
 
             generate_enum_lines(message, lines, indent + 1)
             generate_message_lines(message, lines, indent + 1)
@@ -137,16 +137,17 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
 
             if len(message.extension_range):
                 if len(message.extension_range) > 1:
-                    raise NotImplementedError("Not sure how to handle multiple extension ranges!")
+                    msg = "Not sure how to handle multiple extension ranges!"
+                    raise NotImplementedError(msg)
                 start, end = (
                     message.extension_range[0].start,
-                    min(message.extension_range[0].end, 536870911)
+                    min(message.extension_range[0].end, 536870911),
                 )
                 lines.append(next_prefix + f"extensions {start} to {end};")
 
             generate_extension_lines(message, lines, indent + 1)
-            lines.append(prefix + '}')
-            lines.append('')
+            lines.append(prefix + "}")
+            lines.append("")
 
     generate_enum_lines(f, lines)
     generate_message_lines(f, lines)
@@ -155,7 +156,7 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
     return "\n".join(lines)
 
 
-class ProtoFile(object):
+class ProtoFile:
     def __init__(self, data, pool):
         self.data = data
         self.pool = pool
@@ -184,7 +185,7 @@ class ProtoFile(object):
         return self.attempt_to_load()
 
     def __repr__(self):
-        return '<%s: path="%s">' % (self.__class__.__name__, self.path)
+        return f'<{self.__class__.__name__}: path="{self.path}">'
 
     @property
     def source(self):
@@ -215,6 +216,7 @@ def read_until_null_tag(data):
         if new_position == -1:
             return position
         position = new_position
+    return None
 
 
 def extract_proto_from_file(filename, descriptor_pool):
@@ -238,7 +240,7 @@ def extract_proto_from_file(filename, descriptor_pool):
 
         try:
             name_length, new_pos = _DecodeVarint(data, marker_start)
-        except Exception as e:
+        except Exception:
             # Expected a VarInt here, so if not, continue
             offset = suffix_position + len(PROTO_MARKER)
             continue
@@ -268,7 +270,7 @@ def extract_proto_from_file(filename, descriptor_pool):
                 and proto_file.path != "google/protobuf/descriptor.proto"
             ):
                 yield proto_file
-        except Exception as e:
+        except Exception:
             pass
 
         offset = marker_start + descriptor_length
@@ -298,7 +300,7 @@ def main():
         description=(
             "Read all files in a given directory and scan each file for protobuf definitions,"
             " printing usable .proto files to a given directory."
-        )
+        ),
     )
     parser.add_argument("input_path", help="Input path to scan. May be a file or directory.")
     parser.add_argument("output_path", help="Output directory to dump .protoc files to.")
@@ -309,7 +311,7 @@ def main():
     all_filenames = [str(path) for path in Path(args.input_path).rglob("*") if not path.is_dir()]
 
     print(
-        f"Scanning {len(all_filenames):,} files under {args.input_path} for protobuf definitions..."
+        f"Scanning {len(all_filenames):,} files under {args.input_path} for protobuf definitions...",
     )
 
     proto_files_found = set()
@@ -331,7 +333,7 @@ def main():
     if missing_deps:
         print(
             f"Unable to print out all Protobuf definitions; {len(missing_deps):,} proto files could"
-            f" not be found:\n{missing_deps}"
+            f" not be found:\n{missing_deps}",
         )
         sys.exit(1)
     else:

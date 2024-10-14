@@ -444,8 +444,8 @@ def test_issue_75(configurable_save_file):
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
-    assert all([table.cell(1, col).style.bg_image.filename == "cat.jpg" for col in range(1, 6)])
-    assert all([table.cell(2, col).style.bg_image.filename == "cat.jpg" for col in range(1, 6)])
+    assert all(table.cell(1, col).style.bg_image.filename == "cat.jpg" for col in range(1, 6))
+    assert all(table.cell(2, col).style.bg_image.filename == "cat.jpg" for col in range(1, 6))
 
 
 def test_issue_76(configurable_save_file):
@@ -558,7 +558,7 @@ def test_issue_90(configurable_save_file):
     doc = Document(num_header_rows=0, num_header_cols=0)
     doc.default_table.write(0, 0, 1769900.26)
     doc.default_table.set_cell_formatting(
-        0, 0, "currency", decimal_places=0, show_thousands_separator=True
+        0, 0, "currency", decimal_places=0, show_thousands_separator=True,
     )
     doc.save(configurable_save_file)
     doc = Document(configurable_save_file)

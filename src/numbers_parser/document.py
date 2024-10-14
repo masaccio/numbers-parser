@@ -1527,9 +1527,9 @@ class Table(Cacheable):
                 msg,
             )
 
-        format = Formatting(type=format_type, **kwargs)
+        formatting = Formatting(type=format_type, **kwargs)
         if format_type_name in FORMATTING_ACTION_CELLS:
-            control_id = self._model.control_cell_archive(self._table_id, format_type, format)
+            control_id = self._model.control_cell_archive(self._table_id, format_type, formatting)
         else:
             control_id = None
 
@@ -1548,20 +1548,20 @@ class Table(Cacheable):
                     ) from None
             else:
                 number_format_type = FormattingType.NUMBER
-            format_id = self._model.format_archive(self._table_id, number_format_type, format)
+            format_id = self._model.format_archive(self._table_id, number_format_type, formatting)
         elif format_type_name == "popup":
-            if cell.value == "" and not format.allow_none:
+            if cell.value == "" and not formatting.allow_none:
                 msg = "none value not allowed for popup"
                 raise IndexError(msg)
-            if cell.value != "" and cell.value not in format.popup_values:
+            if cell.value != "" and cell.value not in formatting.popup_values:
                 msg = f"current cell value '{cell.value}' does not match any popup values"
                 raise IndexError(
                     msg,
                 )
 
             popup_format_type = FormattingType.TEXT if isinstance(cell, TextCell) else True
-            format_id = self._model.format_archive(self._table_id, popup_format_type, format)
+            format_id = self._model.format_archive(self._table_id, popup_format_type, formatting)
         else:
-            format_id = self._model.format_archive(self._table_id, format_type, format)
+            format_id = self._model.format_archive(self._table_id, format_type, formatting)
 
         cell._set_formatting(format_id, format_type, control_id, is_currency=is_currency)

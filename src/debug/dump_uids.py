@@ -13,7 +13,7 @@ def find_fields(obj=object, tree=""):
             uuid = NumbersUUID(value)
             print(f"{tree}.{name} = {uuid}")
         elif not isinstance(value, TSPMessages.Reference) and hasattr(
-            value, "DESCRIPTOR"
+            value, "DESCRIPTOR",
         ):
             find_fields(getattr(obj, name), tree + "." + name)
 

@@ -17,7 +17,8 @@ import lldb
 from debug.lldbutil import print_stacktrace
 
 if len(sys.argv) != 3:
-    raise (ValueError(f"Usage: {sys.argv[0]} exe-file output.json"))
+    msg = f"Usage: {sys.argv[0]} exe-file output.json"
+    raise (ValueError(msg))
 
 exe = sys.argv[1]
 output = sys.argv[2]
@@ -49,14 +50,16 @@ if not process:
     raise ValueError("Failed to launch process: " + exe)
 
 if process.GetState() == lldb.eStateExited:
-    raise ValueError(f"LLDB was unable to stop process! {process}")
+    msg = f"LLDB was unable to stop process! {process}"
+    raise ValueError(msg)
 
 try:
     while process.GetState() == lldb.eStateStopped:
         thread = process.GetThreadAtIndex(0)
         frame = thread.GetSelectedFrame()
         if frame.name == "-[NSApplication _crashOnException:]":
-            raise ValueError(f"Process crashed at {frame.name}")
+            msg = f"Process crashed at {frame.name}"
+            raise ValueError(msg)
 
         stop_reason = thread.GetStopReason()
 
@@ -64,7 +67,8 @@ try:
             print_stacktrace(thread)
             function = frame.GetFunction()
             function_or_symbol = function if function else frame.GetSymbol()
-            raise ValueError(f"Exception at {frame.name}")
+            msg = f"Exception at {frame.name}"
+            raise ValueError(msg)
         if stop_reason != lldb.eStopReasonBreakpoint:
             process.Continue()
             continue

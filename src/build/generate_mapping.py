@@ -3,7 +3,8 @@ import os
 import sys
 
 if len(sys.argv) != 3:
-    raise (ValueError(f"Usage: {sys.argv[0]} mapping.json mapping.py"))
+    msg = f"Usage: {sys.argv[0]} mapping.json mapping.py"
+    raise (ValueError(msg))
 
 mapping_json = sys.argv[1]
 mapping_py = sys.argv[2]

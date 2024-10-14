@@ -509,17 +509,17 @@ class _NumbersModel(Cacheable):
         return self._table_formats.lookup_value(table_id, key).format
 
     @cache(num_args=3)
-    def format_archive(self, table_id: int, format_type: FormattingType, format: Formatting):
+    def format_archive(self, table_id: int, format_type: FormattingType, formatting: Formatting):
         """Create a table format from a Formatting spec and return the table format ID."""
-        attrs = {x: getattr(format, x) for x in ALLOWED_FORMATTING_PARAMETERS[format_type]}
+        attrs = {x: getattr(formatting, x) for x in ALLOWED_FORMATTING_PARAMETERS[format_type]}
         attrs["format_type"] = FORMAT_TYPE_MAP[format_type]
 
-        format = TSKArchives.FormatStructArchive(**attrs)
-        return self._table_formats.lookup_key(table_id, format)
+        format_archive = TSKArchives.FormatStructArchive(**attrs)
+        return self._table_formats.lookup_key(table_id, format_archive)
 
-    def cell_popup_model(self, parent_id: int, format: Formatting):
+    def cell_popup_model(self, parent_id: int, formatting: Formatting):
         tsce_items = [{"cell_value_type": "NIL_TYPE"}]
-        for item in format.popup_values:
+        for item in formatting.popup_values:
             if isinstance(item, str):
                 tsce_items.append(
                     {
@@ -548,7 +548,12 @@ class _NumbersModel(Cacheable):
         )
         return popup_menu_id
 
-    def control_cell_archive(self, table_id: int, format_type: FormattingType, format: Formatting):
+    def control_cell_archive(
+        self,
+        table_id: int,
+        format_type: FormattingType,
+        formatting: Formatting,
+    ):
         """Create control cell archive from a Formatting spec and return the table format ID."""
         if format_type == FormattingType.TICKBOX:
             cell_spec = TSTArchives.CellSpecArchive(interaction_type=CellInteractionType.TOGGLE)
@@ -562,26 +567,26 @@ class _NumbersModel(Cacheable):
         elif format_type == FormattingType.SLIDER:
             cell_spec = TSTArchives.CellSpecArchive(
                 interaction_type=CellInteractionType.SLIDER,
-                range_control_min=format.minimum,
-                range_control_max=format.maximum,
-                range_control_inc=format.increment,
+                range_control_min=formatting.minimum,
+                range_control_max=formatting.maximum,
+                range_control_inc=formatting.increment,
             )
         else:  # POPUP
-            popup_id = self.cell_popup_model(self._control_specs.id(table_id), format)
+            popup_id = self.cell_popup_model(self._control_specs.id(table_id), formatting)
             cell_spec = TSTArchives.CellSpecArchive(
                 interaction_type=CellInteractionType.POPUP,
                 chooser_control_popup_model=TSPMessages.Reference(identifier=popup_id),
-                chooser_control_start_w_first=not (format.allow_none),
+                chooser_control_start_w_first=not (formatting.allow_none),
             )
         return self._control_specs.lookup_key(table_id, cell_spec)
 
-    def add_custom_decimal_format_archive(self, format: CustomFormatting) -> None:
+    def add_custom_decimal_format_archive(self, formatting: CustomFormatting) -> None:
         """Create a custom format from the format spec."""
-        integer_format = format.integer_format
-        decimal_format = format.decimal_format
-        num_integers = format.num_integers
-        num_decimals = format.num_decimals
-        show_thousands_separator = format.show_thousands_separator
+        integer_format = formatting.integer_format
+        decimal_format = formatting.decimal_format
+        num_integers = formatting.num_integers
+        num_decimals = formatting.num_decimals
+        show_thousands_separator = formatting.show_thousands_separator
 
         if num_integers == 0:
             format_string = ""
@@ -616,7 +621,7 @@ class _NumbersModel(Cacheable):
         )
 
         format_archive = TSKArchives.CustomFormatArchive(
-            name=format.name,
+            name=formatting.name,
             format_type_pre_bnc=FormatType.CUSTOM_NUMBER,
             format_type=FormatType.CUSTOM_NUMBER,
             default_format=TSKArchives.FormatStructArchive(
@@ -638,45 +643,49 @@ class _NumbersModel(Cacheable):
                 use_accounting_style=False,
             ),
         )
-        self.add_custom_format_archive(format, format_archive)
+        self.add_custom_format_archive(formatting, format_archive)
 
-    def add_custom_datetime_format_archive(self, format: CustomFormatting) -> None:
+    def add_custom_datetime_format_archive(self, formatting: CustomFormatting) -> None:
         format_archive = TSKArchives.CustomFormatArchive(
-            name=format.name,
+            name=formatting.name,
             format_type_pre_bnc=FormatType.CUSTOM_DATE,
             format_type=FormatType.CUSTOM_DATE,
             default_format=TSKArchives.FormatStructArchive(
-                custom_format_string=format.format,
+                custom_format_string=formatting.format,
                 format_type=FormatType.CUSTOM_DATE,
             ),
         )
-        self.add_custom_format_archive(format, format_archive)
+        self.add_custom_format_archive(formatting, format_archive)
 
-    def add_custom_format_archive(self, format: CustomFormatting, format_archive: object) -> None:
+    def add_custom_format_archive(
+        self,
+        formatting: CustomFormatting,
+        format_archive: object,
+    ) -> None:
         format_uuid = NumbersUUID().protobuf2
-        self._custom_formats[format.name] = format
-        self._custom_format_archives[format.name] = format_archive
-        self._custom_format_uuids[format.name] = format_uuid
+        self._custom_formats[formatting.name] = formatting
+        self._custom_format_archives[formatting.name] = format_archive
+        self._custom_format_uuids[formatting.name] = format_uuid
 
         custom_format_list_id = self.objects[DOCUMENT_ID].super.custom_format_list.identifier
         custom_format_list = self.objects[custom_format_list_id]
         custom_format_list.custom_formats.append(format_archive)
         custom_format_list.uuids.append(format_uuid)
 
-    def custom_format_id(self, table_id: int, format: CustomFormatting) -> int:
+    def custom_format_id(self, table_id: int, formatting: CustomFormatting) -> int:
         """Look up the custom format and return the format ID for the table."""
-        format_type = CUSTOM_FORMAT_TYPE_MAP[format.type]
-        format_uuid = self._custom_format_uuids[format.name]
+        format_type = CUSTOM_FORMAT_TYPE_MAP[formatting.type]
+        format_uuid = self._custom_format_uuids[formatting.name]
         custom_format = TSKArchives.FormatStructArchive(
             format_type=format_type,
             custom_uid=TSPMessages.UUID(lower=format_uuid.lower, upper=format_uuid.upper),
         )
         return self._table_formats.lookup_key(table_id, custom_format)
 
-    def add_custom_text_format_archive(self, format: CustomFormatting) -> None:
-        format_string = format.format.replace("%s", CUSTOM_TEXT_PLACEHOLDER)
+    def add_custom_text_format_archive(self, formatting: CustomFormatting) -> None:
+        format_string = formatting.format.replace("%s", CUSTOM_TEXT_PLACEHOLDER)
         format_archive = TSKArchives.CustomFormatArchive(
-            name=format.name,
+            name=formatting.name,
             format_type_pre_bnc=FormatType.CUSTOM_TEXT,
             format_type=FormatType.CUSTOM_TEXT,
             default_format=TSKArchives.FormatStructArchive(
@@ -684,7 +693,7 @@ class _NumbersModel(Cacheable):
                 format_type=FormatType.CUSTOM_TEXT,
             ),
         )
-        self.add_custom_format_archive(format, format_archive)
+        self.add_custom_format_archive(formatting, format_archive)
 
     @cache(num_args=2)
     def table_style(self, table_id: int, key: int) -> str:

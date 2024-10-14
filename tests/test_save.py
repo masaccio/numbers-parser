@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 
 import pytest
 
@@ -260,7 +261,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         table: object,
         table_num_rows: int,
         num_rows: int = 1,
-        start_row: int = None,
+        start_row: Optional[int] = None,
         default: object = None,
     ) -> int:
         table.add_row(num_rows, start_row, default)
@@ -273,7 +274,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         table: object,
         table_num_cols: int,
         num_cols: int = 1,
-        start_col: int = None,
+        start_col: Optional[int] = None,
         default: object = None,
     ) -> int:
         table.add_column(num_cols, start_col, default)
@@ -283,7 +284,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         return table_num_cols
 
     def delete_row(
-        table: object, table_num_rows: int, num_rows: int = 1, start_row: int = None
+        table: object, table_num_rows: int, num_rows: int = 1, start_row: Optional[int] = None,
     ) -> int:
         table.delete_row(num_rows, start_row)
         table_num_rows -= num_rows
@@ -292,7 +293,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         return table_num_rows
 
     def delete_column(
-        table: object, table_num_cols: int, num_cols: int = 1, start_col: int = None
+        table: object, table_num_cols: int, num_cols: int = 1, start_col: Optional[int] = None,
     ) -> int:
         table.delete_column(num_cols, start_col)
         table_num_cols -= num_cols
@@ -314,15 +315,15 @@ def test_edit_table_rows_columns(configurable_save_file):
     doc.save(configurable_save_file)
 
     ref_values = []
-    for row in range(0, NUM_ROW_COLS):
+    for row in range(NUM_ROW_COLS):
         ref_values.append([])
-        for col in range(0, NUM_ROW_COLS):
+        for col in range(NUM_ROW_COLS):
             ref_values[row].append(f"cell[{row},{col}]")
 
-    ref_values[1:1] = [["new_row" for _ in range(0, NUM_ROW_COLS)] for _ in range(3)]
+    ref_values[1:1] = [["new_row" for _ in range(NUM_ROW_COLS)] for _ in range(3)]
     for row, _ in enumerate(ref_values):
         ref_values[row][1:1] = ["new_col"] * 3
-    ref_values[10:10] = [["" for _ in range(0, NUM_ROW_COLS + 3)] for _ in range(2)]
+    ref_values[10:10] = [["" for _ in range(NUM_ROW_COLS + 3)] for _ in range(2)]
     for row, _ in enumerate(ref_values):
         ref_values[row][10:10] = ["", ""]
     del ref_values[6:8]

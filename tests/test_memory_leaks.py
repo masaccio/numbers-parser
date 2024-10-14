@@ -13,7 +13,7 @@ def test_mempory_leaks():
 
     rss_base = process.memory_info().rss / 1000000.0
 
-    print("")
+    print()
     print(f"LEAK TEST: Creating {NUM_DOCS} large documents")
     print(f"LEAK TEST: RSS={rss_base:.1f}MB")
 

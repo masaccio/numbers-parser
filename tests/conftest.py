@@ -36,7 +36,7 @@ def configurable_save_file_fixture(request, tmp_path, pytestconfig):
     else:
         new_filename = tmp_path / "test-save-new.numbers"
 
-    yield new_filename
+    return new_filename
 
 
 @pytest.fixture(name="configurable_multi_save_file", params="num_files")

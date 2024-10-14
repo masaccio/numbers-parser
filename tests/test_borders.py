@@ -94,7 +94,7 @@ def test_exceptions():
 
     with pytest.raises(TypeError) as e:
         doc.sheets[0].tables[0].set_cell_border(
-            "A1", "left", Border(1.0, RGB(0, 0, 0), "solid"), "invalid"
+            "A1", "left", Border(1.0, RGB(0, 0, 0), "solid"), "invalid",
         )
     assert "border length must be an int" in str(e)
 
@@ -212,31 +212,30 @@ def test_edit_borders(configurable_save_file):
 def invert_border_test(test):
     if test == "None":
         return None, None
-    else:
-        values = test.split(",")
-        width = float(values[0])
-        color = eval(values[1].replace(";", ","))
-        style = values[2]
-        width = round(width * 2.0, 1) if width < 4.0 else round(width / 2.0, 1)
+    values = test.split(",")
+    width = float(values[0])
+    color = eval(values[1].replace(";", ","))
+    style = values[2]
+    width = round(width * 2.0, 1) if width < 4.0 else round(width / 2.0, 1)
 
-        color = (abs(200 - color[0]), abs(200 - color[1]), abs(200 - color[2]))
+    color = (abs(200 - color[0]), abs(200 - color[1]), abs(200 - color[2]))
 
-        if style == "solid":
-            style = "dashes"
-        elif style == "dashes":
-            style = "dots"
-        elif style == "dots":
-            style = "none"
-            width = 0.0
-            color = (0, 0, 0)
-        elif style == "none":
-            style = "solid"
+    if style == "solid":
+        style = "dashes"
+    elif style == "dashes":
+        style = "dots"
+    elif style == "dots":
+        style = "none"
+        width = 0.0
+        color = (0, 0, 0)
+    elif style == "none":
+        style = "solid"
 
-        border = Border(width, color, style)
+    border = Border(width, color, style)
 
-        color = "(" + ";".join([str(x) for x in color]) + ")"
-        test_value = ",".join([str(width), color, style])
-        return test_value, border
+    color = "(" + ";".join([str(x) for x in color]) + ")"
+    test_value = ",".join([str(width), color, style])
+    return test_value, border
 
 
 def invert_tests(tests):

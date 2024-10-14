@@ -3,7 +3,8 @@ import sys
 import Cocoa
 
 if len(sys.argv) != 2:
-    raise (ValueError(f"Usage: {sys.argv[0]} fontmap.py"))
+    msg = f"Usage: {sys.argv[0]} fontmap.py"
+    raise (ValueError(msg))
 
 mapping_py = sys.argv[1]
 

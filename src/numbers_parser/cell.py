@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import math
 import re
-from collections import namedtuple
 from dataclasses import asdict, dataclass, field, fields
 from datetime import datetime, timedelta
 from enum import IntEnum
@@ -11,7 +10,7 @@ from fractions import Fraction
 from hashlib import sha1
 from os.path import basename
 from struct import pack, unpack
-from typing import Any
+from typing import Any, NamedTuple
 from warnings import warn
 
 from sigfig import round as sigfig
@@ -169,7 +168,12 @@ VERTICAL_MAP = {
     "bottom": VerticalJustification.BOTTOM,
 }
 
-_Alignment = namedtuple("Alignment", ["horizontal", "vertical"])
+
+class _Alignment(NamedTuple):
+    """Class for internal alignment type."""
+
+    horizontal: str
+    vertical: str
 
 
 class Alignment(_Alignment):
@@ -193,7 +197,17 @@ class Alignment(_Alignment):
 
 DEFAULT_ALIGNMENT_CLASS = Alignment(*DEFAULT_ALIGNMENT)
 
-RGB = namedtuple("RGB", ["r", "g", "b"])
+
+class RGB(NamedTuple):
+    """A color in RGB."""
+
+    r: int
+    g: int
+    b: int
+
+
+def default_color() -> RGB:
+    return RGB(0, 0, 0)
 
 
 @dataclass
@@ -244,7 +258,7 @@ class Style:
     alignment: Alignment = DEFAULT_ALIGNMENT_CLASS  # : horizontal and vertical alignment
     bg_image: object = None  # : backgroung image
     bg_color: RGB | list[RGB] = None
-    font_color: RGB = RGB(0, 0, 0)
+    font_color: RGB = field(default_factory=default_color)
     font_size: float = DEFAULT_FONT_SIZE
     font_name: str = DEFAULT_FONT
     bold: bool = False

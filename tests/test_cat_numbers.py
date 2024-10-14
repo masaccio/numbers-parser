@@ -246,7 +246,7 @@ def test_debug(script_runner):
 @pytest.mark.script_launch_mode("subprocess")
 def test_main(script_runner):
     ret = script_runner.run(
-        ["python3", "-m", "numbers_parser._cat_numbers", "--help"], print_result=False
+        ["python3", "-m", "numbers_parser._cat_numbers", "--help"], print_result=False,
     )
     assert ret.success
     assert "List the names of tables" in ret.stdout

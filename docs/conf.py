@@ -48,7 +48,7 @@ html_theme_options = {
             f"Package|{GITHUB}",
             f"Repository|{GITHUB}",
             f"Issues|{GITHUB}/issues",
-        ]
+        ],
     ),
     # "show_colorset_choices": True,
 }

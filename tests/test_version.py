@@ -16,22 +16,19 @@ def test_version():
 def mock_valid_plist(file, mode):
     if file.endswith("version.plist"):
         return builtin_open("tests/data/numbers-version-13.0.plist", mode)
-    else:
-        return builtin_open(file, mode)
+    return builtin_open(file, mode)
 
 
 def mock_newer_plist(file, mode):
     if file.endswith("version.plist"):
         return builtin_open("tests/data/numbers-version-99.0.plist", mode)
-    else:
-        return builtin_open(file, mode)
+    return builtin_open(file, mode)
 
 
 def mock_invalid_plist(file, mode):
     if file.endswith("version.plist"):
         return builtin_open("tests/data/XXXX.plist", mode)
-    else:
-        return builtin_open(file, mode)
+    return builtin_open(file, mode)
 
 
 def test_numbers_version_check():

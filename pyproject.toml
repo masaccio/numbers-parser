@@ -107,13 +107,12 @@ profile = "black"
 [tool.ruff]
 exclude = [
   # Machine-generated files
-  ".bootstrap/*",
-  ".tox/*",
-  "*.pyi",
-  ".vscode/extensions/*",
-  "src/numbers_parser/generated/*",
+  "**/.bootstrap/*",
+  "**/.tox/*",
+  "**/.vscode/*",
+  "**/src/numbers_parser/generated/*",
   # Third-party files not to lint
-  "src/debug/lldbutil.py",
+  "**/src/debug/lldbutil.py",
 ]
 fix = true
 ignore = [

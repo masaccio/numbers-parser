@@ -371,7 +371,7 @@ def test_custom_formatting(pytestconfig):
             if value != ref:
                 fails += 1
             if max_check_fails > 0 and fails >= max_check_fails:
-                raise AssertionError()
+                raise AssertionError
 
 
 def test_formatting_stress(pytestconfig):
@@ -392,12 +392,12 @@ def test_formatting_stress(pytestconfig):
         if value != ref:
             fails += 1
         if max_check_fails > 0 and fails >= max_check_fails:
-            raise AssertionError()
+            raise AssertionError
 
 
 def test_write_date_format(configurable_save_file):
     doc = Document(
-        num_header_cols=0, num_header_rows=0, num_cols=len(TIME_FORMATS), num_rows=len(DATE_FORMATS)
+        num_header_cols=0, num_header_rows=0, num_cols=len(TIME_FORMATS), num_rows=len(DATE_FORMATS),
     )
     table = doc.sheets[0].tables[0]
 
@@ -490,7 +490,7 @@ def test_write_numbers_format(configurable_save_file):
             "JPY",
             "CNY",
             "ILS",
-        ]
+        ],
     ):
         table.write(10, col, ref_number)
         table.set_cell_formatting(
@@ -582,7 +582,7 @@ def test_write_numbers_format(configurable_save_file):
 
 def test_write_mixed_number_formats(configurable_save_file):
     doc = Document(
-        num_header_cols=0, num_header_rows=0, num_cols=len(TIME_FORMATS), num_rows=len(DATE_FORMATS)
+        num_header_cols=0, num_header_rows=0, num_cols=len(TIME_FORMATS), num_rows=len(DATE_FORMATS),
     )
     table = doc.sheets[0].tables[0]
 
@@ -597,10 +597,7 @@ def test_write_mixed_number_formats(configurable_save_file):
     row = 0
     for decimal_places in [None, 0, 1, 4]:
         for show_thousands_separator in [False, True]:
-            if show_thousands_separator:
-                values = [12.3456, -12.3456]
-            else:
-                values = [0.1234, -0.1234]
+            values = [12.3456, -12.3456] if show_thousands_separator else [0.1234, -0.1234]
             col = 0
             for negative_style in NegativeNumberStyle:
                 for value in values:
@@ -683,7 +680,7 @@ def test_write_mixed_number_formats(configurable_save_file):
 
     table.write(row, len(FractionAccuracy), 2.0)
     table.set_cell_formatting(
-        row, len(FractionAccuracy), "fraction", fraction_accuracy=FractionAccuracy.HALVES
+        row, len(FractionAccuracy), "fraction", fraction_accuracy=FractionAccuracy.HALVES,
     )
 
     row += 1
@@ -710,7 +707,7 @@ def test_currency_symbols():
     table = doc.sheets[0].tables[0]
     table.write(0, 0, -12.50)
     table.set_cell_formatting(
-        0, 0, "currency", currency_code="EUR", use_accounting_style=True, decimal_places=1
+        0, 0, "currency", currency_code="EUR", use_accounting_style=True, decimal_places=1,
     )
     assert table.cell(0, 0).formatted_value == "€\t(12.5)"
 
@@ -822,7 +819,7 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
         if value != ref:
             fails += 1
         if max_check_fails > 0 and fails >= max_check_fails:
-            raise AssertionError()
+            raise AssertionError
 
 
 def test_write_text_custom_formatting(configurable_save_file):
@@ -891,7 +888,7 @@ def test_write_interactive_formats(configurable_save_file):
     table.write(1, 0, 0.0)
     table.write(1, 1, 3.0)
     table.write(1, 2, 5.0)
-    for col in range(0, 3):
+    for col in range(3):
         table.set_cell_formatting(1, col, "rating")
 
     table.write(2, 0, 20.0)
