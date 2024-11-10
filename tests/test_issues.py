@@ -11,6 +11,7 @@ from numbers_parser import (
     Document,
     EmptyCell,
     ErrorCell,
+    UnsupportedError,
     UnsupportedWarning,
 )
 from numbers_parser.constants import (
@@ -558,8 +559,18 @@ def test_issue_90(configurable_save_file):
     doc = Document(num_header_rows=0, num_header_cols=0)
     doc.default_table.write(0, 0, 1769900.26)
     doc.default_table.set_cell_formatting(
-        0, 0, "currency", decimal_places=0, show_thousands_separator=True,
+        0,
+        0,
+        "currency",
+        decimal_places=0,
+        show_thousands_separator=True,
     )
     doc.save(configurable_save_file)
     doc = Document(configurable_save_file)
     assert doc.default_table.cell(0, 0).formatted_value == "£1,769,900"
+
+
+def test_issue_93():
+    with pytest.raises(UnsupportedError) as e:
+        _ = Document("tests/data/test-issue-93.numbers")
+    assert "encrypted documents are not supported" in str(e)

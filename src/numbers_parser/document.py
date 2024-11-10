@@ -79,6 +79,8 @@ class Document:
         If the sheet name already exists in the document.
     IndexError:
         If the table name already exists in the first sheet.
+    UnsupportedError:
+        If the document is encrypted.
 
     """
 

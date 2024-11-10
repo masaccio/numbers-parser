@@ -7,7 +7,7 @@ from sys import version_info
 from warnings import warn
 from zipfile import BadZipFile, ZipFile
 
-from numbers_parser.exceptions import FileError, FileFormatError
+from numbers_parser.exceptions import FileError, FileFormatError, UnsupportedError
 from numbers_parser.iwafile import IWAFile, is_iwa_file
 
 logger = logging.getLogger(__name__)
@@ -197,6 +197,14 @@ class IWork:
                     self._store_blob(package_filename, blob)
 
     def _read_objects_from_zipfile(self, zipf) -> None:
+        try:
+            _ = zipf.getinfo(".iwph")
+        except KeyError:
+            pass
+        else:
+            msg = f"{zipf.filename}: encrypted documents are not supported"
+            raise UnsupportedError(msg)
+
         for filename in zipf.namelist():
             blob = zipf.read(filename)
             if filename.lower().endswith("index.zip"):

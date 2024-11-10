@@ -26,4 +26,5 @@ The following limitations are expected to always remain:
   ``None`` for such files and issues a ``RuntimeWarning``
   (see :github:`issue 69 <issues/69>` for details).  
 - Password-encrypted documents cannot be opened. You must first re-save without
-  a password to read (see :github:`issue 88 <issues/88>` for details).  
+  a password to read (see :github:`issue 88 <issues/88>` for details).
+  A `UnsupportedError` exception is raised when such documents are opened.

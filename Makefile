@@ -1,5 +1,5 @@
 # Apple developer certificate for re-signing
-IDENTITY := $(shell security find-identity -v -p codesigning | head -n 1 | python3 -c 'import sys; print(sys.stdin.read().split("\"")[1])')
+IDENTITY := $(shell security find-identity -v -p codesigning | head -n 1 | python3 -c 'import sys; print(sys.stdin.read().split("\"")[1])' 2>/dev/null)
 
 # Change this to the location of the proto-dump executable
 PROTOC=/usr/local/bin/protoc
