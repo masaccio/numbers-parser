@@ -460,6 +460,7 @@ The following limitations are expected to always remain:
   (see [issue 69](https://github.com/masaccio/numbers-parser/issues/69) for details).
 - Password-encrypted documents cannot be opened. You must first re-save without
   a password to read (see [issue 88](https://github.com/masaccio/numbers-parser/issues/88) for details).
+  A UnsupportedError exception is raised when such documents are opened.
 
 ## License
 
