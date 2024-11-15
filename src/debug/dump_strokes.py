@@ -42,13 +42,22 @@ def dump_strokesfor_doc(doc):
             sidecar_obj = objects[table_obj.stroke_sidecar.identifier]
             dump_strokes_for_layer(objects, doc._model, sidecar_obj.top_row_stroke_layers, "top")
             dump_strokes_for_layer(
-                objects, doc._model, sidecar_obj.right_column_stroke_layers, "right",
+                objects,
+                doc._model,
+                sidecar_obj.right_column_stroke_layers,
+                "right",
             )
             dump_strokes_for_layer(
-                objects, doc._model, sidecar_obj.bottom_row_stroke_layers, "bottom",
+                objects,
+                doc._model,
+                sidecar_obj.bottom_row_stroke_layers,
+                "bottom",
             )
             dump_strokes_for_layer(
-                objects, doc._model, sidecar_obj.left_column_stroke_layers, "left",
+                objects,
+                doc._model,
+                sidecar_obj.left_column_stroke_layers,
+                "left",
             )
 
 

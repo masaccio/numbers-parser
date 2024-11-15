@@ -48,7 +48,7 @@ have a property ``value`` which returns the contents of the cell as a
 python datatype. Available cell types are:
 
 +---------------+------------------------+---------------------------------+
-| Cell type     | value type            | Additional properties           |
+| Cell type     | value type             | Additional properties           |
 +===============+========================+=================================+
 | NumberCell    | ``float``              |                                 |
 +---------------+------------------------+---------------------------------+

@@ -253,10 +253,16 @@ def test_custom_format_from_archive(configurable_save_file):
     doc.add_custom_format(type="text", name="text_format")
     doc.add_custom_format(type="number", name="number_format")
     doc.add_custom_format(
-        type="number", name="number_format_1", num_integers=4, integer_format=PaddingType.ZEROS,
+        type="number",
+        name="number_format_1",
+        num_integers=4,
+        integer_format=PaddingType.ZEROS,
     )
     doc.add_custom_format(
-        type="number", name="number_format_2", num_integers=7, integer_format=PaddingType.ZEROS,
+        type="number",
+        name="number_format_2",
+        num_integers=7,
+        integer_format=PaddingType.ZEROS,
     )
     table = doc.sheets[0].tables[0]
     table.write(0, 0, datetime(2022, 1, 1))

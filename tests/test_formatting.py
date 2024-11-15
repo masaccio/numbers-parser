@@ -397,7 +397,10 @@ def test_formatting_stress(pytestconfig):
 
 def test_write_date_format(configurable_save_file):
     doc = Document(
-        num_header_cols=0, num_header_rows=0, num_cols=len(TIME_FORMATS), num_rows=len(DATE_FORMATS),
+        num_header_cols=0,
+        num_header_rows=0,
+        num_cols=len(TIME_FORMATS),
+        num_rows=len(DATE_FORMATS),
     )
     table = doc.sheets[0].tables[0]
 
@@ -582,7 +585,10 @@ def test_write_numbers_format(configurable_save_file):
 
 def test_write_mixed_number_formats(configurable_save_file):
     doc = Document(
-        num_header_cols=0, num_header_rows=0, num_cols=len(TIME_FORMATS), num_rows=len(DATE_FORMATS),
+        num_header_cols=0,
+        num_header_rows=0,
+        num_cols=len(TIME_FORMATS),
+        num_rows=len(DATE_FORMATS),
     )
     table = doc.sheets[0].tables[0]
 
@@ -680,7 +686,10 @@ def test_write_mixed_number_formats(configurable_save_file):
 
     table.write(row, len(FractionAccuracy), 2.0)
     table.set_cell_formatting(
-        row, len(FractionAccuracy), "fraction", fraction_accuracy=FractionAccuracy.HALVES,
+        row,
+        len(FractionAccuracy),
+        "fraction",
+        fraction_accuracy=FractionAccuracy.HALVES,
     )
 
     row += 1
@@ -707,7 +716,12 @@ def test_currency_symbols():
     table = doc.sheets[0].tables[0]
     table.write(0, 0, -12.50)
     table.set_cell_formatting(
-        0, 0, "currency", currency_code="EUR", use_accounting_style=True, decimal_places=1,
+        0,
+        0,
+        "currency",
+        currency_code="EUR",
+        use_accounting_style=True,
+        decimal_places=1,
     )
     assert table.cell(0, 0).formatted_value == "€\t(12.5)"
 

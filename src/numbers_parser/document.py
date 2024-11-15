@@ -50,7 +50,8 @@ __all__ = ["Document", "Sheet", "Table"]
 
 
 class Document:
-    """Create an instance of a new Numbers document.
+    """
+    Create an instance of a new Numbers document.
 
     If ``filename`` is ``None``, an empty document is created using the defaults
     defined by the class constructor. You can optionionally override these
@@ -126,13 +127,15 @@ class Document:
 
     @property
     def custom_formats(self) -> dict[str, CustomFormatting]:
-        """Dict[str, :class:`CustomFormatting`]: A dict mapping custom format names
+        """
+        Dict[str, :class:`CustomFormatting`]: A dict mapping custom format names
         to the corresponding custom format.
         """
         return self._model.custom_formats
 
     def save(self, filename: str | Path, package: bool = False) -> None:
-        """Save the document in the specified filename.
+        """
+        Save the document in the specified filename.
 
         Parameters
         ----------
@@ -170,7 +173,8 @@ class Document:
         num_rows: int | None = DEFAULT_ROW_COUNT,
         num_cols: int | None = DEFAULT_COLUMN_COUNT,
     ) -> None:
-        """Add a new sheet to the current document.
+        """
+        Add a new sheet to the current document.
 
         If no sheet name is provided, the next available numbered sheet
         will be generated in the series ``Sheet 1``, ``Sheet 2``, etc.
@@ -221,7 +225,8 @@ class Document:
         self._sheets.append(new_sheet)
 
     def add_style(self, **kwargs) -> Style:
-        r"""Add a new style to the current document.
+        r"""
+        Add a new style to the current document.
 
         If no style name is provided, the next available numbered style
         will be generated in the series ``Custom Style 1``, ``Custom Style 2``, etc.
@@ -271,7 +276,8 @@ class Document:
         return style
 
     def add_custom_format(self, **kwargs) -> CustomFormatting:
-        r"""Add a new custom format to the current document.
+        r"""
+        Add a new custom format to the current document.
 
         .. code-block:: python
 
@@ -374,7 +380,8 @@ class Sheet:
         num_rows: int | None = DEFAULT_ROW_COUNT,
         num_cols: int | None = DEFAULT_COLUMN_COUNT,
     ) -> Table:
-        """Add a new table to the current sheet.
+        """
+        Add a new table to the current sheet.
 
         If no table name is provided, the next available numbered table
         will be generated in the series ``Table 1``, ``Table 2``, etc.
@@ -514,16 +521,17 @@ class Table(Cacheable):
 
     @property
     def num_header_rows(self) -> int:
-        """int: The number of header rows.
+        """
+        int: The number of header rows.
 
-        Example:
+        Example
         -------
         .. code-block:: python
 
             # Add an extra header row
             table.num_header_rows += 1
 
-        Raises:
+        Raises
         ------
         ValueError:
             If the number of headers is negative, exceeds the number of rows in the
@@ -547,16 +555,17 @@ class Table(Cacheable):
 
     @property
     def num_header_cols(self) -> int:
-        """int: The number of header columns.
+        """
+        int: The number of header columns.
 
-        Example:
+        Example
         -------
         .. code-block:: python
 
             # Add an extra header column
             table.num_header_cols += 1
 
-        Raises:
+        Raises
         ------
         ValueError:
             If the number of headers is negative, exceeds the number of rows in the
@@ -589,7 +598,8 @@ class Table(Cacheable):
         return self._model.table_width(self._table_id)
 
     def row_height(self, row: int, height: int | None = None) -> int:
-        """The height of a table row in points.
+        """
+        The height of a table row in points.
 
         .. code-block:: python
 
@@ -612,7 +622,8 @@ class Table(Cacheable):
         return self._model.row_height(self._table_id, row, height)
 
     def col_width(self, col: int, width: int | None = None) -> int:
-        """The width of a table column in points.
+        """
+        The width of a table column in points.
 
         Parameters
         ----------
@@ -635,7 +646,8 @@ class Table(Cacheable):
         return self._model.table_coordinates(self._table_id)
 
     def rows(self, values_only: bool = False) -> list[list[Cell]] | list[list[str]]:
-        """Return all rows of cells for the Table.
+        """
+        Return all rows of cells for the Table.
 
         Parameters
         ----------
@@ -654,9 +666,10 @@ class Table(Cacheable):
 
     @property
     def merge_ranges(self) -> list[str]:
-        """List[str]: The merge ranges of cells in A1 notation.
+        """
+        List[str]: The merge ranges of cells in A1 notation.
 
-        Example:
+        Example
         -------
         .. code-block:: python
 
@@ -677,7 +690,8 @@ class Table(Cacheable):
         return sorted(merge_cells)
 
     def cell(self, *args) -> Cell | MergedCell:  # noqa: D417
-        """Return a single cell in the table.
+        """
+        Return a single cell in the table.
 
         The ``cell()`` method supports two forms of notation to designate the position
         of cells: **Row-column** notation and **A1** notation:
@@ -742,7 +756,8 @@ class Table(Cacheable):
         max_col: int | None = None,
         values_only: bool | None = False,
     ) -> Iterator[tuple[Cell] | tuple[str]]:
-        """Produces cells from a table, by row.
+        """
+        Produces cells from a table, by row.
 
         Specify the iteration range using the indexes of the rows and columns.
 
@@ -811,7 +826,8 @@ class Table(Cacheable):
         max_row: int | None = None,
         values_only: bool | None = False,
     ) -> Iterator[tuple[Cell] | tuple[str]]:
-        """Produces cells from a table, by column.
+        """
+        Produces cells from a table, by column.
 
         Specify the iteration range using the indexes of the rows and columns.
 
@@ -898,7 +914,8 @@ class Table(Cacheable):
         return (row, col, *tuple(values))
 
     def write(self, *args, style: Style | str | None = None) -> None:  # noqa: D417
-        """Write a value to a cell and update the style/cell type.
+        """
+        Write a value to a cell and update the style/cell type.
 
         The ``write()`` method supports two forms of notation to designate the position
         of cells: **Row-column** notation and **A1** notation:
@@ -973,7 +990,8 @@ class Table(Cacheable):
         start_row: int | None = None,
         default: str | float | bool | datetime | timedelta | None = None,
     ) -> None:
-        """Add or insert rows to the table.
+        """
+        Add or insert rows to the table.
 
         Parameters
         ----------
@@ -1036,7 +1054,8 @@ class Table(Cacheable):
         start_col: int | None = None,
         default: str | float | bool | datetime | timedelta | None = None,
     ) -> None:
-        """Add or insert columns to the table.
+        """
+        Add or insert columns to the table.
 
         Parameters
         ----------
@@ -1092,7 +1111,8 @@ class Table(Cacheable):
         num_rows: int | None = 1,
         start_row: int | None = None,
     ) -> None:
-        """Delete rows from the table.
+        """
+        Delete rows from the table.
 
         Parameters
         ----------
@@ -1137,7 +1157,8 @@ class Table(Cacheable):
         num_cols: int | None = 1,
         start_col: int | None = None,
     ) -> None:
-        """Add or delete columns columns from the table.
+        """
+        Add or delete columns columns from the table.
 
         Parameters
         ----------
@@ -1169,7 +1190,8 @@ class Table(Cacheable):
         self._model.number_of_columns(self._table_id, self.num_cols)
 
     def merge_cells(self, cell_range: str | list[str]) -> None:
-        """Convert a cell range or list of cell ranges into merged cells.
+        """
+        Convert a cell range or list of cell ranges into merged cells.
 
         Parameters
         ----------
@@ -1211,7 +1233,8 @@ class Table(Cacheable):
                     cell._set_merge(merge_cells.get((row, col)))
 
     def set_cell_border(self, *args) -> None:
-        """Set the borders for a cell.
+        """
+        Set the borders for a cell.
 
         Cell references can be row-column offsers or Excel/Numbers-style A1 notation. Borders
         can be applied to multiple sides of a cell by passing a list of sides. The name(s)
@@ -1241,7 +1264,7 @@ class Table(Cacheable):
             * **param3** (:py:class:`Border`): The border to add.
             * **param4** (*int*, *optional*, default: 1): The length of the stroke to add.
 
-        Raises:
+        Raises
         ------
         TypeError:
             If an invalid number of arguments is passed or if the types of the arguments
@@ -1310,7 +1333,8 @@ class Table(Cacheable):
         self._model.add_stroke(self._table_id, row, col, side, border_value, length)
 
     def set_cell_formatting(self, *args: str, **kwargs) -> None:
-        r"""Set the data format for a cell.
+        r"""
+        Set the data format for a cell.
 
         Cell references can be **row-column** offsers or Excel/Numbers-style **A1** notation.
 

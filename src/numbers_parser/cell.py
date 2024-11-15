@@ -100,7 +100,8 @@ __all__ = [
 
 
 class BackgroundImage:
-    """A named document style that can be applied to cells.
+    """
+    A named document style that can be applied to cells.
 
     .. code-block:: python
 
@@ -212,7 +213,8 @@ def default_color() -> RGB:
 
 @dataclass
 class Style:
-    """A named document style that can be applied to cells.
+    """
+    A named document style that can be applied to cells.
 
     Parameters
     ----------
@@ -348,7 +350,8 @@ class Style:
                 raise TypeError(msg)
 
     def __setattr__(self, name: str, value: Any) -> None:
-        """Detect changes to cell styles and flag the style for
+        """
+        Detect changes to cell styles and flag the style for
         possible updates when saving the document.
         """
         if name in ["bg_color", "font_color"]:
@@ -407,7 +410,8 @@ class BorderType(IntEnum):
 
 
 class Border:
-    """Create a cell border to use with the :py:class:`~numbers_parser.Table` method
+    """
+    Create a cell border to use with the :py:class:`~numbers_parser.Table` method
     :py:meth:`~numbers_parser.Table.set_cell_border`.
 
     .. code-block:: python
@@ -584,10 +588,11 @@ class CellStorageFlags:
 
 
 class Cell(CellStorageFlags, Cacheable):
-    """.. NOTE::
+    """
+    .. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """  # fmt: skip
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """
 
     def __init__(self, row: int, col: int, value) -> None:
         self._value = value
@@ -642,7 +647,8 @@ class Cell(CellStorageFlags, Cacheable):
     @property
     @cache(num_args=0)
     def formula(self) -> str:
-        """str: The formula in a cell.
+        """
+        str: The formula in a cell.
 
         Formula evaluation relies on Numbers storing current values which should
         usually be the case. In cells containing a formula, :py:meth:`numbers_parser.Cell.value`
@@ -667,7 +673,8 @@ class Cell(CellStorageFlags, Cacheable):
 
     @property
     def bullets(self) -> list[str] | None:
-        r"""List[str] | None: The bullets in a cell, or ``None``.
+        r"""
+        List[str] | None: The bullets in a cell, or ``None``.
 
         Cells that contain bulleted or numbered lists are identified
         by :py:attr:`numbers_parser.Cell.is_bulleted`. For these cells,
@@ -676,7 +683,7 @@ class Cell(CellStorageFlags, Cacheable):
         bullet or numbering character. Newlines are not included in the
         bullet list.
 
-        Example:
+        Example
         -------
         .. code-block:: python
 
@@ -696,7 +703,8 @@ class Cell(CellStorageFlags, Cacheable):
 
     @property
     def formatted_value(self) -> str:
-        """str: The formatted value of the cell as it appears in Numbers.
+        """
+        str: The formatted value of the cell as it appears in Numbers.
 
         Interactive elements are converted into a suitable text format where
         supported, or as their number values where there is no suitable
@@ -736,9 +744,10 @@ class Cell(CellStorageFlags, Cacheable):
 
     @property
     def style(self) -> Style | None:
-        """Style | None: The :class:`Style` associated with the cell or ``None``.
+        """
+        Style | None: The :class:`Style` associated with the cell or ``None``.
 
-        Warns:
+        Warns
         -----
             UnsupportedWarning: On assignment; use
                 :py:meth:`numbers_parser.Table.set_cell_style` instead.
@@ -758,9 +767,10 @@ class Cell(CellStorageFlags, Cacheable):
 
     @property
     def border(self) -> CellBorder | None:
-        """CellBorder| None: The :class:`CellBorder` associated with the cell or ``None``.
+        """
+        CellBorder| None: The :class:`CellBorder` associated with the cell or ``None``.
 
-        Warns:
+        Warns
         -----
             UnsupportedWarning: On assignment; use
                 :py:meth:`numbers_parser.Table.set_cell_border` instead.
@@ -1363,10 +1373,11 @@ class Cell(CellStorageFlags, Cacheable):
 
 
 class NumberCell(Cell):
-    """.. NOTE::
+    """
+    .. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """  # fmt: skip
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """
 
     def __init__(self, row: int, col: int, value: float, cell_type=CellType.NUMBER) -> None:
         self._type = cell_type
@@ -1388,10 +1399,11 @@ class TextCell(Cell):
 
 
 class RichTextCell(Cell):
-    """.. NOTE::
+    """
+    .. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """  # fmt: skip
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """
 
     def __init__(self, row: int, col: int, value) -> None:
         super().__init__(row, col, value["text"])
@@ -1425,7 +1437,8 @@ class RichTextCell(Cell):
 
     @property
     def hyperlinks(self) -> list[tuple] | None:
-        """List[Tuple] | None: the hyperlinks in a cell or ``None``.
+        """
+        List[Tuple] | None: the hyperlinks in a cell or ``None``.
 
         Numbers does not support hyperlinks to cells within a spreadsheet, but does
         allow embedding links in cells. When cells contain hyperlinks,
@@ -1433,7 +1446,7 @@ class RichTextCell(Cell):
         of cells where :py:attr:`numbers_parser.Cell.is_bulleted` is ``True`` is a
         list of text and URL tuples.
 
-        Example:
+        Example
         -------
         .. code-block:: python
 
@@ -1450,10 +1463,11 @@ class BulletedTextCell(RichTextCell):
 
 
 class EmptyCell(Cell):
-    """.. NOTE::
+    """
+    .. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """  # fmt: skip
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """
 
     def __init__(self, row: int, col: int) -> None:
         super().__init__(row, col, None)
@@ -1469,10 +1483,11 @@ class EmptyCell(Cell):
 
 
 class BoolCell(Cell):
-    """.. NOTE::
+    """
+    .. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """  # fmt: skip
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """
 
     def __init__(self, row: int, col: int, value: bool) -> None:
         super().__init__(row, col, value)
@@ -1485,10 +1500,11 @@ class BoolCell(Cell):
 
 
 class DateCell(Cell):
-    """.. NOTE::
+    """
+    .. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """  # fmt: skip
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """
 
     def __init__(self, row: int, col: int, value: datetime) -> None:
         super().__init__(row, col, value)
@@ -1510,10 +1526,11 @@ class DurationCell(Cell):
 
 
 class ErrorCell(Cell):
-    """.. NOTE::
+    """
+    .. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """  # fmt: skip
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """
 
     def __init__(self, row: int, col: int) -> None:
         super().__init__(row, col, None)
@@ -1525,10 +1542,11 @@ class ErrorCell(Cell):
 
 
 class MergedCell(Cell):
-    """.. NOTE::
+    """
+    .. NOTE::
 
-    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
-    """  # fmt: skip
+       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    """
 
     def __init__(self, row: int, col: int) -> None:
         super().__init__(row, col, None)
@@ -1925,7 +1943,8 @@ def _float_to_fraction(value: float, denominator: int) -> str:
 
 
 def _float_to_n_digit_fraction(value: float, max_digits: int) -> str:
-    """Convert a float to a fraction of a maxinum number of digits
+    """
+    Convert a float to a fraction of a maxinum number of digits
     and return as a string.
     """
     max_denominator = 10**max_digits - 1
@@ -2003,7 +2022,8 @@ range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
 
 
 def xl_cell_to_rowcol(cell_str: str) -> tuple:
-    """Convert a cell reference in A1 notation to a zero indexed row and column.
+    """
+    Convert a cell reference in A1 notation to a zero indexed row and column.
 
     Parameters
     ----------
@@ -2040,7 +2060,8 @@ def xl_cell_to_rowcol(cell_str: str) -> tuple:
 
 
 def xl_range(first_row, first_col, last_row, last_col):
-    """Convert zero indexed row and col cell references to a A1:B1 range string.
+    """
+    Convert zero indexed row and col cell references to a A1:B1 range string.
 
     Parameters
     ----------
@@ -2068,7 +2089,8 @@ def xl_range(first_row, first_col, last_row, last_col):
 
 
 def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
-    """Convert a zero indexed row and column cell reference to a A1 style string.
+    """
+    Convert a zero indexed row and column cell reference to a A1 style string.
 
     Parameters
     ----------
@@ -2104,7 +2126,8 @@ def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
 
 
 def xl_col_to_name(col, col_abs=False):
-    """Convert a zero indexed column cell reference to a string.
+    """
+    Convert a zero indexed column cell reference to a string.
 
     Parameters
     ----------

@@ -3,16 +3,12 @@
         "editor.formatOnSave": true,
         "editor.wordWrap": "wordWrapColumn",
         "editor.wordWrapColumn": 100,
-        "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.codeActionsOnSave": {
             "source.fixAll": "explicit",
             "source.organizeImports": "explicit"
-        }
+        },
+        "editor.defaultFormatter": "charliermarsh.ruff"
     },
-    "black-formatter.args": [
-        "--line-length",
-        "100"
-    ],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
     "python.testing.pytestArgs": [
@@ -32,5 +28,6 @@
     "markdownlint.ignore": [ "README.md" ],
     "esbonio.sphinx.buildDir" : "${workspaceFolder}/docs/build/html",
     "esbonio.sphinx.confDir"  : "${workspaceFolder}/docs",
-    "esbonio.sphinx.srcDir"   : "${workspaceFolder}/docs"
+    "esbonio.sphinx.srcDir": "${workspaceFolder}/docs",
+    "editor.defaultFormatter": "charliermarsh.ruff"
 }

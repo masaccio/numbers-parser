@@ -19,22 +19,23 @@ from google.protobuf.message import DecodeError
 from tqdm import tqdm
 
 PROTO_TYPES = {
-  1: "double",
-  2: "float",
-  3: "int64",
-  4: "uint64",
-  5: "int32",
-  6: "fixed64",
-  7: "fixed32",
-  8: "bool",
-  9: "string",
-  12: "bytes",
-  13: "uint32",
-  15: "sfixed32",
-  16: "sfixed64",
-  17: "sint32",
-  18: "sint64",
+    1: "double",
+    2: "float",
+    3: "int64",
+    4: "uint64",
+    5: "int32",
+    6: "fixed64",
+    7: "fixed32",
+    8: "bool",
+    9: "string",
+    12: "bytes",
+    13: "uint32",
+    15: "sfixed32",
+    16: "sfixed64",
+    17: "sint32",
+    18: "sint64",
 }
+
 
 def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
     if len(fds.file) != 1:
@@ -60,7 +61,6 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
                 lines.append(prefix + f"  {value.name} = {value.number};")
             lines.append(prefix + "}")
 
-
     def generate_field_line(field, in_oneof: bool = False) -> str:
         line = []
         if field.label == 1:
@@ -76,7 +76,7 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
 
         if field.type in PROTO_TYPES:
             line.append(PROTO_TYPES[field.type])
-        elif field.type in (11, 14): # MESSAGE
+        elif field.type in (11, 14):  # MESSAGE
             line.append(field.type_name)
         else:
             msg = f"Unknown field type {field.type}!"
@@ -232,7 +232,7 @@ def extract_proto_from_file(filename, descriptor_pool):
         if suffix_position == -1:
             break
 
-        marker_start = data.rfind(b"\x0A", offset, suffix_position)
+        marker_start = data.rfind(b"\x0a", offset, suffix_position)
         if marker_start == -1:
             # Doesn't look like a proto descriptor
             offset = suffix_position + len(PROTO_MARKER)

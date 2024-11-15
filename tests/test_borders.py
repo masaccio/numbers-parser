@@ -94,7 +94,10 @@ def test_exceptions():
 
     with pytest.raises(TypeError) as e:
         doc.sheets[0].tables[0].set_cell_border(
-            "A1", "left", Border(1.0, RGB(0, 0, 0), "solid"), "invalid",
+            "A1",
+            "left",
+            Border(1.0, RGB(0, 0, 0), "solid"),
+            "invalid",
         )
     assert "border length must be an int" in str(e)
 

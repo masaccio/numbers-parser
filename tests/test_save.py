@@ -284,7 +284,10 @@ def test_edit_table_rows_columns(configurable_save_file):
         return table_num_cols
 
     def delete_row(
-        table: object, table_num_rows: int, num_rows: int = 1, start_row: Optional[int] = None,
+        table: object,
+        table_num_rows: int,
+        num_rows: int = 1,
+        start_row: Optional[int] = None,
     ) -> int:
         table.delete_row(num_rows, start_row)
         table_num_rows -= num_rows
@@ -293,7 +296,10 @@ def test_edit_table_rows_columns(configurable_save_file):
         return table_num_rows
 
     def delete_column(
-        table: object, table_num_cols: int, num_cols: int = 1, start_col: Optional[int] = None,
+        table: object,
+        table_num_cols: int,
+        num_cols: int = 1,
+        start_col: Optional[int] = None,
     ) -> int:
         table.delete_column(num_cols, start_col)
         table_num_cols -= num_cols

@@ -31,10 +31,14 @@ for line in proc.stdout.splitlines():
         right_side_no_numbers = re.sub(r"\b(\d+)\b", lambda x: "X" * len(x.group(0)), right_side)
         if left_side_no_numbers[0 : len(right_side_no_numbers)] == right_side_no_numbers:
             left_side = re.sub(
-                r"\b(\d+)\b", lambda x: Fore.GREEN + x.group(0) + Fore.RESET, left_side,
+                r"\b(\d+)\b",
+                lambda x: Fore.GREEN + x.group(0) + Fore.RESET,
+                left_side,
             )
             right_side = re.sub(
-                r"\b(\d+)\b", lambda x: Fore.GREEN + x.group(0) + Fore.RESET, right_side,
+                r"\b(\d+)\b",
+                lambda x: Fore.GREEN + x.group(0) + Fore.RESET,
+                right_side,
             )
             print(left_side, space.replace("|", "~"), right_side)
             continue

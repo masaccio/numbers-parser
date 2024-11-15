@@ -71,5 +71,8 @@ class NumbersUUID(UUID):
         uuid_w1 = (self.int >> 32) & 0xFFFFFFFF
         uuid_w0 = self.int & 0xFFFFFFFF
         return TSPMessages.CFUUIDArchive(
-            uuid_w3=uuid_w3, uuid_w2=uuid_w2, uuid_w1=uuid_w1, uuid_w0=uuid_w0,
+            uuid_w3=uuid_w3,
+            uuid_w2=uuid_w2,
+            uuid_w1=uuid_w1,
+            uuid_w0=uuid_w0,
         )
