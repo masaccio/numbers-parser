@@ -269,7 +269,8 @@ CUSTOM_FORMATTING_ALLOWED_CELLS = {
 
 @enum_tools.documentation.document_enum
 class NegativeNumberStyle(IntEnum):
-    """How negative numbers are formatted.
+    """
+    How negative numbers are formatted.
 
     This enum is used in cell data formats and cell custom formats using the
     `negative_style` keyword argument.
@@ -287,7 +288,8 @@ class NegativeNumberStyle(IntEnum):
 
 @enum_tools.documentation.document_enum
 class FractionAccuracy(IntEnum):
-    """How fractions are formatted.
+    """
+    How fractions are formatted.
 
     This enum is used in cell data formats and cell custom formats using the
     `fraction_accuracy` keyword argument.

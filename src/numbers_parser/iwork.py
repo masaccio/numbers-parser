@@ -37,7 +37,8 @@ class IWorkHandler:
 
 class IWork:
     def __init__(self, handler: IWorkHandler = None) -> None:
-        """Create an IWork document handler that can read and write iWork documents.
+        """
+        Create an IWork document handler that can read and write iWork documents.
 
         Parameters
         ----------
@@ -50,7 +51,8 @@ class IWork:
 
     @property
     def document_version(self) -> str:
-        """str: the version of the iWork document.
+        """
+        str: the version of the iWork document.
 
         Raises
         ------
@@ -89,7 +91,8 @@ class IWork:
         return doc_version
 
     def open(self, filepath: Path) -> None:
-        """Open an iWork file and read in the files and archives contained in it.
+        """
+        Open an iWork file and read in the files and archives contained in it.
 
         Raises:
         ------
@@ -181,7 +184,8 @@ class IWork:
             raise FileFormatError(msg) from None
 
     def _read_objects_from_package(self, filepath: Path) -> None:
-        """Read a Numbers package and iterate through all files and directories
+        """
+        Read a Numbers package and iterate through all files and directories
         storing the files blobs and objects though the supplies callbacks.
         """
         for sub_filepath in filepath.iterdir():
@@ -214,7 +218,8 @@ class IWork:
                 self._store_blob(filename, blob)
 
     def _store_blob(self, filename: str, blob: bytes) -> None:
-        """If blob is an IWA archive, store each archive using the file handler and, if
+        """
+        If blob is an IWA archive, store each archive using the file handler and, if
         specified, unpack the archives into the object handler.
         """
         if filename.endswith(".iwa") and is_iwa_file(blob):

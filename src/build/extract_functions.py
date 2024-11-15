@@ -32,8 +32,8 @@ if framework.endswith(".s"):
     with open(framework, "rb") as fh:
         disassembly = fh.readlines()
 else:
-    objdump = Popen(
-        [
+    objdump = Popen(  # noqa: S603
+        [  # noqa: S607
             "objdump",
             "--disassemble",
             "--no-addresses",
@@ -45,7 +45,7 @@ else:
         ],
         stdout=PIPE,
     )
-    cxxfilt = Popen(["c++filt"], stdin=objdump.stdout, stdout=PIPE)
+    cxxfilt = Popen(["c++filt"], stdin=objdump.stdout, stdout=PIPE)  # noqa: S603, S607
     objdump.stdout.close()
     disassembly = str(cxxfilt.communicate()[0]).split("\\n")
 
@@ -97,8 +97,8 @@ with open(output_map, "w") as fh:
     fh.write("FUNCTION_MAP = {\n")
     if "ABS" not in function_refs:
         fh.write('    1: "ABS",\n')
-    for func, id in function_refs.items():
+    for func_name, func_id in function_refs.items():
         if func in tsce_functions:
-            fh.write(f'    {id}: "{func}",\n')
+            fh.write(f'    {func_id}: "{func_name}",\n')
 
     fh.write("}\n")

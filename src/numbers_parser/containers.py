@@ -78,7 +78,8 @@ class ObjectStore(IWorkHandler):
         return self._max_id
 
     def create_object_from_dict(self, iwa_file: str, object_dict: dict, cls: object, append=False):
-        """Create a new object and store the associated IWA segment. Return the
+        """
+        Create a new object and store the associated IWA segment. Return the
         message ID for the object and the newly created object. If the IWA
         file cannot be found, it will be created.
         """
@@ -100,7 +101,8 @@ class ObjectStore(IWorkHandler):
         return new_id, self._objects[new_id]
 
     def update_object_file_store(self) -> None:
-        """Copy the protobuf messages from any updated object to the cached
+        """
+        Copy the protobuf messages from any updated object to the cached
         version in the file store so this can be saved to a new document.
         """
         for obj_id in self._objects:

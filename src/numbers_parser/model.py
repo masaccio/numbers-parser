@@ -176,7 +176,8 @@ class DataLists(Cacheable):
         clear_field_container(self._datalists[table_id]["datalist"].entries)
 
     def lookup_key(self, table_id: int, value) -> int:
-        """Return the key associated with a value for a particular table entry.
+        """
+        Return the key associated with a value for a particular table entry.
         If the value is not in the datalist, allocate a new entry with the
         next available key.
         """
@@ -204,7 +205,8 @@ class DataLists(Cacheable):
 
 
 class _NumbersModel(Cacheable):
-    """Loads all objects from Numbers document and provides decoding
+    """
+    Loads all objects from Numbers document and provides decoding
     methods for other classes in the module to abstract away the
     internal structures of Numbers document data structures.
 
@@ -711,7 +713,8 @@ class _NumbersModel(Cacheable):
         self._table_strings.init(table_id)
 
     def table_string_key(self, table_id: int, value: str) -> int:
-        """Return the key associated with a string for a particular table. If
+        """
+        Return the key associated with a string for a particular table. If
         the string is not in the strings table, allocate a new entry with the
         next available key.
         """
@@ -719,7 +722,8 @@ class _NumbersModel(Cacheable):
 
     @cache(num_args=0)
     def owner_id_map(self):
-        """ "
+        """
+        "
         Extracts the mapping table from Owner IDs to UUIDs. Returns a
         dictionary mapping the owner ID int to a 128-bit UUID.
         """
@@ -1517,7 +1521,8 @@ class _NumbersModel(Cacheable):
         number_of_header_rows: int,
         number_of_header_columns: int,
     ) -> None:
-        """Create a FormulaOwnerDependenciesArchive that references a TableInfoArchive
+        """
+        Create a FormulaOwnerDependenciesArchive that references a TableInfoArchive
         so that cross-references to cells in this table will work.
         """
         formula_owner_uuid = NumbersUUID()
@@ -1745,7 +1750,8 @@ class _NumbersModel(Cacheable):
         style_obj.para_properties.right_indent = style.right_indent
 
     def update_paragraph_styles(self) -> None:
-        """Create new paragraph style archives for any new styles that
+        """
+        Create new paragraph style archives for any new styles that
         have been created for this document.
         """
         new_styles = [x for x in self.styles.values() if x._text_style_obj_id is None]
@@ -1762,7 +1768,8 @@ class _NumbersModel(Cacheable):
             self.update_paragraph_style(style)
 
     def update_cell_styles(self, table_id: int, data: list) -> None:
-        """Create new cell style archives for any cells whose styles
+        """
+        Create new cell style archives for any cells whose styles
         have changes that require a cell style.
         """
         cell_styles = {}
@@ -1881,7 +1888,8 @@ class _NumbersModel(Cacheable):
         return entry.reference.identifier
 
     def custom_style_name(self) -> str:
-        """Find custom styles in the current document and return the next
+        """
+        Find custom styles in the current document and return the next
         highest numbered style.
         """
         stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
@@ -1917,7 +1925,8 @@ class _NumbersModel(Cacheable):
         return self._custom_formats
 
     def custom_format_name(self) -> str:
-        """Find custom formats in the current document and return the next
+        """
+        Find custom formats in the current document and return the next
         highest numbered format.
         """
         current_formats = self.custom_formats.keys()
@@ -2028,7 +2037,8 @@ class _NumbersModel(Cacheable):
         return None
 
     def cell_text_style(self, cell: Cell) -> object:
-        """Return the text style object for the cell or, if none
+        """
+        Return the text style object for the cell or, if none
         is defined, the default header, footer or body style.
         """
         if cell._text_style_id is not None:
@@ -2071,7 +2081,8 @@ class _NumbersModel(Cacheable):
         return None
 
     def char_property(self, style: object, field: str):
-        """Return a char_property field from a style if present
+        """
+        Return a char_property field from a style if present
         in the style, or from the parent if not.
         """
         if not style.char_properties.HasField(field):
@@ -2080,7 +2091,8 @@ class _NumbersModel(Cacheable):
         return getattr(style.char_properties, field)
 
     def para_property(self, style: object, field: str) -> float:
-        """Return a para_property field from a style if present
+        """
+        Return a para_property field from a style if present
         in the style, or from the parent if not.
         """
         if not style.para_properties.HasField(field):
@@ -2089,7 +2101,8 @@ class _NumbersModel(Cacheable):
         return getattr(style.para_properties, field)
 
     def cell_property(self, style: object, field: str) -> float:
-        """Return a cell_property field from a style if present
+        """
+        Return a cell_property field from a style if present
         in the style, or from the parent if not.
         """
         if not style.cell_properties.HasField(field):
@@ -2473,7 +2486,8 @@ def get_storage_buffers_for_row(
     num_cols: int,
     has_wide_offsets: bool,
 ) -> list[bytes]:
-    """Extract storage buffers for each cell in a table row.
+    """
+    Extract storage buffers for each cell in a table row.
 
     Args:
     ----
@@ -2518,7 +2532,8 @@ def get_storage_buffers_for_row(
 
 
 def clear_field_container(obj) -> None:
-    """Remove all entries from a protobuf RepeatedCompositeFieldContainer
+    """
+    Remove all entries from a protobuf RepeatedCompositeFieldContainer
     in a portable fashion.
     """
     while len(obj) > 0:
