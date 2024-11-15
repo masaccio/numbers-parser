@@ -5,7 +5,7 @@ from sys import argv, exit, stderr
 
 from colorama import Fore, Style
 
-diff_version = subprocess.check_output(["diff", "--version"])
+diff_version = subprocess.check_output(["diff", "--version"])  # noqa: S603, S607
 if "GNU diffutils" not in diff_version.decode():
     print("Unsupported diff utility (expected GNU diffutils)", file=stderr)
     exit(1)
@@ -16,7 +16,7 @@ except OSError:
     diff_width = 160
 
 args = ["diff", "--side-by-side", f"--width={diff_width}"] + argv[1:]
-proc = subprocess.run(args, capture_output=True, encoding="utf8", check=False)
+proc = subprocess.run(args, capture_output=True, encoding="utf8", check=False)  # noqa: S603
 if proc.stderr:
     print(proc.stderr, file=stderr)
     exit(1)

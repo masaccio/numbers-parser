@@ -14,14 +14,14 @@ def deep_print(objects, obj, indent=0, max_depth=MAX_DEPTH):
     for descriptor in obj.DESCRIPTOR.fields:
         value = getattr(obj, descriptor.name)
         if isinstance(value, TSPMessages.Reference):
-            id = value.identifier
+            obj_id = value.identifier
             name = descriptor.name
-            if id != 0:
+            if obj_id != 0:
                 type_name = objects[id].DESCRIPTOR.full_name
-                print("  " * indent + f"{name}->#{id} [{type_name}]")
+                print("  " * indent + f"{name}->#{obj_id} [{type_name}]")
                 deep_print(objects, objects[id], indent=indent + 1, max_depth=max_depth)
             else:
-                print("  " * indent + f"{name}->#{id}")
+                print("  " * indent + f"{name}->#{obj_id}")
         elif isinstance(value, (TSPMessages.CFUUIDArchive, TSPMessages.UUID)):
             uuid = NumbersUUID(value)
             print("  " * indent + f"{descriptor.name}={uuid}")
@@ -35,9 +35,9 @@ def deep_print(objects, obj, indent=0, max_depth=MAX_DEPTH):
                 deep_print(objects, value, indent=indent + 1, max_depth=max_depth)
         elif descriptor.type == descriptor.TYPE_ENUM:
             if type(value).__name__ == "RepeatedScalarContainer":
-                enum_str = [descriptor.enum_type.values[x].name for x in value]
+                enum_str = [descriptor.enum_type.values[x].name for x in value]  # noqa: PD011
             else:
-                enum_str = descriptor.enum_type.values[value - 1].name
+                enum_str = descriptor.enum_type.values[value - 1].name  # noqa: PD011
             print("  " * indent + f"{descriptor.name}={enum_str}")
         else:
             print("  " * indent + f"{descriptor.name}={value}")
@@ -98,16 +98,16 @@ for filename in args.numbers:
                 )
     elif args.iwa:
         filenames = [x for x in doc._model.file_store if args.iwa in x]
-        for filename in filenames:
+        for sub_filename in filenames:
             object_ids = [
-                id
-                for id in doc._model.objects._object_to_filename_map
-                if doc._model.objects._object_to_filename_map[id] == filename
+                obj_id
+                for obj_id in doc._model.objects._object_to_filename_map
+                if doc._model.objects._object_to_filename_map[obj_id] == sub_filename
             ]
-            for id in sorted(object_ids):
-                print(f"===== object={id}")
-                deep_print(doc._model.objects, doc._model.objects[id], max_depth=args.max_depth)
+            for obj_id in sorted(object_ids):
+                print(f"===== object={obj_id}")
+                deep_print(doc._model.objects, doc._model.objects[obj_id], max_depth=args.max_depth)
     else:
-        for id in doc._model.find_refs(args.archive):
-            print(f"===== object={id}")
-            deep_print(doc._model.objects, doc._model.objects[id], max_depth=args.max_depth)
+        for obj_id in doc._model.find_refs(args.archive):
+            print(f"===== object={obj_id}")
+            deep_print(doc._model.objects, doc._model.objects[obj_id], max_depth=args.max_depth)
