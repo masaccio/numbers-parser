@@ -99,6 +99,18 @@ Cells are objects with a common base class of `Cell`. All cell types
 have a property `value` which returns the contents of the cell as a
 python datatype. Available cell types are:
 
+| Cell type    | value type           | Additional properties                                                                                  |
+|--------------|----------------------|--------------------------------------------------------------------------------------------------------|
+| NumberCell   | `float`              |                                                                                                        |
+| TextCell     | `str`                |                                                                                                        |
+| RichTextCell | `str`                | See [Rich text](https://masaccio.github.io/numbers-parser/api/cells.html#numbers_parser.RichTextCell)  |
+| EmptyCell    | `None`               |                                                                                                        |
+| BoolCell     | `bool`               |                                                                                                        |
+| DateCell     | `datetime.datetime`  |                                                                                                        |
+| DurationCell | `datetime.timedelta` |                                                                                                        |
+| ErrorCell    | `None`               |                                                                                                        |
+| MergedCell   | `None`               | See [Merged cells](https://masaccio.github.io/numbers-parser/api/cells.html#numbers_parser.MergedCell) |
+
 Cell references can be either zero-offset row/column integers or an
 Excel/Numbers A1 notation. Where cell values are not `None` the
 property `formatted_value` returns the cell value as a `str` as
