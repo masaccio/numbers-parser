@@ -68,9 +68,9 @@ class IWACompressedChunk:
             header = data[:4]
 
             first_byte = header[0]
-            if first_byte != 0x00:
+            if first_byte != 0x00:  # pragma: no cover
                 msg = f"IWA chunk does not start with 0x00! (found {first_byte:x})"
-                raise ValueError(  # pragma: no cover
+                raise ValueError(
                     msg,
                 )
 
