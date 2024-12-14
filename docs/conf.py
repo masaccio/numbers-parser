@@ -3,7 +3,7 @@ import sys
 
 from numbers_parser import _get_version
 
-sys.path.insert(0, os.path.abspath("../"))
+sys.path.insert(0, os.path.abspath("../"))  # noqa: PTH100
 
 GITHUB = "https://github.com/masaccio/numbers-parser"
 PAGES = "https://masaccio.github.io/numbers-parser"
@@ -22,7 +22,7 @@ exclude_patterns = ["build", "Thumbs.db", ".DS_Store"]
 language = "en"
 master_doc = "index"
 project = "numbers-parser"
-copyright = "Copyright Jon Connell under MIT license"
+copyright = "Copyright Jon Connell under MIT license"  # noqa: A001
 
 # sphinx.ext.napoleon configuration
 napoleon_google_docstring = False
