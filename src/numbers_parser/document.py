@@ -34,7 +34,7 @@ from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
 from numbers_parser.numbers_cache import Cacheable
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: nocover
     from collections.abc import Iterator
     from datetime import datetime, timedelta
 
