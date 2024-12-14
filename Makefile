@@ -104,6 +104,7 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 .bootstrap/fontmap.py:
 	@echo $$(tput setaf 2)"Bootstrap: generating font name map"$$(tput init)
 	@mkdir -p .bootstrap
+	poetry install --with bootstrap
 	poetry run python3 src/build/generate_fontmap.py $@
 
 .bootstrap/protos/TNArchives.proto:
