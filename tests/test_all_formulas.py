@@ -15,7 +15,7 @@ def compare_table_functions(sheet_name, filename):
             # Skip header and invalid test rows
             continue
 
-        if isinstance(row[0], BoolCell):
+        if isinstance(row[0], BoolCell):  # noqa: SIM108
             # Test value is true/false
             formula_text = str(row[0].value).upper()
         else:
