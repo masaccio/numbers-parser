@@ -174,11 +174,11 @@ class IWork:
     def _open_zipfile(self, filepath: Path):
         """Open Zip file with the correct filename encoding supported by current python."""
         # Coverage is python version dependent, so one path with always fail coverage
-        try:
-            if version_info >= (3, 11):  # pragma: no cover
+        try:  # pragma: no cover
+            if version_info >= (3, 11):
                 return ZipFile(filepath, metadata_encoding="utf-8")
-            # pragma: no cover
             return ZipFile(filepath)
+
         except BadZipFile:
             msg = "invalid Numbers document"
             raise FileFormatError(msg) from None

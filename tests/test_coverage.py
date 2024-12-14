@@ -7,6 +7,7 @@ from numbers_parser import (
     CellBorder,
     CustomFormatting,
     Document,
+    FileFormatError,
     Formatting,
     PaddingType,
     UnsupportedError,
@@ -300,3 +301,9 @@ def test_invalid_format():
     cell = doc.default_table.cell(1, 1)
     cell._text_format_id = None
     assert cell._custom_format() == cell.value
+
+
+def test_invalid_format_2():
+    with pytest.raises(FileFormatError) as e:
+        _ = Document("tests/data/invalid-index-zip.numbers")
+    assert "invalid Numbers document" in str(e)

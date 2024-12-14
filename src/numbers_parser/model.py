@@ -877,12 +877,11 @@ class _NumbersModel(Cacheable):
         return None
 
     @cache()
-    def table_uuids_to_id(self, table_uuid) -> int:
-        for sheet_id in self.sheet_ids():  # pragma: no branch
+    def table_uuids_to_id(self, table_uuid) -> int | None:
+        for sheet_id in self.sheet_ids():  # pragma: no branch   # noqa: RET503
             for table_id in self.table_ids(sheet_id):
                 if table_uuid == self.table_base_id(table_id):
                     return table_id
-        return None
 
     def node_to_ref(self, this_table_id: int, row: int, col: int, node):
         if node.HasField("AST_cross_table_reference_extra_info"):
@@ -1980,7 +1979,7 @@ class _NumbersModel(Cacheable):
         # a string with a new bullet character
         bds = self.objects[table_id].base_data_store
         rich_text_table = self.objects[bds.rich_text_table.identifier]
-        for entry in rich_text_table.entries:  # pragma: no branch
+        for entry in rich_text_table.entries:  # pragma: no branch  # noqa: RET503
             if string_key == entry.key:
                 payload = self.objects[entry.rich_text_payload.identifier]
                 payload_storage = self.objects[payload.storage.identifier]
@@ -2034,7 +2033,6 @@ class _NumbersModel(Cacheable):
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,
                 }
-        return None
 
     def cell_text_style(self, cell: Cell) -> object:
         """
