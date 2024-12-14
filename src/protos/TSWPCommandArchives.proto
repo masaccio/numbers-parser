@@ -39,11 +39,11 @@ message TextCommandArchive {
     kKindInsertBibliographyEntry = 11;
     kKindFormatCitationFields = 12;
     kKindInsertTOCSmartField = 13;
-    kKindInsertDateTimeField = 14;
+    kKindInsertDateTimeField_DEPRECATED = 14;
     kKindUpdateDateTimeField = 15;
     kKindSetParagraphFirstTopicNumber = 16;
     kKindCharacterStyle = 17;
-    kKindRevertStyles = 18;
+    kKindRevertStyles_DEPRECATED = 18;
     kKindSetParagraphBidi = 19;
   }
   optional .TSK.CommandArchive super = 1;

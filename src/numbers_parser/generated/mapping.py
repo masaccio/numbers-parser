@@ -231,7 +231,6 @@ TSPRegistryMapping = {
     "2107": "TSWP.ApplyPlaceholderTextCommandArchive",
     "2116": "TSWP.ApplyRubyTextCommandArchive",
     "2118": "TSWP.ModifyRubyTextCommandArchive",
-    "2119": "TSWP.UpdateDateTimeFieldCommandArchive",
     "2120": "TSWP.ModifyTOCSettingsBaseCommandArchive",
     "2121": "TSWP.ModifyTOCSettingsForTOCInfoCommandArchive",
     "2123": "TSWP.SetObjectPropertiesCommandArchive",

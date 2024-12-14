@@ -44,6 +44,7 @@ message DocumentArchive {
   optional .TSP.Reference collaboration_operation_history = 14;
   optional bool should_measure_negatively_tracked_text_correctly = 15;
   optional bool use_optimized_text_vertical_alignment = 16;
+  optional bool should_allow_ligatures_in_minimally_tracked_text = 18;
   optional .TSK.FormattingSymbolsArchive formatting_symbols = 17;
   optional .TSP.Reference activity_stream = 199;
 }
@@ -363,6 +364,8 @@ message OutgoingCommandQueueItem {
   optional .TSP.Reference command = 1;
   optional string serialized_json_without_data_base64_encoded_string = 2;
   optional .TSP.DataReference serialized_json_without_data_base64_encoded_data = 4;
+  optional bool did_rollback_reapply = 6;
+  optional bool contains_large_pending_upload_data = 7;
   repeated .TSK.OutgoingCommandQueueItemUUIDToDataMapEntry uuid_to_data_map_entries = 3;
   repeated .TSP.DataReference large_data_list = 5;
 }
