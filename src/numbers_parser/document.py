@@ -283,7 +283,7 @@ class Document:
 
             long_date = doc.add_custom_format(
                 name="Long Date",
-                type="date",
+                type="datetime",
                 date_time_format="EEEE, d MMMM yyyy"
             )
             table.set_cell_formatting("C1", "custom", format=long_date)
@@ -1303,7 +1303,8 @@ class Table(Cacheable):
         if (
             cell.is_merged
             and ((side == "right" and cell.size[1] > 1) or (side == "bottom" and cell.size[0] > 1))
-            or isinstance(cell, MergedCell)
+        ) or (
+            isinstance(cell, MergedCell)
             and (
                 (side == "top" and cell.row_start < row)
                 or (side == "right" and cell.col_end > col)
@@ -1342,7 +1343,7 @@ class Table(Cacheable):
 
             table.set_cell_formatting(
                 "C1",
-                "date",
+                "datetime",
                 date_time_format="EEEE, d MMMM yyyy"
             )
             table.set_cell_formatting(

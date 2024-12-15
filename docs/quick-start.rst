@@ -176,7 +176,7 @@ Cell formats are changed using
 
    table.set_cell_formatting(
       "C1", 
-      "date", 
+      "datetime", 
       date_time_format="EEEE, d MMMM yyyy"
    )
    table.set_cell_formatting(
@@ -199,7 +199,7 @@ before assigning it to cells using
 
    long_date = doc.add_custom_format(
       name="Long Date", 
-      type="date", 
+      type="datetime", 
       date_time_format="EEEE, d MMMM yyyy"
    )
    table.set_cell_formatting("C1", "custom", format=long_date)
