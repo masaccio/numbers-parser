@@ -1,6 +1,6 @@
 # Numbers file format
 
-[SheetsJS has documented](https://oss.sheetjs.com/notes/iwa/) some of the core file format details. These notes are additional information tracking other discoveries.
+[SheetsJS has documented](https://oss.sheetjs.com/notes/iwa/) some of the core file format details. These notes are additional information tracking other discoveries. The project also has an [IWA inspector](https://sheetjs.com/tools/iwa-inspector/) which may be more useful than using `unpack-numbers`.
 
 ## Cell formats
 
