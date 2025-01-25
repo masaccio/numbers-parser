@@ -1,7 +1,8 @@
 import pytest
 import pytest_check as check
 
-from numbers_parser import Document, UnsupportedWarning
+from numbers_parser import Cell, Document, UnsupportedWarning
+from numbers_parser.formula import Formula
 
 TABLE_1_FORMULAS = [
     [None, "A1", "$B$1=1"],
@@ -104,3 +105,36 @@ def test_exceptions(configurable_save_file):
         _ = doc.sheets[0].tables[0].cell(0, 1).formula
 
     assert str(record[0].message) == "Table 1@[0,1]: key #999 not found"
+
+
+def test_parse_formulas():
+    def check_formula(cell: Cell, node):
+        new_formula = Formula.from_str(
+            cell._model,
+            cell._table_id,
+            cell.row,
+            cell.col,
+            cell.formula,
+        )
+        # print("*******************\n")
+        # print("TOKENS:", new_formula._tokens)
+        # print("REF-AST:", cell._model.formula_ast(cell._table_id)[cell._formula_id])
+        # print("NEW-AST:", new_formula._archive)
+        # print("*******************\n")
+        return True
+
+    for filename in [
+        "tests/data/test-10.numbers",
+        # "tests/data/simple-func.numbers",
+        # "tests/data/test-all-formulas.numbers",
+        # "tests/data/test-extra-formulas.numbers",
+        # "tests/data/test-new-formulas.numbers",
+    ]:
+        doc = Document(filename)
+        for sheet in doc.sheets:
+            for table in sheet.tables:
+                formula_ast = doc._model.formula_ast(table._table_id)
+                for row in table.rows():
+                    for cell in row:
+                        if cell.is_formula:
+                            assert check_formula(cell, formula_ast[cell._formula_id])
