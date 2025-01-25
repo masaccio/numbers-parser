@@ -924,17 +924,7 @@ class Cell(CellStorageFlags, Cacheable):
         elif cell_type == TSTArchives.textCellType:
             cell = TextCell(row, col, model.table_string(table_id, storage_flags._string_id))
         elif cell_type == TSTArchives.dateCellType:
-            if seconds < 0:
-                table_name = model.table_name(table_id)
-                table_ref = f"@{table_name}:[{row},{col}]"
-                warn(
-                    f"{table_ref}: negative time values are not supported",
-                    UnsupportedWarning,
-                    stacklevel=1,
-                )
-                cell = DateCell(row, col, EPOCH)
-            else:
-                cell = DateCell(row, col, EPOCH + timedelta(seconds=seconds))
+            cell = DateCell(row, col, EPOCH + timedelta(seconds=seconds))
             cell._datetime = cell._value
         elif cell_type == TSTArchives.boolCellType:
             cell = BoolCell(row, col, double > 0.0)
