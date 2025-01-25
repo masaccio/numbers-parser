@@ -68,6 +68,7 @@ debug = logger.debug
 
 
 __all__ = [
+    "RGB",
     "Alignment",
     "BackgroundImage",
     "BoolCell",
@@ -88,7 +89,6 @@ __all__ = [
     "MergedCell",
     "NumberCell",
     "RichTextCell",
-    "RGB",
     "Style",
     "TextCell",
     "VerticalJustification",
@@ -924,7 +924,17 @@ class Cell(CellStorageFlags, Cacheable):
         elif cell_type == TSTArchives.textCellType:
             cell = TextCell(row, col, model.table_string(table_id, storage_flags._string_id))
         elif cell_type == TSTArchives.dateCellType:
-            cell = DateCell(row, col, EPOCH + timedelta(seconds=seconds))
+            if seconds < 0:
+                table_name = model.table_name(table_id)
+                table_ref = f"@{table_name}:[{row},{col}]"
+                warn(
+                    f"{table_ref}: negative time values are not supported",
+                    UnsupportedWarning,
+                    stacklevel=1,
+                )
+                cell = DateCell(row, col, EPOCH)
+            else:
+                cell = DateCell(row, col, EPOCH + timedelta(seconds=seconds))
             cell._datetime = cell._value
         elif cell_type == TSTArchives.boolCellType:
             cell = BoolCell(row, col, double > 0.0)
@@ -1779,16 +1789,11 @@ def _decode_number_format(number_format, value, name):  # noqa: PLR0912
         formatted_value = "".rjust(int_width)
     elif integer == 0 and int_pad is None and dec_pad == CellPadding.SPACE:
         formatted_value = ""
-    elif (
+    elif (integer == 0 and int_pad == CellPadding.SPACE and dec_pad is not None) or (
         integer == 0
         and int_pad == CellPadding.SPACE
-        and dec_pad is not None
-        or (
-            integer == 0
-            and int_pad == CellPadding.SPACE
-            and dec_pad is None
-            and len(str(decimal)) > num_decimals
-        )
+        and dec_pad is None
+        and len(str(decimal)) > num_decimals
     ):
         formatted_value = "".rjust(int_width)
     elif int_pad_space_as_zero or int_pad == CellPadding.ZERO:
@@ -2021,7 +2026,7 @@ def _auto_units(cell_value, number_format):
 range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
 
 
-def xl_cell_to_rowcol(cell_str: str) -> tuple:
+def xl_cell_to_rowcol(cell_str: str, absolute=False) -> tuple:
     """
     Convert a cell reference in A1 notation to a zero indexed row and column.
 
@@ -2056,6 +2061,10 @@ def xl_cell_to_rowcol(cell_str: str) -> tuple:
     row = int(row_str) - 1
     col -= 1
 
+    if absolute:
+        row_abs = match.group(1) == "$"
+        col_abs = match.group(3) == "$"
+        return row, row_abs, col, col_abs
     return row, col
 
 
