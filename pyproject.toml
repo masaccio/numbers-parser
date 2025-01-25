@@ -45,7 +45,6 @@ tox = "^4.11.4"
 python-magic = ">=0.4"
 tqdm = ">=4.66"
 colorama = "^0.4.6"
-roman = "^4.2"
 
 [tool.poetry.group.docs]
 optional = true
