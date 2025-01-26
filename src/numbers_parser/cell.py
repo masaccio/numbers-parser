@@ -2016,7 +2016,7 @@ def _auto_units(cell_value, number_format):
 range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
 
 
-def xl_cell_to_rowcol(cell_str: str, absolute=False) -> tuple:
+def xl_cell_to_rowcol(cell_str: str) -> tuple:
     """
     Convert a cell reference in A1 notation to a zero indexed row and column.
 
@@ -2051,10 +2051,6 @@ def xl_cell_to_rowcol(cell_str: str, absolute=False) -> tuple:
     row = int(row_str) - 1
     col -= 1
 
-    if absolute:
-        row_abs = match.group(1) == "$"
-        col_abs = match.group(3) == "$"
-        return row, row_abs, col, col_abs
     return row, col
 
 
