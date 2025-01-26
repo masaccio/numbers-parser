@@ -2,7 +2,6 @@ import re
 import warnings
 from datetime import datetime, timedelta
 
-from numbers_parser.cell import xl_cell_to_rowcol
 from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated.functionmap import FUNCTION_MAP
@@ -11,6 +10,22 @@ from numbers_parser.generated.TSCEArchives_pb2 import ASTNodeArrayArchive
 FUNCTION_NAME_TO_ID = {v: k for k, v in FUNCTION_MAP.items()}
 
 OPERATOR_MAP = str.maketrans({"×": "*", "÷": "/", "≥": ">=", "≤": "<=", "≠": "<>"})
+
+OPERATOR_INFIX_MAP = {
+    "=": "EQUAL_TO_NODE",
+    "+": "ADDITION_NODE",
+    "-": "SUBTRACTION_NODE",
+    "*": "MULTIPLICATION_NODE",
+    "/": "DIVISION_NODE",
+    "&": "CONCATENATION_NODE",
+    "^": "POWER_NODE",
+    "==": "EQUAL_TO_NODE",
+    "<>": "NOT_EQUAL_TO_NODE",
+    "<": "LESS_THAN_NODE",
+    ">": "GREATER_THAN_NODE",
+    "<=": "LESS_THAN_OR_EQUAL_TO_NODE",
+    ">=": "GREATER_THAN_OR_EQUAL_TO_NODE",
+}
 
 
 class Formula(list):
@@ -24,42 +39,34 @@ class Formula(list):
     @classmethod
     def from_str(cls, model, table_id, row, col, formula_str) -> "Formula":
         formula = cls(model, table_id, row, col)
-        formula_str = formula_str.translate(OPERATOR_MAP)
-        tok = Tokenizer(formula_str if formula_str.startswith("=") else "=" + formula_str)
-        formula._tokens = tok.items
+        formula._tokens = cls.formula_tokens(formula_str)
         archive = TSCEArchives.FormulaArchive()
-        for token in tok.items:
-            if token.type == Token.FUNC:
-                if token.subtype == Token.OPEN:
-                    function_name = token.value[0:-1]
-                    if function_name not in FUNCTION_NAME_TO_ID:
-                        table_name = model.table_name(table_id)
-                        cell_ref = f"{table_name}@[{row},{col}]"
-                        warnings.warn(
-                            f"{cell_ref}: function {function_name} is not supported.",
-                            stacklevel=2,
-                        )
-                        return None
-                    archive.AST_node_array.AST_node.append(
-                        ASTNodeArrayArchive.ASTNodeArchive(
-                            AST_node_type="FUNCTION_NODE",
-                            AST_function_node_index=FUNCTION_NAME_TO_ID[function_name],
-                            AST_function_node_numArgs=0,
-                        ),
+        for token in formula._tokens:
+            if token.type == Token.FUNC and token.subtype == Token.CLOSE:
+                function_name = token.value
+                if function_name not in FUNCTION_NAME_TO_ID:
+                    table_name = model.table_name(table_id)
+                    cell_ref = f"{table_name}@[{row},{col}]"
+                    warnings.warn(
+                        f"{cell_ref}: function {function_name} is not supported.",
+                        stacklevel=2,
                     )
-            elif token.type == Token.OPERAND and token.subtype == Token.RANGE:
-                coords = xl_cell_to_rowcol(token.value, absolute=True)
+                    return None
                 archive.AST_node_array.AST_node.append(
                     ASTNodeArrayArchive.ASTNodeArchive(
-                        AST_node_type="CELL_REFERENCE_NODE",
-                        AST_row=ASTNodeArrayArchive.ASTRowCoordinateArchive(
-                            row=coords[0],
-                            absolute=coords[1],
-                        ),
-                        AST_column=ASTNodeArrayArchive.ASTColumnCoordinateArchive(
-                            column=coords[2],
-                            absolute=coords[3],
-                        ),
+                        AST_node_type="FUNCTION_NODE",
+                        AST_function_node_index=FUNCTION_NAME_TO_ID[function_name],
+                        AST_function_node_numArgs=0,
+                    ),
+                )
+            elif token.type == Token.OPERAND:
+                node = Formula.operand_archive(row, col, token)
+                if node is not None:
+                    archive.AST_node_array.AST_node.append(node)
+            elif token.type == Token.OP_IN:
+                archive.AST_node_array.AST_node.append(
+                    ASTNodeArrayArchive.ASTNodeArchive(
+                        AST_node_type=OPERATOR_INFIX_MAP[token.value],
                     ),
                 )
             # LITERAL = "LITERAL"
@@ -74,6 +81,103 @@ class Formula(list):
             # WSPACE = "WHITE-SPACE"
         formula._archive = archive
         return formula
+
+    @staticmethod
+    def formula_tokens(formula_str: str):
+        formula_str = formula_str.translate(OPERATOR_MAP)
+        tok = Tokenizer(formula_str if formula_str.startswith("=") else "=" + formula_str)
+        i = 0
+        func_stack = []
+        while i < len(tok.items):
+            token = tok.items[i]
+            if token.type == Token.OP_IN:
+                # Numbers needs the two arguments to an operator
+                # on the stack before the operator function itself
+                next_token = tok.items[i + 1]
+                if next_token.subtype == Token.OPEN:
+                    func_stack.append(next_token.value[0:-1])
+                tok.items[i] = next_token
+                tok.items[i + 1] = token
+                i += 1
+            elif token.type == Token.FUNC:
+                # Numbers needs function arguments on the stack
+                # before the function node itself
+                if token.subtype == Token.OPEN:
+                    func_stack.append(token.value[0:-1])
+                else:
+                    token.value = func_stack.pop()
+
+            i += 1
+        return tok.items
+
+    @staticmethod
+    def operand_archive(row: int, col: int, token: "Token") -> ASTNodeArrayArchive.ASTNodeArchive:
+        if token.subtype == Token.RANGE:
+            if False and ":" in token.value:
+                return ASTNodeArrayArchive.ASTNodeArchive(
+                    AST_node_type="COLON_TRACT_NODE",
+                    AST_sticky_bits=ASTNodeArrayArchive.ASTStickyBits(
+                        begin_row_is_absolute=False,
+                        begin_column_is_absolute=False,
+                        end_row_is_absolute=False,
+                        end_column_is_absolute=False,
+                    ),
+                    AST_colon_tract=ASTNodeArrayArchive.ASTColonTractArchive(
+                        relative_row=[
+                            ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
+                                range_begin=-2,
+                            ),
+                        ],
+                        relative_column=[
+                            ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
+                                range_begin=-2,
+                                range_end=-1,
+                            ),
+                        ],
+                        preserve_rectangular=True,
+                    ),
+                )
+
+            range = parse_numbers_range(token.value)
+            print(f"RANGE: {token.value} -> {range}")
+
+            return ASTNodeArrayArchive.ASTNodeArchive(
+                AST_node_type="CELL_REFERENCE_NODE",
+                AST_row=ASTNodeArrayArchive.ASTRowCoordinateArchive(
+                    row=range["row_start"] if range["row_start_abs"] else range["row_start"] - row,
+                    absolute=range["row_start_abs"],
+                ),
+                AST_column=ASTNodeArrayArchive.ASTColumnCoordinateArchive(
+                    column=range["col_start"]
+                    if range["col_start_abs"]
+                    else range["col_start"] - col,
+                    absolute=range["col_start_abs"],
+                ),
+            )
+        if token.subtype == Token.NUMBER:
+            if float(token.value).is_integer():
+                return ASTNodeArrayArchive.ASTNodeArchive(
+                    AST_node_type="NUMBER_NODE",
+                    AST_number_node_number=int(token.value),
+                    AST_number_node_decimal_low=int(token.value),
+                    AST_number_node_decimal_high=0x3040000000000000,
+                )
+            return ASTNodeArrayArchive.ASTNodeArchive(
+                AST_node_type="NUMBER_NODE",
+                AST_number_node_number=float(token.value),
+                # AST_number_node_decimal_low=int(token.value),
+                # AST_number_node_decimal_high=0x3040000000000000,
+            )
+        if token.subtype == Token.TEXT:
+            # String literals from tokenizer include start and end quotes
+            value = token.value[1:-1]
+            # Numbers does not escape quotes in the AST
+            value = value.replace('""', '"')
+            return ASTNodeArrayArchive.ASTNodeArchive(
+                AST_node_type="STRING_NODE",
+                AST_string_node_string=value,
+            )
+        return None
 
     def __str__(self) -> str:
         return "".join(reversed(self._stack))
@@ -233,7 +337,10 @@ class Formula(list):
 
     def string(self, *args) -> None:
         node = args[2]
-        self.push('"' + node.AST_string_node_string + '"')
+        # Numbers does not escape quotes in the AST; in the app, they are
+        # doubled up just like in Excel
+        value = node.AST_string_node_string.replace('"', '""')
+        self.push(f'"{value}"')
 
     def sub(self, *args) -> None:
         arg2, arg1 = self.popn(2)
@@ -382,6 +489,14 @@ def number_to_str(v: int) -> str:
     return v_str
 
 
+def str_to_number(v: str) -> int:
+    """Convert a string to a number."""
+    if "." in v:
+        v = v.split(".")
+        return int(v[0] + v[1])
+    return int(v)
+
+
 # The Tokenizer class is taken from the openpyxl library which is
 # licensed under the MIT License. The original source code can be found at:
 #
@@ -400,7 +515,7 @@ class TokenizerError(Exception):
     """Base class for all Tokenizer errors."""
 
 
-class Tokenizer:
+class Tokenizer:  # pragma: no cover
     """
     A tokenizer for Excel worksheet formulae.
 
@@ -425,7 +540,8 @@ class Tokenizer:
         "'": re.compile("'(?:[^']*'')*[^']*'(?!')"),
     }
     ERROR_CODES = ("#NULL!", "#DIV/0!", "#VALUE!", "#REF!", "#NAME?", "#NUM!", "#N/A")
-    TOKEN_ENDERS = ",;}) +-*/^&=><%"  # Each of these characters, marks the  # noqa: S105
+    # TOKEN_ENDERS = ",;}) +-*/^&=><%"  # Each of these characters, marks the
+    TOKEN_ENDERS = ",;})+-*/^&=><%"  # Each of these characters, marks the  # noqa: S105
     # end of an operand token
 
     def __init__(self, formula):
@@ -454,7 +570,7 @@ class Tokenizer:
             ("\"'", self.parse_string),
             ("[", self.parse_brackets),
             ("#", self.parse_error),
-            (" ", self.parse_whitespace),
+            # (" ", self.parse_whitespace),
             ("+-*/^&=><%", self.parse_operator),
             ("{(", self.parse_opener),
             (")}", self.parse_closer),
@@ -703,7 +819,7 @@ class Tokenizer:
         return "=" + "".join(token.value for token in self.items)
 
 
-class Token:
+class Token:  # pragma: no cover
     """
     A token in an Excel formula.
 
@@ -835,3 +951,87 @@ class Token:
 
         subtype = cls.ARG if value == "," else cls.ROW
         return cls(value, cls.SEP, subtype)
+
+
+# Regex pattern
+SHEET_RANGE_REGEXP = re.compile(
+    r"""
+    ^                                             # Start of the string
+    (?:(?P<sheet_name>[^:]+)::)?                  # Optional sheet name followed by ::
+    (?:(?P<table_name>[^:]+)::)?                  # Optional table name followed by ::
+    (?:
+        (?P<range_start>                          # Group for single cell or start of range
+            (?P<col_start>\$?[0-9A-Z]+)           # Start column (e.g., A, $A, AA), $ optional
+            (?P<row_start>\$?\d+)                 # Start row (e.g., 1, $1), $ optional
+        )
+        (?:
+            :
+            (?P<range_end>                        # Optional range end (e.g., B2)
+                (?P<col_end>\$?[0-9A-Z]+)?        # End column (e.g., B, $B, AB), $ optional
+                (?P<row_end>\$?\d+)?              # End row (e.g., 2, $2), $ optional
+            )
+        )?
+    |
+        (?P<named_range>[a-zA-Z_][a-zA-Z0-9_]*)   # Named range (e.g., cats)
+    )
+    $                                             # End of the string
+""",
+    re.VERBOSE,
+)
+
+# sheet_name: Matches the optional sheet name (e.g., "Sheet1").
+# table_name: Matches the optional table name (e.g., "Table1").
+# range_start: Matches the start of a range or single cell (e.g., "A1" or "$B$2").
+# col_start: Matches the column portion of the range start (e.g., "A", "$B").
+# row_start: Matches the row portion of the range start (e.g., "1", "$2").
+# range_end: Matches the optional end of a range (e.g., "C3").
+# col_end: Matches the column portion of the range end (e.g., "C", "$D").
+# row_end: Matches the row portion of the range end (e.g., "3", "$4").
+# named_range: Matches a named range (e.g., "cats").
+
+
+def parse_numbers_range(range_str: str) -> dict:
+    """
+    Parse a cell range string in Numbers format.
+
+    Args:
+        range_str (str): The Numbers cell range string.
+
+    Returns:
+        dict: A dictionary containing the start and end column/row numbers
+              with zero offset, booleans indicating whether the references
+              are absolute or relative, and any sheet or table name.
+
+    """
+    if not (match := SHEET_RANGE_REGEXP.match(range_str)):
+        msg = f"Invalid range string: {range_str}"
+        raise ValueError(msg)
+
+    def col_to_index(col: str) -> int:
+        if col is None:
+            return ""
+        col = col.lstrip("$")
+        index = 0
+        for char in col:
+            index = index * 26 + (ord(char) - ord("A") + 1)
+        return index - 1
+
+    def row_to_index(row: str) -> int:
+        return int(row.lstrip("$")) - 1 if row is not None else ""
+
+    col_start = match.group("col_start") or ""
+    row_start = match.group("row_start") or ""
+    col_end = match.group("col_end") or ""
+    row_end = match.group("row_end") or ""
+
+    return {
+        **match.groupdict(),
+        "col_start": col_to_index(col_start),
+        "row_start": row_to_index(row_start),
+        "col_end": col_to_index(col_end) if col_end else col_to_index(col_start),
+        "end_row": row_to_index(row_end) if row_end else row_to_index(row_start),
+        "col_start_abs": col_start.startswith("$"),
+        "row_start_abs": row_start.startswith("$"),
+        "col_end_abs": col_end.startswith("$") if col_end else col_start.startswith("$"),
+        "row_end_abs": row_end.startswith("$") if row_end else row_start.startswith("$"),
+    }
