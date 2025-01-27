@@ -56,7 +56,7 @@ class Formula(list):
                     ASTNodeArrayArchive.ASTNodeArchive(
                         AST_node_type="FUNCTION_NODE",
                         AST_function_node_index=FUNCTION_NAME_TO_ID[function_name],
-                        AST_function_node_numArgs=0,
+                        AST_function_node_numArgs=token.num_args,
                     ),
                 )
             elif token.type == Token.OPERAND:
@@ -86,72 +86,73 @@ class Formula(list):
     def formula_tokens(formula_str: str):
         formula_str = formula_str.translate(OPERATOR_MAP)
         tok = Tokenizer(formula_str if formula_str.startswith("=") else "=" + formula_str)
-        i = 0
+
+        # Tag function close with function name and number of arguments
         func_stack = []
+        func_arg_count = {}
+        for token in tok.items:
+            if token.type == Token.FUNC:
+                if token.subtype == Token.OPEN:
+                    func_stack.append(token.value[0:-1])
+                    func_arg_count[len(func_stack)] = 0
+                else:
+                    token.num_args = func_arg_count[len(func_stack)]
+                    token.value = func_stack.pop()
+            elif token.type == Token.OPERAND and func_stack:
+                func_arg_count[len(func_stack)] += 1
+
+        # Re-order infix operators and their arguments
+        i = 0
         while i < len(tok.items):
             token = tok.items[i]
             if token.type == Token.OP_IN:
-                # Numbers needs the two arguments to an operator
-                # on the stack before the operator function itself
                 next_token = tok.items[i + 1]
-                if next_token.subtype == Token.OPEN:
-                    func_stack.append(next_token.value[0:-1])
                 tok.items[i] = next_token
                 tok.items[i + 1] = token
                 i += 1
-            elif token.type == Token.FUNC:
-                # Numbers needs function arguments on the stack
-                # before the function node itself
-                if token.subtype == Token.OPEN:
-                    func_stack.append(token.value[0:-1])
-                else:
-                    token.value = func_stack.pop()
-
             i += 1
         return tok.items
 
     @staticmethod
     def operand_archive(row: int, col: int, token: "Token") -> ASTNodeArrayArchive.ASTNodeArchive:
         if token.subtype == Token.RANGE:
-            if False and ":" in token.value:
+            r = parse_numbers_range(token.value)
+            if r["range_end"]:
+                row_range_begin = r["row_start"] if r["row_start_abs"] else r["row_start"] - row
+                col_range_begin = r["col_start"] if r["col_start_abs"] else r["col_start"] - col
+                col_range_end = r["col_end"] if r["col_end_abs"] else r["col_end"] - col
                 return ASTNodeArrayArchive.ASTNodeArchive(
                     AST_node_type="COLON_TRACT_NODE",
                     AST_sticky_bits=ASTNodeArrayArchive.ASTStickyBits(
-                        begin_row_is_absolute=False,
-                        begin_column_is_absolute=False,
-                        end_row_is_absolute=False,
-                        end_column_is_absolute=False,
+                        begin_row_is_absolute=r["row_start_abs"],
+                        begin_column_is_absolute=r["col_start_abs"],
+                        end_row_is_absolute=r["row_end_abs"],
+                        end_column_is_absolute=r["col_end_abs"],
                     ),
                     AST_colon_tract=ASTNodeArrayArchive.ASTColonTractArchive(
                         relative_row=[
                             ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
-                                range_begin=-2,
+                                range_begin=row_range_begin,
                             ),
                         ],
                         relative_column=[
                             ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
-                                range_begin=-2,
-                                range_end=-1,
+                                range_begin=col_range_begin,
+                                range_end=col_range_end,
                             ),
                         ],
                         preserve_rectangular=True,
                     ),
                 )
-
-            range = parse_numbers_range(token.value)
-            print(f"RANGE: {token.value} -> {range}")
-
             return ASTNodeArrayArchive.ASTNodeArchive(
                 AST_node_type="CELL_REFERENCE_NODE",
                 AST_row=ASTNodeArrayArchive.ASTRowCoordinateArchive(
-                    row=range["row_start"] if range["row_start_abs"] else range["row_start"] - row,
-                    absolute=range["row_start_abs"],
+                    row=r["row_start"] if r["row_start_abs"] else r["row_start"] - row,
+                    absolute=r["row_start_abs"],
                 ),
                 AST_column=ASTNodeArrayArchive.ASTColumnCoordinateArchive(
-                    column=range["col_start"]
-                    if range["col_start_abs"]
-                    else range["col_start"] - col,
-                    absolute=range["col_start_abs"],
+                    column=r["col_start"] if r["col_start_abs"] else r["col_start"] - col,
+                    absolute=r["col_start_abs"],
                 ),
             )
         if token.subtype == Token.NUMBER:
@@ -176,6 +177,12 @@ class Formula(list):
             return ASTNodeArrayArchive.ASTNodeArchive(
                 AST_node_type="STRING_NODE",
                 AST_string_node_string=value,
+            )
+
+        if token.subtype == Token.LOGICAL:
+            return ASTNodeArrayArchive.ASTNodeArchive(
+                AST_node_type="BOOLEAN_NODE",
+                AST_boolean_node_boolean=token.value.lower() == "true",
             )
         return None
 
@@ -832,7 +839,7 @@ class Token:  # pragma: no cover
 
     """
 
-    __slots__ = ["subtype", "type", "value"]
+    __slots__ = ["num_args", "subtype", "type", "value"]
 
     LITERAL = "LITERAL"
     OPERAND = "OPERAND"
@@ -849,6 +856,7 @@ class Token:  # pragma: no cover
         self.value = value
         self.type = type_
         self.subtype = subtype
+        self.num_args = 0
 
     def __repr__(self):
         return f"{self.type}({self.subtype},'{self.value}')"
@@ -961,13 +969,13 @@ SHEET_RANGE_REGEXP = re.compile(
     (?:(?P<table_name>[^:]+)::)?                  # Optional table name followed by ::
     (?:
         (?P<range_start>                          # Group for single cell or start of range
-            (?P<col_start>\$?[0-9A-Z]+)           # Start column (e.g., A, $A, AA), $ optional
+            (?P<col_start>\$?([0-9]+|[A-Z]+))     # Start column (e.g., A, $A, AA), $ optional
             (?P<row_start>\$?\d+)                 # Start row (e.g., 1, $1), $ optional
         )
         (?:
             :
             (?P<range_end>                        # Optional range end (e.g., B2)
-                (?P<col_end>\$?[0-9A-Z]+)?        # End column (e.g., B, $B, AB), $ optional
+                (?P<col_end>\$?([0-9]+|[A-Z]+))?  # End column (e.g., B, $B, AB), $ optional
                 (?P<row_end>\$?\d+)?              # End row (e.g., 2, $2), $ optional
             )
         )?
