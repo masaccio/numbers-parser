@@ -121,6 +121,12 @@ def test_tokenizer():
 
 
 def test_parse_formulas():
+    from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
+
+    node_name_map = {
+        k: v.name for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
+    }
+
     def check_formula(cell: Cell, node):
         new_formula = Formula.from_str(
             cell._model,
@@ -131,18 +137,29 @@ def test_parse_formulas():
         )
         ref_archive = [str(x) for x in cell._model.formula_ast(cell._table_id)[cell._formula_id]]
         new_archive = [str(x) for x in new_formula._archive.AST_node_array.AST_node]
+        ref_node_types = [
+            node_name_map[x.AST_node_type]
+            for x in cell._model.formula_ast(cell._table_id)[cell._formula_id]
+        ]
+        new_node_types = [
+            node_name_map[x.AST_node_type] for x in new_formula._archive.AST_node_array.AST_node
+        ]
         table_name = cell._model.table_name(cell._table_id)
-        print("\n")
-        if ref_archive == new_archive:
-            print(f"OK: {table_name}@{cell.row},{cell.col}: {cell.formula}")
-        else:
+        if ref_archive != new_archive:
+            print("\n")
             print(f"MISMATCH: {table_name}@{cell.row},{cell.col}: {cell.formula}")
             print(f"TOKENS: {new_formula._tokens}§")
+            max_len = max([len(x) for x in ref_node_types + new_node_types])
             if len(ref_archive) != len(new_archive):
-                print(f"LEN-REF: {len(ref_archive)}")
-                print(f"LEN-NEW: {len(new_archive)}")
-                print("REF-AST: " + "§".join(ref_archive) + "§")
-                print("NEW-AST: " + "§".join(new_archive) + "§")
+                print("--- REF ---".center(max_len), "|", "--- NEW ---".center(max_len))
+                for i in range(max([len(ref_node_types), len(new_node_types)])):
+                    ref = ref_node_types[i] if i < len(ref_node_types) else ""
+                    new = new_node_types[i] if i < len(new_node_types) else ""
+                    print(f"{ref:{max_len}s} | {new:{max_len}s}")
+            elif ref_node_types != new_node_types:
+                print("--- REF ---".center(max_len), "|", "--- NEW ---".center(max_len))
+                for i in range(len(ref_node_types)):
+                    print(f"{ref_node_types[i]:{max_len}s} | {new_node_types[i]:{max_len}s}")
             else:
                 for i, (ref, new) in enumerate(zip(ref_archive, new_archive)):
                     if ref != new:
