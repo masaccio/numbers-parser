@@ -3,6 +3,7 @@ import pytest_check as check
 
 from numbers_parser import Cell, Document, UnsupportedWarning
 from numbers_parser.formula import Formula, Tokenizer
+from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 
 TABLE_1_FORMULAS = [
     [None, "A1", "$B$1=1"],
@@ -166,33 +167,24 @@ TOKEN_TESTS = {
         "OPERAND(NUMBER,'1')",
         "OPERAND(NUMBER,'2')",
         "OPERATOR-INFIX(,'≤')",
-        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
         "OPERAND(LOGICAL,'TRUE')",
-        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAY
         "OPERAND(LOGICAL,'FALSE')",
-        # END_THUNK_NODE
         "FUNC(OPEN,'IF')",
     ],
     "IF(1≥2,TRUE,FALSE)": [
         "OPERAND(NUMBER,'1')",
         "OPERAND(NUMBER,'2')",
         "OPERATOR-INFIX(,'≥')",
-        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
         "OPERAND(LOGICAL,'TRUE')",
-        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAY
         "OPERAND(LOGICAL,'FALSE')",
-        # END_THUNK_NODE
         "FUNC(OPEN,'IF')",
     ],
     "IF(1≠2,TRUE,FALSE)": [
         "OPERAND(NUMBER,'1')",
         "OPERAND(NUMBER,'2')",
         "OPERATOR-INFIX(,'≠')",
-        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
         "OPERAND(LOGICAL,'TRUE')",
-        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAY
         "OPERAND(LOGICAL,'FALSE')",
-        # END_THUNK_NODE
         "FUNC(OPEN,'IF')",
     ],
     "A1+B1-C1": [
@@ -215,13 +207,10 @@ TOKEN_TESTS = {
         "OPERAND(RANGE,'B1')",
         "OPERAND(NUMBER,'0')",
         "OPERATOR-INFIX(,'>')",
-        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
         "OPERAND(RANGE,'E1:F1')",
         "FUNC(OPEN,'COUNTA')",
-        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAY
         "OPERAND(RANGE,'E1:H1')",
         "FUNC(OPEN,'COUNTA')",
-        # END_THUNK_NODE
         "FUNC(OPEN,'IF')",
     ],
     'IF(OR(SUM(A2:B2)>1,SUM(A1:B1)>1),"yay","nay")': [
@@ -234,20 +223,14 @@ TOKEN_TESTS = {
         "OPERAND(NUMBER,'1')",
         "OPERATOR-INFIX(,'>')",
         "FUNC(OPEN,'OR')",
-        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
         "OPERAND(TEXT,'\"yay\"')",
-        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAY
         "OPERAND(TEXT,'\"nay\"')",
-        # END_THUNK_NODE
         "FUNC(OPEN,'IF')",
     ],
     "IF(TRUE,1,0)": [
         "OPERAND(LOGICAL,'TRUE')",
-        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
         "OPERAND(NUMBER,'1')",
-        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAYND_THUNK_NODE
         "OPERAND(NUMBER,'0')",
-        # END_THUNK_NODE
         "FUNC(OPEN,'IF')",
     ],
     "POWER(2,5)": [
@@ -273,35 +256,29 @@ def test_tokenizer():
     for formula, ref_tokens in TOKEN_TESTS.items():
         tok = Tokenizer("=" + formula)
         tokens = Formula.rpn_tokens(tok.items)
-        if [str(x) for x in tokens] == ref_tokens:
-            print(f"\nFORMULA: {formula} (SUCCESS)")
-        else:
-            print(f"\nFORMULA: {formula}")
-            for i, ref_token in enumerate(ref_tokens):
-                test_token = "MISSING" if i > len(tokens) - 1 else tokens[i]
-                print(f"{ref_token:40s}| {test_token}")
+        assert [str(x) for x in tokens] == ref_tokens, formula
 
 
-def test_parse_formulas():
-    from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
+def check_generated_formula(cell: Cell) -> None:
+    new_formula = Formula.from_str(
+        cell._model,
+        cell._table_id,
+        cell.row,
+        cell.col,
+        cell.formula,
+    )
 
-    node_name_map = {
-        k: v.name for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
-    }
+    ref_archive = [str(x) for x in cell._model.formula_ast(cell._table_id)[cell._formula_id]]
+    new_archive = [str(x) for x in new_formula._archive.AST_node_array.AST_node]
 
-    def check_formula(cell: Cell, node):
-        new_formula = Formula.from_str(
-            cell._model,
-            cell._table_id,
-            cell.row,
-            cell.col,
-            cell.formula,
-        )
-        ref_archive = [str(x) for x in cell._model.formula_ast(cell._table_id)[cell._formula_id]]
-        new_archive = [str(x) for x in new_formula._archive.AST_node_array.AST_node]
+    if ref_archive != new_archive:
+        s = ""
+        node_name_map = {
+            k: v.name
+            for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
+        }
+
         table_name = cell._model.table_name(cell._table_id)
-        print(f"\n*FORMULA: {table_name}@{cell.row},{cell.col}: {cell.formula}")
-
         ref_node_types = [
             node_name_map[x.AST_node_type]
             for x in cell._model.formula_ast(cell._table_id)[cell._formula_id]
@@ -309,30 +286,37 @@ def test_parse_formulas():
         new_node_types = [
             node_name_map[x.AST_node_type] for x in new_formula._archive.AST_node_array.AST_node
         ]
-        table_name = cell._model.table_name(cell._table_id)
-        if ref_archive != new_archive:
-            print("\n")
-            print(f"MISMATCH: {table_name}@{cell.row},{cell.col}: {cell.formula}")
-            print(f"TOKENS: {new_formula._tokens}§")
-            max_len = max([len(x) for x in ref_node_types + new_node_types])
-            if len(ref_archive) != len(new_archive):
-                print("--- REF ---".center(max_len), "|", "--- NEW ---".center(max_len))
-                for i in range(max([len(ref_node_types), len(new_node_types)])):
-                    ref = ref_node_types[i] if i < len(ref_node_types) else ""
-                    new = new_node_types[i] if i < len(new_node_types) else ""
-                    print(f"{ref:{max_len}s} | {new:{max_len}s}")
-            elif ref_node_types != new_node_types:
-                print("--- REF ---".center(max_len), "|", "--- NEW ---".center(max_len))
-                for i in range(len(ref_node_types)):
-                    print(f"{ref_node_types[i]:{max_len}s} | {new_node_types[i]:{max_len}s}")
-            else:
-                for i, (ref, new) in enumerate(zip(ref_archive, new_archive)):
-                    if ref != new:
-                        print(f"REF[{i}]: {ref}")
-                        print(f"NEW[{i}]: {new}")
 
-        return True
+        print("\n")
+        print(f"MISMATCH: {table_name}@{cell.row},{cell.col}: {cell.formula}")
+        print(f"TOKENS: {new_formula._tokens}")
 
+        max_len = max([len(x) for x in ref_node_types + new_node_types]) + 2
+        num_dashes = int(max_len / 2) - 2
+        ref_header = "-" * num_dashes + " REF " + "-" * num_dashes
+        new_header = "-" * num_dashes + " NEW " + "-" * num_dashes
+
+        if len(ref_archive) != len(new_archive):
+            print(f"{ref_header} | {new_header}")
+            for i in range(max([len(ref_node_types), len(new_node_types)])):
+                ref = ref_node_types[i] if i < len(ref_node_types) else ""
+                new = new_node_types[i] if i < len(new_node_types) else ""
+                print(f"{ref:{max_len}s} | {new:{max_len}s}")
+        elif ref_node_types != new_node_types:
+            print(f"{ref_header} | {new_header}")
+            for i in range(len(ref_node_types)):
+                print(f"{ref_node_types[i]:{max_len}s} | {new_node_types[i]:{max_len}s}")
+        else:
+            for i, (ref, new) in enumerate(zip(ref_archive, new_archive)):
+                if ref != new:
+                    print(f"REF[{i}]: {ref}")
+                    print(f"NEW[{i}]: {new}")
+        return False
+
+    return True
+
+
+def test_parse_formulas():
     for filename in [
         "tests/data/create-formulas.numbers",
         # "tests/data/test-10.numbers",
@@ -344,8 +328,7 @@ def test_parse_formulas():
         doc = Document(filename)
         for sheet in doc.sheets:
             for table in sheet.tables:
-                formula_ast = doc._model.formula_ast(table._table_id)
                 for row in table.rows():
                     for cell in row:
                         if cell.formula is not None:
-                            assert check_formula(cell, formula_ast[cell._formula_id])
+                            assert check_generated_formula(cell)
