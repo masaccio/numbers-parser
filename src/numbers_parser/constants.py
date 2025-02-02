@@ -12,16 +12,16 @@ except ImportError:  # pragma: nocover
     from importlib_resources import files
 
 __all__ = [
-    "CellType",
-    "PaddingType",
     "CellPadding",
+    "CellType",
+    "ControlFormattingType",
     "DurationStyle",
     "DurationUnits",
     "FormatType",
     "FormattingType",
-    "NegativeNumberStyle",
     "FractionAccuracy",
-    "ControlFormattingType",
+    "NegativeNumberStyle",
+    "PaddingType",
 ]
 
 DEFAULT_DOCUMENT = files("numbers_parser") / "data" / "empty.numbers"
