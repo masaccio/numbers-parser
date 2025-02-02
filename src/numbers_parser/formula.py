@@ -50,6 +50,7 @@ class Formula(list):
                     cell_ref = f"{table_name}@[{row},{col}]"
                     warnings.warn(
                         f"{cell_ref}: function {token.value} is not supported.",
+                        UnsupportedWarning,
                         stacklevel=2,
                     )
                     return None
@@ -62,8 +63,8 @@ class Formula(list):
                 )
             elif token.type == Token.OPERAND:
                 node = Formula.operand_archive(row, col, token)
-                if node is not None:
-                    archive.AST_node_array.AST_node.append(node)
+                # if node is not None:
+                archive.AST_node_array.AST_node.append(node)
             elif token.type == Token.OP_IN:
                 archive.AST_node_array.AST_node.append(
                     ASTNodeArrayArchive.ASTNodeArchive(
@@ -72,64 +73,6 @@ class Formula(list):
                 )
         formula._archive = archive
         return formula
-
-    @staticmethod
-    def rpn_tokens(tokens):
-        output = []
-        operators = []
-        functions = []
-
-        for token in tokens:
-            if token.type in ["OPERAND", "NUMBER", "LITERAL", "TEXT", "RANGE"]:
-                output.append(token)
-                if functions:
-                    functions[-1].num_args += 1
-            elif token.type == "FUNC" and token.subtype == "OPEN":
-                token.value = token.value[0:-1]
-                functions.append(token)
-                functions[-1].num_args = 0
-            elif token.type in ["OPERATOR-POSTFIX", "OPERATOR-PREFIX"]:
-                output.append(token)
-            elif token.type == "OPERATOR-INFIX":
-                while (
-                    operators
-                    and operators[-1].type == "OPERATOR-INFIX"
-                    and OPERATOR_PRECEDENCE[operators[-1].value] >= OPERATOR_PRECEDENCE[token.value]
-                ):
-                    output.append(operators.pop())
-                operators.append(token)
-            elif token.type == "FUNC" and token.subtype == "CLOSE":
-                while operators and (
-                    operators[-1].type != "FUNC" and operators[-1].subtype != "OPEN"
-                ):
-                    output.append(operators.pop())
-                if operators:
-                    operators.pop()
-                if functions:
-                    output.append(functions.pop())
-            elif token.type == "SEP":
-                if operators:
-                    output.append(operators.pop())
-            elif token.type == "PAREN":
-                if token.subtype == "OPEN":
-                    operators.append(token)
-                elif token.subtype == "CLOSE":
-                    while operators and operators[-1].subtype != "OPEN":
-                        output.append(operators.pop())
-                    operators.pop()
-                    if operators and operators[-1].type == "FUNC":
-                        output.append(operators.pop())
-
-        while operators:
-            output.append(operators.pop())
-
-        return output
-
-    @staticmethod
-    def formula_tokens(formula_str: str):
-        formula_str = formula_str.translate(OPERATOR_MAP)
-        tok = Tokenizer(formula_str if formula_str.startswith("=") else "=" + formula_str)
-        return Formula.rpn_tokens(tok.items)
 
     @staticmethod
     def operand_archive(row: int, col: int, token: "Token") -> ASTNodeArrayArchive.ASTNodeArchive:
@@ -202,7 +145,63 @@ class Formula(list):
                 AST_node_type="BOOLEAN_NODE",
                 AST_boolean_node_boolean=token.value.lower() == "true",
             )
+
         return None
+
+    @staticmethod
+    def rpn_tokens(tokens):
+        output = []
+        operators = []
+
+        for token in tokens:
+            if token.type in ["OPERAND", "NUMBER", "LITERAL", "TEXT", "RANGE"]:
+                output.append(token)
+                if operators and operators[-1].type == "FUNC":
+                    operators[-1].num_args += 1
+            elif token.type == "FUNC" and token.subtype == "OPEN":
+                token.value = token.value[0:-1]
+                operators.append(token)
+                operators[-1].num_args = 0
+            elif token.type in ["OPERATOR-POSTFIX", "OPERATOR-PREFIX"]:
+                output.append(token)
+            elif token.type == "OPERATOR-INFIX":
+                while (
+                    operators
+                    and operators[-1].type == "OPERATOR-INFIX"
+                    and OPERATOR_PRECEDENCE[operators[-1].value] >= OPERATOR_PRECEDENCE[token.value]
+                ):
+                    output.append(operators.pop())
+                operators.append(token)
+            elif token.type == "FUNC" and token.subtype == "CLOSE":
+                while operators and (
+                    operators[-1].type != "FUNC" and operators[-1].subtype != "OPEN"
+                ):
+                    output.append(operators.pop())
+                if operators:
+                    output.append(operators.pop())
+            elif token.type == "SEP":
+                if operators and operators[-1].type != "FUNC":
+                    output.append(operators.pop())
+            elif token.type == "PAREN":
+                if token.subtype == "OPEN":
+                    operators.append(token)
+                elif token.subtype == "CLOSE":
+                    while operators and operators[-1].subtype != "OPEN":
+                        output.append(operators.pop())
+                    operators.pop()
+                    if operators and operators[-1].type == "FUNC":
+                        output.append(operators.pop())
+
+        while operators:
+            output.append(operators.pop())
+
+        return output
+
+    @staticmethod
+    def formula_tokens(formula_str: str):
+        formula_str = formula_str.translate(OPERATOR_MAP)
+        tok = Tokenizer(formula_str if formula_str.startswith("=") else "=" + formula_str)
+        return Formula.rpn_tokens(tok.items)
 
     def __str__(self) -> str:
         return "".join(reversed(self._stack))
@@ -212,7 +211,7 @@ class Formula(list):
 
     def popn(self, num_args: int) -> tuple:
         values = ()
-        for _i in range(num_args):
+        for _ in range(num_args):
             values += (self._stack.pop(),)
         return values
 
@@ -522,7 +521,7 @@ def str_to_number(v: str) -> int:
     return int(v)
 
 
-# The Tokenizer class is taken from the openpyxl library which is
+# The Tokenizer and Token classesare taken from the openpyxl library which is
 # licensed under the MIT License. The original source code can be found at:
 #
 # https://github.com/gleeda/openpyxl/blob/master/openpyxl/formula/tokenizer.py
@@ -540,7 +539,7 @@ class TokenizerError(Exception):
     """Base class for all Tokenizer errors."""
 
 
-class Tokenizer:  # pragma: no cover
+class Tokenizer:
     """
     A tokenizer for Excel worksheet formulae.
 
@@ -843,7 +842,7 @@ class Tokenizer:  # pragma: no cover
         return "=" + "".join(token.value for token in self.items)
 
 
-class Token:  # pragma: no cover
+class Token:
     """
     A token in an Excel formula.
 
