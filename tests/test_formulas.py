@@ -107,6 +107,157 @@ def test_exceptions(configurable_save_file):
     assert str(record[0].message) == "Table 1@[0,1]: key #999 not found"
 
 
+TOKEN_TESTS = {
+    "A1": [
+        "OPERAND(RANGE,'A1')",
+    ],
+    "10+10×20+20": [
+        "OPERAND(NUMBER,'10')",
+        "OPERAND(NUMBER,'10')",
+        "OPERAND(NUMBER,'20')",
+        "OPERATOR-INFIX(,'×')",
+        "OPERATOR-INFIX(,'+')",
+        "OPERAND(NUMBER,'20')",
+        "OPERATOR-INFIX(,'+')",
+    ],
+    "((10+10)÷(20+20))%": [
+        "OPERAND(NUMBER,'10')",
+        "OPERAND(NUMBER,'10')",
+        "OPERATOR-INFIX(,'+')",
+        "OPERAND(NUMBER,'20')",
+        "OPERAND(NUMBER,'20')",
+        "OPERATOR-INFIX(,'+')",
+        "OPERATOR-INFIX(,'÷')",
+        "OPERATOR-POSTFIX(,'%')",
+    ],
+    "SUM(A1:B1)": [
+        "OPERAND(RANGE,'A1:B1')",
+        "FUNC(OPEN,'SUM')",
+    ],
+    'E1&" "&F1': [
+        "OPERAND(RANGE,'E1')",
+        "OPERAND(TEXT,'\" \"')",
+        "OPERATOR-INFIX(,'&')",
+        "OPERAND(RANGE,'F1')",
+        "OPERATOR-INFIX(,'&')",
+    ],
+    '""""&E1&""" """&F1&""""': [
+        'OPERAND(TEXT,\'""""\')',
+        "OPERAND(RANGE,'E1')",
+        "OPERATOR-INFIX(,'&')",
+        'OPERAND(TEXT,\'""" """\')',
+        "OPERATOR-INFIX(,'&')",
+        "OPERAND(RANGE,'F1')",
+        "OPERATOR-INFIX(,'&')",
+        'OPERAND(TEXT,\'""""\')',
+        "OPERATOR-INFIX(,'&')",
+    ],
+    "A1×B1": [
+        "OPERAND(RANGE,'A1')",
+        "OPERAND(RANGE,'B1')",
+        "OPERATOR-INFIX(,'×')",
+    ],
+    "A1÷B1": [
+        "OPERAND(RANGE,'A1')",
+        "OPERAND(RANGE,'B1')",
+        "OPERATOR-INFIX(,'÷')",
+    ],
+    "IF(1≤2,TRUE,FALSE)": [
+        "OPERAND(NUMBER,'1')",
+        "OPERAND(NUMBER,'2')",
+        "OPERATOR-INFIX(,'≤')",
+        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
+        "OPERAND(LOGICAL,'TRUE')",
+        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAY
+        "OPERAND(LOGICAL,'FALSE')",
+        # END_THUNK_NODE
+        "FUNC(OPEN,'IF')",
+    ],
+    "IF(1≥2,TRUE,FALSE)": [
+        "OPERAND(NUMBER,'1')",
+        "OPERAND(NUMBER,'2')",
+        "OPERATOR-INFIX(,'≥')",
+        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
+        "OPERAND(LOGICAL,'TRUE')",
+        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAY
+        "OPERAND(LOGICAL,'FALSE')",
+        # END_THUNK_NODE
+        "FUNC(OPEN,'IF')",
+    ],
+    "IF(1≠2,TRUE,FALSE)": [
+        "OPERAND(NUMBER,'1')",
+        "OPERAND(NUMBER,'2')",
+        "OPERATOR-INFIX(,'≠')",
+        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
+        "OPERAND(LOGICAL,'TRUE')",
+        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAY
+        "OPERAND(LOGICAL,'FALSE')",
+        # END_THUNK_NODE
+        "FUNC(OPEN,'IF')",
+    ],
+    "A1+B1-C1": [
+        "OPERAND(RANGE,'A1')",
+        "OPERAND(RANGE,'B1')",
+        "OPERATOR-INFIX(,'+')",
+        "OPERAND(RANGE,'C1')",
+        "OPERATOR-INFIX(,'-')",
+    ],
+    "A1+SUM(A1:B1)-SUM(A2:B2)": [
+        "OPERAND(RANGE,'A1')",
+        "OPERAND(RANGE,'A1:B1')",
+        "FUNC(OPEN,'SUM')",
+        "OPERATOR-INFIX(,'+')",
+        "OPERAND(RANGE,'A2:B2')",
+        "FUNC(OPEN,'SUM')",
+        "OPERATOR-INFIX(,'-')",
+    ],
+    "IF(B1>0,COUNTA(E1:F1),COUNTA(E1:H1))": [
+        "OPERAND(RANGE,'B1')",
+        "OPERAND(NUMBER,'0')",
+        "OPERATOR-INFIX(,'>')",
+        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
+        "OPERAND(RANGE,'E1:F1')",
+        "FUNC(OPEN,'COUNTA')",
+        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAY
+        "OPERAND(RANGE,'E1:H1')",
+        "FUNC(OPEN,'COUNTA')",
+        # END_THUNK_NODE
+        "FUNC(OPEN,'IF')",
+    ],
+    'IF(OR(SUM(A2:B2)>1,SUM(A1:B1)>1),"yay","nay")': [
+        "OPERAND(RANGE,'A2:B2')",
+        "FUNC(OPEN,'SUM')",
+        "OPERAND(NUMBER,'1')",
+        "OPERATOR-INFIX(,'>')",
+        "OPERAND(RANGE,'A1:B1')",
+        "FUNC(OPEN,'SUM')",
+        "OPERAND(NUMBER,'1')",
+        "OPERATOR-INFIX(,'>')",
+        "FUNC(OPEN,'OR')",
+        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
+        "OPERAND(TEXT,'\"yay\"')",
+        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAY
+        "OPERAND(TEXT,'\"nay\"')",
+        # END_THUNK_NODE
+        "FUNC(OPEN,'IF')",
+    ],
+    "IF(TRUE,1,0)": [
+        "OPERAND(LOGICAL,'TRUE')",
+        # "SEP(ARG,','",  # BEGIN_EMBEDDED_NODE_ARRAY
+        "OPERAND(NUMBER,'1')",
+        # "SEP(ARG,','",  # END_THUNK_NODE / BEGIN_EMBEDDED_NODE_ARRAYND_THUNK_NODE
+        "OPERAND(NUMBER,'0')",
+        # END_THUNK_NODE
+        "FUNC(OPEN,'IF')",
+    ],
+    "POWER(2,5)": [
+        "OPERAND(NUMBER,'2')",
+        "OPERAND(NUMBER,'5')",
+        "FUNC(OPEN,'POWER')",
+    ],
+}
+
+
 def test_tokenizer():
     tok = Tokenizer("=AVERAGE(A1:D1)")
     assert str(tok) == "[FUNC(OPEN,'AVERAGE('),OPERAND(RANGE,'A1:D1'),FUNC(CLOSE,')')]"
@@ -118,6 +269,17 @@ def test_tokenizer():
     assert str(tok) == "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,'super hero'),FUNC(CLOSE,')')]"
     tok = Tokenizer("=Sheet 2::Table 1::A1")
     assert str(tok) == "[OPERAND(RANGE,'Sheet 2::Table 1::A1')]"
+
+    for formula, ref_tokens in TOKEN_TESTS.items():
+        tok = Tokenizer("=" + formula)
+        tokens = Formula.rpn_tokens(tok.items)
+        if [str(x) for x in tokens] == ref_tokens:
+            print(f"\nFORMULA: {formula} (SUCCESS)")
+        else:
+            print(f"\nFORMULA: {formula}")
+            for i, ref_token in enumerate(ref_tokens):
+                test_token = "MISSING" if i > len(tokens) - 1 else tokens[i]
+                print(f"{ref_token:40s}| {test_token}")
 
 
 def test_parse_formulas():
@@ -137,6 +299,9 @@ def test_parse_formulas():
         )
         ref_archive = [str(x) for x in cell._model.formula_ast(cell._table_id)[cell._formula_id]]
         new_archive = [str(x) for x in new_formula._archive.AST_node_array.AST_node]
+        table_name = cell._model.table_name(cell._table_id)
+        print(f"\n*FORMULA: {table_name}@{cell.row},{cell.col}: {cell.formula}")
+
         ref_node_types = [
             node_name_map[x.AST_node_type]
             for x in cell._model.formula_ast(cell._table_id)[cell._formula_id]
