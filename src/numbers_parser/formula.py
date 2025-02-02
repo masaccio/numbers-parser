@@ -11,6 +11,8 @@ FUNCTION_NAME_TO_ID = {v: k for k, v in FUNCTION_MAP.items()}
 
 OPERATOR_MAP = str.maketrans({"×": "*", "÷": "/", "≥": ">=", "≤": "<=", "≠": "<>"})
 
+OPERATOR_PRECEDENCE = {"%": 6, "^": 5, "×": 4, "*": 4, "/": 4, "÷": 4, "+": 3, "-": 3, "&": 2}
+
 OPERATOR_INFIX_MAP = {
     "=": "EQUAL_TO_NODE",
     "+": "ADDITION_NODE",
@@ -42,20 +44,19 @@ class Formula(list):
         formula._tokens = cls.formula_tokens(formula_str)
         archive = TSCEArchives.FormulaArchive()
         for token in formula._tokens:
-            if token.type == Token.FUNC and token.subtype == Token.CLOSE:
-                function_name = token.value
-                if function_name not in FUNCTION_NAME_TO_ID:
+            if token.type == Token.FUNC and token.subtype == Token.OPEN:
+                if token.value not in FUNCTION_NAME_TO_ID:
                     table_name = model.table_name(table_id)
                     cell_ref = f"{table_name}@[{row},{col}]"
                     warnings.warn(
-                        f"{cell_ref}: function {function_name} is not supported.",
+                        f"{cell_ref}: function {token.value} is not supported.",
                         stacklevel=2,
                     )
                     return None
                 archive.AST_node_array.AST_node.append(
                     ASTNodeArrayArchive.ASTNodeArchive(
                         AST_node_type="FUNCTION_NODE",
-                        AST_function_node_index=FUNCTION_NAME_TO_ID[function_name],
+                        AST_function_node_index=FUNCTION_NAME_TO_ID[token.value],
                         AST_function_node_numArgs=token.num_args,
                     ),
                 )
@@ -69,49 +70,66 @@ class Formula(list):
                         AST_node_type=OPERATOR_INFIX_MAP[token.value],
                     ),
                 )
-            # LITERAL = "LITERAL"
-            # OPERAND = "OPERAND"
-            # FUNC = "FUNC"
-            # ARRAY = "ARRAY"
-            # PAREN = "PAREN"
-            # SEP = "SEP"
-            # OP_PRE = "OPERATOR-PREFIX"
-            # OP_IN = "OPERATOR-INFIX"
-            # OP_POST = "OPERATOR-POSTFIX"
-            # WSPACE = "WHITE-SPACE"
         formula._archive = archive
         return formula
+
+    @staticmethod
+    def rpn_tokens(tokens):
+        output = []
+        operators = []
+        functions = []
+
+        for token in tokens:
+            if token.type in ["OPERAND", "NUMBER", "LITERAL", "TEXT", "RANGE"]:
+                output.append(token)
+                if functions:
+                    functions[-1].num_args += 1
+            elif token.type == "FUNC" and token.subtype == "OPEN":
+                token.value = token.value[0:-1]
+                functions.append(token)
+                functions[-1].num_args = 0
+            elif token.type in ["OPERATOR-POSTFIX", "OPERATOR-PREFIX"]:
+                output.append(token)
+            elif token.type == "OPERATOR-INFIX":
+                while (
+                    operators
+                    and operators[-1].type == "OPERATOR-INFIX"
+                    and OPERATOR_PRECEDENCE[operators[-1].value] >= OPERATOR_PRECEDENCE[token.value]
+                ):
+                    output.append(operators.pop())
+                operators.append(token)
+            elif token.type == "FUNC" and token.subtype == "CLOSE":
+                while operators and (
+                    operators[-1].type != "FUNC" and operators[-1].subtype != "OPEN"
+                ):
+                    output.append(operators.pop())
+                if operators:
+                    operators.pop()
+                if functions:
+                    output.append(functions.pop())
+            elif token.type == "SEP":
+                if operators:
+                    output.append(operators.pop())
+            elif token.type == "PAREN":
+                if token.subtype == "OPEN":
+                    operators.append(token)
+                elif token.subtype == "CLOSE":
+                    while operators and operators[-1].subtype != "OPEN":
+                        output.append(operators.pop())
+                    operators.pop()
+                    if operators and operators[-1].type == "FUNC":
+                        output.append(operators.pop())
+
+        while operators:
+            output.append(operators.pop())
+
+        return output
 
     @staticmethod
     def formula_tokens(formula_str: str):
         formula_str = formula_str.translate(OPERATOR_MAP)
         tok = Tokenizer(formula_str if formula_str.startswith("=") else "=" + formula_str)
-
-        # Tag function close with function name and number of arguments
-        func_stack = []
-        func_arg_count = {}
-        for token in tok.items:
-            if token.type == Token.FUNC:
-                if token.subtype == Token.OPEN:
-                    func_stack.append(token.value[0:-1])
-                    func_arg_count[len(func_stack)] = 0
-                else:
-                    token.num_args = func_arg_count[len(func_stack)]
-                    token.value = func_stack.pop()
-            elif token.type == Token.OPERAND and func_stack:
-                func_arg_count[len(func_stack)] += 1
-
-        # Re-order infix operators and their arguments
-        i = 0
-        while i < len(tok.items):
-            token = tok.items[i]
-            if token.type == Token.OP_IN:
-                next_token = tok.items[i + 1]
-                tok.items[i] = next_token
-                tok.items[i + 1] = token
-                i += 1
-            i += 1
-        return tok.items
+        return Formula.rpn_tokens(tok.items)
 
     @staticmethod
     def operand_archive(row: int, col: int, token: "Token") -> ASTNodeArrayArchive.ASTNodeArchive:
@@ -547,8 +565,7 @@ class Tokenizer:  # pragma: no cover
         "'": re.compile("'(?:[^']*'')*[^']*'(?!')"),
     }
     ERROR_CODES = ("#NULL!", "#DIV/0!", "#VALUE!", "#REF!", "#NAME?", "#NUM!", "#N/A")
-    # TOKEN_ENDERS = ",;}) +-*/^&=><%"  # Each of these characters, marks the
-    TOKEN_ENDERS = ",;})+-*/^&=><%"  # Each of these characters, marks the  # noqa: S105
+    TOKEN_ENDERS = ",;})+-*/^&=><%×÷≥≤≠"  # Each of these characters, marks the  # noqa: S105
     # end of an operand token
 
     def __init__(self, formula):
@@ -578,7 +595,7 @@ class Tokenizer:  # pragma: no cover
             ("[", self.parse_brackets),
             ("#", self.parse_error),
             # (" ", self.parse_whitespace),
-            ("+-*/^&=><%", self.parse_operator),
+            ("+-*/^&=><%×÷≥≤≠", self.parse_operator),
             ("{(", self.parse_opener),
             (")}", self.parse_closer),
             (";,", self.parse_separator),
@@ -692,7 +709,7 @@ class Tokenizer:  # pragma: no cover
         self.offset)
 
         """
-        if self.formula[self.offset : self.offset + 2] in (">=", "<=", "<>"):
+        if self.formula[self.offset : self.offset + 2] in (">=", "<=", "<>", "≥", "≤", "≠"):
             self.items.append(
                 Token(
                     self.formula[self.offset : self.offset + 2],
@@ -703,7 +720,7 @@ class Tokenizer:  # pragma: no cover
         curr_char = self.formula[self.offset]  # guaranteed to be 1 char
         if curr_char == "%":
             token = Token("%", Token.OP_POST)
-        elif curr_char in "*/^&=><":
+        elif curr_char in "*/^&=><×÷≥≤≠":
             token = Token(curr_char, Token.OP_IN)
         # From here on, curr_char is guaranteed to be in '+-'
         elif not self.items:
