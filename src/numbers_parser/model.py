@@ -876,6 +876,13 @@ class _NumbersModel(Cacheable):
                 return sheet_id
         return None
 
+    def table_name_to_uuid(self, sheet_name: str, table_name: str) -> str:
+        sheet_name_to_id = {self.sheet_name(x): x for x in self.sheet_ids()}
+        sheet_id = sheet_name_to_id[sheet_name]
+        table_name_to_id = {self.table_name(x): x for x in self.table_ids(sheet_id)}
+        table_id = table_name_to_id[table_name]
+        return self.table_base_id(table_id)
+
     @cache()
     def table_uuids_to_id(self, table_uuid) -> int | None:
         for sheet_id in self.sheet_ids():  # pragma: no branch   # noqa: RET503
@@ -2457,7 +2464,7 @@ def node_to_col_ref(node: object, table_name: str, col: int) -> str:
 def node_to_row_ref(node: object, table_name: str, row: int) -> str:
     row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
 
-    row_name = f"${row+1}" if node.AST_row.absolute else f"{row+1}"
+    row_name = f"${row + 1}" if node.AST_row.absolute else f"{row + 1}"
     if table_name is not None:
         return f"{table_name}::{row_name}:{row_name}"
     return f"{row_name}:{row_name}"
