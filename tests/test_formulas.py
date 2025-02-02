@@ -272,7 +272,6 @@ def check_generated_formula(cell: Cell) -> None:
     new_archive = [str(x) for x in new_formula._archive.AST_node_array.AST_node]
 
     if ref_archive != new_archive:
-        s = ""
         node_name_map = {
             k: v.name
             for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
@@ -317,18 +316,25 @@ def check_generated_formula(cell: Cell) -> None:
 
 
 def test_parse_formulas():
-    for filename in [
-        "tests/data/create-formulas.numbers",
-        # "tests/data/test-10.numbers",
-        # "tests/data/simple-func.numbers",
-        # "tests/data/test-all-formulas.numbers",
-        # "tests/data/test-extra-formulas.numbers",
-        # "tests/data/test-new-formulas.numbers",
-    ]:
-        doc = Document(filename)
-        for sheet in doc.sheets:
-            for table in sheet.tables:
-                for row in table.rows():
-                    for cell in row:
-                        if cell.formula is not None:
-                            assert check_generated_formula(cell)
+    # for filename in [
+    #     "tests/data/create-formulas.numbers",
+    #     # "tests/data/test-10.numbers",
+    #     # "tests/data/simple-func.numbers",
+    #     # "tests/data/test-all-formulas.numbers",
+    #     # "tests/data/test-extra-formulas.numbers",
+    #     # "tests/data/test-new-formulas.numbers",
+    # ]:
+
+    doc = Document("tests/data/create-formulas.numbers")
+
+    cell = doc.default_table.cell(1, 0)
+    with pytest.warns(UnsupportedWarning) as record:
+        _ = Formula.from_str(cell._model, cell._table_id, cell.row, cell.col, "=UNKNOWNFUNC()")
+    assert record[0].message.args[0] == "Table One@[1,0]: function UNKNOWNFUNC is not supported."
+
+    for sheet in doc.sheets:
+        for table in sheet.tables:
+            for row in table.rows():
+                for cell in row:
+                    if cell.formula is not None:
+                        assert check_generated_formula(cell)
