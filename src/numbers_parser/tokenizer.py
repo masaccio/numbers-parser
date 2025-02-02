@@ -3,8 +3,8 @@ import re
 SHEET_RANGE_REGEXP = re.compile(
     r"""
     ^                                             # Start of the string
-    (?:(?P<sheet_name>[^:]+)::)?                  # Optional sheet name followed by ::
-    (?:(?P<table_name>[^:]+)::)?                  # Optional table name followed by ::
+    (?:(?P<named_ref1>[^:]+)::)?                  # Optional sheet/table name followed by ::
+    (?:(?P<named_ref2>[^:]+)::)?                  # Optional table name followed by ::
     (?:
         (?P<range_start>                          # Group for single cell or start of range
             (?P<col_start>\$?([0-9]+|[A-Z]+))     # Start column (e.g., A, $A, AA), $ optional
@@ -25,14 +25,14 @@ SHEET_RANGE_REGEXP = re.compile(
     re.VERBOSE,
 )
 
-# sheet_name: Matches the optional sheet name (e.g., "Sheet1").
-# table_name: Matches the optional table name (e.g., "Table1").
-# range_start: Matches the start of a range or single cell (e.g., "A1" or "$B$2").
-# col_start: Matches the column portion of the range start (e.g., "A", "$B").
-# row_start: Matches the row portion of the range start (e.g., "1", "$2").
-# range_end: Matches the optional end of a range (e.g., "C3").
-# col_end: Matches the column portion of the range end (e.g., "C", "$D").
-# row_end: Matches the row portion of the range end (e.g., "3", "$4").
+# named_ref1: Matches optional sheet name (e.g., "Sheet1"), or table if in current sheet
+# named_ref2: Matches optional table name (e.g., "Table1").
+# range_start: Matches start of a range or single cell (e.g., "A1" or "$B$2").
+# col_start: Matches column portion of the range start (e.g., "A", "$B").
+# row_start: Matches row portion of the range start (e.g., "1", "$2").
+# range_end: Matches optional end of a range (e.g., "C3").
+# col_end: Matches column portion of the range end (e.g., "C", "$D").
+# row_end: Matches row portion of the range end (e.g., "3", "$4").
 # named_range: Matches a named range (e.g., "cats").
 
 
