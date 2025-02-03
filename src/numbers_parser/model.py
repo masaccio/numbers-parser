@@ -4,6 +4,7 @@ import re
 from array import array
 from collections import defaultdict
 from hashlib import sha1
+from itertools import chain
 from math import floor
 from pathlib import Path
 from struct import pack
@@ -900,40 +901,294 @@ class _NumbersModel(Cacheable):
             other_table_name = None
 
         if other_table_id is not None:
-            this_sheet_id = self.table_id_to_sheet_id(this_table_id)
-            other_sheet_id = self.table_id_to_sheet_id(other_table_id)
-            if this_sheet_id != other_sheet_id:
-                other_sheet_name = self.sheet_name(other_sheet_id)
-                other_table_name = f"{other_sheet_name}::" + other_table_name
+            table_names = list(
+                chain.from_iterable(
+                    [
+                        [self.table_name(tid) for tid in self.table_ids(sid)]
+                        for sid in self.sheet_ids()
+                    ],
+                ),
+            )
+            # Numbers uses a table name alone when the table name is unique
+            if table_names.count(other_table_name) > 1:
+                this_sheet_id = self.table_id_to_sheet_id(this_table_id)
+                other_sheet_id = self.table_id_to_sheet_id(other_table_id)
+                if this_sheet_id != other_sheet_id:
+                    other_sheet_name = self.sheet_name(other_sheet_id)
+                    other_table_name = f"{other_sheet_name}::" + other_table_name
 
         if node.HasField("AST_colon_tract"):
-            return self.tract_to_row_col_ref(node, other_table_name, row, col)
+            return self.tract_to_row_col_ref(node, other_table_id, other_table_name, row, col)
         if node.HasField("AST_row") and not node.HasField("AST_column"):
-            return node_to_row_ref(node, other_table_name, row)
+            return self.node_to_row_ref(node, other_table_id, other_table_name, row)
         if node.HasField("AST_column") and not node.HasField("AST_row"):
             return node_to_col_ref(node, other_table_name, col)
         return node_to_row_col_ref(node, other_table_name, row, col)
 
-    def tract_to_row_col_ref(self, node: object, table_name: str, row: int, col: int) -> str:
+    def node_to_row_ref(self, node: object, table_id: int, table_name: str, row: int) -> str:
+        row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
+
+        row_ranges, _ = self.named_ranges()
+        sheet_id = self.table_id_to_sheet_id(table_id)
+        if row_ranges[sheet_id][table_id][row] is not None:
+            name = row_ranges[sheet_id][table_id][row]
+            if "GLOBAL" in name:
+                if node.AST_row.absolute:
+                    return name.replace("GLOBAL::", "$")
+                return name.replace("GLOBAL::", "")
+            if node.AST_row.absolute:
+                return name.replace("TABLE::", f"{table_name}::$")
+            return name.replace("TABLE", table_name)
+
+        row_name = f"${row + 1}" if node.AST_row.absolute else f"{row + 1}"
+        if table_name is not None:
+            return f"{table_name}::{row_name}:{row_name}"
+        return f"{row_name}:{row_name}"
+
+    def named_ranges(self):
+        """
+        Find the globally unique row and column headers and the table unique
+        row and column headers for use in range references. Returns a dict
+        mapping table ID to lists of rows and columns and their names if
+        they are unique.
+        """
+        doc_names = defaultdict(int)
+        sheet_names = {}
+        row_offset_to_name = {}
+        col_offset_to_name = {}
+        for sheet_id in self.sheet_ids():
+            sheet_names[sheet_id] = defaultdict(int)
+            row_offset_to_name[sheet_id] = {}
+            col_offset_to_name[sheet_id] = {}
+            for table_id in self.table_ids(sheet_id):
+                row_offset_to_name[sheet_id][table_id] = {}
+                num_header_rows = self.num_header_rows(table_id)
+                num_header_cols = self.num_header_cols(table_id)
+
+                # Named row is the right-most header column value in the row
+                if num_header_cols > 0:
+                    row_names = []
+                    all_row_names = [
+                        self._table_data[table_id][row][num_header_cols - 1].value
+                        for row in range(num_header_rows, len(self._table_data[table_id]))
+                    ]
+
+                    for row in range(self.number_of_rows(table_id)):
+                        if row < num_header_rows:
+                            row_names.append(None)
+                            row_offset_to_name[sheet_id][table_id][row] = None
+                        else:
+                            name = self._table_data[table_id][row][num_header_cols - 1].value
+                            if all_row_names.count(name) > 1:
+                                row_names.append(None)
+                                row_offset_to_name[sheet_id][table_id][row] = None
+                            else:
+                                row_names.append(name)
+                                row_offset_to_name[sheet_id][table_id][row] = name
+                    for name in row_names:
+                        doc_names[name] += 1
+                        sheet_names[sheet_id][name] += 1
+                    # Names are never used if rows share the same leading value
+                    for row_name in row_names:
+                        if row_names.count(row_name) > 1:
+                            row_names = list(filter(lambda x: x != row_name, row_names))
+                else:
+                    row_offset_to_name[sheet_id][table_id] = {
+                        row: None for row in range(self.number_of_rows(table_id))
+                    }
+
+                # Named column is the last header row value in the column
+                col_offset_to_name[sheet_id][table_id] = {}
+                if num_header_rows > 0:
+                    col_names = []
+                    all_col_names = [
+                        self._table_data[table_id][num_header_rows - 1][col].value
+                        for col in range(num_header_cols, len(self._table_data[table_id][0]))
+                    ]
+                    for col in range(self.number_of_columns(table_id)):
+                        if col < num_header_cols:
+                            col_names.append(None)
+                            col_offset_to_name[sheet_id][table_id][col] = None
+                        else:
+                            name = self._table_data[table_id][num_header_rows - 1][col].value
+                            if all_col_names.count(name) > 1:
+                                col_names.append(None)
+                                col_offset_to_name[sheet_id][table_id][col] = None
+                            else:
+                                col_names.append(name)
+                                col_offset_to_name[sheet_id][table_id][col] = name
+
+                    for name in col_names:
+                        doc_names[name] += 1
+                        sheet_names[sheet_id][name] += 1
+                    # Names are never used if columns share the same heading value
+                    for col_name in col_names:
+                        if col_names.count(col_name) > 1:
+                            col_names = list(filter(lambda x: x != col_name, col_names))
+                else:
+                    col_offset_to_name[sheet_id][table_id] = {
+                        col: None for col in range(self.number_of_columns(table_id))
+                    }
+
+        doc_names = [name for name, count in doc_names.items() if count == 1]
+
+        for sheet_id in self.sheet_ids():
+            for table_id in self.table_ids(sheet_id):
+                for row in range(self.number_of_rows(table_id)):
+                    name = row_offset_to_name[sheet_id][table_id][row]
+                    if name is None:
+                        pass
+                    elif name in doc_names:
+                        row_offset_to_name[sheet_id][table_id][row] = f"GLOBAL::{name}"
+                    elif name in sheet_names[sheet_id] and sheet_names[sheet_id][name] == 1:
+                        row_offset_to_name[sheet_id][table_id][row] = f"SHEET::{name}"
+                    else:
+                        row_offset_to_name[sheet_id][table_id][row] = f"TABLE::{name}"
+                for col in range(self.number_of_columns(table_id)):
+                    name = col_offset_to_name[sheet_id][table_id][col]
+                    if name is None:
+                        pass
+                    elif name in doc_names:
+                        col_offset_to_name[sheet_id][table_id][col] = f"GLOBAL::{name}"
+                    elif name in sheet_names[sheet_id] and sheet_names[sheet_id][name] == 1:
+                        col_offset_to_name[sheet_id][table_id][col] = f"SHEET::{name}"
+                    else:
+                        col_offset_to_name[sheet_id][table_id][col] = f"TABLE::{name}"
+
+        return row_offset_to_name, col_offset_to_name
+
+    # def name_fragments(self):
+    #     uid_to_column = {}
+    #     uid_to_row = {}
+    #     for sheet_id in self.sheet_ids():
+    #         for table_id in self.table_ids(sheet_id):
+    #             table_model = self.objects[table_id]
+    #             column_row_uid_map = self.objects[table_model.base_column_row_uids.identifier]
+    #             uid_to_column |= {
+    #                 NumbersUUID(k).hex: {"table_id": table_id, "col": v}
+    #                 for k, v in zip(
+    #                     column_row_uid_map.sorted_column_uids,
+    #                     column_row_uid_map.column_index_for_uid,
+    #                 )
+    #             }
+    #             uid_to_row |= {
+    #                 NumbersUUID(k).hex: {"table_id": table_id, "row": v}
+    #                 for k, v in zip(
+    #                     column_row_uid_map.sorted_row_uids,
+    #                     column_row_uid_map.row_index_for_uid,
+    #                 )
+    #             }
+
+    #     header_name_manager = self.objects[self.calc_engine().header_name_manager.identifier]
+    #     name_frag_tile_ids = [ref.identifier for ref in header_name_manager.name_frag_tiles]
+    #     name_frag_map = {}
+    #     for tile in [self.objects[obj_id] for obj_id in name_frag_tile_ids]:
+    #         for entry in tile.name_frag_entries:
+    #             if len(entry.uses_of_name_fragment.owner_entries) > 0:
+    #                 name = entry.name_fragment
+    #                 coord_set = entry.uses_of_name_fragment.owner_entries[0].coord_set
+    #                 column_entry = coord_set.column_entries[0]
+    #                 col_ref = uid_to_column[NumbersUUID(column_entry.column).hex]
+    #                 row_ref = uid_to_row[NumbersUUID(column_entry.row_set[0]).hex]
+    #                 if row_ref["table_id"] not in name_frag_map:
+    #                     name_frag_map[row_ref["table_id"]] = {"row": {}, "col": {}}
+    #                 if col_ref["table_id"] not in name_frag_map:
+    #                     name_frag_map[col_ref["table_id"]] = {"row": {}, "col": {}}
+    #                 if row_ref["row"] in name_frag_map[row_ref["table_id"]]["row"]:
+    #                     name_frag_map[row_ref["table_id"]]["row"][row_ref["row"]] = (
+    #                         name + " " + name_frag_map[row_ref["table_id"]]["row"][row_ref["row"]]
+    #                     )
+    #                 else:
+    #                     name_frag_map[row_ref["table_id"]]["row"][row_ref["row"]] = name
+    #                 if col_ref["col"] in name_frag_map[col_ref["table_id"]]["col"]:
+    #                     name_frag_map[col_ref["table_id"]]["col"][col_ref["col"]] = (
+    #                         name + " " + name_frag_map[col_ref["table_id"]]["col"][col_ref["col"]]
+    #                     )
+    #                 else:
+    #                     name_frag_map[col_ref["table_id"]]["col"][col_ref["col"]] = name
+
+    #     return name_frag_map
+
+    def tract_to_row_col_ref(
+        self,
+        node: object,
+        table_id: int,
+        table_name: str,
+        row: int,
+        col: int,
+    ) -> str:
+        row_ranges, col_ranges = self.named_ranges()
+
         if node.AST_sticky_bits.begin_row_is_absolute:
             row_begin = node.AST_colon_tract.absolute_row[0].range_begin
+        elif (
+            len(node.AST_colon_tract.relative_row) == 0
+            and node.AST_colon_tract.absolute_row[0].range_begin == 0x7FFFFFFF
+        ):
+            row_begin = 0x7FFFFFFF
         else:
             row_begin = row + node.AST_colon_tract.relative_row[0].range_begin
 
         if node.AST_sticky_bits.end_row_is_absolute:
             row_end = range_end(node.AST_colon_tract.absolute_row[0])
+        elif (
+            len(node.AST_colon_tract.relative_row) == 0
+            and range_end(node.AST_colon_tract.absolute_row[0]) == 0x7FFFFFFF
+        ):
+            row_end = 0x7FFFFFFF
         else:
             row_end = row + range_end(node.AST_colon_tract.relative_row[0])
 
         if node.AST_sticky_bits.begin_column_is_absolute:
             col_begin = node.AST_colon_tract.absolute_column[0].range_begin
+        elif (
+            len(node.AST_colon_tract.relative_column) == 0
+            and node.AST_colon_tract.absolute_column[0].range_begin == 0x7FFF
+        ):
+            col_begin = 0x7FFF
         else:
             col_begin = col + node.AST_colon_tract.relative_column[0].range_begin
 
         if node.AST_sticky_bits.end_column_is_absolute:
             col_end = range_end(node.AST_colon_tract.absolute_column[0])
+        elif (
+            len(node.AST_colon_tract.relative_column) == 0
+            and node.AST_colon_tract.absolute_column[0].range_begin == 0x7FFF
+        ):
+            col_end = 0x7FFF
         else:
             col_end = col + range_end(node.AST_colon_tract.relative_column[0])
+
+        def abs_ref(ref, abs):
+            if abs:
+                return f"${ref}"
+            return f"{ref}"
+
+        if col_begin == 0x7FFF:
+            table_name = self.table_name(table_id)
+            sheet_id = self.table_id_to_sheet_id(table_id)
+            row_range = row_ranges[sheet_id][table_id]
+            if row_range[row_begin] is None or row_range[row_end] is None:
+                row_begin = abs_ref(row_begin + 1, node.AST_sticky_bits.begin_row_is_absolute)
+                row_end = abs_ref(row_end + 1, node.AST_sticky_bits.end_row_is_absolute)
+                return f"{table_name}::{row_begin}:{row_end}"
+            return f"{table_name}::{row_range[row_begin]}:{row_range[row_end]}"
+
+        if row_begin == 0x7FFFFFFF:
+            table_name = self.table_name(table_id)
+            sheet_id = self.table_id_to_sheet_id(table_id)
+            col_range = row_ranges[sheet_id][table_id]
+            if col_range[col_begin] is None or col_range[col_end] is None:
+                col_begin = abs_ref(
+                    xl_col_to_name(col_begin),
+                    node.AST_sticky_bits.begin_column_is_absolute,
+                )
+                col_end = abs_ref(
+                    xl_col_to_name(col_end),
+                    node.AST_sticky_bits.end_column_is_absolute,
+                )
+                return f"{table_name}::{col_begin}:{col_end}"
+            return f"{table_name}::{col_range[col_begin]}:{col_range[col_end]}"
 
         begin_ref = xl_rowcol_to_cell(
             row_begin,
@@ -2459,15 +2714,6 @@ def node_to_col_ref(node: object, table_name: str, col: int) -> str:
     if table_name is not None:
         return f"{table_name}::{col_name}"
     return col_name
-
-
-def node_to_row_ref(node: object, table_name: str, row: int) -> str:
-    row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
-
-    row_name = f"${row + 1}" if node.AST_row.absolute else f"{row + 1}"
-    if table_name is not None:
-        return f"{table_name}::{row_name}:{row_name}"
-    return f"{row_name}:{row_name}"
 
 
 def node_to_row_col_ref(node: object, table_name: str, row: int, col: int) -> str:
