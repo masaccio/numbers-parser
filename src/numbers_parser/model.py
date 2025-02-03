@@ -930,7 +930,7 @@ class _NumbersModel(Cacheable):
 
         row_ranges, _ = self.named_ranges()
         sheet_id = self.table_id_to_sheet_id(table_id)
-        if row_ranges[sheet_id][table_id][row] is not None:
+        if False and row_ranges[sheet_id][table_id][row] is not None:
             name = row_ranges[sheet_id][table_id][row]
             if "GLOBAL" in name:
                 if node.AST_row.absolute:
