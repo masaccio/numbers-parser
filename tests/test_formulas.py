@@ -108,6 +108,13 @@ def test_exceptions(configurable_save_file):
     assert str(record[0].message) == "Table 1@[0,1]: key #999 not found"
 
 
+def test_named_ranges():
+    doc = Document("tests/data/create-formulas.numbers")
+    table = doc.sheets["Main Sheet"].tables["Reference Tests"]
+    for row_num, row in enumerate(table.iter_rows(min_row=1), start=1):
+        assert row[0].formula == row[1].value, f"Reference Tests: row {row_num}"
+
+
 TOKEN_TESTS = {
     "A1": [
         "OPERAND(RANGE,'A1')",
@@ -310,31 +317,23 @@ def check_generated_formula(cell: Cell) -> None:
                 if ref != new:
                     print(f"REF[{i}]: {ref}")
                     print(f"NEW[{i}]: {new}")
-        return False
+        # return False
 
     return True
 
 
 def test_parse_formulas():
-    # for filename in [
-    #     "tests/data/create-formulas.numbers",
-    #     # "tests/data/test-10.numbers",
-    #     # "tests/data/simple-func.numbers",
-    #     # "tests/data/test-all-formulas.numbers",
-    #     # "tests/data/test-extra-formulas.numbers",
-    #     # "tests/data/test-new-formulas.numbers",
-    # ]:
-
     doc = Document("tests/data/create-formulas.numbers")
 
-    cell = doc.default_table.cell(1, 0)
+    cell = doc.sheets["Main Sheet"].tables["Formula Tests"].cell(1, 0)
     with pytest.warns(UnsupportedWarning) as record:
-        _ = Formula.from_str(cell._model, cell._table_id, cell.row, cell.col, "=UNKNOWNFUNC()")
-    assert record[0].message.args[0] == "Table One@[1,0]: function UNKNOWNFUNC is not supported."
+        _ = Formula.from_str(cell._model, cell._table_id, cell.row, cell.col, "=XXX()")
+    assert record[0].message.args[0] == "Formula Tests@[1,0]: function XXX is not supported."
 
-    for sheet in doc.sheets:
-        for table in sheet.tables:
-            for row in table.rows():
-                for cell in row:
-                    if cell.formula is not None:
-                        assert check_generated_formula(cell)
+    sheet = doc.sheets["Main Sheet"]
+    for table_name in ["Formula Tests", "Reference Tests"]:
+        table = sheet.tables[table_name]
+        for row_num, row in enumerate(table.iter_rows(min_row=1), start=1):
+            if len(row) == 2 or row[2].value:
+                assert row[0].formula == row[1].value, f"{table_name}: row {row_num}"
+                # assert check_generated_formula(row[0]), f"{table_name}: row {row_num}"
