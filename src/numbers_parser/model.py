@@ -895,10 +895,10 @@ class _NumbersModel(Cacheable):
         if node.HasField("AST_cross_table_reference_extra_info"):
             table_uuid = NumbersUUID(node.AST_cross_table_reference_extra_info.table_id).hex
             other_table_id = self.table_uuids_to_id(table_uuid)
-            other_table_name = self.table_name(other_table_id)
+            to_table_name = self.table_name(other_table_id)
         else:
             other_table_id = None
-            other_table_name = None
+            to_table_name = None
 
         if other_table_id is not None:
             table_names = list(
@@ -910,32 +910,58 @@ class _NumbersModel(Cacheable):
                 ),
             )
             # Numbers uses a table name alone when the table name is unique
-            if table_names.count(other_table_name) > 1:
+            if table_names.count(to_table_name) > 1:
                 this_sheet_id = self.table_id_to_sheet_id(this_table_id)
                 other_sheet_id = self.table_id_to_sheet_id(other_table_id)
                 if this_sheet_id != other_sheet_id:
                     other_sheet_name = self.sheet_name(other_sheet_id)
-                    other_table_name = f"{other_sheet_name}::" + other_table_name
+                    to_table_name = f"{other_sheet_name}::" + to_table_name
 
         if node.HasField("AST_colon_tract"):
-            return self.tract_to_row_col_ref(node, other_table_id, other_table_name, row, col)
+            return self.tract_to_row_col_ref(
+                node,
+                this_table_id,
+                other_table_id,
+                to_table_name,
+                row,
+                col,
+            )
         if node.HasField("AST_row") and not node.HasField("AST_column"):
-            return self.node_to_row_ref(node, other_table_id, other_table_name, row)
+            row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
+            return self.named_cell_range(
+                (row, None, None, None),
+                (node.AST_row.absolute, False, False, False),
+                this_table_id,
+                other_table_id,
+            )
         if node.HasField("AST_column") and not node.HasField("AST_row"):
-            return node_to_col_ref(node, other_table_name, col)
-        return node_to_row_col_ref(node, other_table_name, row, col)
+            col = (
+                node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
+            )
+            return self.named_cell_range(
+                (None, None, col, None),
+                (False, False, node.AST_column.absolute, False),
+                this_table_id,
+                other_table_id,
+            )
+        return self.node_to_row_col_ref(node, other_table_id, to_table_name, row, col)
 
     def node_to_row_ref(self, node: object, table_id: int, table_name: str, row: int) -> str:
         row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
 
         row_ranges, _ = self.named_ranges()
         sheet_id = self.table_id_to_sheet_id(table_id)
-        if False and row_ranges[sheet_id][table_id][row] is not None:
+        if row_ranges[sheet_id][table_id][row] is not None:
             name = row_ranges[sheet_id][table_id][row]
             if "GLOBAL" in name:
                 if node.AST_row.absolute:
                     return name.replace("GLOBAL::", "$")
                 return name.replace("GLOBAL::", "")
+
+            if "SHEET" in name:
+                sheet_name = self.sheet_name(sheet_id)
+                table_name = f"{sheet_name}::{table_name}"
+
             if node.AST_row.absolute:
                 return name.replace("TABLE::", f"{table_name}::$")
             return name.replace("TABLE", table_name)
@@ -945,6 +971,69 @@ class _NumbersModel(Cacheable):
             return f"{table_name}::{row_name}:{row_name}"
         return f"{row_name}:{row_name}"
 
+    def node_to_col_ref(
+        self,
+        node: object,
+        this_table_id: int,
+        other_table_id: int,
+        table_name: str,
+        col: int,
+    ) -> str:
+        col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
+
+        _, col_ranges = self.named_ranges()
+        other_sheet_id = self.table_id_to_sheet_id(other_table_id)
+        this_sheet_id = self.table_id_to_sheet_id(this_table_id)
+
+        if col_ranges[other_sheet_id][other_table_id][col] is not None:
+            name = col_ranges[other_sheet_id][other_table_id][col]
+            if "GLOBAL" in name:
+                if node.AST_column.absolute:
+                    return name.replace("GLOBAL::", "$")
+                return name.replace("GLOBAL::", "")
+
+            if "SHEET" in name:
+                if this_sheet_id == other_sheet_id:
+                    if node.AST_column.absolute:
+                        to_table_name = self.table_name(other_table_id)
+                        return name.replace("SHEET::", f"{to_table_name}::$")
+                    return name.replace("SHEET::", "")
+
+                sheet_name = self.sheet_name(other_sheet_id)
+                if node.AST_column.absolute:
+                    return name.replace("SHEET::", f"{sheet_name}::$")
+                return name.replace("SHEET::", f"{sheet_name}::")
+
+            if node.AST_column.absolute:
+                return name.replace("TABLE::", f"{table_name}::$")
+            return name.replace("TABLE", table_name)
+
+        col_name = xl_col_to_name(col, node.AST_column.absolute)
+        if table_name is not None:
+            return f"{table_name}::{col_name}"
+        return col_name
+
+    def node_to_row_col_ref(
+        self,
+        node: object,
+        table_id: int,
+        table_name: str,
+        row: int,
+        col: int,
+    ) -> str:
+        row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
+        col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
+
+        ref = xl_rowcol_to_cell(
+            row,
+            col,
+            row_abs=node.AST_row.absolute,
+            col_abs=node.AST_column.absolute,
+        )
+        if table_name is not None:
+            return f"{table_name}::{ref}"
+        return ref
+
     def named_ranges(self):
         """
         Find the globally unique row and column headers and the table unique
@@ -952,6 +1041,10 @@ class _NumbersModel(Cacheable):
         mapping table ID to lists of rows and columns and their names if
         they are unique.
         """
+
+        def exact_count(pool: list, value: int | str | bool):
+            return sum(1 for x in pool if type(x) is type(value) and x == value)
+
         doc_names = defaultdict(int)
         sheet_names = {}
         row_offset_to_name = {}
@@ -969,7 +1062,7 @@ class _NumbersModel(Cacheable):
                 if num_header_cols > 0:
                     row_names = []
                     all_row_names = [
-                        self._table_data[table_id][row][num_header_cols - 1].value
+                        self._table_data[table_id][row][num_header_cols - 1].formatted_value
                         for row in range(num_header_rows, len(self._table_data[table_id]))
                     ]
 
@@ -978,8 +1071,12 @@ class _NumbersModel(Cacheable):
                             row_names.append(None)
                             row_offset_to_name[sheet_id][table_id][row] = None
                         else:
-                            name = self._table_data[table_id][row][num_header_cols - 1].value
-                            if all_row_names.count(name) > 1:
+                            name = self._table_data[table_id][row][
+                                num_header_cols - 1
+                            ].formatted_value
+                            if name is None:
+                                row_offset_to_name[sheet_id][table_id][row] = None
+                            elif name is None or exact_count(all_row_names, name) > 1:
                                 row_names.append(None)
                                 row_offset_to_name[sheet_id][table_id][row] = None
                             else:
@@ -990,7 +1087,7 @@ class _NumbersModel(Cacheable):
                         sheet_names[sheet_id][name] += 1
                     # Names are never used if rows share the same leading value
                     for row_name in row_names:
-                        if row_names.count(row_name) > 1:
+                        if exact_count(row_names, row_name) > 1:
                             row_names = list(filter(lambda x: x != row_name, row_names))
                 else:
                     row_offset_to_name[sheet_id][table_id] = {
@@ -1002,7 +1099,7 @@ class _NumbersModel(Cacheable):
                 if num_header_rows > 0:
                     col_names = []
                     all_col_names = [
-                        self._table_data[table_id][num_header_rows - 1][col].value
+                        self._table_data[table_id][num_header_rows - 1][col].formatted_value
                         for col in range(num_header_cols, len(self._table_data[table_id][0]))
                     ]
                     for col in range(self.number_of_columns(table_id)):
@@ -1010,8 +1107,12 @@ class _NumbersModel(Cacheable):
                             col_names.append(None)
                             col_offset_to_name[sheet_id][table_id][col] = None
                         else:
-                            name = self._table_data[table_id][num_header_rows - 1][col].value
-                            if all_col_names.count(name) > 1:
+                            name = self._table_data[table_id][num_header_rows - 1][
+                                col
+                            ].formatted_value
+                            if name is None:
+                                col_offset_to_name[sheet_id][table_id][col] = None
+                            elif exact_count(all_col_names, name) > 1:
                                 col_names.append(None)
                                 col_offset_to_name[sheet_id][table_id][col] = None
                             else:
@@ -1023,7 +1124,7 @@ class _NumbersModel(Cacheable):
                         sheet_names[sheet_id][name] += 1
                     # Names are never used if columns share the same heading value
                     for col_name in col_names:
-                        if col_names.count(col_name) > 1:
+                        if exact_count(col_names, col_name) > 1:
                             col_names = list(filter(lambda x: x != col_name, col_names))
                 else:
                     col_offset_to_name[sheet_id][table_id] = {
@@ -1031,9 +1132,15 @@ class _NumbersModel(Cacheable):
                     }
 
         doc_names = [name for name, count in doc_names.items() if count == 1]
+        table_names = list(
+            chain.from_iterable(
+                [[self.table_name(tid) for tid in self.table_ids(sid)] for sid in self.sheet_ids()],
+            ),
+        )
 
         for sheet_id in self.sheet_ids():
             for table_id in self.table_ids(sheet_id):
+                table_name = self.table_name(table_id)
                 for row in range(self.number_of_rows(table_id)):
                     name = row_offset_to_name[sheet_id][table_id][row]
                     if name is None:
@@ -1042,6 +1149,8 @@ class _NumbersModel(Cacheable):
                         row_offset_to_name[sheet_id][table_id][row] = f"GLOBAL::{name}"
                     elif name in sheet_names[sheet_id] and sheet_names[sheet_id][name] == 1:
                         row_offset_to_name[sheet_id][table_id][row] = f"SHEET::{name}"
+                    elif table_names.count(table_name) > 1:
+                        row_offset_to_name[sheet_id][table_id][row] = f"SHEET::TABLE::{name}"
                     else:
                         row_offset_to_name[sheet_id][table_id][row] = f"TABLE::{name}"
                 for col in range(self.number_of_columns(table_id)):
@@ -1052,10 +1161,218 @@ class _NumbersModel(Cacheable):
                         col_offset_to_name[sheet_id][table_id][col] = f"GLOBAL::{name}"
                     elif name in sheet_names[sheet_id] and sheet_names[sheet_id][name] == 1:
                         col_offset_to_name[sheet_id][table_id][col] = f"SHEET::{name}"
+                    elif table_names.count(table_name) > 1:
+                        col_offset_to_name[sheet_id][table_id][col] = f"SHEET::TABLE::{name}"
                     else:
                         col_offset_to_name[sheet_id][table_id][col] = f"TABLE::{name}"
 
         return row_offset_to_name, col_offset_to_name
+
+    def named_cell_range(
+        self,
+        coords: tuple[int],
+        abs_flags: tuple[bool],
+        from_table_id: int,
+        to_table_id: int,
+    ) -> str:
+        def abs_ref(ref: int | str, is_abs: bool) -> str:
+            parts = str(ref).split("::")
+            parts[-1] = f"${parts[-1]}" if is_abs else f"{parts[-1]}"
+            if "-" in parts[-1] or "%" in parts[-1]:
+                parts[-1] = f"'{parts[-1]}'"
+            return "::".join(parts)
+
+        def no_prefix(ref: str) -> str:
+            ref = ref.replace("GLOBAL::", "")
+            ref = ref.replace("SHEET::", "")
+            return ref.replace("TABLE::", "")
+
+        def named_cell_ref(  # noqa: PLR0911
+            name: str,
+            is_abs: bool,
+            from_sheet_id: int,
+            to_sheet_id: int,
+            to_table_id: int,
+            prefix: bool = True,
+        ) -> str:
+            table_names = list(
+                chain.from_iterable(
+                    [
+                        [self.table_name(tid) for tid in self.table_ids(sid)]
+                        for sid in self.sheet_ids()
+                    ],
+                ),
+            )
+            if "GLOBAL" in name:
+                return abs_ref(name.replace("GLOBAL::", ""), is_abs)
+
+            if not prefix:
+                name = no_prefix(name)
+                return f"${name}" if is_abs else name
+
+            to_table_name = self.table_name(to_table_id)
+
+            if "SHEET" in name:
+                if "TABLE" in name:
+                    if from_sheet_id == to_sheet_id:
+                        name = name.replace("SHEET::", "")
+                        if is_abs:
+                            return name.replace("TABLE::", f"{to_table_name}::$")
+                        return name.replace("TABLE::", f"{to_table_name}::")
+
+                    to_sheet_name = self.sheet_name(to_sheet_id)
+                    name = name.replace("SHEET", f"{to_sheet_name}")
+                    if is_abs:
+                        return name.replace("TABLE::", f"{to_table_name}::$")
+                    return name.replace("TABLE", to_table_name)
+
+                if from_sheet_id == to_sheet_id:
+                    if is_abs:
+                        to_table_name = self.table_name(to_table_id)
+                        return name.replace("SHEET::", f"{to_table_name}::$")
+                    return name.replace("SHEET::", "")
+
+                to_sheet_name = self.sheet_name(to_sheet_id)
+                if is_abs:
+                    return name.replace("SHEET::", f"{to_sheet_name}::$")
+                return name.replace("SHEET::", f"{to_sheet_name}::")
+
+            if is_abs:
+                return name.replace("TABLE::", f"{to_table_name}::$")
+            return name.replace("TABLE", to_table_name)
+
+        (row_begin, row_end, col_begin, col_end) = coords
+        (row_begin_abs, row_end_abs, col_begin_abs, col_end_abs) = abs_flags
+        row_ranges, col_ranges = self.named_ranges()
+
+        to_sheet_id = self.table_id_to_sheet_id(to_table_id)
+        from_sheet_id = self.table_id_to_sheet_id(from_table_id)
+
+        if col_begin is None:
+            # Range containing row(s) only
+            row_range = row_ranges[to_sheet_id][to_table_id]
+            if row_end is None:
+                if row_range[row_begin] is None:
+                    # Single numeric row
+                    row_begin = abs_ref(row_begin + 1, row_begin_abs)
+                    if to_table_id != from_table_id:
+                        to_table_name = self.table_name(to_table_id)
+                        row_begin = f"{to_table_name}::{row_begin}:{row_begin}"
+                else:
+                    # Single named row
+                    row_begin = named_cell_ref(
+                        row_range[row_begin],
+                        row_begin_abs,
+                        from_sheet_id,
+                        to_sheet_id,
+                        to_table_id,
+                    )
+                return row_begin
+
+            if row_range[row_begin] is None:
+                # Numeric row range
+                row_begin = abs_ref(row_begin + 1, row_begin_abs)
+                row_end = abs_ref(row_end + 1, row_end_abs)
+
+                ref = f"{row_begin}:{row_end}"
+                if to_table_id != from_table_id:
+                    to_table_name = self.table_name(to_table_id)
+                    return f"{to_table_name}::{ref}"
+                return ref
+
+            # Named row range
+            if "GLOBAL" in row_range[row_begin] or "GLOBAL" in row_range[row_end]:
+                row_begin = abs_ref(row_range[row_begin], row_begin_abs)
+                row_end = abs_ref(row_range[row_end], row_end_abs)
+                return no_prefix(f"{row_begin}:{row_end}")
+
+            row_begin = named_cell_ref(
+                row_range[row_begin],
+                row_begin_abs,
+                from_sheet_id,
+                to_sheet_id,
+                to_table_id,
+            )
+            row_end = named_cell_ref(
+                row_range[row_end],
+                row_end_abs,
+                from_sheet_id,
+                to_sheet_id,
+                to_table_id,
+                prefix=False,
+            )
+            return f"{row_begin}:{row_end}"
+
+        if row_begin is None:
+            # Range containing column(s) only
+            col_range = col_ranges[to_sheet_id][to_table_id]
+            if col_end is None:
+                if col_range[col_begin] is None:
+                    # Single column
+                    col_begin = abs_ref(xl_col_to_name(col_begin), col_begin_abs)
+                    if from_table_id != to_table_id:
+                        to_table_name = self.table_name(to_table_id)
+                        col_begin = f"{to_table_name}::{col_begin}"
+                else:
+                    # Single named column
+                    col_begin = named_cell_ref(
+                        col_range[col_begin],
+                        col_begin_abs,
+                        from_sheet_id,
+                        to_sheet_id,
+                        to_table_id,
+                    )
+                return col_begin
+            if col_range[col_begin] is None:
+                # A1 style column name
+                col_begin = abs_ref(xl_col_to_name(col_begin), col_begin_abs)
+                col_end = abs_ref(xl_col_to_name(col_end), col_end_abs)
+
+                ref = f"{col_begin}:{col_end}"
+                if to_table_id != from_table_id:
+                    to_table_name = self.table_name(to_table_id)
+                    return f"{to_table_name}::{ref}"
+                return ref
+
+            # Named column range
+            if "GLOBAL" in col_range[col_begin] or "GLOBAL" in col_range[col_end]:
+                col_begin = abs_ref(col_range[col_begin], col_begin_abs)
+                col_end = abs_ref(col_range[col_end], col_end_abs)
+                return no_prefix(f"{col_begin}:{col_end}")
+
+            col_begin = named_cell_ref(
+                col_range[col_begin],
+                col_begin_abs,
+                from_sheet_id,
+                to_sheet_id,
+                to_table_id,
+            )
+            col_end = named_cell_ref(
+                col_range[col_end],
+                col_end_abs,
+                from_sheet_id,
+                to_sheet_id,
+                to_table_id,
+                prefix=False,
+            )
+            return f"{col_begin}:{col_end}"
+
+        # A1 column range
+        begin_ref = xl_rowcol_to_cell(
+            row_begin,
+            col_begin,
+            row_abs=row_begin_abs,
+            col_abs=col_begin_abs,
+        )
+        end_ref = xl_rowcol_to_cell(
+            row_end,
+            col_end,
+            row_abs=row_end_abs,
+            col_abs=col_end_abs,
+        )
+        if from_table_id != to_table_id:
+            return f"{to_table_name}::{begin_ref}:{end_ref}"
+        return f"{begin_ref}:{end_ref}"
 
     # def name_fragments(self):
     #     uid_to_column = {}
@@ -1112,7 +1429,8 @@ class _NumbersModel(Cacheable):
     def tract_to_row_col_ref(
         self,
         node: object,
-        table_id: int,
+        this_table_id: int,
+        other_table_id: int,
         table_name: str,
         row: int,
         col: int,
@@ -1159,52 +1477,22 @@ class _NumbersModel(Cacheable):
         else:
             col_end = col + range_end(node.AST_colon_tract.relative_column[0])
 
-        def abs_ref(ref, abs):
-            if abs:
-                return f"${ref}"
-            return f"{ref}"
-
-        if col_begin == 0x7FFF:
-            table_name = self.table_name(table_id)
-            sheet_id = self.table_id_to_sheet_id(table_id)
-            row_range = row_ranges[sheet_id][table_id]
-            if row_range[row_begin] is None or row_range[row_end] is None:
-                row_begin = abs_ref(row_begin + 1, node.AST_sticky_bits.begin_row_is_absolute)
-                row_end = abs_ref(row_end + 1, node.AST_sticky_bits.end_row_is_absolute)
-                return f"{table_name}::{row_begin}:{row_end}"
-            return f"{table_name}::{row_range[row_begin]}:{row_range[row_end]}"
-
-        if row_begin == 0x7FFFFFFF:
-            table_name = self.table_name(table_id)
-            sheet_id = self.table_id_to_sheet_id(table_id)
-            col_range = row_ranges[sheet_id][table_id]
-            if col_range[col_begin] is None or col_range[col_end] is None:
-                col_begin = abs_ref(
-                    xl_col_to_name(col_begin),
-                    node.AST_sticky_bits.begin_column_is_absolute,
-                )
-                col_end = abs_ref(
-                    xl_col_to_name(col_end),
-                    node.AST_sticky_bits.end_column_is_absolute,
-                )
-                return f"{table_name}::{col_begin}:{col_end}"
-            return f"{table_name}::{col_range[col_begin]}:{col_range[col_end]}"
-
-        begin_ref = xl_rowcol_to_cell(
-            row_begin,
-            col_begin,
-            row_abs=node.AST_sticky_bits.begin_row_is_absolute,
-            col_abs=node.AST_sticky_bits.begin_column_is_absolute,
+        return self.named_cell_range(
+            (
+                None if row_begin == 0x7FFFFFFF else row_begin,
+                None if row_end == 0x7FFFFFFF else row_end,
+                None if col_begin == 0x7FFF else col_begin,
+                None if col_end == 0x7FFF else col_end,
+            ),
+            (
+                node.AST_sticky_bits.begin_row_is_absolute,
+                node.AST_sticky_bits.end_row_is_absolute,
+                node.AST_sticky_bits.begin_column_is_absolute,
+                node.AST_sticky_bits.end_column_is_absolute,
+            ),
+            this_table_id,
+            other_table_id,
         )
-        end_ref = xl_rowcol_to_cell(
-            row_end,
-            col_end,
-            row_abs=node.AST_sticky_bits.end_row_is_absolute,
-            col_abs=node.AST_sticky_bits.end_column_is_absolute,
-        )
-        if table_name is not None:
-            return f"{table_name}::{begin_ref}:{end_ref}"
-        return f"{begin_ref}:{end_ref}"
 
     @cache()
     def formula_ast(self, table_id: int):
@@ -2705,30 +2993,6 @@ def formatted_number(number_type, index):
     bullet_char += BULLET_SUFFIXES[number_type]
 
     return bullet_char
-
-
-def node_to_col_ref(node: object, table_name: str, col: int) -> str:
-    col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
-
-    col_name = xl_col_to_name(col, node.AST_column.absolute)
-    if table_name is not None:
-        return f"{table_name}::{col_name}"
-    return col_name
-
-
-def node_to_row_col_ref(node: object, table_name: str, row: int, col: int) -> str:
-    row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
-    col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
-
-    ref = xl_rowcol_to_cell(
-        row,
-        col,
-        row_abs=node.AST_row.absolute,
-        col_abs=node.AST_column.absolute,
-    )
-    if table_name is not None:
-        return f"{table_name}::{ref}"
-    return ref
 
 
 def get_storage_buffers_for_row(

@@ -112,8 +112,8 @@ def test_named_ranges():
     doc = Document("tests/data/create-formulas.numbers")
     table = doc.sheets["Main Sheet"].tables["Reference Tests"]
     for row_num, row in enumerate(table.iter_rows(min_row=1), start=1):
-        pass
-        # assert row[0].formula == row[1].value, f"Reference Tests: row {row_num}"
+        if len(row) == 2 or row[2].value:
+            assert row[0].formula == row[1].value, f"Reference Tests: row {row_num + 1}"
 
 
 TOKEN_TESTS = {
@@ -337,5 +337,5 @@ def test_parse_formulas():
         for row_num, row in enumerate(table.iter_rows(min_row=1), start=1):
             if len(row) == 2 or row[2].value:
                 pass
-                # assert row[0].formula == row[1].value, f"{table_name}: row {row_num}"
-                # assert check_generated_formula(row[0]), f"{table_name}: row {row_num}"
+                # assert row[0].formula == row[1].value, f"{table_name}: row {row_num + 1}"
+                # assert check_generated_formula(row[0]), f"{table_name}: row {row_num + 1}"
