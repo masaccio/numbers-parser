@@ -1,7 +1,10 @@
 import re
 import warnings
+from dataclasses import dataclass
 from datetime import datetime, timedelta
+from itertools import chain
 
+from numbers_parser.cell import xl_col_to_name, xl_rowcol_to_cell
 from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated.functionmap import FUNCTION_MAP
@@ -37,6 +40,199 @@ OPERAND_ARCHIVE_MAP = {
     Token.TEXT: "text_archive",
     Token.LOGICAL: "logical_archive",
 }
+
+
+@dataclass
+class CellRefType:
+    name: str
+    is_global_unique: bool = False
+    is_table_unique: bool = False
+    is_sheet_unique: bool = False
+
+
+@dataclass
+class CellRef:
+    model: object = None
+    start: tuple[int] = (None, None)
+    end: tuple[int] = (None, None)
+    start_abs: tuple[bool] = (False, False)
+    end_abs: tuple[bool] = (False, False)
+    table_ids: tuple[int] = (None, None)
+
+    def __post_init__(self):
+        self._initialize_table_data()
+        self._set_sheet_ids()
+        self.row_ranges, self.col_ranges = self.model.named_ranges()
+
+    def _initialize_table_data(self):
+        self.table_names = list(
+            chain.from_iterable(
+                [self.model.table_name(tid) for tid in self.model.table_ids(sid)]
+                for sid in self.model.sheet_ids()
+            ),
+        )
+        self.table_name_unique = {
+            name: self.table_names.count(name) == 1 for name in self.table_names
+        }
+
+    def _set_sheet_ids(self):
+        """Determine the sheet IDs for the referenced tables."""
+        if self.table_ids[1] is None:
+            self.table_ids = (self.table_ids[0], self.table_ids[0])
+        self.sheet_ids = (
+            self.model.table_id_to_sheet_id(self.table_ids[0]),
+            self.model.table_id_to_sheet_id(self.table_ids[1]),
+        )
+
+    def expand_ref(self, ref: str, is_abs: bool = False, no_prefix=False) -> str:
+        is_global_unique = ref.is_global_unique if isinstance(ref, CellRefType) else False
+        is_sheet_unique = (
+            ref.is_sheet_unique and not is_abs if isinstance(ref, CellRefType) else False
+        )
+
+        if isinstance(ref, CellRefType):
+            ref = f"${ref.name}" if is_abs else ref.name
+        else:
+            ref = f"${ref}" if is_abs else ref
+        if "-" in ref or "%" in ref:
+            ref = f"'{ref}'"
+
+        if no_prefix or is_global_unique:
+            return ref
+
+        table_name = self.model.table_name(self.table_ids[1])
+        sheet_name = self.model.sheet_name(self.sheet_ids[1])
+        if self.table_ids[0] != self.table_ids[1]:
+            if self.sheet_ids[0] == self.sheet_ids[1] and is_sheet_unique:
+                return ref
+            ref = f"{table_name}::{ref}"
+
+        is_table_name_unique = self.table_name_unique[table_name]
+        if self.sheet_ids[0] != self.sheet_ids[1] and not is_table_name_unique:
+            sheet_name = self.model.sheet_name(self.sheet_ids[1])
+            ref = f"{sheet_name}::{ref}"
+
+        return ref
+
+    def __str__(self):
+        row_start, col_start = self.start
+        row_end, col_end = self.end
+
+        # Handle row-only ranges
+        if col_start is None:
+            row_range = self.row_ranges[self.sheet_ids[1]][self.table_ids[1]]
+            return self._format_row_range(row_start, row_end, row_range)
+
+        # Handle column-only ranges
+        if row_start is None:
+            col_range = self.col_ranges[self.sheet_ids[1]][self.table_ids[1]]
+            return self._format_col_range(col_start, col_end, col_range)
+
+        # Handle full cell ranges
+        return self._format_cell_range(row_start, col_start, row_end, col_end)
+
+    def _format_row_range(self, row_start, row_end, row_range):
+        """Formats a row-only range."""
+        if row_end is None:
+            return self._format_single_row(row_start, row_range)
+        return self._format_row_span(row_start, row_end, row_range)
+
+    def _format_single_row(self, row_start, row_range):
+        """Formats a single row, either numeric or named."""
+        if row_range[row_start] is None:
+            return self._format_numeric_row(row_start)
+        return self.expand_ref(row_range[row_start], self.start_abs[0])
+
+    def _format_numeric_row(self, row_start):
+        """Formats a single numeric row."""
+        return ":".join(
+            [
+                self.expand_ref(str(row_start + 1), self.start_abs[0]),
+                self.expand_ref(str(row_start + 1), self.start_abs[0], no_prefix=True),
+            ],
+        )
+
+    def _format_row_span(self, row_start, row_end, row_range):
+        """Formats a range of rows."""
+        if row_range[row_start] is None:
+            return ":".join(
+                [
+                    self.expand_ref(str(row_start + 1), self.start_abs[0]),
+                    self.expand_ref(str(row_end + 1), self.end_abs[0], no_prefix=True),
+                ],
+            )
+        return ":".join(
+            [
+                self.expand_ref(
+                    row_range[row_start],
+                    self.start_abs[0],
+                    no_prefix=row_range[row_start].is_global_unique
+                    or row_range[row_end].is_global_unique,
+                ),
+                self.expand_ref(row_range[row_end], self.end_abs[0], no_prefix=True),
+            ],
+        )
+
+    def _format_col_range(self, col_start, col_end, col_range):
+        """Formats a column-only range."""
+        if col_end is None:
+            return self._format_single_column(col_start, col_range)
+        return self._format_column_span(col_start, col_end, col_range)
+
+    def _format_single_column(self, col_start, col_range):
+        """Formats a single column, either numeric or named."""
+        if col_range[col_start] is None:
+            return self.expand_ref(xl_col_to_name(col_start, col_abs=self.start_abs[1]))
+        return self.expand_ref(col_range[col_start], self.start_abs[1])
+
+    def _format_column_span(self, col_start, col_end, col_range):
+        """Formats a range of columns."""
+        if col_range[col_start] is None:
+            return f"{self.expand_ref(xl_col_to_name(col_start, col_abs=self.start_abs[1]))}:{self.expand_ref(xl_col_to_name(col_end, col_abs=self.end_abs[1]), no_prefix=True)}"
+        return ":".join(
+            [
+                self.expand_ref(
+                    col_range[col_start],
+                    self.start_abs[1],
+                    no_prefix=col_range[col_start].is_global_unique
+                    or col_range[col_end].is_global_unique,
+                ),
+                self.expand_ref(col_range[col_end], self.end_abs[1], no_prefix=True),
+            ],
+        )
+
+    def _format_cell_range(self, row_start, col_start, row_end, col_end):
+        """Formats a full cell range."""
+        if row_end is None or col_end is None:
+            return self.expand_ref(
+                xl_rowcol_to_cell(
+                    row_start,
+                    col_start,
+                    row_abs=self.start_abs[0],
+                    col_abs=self.start_abs[1],
+                ),
+            )
+        return ":".join(
+            [
+                self.expand_ref(
+                    xl_rowcol_to_cell(
+                        row_start,
+                        col_start,
+                        row_abs=self.start_abs[0],
+                        col_abs=self.start_abs[1],
+                    ),
+                ),
+                self.expand_ref(
+                    xl_rowcol_to_cell(
+                        row_end,
+                        col_end,
+                        row_abs=self.end_abs[0],
+                        col_abs=self.end_abs[1],
+                    ),
+                    no_prefix=True,
+                ),
+            ],
+        )
 
 
 class Formula(list):
@@ -95,9 +291,9 @@ class Formula(list):
     ) -> ASTNodeArrayArchive.ASTNodeArchive:
         r = parse_numbers_range(token.value)
         if r["range_end"]:
-            row_range_begin = r["row_start"] if r["row_start_abs"] else r["row_start"] - row
+            row_range_start = r["row_start"] if r["row_start_abs"] else r["row_start"] - row
             row_range_end = r["row_end"] if r["row_end_abs"] else r["row_end"] - row
-            col_range_begin = r["col_start"] if r["col_start_abs"] else r["col_start"] - col
+            col_range_start = r["col_start"] if r["col_start_abs"] else r["col_start"] - col
             col_range_end = r["col_end"] if r["col_end_abs"] else r["col_end"] - col
 
             args = {}
@@ -116,8 +312,8 @@ class Formula(list):
                     )
                 )
 
-            row_range = {"range_begin": row_range_begin}
-            if row_range_begin != row_range_end:
+            row_range = {"range_start": row_range_start}
+            if row_range_start != row_range_end:
                 row_range["range_end"] = row_range_end
 
             return ASTNodeArrayArchive.ASTNodeArchive(
@@ -136,7 +332,7 @@ class Formula(list):
                     ],
                     relative_column=[
                         ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
-                            range_begin=col_range_begin,
+                            range_start=col_range_start,
                             range_end=col_range_end,
                         ),
                     ],
@@ -267,7 +463,7 @@ class Formula(list):
         return output
 
     def __str__(self) -> str:
-        return "".join(reversed(self._stack))
+        return "".join(reversed([str(x) for x in self._stack]))
 
     def pop(self) -> str:
         return self._stack.pop()
@@ -358,7 +554,7 @@ class Formula(list):
             num_args = len(self._stack)
 
         args = self.popn(num_args)
-        args = ",".join(reversed(args))
+        args = ",".join(reversed([str(x) for x in args]))
         self.push(f"{func_name}({args})")
 
     def greater_than(self, *args) -> None:
@@ -380,7 +576,7 @@ class Formula(list):
     def list(self, *args) -> None:
         node = args[2]
         args = self.popn(node.AST_list_node_numArgs)
-        args = ",".join(reversed(args))
+        args = ",".join(reversed([str(x) for x in args]))
         self.push(f"({args})")
 
     def mul(self, *args) -> None:
@@ -412,7 +608,7 @@ class Formula(list):
         self.push(f"{arg1}^{arg2}")
 
     def range(self, *args) -> None:
-        arg2, arg1 = self.popn(2)
+        arg2, arg1 = [str(x) for x in self.popn(2)]
         func_range = "(" in arg1 or "(" in arg2
         if "::" in arg1 and not func_range:
             # Assumes references are not cross-table
