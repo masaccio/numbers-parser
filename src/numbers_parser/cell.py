@@ -599,6 +599,7 @@ class Cell(CellStorageFlags, Cacheable):
         self.row = row
         self.col = col
         self._is_bulleted = False
+        self._formula_id = None
         self._storage = None
         self._style = None
         self._d128 = None
@@ -641,8 +642,7 @@ class Cell(CellStorageFlags, Cacheable):
     @property
     def is_formula(self) -> bool:
         """bool: ``True`` if the cell contains a formula."""
-        table_formulas = self._model.table_formulas(self._table_id)
-        return table_formulas.is_formula(self.row, self.col)
+        return self._formula_id is not None
 
     @property
     @cache(num_args=0)

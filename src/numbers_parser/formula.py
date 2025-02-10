@@ -529,8 +529,9 @@ class TableFormulas:
             for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
         }
 
-    def is_formula(self, row, col):
-        return (row, col) in self._model.formula_cell_ranges(self._table_id)
+    # def is_formula(self, row, col):
+    #     return self._table_data[self._table_id][row][col]._formula_id is not None
+    #     return (row, col) in self._model.formula_cell_ranges(self._table_id)
 
     def formula(self, formula_key, row, col):
         all_formulas = self._model.formula_ast(self._table_id)
