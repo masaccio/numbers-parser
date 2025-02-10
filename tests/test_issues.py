@@ -215,7 +215,7 @@ def test_issue_42(script_runner):
     lines = ret.stdout.split("\r\n")
     assert lines[4] == "3.0,#REF!×A5:A6"
     assert lines[5] == ",#REF!×A6:A6"
-    assert lines[6] == "SUM(A),PRODUCT(B)"
+    assert lines[6] == "SUM(sum),PRODUCT(prod)"
 
 
 def test_issue_43():
