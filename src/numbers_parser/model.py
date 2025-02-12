@@ -257,13 +257,16 @@ class _NumbersModel(Cacheable):
         self._table_data[table_id] = data
 
     # Don't cache: new tables can be added at runtime
-    def table_ids(self, sheet_id: int) -> list:
-        """Return a list of table IDs for a given sheet ID."""
+    def table_ids(self, sheet_id: int | None = None) -> list:
+        """
+        Return a list of table IDs for a given sheet ID or all table
+        IDs id the sheet ID is None
+        """
         table_info_ids = self.find_refs("TableInfoArchive")
         return [
             self.objects[t_id].tableModel.identifier
             for t_id in table_info_ids
-            if self.objects[t_id].super.parent.identifier == sheet_id
+            if (sheet_id is None or self.objects[t_id].super.parent.identifier == sheet_id)
         ]
 
     # Don't cache: new tables can be added at runtime
@@ -859,6 +862,15 @@ class _NumbersModel(Cacheable):
         return None
 
     def table_name_to_uuid(self, sheet_name: str, table_name: str) -> str:
+        if not sheet_name:
+            # Table:: reference
+            table_ids = [tid for tid in self.table_ids() if table_name == self.table_name(tid)]
+            if len(table_ids) > 1:
+                msg = f"Table name '{table_name}' is ambiguous and cannot be uniquely resolved."
+                raise ValueError(msg)
+            return self.table_base_id(table_ids[0])
+
+        # Sheet::Table reference
         sheet_name_to_id = {self.sheet_name(x): x for x in self.sheet_ids()}
         sheet_id = sheet_name_to_id[sheet_name]
         table_name_to_id = {self.table_name(x): x for x in self.table_ids(sheet_id)}
