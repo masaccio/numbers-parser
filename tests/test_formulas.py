@@ -41,7 +41,7 @@ def compare_tables(table, ref):
                     f"!existsy@[{row},{col}]",
                 )
             else:
-                check.is_true(table.cell(row, col).is_formula)
+                check.is_true(table.cell(row, col).is_formula, f"formula@[{row},{col}]")
                 check.is_not_none(
                     table.cell(row, col).formula,
                     f"exists@[{row},{col}]",
@@ -260,6 +260,10 @@ def test_tokenizer():
     assert str(tok) == "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,'super hero'),FUNC(CLOSE,')')]"
     tok = Tokenizer("=Sheet 2::Table 1::A1")
     assert str(tok) == "[OPERAND(RANGE,'Sheet 2::Table 1::A1')]"
+    tok = Tokenizer("=COUNTA('hyphen-name')")
+    assert str(tok) == "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,''hyphen-name''),FUNC(CLOSE,')')]"
+    tok = Tokenizer("=COUNTA('10%':'20%')")
+    assert str(tok) == "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,''10%':'20%''),FUNC(CLOSE,')')]"
 
     for formula, ref_tokens in TOKEN_TESTS.items():
         tok = Tokenizer("=" + formula)
@@ -335,7 +339,7 @@ def test_parse_formulas():
     for table_name in ["Formula Tests", "Reference Tests"]:
         table = sheet.tables[table_name]
         for row_num, row in enumerate(table.iter_rows(min_row=1), start=1):
+            print(f"ROW: {row_num + 1}")
             if len(row) == 2 or row[2].value:
-                pass
-                # assert row[0].formula == row[1].value, f"{table_name}: row {row_num + 1}"
-                # assert check_generated_formula(row[0]), f"{table_name}: row {row_num + 1}"
+                assert row[0].formula == row[1].value, f"{table_name}: row {row_num + 1}"
+                _ = check_generated_formula(row[0]), f"{table_name}: row {row_num + 1}"
