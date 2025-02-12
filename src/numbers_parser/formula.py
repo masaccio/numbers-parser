@@ -10,7 +10,7 @@ from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated.functionmap import FUNCTION_MAP
 from numbers_parser.generated.TSCEArchives_pb2 import ASTNodeArrayArchive
 from numbers_parser.numbers_uuid import NumbersUUID
-from numbers_parser.tokenizer import Token, Tokenizer, parse_numbers_range
+from numbers_parser.tokenizer import RangeType, Token, Tokenizer, parse_numbers_range
 
 FUNCTION_NAME_TO_ID = {v: k for k, v in FUNCTION_MAP.items()}
 
@@ -39,6 +39,7 @@ OPERAND_ARCHIVE_MAP = {
     Token.NUMBER: "number_archive",
     Token.TEXT: "text_archive",
     Token.LOGICAL: "logical_archive",
+    Token.ERROR: "error",
 }
 
 
@@ -94,8 +95,10 @@ class CellRef:
             ref = f"${ref.name}" if is_abs else ref.name
         else:
             ref = f"${ref}" if is_abs else ref
-        if "-" in ref or "%" in ref:
+        if any(x in ref for x in OPERATOR_PRECEDENCE):
             ref = f"'{ref}'"
+        elif "'" in ref:
+            ref = ref.replace("'", "'''")
 
         if no_prefix or is_global_unique:
             return ref
@@ -290,21 +293,16 @@ class Formula(list):
         token: "Token",
     ) -> ASTNodeArrayArchive.ASTNodeArchive:
         r = parse_numbers_range(token.value)
-        if r["range_end"]:
+
+        if r["range_type"] == RangeType.RANGE:
             row_range_start = r["row_start"] if r["row_start_abs"] else r["row_start"] - row
             row_range_end = r["row_end"] if r["row_end_abs"] else r["row_end"] - row
             col_range_start = r["col_start"] if r["col_start_abs"] else r["col_start"] - col
             col_range_end = r["col_end"] if r["col_end_abs"] else r["col_end"] - col
 
             args = {}
-            if r["named_ref1"]:
-                if r["named_ref2"] is None:
-                    sheet_id = model.table_id_to_sheet_id(table_id)
-                    sheet_name = model.sheet_name(sheet_id)
-                    table_name = r["named_ref1"]
-                    table_uuid = model.table_name_to_uuid(sheet_name, table_name)
-                else:
-                    table_uuid = model.table_name_to_uuid(r["named_ref1"], r["named_ref2"])
+            if r["table_name"]:
+                table_uuid = model.table_name_to_uuid(r["sheet_name"], r["table_name"])
                 xref_archive = NumbersUUID(table_uuid).protobuf4
                 args["AST_cross_table_reference_extra_info"] = (
                     TSCEArchives.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive(
@@ -312,7 +310,7 @@ class Formula(list):
                     )
                 )
 
-            row_range = {"range_start": row_range_start}
+            row_range = {"range_begin": row_range_start}
             if row_range_start != row_range_end:
                 row_range["range_end"] = row_range_end
 
@@ -332,7 +330,7 @@ class Formula(list):
                     ],
                     relative_column=[
                         ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
-                            range_start=col_range_start,
+                            range_begin=col_range_start,
                             range_end=col_range_end,
                         ),
                     ],
@@ -340,6 +338,47 @@ class Formula(list):
                 ),
                 **args,
             )
+
+        if r["range_type"] == RangeType.ROW_RANGE:
+            row_range_start = r["row_start"] if r["row_start_abs"] else r["row_start"] - row
+            row_range_end = r["row_end"] if r["row_end_abs"] else r["row_end"] - row
+            row_range = {"range_begin": row_range_start}
+            if row_range_start != row_range_end:
+                row_range["range_end"] = row_range_end
+
+            return ASTNodeArrayArchive.ASTNodeArchive(
+                AST_node_type="COLON_TRACT_NODE",
+                AST_sticky_bits=ASTNodeArrayArchive.ASTStickyBits(
+                    begin_row_is_absolute=r["row_start_abs"],
+                    begin_column_is_absolute=False,
+                    end_row_is_absolute=r["row_end_abs"],
+                    end_column_is_absolute=False,
+                ),
+                AST_colon_tract=ASTNodeArrayArchive.ASTColonTractArchive(
+                    relative_row=[
+                        ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
+                            **row_range,
+                        ),
+                    ],
+                    relative_column=[
+                        ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
+                            range_begin=0x7FFF,
+                        ),
+                    ],
+                    preserve_rectangular=True,
+                ),
+            )
+
+        if r["range_type"] == RangeType.COL_RANGE:
+            return ASTNodeArrayArchive.ASTNodeArchive()
+
+        if r["range_type"] == RangeType.NAMED_RANGE:
+            return ASTNodeArrayArchive.ASTNodeArchive()
+
+        if r["range_type"] == RangeType.NAMED_ROW_COLUMN:
+            return ASTNodeArrayArchive.ASTNodeArchive()
+
+        # RangeType.CELL
         return ASTNodeArrayArchive.ASTNodeArchive(
             AST_node_type="CELL_REFERENCE_NODE",
             AST_row=ASTNodeArrayArchive.ASTRowCoordinateArchive(
@@ -363,8 +402,8 @@ class Formula(list):
         if float(token.value).is_integer():
             return ASTNodeArrayArchive.ASTNodeArchive(
                 AST_node_type="NUMBER_NODE",
-                AST_number_node_number=int(token.value),
-                AST_number_node_decimal_low=int(token.value),
+                AST_number_node_number=int(float(token.value)),
+                AST_number_node_decimal_low=int(float(token.value)),
                 AST_number_node_decimal_high=0x3040000000000000,
             )
         return ASTNodeArrayArchive.ASTNodeArchive(
@@ -406,6 +445,19 @@ class Formula(list):
             )
 
         return None
+
+    @staticmethod
+    def error(
+        _model: object,
+        _table_id: int,
+        _row: int,
+        _col: int,
+        token: "Token",
+    ) -> ASTNodeArrayArchive.ASTNodeArchive:
+        return ASTNodeArrayArchive.ASTNodeArchive(
+            AST_node_type="BOOLEAN_NODE",
+            AST_boolean_node_boolean=token.value.lower() == "true",
+        )
 
     @staticmethod
     def formula_tokens(formula_str: str):
@@ -725,10 +777,6 @@ class TableFormulas:
             for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
         }
 
-    # def is_formula(self, row, col):
-    #     return self._table_data[self._table_id][row][col]._formula_id is not None
-    #     return (row, col) in self._model.formula_cell_ranges(self._table_id)
-
     def formula(self, formula_key, row, col):
         all_formulas = self._model.formula_ast(self._table_id)
         if formula_key not in all_formulas:
@@ -771,11 +819,3 @@ def number_to_str(v: int) -> str:
             return f"{number}{zeroes}"
         return f"0.{zeroes}{number}"
     return v_str
-
-
-def str_to_number(v: str) -> int:
-    """Convert a string to a number."""
-    if "." in v:
-        v = v.split(".")
-        return int(v[0] + v[1])
-    return int(v)
