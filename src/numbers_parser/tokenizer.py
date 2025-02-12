@@ -1,42 +1,23 @@
+from __future__ import annotations
+
 import re
-
-SHEET_RANGE_REGEXP = re.compile(
-    r"""
-    ^                                             # Start of the string
-    (?:(?P<named_ref1>[^:]+)::)?                  # Optional sheet/table name followed by ::
-    (?:(?P<named_ref2>[^:]+)::)?                  # Optional table name followed by ::
-    (?:
-        (?P<range_start>                          # Group for single cell or start of range
-            (?P<col_start>\$?([0-9]+|[A-Z]+))     # Start column (e.g., A, $A, AA), $ optional
-            (?P<row_start>\$?\d+)                 # Start row (e.g., 1, $1), $ optional
-        )
-        (?:
-            :
-            (?P<range_end>                        # Optional range end (e.g., B2)
-                (?P<col_end>\$?([0-9]+|[A-Z]+))?  # End column (e.g., B, $B, AB), $ optional
-                (?P<row_end>\$?\d+)?              # End row (e.g., 2, $2), $ optional
-            )
-        )?
-    |
-        (?P<named_range>[a-zA-Z_][a-zA-Z0-9_]*)   # Named range (e.g., cats)
-    )
-    $                                             # End of the string
-""",
-    re.VERBOSE,
-)
-
-# named_ref1: Matches optional sheet name (e.g., "Sheet1"), or table if in current sheet
-# named_ref2: Matches optional table name (e.g., "Table1").
-# range_start: Matches start of a range or single cell (e.g., "A1" or "$B$2").
-# col_start: Matches column portion of the range start (e.g., "A", "$B").
-# row_start: Matches row portion of the range start (e.g., "1", "$2").
-# range_end: Matches optional end of a range (e.g., "C3").
-# col_end: Matches column portion of the range end (e.g., "C", "$D").
-# row_end: Matches row portion of the range end (e.g., "3", "$4").
-# named_range: Matches a named range (e.g., "cats").
+from enum import IntEnum
+from typing import TypeAlias
 
 
-def parse_numbers_range(range_str: str) -> dict:
+class RangeType(IntEnum):
+    ROW_RANGE = 1
+    COL_RANGE = 2
+    RANGE = 3
+    NAMED_RANGE = 4
+    CELL = 5
+    NAMED_ROW_COLUMN = 6
+
+
+RangeResultType: TypeAlias = int | bool | str | RangeType
+
+
+def parse_numbers_range(range_str: str) -> dict[str, RangeResultType]:
     """
     Parse a cell range string in Numbers format.
 
@@ -49,38 +30,130 @@ def parse_numbers_range(range_str: str) -> dict:
               are absolute or relative, and any sheet or table name.
 
     """
-    if not (match := SHEET_RANGE_REGEXP.match(range_str)):
-        msg = f"Invalid range string: {range_str}"
-        raise ValueError(msg)
 
-    def col_to_index(col: str) -> int:
-        if col is None:
-            return ""
-        col = col.lstrip("$")
-        index = 0
-        for char in col:
-            index = index * 26 + (ord(char) - ord("A") + 1)
-        return index - 1
+    def col_to_index(col_str: str) -> int:
+        """Convert Excel-like column letter to zero-based index."""
+        col = 0
+        for expn, char in enumerate(reversed(col_str)):
+            col += (ord(char) - ord("A") + 1) * (26**expn)
+        return col
 
-    def row_to_index(row: str) -> int:
-        return int(row.lstrip("$")) - 1 if row is not None else ""
+    def parse_row_range(
+        match: re.Match[str],
+        result: dict[str, RangeResultType],
+    ) -> dict[str, RangeResultType]:
+        """Parse row range format (e.g., '1:2' or '$1:$2')."""
+        result["row_start_abs"] = match.group(1) == "$"
+        result["row_start"] = int(match.group(2)) - 1
+        result["row_end_abs"] = match.group(3) == "$"
+        result["row_end"] = int(match.group(4)) - 1
+        result["range_type"] = RangeType.ROW_RANGE
+        return result
 
-    col_start = match.group("col_start") or ""
-    row_start = match.group("row_start") or ""
-    col_end = match.group("col_end") or ""
-    row_end = match.group("row_end") or ""
+    def parse_col_range(
+        match: re.Match[str],
+        result: dict[str, RangeResultType],
+    ) -> dict[str, RangeResultType]:
+        """Parse column range format (e.g., 'A:C' or '$E:$F')."""
+        result["col_start_abs"] = match.group(1) == "$"
+        result["col_start"] = col_to_index(match.group(2))
+        result["col_end_abs"] = match.group(3) == "$"
+        result["col_end"] = col_to_index(match.group(4))
+        result["range_type"] = RangeType.COL_RANGE
+        return result
 
-    return {
-        **match.groupdict(),
-        "col_start": col_to_index(col_start),
-        "row_start": row_to_index(row_start),
-        "col_end": col_to_index(col_end) if col_end else col_to_index(col_start),
-        "row_end": row_to_index(row_end) if row_end else row_to_index(row_start),
-        "col_start_abs": col_start.startswith("$"),
-        "row_start_abs": row_start.startswith("$"),
-        "col_end_abs": col_end.startswith("$") if col_end else col_start.startswith("$"),
-        "row_end_abs": row_end.startswith("$") if row_end else row_start.startswith("$"),
-    }
+    def parse_full_range(
+        match: re.Match[str],
+        result: dict[str, RangeResultType],
+    ) -> dict[str, RangeResultType]:
+        """Parse full range format (e.g., 'A1:C4' or '$A3:$B3')."""
+        result["col_start_abs"] = match.group(1) == "$"
+        result["col_start"] = col_to_index(match.group(2))
+        result["row_start_abs"] = match.group(3) == "$"
+        result["row_start"] = int(match.group(4)) - 1
+        result["col_end_abs"] = match.group(5) == "$"
+        result["col_end"] = col_to_index(match.group(6))
+        result["row_end_abs"] = match.group(7) == "$"
+        result["row_end"] = int(match.group(8)) - 1
+        result["range_type"] = RangeType.RANGE
+        return result
+
+    def parse_named_range(
+        match: re.Match[str],
+        result: dict[str, RangeResultType],
+    ) -> dict[str, RangeResultType]:
+        """Parse a named range (e.g. 'cats:dogs' from 'Table::cats:dogs')."""
+        result["named_row_abs"] = match.group(1) == "$"
+        result["named_row"] = match.group(2)
+        result["named_col_abs"] = match.group(3) == "$"
+        result["named_col"] = match.group(4)
+        result["range_type"] = RangeType.NAMED_RANGE
+        return result
+
+    def parse_single_cell(
+        match: re.Match[str],
+        result: dict[str, RangeResultType],
+    ) -> dict[str, RangeResultType]:
+        """Parse single cell format (e.g., 'A1' or '$B$3')."""
+        result["col_start_abs"] = match.group(1) == "$"
+        result["col_start"] = col_to_index(match.group(2))
+        result["row_start_abs"] = match.group(3) == "$"
+        result["row_start"] = int(match.group(4)) - 1
+        result["range_type"] = RangeType.CELL
+        return result
+
+    def parse_named_row_column(
+        match: re.Match[str],
+        result: dict[str, RangeResultType],
+    ) -> dict[str, RangeResultType]:
+        """Parse single cell format (e.g., 'cats' from 'Table::cats')."""
+        result["rowcol_start_abs"] = match.group(1) == "$"
+        result["rowcol_start"] = col_to_index(match.group(2))
+        result["range_type"] = RangeType.NAMED_ROW_COLUMN
+        return result
+
+    result = dict.fromkeys(
+        [
+            # "range_type",
+            "row_start",
+            "col_start",
+            "row_start_abs",
+            "col_start_abs",
+            "row_end",
+            "col_end",
+            "row_end_abs",
+            "col_end_abs",
+            # "named_row",
+            # "named_col",
+            # "named_row_abs",
+            # "named_col_abs",
+        ],
+        "",
+    )
+
+    parts = range_str.split("::")
+    if len(parts) == 3:
+        result["sheet_name"], result["table_name"], ref = parts
+    elif len(parts) == 2:
+        result["sheet_name"], result["table_name"], ref = "", parts[0], parts[1]
+    else:
+        result["sheet_name"], result["table_name"], ref = "", "", parts[0]
+
+    patterns = [
+        (r"(\$?)(\d+):(\$?)(\d+)", parse_row_range),
+        (r"(\$?)([A-Z]+):(\$?)([A-Z]+)", parse_col_range),
+        (r"(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)", parse_full_range),
+        (r"(\$?)([A-Z]+)(\$?)(\d+)", parse_single_cell),
+        (r"(\$?)([^:]+):(\$?)(.*)", parse_named_range),
+        (r"(\$?)(.*)", parse_named_row_column),
+    ]
+
+    for pattern, handler in patterns:
+        if m := re.match(pattern, ref):
+            return handler(m, result)
+
+    msg = f"Invalid range string: {range_str}"
+    raise ValueError(msg)
 
 
 # The Tokenizer and Token classes are taken from the openpyxl library which is
@@ -117,13 +190,16 @@ class Tokenizer:
 
     SN_RE = re.compile("^[1-9](\\.[0-9]+)?E$")  # Scientific notation
     WSPACE_RE = re.compile(" +")
-    STRING_REGEXES = {
+    STRING_REGEXES = {  # noqa: RUF012
         # Inside a string, all characters are treated as literals, except for
         # the quote character used to start the string. That character, when
         # doubled is treated as a single character in the string. If an
         # unmatched quote appears, the string is terminated.
         '"': re.compile('"(?:[^"]*"")*[^"]*"(?!")'),
-        "'": re.compile("'(?:[^']*'')*[^']*'(?!')"),
+        # Single-quoted string includes an optional sequence to match
+        # range names such as 'start':'finish' including quoted strings
+        # such as ''10%''.
+        "'": re.compile(r"(?:'[^']*(?:''[^']*)*')(?:\s*:\s*'[^']*(?:''[^']*)*')*"),
     }
     ERROR_CODES = ("#NULL!", "#DIV/0!", "#VALUE!", "#REF!", "#NAME?", "#NUM!", "#N/A")
     TOKEN_ENDERS = ",;})+-*/^&=><%×÷≥≤≠"  # Each of these characters, marks the  # noqa: S105
@@ -204,7 +280,7 @@ class Tokenizer:
             msg = f"Reached end of formula while parsing {subtype} in {self.formula}"
             raise TokenizerError(msg)
         match = match.group(0)
-        if delim == '"':
+        if delim == '"' or (delim.startswith("'") and delim.endswith("'")):
             self.items.append(Token.make_operand(match))
         else:
             self.token.append(match)
