@@ -36,7 +36,7 @@ def parse_numbers_range(range_str: str) -> dict[str, RangeResultType]:
         col = 0
         for expn, char in enumerate(reversed(col_str)):
             col += (ord(char) - ord("A") + 1) * (26**expn)
-        return col
+        return col - 1
 
     def parse_row_range(
         match: re.Match[str],
@@ -112,25 +112,21 @@ def parse_numbers_range(range_str: str) -> dict[str, RangeResultType]:
         result["range_type"] = RangeType.NAMED_ROW_COLUMN
         return result
 
-    result = dict.fromkeys(
-        [
-            # "range_type",
-            "row_start",
-            "col_start",
-            "row_start_abs",
-            "col_start_abs",
-            "row_end",
-            "col_end",
-            "row_end_abs",
-            "col_end_abs",
-            # "named_row",
-            # "named_col",
-            # "named_row_abs",
-            # "named_col_abs",
-        ],
-        "",
-    )
-
+    result = {
+        # "range_type",
+        "row_start": None,
+        "col_start": None,
+        "row_start_abs": False,
+        "col_start_abs": False,
+        "row_end": None,
+        "col_end": None,
+        "row_end_abs": False,
+        "col_end_abs": False,
+        # "named_row",
+        # "named_col",
+        # "named_row_abs",
+        # "named_col_abs",
+    }
     parts = range_str.split("::")
     if len(parts) == 3:
         result["sheet_name"], result["table_name"], ref = parts
