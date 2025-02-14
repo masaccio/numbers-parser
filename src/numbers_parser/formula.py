@@ -502,7 +502,7 @@ class Formula(list):
             elif token.type == "SEP":
                 if operators and operators[-1].type != "FUNC":
                     output.append(operators.pop())
-                output.append(token)
+                # output.append(token)
             elif token.type == "PAREN":
                 if token.subtype == "OPEN":
                     operators.append(token)
