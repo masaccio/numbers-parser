@@ -1,3 +1,4 @@
+import math
 import re
 import warnings
 from dataclasses import dataclass
@@ -5,6 +6,7 @@ from datetime import datetime, timedelta
 from itertools import chain
 
 from numbers_parser.cell import xl_col_to_name, xl_rowcol_to_cell
+from numbers_parser.constants import DECIMAL128_BIAS
 from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated.functionmap import FUNCTION_MAP
@@ -247,10 +249,19 @@ class Formula(list):
         self.col = col
 
     @classmethod
-    def from_str(cls, model, table_id, row, col, formula_str) -> "Formula":
+    def from_str(cls, model, table_id, row, col, formula_str) -> int:
+        """
+        Create a new formula by parsing a formula string and
+        return the allocated formula ID.
+        """
         formula = cls(model, table_id, row, col)
         formula._tokens = cls.formula_tokens(formula_str)
-        archive = TSCEArchives.FormulaArchive()
+
+        model._formulas.add_table(table_id)
+        formula_attrs = {"AST_node_array": {"AST_node": []}}
+        ast_node = formula_attrs["AST_node_array"]["AST_node"]
+
+        # thunk = 0
         for token in formula._tokens:
             if token.type == Token.FUNC and token.subtype == Token.OPEN:
                 if token.value not in FUNCTION_NAME_TO_ID:
@@ -262,36 +273,52 @@ class Formula(list):
                         stacklevel=2,
                     )
                     return None
-                archive.AST_node_array.AST_node.append(
-                    ASTNodeArrayArchive.ASTNodeArchive(
-                        AST_node_type="FUNCTION_NODE",
-                        AST_function_node_index=FUNCTION_NAME_TO_ID[token.value],
-                        AST_function_node_numArgs=token.num_args,
-                    ),
+
+                # if token.value == "IF":
+                #     ast_node.append({"AST_node_type": "END_THUNK_NODE"})
+
+                ast_node.append(
+                    {
+                        "AST_node_type": "FUNCTION_NODE",
+                        "AST_function_node_index": FUNCTION_NAME_TO_ID[token.value],
+                        "AST_function_node_numArgs": token.num_args,
+                    },
                 )
             elif token.type == Token.OPERAND:
-                method = OPERAND_ARCHIVE_MAP[token.subtype]
-                node = getattr(cls, method)(model, table_id, row, col, token)
-                # node = Formula.operand_archive(row, col, token)
-                # # if node is not None:
-                archive.AST_node_array.AST_node.append(node)
+                func = getattr(cls, OPERAND_ARCHIVE_MAP[token.subtype])
+                ast_node.append(func(model, row, col, token))
+
             elif token.type == Token.OP_IN:
-                archive.AST_node_array.AST_node.append(
-                    ASTNodeArrayArchive.ASTNodeArchive(
-                        AST_node_type=OPERATOR_INFIX_MAP[token.value],
-                    ),
-                )
-        formula._archive = archive
-        return formula
+                ast_node.append({"AST_node_type": OPERATOR_INFIX_MAP[token.value]})
+
+            # elif token.type == Token.SEP:
+            #     if thunk:
+            #         archive.AST_node_array.AST_node.append(
+            #             ASTNodeArrayArchive.ASTNodeArchive(
+            #                 AST_node_type="END_THUNK_NODE",
+            #             ),
+            #         )
+            #     archive.AST_node_array.AST_node.append(
+            #         ASTNodeArrayArchive.ASTNodeArchive(
+            #             AST_node_type="BEGIN_EMBEDDED_NODE_ARRAY",
+            #         ),
+            #     )
+            #     thunk += 1
+            #     if thunk > 2:
+            #         thunk = 0
+
+        return model._formulas.lookup_key(
+            table_id,
+            TSCEArchives.FormulaArchive(**formula_attrs),
+        )
 
     @staticmethod
     def range_archive(
         model: object,
-        table_id: int,
         row: int,
         col: int,
         token: "Token",
-    ) -> ASTNodeArrayArchive.ASTNodeArchive:
+    ) -> dict:
         r = parse_numbers_range(token.value)
 
         if r["range_type"] == RangeType.RANGE:
@@ -314,30 +341,25 @@ class Formula(list):
             if row_range_start != row_range_end:
                 row_range["range_end"] = row_range_end
 
-            return ASTNodeArrayArchive.ASTNodeArchive(
-                AST_node_type="COLON_TRACT_NODE",
-                AST_sticky_bits=ASTNodeArrayArchive.ASTStickyBits(
-                    begin_row_is_absolute=r["row_start_abs"],
-                    begin_column_is_absolute=r["col_start_abs"],
-                    end_row_is_absolute=r["row_end_abs"],
-                    end_column_is_absolute=r["col_end_abs"],
-                ),
-                AST_colon_tract=ASTNodeArrayArchive.ASTColonTractArchive(
-                    relative_row=[
-                        ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
-                            **row_range,
-                        ),
+            return {
+                "AST_node_type": "COLON_TRACT_NODE",
+                "AST_sticky_bits": {
+                    "begin_row_is_absolute": r["row_start_abs"],
+                    "begin_column_is_absolute": r["col_start_abs"],
+                    "end_row_is_absolute": r["row_end_abs"],
+                    "end_column_is_absolute": r["col_end_abs"],
+                },
+                "AST_colon_tract": {
+                    "relative_row": [dict(**row_range)],
+                    "relative_column": [
+                        {
+                            "range_begin": col_range_start,
+                            "range_end": col_range_end,
+                        },
                     ],
-                    relative_column=[
-                        ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
-                            range_begin=col_range_start,
-                            range_end=col_range_end,
-                        ),
-                    ],
-                    preserve_rectangular=True,
-                ),
-                **args,
-            )
+                    "preserve_rectangular": True,
+                },
+            }
 
         if r["range_type"] == RangeType.ROW_RANGE:
             row_range_start = r["row_start"] if r["row_start_abs"] else r["row_start"] - row
@@ -346,77 +368,60 @@ class Formula(list):
             if row_range_start != row_range_end:
                 row_range["range_end"] = row_range_end
 
-            return ASTNodeArrayArchive.ASTNodeArchive(
-                AST_node_type="COLON_TRACT_NODE",
-                AST_sticky_bits=ASTNodeArrayArchive.ASTStickyBits(
-                    begin_row_is_absolute=r["row_start_abs"],
-                    begin_column_is_absolute=False,
-                    end_row_is_absolute=r["row_end_abs"],
-                    end_column_is_absolute=False,
-                ),
-                AST_colon_tract=ASTNodeArrayArchive.ASTColonTractArchive(
-                    relative_row=[
-                        ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
-                            **row_range,
-                        ),
-                    ],
-                    relative_column=[
-                        ASTNodeArrayArchive.ASTColonTractArchive.ASTColonTractRelativeRangeArchive(
-                            range_begin=0x7FFF,
-                        ),
-                    ],
-                    preserve_rectangular=True,
-                ),
-            )
-
         if r["range_type"] == RangeType.COL_RANGE:
-            return ASTNodeArrayArchive.ASTNodeArchive()
+            return {}
 
         if r["range_type"] == RangeType.NAMED_RANGE:
-            return ASTNodeArrayArchive.ASTNodeArchive()
+            return {}
 
         if r["range_type"] == RangeType.NAMED_ROW_COLUMN:
-            return ASTNodeArrayArchive.ASTNodeArchive()
+            return {}
 
-        # RangeType.CELL
-        return ASTNodeArrayArchive.ASTNodeArchive(
-            AST_node_type="CELL_REFERENCE_NODE",
-            AST_row=ASTNodeArrayArchive.ASTRowCoordinateArchive(
-                row=r["row_start"] if r["row_start_abs"] else r["row_start"] - row,
-                absolute=r["row_start_abs"],
-            ),
-            AST_column=ASTNodeArrayArchive.ASTColumnCoordinateArchive(
-                column=r["col_start"] if r["col_start_abs"] else r["col_start"] - col,
-                absolute=r["col_start_abs"],
-            ),
-        )
+        # # RangeType.CELL
+        return {
+            "AST_node_type": "CELL_REFERENCE_NODE",
+            "AST_row": {
+                "row": r["row_start"] if r["row_start_abs"] else r["row_start"] - row,
+                "absolute": r["row_start_abs"],
+            },
+            "AST_column": {
+                "column": r["col_start"] if r["col_start_abs"] else r["col_start"] - col,
+                "absolute": r["col_start_abs"],
+            },
+        }
 
     @staticmethod
     def number_archive(
         _model: object,
-        _table_id: int,
         _row: int,
         _col: int,
         token: "Token",
     ) -> ASTNodeArrayArchive.ASTNodeArchive:
         if float(token.value).is_integer():
-            return ASTNodeArrayArchive.ASTNodeArchive(
-                AST_node_type="NUMBER_NODE",
-                AST_number_node_number=int(float(token.value)),
-                AST_number_node_decimal_low=int(float(token.value)),
-                AST_number_node_decimal_high=0x3040000000000000,
-            )
-        return ASTNodeArrayArchive.ASTNodeArchive(
-            AST_node_type="NUMBER_NODE",
-            AST_number_node_number=float(token.value),
-            # AST_number_node_decimal_low=int(token.value),
-            # AST_number_node_decimal_high=0x3040000000000000,
-        )
+            return {
+                "AST_node_type": "NUMBER_NODE",
+                "AST_number_node_number": int(float(token.value)),
+                "AST_number_node_decimal_low": int(float(token.value)),
+                "AST_number_node_decimal_high": 0x3040000000000000,
+            }
+
+        value = float(token.value)
+        num_dp = len(re.sub(r"0*$", "", token.value.split(".")[1]))
+        decimal_low = int(value * 10**num_dp)
+        exp = math.floor(math.log10(abs(value)))
+        bias = DECIMAL128_BIAS * 2 - 6
+        decimal_high = (bias + (2 * exp)) << 48
+
+        return {
+            "AST_node_type": "NUMBER_NODE",
+            "AST_number_node_number": float(token.value),
+            "AST_number_node_decimal_low": decimal_low,
+            "AST_number_node_decimal_high": decimal_high,
+        }
 
     @staticmethod
     def text_archive(
         _model: object,
-        _table_id: int,
         _row: int,
         _col: int,
         token: "Token",
@@ -425,39 +430,37 @@ class Formula(list):
         value = token.value[1:-1]
         # Numbers does not escape quotes in the AST
         value = value.replace('""', '"')
-        return ASTNodeArrayArchive.ASTNodeArchive(
-            AST_node_type="STRING_NODE",
-            AST_string_node_string=value,
-        )
+        return {
+            "AST_node_type": "STRING_NODE",
+            "AST_string_node_string": value,
+        }
 
     @staticmethod
     def logical_archive(
         _model: object,
-        _table_id: int,
         _row: int,
         _col: int,
         token: "Token",
     ) -> ASTNodeArrayArchive.ASTNodeArchive:
         if token.subtype == Token.LOGICAL:
-            return ASTNodeArrayArchive.ASTNodeArchive(
-                AST_node_type="BOOLEAN_NODE",
-                AST_boolean_node_boolean=token.value.lower() == "true",
-            )
+            return {
+                "AST_node_type": "BOOLEAN_NODE",
+                "AST_boolean_node_boolean": token.value.lower() == "true",
+            }
 
         return None
 
     @staticmethod
     def error(
         _model: object,
-        _table_id: int,
         _row: int,
         _col: int,
         token: "Token",
     ) -> ASTNodeArrayArchive.ASTNodeArchive:
-        return ASTNodeArrayArchive.ASTNodeArchive(
-            AST_node_type="BOOLEAN_NODE",
-            AST_boolean_node_boolean=token.value.lower() == "true",
-        )
+        return {
+            "AST_node_type": "BOOLEAN_NODE",
+            "AST_boolean_node_boolean": token.value.lower() == "true",
+        }
 
     @staticmethod
     def formula_tokens(formula_str: str):
@@ -499,6 +502,7 @@ class Formula(list):
             elif token.type == "SEP":
                 if operators and operators[-1].type != "FUNC":
                     output.append(operators.pop())
+                output.append(token)
             elif token.type == "PAREN":
                 if token.subtype == "OPEN":
                     operators.append(token)
