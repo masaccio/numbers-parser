@@ -223,6 +223,7 @@ class _NumbersModel(Cacheable):
         self._table_styles = DataLists(self, "styleTable", "reference")
         self._table_strings = DataLists(self, "stringTable", "string")
         self._control_specs = DataLists(self, "control_cell_spec_table", "cell_spec")
+        self._formulas = DataLists(self, "formula_table", "formula")
         self._table_data = {}
         self._styles = None
         self._images = {}
