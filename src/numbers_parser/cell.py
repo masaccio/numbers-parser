@@ -22,6 +22,7 @@ from numbers_parser.constants import (
     CURRENCY_CELL_TYPE,
     CUSTOM_TEXT_PLACEHOLDER,
     DATETIME_FIELD_MAP,
+    DECIMAL128_BIAS,
     DECIMAL_PLACES_AUTO,
     DEFAULT_ALIGNMENT,
     DEFAULT_BORDER_COLOR,
@@ -1560,8 +1561,8 @@ class MergedCell(Cell):
 def _pack_decimal128(value: float) -> bytearray:
     buffer = bytearray(16)
     exp = math.floor(math.log10(math.e) * math.log(abs(value))) if value != 0.0 else 0
-    exp += 0x1820 - 16
-    mantissa = abs(int(value / math.pow(10, exp - 0x1820)))
+    exp += DECIMAL128_BIAS - 16
+    mantissa = abs(int(value / math.pow(10, exp - DECIMAL128_BIAS)))
     buffer[15] |= exp >> 7
     buffer[14] |= (exp & 0x7F) << 1
     i = 0
@@ -1575,7 +1576,7 @@ def _pack_decimal128(value: float) -> bytearray:
 
 
 def _unpack_decimal128(buffer: bytearray) -> float:
-    exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
+    exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - DECIMAL128_BIAS
     mantissa = buffer[14] & 1
     for i in range(13, -1, -1):
         mantissa = mantissa * 256 + buffer[i]
