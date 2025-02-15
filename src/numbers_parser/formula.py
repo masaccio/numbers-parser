@@ -44,6 +44,26 @@ OPERAND_ARCHIVE_MAP = {
     Token.ERROR: "error",
 }
 
+# TODO: Understand what the frozen stick bits do!
+FROZEN_STICKY_BIT_MAP = {
+    (False, False, False, False): None,
+    (False, True, False, False): (True, False, False, False),
+    (False, False, False, True): (False, False, True, False),
+    (False, True, False, True): (True, False, True, False),
+    (False, False, True, False): None,
+    (False, False, True, True): (False, False, True, False),
+    (False, True, True, False): (True, False, False, False),
+    (False, True, True, True): (True, False, True, False),
+    (True, False, False, False): None,
+    (True, True, False, False): (True, False, False, False),
+    (True, False, False, True): (False, False, True, False),
+    (True, True, False, True): (True, False, True, False),
+    (True, False, True, False): None,
+    (True, True, True, False): (True, False, False, False),
+    (True, False, True, True): (False, False, True, False),
+    (True, True, True, True): (True, False, True, False),
+}
+
 
 @dataclass
 class CellRefType:
@@ -286,7 +306,7 @@ class Formula(list):
                 )
             elif token.type == Token.OPERAND:
                 func = getattr(cls, OPERAND_ARCHIVE_MAP[token.subtype])
-                ast_node.append(func(model, row, col, token))
+                ast_node.append(func(model, table_id, row, col, token))
 
             elif token.type == Token.OP_IN:
                 ast_node.append({"AST_node_type": OPERATOR_INFIX_MAP[token.value]})
@@ -315,6 +335,7 @@ class Formula(list):
     @staticmethod
     def range_archive(
         model: object,
+        table_id: int,
         row: int,
         col: int,
         token: "Token",
@@ -322,51 +343,91 @@ class Formula(list):
         r = parse_numbers_range(token.value)
 
         if r["range_type"] == RangeType.RANGE:
-            row_range_start = r["row_start"] if r["row_start_abs"] else r["row_start"] - row
-            row_range_end = r["row_end"] if r["row_end_abs"] else r["row_end"] - row
-            col_range_start = r["col_start"] if r["col_start_abs"] else r["col_start"] - col
-            col_range_end = r["col_end"] if r["col_end_abs"] else r["col_end"] - col
+            ast_colon_tract = {
+                "preserve_rectangular": True,
+                "relative_row": [{}],
+                "relative_column": [{}],
+                "absolute_row": [{}],
+                "absolute_column": [{}],
+            }
 
-            args = {}
+            if not (r["col_start_abs"] and r["col_end_abs"]):
+                ast_colon_tract["relative_column"][0]["range_begin"] = (
+                    (r["col_end"] - col) if r["col_start_abs"] else (r["col_start"] - col)
+                )
+
+            if not (r["col_start_abs"]) and not (r["col_end_abs"]):
+                ast_colon_tract["relative_column"][0]["range_end"] = r["col_end"] - col
+
+            if not (r["row_start_abs"] and r["row_end_abs"]):
+                ast_colon_tract["relative_row"][0]["range_begin"] = r["row_start"] - row
+                if r["row_start"] != r["row_end"]:
+                    ast_colon_tract["relative_row"][0]["range_end"] = r["row_end"] - row
+
+            if r["col_start_abs"] or r["col_end_abs"]:
+                ast_colon_tract["absolute_column"][0]["range_begin"] = (
+                    r["col_start"] if r["row_start_abs"] else r["col_end"]
+                )
+
+            if r["col_start_abs"] and r["col_end_abs"]:
+                ast_colon_tract["absolute_column"][0]["range_end"] = r["col_end"]
+
+            if r["row_start_abs"] or r["row_end_abs"]:
+                ast_colon_tract["absolute_row"][0]["range_begin"] = (
+                    r["row_start"] if r["row_start_abs"] else r["row_end_abs"]
+                )
+
+            if r["row_start_abs"] and r["row_end_abs"]:
+                ast_colon_tract["absolute_row"][0]["range_end"] = r["row_end"]
+
+            ast_sticky_bits = {
+                "begin_row_is_absolute": r["row_start_abs"],
+                "begin_column_is_absolute": r["col_start_abs"],
+                "end_row_is_absolute": r["row_end_abs"],
+                "end_column_is_absolute": r["col_end_abs"],
+            }
+
+            node = {
+                "AST_node_type": "COLON_TRACT_NODE",
+                "AST_sticky_bits": ast_sticky_bits,
+                "AST_colon_tract": ast_colon_tract,
+            }
+
+            key = (r["col_start_abs"], r["col_end_abs"], r["row_start_abs"], r["row_end_abs"])
+            ast_frozen_sticky_bits = {}
+            if FROZEN_STICKY_BIT_MAP[key] is not None:
+                sticky_bits = FROZEN_STICKY_BIT_MAP[key]
+                ast_frozen_sticky_bits["begin_column_is_absolute"] = sticky_bits[0]
+                ast_frozen_sticky_bits["end_column_is_absolute"] = sticky_bits[1]
+                ast_frozen_sticky_bits["begin_row_is_absolute"] = sticky_bits[2]
+                ast_frozen_sticky_bits["end_row_is_absolute"] = sticky_bits[3]
+                node["AST_frozen_sticky_bits"] = ast_frozen_sticky_bits
+
+            for key in ["absolute_row", "relative_row", "absolute_column", "relative_column"]:
+                if len(ast_colon_tract[key][0].keys()) == 0:
+                    del ast_colon_tract[key]
+
             if r["table_name"]:
-                table_uuid = model.table_name_to_uuid(r["sheet_name"], r["table_name"])
+                sheet_name = (
+                    r["sheet_name"]
+                    if r["sheet_name"]
+                    else model.sheet_name(model.table_id_to_sheet_id(table_id))
+                )
+                table_uuid = model.table_name_to_uuid(sheet_name, r["table_name"])
                 xref_archive = NumbersUUID(table_uuid).protobuf4
-                args["AST_cross_table_reference_extra_info"] = (
+                node["AST_cross_table_reference_extra_info"] = (
                     TSCEArchives.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive(
                         table_id=xref_archive,
                     )
                 )
-
-            row_range = {"range_begin": row_range_start}
-            if row_range_start != row_range_end:
-                row_range["range_end"] = row_range_end
-
-            return {
-                "AST_node_type": "COLON_TRACT_NODE",
-                "AST_sticky_bits": {
-                    "begin_row_is_absolute": r["row_start_abs"],
-                    "begin_column_is_absolute": r["col_start_abs"],
-                    "end_row_is_absolute": r["row_end_abs"],
-                    "end_column_is_absolute": r["col_end_abs"],
-                },
-                "AST_colon_tract": {
-                    "relative_row": [dict(**row_range)],
-                    "relative_column": [
-                        {
-                            "range_begin": col_range_start,
-                            "range_end": col_range_end,
-                        },
-                    ],
-                    "preserve_rectangular": True,
-                },
-            }
+            return node
 
         if r["range_type"] == RangeType.ROW_RANGE:
-            row_range_start = r["row_start"] if r["row_start_abs"] else r["row_start"] - row
-            row_range_end = r["row_end"] if r["row_end_abs"] else r["row_end"] - row
-            row_range = {"range_begin": row_range_start}
-            if row_range_start != row_range_end:
-                row_range["range_end"] = row_range_end
+            row_start = r["row_start"] if r["row_start_abs"] else r["row_start"] - row
+            row_end = r["row_end"] if r["row_end_abs"] else r["row_end"] - row
+            row_range = {"range_begin": row_start}
+            if row_start != row_end:
+                row_range["range_end"] = row_end
 
         if r["range_type"] == RangeType.COL_RANGE:
             return {}
@@ -377,7 +438,7 @@ class Formula(list):
         if r["range_type"] == RangeType.NAMED_ROW_COLUMN:
             return {}
 
-        # # RangeType.CELL
+        # RangeType.CELL
         return {
             "AST_node_type": "CELL_REFERENCE_NODE",
             "AST_row": {
@@ -393,6 +454,7 @@ class Formula(list):
     @staticmethod
     def number_archive(
         _model: object,
+        _table_id: int,
         _row: int,
         _col: int,
         token: "Token",
@@ -405,16 +467,25 @@ class Formula(list):
                 "AST_number_node_decimal_high": 0x3040000000000000,
             }
 
-        value = float(token.value)
-        num_dp = len(re.sub(r"0*$", "", token.value.split(".")[1]))
-        decimal_low = int(value * 10**num_dp)
-        exp = math.floor(math.log10(abs(value)))
-        bias = DECIMAL128_BIAS * 2 - 6
-        decimal_high = (bias + (2 * exp)) << 48
+        value = token.value
+        exponent = (
+            math.floor(math.log10(math.e) * math.log(abs(float(value))))
+            if float(value) != 0.0
+            else 0
+        )
+        if "E" in value:
+            significand, exponent = value.split("E")
+        else:
+            significand = value
+            exponent = 0
+        num_dp = len(re.sub(r"0*$", "", str(significand).split(".")[1]))
+        exponent = int(exponent) - num_dp
+        decimal_low = int(float(significand) * 10**num_dp)
+        decimal_high = ((DECIMAL128_BIAS * 2) + (2 * exponent)) << 48
 
         return {
             "AST_node_type": "NUMBER_NODE",
-            "AST_number_node_number": float(token.value),
+            "AST_number_node_number": float(value),
             "AST_number_node_decimal_low": decimal_low,
             "AST_number_node_decimal_high": decimal_high,
         }
@@ -422,6 +493,7 @@ class Formula(list):
     @staticmethod
     def text_archive(
         _model: object,
+        _table_id: int,
         _row: int,
         _col: int,
         token: "Token",
@@ -438,6 +510,7 @@ class Formula(list):
     @staticmethod
     def logical_archive(
         _model: object,
+        _table_id: int,
         _row: int,
         _col: int,
         token: "Token",
@@ -453,6 +526,7 @@ class Formula(list):
     @staticmethod
     def error(
         _model: object,
+        _table_id: int,
         _row: int,
         _col: int,
         token: "Token",
