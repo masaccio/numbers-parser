@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from itertools import chain
 
-from numbers_parser.cell import xl_col_to_name, xl_rowcol_to_cell
 from numbers_parser.constants import DECIMAL128_BIAS
 from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
@@ -13,6 +12,7 @@ from numbers_parser.generated.functionmap import FUNCTION_MAP
 from numbers_parser.generated.TSCEArchives_pb2 import ASTNodeArrayArchive
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.tokenizer import RangeType, Token, Tokenizer, parse_numbers_range
+from numbers_parser.xref_utils import xl_col_to_name, xl_rowcol_to_cell
 
 FUNCTION_NAME_TO_ID = {v: k for k, v in FUNCTION_MAP.items()}
 
