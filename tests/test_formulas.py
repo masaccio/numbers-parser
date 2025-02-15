@@ -340,8 +340,8 @@ def test_parse_formulas():
     assert record[0].message.args[0] == "Formula Tests@[1,0]: function XXX is not supported."
 
     sheet = doc.sheets["Main Sheet"]
-    # for table_name in ["Formula Tests", "Reference Tests"]:
-    for table_name in ["Formula Tests"]:
+    for table_name in ["Formula Tests", "Reference Tests"]:
+        # for table_name in ["Formula Tests"]:
         table = sheet.tables[table_name]
         for row_num, row in enumerate(table.iter_rows(min_row=1), start=1):
             print(f"ROW: {row_num + 1}")
@@ -353,12 +353,18 @@ def test_parse_formulas():
 def test_create_formula(configurable_save_file):
     doc = Document()
     table = doc.default_table
-    table.write(0, 0, 0.0)
-    cell = table.cell(0, 0)
-    cell.formula = "=SUM(1000.0,200.0,30.0,4.0,0.5)"
+
+    for row, values in enumerate(TABLE_1_FORMULAS):
+        if values[0] is None:
+            table.write(row, 0, row + 1.0)
+            table.cell(row, 1).formula = values[1]
+            table.cell(row, 2).formula = values[2]
+
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
     table = doc.default_table
-    cell = table.cell(0, 0)
-    assert cell.formula == "SUM(1000,200,30,4,0.5)"
+    for row, values in enumerate(TABLE_1_FORMULAS):
+        if values[0] is None:
+            assert table.cell(row, 1).formula == values[1]
+            assert table.cell(row, 2).formula == values[2]

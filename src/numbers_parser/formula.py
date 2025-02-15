@@ -1,24 +1,20 @@
 import math
 import re
 import warnings
-from dataclasses import dataclass
 from datetime import datetime, timedelta
-from itertools import chain
 
-from numbers_parser.constants import DECIMAL128_BIAS
+from numbers_parser.constants import DECIMAL128_BIAS, OPERATOR_PRECEDENCE
 from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated.functionmap import FUNCTION_MAP
 from numbers_parser.generated.TSCEArchives_pb2 import ASTNodeArrayArchive
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.tokenizer import RangeType, Token, Tokenizer, parse_numbers_range
-from numbers_parser.xref_utils import xl_col_to_name, xl_rowcol_to_cell
 
 FUNCTION_NAME_TO_ID = {v: k for k, v in FUNCTION_MAP.items()}
 
 OPERATOR_MAP = str.maketrans({"×": "*", "÷": "/", "≥": ">=", "≤": "<=", "≠": "<>"})
 
-OPERATOR_PRECEDENCE = {"%": 6, "^": 5, "×": 4, "*": 4, "/": 4, "÷": 4, "+": 3, "-": 3, "&": 2}
 
 OPERATOR_INFIX_MAP = {
     "=": "EQUAL_TO_NODE",
@@ -63,201 +59,6 @@ FROZEN_STICKY_BIT_MAP = {
     (True, False, True, True): (False, False, True, False),
     (True, True, True, True): (True, False, True, False),
 }
-
-
-@dataclass
-class CellRefType:
-    name: str
-    is_global_unique: bool = False
-    is_table_unique: bool = False
-    is_sheet_unique: bool = False
-
-
-@dataclass
-class CellRef:
-    model: object = None
-    start: tuple[int] = (None, None)
-    end: tuple[int] = (None, None)
-    start_abs: tuple[bool] = (False, False)
-    end_abs: tuple[bool] = (False, False)
-    table_ids: tuple[int] = (None, None)
-
-    def __post_init__(self):
-        self._initialize_table_data()
-        self._set_sheet_ids()
-        self.row_ranges, self.col_ranges = self.model.named_ranges()
-
-    def _initialize_table_data(self):
-        self.table_names = list(
-            chain.from_iterable(
-                [self.model.table_name(tid) for tid in self.model.table_ids(sid)]
-                for sid in self.model.sheet_ids()
-            ),
-        )
-        self.table_name_unique = {
-            name: self.table_names.count(name) == 1 for name in self.table_names
-        }
-
-    def _set_sheet_ids(self):
-        """Determine the sheet IDs for the referenced tables."""
-        if self.table_ids[1] is None:
-            self.table_ids = (self.table_ids[0], self.table_ids[0])
-        self.sheet_ids = (
-            self.model.table_id_to_sheet_id(self.table_ids[0]),
-            self.model.table_id_to_sheet_id(self.table_ids[1]),
-        )
-
-    def expand_ref(self, ref: str, is_abs: bool = False, no_prefix=False) -> str:
-        is_global_unique = ref.is_global_unique if isinstance(ref, CellRefType) else False
-        is_sheet_unique = (
-            ref.is_sheet_unique and not is_abs if isinstance(ref, CellRefType) else False
-        )
-
-        if isinstance(ref, CellRefType):
-            ref = f"${ref.name}" if is_abs else ref.name
-        else:
-            ref = f"${ref}" if is_abs else ref
-        if any(x in ref for x in OPERATOR_PRECEDENCE):
-            ref = f"'{ref}'"
-        elif "'" in ref:
-            ref = ref.replace("'", "'''")
-
-        if no_prefix or is_global_unique:
-            return ref
-
-        table_name = self.model.table_name(self.table_ids[1])
-        sheet_name = self.model.sheet_name(self.sheet_ids[1])
-        if self.table_ids[0] != self.table_ids[1]:
-            if self.sheet_ids[0] == self.sheet_ids[1] and is_sheet_unique:
-                return ref
-            ref = f"{table_name}::{ref}"
-
-        is_table_name_unique = self.table_name_unique[table_name]
-        if self.sheet_ids[0] != self.sheet_ids[1] and not is_table_name_unique:
-            sheet_name = self.model.sheet_name(self.sheet_ids[1])
-            ref = f"{sheet_name}::{ref}"
-
-        return ref
-
-    def __str__(self):
-        row_start, col_start = self.start
-        row_end, col_end = self.end
-
-        # Handle row-only ranges
-        if col_start is None:
-            row_range = self.row_ranges[self.sheet_ids[1]][self.table_ids[1]]
-            return self._format_row_range(row_start, row_end, row_range)
-
-        # Handle column-only ranges
-        if row_start is None:
-            col_range = self.col_ranges[self.sheet_ids[1]][self.table_ids[1]]
-            return self._format_col_range(col_start, col_end, col_range)
-
-        # Handle full cell ranges
-        return self._format_cell_range(row_start, col_start, row_end, col_end)
-
-    def _format_row_range(self, row_start, row_end, row_range):
-        """Formats a row-only range."""
-        if row_end is None:
-            return self._format_single_row(row_start, row_range)
-        return self._format_row_span(row_start, row_end, row_range)
-
-    def _format_single_row(self, row_start, row_range):
-        """Formats a single row, either numeric or named."""
-        if row_range[row_start] is None:
-            return self._format_numeric_row(row_start)
-        return self.expand_ref(row_range[row_start], self.start_abs[0])
-
-    def _format_numeric_row(self, row_start):
-        """Formats a single numeric row."""
-        return ":".join(
-            [
-                self.expand_ref(str(row_start + 1), self.start_abs[0]),
-                self.expand_ref(str(row_start + 1), self.start_abs[0], no_prefix=True),
-            ],
-        )
-
-    def _format_row_span(self, row_start, row_end, row_range):
-        """Formats a range of rows."""
-        if row_range[row_start] is None:
-            return ":".join(
-                [
-                    self.expand_ref(str(row_start + 1), self.start_abs[0]),
-                    self.expand_ref(str(row_end + 1), self.end_abs[0], no_prefix=True),
-                ],
-            )
-        return ":".join(
-            [
-                self.expand_ref(
-                    row_range[row_start],
-                    self.start_abs[0],
-                    no_prefix=row_range[row_start].is_global_unique
-                    or row_range[row_end].is_global_unique,
-                ),
-                self.expand_ref(row_range[row_end], self.end_abs[0], no_prefix=True),
-            ],
-        )
-
-    def _format_col_range(self, col_start, col_end, col_range):
-        """Formats a column-only range."""
-        if col_end is None:
-            return self._format_single_column(col_start, col_range)
-        return self._format_column_span(col_start, col_end, col_range)
-
-    def _format_single_column(self, col_start, col_range):
-        """Formats a single column, either numeric or named."""
-        if col_range[col_start] is None:
-            return self.expand_ref(xl_col_to_name(col_start, col_abs=self.start_abs[1]))
-        return self.expand_ref(col_range[col_start], self.start_abs[1])
-
-    def _format_column_span(self, col_start, col_end, col_range):
-        """Formats a range of columns."""
-        if col_range[col_start] is None:
-            return f"{self.expand_ref(xl_col_to_name(col_start, col_abs=self.start_abs[1]))}:{self.expand_ref(xl_col_to_name(col_end, col_abs=self.end_abs[1]), no_prefix=True)}"
-        return ":".join(
-            [
-                self.expand_ref(
-                    col_range[col_start],
-                    self.start_abs[1],
-                    no_prefix=col_range[col_start].is_global_unique
-                    or col_range[col_end].is_global_unique,
-                ),
-                self.expand_ref(col_range[col_end], self.end_abs[1], no_prefix=True),
-            ],
-        )
-
-    def _format_cell_range(self, row_start, col_start, row_end, col_end):
-        """Formats a full cell range."""
-        if row_end is None or col_end is None:
-            return self.expand_ref(
-                xl_rowcol_to_cell(
-                    row_start,
-                    col_start,
-                    row_abs=self.start_abs[0],
-                    col_abs=self.start_abs[1],
-                ),
-            )
-        return ":".join(
-            [
-                self.expand_ref(
-                    xl_rowcol_to_cell(
-                        row_start,
-                        col_start,
-                        row_abs=self.start_abs[0],
-                        col_abs=self.start_abs[1],
-                    ),
-                ),
-                self.expand_ref(
-                    xl_rowcol_to_cell(
-                        row_end,
-                        col_end,
-                        row_abs=self.end_abs[0],
-                        col_abs=self.end_abs[1],
-                    ),
-                    no_prefix=True,
-                ),
-            ],
-        )
 
 
 class Formula(list):
@@ -305,8 +106,8 @@ class Formula(list):
                     },
                 )
             elif token.type == Token.OPERAND:
-                func = getattr(cls, OPERAND_ARCHIVE_MAP[token.subtype])
-                ast_node.append(func(model, table_id, row, col, token))
+                func = getattr(formula, OPERAND_ARCHIVE_MAP[token.subtype])
+                ast_node.append(func(token))
 
             elif token.type == Token.OP_IN:
                 ast_node.append({"AST_node_type": OPERATOR_INFIX_MAP[token.value]})
@@ -332,14 +133,30 @@ class Formula(list):
             TSCEArchives.FormulaArchive(**formula_attrs),
         )
 
+    def _add_xref_tableto_node(self, r: dict[str, str], node: dict) -> None:
+        sheet_name = (
+            r["sheet_name"]
+            if r["sheet_name"]
+            else self._model.sheet_name(self._model.table_id_to_sheet_id(self._table_id))
+        )
+        table_uuid = self._model.table_name_to_uuid(sheet_name, r["table_name"])
+        xref_archive = NumbersUUID(table_uuid).protobuf4
+        node["AST_cross_table_reference_extra_info"] = (
+            TSCEArchives.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive(
+                table_id=xref_archive,
+            )
+        )
+
     @staticmethod
-    def range_archive(
-        model: object,
-        table_id: int,
-        row: int,
-        col: int,
-        token: "Token",
-    ) -> dict:
+    def _ast_sticky_bits(r: dict[str, str]) -> dict[str, str]:
+        return {
+            "begin_row_is_absolute": r["row_start_abs"],
+            "begin_column_is_absolute": r["col_start_abs"],
+            "end_row_is_absolute": r["row_end_abs"],
+            "end_column_is_absolute": r["col_end_abs"],
+        }
+
+    def range_archive(self, token: "Token") -> dict:
         r = parse_numbers_range(token.value)
 
         if r["range_type"] == RangeType.RANGE:
@@ -353,16 +170,16 @@ class Formula(list):
 
             if not (r["col_start_abs"] and r["col_end_abs"]):
                 ast_colon_tract["relative_column"][0]["range_begin"] = (
-                    (r["col_end"] - col) if r["col_start_abs"] else (r["col_start"] - col)
+                    (r["col_end"] - self.col) if r["col_start_abs"] else (r["col_start"] - self.col)
                 )
 
             if not (r["col_start_abs"]) and not (r["col_end_abs"]):
-                ast_colon_tract["relative_column"][0]["range_end"] = r["col_end"] - col
+                ast_colon_tract["relative_column"][0]["range_end"] = r["col_end"] - self.col
 
             if not (r["row_start_abs"] and r["row_end_abs"]):
-                ast_colon_tract["relative_row"][0]["range_begin"] = r["row_start"] - row
+                ast_colon_tract["relative_row"][0]["range_begin"] = r["row_start"] - self.row
                 if r["row_start"] != r["row_end"]:
-                    ast_colon_tract["relative_row"][0]["range_end"] = r["row_end"] - row
+                    ast_colon_tract["relative_row"][0]["range_end"] = r["row_end"] - self.row
 
             if r["col_start_abs"] or r["col_end_abs"]:
                 ast_colon_tract["absolute_column"][0]["range_begin"] = (
@@ -380,16 +197,9 @@ class Formula(list):
             if r["row_start_abs"] and r["row_end_abs"]:
                 ast_colon_tract["absolute_row"][0]["range_end"] = r["row_end"]
 
-            ast_sticky_bits = {
-                "begin_row_is_absolute": r["row_start_abs"],
-                "begin_column_is_absolute": r["col_start_abs"],
-                "end_row_is_absolute": r["row_end_abs"],
-                "end_column_is_absolute": r["col_end_abs"],
-            }
-
             node = {
                 "AST_node_type": "COLON_TRACT_NODE",
-                "AST_sticky_bits": ast_sticky_bits,
+                "AST_sticky_bits": Formula._ast_sticky_bits(r),
                 "AST_colon_tract": ast_colon_tract,
             }
 
@@ -408,31 +218,66 @@ class Formula(list):
                     del ast_colon_tract[key]
 
             if r["table_name"]:
-                sheet_name = (
-                    r["sheet_name"]
-                    if r["sheet_name"]
-                    else model.sheet_name(model.table_id_to_sheet_id(table_id))
-                )
-                table_uuid = model.table_name_to_uuid(sheet_name, r["table_name"])
-                xref_archive = NumbersUUID(table_uuid).protobuf4
-                node["AST_cross_table_reference_extra_info"] = (
-                    TSCEArchives.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive(
-                        table_id=xref_archive,
-                    )
-                )
+                self._add_xref_tableto_node(r, node)
+
             return node
 
         if r["range_type"] == RangeType.ROW_RANGE:
-            row_start = r["row_start"] if r["row_start_abs"] else r["row_start"] - row
-            row_end = r["row_end"] if r["row_end_abs"] else r["row_end"] - row
-            row_range = {"range_begin": row_start}
-            if row_start != row_end:
-                row_range["range_end"] = row_end
+            row_start = r["row_start"] if r["row_start_abs"] else r["row_start"] - self.row
+            row_end = r["row_end"] if r["row_end_abs"] else r["row_end"] - self.row
+
+            node = {
+                "AST_node_type": "COLON_TRACT_NODE",
+                "AST_sticky_bits": Formula._ast_sticky_bits(r),
+                "AST_colon_tract": {
+                    "relative_row": [{"range_begin": row_start, "range_end": row_end}],
+                    "absolute_column": [{"range_begin": 0x7FFF}],
+                    "preserve_rectangular": True,
+                },
+            }
+            if r["table_name"]:
+                self._add_xref_tableto_node(r, node)
+            return node
 
         if r["range_type"] == RangeType.COL_RANGE:
-            return {}
+            col_start = r["col_start"] if r["col_start_abs"] else r["col_start"] - self.col
+            col_end = r["col_end"] if r["col_end_abs"] else r["col_end"] - self.col
+
+            node = {
+                "AST_node_type": "COLON_TRACT_NODE",
+                "AST_sticky_bits": Formula._ast_sticky_bits(r),
+                "AST_colon_tract": {
+                    "relative_column": [{"range_begin": col_start, "range_end": col_end}],
+                    "absolute_row": [{"range_begin": 2147483647}],
+                    "preserve_rectangular": True,
+                },
+            }
+            if r["table_name"]:
+                self._add_xref_tableto_node(r, node)
+            return node
 
         if r["range_type"] == RangeType.NAMED_RANGE:
+            # (sheet_id, table_id, row) = self._model.row_col_name_to_offset(
+            #     r["sheet_name"],
+            #     r["table_name"],
+            #     r["named_row"],
+            #     None,
+            # )
+
+            #     col_start = r["col_start"] if r["col_start_abs"] else r["col_start"] - self.col
+            #     col_end = r["col_end"] if r["col_end_abs"] else r["col_end"] - self.col
+
+            #     node = {
+            #         "AST_node_type": "COLON_TRACT_NODE",
+            #         "AST_sticky_bits": ast_sticky_bits(r),
+            #         "AST_colon_tract": {
+            #             "relative_row": [{"range_begin": -12, "range_end": -11}],
+            #             "absolute_column": [{"range_begin": 32767}],
+            #             "preserve_rectangular": True,
+            #         },
+            #     }
+            #     if r["table_name"]:
+            #         add_xref_table(r, table_id, model, node)
             return {}
 
         if r["range_type"] == RangeType.NAMED_ROW_COLUMN:
@@ -442,23 +287,16 @@ class Formula(list):
         return {
             "AST_node_type": "CELL_REFERENCE_NODE",
             "AST_row": {
-                "row": r["row_start"] if r["row_start_abs"] else r["row_start"] - row,
+                "row": r["row_start"] if r["row_start_abs"] else r["row_start"] - self.row,
                 "absolute": r["row_start_abs"],
             },
             "AST_column": {
-                "column": r["col_start"] if r["col_start_abs"] else r["col_start"] - col,
+                "column": r["col_start"] if r["col_start_abs"] else r["col_start"] - self.col,
                 "absolute": r["col_start_abs"],
             },
         }
 
-    @staticmethod
-    def number_archive(
-        _model: object,
-        _table_id: int,
-        _row: int,
-        _col: int,
-        token: "Token",
-    ) -> ASTNodeArrayArchive.ASTNodeArchive:
+    def number_archive(self, token: "Token") -> ASTNodeArrayArchive.ASTNodeArchive:
         if float(token.value).is_integer():
             return {
                 "AST_node_type": "NUMBER_NODE",
@@ -490,14 +328,7 @@ class Formula(list):
             "AST_number_node_decimal_high": decimal_high,
         }
 
-    @staticmethod
-    def text_archive(
-        _model: object,
-        _table_id: int,
-        _row: int,
-        _col: int,
-        token: "Token",
-    ) -> ASTNodeArrayArchive.ASTNodeArchive:
+    def text_archive(self, token: "Token") -> ASTNodeArrayArchive.ASTNodeArchive:
         # String literals from tokenizer include start and end quotes
         value = token.value[1:-1]
         # Numbers does not escape quotes in the AST
@@ -507,14 +338,7 @@ class Formula(list):
             "AST_string_node_string": value,
         }
 
-    @staticmethod
-    def logical_archive(
-        _model: object,
-        _table_id: int,
-        _row: int,
-        _col: int,
-        token: "Token",
-    ) -> ASTNodeArrayArchive.ASTNodeArchive:
+    def logical_archive(self, token: "Token") -> ASTNodeArrayArchive.ASTNodeArchive:
         if token.subtype == Token.LOGICAL:
             return {
                 "AST_node_type": "BOOLEAN_NODE",
@@ -523,14 +347,7 @@ class Formula(list):
 
         return None
 
-    @staticmethod
-    def error(
-        _model: object,
-        _table_id: int,
-        _row: int,
-        _col: int,
-        token: "Token",
-    ) -> ASTNodeArrayArchive.ASTNodeArchive:
+    def error(self, token: "Token") -> ASTNodeArrayArchive.ASTNodeArchive:
         return {
             "AST_node_type": "BOOLEAN_NODE",
             "AST_boolean_node_boolean": token.value.lower() == "true",

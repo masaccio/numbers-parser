@@ -64,7 +64,7 @@ from numbers_parser.generated.TSWPArchives_pb2 import (
 )
 from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID
-from numbers_parser.xref_utils import xl_range
+from numbers_parser.xrefs import xl_range
 
 logger = logging.getLogger(numbers_parser_name)
 debug = logger.debug

@@ -29,7 +29,7 @@ from numbers_parser.constants import (
 from numbers_parser.experimental import _enable_experimental_features, _experimental_features
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.numbers_uuid import NumbersUUID
-from numbers_parser.xref_utils import xl_col_to_name, xl_range, xl_rowcol_to_cell
+from numbers_parser.xrefs import xl_col_to_name, xl_range, xl_rowcol_to_cell
 
 
 def test_containers():

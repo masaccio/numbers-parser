@@ -4,7 +4,6 @@ import re
 from array import array
 from collections import defaultdict
 from hashlib import sha1
-from itertools import chain
 from math import floor
 from pathlib import Path
 from struct import pack
@@ -53,7 +52,7 @@ from numbers_parser.constants import (
 )
 from numbers_parser.containers import ObjectStore
 from numbers_parser.exceptions import UnsupportedError
-from numbers_parser.formula import CellRef, CellRefType, TableFormulas
+from numbers_parser.formula import TableFormulas
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSAArchives_pb2 as TSAArchives
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
@@ -74,6 +73,7 @@ from numbers_parser.generated.TSWPArchives_pb2 import (
 from numbers_parser.iwafile import find_extension
 from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID
+from numbers_parser.xrefs import CellRef
 
 
 def create_font_name_map(font_map: dict) -> dict:
@@ -236,6 +236,9 @@ class _NumbersModel(Cacheable):
             "bottom": defaultdict(),
             "left": defaultdict(),
         }
+        self._row_offset_to_name = None
+        self._col_offset_to_name = None
+        self._row_col_name_to_offset = None
 
     def save(self, filepath: Path, package: bool) -> None:
         self.objects.save(filepath, package)
@@ -980,158 +983,21 @@ class _NumbersModel(Cacheable):
             table_ids=(table_id, to_table_id),
         )
 
-    # @cache()
-    def named_ranges(self):
-        """
-        Find the globally unique row and column headers and the table unique
-        row and column headers for use in range references. Returns a dict
-        mapping table ID to lists of rows and columns and their names if
-        they are unique.
-        """
+    def row_col_name_to_offset(
+        self,
+        sheet_name: str,
+        table_name: str,
+        row_name: str | None,
+        col_name: str | None,
+    ) -> tuple[int]:
+        if not sheet_name and not table_name:
+            name = row_name or col_name
+            if name in self._row_col_name_to_offset["globals"]:
+                return self._row_col_name_to_offset["globals"]
+            msg = f"{name}: is not a globally unique reference."
+            raise ValueError(msg)
 
-        def exact_count(pool: list, value: int | str | bool):
-            return sum(1 for x in pool if type(x) is type(value) and x == value)
-
-        doc_names = defaultdict(int)
-        sheet_names = {}
-        row_offset_to_name = {}
-        col_offset_to_name = {}
-        for sheet_id in self.sheet_ids():
-            sheet_names[sheet_id] = defaultdict(int)
-            row_offset_to_name[sheet_id] = {}
-            col_offset_to_name[sheet_id] = {}
-            for table_id in self.table_ids(sheet_id):
-                row_offset_to_name[sheet_id][table_id] = {}
-                num_header_rows = self.num_header_rows(table_id)
-                num_header_cols = self.num_header_cols(table_id)
-
-                # Named row is the right-most header column value in the row
-                if num_header_cols > 0:
-                    row_names = []
-                    all_row_names = [
-                        self._table_data[table_id][row][num_header_cols - 1].formatted_value
-                        for row in range(num_header_rows, len(self._table_data[table_id]))
-                    ]
-
-                    for row in range(self.number_of_rows(table_id)):
-                        if row < num_header_rows:
-                            row_names.append(None)
-                            row_offset_to_name[sheet_id][table_id][row] = None
-                        else:
-                            name = self._table_data[table_id][row][
-                                num_header_cols - 1
-                            ].formatted_value
-                            if name is None:
-                                row_offset_to_name[sheet_id][table_id][row] = None
-                            elif name is None or exact_count(all_row_names, name) > 1:
-                                row_names.append(None)
-                                row_offset_to_name[sheet_id][table_id][row] = None
-                            else:
-                                row_names.append(name)
-                                row_offset_to_name[sheet_id][table_id][row] = name
-                    for name in row_names:
-                        doc_names[name] += 1
-                        sheet_names[sheet_id][name] += 1
-                    # Names are never used if rows share the same leading value
-                    for row_name in row_names:
-                        if exact_count(row_names, row_name) > 1:
-                            row_names = list(filter(lambda x: x != row_name, row_names))
-                else:
-                    row_offset_to_name[sheet_id][table_id] = {
-                        row: None for row in range(self.number_of_rows(table_id))
-                    }
-
-                # Named column is the last header row value in the column
-                col_offset_to_name[sheet_id][table_id] = {}
-                if num_header_rows > 0:
-                    col_names = []
-                    all_col_names = [
-                        self._table_data[table_id][num_header_rows - 1][col].formatted_value
-                        for col in range(num_header_cols, len(self._table_data[table_id][0]))
-                    ]
-                    for col in range(self.number_of_columns(table_id)):
-                        if col < num_header_cols:
-                            col_names.append(None)
-                            col_offset_to_name[sheet_id][table_id][col] = None
-                        else:
-                            name = self._table_data[table_id][num_header_rows - 1][
-                                col
-                            ].formatted_value
-                            if name is None:
-                                col_offset_to_name[sheet_id][table_id][col] = None
-                            elif exact_count(all_col_names, name) > 1:
-                                col_names.append(None)
-                                col_offset_to_name[sheet_id][table_id][col] = None
-                            else:
-                                col_names.append(name)
-                                col_offset_to_name[sheet_id][table_id][col] = name
-
-                    for name in col_names:
-                        doc_names[name] += 1
-                        sheet_names[sheet_id][name] += 1
-                    # Names are never used if columns share the same heading value
-                    for col_name in col_names:
-                        if exact_count(col_names, col_name) > 1:
-                            col_names = list(filter(lambda x: x != col_name, col_names))
-                else:
-                    col_offset_to_name[sheet_id][table_id] = {
-                        col: None for col in range(self.number_of_columns(table_id))
-                    }
-
-        doc_names = [name for name, count in doc_names.items() if count == 1]
-        table_names = list(
-            chain.from_iterable(
-                [[self.table_name(tid) for tid in self.table_ids(sid)] for sid in self.sheet_ids()],
-            ),
-        )
-
-        for sheet_id in self.sheet_ids():
-            for table_id in self.table_ids(sheet_id):
-                table_name = self.table_name(table_id)
-                for row in range(self.number_of_rows(table_id)):
-                    name = row_offset_to_name[sheet_id][table_id][row]
-                    if name is None:
-                        pass
-                    elif name in doc_names:
-                        row_offset_to_name[sheet_id][table_id][row] = CellRefType(
-                            name,
-                            is_global_unique=True,
-                        )
-                    elif name in sheet_names[sheet_id] and sheet_names[sheet_id][name] == 1:
-                        row_offset_to_name[sheet_id][table_id][row] = CellRefType(
-                            name,
-                            is_sheet_unique=True,
-                        )
-                    elif table_names.count(table_name) > 1:
-                        row_offset_to_name[sheet_id][table_id][row] = CellRefType(name)
-                    else:
-                        row_offset_to_name[sheet_id][table_id][row] = CellRefType(
-                            name,
-                            is_table_unique=True,
-                        )
-                for col in range(self.number_of_columns(table_id)):
-                    name = col_offset_to_name[sheet_id][table_id][col]
-                    if name is None:
-                        pass
-                    elif name in doc_names:
-                        col_offset_to_name[sheet_id][table_id][col] = CellRefType(
-                            name,
-                            is_global_unique=True,
-                        )
-                    elif name in sheet_names[sheet_id] and sheet_names[sheet_id][name] == 1:
-                        col_offset_to_name[sheet_id][table_id][col] = CellRefType(
-                            name,
-                            is_sheet_unique=True,
-                        )
-                    elif table_names.count(table_name) > 1:
-                        col_offset_to_name[sheet_id][table_id][col] = CellRefType(name)
-                    else:
-                        col_offset_to_name[sheet_id][table_id][col] = CellRefType(
-                            name,
-                            is_table_unique=True,
-                        )
-
-        return row_offset_to_name, col_offset_to_name
+        return ()
 
     @cache()
     def formula_ast(self, table_id: int):

@@ -31,7 +31,7 @@ from numbers_parser.constants import (
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
 from numbers_parser.numbers_cache import Cacheable
-from numbers_parser.xref_utils import xl_cell_to_rowcol, xl_range
+from numbers_parser.xrefs import xl_cell_to_rowcol, xl_range
 
 if TYPE_CHECKING:  # pragma: nocover
     from collections.abc import Iterator
