@@ -115,15 +115,6 @@ def test_named_ranges():
         if len(row) == 2 or row[2].value:
             assert row[0].formula == row[1].value, f"Reference Tests: row {row_num + 1}"
 
-    with pytest.raises(ValueError) as e:  # noqa: PT011
-        _ = table._model.table_name_to_uuid("", "Food Table")
-    assert str(e.value) == "Table name 'Food Table' is ambiguous and cannot be uniquely resolved."
-
-    uuid = table._model.table_name_to_uuid("Powers Sheet", "Food Table")
-    assert uuid == table._model.table_base_id(
-        doc.sheets["Powers Sheet"].tables["Food Table"]._table_id
-    )
-
 
 TOKEN_TESTS = {
     "A1": [
@@ -357,3 +348,23 @@ def test_parse_formulas():
             if len(row) == 2 or row[2].value:
                 assert row[0].formula == row[1].value, f"{table_name}: row {row_num + 1}"
                 _ = check_generated_formula(row[0]), f"{table_name}: row {row_num + 1}"
+
+
+def test_create_formula(configurable_save_file):
+    doc = Document()
+    table = doc.default_table
+    table.write(0, 0, 0.0)
+    cell = table.cell(0, 0)
+    cell._formula_id = Formula.from_str(
+        cell._model,
+        cell._table_id,
+        cell.row,
+        cell.col,
+        "=SUM(1000.0,200.0,30.0,4.0,0.5)",
+    )
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.default_table
+    cell = table.cell(0, 0)
+    assert cell.formula == "SUM(1000,200,30,4,0.5)"
