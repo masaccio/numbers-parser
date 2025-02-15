@@ -863,15 +863,10 @@ class _NumbersModel(Cacheable):
         return None
 
     def table_name_to_uuid(self, sheet_name: str, table_name: str) -> str:
-        if not sheet_name:
-            # Table:: reference
-            table_ids = [tid for tid in self.table_ids() if table_name == self.table_name(tid)]
-            if len(table_ids) > 1:
-                msg = f"Table name '{table_name}' is ambiguous and cannot be uniquely resolved."
-                raise ValueError(msg)
+        table_ids = [tid for tid in self.table_ids() if table_name == self.table_name(tid)]
+        if len(table_ids) == 1:
             return self.table_base_id(table_ids[0])
 
-        # Sheet::Table reference
         sheet_name_to_id = {self.sheet_name(x): x for x in self.sheet_ids()}
         sheet_id = sheet_name_to_id[sheet_name]
         table_name_to_id = {self.table_name(x): x for x in self.table_ids(sheet_id)}
