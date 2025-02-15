@@ -355,13 +355,7 @@ def test_create_formula(configurable_save_file):
     table = doc.default_table
     table.write(0, 0, 0.0)
     cell = table.cell(0, 0)
-    cell._formula_id = Formula.from_str(
-        cell._model,
-        cell._table_id,
-        cell.row,
-        cell.col,
-        "=SUM(1000.0,200.0,30.0,4.0,0.5)",
-    )
+    cell.formula = "=SUM(1000.0,200.0,30.0,4.0,0.5)"
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
