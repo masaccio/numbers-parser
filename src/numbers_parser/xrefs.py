@@ -234,14 +234,6 @@ class ScopedNameRefCache:
     def _exact_count(pool: list, value: int | str | bool):
         return sum(1 for x in pool if type(x) is type(value) and x == value)
 
-    def _row_range(self, table_id: int) -> range:
-        num_header_rows = self.model.num_header_rows(table_id)
-        return range(num_header_rows, len(self.model._table_data[table_id]))
-
-    def _column_range(self, table_id: int) -> range:
-        num_header_cols = self.model.num_header_cols(table_id)
-        return range(num_header_cols, len(self.model._table_data[table_id][0]))
-
     def _row_data(self, table_id: int, row: int) -> int | str | bool | None:
         num_header_cols = self.model.num_header_cols(table_id)
         return self.model._table_data[table_id][row][num_header_cols - 1].formatted_value
