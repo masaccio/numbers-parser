@@ -22,12 +22,21 @@ class ScopedNameRef:
     is_sheet_unique: bool = False
 
 
+class CellRangeType(IntEnum):
+    ROW_RANGE = 1
+    COL_RANGE = 2
+    RANGE = 3
+    NAMED_RANGE = 4
+    CELL = 5
+    NAMED_ROW_COLUMN = 6
+
+
 @dataclass
 class CellRange:
     model: object = None
-    row_start: int = None
+    row_start: int | str = None
     row_end: int = None
-    col_start: int = None
+    col_start: int | str = None
     col_end: int = None
     row_start_is_abs: bool = False
     row_end_is_abs: bool = False
@@ -35,6 +44,7 @@ class CellRange:
     col_end_is_abs: bool = False
     from_table_id: int = None
     to_table_id: int = None
+    range_type: CellRangeType = None
 
     def __post_init__(self):
         self._initialize_table_data()

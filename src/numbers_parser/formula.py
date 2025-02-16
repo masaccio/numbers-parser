@@ -9,7 +9,8 @@ from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated.functionmap import FUNCTION_MAP
 from numbers_parser.generated.TSCEArchives_pb2 import ASTNodeArrayArchive
 from numbers_parser.numbers_uuid import NumbersUUID
-from numbers_parser.tokenizer import RangeType, Token, Tokenizer, parse_numbers_range
+from numbers_parser.tokenizer import Token, Tokenizer, parse_numbers_range
+from numbers_parser.xrefs import CellRange, CellRangeType
 
 FUNCTION_NAME_TO_ID = {v: k for k, v in FUNCTION_MAP.items()}
 
@@ -82,7 +83,6 @@ class Formula(list):
         formula_attrs = {"AST_node_array": {"AST_node": []}}
         ast_node = formula_attrs["AST_node_array"]["AST_node"]
 
-        # thunk = 0
         for token in formula._tokens:
             if token.type == Token.FUNC and token.subtype == Token.OPEN:
                 if token.value not in FUNCTION_NAME_TO_ID:
@@ -94,9 +94,6 @@ class Formula(list):
                         stacklevel=2,
                     )
                     return None
-
-                # if token.value == "IF":
-                #     ast_node.append({"AST_node_type": "END_THUNK_NODE"})
 
                 ast_node.append(
                     {
@@ -112,34 +109,18 @@ class Formula(list):
             elif token.type == Token.OP_IN:
                 ast_node.append({"AST_node_type": OPERATOR_INFIX_MAP[token.value]})
 
-            # elif token.type == Token.SEP:
-            #     if thunk:
-            #         archive.AST_node_array.AST_node.append(
-            #             ASTNodeArrayArchive.ASTNodeArchive(
-            #                 AST_node_type="END_THUNK_NODE",
-            #             ),
-            #         )
-            #     archive.AST_node_array.AST_node.append(
-            #         ASTNodeArrayArchive.ASTNodeArchive(
-            #             AST_node_type="BEGIN_EMBEDDED_NODE_ARRAY",
-            #         ),
-            #     )
-            #     thunk += 1
-            #     if thunk > 2:
-            #         thunk = 0
-
         return model._formulas.lookup_key(
             table_id,
             TSCEArchives.FormulaArchive(**formula_attrs),
         )
 
-    def _add_xref_tableto_node(self, r: dict[str, str], node: dict) -> None:
+    def _add_xref_tableto_node(self, ref: dict[str, CellRange], node: dict) -> None:
         sheet_name = (
-            r["sheet_name"]
-            if r["sheet_name"]
+            ref.sheet_name
+            if ref.sheet_name
             else self._model.sheet_name(self._model.table_id_to_sheet_id(self._table_id))
         )
-        table_uuid = self._model.table_name_to_uuid(sheet_name, r["table_name"])
+        table_uuid = self._model.table_name_to_uuid(sheet_name, ref.table_name)
         xref_archive = NumbersUUID(table_uuid).protobuf4
         node["AST_cross_table_reference_extra_info"] = (
             TSCEArchives.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive(
@@ -148,18 +129,18 @@ class Formula(list):
         )
 
     @staticmethod
-    def _ast_sticky_bits(r: dict[str, str]) -> dict[str, str]:
+    def _ast_sticky_bits(ref: dict[str, CellRange]) -> dict[str, str]:
         return {
-            "begin_row_is_absolute": r["row_start_abs"],
-            "begin_column_is_absolute": r["col_start_abs"],
-            "end_row_is_absolute": r["row_end_abs"],
-            "end_column_is_absolute": r["col_end_abs"],
+            "begin_row_is_absolute": ref.row_start_is_abs,
+            "begin_column_is_absolute": ref.col_start_is_abs,
+            "end_row_is_absolute": ref.row_end_is_abs,
+            "end_column_is_absolute": ref.col_end_is_abs,
         }
 
     def range_archive(self, token: "Token") -> dict:
-        r = parse_numbers_range(token.value)
+        ref = parse_numbers_range(self._model, token.value)
 
-        if r["range_type"] == RangeType.RANGE:
+        if ref.range_type == CellRangeType.RANGE:
             ast_colon_tract = {
                 "preserve_rectangular": True,
                 "relative_row": [{}],
@@ -168,42 +149,47 @@ class Formula(list):
                 "absolute_column": [{}],
             }
 
-            if not (r["col_start_abs"] and r["col_end_abs"]):
+            if not (ref.col_start_is_abs and ref.col_end_is_abs):
                 ast_colon_tract["relative_column"][0]["range_begin"] = (
-                    (r["col_end"] - self.col) if r["col_start_abs"] else (r["col_start"] - self.col)
+                    (ref.col_end - self.col) if ref.col_start_is_abs else (ref.col_start - self.col)
                 )
 
-            if not (r["col_start_abs"]) and not (r["col_end_abs"]):
-                ast_colon_tract["relative_column"][0]["range_end"] = r["col_end"] - self.col
+            if not (ref.col_start_is_abs) and not (ref.col_end_is_abs):
+                ast_colon_tract["relative_column"][0]["range_end"] = ref.col_end - self.col
 
-            if not (r["row_start_abs"] and r["row_end_abs"]):
-                ast_colon_tract["relative_row"][0]["range_begin"] = r["row_start"] - self.row
-                if r["row_start"] != r["row_end"]:
-                    ast_colon_tract["relative_row"][0]["range_end"] = r["row_end"] - self.row
+            if not (ref.row_start_is_abs and ref.row_end_is_abs):
+                ast_colon_tract["relative_row"][0]["range_begin"] = ref.row_start - self.row
+                if ref.row_start != ref.row_end:
+                    ast_colon_tract["relative_row"][0]["range_end"] = ref.row_end - self.row
 
-            if r["col_start_abs"] or r["col_end_abs"]:
+            if ref.col_start_is_abs or ref.col_end_is_abs:
                 ast_colon_tract["absolute_column"][0]["range_begin"] = (
-                    r["col_start"] if r["row_start_abs"] else r["col_end"]
+                    ref.col_start if ref.row_start_is_abs else ref.col_end
                 )
 
-            if r["col_start_abs"] and r["col_end_abs"]:
-                ast_colon_tract["absolute_column"][0]["range_end"] = r["col_end"]
+            if ref.col_start_is_abs and ref.col_end_is_abs:
+                ast_colon_tract["absolute_column"][0]["range_end"] = ref.col_end
 
-            if r["row_start_abs"] or r["row_end_abs"]:
+            if ref.row_start_is_abs or ref.row_end_is_abs:
                 ast_colon_tract["absolute_row"][0]["range_begin"] = (
-                    r["row_start"] if r["row_start_abs"] else r["row_end_abs"]
+                    ref.row_start if ref.row_start_is_abs else ref.row_end_is_abs
                 )
 
-            if r["row_start_abs"] and r["row_end_abs"]:
-                ast_colon_tract["absolute_row"][0]["range_end"] = r["row_end"]
+            if ref.row_start_is_abs and ref.row_end_is_abs:
+                ast_colon_tract["absolute_row"][0]["range_end"] = ref.row_end
 
             node = {
                 "AST_node_type": "COLON_TRACT_NODE",
-                "AST_sticky_bits": Formula._ast_sticky_bits(r),
+                "AST_sticky_bits": Formula._ast_sticky_bits(ref),
                 "AST_colon_tract": ast_colon_tract,
             }
 
-            key = (r["col_start_abs"], r["col_end_abs"], r["row_start_abs"], r["row_end_abs"])
+            key = (
+                ref.col_start_is_abs,
+                ref.col_end_is_abs,
+                ref.row_start_is_abs,
+                ref.row_end_is_abs,
+            )
             ast_frozen_sticky_bits = {}
             if FROZEN_STICKY_BIT_MAP[key] is not None:
                 sticky_bits = FROZEN_STICKY_BIT_MAP[key]
@@ -217,82 +203,71 @@ class Formula(list):
                 if len(ast_colon_tract[key][0].keys()) == 0:
                     del ast_colon_tract[key]
 
-            if r["table_name"]:
-                self._add_xref_tableto_node(r, node)
+            if ref.table_name:
+                self._add_xref_tableto_node(ref, node)
 
             return node
 
-        if r["range_type"] == RangeType.ROW_RANGE:
-            row_start = r["row_start"] if r["row_start_abs"] else r["row_start"] - self.row
-            row_end = r["row_end"] if r["row_end_abs"] else r["row_end"] - self.row
+        if ref.range_type == CellRangeType.ROW_RANGE:
+            row_start = ref.row_start if ref.row_start_is_abs else ref.row_start - self.row
+            row_end = ref.row_end if ref.row_end_is_abs else ref.row_end - self.row
 
             node = {
                 "AST_node_type": "COLON_TRACT_NODE",
-                "AST_sticky_bits": Formula._ast_sticky_bits(r),
+                "AST_sticky_bits": Formula._ast_sticky_bits(ref),
                 "AST_colon_tract": {
                     "relative_row": [{"range_begin": row_start, "range_end": row_end}],
                     "absolute_column": [{"range_begin": 0x7FFF}],
                     "preserve_rectangular": True,
                 },
             }
-            if r["table_name"]:
-                self._add_xref_tableto_node(r, node)
+            if ref.table_name:
+                self._add_xref_tableto_node(ref, node)
             return node
 
-        if r["range_type"] == RangeType.COL_RANGE:
-            col_start = r["col_start"] if r["col_start_abs"] else r["col_start"] - self.col
-            col_end = r["col_end"] if r["col_end_abs"] else r["col_end"] - self.col
+        if ref.range_type == CellRangeType.COL_RANGE:
+            col_start = ref.col_start if ref.col_start_is_abs else ref.col_start - self.col
+            col_end = ref.col_end if ref.col_end_is_abs else ref.col_end - self.col
 
             node = {
                 "AST_node_type": "COLON_TRACT_NODE",
-                "AST_sticky_bits": Formula._ast_sticky_bits(r),
+                "AST_sticky_bits": Formula._ast_sticky_bits(ref),
                 "AST_colon_tract": {
                     "relative_column": [{"range_begin": col_start, "range_end": col_end}],
                     "absolute_row": [{"range_begin": 2147483647}],
                     "preserve_rectangular": True,
                 },
             }
-            if r["table_name"]:
-                self._add_xref_tableto_node(r, node)
+            if ref.table_name:
+                self._add_xref_tableto_node(ref, node)
             return node
 
-        if r["range_type"] == RangeType.NAMED_RANGE:
-            # (sheet_id, table_id, row) = self._model.row_col_name_to_offset(
-            #     r["sheet_name"],
-            #     r["table_name"],
-            #     r["named_row"],
-            #     None,
-            # )
+        if ref.range_type == CellRangeType.NAMED_RANGE:
+            if ref.row_start and ref.col_start:
+                xref = f"{ref.row_start}:{ref.col_start}"
+            elif ref.named_row:
+                xref = ref.row_start
+            else:
+                xref = ref.col_start
+            xref = f"{ref.table_name}::{xref}" if ref.table_name else xref
+            xref = f"{ref.sheet_name}::{xref}" if ref.sheet_name else xref
+            # cell_ref = self._model.name_ref_cache.lookup_xref(self._table_id, xref)
 
-            #     col_start = r["col_start"] if r["col_start_abs"] else r["col_start"] - self.col
-            #     col_end = r["col_end"] if r["col_end_abs"] else r["col_end"] - self.col
-
-            #     node = {
-            #         "AST_node_type": "COLON_TRACT_NODE",
-            #         "AST_sticky_bits": ast_sticky_bits(r),
-            #         "AST_colon_tract": {
-            #             "relative_row": [{"range_begin": -12, "range_end": -11}],
-            #             "absolute_column": [{"range_begin": 32767}],
-            #             "preserve_rectangular": True,
-            #         },
-            #     }
-            #     if r["table_name"]:
-            #         add_xref_table(r, table_id, model, node)
             return {}
 
-        if r["range_type"] == RangeType.NAMED_ROW_COLUMN:
+        if ref.range_type == CellRangeType.NAMED_ROW_COLUMN:
             return {}
 
-        # RangeType.CELL
+        # CellRangeType.CELL
         return {
             "AST_node_type": "CELL_REFERENCE_NODE",
             "AST_row": {
-                "row": r["row_start"] if r["row_start_abs"] else r["row_start"] - self.row,
-                "absolute": r["row_start_abs"],
+                "row": ref.row_start if ref.row_start_is_abs else ref.row_start - self.row,
+                "absolute": ref.row_start_is_abs,
             },
             "AST_column": {
-                "column": r["col_start"] if r["col_start_abs"] else r["col_start"] - self.col,
-                "absolute": r["col_start_abs"],
+                "column": ref.col_start if ref.col_start_is_abs else ref.col_start - self.col,
+                "absolute": ref.col_start_is_abs,
             },
         }
 
@@ -393,7 +368,6 @@ class Formula(list):
             elif token.type == "SEP":
                 if operators and operators[-1].type != "FUNC":
                     output.append(operators.pop())
-                # output.append(token)
             elif token.type == "PAREN":
                 if token.subtype == "OPEN":
                     operators.append(token)
@@ -585,81 +559,34 @@ NODE_FUNCTION_MAP = {
     "ADDITION_NODE": "add",
     "APPEND_WHITESPACE_NODE": None,
     "ARRAY_NODE": "array",
-    # Unimplemented: AVERAGE
-    # Unimplemented: AVERAGE_ALL
     "BEGIN_EMBEDDED_NODE_ARRAY": None,
-    # Unimplemented: BODY_ROWS
     "BOOLEAN_NODE": "boolean",
-    # Unimplemented: CATEGORY_REF_NODE
     "CELL_REFERENCE_NODE": "xref",
-    # Unimplemented: CHART_GROUP_VALUE_HIERARCHY
     "COLON_NODE": "range",
     "COLON_NODE_WITH_UIDS": "range",
     "COLON_TRACT_NODE": "xref",
-    # Unimplemented: COLON_WITH_UIDS_NODE
     "CONCATENATION_NODE": "concat",
-    # Unimplemented: COUNT_ALL
-    # Unimplemented: COUNT_BLANK
-    # Unimplemented: COUNT_DUPS
-    # Unimplemented: COUNT_NO_ALL
-    # Unimplemented: COUNT_ROWS
-    # Unimplemented: COUNT_UNIQUE
-    # Unimplemented: CROSS_TABLE_CELL_REFERENCE_NODE
     "DATE_NODE": "date",
     "DIVISION_NODE": "div",
-    # Unimplemented: DURATION_NODE
     "EMPTY_ARGUMENT_NODE": "empty",
     "END_THUNK_NODE": None,
     "EQUAL_TO_NODE": "equals",
     "FUNCTION_NODE": "function",
     "GREATER_THAN_NODE": "greater_than",
     "GREATER_THAN_OR_EQUAL_TO_NODE": "greater_than_or_equal",
-    # Unimplemented: GROUP_VALUE
-    # Unimplemented: GROUP_VALUE_HIERARCHY
-    # Unimplemented: GSCE.CalculationEngineAstNodeType={ADDITION_NODE
-    # Unimplemented: INDIRECT
-    # Unimplemented: LABEL
     "LESS_THAN_NODE": "less_than",
     "LESS_THAN_OR_EQUAL_TO_NODE": "less_than_or_equal",
-    # Unimplemented: LINKED_CELL_REF_NODE
-    # Unimplemented: LINKED_COLUMN_REF_NODE
-    # Unimplemented: LINKED_ROW_REF_NODE
     "LIST_NODE": "list",
-    # Unimplemented: LOCAL_CELL_REFERENCE_NODE
-    # Unimplemented: MAX
-    # Unimplemented: MEDIAN
-    # Unimplemented: MIN
-    # Unimplemented: MISSING_RUNNING_TOTAL_IN_FIELD
-    # Unimplemented: MODE
     "MULTIPLICATION_NODE": "mul",
     "NEGATION_NODE": "negate",
-    # Unimplemented: NONE
     "NOT_EQUAL_TO_NODE": "not_equals",
     "NUMBER_NODE": "number",
     "PERCENT_NODE": "percent",
-    # Unimplemented: PLUS_SIGN_NODE
     "POWER_NODE": "power",
     "PREPEND_WHITESPACE_NODE": None,
-    # Unimplemented: PRODUCT
-    # Unimplemented: RANGE
-    # Unimplemented: REFERENCE_ERROR_NODE
-    # Unimplemented: REFERENCE_ERROR_WITH_UIDS_NODE
     "STRING_NODE": "string",
-    # Unimplemented: ST_DEV
-    # Unimplemented: ST_DEV_ALL
-    # Unimplemented: ST_DEV_POP
-    # Unimplemented: ST_DEV_POP_ALL
     "SUBTRACTION_NODE": "sub",
-    # Unimplemented: THUNK_NODE
     "TOKEN_NODE": "boolean",
-    # Unimplemented: TOTAL
-    # Unimplemented: UID_REFERENCE_NODE
-    # Unimplemented: UNKNOWN_FUNCTION_NODE
-    # Unimplemented: VARIANCE
-    # Unimplemented: VARIANCE_ALL
-    # Unimplemented: VARIANCE_POP
-    # Unimplemented: VARIANCE_POP_ALL
-    # Unimplemented: VIEW_TRACT_REF_NODE
 }
 
 

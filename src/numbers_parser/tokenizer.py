@@ -1,23 +1,9 @@
-from __future__ import annotations
-
 import re
-from enum import IntEnum
-from typing import TypeAlias
+
+from numbers_parser.xrefs import CellRange, CellRangeType
 
 
-class RangeType(IntEnum):
-    ROW_RANGE = 1
-    COL_RANGE = 2
-    RANGE = 3
-    NAMED_RANGE = 4
-    CELL = 5
-    NAMED_ROW_COLUMN = 6
-
-
-RangeResultType: TypeAlias = int | bool | str | RangeType
-
-
-def parse_numbers_range(range_str: str) -> dict[str, RangeResultType]:
+def parse_numbers_range(model: object, range_str: str) -> dict[str, CellRange]:
     """
     Parse a cell range string in Numbers format.
 
@@ -38,102 +24,81 @@ def parse_numbers_range(range_str: str) -> dict[str, RangeResultType]:
             col += (ord(char) - ord("A") + 1) * (26**expn)
         return col - 1
 
-    def parse_row_range(
-        match: re.Match[str],
-        result: dict[str, RangeResultType],
-    ) -> dict[str, RangeResultType]:
+    def parse_row_range(model: object, match: re.Match[str]) -> dict[str, CellRange]:
         """Parse row range format (e.g., '1:2' or '$1:$2')."""
-        result["row_start_abs"] = match.group(1) == "$"
-        result["row_start"] = int(match.group(2)) - 1
-        result["row_end_abs"] = match.group(3) == "$"
-        result["row_end"] = int(match.group(4)) - 1
-        result["range_type"] = RangeType.ROW_RANGE
-        return result
+        return CellRange(
+            model=model,
+            row_start_is_abs=match.group(1) == "$",
+            row_start=int(match.group(2)) - 1,
+            row_end_is_abs=match.group(3) == "$",
+            row_end=int(match.group(4)) - 1,
+            range_type=CellRangeType.ROW_RANGE,
+        )
 
-    def parse_col_range(
-        match: re.Match[str],
-        result: dict[str, RangeResultType],
-    ) -> dict[str, RangeResultType]:
+    def parse_col_range(model: object, match: re.Match[str]) -> dict[str, CellRange]:
         """Parse column range format (e.g., 'A:C' or '$E:$F')."""
-        result["col_start_abs"] = match.group(1) == "$"
-        result["col_start"] = col_to_index(match.group(2))
-        result["col_end_abs"] = match.group(3) == "$"
-        result["col_end"] = col_to_index(match.group(4))
-        result["range_type"] = RangeType.COL_RANGE
-        return result
+        return CellRange(
+            model=model,
+            col_start_is_abs=match.group(1) == "$",
+            col_start=col_to_index(match.group(2)),
+            col_end_is_abs=match.group(3) == "$",
+            col_end=col_to_index(match.group(4)),
+            range_type=CellRangeType.COL_RANGE,
+        )
 
-    def parse_full_range(
-        match: re.Match[str],
-        result: dict[str, RangeResultType],
-    ) -> dict[str, RangeResultType]:
+    def parse_full_range(model: object, match: re.Match[str]) -> dict[str, CellRange]:
         """Parse full range format (e.g., 'A1:C4' or '$A3:$B3')."""
-        result["col_start_abs"] = match.group(1) == "$"
-        result["col_start"] = col_to_index(match.group(2))
-        result["row_start_abs"] = match.group(3) == "$"
-        result["row_start"] = int(match.group(4)) - 1
-        result["col_end_abs"] = match.group(5) == "$"
-        result["col_end"] = col_to_index(match.group(6))
-        result["row_end_abs"] = match.group(7) == "$"
-        result["row_end"] = int(match.group(8)) - 1
-        result["range_type"] = RangeType.RANGE
-        return result
+        return CellRange(
+            model=model,
+            col_start_is_abs=match.group(1) == "$",
+            col_start=col_to_index(match.group(2)),
+            row_start_is_abs=match.group(3) == "$",
+            row_start=int(match.group(4)) - 1,
+            col_end_is_abs=match.group(5) == "$",
+            col_end=col_to_index(match.group(6)),
+            row_end_is_abs=match.group(7) == "$",
+            row_end=int(match.group(8)) - 1,
+            range_type=CellRangeType.RANGE,
+        )
 
-    def parse_named_range(
-        match: re.Match[str],
-        result: dict[str, RangeResultType],
-    ) -> dict[str, RangeResultType]:
+    def parse_named_range(model: object, match: re.Match[str]) -> dict[str, CellRange]:
         """Parse a named range (e.g. 'cats:dogs' from 'Table::cats:dogs')."""
-        result["named_row_abs"] = match.group(1) == "$"
-        result["named_row"] = match.group(2)
-        result["named_col_abs"] = match.group(3) == "$"
-        result["named_col"] = match.group(4)
-        result["range_type"] = RangeType.NAMED_RANGE
-        return result
+        return CellRange(
+            model=model,
+            row_start_is_abs=match.group(1) == "$",
+            row_start=match.group(2),
+            col_start_is_abs=match.group(3) == "$",
+            col_start=match.group(4),
+            range_type=CellRangeType.NAMED_RANGE,
+        )
 
-    def parse_single_cell(
-        match: re.Match[str],
-        result: dict[str, RangeResultType],
-    ) -> dict[str, RangeResultType]:
+    def parse_single_cell(model: object, match: re.Match[str]) -> dict[str, CellRange]:
         """Parse single cell format (e.g., 'A1' or '$B$3')."""
-        result["col_start_abs"] = match.group(1) == "$"
-        result["col_start"] = col_to_index(match.group(2))
-        result["row_start_abs"] = match.group(3) == "$"
-        result["row_start"] = int(match.group(4)) - 1
-        result["range_type"] = RangeType.CELL
-        return result
+        return CellRange(
+            model=model,
+            col_start_is_abs=match.group(1) == "$",
+            col_start=col_to_index(match.group(2)),
+            row_start_is_abs=match.group(3) == "$",
+            row_start=int(match.group(4)) - 1,
+            range_type=CellRangeType.CELL,
+        )
 
-    def parse_named_row_column(
-        match: re.Match[str],
-        result: dict[str, RangeResultType],
-    ) -> dict[str, RangeResultType]:
+    def parse_named_row_column(model: object, match: re.Match[str]) -> dict[str, CellRange]:
         """Parse single cell format (e.g., 'cats' from 'Table::cats')."""
-        result["rowcol_start_abs"] = match.group(1) == "$"
-        result["rowcol_start"] = col_to_index(match.group(2))
-        result["range_type"] = RangeType.NAMED_ROW_COLUMN
-        return result
+        return CellRange(
+            model=model,
+            col_start_is_abs=match.group(1) == "$",
+            col_start=col_to_index(match.group(2)),
+            range_type=CellRangeType.NAMED_ROW_COLUMN,
+        )
 
-    result = {
-        # "range_type",
-        "row_start": None,
-        "col_start": None,
-        "row_start_abs": False,
-        "col_start_abs": False,
-        "row_end": None,
-        "col_end": None,
-        "row_end_abs": False,
-        "col_end_abs": False,
-        # "named_row",
-        # "named_col",
-        # "named_row_abs",
-        # "named_col_abs",
-    }
     parts = range_str.split("::")
     if len(parts) == 3:
-        result["sheet_name"], result["table_name"], ref = parts
+        sheet_name, table_name, ref = parts
     elif len(parts) == 2:
-        result["sheet_name"], result["table_name"], ref = "", parts[0], parts[1]
+        sheet_name, table_name, ref = "", parts[0], parts[1]
     else:
-        result["sheet_name"], result["table_name"], ref = "", "", parts[0]
+        sheet_name, table_name, ref = "", "", parts[0]
 
     patterns = [
         (r"(\$?)(\d+):(\$?)(\d+)", parse_row_range),
@@ -145,8 +110,11 @@ def parse_numbers_range(range_str: str) -> dict[str, RangeResultType]:
     ]
 
     for pattern, handler in patterns:
-        if m := re.match(pattern, ref):
-            return handler(m, result)
+        if match := re.match(pattern, ref):
+            result = handler(model, match)
+            result.sheet_name = sheet_name
+            result.table_name = table_name
+            return result
 
     msg = f"Invalid range string: {range_str}"
     raise ValueError(msg)
@@ -227,7 +195,6 @@ class Tokenizer:
             ("\"'", self.parse_string),
             ("[", self.parse_brackets),
             ("#", self.parse_error),
-            # (" ", self.parse_whitespace),
             ("+-*/^&=><%×÷≥≤≠", self.parse_operator),
             ("{(", self.parse_opener),
             (")}", self.parse_closer),
