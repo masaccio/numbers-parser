@@ -73,7 +73,7 @@ from numbers_parser.generated.TSWPArchives_pb2 import (
 from numbers_parser.iwafile import find_extension
 from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID
-from numbers_parser.xrefs import CellRef
+from numbers_parser.xrefs import CellRange, ScopedNameRefCache
 
 
 def create_font_name_map(font_map: dict) -> dict:
@@ -236,9 +236,7 @@ class _NumbersModel(Cacheable):
             "bottom": defaultdict(),
             "left": defaultdict(),
         }
-        self._row_offset_to_name = None
-        self._col_offset_to_name = None
-        self._row_col_name_to_offset = None
+        self.name_ref_cache = ScopedNameRefCache(self)
 
     def save(self, filepath: Path, package: bool) -> None:
         self.objects.save(filepath, package)
@@ -937,67 +935,49 @@ class _NumbersModel(Cacheable):
                 0x7FFF,
             )
 
-            return CellRef(
+            return CellRange(
                 model=self,
-                start=(
-                    None if row_begin == 0x7FFFFFFF else row_begin,
-                    None if col_begin == 0x7FFF else col_begin,
-                ),
-                end=(
-                    None if row_end == 0x7FFFFFFF else row_end,
-                    None if col_end == 0x7FFF else col_end,
-                ),
-                start_abs=(
-                    node.AST_sticky_bits.begin_row_is_absolute,
-                    node.AST_sticky_bits.begin_column_is_absolute,
-                ),
-                end_abs=(
-                    node.AST_sticky_bits.end_row_is_absolute,
-                    node.AST_sticky_bits.end_column_is_absolute,
-                ),
-                table_ids=(table_id, to_table_id),
+                row_start=None if row_begin == 0x7FFFFFFF else row_begin,
+                row_end=None if row_end == 0x7FFFFFFF else row_end,
+                col_start=None if col_begin == 0x7FFF else col_begin,
+                col_end=None if col_end == 0x7FFF else col_end,
+                row_start_is_abs=node.AST_sticky_bits.begin_row_is_absolute,
+                row_end_is_abs=node.AST_sticky_bits.end_row_is_absolute,
+                col_start_is_abs=node.AST_sticky_bits.begin_column_is_absolute,
+                col_end_is_abs=node.AST_sticky_bits.end_column_is_absolute,
+                from_table_id=table_id,
+                to_table_id=to_table_id,
             )
 
         row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
         col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
         if node.HasField("AST_row") and not node.HasField("AST_column"):
-            return CellRef(
+            return CellRange(
                 model=self,
-                start=(row, None),
-                start_abs=(node.AST_row.absolute, False),
-                table_ids=(table_id, to_table_id),
+                row_start=row,
+                row_start_is_abs=node.AST_row.absolute,
+                from_table_id=table_id,
+                to_table_id=to_table_id,
             )
 
         if node.HasField("AST_column") and not node.HasField("AST_row"):
-            return CellRef(
+            return CellRange(
                 model=self,
-                start=(None, col),
-                start_abs=(False, node.AST_column.absolute),
-                table_ids=(table_id, to_table_id),
+                col_start=col,
+                col_start_is_abs=node.AST_column.absolute,
+                from_table_id=table_id,
+                to_table_id=to_table_id,
             )
 
-        return CellRef(
+        return CellRange(
             model=self,
-            start=(row, col),
-            start_abs=(node.AST_row.absolute, node.AST_column.absolute),
-            table_ids=(table_id, to_table_id),
+            row_start=row,
+            col_start=col,
+            row_start_is_abs=node.AST_row.absolute,
+            col_start_is_abs=node.AST_column.absolute,
+            from_table_id=table_id,
+            to_table_id=to_table_id,
         )
-
-    def row_col_name_to_offset(
-        self,
-        sheet_name: str,
-        table_name: str,
-        row_name: str | None,
-        col_name: str | None,
-    ) -> tuple[int]:
-        if not sheet_name and not table_name:
-            name = row_name or col_name
-            if name in self._row_col_name_to_offset["globals"]:
-                return self._row_col_name_to_offset["globals"]
-            msg = f"{name}: is not a globally unique reference."
-            raise ValueError(msg)
-
-        return ()
 
     @cache()
     def formula_ast(self, table_id: int):

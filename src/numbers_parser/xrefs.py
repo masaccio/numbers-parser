@@ -15,7 +15,7 @@ class TableAxis(IntEnum):
 
 
 @dataclass
-class CellRefType:
+class ScopedNameRef:
     name: str
     is_document_unique: bool = False
     is_table_unique: bool = False
@@ -23,21 +23,26 @@ class CellRefType:
 
 
 @dataclass
-class CellRef:
+class CellRange:
     model: object = None
-    start: tuple[int] = (None, None)
-    end: tuple[int] = (None, None)
-    start_abs: tuple[bool] = (False, False)
-    end_abs: tuple[bool] = (False, False)
-    table_ids: tuple[int] = (None, None)
+    row_start: int = None
+    row_end: int = None
+    col_start: int = None
+    col_end: int = None
+    row_start_is_abs: bool = False
+    row_end_is_abs: bool = False
+    col_start_is_abs: bool = False
+    col_end_is_abs: bool = False
+    from_table_id: int = None
+    to_table_id: int = None
 
     def __post_init__(self):
         self._initialize_table_data()
         self._set_sheet_ids()
-        self.table_ref_engine = TableRefs(self.model)
-        self.table_ref_engine.calculate_named_ranges()
-        self.row_ranges = self.table_ref_engine.row_ranges
-        self.col_ranges = self.table_ref_engine.col_ranges
+        self.name_ref_cache = self.model.name_ref_cache
+        self.name_ref_cache.calculate_named_ranges()
+        self.row_ranges = self.name_ref_cache.row_ranges
+        self.col_ranges = self.name_ref_cache.col_ranges
 
     def _initialize_table_data(self):
         self.table_names = list(
@@ -52,20 +57,18 @@ class CellRef:
 
     def _set_sheet_ids(self):
         """Determine the sheet IDs for the referenced tables."""
-        if self.table_ids[1] is None:
-            self.table_ids = (self.table_ids[0], self.table_ids[0])
-        self.sheet_ids = (
-            self.model.table_id_to_sheet_id(self.table_ids[0]),
-            self.model.table_id_to_sheet_id(self.table_ids[1]),
-        )
+        if self.to_table_id is None:
+            self.to_table_id = self.from_table_id
+        self.from_sheet_id = self.model.table_id_to_sheet_id(self.from_table_id)
+        self.to_sheet_id = self.model.table_id_to_sheet_id(self.to_table_id)
 
     def expand_ref(self, ref: str, is_abs: bool = False, no_prefix=False) -> str:
-        is_document_unique = ref.is_document_unique if isinstance(ref, CellRefType) else False
+        is_document_unique = ref.is_document_unique if isinstance(ref, ScopedNameRef) else False
         is_sheet_unique = (
-            ref.is_sheet_unique and not is_abs if isinstance(ref, CellRefType) else False
+            ref.is_sheet_unique and not is_abs if isinstance(ref, ScopedNameRef) else False
         )
 
-        if isinstance(ref, CellRefType):
+        if isinstance(ref, ScopedNameRef):
             ref = f"${ref.name}" if is_abs else ref.name
         else:
             ref = f"${ref}" if is_abs else ref
@@ -77,36 +80,33 @@ class CellRef:
         if no_prefix or is_document_unique:
             return ref
 
-        table_name = self.model.table_name(self.table_ids[1])
-        sheet_name = self.model.sheet_name(self.sheet_ids[1])
-        if self.table_ids[0] != self.table_ids[1]:
-            if self.sheet_ids[0] == self.sheet_ids[1] and is_sheet_unique:
+        table_name = self.model.table_name(self.to_table_id)
+        sheet_name = self.model.sheet_name(self.to_sheet_id)
+        if self.from_table_id != self.to_table_id:
+            if self.from_sheet_id == self.to_sheet_id and is_sheet_unique:
                 return ref
             ref = f"{table_name}::{ref}"
 
         is_table_name_unique = self.table_name_unique[table_name]
-        if self.sheet_ids[0] != self.sheet_ids[1] and not is_table_name_unique:
-            sheet_name = self.model.sheet_name(self.sheet_ids[1])
+        if self.from_sheet_id != self.to_sheet_id and not is_table_name_unique:
+            sheet_name = self.model.sheet_name(self.to_sheet_id)
             ref = f"{sheet_name}::{ref}"
 
         return ref
 
     def __str__(self):
-        row_start, col_start = self.start
-        row_end, col_end = self.end
-
         # Handle row-only ranges
-        if col_start is None:
-            row_range = self.row_ranges[self.sheet_ids[1]][self.table_ids[1]]
-            return self._format_row_range(row_start, row_end, row_range)
+        if self.col_start is None:
+            row_range = self.row_ranges[self.to_table_id]
+            return self._format_row_range(self.row_start, self.row_end, row_range)
 
         # Handle column-only ranges
-        if row_start is None:
-            col_range = self.col_ranges[self.sheet_ids[1]][self.table_ids[1]]
-            return self._format_col_range(col_start, col_end, col_range)
+        if self.row_start is None:
+            col_range = self.col_ranges[self.to_table_id]
+            return self._format_col_range(self.col_start, self.col_end, col_range)
 
         # Handle full cell ranges
-        return self._format_cell_range(row_start, col_start, row_end, col_end)
+        return self._format_cell_range(self.row_start, self.col_start, self.row_end, self.col_end)
 
     def _format_row_range(self, row_start, row_end, row_range):
         """Formats a row-only range."""
@@ -118,14 +118,14 @@ class CellRef:
         """Formats a single row, either numeric or named."""
         if row_range[row_start] is None:
             return self._format_numeric_row(row_start)
-        return self.expand_ref(row_range[row_start], self.start_abs[0])
+        return self.expand_ref(row_range[row_start], self.row_start_is_abs)
 
     def _format_numeric_row(self, row_start):
         """Formats a single numeric row."""
         return ":".join(
             [
-                self.expand_ref(str(row_start + 1), self.start_abs[0]),
-                self.expand_ref(str(row_start + 1), self.start_abs[0], no_prefix=True),
+                self.expand_ref(str(row_start + 1), self.row_start_is_abs),
+                self.expand_ref(str(row_start + 1), self.row_start_is_abs, no_prefix=True),
             ],
         )
 
@@ -134,19 +134,19 @@ class CellRef:
         if row_range[row_start] is None:
             return ":".join(
                 [
-                    self.expand_ref(str(row_start + 1), self.start_abs[0]),
-                    self.expand_ref(str(row_end + 1), self.end_abs[0], no_prefix=True),
+                    self.expand_ref(str(row_start + 1), self.row_start_is_abs),
+                    self.expand_ref(str(row_end + 1), self.row_end_is_abs, no_prefix=True),
                 ],
             )
         return ":".join(
             [
                 self.expand_ref(
                     row_range[row_start],
-                    self.start_abs[0],
+                    self.row_start_is_abs,
                     no_prefix=row_range[row_start].is_document_unique
                     or row_range[row_end].is_document_unique,
                 ),
-                self.expand_ref(row_range[row_end], self.end_abs[0], no_prefix=True),
+                self.expand_ref(row_range[row_end], self.row_end_is_abs, no_prefix=True),
             ],
         )
 
@@ -159,22 +159,22 @@ class CellRef:
     def _format_single_column(self, col_start, col_range):
         """Formats a single column, either numeric or named."""
         if col_range[col_start] is None:
-            return self.expand_ref(xl_col_to_name(col_start, col_abs=self.start_abs[1]))
-        return self.expand_ref(col_range[col_start], self.start_abs[1])
+            return self.expand_ref(xl_col_to_name(col_start, col_abs=self.col_start_is_abs))
+        return self.expand_ref(col_range[col_start], self.col_start_is_abs)
 
     def _format_column_span(self, col_start, col_end, col_range):
         """Formats a range of columns."""
         if col_range[col_start] is None:
-            return f"{self.expand_ref(xl_col_to_name(col_start, col_abs=self.start_abs[1]))}:{self.expand_ref(xl_col_to_name(col_end, col_abs=self.end_abs[1]), no_prefix=True)}"
+            return f"{self.expand_ref(xl_col_to_name(col_start, col_abs=self.col_start_is_abs))}:{self.expand_ref(xl_col_to_name(col_end, col_abs=self.col_end_is_abs), no_prefix=True)}"
         return ":".join(
             [
                 self.expand_ref(
                     col_range[col_start],
-                    self.start_abs[1],
+                    self.col_start_is_abs,
                     no_prefix=col_range[col_start].is_document_unique
                     or col_range[col_end].is_document_unique,
                 ),
-                self.expand_ref(col_range[col_end], self.end_abs[1], no_prefix=True),
+                self.expand_ref(col_range[col_end], self.col_end_is_abs, no_prefix=True),
             ],
         )
 
@@ -185,8 +185,8 @@ class CellRef:
                 xl_rowcol_to_cell(
                     row_start,
                     col_start,
-                    row_abs=self.start_abs[0],
-                    col_abs=self.start_abs[1],
+                    row_abs=self.row_start_is_abs,
+                    col_abs=self.col_start_is_abs,
                 ),
             )
         return ":".join(
@@ -195,16 +195,16 @@ class CellRef:
                     xl_rowcol_to_cell(
                         row_start,
                         col_start,
-                        row_abs=self.start_abs[0],
-                        col_abs=self.start_abs[1],
+                        row_abs=self.row_start_is_abs,
+                        col_abs=self.col_start_is_abs,
                     ),
                 ),
                 self.expand_ref(
                     xl_rowcol_to_cell(
                         row_end,
                         col_end,
-                        row_abs=self.end_abs[0],
-                        col_abs=self.end_abs[1],
+                        row_abs=self.row_end_is_abs,
+                        col_abs=self.col_end_is_abs,
                     ),
                     no_prefix=True,
                 ),
@@ -212,17 +212,11 @@ class CellRef:
         )
 
 
-class TableRefs:
+class ScopedNameRefCache:
     def __init__(self, model):
         self.model = model
-
-    @property
-    def row_ranges(self):
-        return self._row_offset_to_name
-
-    @property
-    def col_ranges(self):
-        return self._col_offset_to_name
+        self.row_ranges = {}
+        self.col_ranges = {}
 
     @staticmethod
     def _exact_count(pool: list, value: int | str | bool):
@@ -291,10 +285,6 @@ class TableRefs:
             self.doc_names[name] += 1
             self.sheet_names[sheet_id][name] += 1
 
-        # for name in names:
-        #     if self._exact_count(names, name) > 1:
-        #         names = list(filter(lambda x: x != name, names))
-
         return scopes
 
     def _calculate_scope_types(
@@ -302,7 +292,7 @@ class TableRefs:
         sheet_id: int,
         table_id: int,
         axis: TableAxis,
-        scopes: dict[int, CellRef | None],
+        scopes: dict[int, CellRange | None],
     ):
         """
         For any locally unique row/column names, tag whether they are table-unique,
@@ -319,13 +309,61 @@ class TableRefs:
             if name is None:
                 continue
             if name in self.doc_names:
-                scopes[idx] = CellRefType(name, is_document_unique=True)
+                scopes[idx] = ScopedNameRef(name, is_document_unique=True)
+                self.doc_names[name] = scopes[idx]
             elif name in self.sheet_names[sheet_id] and self.sheet_names[sheet_id][name] == 1:
-                scopes[idx] = CellRefType(name, is_sheet_unique=True)
+                scopes[idx] = ScopedNameRef(name, is_sheet_unique=True)
             elif self.table_names.count(table_name) > 1:
-                scopes[idx] = CellRefType(name)
+                scopes[idx] = ScopedNameRef(name)
             else:
-                scopes[idx] = CellRefType(name, is_table_unique=True)
+                scopes[idx] = ScopedNameRef(name, is_table_unique=True)
+
+    def _calculate_table_name_maps(self) -> dict[str, int]:
+        sheet_id_to_name = {sid: self.model.sheet_name(sid) for sid in self.model.sheet_ids()}
+        self.table_name_id_map = {}
+        self.sheet_name_id_map = {}
+        for sheet_id in self.model.sheet_ids():
+            sheet_name = sheet_id_to_name[sheet_id]
+            self.sheet_name_id_map[sheet_name] = sheet_id
+            self.table_name_id_map[sheet_name] = {}
+            for table_id in self.model.table_ids(sheet_id):
+                table_name = self.model.table_name(table_id)
+            self.table_name_id_map[sheet_name][table_name] = table_id
+
+    def lookup_xref(self, from_table_id: int, xref: str) -> CellRange | tuple[CellRange]:
+        parts = xref.split("::")
+        if len(parts) == 1:
+            if ":" in xref:
+                row, col = xref.split(":")
+                if row not in self.doc_names and col not in self.doc_names:
+                    msg = f"{xref}: invalid document reference"
+                    raise IndexError(msg)
+
+                return self.doc_names[row], self.doc_names[col]
+            if xref not in self.doc_names:
+                msg = f"{xref}: invalid document reference"
+                raise IndexError(msg)
+            return self.doc_names[col]
+
+        if len(parts) == 3:
+            (sheet_name, table_name, ref) = parts
+            if sheet_name not in self.table_name_id_map:
+                msg = f"{sheet_name}: invalid sheet reference"
+                raise IndexError(msg)
+            if table_name not in self.table_name_id_map[sheet_name]:
+                msg = f"{table_name}: invalid table reference"
+                raise IndexError(msg)
+            to_table_id = self.table_name_id_map[sheet_name][table_name]
+            name_to_row = {v: k for k, v in self.row_ranges[to_table_id].items()}
+            name_to_col = {v: k for k, v in self.col_offset_to_name[to_table_id].items()}
+            if ":" in ref:
+                row, col = ref.split(":")
+            elif ref in name_to_row:
+                pass
+            if ref in name_to_col:
+                pass
+
+        return CellRange(model=self.model)
 
     def calculate_named_ranges(self):
         """
@@ -336,26 +374,25 @@ class TableRefs:
         """
         self.doc_names = defaultdict(int)
         self.sheet_names = {}
+        self._calculate_table_name_maps()
 
-        row_offset_to_name = {}
-        col_offset_to_name = {}
+        self.row_ranges = {}
+        self.col_ranges = {}
         for sheet_id in self.model.sheet_ids():
             self.sheet_names[sheet_id] = defaultdict(int)
-            row_offset_to_name[sheet_id] = {}
-            col_offset_to_name[sheet_id] = {}
             for table_id in self.model.table_ids(sheet_id):
-                row_offset_to_name[sheet_id][table_id] = self._calculate_name_scopes(
+                self.row_ranges[table_id] = self._calculate_name_scopes(
                     sheet_id,
                     table_id,
                     TableAxis.ROW,
                 )
-                col_offset_to_name[sheet_id][table_id] = self._calculate_name_scopes(
+                self.col_ranges[table_id] = self._calculate_name_scopes(
                     sheet_id,
                     table_id,
                     TableAxis.COLUMN,
                 )
 
-        self.doc_names = [name for name, count in self.doc_names.items() if count == 1]
+        self.doc_names = {name: None for name, count in self.doc_names.items() if count == 1}
         self.table_names = list(
             chain.from_iterable(
                 [
@@ -371,17 +408,14 @@ class TableRefs:
                     sheet_id,
                     table_id,
                     TableAxis.ROW,
-                    row_offset_to_name[sheet_id][table_id],
+                    self.row_ranges[table_id],
                 )
                 self._calculate_scope_types(
                     sheet_id,
                     table_id,
                     TableAxis.COLUMN,
-                    col_offset_to_name[sheet_id][table_id],
+                    self.col_ranges[table_id],
                 )
-
-        self._row_offset_to_name = row_offset_to_name
-        self._col_offset_to_name = col_offset_to_name
 
 
 # Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
