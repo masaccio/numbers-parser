@@ -8,6 +8,8 @@ from itertools import chain
 
 from numbers_parser.constants import OPERATOR_PRECEDENCE
 
+__all__ = ["xl_cell_to_rowcol", "xl_col_to_name", "xl_range", "xl_rowcol_to_cell"]
+
 
 class TableAxis(IntEnum):
     ROW = 1
