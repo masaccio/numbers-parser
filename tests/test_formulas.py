@@ -250,20 +250,23 @@ TOKEN_TESTS = {
 
 
 def test_tokenizer():
-    tok = Tokenizer("AVERAGE(A1:D1)")
-    assert str(tok) == "[FUNC(OPEN,'AVERAGE('),OPERAND(RANGE,'A1:D1'),FUNC(CLOSE,')')]"
-    tok = Tokenizer('""""&E1')
-    assert str(tok) == "[OPERAND(TEXT,'\"\"\"\"'),OPERATOR-INFIX(,'&'),OPERAND(RANGE,'E1')]"
-    tok = Tokenizer("COUNTA(safari:farm)")
-    assert str(tok) == "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,'safari:farm'),FUNC(CLOSE,')')]"
-    tok = Tokenizer("COUNTA(super hero)")
-    assert str(tok) == "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,'super hero'),FUNC(CLOSE,')')]"
-    tok = Tokenizer("Sheet 2::Table 1::A1")
-    assert str(tok) == "[OPERAND(RANGE,'Sheet 2::Table 1::A1')]"
-    tok = Tokenizer("COUNTA('hyphen-name')")
-    assert str(tok) == "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,''hyphen-name''),FUNC(CLOSE,')')]"
-    tok = Tokenizer("COUNTA('10%':'20%')")
-    assert str(tok) == "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,''10%':'20%''),FUNC(CLOSE,')')]"
+    test_cases = {
+        "AVERAGE(A1:D1)": "[FUNC(OPEN,'AVERAGE('),OPERAND(RANGE,'A1:D1'),FUNC(CLOSE,')')]",
+        '""""&E1': "[OPERAND(TEXT,'\"\"\"\"'),OPERATOR-INFIX(,'&'),OPERAND(RANGE,'E1')]",
+        "COUNTA(safari:farm)": "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,'safari:farm'),FUNC(CLOSE,')')]",
+        "COUNTA(super hero)": "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,'super hero'),FUNC(CLOSE,')')]",
+        "Sheet 2::Table 1::A1": "[OPERAND(RANGE,'Sheet 2::Table 1::A1')]",
+        "COUNTA('hyphen-name')": "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,''hyphen-name''),FUNC(CLOSE,')')]",
+        "COUNTA('10%':'20%')": "[FUNC(OPEN,'COUNTA('),OPERAND(RANGE,''10%':'20%''),FUNC(CLOSE,')')]",
+        "SUM(#REF!)": "[FUNC(OPEN,'SUM('),OPERAND(ERROR,'#REF!'),FUNC(CLOSE,')')]",
+        "(1)": "[PAREN(OPEN,'('),OPERAND(NUMBER,'1'),PAREN(CLOSE,')')]",
+        "-A1": "[OPERATOR-PREFIX(,'-'),OPERAND(RANGE,'A1')]",
+        "A1%": "[OPERAND(RANGE,'A1'),OPERATOR-POSTFIX(,'%')]",
+    }
+
+    for formula, expected in test_cases.items():
+        tok = Tokenizer(formula)
+        assert str(tok) == expected, formula
 
     for formula, ref_tokens in TOKEN_TESTS.items():
         tok = Tokenizer(formula)
