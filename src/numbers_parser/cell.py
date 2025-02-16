@@ -561,8 +561,6 @@ class CellStorageFlags:
     _rich_id: int = None
     _cell_style_id: int = None
     _text_style_id: int = None
-    # _cond_style_id: int = None
-    # _cond_rule_style_id: int = None
     _formula_id: int = None
     _control_id: int = None
     _formula_error_id: int = None
@@ -573,8 +571,6 @@ class CellStorageFlags:
     _duration_format_id: int = None
     _text_format_id: int = None
     _bool_format_id: int = None
-    # _comment_id: int = None
-    # _import_warning_id: int = None
 
     def __str__(self) -> str:
         fields = [
@@ -880,20 +876,16 @@ class Cell(CellStorageFlags, Cacheable):
             storage_flags._text_style_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
         if flags & 0x80:
-            # storage_flags._cond_style_id = unpack("<i", buffer[offset : offset + 4])[0]
+            # cond_style_id skipped
             offset += 4
-        # if flags & 0x100:
-        #     storage_flags._cond_rule_style_id = unpack("<i", buffer[offset : offset + 4])[0]
-        #     offset += 4
+        # Skip flag 0x100 (cond_rule_style_id)
         if flags & 0x200:
             storage_flags._formula_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
         if flags & 0x400:
             storage_flags._control_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
-        # if flags & 0x800:
-        #     storage_flags._formula_error_id = unpack("<i", buffer[offset : offset + 4])[0]
-        #     offset += 4
+        # Skip flag 0x800 (formula_error_id)
         if flags & 0x1000:
             storage_flags._suggest_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
@@ -917,12 +909,7 @@ class Cell(CellStorageFlags, Cacheable):
         if flags & 0x40000:
             storage_flags._bool_format_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
-        # if flags & 0x80000:
-        #     cstorage_flags._omment_id = unpack("<i", buffer[offset : offset + 4])[0]
-        #     offset += 4
-        # if flags & 0x100000:
-        #     storage_flags._import_warning_id = unpack("<i", buffer[offset : offset + 4])[0]
-        #     offset += 4
+        # Skip 0x80000 (comment_id) and 0x100000 (import_warning_id)
 
         cell_type = buffer[1]
         if cell_type == TSTArchives.genericCellType:
@@ -1040,7 +1027,6 @@ class Cell(CellStorageFlags, Cacheable):
             flags = 4
             length += 8
             cell_type = TSTArchives.dateCellType
-            # date_delta = self._value.astimezone() - EPOCH
             if self._value.tzinfo is None:
                 date_delta = self._value - EPOCH
             else:
@@ -1112,7 +1098,6 @@ class Cell(CellStorageFlags, Cacheable):
             length += 4
             storage += pack("<i", self._num_format_id)
             storage[6] |= 1
-            # storage[6:8] = pack("<h", 1)
         if self._currency_format_id is not None:
             flags |= 0x4000
             length += 4
@@ -1764,16 +1749,6 @@ def _decode_number_format(number_format, value, name):  # noqa: PLR0912
         int_pad = None
         int_width = num_integers
 
-    # value_1 = str(value).split(".")[0]
-    # value_2 = sigfig(str(value).split(".")[1], sigfig=MAX_SIGNIFICANT_DIGITS, warn=False)
-    # int_pad_space_as_zero = (
-    #     num_integers > 0
-    #     and num_decimals > 0
-    #     and int_pad == CellPadding.SPACE
-    #     and dec_pad is None
-    #     and num_integers > len(value_1)
-    #     and num_decimals > len(value_2)
-    # )
     int_pad_space_as_zero = False
 
     # Formatting integer zero:

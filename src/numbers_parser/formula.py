@@ -330,8 +330,7 @@ class Formula(list):
 
     @staticmethod
     def formula_tokens(formula_str: str):
-        formula_str = formula_str.translate(OPERATOR_MAP)
-        tok = Tokenizer(formula_str if formula_str.startswith("=") else "=" + formula_str)
+        tok = Tokenizer(formula_str.translate(OPERATOR_MAP))
         return Formula.rpn_tokens(tok.items)
 
     @staticmethod

@@ -109,15 +109,14 @@ def parse_numbers_range(model: object, range_str: str) -> dict[str, CellRange]:
         (r"(\$?)(.*)", parse_named_row_column),
     ]
 
-    for pattern, handler in patterns:
+    # Function never falls through to return as parse_named_row_column()
+    # will be a catch-all as row/column names can be any string
+    for pattern, handler in patterns:  # noqa: RET503 # pragma: no branch
         if match := re.match(pattern, ref):
             result = handler(model, match)
             result.sheet_name = sheet_name
             result.table_name = table_name
             return result
-
-    msg = f"Invalid range string: {range_str}"
-    raise ValueError(msg)
 
 
 # The Tokenizer and Token classes are taken from the openpyxl library which is
@@ -184,13 +183,6 @@ class Tokenizer:
 
     def parse(self):
         """Populate self.items with the tokens from the formula."""
-        if not self.formula:
-            return
-        if self.formula[0] == "=":
-            self.offset += 1
-        else:
-            self.items.append(Token(self.formula, Token.LITERAL))
-            return
         consumers = (
             ("\"'", self.parse_string),
             ("[", self.parse_brackets),
@@ -286,20 +278,6 @@ class Tokenizer:
                 return len(err)
         msg = f"Invalid error code at position {self.offset} in 'self.formula'"
         raise TokenizerError(msg)
-
-    def parse_whitespace(self):
-        """
-        Consume a string of consecutive spaces.
-
-        Returns the number of spaces found. (Does not update
-        self.offset).
-
-        """
-        if self.formula[self.offset] != " ":
-            msg = f"Expected ' ', found: {self.formula[self.offset]}"
-            raise TokenizerError(msg)
-        self.items.append(Token(" ", Token.WSPACE))
-        return self.WSPACE_RE.match(self.formula[self.offset :]).end()
 
     def parse_operator(self):
         """
@@ -433,14 +411,6 @@ class Tokenizer:
         if self.token:
             self.items.append(Token.make_operand("".join(self.token)))
             del self.token[:]
-
-    def render(self):
-        """Convert the parsed tokens back to a string."""
-        if not self.items:
-            return ""
-        if self.items[0].type == Token.LITERAL:
-            return self.items[0].value
-        return "=" + "".join(token.value for token in self.items)
 
 
 class Token:
