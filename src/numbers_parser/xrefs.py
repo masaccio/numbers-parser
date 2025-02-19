@@ -346,60 +346,74 @@ class ScopedNameRefCache:
                 scopes[idx] = ScopedNameRef(name)
 
     def _calculate_table_name_maps(self) -> dict[str, int]:
+        self.sheet_name_to_id = {self.model.sheet_name(sid): sid for sid in self.model.sheet_ids()}
         self.sheet_id_to_name = {sid: self.model.sheet_name(sid) for sid in self.model.sheet_ids()}
-        self.table_name_id_map = {}
-        self.sheet_name_id_map = {}
-        self.unique_tables = {}
-        for sheet_id in self.model.sheet_ids():
-            sheet_name = self.sheet_id_to_name[sheet_id]
-            self.sheet_name_id_map[sheet_name] = sheet_id
-            self.table_name_id_map[sheet_name] = {}
-            for table_id in self.model.table_ids(sheet_id):
-                table_name = self.model.table_name(table_id)
-                self.table_name_id_map[sheet_name][table_name] = table_id
-                if self._all_table_names.count(table_name) == 1:
-                    self.unique_tables[table_name] = table_id
+        table_names = self.model.table_names()
+        self.unique_table_name_to_id = {
+            self.model.table_name(tid): tid
+            for tid in self.model.table_ids()
+            if table_names.count(self.model.table_name(tid)) == 1
+        }
+        self.sheet_table_name_to_id = {
+            self.model.sheet_name(sid): {
+                self.model.table_name(tid): tid for tid in self.model.table_ids(sid)
+            }
+            for sid in self.model.sheet_ids()
+        }
 
-    def _deref_doc_scope(self, name: str) -> CellRange:
+    def _deref_doc_scope(self, from_table_id: int, name: str) -> CellRange:
         """Try and use a name reference in the document scope."""
         # Try using the name as document scope
         if name in self.doc_names:
             return self.doc_names[name]
+        from_sheet_id = self.model.table_id_to_sheet_id(from_table_id)
+        if self._name_in_cell_range(name, self.sheet_names[from_sheet_id]):
+            return self.sheet_names[from_sheet_id][name]
         msg = f"'{name}' does not exist or scope is ambiguous"
         raise ValueError(msg)
+
+    @staticmethod
+    def _name_in_cell_range(name: str, cell_range: list[CellRange]) -> bool:
+        names = [x.name if isinstance(x, ScopedNameRef) else None for x in cell_range.values()]
+        return name in names
 
     def _deref_single_scope(self, from_table_id: int, name_scope: str, name: str) -> CellRange:
         # Try using the name as sheet/table scope
         from_sheet_id = self.model.table_id_to_sheet_id(from_table_id)
-        if name_scope in self.sheet_name_id_map:
-            to_sheet_id = self.sheet_name_id_map[name_scope]
+        if name_scope in self.sheet_name_to_id:
+            # Test if scope is a sheet name and the reference is valid in that
+            # sheet's name scope
+            to_sheet_id = self.sheet_name_to_id[name_scope]
             if name in self.sheet_names[to_sheet_id]:
                 # Name is valid in a sheet scope
                 return self.sheet_names[to_sheet_id][name]
 
-        if name_scope in self.unique_tables:
-            to_table_id = self.unique_tables[name_scope]
-            if name in self.table_names[to_table_id]:
+        from_sheet_name = self.sheet_id_to_name[from_sheet_id]
+        to_table_id = self.sheet_table_name_to_id[from_sheet_name][name_scope]
+        if self._name_in_cell_range(name, self.sheet_names[from_sheet_id]):
+            # Scope is a table but in the same sheet so sheet
+            # scoping rules apply.
+            return self.sheet_names[from_sheet_id][name]
+
+        if name_scope in self.unique_table_name_to_id:
+            if self._name_in_cell_range(name, self.table_names[to_table_id]):
                 # Name is valid in table scope and table name is document-unique
                 return self.table_names[to_table_id][name]
-        else:
-            from_sheet_id = self.model.table_id_to_sheet_id(from_table_id)
-            from_sheet_name = self.sheet_id_to_name[from_sheet_id]
-            if name_scope in self.table_name_id_map[from_sheet_name]:
-                to_table_id = self.table_name_id_map[from_sheet_name][name_scope]
-                # Name is valid in a table in the current sheet
-                if name in self.row_ranges[to_table_id]:
-                    return CellRange(
-                        model=self.model,
-                        to_table_id=to_table_id,
-                        row_start=self.row_ranges[to_table_id],
-                    )
-                if name in self.col_ranges[to_table_id]:
-                    return CellRange(
-                        model=self.model,
-                        to_table_id=to_table_id,
-                        col_start=self.col_ranges[to_table_id],
-                    )
+        elif name_scope in self.sheet_table_name_to_id[from_sheet_name]:
+            to_table_id = self.sheet_table_name_to_id[from_sheet_name][name_scope]
+            # Name is valid in a table in the current sheet
+            if self._name_in_cell_range(name, self.row_ranges[to_table_id]):
+                return CellRange(
+                    model=self.model,
+                    to_table_id=to_table_id,
+                    row_start=self.row_ranges[to_table_id],
+                )
+            if self._name_in_cell_range(name, self.col_ranges[to_table_id]):
+                return CellRange(
+                    model=self.model,
+                    to_table_id=to_table_id,
+                    col_start=self.col_ranges[to_table_id],
+                )
 
         msg = f"'{name_scope}::{name}' does not exist or scope is ambiguous"
         raise ValueError(msg)
@@ -412,21 +426,21 @@ class ScopedNameRefCache:
         name: str,
     ) -> CellRange:
         if not name_scope_1 and not name_scope_2:
-            return self._deref_doc_scope(name)
+            return self._deref_doc_scope(from_table_id, name)
 
         if not name_scope_1:
             return self._deref_single_scope(from_table_id, name_scope_2, name)
 
         # Full sheet::table::name scope
         try:
-            to_table_id = self.table_name_id_map[name_scope_1][name_scope_2]
-            if name in self.row_ranges[to_table_id]:
+            to_table_id = self.sheet_table_name_to_id[name_scope_1][name_scope_2]
+            if self._name_in_cell_range(name, self.row_ranges[to_table_id]):
                 return CellRange(
                     model=self.model,
                     to_table_id=to_table_id,
                     row_start=self.row_ranges[to_table_id],
                 )
-            if name in self.col_ranges[to_table_id]:
+            if self._name_in_cell_range(name, self.col_ranges[to_table_id]):
                 return CellRange(
                     model=self.model,
                     to_table_id=to_table_id,
