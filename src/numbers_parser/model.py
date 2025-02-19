@@ -2020,7 +2020,7 @@ class _NumbersModel(Cacheable):
                 payload = self.objects[entry.rich_text_payload.identifier]
                 payload_storage = self.objects[payload.storage.identifier]
                 smartfield_entries = payload_storage.table_smartfield.entries
-                cell_text = payload_storage.text[0]
+                cell_text = payload_storage.text[0] if len(payload_storage.text) > 0 else ""
 
                 hyperlinks = []
                 for i, e in enumerate(smartfield_entries):

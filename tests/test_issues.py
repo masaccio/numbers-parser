@@ -574,3 +574,10 @@ def test_issue_93():
     with pytest.raises(UnsupportedError) as e:
         _ = Document("tests/data/test-issue-93.numbers")
     assert "encrypted documents are not supported" in str(e)
+
+
+def test_issue_96():
+    doc = Document("tests/data/issue-96.numbers")
+    table = doc.default_table
+    assert table.cell(12, 1).formatted_value == "20.0%"
+    assert table.cell(12, 2).formatted_value == ""
