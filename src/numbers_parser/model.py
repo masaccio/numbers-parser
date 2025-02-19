@@ -4,6 +4,7 @@ import re
 from array import array
 from collections import defaultdict
 from hashlib import sha1
+from itertools import chain
 from math import floor
 from pathlib import Path
 from struct import pack
@@ -286,14 +287,7 @@ class _NumbersModel(Cacheable):
         # The base data store contains a reference to rowHeaders.buckets
         # which is an ordered list that matches the storage buffers, but
         # identifies which row a storage buffer belongs to (empty rows have
-        # no storage buffers). Each bucket is:
-        #
-        #  {
-        #      "hiding_state": 0,
-        #      "index": 0,
-        #      "number_of_cells": 3,
-        #      "size": 0.0
-        #  },
+        # no storage buffers).
         row_bucket_map = {i: None for i in range(self.objects[table_id].number_of_rows)}
         bds = self.objects[table_id].base_data_store
         bucket_ids = [x.identifier for x in bds.rowHeaders.buckets]
@@ -319,6 +313,13 @@ class _NumbersModel(Cacheable):
             return self.objects[table_id].table_name
         self.objects[table_id].table_name = value
         return None
+
+    def table_names(self):
+        return list(
+            chain.from_iterable(
+                [[self.table_name(tid) for tid in self.table_ids(sid)] for sid in self.sheet_ids()],
+            ),
+        )
 
     def table_name_enabled(self, table_id: int, enabled: bool | None = None):
         if enabled is not None:
