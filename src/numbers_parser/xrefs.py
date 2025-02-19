@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum
-from itertools import chain
 
 from numbers_parser.constants import OPERATOR_PRECEDENCE
 
@@ -12,16 +11,29 @@ __all__ = ["xl_cell_to_rowcol", "xl_col_to_name", "xl_range", "xl_rowcol_to_cell
 
 
 class TableAxis(IntEnum):
+    """Indicates whether a cache is for rows or columns."""
+
     ROW = 1
     COLUMN = 2
+
+
+class RefScope(IntEnum):
+    """The required scope for a name reference in a document."""
+
+    """Name is unique to the document."""
+    DOCUMENT = 1
+    """Name is unique to a sheet."""
+    SHEET = 2
+    """Name is unique to a table and that table is uniquely named."""
+    TABLE = 3
+    """All other names."""
+    NONE = 4
 
 
 @dataclass
 class ScopedNameRef:
     name: str
-    is_document_unique: bool = False
-    is_table_unique: bool = False
-    is_sheet_unique: bool = False
+    scope: RefScope = RefScope.NONE
 
 
 class CellRangeType(IntEnum):
@@ -47,24 +59,20 @@ class CellRange:
     from_table_id: int = None
     to_table_id: int = None
     range_type: CellRangeType = None
+    _table_names: list[str] = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
-        self._initialize_table_data()
-        self._set_sheet_ids()
+        if self._table_names is None:
+            self._initialize_table_data()
+        if len(self.model.name_ref_cache.row_ranges) == 0:
+            self.model.name_ref_cache.calculate_named_ranges()
         self.name_ref_cache = self.model.name_ref_cache
-        self.name_ref_cache.calculate_named_ranges()
-        self.row_ranges = self.name_ref_cache.row_ranges
-        self.col_ranges = self.name_ref_cache.col_ranges
+        self._set_sheet_ids()
 
     def _initialize_table_data(self):
-        self.table_names = list(
-            chain.from_iterable(
-                [self.model.table_name(tid) for tid in self.model.table_ids(sid)]
-                for sid in self.model.sheet_ids()
-            ),
-        )
+        self._table_names = self.model.table_names()
         self.table_name_unique = {
-            name: self.table_names.count(name) == 1 for name in self.table_names
+            name: self._table_names.count(name) == 1 for name in self._table_names
         }
 
     def _set_sheet_ids(self):
@@ -75,46 +83,48 @@ class CellRange:
         self.to_sheet_id = self.model.table_id_to_sheet_id(self.to_table_id)
 
     def expand_ref(self, ref: str, is_abs: bool = False, no_prefix=False) -> str:
-        is_document_unique = ref.is_document_unique if isinstance(ref, ScopedNameRef) else False
-        is_sheet_unique = (
-            ref.is_sheet_unique and not is_abs if isinstance(ref, ScopedNameRef) else False
+        is_document_unique = (
+            ref.scope == RefScope.DOCUMENT if isinstance(ref, ScopedNameRef) else False
         )
+        is_sheet_unique = ref.scope == RefScope.SHEET if isinstance(ref, ScopedNameRef) else False
+        is_table_unique = ref.scope == RefScope.TABLE if isinstance(ref, ScopedNameRef) else False
 
         if isinstance(ref, ScopedNameRef):
-            ref = f"${ref.name}" if is_abs else ref.name
+            ref_str = f"${ref.name}" if is_abs else ref.name
         else:
-            ref = f"${ref}" if is_abs else ref
-        if any(x in ref for x in OPERATOR_PRECEDENCE):
-            ref = f"'{ref}'"
-        elif "'" in ref:
-            ref = ref.replace("'", "'''")
+            ref_str = f"${ref}" if is_abs else ref
+        if any(x in ref_str for x in OPERATOR_PRECEDENCE):
+            ref_str = f"'{ref_str}'"
+        elif "'" in ref_str:
+            ref_str = ref_str.replace("'", "'''")
 
         if no_prefix or is_document_unique:
-            return ref
+            return ref_str
+
+        if self.from_table_id == self.to_table_id:
+            return ref_str
 
         table_name = self.model.table_name(self.to_table_id)
+        if self.from_sheet_id == self.to_sheet_id and is_sheet_unique:
+            # If absolute Numbers seems to unnecessarily include the table name
+            return f"{table_name}::{ref_str}" if is_abs else ref_str
+
+        is_table_unique |= self.table_name_unique[table_name]
+        if self.from_sheet_id == self.to_sheet_id or is_table_unique:
+            return f"{table_name}::{ref_str}"
+
         sheet_name = self.model.sheet_name(self.to_sheet_id)
-        if self.from_table_id != self.to_table_id:
-            if self.from_sheet_id == self.to_sheet_id and is_sheet_unique:
-                return ref
-            ref = f"{table_name}::{ref}"
-
-        is_table_name_unique = self.table_name_unique[table_name]
-        if self.from_sheet_id != self.to_sheet_id and not is_table_name_unique:
-            sheet_name = self.model.sheet_name(self.to_sheet_id)
-            ref = f"{sheet_name}::{ref}"
-
-        return ref
+        return f"{sheet_name}::{table_name}::{ref_str}"
 
     def __str__(self):
         # Handle row-only ranges
         if self.col_start is None:
-            row_range = self.row_ranges[self.to_table_id]
+            row_range = self.name_ref_cache.row_ranges[self.to_table_id]
             return self._format_row_range(self.row_start, self.row_end, row_range)
 
         # Handle column-only ranges
         if self.row_start is None:
-            col_range = self.col_ranges[self.to_table_id]
+            col_range = self.name_ref_cache.col_ranges[self.to_table_id]
             return self._format_col_range(self.col_start, self.col_end, col_range)
 
         # Handle full cell ranges
@@ -155,8 +165,8 @@ class CellRange:
                 self.expand_ref(
                     row_range[row_start],
                     self.row_start_is_abs,
-                    no_prefix=row_range[row_start].is_document_unique
-                    or row_range[row_end].is_document_unique,
+                    no_prefix=row_range[row_start].scope == RefScope.DOCUMENT
+                    or row_range[row_end].scope == RefScope.DOCUMENT,
                 ),
                 self.expand_ref(row_range[row_end], self.row_end_is_abs, no_prefix=True),
             ],
@@ -183,8 +193,8 @@ class CellRange:
                 self.expand_ref(
                     col_range[col_start],
                     self.col_start_is_abs,
-                    no_prefix=col_range[col_start].is_document_unique
-                    or col_range[col_end].is_document_unique,
+                    no_prefix=col_range[col_start].scope == RefScope.DOCUMENT
+                    or col_range[col_end].scope == RefScope.DOCUMENT,
                 ),
                 self.expand_ref(col_range[col_end], self.col_end_is_abs, no_prefix=True),
             ],
@@ -227,8 +237,13 @@ class CellRange:
 class ScopedNameRefCache:
     def __init__(self, model):
         self.model = model
+        self.doc_names: dict[str, int | CellRange] = {}
+        self.sheet_names: dict[int, dict[str, int | CellRange]] = {}
+        self.table_names: dict[int, dict[str, int | CellRange]] = {}
         self.row_ranges = {}
         self.col_ranges = {}
+        self._all_table_names = model.table_names()
+        self.unique_tables: dict[str, id] = {}
 
     @staticmethod
     def _exact_count(pool: list, value: int | str | bool):
@@ -313,61 +328,132 @@ class ScopedNameRefCache:
             if name is None:
                 continue
             if name in self.doc_names:
-                scopes[idx] = ScopedNameRef(name, is_document_unique=True)
-                self.doc_names[name] = scopes[idx]
-            elif name in self.sheet_names[sheet_id] and self.sheet_names[sheet_id][name] == 1:
-                scopes[idx] = ScopedNameRef(name, is_sheet_unique=True)
-            elif self.table_names.count(table_name) > 1:
-                scopes[idx] = ScopedNameRef(name)
+                # Name is unique in the document
+                scopes[idx] = ScopedNameRef(name, scope=RefScope.DOCUMENT)
+                self.doc_names[name] = CellRange(
+                    model=self.model,
+                    row_start=idx if axis == TableAxis.ROW else None,
+                    col_start=idx if axis == TableAxis.ROW else None,
+                    to_table_id=table_id,
+                )
+            elif name in self.sheet_names[sheet_id]:
+                scopes[idx] = ScopedNameRef(name, scope=RefScope.SHEET)
+                self.sheet_names[sheet_id][name] = scopes[idx]
+            elif self._all_table_names.count(table_name) == 1:
+                scopes[idx] = ScopedNameRef(name, scope=RefScope.TABLE)
+                self.table_names[table_id][name] = scopes[idx]
             else:
-                scopes[idx] = ScopedNameRef(name, is_table_unique=True)
+                scopes[idx] = ScopedNameRef(name)
 
     def _calculate_table_name_maps(self) -> dict[str, int]:
-        sheet_id_to_name = {sid: self.model.sheet_name(sid) for sid in self.model.sheet_ids()}
+        self.sheet_id_to_name = {sid: self.model.sheet_name(sid) for sid in self.model.sheet_ids()}
         self.table_name_id_map = {}
         self.sheet_name_id_map = {}
+        self.unique_tables = {}
         for sheet_id in self.model.sheet_ids():
-            sheet_name = sheet_id_to_name[sheet_id]
+            sheet_name = self.sheet_id_to_name[sheet_id]
             self.sheet_name_id_map[sheet_name] = sheet_id
             self.table_name_id_map[sheet_name] = {}
             for table_id in self.model.table_ids(sheet_id):
                 table_name = self.model.table_name(table_id)
-            self.table_name_id_map[sheet_name][table_name] = table_id
+                self.table_name_id_map[sheet_name][table_name] = table_id
+                if self._all_table_names.count(table_name) == 1:
+                    self.unique_tables[table_name] = table_id
 
-    def lookup_xref(self, from_table_id: int, xref: str) -> CellRange | tuple[CellRange]:
-        parts = xref.split("::")
-        if len(parts) == 1:
-            if ":" in xref:
-                row, col = xref.split(":")
-                if row not in self.doc_names and col not in self.doc_names:
-                    msg = f"{xref}: invalid document reference"
-                    raise IndexError(msg)
+    def _deref_doc_scope(self, name: str) -> CellRange:
+        """Try and use a name reference in the document scope."""
+        # Try using the name as document scope
+        if name in self.doc_names:
+            return self.doc_names[name]
+        msg = f"'{name}' does not exist or scope is ambiguous"
+        raise ValueError(msg)
 
-                return self.doc_names[row], self.doc_names[col]
-            if xref not in self.doc_names:
-                msg = f"{xref}: invalid document reference"
-                raise IndexError(msg)
-            return self.doc_names[col]
+    def _deref_single_scope(self, from_table_id: int, name_scope: str, name: str) -> CellRange:
+        # Try using the name as sheet/table scope
+        from_sheet_id = self.model.table_id_to_sheet_id(from_table_id)
+        if name_scope in self.sheet_name_id_map:
+            to_sheet_id = self.sheet_name_id_map[name_scope]
+            if name in self.sheet_names[to_sheet_id]:
+                # Name is valid in a sheet scope
+                return self.sheet_names[to_sheet_id][name]
 
-        if len(parts) == 3:
-            (sheet_name, table_name, ref) = parts
-            if sheet_name not in self.table_name_id_map:
-                msg = f"{sheet_name}: invalid sheet reference"
-                raise IndexError(msg)
-            if table_name not in self.table_name_id_map[sheet_name]:
-                msg = f"{table_name}: invalid table reference"
-                raise IndexError(msg)
-            to_table_id = self.table_name_id_map[sheet_name][table_name]
-            name_to_row = {v: k for k, v in self.row_ranges[to_table_id].items()}
-            name_to_col = {v: k for k, v in self.col_offset_to_name[to_table_id].items()}
-            if ":" in ref:
-                row, col = ref.split(":")
-            elif ref in name_to_row:
-                pass
-            if ref in name_to_col:
-                pass
+        if name_scope in self.unique_tables:
+            to_table_id = self.unique_tables[name_scope]
+            if name in self.table_names[to_table_id]:
+                # Name is valid in table scope and table name is document-unique
+                return self.table_names[to_table_id][name]
+        else:
+            from_sheet_id = self.model.table_id_to_sheet_id(from_table_id)
+            from_sheet_name = self.sheet_id_to_name[from_sheet_id]
+            if name_scope in self.table_name_id_map[from_sheet_name]:
+                to_table_id = self.table_name_id_map[from_sheet_name][name_scope]
+                # Name is valid in a table in the current sheet
+                if name in self.row_ranges[to_table_id]:
+                    return CellRange(
+                        model=self.model,
+                        to_table_id=to_table_id,
+                        row_start=self.row_ranges[to_table_id],
+                    )
+                if name in self.col_ranges[to_table_id]:
+                    return CellRange(
+                        model=self.model,
+                        to_table_id=to_table_id,
+                        col_start=self.col_ranges[to_table_id],
+                    )
 
-        return CellRange(model=self.model)
+        msg = f"'{name_scope}::{name}' does not exist or scope is ambiguous"
+        raise ValueError(msg)
+
+    def _deref_name(
+        self,
+        from_table_id: int,
+        name_scope_1: str,
+        name_scope_2: str,
+        name: str,
+    ) -> CellRange:
+        if not name_scope_1 and not name_scope_2:
+            return self._deref_doc_scope(name)
+
+        if not name_scope_1:
+            return self._deref_single_scope(from_table_id, name_scope_2, name)
+
+        # Full sheet::table::name scope
+        try:
+            to_table_id = self.table_name_id_map[name_scope_1][name_scope_2]
+            if name in self.row_ranges[to_table_id]:
+                return CellRange(
+                    model=self.model,
+                    to_table_id=to_table_id,
+                    row_start=self.row_ranges[to_table_id],
+                )
+            if name in self.col_ranges[to_table_id]:
+                return CellRange(
+                    model=self.model,
+                    to_table_id=to_table_id,
+                    col_start=self.col_ranges[to_table_id],
+                )
+        except KeyError:
+            # Catch invalid sheet/table names
+            pass
+
+        msg = f"'{name_scope_1}::{name_scope_2}::{name}' does not exist or scope is ambiguous"
+        raise ValueError(msg)
+
+    def lookup_named_ref(self, from_table_id: int, ref: CellRange) -> tuple[CellRange]:
+        result = ()
+        if ref.row_start:
+            result += (
+                self._deref_name(from_table_id, ref.name_scope_1, ref.name_scope_2, ref.row_start),
+            )
+        if ref.col_start:
+            result += (
+                self._deref_name(from_table_id, ref.name_scope_1, ref.name_scope_2, ref.col_start),
+            )
+
+        print(
+            f"\nXREF: {ref.name_scope_1 or '<none>'}::{ref.name_scope_2 or '<none>'}::{ref.row_start}:{ref.col_start}",
+        )
+        return result
 
     def calculate_named_ranges(self):
         """
@@ -385,6 +471,7 @@ class ScopedNameRefCache:
         for sheet_id in self.model.sheet_ids():
             self.sheet_names[sheet_id] = defaultdict(int)
             for table_id in self.model.table_ids(sheet_id):
+                self.table_names[table_id] = defaultdict(int)
                 self.row_ranges[table_id] = self._calculate_name_scopes(
                     sheet_id,
                     table_id,
@@ -396,17 +483,15 @@ class ScopedNameRefCache:
                     TableAxis.COLUMN,
                 )
 
+        # Re-init the list of document-scoped names if they are unique
         self.doc_names = {name: None for name, count in self.doc_names.items() if count == 1}
-        self.table_names = list(
-            chain.from_iterable(
-                [
-                    [self.model.table_name(tid) for tid in self.model.table_ids(sid)]
-                    for sid in self.model.sheet_ids()
-                ],
-            ),
-        )
 
         for sheet_id in self.model.sheet_ids():
+            # Re-init the list of sheet-scoped names if they are unique
+            self.sheet_names[sheet_id] = {
+                name: None for name, count in self.sheet_names[sheet_id].items() if count == 1
+            }
+
             for table_id in self.model.table_ids(sheet_id):
                 self._calculate_scope_types(
                     sheet_id,

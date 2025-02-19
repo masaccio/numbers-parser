@@ -114,13 +114,16 @@ class Formula(list):
             TSCEArchives.FormulaArchive(**formula_attrs),
         )
 
-    def _add_xref_tableto_node(self, ref: dict[str, CellRange], node: dict) -> None:
+    def add_table_xref_info(self, ref: dict[str, CellRange], node: dict) -> None:
+        if not ref.name_scope_2:
+            return
+
         sheet_name = (
-            ref.sheet_name
-            if ref.sheet_name
+            ref.name_scope_1
+            if ref.name_scope_1
             else self._model.sheet_name(self._model.table_id_to_sheet_id(self._table_id))
         )
-        table_uuid = self._model.table_name_to_uuid(sheet_name, ref.table_name)
+        table_uuid = self._model.table_name_to_uuid(sheet_name, ref.name_scope_2)
         xref_archive = NumbersUUID(table_uuid).protobuf4
         node["AST_cross_table_reference_extra_info"] = (
             TSCEArchives.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive(
@@ -203,8 +206,7 @@ class Formula(list):
                 if len(ast_colon_tract[key][0].keys()) == 0:
                     del ast_colon_tract[key]
 
-            if ref.table_name:
-                self._add_xref_tableto_node(ref, node)
+            self.add_table_xref_info(ref, node)
 
             return node
 
@@ -221,8 +223,7 @@ class Formula(list):
                     "preserve_rectangular": True,
                 },
             }
-            if ref.table_name:
-                self._add_xref_tableto_node(ref, node)
+            self.add_table_xref_info(ref, node)
             return node
 
         if ref.range_type == CellRangeType.COL_RANGE:
@@ -238,24 +239,17 @@ class Formula(list):
                     "preserve_rectangular": True,
                 },
             }
-            if ref.table_name:
-                self._add_xref_tableto_node(ref, node)
+            self.add_table_xref_info(ref, node)
             return node
 
         if ref.range_type == CellRangeType.NAMED_RANGE:
-            if ref.row_start and ref.col_start:
-                xref = f"{ref.row_start}:{ref.col_start}"
-            elif ref.named_row:
-                xref = ref.row_start
-            else:
-                xref = ref.col_start
-            xref = f"{ref.table_name}::{xref}" if ref.table_name else xref
-            xref = f"{ref.sheet_name}::{xref}" if ref.sheet_name else xref
-            # cell_ref = self._model.name_ref_cache.lookup_xref(self._table_id, xref)
+            _ = self._model.name_ref_cache.lookup_named_ref(self._table_id, ref)
 
             return {}
 
         if ref.range_type == CellRangeType.NAMED_ROW_COLUMN:
+            _ = self._model.name_ref_cache.lookup_named_ref(self._table_id, ref)
+
             return {}
 
         # CellRangeType.CELL
