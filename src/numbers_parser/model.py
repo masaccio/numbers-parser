@@ -1984,7 +1984,7 @@ class _NumbersModel(Cacheable):
                 payload = self.objects[entry.rich_text_payload.identifier]
                 payload_storage = self.objects[payload.storage.identifier]
                 smartfield_entries = payload_storage.table_smartfield.entries
-                cell_text = payload_storage.text[0]
+                cell_text = payload_storage.text[0] if len(payload_storage.text) > 0 else ""
 
                 hyperlinks = []
                 for i, e in enumerate(smartfield_entries):
@@ -2457,7 +2457,7 @@ def node_to_col_ref(node: object, table_name: str, col: int) -> str:
 def node_to_row_ref(node: object, table_name: str, row: int) -> str:
     row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
 
-    row_name = f"${row+1}" if node.AST_row.absolute else f"{row+1}"
+    row_name = f"${row + 1}" if node.AST_row.absolute else f"{row + 1}"
     if table_name is not None:
         return f"{table_name}::{row_name}:{row_name}"
     return f"{row_name}:{row_name}"
