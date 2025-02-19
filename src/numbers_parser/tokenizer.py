@@ -3,7 +3,7 @@ import re
 from numbers_parser.xrefs import CellRange, CellRangeType
 
 
-def parse_numbers_range(model: object, range_str: str) -> dict[str, CellRange]:
+def parse_numbers_range(model: object, range_str: str) -> CellRange:
     """
     Parse a cell range string in Numbers format.
 
@@ -24,7 +24,7 @@ def parse_numbers_range(model: object, range_str: str) -> dict[str, CellRange]:
             col += (ord(char) - ord("A") + 1) * (26**expn)
         return col - 1
 
-    def parse_row_range(model: object, match: re.Match[str]) -> dict[str, CellRange]:
+    def parse_row_range(model: object, match: re.Match[str]) -> CellRange:
         """Parse row range format (e.g., '1:2' or '$1:$2')."""
         return CellRange(
             model=model,
@@ -35,7 +35,7 @@ def parse_numbers_range(model: object, range_str: str) -> dict[str, CellRange]:
             range_type=CellRangeType.ROW_RANGE,
         )
 
-    def parse_col_range(model: object, match: re.Match[str]) -> dict[str, CellRange]:
+    def parse_col_range(model: object, match: re.Match[str]) -> CellRange:
         """Parse column range format (e.g., 'A:C' or '$E:$F')."""
         return CellRange(
             model=model,
@@ -46,7 +46,7 @@ def parse_numbers_range(model: object, range_str: str) -> dict[str, CellRange]:
             range_type=CellRangeType.COL_RANGE,
         )
 
-    def parse_full_range(model: object, match: re.Match[str]) -> dict[str, CellRange]:
+    def parse_full_range(model: object, match: re.Match[str]) -> CellRange:
         """Parse full range format (e.g., 'A1:C4' or '$A3:$B3')."""
         return CellRange(
             model=model,
@@ -61,7 +61,7 @@ def parse_numbers_range(model: object, range_str: str) -> dict[str, CellRange]:
             range_type=CellRangeType.RANGE,
         )
 
-    def parse_named_range(model: object, match: re.Match[str]) -> dict[str, CellRange]:
+    def parse_named_range(model: object, match: re.Match[str]) -> CellRange:
         """Parse a named range (e.g. 'cats:dogs' from 'Table::cats:dogs')."""
         return CellRange(
             model=model,
@@ -72,7 +72,7 @@ def parse_numbers_range(model: object, range_str: str) -> dict[str, CellRange]:
             range_type=CellRangeType.NAMED_RANGE,
         )
 
-    def parse_single_cell(model: object, match: re.Match[str]) -> dict[str, CellRange]:
+    def parse_single_cell(model: object, match: re.Match[str]) -> CellRange:
         """Parse single cell format (e.g., 'A1' or '$B$3')."""
         return CellRange(
             model=model,
@@ -83,22 +83,22 @@ def parse_numbers_range(model: object, range_str: str) -> dict[str, CellRange]:
             range_type=CellRangeType.CELL,
         )
 
-    def parse_named_row_column(model: object, match: re.Match[str]) -> dict[str, CellRange]:
+    def parse_named_row_column(model: object, match: re.Match[str]) -> CellRange:
         """Parse single cell format (e.g., 'cats' from 'Table::cats')."""
         return CellRange(
             model=model,
-            col_start_is_abs=match.group(1) == "$",
-            col_start=col_to_index(match.group(2)),
+            row_start_is_abs=match.group(1) == "$",
+            row_start=match.group(2),
             range_type=CellRangeType.NAMED_ROW_COLUMN,
         )
 
     parts = range_str.split("::")
     if len(parts) == 3:
-        sheet_name, table_name, ref = parts
+        name_scope_1, name_scope_2, ref = parts
     elif len(parts) == 2:
-        sheet_name, table_name, ref = "", parts[0], parts[1]
+        name_scope_1, name_scope_2, ref = "", parts[0], parts[1]
     else:
-        sheet_name, table_name, ref = "", "", parts[0]
+        name_scope_1, name_scope_2, ref = "", "", parts[0]
 
     patterns = [
         (r"(\$?)(\d+):(\$?)(\d+)", parse_row_range),
@@ -114,8 +114,8 @@ def parse_numbers_range(model: object, range_str: str) -> dict[str, CellRange]:
     for pattern, handler in patterns:  # noqa: RET503 # pragma: no branch
         if match := re.match(pattern, ref):
             result = handler(model, match)
-            result.sheet_name = sheet_name
-            result.table_name = table_name
+            result.name_scope_1 = name_scope_1
+            result.name_scope_2 = name_scope_2
             return result
 
 
