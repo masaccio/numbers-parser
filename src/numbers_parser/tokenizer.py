@@ -67,8 +67,8 @@ def parse_numbers_range(model: object, range_str: str) -> CellRange:
             model=model,
             row_start_is_abs=match.group(1) == "$",
             row_start=match.group(2),
-            col_start_is_abs=match.group(3) == "$",
-            col_start=match.group(4),
+            row_end_is_abs=match.group(3) == "$",
+            row_end=match.group(4),
             range_type=CellRangeType.NAMED_RANGE,
         )
 

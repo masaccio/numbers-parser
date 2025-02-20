@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from dataclasses import dataclass, field
+from contextlib import suppress
+from dataclasses import dataclass, field, replace
 from enum import IntEnum
 
 from numbers_parser.constants import OPERATOR_PRECEDENCE
@@ -33,6 +34,9 @@ class RefScope(IntEnum):
 @dataclass
 class ScopedNameRef:
     name: str
+    offset: int = None
+    axis: TableAxis = None
+    table_id: int = None
     scope: RefScope = RefScope.NONE
 
 
@@ -325,25 +329,23 @@ class ScopedNameRefCache:
         table_name = self.model.table_name(table_id)
         for idx in axis_range:
             name = scopes[idx]
+            scope = ScopedNameRef(name, axis=axis, table_id=table_id, offset=idx)
             if name is None:
                 continue
             if name in self.doc_names:
-                # Name is unique in the document
-                scopes[idx] = ScopedNameRef(name, scope=RefScope.DOCUMENT)
-                self.doc_names[name] = CellRange(
-                    model=self.model,
-                    row_start=idx if axis == TableAxis.ROW else None,
-                    col_start=idx if axis == TableAxis.ROW else None,
-                    to_table_id=table_id,
-                )
+                scopes[idx] = replace(scope, scope=RefScope.DOCUMENT)
+                self.doc_names[name] = scopes[idx]
             elif name in self.sheet_names[sheet_id]:
-                scopes[idx] = ScopedNameRef(name, scope=RefScope.SHEET)
+                scopes[idx] = replace(scope, scope=RefScope.SHEET)
                 self.sheet_names[sheet_id][name] = scopes[idx]
-            elif self._all_table_names.count(table_name) == 1:
-                scopes[idx] = ScopedNameRef(name, scope=RefScope.TABLE)
-                self.table_names[table_id][name] = scopes[idx]
             else:
-                scopes[idx] = ScopedNameRef(name)
+                scope_type = (
+                    RefScope.TABLE
+                    if self._exact_count(self._all_table_names, table_name) == 1
+                    else RefScope.NONE
+                )
+                scopes[idx] = replace(scope, scope=scope_type)
+                self.table_names[table_id][name] = scopes[idx]
 
     def _calculate_table_name_maps(self) -> dict[str, int]:
         self.sheet_name_to_id = {self.model.sheet_name(sid): sid for sid in self.model.sheet_ids()}
@@ -361,14 +363,22 @@ class ScopedNameRefCache:
             for sid in self.model.sheet_ids()
         }
 
+    def _scoped_ref_to_cell_ref(self, ref: ScopedNameRef) -> CellRange:
+        return CellRange(
+            model=self.model,
+            to_table_id=ref.table_id,
+            row_start=ref.offset if ref.axis == TableAxis.ROW else None,
+            col_start=ref.offset if ref.axis == TableAxis.COLUMN else None,
+        )
+
     def _deref_doc_scope(self, from_table_id: int, name: str) -> CellRange:
         """Try and use a name reference in the document scope."""
         # Try using the name as document scope
         if name in self.doc_names:
-            return self.doc_names[name]
+            return self._scoped_ref_to_cell_ref(self.doc_names[name])
         from_sheet_id = self.model.table_id_to_sheet_id(from_table_id)
         if self._name_in_cell_range(name, self.sheet_names[from_sheet_id]):
-            return self.sheet_names[from_sheet_id][name]
+            return self._scoped_ref_to_cell_ref(self.sheet_names[from_sheet_id][name])
         msg = f"'{name}' does not exist or scope is ambiguous"
         raise ValueError(msg)
 
@@ -386,19 +396,19 @@ class ScopedNameRefCache:
             to_sheet_id = self.sheet_name_to_id[name_scope]
             if name in self.sheet_names[to_sheet_id]:
                 # Name is valid in a sheet scope
-                return self.sheet_names[to_sheet_id][name]
+                return self._scoped_ref_to_cell_ref(self.sheet_names[to_sheet_id][name])
 
         from_sheet_name = self.sheet_id_to_name[from_sheet_id]
-        to_table_id = self.sheet_table_name_to_id[from_sheet_name][name_scope]
         if self._name_in_cell_range(name, self.sheet_names[from_sheet_id]):
             # Scope is a table but in the same sheet so sheet
             # scoping rules apply.
-            return self.sheet_names[from_sheet_id][name]
+            return self._scoped_ref_to_cell_ref(self.sheet_names[from_sheet_id][name])
 
         if name_scope in self.unique_table_name_to_id:
+            to_table_id = self.unique_table_name_to_id[name_scope]
             if self._name_in_cell_range(name, self.table_names[to_table_id]):
                 # Name is valid in table scope and table name is document-unique
-                return self.table_names[to_table_id][name]
+                return self._scoped_ref_to_cell_ref(self.table_names[to_table_id][name])
         elif name_scope in self.sheet_table_name_to_id[from_sheet_name]:
             to_table_id = self.sheet_table_name_to_id[from_sheet_name][name_scope]
             # Name is valid in a table in the current sheet
@@ -454,20 +464,89 @@ class ScopedNameRefCache:
         raise ValueError(msg)
 
     def lookup_named_ref(self, from_table_id: int, ref: CellRange) -> tuple[CellRange]:
-        result = ()
-        if ref.row_start:
-            result += (
-                self._deref_name(from_table_id, ref.name_scope_1, ref.name_scope_2, ref.row_start),
-            )
-        if ref.col_start:
-            result += (
-                self._deref_name(from_table_id, ref.name_scope_1, ref.name_scope_2, ref.col_start),
-            )
-
         print(
-            f"\nXREF: {ref.name_scope_1 or '<none>'}::{ref.name_scope_2 or '<none>'}::{ref.row_start}:{ref.col_start}",
+            f"\nXREF: {ref.name_scope_1 or '<none>'}::{ref.name_scope_2 or '<none>'}::{ref.row_start}:{ref.row_end}",
         )
-        return result
+        if ref.row_start and ref.row_end:
+            # Numbers will use the reduced scope of one part of a range to scope the other
+            # so start:en   d in a document scope will resolve if either of the references can
+            # be resolved in that scope.
+            start_ref, end_ref = None, None
+            with suppress(ValueError):
+                start_ref = self._deref_name(
+                    from_table_id,
+                    ref.name_scope_1,
+                    ref.name_scope_2,
+                    ref.row_start,
+                )
+            with suppress(ValueError):
+                end_ref = self._deref_name(
+                    from_table_id,
+                    ref.name_scope_1,
+                    ref.name_scope_2,
+                    ref.row_end,
+                )
+
+            if start_ref is None and end_ref is None:
+                msg = f"'{ref.name_scope_1}::{ref.name_scope_2}::{ref.row_start}:{ref.row_end}'"
+                msg += "does not exist or scope is ambiguous"
+                raise ValueError(msg)
+
+            if start_ref is None:
+                row_start = [
+                    v.offset
+                    for k, v in self.row_ranges[end_ref.to_table_id].items()
+                    if v is not None and v.name == ref.row_start
+                ]
+                col_start = [
+                    v.offset
+                    for k, v in self.col_ranges[end_ref.to_table_id].items()
+                    if v is not None and v.name == ref.row_start
+                ]
+                if len(row_start) == 0 and len(col_start) == 0:
+                    msg = f"'{ref.name_scope_1}::{ref.name_scope_2}::{ref.row_start}'"
+                    msg += "does not exist or scope is ambiguous"
+                    raise ValueError(msg)
+
+                start_ref = CellRange(
+                    model=self.model,
+                    to_table_id=end_ref.to_table_id,
+                    row_start=row_start[0] if row_start else col_start[0],
+                )
+            elif end_ref is None:
+                row_end = [
+                    v.offset
+                    for k, v in self.row_ranges[start_ref.to_table_id].items()
+                    if v is not None and v.name == ref.row_end
+                ]
+                col_end = [
+                    v.offset
+                    for k, v in self.col_ranges[start_ref.to_table_id].items()
+                    if v is not None and v.name == ref.row_end
+                ]
+                if len(row_end) == 0 and len(col_end) == 0:
+                    msg = f"'{ref.name_scope_1}::{ref.name_scope_2}::{ref.col_start}'"
+                    msg += "does not exist or scope is ambiguous"
+                    raise ValueError(msg)
+                end_ref = CellRange(
+                    model=self.model,
+                    to_table_id=start_ref.to_table_id,
+                    col_start=row_end[0] if row_end else col_end[0],
+                )
+            return (start_ref, end_ref)
+        if ref.row_start:
+            return self._deref_name(
+                from_table_id,
+                ref.name_scope_1,
+                ref.name_scope_2,
+                ref.row_start,
+            )
+        return self._deref_name(
+            from_table_id,
+            ref.name_scope_1,
+            ref.name_scope_2,
+            ref.col_start,
+        )
 
     def calculate_named_ranges(self):
         """

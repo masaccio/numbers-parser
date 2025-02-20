@@ -350,7 +350,7 @@ def test_parse_formulas():
         for row_num, row in enumerate(table.iter_rows(min_row=1), start=1):
             if len(row) == 2 or row[2].value:
                 assert row[0].formula == row[1].value, f"{table_name}: row {row_num + 1}"
-                # _ = check_generated_formula(row[0]), f"{table_name}: row {row_num + 1}"
+                _ = check_generated_formula(row[0]), f"{table_name}: row {row_num + 1}"
 
 
 def test_create_formula(configurable_save_file):
