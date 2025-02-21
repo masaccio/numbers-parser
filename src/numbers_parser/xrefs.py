@@ -364,6 +364,7 @@ class ScopedNameRefCache:
         }
 
     def _scoped_ref_to_cell_ref(self, ref: ScopedNameRef) -> CellRange:
+        """Convert a ScopedNameRef into a CellRange."""
         return CellRange(
             model=self.model,
             to_table_id=ref.table_id,
@@ -371,45 +372,64 @@ class ScopedNameRefCache:
             col_start=ref.offset if ref.axis == TableAxis.COLUMN else None,
         )
 
+    @staticmethod
+    def _name_in_cell_range(name: str, cell_range: list[CellRange]) -> bool:
+        """Check whether the given name is found among a list of  ScopedNameRefs."""
+        return any(
+            isinstance(cell, ScopedNameRef) and cell.name == name for cell in cell_range.values()
+        )
+
     def _deref_doc_scope(self, from_table_id: int, name: str) -> CellRange:
-        """Try and use a name reference in the document scope."""
+        """Try and use a name reference in the document scope or current sheet."""
+        name = name.replace("''", "'")
+        if name.startswith("'") and name.endswith("'"):
+            name = name[1:-1]
+
         # Try using the name as document scope
         if name in self.doc_names:
             return self._scoped_ref_to_cell_ref(self.doc_names[name])
+
+        # Next, try the the current sheet scope
         from_sheet_id = self.model.table_id_to_sheet_id(from_table_id)
         if self._name_in_cell_range(name, self.sheet_names[from_sheet_id]):
             return self._scoped_ref_to_cell_ref(self.sheet_names[from_sheet_id][name])
+
         msg = f"'{name}' does not exist or scope is ambiguous"
         raise ValueError(msg)
 
-    @staticmethod
-    def _name_in_cell_range(name: str, cell_range: list[CellRange]) -> bool:
-        names = [x.name if isinstance(x, ScopedNameRef) else None for x in cell_range.values()]
-        return name in names
-
     def _deref_single_scope(self, from_table_id: int, name_scope: str, name: str) -> CellRange:
-        # Try using the name as sheet/table scope
+        """
+        Resolve a name using a single scope. The scopy could be one of:
+        - A sheet name
+        - A table within the current sheet
+        - A unique table name anwhere in the document
+        """
+        name = name.replace("''", "'")
+        if name.startswith("'") and name.endswith("'"):
+            name = name[1:-1]
+
         from_sheet_id = self.model.table_id_to_sheet_id(from_table_id)
+
+        # 1. Try resolving the name treating the scope as a sheet name
         if name_scope in self.sheet_name_to_id:
-            # Test if scope is a sheet name and the reference is valid in that
-            # sheet's name scope
             to_sheet_id = self.sheet_name_to_id[name_scope]
             if name in self.sheet_names[to_sheet_id]:
-                # Name is valid in a sheet scope
                 return self._scoped_ref_to_cell_ref(self.sheet_names[to_sheet_id][name])
 
+        # 2. Try resolving as a name the current sheet
         from_sheet_name = self.sheet_id_to_name[from_sheet_id]
         if self._name_in_cell_range(name, self.sheet_names[from_sheet_id]):
-            # Scope is a table but in the same sheet so sheet
-            # scoping rules apply.
             return self._scoped_ref_to_cell_ref(self.sheet_names[from_sheet_id][name])
 
+        # 4. Try resolving as a name in a unique table in the document
         if name_scope in self.unique_table_name_to_id:
             to_table_id = self.unique_table_name_to_id[name_scope]
             if self._name_in_cell_range(name, self.table_names[to_table_id]):
                 # Name is valid in table scope and table name is document-unique
                 return self._scoped_ref_to_cell_ref(self.table_names[to_table_id][name])
-        elif name_scope in self.sheet_table_name_to_id[from_sheet_name]:
+
+        # 4. Try resolving as a name in a table in the current sheet
+        if name_scope in self.sheet_table_name_to_id[from_sheet_name]:
             to_table_id = self.sheet_table_name_to_id[from_sheet_name][name_scope]
             # Name is valid in a table in the current sheet
             if self._name_in_cell_range(name, self.row_ranges[to_table_id]):
@@ -424,6 +444,12 @@ class ScopedNameRefCache:
                     to_table_id=to_table_id,
                     col_start=self.col_ranges[to_table_id],
                 )
+
+        # 5. Try resolving the name as a row or column reference
+        with suppress(IndexError):
+            col_start = xl_col_to_offset(name)
+        if col_start:
+            return CellRange(model=self.model, to_table_id=to_table_id, col_start=col_start)
 
         msg = f"'{name_scope}::{name}' does not exist or scope is ambiguous"
         raise ValueError(msg)
@@ -457,16 +483,13 @@ class ScopedNameRefCache:
                     col_start=self.col_ranges[to_table_id],
                 )
         except KeyError:
-            # Catch invalid sheet/table names
+            # Catch invalid sheet/table names and fall through
             pass
 
         msg = f"'{name_scope_1}::{name_scope_2}::{name}' does not exist or scope is ambiguous"
         raise ValueError(msg)
 
     def lookup_named_ref(self, from_table_id: int, ref: CellRange) -> tuple[CellRange]:
-        print(
-            f"\nXREF: {ref.name_scope_1 or '<none>'}::{ref.name_scope_2 or '<none>'}::{ref.row_start}:{ref.row_end}",
-        )
         if ref.row_start and ref.row_end:
             # Numbers will use the reduced scope of one part of a range to scope the other
             # so start:en   d in a document scope will resolve if either of the references can
@@ -603,6 +626,44 @@ class ScopedNameRefCache:
 # Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
 # Copyright (c) 2013-2021, John McNamara <jmcnamara@cpan.org>
 range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
+
+col_parts = re.compile(r"(\$?)([A-Z]{1,3})")
+
+
+def xl_col_to_offset(col_str: str) -> int:
+    """
+    Convert a column reference in A1 notation to a zero indexed column.
+
+    Parameters
+    ----------
+    col_str:  str
+        A1 notation column reference
+
+    Returns
+    -------
+    col: int
+        Column numbers (zero indexed).
+
+    """
+    if not col_str:
+        return 0
+
+    match = col_parts.match(col_str)
+    if not match:
+        msg = f"invalid cell reference {col_str}"
+        raise IndexError(msg)
+
+    col_str = match.group(2)
+
+    # Convert base26 column string to number.
+    col = 0
+    for expn, char in enumerate(reversed(match.group(2))):
+        col += (ord(char) - ord("A") + 1) * (26**expn)
+
+    # Convert 1-index to zero-index
+    col -= 1
+
+    return col
 
 
 def xl_cell_to_rowcol(cell_str: str) -> tuple:
