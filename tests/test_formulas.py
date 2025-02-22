@@ -358,8 +358,6 @@ def test_parse_formulas():
 def test_create_formula(configurable_save_file):
     def copy_tables(src, dest):
         for table in src.tables:
-            if table.name.endswith(" Tests"):
-                continue
             if table.name not in dest.tables:
                 new_table = dest.add_table(
                     table_name=table.name,
@@ -375,7 +373,13 @@ def test_create_formula(configurable_save_file):
                 for col_num, cell in enumerate(row):
                     if cell.value is not None:
                         new_table.write(row_num, col_num, cell.value)
+
+        # Do formula writes after all tables have been created
+        for table in src.tables:
+            for row_num, row in enumerate(table.iter_rows()):
+                for col_num, cell in enumerate(row):
                     if cell.formula is not None:
+                        new_table = dest.tables[table.name]
                         new_table.cell(row_num, col_num).formula = cell.formula
 
     ref_doc = doc = Document("tests/data/create-formulas.numbers")
