@@ -21,6 +21,63 @@ Bytes offets 6 and 7 include other values which are important to Numbers
 
 This is then followed by the flags as described in the SheetsJS docs.
 
+## UUID mapping
+
+References between tables for formulas, merge ranges and likely plenty of other features rely on UUIDs that relate to a `FormulaOwnerDependenciesArchive` which includes:
+
+``` proto
+message FormulaOwnerDependenciesArchive {
+  required .TSP.UUID formula_owner_uid = 1;
+  required uint32 internal_formula_owner_id = 2;
+  optional uint32 owner_kind = 3 [default = 0];
+  /* ... */
+  optional .TSP.UUID base_owner_uid = 12;
+}
+```
+
+The `OwnerKind` appears to be a Numbers-internal enum whose protobuf equivalent is:
+
+``` proto
+enum OwnerKind {
+  UNKNOWN = 0;
+  TABLE_MODEL = 1;
+  CHART = 2;
+  CONDITIONAL_STYLE_OWNER = 3;
+  HIDDEN_STATES_FOR_ROWS = 4;
+  MERGE_OWNER = 5;
+  SORT_RULE_OWNER = 6;
+  LEGACY_NAMED_REFERENCE_MGR = 7;
+  CATEGORIES_GROUP_BY = 8;
+  CATEGORY_AGGREGATE_OWNER = 9;
+  PENCIL_ANNOTATION_OWNER = 10;
+  HIDDEN_STATES_FOR_COLUMNS = 11;
+  PIVOT_OWNER = 17;
+  HAUNTED_OWNER = 35;
+  PIVOT_DATA_MODEL = 100;
+  HEADER_NAME_MGR = 200;
+  PRACTICAL_GROUP_BY_MIN = 205;
+  PRACTICAL_GROUP_BY_MAX = 214;
+  BITWISE_GROUP_BY_MIN = 215;
+  BITWISE_GROUP_BY_MAX = 1305;
+  GROUP_BY_FOR_PIVOT_MIN = 205;
+  GROUP_BY_FOR_PIVOT_MAX = 1305
+}
+```
+
+Within the `TableModel` there is a UUID reference in the `haunted_owner` field which maps to a `FormulaOwnerDependenciesArchive` whose `formula_owner_uid` is the same UUID as the `haunted_owner`. Within this `FormulaOwnerDependenciesArchive`, the `base_owner_uid` is the table's UUID that is used within the document for cross-referencing. The formula owner archive containing this mapping will have an `owner_kind=OwnerKind.HAUNTED_OWNER`.
+
+``` proto
+message TableModelArchive {
+  /* ... */
+  optional .TSCE.HauntedOwnerArchive haunted_owner = 84;
+}
+
+message HauntedOwnerArchive {
+  required .TSP.UUID owner_uid = 1;
+}
+```
+
+
 ## Owner IDs
 
 The single `TSCE.CalculationEngineArchive` contains a number of owner ID mappings:
