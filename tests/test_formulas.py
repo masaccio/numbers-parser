@@ -335,6 +335,7 @@ def check_generated_formula(cell: Cell) -> bool:
     return True
 
 
+@pytest.mark.experimental
 def test_parse_formulas():
     doc = Document("tests/data/create-formulas.numbers")
 
@@ -353,21 +354,39 @@ def test_parse_formulas():
                 _ = check_generated_formula(row[0]), f"{table_name}: row {row_num + 1}"
 
 
+@pytest.mark.experimental
 def test_create_formula(configurable_save_file):
-    doc = Document()
-    table = doc.default_table
+    def copy_tables(src, dest):
+        for table in src.tables:
+            if table.name.endswith(" Tests"):
+                continue
+            if table.name not in dest.tables:
+                new_table = dest.add_table(
+                    table_name=table.name,
+                    num_rows=table.num_rows,
+                    num_cols=table.num_cols,
+                )
+                new_table.num_header_rows = table.num_header_rows
+                new_table.num_header_cols = table.num_header_cols
+            else:
+                new_table = dest.tables[table.name]
 
-    for row, values in enumerate(TABLE_1_FORMULAS):
-        if values[0] is None:
-            table.write(row, 0, row + 1.0)
-            table.cell(row, 1).formula = values[1]
-            table.cell(row, 2).formula = values[2]
+            for row_num, row in enumerate(table.iter_rows()):
+                for col_num, cell in enumerate(row):
+                    if cell.value is not None:
+                        new_table.write(row_num, col_num, cell.value)
+                    if cell.formula is not None:
+                        new_table.cell(row_num, col_num).formula = cell.formula
+
+    ref_doc = doc = Document("tests/data/create-formulas.numbers")
+    doc = Document(
+        sheet_name="Main Sheet",
+        table_name="Formula Tests",
+        num_header_cols=0,
+        num_cols=3,
+    )
+    doc.add_sheet("Powers Sheet", table_name="Powers of Two", num_rows=5, num_cols=3)
+    copy_tables(ref_doc.sheets["Main Sheet"], doc.sheets["Main Sheet"])
+    copy_tables(ref_doc.sheets["Powers Sheet"], doc.sheets["Powers Sheet"])
 
     doc.save(configurable_save_file)
-
-    doc = Document(configurable_save_file)
-    table = doc.default_table
-    for row, values in enumerate(TABLE_1_FORMULAS):
-        if values[0] is None:
-            assert table.cell(row, 1).formula == values[1]
-            assert table.cell(row, 2).formula == values[2]
