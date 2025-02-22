@@ -669,6 +669,7 @@ class Cell(CellStorageFlags, Cacheable):
             self.col,
             value,
         )
+        self._model.add_formula_dependency(self.row, self.col, self._table_id)
 
     @property
     def is_bulleted(self) -> bool:
