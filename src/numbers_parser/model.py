@@ -73,7 +73,7 @@ from numbers_parser.generated.TSWPArchives_pb2 import (
 )
 from numbers_parser.iwafile import find_extension
 from numbers_parser.numbers_cache import Cacheable, cache
-from numbers_parser.numbers_uuid import NumbersUUID
+from numbers_parser.numbers_uuid import NumbersUUID, uuid_to_hex
 from numbers_parser.xrefs import CellRange, ScopedNameRefCache
 
 
@@ -238,6 +238,7 @@ class _NumbersModel(Cacheable):
             "left": defaultdict(),
         }
         self.name_ref_cache = ScopedNameRefCache(self)
+        self.calculate_table_uuid_map()
 
     def save(self, filepath: Path, package: bool) -> None:
         self.objects.save(filepath, package)
@@ -753,34 +754,71 @@ class _NumbersModel(Cacheable):
             owner_id_map[e.internal_owner_id] = NumbersUUID(e.owner_id).hex
         return owner_id_map
 
+    def calculate_table_uuid_map(self) -> None:
+        # Each Table Model has a UUID which is used in references to the table. See
+        # Numbers.md#uuid-mapping for more details.
+
+        # For haunted owner archive types, map formula_owner_uids to their base_owner_uids
+        haunted_owner_ids = [
+            obj_id
+            for obj_id in self.find_refs("FormulaOwnerDependenciesArchive")
+            if self.objects[obj_id].owner_kind == OwnerKind.HAUNTED_OWNER
+        ]
+        formula_owner_to_base_owner_map = {
+            uuid_to_hex(self.objects[obj_id].formula_owner_uid): uuid_to_hex(
+                self.objects[obj_id].base_owner_uid,
+            )
+            for obj_id in haunted_owner_ids
+        }
+
+        # Map table IDs to the base_owner_uids of the formula owners that match
+        # the table model's haunted owner
+        self._table_id_to_base_id = {
+            table_id: formula_owner_to_base_owner_map[
+                uuid_to_hex(self.objects[table_id].haunted_owner.owner_uid)
+            ]
+            for table_id in self.table_ids()
+        }
+        self._table_base_id_to_formula_owner_id = {
+            uuid_to_hex(self.objects[obj_id].base_owner_uid): obj_id for obj_id in haunted_owner_ids
+        }
+
     @cache()
     def table_base_id(self, table_id: int) -> int:
         """ "Finds the UUID of a table."""
-        # Look for a TSCE.FormulaOwnerDependenciesArchive objects with the following at the
-        # root level of the protobuf:
-        #
-        #     "base_owner_uid": "6a4a5281-7b06-f5a1-904b-7f9ec784b368"",
-        #     "formula_owner_uid": "6a4a5281-7b06-f5a1-904b-7f9ec784b36d"
-        #
-        # The Table UUID is the TSCE.FormulaOwnerDependenciesArchive whose formula_owner_uid
-        # matches the UUID of the haunted_owner of the Table:
-        #
-        #    "haunted_owner": {
-        #        "owner_uid": "6a4a5281-7b06-f5a1-904b-7f9ec784b368""
-        #    }
-        haunted_owner = NumbersUUID(self.objects[table_id].haunted_owner.owner_uid).hex
-        formula_owner_ids = self.find_refs("FormulaOwnerDependenciesArchive")
-        for dependency_id in formula_owner_ids:  # pragma: no branch
-            obj = self.objects[dependency_id]
-            # if obj.owner_kind == OwnerKind.HAUNTED_OWNER:
-            if obj.HasField("base_owner_uid") and obj.HasField(
-                "formula_owner_uid",
-            ):  # pragma: no branch
-                base_owner_uid = NumbersUUID(obj.base_owner_uid).hex
-                formula_owner_uid = NumbersUUID(obj.formula_owner_uid).hex
-                if formula_owner_uid == haunted_owner:
-                    return base_owner_uid
-        return None
+        return self._table_id_to_base_id[table_id]
+
+    def get_formula_owner(self, table_id: int) -> object:
+        table_uuid = self.table_base_id(table_id)
+        return self.objects[self._table_base_id_to_formula_owner_id[table_uuid]]
+
+    def add_formula_dependency(self, row: int, col: int, table_id: int) -> None:
+        calc_engine = self.calc_engine()
+        calc_engine.dependency_tracker.number_of_formulas += 1
+        internal_formula_id = calc_engine.dependency_tracker.number_of_formulas
+
+        formula_owner = self.get_formula_owner(table_id)
+        formula_owner.cell_dependencies.cell_record.append(
+            TSCEArchives.CellRecordExpandedArchive(column=col, row=row),
+        )
+        if len(formula_owner.tiled_cell_dependencies.cell_record_tiles) == 0:
+            cell_record_id, cell_record = self.objects.create_object_from_dict(
+                "CalculationEngine",
+                {
+                    "internal_owner_id": internal_formula_id,
+                    "tile_column_begin": 0,
+                    "tile_row_begin": 0,
+                },
+                TSCEArchives.CellRecordTileArchive,
+            )
+            formula_owner.tiled_cell_dependencies.cell_record_tiles.append(
+                TSPMessages.Reference(identifier=cell_record_id),
+            )
+        else:
+            cell_record_id = formula_owner.tiled_cell_dependencies.cell_record_tiles[0].identifier
+            cell_record = self.objects[cell_record_id]
+
+        cell_record.cell_records.append(formula_owner.cell_dependencies.cell_record[-1])
 
     @cache(num_args=0)
     def calc_engine_id(self):
@@ -800,8 +838,8 @@ class _NumbersModel(Cacheable):
 
     @cache()
     def calculate_merge_cell_ranges(self, table_id) -> None:
-        """Exract all the merge cell ranges for the Table."""
-        # https://github.com/masaccio/numbers-parser/blob/main/doc/Numbers.md#merge-ranges
+        """Extract all the merge cell ranges for the Table."""
+        # See details in Numbers.md#merge-ranges.
         owner_id_map = self.owner_id_map()
         table_base_id = self.table_base_id(table_id)
 
@@ -1513,12 +1551,6 @@ class _NumbersModel(Cacheable):
             TSPMessages.Reference(identifier=row_headers_id),
         )
 
-        self._table_data[table_model_id] = [
-            [Cell._empty_cell(table_model_id, row, col, self) for col in range(num_cols)]
-            for row in range(num_rows)
-        ]
-        self.recalculate_table_data(table_model_id, self._table_data[table_model_id])
-
         table_info_id, table_info = self.objects.create_object_from_dict(
             "CalculationEngine",
             {},
@@ -1527,6 +1559,22 @@ class _NumbersModel(Cacheable):
         table_info.tableModel.MergeFrom(TSPMessages.Reference(identifier=table_model_id))
         table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
 
+        haunted_owner_uuid = self.add_formula_owner(
+            table_info_id,
+            num_rows,
+            num_cols,
+            number_of_header_rows,
+            number_of_header_columns,
+        )
+        table_model.haunted_owner.owner_uid.MergeFrom(haunted_owner_uuid.protobuf2)
+        self.calculate_table_uuid_map()
+
+        self._table_data[table_model_id] = [
+            [Cell._empty_cell(table_model_id, row, col, self) for col in range(num_cols)]
+            for row in range(num_rows)
+        ]
+        self.recalculate_table_data(table_model_id, self._table_data[table_model_id])
+
         self.add_component_reference(
             table_info_id,
             location="Document",
@@ -1534,14 +1582,6 @@ class _NumbersModel(Cacheable):
         )
         self.create_caption_archive(table_model_id)
         self.caption_enabled(table_model_id, False)
-
-        self.add_formula_owner(
-            table_info_id,
-            num_rows,
-            num_cols,
-            number_of_header_rows,
-            number_of_header_columns,
-        )
 
         self.objects[sheet_id].drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id),
@@ -1555,7 +1595,7 @@ class _NumbersModel(Cacheable):
         num_cols: int,
         number_of_header_rows: int,
         number_of_header_columns: int,
-    ) -> None:
+    ) -> NumbersUUID:
         """
         Create a FormulaOwnerDependenciesArchive that references a TableInfoArchive
         so that cross-references to cells in this table will work.
@@ -1564,49 +1604,43 @@ class _NumbersModel(Cacheable):
         calc_engine = self.calc_engine()
         owner_id_map = calc_engine.dependency_tracker.owner_id_map.map_entry
         next_owner_id = max([x.internal_owner_id for x in owner_id_map]) + 1
-        formula_deps_id, formula_deps = self.objects.create_object_from_dict(
+        volatile_dependencies = {
+            "volatile_time_cells": {},
+            "volatile_random_cells": {},
+            "volatile_locale_cells": {},
+            "volatile_sheet_table_name_cells": {},
+            "volatile_remote_data_cells": {},
+            "volatile_geometry_cell_refs": {},
+        }
+        total_range_for_table = {
+            "top_left_column": 0,
+            "top_left_row": 0,
+            "bottom_right_column": num_cols - 1,
+            "bottom_right_row": num_cols - 1,
+        }
+        body_range_for_table = {
+            "top_left_column": number_of_header_columns,
+            "top_left_row": number_of_header_rows,
+            "bottom_right_column": num_cols - 1,
+            "bottom_right_row": num_cols - 1,
+        }
+
+        formula_deps_id, _ = self.objects.create_object_from_dict(
             "CalculationEngine",
             {
                 "formula_owner_uid": formula_owner_uuid.dict2,
                 "internal_formula_owner_id": next_owner_id,
-                "owner_kind": 1,
+                "owner_kind": OwnerKind.TABLE_MODEL,
                 "cell_dependencies": {},
                 "range_dependencies": {},
-                "volatile_dependencies": {
-                    "volatile_time_cells": {},
-                    "volatile_random_cells": {},
-                    "volatile_locale_cells": {},
-                    "volatile_sheet_table_name_cells": {},
-                    "volatile_remote_data_cells": {},
-                    "volatile_geometry_cell_refs": {},
-                },
+                "volatile_dependencies": volatile_dependencies,
                 "spanning_column_dependencies": {
-                    "total_range_for_table": {
-                        "top_left_column": 0,
-                        "top_left_row": 0,
-                        "bottom_right_column": num_cols - 1,
-                        "bottom_right_row": num_cols - 1,
-                    },
-                    "body_range_for_table": {
-                        "top_left_column": number_of_header_columns,
-                        "top_left_row": number_of_header_rows,
-                        "bottom_right_column": num_cols - 1,
-                        "bottom_right_row": num_cols - 1,
-                    },
+                    "total_range_for_table": total_range_for_table,
+                    "body_range_for_table": body_range_for_table,
                 },
                 "spanning_row_dependencies": {
-                    "total_range_for_table": {
-                        "top_left_column": 0,
-                        "top_left_row": 0,
-                        "bottom_right_column": num_cols - 1,
-                        "bottom_right_row": num_cols - 1,
-                    },
-                    "body_range_for_table": {
-                        "top_left_column": number_of_header_columns,
-                        "top_left_row": number_of_header_rows,
-                        "bottom_right_column": num_cols - 1,
-                        "bottom_right_row": num_cols - 1,
-                    },
+                    "total_range_for_table": total_range_for_table,
+                    "body_range_for_table": body_range_for_table,
                 },
                 "whole_owner_dependencies": {"dependent_cells": {}},
                 "cell_errors": {},
@@ -1626,6 +1660,52 @@ class _NumbersModel(Cacheable):
                 owner_id=formula_owner_uuid.protobuf4,
             ),
         )
+
+        # See Numbers.md#uuid-mapping for more details on mapping table model
+        # UUID to the formula owner.
+        formula_owner_uuid = NumbersUUID()
+        base_owner_uuid = NumbersUUID()
+        next_owner_id += 1
+        null_range_ref = {
+            "top_left_column": 0x7FFF,
+            "top_left_row": 0x7FFFFFFF,
+            "bottom_right_column": 0x7FFF,
+            "bottom_right_row": 0x7FFFFFFF,
+        }
+        spanning_depdendencies = {
+            "total_range_for_table": null_range_ref,
+            "body_range_for_table": null_range_ref,
+        }
+        formula_deps_id, formula_deps = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {
+                "formula_owner_uid": formula_owner_uuid.dict2,
+                "internal_formula_owner_id": next_owner_id,
+                "owner_kind": OwnerKind.HAUNTED_OWNER,
+                "cell_dependencies": {},
+                "range_dependencies": {},
+                "volatile_dependencies": volatile_dependencies,
+                "spanning_column_dependencies": spanning_depdendencies,
+                "spanning_row_dependencies": spanning_depdendencies,
+                "whole_owner_dependencies": {"dependent_cells": {}},
+                "cell_errors": {},
+                "base_owner_uid": base_owner_uuid.dict2,
+                "tiled_cell_dependencies": {},
+                "uuid_references": {},
+                "tiled_range_dependencies": {},
+            },
+            TSCEArchives.FormulaOwnerDependenciesArchive,
+        )
+        calc_engine.dependency_tracker.formula_owner_dependencies.append(
+            TSPMessages.Reference(identifier=formula_deps_id),
+        )
+        owner_id_map.append(
+            TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
+                internal_owner_id=next_owner_id,
+                owner_id=formula_owner_uuid.protobuf4,
+            ),
+        )
+        return formula_owner_uuid
 
     def add_sheet(self, sheet_name: str) -> int:
         """Add a new sheet with a copy of a table from another sheet."""
