@@ -76,3 +76,9 @@ class NumbersUUID(UUID):
             uuid_w1=uuid_w1,
             uuid_w0=uuid_w0,
         )
+
+
+def uuid_to_hex(archive: object) -> str:
+    """Convert a protobuf UUID to a hex string"""
+    uuid = NumbersUUID(archive)
+    return uuid.hex
