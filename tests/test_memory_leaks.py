@@ -5,7 +5,6 @@ from pympler import muppy, summary
 
 from numbers_parser import Document
 
-
 @pytest.mark.experimental
 def test_memory_leaks():
     """Memory leak test (see issue-67)."""
