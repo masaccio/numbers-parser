@@ -353,16 +353,16 @@ def test_parse_formulas():
 
 @pytest.mark.experimental
 def test_create_formula(configurable_save_file):
-    def copy_tables(src, dest):
+    def copy_table_data(src, dest):
         for table in src.tables:
             if table.name not in dest.tables:
                 new_table = dest.add_table(
                     table_name=table.name,
                     num_rows=table.num_rows,
                     num_cols=table.num_cols,
+                    num_header_rows=table.num_header_rows,
+                    num_header_cols=table.num_header_cols,
                 )
-                new_table.num_header_rows = table.num_header_rows
-                new_table.num_header_cols = table.num_header_cols
             else:
                 new_table = dest.tables[table.name]
 
@@ -371,7 +371,7 @@ def test_create_formula(configurable_save_file):
                     if cell.value is not None:
                         new_table.write(row_num, col_num, cell.value)
 
-        # Do formula writes after all tables have been created
+    def copy_table_formulas(src, dest):
         for table in src.tables:
             for row_num, row in enumerate(table.iter_rows()):
                 for col_num, cell in enumerate(row):
@@ -387,7 +387,11 @@ def test_create_formula(configurable_save_file):
         num_cols=3,
     )
     doc.add_sheet("Powers Sheet", table_name="Powers of Two", num_rows=5, num_cols=3)
-    copy_tables(ref_doc.sheets["Main Sheet"], doc.sheets["Main Sheet"])
-    copy_tables(ref_doc.sheets["Powers Sheet"], doc.sheets["Powers Sheet"])
+    copy_table_data(ref_doc.sheets["Main Sheet"], doc.sheets["Main Sheet"])
+    copy_table_data(ref_doc.sheets["Powers Sheet"], doc.sheets["Powers Sheet"])
+    # Copy formulas only after all data is copied as rows and column references
+    # will otherwise fail
+    copy_table_formulas(ref_doc.sheets["Main Sheet"], doc.sheets["Main Sheet"])
+    copy_table_formulas(ref_doc.sheets["Powers Sheet"], doc.sheets["Powers Sheet"])
 
     doc.save(configurable_save_file)
