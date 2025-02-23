@@ -243,14 +243,69 @@ class Formula(list):
             return node
 
         if ref.range_type == CellRangeType.NAMED_RANGE:
-            _ = self._model.name_ref_cache.lookup_named_ref(self._table_id, ref)
+            new_ref = self._model.name_ref_cache.lookup_named_ref(self._table_id, ref)
+            if new_ref.row_start is not None:
+                row_start = (
+                    new_ref.row_start if ref.row_start_is_abs else new_ref.row_start - self.row
+                )
+                row_end = new_ref.row_end if ref.row_end_is_abs else new_ref.row_end - self.row
+                node = {
+                    "AST_node_type": "COLON_TRACT_NODE",
+                    "AST_sticky_bits": Formula._ast_sticky_bits(ref),
+                    "AST_colon_tract": {
+                        "relative_row": [{"range_begin": row_start, "range_end": row_end}],
+                        "absolute_column": [{"range_begin": 0x7FFF}],
+                        "preserve_rectangular": True,
+                    },
+                }
+            else:
+                col_start = (
+                    new_ref.col_start if ref.col_start_is_abs else new_ref.col_start - self.col
+                )
+                col_end = new_ref.col_end if ref.col_end_is_abs else new_ref.col_end - self.col
+                node = {
+                    "AST_node_type": "COLON_TRACT_NODE",
+                    "AST_sticky_bits": Formula._ast_sticky_bits(ref),
+                    "AST_colon_tract": {
+                        "relative_column": [{"range_begin": col_start, "range_end": col_end}],
+                        "absolute_row": [{"range_begin": 2147483647}],
+                        "preserve_rectangular": True,
+                    },
+                }
 
-            return {}
+            self.add_table_xref_info(ref, node)
+            return node
 
         if ref.range_type == CellRangeType.NAMED_ROW_COLUMN:
-            _ = self._model.name_ref_cache.lookup_named_ref(self._table_id, ref)
-
-            return {}
+            new_ref = self._model.name_ref_cache.lookup_named_ref(self._table_id, ref)
+            if new_ref.row_start is not None:
+                row_start = (
+                    new_ref.row_start if ref.row_start_is_abs else new_ref.row_start - self.row
+                )
+                node = {
+                    "AST_node_type": "COLON_TRACT_NODE",
+                    "AST_sticky_bits": Formula._ast_sticky_bits(ref),
+                    "AST_colon_tract": {
+                        "relative_column": [{"range_begin": row_start}],
+                        "absolute_row": [{"range_begin": 2147483647}],
+                        "preserve_rectangular": True,
+                    },
+                }
+            else:
+                col_start = (
+                    new_ref.col_start if ref.col_start_is_abs else new_ref.col_start - self.col
+                )
+                node = {
+                    "AST_node_type": "COLON_TRACT_NODE",
+                    "AST_sticky_bits": Formula._ast_sticky_bits(ref),
+                    "AST_colon_tract": {
+                        "relative_column": [{"range_begin": col_start}],
+                        "absolute_row": [{"range_begin": 2147483647}],
+                        "preserve_rectangular": True,
+                    },
+                }
+                self.add_table_xref_info(ref, node)
+            return node
 
         # CellRangeType.CELL
         return {
