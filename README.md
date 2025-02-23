@@ -11,32 +11,15 @@ with earlier versions of Python.
 
 ## Installation
 
-```bash
-python3 -m pip install numbers-parser
-```
-
-A pre-requisite for this package is [python-snappy](https://pypi.org/project/python-snappy/)
-which will be installed by Python automatically, but python-snappy also requires that the binary
-libraries for snappy compression are present.
+A pre-requisite for this package is [python-snappy](https://pypi.org/project/python-snappy/) which will be installed by Python automatically, but python-snappy also requires binary libraries for snappy compression.
 
 The most straightforward way to install the binary dependencies is to use
 [Homebrew](https://brew.sh) and source Python from Homebrew rather than from macOS as described
-in the [python-snappy github](https://github.com/andrix/python-snappy):
-
-For Intel Macs:
+in the [python-snappy github](https://github.com/andrix/python-snappy). Using [pipx](https://pipx.pypa.io/stable/installation/) for package management is also strongly recommended:
 
 ```bash
-brew install snappy python3
-CPPFLAGS="-I/usr/local/include -L/usr/local/lib" \
-python3 -m pip install python-snappy
-```
-
-For Apple Silicon Macs:
-
-```bash
-brew install snappy python3
-CPPFLAGS="-I/opt/homebrew/include -L/opt/homebrew/lib" \
-python3 -m pip install python-snappy
+brew install snappy python3 pipx
+pipx install numbers-parser
 ```
 
 For Linux (your package manager may be different):
