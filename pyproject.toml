@@ -114,7 +114,6 @@ exclude = [
 ]
 fix = true
 lint.ignore = [
-  # "PLR2004", # Allow constant values
   "T201", # Allow print()
   # To fix:
   "ANN001", #Missing type annotation
@@ -143,6 +142,7 @@ lint.ignore = [
   "D401", #First line of docstring should be in imperative mood
   "D415", #First line should end with a period, question mark, or exclamation point
   "E501", #Line too long
+  "ERA001", # Remove commented out code
   "FBT001", #Boolean-typed positional argument in function definition
   "FBT002", #Boolean default positional argument in function definition
   "FBT003", #Boolean positional value in function call

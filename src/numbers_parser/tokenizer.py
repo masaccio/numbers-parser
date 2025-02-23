@@ -185,7 +185,7 @@ class Tokenizer:
         """Populate self.items with the tokens from the formula."""
         consumers = (
             ("\"'", self.parse_string),
-            ("[", self.parse_brackets),
+            # ("[", self.parse_brackets),
             ("#", self.parse_error),
             ("+-*/^&=><%×÷≥≤≠", self.parse_operator),
             ("{(", self.parse_opener),
@@ -225,9 +225,9 @@ class Tokenizer:
         """
         self.assert_empty_token()
         delim = self.formula[self.offset]
-        if delim not in ('"', "'"):
-            msg = f"Invalid string delimiter: {delim}"
-            raise TokenizerError(msg)
+        # if delim not in ('"', "'"):
+        #     msg = f"Invalid string delimiter: {delim}"
+        #     raise TokenizerError(msg)
         regex = self.STRING_REGEXES[delim]
         match = regex.match(self.formula[self.offset :])
         if match is None:
@@ -241,23 +241,23 @@ class Tokenizer:
             self.token.append(match)
         return len(match)
 
-    def parse_brackets(self):
-        """
-        Consume all the text between square brackets [].
+    # def parse_brackets(self):
+    #     """
+    #     Consume all the text between square brackets [].
 
-        Returns the number of characters matched. (Does not update
-        self.offset)
+    #     Returns the number of characters matched. (Does not update
+    #     self.offset)
 
-        """
-        if self.formula[self.offset] != "[":
-            msg = f"Expected '[', found: {self.formula[self.offset]}"
-            raise TokenizerError(msg)
-        right = self.formula.find("]", self.offset) + 1
-        if right == 0:
-            msg = "Encountered unmatched '[' in '{self.formula}'"
-            raise TokenizerError(msg)
-        self.token.append(self.formula[self.offset : right])
-        return right - self.offset
+    #     """
+    #     if self.formula[self.offset] != "[":
+    #         msg = f"Expected '[', found: {self.formula[self.offset]}"
+    #         raise TokenizerError(msg)
+    #     right = self.formula.find("]", self.offset) + 1
+    #     if right == 0:
+    #         msg = "Encountered unmatched '[' in '{self.formula}'"
+    #         raise TokenizerError(msg)
+    #     self.token.append(self.formula[self.offset : right])
+    #     return right - self.offset
 
     def parse_error(self):
         """

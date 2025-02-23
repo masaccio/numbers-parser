@@ -363,13 +363,10 @@ class Formula(list):
         }
 
     def logical_archive(self, token: "Token") -> ASTNodeArrayArchive.ASTNodeArchive:
-        if token.subtype == Token.LOGICAL:
-            return {
-                "AST_node_type": "BOOLEAN_NODE",
-                "AST_boolean_node_boolean": token.value.lower() == "true",
-            }
-
-        return None
+        return {
+            "AST_node_type": "BOOLEAN_NODE",
+            "AST_boolean_node_boolean": token.value.lower() == "true",
+        }
 
     def error(self, token: "Token") -> ASTNodeArrayArchive.ASTNodeArchive:
         return {
@@ -411,20 +408,20 @@ class Formula(list):
                     operators[-1].type != "FUNC" and operators[-1].subtype != "OPEN"
                 ):
                     output.append(operators.pop())
-                if operators:
-                    output.append(operators.pop())
+                output.append(operators.pop())
             elif token.type == "SEP":
                 if operators and operators[-1].type != "FUNC":
                     output.append(operators.pop())
-            elif token.type == "PAREN":
-                if token.subtype == "OPEN":
-                    operators.append(token)
-                elif token.subtype == "CLOSE":
-                    while operators and operators[-1].subtype != "OPEN":
-                        output.append(operators.pop())
-                    operators.pop()
-                    if operators and operators[-1].type == "FUNC":
-                        output.append(operators.pop())
+            # Only remaining token type is PAREN
+            elif token.subtype == "OPEN":
+                operators.append(token)
+            else:
+                # Must be a CLOSE PAREN
+                while operators and operators[-1].subtype != "OPEN":
+                    output.append(operators.pop())
+                operators.pop()
+                # if operators and operators[-1].type == "FUNC":
+                #     output.append(operators.pop())
 
         while operators:
             output.append(operators.pop())

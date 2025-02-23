@@ -2,8 +2,9 @@ import pytest
 import pytest_check as check
 
 from numbers_parser import Cell, Document, UnsupportedWarning
-from numbers_parser.formula import Formula, Tokenizer
+from numbers_parser.formula import Formula
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
+from numbers_parser.tokenizer import Tokenizer, TokenizerError
 
 TABLE_1_FORMULAS = [
     [None, "A1", "$B$1=1"],
@@ -272,6 +273,12 @@ def test_tokenizer():
         tok = Tokenizer(formula)
         tokens = Formula.rpn_tokens(tok.items)
         assert [str(x) for x in tokens] == ref_tokens, formula
+
+    with pytest.raises(
+        TokenizerError,
+        match=r"Reached end of formula while parsing link in LEFT\('",
+    ):
+        _ = Tokenizer("LEFT('")
 
 
 def check_generated_formula(cell: Cell) -> bool:
