@@ -11,20 +11,38 @@ with earlier versions of Python.
 
 ## Installation
 
-A pre-requisite for this package is [python-snappy](https://pypi.org/project/python-snappy/) which will be installed by Python automatically, but python-snappy also requires binary libraries for snappy compression.
+```bash
+python3 -m pip install numbers-parser
+```
 
-The most straightforward way to install the binary dependencies is to use [Homebrew](https://brew.sh) and source Python from Homebrew rather than from macOS as described in the [python-snappy github](https://github.com/andrix/python-snappy). Using [pipx](https://pipx.pypa.io/stable/installation/) for package management is also strongly recommended:
+A pre-requisite for this package is [python-snappy](https://pypi.org/project/python-snappy/)
+which will be installed by Python automatically, but python-snappy also requires that the binary
+libraries for snappy compression are present.
+
+The most straightforward way to install the binary dependencies is to use
+[Homebrew](https://brew.sh) and source Python from Homebrew rather than from macOS as described
+in the [python-snappy github](https://github.com/andrix/python-snappy):
+
+For Intel Macs:
 
 ```bash
-brew install snappy python3 pipx
-pipx install numbers-parser
+brew install snappy python3
+CPPFLAGS="-I/usr/local/include -L/usr/local/lib" \
+python3 -m pip install python-snappy
+```
+
+For Apple Silicon Macs:
+
+```bash
+brew install snappy python3
+CPPFLAGS="-I/opt/homebrew/include -L/opt/homebrew/lib" \
+python3 -m pip install python-snappy
 ```
 
 For Linux (your package manager may be different):
 
 ```bash
 sudo apt-get -y install libsnappy-dev
-python3 -m pip install numbers-parser
 ```
 
 On Windows, you will need to either arrange for snappy to be found for VSC++ or you can install python
@@ -33,7 +51,6 @@ for Windows on Arm. There appear to be no x86 pre-compiled packages for Windows.
 
 ```text
 pip install python_snappy-0.6.1-cp312-cp312-win_arm64.whl
-python3 -m pip install numbers-parser
 ```
 
 ## Quick Start
