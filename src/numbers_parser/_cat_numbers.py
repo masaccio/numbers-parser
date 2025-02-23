@@ -146,7 +146,11 @@ def main() -> None:
                 else:
                     print_table(args, filename)
             except (FileFormatError, FileError, UnsupportedError) as e:  # noqa: PERF203
-                print(f"{filename}:", str(e), file=sys.stderr)
+                err_str = str(e)
+                if filename in err_str:
+                    print(err_str, file=sys.stderr)
+                else:
+                    print(f"{filename}: {err_str}", file=sys.stderr)
                 sys.exit(1)
 
 
