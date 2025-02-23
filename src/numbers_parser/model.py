@@ -764,6 +764,11 @@ class _NumbersModel(Cacheable):
             for obj_id in self.find_refs("FormulaOwnerDependenciesArchive")
             if self.objects[obj_id].owner_kind == OwnerKind.HAUNTED_OWNER
         ]
+        if len(haunted_owner_ids) == 0:
+            # Some older documents (see issue-18) do not use FormulaOwnerDependenciesArchive
+            self._table_id_to_base_id = {}
+            return
+
         formula_owner_to_base_owner_map = {
             uuid_to_hex(self.objects[obj_id].formula_owner_uid): uuid_to_hex(
                 self.objects[obj_id].base_owner_uid,
@@ -786,7 +791,8 @@ class _NumbersModel(Cacheable):
     @cache()
     def table_base_id(self, table_id: int) -> int:
         """ "Finds the UUID of a table."""
-        return self._table_id_to_base_id[table_id]
+        # Table can be empty if the document does not use FormulaOwnerDependenciesArchive
+        return self._table_id_to_base_id.get(table_id)
 
     def get_formula_owner(self, table_id: int) -> object:
         table_uuid = self.table_base_id(table_id)
