@@ -745,7 +745,7 @@ class Cell(CellStorageFlags, Cacheable):
             or self._bool_format_id is not None
         ):
             return self._custom_format()
-        return str(self.value)
+        return str(self.value).upper() if isinstance(self.value, bool) else str(self.value)
 
     @property
     def style(self) -> Style | None:
