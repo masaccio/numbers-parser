@@ -283,7 +283,6 @@ def check_generated_formula(cell: Cell) -> bool:
         cell.formula,
     )
 
-    return True
     ref_archive = cell._model._formulas.lookup_value(cell._table_id, cell._formula_id)
     new_archive = cell._model._formulas.lookup_value(cell._table_id, new_formula_id)
 
@@ -335,7 +334,6 @@ def check_generated_formula(cell: Cell) -> bool:
     return True
 
 
-@pytest.mark.experimental
 def test_parse_formulas():
     doc = Document("tests/data/create-formulas.numbers")
 
@@ -346,7 +344,6 @@ def test_parse_formulas():
 
     sheet = doc.sheets["Main Sheet"]
     for table_name in ["Formula Tests", "Reference Tests"]:
-        # for table_name in ["Formula Tests"]:
         table = sheet.tables[table_name]
         for row_num, row in enumerate(table.iter_rows(min_row=1), start=1):
             if len(row) == 2 or row[2].value:
