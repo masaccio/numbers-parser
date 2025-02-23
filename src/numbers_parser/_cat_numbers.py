@@ -5,7 +5,15 @@ import sys
 
 from sigfig import round as sigfig
 
-from numbers_parser import Document, ErrorCell, FileError, FileFormatError, NumberCell, _get_version
+from numbers_parser import (
+    Document,
+    ErrorCell,
+    FileError,
+    FileFormatError,
+    NumberCell,
+    UnsupportedError,
+    _get_version,
+)
 from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser.constants import MAX_SIGNIFICANT_DIGITS
 from numbers_parser.experimental import _enable_experimental_features
@@ -137,11 +145,12 @@ def main() -> None:
                     print_table_names(filename)
                 else:
                     print_table(args, filename)
-            except FileFormatError as e:  # noqa: PERF203
-                print(f"{filename}:", str(e), file=sys.stderr)
-                sys.exit(1)
-            except FileError as e:
-                print(f"{filename}:", str(e), file=sys.stderr)
+            except (FileFormatError, FileError, UnsupportedError) as e:  # noqa: PERF203
+                err_str = str(e)
+                if filename in err_str:
+                    print(err_str, file=sys.stderr)
+                else:
+                    print(f"{filename}: {err_str}", file=sys.stderr)
                 sys.exit(1)
 
 

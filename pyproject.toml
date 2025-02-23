@@ -12,7 +12,7 @@ name = "numbers-parser"
 packages = [{include = "numbers_parser", from = "src"}]
 readme = "README.md"
 repository = "https://github.com/masaccio/numbers-parser"
-version = "4.14.3"
+version = "4.14.4"
 
 [tool.poetry.scripts]
 cat-numbers = "numbers_parser._cat_numbers:main"
@@ -34,7 +34,6 @@ python-dateutil = "^2.9.0.post0"
 gprof2dot = "^2022.7.29"
 line-profiler = "^4.0.3"
 mock = ">=5.1.0"
-psutil = ">=5.9"
 pytest = ">=7.2.0"
 pytest-check = ">=1.0"
 pytest-console-scripts = "^1.3.1"
@@ -46,6 +45,7 @@ python-magic = ">=0.4"
 tqdm = ">=4.66"
 colorama = "^0.4.6"
 roman = "^4.2"
+pympler = "^1.1"
 
 [tool.poetry.group.docs]
 optional = true

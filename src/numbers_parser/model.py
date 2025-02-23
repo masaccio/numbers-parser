@@ -706,7 +706,10 @@ class _NumbersModel(Cacheable):
     @cache(num_args=2)
     def table_string(self, table_id: int, key: int) -> str:
         """Return the string associated with a string ID for a particular table."""
-        return self._table_strings.lookup_value(table_id, key).string
+        try:
+            return self._table_strings.lookup_value(table_id, key).string
+        except KeyError:
+            return ""
 
     def init_table_strings(self, table_id: int) -> None:
         """Cache table strings reference and delete all existing keys/values."""
