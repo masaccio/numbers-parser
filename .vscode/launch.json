@@ -2,6 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Python: Debug Tests",
             "type": "debugpy",
             "request": "launch",
@@ -11,36 +18,23 @@
             ],
             "console": "integratedTerminal",
             "env": {
-                "PYDEVD_DISABLE_FILE_VALIDATION": "1",
+                "PYDEVD_DISABLE_FILE_VALIDATION": "1"
             },
             "justMyCode": true
         },
         {
-            "name": "Pytest: Current File",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "pytest",
-            "console": "integratedTerminal",
-            "env": {
-                "PYDEVD_DISABLE_FILE_VALIDATION": "1",
-            },
-            "justMyCode": true,
-            "args": [
-                "${file}"
-            ]
-        },
-        {
-            "name": "Extract Functions",
+            "name": "Debug extract_functions.py",
             "type": "debugpy",
             "request": "launch",
             "program": "src/build/extract_functions.py",
             "console": "integratedTerminal",
             "env": {
-                "PYDEVD_DISABLE_FILE_VALIDATION": "1",
+                "PYDEVD_DISABLE_FILE_VALIDATION": "1"
             },
             "justMyCode": true,
             "args": [
-                "test.s", "test.py"
+                "test.s",
+                "test.py"
             ]
         }
     ]

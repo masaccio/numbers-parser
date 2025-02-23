@@ -13,6 +13,7 @@ with warnings.catch_warnings():
     from numbers_parser.constants import *  # noqa: F403
     from numbers_parser.document import *  # noqa: F403
     from numbers_parser.exceptions import *  # noqa: F403
+    from numbers_parser.xrefs import *  # noqa: F403
 
 __version__ = importlib.metadata.version("numbers-parser")
 

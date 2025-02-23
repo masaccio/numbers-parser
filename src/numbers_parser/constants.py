@@ -12,16 +12,16 @@ except ImportError:  # pragma: nocover
     from importlib_resources import files
 
 __all__ = [
-    "CellType",
-    "PaddingType",
     "CellPadding",
+    "CellType",
+    "ControlFormattingType",
     "DurationStyle",
     "DurationUnits",
     "FormatType",
     "FormattingType",
-    "NegativeNumberStyle",
     "FractionAccuracy",
-    "ControlFormattingType",
+    "NegativeNumberStyle",
+    "PaddingType",
 ]
 
 DEFAULT_DOCUMENT = files("numbers_parser") / "data" / "empty.numbers"
@@ -51,6 +51,8 @@ DEFAULT_DATETIME_FORMAT = "dd MMM YYY HH:MM"
 CHECKBOX_FALSE_VALUE = "☐"
 CHECKBOX_TRUE_VALUE = "☑"
 STAR_RATING_VALUE = "★"
+OPERATOR_PRECEDENCE = {"%": 6, "^": 5, "×": 4, "*": 4, "/": 4, "÷": 4, "+": 3, "-": 3, "&": 2}
+
 
 # Numbers limits
 MAX_TILE_SIZE = 256
@@ -69,6 +71,7 @@ EPOCH = datetime(2001, 1, 1)  # noqa: DTZ001
 SECONDS_IN_HOUR = 60 * 60
 SECONDS_IN_DAY = SECONDS_IN_HOUR * 24
 SECONDS_IN_WEEK = SECONDS_IN_DAY * 7
+DECIMAL128_BIAS = 0x1820
 
 # File format enumerations
 DECIMAL_PLACES_AUTO = 253

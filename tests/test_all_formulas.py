@@ -24,10 +24,8 @@ def compare_table_functions(sheet_name, filename):
         formula_ref_value = row[2].value
         check.is_not_none(row[1].formula, f"exists@{i}")
         check.equal(row[1].formula, formula_text, f"formula@{i}")
-        if (
-            isinstance(row[1], ErrorCell)
-            or isinstance(row[1], TextCell)
-            and formula_ref_value is None
+        if isinstance(row[1], ErrorCell) or (
+            isinstance(row[1], TextCell) and formula_ref_value is None
         ):
             pass
         else:

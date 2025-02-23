@@ -4,6 +4,7 @@ import re
 from array import array
 from collections import defaultdict
 from hashlib import sha1
+from itertools import chain
 from math import floor
 from pathlib import Path
 from struct import pack
@@ -29,8 +30,6 @@ from numbers_parser.cell import (
     PaddingType,
     Style,
     VerticalJustification,
-    xl_col_to_name,
-    xl_rowcol_to_cell,
 )
 from numbers_parser.constants import (
     ALLOWED_FORMATTING_PARAMETERS,
@@ -74,7 +73,8 @@ from numbers_parser.generated.TSWPArchives_pb2 import (
 )
 from numbers_parser.iwafile import find_extension
 from numbers_parser.numbers_cache import Cacheable, cache
-from numbers_parser.numbers_uuid import NumbersUUID
+from numbers_parser.numbers_uuid import NumbersUUID, uuid_to_hex
+from numbers_parser.xrefs import CellRange, ScopedNameRefCache
 
 
 def create_font_name_map(font_map: dict) -> dict:
@@ -224,6 +224,7 @@ class _NumbersModel(Cacheable):
         self._table_styles = DataLists(self, "styleTable", "reference")
         self._table_strings = DataLists(self, "stringTable", "string")
         self._control_specs = DataLists(self, "control_cell_spec_table", "cell_spec")
+        self._formulas = DataLists(self, "formula_table", "formula")
         self._table_data = {}
         self._styles = None
         self._images = {}
@@ -236,6 +237,8 @@ class _NumbersModel(Cacheable):
             "bottom": defaultdict(),
             "left": defaultdict(),
         }
+        self.name_ref_cache = ScopedNameRefCache(self)
+        self.calculate_table_uuid_map()
 
     def save(self, filepath: Path, package: bool) -> None:
         self.objects.save(filepath, package)
@@ -258,13 +261,16 @@ class _NumbersModel(Cacheable):
         self._table_data[table_id] = data
 
     # Don't cache: new tables can be added at runtime
-    def table_ids(self, sheet_id: int) -> list:
-        """Return a list of table IDs for a given sheet ID."""
+    def table_ids(self, sheet_id: int | None = None) -> list:
+        """
+        Return a list of table IDs for a given sheet ID or all table
+        IDs id the sheet ID is None
+        """
         table_info_ids = self.find_refs("TableInfoArchive")
         return [
             self.objects[t_id].tableModel.identifier
             for t_id in table_info_ids
-            if self.objects[t_id].super.parent.identifier == sheet_id
+            if (sheet_id is None or self.objects[t_id].super.parent.identifier == sheet_id)
         ]
 
     # Don't cache: new tables can be added at runtime
@@ -282,14 +288,7 @@ class _NumbersModel(Cacheable):
         # The base data store contains a reference to rowHeaders.buckets
         # which is an ordered list that matches the storage buffers, but
         # identifies which row a storage buffer belongs to (empty rows have
-        # no storage buffers). Each bucket is:
-        #
-        #  {
-        #      "hiding_state": 0,
-        #      "index": 0,
-        #      "number_of_cells": 3,
-        #      "size": 0.0
-        #  },
+        # no storage buffers).
         row_bucket_map = {i: None for i in range(self.objects[table_id].number_of_rows)}
         bds = self.objects[table_id].base_data_store
         bucket_ids = [x.identifier for x in bds.rowHeaders.buckets]
@@ -315,6 +314,13 @@ class _NumbersModel(Cacheable):
             return self.objects[table_id].table_name
         self.objects[table_id].table_name = value
         return None
+
+    def table_names(self):
+        return list(
+            chain.from_iterable(
+                [[self.table_name(tid) for tid in self.table_ids(sid)] for sid in self.sheet_ids()],
+            ),
+        )
 
     def table_name_enabled(self, table_id: int, enabled: bool | None = None):
         if enabled is not None:
@@ -751,51 +757,77 @@ class _NumbersModel(Cacheable):
             owner_id_map[e.internal_owner_id] = NumbersUUID(e.owner_id).hex
         return owner_id_map
 
+    def calculate_table_uuid_map(self) -> None:
+        # Each Table Model has a UUID which is used in references to the table. See
+        # Numbers.md#uuid-mapping for more details.
+
+        # For haunted owner archive types, map formula_owner_uids to their base_owner_uids
+        haunted_owner_ids = [
+            obj_id
+            for obj_id in self.find_refs("FormulaOwnerDependenciesArchive")
+            if self.objects[obj_id].owner_kind == OwnerKind.HAUNTED_OWNER
+        ]
+        if len(haunted_owner_ids) == 0:
+            # Some older documents (see issue-18) do not use FormulaOwnerDependenciesArchive
+            self._table_id_to_base_id = {}
+            return
+
+        formula_owner_to_base_owner_map = {
+            uuid_to_hex(self.objects[obj_id].formula_owner_uid): uuid_to_hex(
+                self.objects[obj_id].base_owner_uid,
+            )
+            for obj_id in haunted_owner_ids
+        }
+
+        # Map table IDs to the base_owner_uids of the formula owners that match
+        # the table model's haunted owner
+        self._table_id_to_base_id = {
+            table_id: formula_owner_to_base_owner_map[
+                uuid_to_hex(self.objects[table_id].haunted_owner.owner_uid)
+            ]
+            for table_id in self.table_ids()
+        }
+        self._table_base_id_to_formula_owner_id = {
+            uuid_to_hex(self.objects[obj_id].base_owner_uid): obj_id for obj_id in haunted_owner_ids
+        }
+
     @cache()
     def table_base_id(self, table_id: int) -> int:
         """ "Finds the UUID of a table."""
-        # Look for a TSCE.FormulaOwnerDependenciesArchive objects with the following at the
-        # root level of the protobuf:
-        #
-        #     "base_owner_uid": "6a4a5281-7b06-f5a1-904b-7f9ec784b368"",
-        #     "formula_owner_uid": "6a4a5281-7b06-f5a1-904b-7f9ec784b36d"
-        #
-        # The Table UUID is the TSCE.FormulaOwnerDependenciesArchive whose formula_owner_uid
-        # matches the UUID of the haunted_owner of the Table:
-        #
-        #    "haunted_owner": {
-        #        "owner_uid": "6a4a5281-7b06-f5a1-904b-7f9ec784b368""
-        #    }
-        haunted_owner = NumbersUUID(self.objects[table_id].haunted_owner.owner_uid).hex
-        formula_owner_ids = self.find_refs("FormulaOwnerDependenciesArchive")
-        for dependency_id in formula_owner_ids:  # pragma: no branch
-            obj = self.objects[dependency_id]
-            # if obj.owner_kind == OwnerKind.HAUNTED_OWNER:
-            if obj.HasField("base_owner_uid") and obj.HasField(
-                "formula_owner_uid",
-            ):  # pragma: no branch
-                base_owner_uid = NumbersUUID(obj.base_owner_uid).hex
-                formula_owner_uid = NumbersUUID(obj.formula_owner_uid).hex
-                if formula_owner_uid == haunted_owner:
-                    return base_owner_uid
-        return None
+        # Table can be empty if the document does not use FormulaOwnerDependenciesArchive
+        return self._table_id_to_base_id.get(table_id)
 
-    @cache()
-    def formula_cell_ranges(self, table_id: int) -> list:
-        """Exract all the formula cell ranges for the Table."""
-        # https://github.com/masaccio/numbers-parser/blob/main/doc/Numbers.md#formula-ranges
+    def get_formula_owner(self, table_id: int) -> object:
+        table_uuid = self.table_base_id(table_id)
+        return self.objects[self._table_base_id_to_formula_owner_id[table_uuid]]
+
+    def add_formula_dependency(self, row: int, col: int, table_id: int) -> None:
         calc_engine = self.calc_engine()
+        calc_engine.dependency_tracker.number_of_formulas += 1
+        internal_formula_id = calc_engine.dependency_tracker.number_of_formulas
 
-        table_base_id = self.table_base_id(table_id)
-        cell_records = []
-        for finfo in calc_engine.dependency_tracker.formula_owner_info:
-            if finfo.HasField("cell_dependencies"):  # pragma: no branch
-                formula_owner_id = NumbersUUID(finfo.formula_owner_id).hex
-                if formula_owner_id == table_base_id:
-                    for cell_record in finfo.cell_dependencies.cell_record:
-                        if cell_record.contains_a_formula:  # pragma: no branch
-                            cell_records.append((cell_record.row, cell_record.column))
-        return cell_records
+        formula_owner = self.get_formula_owner(table_id)
+        formula_owner.cell_dependencies.cell_record.append(
+            TSCEArchives.CellRecordExpandedArchive(column=col, row=row),
+        )
+        if len(formula_owner.tiled_cell_dependencies.cell_record_tiles) == 0:
+            cell_record_id, cell_record = self.objects.create_object_from_dict(
+                "CalculationEngine",
+                {
+                    "internal_owner_id": internal_formula_id,
+                    "tile_column_begin": 0,
+                    "tile_row_begin": 0,
+                },
+                TSCEArchives.CellRecordTileArchive,
+            )
+            formula_owner.tiled_cell_dependencies.cell_record_tiles.append(
+                TSPMessages.Reference(identifier=cell_record_id),
+            )
+        else:
+            cell_record_id = formula_owner.tiled_cell_dependencies.cell_record_tiles[0].identifier
+            cell_record = self.objects[cell_record_id]
+
+        cell_record.cell_records.append(formula_owner.cell_dependencies.cell_record[-1])
 
     @cache(num_args=0)
     def calc_engine_id(self):
@@ -815,8 +847,8 @@ class _NumbersModel(Cacheable):
 
     @cache()
     def calculate_merge_cell_ranges(self, table_id) -> None:
-        """Exract all the merge cell ranges for the Table."""
-        # https://github.com/masaccio/numbers-parser/blob/main/doc/Numbers.md#merge-ranges
+        """Extract all the merge cell ranges for the Table."""
+        # See details in Numbers.md#merge-ranges.
         owner_id_map = self.owner_id_map()
         table_base_id = self.table_base_id(table_id)
 
@@ -879,6 +911,17 @@ class _NumbersModel(Cacheable):
                 return sheet_id
         return None
 
+    def table_name_to_uuid(self, sheet_name: str, table_name: str) -> str:
+        table_ids = [tid for tid in self.table_ids() if table_name == self.table_name(tid)]
+        if len(table_ids) == 1:
+            return self.table_base_id(table_ids[0])
+
+        sheet_name_to_id = {self.sheet_name(x): x for x in self.sheet_ids()}
+        sheet_id = sheet_name_to_id[sheet_name]
+        table_name_to_id = {self.table_name(x): x for x in self.table_ids(sheet_id)}
+        table_id = table_name_to_id[table_name]
+        return self.table_base_id(table_id)
+
     @cache()
     def table_uuids_to_id(self, table_uuid) -> int | None:
         for sheet_id in self.sheet_ids():  # pragma: no branch   # noqa: RET503
@@ -886,66 +929,103 @@ class _NumbersModel(Cacheable):
                 if table_uuid == self.table_base_id(table_id):
                     return table_id
 
-    def node_to_ref(self, this_table_id: int, row: int, col: int, node):
+    def node_to_ref(self, table_id: int, row: int, col: int, node):
+        def resolve_range(is_absolute, absolute_list, relative_list, offset, max_val):
+            if is_absolute:
+                return absolute_list[0].range_begin
+            if not relative_list and absolute_list[0].range_begin == max_val:
+                return max_val
+            return offset + relative_list[0].range_begin
+
+        def resolve_range_end(is_absolute, absolute_list, relative_list, offset, max_val):
+            if is_absolute:
+                return range_end(absolute_list[0])
+            if not relative_list and range_end(absolute_list[0]) == max_val:
+                return max_val
+            return offset + range_end(relative_list[0])
+
         if node.HasField("AST_cross_table_reference_extra_info"):
             table_uuid = NumbersUUID(node.AST_cross_table_reference_extra_info.table_id).hex
-            other_table_id = self.table_uuids_to_id(table_uuid)
-            other_table_name = self.table_name(other_table_id)
+            to_table_id = self.table_uuids_to_id(table_uuid)
         else:
-            other_table_id = None
-            other_table_name = None
-
-        if other_table_id is not None:
-            this_sheet_id = self.table_id_to_sheet_id(this_table_id)
-            other_sheet_id = self.table_id_to_sheet_id(other_table_id)
-            if this_sheet_id != other_sheet_id:
-                other_sheet_name = self.sheet_name(other_sheet_id)
-                other_table_name = f"{other_sheet_name}::" + other_table_name
+            to_table_id = None
 
         if node.HasField("AST_colon_tract"):
-            return self.tract_to_row_col_ref(node, other_table_name, row, col)
+            row_begin = resolve_range(
+                node.AST_sticky_bits.begin_row_is_absolute,
+                node.AST_colon_tract.absolute_row,
+                node.AST_colon_tract.relative_row,
+                row,
+                0x7FFFFFFF,
+            )
+
+            row_end = resolve_range_end(
+                node.AST_sticky_bits.end_row_is_absolute,
+                node.AST_colon_tract.absolute_row,
+                node.AST_colon_tract.relative_row,
+                row,
+                0x7FFFFFFF,
+            )
+
+            col_begin = resolve_range(
+                node.AST_sticky_bits.begin_column_is_absolute,
+                node.AST_colon_tract.absolute_column,
+                node.AST_colon_tract.relative_column,
+                col,
+                0x7FFF,
+            )
+
+            col_end = resolve_range_end(
+                node.AST_sticky_bits.end_column_is_absolute,
+                node.AST_colon_tract.absolute_column,
+                node.AST_colon_tract.relative_column,
+                col,
+                0x7FFF,
+            )
+
+            return CellRange(
+                model=self,
+                row_start=None if row_begin == 0x7FFFFFFF else row_begin,
+                row_end=None if row_end == 0x7FFFFFFF else row_end,
+                col_start=None if col_begin == 0x7FFF else col_begin,
+                col_end=None if col_end == 0x7FFF else col_end,
+                row_start_is_abs=node.AST_sticky_bits.begin_row_is_absolute,
+                row_end_is_abs=node.AST_sticky_bits.end_row_is_absolute,
+                col_start_is_abs=node.AST_sticky_bits.begin_column_is_absolute,
+                col_end_is_abs=node.AST_sticky_bits.end_column_is_absolute,
+                from_table_id=table_id,
+                to_table_id=to_table_id,
+            )
+
+        row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
+        col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
         if node.HasField("AST_row") and not node.HasField("AST_column"):
-            return node_to_row_ref(node, other_table_name, row)
+            return CellRange(
+                model=self,
+                row_start=row,
+                row_start_is_abs=node.AST_row.absolute,
+                from_table_id=table_id,
+                to_table_id=to_table_id,
+            )
+
         if node.HasField("AST_column") and not node.HasField("AST_row"):
-            return node_to_col_ref(node, other_table_name, col)
-        return node_to_row_col_ref(node, other_table_name, row, col)
+            return CellRange(
+                model=self,
+                col_start=col,
+                col_start_is_abs=node.AST_column.absolute,
+                from_table_id=table_id,
+                to_table_id=to_table_id,
+            )
 
-    def tract_to_row_col_ref(self, node: object, table_name: str, row: int, col: int) -> str:
-        if node.AST_sticky_bits.begin_row_is_absolute:
-            row_begin = node.AST_colon_tract.absolute_row[0].range_begin
-        else:
-            row_begin = row + node.AST_colon_tract.relative_row[0].range_begin
-
-        if node.AST_sticky_bits.end_row_is_absolute:
-            row_end = range_end(node.AST_colon_tract.absolute_row[0])
-        else:
-            row_end = row + range_end(node.AST_colon_tract.relative_row[0])
-
-        if node.AST_sticky_bits.begin_column_is_absolute:
-            col_begin = node.AST_colon_tract.absolute_column[0].range_begin
-        else:
-            col_begin = col + node.AST_colon_tract.relative_column[0].range_begin
-
-        if node.AST_sticky_bits.end_column_is_absolute:
-            col_end = range_end(node.AST_colon_tract.absolute_column[0])
-        else:
-            col_end = col + range_end(node.AST_colon_tract.relative_column[0])
-
-        begin_ref = xl_rowcol_to_cell(
-            row_begin,
-            col_begin,
-            row_abs=node.AST_sticky_bits.begin_row_is_absolute,
-            col_abs=node.AST_sticky_bits.begin_column_is_absolute,
+        return CellRange(
+            model=self,
+            row_start=row,
+            col_start=col,
+            row_start_is_abs=node.AST_row.absolute,
+            col_start_is_abs=node.AST_column.absolute,
+            from_table_id=table_id,
+            to_table_id=to_table_id,
         )
-        end_ref = xl_rowcol_to_cell(
-            row_end,
-            col_end,
-            row_abs=node.AST_sticky_bits.end_row_is_absolute,
-            col_abs=node.AST_sticky_bits.end_column_is_absolute,
-        )
-        if table_name is not None:
-            return f"{table_name}::{begin_ref}:{end_ref}"
-        return f"{begin_ref}:{end_ref}"
 
     @cache()
     def formula_ast(self, table_id: int):
@@ -1480,12 +1560,6 @@ class _NumbersModel(Cacheable):
             TSPMessages.Reference(identifier=row_headers_id),
         )
 
-        self._table_data[table_model_id] = [
-            [Cell._empty_cell(table_model_id, row, col, self) for col in range(num_cols)]
-            for row in range(num_rows)
-        ]
-        self.recalculate_table_data(table_model_id, self._table_data[table_model_id])
-
         table_info_id, table_info = self.objects.create_object_from_dict(
             "CalculationEngine",
             {},
@@ -1493,6 +1567,22 @@ class _NumbersModel(Cacheable):
         )
         table_info.tableModel.MergeFrom(TSPMessages.Reference(identifier=table_model_id))
         table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
+
+        haunted_owner_uuid = self.add_formula_owner(
+            table_info_id,
+            num_rows,
+            num_cols,
+            number_of_header_rows,
+            number_of_header_columns,
+        )
+        table_model.haunted_owner.owner_uid.MergeFrom(haunted_owner_uuid.protobuf2)
+        self.calculate_table_uuid_map()
+
+        self._table_data[table_model_id] = [
+            [Cell._empty_cell(table_model_id, row, col, self) for col in range(num_cols)]
+            for row in range(num_rows)
+        ]
+        self.recalculate_table_data(table_model_id, self._table_data[table_model_id])
 
         self.add_component_reference(
             table_info_id,
@@ -1502,17 +1592,11 @@ class _NumbersModel(Cacheable):
         self.create_caption_archive(table_model_id)
         self.caption_enabled(table_model_id, False)
 
-        self.add_formula_owner(
-            table_info_id,
-            num_rows,
-            num_cols,
-            number_of_header_rows,
-            number_of_header_columns,
-        )
-
         self.objects[sheet_id].drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id),
         )
+
+        self.name_ref_cache.mark_dirty()
         return table_model_id
 
     def add_formula_owner(
@@ -1522,7 +1606,7 @@ class _NumbersModel(Cacheable):
         num_cols: int,
         number_of_header_rows: int,
         number_of_header_columns: int,
-    ) -> None:
+    ) -> NumbersUUID:
         """
         Create a FormulaOwnerDependenciesArchive that references a TableInfoArchive
         so that cross-references to cells in this table will work.
@@ -1531,49 +1615,43 @@ class _NumbersModel(Cacheable):
         calc_engine = self.calc_engine()
         owner_id_map = calc_engine.dependency_tracker.owner_id_map.map_entry
         next_owner_id = max([x.internal_owner_id for x in owner_id_map]) + 1
-        formula_deps_id, formula_deps = self.objects.create_object_from_dict(
+        volatile_dependencies = {
+            "volatile_time_cells": {},
+            "volatile_random_cells": {},
+            "volatile_locale_cells": {},
+            "volatile_sheet_table_name_cells": {},
+            "volatile_remote_data_cells": {},
+            "volatile_geometry_cell_refs": {},
+        }
+        total_range_for_table = {
+            "top_left_column": 0,
+            "top_left_row": 0,
+            "bottom_right_column": num_cols - 1,
+            "bottom_right_row": num_cols - 1,
+        }
+        body_range_for_table = {
+            "top_left_column": number_of_header_columns,
+            "top_left_row": number_of_header_rows,
+            "bottom_right_column": num_cols - 1,
+            "bottom_right_row": num_cols - 1,
+        }
+
+        formula_deps_id, _ = self.objects.create_object_from_dict(
             "CalculationEngine",
             {
                 "formula_owner_uid": formula_owner_uuid.dict2,
                 "internal_formula_owner_id": next_owner_id,
-                "owner_kind": 1,
+                "owner_kind": OwnerKind.TABLE_MODEL,
                 "cell_dependencies": {},
                 "range_dependencies": {},
-                "volatile_dependencies": {
-                    "volatile_time_cells": {},
-                    "volatile_random_cells": {},
-                    "volatile_locale_cells": {},
-                    "volatile_sheet_table_name_cells": {},
-                    "volatile_remote_data_cells": {},
-                    "volatile_geometry_cell_refs": {},
-                },
+                "volatile_dependencies": volatile_dependencies,
                 "spanning_column_dependencies": {
-                    "total_range_for_table": {
-                        "top_left_column": 0,
-                        "top_left_row": 0,
-                        "bottom_right_column": num_cols - 1,
-                        "bottom_right_row": num_cols - 1,
-                    },
-                    "body_range_for_table": {
-                        "top_left_column": number_of_header_columns,
-                        "top_left_row": number_of_header_rows,
-                        "bottom_right_column": num_cols - 1,
-                        "bottom_right_row": num_cols - 1,
-                    },
+                    "total_range_for_table": total_range_for_table,
+                    "body_range_for_table": body_range_for_table,
                 },
                 "spanning_row_dependencies": {
-                    "total_range_for_table": {
-                        "top_left_column": 0,
-                        "top_left_row": 0,
-                        "bottom_right_column": num_cols - 1,
-                        "bottom_right_row": num_cols - 1,
-                    },
-                    "body_range_for_table": {
-                        "top_left_column": number_of_header_columns,
-                        "top_left_row": number_of_header_rows,
-                        "bottom_right_column": num_cols - 1,
-                        "bottom_right_row": num_cols - 1,
-                    },
+                    "total_range_for_table": total_range_for_table,
+                    "body_range_for_table": body_range_for_table,
                 },
                 "whole_owner_dependencies": {"dependent_cells": {}},
                 "cell_errors": {},
@@ -1593,6 +1671,52 @@ class _NumbersModel(Cacheable):
                 owner_id=formula_owner_uuid.protobuf4,
             ),
         )
+
+        # See Numbers.md#uuid-mapping for more details on mapping table model
+        # UUID to the formula owner.
+        formula_owner_uuid = NumbersUUID()
+        base_owner_uuid = NumbersUUID()
+        next_owner_id += 1
+        null_range_ref = {
+            "top_left_column": 0x7FFF,
+            "top_left_row": 0x7FFFFFFF,
+            "bottom_right_column": 0x7FFF,
+            "bottom_right_row": 0x7FFFFFFF,
+        }
+        spanning_depdendencies = {
+            "total_range_for_table": null_range_ref,
+            "body_range_for_table": null_range_ref,
+        }
+        formula_deps_id, formula_deps = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {
+                "formula_owner_uid": formula_owner_uuid.dict2,
+                "internal_formula_owner_id": next_owner_id,
+                "owner_kind": OwnerKind.HAUNTED_OWNER,
+                "cell_dependencies": {},
+                "range_dependencies": {},
+                "volatile_dependencies": volatile_dependencies,
+                "spanning_column_dependencies": spanning_depdendencies,
+                "spanning_row_dependencies": spanning_depdendencies,
+                "whole_owner_dependencies": {"dependent_cells": {}},
+                "cell_errors": {},
+                "base_owner_uid": base_owner_uuid.dict2,
+                "tiled_cell_dependencies": {},
+                "uuid_references": {},
+                "tiled_range_dependencies": {},
+            },
+            TSCEArchives.FormulaOwnerDependenciesArchive,
+        )
+        calc_engine.dependency_tracker.formula_owner_dependencies.append(
+            TSPMessages.Reference(identifier=formula_deps_id),
+        )
+        owner_id_map.append(
+            TSCEArchives.OwnerIDMapArchive.OwnerIDMapArchiveEntry(
+                internal_owner_id=next_owner_id,
+                owner_id=formula_owner_uuid.protobuf4,
+            ),
+        )
+        return formula_owner_uuid
 
     def add_sheet(self, sheet_name: str) -> int:
         """Add a new sheet with a copy of a table from another sheet."""
@@ -2446,39 +2570,6 @@ def formatted_number(number_type, index):
     bullet_char += BULLET_SUFFIXES[number_type]
 
     return bullet_char
-
-
-def node_to_col_ref(node: object, table_name: str, col: int) -> str:
-    col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
-
-    col_name = xl_col_to_name(col, node.AST_column.absolute)
-    if table_name is not None:
-        return f"{table_name}::{col_name}"
-    return col_name
-
-
-def node_to_row_ref(node: object, table_name: str, row: int) -> str:
-    row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
-
-    row_name = f"${row + 1}" if node.AST_row.absolute else f"{row + 1}"
-    if table_name is not None:
-        return f"{table_name}::{row_name}:{row_name}"
-    return f"{row_name}:{row_name}"
-
-
-def node_to_row_col_ref(node: object, table_name: str, row: int, col: int) -> str:
-    row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
-    col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
-
-    ref = xl_rowcol_to_cell(
-        row,
-        col,
-        row_abs=node.AST_row.absolute,
-        col_abs=node.AST_column.absolute,
-    )
-    if table_name is not None:
-        return f"{table_name}::{ref}"
-    return ref
 
 
 def get_storage_buffers_for_row(

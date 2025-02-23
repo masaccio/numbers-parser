@@ -12,7 +12,7 @@ name = "numbers-parser"
 packages = [{include = "numbers_parser", from = "src"}]
 readme = "README.md"
 repository = "https://github.com/masaccio/numbers-parser"
-version = "4.14.4"
+version = "4.15.0"
 
 [tool.poetry.scripts]
 cat-numbers = "numbers_parser._cat_numbers:main"
@@ -44,7 +44,6 @@ tox = "^4.11.4"
 python-magic = ">=0.4"
 tqdm = ">=4.66"
 colorama = "^0.4.6"
-roman = "^4.2"
 pympler = "^1.1"
 
 [tool.poetry.group.docs]
@@ -54,7 +53,7 @@ optional = true
 sphinx = ">= 7.3"
 enum-tools = ">=0.11"
 sphinx-toolbox = ">=3.5"
-sphinx-nefertiti = ">=0.3.3"
+sphinx-nefertiti = ">=0.7"
 sphinx-markdown-builder = ">=0.6"
 sphinx-copybutton = ">=0.5"
 
@@ -115,7 +114,6 @@ exclude = [
 ]
 fix = true
 lint.ignore = [
-  # "PLR2004", # Allow constant values
   "T201", # Allow print()
   # To fix:
   "ANN001", #Missing type annotation
@@ -144,7 +142,7 @@ lint.ignore = [
   "D401", #First line of docstring should be in imperative mood
   "D415", #First line should end with a period, question mark, or exclamation point
   "E501", #Line too long
-  "ERA001", #Found commented-out code
+  "ERA001", # Remove commented out code
   "FBT001", #Boolean-typed positional argument in function definition
   "FBT002", #Boolean default positional argument in function definition
   "FBT003", #Boolean positional value in function call

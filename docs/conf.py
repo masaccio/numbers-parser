@@ -42,16 +42,23 @@ html_theme_options = {
     "repository_url": GITHUB,
     "repository_name": "masaccio/numbers-parser",
     "current_version": _get_version(),
-    "footer_links": ",".join(
-        [
-            f"Documentation|{PAGES}",
-            f"Package|{GITHUB}",
-            f"Repository|{GITHUB}",
-            f"Issues|{GITHUB}/issues",
-        ],
-    ),
-    # "show_colorset_choices": True,
+    "footer_links": [
+        {
+            "text": "Documentation",
+            "link": f"{PAGES}",
+        },
+        {
+            "text": "Repository",
+            "link": f"{GITHUB}",
+        },
+        {
+            "text": "Issues",
+            "link": f"{GITHUB}/issues",
+        },
+    ],
+    "show_colorset_choices": True,
 }
+
 
 # sphinx_copybutton options
 copybutton_prompt_text = ">>> "

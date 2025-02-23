@@ -22,6 +22,7 @@ from numbers_parser.constants import (
     CURRENCY_CELL_TYPE,
     CUSTOM_TEXT_PLACEHOLDER,
     DATETIME_FIELD_MAP,
+    DECIMAL128_BIAS,
     DECIMAL_PLACES_AUTO,
     DEFAULT_ALIGNMENT,
     DEFAULT_BORDER_COLOR,
@@ -55,6 +56,7 @@ from numbers_parser.constants import (
 )
 from numbers_parser.currencies import CURRENCIES, CURRENCY_SYMBOLS
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
+from numbers_parser.formula import Formula
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
@@ -62,12 +64,14 @@ from numbers_parser.generated.TSWPArchives_pb2 import (
 )
 from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID
+from numbers_parser.xrefs import xl_range
 
 logger = logging.getLogger(numbers_parser_name)
 debug = logger.debug
 
 
 __all__ = [
+    "RGB",
     "Alignment",
     "BackgroundImage",
     "BoolCell",
@@ -88,14 +92,9 @@ __all__ = [
     "MergedCell",
     "NumberCell",
     "RichTextCell",
-    "RGB",
     "Style",
     "TextCell",
     "VerticalJustification",
-    "xl_cell_to_rowcol",
-    "xl_col_to_name",
-    "xl_range",
-    "xl_rowcol_to_cell",
 ]
 
 
@@ -562,8 +561,6 @@ class CellStorageFlags:
     _rich_id: int = None
     _cell_style_id: int = None
     _text_style_id: int = None
-    # _cond_style_id: int = None
-    # _cond_rule_style_id: int = None
     _formula_id: int = None
     _control_id: int = None
     _formula_error_id: int = None
@@ -574,8 +571,6 @@ class CellStorageFlags:
     _duration_format_id: int = None
     _text_format_id: int = None
     _bool_format_id: int = None
-    # _comment_id: int = None
-    # _import_warning_id: int = None
 
     def __str__(self) -> str:
         fields = [
@@ -599,6 +594,7 @@ class Cell(CellStorageFlags, Cacheable):
         self.row = row
         self.col = col
         self._is_bulleted = False
+        self._formula_id = None
         self._storage = None
         self._style = None
         self._d128 = None
@@ -641,11 +637,9 @@ class Cell(CellStorageFlags, Cacheable):
     @property
     def is_formula(self) -> bool:
         """bool: ``True`` if the cell contains a formula."""
-        table_formulas = self._model.table_formulas(self._table_id)
-        return table_formulas.is_formula(self.row, self.col)
+        return self._formula_id is not None
 
     @property
-    @cache(num_args=0)
     def formula(self) -> str:
         """
         str: The formula in a cell.
@@ -665,6 +659,17 @@ class Cell(CellStorageFlags, Cacheable):
             table_formulas = self._model.table_formulas(self._table_id)
             return table_formulas.formula(self._formula_id, self.row, self.col)
         return None
+
+    @formula.setter
+    def formula(self, value: str) -> None:
+        self._formula_id = Formula.from_str(
+            self._model,
+            self._table_id,
+            self.row,
+            self.col,
+            value,
+        )
+        self._model.add_formula_dependency(self.row, self.col, self._table_id)
 
     @property
     def is_bulleted(self) -> bool:
@@ -740,7 +745,7 @@ class Cell(CellStorageFlags, Cacheable):
             or self._bool_format_id is not None
         ):
             return self._custom_format()
-        return str(self.value)
+        return str(self.value).upper() if isinstance(self.value, bool) else str(self.value)
 
     @property
     def style(self) -> Style | None:
@@ -872,20 +877,16 @@ class Cell(CellStorageFlags, Cacheable):
             storage_flags._text_style_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
         if flags & 0x80:
-            # storage_flags._cond_style_id = unpack("<i", buffer[offset : offset + 4])[0]
+            # cond_style_id skipped
             offset += 4
-        # if flags & 0x100:
-        #     storage_flags._cond_rule_style_id = unpack("<i", buffer[offset : offset + 4])[0]
-        #     offset += 4
+        # Skip flag 0x100 (cond_rule_style_id)
         if flags & 0x200:
             storage_flags._formula_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
         if flags & 0x400:
             storage_flags._control_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
-        # if flags & 0x800:
-        #     storage_flags._formula_error_id = unpack("<i", buffer[offset : offset + 4])[0]
-        #     offset += 4
+        # Skip flag 0x800 (formula_error_id)
         if flags & 0x1000:
             storage_flags._suggest_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
@@ -909,12 +910,7 @@ class Cell(CellStorageFlags, Cacheable):
         if flags & 0x40000:
             storage_flags._bool_format_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
-        # if flags & 0x80000:
-        #     cstorage_flags._omment_id = unpack("<i", buffer[offset : offset + 4])[0]
-        #     offset += 4
-        # if flags & 0x100000:
-        #     storage_flags._import_warning_id = unpack("<i", buffer[offset : offset + 4])[0]
-        #     offset += 4
+        # Skip 0x80000 (comment_id) and 0x100000 (import_warning_id)
 
         cell_type = buffer[1]
         if cell_type == TSTArchives.genericCellType:
@@ -1032,7 +1028,6 @@ class Cell(CellStorageFlags, Cacheable):
             flags = 4
             length += 8
             cell_type = TSTArchives.dateCellType
-            # date_delta = self._value.astimezone() - EPOCH
             if self._value.tzinfo is None:
                 date_delta = self._value - EPOCH
             else:
@@ -1104,7 +1099,6 @@ class Cell(CellStorageFlags, Cacheable):
             length += 4
             storage += pack("<i", self._num_format_id)
             storage[6] |= 1
-            # storage[6:8] = pack("<h", 1)
         if self._currency_format_id is not None:
             flags |= 0x4000
             length += 4
@@ -1560,8 +1554,8 @@ class MergedCell(Cell):
 def _pack_decimal128(value: float) -> bytearray:
     buffer = bytearray(16)
     exp = math.floor(math.log10(math.e) * math.log(abs(value))) if value != 0.0 else 0
-    exp += 0x1820 - 16
-    mantissa = abs(int(value / math.pow(10, exp - 0x1820)))
+    exp += DECIMAL128_BIAS - 16
+    mantissa = abs(int(value / math.pow(10, exp - DECIMAL128_BIAS)))
     buffer[15] |= exp >> 7
     buffer[14] |= (exp & 0x7F) << 1
     i = 0
@@ -1575,7 +1569,7 @@ def _pack_decimal128(value: float) -> bytearray:
 
 
 def _unpack_decimal128(buffer: bytearray) -> float:
-    exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - 0x1820
+    exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - DECIMAL128_BIAS
     mantissa = buffer[14] & 1
     for i in range(13, -1, -1):
         mantissa = mantissa * 256 + buffer[i]
@@ -1756,16 +1750,6 @@ def _decode_number_format(number_format, value, name):  # noqa: PLR0912
         int_pad = None
         int_width = num_integers
 
-    # value_1 = str(value).split(".")[0]
-    # value_2 = sigfig(str(value).split(".")[1], sigfig=MAX_SIGNIFICANT_DIGITS, warn=False)
-    # int_pad_space_as_zero = (
-    #     num_integers > 0
-    #     and num_decimals > 0
-    #     and int_pad == CellPadding.SPACE
-    #     and dec_pad is None
-    #     and num_integers > len(value_1)
-    #     and num_decimals > len(value_2)
-    # )
     int_pad_space_as_zero = False
 
     # Formatting integer zero:
@@ -1779,16 +1763,11 @@ def _decode_number_format(number_format, value, name):  # noqa: PLR0912
         formatted_value = "".rjust(int_width)
     elif integer == 0 and int_pad is None and dec_pad == CellPadding.SPACE:
         formatted_value = ""
-    elif (
+    elif (integer == 0 and int_pad == CellPadding.SPACE and dec_pad is not None) or (
         integer == 0
         and int_pad == CellPadding.SPACE
-        and dec_pad is not None
-        or (
-            integer == 0
-            and int_pad == CellPadding.SPACE
-            and dec_pad is None
-            and len(str(decimal)) > num_decimals
-        )
+        and dec_pad is None
+        and len(str(decimal)) > num_decimals
     ):
         formatted_value = "".rjust(int_width)
     elif int_pad_space_as_zero or int_pad == CellPadding.ZERO:
@@ -2014,159 +1993,6 @@ def _auto_units(cell_value, number_format):
         unit_smallest = max(unit_smallest, unit_largest)
 
     return unit_smallest, unit_largest
-
-
-# Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
-# Copyright (c) 2013-2021, John McNamara <jmcnamara@cpan.org>
-range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
-
-
-def xl_cell_to_rowcol(cell_str: str) -> tuple:
-    """
-    Convert a cell reference in A1 notation to a zero indexed row and column.
-
-    Parameters
-    ----------
-    cell_str:  str
-        A1 notation cell reference
-
-    Returns
-    -------
-    row, col: int, int
-        Cell row and column numbers (zero indexed).
-
-    """
-    if not cell_str:
-        return 0, 0
-
-    match = range_parts.match(cell_str)
-    if not match:
-        msg = f"invalid cell reference {cell_str}"
-        raise IndexError(msg)
-
-    col_str = match.group(2)
-    row_str = match.group(4)
-
-    # Convert base26 column string to number.
-    col = 0
-    for expn, char in enumerate(reversed(col_str)):
-        col += (ord(char) - ord("A") + 1) * (26**expn)
-
-    # Convert 1-index to zero-index
-    row = int(row_str) - 1
-    col -= 1
-
-    return row, col
-
-
-def xl_range(first_row, first_col, last_row, last_col):
-    """
-    Convert zero indexed row and col cell references to a A1:B1 range string.
-
-    Parameters
-    ----------
-    first_row: int
-        The first cell row.
-    first_col: int
-        The first cell column.
-    last_row: int
-        The last cell row.
-    last_col: int
-        The last cell column.
-
-    Returns
-    -------
-    str:
-        A1:B1 style range string.
-
-    """
-    range1 = xl_rowcol_to_cell(first_row, first_col)
-    range2 = xl_rowcol_to_cell(last_row, last_col)
-
-    if range1 == range2:
-        return range1
-    return range1 + ":" + range2
-
-
-def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
-    """
-    Convert a zero indexed row and column cell reference to a A1 style string.
-
-    Parameters
-    ----------
-    row: int
-         The cell row.
-    col: int
-        The cell column.
-    row_abs: bool
-        If ``True``, make the row absolute.
-    col_abs: bool
-        If ``True``, make the column absolute.
-
-    Returns
-    -------
-    str:
-        A1 style string.
-
-    """
-    if row < 0:
-        msg = f"row reference {row} below zero"
-        raise IndexError(msg)
-
-    if col < 0:
-        msg = f"column reference {col} below zero"
-        raise IndexError(msg)
-
-    row += 1  # Change to 1-index.
-    row_abs = "$" if row_abs else ""
-
-    col_str = xl_col_to_name(col, col_abs)
-
-    return col_str + row_abs + str(row)
-
-
-def xl_col_to_name(col, col_abs=False):
-    """
-    Convert a zero indexed column cell reference to a string.
-
-    Parameters
-    ----------
-    col: int
-        The column number (zero indexed).
-    col_abs: bool, default: False
-        If ``True``, make the column absolute.
-
-    Returns
-    -------
-        str:
-            Column in A1 notation.
-
-    """
-    if col < 0:
-        msg = f"column reference {col} below zero"
-        raise IndexError(msg)
-
-    col += 1  # Change to 1-index.
-    col_str = ""
-    col_abs = "$" if col_abs else ""
-
-    while col:
-        # Set remainder from 1 .. 26
-        remainder = col % 26
-
-        if remainder == 0:
-            remainder = 26
-
-        # Convert the remainder to a character.
-        col_letter = chr(ord("A") + remainder - 1)
-
-        # Accumulate the column letters, right to left.
-        col_str = col_letter + col_str
-
-        # Get the next order of magnitude.
-        col = int((col - 1) / 26)
-
-    return col_abs + col_str
 
 
 @dataclass()
