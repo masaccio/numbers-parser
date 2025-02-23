@@ -378,6 +378,8 @@ class Sheet:
         y: float | None = None,
         num_rows: int | None = DEFAULT_ROW_COUNT,
         num_cols: int | None = DEFAULT_COLUMN_COUNT,
+        num_header_rows: int | None = 1,
+        num_header_cols: int | None = 1,
     ) -> Table:
         """
         Add a new table to the current sheet.
@@ -410,6 +412,10 @@ class Sheet:
             The number of rows for the new table.
         num_cols: int, optional, default: 10
             The number of columns for the new table.
+        num_header_rows: int, optional, default: 1
+            The number of header rows for the new table.
+        num_header_cols: int, optional, default: 1
+            The number of header columns for the new table.
 
         Returns
         -------
@@ -422,7 +428,16 @@ class Sheet:
 
         """
         from_table_id = self._tables[-1]._table_id
-        return self._add_table(table_name, from_table_id, x, y, num_rows, num_cols)
+        return self._add_table(
+            table_name,
+            from_table_id,
+            x,
+            y,
+            num_rows,
+            num_cols,
+            num_header_rows,
+            num_header_cols,
+        )
 
     def _add_table(
         self,
@@ -432,6 +447,8 @@ class Sheet:
         y,
         num_rows,
         num_cols,
+        num_header_rows,
+        num_header_cols,
     ) -> object:
         if table_name is not None:
             if table_name in self._tables:
@@ -451,6 +468,8 @@ class Sheet:
             y,
             num_rows,
             num_cols,
+            num_header_rows,
+            num_header_cols,
         )
         self._tables.append(Table(self._model, new_table_id))
         return self._tables[-1]
@@ -966,6 +985,11 @@ class Table(Cacheable):
         self._data[row][col]._table_id = self._table_id
         self._data[row][col]._model = self._model
         self._data[row][col]._set_merge(merge_cells.get((row, col)))
+
+        if row < self._model.num_header_rows(self._table_id) or col < self._model.num_header_cols(
+            self._table_id,
+        ):
+            self._model.name_ref_cache.mark_dirty()
 
         if style is not None:
             self.set_cell_style(row, col, style)
