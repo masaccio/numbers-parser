@@ -42,7 +42,7 @@ ISSUE_10_REF = [
     1234,  # 0x42d
     1234.56,
     "123",
-    datetime(2021, 4, 3, 0, 0, 0),
+    datetime(2021, 4, 3, 0, 0, 0),  # noqa: DTZ001
     timedelta(days=4, hours=2, minutes=3),
     timedelta(days=5, hours=4, minutes=3, seconds=20),
     timedelta(hours=4, minutes=3, seconds=2, milliseconds=10),
@@ -406,7 +406,7 @@ def test_issue_69():
 
     doc = Document("tests/data/issue-69.numbers")
     table = doc.sheets[0].tables[0]
-    if version_info.minor >= 11:
+    if version_info.minor >= 11:  # noqa: YTT204
         assert table.cell(0, 0).style.bg_image.filename == "sssssss的副本.jpeg"
         assert table.cell(9, 4).style.bg_image.filename == "sssssss的副本.jpeg"
     else:
