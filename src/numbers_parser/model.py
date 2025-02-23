@@ -1595,6 +1595,8 @@ class _NumbersModel(Cacheable):
         self.objects[sheet_id].drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id),
         )
+
+        self.name_ref_cache.mark_dirty()
         return table_model_id
 
     def add_formula_owner(

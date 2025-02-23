@@ -68,9 +68,7 @@ class CellRange:
     def __post_init__(self):
         if self._table_names is None:
             self._initialize_table_data()
-        if len(self.model.name_ref_cache.row_ranges) == 0:
-            self.model.name_ref_cache.calculate_named_ranges()
-        self.name_ref_cache = self.model.name_ref_cache
+        self.model.name_ref_cache.refresh()
         self._set_sheet_ids()
 
     def _initialize_table_data(self):
@@ -87,6 +85,7 @@ class CellRange:
         self.to_sheet_id = self.model.table_id_to_sheet_id(self.to_table_id)
 
     def expand_ref(self, ref: str, is_abs: bool = False, no_prefix=False) -> str:
+        self.model.name_ref_cache.refresh()
         is_document_unique = (
             ref.scope == RefScope.DOCUMENT if isinstance(ref, ScopedNameRef) else False
         )
@@ -121,14 +120,15 @@ class CellRange:
         return f"{sheet_name}::{table_name}::{ref_str}"
 
     def __str__(self):
+        self.model.name_ref_cache.refresh()
         # Handle row-only ranges
         if self.col_start is None:
-            row_range = self.name_ref_cache.row_ranges[self.to_table_id]
+            row_range = self.model.name_ref_cache.row_ranges[self.to_table_id]
             return self._format_row_range(self.row_start, self.row_end, row_range)
 
         # Handle column-only ranges
         if self.row_start is None:
-            col_range = self.name_ref_cache.col_ranges[self.to_table_id]
+            col_range = self.model.name_ref_cache.col_ranges[self.to_table_id]
             return self._format_col_range(self.col_start, self.col_end, col_range)
 
         # Handle full cell ranges
@@ -246,7 +246,16 @@ class ScopedNameRefCache:
         self.table_name_refs = {}
         self.row_ranges = {}
         self.col_ranges = {}
-        self.table_names = model.table_names()
+        self._dirty_cache = True
+        self.table_names = []
+
+    def mark_dirty(self):
+        self._dirty_cache = True
+
+    def refresh(self):
+        if self._dirty_cache:
+            self.calculate_named_ranges()
+            self._dirty_cache = False
 
     @staticmethod
     def _exact_count(pool: list, value: int | str | bool):
@@ -384,7 +393,7 @@ class ScopedNameRefCache:
             name = name[1:-1]
 
         # Try using the name as document scope
-        if name in self.doc_name_refs:
+        if self._name_in_cell_range(name, self.doc_name_refs):
             return self._scoped_ref_to_cell_ref(self.doc_name_refs[name])
 
         # Next, try the the current sheet scope
@@ -488,6 +497,14 @@ class ScopedNameRefCache:
         raise ValueError(msg)
 
     def lookup_named_ref(self, from_table_id: int, ref: CellRange) -> tuple[CellRange]:
+        def range_error_message(ref: CellRange):
+            msg = f"{ref.name_scope_1}::" if ref.name_scope_1 else ""
+            msg += f"{ref.name_scope_2}::" if ref.name_scope_2 else ""
+            msg += ref.row_start
+            msg += f":{ref.row_end}" if ref.row_end else ""
+            return f"'{msg}' does not exist or scope is ambiguous"
+
+        self.model.name_ref_cache.refresh()
         if ref.row_start and ref.row_end:
             # Numbers will use the reduced scope of one part of a range to scope the other
             # so start:en   d in a document scope will resolve if either of the references can
@@ -509,9 +526,7 @@ class ScopedNameRefCache:
                 )
 
             if start_ref is None and end_ref is None:
-                msg = f"'{ref.name_scope_1}::{ref.name_scope_2}::{ref.row_start}:{ref.row_end}'"
-                msg += "does not exist or scope is ambiguous"
-                raise ValueError(msg)
+                raise ValueError(range_error_message(ref))
 
             if start_ref is None:
                 row_start = [
@@ -525,9 +540,7 @@ class ScopedNameRefCache:
                     if v is not None and v.name == ref.row_start
                 ]
                 if len(row_start) == 0 and len(col_start) == 0:
-                    msg = f"'{ref.name_scope_1}::{ref.name_scope_2}::{ref.row_start}'"
-                    msg += "does not exist or scope is ambiguous"
-                    raise ValueError(msg)
+                    raise ValueError(range_error_message(ref))
 
                 start_ref = CellRange(
                     model=self.model,
@@ -546,9 +559,7 @@ class ScopedNameRefCache:
                     if v is not None and v.name == ref.row_end
                 ]
                 if len(row_end) == 0 and len(col_end) == 0:
-                    msg = f"'{ref.name_scope_1}::{ref.name_scope_2}::{ref.col_start}'"
-                    msg += "does not exist or scope is ambiguous"
-                    raise ValueError(msg)
+                    raise ValueError(range_error_message(ref))
                 end_ref = CellRange(
                     model=self.model,
                     to_table_id=start_ref.to_table_id,
@@ -578,6 +589,7 @@ class ScopedNameRefCache:
         """
         self.doc_name_refs = defaultdict(int)
         self.sheet_name_refs = {}
+        self.table_names = self.model.table_names()
         self._calculate_table_name_maps()
 
         self.row_ranges = {}
