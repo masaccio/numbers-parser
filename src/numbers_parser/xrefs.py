@@ -380,11 +380,16 @@ class ScopedNameRefCache:
         )
 
     @staticmethod
-    def _name_in_cell_range(name: str, cell_range: list[CellRange]) -> bool:
+    def _name_in_cell_range(name: str, cell_range: list[CellRange]) -> int:
         """Check whether the given name is found among a list of  ScopedNameRefs."""
-        return any(
-            isinstance(cell, ScopedNameRef) and cell.name == name for cell in cell_range.values()
-        )
+        match = [
+            cell.offset
+            for cell in cell_range.values()
+            if isinstance(cell, ScopedNameRef) and cell.name == name
+        ]
+        if len(match) == 0:
+            return -1
+        return match[0]
 
     def _deref_doc_scope(self, from_table_id: int, name: str) -> CellRange:
         """Try and use a name reference in the document scope or current sheet."""
@@ -393,12 +398,12 @@ class ScopedNameRefCache:
             name = name[1:-1]
 
         # Try using the name as document scope
-        if self._name_in_cell_range(name, self.doc_name_refs):
+        if self._name_in_cell_range(name, self.doc_name_refs) >= 0:
             return self._scoped_ref_to_cell_ref(self.doc_name_refs[name])
 
         # Next, try the the current sheet scope
         from_sheet_id = self.model.table_id_to_sheet_id(from_table_id)
-        if self._name_in_cell_range(name, self.sheet_name_refs[from_sheet_id]):
+        if self._name_in_cell_range(name, self.sheet_name_refs[from_sheet_id]) >= 0:
             return self._scoped_ref_to_cell_ref(self.sheet_name_refs[from_sheet_id][name])
 
         msg = f"'{name}' does not exist or scope is ambiguous"
@@ -425,13 +430,13 @@ class ScopedNameRefCache:
 
         # 2. Try resolving as a name the current sheet
         from_sheet_name = self.sheet_id_to_name[from_sheet_id]
-        if self._name_in_cell_range(name, self.sheet_name_refs[from_sheet_id]):
+        if self._name_in_cell_range(name, self.sheet_name_refs[from_sheet_id]) >= 0:
             return self._scoped_ref_to_cell_ref(self.sheet_name_refs[from_sheet_id][name])
 
         # 4. Try resolving as a name in a unique table in the document
         if name_scope in self.unique_table_name_to_id:
             to_table_id = self.unique_table_name_to_id[name_scope]
-            if self._name_in_cell_range(name, self.table_name_refs[to_table_id]):
+            if self._name_in_cell_range(name, self.table_name_refs[to_table_id]) >= 0:
                 # Name is valid in table scope and table name is document-unique
                 return self._scoped_ref_to_cell_ref(self.table_name_refs[to_table_id][name])
 
@@ -439,17 +444,17 @@ class ScopedNameRefCache:
         if name_scope in self.sheet_table_name_to_id[from_sheet_name]:
             to_table_id = self.sheet_table_name_to_id[from_sheet_name][name_scope]
             # Name is valid in a table in the current sheet
-            if self._name_in_cell_range(name, self.row_ranges[to_table_id]):
+            if (offset := self._name_in_cell_range(name, self.row_ranges[to_table_id])) >= 0:
                 return CellRange(
                     model=self.model,
                     to_table_id=to_table_id,
-                    row_start=self.row_ranges[to_table_id],
+                    row_start=offset,
                 )
-            if self._name_in_cell_range(name, self.col_ranges[to_table_id]):
+            if (offset := self._name_in_cell_range(name, self.col_ranges[to_table_id])) >= 0:
                 return CellRange(
                     model=self.model,
                     to_table_id=to_table_id,
-                    col_start=self.col_ranges[to_table_id],
+                    col_start=offset,
                 )
 
         # 5. Try resolving the name as a row or column reference
@@ -477,17 +482,17 @@ class ScopedNameRefCache:
         # Full sheet::table::name scope
         try:
             to_table_id = self.sheet_table_name_to_id[name_scope_1][name_scope_2]
-            if self._name_in_cell_range(name, self.row_ranges[to_table_id]):
+            if (offset := self._name_in_cell_range(name, self.row_ranges[to_table_id])) >= 0:
                 return CellRange(
                     model=self.model,
                     to_table_id=to_table_id,
-                    row_start=self.row_ranges[to_table_id],
+                    row_start=offset,
                 )
-            if self._name_in_cell_range(name, self.col_ranges[to_table_id]):
+            if (offset := self._name_in_cell_range(name, self.col_ranges[to_table_id])) >= 0:
                 return CellRange(
                     model=self.model,
                     to_table_id=to_table_id,
-                    col_start=self.col_ranges[to_table_id],
+                    col_start=offset,
                 )
         except KeyError:
             # Catch invalid sheet/table names and fall through
@@ -496,7 +501,7 @@ class ScopedNameRefCache:
         msg = f"'{name_scope_1}::{name_scope_2}::{name}' does not exist or scope is ambiguous"
         raise ValueError(msg)
 
-    def lookup_named_ref(self, from_table_id: int, ref: CellRange) -> tuple[CellRange]:
+    def lookup_named_ref(self, from_table_id: int, ref: CellRange) -> CellRange:
         def range_error_message(ref: CellRange):
             msg = f"{ref.name_scope_1}::" if ref.name_scope_1 else ""
             msg += f"{ref.name_scope_2}::" if ref.name_scope_2 else ""
@@ -545,7 +550,8 @@ class ScopedNameRefCache:
                 start_ref = CellRange(
                     model=self.model,
                     to_table_id=end_ref.to_table_id,
-                    row_start=row_start[0] if row_start else col_start[0],
+                    row_start=row_start[0] if row_start else None,
+                    col_start=col_start[0] if col_start else None,
                 )
             elif end_ref is None:
                 row_end = [
@@ -563,9 +569,27 @@ class ScopedNameRefCache:
                 end_ref = CellRange(
                     model=self.model,
                     to_table_id=start_ref.to_table_id,
-                    col_start=row_end[0] if row_end else col_end[0],
+                    row_start=row_end[0] if row_end else None,
+                    col_start=col_end[0] if col_end else None,
                 )
-            return (start_ref, end_ref)
+            elif start_ref.row_start is None:
+                return CellRange(
+                    model=self.model,
+                    to_table_id=start_ref.to_table_id,
+                    col_start=start_ref.col_start,
+                    col_end=end_ref.col_start,
+                )
+            elif start_ref.col_start is None:
+                return CellRange(
+                    model=self.model,
+                    to_table_id=start_ref.to_table_id,
+                    row_start=start_ref.row_start,
+                    row_end=end_ref.row_start,
+                )
+            start_ref.row_end = end_ref.row_start
+            start_ref.col_end = end_ref.col_start
+            return start_ref
+
         if ref.row_start:
             return self._deref_name(
                 from_table_id,
