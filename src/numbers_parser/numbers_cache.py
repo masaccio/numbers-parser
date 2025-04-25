@@ -11,23 +11,8 @@ class Cacheable:
 
 def cache(num_args=1):
     """
-    Decorator to memoize a class method using a precise subset of its
-    arguments. The cache is stored in the `_cache` attribute of the instance
-    ensuring that all caches are instance-specific rather than class-specific.
-
-    Args:
-        num_args (int): The number of arguments to use as the cache key. If set to 0,
-                        the method will be cached without any arguments.
-
-    Returns:
-        function: The decorated function with caching applied.
-
-    Usage:
-        @cache(num_args=2)
-        def some_method(self, arg1, arg2):
-            # Method implementation
-            pass
-
+    Decorator to memoize a class method using a precise subset of
+    its arguments.
     """
 
     def cache_decorator(func):
