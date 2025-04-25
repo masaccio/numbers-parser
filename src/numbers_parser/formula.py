@@ -605,6 +605,7 @@ NODE_FUNCTION_MAP = {
     "APPEND_WHITESPACE_NODE": None,
     "ARRAY_NODE": "array",
     "BEGIN_EMBEDDED_NODE_ARRAY": None,
+    "BEGIN_THUNK_NODE": None,
     "BOOLEAN_NODE": "boolean",
     "CELL_REFERENCE_NODE": "xref",
     "COLON_NODE": "range",
