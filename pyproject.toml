@@ -81,23 +81,23 @@ show_contexts = true
 addopts = "--cov=src/numbers_parser --cov-report=html --cov-report=term-missing:skip-covered --cov-context=test"
 
 [tool.tox]
-legacy_tox_ini = """
-[tox]
-isolated_build = true
-envlist = py39, py310, py311, py312, py313
+requires = ["tox>=4.0"]
+envlist = ["py39", "py310", "py311", "py312", "py313"]
+
 [testenv]
-deps =
-  pytest
-  pytest-check
-  pytest-console-scripts
-  pytest-cov
-  pytest-xdist
-  python-magic
-  psutil
-  roman
-commands =
-  pytest tests/ --import-mode importlib -n logical --no-cov
-"""
+deps = [
+  "pytest",
+  "pytest-check",
+  "pytest-console-scripts",
+  "pytest-cov",
+  "pytest-xdist",
+  "python-magic",
+  "pympler",
+  "colorama"
+]
+commands = [
+  "pytest tests/ --import-mode importlib -n logical --no-cov"
+]
 
 [tool.isort]
 profile = "black"
