@@ -208,6 +208,7 @@ message ImportWarningSetArchive {
   optional string original_data_format = 15;
   optional bool formula_warning_filtered_column_formula_not_copied = 16 [default = false];
   optional bool duration_format_range_changed = 17 [default = false];
+  repeated .TSCE.WarningArchive sorted_warnings = 18;
 }
 
 message CellRefImportWarningSetPairArchive {
@@ -539,6 +540,7 @@ message TableModelArchive {
   repeated uint32 pivot_value_types_by_col = 90;
   repeated uint32 pivot_date_grouping_columns = 91;
   repeated uint32 pivot_date_grouping_types = 92;
+  optional .TSCE.SpillOwnerArchive spill_owner = 93;
 }
 
 message SummaryModelArchive {
@@ -655,6 +657,7 @@ message CellMapArchive {
   repeated .TST.MergeOperationArchive merge_actions = 13;
   optional bool may_modify_formulas_in_cells = 10 [default = true];
   optional bool may_modify_values_referenced_by_formulas = 11 [default = true];
+  optional bool should_reset_spill_formulas = 12 [default = true];
 }
 
 message CellListArchive {
@@ -673,6 +676,8 @@ message ConcurrentCellMapArchive {
   optional bool may_modify_formulas_in_cells = 4 [default = true];
   optional bool may_modify_values_referenced_by_formulas = 5 [default = true];
   optional bool affects_cell_borders = 6 [default = true];
+  optional bool skip_dirtying_ranges = 7 [default = false];
+  optional bool should_reset_spill_formulas = 8 [default = true];
 }
 
 message ConcurrentCellListArchive {
@@ -994,10 +999,6 @@ message TokenAttachmentArchive {
   optional .TSP.Reference expressionNode = 2;
 }
 
-message FormulaArchive {
-  optional .TSP.Reference expressionTree = 1;
-}
-
 message ExpressionNodeArchive {
   repeated .TSP.Reference children = 1;
   optional uint64 first_index = 2 [default = 0];
@@ -1077,6 +1078,7 @@ message ReferenceNodeArchive {
   optional .TSP.UUIDCoordArchive range_bottom_right = 7;
   optional .TSCE.CategoryReferenceArchive category_ref = 8;
   optional .TSP.UUIDRectArchive uid_range_rect = 9;
+  optional bool spill_range_op_suffix = 11;
 }
 
 message DurationNodeArchive {
@@ -1098,22 +1100,15 @@ message EmptyExpressionNodeArchive {
   required .TST.ExpressionNodeArchive super = 1;
 }
 
-message LetNodeArchive {
-  required .TST.ExpressionNodeArchive super = 1;
-  optional string whitespace_after_let = 2;
-  optional string whitespace_after_identifier = 3;
-  optional string whitespace_after_equals = 4;
-  optional string whitespace_after_delimiter = 5;
-}
-
-message InNodeArchive {
-  required .TST.ExpressionNodeArchive super = 1;
-}
-
 message VariableNodeArchive {
   required .TST.ExpressionNodeArchive super = 1;
-  required string identifier = 2;
+  optional string identifier = 2;
   required uint32 symbol = 3;
+}
+
+message SpillOriginRefNodeArchive {
+  required .TST.ExpressionNodeArchive super = 1;
+  required .TSCE.CellCoordinateArchive spill_origin_coord = 2;
 }
 
 message LayoutHintArchive {

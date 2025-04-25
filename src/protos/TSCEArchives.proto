@@ -352,6 +352,29 @@ message WholeOwnerDependenciesExpandedArchive {
   optional .TSCE.InternalCellRefSetArchive dependent_cells = 1;
 }
 
+message ErrorArchive {
+  message ErrorDictionaryEntry {
+    required string error_key = 1;
+    optional string value_for_key_string = 2;
+    optional double value_for_key_number = 3;
+  }
+
+  required uint32 error_type_code = 1;
+  repeated .TSCE.ErrorArchive.ErrorDictionaryEntry error_info_dictionary = 2;
+}
+
+message WarningArchive {
+  message WarningDictionaryEntry {
+    required string warning_key = 1;
+    optional string value_for_key_string = 2;
+    optional double value_for_key_number = 3;
+  }
+
+  required uint32 warning_type = 1;
+  repeated .TSCE.WarningArchive.WarningDictionaryEntry warning_info_dictionary = 2;
+  optional .TSCE.RangeReferenceArchive range_ref = 3;
+}
+
 message CellErrorsArchive {
   enum ErrorFlavor {
     NONE = 0;
@@ -366,7 +389,24 @@ message CellErrorsArchive {
     optional .TSCE.InternalCellReferenceArchive err_due_to_cell = 3;
   }
 
+  message EnhancedErrorForCell {
+    required .TSCE.CellCoordinateArchive coordinate = 1;
+    optional .TSCE.ErrorArchive error = 2;
+    optional .TSCE.InternalCellReferenceArchive err_due_to_cell = 3;
+    repeated .TSCE.WarningArchive sorted_warnings = 4;
+  }
+
   repeated .TSCE.CellErrorsArchive.ErrorForCell errors = 1;
+  repeated .TSCE.CellErrorsArchive.EnhancedErrorForCell enhanced_errors = 2;
+}
+
+message CellSpillSizesArchive {
+  message SpillForCell {
+    required .TSCE.CellCoordinateArchive coordinate = 1;
+    required .TSCE.ColumnRowSize spill_size = 2;
+  }
+
+  repeated .TSCE.CellSpillSizesArchive.SpillForCell spills = 1;
 }
 
 message UuidReferencesArchive {
@@ -405,6 +445,7 @@ message FormulaOwnerDependenciesArchive {
   optional .TSCE.CellDependenciesTiledArchive tiled_cell_dependencies = 13;
   optional .TSCE.UuidReferencesArchive uuid_references = 14;
   optional .TSCE.RangeDependenciesTiledArchive tiled_range_dependencies = 15;
+  optional .TSCE.CellSpillSizesArchive spill_range_sizes = 16;
 }
 
 message FormulaOwnerInfoArchive {
@@ -615,21 +656,26 @@ message ASTNodeArrayArchive {
     UNKNOWN_FUNCTION_NODE = 31;
     APPEND_WHITESPACE_NODE = 32;
     PREPEND_WHITESPACE_NODE = 33;
-    BEGIN_EMBEDDED_NODE_ARRAY = 34;
+    BEGIN_THUNK_NODE = 34;
     END_THUNK_NODE = 35;
     CELL_REFERENCE_NODE = 36;
     COLON_NODE_WITH_UIDS = 45;
     REFERENCE_ERROR_WITH_UIDS = 46;
     UID_REFERENCE_NODE = 48;
     LET_BIND_NODE = 52;
-    LET_VAR_NODE = 53;
-    LET_END_SCOPE_NODE = 54;
+    VAR_NODE = 53;
+    END_SCOPE_NODE = 54;
+    LAMBDA_NODE = 55;
+    BEGIN_LAMBDA_THUNK_NODE = 56;
+    END_LAMBDA_THUNK_NODE = 57;
     LINKED_CELL_REF_NODE = 63;
     LINKED_COLUMN_REF_NODE = 64;
     LINKED_ROW_REF_NODE = 65;
     CATEGORY_REF_NODE = 66;
     COLON_TRACT_NODE = 67;
     VIEW_TRACT_REF_NODE = 68;
+    INTERSECTION_NODE = 69;
+    SPILL_RANGE_NODE = 70;
   }
   enum ASTUidTractPurpose {
     UIDS_INCLUDED = 0;
@@ -739,11 +785,11 @@ message ASTNodeArrayArchive {
     optional string AST_reference_whitespace_before_cell_address = 5;
   }
 
-  message ASTLetNodeWhitespace {
-    optional string AST_let_whitespace_after_let = 1;
-    optional string AST_let_whitespace_after_identifier = 2;
-    optional string AST_let_whitespace_after_equals = 3;
-    optional string AST_let_whitespace_after_delimiter = 4;
+  message ASTLambdaIdentsListArchive {
+    repeated string AST_identifier_string = 1;
+    optional uint32 AST_first_symbol = 2;
+    optional string AST_whitespace_before_idents = 3;
+    optional string AST_whitespace_after_idents = 4;
   }
 
   message ASTNodeArchive {
@@ -780,8 +826,8 @@ message ASTNodeArrayArchive {
     optional .TSCE.ASTNodeArrayArchive.ASTStickyBits AST_sticky_bits = 33;
     optional .TSCE.ASTNodeArrayArchive.ASTStickyBits AST_frozen_sticky_bits = 41;
     optional string AST_let_identifier = 34;
-    optional .TSCE.ASTNodeArrayArchive AST_let_e2 = 35;
-    optional .TSCE.ASTNodeArrayArchive.ASTLetNodeWhitespace AST_let_whitespace = 36;
+    optional string AST_let_whitespace = 35;
+    optional bool AST_let_is_continuation = 36 [default = false];
     optional uint32 AST_symbol = 37;
     optional .TSCE.ASTNodeArrayArchive.ASTUidTractList AST_tract_list = 38;
     optional .TSCE.ASTNodeArrayArchive.ASTCategoryReferenceArchive AST_category_ref = 39;
@@ -789,6 +835,9 @@ message ASTNodeArrayArchive {
     optional uint64 AST_number_node_decimal_low = 42;
     optional uint64 AST_number_node_decimal_high = 43;
     optional .TSCE.ASTNodeArrayArchive.ASTCategoryLevels AST_category_levels = 44;
+    optional .TSCE.ASTNodeArrayArchive.ASTLambdaIdentsListArchive AST_lambda_idents = 45;
+    optional uint32 AST_range_context = 46;
+    optional .TSCE.ASTNodeArrayArchive.ASTNodeType upgrade_node_type = 47;
   }
 
   repeated .TSCE.ASTNodeArrayArchive.ASTNodeArchive AST_node = 1;
@@ -817,6 +866,7 @@ message FormulaArchive {
 message FunctorArchive {
   required .TSCE.FormulaArchive formula = 1;
   required uint32 num_args = 2;
+  optional uint32 first_symbol = 3;
 }
 
 message FormatStructArchive {
@@ -966,6 +1016,10 @@ message MergeSourceArchive {
 }
 
 message HauntedOwnerArchive {
+  required .TSP.UUID owner_uid = 1;
+}
+
+message SpillOwnerArchive {
   required .TSP.UUID owner_uid = 1;
 }
 

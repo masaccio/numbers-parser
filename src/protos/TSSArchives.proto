@@ -65,6 +65,7 @@ message StylesheetArchive {
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_14_0 = 19;
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_14_1 = 20;
   optional .TSS.StylesheetArchive.VersionedStyles styles_for_14_2 = 21;
+  optional .TSS.StylesheetArchive.VersionedStyles styles_for_14_4 = 22;
 }
 
 message ThemeArchive {
