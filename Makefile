@@ -62,7 +62,13 @@ BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
 				  src/$(package_c)/generated/mapping.py \
 				  src/protos/TNArchives.proto
 
-bootstrap: $(BOOTSTRAP_FILES)
+bootstrap: check_identity $(BOOTSTRAP_FILES)
+
+check_identity::
+	@if [ "$(IDENTITY)" == "" ]; then \
+		echo $$(tput setaf 1)"Bootstrap: No code signing identity found."$$(tput init); \
+		exit 1; \
+	fi
 
 ENTITLEMENTS = src/build/entitlements.xml
 TMP_NUMBERS_APP = /tmp/Numbers.unsigned.app
