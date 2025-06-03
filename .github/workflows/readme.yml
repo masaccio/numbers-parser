@@ -26,7 +26,7 @@ jobs:
         run: sudo apt-get -y install libsnappy-dev
 
       - name: Install the project
-        run: uv sync --locked --all-extras --dev --grpup docs
+        run: uv sync --locked --all-extras --dev --group docs
   
       - name: Built README with Sphinx
         run: uv run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
