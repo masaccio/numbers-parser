@@ -7,25 +7,30 @@ jobs:
       OS: ubuntu-latest
       PYTHON: '3.11'
     steps:
-    - uses: actions/checkout@master
-    - name: Setup Python
-      uses: actions/setup-python@master
-      with:
-        python-version: '3.11'
-    - name: Generate coverage report
-      run: |
-        sudo apt-get -y install libsnappy-dev
-        pip install poetry
-        poetry install
-        poetry run pytest  -n logical --cov=numbers_parser --cov-report=xml
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        directory: ./coverage/reports/
-        env_vars: OS,PYTHON
-        fail_ci_if_error: true
-        files: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        verbose: true
+      - uses: actions/checkout@v4
+  
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: '3.12'
+ 
+      - name: Install libsnappy
+        run: sudo apt-get -y install libsnappy-dev
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev --group docs
+  
+      - name: Generate coverage report
+        run: uv run pytest  -n logical --cov=numbers_parser --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage/reports/
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          verbose: true
