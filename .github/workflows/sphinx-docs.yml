@@ -18,7 +18,20 @@ jobs:
       pages: write
       id-token: write
     steps:
-    - id: deployment
-      uses: sphinx-notes/pages@v3
-      with:
-        sphinx_build_options: -t HtmlDocs 
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev --group docs
+
+      - name: Build and deploy Sphinx documentation
+        uses: sphinx-notes/pages@v3
+        with:
+          sphinx_build_options: -t HtmlDocs 
+
+      # - id: deployment
+      # uses: sphinx-notes/pages@v3
+      # with:
+      #   sphinx_build_options: -t HtmlDocs 
