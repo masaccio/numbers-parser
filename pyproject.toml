@@ -1,73 +1,85 @@
-[tool.poetry]
-authors = ["Jon Connell <python@figsandfudge.com>"]
+[project]
+authors = [
+    {name = "Jon Connell", email = "python@figsandfudge.com"},
+]
+license = "MIT"
+requires-python = "<4.0,>=3.9"
+dependencies = [
+    "compact-json<2.0.0,>=1.1.3",
+    "protobuf<6.0,>=4.0",
+    "python-snappy<1.0,>=0.7",
+    "sigfig<2.0.0,>=1.3.3",
+    "setuptools>=70.0.0",
+    "importlib-resources>=6.1",
+    "enum-tools>=0.11",
+    "python-dateutil<3.0.0.0,>=2.9.0.post0",
+]
 classifiers = [
-  "Topic :: Office/Business :: Financial :: Spreadsheet",
-  "Programming Language :: Python :: 3",
-  "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial :: Spreadsheet",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
 ]
 description = "Read and write Apple Numbers spreadsheets"
-documentation = "https://github.com/masaccio/numbers-parser/blob/main/README.md"
-license = "MIT"
 name = "numbers-parser"
-packages = [{include = "numbers_parser", from = "src"}]
 readme = "README.md"
-repository = "https://github.com/masaccio/numbers-parser"
 version = "4.15.1"
 
-[tool.poetry.scripts]
+[project.urls]
+repository = "https://github.com/masaccio/numbers-parser"
+documentation = "https://github.com/masaccio/numbers-parser/blob/main/README.md"
+
+[project.scripts]
 cat-numbers = "numbers_parser._cat_numbers:main"
 unpack-numbers = "numbers_parser._unpack_numbers:main"
 csv2numbers = "numbers_parser._csv2numbers:main"
 
-[tool.poetry.dependencies]
-compact-json = "^1.1.3"
-protobuf = ">=4.0,<6.0"
-python = ">=3.9,<4.0"
-python-snappy = "^0.7"
-sigfig = "^1.3.3"
-setuptools = ">=70.0.0"
-importlib-resources = ">=6.1"
-enum-tools = ">=0.11"
-python-dateutil = "^2.9.0.post0"
-
-[tool.poetry.group.dev.dependencies]
-gprof2dot = "^2022.7.29"
-line-profiler = "^4.0.3"
-mock = ">=5.1.0"
-pytest = ">=7.2.0"
-pytest-check = ">=1.0"
-pytest-console-scripts = "^1.3.1"
-pytest-cov = ">=4.0,>=5.0"
-pytest-xdist = "^3.3.1"
-ruff = "*"
-tox = "^4.11.4"
-python-magic = ">=0.4"
-tqdm = ">=4.66"
-colorama = "^0.4.6"
-pympler = "^1.1"
-
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-sphinx = ">= 7.3"
-enum-tools = ">=0.11"
-sphinx-toolbox = ">=3.5"
-sphinx-nefertiti = ">=0.7"
-sphinx-markdown-builder = ">=0.6"
-sphinx-copybutton = ">=0.5"
-
-[tool.poetry.group.bootstrap]
-optional = true
-
-[tool.poetry.group.bootstrap.dependencies]
-pyobjc-core = ">=10.2"
-pyobjc-framework-Cocoa = ">=10.2"
-py2app = ">=0.28"
+[dependency-groups]
+dev = [
+    "gprof2dot<2023.0.0,>=2022.7.29",
+    "line-profiler<5.0.0,>=4.0.3",
+    "mock>=5.1.0",
+    "pytest>=7.2.0",
+    "pytest-check>=1.0",
+    "pytest-console-scripts<2.0.0,>=1.3.1",
+    "pytest-cov>=4.0,>=5.0",
+    "pytest-xdist<4.0.0,>=3.3.1",
+    "ruff",
+    "tox<5.0.0,>=4.11.4",
+    "python-magic>=0.4",
+    "tqdm>=4.66",
+    "colorama<1.0.0,>=0.4.6",
+    "pympler<2.0,>=1.1",
+]
+docs = [
+    "sphinx>=7.3",
+    "enum-tools>=0.11",
+    "sphinx-toolbox>=3.5",
+    "sphinx-nefertiti>=0.7",
+    "sphinx-markdown-builder>=0.6",
+    "sphinx-copybutton>=0.5",
+]
+bootstrap = [
+    "pyobjc-core>=10.2",
+    "pyobjc-framework-Cocoa>=10.2",
+    "py2app>=0.28",
+]
 
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core>=1.0.0"]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+# [tool.setuptools]
+# exclude-package-data = { "*" = ["tests*"]}
+# include-package-data = false
+# packages.find.include = ['numbers-parser/src*']
+# packages.find.exclude = ['tests*']
+# package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]  # list of folders that contain the packages (["."] by default)
+include = ["numbers_parser*"]  # package names should match these glob patterns (["*"] by default)
+exclude = ["*tests*"]  # exclude packages matching these glob patterns (empty by default)
+namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 
 [tool.coverage.run]
 branch = true
@@ -189,3 +201,4 @@ ban-relative-imports = "all"
 "src/build/protodump.py" = ["PLR2004", "INP001", "PTH", "S110", "N806"]
 "src/debug/**" = ["INP001"]
 "tests/**" = ["PLR2004", "S101", "D103", "ANN201", "ANN001"]
+

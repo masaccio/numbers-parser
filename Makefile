@@ -27,15 +27,15 @@ all:
 	@echo "    bootstrap  - rebuild all auto-generated files for new Numbers version"
 
 dist:
-	poetry build
+	uv run -m build
 
 upload:
 	tox
-	poetry publish --build
+	uv publish --build
 
 profile:
-	poetry run pytest --profile
-	poetry run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
+	uv run pytest --profile
+	uv run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
 
 DOCS_SOURCES = $(shell find docs -name \*.rst) \
 			   docs/conf.py \
@@ -50,11 +50,11 @@ docs/build/_static/custom.css: docs/custom.css
 
 docs/build/index.html: $(DOCS_SOURCES)
 	@mkdir -p docs/build
-	poetry run sphinx-build -q -b html -t HtmlDocs docs docs/build
-	poetry run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
+	uv run sphinx-build -q -b html -t HtmlDocs docs docs/build
+	uv run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
 
 test:
-	poetry run pytest -n logical
+	uv run pytest -n logical
 
 BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
 				  src/$(package_c)/generated/fontmap.py \
@@ -91,7 +91,7 @@ $(TMP_NUMBERS_APP): $(ENTITLEMENTS)
 
 .bootstrap/mapping.py: .bootstrap/mapping.json
 	@mkdir -p $(dir $@)
-	poetry run python3 src/build/generate_mapping.py $< $@
+	uv run python3 src/build/generate_mapping.py $< $@
 
 src/$(package_c)/generated/functionmap.py: .bootstrap/functionmap.py
 	@mkdir -p $(dir $@)
@@ -105,18 +105,18 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 .bootstrap/functionmap.py:
 	@echo $$(tput setaf 2)"Bootstrap: extracting function names from Numbers"$$(tput init)
 	@mkdir -p .bootstrap
-	poetry run python3 src/build/extract_functions.py $(TST_TABLES) $@ >/dev/null
+	uv run python3 src/build/extract_functions.py $(TST_TABLES) $@ >/dev/null
 
 .bootstrap/fontmap.py:
 	@echo $$(tput setaf 2)"Bootstrap: generating font name map"$$(tput init)
 	@mkdir -p .bootstrap
-	poetry install --with bootstrap
-	poetry run python3 src/build/generate_fontmap.py $@
+	uv install --with bootstrap
+	uv run python3 src/build/generate_fontmap.py $@
 
 .bootstrap/protos/TNArchives.proto:
 	@echo $$(tput setaf 2)"Bootstrap: extracting protobufs from Numbers"$$(tput init)
-	poetry run python3 src/build/protodump.py $(NUMBERS) .bootstrap/protos
-	poetry run python3 src/build/rename_proto_files.py .bootstrap/protos
+	uv run python3 src/build/protodump.py $(NUMBERS) .bootstrap/protos
+	uv run python3 src/build/rename_proto_files.py .bootstrap/protos
 
 src/$(package_c)/generated/mapping.py: .bootstrap/mapping.py
 	cp $< $@
@@ -138,7 +138,7 @@ src/protos/TNArchives.proto: .bootstrap/protos/TNArchives.proto
 
 src/$(package_c)/generated/__init__.py: src/$(package_c)/generated/TNArchives_pb2.py
 	@echo $$(tput setaf 2)"Bootstrap: patching paths in generated protobuf files"$$(tput init)
-	poetry run python3 src/build/replace_paths.py src/$(package_c)/generated/T*.py
+	uv run python3 src/build/replace_paths.py src/$(package_c)/generated/T*.py
 	touch $@
 
 veryclean:
