@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from numbers_parser import Document
-from numbers_parser.numbers_uuid import NumbersUUID
 
 TEXT_CATEGORIES = {
     "Transport": [
@@ -88,26 +87,26 @@ NESTED_TEXT_CATEGORIES = {
 }
 
 NUMBER_CATEGORIES = {
-    5: [
+    5.0: [
         {"Description": "Airplane", "Category": "Transport", "Count": 5.0},
+        {"Description": "Bus", "Category": "Transport", "Count": 5.0},
         {"Description": "Helicopter", "Category": "Transport", "Count": 5.0},
         {"Description": "Van", "Category": "Transport", "Count": 5.0},
-        {"Description": "Bus", "Category": "Transport", "Count": 5.0},
     ],
-    10: [
+    10.0: [
         {"Description": "Bear", "Category": "Animal", "Count": 10.0},
         {"Description": "Deer", "Category": "Animal", "Count": 10.0},
         {"Description": "Elephant", "Category": "Animal", "Count": 10.0},
-        {"Description": "Train", "Category": "Transport", "Count": 10.0},
         {"Description": "Lion", "Category": "Animal", "Count": 10.0},
         {"Description": "Scooter", "Category": "Transport", "Count": 10.0},
+        {"Description": "Train", "Category": "Transport", "Count": 10.0},
     ],
-    20: [
+    20.0: [
         {"Description": "Cat", "Category": "Animal", "Count": 20.0},
         {"Description": "Dog", "Category": "Animal", "Count": 20.0},
         {"Description": "Truck", "Category": "Transport", "Count": 20.0},
     ],
-    30: [
+    30.0: [
         {"Description": "Car", "Category": "Transport", "Count": 30.0},
         {"Description": "Horse", "Category": "Animal", "Count": 30.0},
         {"Description": "Kiwi", "Category": "Fruit", "Count": 30.0},
@@ -116,19 +115,19 @@ NUMBER_CATEGORIES = {
         {"Description": "Parrot", "Category": "Animal", "Count": 30.0},
         {"Description": "Zebra", "Category": "Animal", "Count": 30.0},
     ],
-    40: [
-        {"Description": "Watermelon", "Category": "Fruit", "Count": 40.0},
+    40.0: [
         {"Description": "Apple", "Category": "Fruit", "Count": 40.0},
-        {"Description": "Banana", "Category": "Fruit", "Count": 40},
-        {"Description": "Bicycle", "Category": "Transport", "Count": 40},
-        {"Description": "Orange", "Category": "Fruit", "Count": 40},
-        {"Description": "Pineapple", "Category": "Fruit", "Count": 40},
-        {"Description": "Peach", "Category": "Fruit", "Count": 40},
+        {"Description": "Banana", "Category": "Fruit", "Count": 40.0},
+        {"Description": "Bicycle", "Category": "Transport", "Count": 40.0},
+        {"Description": "Orange", "Category": "Fruit", "Count": 40.0},
+        {"Description": "Peach", "Category": "Fruit", "Count": 40.0},
+        {"Description": "Pineapple", "Category": "Fruit", "Count": 40.0},
+        {"Description": "Watermelon", "Category": "Fruit", "Count": 40.0},
     ],
-    120: [
-        {"Description": "Rabbit", "Category": "Animal", "Count": 120},
-        {"Description": "Grape", "Category": "Fruit", "Count": 120},
-        {"Description": "Strawberry", "Category": "Fruit", "Count": 120},
+    120.0: [
+        {"Description": "Grape", "Category": "Fruit", "Count": 120.0},
+        {"Description": "Rabbit", "Category": "Animal", "Count": 120.0},
+        {"Description": "Strawberry", "Category": "Fruit", "Count": 120.0},
     ],
 }
 
@@ -356,51 +355,19 @@ DATE_CATEGORIES = {
 
 def test_categories():
     doc = Document("tests/data/test-categories.numbers")
-    grouped_table = doc.sheets["Categories"].tables["Categories"]
+    sheet = doc.sheets["Categories"]
 
-    objects = doc._model.objects
-    category_owner_id = objects[grouped_table._table_id].category_owner.identifier
-    category_archive_id = objects[category_owner_id].group_by[0].identifier
-    category_archive = objects[category_archive_id]
+    categories = sheet.tables["Uncategorised"].categorized_data()
+    assert categories is None
 
-    table_info = objects[doc._model.table_info_id(grouped_table._table_id)]
-    category_order = objects[table_info.category_order.identifier]
-    row_uid_map = objects[category_order.uid_map.identifier]
-    sorted_row_uuids = [
-        NumbersUUID(row_uid_map.sorted_row_uids[i]).hex for i in row_uid_map.row_uid_for_index
-    ]
-    uuid_to_row_index = {
-        NumbersUUID(uuid).hex: i for i, uuid in enumerate(category_archive.row_uid_lookup.uuids)
-    }
-    group_uuid_map = {
-        NumbersUUID(x.group_uid).hex: x.group_cell_value
-        for x in category_archive.group_node_root.child
-    }
-
-    categories = {}
-    key = None
-    data = grouped_table.rows()
-    assert uuid_to_row_index[sorted_row_uuids[0]] == 0
-    header = [cell.value for cell in data[0]]
-    for uuid in sorted_row_uuids[1:]:
-        if uuid in group_uuid_map:
-            key = group_uuid_map[uuid].string_value.value
-            categories[key] = []
-        else:
-            row = uuid_to_row_index[uuid]
-            categories[key].append({header[col]: cell.value for col, cell in enumerate(data[row])})
-
-    # categories = doc.sheets["Text"].tables["Uncategorised"].categorized_data()
-    # assert categories is None
-
-    # categories = doc.sheets["Text"].tables["Categories"].categorized_data()
+    categories = sheet.tables["Categories"].categorized_data()
     assert categories == TEXT_CATEGORIES
 
-    # categories = doc.sheets["Text"].tables["Nested Categories"].categorized_data()
+    # categories = sheet.tables["Nested Categories"].categorized_data()
     # assert categories == NESTED_TEXT_CATEGORIES
 
-    # categories = doc.sheets["Text"].tables["Number Categories"].categorized_data()
-    # assert categories == NUMBER_CATEGORIES
+    categories = sheet.tables["Number Categories"].categorized_data()
+    assert categories == NUMBER_CATEGORIES
 
-    # categories = doc.sheets["Text"].tables["Date Categories"].categorized_data()
+    # categories = sheet.tables["Date Categories"].categorized_data()
     # assert categories == DATE_CATEGORIES

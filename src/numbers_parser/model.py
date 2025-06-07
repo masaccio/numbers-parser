@@ -48,6 +48,7 @@ from numbers_parser.constants import (
     MAX_TILE_SIZE,
     PACKAGE_ID,
     CellInteractionType,
+    CellValueType,
     FormatType,
     OwnerKind,
 )
@@ -2549,6 +2550,50 @@ class _NumbersModel(Cacheable):
         image_ids = [x.identifier for x in datas]
         # datas never appears to be an empty list (default themes include images)
         return max(image_ids) + 1
+
+    def table_category_data(self, table_id: int):
+        category_owner_id = self.objects[table_id].category_owner.identifier
+        category_archive_id = self.objects[category_owner_id].group_by[0].identifier
+        category_archive = self.objects[category_archive_id]
+        if not category_archive.is_enabled:
+            return None
+
+        table_info = self.objects[self.table_info_id(table_id)]
+        category_order = self.objects[table_info.category_order.identifier]
+        row_uid_map = self.objects[category_order.uid_map.identifier]
+        sorted_row_uuids = [
+            NumbersUUID(row_uid_map.sorted_row_uids[i]).hex for i in row_uid_map.row_uid_for_index
+        ]
+        uuid_to_row_index = {
+            NumbersUUID(uuid).hex: i for i, uuid in enumerate(category_archive.row_uid_lookup.uuids)
+        }
+        group_uuid_map = {
+            NumbersUUID(x.group_uid).hex: x.group_cell_value
+            for x in category_archive.group_node_root.child
+        }
+
+        categories = {}
+        key = None
+        data = self._table_data[table_id]
+        header = [cell.value for cell in data[0]]
+        for uuid in sorted_row_uuids[1:]:
+            if uuid in group_uuid_map:
+                if group_uuid_map[uuid].cell_value_type == CellValueType.STRING_TYPE:
+                    key = group_uuid_map[uuid].string_value.value
+                elif group_uuid_map[uuid].cell_value_type == CellValueType.NUMBER_TYPE:
+                    key = group_uuid_map[uuid].number_value.value
+                elif group_uuid_map[uuid].cell_value_type == CellValueType.BOOLEAN_TYPE:
+                    key = group_uuid_map[uuid].boolean_value.value
+                elif group_uuid_map[uuid].cell_value_type == CellValueType.DATE_TYPE:
+                    key = group_uuid_map[uuid].date_value.value
+                categories[key] = []
+            elif uuid in uuid_to_row_index:
+                row = uuid_to_row_index[uuid]
+                categories[key].append(
+                    {header[col]: cell.value for col, cell in enumerate(data[row])},
+                )
+
+        return categories
 
 
 def rgb(obj) -> RGB:

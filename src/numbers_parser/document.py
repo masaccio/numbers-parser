@@ -40,14 +40,6 @@ if TYPE_CHECKING:  # pragma: nocover
 __all__ = ["Document", "Sheet", "Table"]
 
 
-# class Sheet:
-#     pass
-
-
-# class Table:
-#     pass
-
-
 class Document:
     """
     Create an instance of a new Numbers document.
@@ -1006,6 +998,34 @@ class Table(Cacheable):
         else:
             msg = "style must be a Style object or style name"
             raise TypeError(msg)
+
+    def categorized_data(self) -> dict | None:
+        """
+        Return the table's data organised into categories, if enabled or ``None``
+        if the table has not had categoried enabled.
+
+        The data is a dictionary with the category names as keys and a list
+        dictionaries for each row in that category of the table. The table heading
+        row is used as the keys for the row dictionary.
+
+        Example
+        -------
+        .. code:: python
+
+            "Transport": [
+                {"Description": "Airplane", "Category": "Transport" },
+                {"Description": "Bicycle", "Category": "Transport" },
+                {"Description": "Bus", "Category": "Transport"},
+            ],
+            "Fruit": [
+                {"Description": "Apple", "Category": "Fruit" },
+                {"Description": "Banana", "Category": "Fruit" },
+            ],
+
+        For tables with multiple categories, the top-level dictionary is nested.
+
+        """
+        return self._model.table_category_data(self._table_id)
 
     def add_row(
         self,
