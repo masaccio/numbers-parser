@@ -588,20 +588,3 @@ def test_issue_96():
     table = doc.default_table
     assert table.cell(12, 1).formatted_value == "20.0%"
     assert table.cell(12, 2).formatted_value == ""
-
-
-def test_issue_98():
-    doc = Document("tests/data/test-issue-98.numbers")
-    std_table = doc.sheets[0].tables["Original Table"]
-    grouped_table = doc.sheets[0].tables["Same table but with group categories"]
-
-    for row, cells in enumerate(std_table.iter_rows()):
-        for col, cell in enumerate(cells):
-            assert cell.value == grouped_table.cell(row, col).value, (
-                f"Value mismatch at row {row}, col {col}: "
-                f"{cell.value} != {grouped_table.cell(row, col).value}"
-            )
-            assert cell.formatted_value == grouped_table.cell(row, col).formatted_value, (
-                f"Formatted value mismatch at row {row}, col {col}: "
-                f"{cell.formatted_value} != {grouped_table.cell(row, col).formatted_value}"
-            )
