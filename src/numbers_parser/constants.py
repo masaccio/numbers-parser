@@ -5,15 +5,16 @@ from math import ceil
 
 import enum_tools.documentation
 
+# Path to package date varies by Python version
 try:
     from importlib.resources import files
-# Can't cover exception using modern python
 except ImportError:  # pragma: nocover
     from importlib_resources import files
 
 __all__ = [
     "CellPadding",
     "CellType",
+    "CellValueType",
     "ControlFormattingType",
     "DurationStyle",
     "DurationUnits",
@@ -112,7 +113,7 @@ def _day_of_year(value: datetime) -> int:
 
 def _week_of_month(value: datetime) -> int:
     """Return the week number in a month for a datetime."""
-    return int(ceil((value.day + value.replace(day=1).weekday()) / 7.0))
+    return ceil((value.day + value.replace(day=1).weekday()) / 7.0)
 
 
 DATETIME_FIELD_MAP = OrderedDict(
@@ -397,6 +398,14 @@ class CellInteractionType(IntEnum):
     RATING = 6
     POPUP = 7
     TOGGLE = 8
+
+
+class CellValueType(IntEnum):
+    NIL_TYPE = 1
+    BOOLEAN_TYPE = 2
+    DATE_TYPE = 3
+    NUMBER_TYPE = 4
+    STRING_TYPE = 5
 
 
 CONTROL_CELL_TYPE_MAP = {
