@@ -289,7 +289,7 @@ class _NumbersModel(Cacheable):
         # which is an ordered list that matches the storage buffers, but
         # identifies which row a storage buffer belongs to (empty rows have
         # no storage buffers).
-        row_bucket_map = {i: None for i in range(self.objects[table_id].number_of_rows)}
+        row_bucket_map = dict.fromkeys(range(self.objects[table_id].number_of_rows))
         bds = self.objects[table_id].base_data_store
         bucket_ids = [x.identifier for x in bds.rowHeaders.buckets]
         idx = 0
