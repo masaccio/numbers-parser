@@ -49,13 +49,7 @@ class NumbersUnpacker(IWorkHandler):
                 if self.compact_json or self.pretty:
                     formatter = Formatter()
                     formatter.indent_spaces = 2
-                    formatter.max_inline_complexity = 100
-                    formatter.max_compact_list_complexity = 100
-                    formatter.max_inline_length = 160
-                    formatter.max_compact_list_complexity = 2
-                    formatter.simple_bracket_padding = True
-                    formatter.nested_bracket_padding = False
-                    formatter.always_expand_depth = 10
+                    formatter.max_inline_length = 180
                     pretty_json = formatter.serialize(data)
                     out.write(pretty_json)
                 else:

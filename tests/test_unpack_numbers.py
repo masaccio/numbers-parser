@@ -146,10 +146,7 @@ def test_compact_json(script_runner, tmp_path):
 
     with open(str(output_dir / "Index/CalculationEngine.json")) as f:
         data = f.read()
-    assert (
-        '"column": 0, "row": 1, "contains_a_formula": true, "edges": {"packed_edge_without_owner":'
-        in data
-    )
+    assert '"formula_owner_id": {"uuid_w0": 666, "uuid_w1": 0, "uuid_w2": 0, "uuid_w3": 0},' in data
 
 
 @pytest.mark.script_launch_mode("subprocess")
