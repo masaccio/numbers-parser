@@ -28,3 +28,7 @@ The following limitations are expected to always remain:
 - Password-encrypted documents cannot be opened. You must first re-save without
   a password to read (see :github:`issue 88 <issues/88>` for details).
   A `UnsupportedError` exception is raised when such documents are opened.
+- Due to changes in the format of Numbers documents, decoding of category groups
+  (introduced in ``numbers-parser`` version 4.16) is supported only for documents
+  created by Numbers 12.0 and later. No warnings are issued for earlier
+  Numbers documents.
