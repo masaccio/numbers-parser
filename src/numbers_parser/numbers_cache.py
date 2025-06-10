@@ -3,7 +3,7 @@ from functools import wraps
 
 
 class Cacheable:
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *_args, **_kwargs):
         obj = object.__new__(cls)
         obj._cache = defaultdict(lambda: defaultdict(dict))
         return obj
