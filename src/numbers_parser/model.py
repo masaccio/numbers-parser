@@ -8,6 +8,8 @@ from itertools import chain
 from math import floor
 from pathlib import Path
 from struct import pack
+from typing import TYPE_CHECKING
+from warnings import warn
 
 from numbers_parser.bullets import (
     BULLET_CONVERSION,
@@ -37,6 +39,7 @@ from numbers_parser.constants import (
     CUSTOM_TEXT_PLACEHOLDER,
     DEFAULT_COLUMN_WIDTH,
     DEFAULT_DOCUMENT,
+    DEFAULT_FONT,
     DEFAULT_PRE_BNC_BYTES,
     DEFAULT_ROW_HEIGHT,
     DEFAULT_TABLE_OFFSET,
@@ -53,7 +56,7 @@ from numbers_parser.constants import (
     OwnerKind,
 )
 from numbers_parser.containers import ObjectStore
-from numbers_parser.exceptions import UnsupportedError
+from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
 from numbers_parser.generated import TSAArchives_pb2 as TSAArchives
@@ -76,6 +79,9 @@ from numbers_parser.iwafile import find_extension
 from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID, uuid_to_hex
 from numbers_parser.xrefs import CellRange, ScopedNameRefCache
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 def create_font_name_map(font_map: dict) -> dict:
@@ -239,6 +245,7 @@ class _NumbersModel(Cacheable):
             "left": defaultdict(),
         }
         self.name_ref_cache = ScopedNameRefCache(self)
+        self.missing_fonts = {}
         self.calculate_table_uuid_map()
 
     def save(self, filepath: Path, package: bool) -> None:
@@ -2269,6 +2276,16 @@ class _NumbersModel(Cacheable):
     def cell_font_name(self, obj: Cell | object) -> str:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         font_name = self.char_property(style, "font_name")
+        if font_name not in FONT_NAME_TO_FAMILY:
+            if font_name not in self.missing_fonts:
+                warn(
+                    f"Custom font '{font_name}' unsupported; falling back to {DEFAULT_FONT}",
+                    UnsupportedWarning,
+                    stacklevel=2,
+                )
+                self.missing_fonts[font_name] = True
+            return DEFAULT_FONT
+
         return FONT_NAME_TO_FAMILY[font_name]
 
     def cell_first_indent(self, obj: Cell | object) -> float:
@@ -2551,7 +2568,7 @@ class _NumbersModel(Cacheable):
         # datas never appears to be an empty list (default themes include images)
         return max(image_ids) + 1
 
-    def table_category_data(self, table_id: int):
+    def table_category_data(self, table_id: int) -> dict | None:
         category_owner_id = self.objects[table_id].category_owner.identifier
         category_archive_id = self.objects[category_owner_id].group_by[0].identifier
         category_archive = self.objects[category_archive_id]
@@ -2564,36 +2581,94 @@ class _NumbersModel(Cacheable):
         sorted_row_uuids = [
             NumbersUUID(row_uid_map.sorted_row_uids[i]).hex for i in row_uid_map.row_uid_for_index
         ]
-        uuid_to_row_index = {
-            NumbersUUID(uuid).hex: i for i, uuid in enumerate(category_archive.row_uid_lookup.uuids)
-        }
-        group_uuid_map = {
-            NumbersUUID(x.group_uid).hex: x.group_cell_value
-            for x in category_archive.group_node_root.child
-        }
 
-        categories = {}
-        key = None
         data = self._table_data[table_id]
         header = [cell.value for cell in data[0]]
-        for uuid in sorted_row_uuids[1:]:
-            if uuid in group_uuid_map:
-                if group_uuid_map[uuid].cell_value_type == CellValueType.STRING_TYPE:
-                    key = group_uuid_map[uuid].string_value.value
-                elif group_uuid_map[uuid].cell_value_type == CellValueType.NUMBER_TYPE:
-                    key = group_uuid_map[uuid].number_value.value
-                elif group_uuid_map[uuid].cell_value_type == CellValueType.BOOLEAN_TYPE:
-                    key = group_uuid_map[uuid].boolean_value.value
-                elif group_uuid_map[uuid].cell_value_type == CellValueType.DATE_TYPE:
-                    key = group_uuid_map[uuid].date_value.value
-                categories[key] = []
-            elif uuid in uuid_to_row_index:
-                row = uuid_to_row_index[uuid]
-                categories[key].append(
-                    {header[col]: cell.value for col, cell in enumerate(data[row])},
-                )
 
-        return categories
+        def index_set_to_offsets(index_set: TSCEArchives.IndexSetArchive) -> list[int]:
+            """Convert an IndexSetArchive to a list of offsets."""
+            offsets = []
+            for entry in index_set.entries:
+                if entry.HasField("range_end"):
+                    offsets += list(range(entry.range_begin, entry.range_end + 1))
+                else:
+                    offsets += list(range(entry.range_begin, entry.range_begin + 1))
+            return offsets
+
+        def cell_value_to_key(
+            cell_value: TSCEArchives.CellValueArchive,
+        ) -> str | int | bool | datetime:
+            """Convert a CellValueArchive to a key."""
+            cell_value_type = cell_value.cell_value_type
+            if cell_value_type == CellValueType.STRING_TYPE:
+                return cell_value.string_value.value
+            if cell_value_type == CellValueType.NUMBER_TYPE:
+                return cell_value.number_value.value
+            if cell_value_type == CellValueType.BOOLEAN_TYPE:
+                return cell_value.boolean_value.value
+            # Must be DATE_TYPE
+            return cell_value.date_value.value
+
+        group_node_to_key = {
+            NumbersUUID(self.objects[_id].group_uid).hex: cell_value_to_key(
+                self.objects[_id].group_cell_value,
+            )
+            for _id in self.find_refs("GroupNodeArchive")
+        }
+        group_uuids = [NumbersUUID(x.group_uid).hex for x in category_archive.group_node_root.child]
+        group_uuids = [uuid for uuid in sorted_row_uuids if uuid in group_uuids]
+
+        def group_hierarchy(parent: str, children: list):
+            nodes = {}
+            for child in children:
+                group_uuid = NumbersUUID(child.group_uid).hex
+                if len(child.child) > 0:
+                    nodes[group_uuid] = group_hierarchy(group_uuid, child.child)
+                else:
+                    nodes[group_uuid] = None
+            return nodes
+
+        def assign_rows_to_categories(parent: str, children: list, categories: dict):
+            for child in children:
+                group_uuid = NumbersUUID(child.group_uid).hex
+                if len(child.child) == 0:
+                    key = cell_value_to_key(child.group_cell_value)
+
+                    row_offsets = index_set_to_offsets(child.row_lookup_uids)
+                    categories[group_uuid] = {
+                        "key": key,
+                        "parent": parent,
+                        "rows": [
+                            {header[col]: cell.value for col, cell in enumerate(data[row])}
+                            for row in row_offsets
+                        ],
+                    }
+                else:
+                    categories[group_uuid] = {
+                        "key": group_node_to_key[group_uuid],
+                        "parent": parent,
+                        "rows": None,
+                    }
+                    assign_rows_to_categories(group_uuid, child.child, categories)
+
+        category_tree = group_hierarchy(
+            NumbersUUID(category_archive.group_node_root.group_uid).hex,
+            category_archive.group_node_root.child,
+        )
+
+        categories = {}
+        assign_rows_to_categories(None, category_archive.group_node_root.child, categories)
+
+        def merge_trees(a: dict, b: dict):
+            new_tree = {}
+            for k, v in a.items():
+                if v is not None:
+                    new_tree[b[k]["key"]] = merge_trees(v, b)
+                else:
+                    new_tree[b[k]["key"]] = b[k]["rows"]
+            return new_tree
+
+        return merge_trees(category_tree, categories)
 
 
 def rgb(obj) -> RGB:

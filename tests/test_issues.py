@@ -588,3 +588,21 @@ def test_issue_96():
     table = doc.default_table
     assert table.cell(12, 1).formatted_value == "20.0%"
     assert table.cell(12, 2).formatted_value == ""
+
+
+def test_issue_99():
+    doc = Document("tests/data/issue-99.numbers")
+    table = doc.default_table
+    cell = table.cell(0, 0)
+    with pytest.warns(UnsupportedWarning) as record:
+        style = cell.style
+    assert len(record) == 1
+    assert (
+        str(
+            record[0].message,
+        )
+        == "Custom font 'Roboto-Regular' unsupported; falling back to Helvetica Neue"
+    )
+    assert style.font_size == 10.0
+    assert style.font_name == "Helvetica Neue"
+    assert style.font_color == RGB(238, 34, 12)
