@@ -11,6 +11,7 @@
     },
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
+    "python.analysis.typeCheckingMode": "off",
     "python.testing.pytestArgs": [
         "--experimental",
         "--no-cov",
