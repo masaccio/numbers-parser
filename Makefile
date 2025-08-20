@@ -50,6 +50,7 @@ docs/build/_static/custom.css: docs/custom.css
 
 docs/build/index.html: $(DOCS_SOURCES)
 	@mkdir -p docs/build
+	uv sync --group docs
 	uv run sphinx-build -q -b html -t HtmlDocs docs docs/build
 	uv run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
 
@@ -110,7 +111,7 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 .bootstrap/fontmap.py:
 	@echo $$(tput setaf 2)"Bootstrap: generating font name map"$$(tput init)
 	@mkdir -p .bootstrap
-	uv install --with bootstrap
+	uv sync --group bootstrap
 	uv run python3 src/build/generate_fontmap.py $@
 
 .bootstrap/protos/TNArchives.proto:
