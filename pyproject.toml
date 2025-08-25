@@ -22,7 +22,7 @@ classifiers = [
 description = "Read and write Apple Numbers spreadsheets"
 name = "numbers-parser"
 readme = "README.md"
-version = "4.16.1"
+version = "4.16.2"
 
 [project.urls]
 repository = "https://github.com/masaccio/numbers-parser"
@@ -68,18 +68,14 @@ bootstrap = [
 requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
 
-# [tool.setuptools]
-# exclude-package-data = { "*" = ["tests*"]}
-# include-package-data = false
-# packages.find.include = ['numbers-parser/src*']
-# packages.find.exclude = ['tests*']
-# package-dir = { "" = "src" }
-
 [tool.setuptools.packages.find]
-where = ["src"]  # list of folders that contain the packages (["."] by default)
-include = ["numbers_parser*"]  # package names should match these glob patterns (["*"] by default)
-exclude = ["*tests*"]  # exclude packages matching these glob patterns (empty by default)
-namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
+where = ["src"]
+include = ["numbers_parser*"]
+exclude = ["*tests*"]
+namespaces = false  # disable scanning PEP 420 namespaces
+
+[tool.setuptools.package-data]
+"numbers_parser" = ["data/*"]
 
 [tool.coverage.run]
 branch = true

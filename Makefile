@@ -13,7 +13,7 @@ LLDB_PYTHON_PATH := ${shell lldb --python-path}
 PACKAGE=numbers-parser
 package_c := $(subst -,_,$(PACKAGE))
 
-.PHONY: clean veryclean test coverage profile sdist upload docs
+.PHONY: clean veryclean test coverage profile dist upload docs
 
 all:
 	@echo "make targets:"
@@ -27,7 +27,7 @@ all:
 	@echo "    bootstrap  - rebuild all auto-generated files for new Numbers version"
 
 dist:
-	uv run -m build
+	uv build
 
 upload:
 	tox
