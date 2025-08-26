@@ -30,7 +30,7 @@ dist:
 	uv build
 
 upload:
-	uv run tox
+	uv run tox -r
 	uv build
 	uv publish
 
