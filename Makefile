@@ -13,7 +13,7 @@ LLDB_PYTHON_PATH := ${shell lldb --python-path}
 PACKAGE=numbers-parser
 package_c := $(subst -,_,$(PACKAGE))
 
-.PHONY: clean veryclean test coverage profile sdist upload docs
+.PHONY: clean veryclean test coverage profile dist upload docs
 
 all:
 	@echo "make targets:"
@@ -27,11 +27,12 @@ all:
 	@echo "    bootstrap  - rebuild all auto-generated files for new Numbers version"
 
 dist:
-	uv run -m build
+	uv build
 
 upload:
-	tox
-	uv publish --build
+	uv run tox
+	uv build
+	uv publish
 
 profile:
 	uv run pytest --profile
@@ -50,11 +51,12 @@ docs/build/_static/custom.css: docs/custom.css
 
 docs/build/index.html: $(DOCS_SOURCES)
 	@mkdir -p docs/build
+	uv sync --group docs
 	uv run sphinx-build -q -b html -t HtmlDocs docs docs/build
 	uv run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
 
 test:
-	uv run pytest -n logical
+	uv run pytest --numprocesses=logical
 
 BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
 				  src/$(package_c)/generated/fontmap.py \
@@ -110,7 +112,7 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 .bootstrap/fontmap.py:
 	@echo $$(tput setaf 2)"Bootstrap: generating font name map"$$(tput init)
 	@mkdir -p .bootstrap
-	uv install --with bootstrap
+	uv sync --group bootstrap
 	uv run python3 src/build/generate_fontmap.py $@
 
 .bootstrap/protos/TNArchives.proto:
