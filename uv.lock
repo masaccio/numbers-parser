@@ -926,7 +926,7 @@ requires-dist = [
     { name = "protobuf", specifier = ">=6.0" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0" },
     { name = "python-snappy", specifier = ">=0.7" },
-    { name = "setuptools", specifier = ">=80.0.0" },
+    { name = "setuptools", specifier = ">=70.0.0" },
     { name = "sigfig", specifier = ">=1.3.3" },
 ]
 
