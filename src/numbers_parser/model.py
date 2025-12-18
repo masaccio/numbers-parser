@@ -790,9 +790,11 @@ class _NumbersModel(Cacheable):
         # Map table IDs to the base_owner_uids of the formula owners that match
         # the table model's haunted owner
         self._table_id_to_base_id = {
-            table_id: formula_owner_to_base_owner_map[
-                uuid_to_hex(self.objects[table_id].haunted_owner.owner_uid)
-            ]
+            table_id: formula_owner_to_base_owner_map.get(
+                uuid_to_hex(self.objects[table_id].haunted_owner.owner_uid),
+                # Some older documents do not have this mapping
+                None,
+            )
             for table_id in self.table_ids()
         }
         self._table_base_id_to_formula_owner_id = {
