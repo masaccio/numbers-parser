@@ -30,7 +30,7 @@ dist:
 	uv build
 
 upload:
-	uv run tox -r
+	tox
 	uv build
 	uv publish
 
@@ -56,7 +56,7 @@ docs/build/index.html: $(DOCS_SOURCES)
 	uv run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
 
 test:
-	uv run pytest --numprocesses=logical
+	uv run pytest -n logical
 
 BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
 				  src/$(package_c)/generated/fontmap.py \
