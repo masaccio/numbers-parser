@@ -876,7 +876,6 @@ version = "4.16.3"
 source = { editable = "." }
 dependencies = [
     { name = "compact-json" },
-    { name = "cramjam" },
     { name = "enum-tools" },
     { name = "importlib-resources" },
     { name = "protobuf" },
@@ -921,15 +920,14 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "compact-json", specifier = ">=1.1.3,<2.0.0" },
-    { name = "cramjam", specifier = ">=2.11.0" },
+    { name = "compact-json", specifier = ">=1.1.3" },
     { name = "enum-tools", specifier = ">=0.11" },
     { name = "importlib-resources", specifier = ">=6.1" },
     { name = "protobuf", specifier = ">=6.0" },
-    { name = "python-dateutil", specifier = ">=2.9.0.post0,<3.0.0.0" },
+    { name = "python-dateutil", specifier = ">=2.9.0.post0" },
     { name = "python-snappy", specifier = ">=0.7" },
-    { name = "setuptools", specifier = ">=70.0.0" },
-    { name = "sigfig", specifier = ">=1.3.3,<2.0.0" },
+    { name = "setuptools", specifier = ">=80.0.0" },
+    { name = "sigfig", specifier = ">=1.3.3" },
 ]
 
 [package.metadata.requires-dev]
