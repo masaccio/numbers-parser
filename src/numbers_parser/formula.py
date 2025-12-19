@@ -175,7 +175,7 @@ class Formula(list):
 
             if ref.row_start_is_abs or ref.row_end_is_abs:
                 ast_colon_tract["absolute_row"][0]["range_begin"] = (
-                    ref.row_start if ref.row_start_is_abs else ref.row_end_is_abs
+                    ref.row_start if ref.row_start_is_abs else ref.row_end
                 )
 
             if ref.row_start_is_abs and ref.row_end_is_abs:
