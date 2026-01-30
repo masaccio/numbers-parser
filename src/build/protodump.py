@@ -15,8 +15,7 @@ from pathlib import Path
 
 from google.protobuf import descriptor_pb2
 from google.protobuf.descriptor_pool import DescriptorPool
-from google.protobuf.internal.decoder import SkipField, _DecodeVarint
-from google.protobuf.message import DecodeError
+from google.protobuf.internal.decoder import _DecodeVarint
 from tqdm import tqdm
 
 PROTO_TYPES = {
@@ -198,7 +197,7 @@ class ProtoFile:
         return None
 
 
-def read_until_null_tag(data):
+def read_until_null_tag(data: bytes):
     position = 0
     while position < len(data):
         try:
@@ -207,17 +206,23 @@ def read_until_null_tag(data):
             return position
 
         if tag == 0:
-            # Found a null tag, so we're done
             return position
 
-        try:
-            new_position = SkipField(data, position, len(data), bytes([tag]))
-        except (AttributeError, DecodeError):
-            return position
-        if new_position == -1:
-            return position
-        position = new_position
-    return None
+        wire_type = tag & 7
+        if wire_type == 0:
+            position += 1
+        elif wire_type == 1:
+            position += 8
+        elif wire_type == 2:
+            try:
+                length, position = _DecodeVarint(data, position)
+                position += length
+            except Exception:
+                return position
+        elif wire_type == 5:
+            position += 4
+
+    return position
 
 
 def extract_proto_from_file(filename, descriptor_pool):
