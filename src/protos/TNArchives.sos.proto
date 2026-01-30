@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+import "TSDArchives.sos.proto";
+package TNSOS;
+
+message SheetStylePropertyChangeSetArchive {
+  optional .TSDSOS.SpecFillArchive fill = 1;
+  optional bool fill_undefined = 2;
+}
