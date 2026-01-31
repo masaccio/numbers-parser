@@ -63,9 +63,12 @@ class CellRange:
     from_table_id: int = None
     to_table_id: int = None
     range_type: CellRangeType = None
+    _do_init: bool = True
     _table_names: list[str] = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
+        if not self._do_init:
+            return
         if self._table_names is None:
             self._initialize_table_data()
         self.model.name_ref_cache.refresh()
@@ -292,7 +295,7 @@ class ScopedNameRefCache:
         if (axis == TableAxis.ROW and num_header_cols == 0) or (
             axis == TableAxis.COLUMN and num_header_rows == 0
         ):
-            return {idx: None for idx in range(range_end)}
+            return dict.fromkeys(range(range_end))
 
         scopes = {}
         names = []

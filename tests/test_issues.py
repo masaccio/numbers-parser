@@ -612,6 +612,7 @@ def test_issue_102():
     doc1 = Document("tests/data/issue-102-v14.4.numbers")
     doc2 = Document("tests/data/issue-102-v15.1.numbers")
 
+    assert doc1.default_table.merge_ranges == doc2.default_table.merge_ranges
     for row_num, row in enumerate(doc1.default_table.rows()):
         for col_num, cell in enumerate(row):
             assert type(cell) is type(doc2.default_table.cell(row_num, col_num))

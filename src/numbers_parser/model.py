@@ -855,6 +855,37 @@ class _NumbersModel(Cacheable):
             return None
         return self.objects[ce_id]
 
+    def add_merge_range(self, table_id, row_start, row_end, col_start, col_end) -> None:
+        size = (row_end - row_start + 1, col_end - col_start + 1)
+        for row in range(row_start, row_end + 1):
+            for col in range(col_start, col_end + 1):
+                self._merge_cells[table_id].add_reference(
+                    row,
+                    col,
+                    (row_start, col_start, row_end, col_end),
+                )
+        self._merge_cells[table_id].add_anchor(row_start, col_start, size)
+
+    @cache()
+    def calculate_new_merge_cell_ranges(self, table_id) -> None:
+        table_model = self.objects[table_id]
+        formulas = table_model.merge_owner.formula_store.formulas
+        if len(formulas) == 0:
+            return
+
+        for formula in formulas:
+            node = formula.formula.AST_node_array.AST_node[0]
+            # COLON_TRACT_NODE=67
+            if node.AST_node_type != 67:
+                continue
+            self.add_merge_range(
+                table_id,
+                node.AST_colon_tract.absolute_row[0].range_begin,
+                node.AST_colon_tract.absolute_row[0].range_end,
+                node.AST_colon_tract.absolute_column[0].range_begin,
+                node.AST_colon_tract.absolute_column[0].range_end,
+            )
+
     @cache()
     def calculate_merge_cell_ranges(self, table_id) -> None:
         """Extract all the merge cell ranges for the Table."""
@@ -871,20 +902,13 @@ class _NumbersModel(Cacheable):
                 to_owner_id = record.internal_range_reference.owner_id
                 if owner_id_map[to_owner_id] == table_base_id:
                     record_range = record.internal_range_reference.range
-                    row_start = record_range.top_left_row
-                    row_end = record_range.bottom_right_row
-                    col_start = record_range.top_left_column
-                    col_end = record_range.bottom_right_column
-
-                    size = (row_end - row_start + 1, col_end - col_start + 1)
-                    for row in range(row_start, row_end + 1):
-                        for col in range(col_start, col_end + 1):
-                            self._merge_cells[table_id].add_reference(
-                                row,
-                                col,
-                                (row_start, col_start, row_end, col_end),
-                            )
-                    self._merge_cells[table_id].add_anchor(row_start, col_start, size)
+                    self.add_merge_range(
+                        table_id,
+                        record_range.top_left_row,
+                        record_range.bottom_right_row,
+                        record_range.top_left_column,
+                        record_range.bottom_right_column,
+                    )
 
         base_data_store = self.objects[table_id].base_data_store
         if base_data_store.merge_region_map.identifier == 0:
@@ -912,6 +936,7 @@ class _NumbersModel(Cacheable):
             self._merge_cells[table_id].add_anchor(row_start, col_start, (num_rows, num_columns))
 
     def merge_cells(self, table_id):
+        self.calculate_new_merge_cell_ranges(table_id)
         self.calculate_merge_cell_ranges(table_id)
         return self._merge_cells[table_id]
 
@@ -934,12 +959,12 @@ class _NumbersModel(Cacheable):
 
     @cache()
     def table_uuids_to_id(self, table_uuid) -> int | None:
-        for sheet_id in self.sheet_ids():  # pragma: no branch   # noqa: RET503
+        for sheet_id in self.sheet_ids():  # pragma: no branch
             for table_id in self.table_ids(sheet_id):
                 if table_uuid == self.table_base_id(table_id):
                     return table_id
 
-    def node_to_ref(self, table_id: int, row: int, col: int, node):
+    def node_to_ref(self, table_id: int, row: int, col: int, node, merge_mode: bool = False):
         def resolve_range(is_absolute, absolute_list, relative_list, offset, max_val):
             if is_absolute:
                 return absolute_list[0].range_begin
@@ -1005,6 +1030,7 @@ class _NumbersModel(Cacheable):
                 col_end_is_abs=node.AST_sticky_bits.end_column_is_absolute,
                 from_table_id=table_id,
                 to_table_id=to_table_id,
+                _do_init=not merge_mode,
             )
 
         row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
@@ -2116,7 +2142,7 @@ class _NumbersModel(Cacheable):
         # a string with a new bullet character
         bds = self.objects[table_id].base_data_store
         rich_text_table = self.objects[bds.rich_text_table.identifier]
-        for entry in rich_text_table.entries:  # pragma: no branch  # noqa: RET503
+        for entry in rich_text_table.entries:  # pragma: no branch
             if string_key == entry.key:
                 payload = self.objects[entry.rich_text_payload.identifier]
                 payload_storage = self.objects[payload.storage.identifier]
