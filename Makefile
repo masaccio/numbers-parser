@@ -18,7 +18,8 @@ package_c := $(subst -,_,$(PACKAGE))
 all:
 	@echo "make targets:"
 	@echo "    test       - run pytest with all tests"
-	@echo "    docs       - rebuild maekdown docs from source"
+	@echo "    readme     - rebuild README.md from source"
+	@echo "    docs       - rebuild markdown and HTML docs from source"
 	@echo "    profile    - run pytest and generate a profile graph"
 	@echo "    dist       - build distributions"
 	@echo "    upload     - upload package to PyPI"
@@ -26,17 +27,15 @@ all:
 	@echo "    veryclean  - delete all auto-generated files (requires new bootstrap)"
 	@echo "    bootstrap  - rebuild all auto-generated files for new Numbers version"
 
-dist:
+dist: readme
+	-rm -rf dist
 	uv build
 
 upload:
+	-rm -rf dist
 	tox
 	uv build
 	uv publish
-
-profile:
-	uv run pytest --profile
-	uv run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
 
 DOCS_SOURCES = $(shell find docs -name \*.rst) \
 			   docs/conf.py \
@@ -54,6 +53,17 @@ docs/build/index.html: $(DOCS_SOURCES)
 	uv sync --group docs
 	uv run sphinx-build -q -b html -t HtmlDocs docs docs/build
 	uv run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
+
+readme:
+	@mkdir -p docs/build
+	uv sync --group docs
+	uv run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
+	cp docs/build/index.md README.md
+
+profile:
+	uv run pytest --profile
+	uv run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
+
 
 test:
 	uv run pytest -n logical
