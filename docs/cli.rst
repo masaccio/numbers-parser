@@ -12,9 +12,7 @@ a number of command-line scripts are installed:
 cat-numbers
 ^^^^^^^^^^^
 
-This script dumps Numbers spreadsheets into Excel-compatible CSV
-format, iterating through all the spreadsheets passed on the
-command-line.
+This script dumps Numbers spreadsheets into Excel-compatible CSV format, iterating through all the spreadsheets passed on the command-line.
 
 .. code:: text
 
@@ -43,26 +41,18 @@ command-line.
                             Names of table(s) to include in export
       --debug               Enable debug logging
 
-Note: ``--formatting`` will return different capitalization for 12-hour
-times due to differences between Numbers’ representation of these dates
-and ``datetime.strftime``. Numbers in English locales displays 12-hour
-times with ‘am’ and ‘pm’, but ``datetime.strftime`` on macOS at least
-cannot return lower-case versions of AM/PM.
+Note: ``--formatting`` will return different capitalization for 12-hour times due to differences between Numbers’ representation of these dates and ``datetime.strftime``. Numbers in English locales displays 12-hour times with ‘am’ and ‘pm’, but ``datetime.strftime`` on macOS at least cannot return lower-case versions of AM/PM.
 
 csv2numbers
 ^^^^^^^^^^^
 
-This script converts Excel-compatible CSV files into Numbers documents. Output files
-can optionally be provided, but is none are provided, the output is created by replacing
-the input's files suffix with `.numbers`. For example:
+This script converts Excel-compatible CSV files into Numbers documents. Output files can optionally be provided, but is none are provided, the output is created by replacing the input's files suffix with `.numbers`. For example:
 
 .. code:: text
 
   csv2numbers file1.csv file2.csv -o file1.numbers file2.numbers
 
-Columns of data can have a number of transformations applied to them. The primary use-
-case intended for ``csv2numbers`` is converting banking exports to well-formatted
-spreadsheets.
+Columns of data can have a number of transformations applied to them. The primary use- case intended for ``csv2numbers`` is converting banking exports to well-formatted spreadsheets.
 
 .. code:: text
 

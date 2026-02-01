@@ -75,12 +75,7 @@ python datatype. Available cell types are:
 |               |                        | #numbers_parser.MergedCell>`__  |
 +---------------+------------------------+---------------------------------+
 
-Cell references can be either zero-offset row/column integers or an
-Excel/Numbers A1 notation. Where cell values are not ``None`` the
-property ``formatted_value`` returns the cell value as a ``str`` as
-displayed in Numbers. Cells that have no values in a table are
-represented as ``EmptyCell`` and cells containing evaluation errors of
-any kind ``ErrorCell``.
+Cell references can be either zero-offset row/column integers or an Excel/Numbers A1 notation. Where cell values are not ``None`` the property ``formatted_value`` returns the cell value as a ``str`` as displayed in Numbers. Cells that have no values in a table are represented as ``EmptyCell`` and cells containing evaluation errors of any kind ``ErrorCell``.
 
 .. code:: python
 
@@ -98,10 +93,7 @@ any kind ``ErrorCell``.
 Pandas Support
 ^^^^^^^^^^^^^^
 
-Since the return value of ``rows()`` is a list of lists, you can pass
-this directly to pandas. Assuming you have a Numbers table with a single
-header which contains the names of the pandas series you want to create
-you can construct a pandas dataframe using:
+Since the return value of ``rows()`` is a list of lists, you can pass this directly to pandas. Assuming you have a Numbers table with a single header which contains the names of the pandas series you want to create you can construct a pandas dataframe using:
 
 .. code:: python
 
@@ -116,14 +108,9 @@ you can construct a pandas dataframe using:
 Writing Numbers Documents
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Whilst support for writing numbers files has been stable since version
-3.4.0, you are highly recommended not to overwrite working Numbers files
-and instead save data to a new file.
+Whilst support for writing numbers files has been stable since version 3.4.0, you are highly recommended not to overwrite working Numbers files and instead save data to a new file.
 
-Cell values are written using
-:pages:`Table.write() <api/table.html#numbers_parser.Table.write>` and
-``numbers-parser`` will automatically create empty rows and columns
-for any cell references that are out of range of the current table.
+Cell values are written using :pages:`Table.write() <api/table.html#numbers_parser.Table.write>` and ``numbers-parser`` will automatically create empty rows and columns for any cell references that are out of range of the current table.
 
 .. code:: python
 
@@ -135,9 +122,7 @@ for any cell references that are out of range of the current table.
    table.write("B7", datetime(2020, 12, 25))
    doc.save("new-sheet.numbers")
 
-Additional tables and worksheets can be added to a ``Document`` before saving using 
-:pages:`Document.add_sheet() <api/document.html#numbers_parser.Document.add_sheet>` and
-:pages:`Sheet.add_table() <api/sheet.html#numbers_parser.Sheet.add_table>` respectively:
+Additional tables and worksheets can be added to a ``Document`` before saving using :pages:`Document.add_sheet() <api/document.html#numbers_parser.Document.add_sheet>` and :pages:`Sheet.add_table() <api/sheet.html#numbers_parser.Sheet.add_table>` respectively:
 
 .. code:: python
 
@@ -159,18 +144,11 @@ Styles
 Cell Data Formatting
 ^^^^^^^^^^^^^^^^^^^^
 
-Numbers has two different cell formatting types: data formats and custom
-formats.
+Numbers has two different cell formatting types: data formats and custom formats.
 
-Data formats are presented in Numbers in the Cell tab of the Format pane
-and are applied to individual cells. Like Numbers, ``numbers-parsers``
-caches formatting information that is identical across multiple cells.
-You do not need to take any action for this to happen; this is handled
-internally by the package. Changing a data format for cell has no impact
-on any other cells.
+Data formats are presented in Numbers in the Cell tab of the Format pane and are applied to individual cells. Like Numbers, ``numbers-parsers`` caches formatting information that is identical across multiple cells. You do not need to take any action for this to happen; this is handled internally by the package. Changing a data format for cell has no impact on any other cells.
 
-Cell formats are changed using
-:pages:`Table.set_cell_formatting() <api/table.html#numbers_parser.Table.set_cell_formatting>`:
+Cell formats are changed using :pages:`Table.set_cell_formatting() <api/table.html#numbers_parser.Table.set_cell_formatting>`:
 
 .. code:: python
 
@@ -187,13 +165,7 @@ Cell formats are changed using
       negative_style=NegativeNumberStyle.RED
    )
 
-Custom formats are shared across a Document and can be applied to
-multiple cells in multiple tables. Editing a custom format changes the
-appearance of data in all cells that share that format. You must first
-add a custom format to the document using
-:pages:`Document.add_custom_format() <api/document.html#numbers_parser.Document.add_custom_format>`
-before assigning it to cells using
-:pages:`Table.set_cell_formatting() <api/table.html#numbers_parser.Table.set_cell_formatting>`:
+Custom formats are shared across a Document and can be applied to multiple cells in multiple tables. Editing a custom format changes the appearance of data in all cells that share that format. You must first add a custom format to the document using :pages:`Document.add_custom_format() <api/document.html#numbers_parser.Document.add_custom_format>` before assigning it to cells using :pages:`Table.set_cell_formatting() <api/table.html#numbers_parser.Table.set_cell_formatting>`:
 
 .. code:: python
 
@@ -204,26 +176,11 @@ before assigning it to cells using
    )
    table.set_cell_formatting("C1", "custom", format=long_date)
 
-A limited number of currencies are formatted using symbolic notation
-rather than an ISO code. These are defined in
-``numbers_parser.currencies`` and match the ones chosen by Numbers. For
-example, US dollars are referred to as ``US$`` whereas Euros and British
-Pounds are referred to using their symbols of ``€`` and ``£``
-respectively.
+A limited number of currencies are formatted using symbolic notation rather than an ISO code. These are defined in ``numbers_parser.currencies`` and match the ones chosen by Numbers. For example, US dollars are referred to as ``US$`` whereas Euros and British Pounds are referred to using their symbols of ``€`` and ``£`` respectively.
 
 Borders
 ^^^^^^^
 
-``numbers-parser`` supports reading and writing cell borders, though the
-interface for each differs. Individual cells can have each of their four
-borders tested, but when drawing new borders, these are set for the
-table to allow for drawing borders across multiple cells. Setting the
-border of merged cells is not possible unless the edge of the cells is
-at the end of the merged region.
+``numbers-parser`` supports reading and writing cell borders, though the interface for each differs. Individual cells can have each of their four borders tested, but when drawing new borders, these are set for the table to allow for drawing borders across multiple cells. Setting the border of merged cells is not possible unless the edge of the cells is at the end of the merged region.
 
-Borders are represented using the :pages:`Border <api/border.html>` class
-that can be initialized with line width, color and line style. The
-current state of a cell border is read using the
-:pages:`Cell.border <api/cells.html#numbers_parser.Cell.border>` property
-and :pages:`Table.set_cell_border() <api/table.html#numbers_parser.Table.set_cell_border>`
-sets the border for a cell edge or a range of cells.
+Borders are represented using the :pages:`Border <api/border.html>` class that can be initialized with line width, color and line style. The current state of a cell border is read using the :pages:`Cell.border <api/cells.html#numbers_parser.Cell.border>` property and :pages:`Table.set_cell_border() <api/table.html#numbers_parser.Table.set_cell_border>` sets the border for a cell edge or a range of cells.
