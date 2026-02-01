@@ -67,8 +67,6 @@ class CellRange:
     _table_names: list[str] = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
-        if not self._do_init:
-            return
         if self._table_names is None:
             self._initialize_table_data()
         self.model.name_ref_cache.refresh()
