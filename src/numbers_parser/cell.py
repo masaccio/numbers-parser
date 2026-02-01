@@ -56,7 +56,6 @@ from numbers_parser.constants import (
 )
 from numbers_parser.currencies import CURRENCIES, CURRENCY_SYMBOLS
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
-from numbers_parser.formula import Formula
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
@@ -659,17 +658,6 @@ class Cell(CellStorageFlags, Cacheable):
             table_formulas = self._model.table_formulas(self._table_id)
             return table_formulas.formula(self._formula_id, self.row, self.col)
         return None
-
-    @formula.setter
-    def formula(self, value: str) -> None:
-        self._formula_id = Formula.from_str(
-            self._model,
-            self._table_id,
-            self.row,
-            self.col,
-            value,
-        )
-        self._model.add_formula_dependency(self.row, self.col, self._table_id)
 
     @property
     def is_bulleted(self) -> bool:

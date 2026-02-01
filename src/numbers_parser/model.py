@@ -807,38 +807,6 @@ class _NumbersModel(Cacheable):
         # Table can be empty if the document does not use FormulaOwnerDependenciesArchive
         return self._table_id_to_base_id.get(table_id)
 
-    def get_formula_owner(self, table_id: int) -> object:
-        table_uuid = self.table_base_id(table_id)
-        return self.objects[self._table_base_id_to_formula_owner_id[table_uuid]]
-
-    def add_formula_dependency(self, row: int, col: int, table_id: int) -> None:
-        calc_engine = self.calc_engine()
-        calc_engine.dependency_tracker.number_of_formulas += 1
-        internal_formula_id = calc_engine.dependency_tracker.number_of_formulas
-
-        formula_owner = self.get_formula_owner(table_id)
-        formula_owner.cell_dependencies.cell_record.append(
-            TSCEArchives.CellRecordExpandedArchive(column=col, row=row),
-        )
-        if len(formula_owner.tiled_cell_dependencies.cell_record_tiles) == 0:
-            cell_record_id, cell_record = self.objects.create_object_from_dict(
-                "CalculationEngine",
-                {
-                    "internal_owner_id": internal_formula_id,
-                    "tile_column_begin": 0,
-                    "tile_row_begin": 0,
-                },
-                TSCEArchives.CellRecordTileArchive,
-            )
-            formula_owner.tiled_cell_dependencies.cell_record_tiles.append(
-                TSPMessages.Reference(identifier=cell_record_id),
-            )
-        else:
-            cell_record_id = formula_owner.tiled_cell_dependencies.cell_record_tiles[0].identifier
-            cell_record = self.objects[cell_record_id]
-
-        cell_record.cell_records.append(formula_owner.cell_dependencies.cell_record[-1])
-
     @cache(num_args=0)
     def calc_engine_id(self):
         """Return the CalculationEngine ID for the current document."""
@@ -941,17 +909,6 @@ class _NumbersModel(Cacheable):
             if table_id in self.table_ids(sheet_id):
                 return sheet_id
         return None
-
-    def table_name_to_uuid(self, sheet_name: str, table_name: str) -> str:
-        table_ids = [tid for tid in self.table_ids() if table_name == self.table_name(tid)]
-        if len(table_ids) == 1:
-            return self.table_base_id(table_ids[0])
-
-        sheet_name_to_id = {self.sheet_name(x): x for x in self.sheet_ids()}
-        sheet_id = sheet_name_to_id[sheet_name]
-        table_name_to_id = {self.table_name(x): x for x in self.table_ids(sheet_id)}
-        table_id = table_name_to_id[table_name]
-        return self.table_base_id(table_id)
 
     @cache()  # noqa: RET503
     def table_uuids_to_id(self, table_uuid) -> int | None:
