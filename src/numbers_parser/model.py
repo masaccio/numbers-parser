@@ -867,7 +867,7 @@ class _NumbersModel(Cacheable):
         self._merge_cells[table_id].add_anchor(row_start, col_start, size)
 
     @cache()
-    def calculate_new_merge_cell_ranges(self, table_id) -> None:
+    def calculate_merges_using_formula_stores(self, table_id) -> None:
         table_model = self.objects[table_id]
         formulas = table_model.merge_owner.formula_store.formulas
         if len(formulas) == 0:
@@ -887,7 +887,7 @@ class _NumbersModel(Cacheable):
             )
 
     @cache()
-    def calculate_merge_cell_ranges(self, table_id) -> None:
+    def calculate_merges_using_dependency_archives(self, table_id) -> None:
         """Extract all the merge cell ranges for the Table."""
         # See details in Numbers.md#merge-ranges.
         owner_id_map = self.owner_id_map()
@@ -910,6 +910,8 @@ class _NumbersModel(Cacheable):
                         record_range.bottom_right_column,
                     )
 
+    @cache()
+    def calculate_merges_using_region_map(self, table_id) -> None:
         base_data_store = self.objects[table_id].base_data_store
         if base_data_store.merge_region_map.identifier == 0:
             return
@@ -926,18 +928,12 @@ class _NumbersModel(Cacheable):
             )
             row_end = row_start + num_rows - 1
             col_end = col_start + num_columns - 1
-            for row in range(row_start, row_end + 1):
-                for col in range(col_start, col_end + 1):
-                    self._merge_cells[table_id].add_reference(
-                        row,
-                        col,
-                        (row_start, col_start, row_end, col_end),
-                    )
-            self._merge_cells[table_id].add_anchor(row_start, col_start, (num_rows, num_columns))
+            self.add_merge_range(table_id, row_start, row_end, col_start, col_end)
 
     def merge_cells(self, table_id):
-        self.calculate_new_merge_cell_ranges(table_id)
-        self.calculate_merge_cell_ranges(table_id)
+        self.calculate_merges_using_formula_stores(table_id)
+        self.calculate_merges_using_dependency_archives(table_id)
+        self.calculate_merges_using_region_map(table_id)
         return self._merge_cells[table_id]
 
     def table_id_to_sheet_id(self, table_id: int) -> int:
@@ -957,14 +953,14 @@ class _NumbersModel(Cacheable):
         table_id = table_name_to_id[table_name]
         return self.table_base_id(table_id)
 
-    @cache()
+    @cache()  # noqa: RET503
     def table_uuids_to_id(self, table_uuid) -> int | None:
         for sheet_id in self.sheet_ids():  # pragma: no branch
             for table_id in self.table_ids(sheet_id):
                 if table_uuid == self.table_base_id(table_id):
                     return table_id
 
-    def node_to_ref(self, table_id: int, row: int, col: int, node, merge_mode: bool = False):
+    def node_to_ref(self, table_id: int, row: int, col: int, node):
         def resolve_range(is_absolute, absolute_list, relative_list, offset, max_val):
             if is_absolute:
                 return absolute_list[0].range_begin
@@ -1030,7 +1026,6 @@ class _NumbersModel(Cacheable):
                 col_end_is_abs=node.AST_sticky_bits.end_column_is_absolute,
                 from_table_id=table_id,
                 to_table_id=to_table_id,
-                _do_init=not merge_mode,
             )
 
         row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
