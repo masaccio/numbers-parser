@@ -7,7 +7,7 @@ class UnsupportedError(NumbersError):
 
 
 class NotImplementedError(NumbersError):
-    """Raised for unsuported Protobufs/Formats."""
+    """Raised for unsupported Protobufs/Formats."""
 
 
 class FileError(NumbersError):

@@ -45,7 +45,7 @@ class Document:
     Create an instance of a new Numbers document.
 
     If ``filename`` is ``None``, an empty document is created using the defaults
-    defined by the class constructor. You can optionionally override these
+    defined by the class constructor. You can optionally override these
     defaults at object construction time.
 
     Parameters
@@ -303,7 +303,7 @@ class Document:
             * **num_decimals** (``int``, *optional*, default: ``0``) - Integer precision
               when decimals are padded.
             * **show_thousands_separator** (``bool``, *optional*, default: ``False``) - ``True``
-              if the number should include a thousands seperator.
+              if the number should include a thousands separator.
 
         :``"datetime"``:
             * **format** (``str``, *optional*, default: ``"d MMM y"``) - A POSIX strftime-like
@@ -327,7 +327,7 @@ class Document:
             try:
                 kwargs["type"] = CustomFormattingType[format_type]
             except (KeyError, AttributeError):
-                msg = f"unsuported cell format type '{format_type}'"
+                msg = f"unsupported cell format type '{format_type}'"
                 raise TypeError(msg) from None
 
         custom_format = CustomFormatting(**kwargs)
@@ -474,7 +474,7 @@ class Table(Cacheable):
         self._table_id = table_id
         self.num_rows = self._model.number_of_rows(self._table_id)
         self.num_cols = self._model.number_of_columns(self._table_id)
-        # Cache all data now to facilite write(). Performance impact
+        # Cache all data now to facilitate write(). Performance impact
         # of computing all cells is minimal compared to file IO
         self._data = []
         self._model.set_table_data(table_id, self._data)
@@ -545,7 +545,7 @@ class Table(Cacheable):
         ------
         ValueError:
             If the number of headers is negative, exceeds the number of rows in the
-            table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).
+            table, or exceeds Numbers maximum number of headers (``MAX_HEADER_COUNT``).
 
         """
         return self._model.num_header_rows(self._table_id)
@@ -579,7 +579,7 @@ class Table(Cacheable):
         ------
         ValueError:
             If the number of headers is negative, exceeds the number of rows in the
-            table, or exceeds Numbers maxinum number of headers (``MAX_HEADER_COUNT``).
+            table, or exceeds Numbers maximum number of headers (``MAX_HEADER_COUNT``).
 
         """
         return self._model.num_header_cols(self._table_id)
@@ -961,7 +961,7 @@ class Table(Cacheable):
         Raises
         ------
         IndexError:
-            If the style name cannot be foiund in the document.
+            If the style name cannot be found in the document.
         TypeError:
             If the style parameter is an invalid type.
         ValueError:
@@ -1001,8 +1001,8 @@ class Table(Cacheable):
 
     def categorized_data(self) -> dict | None:
         """
-        Return the table's data organised into categories, if enabled or ``None``
-        if the table has not had categoried enabled.
+        Return the table's data organized into categories, if enabled or ``None``
+        if the table has not had categories enabled.
 
         The data is a dictionary with the category names as keys and a list
         dictionaries for each row in that category of the table. The table heading
@@ -1279,7 +1279,7 @@ class Table(Cacheable):
         """
         Set the borders for a cell.
 
-        Cell references can be row-column offsers or Excel/Numbers-style A1 notation. Borders
+        Cell references can be row-column offsets or Excel/Numbers-style A1 notation. Borders
         can be applied to multiple sides of a cell by passing a list of sides. The name(s)
         of the side(s) must be one of ``"top"``, ``"right"``, ``"bottom"`` or ``"left"``.
 
@@ -1299,7 +1299,7 @@ class Table(Cacheable):
             * **param2** (*int*): The column number (zero indexed).
             * **param3** (*str | List[str]*): Which side(s) of the cell to apply the border to.
             * **param4** (:py:class:`Border`): The border to add.
-            * **param5** (*int*, *optinal*, default: 1): The length of the stroke to add.
+            * **param5** (*int*, *optional*, default: 1): The length of the stroke to add.
 
         :Args (A1):
             * **param1** (*str*): A cell reference using Excel/Numbers-style A1 notation.
@@ -1380,7 +1380,7 @@ class Table(Cacheable):
         r"""
         Set the data format for a cell.
 
-        Cell references can be **row-column** offsers or Excel/Numbers-style **A1** notation.
+        Cell references can be **row-column** offsets or Excel/Numbers-style **A1** notation.
 
         .. code:: python
 
@@ -1463,8 +1463,8 @@ class Table(Cacheable):
               decimal places, or ``None`` for automatic.
 
         :``"custom"``:
-            * **format** (*str | CustomFormating*) - The name of a custom
-                formatin the document or a :py:class:`~numbers_parser.CustomFormatting`
+            * **format** (*str | CustomFormatting*) - The name of a custom
+                formatting the document or a :py:class:`~numbers_parser.CustomFormatting`
                 object.
 
         :``"currency"``:
@@ -1475,7 +1475,7 @@ class Table(Cacheable):
             * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) - How negative numbers are represented.
               See `Negative number formats <#negative-formats>`_.
             * **show_thousands_separator** (*bool, optional, default: False*) - ``True``
-              if the number should include a thousands seperator, e.g. ``,``
+              if the number should include a thousands separator, e.g. ``,``
             * **use_accounting_style** (*bool, optional, default: False*) -  ``True``
               if the currency symbol should be formatted to the left of the cell and
               separated from the number value by a tab.
@@ -1495,7 +1495,7 @@ class Table(Cacheable):
             * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) - How negative numbers are represented.
               See `Negative number formats <#negative-formats>`_.
             * **show_thousands_separator** (*bool, optional, default: False*) - ``True``
-              if the number should include a thousands seperator, e.g. ``,``
+              if the number should include a thousands separator, e.g. ``,``
 
         :``"scientific"``:
             * **decimal_places** (*float, optional, default: None*) - number of
@@ -1586,7 +1586,7 @@ class Table(Cacheable):
             format_type = FormattingType[format_type_name.upper()]
             _ = FORMATTING_ALLOWED_CELLS[format_type_name]
         except (KeyError, AttributeError):
-            msg = f"unsuported cell format type '{format_type_name}'"
+            msg = f"unsupported cell format type '{format_type_name}'"
             raise TypeError(msg) from None
 
         cell = self._data[row][col]

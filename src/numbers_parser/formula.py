@@ -41,12 +41,12 @@ class Formula(list):
         num_rows = node.AST_array_node_numRow
         num_cols = node.AST_array_node_numCol
         if num_rows == 1:
-            # 1-dimentional array: {a,b,c,d}
+            # 1-dimensional array: {a,b,c,d}
             args = self.popn(num_cols)
             args = ",".join(reversed(args))
             self.push(f"{{{args}}}")
         else:
-            # 2-dimentional array: {a,b;c,d}
+            # 2-dimensional array: {a,b;c,d}
             rows = []
             for _row_num in range(num_rows):
                 args = self.popn(num_cols)
