@@ -4,7 +4,6 @@ import pytest
 import pytest_check as check
 
 from numbers_parser import __version__
-from numbers_parser.experimental import _enable_experimental_features
 
 ZZZ_TABLE_1_REF = [
     [None, "YYY_COL_1", "YYY_COL_2"],
@@ -132,7 +131,7 @@ def test_select_table(script_runner):
 def test_list_sheets(script_runner):
     ret = script_runner.run(["cat-numbers", "-S", DOCUMENT], print_result=False)
     assert ret.success
-    assert ret.stdout == (f"{DOCUMENT}: ZZZ_Sheet_1\n" "tests/data/test-1.numbers: ZZZ_Sheet_2\n")
+    assert ret.stdout == (f"{DOCUMENT}: ZZZ_Sheet_1\ntests/data/test-1.numbers: ZZZ_Sheet_2\n")
     assert ret.stderr == ""
 
 
@@ -231,16 +230,20 @@ def test_date_formatting(script_runner):
             check.equal(row[6], row[7])
 
 
+@pytest.mark.script_launch_mode("subprocess")
 def test_debug(script_runner):
     ret = script_runner.run(
-        ["cat-numbers", "--experimental", "--debug", "tests/data/test-1.numbers"],
+        [
+            "cat-numbers",
+            "--experimental=TESTING",
+            "--debug",
+            "tests/data/test-1.numbers",
+        ],
         print_result=False,
     )
     assert ret.success
     rows = ret.stderr.strip().splitlines()
-    assert rows[0] == "DEBUG:numbers_parser.experimental:Experimental features on"
-
-    _enable_experimental_features(False)
+    assert "enabling ExperimentalFeatures.TESTING" in rows[0]
 
 
 @pytest.mark.script_launch_mode("subprocess")
