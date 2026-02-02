@@ -26,7 +26,12 @@ from numbers_parser.constants import (
     EMPTY_STORAGE_BUFFER,
     NegativeNumberStyle,
 )
-from numbers_parser.experimental import _enable_experimental_features, _experimental_features
+from numbers_parser.experimental import (
+    ExperimentalFeatures,
+    disable_experimental_feature,
+    enable_experimental_feature,
+    experimental_features,
+)
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.xrefs import xl_col_to_name, xl_range, xl_rowcol_to_cell
@@ -53,7 +58,7 @@ def test_cell_storage(tmp_path):
     buffer[1] = 255
     with pytest.raises(UnsupportedError) as e:
         _ = Cell._from_storage(table_id, 0, 0, buffer, model)
-    assert "Cell type ID 255 is not recognised" in str(e)
+    assert "Cell type ID 255 is not recognized" in str(e)
 
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
     buffer[0] = 4
@@ -191,11 +196,11 @@ def test_merge(configurable_save_file):
 
 
 def test_experimental():
-    assert not _experimental_features()
-    _enable_experimental_features(True)
-    assert _experimental_features()
-    _enable_experimental_features(False)
-    assert not _experimental_features()
+    assert experimental_features() == ExperimentalFeatures.NONE
+    enable_experimental_feature(ExperimentalFeatures.TESTING)
+    assert ExperimentalFeatures.TESTING in experimental_features()
+    disable_experimental_feature(ExperimentalFeatures.TESTING)
+    assert experimental_features() == ExperimentalFeatures.NONE
 
 
 def test_bad_image_filenames():

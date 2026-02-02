@@ -16,9 +16,17 @@ from numbers_parser import (
 )
 from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser.constants import MAX_SIGNIFICANT_DIGITS
-from numbers_parser.experimental import _enable_experimental_features
+from numbers_parser.experimental import ExperimentalFeatures, enable_experimental_feature
 
 logger = logging.getLogger(numbers_parser_name)
+
+
+def experimental_feature_choice(s: str) -> ExperimentalFeatures:
+    try:
+        return ExperimentalFeatures[s]
+    except KeyError:
+        msg = f"invalid experimental feature: {s}"
+        raise argparse.ArgumentTypeError(msg)  # noqa: B904
 
 
 def command_line_parser():
@@ -70,10 +78,13 @@ def command_line_parser():
     )
     parser.add_argument("document", nargs="*", help="Document(s) to export")
     parser.add_argument("--debug", default=False, action="store_true", help="Enable debug logging")
+    experimental_choices = [
+        f.name for f in ExperimentalFeatures if f is not ExperimentalFeatures.NONE
+    ]
     parser.add_argument(
         "--experimental",
-        default=False,
-        action="store_true",
+        type=experimental_feature_choice,
+        choices=[ExperimentalFeatures[name] for name in experimental_choices],
         help=argparse.SUPPRESS,
     )
     return parser
@@ -136,7 +147,7 @@ def main() -> None:
         else:
             logger.setLevel("ERROR")
         if args.experimental:
-            _enable_experimental_features(True)
+            enable_experimental_feature(args.experimental)
         for filename in args.document:
             try:
                 if args.list_sheets:

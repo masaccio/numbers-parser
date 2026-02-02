@@ -1,16 +1,30 @@
 import logging
+from enum import Flag, auto
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
 
-_EXPERIMENTAL_FEATURES = False
+
+class ExperimentalFeatures(Flag):
+    NONE = auto()
+    TESTING = auto()
+    GROUPED_CATEGORIES = auto()
 
 
-def _enable_experimental_features(status: bool) -> None:
-    global _EXPERIMENTAL_FEATURES
-    _EXPERIMENTAL_FEATURES = status
-    debug("Experimental features %s", "on" if status else "off")
+EXPERIMENTAL_FEATURES = ExperimentalFeatures.NONE
 
 
-def _experimental_features() -> bool:
-    return _EXPERIMENTAL_FEATURES
+def enable_experimental_feature(flags: ExperimentalFeatures) -> None:
+    global EXPERIMENTAL_FEATURES
+    EXPERIMENTAL_FEATURES |= flags
+    debug("Experimental features: enabling %s, flags=%s", flags, EXPERIMENTAL_FEATURES)
+
+
+def disable_experimental_feature(flags: ExperimentalFeatures) -> None:
+    global EXPERIMENTAL_FEATURES
+    EXPERIMENTAL_FEATURES ^= flags
+    debug("Experimental features: disabling %s, flags=%s", flags, EXPERIMENTAL_FEATURES)
+
+
+def experimental_features() -> ExperimentalFeatures:
+    return EXPERIMENTAL_FEATURES
