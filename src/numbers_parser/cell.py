@@ -256,7 +256,7 @@ class Style:
     """
 
     alignment: Alignment = DEFAULT_ALIGNMENT_CLASS  # : horizontal and vertical alignment
-    bg_image: object = None  # : backgroung image
+    bg_image: object = None  # : background image
     bg_color: RGB | list[RGB] = None
     font_color: RGB = field(default_factory=default_color)
     font_size: float = DEFAULT_FONT_SIZE
@@ -650,7 +650,7 @@ class Cell(CellStorageFlags, Cacheable):
         Returns
         -------
             str:
-                The text of the foruma in a cell, or `None` if there is no formula
+                The text of the formula in a cell, or `None` if there is no formula
                 present in a cell.
 
         """
@@ -921,7 +921,7 @@ class Cell(CellStorageFlags, Cacheable):
         elif cell_type == CURRENCY_CELL_TYPE:
             cell = NumberCell(row, col, d128, cell_type=CellType.CURRENCY)
         else:
-            msg = f"Cell type ID {cell_type} is not recognised"
+            msg = f"Cell type ID {cell_type} is not recognized"
             raise UnsupportedError(msg)
 
         cell._copy_flags(storage_flags)

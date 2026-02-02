@@ -414,7 +414,7 @@ def test_write_date_format(configurable_save_file):
     assert "no type defined for cell format" in str(e)
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting("A1", "invalid")
-    assert "unsuported cell format type 'invalid'" in str(e)
+    assert "unsupported cell format type 'invalid'" in str(e)
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(0, 0, "datetime", "invalid")
     assert "too many positional arguments to set_cell_formatting" in str(e)
@@ -744,7 +744,7 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
     assert "'Custom Format 1' already exists" in str(e)
     with pytest.raises(TypeError) as e:
         format = doc.add_custom_format(type="error")
-    assert "unsuported cell format type 'ERROR'" in str(e)
+    assert "unsupported cell format type 'ERROR'" in str(e)
     format = doc.add_custom_format()
     assert format.name == "Custom Format"
 

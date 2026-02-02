@@ -36,7 +36,7 @@ def compare_tables(table, ref):
             if ref[row][col] is None:
                 check.is_none(
                     table.cell(row, col).formula,
-                    f"!existsy@[{row},{col}]",
+                    f"!exists@[{row},{col}]",
                 )
             else:
                 check.is_true(table.cell(row, col).is_formula, f"formula@[{row},{col}]")

@@ -910,9 +910,9 @@ class _NumbersModel(Cacheable):
                 return sheet_id
         return None
 
-    @cache()  # noqa: RET503
+    @cache()
     def table_uuids_to_id(self, table_uuid) -> int | None:
-        for sheet_id in self.sheet_ids():  # pragma: no branch
+        for sheet_id in self.sheet_ids():  # pragma: no branch  # noqa: RET503
             for table_id in self.table_ids(sheet_id):
                 if table_uuid == self.table_base_id(table_id):
                     return table_id
@@ -1462,7 +1462,7 @@ class _NumbersModel(Cacheable):
             },
             TSTArchives.TableModelArchive,
         )
-        # Supresses Numbers assertions for tables sharing the same data
+        # Suppress Numbers assertions for tables sharing the same data
         table_model.category_owner.identifier = 0
 
         column_headers_id, column_headers = self.objects.create_object_from_dict(
@@ -1671,7 +1671,7 @@ class _NumbersModel(Cacheable):
             "bottom_right_column": 0x7FFF,
             "bottom_right_row": 0x7FFFFFFF,
         }
-        spanning_depdendencies = {
+        spanning_dependencies = {
             "total_range_for_table": null_range_ref,
             "body_range_for_table": null_range_ref,
         }
@@ -1684,8 +1684,8 @@ class _NumbersModel(Cacheable):
                 "cell_dependencies": {},
                 "range_dependencies": {},
                 "volatile_dependencies": volatile_dependencies,
-                "spanning_column_dependencies": spanning_depdendencies,
-                "spanning_row_dependencies": spanning_depdendencies,
+                "spanning_column_dependencies": spanning_dependencies,
+                "spanning_row_dependencies": spanning_dependencies,
                 "whole_owner_dependencies": {"dependent_cells": {}},
                 "cell_errors": {},
                 "base_owner_uid": base_owner_uuid.dict2,
@@ -1761,7 +1761,7 @@ class _NumbersModel(Cacheable):
             for k, v in presets_map.items()
         }
         for style in styles.values():
-            # Override __setattr__ behaviour for builtin styles
+            # Override __setattr__ behavior for builtin styles
             style.__dict__["_update_text_style"] = False
             style.__dict__["_update_cell_style"] = False
         return styles
@@ -2094,7 +2094,7 @@ class _NumbersModel(Cacheable):
         # a string with a new bullet character
         bds = self.objects[table_id].base_data_store
         rich_text_table = self.objects[bds.rich_text_table.identifier]
-        for entry in rich_text_table.entries:  # pragma: no branch
+        for entry in rich_text_table.entries:  # pragma: no branch  # noqa: RET503
             if string_key == entry.key:
                 payload = self.objects[entry.rich_text_payload.identifier]
                 payload_storage = self.objects[payload.storage.identifier]
