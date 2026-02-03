@@ -688,6 +688,11 @@ def test_group_lookups():
     )
     assert list(data) == [("Bus", "Car", "Helicopter")]
 
+    table = doc.sheets[0].tables["Maximal Nesting"]
+    assert table.cell("D8").value == "Transport"
+    assert table.cell("B9").value == False  # noqa: E712
+    assert table.cell("C10").value == datetime(2011, 1, 30)  # noqa: DTZ001
+
 
 def test_categories():
     doc = Document("tests/data/test-categories.numbers")
