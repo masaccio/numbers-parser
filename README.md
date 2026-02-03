@@ -362,12 +362,13 @@ csv2numbers --transform='Category=LOOKUP:Transaction;mapping.numbers' file1.csv
 
 Current known limitations of `numbers-parser` which may be implemented in the future are:
 
-- Table styles that allow new tables to adopt a style across the whole table are not suppported
+- Table styles that allow new tables to adopt a style across the whole table are not supported
 - Creating cells of type `BulletedTextCell` is not supported
 - New tables are inserted with a fixed offset below the last table in a worksheet which does not take into account title or caption size
 - Captions can be created and edited as of numbers-parser version 4.12, but cannot be styled. New captions adopt the first caption style available in the current document
 - Formulas cannot be written to a document
 - Pivot tables are unsupported and saving a document with a pivot table issues a UnsupportedWarning (see [issue 73](https://github.com/masaccio/numbers-parser/issues/73) for details).
+- Tables which have been saved grouped cannot be safely edited as references to written cells refer to the ungrouped cell rows rather than the row number in the groups.
 
 The following limitations are expected to always remain:
 
