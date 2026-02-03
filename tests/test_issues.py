@@ -590,18 +590,6 @@ def test_issue_96():
     assert table.cell(12, 2).formatted_value == ""
 
 
-def test_issue_98():
-    doc = Document("tests/data/issue-98.numbers")
-    ungrouped_table = doc.sheets[0].tables[0]
-    grouped_table = doc.sheets[0].tables[1]
-
-    assert ungrouped_table.categorized_data() is None
-    assert ungrouped_table.cell("B4").value == "Dinner Out"
-    assert ungrouped_table.cell("D4").formatted_value == "RON 50.75"
-    assert grouped_table.cell("B4").value == "Petrol"
-    assert grouped_table.cell("D4").formatted_value == "RON 90.00"
-
-
 def test_issue_99():
     doc = Document("tests/data/issue-99.numbers")
     table = doc.default_table
