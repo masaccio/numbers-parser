@@ -756,6 +756,8 @@ class Table(Cacheable):
             msg = f"column {col} out of range"
             raise IndexError(msg)
 
+        if (row_mapper := self._model.table_category_row_map(self._table_id)) is not None:
+            return self._data[row_mapper[row]][col]
         return self._data[row][col]
 
     def iter_rows(
