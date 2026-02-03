@@ -502,7 +502,7 @@ def test_issue_83():
     table.write(0, 0, "test")
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(0, 0, "text")
-    assert "unsuported cell format type 'text'" in str(e)
+    assert "unsupported cell format type 'text'" in str(e)
 
 
 def test_issue_85():
@@ -588,6 +588,18 @@ def test_issue_96():
     table = doc.default_table
     assert table.cell(12, 1).formatted_value == "20.0%"
     assert table.cell(12, 2).formatted_value == ""
+
+
+def test_issue_98():
+    doc = Document("tests/data/issue-98.numbers")
+    ungrouped_table = doc.sheets[0].tables[0]
+    grouped_table = doc.sheets[0].tables[1]
+
+    assert ungrouped_table.categorized_data() is None
+    assert ungrouped_table.cell("B4").value == "Dinner Out"
+    assert ungrouped_table.cell("D4").formatted_value == "RON 50.75"
+    assert grouped_table.cell("B4").value == "Petrol"
+    assert grouped_table.cell("D4").formatted_value == "RON 90.00"
 
 
 def test_issue_99():
