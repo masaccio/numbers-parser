@@ -664,11 +664,36 @@ MAXIMALLY_NESTED_CATEGORIES = (
 )
 
 
+def test_group_lookups():
+    doc = Document("tests/data/test-categories.numbers")
+
+    ungrouped_table = doc.sheets[0].tables["Uncategorized"]
+    grouped_table = doc.sheets[0].tables["Categories"]
+
+    assert ungrouped_table.categorized_data() is None
+    assert ungrouped_table.cell("A5").value == "Bear"
+    assert ungrouped_table.cell("E5").value == 10
+    assert grouped_table.cell("A5").value == "Car"
+    assert grouped_table.cell("C5").value == 30
+
+    data = [x[0] for x in grouped_table.iter_rows(min_row=3, max_row=5, values_only=True)]
+    assert data == ["Bus", "Car", "Helicopter"]
+
+    data = grouped_table.iter_cols(
+        min_col=0,
+        max_col=0,
+        min_row=3,
+        max_row=5,
+        values_only=True,
+    )
+    assert list(data) == [("Bus", "Car", "Helicopter")]
+
+
 def test_categories():
     doc = Document("tests/data/test-categories.numbers")
     sheet = doc.sheets["Categories"]
 
-    categories = sheet.tables["Uncategorised"].categorized_data()
+    categories = sheet.tables["Uncategorized"].categorized_data()
     assert categories is None
 
     categories = sheet.tables["Categories"].categorized_data()
