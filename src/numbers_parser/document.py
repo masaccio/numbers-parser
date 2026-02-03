@@ -805,10 +805,10 @@ class Table(Cacheable):
                 sum += row
 
         """
-        min_row = min_row or 0
-        max_row = max_row or self.num_rows - 1
-        min_col = min_col or 0
-        max_col = max_col or self.num_cols - 1
+        min_row = min_row if min_row is not None else 0
+        max_row = max_row if max_row is not None else self.num_rows - 1
+        min_col = min_col if min_col is not None else 0
+        max_col = max_col if max_col is not None else self.num_cols - 1
 
         if min_row < 0:
             msg = f"row {min_row} out of range"
@@ -824,11 +824,16 @@ class Table(Cacheable):
             raise IndexError(msg)
 
         rows = self.rows()
-        for row in range(min_row, max_row + 1):
+        if (row_mapper := self._model.table_category_row_map(self._table_id)) is not None:
+            rows = [rows[row_mapper[row]] for row in range(min_row, max_row + 1)]
+        else:
+            rows = rows[min_row : max_row + 1]
+
+        for row in rows:
             if values_only:
-                yield tuple(cell.value for cell in rows[row][min_col : max_col + 1])
+                yield tuple(cell.value for cell in row[min_col : max_col + 1])
             else:
-                yield tuple(rows[row][min_col : max_col + 1])
+                yield tuple(row[min_col : max_col + 1])
 
     def iter_cols(
         self,
@@ -875,10 +880,10 @@ class Table(Cacheable):
                 sum += col.value
 
         """
-        min_row = min_row or 0
-        max_row = max_row or self.num_rows - 1
-        min_col = min_col or 0
-        max_col = max_col or self.num_cols - 1
+        min_row = min_row if min_row is not None else 0
+        max_row = max_row if max_row is not None else self.num_rows - 1
+        min_col = min_col if min_col is not None else 0
+        max_col = max_col if max_col is not None else self.num_cols - 1
 
         if min_row < 0:
             msg = f"row {min_row} out of range"
@@ -894,11 +899,16 @@ class Table(Cacheable):
             raise IndexError(msg)
 
         rows = self.rows()
+        if (row_mapper := self._model.table_category_row_map(self._table_id)) is not None:
+            rows = [rows[row_mapper[row_num]] for row_num in range(min_row, max_row + 1)]
+        else:
+            rows = rows[min_row : max_row + 1]
+
         for col in range(min_col, max_col + 1):
             if values_only:
-                yield tuple(row[col].value for row in rows[min_row : max_row + 1])
+                yield tuple(row[col].value for row in rows)
             else:
-                yield tuple(row[col] for row in rows[min_row : max_row + 1])
+                yield tuple(row[col] for row in rows)
 
     def _validate_cell_coords(self, *args):
         if isinstance(args[0], str):
