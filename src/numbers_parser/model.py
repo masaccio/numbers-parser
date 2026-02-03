@@ -2589,15 +2589,16 @@ class _NumbersModel(Cacheable):
 
         group_uuids = self.group_uuid_values()
         row_uuid_to_offset = {
-            NumbersUUID(x): row_num
-            for row_num, x in enumerate(category_archive.row_uid_lookup.uuids)
+            NumbersUUID(uuid): row for row, uuid in enumerate(category_archive.row_uid_lookup.uuids)
         }
         row_uid_for_index = [
             NumbersUUID(row_uid_map.sorted_row_uids[i]) for i in row_uid_map.row_uid_for_index
         ]
         return {
-            row_num: row_uuid_to_offset[x]
-            for row_num, x in enumerate(x for x in row_uid_for_index if x not in group_uuids)
+            row: row_uuid_to_offset[uuid]
+            for row, uuid in enumerate(
+                uuid for uuid in row_uid_for_index if uuid not in group_uuids
+            )
         }
 
     def table_category_data(self, table_id: int) -> dict | None:
