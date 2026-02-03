@@ -2548,6 +2548,58 @@ class _NumbersModel(Cacheable):
         # datas never appears to be an empty list (default themes include images)
         return max(image_ids) + 1
 
+    @classmethod
+    def cell_value_to_key(
+        cls,
+        cell_value: TSCEArchives.CellValueArchive,
+    ) -> str | int | bool | datetime:
+        """Convert a CellValueArchive to a key."""
+        cell_value_type = cell_value.cell_value_type
+        if cell_value_type == CellValueType.STRING_TYPE:
+            return cell_value.string_value.value
+        if cell_value_type == CellValueType.NUMBER_TYPE:
+            return cell_value.number_value.value
+        if cell_value_type == CellValueType.BOOLEAN_TYPE:
+            return cell_value.boolean_value.value
+        # Must be DATE_TYPE
+        return cell_value.date_value.value
+
+    @cache(num_args=0)
+    def group_uuid_values(self):
+        return {
+            NumbersUUID(self.objects[_id].group_uid): _NumbersModel.cell_value_to_key(
+                self.objects[_id].group_cell_value,
+            )
+            for _id in self.find_refs("GroupNodeArchive")
+        }
+
+    @cache()
+    def table_category_row_map(self, table_id: int) -> dict[int, int] | None:
+        category_owner_id = self.objects[table_id].category_owner.identifier
+        if not category_owner_id:
+            return None
+        category_archive_id = self.objects[category_owner_id].group_by[0].identifier
+        category_archive = self.objects[category_archive_id]
+        if not category_archive.is_enabled:
+            return None
+
+        table_info = self.objects[self.table_info_id(table_id)]
+        category_order = self.objects[table_info.category_order.identifier]
+        row_uid_map = self.objects[category_order.uid_map.identifier]
+
+        group_uuids = self.group_uuid_values()
+        row_uuid_to_offset = {
+            NumbersUUID(x): row_num
+            for row_num, x in enumerate(category_archive.row_uid_lookup.uuids)
+        }
+        row_uid_for_index = [
+            NumbersUUID(row_uid_map.sorted_row_uids[i]) for i in row_uid_map.row_uid_for_index
+        ]
+        return {
+            row_num: row_uuid_to_offset[x]
+            for row_num, x in enumerate(x for x in row_uid_for_index if x not in group_uuids)
+        }
+
     def table_category_data(self, table_id: int) -> dict | None:
         category_owner_id = self.objects[table_id].category_owner.identifier
         category_archive_id = self.objects[category_owner_id].group_by[0].identifier
@@ -2558,8 +2610,9 @@ class _NumbersModel(Cacheable):
         table_info = self.objects[self.table_info_id(table_id)]
         category_order = self.objects[table_info.category_order.identifier]
         row_uid_map = self.objects[category_order.uid_map.identifier]
+
         sorted_row_uuids = [
-            NumbersUUID(row_uid_map.sorted_row_uids[i]).hex for i in row_uid_map.row_uid_for_index
+            NumbersUUID(row_uid_map.sorted_row_uids[i]).hex for i in row_uid_map.row_index_for_uid
         ]
 
         data = self._table_data[table_id]
@@ -2575,22 +2628,8 @@ class _NumbersModel(Cacheable):
                     offsets += list(range(entry.range_begin, entry.range_begin + 1))
             return offsets
 
-        def cell_value_to_key(
-            cell_value: TSCEArchives.CellValueArchive,
-        ) -> str | int | bool | datetime:
-            """Convert a CellValueArchive to a key."""
-            cell_value_type = cell_value.cell_value_type
-            if cell_value_type == CellValueType.STRING_TYPE:
-                return cell_value.string_value.value
-            if cell_value_type == CellValueType.NUMBER_TYPE:
-                return cell_value.number_value.value
-            if cell_value_type == CellValueType.BOOLEAN_TYPE:
-                return cell_value.boolean_value.value
-            # Must be DATE_TYPE
-            return cell_value.date_value.value
-
         group_node_to_key = {
-            NumbersUUID(self.objects[_id].group_uid).hex: cell_value_to_key(
+            NumbersUUID(self.objects[_id].group_uid).hex: _NumbersModel.cell_value_to_key(
                 self.objects[_id].group_cell_value,
             )
             for _id in self.find_refs("GroupNodeArchive")
@@ -2612,7 +2651,7 @@ class _NumbersModel(Cacheable):
             for child in children:
                 group_uuid = NumbersUUID(child.group_uid).hex
                 if len(child.child) == 0:
-                    key = cell_value_to_key(child.group_cell_value)
+                    key = _NumbersModel.cell_value_to_key(child.group_cell_value)
 
                     row_offsets = index_set_to_offsets(child.row_lookup_uids)
                     categories[group_uuid] = {
