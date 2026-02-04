@@ -121,6 +121,7 @@ def _week_of_month(value: datetime) -> int:
 
 DATETIME_FIELD_MAP = OrderedDict(
     [
+        # Cell formats
         ("a", lambda x: x.strftime("%p").lower()),
         ("EEEE", "%A"),
         ("EEE", "%a"),
@@ -157,6 +158,10 @@ DATETIME_FIELD_MAP = OrderedDict(
         ("SSS", lambda x: str(x.microsecond).zfill(6)[0:3]),
         ("SSSS", lambda x: str(x.microsecond).zfill(6)[0:4]),
         ("SSSSS", lambda x: str(x.microsecond).zfill(6)[0:5]),
+        # Table category formats
+        ("QQQ", lambda x: "Q" + str(int(x.month / 3) + 1)),
+        ("LLLL", "%B"),
+        ("w", "%-W"),
     ],
 )
 
