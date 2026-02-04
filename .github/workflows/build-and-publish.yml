@@ -1,0 +1,51 @@
+name: Build and Publish
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  workflow_dispatch:
+  release:
+    types: [created]
+
+name: All tests
+
+on:
+  push:
+    branches: [ "main", "v2.3" ]
+  pull_request:
+    branches: [ "main", "v2.3" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.13"]
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install libsnappy
+        run: sudo apt-get -y install libsnappy-dev
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
+
+      - name: Run tests
+        run: uv run pytest -n logical
+
+      - name: Build distribution
+        run: uv build
+
+      - name: Publish to PyPI
+        run: uv publish
