@@ -56,7 +56,9 @@ docs = [
     "sphinx-toolbox>=3.5",
     "sphinx-nefertiti>=0.7",
     "sphinx-markdown-builder>=0.6",
-    "sphinx-copybutton>=0.5",
+    "sphinx-copybutton>=0.5.2",
+    # Security updates
+    "urllib3>=2.6.0",
 ]
 bootstrap = [
     "rich>=14.0",
