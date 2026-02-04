@@ -35,6 +35,9 @@ jobs:
       - name: Run tests
         run: uv run pytest -n logical
 
+      - name: Update README
+        run: make readme
+
       - name: Build distribution
         run: uv build
 
