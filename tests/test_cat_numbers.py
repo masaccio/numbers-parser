@@ -284,3 +284,8 @@ def test_errors(script_runner):
     assert not ret.success
     assert "invalid.numbers: no such file or directory" in ret.stderr
     assert ret.stdout == ""
+
+    ret = script_runner.run(["cat-numbers", "--experimental=ERROR"], print_result=False)
+    assert not ret.success
+    assert "invalid experimental feature: ERROR" in ret.stderr
+    assert ret.stdout == ""

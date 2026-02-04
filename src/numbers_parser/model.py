@@ -2626,27 +2626,15 @@ class _NumbersModel(Cacheable):
         for uuid in row_uid_for_index:
             if uuid in group_uuids:
                 parent = group_parents.get(uuid)
-
-                if uuid not in nodes:
-                    nodes[uuid] = {
-                        "key": group_uuids[uuid],
-                        "children": {},
-                        "rows": [],
-                    }
+                nodes[uuid] = {"key": group_uuids[uuid], "children": {}, "rows": []}
 
                 if parent is None:
-                    if nodes[uuid]["key"] not in root_children:
-                        root_children[nodes[uuid]["key"]] = nodes[uuid]
+                    root_children[nodes[uuid]["key"]] = nodes[uuid]
                 else:
                     if parent not in nodes:
-                        nodes[parent] = {
-                            "key": group_uuids[parent],
-                            "children": {},
-                            "rows": [],
-                        }
+                        nodes[parent] = {"key": group_uuids[parent], "children": {}, "rows": []}
                     parent_node = nodes[parent]
-                    if nodes[uuid]["key"] not in parent_node["children"]:
-                        parent_node["children"][nodes[uuid]["key"]] = nodes[uuid]
+                    parent_node["children"][nodes[uuid]["key"]] = nodes[uuid]
 
                 while stack and stack[-1] != parent:
                     stack.pop()
