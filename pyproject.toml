@@ -22,7 +22,7 @@ classifiers = [
 description = "Read and write Apple Numbers spreadsheets"
 name = "numbers-parser"
 readme = "README.md"
-version = "4.18.0"
+version = "4.18.1"
 
 [project.urls]
 repository = "https://github.com/masaccio/numbers-parser"
