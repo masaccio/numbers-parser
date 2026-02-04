@@ -9,15 +9,6 @@ on:
   release:
     types: [created]
 
-name: All tests
-
-on:
-  push:
-    branches: [ "main", "v2.3" ]
-  pull_request:
-    branches: [ "main", "v2.3" ]
-  workflow_dispatch:
-
 jobs:
   build-and-publish:
     runs-on: ${{ matrix.os }}
