@@ -133,157 +133,155 @@ NUMBER_CATEGORIES = {
 
 NESTED_DATE_CATEGORIES = {
     "Fruit": {
-        2010: [
+        "2010": [
             ["Banana", datetime(2010, 11, 5), "Fruit", 40.0],
             ["Grape", datetime(2010, 9, 22), "Fruit", 120.0],
             ["Watermelon", datetime(2010, 6, 27), "Fruit", 40.0],
         ],
-        2011: [
+        "2011": [
             ["Pineapple", datetime(2011, 10, 23), "Fruit", 40.0],
         ],
-        2012: [
+        "2012": [
             ["Apple", datetime(2012, 4, 15), "Fruit", 40.0],
             ["Kiwi", datetime(2012, 7, 13), "Fruit", 30.0],
             ["Orange", datetime(2012, 10, 5), "Fruit", 40.0],
         ],
-        2013: [
+        "2013": [
             ["Mango", datetime(2013, 2, 1), "Fruit", 30.0],
         ],
-        2014: [
+        "2014": [
             ["Strawberry", datetime(2014, 8, 16), "Fruit", 120.0],
         ],
-        2015: [
+        "2015": [
             ["Peach", datetime(2015, 2, 28), "Fruit", 40.0],
         ],
     },
     "Animal": {
-        2010: [
+        "2010": [
             ["Deer", datetime(2010, 5, 18), "Animal", 10.0],
             ["Rabbit", datetime(2010, 2, 14), "Animal", 120.0],
         ],
-        2011: [
+        "2011": [
             ["Cat", datetime(2011, 8, 29), "Animal", 20.0],
         ],
-        2013: [
+        "2013": [
             ["Elephant", datetime(2013, 11, 11), "Animal", 10.0],
             ["Zebra", datetime(2013, 10, 14), "Animal", 30.0],
         ],
-        2014: [
+        "2014": [
             ["Bear", datetime(2014, 9, 19), "Animal", 10.0],
             ["Dog", datetime(2014, 3, 4), "Animal", 20.0],
             ["Lion", datetime(2014, 11, 30), "Animal", 10.0],
             ["Parrot", datetime(2014, 5, 9), "Animal", 30.0],
         ],
-        2015: [
+        "2015": [
             ["Horse", datetime(2015, 4, 25), "Animal", 30.0],
         ],
     },
     "Transport": {
-        2010: [
+        "2010": [
             ["Motorcycle", datetime(2010, 12, 17), "Transport", 30.0],
         ],
-        2011: [
+        "2011": [
             ["Bicycle", datetime(2011, 3, 21), "Transport", 40.0],
             ["Helicopter", datetime(2011, 6, 8), "Transport", 5.0],
             ["Train", datetime(2011, 1, 30), "Transport", 10.0],
         ],
-        2012: [
+        "2012": [
             ["Bus", datetime(2012, 12, 3), "Transport", 5.0],
             ["Truck", datetime(2012, 3, 9), "Transport", 20.0],
         ],
-        2013: [
+        "2013": [
             ["Airplane", datetime(2013, 7, 26), "Transport", 5.0],
             ["Scooter", datetime(2013, 5, 6), "Transport", 10.0],
         ],
-        2015: [
+        "2015": [
             ["Car", datetime(2015, 1, 10), "Transport", 30.0],
             ["Van", datetime(2015, 6, 5), "Transport", 5.0],
         ],
     },
 }
 
-MAXIMALLY_NESTED_CATEGORIES = (
-    {
-        "Transport": {
-            False: {
-                5: {
-                    2013: [
-                        ["Airplane", False, datetime(2013, 7, 26), "Transport", 5.0],
-                    ],
-                    2012: [
-                        ["Bus", False, datetime(2012, 12, 3), "Transport", 5.0],
-                    ],
-                    2011: [["Helicopter", False, datetime(2011, 6, 8), "Transport", 5.0]],
-                    2015: [["Van", False, datetime(2015, 6, 5), "Transport", 5.0]],
-                },
-                40: {2011: [["Bicycle", False, datetime(2011, 3, 21), "Transport", 40.0]]},
-                30: {
-                    2015: [["Car", False, datetime(2015, 1, 10), "Transport", 30.0]],
-                    2010: [["Motorcycle", False, datetime(2010, 12, 17), "Transport", 30.0]],
-                },
-                10: {
-                    2013: [["Scooter", False, datetime(2013, 5, 6), "Transport", 10.0]],
-                    2011: [["Train", False, datetime(2011, 1, 30), "Transport", 10.0]],
-                },
-                20: {2012: [["Truck", False, datetime(2012, 3, 9), "Transport", 20.0]]},
+MAXIMALLY_NESTED_CATEGORIES = {
+    "Transport": {
+        False: {
+            5: {
+                "2013": [
+                    ["Airplane", False, datetime(2013, 7, 26), "Transport", 5.0],
+                ],
+                "2012": [
+                    ["Bus", False, datetime(2012, 12, 3), "Transport", 5.0],
+                ],
+                "2011": [["Helicopter", False, datetime(2011, 6, 8), "Transport", 5.0]],
+                "2015": [["Van", False, datetime(2015, 6, 5), "Transport", 5.0]],
             },
+            40: {"2011": [["Bicycle", False, datetime(2011, 3, 21), "Transport", 40.0]]},
+            30: {
+                "2015": [["Car", False, datetime(2015, 1, 10), "Transport", 30.0]],
+                "2010": [["Motorcycle", False, datetime(2010, 12, 17), "Transport", 30.0]],
+            },
+            10: {
+                "2013": [["Scooter", False, datetime(2013, 5, 6), "Transport", 10.0]],
+                "2011": [["Train", False, datetime(2011, 1, 30), "Transport", 10.0]],
+            },
+            20: {"2012": [["Truck", False, datetime(2012, 3, 9), "Transport", 20.0]]},
         },
-        "Fruit": {
-            True: {
-                40: {
-                    2012: [
-                        ["Apple", True, datetime(2012, 4, 15), "Fruit", 40.0],
-                        ["Orange", True, datetime(2012, 10, 5), "Fruit", 40.0],
-                    ],
-                    2010: [
-                        ["Banana", True, datetime(2010, 11, 5), "Fruit", 40.0],
-                        ["Watermelon", True, datetime(2010, 6, 27), "Fruit", 40.0],
-                    ],
-                    2015: [["Peach", True, datetime(2015, 2, 28), "Fruit", 40.0]],
-                    2011: [["Pineapple", True, datetime(2011, 10, 23), "Fruit", 40.0]],
-                },
-                120: {
-                    2010: [["Grape", True, datetime(2010, 9, 22), "Fruit", 120.0]],
-                    2014: [
-                        ["Strawberry", True, datetime(2014, 8, 16), "Fruit", 120.0],
-                    ],
-                },
-                30: {
-                    2012: [["Kiwi", True, datetime(2012, 7, 13), "Fruit", 30.0]],
-                    2013: [["Mango", True, datetime(2013, 2, 1), "Fruit", 30.0]],
-                },
+    },
+    "Fruit": {
+        True: {
+            40: {
+                "2012": [
+                    ["Apple", True, datetime(2012, 4, 15), "Fruit", 40.0],
+                    ["Orange", True, datetime(2012, 10, 5), "Fruit", 40.0],
+                ],
+                "2010": [
+                    ["Banana", True, datetime(2010, 11, 5), "Fruit", 40.0],
+                    ["Watermelon", True, datetime(2010, 6, 27), "Fruit", 40.0],
+                ],
+                "2015": [["Peach", True, datetime(2015, 2, 28), "Fruit", 40.0]],
+                "2011": [["Pineapple", True, datetime(2011, 10, 23), "Fruit", 40.0]],
             },
-        },
-        "Animal": {
-            False: {
-                10: {
-                    2014: [
-                        ["Bear", False, datetime(2014, 9, 19), "Animal", 10.0],
-                        ["Lion", False, datetime(2014, 11, 30), "Animal", 10.0],
-                    ],
-                    2013: [["Elephant", False, datetime(2013, 11, 11), "Animal", 10.0]],
-                },
-                20: {
-                    2011: [["Cat", False, datetime(2011, 8, 29), "Animal", 20.0]],
-                    2014: [["Dog", False, datetime(2014, 3, 4), "Animal", 20.0]],
-                },
-                30: {2014: [["Parrot", False, datetime(2014, 5, 9), "Animal", 30.0]]},
+            120: {
+                "2010": [["Grape", True, datetime(2010, 9, 22), "Fruit", 120.0]],
+                "2014": [
+                    ["Strawberry", True, datetime(2014, 8, 16), "Fruit", 120.0],
+                ],
             },
-            True: {
-                10: {2010: [["Deer", True, datetime(2010, 5, 18), "Animal", 10.0]]},
-                30: {
-                    2015: [["Horse", True, datetime(2015, 4, 25), "Animal", 30.0]],
-                    2013: [["Zebra", True, datetime(2013, 10, 14), "Animal", 30.0]],
-                },
-                120: {
-                    2010: [
-                        ["Rabbit", True, datetime(2010, 2, 14), "Animal", 120.0],
-                    ],
-                },
+            30: {
+                "2012": [["Kiwi", True, datetime(2012, 7, 13), "Fruit", 30.0]],
+                "2013": [["Mango", True, datetime(2013, 2, 1), "Fruit", 30.0]],
             },
         },
     },
-)
+    "Animal": {
+        False: {
+            10: {
+                "2014": [
+                    ["Bear", False, datetime(2014, 9, 19), "Animal", 10.0],
+                    ["Lion", False, datetime(2014, 11, 30), "Animal", 10.0],
+                ],
+                "2013": [["Elephant", False, datetime(2013, 11, 11), "Animal", 10.0]],
+            },
+            20: {
+                "2011": [["Cat", False, datetime(2011, 8, 29), "Animal", 20.0]],
+                "2014": [["Dog", False, datetime(2014, 3, 4), "Animal", 20.0]],
+            },
+            30: {"2014": [["Parrot", False, datetime(2014, 5, 9), "Animal", 30.0]]},
+        },
+        True: {
+            10: {"2010": [["Deer", True, datetime(2010, 5, 18), "Animal", 10.0]]},
+            30: {
+                "2015": [["Horse", True, datetime(2015, 4, 25), "Animal", 30.0]],
+                "2013": [["Zebra", True, datetime(2013, 10, 14), "Animal", 30.0]],
+            },
+            120: {
+                "2010": [
+                    ["Rabbit", True, datetime(2010, 2, 14), "Animal", 120.0],
+                ],
+            },
+        },
+    },
+}
 
 
 def test_group_lookups():
@@ -367,22 +365,27 @@ def test_category_trees():
     categories = sheet.tables["Uncategorized"].categorized_data()
     assert categories is None
 
-    categories = sheet.tables["Categories"].categorized_data()
-    assert data_to_values(categories) == TEXT_CATEGORIES
-    assert data_to_types(categories) == ref_data_to_types(TEXT_CATEGORIES)
+    table_to_ref_data = {
+        "Categories": TEXT_CATEGORIES,
+        "Nested Categories": NESTED_BOOL_CATEGORIES,
+        "Number Categories": NUMBER_CATEGORIES,
+        "Date Categories": NESTED_DATE_CATEGORIES,
+        "Maximal Nesting": MAXIMALLY_NESTED_CATEGORIES,
+    }
+    for table_name, ref_data in table_to_ref_data.items():
+        categories = sheet.tables[table_name].categorized_data()
+        assert data_to_values(categories) == ref_data
+        assert data_to_types(categories) == ref_data_to_types(ref_data)
+        categories = sheet.tables[table_name].categorized_data(values_only=True)
+        assert categories == ref_data
 
-    categories = sheet.tables["Nested Categories"].categorized_data()
-    assert data_to_values(categories) == NESTED_BOOL_CATEGORIES
-    assert data_to_types(categories) == ref_data_to_types(NESTED_BOOL_CATEGORIES)
-
-    categories = sheet.tables["Number Categories"].categorized_data()
-    assert data_to_values(categories) == NUMBER_CATEGORIES
-    assert data_to_types(categories) == ref_data_to_types(NUMBER_CATEGORIES)
-
-    categories = sheet.tables["Date Categories"].categorized_data()
-    assert data_to_values(categories) == NESTED_DATE_CATEGORIES
-    assert data_to_types(categories) == ref_data_to_types(NESTED_DATE_CATEGORIES)
-
-    categories = sheet.tables["Maximal Nesting"].categorized_data()
-    assert data_to_values(categories) == MAXIMALLY_NESTED_CATEGORIES
-    assert data_to_types(categories) == ref_data_to_types(MAXIMALLY_NESTED_CATEGORIES)
+    table_to_ref_data = {
+        "Date Year-Quarter": ["2010-Q1", "2010-Q4", "2010-Q3"],
+        "Date Year-Month": ["February 2010", "November 2010", "December 2010"],
+        "Date Year-Week": ["2010-W6", "2010-W44", "2010-W50"],
+        "Date Year-Month-Day": ["14/2/2010", "5/11/2010", "17/12/2010"],
+        "Date Weekday": ["Sunday", "Friday", "Wednesday"],
+    }
+    for table_name, ref_data in table_to_ref_data.items():
+        categories = sheet.tables[table_name].categorized_data()
+        assert list(categories.keys())[0:3] == ref_data

@@ -1036,7 +1036,8 @@ class Table(Cacheable):
         -------
         Dict[str, Dict | List]:
             Nested dictionary of lists of rows or dictionaries of the next group
-            of categories down.
+            of categories down. Row data is returned as :py:class:`Cell` classes
+            unless ``values_only`` is ``True``.
 
         Example
         -------
@@ -1055,8 +1056,21 @@ class Table(Cacheable):
         For tables with multiple categories, the top-level dictionary is nested.
 
         """
+
+        def data_to_values(item):
+            if isinstance(item, dict):
+                return {k: data_to_values(v) for k, v in item.items()}
+
+            if isinstance(item, list):
+                return [data_to_values(v) for v in item]
+
+            return item.value
+
         self._model.calculate_table_categories(self._table_id)
-        return self._model._table_categories_data[self._table_id]
+        data = self._model._table_categories_data[self._table_id]
+        if values_only:
+            return data_to_values(data)
+        return data
 
     def add_row(
         self,

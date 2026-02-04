@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from array import array
 from collections import defaultdict
+from datetime import timedelta
 from hashlib import sha1
 from itertools import chain
 from math import floor
@@ -32,6 +33,7 @@ from numbers_parser.cell import (
     PaddingType,
     Style,
     VerticalJustification,
+    _decode_date_format,
 )
 from numbers_parser.constants import (
     ALLOWED_FORMATTING_PARAMETERS,
@@ -47,6 +49,7 @@ from numbers_parser.constants import (
     DEFAULT_TEXT_WRAP,
     DEFAULT_TILE_SIZE,
     DOCUMENT_ID,
+    EPOCH,
     FORMAT_TYPE_MAP,
     MAX_TILE_SIZE,
     PACKAGE_ID,
@@ -2563,12 +2566,18 @@ class _NumbersModel(Cacheable):
             return cell_value.number_value.value
         if cell_value_type == CellValueType.BOOLEAN_TYPE:
             return cell_value.boolean_value.value
-        # Must be DATE_TYPE
-        # TODO: consider formatting. Example:
-        #   "value": 283996800.0,
-        #   "format": {"format_type": 261, "date_time_format": "yyyy"},
-        #   "format_is_explicit": false
-        return cell_value.date_value.value
+        if cell_value_type == CellValueType.DATE_TYPE:
+            # "yyyy"
+            # "yyyy-QQQ"
+            # "LLLL yyyy"
+            # "yyyy'-W'w"
+            # "d/M/yyyy"
+            # "EEEE"
+            return _decode_date_format(
+                cell_value.date_value.format.date_time_format,
+                EPOCH + timedelta(seconds=cell_value.date_value.value),
+            )
+        return None
 
     @cache(num_args=0)
     def group_uuid_values(self):
