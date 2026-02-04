@@ -233,6 +233,8 @@ class _NumbersModel(Cacheable):
         self._control_specs = DataLists(self, "control_cell_spec_table", "cell_spec")
         self._formulas = DataLists(self, "formula_table", "formula")
         self._table_data = {}
+        self._table_categories_data = {}
+        self._table_categories_row_mapper = {}
         self._styles = None
         self._images = {}
         self._custom_formats = None
@@ -2562,6 +2564,10 @@ class _NumbersModel(Cacheable):
         if cell_value_type == CellValueType.BOOLEAN_TYPE:
             return cell_value.boolean_value.value
         # Must be DATE_TYPE
+        # TODO: consider formatting. Example:
+        #   "value": 283996800.0,
+        #   "format": {"format_type": 261, "date_time_format": "yyyy"},
+        #   "format_is_explicit": false
         return cell_value.date_value.value
 
     @cache(num_args=0)
@@ -2574,14 +2580,19 @@ class _NumbersModel(Cacheable):
         }
 
     @cache()
-    def table_category_row_map(self, table_id: int) -> dict[int, int] | None:
+    def calculate_table_categories(self, table_id: int) -> tuple[dict[int, int], dict] | None:
         category_owner_id = self.objects[table_id].category_owner.identifier
         if not category_owner_id:
-            return None
+            self._table_categories_data[table_id] = None
+            self._table_categories_row_mapper[table_id] = None
+            return
+
         category_archive_id = self.objects[category_owner_id].group_by[0].identifier
         category_archive = self.objects[category_archive_id]
         if not category_archive.is_enabled:
-            return None
+            self._table_categories_data[table_id] = None
+            self._table_categories_row_mapper[table_id] = None
+            return
 
         table_info = self.objects[self.table_info_id(table_id)]
         category_order = self.objects[table_info.category_order.identifier]
@@ -2594,101 +2605,99 @@ class _NumbersModel(Cacheable):
         row_uid_for_index = [
             NumbersUUID(row_uid_map.sorted_row_uids[i]) for i in row_uid_map.row_uid_for_index
         ]
-        return {
+
+        def parent_relationships(parent: NumbersUUID, children: list, group_parents: dict):
+            for child in children:
+                child_uuid = NumbersUUID(child.group_uid)
+                group_parents[child_uuid] = parent
+                if len(child.child) > 0:
+                    parent_relationships(child_uuid, child.child, group_parents)
+
+        group_parents = {}
+        parent_relationships(None, category_archive.group_node_root.child, group_parents)
+
+        row = 0
+        row_mapper = {}
+        header = []
+        in_header = True
+
+        nodes: dict[NumbersUUID, dict] = {}
+        root_children: dict = {}
+        stack: list[NumbersUUID | None] = []
+        # rows that are not in any group (rare) kept here
+        root_rows: list = []
+
+        for uuid in row_uid_for_index:
+            if uuid in group_uuids:
+                # this UUID is a group heading
+                in_header = False
+                parent = group_parents.get(uuid)
+
+                # ensure node exists
+                if uuid not in nodes:
+                    nodes[uuid] = {
+                        "key": group_uuids[uuid],
+                        "children": {},
+                        "rows": [],
+                    }
+
+                # attach node to its parent (or root)
+                if parent is None:
+                    if nodes[uuid]["key"] not in root_children:
+                        root_children[nodes[uuid]["key"]] = nodes[uuid]
+                else:
+                    if parent not in nodes:
+                        nodes[parent] = {
+                            "key": group_uuids[parent],
+                            "children": {},
+                            "rows": [],
+                        }
+                    parent_node = nodes[parent]
+                    if nodes[uuid]["key"] not in parent_node["children"]:
+                        parent_node["children"][nodes[uuid]["key"]] = nodes[uuid]
+
+                # update stack to current nesting (pop until parent is on top)
+                while stack and stack[-1] != parent:
+                    stack.pop()
+                stack.append(uuid)
+            else:
+                mapped_row = row_uuid_to_offset[uuid]
+                if in_header:
+                    header.append(self._table_data[table_id][mapped_row])
+                # assign this row to the deepest open group, or root
+                elif stack:
+                    nodes[stack[-1]]["rows"].append(self._table_data[table_id][mapped_row])
+                else:
+                    root_rows.append(self._table_data[table_id][mapped_row])
+
+                row_mapper[row] = mapped_row
+                row += 1
+
+        # helper to convert node dicts to nested mapping (keys -> children or rows)
+        def node_to_structure(node: dict):
+            if not node["children"]:
+                return node["rows"]
+            out = {}
+            for child_key, child_node in node["children"].items():
+                out[child_key] = node_to_structure(child_node)
+            # if this node also has rows in addition to children, include them under a special key
+            if node["rows"]:
+                out["_rows"] = node["rows"]
+            return out
+
+        maximally_nested = {}
+        for key, node in root_children.items():
+            maximally_nested[key] = node_to_structure(node)
+        if root_rows:
+            maximally_nested["_rows"] = root_rows
+
+        self._table_categories_data[table_id] = maximally_nested
+        self._table_categories_row_mapper[table_id] = {
             row: row_uuid_to_offset[uuid]
             for row, uuid in enumerate(
                 uuid for uuid in row_uid_for_index if uuid not in group_uuids
             )
         }
-
-    def table_category_data(self, table_id: int) -> dict | None:
-        category_owner_id = self.objects[table_id].category_owner.identifier
-        category_archive_id = self.objects[category_owner_id].group_by[0].identifier
-        category_archive = self.objects[category_archive_id]
-        if not category_archive.is_enabled:
-            return None
-
-        table_info = self.objects[self.table_info_id(table_id)]
-        category_order = self.objects[table_info.category_order.identifier]
-        row_uid_map = self.objects[category_order.uid_map.identifier]
-
-        sorted_row_uuids = [
-            NumbersUUID(row_uid_map.sorted_row_uids[i]).hex for i in row_uid_map.row_index_for_uid
-        ]
-
-        data = self._table_data[table_id]
-        header = [cell.value for cell in data[0]]
-
-        def index_set_to_offsets(index_set: TSCEArchives.IndexSetArchive) -> list[int]:
-            """Convert an IndexSetArchive to a list of offsets."""
-            offsets = []
-            for entry in index_set.entries:
-                if entry.HasField("range_end"):
-                    offsets += list(range(entry.range_begin, entry.range_end + 1))
-                else:
-                    offsets += list(range(entry.range_begin, entry.range_begin + 1))
-            return offsets
-
-        group_node_to_key = {
-            NumbersUUID(self.objects[_id].group_uid).hex: _NumbersModel.cell_value_to_key(
-                self.objects[_id].group_cell_value,
-            )
-            for _id in self.find_refs("GroupNodeArchive")
-        }
-        group_uuids = [NumbersUUID(x.group_uid).hex for x in category_archive.group_node_root.child]
-        group_uuids = [uuid for uuid in sorted_row_uuids if uuid in group_uuids]
-
-        def group_hierarchy(parent: str, children: list):
-            nodes = {}
-            for child in children:
-                group_uuid = NumbersUUID(child.group_uid).hex
-                if len(child.child) > 0:
-                    nodes[group_uuid] = group_hierarchy(group_uuid, child.child)
-                else:
-                    nodes[group_uuid] = None
-            return nodes
-
-        def assign_rows_to_categories(parent: str, children: list, categories: dict):
-            for child in children:
-                group_uuid = NumbersUUID(child.group_uid).hex
-                if len(child.child) == 0:
-                    key = _NumbersModel.cell_value_to_key(child.group_cell_value)
-
-                    row_offsets = index_set_to_offsets(child.row_lookup_uids)
-                    categories[group_uuid] = {
-                        "key": key,
-                        "parent": parent,
-                        "rows": [
-                            {header[col]: cell.value for col, cell in enumerate(data[row])}
-                            for row in row_offsets
-                        ],
-                    }
-                else:
-                    categories[group_uuid] = {
-                        "key": group_node_to_key[group_uuid],
-                        "parent": parent,
-                        "rows": None,
-                    }
-                    assign_rows_to_categories(group_uuid, child.child, categories)
-
-        category_tree = group_hierarchy(
-            NumbersUUID(category_archive.group_node_root.group_uid).hex,
-            category_archive.group_node_root.child,
-        )
-
-        categories = {}
-        assign_rows_to_categories(None, category_archive.group_node_root.child, categories)
-
-        def merge_trees(a: dict, b: dict):
-            new_tree = {}
-            for k, v in a.items():
-                if v is not None:
-                    new_tree[b[k]["key"]] = merge_trees(v, b)
-                else:
-                    new_tree[b[k]["key"]] = b[k]["rows"]
-            return new_tree
-
-        return merge_trees(category_tree, categories)
 
 
 def rgb(obj) -> RGB:

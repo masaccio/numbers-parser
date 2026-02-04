@@ -756,7 +756,9 @@ class Table(Cacheable):
             msg = f"column {col} out of range"
             raise IndexError(msg)
 
-        if (row_mapper := self._model.table_category_row_map(self._table_id)) is not None:
+        self._model.calculate_table_categories(self._table_id)
+        row_mapper = self._model._table_categories_row_mapper[self._table_id]
+        if row_mapper is not None:
             return self._data[row_mapper[row]][col]
         return self._data[row][col]
 
@@ -824,7 +826,9 @@ class Table(Cacheable):
             raise IndexError(msg)
 
         rows = self.rows()
-        if (row_mapper := self._model.table_category_row_map(self._table_id)) is not None:
+        self._model.calculate_table_categories(self._table_id)
+        row_mapper = self._model._table_categories_row_mapper[self._table_id]
+        if row_mapper is not None:
             rows = [rows[row_mapper[row]] for row in range(min_row, max_row + 1)]
         else:
             rows = rows[min_row : max_row + 1]
@@ -899,7 +903,9 @@ class Table(Cacheable):
             raise IndexError(msg)
 
         rows = self.rows()
-        if (row_mapper := self._model.table_category_row_map(self._table_id)) is not None:
+        self._model.calculate_table_categories(self._table_id)
+        row_mapper = self._model._table_categories_row_mapper[self._table_id]
+        if row_mapper is not None:
             rows = [rows[row_mapper[row_num]] for row_num in range(min_row, max_row + 1)]
         else:
             rows = rows[min_row : max_row + 1]
@@ -1011,33 +1017,46 @@ class Table(Cacheable):
             msg = "style must be a Style object or style name"
             raise TypeError(msg)
 
-    def categorized_data(self) -> dict | None:
+    def categorized_data(self, values_only: bool = False) -> dict | None:
         """
         Return the table's data organized into categories, if enabled or ``None``
         if the table has not had categories enabled.
 
-        The data is a dictionary with the category names as keys and a list
-        dictionaries for each row in that category of the table. The table heading
-        row is used as the keys for the row dictionary.
+        The data is a set of nested dictionaries and lists. Dictionary keys are
+        Category keys and values are either another dictionary in the case of
+        nested categories or a list of rows. Each row is itself a list such that
+        the data is the same as returned by :py:meth:`numbers_parser.Table.rows`.
+
+        Parameters
+        ----------
+        values_only:
+            If ``True``, return cell values instead of :class:`Cell` objects
+
+        Returns
+        -------
+        Dict[str, Dict | List]:
+            Nested dictionary of lists of rows or dictionaries of the next group
+            of categories down.
 
         Example
         -------
         .. code:: python
 
             "Transport": [
-                {"Description": "Airplane", "Category": "Transport" },
-                {"Description": "Bicycle", "Category": "Transport" },
-                {"Description": "Bus", "Category": "Transport"},
+                {"Airplane", "Air": 5 },
+                {"Helicopter": "Air", 2 },
+                {"Bus": "Road", 10 },
             ],
             "Fruit": [
-                {"Description": "Apple", "Category": "Fruit" },
-                {"Description": "Banana", "Category": "Fruit" },
+                {"Apple", "Green": 7 },
+                {"Banana", "Yellow", 6 },
             ],
 
         For tables with multiple categories, the top-level dictionary is nested.
 
         """
-        return self._model.table_category_data(self._table_id)
+        self._model.calculate_table_categories(self._table_id)
+        return self._model._table_categories_data[self._table_id]
 
     def add_row(
         self,
