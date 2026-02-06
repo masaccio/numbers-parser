@@ -3,13 +3,12 @@ from __future__ import annotations
 import re
 from array import array
 from collections import defaultdict
-from datetime import timedelta
+from datetime import datetime, timedelta
 from hashlib import sha1
 from itertools import chain
 from math import floor
 from pathlib import Path
 from struct import pack
-from typing import TYPE_CHECKING
 from warnings import warn
 
 from numbers_parser.bullets import (
@@ -82,9 +81,6 @@ from numbers_parser.iwafile import find_extension
 from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID, uuid_to_hex
 from numbers_parser.xrefs import CellRange, ScopedNameRefCache
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 
 def create_font_name_map(font_map: dict) -> dict:
@@ -910,17 +906,22 @@ class _NumbersModel(Cacheable):
         return self._merge_cells[table_id]
 
     def table_id_to_sheet_id(self, table_id: int) -> int:
-        for sheet_id in self.sheet_ids():  # pragma: no branch
-            if table_id in self.table_ids(sheet_id):
-                return sheet_id
-        return None
+        return next(
+            (sheet_id for sheet_id in self.sheet_ids() if table_id in self.table_ids(sheet_id)),
+            None,
+        )
 
     @cache()
     def table_uuids_to_id(self, table_uuid) -> int | None:
-        for sheet_id in self.sheet_ids():  # pragma: no branch  # noqa: RET503
-            for table_id in self.table_ids(sheet_id):
-                if table_uuid == self.table_base_id(table_id):
-                    return table_id
+        return next(
+            (
+                table_id
+                for sheet_id in self.sheet_ids()
+                for table_id in self.table_ids(sheet_id)
+                if table_uuid == self.table_base_id(table_id)
+            ),
+            None,
+        )
 
     def node_to_ref(self, table_id: int, row: int, col: int, node):
         def resolve_range(is_absolute, absolute_list, relative_list, offset, max_val):

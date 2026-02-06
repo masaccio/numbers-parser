@@ -1,4 +1,5 @@
 from datetime import datetime
+from unittest.mock import patch
 
 import pytest
 
@@ -312,8 +313,43 @@ def test_invalid_format():
     cell._text_format_id = None
     assert cell._custom_format() == cell.value
 
-
-def test_invalid_format_2():
     with pytest.raises(FileFormatError) as e:
         _ = Document("tests/data/invalid-index-zip.numbers")
     assert "invalid Numbers document" in str(e)
+
+
+def test_cli_main_blocks(capsys):
+    from numbers_parser._cat_numbers import main as cat_main
+    from numbers_parser._csv2numbers import main as csv2_main
+    from numbers_parser._unpack_numbers import main as unpack_main
+
+    with (
+        patch("numbers_parser._cat_numbers.__name__", "test"),
+        patch("sys.exit") as _,
+        patch("sys.argv", ["test", "--help"]) as _,
+    ):
+        cat_main()
+        captured = capsys.readouterr()
+        assert "usage: test [-h]" in captured.out
+
+    with (
+        patch("numbers_parser._csv2numbers.__name__", "test"),
+        patch("sys.exit") as _,
+        patch("sys.argv", ["test", "--help"]) as _,
+    ):
+        csv2_main()
+        captured = capsys.readouterr()
+        assert "usage: test [-h]" in captured.out
+
+    with (
+        patch("numbers_parser._unpack_numbers.__name__", "test"),
+        patch("sys.exit") as _,
+        patch("sys.argv", ["test", "--help"]) as _,
+    ):
+        unpack_main()
+        captured = capsys.readouterr()
+        assert "usage: test [-h]" in captured.out
+
+    assert callable(csv2_main)
+    assert callable(cat_main)
+    assert callable(unpack_main)

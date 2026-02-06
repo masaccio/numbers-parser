@@ -6,10 +6,10 @@ import argparse
 import contextlib
 import csv
 import re
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from sys import exit, stderr
 from typing import NamedTuple
 
 from dateutil.parser import parse
@@ -381,11 +381,11 @@ def main() -> None:
 
     if args.version:
         print(_get_version())
-        exit(0)
+        sys.exit(0)
     elif len(args.csvfile) == 0:
-        print("At least one CSV file is required", file=stderr)
-        parser.print_help(stderr)
-        exit(1)
+        print("At least one CSV file is required", file=sys.stderr)
+        parser.print_help(sys.stderr)
+        sys.exit(1)
 
     if args.output is None:
         output_filenames = [Path(x).with_suffix(".numbers") for x in args.csvfile]
@@ -393,8 +393,8 @@ def main() -> None:
         output_filenames = args.output
 
     if len(args.csvfile) != len(output_filenames):
-        print("The numbers of input and output file names do not match", file=stderr)
-        exit(1)
+        print("The numbers of input and output file names do not match", file=sys.tderr)
+        sys.exit(1)
 
     try:
         for input_filename, output_filename in zip(args.csvfile, output_filenames):
@@ -414,10 +414,10 @@ def main() -> None:
             converter.delete_columns(args.delete)
             converter.save()
     except RuntimeError as e:
-        print(e, file=stderr)
-        exit(1)
+        print(e, file=sys.stderr)
+        sys.exit(1)
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     # execute only if run as a script
     main()
