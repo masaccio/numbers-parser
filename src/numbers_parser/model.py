@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 from array import array
 from collections import defaultdict
@@ -81,6 +82,9 @@ from numbers_parser.iwafile import find_extension
 from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID, uuid_to_hex
 from numbers_parser.xrefs import CellRange, ScopedNameRefCache
+
+logger = logging.getLogger(__name__)
+debug = logger.debug
 
 
 def create_font_name_map(font_map: dict) -> dict:
@@ -840,13 +844,16 @@ class _NumbersModel(Cacheable):
         table_model = self.objects[table_id]
         formulas = table_model.merge_owner.formula_store.formulas
         if len(formulas) == 0:
+            debug("table=%s: no formula store merges", self.table_name(table_id))
             return
 
+        merge_count = 0
         for formula in formulas:
             node = formula.formula.AST_node_array.AST_node[0]
             # COLON_TRACT_NODE=67
             if node.AST_node_type != 67:
                 continue
+            merge_count += 1
             self.add_merge_range(
                 table_id,
                 node.AST_colon_tract.absolute_row[0].range_begin,
@@ -854,6 +861,7 @@ class _NumbersModel(Cacheable):
                 node.AST_colon_tract.absolute_column[0].range_begin,
                 node.AST_colon_tract.absolute_column[0].range_end,
             )
+        debug("table=%s: %d formula store merges found", self.table_name(table_id), merge_count)
 
     @cache()
     def calculate_merges_using_dependency_archives(self, table_id) -> None:
@@ -863,6 +871,7 @@ class _NumbersModel(Cacheable):
         table_base_id = self.table_base_id(table_id)
 
         formula_table_ids = self.find_refs("FormulaOwnerDependenciesArchive")
+        merge_count = 0
         for formula_id in formula_table_ids:
             dependencies = self.objects[formula_id]
             if dependencies.owner_kind != OwnerKind.MERGE_OWNER:
@@ -871,6 +880,7 @@ class _NumbersModel(Cacheable):
                 to_owner_id = record.internal_range_reference.owner_id
                 if owner_id_map[to_owner_id] == table_base_id:
                     record_range = record.internal_range_reference.range
+                    merge_count += 1
                     self.add_merge_range(
                         table_id,
                         record_range.top_left_row,
@@ -878,13 +888,20 @@ class _NumbersModel(Cacheable):
                         record_range.top_left_column,
                         record_range.bottom_right_column,
                     )
+        debug(
+            "table=%s: %d dependency archive merges found",
+            self.table_name(table_id),
+            merge_count,
+        )
 
     @cache()
     def calculate_merges_using_region_map(self, table_id) -> None:
         base_data_store = self.objects[table_id].base_data_store
         if base_data_store.merge_region_map.identifier == 0:
+            debug("table=%s: no merge_region_map", self.table_name(table_id))
             return
 
+        merge_count = 0
         cell_ranges = self.objects[base_data_store.merge_region_map.identifier]
         for cell_range in cell_ranges.cell_range:
             (col_start, row_start) = (
@@ -897,7 +914,13 @@ class _NumbersModel(Cacheable):
             )
             row_end = row_start + num_rows - 1
             col_end = col_start + num_columns - 1
+            merge_count += 1
             self.add_merge_range(table_id, row_start, row_end, col_start, col_end)
+        debug(
+            "table=%s: %d merge_region_map merges found",
+            self.table_name(table_id),
+            merge_count,
+        )
 
     def merge_cells(self, table_id):
         self.calculate_merges_using_formula_stores(table_id)
