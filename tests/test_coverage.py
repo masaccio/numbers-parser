@@ -357,7 +357,7 @@ def test_cli_main_blocks(capsys):
 
 
 def test_xref_quoting():
-    doc = Document("/Users/jon/Downloads/test.numbers")
+    doc = Document("tests/data/test-xref-coverage.numbers")
     table = doc.default_table
     assert table.cell("C2").formula == "SUM(Column '''A''')"
     assert table.cell("C3").formula == "COUNTA('Column X & Y')"
