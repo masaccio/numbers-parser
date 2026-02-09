@@ -79,6 +79,37 @@ def test_unpack_dir(script_runner, tmp_path):
 
 
 @pytest.mark.script_launch_mode("inprocess")
+def test_unpack_redacted(script_runner, tmp_path):
+    output_dir = tmp_path / "test"
+    ret = script_runner.run(
+        [
+            "unpack-numbers",
+            "--redact",
+            "--output",
+            str(output_dir),
+            "tests/data/test-5.numbers",
+        ],
+        print_result=False,
+    )
+    assert ret.success
+    assert ret.stdout == ""
+    with open(str(output_dir / "Index/CalculationEngine.json")) as f:
+        data = json.load(f)
+    table_model_archive = next(
+        x["objects"][0]
+        for x in data["chunks"][0]["archives"]
+        if x["objects"][0]["_pbtype"] == "TST.TableModelArchive"
+    )
+    assert table_model_archive["table_name"].startswith("REDACT-")
+
+    string_table_id = table_model_archive["base_data_store"]["stringTable"]["identifier"]
+    with open(str(output_dir / f"Index/Tables/DataList-{string_table_id}.json")) as f:
+        data = json.load(f)
+    string_table = data["chunks"][0]["archives"][0]["objects"][0]
+    assert all(x["string"].startswith("REDACT-") for x in string_table["entries"])
+
+
+@pytest.mark.script_launch_mode("inprocess")
 def test_unpack_hex(script_runner, tmp_path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(

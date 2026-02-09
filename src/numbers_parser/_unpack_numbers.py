@@ -30,6 +30,7 @@ class NumbersUnpacker(IWorkHandler):
     pretty_storage: bool = False
     pretty: bool = False
     compact_json: bool = False
+    redact_strings: bool = False
     output_dir: str = None
 
     def store_file(self, filename: str, blob: bytes) -> None:
@@ -41,6 +42,10 @@ class NumbersUnpacker(IWorkHandler):
             target_path = target_path.replace(".iwa", "")
             target_path += ".json"
             with open(target_path, "w") as out:
+                if self.redact_strings:
+                    for chunk in blob.chunks:
+                        for archive in chunk.archives:
+                            archive.redact_strings()
                 data = blob.to_dict()
                 if self.hex_uuids or self.pretty:
                     self.prettify_uuids(data)
@@ -123,6 +128,7 @@ def main() -> None:
         help="Format JSON compactly as possible",
     )
     parser.add_argument("--pretty", action="store_true", help="Enable all prettifying options")
+    parser.add_argument("--redact", action="store_true", help="Redact strings in the output")
     parser.add_argument("--output", "-o", help="directory name to unpack into")
     parser.add_argument("--debug", default=False, action="store_true", help="Enable debug logging")
     args = parser.parse_args()
@@ -153,6 +159,7 @@ def main() -> None:
                         pretty=args.pretty,
                         pretty_storage=args.pretty_storage,
                         compact_json=args.compact_json,
+                        redact_strings=args.redact,
                         output_dir=output_dir,
                     ),
                 )

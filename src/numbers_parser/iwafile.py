@@ -228,6 +228,35 @@ class IWAArchiveSegment:
             + [obj.SerializeToString() for obj in self.objects],
         )
 
+    def redact_strings(self) -> None:
+        str_index = 0
+
+        def redact_message(message):
+            nonlocal str_index
+
+            if isinstance(message, ProtobufPatch):
+                message = message.data
+
+            for field, value in message.ListFields():
+                if field.type == field.TYPE_MESSAGE:
+                    if field.is_repeated:
+                        for item in value:
+                            redact_message(item)
+                    else:
+                        redact_message(value)
+                elif field.type == field.TYPE_STRING:
+                    if field.is_repeated:
+                        for i in range(len(value)):
+                            str_index += 1
+                            value[i] = f"REDACT-{str_index}"
+                    else:
+                        str_index += 1
+                        setattr(message, field.name, f"REDACT-{str_index}")
+
+        for obj in self.objects:
+            redact_message(obj)
+        _ = str_index
+
 
 def message_to_dict(message):
     if hasattr(message, "to_dict"):
