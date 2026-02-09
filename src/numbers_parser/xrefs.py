@@ -66,8 +66,7 @@ class CellRange:
     _table_names: list[str] = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
-        if self._table_names is None:
-            self._initialize_table_data()
+        self._initialize_table_data()
         self.model.name_ref_cache.refresh()
         self._set_sheet_ids()
 
@@ -303,9 +302,7 @@ class ScopedNameRefCache:
                 scopes[idx] = None
             else:
                 name = data_lookup(table_id, idx)
-                if name is None:
-                    scopes[idx] = None
-                elif self._exact_count(all_names, name) > 1:
+                if self._exact_count(all_names, name) > 1:
                     names.append(None)
                     scopes[idx] = None
                 else:

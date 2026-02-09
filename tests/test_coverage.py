@@ -318,6 +318,7 @@ def test_invalid_format():
     assert "invalid Numbers document" in str(e)
 
 
+@pytest.mark.script_launch_mode("inprocess")
 def test_cli_main_blocks(capsys):
     from numbers_parser._cat_numbers import main as cat_main
     from numbers_parser._csv2numbers import main as csv2_main
@@ -353,3 +354,10 @@ def test_cli_main_blocks(capsys):
     assert callable(csv2_main)
     assert callable(cat_main)
     assert callable(unpack_main)
+
+
+def test_xref_quoting():
+    doc = Document("/Users/jon/Downloads/test.numbers")
+    table = doc.default_table
+    assert table.cell("C2").formula == "SUM(Column '''A''')"
+    assert table.cell("C3").formula == "COUNTA('Column X & Y')"
