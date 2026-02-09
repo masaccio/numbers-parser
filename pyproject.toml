@@ -87,10 +87,10 @@ omit = ["src/numbers_parser/generated/*.py"]
 
 [tool.coverage.html]
 directory = "coverage_html_report"
-show_contexts = true
+show_contexts = false
 
 [tool.pytest.ini_options]
-addopts = "--cov=src/numbers_parser --cov-report=html --cov-report=term-missing:skip-covered --cov-context=test"
+addopts = "--cov=src/numbers_parser --cov-report=html --cov-report=term-missing:skip-covered"
 
 [tool.tox]
 requires = ["tox>=4.0"]
