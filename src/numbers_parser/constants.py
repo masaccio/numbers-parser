@@ -166,6 +166,9 @@ DATETIME_FIELD_MAP = OrderedDict(
     ],
 )
 
+# From TSCEArchives
+COLON_TRACT_NODE = 67
+
 
 class CellType(IntEnum):
     EMPTY = 1
