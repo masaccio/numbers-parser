@@ -234,7 +234,6 @@ class IWork:
             # useful data.
             for archive in iwaf.chunks[0].archives:
                 identifier = archive.header.identifier
-                debug("store IWA: filename=%s", filename)
                 self._handler.store_object(filename, identifier, archive.objects[0])
 
             self._handler.store_file(filename, iwaf)

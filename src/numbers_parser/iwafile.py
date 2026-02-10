@@ -1,6 +1,5 @@
 # Forked from https://github.com/psobot/keynote-parser/blob/master/keynote_parser/codec.py
 
-import logging
 import struct
 from functools import partial
 from struct import unpack
@@ -15,9 +14,6 @@ from numbers_parser.exceptions import NotImplementedError
 from numbers_parser.generated.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_ID_MAP
 from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
 
-logger = logging.getLogger(__name__)
-debug = logger.debug
-
 
 class IWAFile:
     def __init__(self, chunks, filename=None) -> None:
@@ -29,7 +25,6 @@ class IWAFile:
         try:
             chunks = []
             while data:
-                debug("from_buffer: filename=%s len=%d", filename, len(data))
                 chunk, data = IWACompressedChunk.from_buffer(data, filename)
                 chunks.append(chunk)
 
@@ -91,7 +86,6 @@ class IWACompressedChunk:
         data = b"".join(cls._decompress_all(data))
         archives = []
         while data:
-            debug("from_buffer: filename=%s len=%d", filename, len(data))
             archive, data = IWAArchiveSegment.from_buffer(data, filename)
             archives.append(archive)
         return cls(archives), None
