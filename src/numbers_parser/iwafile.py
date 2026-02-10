@@ -185,7 +185,7 @@ class IWAArchiveSegment:
                     output = klass(message_payload)
             except Exception as e:  # pragma: no cover
                 raise ValueError(
-                    "Failed to deserialize %s payload of length %d: %s"
+                    "Failed to deserialize %s payload of length %d: %s"  # noqa: UP031
                     % (klass, message_info.length, e),
                 ) from None
             payloads.append(output)

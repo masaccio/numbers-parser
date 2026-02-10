@@ -703,7 +703,7 @@ class Cell(CellStorageFlags, Cacheable):
         supported, or as their number values where there is no suitable
         visual representation. Currently supported mappings are:
 
-        * Checkboxes are U+2610 (Ballow Box) or U+2611 (Ballot Box with Check)
+        * Checkboxes are U+2610 (Ballot Box) or U+2611 (Ballot Box with Check)
         * Ratings are their star value represented using (U+2605) (Black Star)
 
         .. code-block:: python
@@ -1306,7 +1306,7 @@ class Cell(CellStorageFlags, Cacheable):
                 dstr.append(str(dd) + _unit_format("second", dd, duration_style))
 
         if unit_smallest >= DurationUnits.MILLISECOND:
-            dd = int(round(1000 * d))
+            dd = round(1000 * d)
             if duration_style == DurationStyle.COMPACT:
                 padding = "0" if dd >= 10 else "00"
                 padding = "" if dd >= 100 else padding
@@ -1911,7 +1911,7 @@ def _float_to_fraction(value: float, denominator: int) -> str:
 
 def _float_to_n_digit_fraction(value: float, max_digits: int) -> str:
     """
-    Convert a float to a fraction of a maxinum number of digits
+    Convert a float to a fraction of a maximum number of digits
     and return as a string.
     """
     max_denominator = 10**max_digits - 1

@@ -139,9 +139,9 @@ def main() -> None:
     elif len(args.document) == 0:
         parser.print_help()
     else:
-        hdlr = logging.StreamHandler()
-        hdlr.setFormatter(logging.Formatter("%(levelname)s:%(name)s:%(message)s"))
-        logger.addHandler(hdlr)
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(levelname)s:%(name)s:%(message)s"))
+        logger.addHandler(handler)
         if args.debug:
             logger.setLevel("DEBUG")
         else:

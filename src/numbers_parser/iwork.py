@@ -19,7 +19,7 @@ class IWorkHandler:
         pass  # pragma: nocover
 
     def store_file(self, filename: str, blob: bytes) -> None:
-        """Store a profobuf archive."""
+        """Store a protobuf archive."""
         # pragma: nocover
 
     def store_object(self, filename: str, identifier: int, archive: object) -> None:

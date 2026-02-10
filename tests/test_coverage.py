@@ -84,16 +84,19 @@ def test_cell_storage(tmp_path):
 
     assert _float_to_n_digit_fraction(0.0, 1) == "0"
 
-    format = TSKArchives.FormatStructArchive(
+    format_archive = TSKArchives.FormatStructArchive(
         format_type=268,
         duration_style=0,
         duration_unit_largest=1,
         duration_unit_smallest=0,
         use_automatic_duration_units=True,
     )
-    assert _auto_units(60 * 60 * 24 * 7.0, format) == (DurationUnits.WEEK, DurationUnits.WEEK)
+    assert _auto_units(60 * 60 * 24 * 7.0, format_archive) == (
+        DurationUnits.WEEK,
+        DurationUnits.WEEK,
+    )
 
-    format = TSKArchives.FormatStructArchive(
+    format_archive = TSKArchives.FormatStructArchive(
         format_type=270,
         show_thousands_separator=False,
         use_accounting_style=False,
@@ -111,10 +114,10 @@ def test_cell_storage(tmp_path):
         is_complex=False,
         contains_integer_token=False,
     )
-    assert _decode_number_format(format, 0.1, "test") == "    .1"
+    assert _decode_number_format(format_archive, 0.1, "test") == "    .1"
 
-    format.custom_format_string = "0.##"
-    assert _decode_number_format(format, 1.0, "test") == "1"
+    format_archive.custom_format_string = "0.##"
+    assert _decode_number_format(format_archive, 1.0, "test") == "1"
 
     with pytest.raises(UnsupportedError) as e:
         _ = Document("tests/data/pre-bnc.numbers")
@@ -125,8 +128,8 @@ def test_formatting_exceptions():
     doc = Document("tests/data/test-custom-formats.numbers")
 
     cell = doc.sheets[0].tables[0].cell("B4")
-    format = doc._model.table_format(cell._table_id, cell._date_format_id)
-    format_uuid = NumbersUUID(format.custom_uid).hex
+    format_archive = doc._model.table_format(cell._table_id, cell._date_format_id)
+    format_uuid = NumbersUUID(format_archive.custom_uid).hex
     format_map = doc._model.custom_format_map()
     custom_format = format_map[format_uuid].default_format
 
@@ -144,8 +147,8 @@ def test_formatting_exceptions():
     assert "Unsupported field code 'ZZ'" in str(record[0])
 
     cell = doc.sheets["Numbers"].tables[0].cell("C38")
-    format = doc._model.table_format(cell._table_id, cell._num_format_id)
-    format_uuid = NumbersUUID(format.custom_uid).hex
+    format_archive = doc._model.table_format(cell._table_id, cell._num_format_id)
+    format_uuid = NumbersUUID(format_archive.custom_uid).hex
     format_map = doc._model.custom_format_map()
     custom_format = format_map[format_uuid].default_format
     custom_format.custom_format_string = "XX"
@@ -227,22 +230,22 @@ def test_set_number_defaults():
     table.write(0, 0, 0.0)
     table.set_cell_formatting(0, 0, "number")
     num_format_id = table.cell(0, 0)._num_format_id
-    format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
-    assert not format.show_thousands_separator
-    assert format.negative_style == NegativeNumberStyle.MINUS
-    assert format.decimal_places == DECIMAL_PLACES_AUTO
+    format_archive = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
+    assert not format_archive.show_thousands_separator
+    assert format_archive.negative_style == NegativeNumberStyle.MINUS
+    assert format_archive.decimal_places == DECIMAL_PLACES_AUTO
 
     table.set_cell_formatting(0, 0, "base")
     num_format_id = table.cell(0, 0)._num_format_id
-    format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
-    assert not format.show_thousands_separator
-    assert format.base_places == 0
+    format_archive = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
+    assert not format_archive.show_thousands_separator
+    assert format_archive.base_places == 0
 
     table.set_cell_formatting(0, 0, "currency")
     num_format_id = table.cell(0, 0)._currency_format_id
-    format = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
-    assert not format.show_thousands_separator
-    assert format.decimal_places == 2
+    format_archive = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
+    assert not format_archive.show_thousands_separator
+    assert format_archive.decimal_places == 2
 
     with pytest.raises(TypeError) as e:
         Formatting(type=object())
