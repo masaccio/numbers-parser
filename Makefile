@@ -15,6 +15,12 @@ package_c := $(subst -,_,$(PACKAGE))
 
 .PHONY: clean veryclean test coverage profile dist upload docs
 
+TTY_GREEN  := $(shell tput setaf 2)
+TTY_RESET  := $(shell tput init)
+TTY_RED    := $(shell tput setaf 1)
+info_message = echo "$(TTY_GREEN)Bootstrap: $(1)$(TTY_RESET)"
+error_message = echo "$(TTY_RED)Bootstrap: $(1)$(TTY_RESET)"
+
 all:
 	@echo "make targets:"
 	@echo "    test       - run pytest with all tests"
@@ -68,17 +74,20 @@ profile:
 test:
 	uv run pytest -n logical
 
-BOOTSTRAP_FILES = src/$(package_c)/generated/functionmap.py \
-				  src/$(package_c)/generated/fontmap.py \
+BOOTSTRAP_FILES = src/protos/TNArchives.proto \
+				  src/$(package_c)/generated/TNArchives_pb2.py \
 				  src/$(package_c)/generated/__init__.py \
 				  src/$(package_c)/generated/mapping.py \
-				  src/protos/TNArchives.proto
+				  src/$(package_c)/generated/functionmap.py \
+				  src/$(package_c)/generated/fontmap.py \
+				  src/$(package_c)/generated/__init__.py
+				  
 
 bootstrap: check_identity $(BOOTSTRAP_FILES)
 
 check_identity::
 	@if [ "$(IDENTITY)" == "" ]; then \
-		echo $$(tput setaf 1)"Bootstrap: No code signing identity found."$$(tput init); \
+		$(call error_message,"failure: no code signing identity found"); \
 		exit 1; \
 	fi
 
@@ -86,77 +95,82 @@ ENTITLEMENTS = src/build/entitlements.xml
 TMP_NUMBERS_APP = /tmp/Numbers.unsigned.app
 
 $(TMP_NUMBERS_APP): $(ENTITLEMENTS)
-	@echo $$(tput setaf 2)"Bootstrap: extracting protobuf mapping from Numbers"$$(tput init)
+	@$(call info_message,"creating local copy of Numbers.app")
 	@mkdir -p .bootstrap
-	rm -rf $@
-	cp -R $(NUMBERS) $@
-	xattr -cr $@
-	codesign --remove-signature $@
-	codesign --entitlements $(ENTITLEMENTS) --sign "${IDENTITY}" $@
-	codesign --verify $@
+	@rm -rf $@
+	@cp -R $(NUMBERS) $@
+	@$(call info_message,"re-signing local Numbers.app")
+	@xattr -cr $@
+	@codesign --remove-signature $@
+	@codesign --entitlements $(ENTITLEMENTS) --sign "${IDENTITY}" $@
+	@$(call info_message,"checking signatures of local Numbers.app")
+	@codesign --verify $@
 
 .bootstrap/mapping.json: $(TMP_NUMBERS_APP)
+	@$(call info_message,"dumping protobuf IDs using lldb")
 	@mkdir -p .bootstrap
-	PYTHONPATH=${LLDB_PYTHON_PATH}:src xcrun python3 \
+	@PYTHONPATH=${LLDB_PYTHON_PATH}:src xcrun python3 \
 		src/build/extract_mapping.py \
 		$(TMP_NUMBERS_APP)/Contents/MacOS/Numbers $@
 
 .bootstrap/mapping.py: .bootstrap/mapping.json
+	@$(call info_message,"creating Python mapping of Protobuf IDs")
 	@mkdir -p $(dir $@)
 	uv run python3 src/build/generate_mapping.py $< $@
 
 src/$(package_c)/generated/functionmap.py: .bootstrap/functionmap.py
 	@mkdir -p $(dir $@)
-	cp $< $@
+	@cp $< $@
 
 src/$(package_c)/generated/fontmap.py: .bootstrap/fontmap.py
 	@mkdir -p $(dir $@)
-	cp $< $@
+	@cp $< $@
 
 TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 .bootstrap/functionmap.py:
-	@echo $$(tput setaf 2)"Bootstrap: extracting function names from Numbers"$$(tput init)
+	@$(call info_message,"extracting function names from Numbers")
 	@mkdir -p .bootstrap
 	uv run python3 src/build/extract_functions.py $(TST_TABLES) $@ >/dev/null
 
 .bootstrap/fontmap.py:
-	@echo $$(tput setaf 2)"Bootstrap: generating font name map"$$(tput init)
+	@$(call info_message,"Bootstrap: generating font name map")
 	@mkdir -p .bootstrap
-	uv sync --group bootstrap
+	@uv sync --group bootstrap
 	uv run python3 src/build/generate_fontmap.py $@
 
 .bootstrap/protos/TNArchives.proto:
-	@echo $$(tput setaf 2)"Bootstrap: extracting protobufs from Numbers"$$(tput init)
+	@$(call info_message,"Bootstrap: extracting protobufs from Numbers")
 	uv run python3 src/build/protodump.py $(NUMBERS) .bootstrap/protos
 	uv run python3 src/build/rename_proto_files.py .bootstrap/protos
 
 src/$(package_c)/generated/mapping.py: .bootstrap/mapping.py
-	cp $< $@
+	@cp $< $@
 
 src/$(package_c)/generated/TNArchives_pb2.py: .bootstrap/protos/TNArchives.proto
-	@echo $$(tput setaf 2)"Bootstrap: compiling Python packages from protobufs"$$(tput init)
+	@$(call info_message,"Bootstrap: compiling Python packages from protobufs")
 	@mkdir -p src/$(package_c)/generated
-	for proto in .bootstrap/protos/*.proto; do \
+	@for proto in .bootstrap/protos/*.proto; do \
 	    $(PROTOC) -I=.bootstrap/protos --proto_path .bootstrap/protos --python_out=src/$(package_c)/generated $$proto; \
 	done
 
 src/protos/TNArchives.proto: .bootstrap/protos/TNArchives.proto
-	@echo $$(tput setaf 2)"Bootstrap: creating git-tracked copies of protos"$$(tput init)
+	@$(call info_message,"Bootstrap: creating git-tracked copies of protos")
 	@mkdir -p src/protos
-	for proto in .bootstrap/protos/*.proto; do \
+	@for proto in .bootstrap/protos/*.proto; do \
 		cp $$proto src/protos; \
 	done
 
-
 src/$(package_c)/generated/__init__.py: src/$(package_c)/generated/TNArchives_pb2.py
-	@echo $$(tput setaf 2)"Bootstrap: patching paths in generated protobuf files"$$(tput init)
+	@$(call info_message,"Bootstrap: patching paths in generated protobuf files")
 	uv run python3 src/build/replace_paths.py src/$(package_c)/generated/T*.py
-	touch $@
+	@touch $@
 
 veryclean:
 	make clean
 	rm -rf .bootstrap
-	rm -rf src/$(package_c)/generated
+	rm -f src/$(package_c)/generated/__init__.py
+	rm -f src/$(package_c)/generated/mapping.py
+	rm -f src/$(package_c)/generated/*_pb2.py
 	rm -rf $(TMP_NUMBERS_APP)
 
 clean:
