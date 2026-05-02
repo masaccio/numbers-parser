@@ -261,7 +261,11 @@ class _NumbersModel(Cacheable):
         return self.objects.find_refs(ref)
 
     def sheet_ids(self):
-        return [o.identifier for o in self.objects[DOCUMENT_ID].sheets]
+        return [
+            o.identifier
+            for o in self.objects[DOCUMENT_ID].sheets
+            if isinstance(self.objects[o.identifier], TNArchives.SheetArchive)
+        ]
 
     def sheet_name(self, sheet_id, value=None):
         if value is None:

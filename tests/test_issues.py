@@ -42,7 +42,7 @@ ISSUE_10_REF = [
     1234,  # 0x42d
     1234.56,
     "123",
-    datetime(2021, 4, 3, 0, 0, 0),  # noqa: DTZ001
+    datetime(2021, 4, 3, 0, 0, 0),
     timedelta(days=4, hours=2, minutes=3),
     timedelta(days=5, hours=4, minutes=3, seconds=20),
     timedelta(hours=4, minutes=3, seconds=2, milliseconds=10),
@@ -616,3 +616,16 @@ def test_issue_102():
     for row_num, row in enumerate(doc1.default_table.rows()):
         for col_num, cell in enumerate(row):
             assert type(cell) is type(doc2.default_table.cell(row_num, col_num))
+
+
+def test_issue_104():
+    doc = Document("tests/data/issue-104.numbers")
+    sheets = doc.sheets
+    assert len(sheets) == 1
+    assert sheets[0].name == "default_sheet_name"
+    tables = sheets["default_sheet_name"].tables
+    assert len(tables) == 1
+    assert tables[0].name == "table_name"
+    data = tables["table_name"].rows()
+    assert data[0][0].value == "Data"
+    assert data[3][1].value == "4"  # Cell deliberately formatted as text
