@@ -878,7 +878,7 @@ dev = [
 docs = [
     { name = "enum-tools", specifier = ">=0.11" },
     { name = "filelock", specifier = ">=3.20.1" },
-    { name = "sphinx", specifier = ">=7.3" },
+    { name = "sphinx", specifier = ">=7.3,<9.0" },
     { name = "sphinx-copybutton", specifier = ">=0.5.2" },
     { name = "sphinx-markdown-builder", specifier = ">=0.6" },
     { name = "sphinx-nefertiti", specifier = ">=0.7" },

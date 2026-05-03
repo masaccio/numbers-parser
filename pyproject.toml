@@ -51,7 +51,7 @@ dev = [
     "pympler<2.0,>=1.1",
 ]
 docs = [
-    "sphinx>=7.3",
+    "sphinx<9.0,>=7.3",
     "enum-tools>=0.11",
     "sphinx-toolbox>=3.5",
     "sphinx-nefertiti>=0.7",
