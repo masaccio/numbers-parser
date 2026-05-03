@@ -75,7 +75,7 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["numbers_parser*"]
-exclude = ["*tests*"]
+exclude = ["*tests*", "numbers_parser.data"]
 namespaces = false  # disable scanning PEP 420 namespaces
 
 [tool.setuptools.package-data]
@@ -94,7 +94,7 @@ addopts = "--cov=src/numbers_parser --cov-report=html --cov-report=term-missing:
 
 [tool.tox]
 requires = ["tox>=4.0"]
-envlist = ["py39", "py310", "py311", "py312", "py313"]
+envlist = ["py310", "py311", "py312", "py313"]
 
 [testenv]
 deps = [
