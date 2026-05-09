@@ -2,14 +2,21 @@ name: All tests
 
 on:
   push:
-    branches: [ "main", "v2.3" ]
+    branches: [ "main", "feat/*" ]
   pull_request:
-    branches: [ "main", "v2.3" ]
+    branches: [ "main", "feat/*" ]
+  # For dependabot
+  schedule:
+    - cron: '0 0 1 * *'
   workflow_dispatch:
 
-jobs:
-  build:
+permissions:
+  contents: write
+  pull-requests: write
 
+jobs:
+  test:
+    name: Run All Tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -17,18 +24,35 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install uv and set the python version
-      uses: astral-sh/setup-uv@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install libsnappy
-      run: sudo apt-get -y install libsnappy-dev
+      - name: Install libsnappy
+        run: sudo apt-get -y install libsnappy-dev
 
-    - name: Install the project
-      run: uv sync --locked --all-extras --dev
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
 
-    - name: Run tests
-      run: uv run pytest -n logical
+      - name: Run tests
+        run: uv run pytest -n logical
+
+  dependabot:
+    needs: test
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' && github.event_name == 'pull_request' }}
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Auto-merge for Dependabot PRs
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
