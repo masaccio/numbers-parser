@@ -2,6 +2,7 @@ version: 2
 updates:
   - package-ecosystem: "uv"
     directory: "/"
+    target-branch: "main"
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 10
@@ -9,6 +10,7 @@ updates:
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "main"
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 10
