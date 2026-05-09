@@ -2,6 +2,7 @@ name: Code coverage
 on: [push, workflow_dispatch]
 jobs:
   run:
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     env:
       OS: ubuntu-latest
