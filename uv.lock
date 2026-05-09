@@ -1160,6 +1160,15 @@ wheels = [
 ]
 
 [[package]]
+name = "roman"
+version = "5.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9c/7c/3901b35ed856329bf98e84da8e5e0b4d899ea0027eee222f1be42a24ff3f/roman-5.2.tar.gz", hash = "sha256:275fe9f46290f7d0ffaea1c33251b92b8e463ace23660508ceef522e7587cb6f", size = 8185, upload-time = "2025-11-11T08:03:57.025Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/10/14/ea3cdd7276fcd731a9003fe4abeb6b395a38110ddff6a6a509f4ee00f741/roman-5.2-py3-none-any.whl", hash = "sha256:89d3b47400388806d06ff77ea77c79ab080bc127820dea6bf34e1f1c1b8e676e", size = 6041, upload-time = "2025-11-11T08:03:56.051Z" },
+]
+
+[[package]]
 name = "roman-numerals-py"
 version = "3.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1490,7 +1499,7 @@ wheels = [
 
 [[package]]
 name = "sphinx-toolbox"
-version = "4.0.0"
+version = "4.1.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apeye" },
@@ -1502,6 +1511,7 @@ dependencies = [
     { name = "domdf-python-tools" },
     { name = "filelock" },
     { name = "html5lib" },
+    { name = "roman" },
     { name = "ruamel-yaml" },
     { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -1513,9 +1523,9 @@ dependencies = [
     { name = "tabulate" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/60/d2/fd68940102a02cbff392b91317618e0f87458e98a9684c0f74b1c58d4e49/sphinx_toolbox-4.0.0.tar.gz", hash = "sha256:48c31451db2e2d8c71c03939e72a19ef7bc92ca7850a62db63fc7bb8395b6785", size = 113819, upload-time = "2025-05-12T17:11:39.104Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ba/16/769454374719569f6165149a16d06b8da27cda8330fe5f932c2c65a77a04/sphinx_toolbox-4.1.2.tar.gz", hash = "sha256:c30a4f86c4c29e97adb0eb9337d35f5093cb96a44f49caffcf7d5bc58a88b781", size = 114911, upload-time = "2026-01-14T17:33:02.156Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/77/fd/5f03a1ad6623b3533a4b7ce8156f0b6a185f4a276d12567e434b855040d1/sphinx_toolbox-4.0.0-py3-none-any.whl", hash = "sha256:c700937baee505e440d44d46bc47ccd036ec282ae61b04e40342944128721117", size = 195781, upload-time = "2025-05-12T17:11:37.45Z" },
+    { url = "https://files.pythonhosted.org/packages/fa/38/6763a5a981770a21a18b66d3593a8bbb801884d9828c126866efdd01d41a/sphinx_toolbox-4.1.2-py3-none-any.whl", hash = "sha256:0438f8342ba1c6c0d6e47207f4eac167adba61742e8c2b1dc9624ff955b7bc89", size = 196812, upload-time = "2026-01-14T17:33:00.51Z" },
 ]
 
 [[package]]
