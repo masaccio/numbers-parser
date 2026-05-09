@@ -21,6 +21,7 @@ iwafile
 iwork
 iwph
 klass
+libsnappy
 liststyle
 Lucida
 mydoc
@@ -33,6 +34,7 @@ pathnames
 pathsource
 pbtype
 popn
+pytest
 rgbspace
 Roboto
 rowcol
