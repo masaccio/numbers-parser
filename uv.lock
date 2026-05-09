@@ -1030,15 +1030,15 @@ wheels = [
 
 [[package]]
 name = "pytest-check"
-version = "2.5.3"
+version = "2.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pytest" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7b/f8/58aa6cf0af7bc261c4606c28582258e76cec398a7d8bdc2e82de51039f84/pytest_check-2.5.3.tar.gz", hash = "sha256:2357d7df77c395d30c0c4957724fdfce1a75ea8bc9eb2308c0ffe56f62ac70ca", size = 27422, upload-time = "2025-04-04T01:44:43.188Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7e/22/d6d5e05a1a36bc723b687e624f6d50c9ec3ce7e0752857ec07f77c2da4d1/pytest_check-2.8.0.tar.gz", hash = "sha256:c42e08ddd41ad9c387bd16efa664ade5def4d7aa5c607b05ba9e25f5aaba70c2", size = 37723, upload-time = "2026-03-22T15:10:23.242Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7a/29/d3fbd683c50aeb93d79377c904179c82f01f9f656299deb89328ab85b0a2/pytest_check-2.5.3-py3-none-any.whl", hash = "sha256:354685dfa63e714a20aa62b61c4d30d5acfa30891319df9046f59af653c3b9ba", size = 15998, upload-time = "2025-04-04T01:44:41.951Z" },
+    { url = "https://files.pythonhosted.org/packages/f0/a7/cc6712a6b214fe117a2232182113d0e4deeb2b1fba22f80197b483525a0c/pytest_check-2.8.0-py3-none-any.whl", hash = "sha256:671d94f857cebb4a4195baaf064ad77e3af8c37d0428dabdcfc3dcc992761634", size = 20124, upload-time = "2026-03-22T15:10:22.171Z" },
 ]
 
 [[package]]
