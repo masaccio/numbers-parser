@@ -24,7 +24,7 @@ jobs:
         run: uv run pytest  -n logical --cov=numbers_parser --cov-report=xml
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage/reports/
