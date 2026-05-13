@@ -35,7 +35,7 @@ csv2numbers = "numbers_parser._csv2numbers:main"
 
 [dependency-groups]
 dev = [
-    "gprof2dot<2023.0.0,>=2022.7.29",
+    "gprof2dot>=2022.7.29,<2026.0.0",
     "line-profiler>=5.0.0",
     "mock>=5.1.0",
     "pytest>=7.2.0",
