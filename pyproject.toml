@@ -58,7 +58,7 @@ docs = [
     "sphinx-markdown-builder>=0.6",
     "sphinx-copybutton>=0.5.2",
     # Security updates
-    "urllib3>=2.6.0",
+    "urllib3>=2.7.0",
     "filelock>=3.20.1"
 ]
 bootstrap = [
