@@ -112,7 +112,7 @@ def test_issue_7():
     table = tables[0]
     assert table.cell(1, 1).value == ISSUE_7_REF_1
     assert table.cell(2, 1).value == ISSUE_7_REF_2
-    assert table.cell(1, 1).bullets[0] == ISSUE_7_REF_1.split("\n")[0]
+    assert table.cell(1, 1).bullets[0] == ISSUE_7_REF_1.split("\n", maxsplit=1)[0]
     assert table.cell(2, 1).bullets[2] == ISSUE_7_REF_2.split("\n")[2]
 
 
@@ -629,3 +629,9 @@ def test_issue_104():
     data = tables["table_name"].rows()
     assert data[0][0].value == "Data"
     assert data[3][1].value == "4"  # Cell deliberately formatted as text
+
+
+def test_issue_121():
+    doc = Document("tests/data/issue-121.numbers")
+    table = doc.sheets[0].tables[0]
+    assert table.cell(1, 2).formula == "-SUM(#REF!,#REF!)"

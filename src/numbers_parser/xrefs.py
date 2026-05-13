@@ -62,13 +62,19 @@ class CellRange:
     from_table_id: int = None
     to_table_id: int = None
     range_type: CellRangeType = None
+    _ref_error: bool = False
     _do_init: bool = True
     _table_names: list[str] = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
-        self._initialize_table_data()
-        self.model.name_ref_cache.refresh()
-        self._set_sheet_ids()
+        if (self.row_start is not None and self.row_start < 0) or (
+            self.col_start is not None and self.col_start < 0
+        ):
+            self._ref_error = True
+        else:
+            self._initialize_table_data()
+            self.model.name_ref_cache.refresh()
+            self._set_sheet_ids()
 
     def _initialize_table_data(self):
         self._table_names = self.model.table_names()
@@ -84,6 +90,9 @@ class CellRange:
         self.to_sheet_id = self.model.table_id_to_sheet_id(self.to_table_id)
 
     def expand_ref(self, ref: str, is_abs: bool = False, no_prefix=False) -> str:
+        if self._ref_error:
+            return "#REF!"
+
         self.model.name_ref_cache.refresh()
         is_document_unique = (
             ref.scope == RefScope.DOCUMENT if isinstance(ref, ScopedNameRef) else False
@@ -119,6 +128,9 @@ class CellRange:
         return f"{sheet_name}::{table_name}::{ref_str}"
 
     def __str__(self):
+        if self._ref_error:
+            return "#REF!"
+
         self.model.name_ref_cache.refresh()
         # Handle row-only ranges
         if self.col_start is None:
