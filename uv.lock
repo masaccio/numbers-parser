@@ -541,11 +541,11 @@ wheels = [
 
 [[package]]
 name = "gprof2dot"
-version = "2022.7.29"
+version = "2025.4.14"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ab/0b/fc056b26a90c1836aa6c6e1332372dc13050d384f017e388131854ead8cf/gprof2dot-2022.7.29.tar.gz", hash = "sha256:45b4d298bd36608fccf9511c3fd88a773f7a1abc04d6cd39445b11ba43133ec5", size = 33948, upload-time = "2022-07-29T14:39:55.905Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bb/fd/cad13fa1f7a463a607176432c4affa33ea162f02f58cc36de1d40d3e6b48/gprof2dot-2025.4.14.tar.gz", hash = "sha256:35743e2d2ca027bf48fa7cba37021aaf4a27beeae1ae8e05a50b55f1f921a6ce", size = 39536, upload-time = "2025-04-14T07:21:45.76Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1e/96/2735e0238be958d0a0b578fdfb46ff175869e462351805faab5ce4cae2d7/gprof2dot-2022.7.29-py2.py3-none-any.whl", hash = "sha256:f165b3851d3c52ee4915eb1bd6cca571e5759823c2cd0f71a79bda93c2dc85d6", size = 34080, upload-time = "2022-07-29T14:39:54.059Z" },
+    { url = "https://files.pythonhosted.org/packages/71/ed/89d760cb25279109b89eb52975a7b5479700d3114a2421ce735bfb2e7513/gprof2dot-2025.4.14-py3-none-any.whl", hash = "sha256:0742e4c0b4409a5e8777e739388a11e1ed3750be86895655312ea7c20bd0090e", size = 37555, upload-time = "2025-04-14T07:21:43.319Z" },
 ]
 
 [[package]]
@@ -920,7 +920,7 @@ bootstrap = [
 ]
 dev = [
     { name = "colorama", specifier = ">=0.4.6,<1.0.0" },
-    { name = "gprof2dot", specifier = ">=2022.7.29,<2023.0.0" },
+    { name = "gprof2dot", specifier = ">=2022.7.29,<2026.0.0" },
     { name = "line-profiler", specifier = ">=5.0.0" },
     { name = "mock", specifier = ">=5.1.0" },
     { name = "pympler", specifier = ">=1.1,<2.0" },
