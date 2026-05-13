@@ -205,16 +205,16 @@ wheels = [
 
 [[package]]
 name = "compact-json"
-version = "1.8.1"
+version = "1.8.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "importlib-resources" },
     { name = "setuptools" },
     { name = "wcwidth" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5e/33/6d56e085b4525d2eb863773d1c08710fac59ef349f94e35f4ce3ff7979f2/compact_json-1.8.1.tar.gz", hash = "sha256:1dfcd53a05e27725fd73d694028c6d9a4b5e7fe8586d0980d0f7d5b5672ee144", size = 17975, upload-time = "2024-05-16T07:30:19.001Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/48/2f/f618cff3aa844ad64660931388e993a3c20d6f30b67fbb436b6af3aff182/compact_json-1.8.2.tar.gz", hash = "sha256:dc200148695be04b91ac45cd3cda531aa017fb25609b66b9961a008db25eae77", size = 17821, upload-time = "2025-12-26T13:48:59.041Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/62/3d/32da265b9d062ca624b60431b36ef97a2946e5252a79c08e4e14b0f9c3af/compact_json-1.8.1-py3-none-any.whl", hash = "sha256:1232321c1eb65d48a341265cd289996c02fe4ce213ffc4cfe948c3faf985ea0a", size = 16909, upload-time = "2024-05-16T07:30:17.306Z" },
+    { url = "https://files.pythonhosted.org/packages/4a/40/3f88e56029542a13d8b46f464780255d9fe789923cea19698ca383124e0f/compact_json-1.8.2-py3-none-any.whl", hash = "sha256:b894ab1519e6fe7813351fa96962449f821051b8b5178c609bdda2eabd07abb0", size = 17047, upload-time = "2025-12-26T13:48:57.698Z" },
 ]
 
 [[package]]
