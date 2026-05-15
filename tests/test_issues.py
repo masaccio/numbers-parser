@@ -20,6 +20,7 @@ from numbers_parser.constants import (
     DEFAULT_ROW_COUNT,
     DEFAULT_ROW_HEIGHT,
 )
+from numbers_parser.xrefs import CellRange
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"
@@ -634,4 +635,9 @@ def test_issue_104():
 def test_issue_121():
     doc = Document("tests/data/issue-121.numbers")
     table = doc.sheets[0].tables[0]
-    assert table.cell(1, 2).formula == "-SUM(#REF!,#REF!)"
+    cell = table.cell(1, 2)
+    assert isinstance(cell, ErrorCell)
+    assert cell.formula == "-SUM(#REF!,#REF!)"
+
+    r = CellRange(row_start=cell.row, col_start=-1, model=cell._model)
+    assert r.expand_ref("A1") == "#REF!"
