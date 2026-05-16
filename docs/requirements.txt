@@ -1,5 +1,5 @@
 compact-json
-enum-tools
+enum-tools>=11.0.0
 importlib-resources
 protobuf
 python-dateutil
