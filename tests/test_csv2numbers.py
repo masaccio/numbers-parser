@@ -196,7 +196,7 @@ def test_multifile(script_runner, tmp_path) -> None:
         ],
         print_result=False,
     )
-    assert "numbers of input and output file names do not match" in ret.stderr
+    assert "number of input and output file names do not match" in ret.stderr
 
 
 @pytest.mark.filterwarnings(
@@ -213,6 +213,16 @@ def test_main(capsys):
     captured = capsys.readouterr()
     assert "strip whitespace from beginning" in captured.out
     assert captured.err == ""
+
+
+@pytest.mark.script_launch_mode("inprocess")
+def test_arg_len_mismatch(script_runner) -> None:
+    """Test conversion with no transforms."""
+    ret = script_runner.run(
+        ["csv2numbers", "tests/data/format-1.csv", "tests/data/format-2.csv", "-o", "test.numbers"],
+        print_result=False,
+    )
+    assert "The number of input and output file names do not match" in ret.stderr
 
 
 @pytest.mark.script_launch_mode("inprocess")

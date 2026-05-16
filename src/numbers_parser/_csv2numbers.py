@@ -393,7 +393,7 @@ def main() -> None:
         output_filenames = args.output
 
     if len(args.csvfile) != len(output_filenames):
-        print("The numbers of input and output file names do not match", file=sys.tderr)
+        print("The number of input and output file names do not match", file=sys.stderr)
         sys.exit(1)
 
     try:
