@@ -1,7 +1,10 @@
 """Tests for CSV conversion."""
 
+import runpy
 import shutil
+import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -194,6 +197,22 @@ def test_multifile(script_runner, tmp_path) -> None:
         print_result=False,
     )
     assert "numbers of input and output file names do not match" in ret.stderr
+
+
+@pytest.mark.filterwarnings(
+    "ignore:'numbers_parser._csv2numbers' found in sys.modules:RuntimeWarning",
+)
+def test_main(capsys):
+    with patch.object(sys, "argv", ["_csv2numbers.py", "--help"]):
+        with pytest.raises(SystemExit) as excinfo:
+            # Use runpy instead of script_runner to ensure coverage
+            runpy.run_module("numbers_parser._csv2numbers", run_name="__main__")
+
+        assert excinfo.value.code == 0
+
+    captured = capsys.readouterr()
+    assert "strip whitespace from beginning" in captured.out
+    assert captured.err == ""
 
 
 @pytest.mark.script_launch_mode("inprocess")

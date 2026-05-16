@@ -1,6 +1,8 @@
 import json
+import runpy
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import magic
 import pytest
@@ -180,18 +182,23 @@ def test_compact_json(script_runner, tmp_path):
     assert '"formula_owner_id": {"uuid_w0": 666, "uuid_w1": 0, "uuid_w2": 0, "uuid_w3": 0},' in data
 
 
-@pytest.mark.script_launch_mode("subprocess")
-def test_main(script_runner):
-    ret = script_runner.run(
-        ["python3", "-m", "numbers_parser._unpack_numbers", "--help"],
-        print_result=False,
-    )
-    assert ret.success
-    assert "directory name to unpack into" in ret.stdout
-    assert ret.stderr == ""
+@pytest.mark.filterwarnings(
+    "ignore:'numbers_parser._unpack_numbers' found in sys.modules:RuntimeWarning",
+)
+def test_main(capsys):
+    with patch.object(sys, "argv", ["_unpack_numbers.py", "--help"]):
+        with pytest.raises(SystemExit) as excinfo:
+            # Use runpy instead of script_runner to ensure coverage
+            runpy.run_module("numbers_parser._unpack_numbers", run_name="__main__")
+
+        assert excinfo.value.code == 0
+
+    captured = capsys.readouterr()
+    assert "directory name to unpack into" in captured.out
+    assert captured.err == ""
 
 
-@pytest.mark.script_launch_mode("subprocess")
+@pytest.mark.script_launch_mode("inprocess")
 def test_corrupted(script_runner, tmp_path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
@@ -200,6 +207,14 @@ def test_corrupted(script_runner, tmp_path):
     )
     assert not ret.success
     assert "Index/Metadata.iwa: invalid" in ret.stderr
+    assert ret.stdout == ""
+
+    ret = script_runner.run(
+        ["unpack-numbers", "--output", str(output_dir), "tests/data/invalid.numbers"],
+        print_result=False,
+    )
+    assert not ret.success
+    assert "invalid Numbers document (missing files)" in ret.stderr
     assert ret.stdout == ""
 
 

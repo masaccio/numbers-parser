@@ -1,4 +1,7 @@
 import csv
+import runpy
+import sys
+from unittest.mock import patch
 
 import pytest
 import pytest_check as check
@@ -246,16 +249,21 @@ def test_debug(script_runner):
     assert "enabling ExperimentalFeatures.TESTING" in rows[0]
 
 
-@pytest.mark.script_launch_mode("subprocess")
-def test_main(script_runner):
-    ret = script_runner.run(
-        ["python3", "-m", "numbers_parser._cat_numbers", "--help"],
-        print_result=False,
-    )
-    assert ret.success
-    assert "List the names of tables" in ret.stdout
-    assert "Names of sheet" in ret.stdout
-    assert ret.stderr == ""
+@pytest.mark.filterwarnings(
+    "ignore:'numbers_parser._cat_numbers' found in sys.modules:RuntimeWarning",
+)
+def test_main(capsys):
+    with patch.object(sys, "argv", ["_cat_numbers.py", "--help"]):
+        with pytest.raises(SystemExit) as excinfo:
+            # Use runpy instead of script_runner to ensure coverage
+            runpy.run_module("numbers_parser._cat_numbers", run_name="__main__")
+
+        assert excinfo.value.code == 0
+
+    captured = capsys.readouterr()
+    assert "List the names of tables" in captured.out
+    assert "Names of sheet" in captured.out
+    assert captured.err == ""
 
 
 @pytest.mark.script_launch_mode("inprocess")
