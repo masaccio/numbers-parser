@@ -562,7 +562,6 @@ class CellStorageFlags:
     _text_style_id: int = None
     _formula_id: int = None
     _control_id: int = None
-    _formula_error_id: int = None
     _suggest_id: int = None
     _num_format_id: int = None
     _currency_format_id: int = None
@@ -877,7 +876,7 @@ class Cell(CellStorageFlags, Cacheable):
             storage_flags._control_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
         if flags & 0x800:
-            storage_flags.formula_error_id = unpack("<i", buffer[offset : offset + 4])[0]
+            # formula_error_id skipped
             offset += 4
         if flags & 0x1000:
             storage_flags._suggest_id = unpack("<i", buffer[offset : offset + 4])[0]
