@@ -82,10 +82,12 @@ def test_local_docs():
             test_name = tests[test_ok_count].__name__
             print(f"{doc_path}: FAILED with {exc_type} exception")
             print(f"\tFailing test: {test_name}")
-            print(f"\tMessage:  {exc_message}")
+            print(f"\tMessage: {exc_message}")
             print(f"\tLocation: File '{filename}', line {line_number}")
         else:
             if len(captured_warnings) > 0:
                 print(f"{doc_path}: OK with {len(captured_warnings)} warnings")
+                for ii, w in enumerate(captured_warnings, start=1):
+                    print(f"\tWarning #{ii}: {w.category.__name__}: {w.message}")
             else:
                 print(f"{doc_path}: OK")
