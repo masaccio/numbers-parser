@@ -2143,7 +2143,7 @@ class _NumbersModel(Cacheable):
         # a string with a new bullet character
         bds = self.objects[table_id].base_data_store
         rich_text_table = self.objects[bds.rich_text_table.identifier]
-        for entry in rich_text_table.entries:  # pragma: no branch  # noqa: RET503
+        for entry in rich_text_table.entries:  # pragma: no branch
             if string_key == entry.key:
                 payload = self.objects[entry.rich_text_payload.identifier]
                 payload_storage = self.objects[payload.storage.identifier]
@@ -2442,7 +2442,10 @@ class _NumbersModel(Cacheable):
     @cache()
     def extract_strokes(self, table_id: int) -> None:
         table_obj = self.objects[table_id]
-        sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]
+        stroke_sidecar_id = table_obj.stroke_sidecar.identifier
+        if stroke_sidecar_id == 0:
+            return
+        sidecar_obj = self.objects[stroke_sidecar_id]
         self.extract_strokes_in_layers(table_id, sidecar_obj.top_row_stroke_layers, "top")
         self.extract_strokes_in_layers(table_id, sidecar_obj.left_column_stroke_layers, "left")
         self.extract_strokes_in_layers(table_id, sidecar_obj.right_column_stroke_layers, "right")

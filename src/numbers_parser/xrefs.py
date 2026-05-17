@@ -195,13 +195,13 @@ class CellRange:
 
     def _format_single_column(self, col_start, col_range):
         """Formats a single column, either numeric or named."""
-        if col_range[col_start] is None:
+        if col_range.get(col_start, None) is None:
             return self.expand_ref(xl_col_to_name(col_start, col_abs=self.col_start_is_abs))
         return self.expand_ref(col_range[col_start], self.col_start_is_abs)
 
     def _format_column_span(self, col_start, col_end, col_range):
         """Formats a range of columns."""
-        if col_range[col_start] is None:
+        if col_range.get(col_start, None) is None:
             return f"{self.expand_ref(xl_col_to_name(col_start, col_abs=self.col_start_is_abs))}:{self.expand_ref(xl_col_to_name(col_end, col_abs=self.col_end_is_abs), no_prefix=True)}"
         return ":".join(
             [

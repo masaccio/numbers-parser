@@ -218,6 +218,7 @@ NODE_FUNCTION_MAP = {
     "NUMBER_NODE": "number",
     "PERCENT_NODE": "percent",
     "POWER_NODE": "power",
+    "PLUS_SIGN_NODE": None,
     "PREPEND_WHITESPACE_NODE": None,
     "STRING_NODE": "string",
     "SUBTRACTION_NODE": "sub",

@@ -88,6 +88,8 @@ def test_local_docs():
             if len(captured_warnings) > 0:
                 print(f"{doc_path}: OK with {len(captured_warnings)} warnings")
                 for ii, w in enumerate(captured_warnings, start=1):
-                    print(f"\tWarning #{ii}: {w.category.__name__}: {w.message}")
+                    if "Custom font" not in str(w.message):
+                        # Non-standard font found
+                        print(f"\tWarning #{ii}: {w.category.__name__}: {w.message}")
             else:
                 print(f"{doc_path}: OK")
