@@ -4,7 +4,8 @@ import warnings
 
 import pytest
 
-from numbers_parser import Document, FileFormatError
+from numbers_parser import Document
+from numbers_parser.constants import DEFAULT_FONT
 
 ALL_DOCS_DIRS = [
     os.path.join(os.environ.get("HOME"), x)
@@ -42,7 +43,8 @@ def test_local_docs():
 
     def check_cell_formulas(doc: Document):
         for cell in all_doc_cells(doc):
-            _ = cell.formula
+            if cell.is_formula:
+                _ = cell.formula
 
     def check_cell_style(doc: Document):
         for cell in all_doc_cells(doc):
@@ -51,6 +53,9 @@ def test_local_docs():
     def check_cell_borders(doc: Document):
         for cell in all_doc_cells(doc):
             _ = cell.border
+
+    def allowed_warning(w):
+        return f"falling back to {DEFAULT_FONT}" in str(w.message)
 
     tests = [
         check_cell_values,
@@ -63,33 +68,37 @@ def test_local_docs():
     print("\n*** Testing local docs")
     for doc_path in all_docs_paths():
         test_ok_count = 0
+        captured_warnings = []
+        exc = None
         try:
             with warnings.catch_warnings(record=True) as captured_warnings:
                 warnings.simplefilter("always")
+                print(doc_path)
                 doc = Document(doc_path)
                 for test in tests:
                     test(doc)
                     test_ok_count += 1
-        except FileFormatError:
-            print(f"{doc_path}: invalid Numbers document")
         except Exception as e:
-            exc_type = type(e).__name__
-            exc_message = str(e)
-            extracted_tb = traceback.extract_tb(e.__traceback__)
+            exc = e
+        else:
+            captured_warnings = [w for w in captured_warnings if not allowed_warning(w)]
+
+        assert_msg = ""
+        if len(captured_warnings) > 1:
+            assert_msg += "\n".join(
+                [f"\tWarning: {w.category.__name__}: {w.message}" for w in captured_warnings],
+            )
+        if exc is not None:
+            exc_type = type(exc).__name__
+            exc_message = str(exc)
+            extracted_tb = traceback.extract_tb(exc.__traceback__)
             last_frame = extracted_tb[-1]
             filename = last_frame.filename
             line_number = last_frame.lineno
             test_name = tests[test_ok_count].__name__
-            print(f"{doc_path}: FAILED with {exc_type} exception")
-            print(f"\tFailing test: {test_name}")
-            print(f"\tMessage: {exc_message}")
-            print(f"\tLocation: File '{filename}', line {line_number}")
-        else:
-            if len(captured_warnings) > 0:
-                print(f"{doc_path}: OK with {len(captured_warnings)} warnings")
-                for ii, w in enumerate(captured_warnings, start=1):
-                    if "Custom font" not in str(w.message):
-                        # Non-standard font found
-                        print(f"\tWarning #{ii}: {w.category.__name__}: {w.message}")
-            else:
-                print(f"{doc_path}: OK")
+            assert_msg += f"{doc_path}: FAILED with {exc_type} exception"
+            assert_msg += f"\tFailing test: {test_name}"
+            assert_msg += f"\tMessage: {exc_message}"
+            assert_msg += f"\tLocation: File '{filename}', line {line_number}"
+
+        assert assert_msg == "", assert_msg
