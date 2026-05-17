@@ -867,19 +867,21 @@ class Cell(CellStorageFlags, Cacheable):
         if flags & 0x80:
             # cond_style_id skipped
             offset += 4
-        # Skip flag 0x100 (cond_rule_style_id)
+        if flags & 0x100:
+            # cond_rule_style_id skipped
+            offset += 4
         if flags & 0x200:
             storage_flags._formula_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
         if flags & 0x400:
             storage_flags._control_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
-        # Skip flag 0x800 (formula_error_id)
+        if flags & 0x800:
+            storage_flags.formula_error_id = unpack("<i", buffer[offset : offset + 4])[0]
+            offset += 4
         if flags & 0x1000:
             storage_flags._suggest_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
-        # Skip unused flags
-        offset += 4 * bin(flags & 0x900).count("1")
         if flags & 0x2000:
             storage_flags._num_format_id = unpack("<i", buffer[offset : offset + 4])[0]
             offset += 4
