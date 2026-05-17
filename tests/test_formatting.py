@@ -634,7 +634,7 @@ def test_write_mixed_number_formats(configurable_save_file):
             -(0x1F0000007F): False,
             (-0x7FFFFFFFFFF): False,
         }
-        for value, base_use_minus_sign in zip(values.keys(), values.values()):
+        for value, base_use_minus_sign in values.items():
             for base_places in [0, 8]:
                 if base not in [2, 8, 16] and not base_use_minus_sign:
                     continue
@@ -953,3 +953,11 @@ def test_write_interactive_formats(configurable_save_file):
     doc.save(configurable_save_file)
 
     run_test_interactive_formats(configurable_save_file)
+
+
+def test_no_space_date_formats():
+    doc = Document("tests/data/date-format-nospace.numbers")
+    for row in doc.default_table.rows():
+        if row[0].formula is None:
+            continue
+        assert row[0].formatted_value == row[1].value
