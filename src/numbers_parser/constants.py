@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from datetime import datetime
 from enum import IntEnum
 from math import ceil
@@ -82,6 +81,9 @@ CUSTOM_TEXT_PLACEHOLDER = "\ue421"
 
 # Supported versions
 SUPPORTED_NUMBERS_VERSIONS = [
+    "10.0",
+    "10.1",
+    "10.2",
     "10.3",
     "11.0",
     "11.1",
@@ -121,51 +123,53 @@ def _week_of_month(value: datetime) -> int:
     return ceil((value.day + value.replace(day=1).weekday()) / 7.0)
 
 
-DATETIME_FIELD_MAP = OrderedDict(
-    [
-        # Cell formats
-        ("a", lambda x: x.strftime("%p").lower()),
-        ("EEEE", "%A"),
-        ("EEE", "%a"),
-        ("yyyy", "%Y"),
-        ("yy", "%y"),
-        ("y", "%Y"),
-        ("MMMM", "%B"),
-        ("MMM", "%b"),
-        ("MM", "%m"),
-        ("M", "%-m"),
-        ("d", "%-d"),
-        ("dd", "%d"),
-        ("DDD", lambda x: str(_day_of_year(x)).zfill(3)),
-        ("DD", lambda x: str(_day_of_year(x)).zfill(2)),
-        ("D", lambda x: str(_day_of_year(x)).zfill(1)),
-        ("HH", "%H"),
-        ("H", "%-H"),
-        ("hh", "%I"),
-        ("h", "%-I"),
-        ("k", lambda x: str(x.hour).replace("0", "24")),
-        ("kk", lambda x: str(x.hour).replace("0", "24").zfill(2)),
-        ("K", lambda x: str(x.hour % 12)),
-        ("KK", lambda x: str(x.hour % 12).zfill(2)),
-        ("mm", lambda x: str(x.minute).zfill(2)),
-        ("m", lambda x: str(x.minute)),
-        ("ss", "%S"),
-        ("s", lambda x: str(x.second)),
-        ("W", lambda x: str(_week_of_month(x) - 1)),
-        ("ww", "%W"),
-        ("G", "AD"),  # TODO: support BC
-        ("F", lambda x: _days_occurred_in_month(x)),
-        ("S", lambda x: str(x.microsecond).zfill(6)[0]),
-        ("SS", lambda x: str(x.microsecond).zfill(6)[0:2]),
-        ("SSS", lambda x: str(x.microsecond).zfill(6)[0:3]),
-        ("SSSS", lambda x: str(x.microsecond).zfill(6)[0:4]),
-        ("SSSSS", lambda x: str(x.microsecond).zfill(6)[0:5]),
-        # Table category formats
-        ("QQQ", lambda x: "Q" + str(int(x.month / 3) + 1)),
-        ("LLLL", "%B"),
-        ("w", "%-W"),
-    ],
-)
+# Cell formats. We reorder so that the keys are in length order to greedily
+# match ss in favour of s, etc.
+_DATETIME_FIELD_MAP = {
+    "a": lambda x: x.strftime("%p").lower(),
+    "EEEE": "%A",
+    "EEE": "%a",
+    "yyyy": "%Y",
+    "yy": "%y",
+    "y": "%Y",
+    "MMMM": "%B",
+    "MMM": "%b",
+    "MM": "%m",
+    "M": "%-m",
+    "d": "%-d",
+    "dd": "%d",
+    "DDD": lambda x: str(_day_of_year(x)).zfill(3),
+    "DD": lambda x: str(_day_of_year(x)).zfill(2),
+    "D": lambda x: str(_day_of_year(x)).zfill(1),
+    "HH": "%H",
+    "H": "%-H",
+    "hh": "%I",
+    "h": "%-I",
+    "k": lambda x: str(x.hour).replace("0", "24"),
+    "kk": lambda x: str(x.hour).replace("0", "24").zfill(2),
+    "K": lambda x: str(x.hour % 12),
+    "KK": lambda x: str(x.hour % 12).zfill(2),
+    "mm": lambda x: str(x.minute).zfill(2),
+    "m": lambda x: str(x.minute),
+    "ss": "%S",
+    "s": lambda x: str(x.second),
+    "W": lambda x: str(_week_of_month(x) - 1),
+    "ww": "%W",
+    "G": "AD",  # TODO: support BC
+    "F": lambda x: _days_occurred_in_month(x),
+    "S": lambda x: str(x.microsecond).zfill(6)[0],
+    "SS": lambda x: str(x.microsecond).zfill(6)[0:2],
+    "SSS": lambda x: str(x.microsecond).zfill(6)[0:3],
+    "SSSS": lambda x: str(x.microsecond).zfill(6)[0:4],
+    "SSSSS": lambda x: str(x.microsecond).zfill(6)[0:5],
+    # Table category formats
+    "QQQ": lambda x: "Q" + str(int(x.month / 3) + 1),
+    "LLLL": "%B",
+    "w": "%-W",
+}
+DATETIME_FIELD_MAP = {
+    x: _DATETIME_FIELD_MAP[x] for x in sorted(_DATETIME_FIELD_MAP, key=len, reverse=True)
+}
 
 # From TSCEArchives
 COLON_TRACT_NODE = 67

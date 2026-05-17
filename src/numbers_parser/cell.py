@@ -1207,7 +1207,8 @@ class Cell(CellStorageFlags, Cacheable):
         elif custom_format.format_type == FormatType.BOOLEAN:
             return "TRUE" if self.value else "FALSE"
         elif custom_format.format_type == FormatType.PERCENT:
-            return _format_decimal(self._d128 * 100, custom_format, percent=True)
+            d128 = self._d128 or 0.0
+            return _format_decimal(d128 * 100, custom_format, percent=True)
         elif custom_format.format_type == FormatType.BASE:
             return _format_base(self._d128, custom_format)
         elif custom_format.format_type == FormatType.FRACTION:
@@ -1585,7 +1586,6 @@ def _decode_date_format(date_format, value):
     chars = [*date_format]
     index = 0
     in_string = False
-    in_field = False
     result = ""
     field = ""
     while index < len(chars):
@@ -1602,28 +1602,31 @@ def _decode_date_format(date_format, value):
                 index += 1
             else:
                 in_string = True
-                if in_field:
-                    result += _decode_date_format_field(field, value)
-                    in_field = False
                 index += 1
         elif in_string:
             result += current_char
             index += 1
-        elif not current_char.isalpha():
-            if in_field:
-                result += _decode_date_format_field(field, value)
-                in_field = False
+        elif current_char.isalpha():
+            remaining_str = date_format[index:]
+            matched_field = None
+            for field in DATETIME_FIELD_MAP:
+                # Greedily match the longest possible valid field
+                if remaining_str.startswith(field):
+                    matched_field = field
+                    break
+
+            if matched_field:
+                result += _decode_date_format_field(matched_field, value)
+                index += len(matched_field)
+            else:
+                unknown_field = ""
+                while index < len(chars) and chars[index].isalpha():
+                    unknown_field += chars[index]
+                    index += 1
+                result += _decode_date_format_field(unknown_field, value)
+        else:
             result += current_char
             index += 1
-        elif in_field:
-            field += current_char
-            index += 1
-        else:
-            in_field = True
-            field = current_char
-            index += 1
-    if in_field:
-        result += _decode_date_format_field(field, value)
 
     return result
 
@@ -1662,6 +1665,9 @@ def _expand_quotes(value: str) -> str:
 
 def _decode_number_format(number_format, value, name):  # noqa: PLR0912
     """Parse a custom date format string and return a formatted number value."""
+    if value is None:
+        return None
+
     custom_format_string = number_format.custom_format_string
     value *= number_format.scale_factor
     if "%" in custom_format_string and number_format.scale_factor == 1.0:
@@ -1681,7 +1687,8 @@ def _decode_number_format(number_format, value, name):  # noqa: PLR0912
             UnsupportedWarning,
             stacklevel=1,
         )
-        return custom_format_string
+        return str(value)
+
     format_spec = match.group(1)
     scientific_spec = match.group(2)
 
@@ -1832,6 +1839,9 @@ def _format_decimal(value: float, number_format, percent: bool = False) -> str:
 
 
 def _format_currency(value: float, number_format) -> str:
+    if value is None:
+        return None
+
     formatted_value = _format_decimal(value, number_format)
     if number_format.currency_code in CURRENCY_SYMBOLS:
         symbol = CURRENCY_SYMBOLS[number_format.currency_code]
