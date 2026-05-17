@@ -153,7 +153,7 @@ class DataLists(Cacheable):
         self._datalists[table_id]["key_index"] = {}
         self._datalists[table_id]["datalist"] = datalist
         self._datalists[table_id]["id"] = datalist_id
-        for i, entry in enumerate(datalist.entries):
+        for i, entry in enumerate(sorted(datalist.entries, key=lambda x: x.key)):
             if entry.key > max_key:
                 max_key = entry.key
                 self._datalists[table_id]["by_key"][entry.key] = entry
