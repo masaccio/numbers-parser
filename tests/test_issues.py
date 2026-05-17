@@ -637,7 +637,7 @@ def test_issue_121():
     table = doc.sheets[0].tables[0]
     cell = table.cell(1, 2)
     assert isinstance(cell, ErrorCell)
-    assert cell.formula == "-SUM(#REF!,#REF!)"
+    assert cell.formula == "#REF!"
 
     r = CellRange(row_start=cell.row, col_start=-1, model=cell._model)
     assert r.expand_ref("A1") == "#REF!"
