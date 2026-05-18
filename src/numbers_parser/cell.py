@@ -52,10 +52,12 @@ from numbers_parser.constants import (
     FormatType,
     FractionAccuracy,
     NegativeNumberStyle,
+    NumberFormatConditionType,
     PaddingType,
 )
 from numbers_parser.currencies import CURRENCIES, CURRENCY_SYMBOLS
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
+from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
@@ -1198,6 +1200,7 @@ class Cell(CellStorageFlags, Cacheable):
                     custom_format,
                     self._d128,
                     format_map[format_uuid].name,
+                    format_map[format_uuid].conditions,
                 )
         elif custom_format.format_type == FormatType.DECIMAL:
             return _format_decimal(self._d128, custom_format)
@@ -1662,12 +1665,48 @@ def _expand_quotes(value: str) -> str:
     return formatted_value
 
 
-def _decode_number_format(number_format, value, name):  # noqa: PLR0912
+def _decode_number_format(  # noqa: PLR0912
+    number_format: TSKArchives.FormatStructArchive,
+    value: float,
+    name: str,
+    conditions: list[TSKArchives.CustomFormatArchive.Condition],
+):
     """Parse a custom date format string and return a formatted number value."""
     if value is None:
         return None
 
     custom_format_string = number_format.custom_format_string
+    sign = "-" if value < 0 else ""
+    for condition in conditions:
+        value_sigfig = sigfig(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
+        if (
+            (
+                condition.condition_type == NumberFormatConditionType.EQUAL
+                and value_sigfig == condition.condition_value_dbl
+            )
+            or (
+                condition.condition_type == NumberFormatConditionType.LESS_THAN
+                and value_sigfig < condition.condition_value_dbl
+            )
+            or (
+                condition.condition_type == NumberFormatConditionType.LESS_THAN_OR_EQUAL_TO
+                and value_sigfig <= condition.condition_value_dbl
+            )
+            or (
+                condition.condition_type == NumberFormatConditionType.GREATER_THAN
+                and value_sigfig > condition.condition_value_dbl
+            )
+            or (
+                condition.condition_type == NumberFormatConditionType.GREATER_THAN_OR_EQUAL_TO
+                and value_sigfig >= condition.condition_value_dbl
+            )
+        ):
+            custom_format_string = condition.condition_format.custom_format_string
+            # Numbers discards sign when rules apply
+            sign = ""
+            break
+
+    value = abs(value)
     value *= number_format.scale_factor
     if "%" in custom_format_string and number_format.scale_factor == 1.0:
         # Per cent scale has 100x but % does not
@@ -1681,12 +1720,8 @@ def _decode_number_format(number_format, value, name):  # noqa: PLR0912
         )
 
     if (match := re.search(r"([#0.,]+(E[+]\d+)?)", custom_format_string)) is None:
-        warn(
-            f"Can't parse format string '{custom_format_string}'; skipping",
-            UnsupportedWarning,
-            stacklevel=1,
-        )
-        return str(value)
+        # Value is not part of the format
+        return _expand_quotes(custom_format_string)
 
     format_spec = match.group(1)
     scientific_spec = match.group(2)
@@ -1793,7 +1828,7 @@ def _decode_number_format(number_format, value, name):  # noqa: PLR0912
             formatted_value += "." + str(decimal)[2:]
 
     formatted_value = custom_format_string.replace(format_spec, formatted_value)
-    return _expand_quotes(formatted_value)
+    return sign + _expand_quotes(formatted_value)
 
 
 def _format_decimal(value: float, number_format, percent: bool = False) -> str:

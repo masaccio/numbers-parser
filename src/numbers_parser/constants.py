@@ -417,6 +417,15 @@ class CellInteractionType(IntEnum):
     TOGGLE = 8
 
 
+class NumberFormatConditionType(IntEnum):
+    NONE = -1
+    EQUAL = 0
+    LESS_THAN = 1
+    LESS_THAN_OR_EQUAL_TO = 2
+    GREATER_THAN = 3
+    GREATER_THAN_OR_EQUAL_TO = 4
+
+
 class CellValueType(IntEnum):
     NIL_TYPE = 1
     BOOLEAN_TYPE = 2

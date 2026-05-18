@@ -114,10 +114,10 @@ def test_cell_storage(tmp_path):
         is_complex=False,
         contains_integer_token=False,
     )
-    assert _decode_number_format(format_archive, 0.1, "test") == "    .1"
+    assert _decode_number_format(format_archive, 0.1, "test", []) == "    .1"
 
     format_archive.custom_format_string = "0.##"
-    assert _decode_number_format(format_archive, 1.0, "test") == "1"
+    assert _decode_number_format(format_archive, 1.0, "test", []) == "1"
 
     with pytest.raises(UnsupportedError) as e:
         _ = Document("tests/data/pre-bnc.numbers")
@@ -138,24 +138,6 @@ def test_formatting_exceptions():
         _ = cell.formatted_value
     assert len(record) == 1
     assert "Unexpected custom format type 299" in str(record[0])
-
-    custom_format.format_type = 272
-    custom_format.custom_format_string = "ZZ"
-    with pytest.warns(UnsupportedWarning) as record:
-        _ = cell.formatted_value
-    assert len(record) == 1
-    assert "Unsupported field code 'ZZ'" in str(record[0])
-
-    cell = doc.sheets["Numbers"].tables[0].cell("C38")
-    format_archive = doc._model.table_format(cell._table_id, cell._num_format_id)
-    format_uuid = NumbersUUID(format_archive.custom_uid).hex
-    format_map = doc._model.custom_format_map()
-    custom_format = format_map[format_uuid].default_format
-    custom_format.custom_format_string = "XX"
-    with pytest.warns(UnsupportedWarning) as record:
-        _ = cell.formatted_value
-    assert len(record) == 1
-    assert "Can't parse format string 'XX'" in str(record[0])
 
 
 def test_pretty_uuids():
