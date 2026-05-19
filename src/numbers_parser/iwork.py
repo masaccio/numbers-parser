@@ -1,6 +1,7 @@
 import logging
 import plistlib
 import re
+from abc import ABC, abstractmethod
 from io import BytesIO
 from pathlib import Path
 from sys import version_info
@@ -14,25 +15,26 @@ logger = logging.getLogger(__name__)
 debug = logger.debug
 
 
-class IWorkHandler:
-    def __init__(self) -> None:
-        pass  # pragma: nocover
-
+class IWorkHandler(ABC):
+    @abstractmethod
     def store_file(self, filename: str, blob: bytes) -> None:
         """Store a protobuf archive."""
-        # pragma: nocover
+        raise NotImplementedError
 
+    @abstractmethod
     def store_object(self, filename: str, identifier: int, archive: object) -> None:
         """Store a binary blob of data from the iWork package."""
-        # pragma: nocover
+        raise NotImplementedError
 
+    @abstractmethod
     def allowed_format(self, extension: str) -> bool:
         """bool: Return ``True`` if the filename extension is supported by the handler."""
-        # pragma: nocover
+        raise NotImplementedError
 
+    @abstractmethod
     def allowed_version(self, version: str) -> bool:
         """bool: Return ``True`` if the document version is allowed."""
-        # pragma: nocover
+        raise NotImplementedError
 
 
 class IWork:
@@ -94,12 +96,12 @@ class IWork:
         """
         Open an iWork file and read in the files and archives contained in it.
 
-        Raises:
+        Raises
         ------
         FileFormatError
             If any errors occur extracting data from the archive
 
-        Warns:
+        Warns
         -----
         RuntimeWarning
             If the version of the document is one that the IWork blob handler

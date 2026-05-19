@@ -63,6 +63,9 @@ class NumbersUnpacker(IWorkHandler):
             with open(target_path, "wb") as out:
                 out.write(blob)
 
+    def store_object(self, filename: str, identifier: int, archive: object) -> None:
+        pass
+
     def ensure_directory_exists(self, path: str) -> None:
         """Ensure that a path's directory exists."""
         parts = os.path.split(path)
