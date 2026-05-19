@@ -24,6 +24,7 @@ klass
 libsnappy
 liststyle
 Lucida
+muppy
 mydoc
 nconsectetur
 Neue
