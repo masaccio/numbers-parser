@@ -641,6 +641,7 @@ def test_issue_121():
 
     r = CellRange(row_start=cell.row, col_start=-1, model=cell._model)
     assert r.expand_ref("A1") == "#REF!"
+    assert str(r) == "#REF!"
 
 
 def test_issue_131():

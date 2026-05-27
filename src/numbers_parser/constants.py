@@ -1,15 +1,9 @@
 from datetime import datetime
 from enum import IntEnum
+from importlib.resources import files
 from math import ceil
 
 import enum_tools.documentation
-
-# Path to package data varies by Python version so we can
-# only ever generate coverage for one
-try:
-    from importlib.resources import files
-except ImportError:  # pragma: nocover
-    from importlib_resources import files
 
 __all__ = [
     "CellPadding",

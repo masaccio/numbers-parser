@@ -1142,12 +1142,8 @@ class Cell(CellStorageFlags, Cacheable):
 
         image_id = style.cell_properties.cell_fill.image.imagedata.identifier
         datas = self._model.objects[PACKAGE_ID].datas
-        stored_filename = next(
-            x.file_name for x in datas if x.identifier == image_id
-        )  # pragma: nocover (issue-1333)
-        preferred_filename = next(
-            x.preferred_file_name for x in datas if x.identifier == image_id
-        )  # pragma: nocover (issue-1333)
+        stored_filename = next(x.file_name for x in datas if x.identifier == image_id)
+        preferred_filename = next(x.preferred_file_name for x in datas if x.identifier == image_id)
         all_paths = self._model.objects.file_store.keys()
         image_pathnames = [x for x in all_paths if x == f"Data/{stored_filename}"]
 

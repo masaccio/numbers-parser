@@ -1449,7 +1449,7 @@ class _NumbersModel(Cacheable):
             self.objects[self.table_info_id(x)].super.geometry.position.y
             for x in self.table_ids(sheet_id)
             if x == table_id
-        )  # pragma: nocover (issue-1333)
+        )
 
         return self.table_height(table_id) + y_offset
 
