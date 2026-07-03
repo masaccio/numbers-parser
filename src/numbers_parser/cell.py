@@ -482,6 +482,9 @@ class Border:  # noqa: PLW1641
         """Private method to update stroke rendering order."""
         object.__setattr__(self, "_order", new_order)
 
+    def __repr__(self):
+        return str(self)
+
     def __str__(self) -> str:
         style_name = BorderType(self.style).name.lower()
         return f"Border(width={self.width}, color={self.color}, style={style_name})"
