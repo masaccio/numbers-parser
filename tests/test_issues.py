@@ -13,6 +13,7 @@ from numbers_parser import (
     ErrorCell,
     UnsupportedError,
     UnsupportedWarning,
+    xl_rowcol_to_cell,
 )
 from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
@@ -649,3 +650,40 @@ def test_issue_131():
     table = doc.sheets["Test"].tables["Summary"]
     assert table.cell(0, 1).formula == 'SUMIF(Category,"="&A1,Amount)'
     assert table.cell(9, 1).formula == "-SUM(B1:B6)"
+
+
+def test_issue_152(configurable_save_file):
+
+    cyan = Border(4.0, RGB(0, 240, 255), "solid")
+    magenta = Border(4.0, RGB(255, 0, 180), "dashes")
+    orange = Border(4.0, RGB(255, 130, 0), "solid")
+    green = Border(4.0, RGB(0, 255, 0), "dots")
+
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+    for row in range(table.num_rows):
+        for col in range(table.num_cols):
+            table.write(row, col, xl_rowcol_to_cell(row, col))
+            table.set_cell_border(row, col, "left", cyan, 1)
+            table.set_cell_border(row, col, "right", magenta, 1)
+            table.set_cell_border(row, col, "top", orange, 1)
+            table.set_cell_border(row, col, "bottom", green, 1)
+
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    for row in range(table.num_rows):
+        for col in range(table.num_cols):
+            cell = table.cell(row, col)
+            assert cell.value == xl_rowcol_to_cell(row, col)
+            assert cell.border.left == cyan
+            if col < (table.num_cols - 1):
+                assert cell.border.right == cyan
+            else:
+                assert cell.border.right == magenta
+            assert cell.border.top == orange
+            if row < (table.num_rows - 1):
+                assert cell.border.bottom == orange
+            else:
+                assert cell.border.bottom == green

@@ -2376,6 +2376,22 @@ class _NumbersModel(Cacheable):
             return cell
         return None
 
+    def _neighbor_border_value(
+        self,
+        border_value: Border,
+        neighbor_cell: object,
+        neighbor_side: str,
+        adjust_order: bool,
+    ) -> Border:
+        if adjust_order or neighbor_cell is None:
+            return border_value
+
+        neighbor_border = getattr(neighbor_cell._border, neighbor_side)
+        if neighbor_border is None or neighbor_border._order <= border_value._order:
+            return border_value
+
+        return neighbor_border
+
     def set_cell_border(
         self,
         table_id: int,
@@ -2383,42 +2399,85 @@ class _NumbersModel(Cacheable):
         col: int,
         side: str,
         border_value: Border,
+        adjust_order: bool = True,
     ) -> None:
         """Set the 2 borders adjacent to a stroke if within the table range."""
+        if not adjust_order:
+            border_value = Border(
+                width=border_value.width,
+                color=border_value.color,
+                style=border_value.style,
+                _order=border_value._order,
+            )
+
         if side == "top":
+            bottom_cell = self.cell_for_stroke(table_id, "bottom", row - 1, col)
+            border_value = self._neighbor_border_value(
+                border_value,
+                bottom_cell,
+                "bottom",
+                adjust_order,
+            )
             if (cell := self.cell_for_stroke(table_id, "top", row, col)) is not None:
                 cell._border.top = border_value
-            if (cell := self.cell_for_stroke(table_id, "bottom", row - 1, col)) is not None:
-                cell._border.bottom = border_value
+            if bottom_cell is not None:
+                bottom_cell._border.bottom = border_value
             if table_id in self._row_heights:
                 self._row_heights[table_id].pop(row, None)
                 self._row_heights[table_id].pop(row - 1, None)
         elif side == "right":
+            left_cell = self.cell_for_stroke(table_id, "left", row, col + 1)
+            border_value = self._neighbor_border_value(
+                border_value,
+                left_cell,
+                "left",
+                adjust_order,
+            )
             if (cell := self.cell_for_stroke(table_id, "right", row, col)) is not None:
                 cell._border.right = border_value
-            if (cell := self.cell_for_stroke(table_id, "left", row, col + 1)) is not None:
-                cell._border.left = border_value
+            if left_cell is not None:
+                left_cell._border.left = border_value
             if table_id in self._col_widths:
                 self._col_widths[table_id].pop(col, None)
                 self._col_widths[table_id].pop(col + 1, None)
         elif side == "bottom":
+            top_cell = self.cell_for_stroke(table_id, "top", row + 1, col)
+            border_value = self._neighbor_border_value(
+                border_value,
+                top_cell,
+                "top",
+                adjust_order,
+            )
             if (cell := self.cell_for_stroke(table_id, "bottom", row, col)) is not None:
                 cell._border.bottom = border_value
-            if (cell := self.cell_for_stroke(table_id, "top", row + 1, col)) is not None:
-                cell._border.top = border_value
+            if top_cell is not None:
+                top_cell._border.top = border_value
             if table_id in self._row_heights:
                 self._row_heights[table_id].pop(row, None)
                 self._row_heights[table_id].pop(row + 1, None)
         else:  # left border
+            right_cell = self.cell_for_stroke(table_id, "right", row, col - 1)
+            border_value = self._neighbor_border_value(
+                border_value,
+                right_cell,
+                "right",
+                adjust_order,
+            )
             if (cell := self.cell_for_stroke(table_id, "left", row, col)) is not None:
                 cell._border.left = border_value
-            if (cell := self.cell_for_stroke(table_id, "right", row, col - 1)) is not None:
-                cell._border.right = border_value
+            if right_cell is not None:
+                right_cell._border.right = border_value
             if table_id in self._col_widths:
                 self._col_widths[table_id].pop(col, None)
                 self._col_widths[table_id].pop(col - 1, None)
 
-    def extract_strokes_in_layers(self, table_id: int, layer_ids: list, side: str) -> None:
+    def extract_strokes_in_layers(
+        self,
+        table_id: int,
+        layer_ids: list,
+        side: str,
+    ) -> list[tuple[int, int, int, int, str, Border]]:
+        strokes = []
         for layer_id in layer_ids:
             stroke_layer = self.objects[layer_id.identifier]
             for stroke_run in stroke_layer.stroke_runs:
@@ -2432,12 +2491,31 @@ class _NumbersModel(Cacheable):
                     start_row = stroke_layer.row_column_index
                     start_column = stroke_run.origin
                     for col in range(start_column, start_column + stroke_run.length):
-                        self.set_cell_border(table_id, start_row, col, side, border_value)
+                        strokes.append(
+                            (
+                                stroke_run.order,
+                                table_id,
+                                start_row,
+                                col,
+                                side,
+                                border_value,
+                            ),
+                        )
                 else:
                     start_row = stroke_run.origin
                     start_column = stroke_layer.row_column_index
                     for row in range(start_row, start_row + stroke_run.length):
-                        self.set_cell_border(table_id, row, start_column, side, border_value)
+                        strokes.append(
+                            (
+                                stroke_run.order,
+                                table_id,
+                                row,
+                                start_column,
+                                side,
+                                border_value,
+                            ),
+                        )
+        return strokes
 
     @cache()
     def extract_strokes(self, table_id: int) -> None:
@@ -2446,10 +2524,32 @@ class _NumbersModel(Cacheable):
         if stroke_sidecar_id == 0:
             return
         sidecar_obj = self.objects[stroke_sidecar_id]
-        self.extract_strokes_in_layers(table_id, sidecar_obj.top_row_stroke_layers, "top")
-        self.extract_strokes_in_layers(table_id, sidecar_obj.left_column_stroke_layers, "left")
-        self.extract_strokes_in_layers(table_id, sidecar_obj.right_column_stroke_layers, "right")
-        self.extract_strokes_in_layers(table_id, sidecar_obj.bottom_row_stroke_layers, "bottom")
+        strokes = []
+        strokes.extend(
+            self.extract_strokes_in_layers(table_id, sidecar_obj.top_row_stroke_layers, "top"),
+        )
+        strokes.extend(
+            self.extract_strokes_in_layers(table_id, sidecar_obj.left_column_stroke_layers, "left"),
+        )
+        strokes.extend(
+            self.extract_strokes_in_layers(
+                table_id,
+                sidecar_obj.right_column_stroke_layers,
+                "right",
+            ),
+        )
+        strokes.extend(
+            self.extract_strokes_in_layers(
+                table_id,
+                sidecar_obj.bottom_row_stroke_layers,
+                "bottom",
+            ),
+        )
+        for _, table_id, row, col, side, border_value in sorted(
+            strokes,
+            key=lambda value: value[0],
+        ):
+            self.set_cell_border(table_id, row, col, side, border_value, adjust_order=False)
 
     def create_stroke(self, origin: int, length: int, border_value: Border):
         line_cap = TSDArchives.StrokeArchive.LineCap.ButtCap
