@@ -97,6 +97,8 @@ SUPPORTED_NUMBERS_VERSIONS = [
     # Numbers Creator Studio
     "26.0",
     "26.1",
+    "26.2",
+    "26.3",
 ]
 
 
