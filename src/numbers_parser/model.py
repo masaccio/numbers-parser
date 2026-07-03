@@ -2522,7 +2522,7 @@ class _NumbersModel(Cacheable):
         sidecar_obj.max_order += 1
         sidecar_obj.row_count = table_obj.number_of_rows
         sidecar_obj.column_count = table_obj.number_of_columns
-        border_value._order = sidecar_obj.max_order
+        border_value._set_order(sidecar_obj.max_order)
 
         if side == "top":
             layer_ids = sidecar_obj.top_row_stroke_layers

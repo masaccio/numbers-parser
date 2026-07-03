@@ -409,7 +409,8 @@ class BorderType(IntEnum):
     NONE = BORDER_STYLE_MAP["none"]
 
 
-class Border:
+@dataclass(frozen=True)
+class Border:  # noqa: PLW1641
     """
     Create a cell border to use with the :py:class:`~numbers_parser.Table` method
     :py:meth:`~numbers_parser.Table.set_cell_border`.
@@ -441,34 +442,45 @@ class Border:
 
     """
 
-    def __init__(
-        self,
-        width: float = DEFAULT_BORDER_WIDTH,
-        color: RGB = None,
-        style: BorderType = None,
-        _order: int = 0,
-    ) -> None:
-        if not isinstance(width, float):
+    width: float = DEFAULT_BORDER_WIDTH
+    color: RGB = None
+    style: BorderType = None
+    _order: int = 0
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.width, float):
             msg = "width must be a float number of points"
             raise TypeError(msg)
-        self.width = width
 
-        if color is None:
-            color = RGB(*DEFAULT_BORDER_COLOR)
-        self.color = rgb_color(color)
-
-        if style is None:
-            style = BorderType(BORDER_STYLE_MAP[DEFAULT_BORDER_STYLE])
-        if isinstance(style, str):
-            style = style.lower()
-            if style not in BORDER_STYLE_MAP:
-                msg = "invalid border style"
-                raise TypeError(msg)
-            self.style = BORDER_STYLE_MAP[style]
+        if self.color is None:
+            object.__setattr__(self, "color", RGB(*DEFAULT_BORDER_COLOR))
         else:
-            self.style = style
+            object.__setattr__(self, "color", rgb_color(self.color))
 
-        self._order = _order
+        current_style = self.style
+        if current_style is None:
+            # Default fallback
+            current_style = BorderType(BORDER_STYLE_MAP[DEFAULT_BORDER_STYLE])
+
+        elif isinstance(current_style, str):
+            # String conversion (e.g., "dashes" -> BorderType.DASHES)
+            current_style = current_style.lower()
+            if current_style not in BORDER_STYLE_MAP:
+                msg = f"invalid border style: '{current_style}'"
+                raise TypeError(msg)
+            current_style = BorderType(BORDER_STYLE_MAP[current_style])
+        elif not isinstance(current_style, BorderType):
+            try:
+                current_style = BorderType(current_style)
+            except ValueError as e:
+                msg = f"invalid border style value: {current_style}"
+                raise TypeError(msg) from e
+
+        object.__setattr__(self, "style", current_style)
+
+    def _set_order(self, new_order: int) -> None:
+        """Private method to update stroke rendering order."""
+        object.__setattr__(self, "_order", new_order)
 
     def __str__(self) -> str:
         style_name = BorderType(self.style).name.lower()
