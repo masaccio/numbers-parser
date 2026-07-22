@@ -661,8 +661,8 @@ def test_issue_152(configurable_save_file):
 
     doc = Document()
     table = doc.sheets[0].tables[0]
-    for row in range(table.num_rows):
-        for col in range(table.num_cols):
+    for row in range(50):
+        for col in range(50):
             table.write(row, col, xl_rowcol_to_cell(row, col))
             table.set_cell_border(row, col, "left", cyan, 1)
             table.set_cell_border(row, col, "right", magenta, 1)
