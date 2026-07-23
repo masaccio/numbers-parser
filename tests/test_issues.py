@@ -342,7 +342,7 @@ def test_issue_56(tmp_path):
 
 
 def test_issue_59():
-    from numbers_parser import Document
+    from numbers_parser import Document  # noqa: PLC0415
 
     doc = Document("tests/data/issue-59.numbers")
     sheets = doc.sheets
@@ -654,20 +654,29 @@ def test_issue_131():
 
 def test_issue_152(configurable_save_file):
 
-    cyan = Border(4.0, RGB(0, 240, 255), "solid")
-    magenta = Border(4.0, RGB(255, 0, 180), "dashes")
-    orange = Border(4.0, RGB(255, 130, 0), "solid")
-    green = Border(4.0, RGB(0, 255, 0), "dots")
+    black = Border(4.0, RGB(0, 0, 0), "solid")
+    cyan_dashed = Border(4.0, RGB(0, 240, 255), "dashes")
+    magenta_dashed = Border(4.0, RGB(255, 0, 180), "dashes")
+    orange_dashed = Border(4.0, RGB(255, 130, 0), "dashes")
+    green_dashed = Border(4.0, RGB(0, 255, 0), "dashes")
 
     doc = Document()
     table = doc.sheets[0].tables[0]
-    for row in range(50):
-        for col in range(50):
+    size = 50
+    for row in range(size):
+        for col in range(size):
             table.write(row, col, xl_rowcol_to_cell(row, col))
-            table.set_cell_border(row, col, "left", cyan, 1)
-            table.set_cell_border(row, col, "right", magenta, 1)
-            table.set_cell_border(row, col, "top", orange, 1)
-            table.set_cell_border(row, col, "bottom", green, 1)
+            table.set_cell_border(row, col, "left", black, 1)
+            table.set_cell_border(row, col, "right", black, 1)
+            table.set_cell_border(row, col, "top", black, 1)
+            table.set_cell_border(row, col, "bottom", black, 1)
+
+    for row in range(0, size, 3):
+        for col in range(0, size, 3):
+            table.set_cell_border(row, col, "left", cyan_dashed, 1)
+            table.set_cell_border(row, col, "right", magenta_dashed, 1)
+            table.set_cell_border(row, col, "top", orange_dashed, 1)
+            table.set_cell_border(row, col, "bottom", green_dashed, 1)
 
     doc.save(configurable_save_file)
 
@@ -677,13 +686,33 @@ def test_issue_152(configurable_save_file):
         for col in range(table.num_cols):
             cell = table.cell(row, col)
             assert cell.value == xl_rowcol_to_cell(row, col)
-            assert cell.border.left == cyan
-            if col < (table.num_cols - 1):
-                assert cell.border.right == cyan
+            if (row % 3) == 0 and (col % 3 == 0):
+                assert cell.border.left == cyan_dashed
+                assert cell.border.right == magenta_dashed
+                assert cell.border.top == orange_dashed
+                assert cell.border.bottom == green_dashed
+            elif (row % 3) == 0 and (col % 3 == 1):
+                assert cell.border.left == magenta_dashed
+                assert cell.border.right == black
+                assert cell.border.top == black
+                assert cell.border.bottom == black
+            elif (row % 3) == 0 and (col % 3 == 2):
+                assert cell.border.left == black
+                assert cell.border.right == cyan_dashed
+                assert cell.border.top == black
+                assert cell.border.bottom == black
+            elif (row % 3) == 1 and (col % 3 == 0):
+                assert cell.border.left == black
+                assert cell.border.right == black
+                assert cell.border.top == green_dashed
+                assert cell.border.bottom == black
+            elif (row % 3) == 2 and (col % 3 == 0):
+                assert cell.border.left == black
+                assert cell.border.right == black
+                assert cell.border.top == black
+                assert cell.border.bottom == orange_dashed
             else:
-                assert cell.border.right == magenta
-            assert cell.border.top == orange
-            if row < (table.num_rows - 1):
-                assert cell.border.bottom == orange
-            else:
-                assert cell.border.bottom == green
+                assert cell.border.left == black
+                assert cell.border.right == black
+                assert cell.border.top == black
+                assert cell.border.bottom == black
