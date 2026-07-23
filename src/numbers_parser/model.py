@@ -432,7 +432,7 @@ class _NumbersModel(Cacheable):
             {"childInfoKind": "Caption", "placement": {"identifier": caption_placement_id}},
             TSAArchives.CaptionInfoArchive,
         )
-        storage_id, storage = self.objects.create_object_from_dict(
+        storage_id, _ = self.objects.create_object_from_dict(
             "CalculationEngine",
             {
                 "text": ["Caption"],
@@ -1489,7 +1489,7 @@ class _NumbersModel(Cacheable):
     ) -> int:
         from_table = self.objects[from_table_id]
 
-        table_strings_id, table_strings = self.create_string_table()
+        table_strings_id, _ = self.create_string_table()
 
         # Build a minimal table duplicating references from the source table
         from_table_refs = field_references(from_table)
@@ -1514,7 +1514,7 @@ class _NumbersModel(Cacheable):
         # Suppress Numbers assertions for tables sharing the same data
         table_model.category_owner.identifier = 0
 
-        column_headers_id, column_headers = self.objects.create_object_from_dict(
+        column_headers_id, _ = self.objects.create_object_from_dict(
             "Index/Tables/HeaderStorageBucket-{}",
             {"bucketHashFunction": 1},
             TSTArchives.HeaderStorageBucket,
@@ -1724,7 +1724,7 @@ class _NumbersModel(Cacheable):
             "total_range_for_table": null_range_ref,
             "body_range_for_table": null_range_ref,
         }
-        formula_deps_id, formula_deps = self.objects.create_object_from_dict(
+        formula_deps_id, _ = self.objects.create_object_from_dict(
             "CalculationEngine",
             {
                 "formula_owner_uid": formula_owner_uuid.dict2,
