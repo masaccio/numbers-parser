@@ -678,6 +678,15 @@ def test_issue_152(configurable_save_file):
             table.set_cell_border(row, col, "top", orange_dashed, 1)
             table.set_cell_border(row, col, "bottom", green_dashed, 1)
 
+    for row in range(size):
+        for col in range(size):
+            border = table.cell(row, col).border
+            if (row % 3) == 0 and (col % 3) == 0:
+                assert border.left == cyan_dashed
+                assert border.right == magenta_dashed
+                assert border.top == orange_dashed
+                assert border.bottom == green_dashed
+
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
