@@ -220,8 +220,6 @@ A limited number of currencies are formatted using symbolic notation rather than
 
 Borders are represented using the [Border](https://masaccio.github.io/numbers-parser/api/border.html) class that can be initialized with line width, color and line style. The current state of a cell border is read using the [Cell.border](https://masaccio.github.io/numbers-parser/api/cells.html#numbers_parser.Cell.border) property and [Table.set_cell_border()](https://masaccio.github.io/numbers-parser/api/table.html#numbers_parser.Table.set_cell_border) sets the border for a cell edge or a range of cells.
 
-On save `numbers-parser` flattens all cell border runs to maintain performance which is subtly different to how Numbers organizes cell borders. However, this is visually identical to the presentation of Borders in Numbers.
-
 ## API
 
 For more examples and details of all available classes and methods, see the [full API docs](https://masaccio.github.io/numbers-parser/).
