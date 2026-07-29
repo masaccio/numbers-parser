@@ -851,7 +851,7 @@ wheels = [
 
 [[package]]
 name = "numbers-parser"
-version = "4.18.6b1"
+version = "4.18.6b2"
 source = { editable = "." }
 dependencies = [
     { name = "compact-json" },
