@@ -1250,6 +1250,7 @@ class _NumbersModel(Cacheable):
         self.update_cell_styles(table_id, data)
         self.update_cell_borders(table_id, data)
 
+        self.objects.remove_unreferenced_objects()
         table_model.ClearField("base_column_row_uids")
 
         tile_idx = 0
