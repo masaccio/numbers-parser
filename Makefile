@@ -67,8 +67,14 @@ readme:
 	cp docs/build/index.md README.md
 
 profile:
-	uv run pytest --profile
-	uv run gprof2dot -f pstats prof/combined.prof | dot -Tpng -o prof/combined.png
+	@for sub_test in tables borders styles; do \
+		test_name="test_profiling_$$sub_test"; \
+		heat_graph="prof/$$test_name.svg"; \
+		echo "======== Profile run: test_profiling_$$sub_test"; \
+		uv run pytest --profile-svg -q --experimental --no-cov tests/test_large.py -k "$$test_name"; \
+		mv prof/combined.svg "$$heat_graph"; \
+		echo ">>>>>>>> Saved to $$heat_graph"; \
+	done
 
 
 test:
