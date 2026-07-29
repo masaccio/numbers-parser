@@ -217,7 +217,7 @@ def invert_border_test(test):
         return None, None
     values = test.split(",")
     width = float(values[0])
-    color = eval(values[1].replace(";", ","))
+    color = eval(values[1].replace(";", ","))  # noqa: S307
     style = values[2]
     width = round(width * 2.0, 1) if width < 4.0 else round(width / 2.0, 1)
 
@@ -314,7 +314,7 @@ def test_resave_borders(configurable_save_file):
                 if not cell.value:
                     continue
                 tests = unpack_test_string(cell.value)
-                (test_string, new_tests, borders) = invert_tests(tests)
+                (test_string, _, borders) = invert_tests(tests)
                 table.write(row, col, test_string, style=style)
                 for i, side in enumerate(tests):
                     row_offset = 0
