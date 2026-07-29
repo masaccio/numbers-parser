@@ -341,7 +341,7 @@ def test_issue_56(tmp_path):
 
 
 def test_issue_59():
-    from numbers_parser import Document
+    from numbers_parser import Document  # noqa: PLC0415
 
     doc = Document("tests/data/issue-59.numbers")
     sheets = doc.sheets

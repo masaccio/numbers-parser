@@ -7,6 +7,8 @@ ASTNODETYPE
 capsys
 CFPF
 CFUUID
+codesign
+codesigning
 collab
 colorama
 Connell
@@ -40,6 +42,7 @@ iwph
 klass
 libsnappy
 liststyle
+lldb
 lldbutil
 Lucida
 makedirs
@@ -56,14 +59,18 @@ pathsource
 pbtype
 popn
 profobuf
+PROTOC
 protodump
+pstats
 pylint
 pympler
 pyobjc
 pytest
+PYTHONPATH
 rgbspace
 Roboto
 rowcol
+setaf
 setuptools
 sigfig
 sigfigs
@@ -74,6 +81,8 @@ Standin
 strikethru
 TICKBOX
 tileid
+Tpng
+tput
 tqdm
 transctions
 transformationstransformations
@@ -84,6 +93,8 @@ Uncategorized
 upsell
 urllib
 Varint
+veryclean
+xattr
 xdist
 XLOOKUP
 yday
