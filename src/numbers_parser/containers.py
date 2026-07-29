@@ -2,7 +2,7 @@ import math
 import re
 from pathlib import Path
 
-from numbers_parser.constants import PACKAGE_ID, SUPPORTED_NUMBERS_VERSIONS
+from numbers_parser.constants import DOCUMENT_ID, PACKAGE_ID, SUPPORTED_NUMBERS_VERSIONS
 from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
 from numbers_parser.iwork import IWork, IWorkHandler
 
@@ -111,6 +111,46 @@ class ObjectStore(IWorkHandler):
                 self._objects[obj_id],
                 obj_id,
             )
+
+    def remove_unreferenced_objects(self) -> None:
+        """Removes all objects from the ObjectStore that are not referenced."""
+        referenced_ids = {DOCUMENT_ID, PACKAGE_ID}
+
+        def find_references(msg):
+            """Recursively find all TSP.Reference messages in protobuf."""
+            if hasattr(msg, "identifier") and msg.DESCRIPTOR.name == "Reference":
+                referenced_ids.add(msg.identifier)
+
+            if hasattr(msg, "ListFields"):
+                for field_desc, value in msg.ListFields():
+                    if field_desc.type != field_desc.TYPE_MESSAGE:
+                        continue
+                    if field_desc.is_repeated:
+                        for item in value:
+                            find_references(item)
+                    else:
+                        find_references(value)
+
+        for obj in self._objects.values():
+            find_references(obj)
+
+        unreferenced_ids = set(self._objects.keys()) - referenced_ids
+        unreferenced_ids -= {c.identifier for c in self._objects[PACKAGE_ID].components}
+
+        for obj_id in unreferenced_ids:
+            del self._objects[obj_id]
+            filename = self._object_to_filename_map.pop(obj_id)
+
+            if filename in self._file_store:
+                iwa_file = self._file_store[filename]
+                for chunk in iwa_file.chunks:
+                    chunk.archives = [
+                        arch for arch in chunk.archives if arch.header.identifier != obj_id
+                    ]
+
+                # If the IWA file has no remaining archives, delete the file entirely
+                if all(len(chunk.archives) == 0 for chunk in iwa_file.chunks):
+                    del self._file_store[filename]
 
     @property
     def file_store(self):

@@ -13,6 +13,7 @@ from numbers_parser import (
     ErrorCell,
     UnsupportedError,
     UnsupportedWarning,
+    xl_rowcol_to_cell,
 )
 from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
@@ -649,3 +650,78 @@ def test_issue_131():
     table = doc.sheets["Test"].tables["Summary"]
     assert table.cell(0, 1).formula == 'SUMIF(Category,"="&A1,Amount)'
     assert table.cell(9, 1).formula == "-SUM(B1:B6)"
+
+
+def test_issue_152(configurable_save_file):
+
+    black = Border(4.0, RGB(0, 0, 0), "solid")
+    cyan_dashed = Border(4.0, RGB(0, 240, 255), "dashes")
+    magenta_dashed = Border(4.0, RGB(255, 0, 180), "dashes")
+    orange_dashed = Border(4.0, RGB(255, 130, 0), "dashes")
+    green_dashed = Border(4.0, RGB(0, 255, 0), "dashes")
+
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+    size = 50
+    for row in range(size):
+        for col in range(size):
+            table.write(row, col, xl_rowcol_to_cell(row, col))
+            table.set_cell_border(row, col, "left", black, 1)
+            table.set_cell_border(row, col, "right", black, 1)
+            table.set_cell_border(row, col, "top", black, 1)
+            table.set_cell_border(row, col, "bottom", black, 1)
+
+    for row in range(0, size, 3):
+        for col in range(0, size, 3):
+            table.set_cell_border(row, col, "left", cyan_dashed, 1)
+            table.set_cell_border(row, col, "right", magenta_dashed, 1)
+            table.set_cell_border(row, col, "top", orange_dashed, 1)
+            table.set_cell_border(row, col, "bottom", green_dashed, 1)
+
+    for row in range(size):
+        for col in range(size):
+            border = table.cell(row, col).border
+            if (row % 3) == 0 and (col % 3) == 0:
+                assert border.left == cyan_dashed
+                assert border.right == magenta_dashed
+                assert border.top == orange_dashed
+                assert border.bottom == green_dashed
+
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    for row in range(table.num_rows):
+        for col in range(table.num_cols):
+            cell = table.cell(row, col)
+            assert cell.value == xl_rowcol_to_cell(row, col)
+            if (row % 3) == 0 and (col % 3 == 0):
+                assert cell.border.left == cyan_dashed
+                assert cell.border.right == magenta_dashed
+                assert cell.border.top == orange_dashed
+                assert cell.border.bottom == green_dashed
+            elif (row % 3) == 0 and (col % 3 == 1):
+                assert cell.border.left == magenta_dashed
+                assert cell.border.right == black
+                assert cell.border.top == black
+                assert cell.border.bottom == black
+            elif (row % 3) == 0 and (col % 3 == 2):
+                assert cell.border.left == black
+                assert cell.border.right == cyan_dashed
+                assert cell.border.top == black
+                assert cell.border.bottom == black
+            elif (row % 3) == 1 and (col % 3 == 0):
+                assert cell.border.left == black
+                assert cell.border.right == black
+                assert cell.border.top == green_dashed
+                assert cell.border.bottom == black
+            elif (row % 3) == 2 and (col % 3 == 0):
+                assert cell.border.left == black
+                assert cell.border.right == black
+                assert cell.border.top == black
+                assert cell.border.bottom == orange_dashed
+            else:
+                assert cell.border.left == black
+                assert cell.border.right == black
+                assert cell.border.top == black
+                assert cell.border.bottom == black

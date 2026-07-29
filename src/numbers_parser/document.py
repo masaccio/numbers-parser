@@ -1419,8 +1419,6 @@ class Table(Cacheable):
             msg = "side must be a valid border segment"
             raise TypeError(msg)
 
-        self._model.add_stroke(self._table_id, row, col, side, border_value, length)
-
     def set_cell_formatting(self, *args: str, **kwargs) -> None:
         r"""
         Set the data format for a cell.

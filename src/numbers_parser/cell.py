@@ -445,7 +445,6 @@ class Border:  # noqa: PLW1641
     width: float = DEFAULT_BORDER_WIDTH
     color: RGB = None
     style: BorderType = None
-    _order: int = 0
 
     def __post_init__(self) -> None:
         if not isinstance(self.width, float):
@@ -478,10 +477,6 @@ class Border:  # noqa: PLW1641
 
         object.__setattr__(self, "style", current_style)
 
-    def _set_order(self, new_order: int) -> None:
-        """Private method to update stroke rendering order."""
-        object.__setattr__(self, "_order", new_order)
-
     def __repr__(self):
         return str(self)
 
@@ -490,6 +485,8 @@ class Border:  # noqa: PLW1641
         return f"Border(width={self.width}, color={self.color}, style={style_name})"
 
     def __eq__(self, value: object) -> bool:
+        if value is None:
+            return False
         return all(
             [self.width == value.width, self.color == value.color, self.style == value.style],
         )
@@ -520,8 +517,7 @@ class CellBorder:
 
     @top.setter
     def top(self, value) -> None:
-        if self._top is None or value._order > self.top._order:
-            self._top = value
+        self._top = value
 
     @property
     def right(self):
@@ -531,8 +527,7 @@ class CellBorder:
 
     @right.setter
     def right(self, value) -> None:
-        if self._right is None or value._order > self._right._order:
-            self._right = value
+        self._right = value
 
     @property
     def bottom(self):
@@ -542,8 +537,7 @@ class CellBorder:
 
     @bottom.setter
     def bottom(self, value) -> None:
-        if self._bottom is None or value._order > self._bottom._order:
-            self._bottom = value
+        self._bottom = value
 
     @property
     def left(self):
@@ -553,8 +547,7 @@ class CellBorder:
 
     @left.setter
     def left(self, value) -> None:
-        if self._left is None or value._order > self._left._order:
-            self._left = value
+        self._left = value
 
 
 class MergeReference:
@@ -991,7 +984,8 @@ class Cell(CellStorageFlags, Cacheable):
             self.size = (1, 1)
             self.merge_range = None
             self.rect = None
-            self._border = CellBorder()
+            if getattr(self, "_border", None) is None:
+                self._border = CellBorder()
 
     def _to_buffer(self) -> bytearray:  # noqa: PLR0912, PLR0915
         """Create a storage buffer for a cell using v5 (modern) layout."""

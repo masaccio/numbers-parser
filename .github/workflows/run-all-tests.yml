@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   test:
-    name: Run All Tests
+    name: Run Tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -39,6 +39,13 @@ jobs:
 
       - name: Run tests
         run: uv run pytest -n logical
+
+  all-tests-passed:
+    name: All Tests Passed
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "All matrix jobs completed."
 
   dependabot:
     runs-on: ubuntu-latest
