@@ -152,7 +152,7 @@ _DATETIME_FIELD_MAP = {
     "W": lambda x: str(_week_of_month(x) - 1),
     "ww": "%W",
     "G": "AD",  # TODO: support BC
-    "F": lambda x: _days_occurred_in_month(x),
+    "F": _days_occurred_in_month,
     "S": lambda x: str(x.microsecond).zfill(6)[0],
     "SS": lambda x: str(x.microsecond).zfill(6)[0:2],
     "SSS": lambda x: str(x.microsecond).zfill(6)[0:3],

@@ -14,7 +14,7 @@ def check_border(cell: Cell, side: str, test_value: str) -> bool:
     else:
         values = test_value.split(",")
         values[0] = float(values[0])
-        values[1] = eval(values[1].replace(";", ","))
+        values[1] = eval(values[1].replace(";", ","))  # noqa: S307
         if border_value is None:
             return False
         ref = Border(values[0], values[1], values[2])
@@ -132,20 +132,17 @@ def run_border_tests(filename):
                     col_start = col
                     col_end = col + cell.size[1] - 1
                     offset = 0
-                    for merge_row_num in range(row_start, row_end + 1):
+                    for offset, merge_row_num in enumerate(range(row_start, row_end + 1)):
                         merge_cell = table.cell(merge_row_num, col)
                         valid.append(check_border(merge_cell, "left", tests["left"][offset]))
                         merge_cell = table.cell(merge_row_num, col_end)
                         valid.append(check_border(merge_cell, "right", tests["right"][offset]))
-                        offset += 1
 
-                    offset = 0
-                    for merge_col_num in range(col_start, col_end + 1):
+                    for offset, merge_col_num in enumerate(range(col_start, col_end + 1)):
                         merge_cell = table.cell(row, merge_col_num)
                         valid.append(check_border(merge_cell, "top", tests["top"][offset]))
                         merge_cell = table.cell(row_end, merge_col_num)
                         valid.append(check_border(merge_cell, "bottom", tests["bottom"][offset]))
-                        offset += 1
                 else:
                     valid = [
                         check_border(cell, "top", tests["top"]),
@@ -184,7 +181,7 @@ def test_edit_borders(configurable_save_file):
     table.set_cell_border(7, 1, "right", Border(5.0, RGB(29, 177, 0), "dashes"))
     table.merge_cells("C3:F5")
 
-    with pytest.warns(RuntimeWarning) as record:
+    with pytest.warns(RuntimeWarning) as record:  # noqa: PT031
         table.set_cell_border("C3", ALL_BORDERS, Border())
         table.set_cell_border("D4", ALL_BORDERS, Border())
     assert len(record) == 6
