@@ -121,15 +121,14 @@ class ObjectStore(IWorkHandler):
             if hasattr(msg, "identifier") and msg.DESCRIPTOR.name == "Reference":
                 referenced_ids.add(msg.identifier)
 
-            if hasattr(msg, "ListFields"):
-                for field_desc, value in msg.ListFields():
-                    if field_desc.type != field_desc.TYPE_MESSAGE:
-                        continue
-                    if field_desc.is_repeated:
-                        for item in value:
-                            find_references(item)
-                    else:
-                        find_references(value)
+            for field_desc, value in msg.ListFields():
+                if field_desc.type != field_desc.TYPE_MESSAGE:
+                    continue
+                if field_desc.is_repeated:
+                    for item in value:
+                        find_references(item)
+                else:
+                    find_references(value)
 
         for obj in self._objects.values():
             find_references(obj)
@@ -137,20 +136,16 @@ class ObjectStore(IWorkHandler):
         unreferenced_ids = set(self._objects.keys()) - referenced_ids
         unreferenced_ids -= {c.identifier for c in self._objects[PACKAGE_ID].components}
 
+        # Delete unreferenced archives. In principal we could delete unreferenced files,
+        # but deleting tables/sheets is unsupported so this never happens.
         for obj_id in unreferenced_ids:
             del self._objects[obj_id]
             filename = self._object_to_filename_map.pop(obj_id)
-
-            if filename in self._file_store:
-                iwa_file = self._file_store[filename]
-                for chunk in iwa_file.chunks:
-                    chunk.archives = [
-                        arch for arch in chunk.archives if arch.header.identifier != obj_id
-                    ]
-
-                # If the IWA file has no remaining archives, delete the file entirely
-                if all(len(chunk.archives) == 0 for chunk in iwa_file.chunks):
-                    del self._file_store[filename]
+            iwa_file = self._file_store[filename]
+            for chunk in iwa_file.chunks:
+                chunk.archives = [
+                    arch for arch in chunk.archives if arch.header.identifier != obj_id
+                ]
 
     @property
     def file_store(self):

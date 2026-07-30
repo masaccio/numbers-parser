@@ -1578,16 +1578,6 @@ def _unpack_decimal128(buffer: bytearray) -> float:
     return float(value)
 
 
-def _decode_date_format_field(field: str, value: datetime) -> str:
-    if field in DATETIME_FIELD_MAP:
-        s = DATETIME_FIELD_MAP[field]
-        if callable(s):
-            return s(value)
-        return value.strftime(s)
-    warn(f"Unsupported field code '{field}'", UnsupportedWarning, stacklevel=4)
-    return ""
-
-
 def _decode_date_format(date_format, value):
     """Parse a custom date format string and return a formatted datetime value."""
     chars = [*date_format]
@@ -1616,6 +1606,7 @@ def _decode_date_format(date_format, value):
         elif current_char.isalpha():
             remaining_str = date_format[index:]
             matched_field = None
+
             for field in DATETIME_FIELD_MAP:
                 # Greedily match the longest possible valid field
                 if remaining_str.startswith(field):
@@ -1623,14 +1614,18 @@ def _decode_date_format(date_format, value):
                     break
 
             if matched_field:
-                result += _decode_date_format_field(matched_field, value)
+                s = DATETIME_FIELD_MAP[field]
+                if callable(s):
+                    result += s(value)
+                else:
+                    result += value.strftime(s)
                 index += len(matched_field)
             else:
                 unknown_field = ""
                 while index < len(chars) and chars[index].isalpha():
                     unknown_field += chars[index]
                     index += 1
-                result += _decode_date_format_field(unknown_field, value)
+                warn(f"Unsupported field code '{unknown_field}'", UnsupportedWarning, stacklevel=4)
         else:
             result += current_char
             index += 1
@@ -1966,9 +1961,7 @@ def _float_to_n_digit_fraction(value: float, max_digits: int) -> str:
     and return as a string.
     """
     max_denominator = 10**max_digits - 1
-    (numerator, denominator) = (
-        Fraction.from_float(value).limit_denominator(max_denominator).as_integer_ratio()
-    )
+    (numerator, denominator) = Fraction(value).limit_denominator(max_denominator).as_integer_ratio()
     whole = int(value)
     numerator -= whole * denominator
     return _format_fraction_parts_to(whole, numerator, denominator)

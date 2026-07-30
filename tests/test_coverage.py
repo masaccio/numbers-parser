@@ -34,6 +34,7 @@ from numbers_parser.experimental import (
     experimental_features,
 )
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
+from numbers_parser.model import _decode_date_format
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.xrefs import xl_col_to_name, xl_col_to_offset, xl_range, xl_rowcol_to_cell
 
@@ -138,6 +139,12 @@ def test_formatting_exceptions():
         _ = cell.formatted_value
     assert len(record) == 1
     assert "Unexpected custom format type 299" in str(record[0])
+
+    with pytest.warns(UnsupportedWarning) as record:
+        result = _decode_date_format("ZZZ YYY", datetime(2001, 1, 1))
+    assert len(record) == 2
+    assert str(record[0].message) == "Unsupported field code 'ZZZ'"
+    print(result)
 
 
 def test_pretty_uuids():

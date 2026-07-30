@@ -57,6 +57,7 @@ def test_exceptions():
     with pytest.raises(TypeError) as e:
         _ = Border(width="invalid")
     assert "width must be a float number" in str(e)
+
     with pytest.raises(TypeError) as e:
         _ = Border(width="invalid")
     assert "width must be a float number" in str(e)
@@ -64,6 +65,7 @@ def test_exceptions():
     with pytest.raises(TypeError) as e:
         _ = Border(color=(0, 0, 0, 0))
     assert "RGB color must be an RGB" in str(e)
+
     with pytest.raises(TypeError) as e:
         _ = Border(color=(0, 0, 1.0))
     assert "RGB color must be an RGB" in str(e)
@@ -72,8 +74,13 @@ def test_exceptions():
         _ = Border(style="invalid")
     assert "invalid border style" in str(e)
 
-    style = Border(style=BorderType(3))
-    assert str(style) == "Border(width=0.35, color=RGB(r=0, g=0, b=0), style=none)"
+    with pytest.raises(TypeError) as e:
+        _ = Border(style=999)
+    assert "invalid border style value" in str(e)
+
+    border = Border(style=BorderType(3))
+    assert str(border) == "Border(width=0.35, color=RGB(r=0, g=0, b=0), style=none)"
+    assert str(border) == repr(border)
 
     doc = Document()
     with pytest.raises(TypeError) as e:

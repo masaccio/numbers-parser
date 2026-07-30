@@ -2371,16 +2371,6 @@ class _NumbersModel(Cacheable):
             return cell
         return None
 
-    def allocate_border_order(self, table_id: int) -> int:
-        """Allocate a new max_order for a border to ensure it overrides existing strokes."""
-        table_obj = self.objects[table_id]
-        stroke_sidecar_id = table_obj.stroke_sidecar.identifier
-        if stroke_sidecar_id == 0:
-            return 1
-        sidecar_obj = self.objects[stroke_sidecar_id]
-        sidecar_obj.max_order += 1
-        return sidecar_obj.max_order
-
     def set_cell_border(
         self,
         table_id: int,
@@ -2676,33 +2666,7 @@ class _NumbersModel(Cacheable):
             if self.objects[layer_id.identifier].row_column_index == row_column_index:
                 stroke_layer = self.objects[layer_id.identifier]
         if stroke_layer is not None:
-            stroke_patched = False
-            for stroke_run in stroke_layer.stroke_runs:
-                stroke_start = stroke_run.origin
-                stroke_end = stroke_run.origin + stroke_run.length
-                stroke_range = range(stroke_start, stroke_end)
-                if origin <= stroke_start and (origin + length) >= stroke_end:
-                    # New stroke overwrites all of existing stroke
-                    stroke_run.CopyFrom(self.create_stroke(origin, length, border_value))
-                    stroke_patched = True
-                elif origin == stroke_start and length < stroke_run.length:
-                    # New stroke writes to start of existing stroke
-                    stroke_run.origin = origin + length
-                    stroke_run.length = stroke_run.length - length
-                elif origin in stroke_range and (origin + length) == stroke_end:
-                    # New stoke writes to end of existing stroke
-                    stroke_run.length = stroke_run.length - length
-                elif origin in stroke_range and (origin + length) in stroke_range:
-                    # New stroke in middle of existing stroke
-                    stroke_run.length = origin - stroke_start
-                    stroke_layer.stroke_runs.append(
-                        TSTArchives.StrokeLayerArchive.StrokeRunArchive(),
-                    )
-                    stroke_layer.stroke_runs[-1].CopyFrom(stroke_run)
-                    stroke_layer.stroke_runs[-1].origin = origin + length
-                    stroke_layer.stroke_runs[-1].length = stroke_end - origin - length
-            if not stroke_patched:
-                stroke_layer.stroke_runs.append(self.create_stroke(origin, length, border_value))
+            stroke_layer.stroke_runs.append(self.create_stroke(origin, length, border_value))
             stroke_layer.stroke_runs.sort(key=lambda x: x.origin)
         else:
             stroke_layer_id, stroke_layer = self.objects.create_object_from_dict(
