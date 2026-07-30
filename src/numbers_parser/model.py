@@ -240,7 +240,7 @@ class _NumbersModel(Cacheable):
         self._table_categories_data = {}
         self._table_categories_row_mapper = {}
         self._styles = None
-        self._update_strokes = False
+        self._update_strokes = {}
         self._images = {}
         self._custom_formats = None
         self._custom_format_archives = None
@@ -2365,7 +2365,12 @@ class _NumbersModel(Cacheable):
             ):
                 return cell
         elif cell.is_merged:
-            if side in ["top", "left"]:
+            # No borders for merged edges of anchor cells
+            if (
+                side in ["top", "left"]
+                or (side == "right" and cell.size[1] == 1)
+                or (side == "bottom" and cell.size[0] == 1)
+            ):
                 return cell
         else:
             return cell
@@ -2380,7 +2385,7 @@ class _NumbersModel(Cacheable):
         border_value: Border,
     ) -> None:
         """Set the 2 borders adjacent to a stroke if within the table range."""
-        self._update_strokes = True
+        self._update_strokes[table_id] = True
         if side == "top":
             bottom_cell = self.cell_for_stroke(table_id, "bottom", row - 1, col)
             if (cell := self.cell_for_stroke(table_id, "top", row, col)) is not None:
@@ -2556,7 +2561,7 @@ class _NumbersModel(Cacheable):
 
     def update_cell_borders(self, table_id: int, data: list) -> None:
         """Consolidate identical strokes and then generate stoke archives."""
-        if not self._update_strokes:
+        if table_id not in self._update_strokes:
             return
 
         num_rows = self.objects[table_id].number_of_rows
