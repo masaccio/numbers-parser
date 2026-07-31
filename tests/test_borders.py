@@ -18,10 +18,13 @@ def check_border(cell: Cell, side: str, test_value: str) -> bool:
         if border_value is None:
             return False
         ref = Border(values[0], values[1], values[2])
-        valid = check.equal(border_value, ref)
-    if not valid:
         cell_name = xl_rowcol_to_cell(cell.row, cell.col)
-        print(f"@{cell_name}[{cell.row},{cell.col}].{side}: {border_value} != {ref}")
+        sheet_name = cell._model.sheet_name(cell._model.table_id_to_sheet_id(cell._table_id))
+        valid = check.equal(
+            border_value,
+            ref,
+            f"{sheet_name}@{cell_name}[{cell.row},{cell.col}].{side}",
+        )
     return valid
 
 
@@ -261,7 +264,7 @@ def invert_tests(tests):
                 new_tests.append(new_test)
                 new_borders.append(border)
                 test_string += BORDER_TO_TAG_MAP[side] + f"{i}=" + str(new_tests[-1]) + "\n"
-    return test_string.strip(), new_tests, new_borders
+    return test_string.strip(), new_borders
 
 
 def test_extra_borders(configurable_save_file):
@@ -309,27 +312,68 @@ def test_resave_borders(configurable_save_file):
     doc = Document("tests/data/test-styles.numbers")
 
     style = doc.add_style(font_size=8.0, bold=False, name="Border Test Style")
-    # for sheet_name in ["Borders", "Large Borders"]:
-    for sheet_name in ["Borders"]:
+    for sheet_name in ["Borders", "Large Borders"]:
         table = doc.sheets[sheet_name].tables[0]
-
+        merge_edges = []
         for row, cells in enumerate(table.iter_rows()):
             for col, cell in enumerate(cells):
                 if not cell.value:
                     continue
                 tests = unpack_test_string(cell.value)
-                (test_string, _, borders) = invert_tests(tests)
+                (test_string, borders) = invert_tests(tests)
                 table.write(row, col, test_string, style=style)
-                for i, side in enumerate(tests):
-                    row_offset = 0
-                    if cell.is_merged:
-                        length = cell.size[0] if side in ["left", "right"] else cell.size[1]
-                        if side == "bottom":
-                            row_offset = cell.size[0] - 1
-                    else:
-                        length = 1
-                    if borders[i] is not None:
-                        table.set_cell_border(row + row_offset, col, side, borders[i], length)
+                if cell.is_merged:
+                    for side in ALL_BORDERS:
+                        height = cell.size[0]
+                        width = cell.size[1]
+                        match side:
+                            case "top":
+                                for offset in range(width):
+                                    border = borders.pop(0)
+                                    table.set_cell_border(row, col + offset, side, border, 1)
+                            case "right":
+                                if height > 1:
+                                    for offset in range(height):
+                                        border = borders.pop(0)
+                                        merge_edges.append(
+                                            {
+                                                "row": row + offset,
+                                                "col": col + width - 1,
+                                                "side": side,
+                                                "border": border,
+                                                "length": height,
+                                            },
+                                        )
+                                else:
+                                    border = borders.pop(0)
+                                    table.set_cell_border(row, col + width, side, border, 1)
+                            case "bottom":
+                                if width > 1:
+                                    for offset in range(width):
+                                        border = borders.pop(0)
+                                        merge_edges.append(
+                                            {
+                                                "row": row + height - 1,
+                                                "col": col + offset,
+                                                "side": side,
+                                                "border": border,
+                                                "length": width,
+                                            },
+                                        )
+                                else:
+                                    border = borders.pop(0)
+                                    table.set_cell_border(row + height - 1, col, side, border, 1)
+                            case "left":
+                                for offset in range(height):
+                                    border = borders.pop(0)
+                                    table.set_cell_border(row + offset, col, side, border, 1)
+                else:
+                    for side, border in zip(ALL_BORDERS, borders, strict=True):
+                        if border is not None:
+                            table.set_cell_border(row, col, side, border, 1)
+
+        for edge in merge_edges:
+            table.set_cell_border(edge["row"], edge["col"], edge["side"], edge["border"], 1)
 
     doc.save(configurable_save_file)
     run_border_tests(configurable_save_file)
