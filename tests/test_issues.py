@@ -540,6 +540,7 @@ def test_issue_85():
     assert table0.col_width(0) == 98.0
     assert table0.col_width(1) == 98.0
 
+    # Check borders do not add to cell size (see also issue-152)
     for row in range(0, table0.num_rows, 2):
         for col in range(0, table0.num_cols, 2):
             border_style = Border(1 + (2.0 * col), RGB(29, 177, 0), "solid")
@@ -548,12 +549,12 @@ def test_issue_85():
             table0.set_cell_border(row, col, "bottom", border_style)
             table0.set_cell_border(row, col, "right", border_style)
 
-    assert table0.row_height(0) == 25.0
-    assert table0.row_height(3) == 22.0
-    assert table0.col_width(0) == 99.0
-    assert table0.col_width(1) == 101
-    assert table0.col_width(2) == 103
-    assert table0.col_width(3) == 100
+    assert table0.row_height(0) == 20.0
+    assert table0.row_height(3) == 20.0
+    assert table0.col_width(0) == 98.0
+    assert table0.col_width(1) == 98.0
+    assert table0.col_width(2) == 98.0
+    assert table0.col_width(3) == 98.0
 
 
 def test_issue_90(configurable_save_file):
@@ -653,7 +654,6 @@ def test_issue_131():
 
 
 def test_issue_152(configurable_save_file):
-
     black = Border(4.0, RGB(0, 0, 0), "solid")
     cyan_dashed = Border(4.0, RGB(0, 240, 255), "dashes")
     magenta_dashed = Border(4.0, RGB(255, 0, 180), "dashes")
@@ -725,3 +725,17 @@ def test_issue_152(configurable_save_file):
                 assert cell.border.right == black
                 assert cell.border.top == black
                 assert cell.border.bottom == black
+
+    fat_border = magenta_dashed = Border(10.0, RGB(255, 0, 180), "solid")
+    doc = Document("tests/data/test-border-widths.numbers")
+    table = doc.sheets[0].tables[0]
+    table.set_cell_border("B5", "top", fat_border, 1)
+    table.set_cell_border("B4", "left", fat_border, 1)
+    table.set_cell_border("D1", "bottom", fat_border, 1)
+    table.set_cell_border("D2", "right", fat_border, 1)
+    doc.save(configurable_save_file)
+
+    doc = Document(configurable_save_file)
+    table = doc.sheets[0].tables[0]
+    assert [table.row_height(x) for x in range(table.num_rows)] == [20, 30, 30, 30, 20]
+    assert [table.col_width(x) for x in range(table.num_cols)] == [98, 88, 88, 88, 98]

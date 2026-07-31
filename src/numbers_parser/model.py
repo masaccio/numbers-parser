@@ -1097,17 +1097,20 @@ class _NumbersModel(Cacheable):
         return storage_buffers[row_offset][col]
 
     def recalculate_row_headers(self, table_id: int, data: list) -> None:
+        current_row_heights = {}
+        for row in range(self.number_of_rows(table_id)):
+            current_row_heights[row] = self.row_height(table_id, row)
+
         base_data_store = self.objects[table_id].base_data_store
         buckets = self.objects[base_data_store.rowHeaders.buckets[0].identifier]
         clear_field_container(buckets.headers)
-        for row in range(len(data)):
-            if table_id in self._row_heights and row in self._row_heights[table_id]:
-                height = self._row_heights[table_id][row]
-            else:
-                height = 0.0
+
+        for row, cells in enumerate(data):
+            num_cols = len(data) - sum([isinstance(x, MergedCell) for x in cells])
+            height = current_row_heights[row]
             header = TSTArchives.HeaderStorageBucket.Header(
                 index=row,
-                numberOfCells=len(data[row]),
+                numberOfCells=num_cols,
                 size=height,
                 hidingState=0,
             )
@@ -1334,30 +1337,7 @@ class _NumbersModel(Cacheable):
         else:
             height = round(table_model.default_row_height)
 
-        data = self._table_data[table_id]
-        max_top_border = max(
-            [0.0]
-            + [
-                data[row][col].border.top.width
-                for col in range(len(data[row]))
-                if data[row][col].border.top is not None
-            ],
-        )
-        max_bottom_border = max(
-            [0.0]
-            + [
-                data[row][col].border.bottom.width
-                for col in range(len(data[row]))
-                if data[row][col].border.bottom is not None
-            ],
-        )
-        height += max_top_border / 2
-        height += max_bottom_border / 2
-
-        if table_id not in self._row_heights:
-            self._row_heights[table_id] = {}
-        self._row_heights[table_id][row] = floor(height)
-        return self._row_heights[table_id][row]
+        return height
 
     def table_width(self, table_id: int) -> int:
         """Return the width of a table in points."""
@@ -1385,31 +1365,7 @@ class _NumbersModel(Cacheable):
             width = round(bucket_map[col].size)
         else:
             width = round(table_model.default_column_width)
-
-        data = self._table_data[table_id]
-        max_left_border = max(
-            [0.0]
-            + [
-                data[row][col].border.left.width
-                for row in range(len(data))
-                if data[row][col].border.left is not None
-            ],
-        )
-        max_right_border = max(
-            [0.0]
-            + [
-                data[row][col].border.right.width
-                for row in range(len(data))
-                if data[row][col].border.right is not None
-            ],
-        )
-        width += max_left_border / 2
-        width += max_right_border / 2
-
-        if table_id not in self._col_widths:
-            self._col_widths[table_id] = {}
-        self._col_widths[table_id][col] = floor(width)
-        return self._col_widths[table_id][col]
+        return width
 
     def num_header_rows(self, table_id: int, num_headers: int | None = None) -> int:
         """Return/set the number of header rows."""
@@ -2392,34 +2348,22 @@ class _NumbersModel(Cacheable):
                 cell._border.top = border_value
             if bottom_cell is not None:
                 bottom_cell._border.bottom = border_value
-            if table_id in self._row_heights:
-                self._row_heights[table_id].pop(row, None)
-                self._row_heights[table_id].pop(row - 1, None)
         elif side == "right":
             left_cell = self.cell_for_stroke(table_id, "left", row, col + 1)
             if (cell := self.cell_for_stroke(table_id, "right", row, col)) is not None:
                 cell._border.right = border_value
             if left_cell is not None:
                 left_cell._border.left = border_value
-            if table_id in self._col_widths:
-                self._col_widths[table_id].pop(col, None)
-                self._col_widths[table_id].pop(col + 1, None)
         elif side == "bottom":
             top_cell = self.cell_for_stroke(table_id, "top", row + 1, col)
             if (cell := self.cell_for_stroke(table_id, "bottom", row, col)) is not None:
                 cell._border.bottom = border_value
             if top_cell is not None:
                 top_cell._border.top = border_value
-            if table_id in self._row_heights:
-                self._row_heights[table_id].pop(row, None)
-                self._row_heights[table_id].pop(row + 1, None)
         else:  # left border
             right_cell = self.cell_for_stroke(table_id, "right", row, col - 1)
             if (cell := self.cell_for_stroke(table_id, "left", row, col)) is not None:
                 cell._border.left = border_value
-            if table_id in self._col_widths:
-                self._col_widths[table_id].pop(col, None)
-                self._col_widths[table_id].pop(col - 1, None)
             if right_cell is not None:
                 right_cell._border.right = border_value
 
