@@ -196,7 +196,7 @@ lint.unfixable = [
 ]
 line-length = 100
 src = ["src", "tests"]
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint.pylint]
 max-statements = 100
