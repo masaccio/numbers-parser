@@ -238,7 +238,7 @@ class LookupTransformer(Transformer):
         matches = [
             {"value": v, "len": len(k)}
             for k, v in self.lookup_map.items()
-            if k.lower() in row[self.sources[0]].lower()
+            if re.search(k.lower(), row[self.sources[0]].lower())
         ]
         if len(matches) > 0:
             row[self.dest] = max(matches, key=lambda x: x["len"])["value"]
