@@ -139,6 +139,8 @@ TSPRegistryMapping = {
     "287": "TSCKSOS.ResetActivityStreamCommandArchive",
     "288": "TSCKSOS.RemoveAuthorIdentifiersCommandArchive",
     "289": "TSCK.ActivityCursorCollectionPersistenceWrapperArchive",
+    "290": "TSK.AIGeneratedContentCommandArchive",
+    "291": "TSK.SetLastPremiumUserActivityTimestampCommandArchive",
     "400": "TSS.StyleArchive",
     "401": "TSS.StylesheetArchive",
     "402": "TSS.ThemeArchive",
@@ -650,6 +652,9 @@ TSPRegistryMapping = {
     "12057": "TN.FormViewerSelectionTransformerArchive",
     "12058": "TN.FormSheetSelectionTransformerArchive",
     "12059": "TN.FormCommandActivityBehaviorArchive",
+    "12060": "TN.CommandSheetSetStyleArchive",
+    "12061": "TN.CommandSheetSetIsHiddenArchive",
+    "12062": "TN.CommandSheetSetTabColorArchive",
 }
 
 

@@ -148,10 +148,12 @@ message SheetArchive {
   optional .TSP.Reference style = 22;
   optional bool print_backgrounds = 23;
   optional bool should_print_comments = 24;
+  optional bool is_hidden = 25;
 }
 
 message SheetStylePropertiesArchive {
   optional .TSD.FillArchive fill = 1;
+  optional .TSD.FillArchive tab_color = 2;
 }
 
 message SheetStyleArchive {

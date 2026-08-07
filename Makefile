@@ -5,7 +5,7 @@ IDENTITY := $(shell security find-identity -v -p codesigning | head -n 1 | pytho
 PROTOC=/opt/homebrew/bin/protoc
 
 # Location of the Numbers application
-NUMBERS=/Applications/Numbers.app
+NUMBERS="/Applications/Numbers Creator Studio.app"
 
 # Xcode version of Python that includes LLDB package
 LLDB_PYTHON_PATH := ${shell lldb --python-path}

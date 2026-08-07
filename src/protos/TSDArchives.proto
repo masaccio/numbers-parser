@@ -417,6 +417,10 @@ message ImageDataAttributes {
   optional .TSP.Size pixel_size = 1;
   optional bool image_is_srgb = 2;
   optional bool should_be_interpreted_as_generic_if_untagged = 3;
+  optional .TSP.UUID media_library_asset_id = 4;
+  optional bool may_need_watermark = 5;
+  optional .TSP.Date insertion_timestamp = 6;
+  optional bool is_derived_from_original_asset = 7;
   extend .TSP.DataAttributes {
     optional .TSD.ImageDataAttributes image_data_attributes = 100;
   }

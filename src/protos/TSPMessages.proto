@@ -91,6 +91,7 @@ message Color {
   optional float b = 5;
   optional .TSP.Color.RGBColorSpace rgbspace = 12;
   optional float a = 6 [default = 1];
+  optional float headroom = 13 [default = 1];
   optional float c = 7;
   optional float m = 8;
   optional float y = 9;

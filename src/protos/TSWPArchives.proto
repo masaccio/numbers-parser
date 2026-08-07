@@ -720,6 +720,7 @@ message ShapeInfoArchive {
   optional .TSP.Reference text_flow = 3;
   optional .TSP.Reference owned_storage = 4;
   optional bool is_text_box = 6;
+  optional bool autogrows_for_localization = 7;
 }
 
 message CommentInfoArchive {
@@ -853,6 +854,10 @@ message DateTimeSmartFieldArchive {
     kDateTimeFormatterStyleLong = 3;
     kDateTimeFormatterStyleFull = 4;
   }
+  enum DateTimeCustomFormat {
+    kDateTimeCustomFormatNone = 0;
+    kDateTimeCustomFormatYear = 1;
+  }
   optional .TSWP.SmartFieldArchive super = 1;
   optional string format = 2;
   optional string locale_identifier = 3;
@@ -861,6 +866,8 @@ message DateTimeSmartFieldArchive {
   optional .TSWP.DateTimeSmartFieldArchive.DateTimeUpdatePlan update_plan = 6;
   optional bool needs_update = 7;
   optional .TSP.Date date = 8;
+  optional bool increments_date_by_year = 9;
+  optional .TSWP.DateTimeSmartFieldArchive.DateTimeCustomFormat custom_format = 10 [default = kDateTimeCustomFormatNone];
 }
 
 message BookmarkFieldArchive {

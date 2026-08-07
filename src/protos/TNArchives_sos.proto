@@ -6,4 +6,6 @@ package TNSOS;
 message SheetStylePropertyChangeSetArchive {
   optional .TSDSOS.SpecFillArchive fill = 1;
   optional bool fill_undefined = 2;
+  optional .TSDSOS.SpecFillArchive tab_fill = 3;
+  optional bool tab_fill_undefined = 4;
 }

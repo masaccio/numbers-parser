@@ -455,6 +455,18 @@ message StructuredTextImportRecord {
   optional uint64 source_column_count = 9;
 }
 
+message StructuredTextImportRecordUID {
+  required .TSK.StructuredTextImportSettings import_settings = 1;
+  optional string import_source = 2;
+  optional double import_date = 3;
+  optional bytes source_data = 4;
+  optional uint64 source_encoding = 5;
+  optional float confidence = 6;
+  optional .TST.CellUIDRegionArchive imported_uid_region = 7;
+  optional uint64 source_row_count = 8;
+  optional uint64 source_column_count = 9;
+}
+
 message TableModelArchive {
   required string table_id = 1;
   optional string from_table_id = 43;
