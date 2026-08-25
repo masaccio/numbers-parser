@@ -63,7 +63,9 @@ tsce_functions = {}
 
 previous_line = ""
 for line in disassembly:
-    line = line.decode(encoding="latin1").replace("\\t", " ").strip()  # noqa: PLW2901
+    if isinstance(line, bytes):
+        line = line.decode(encoding="latin1")  # noqa: PLW2901
+    line = line.replace("\\t", " ").strip()  # noqa: PLW2901
 
     if m := re.search(r"^TSCEFormulaCreationMagic::(.*?)\(", line):
         formula_creation_name = m.group(1).replace("_", ".")
