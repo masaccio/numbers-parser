@@ -2,32 +2,32 @@ import re
 import sys
 from subprocess import PIPE, Popen
 
-from numbers_parser.generated.functionmap import FUNCTION_MAP as OLD_FUNC_ID_TO_NAME
+from numbers_parser.generated.functionmap import FUNCTION_MAP
 
-OLD_FUNC_NAME_TO_ID = {v: k for k, v in OLD_FUNC_ID_TO_NAME.items()}
-CFSTRING_MAX_LINES = 10
-FORMULA_CREATION_MAX_LINES = 50
-
-# Since Numbers 14.2, this code sequence indicates a formula node being created. The
-# spreadsheet function is the class method name and the ID is loaded into register W0:
+# Since Numbers 14.x, code sequences have become less and less reliable. Since Numbers function
+# nodes will always be backwards-compatible, we can use the old IDs and only flag up those
+# we are sure are new and missing. This metadata sequence which is definitive:
 #
-# TSCEFormulaCreationMagic::AND(TSCEFormulaCreator, TSCEFormulaCreator):
-#        mov w0, #7
-#         ;
-#         ; Approx. 10-50 lines
-#         ;
-#         bl  TSCEFormulaCreationMagic::function_<n>arg(...
+#   00000000015798f0 0x1656b70 _OBJC_CLASS_$_TSCEFunction_DUR2MILLISECONDS
+#      isa        0x1656b48 _OBJC_METACLASS_$_TSCEFunction_DUR2MILLISECONDS
+#      superclass 0x166f3a0 _OBJC_CLASS_$_TSCEFunctionNode
 #
-# Before this, the following code sequence could be used where CFString is used and
-# with the name of the spreadsheet function just after loading an IS into register W8:
+# This code sequence is also definitive but does not represent all functions:
 #
-#         mov     w8, #325
-#         strh    w8, [sp, #8]
-#         str     x23, [sp]
-#         adrp    x2, 2590 ; 0x14e0000
-#         add     x2, x2, #3776 ; Objc cfstring ref: @"GETPIVOTDATA"
-#
-
+#     TSCEFormulaCreationMagic::STRIPDURATION(TSCEFormulaCreator):
+#         sub    sp, sp, #48
+#         stp    x20, x19, [sp, #16]
+#         stp    x29, x30, [sp, #32]
+#         add    x29, sp, #32
+#         mov    x20, x8
+#         ldr    x0, [x0]
+#         bl    0xf6d65c ; symbol stub for: _objc_retainBlock
+#         mov    x19, x0
+#         str    x0, [sp, #8]
+#         add    x1, sp, #8
+#         mov    x8, x20
+#         mov    w0, #278
+#         bl    TSCEFormulaCreationMagic::function_1arg(TSCEFunctionIndex, TSCEFormulaCreator)
 
 if len(sys.argv) != 3:
     print(f"Usage: {sys.argv[0]} framework-file output.py", file=sys.stderr)
@@ -57,91 +57,56 @@ else:
     objdump.stdout.close()
     disassembly = str(cxxfilt.communicate()[0]).split("\\n")
 
-cfstring_arg = None
-cfstring_line_count = 0
-cfstring_func_name_to_id = {}
-
-formula_creation_arg = False
-formula_creation_line_count = 0
+formula_creation_name = None
 formula_creation_name_to_id = {}
-
 tsce_functions = {}
 
 previous_line = ""
 for line in disassembly:
-    line = str(line).replace("\\t", " ")  # noqa: PLW2901
+    line = line.decode(encoding="latin1").replace("\\t", " ").strip()  # noqa: PLW2901
 
-    # Potential start of code sequence 1 (Objc cfstring ref)
-    if m := re.search(r"mov *w8, #(\d+)", line):
-        cfstring_arg = m.group(1)
-        cfstring_line_count = 0
-        continue
+    if m := re.search(r"^TSCEFormulaCreationMagic::(.*?)\(", line):
+        formula_creation_name = m.group(1).replace("_", ".")
+        if formula_creation_name.startswith((".", "op.")):
+            formula_creation_name = None
 
-    if cfstring_arg is not None:
-        cfstring_line_count += 1
-        if cfstring_line_count > CFSTRING_MAX_LINES:
-            cfstring_arg = None
-            cfstring_line_count = 0
+    if formula_creation_name and (m := re.search(r"bl\s+TSCEFormulaCreationMagic::", line)):
+        if m := re.search(r"mov\s+w\d, #(\d+)", previous_line):
+            arg = m.group(1)
+            print(f"Found TSCEFormulaCreationMagic for '{formula_creation_name}' with ID #{arg}")
+            formula_creation_name_to_id[formula_creation_name] = int(arg)
+        formula_creation_name = None
 
-    if formula_creation_arg is not None:
-        formula_creation_line_count += 1
-        if formula_creation_line_count > FORMULA_CREATION_MAX_LINES:
-            formula_creation_arg = None
-            formula_creation_line_count = 0
-
-    # End of code sequence 1 (Objc cfstring ref)
-    if cfstring_arg is not None and (
-        m := re.search(r'x2, x2.*Objc cfstring ref: @"([A-Z0-9\.]+)"', line)
-    ):
-        func = m.group(1).replace("_", ".")
-        print(f"Found cstring {func} = {cfstring_arg}")
-        cfstring_func_name_to_id[func] = int(cfstring_arg)
-        cfstring_arg = None
-        cfstring_line_count = 0
-
-    # Start of code sequence 2 (defining TSCEFormulaCreationMagic function)
-    if m := re.search(r"^TSCEFormulaCreationMagic::(\w+)\(TSCEFormulaCreator", line):
-        formula_creation_arg = m.group(1).replace("_", ".")
-        formula_creation_line_count = 0
-
-    # End of code sequence 2 (calling TSCEFormulaCreationMagic::function_<n>arg)
-    if (
-        formula_creation_arg is not None
-        and re.search(r"bl *TSCEFormulaCreationMagic::function_[0-9]arg\(", line)
-        and (m := re.search(r"mov *w0, #(\d+)", previous_line))
-    ):
-        print(f"Found TSCEFormulaCreationMagic {formula_creation_arg} = {m.group(1)}")
-        formula_creation_name_to_id[formula_creation_arg] = int(m.group(1))
-        formula_creation_arg = None
-        formula_creation_line_count = 0
-
-    if m := re.search(r"TSCEFunction_(\w+) evaluateForArgsWithContext", line):
-        func = m.group(1).replace("_", ".")
-        print(f"Found TSCEFunction {func}")
-        tsce_functions[func] = True
+    if m := re.search(r"\bisa\b.*_OBJC_METACLASS_\$_TSCEFunction_(.*)", line):
+        formula_creation_name = m.group(1).replace("_", ".")
+        if not formula_creation_name.startswith(("..", "op.")):
+            print(f"Found TSCEFunction '{formula_creation_name}'")
+            tsce_functions[formula_creation_name] = True
 
     previous_line = line
 
-# ID 1 is ABS() but the code sequence scanning finds multiple ID=1 functions
-function_refs = {k: v for k, v in formula_creation_name_to_id.items() if v != 1}
-function_refs.update(
-    {k: v for k, v in cfstring_func_name_to_id.items() if k in tsce_functions and v != 1},
-)
-function_refs = dict(sorted(function_refs.items(), key=lambda x: int(x[1])))
+function_refs = {v: k for k, v in formula_creation_name_to_id.items()}
 
-for func_name, func_id in OLD_FUNC_NAME_TO_ID.items():
-    if func_name not in function_refs:
-        print(f"*** {func_name} has been removed (was ID {func_id})")
-    elif function_refs[func_name] != func_id:
-        print(
-            f"*** {func_name} bad ID: is {function_refs[func_name]}, should be {func_id}",
-        )
+for func_id, old_func_name in FUNCTION_MAP.items():
+    if func_id not in function_refs:
+        print(f"Retained {old_func_name} with ID #{func_id}")
+        function_refs[func_id] = old_func_name
+    else:
+        func_name = function_refs[func_id]
+        if function_refs[func_id] != old_func_name:
+            print(f"*** {func_id} mismatch: was '{old_func_name}', now {func_name}")
+            function_refs[func_id] = old_func_name
+
+function_refs = dict(sorted(function_refs.items()))
+
+for func_id, func_name in function_refs.items():
+    if func_id not in FUNCTION_MAP:
+        print(f"*** {func_id} is new: function is '{func_name}'")
 
 with open(output_map, "w") as fh:
     fh.write("FUNCTION_MAP = {\n")
-    if "ABS" not in function_refs:
-        fh.write('    1: "ABS",\n')
-    for func_name, func_id in function_refs.items():
-        fh.write(f'    {func_id}: "{func_name}",\n')
+    fh.writelines(
+        f'    {func_id}: "{func_name}",\n' for func_id, func_name in function_refs.items()
+    )
 
     fh.write("}\n")
