@@ -29,6 +29,8 @@ from numbers_parser.generated.functionmap import FUNCTION_MAP
 #         mov    w0, #278
 #         bl    TSCEFormulaCreationMagic::function_1arg(TSCEFunctionIndex, TSCEFormulaCreator)
 
+TSCE_FORMULA_IGNORE_PREFIXES = (".", "op.", "RANGE.TRACKING", "SHOW")
+
 if len(sys.argv) != 3:
     print(f"Usage: {sys.argv[0]} framework-file output.py", file=sys.stderr)
     sys.exit(1)
@@ -69,7 +71,7 @@ for line in disassembly:
 
     if m := re.search(r"^TSCEFormulaCreationMagic::(.*?)\(", line):
         formula_creation_name = m.group(1).replace("_", ".")
-        if formula_creation_name.startswith((".", "op.")):
+        if formula_creation_name.startswith(TSCE_FORMULA_IGNORE_PREFIXES):
             formula_creation_name = None
 
     if formula_creation_name and (m := re.search(r"bl\s+TSCEFormulaCreationMagic::", line)):
