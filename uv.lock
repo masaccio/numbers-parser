@@ -1531,7 +1531,7 @@ wheels = [
 
 [[package]]
 name = "sphinx-markdown-builder"
-version = "0.6.10"
+version = "0.6.11"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "docutils" },
@@ -1539,9 +1539,9 @@ dependencies = [
     { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "tabulate" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a0/58/0b7b9a7d071140b3705885d51932e8b62f520388c2772e4952189971727b/sphinx_markdown_builder-0.6.10.tar.gz", hash = "sha256:cd5acf88d52ea0146a712fd557404f10326dff3428a78ba928e59b1727fd4a86", size = 22688, upload-time = "2026-03-11T10:56:57.639Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ad/13/102d7134743120db25e636ffb57a30818e95a416583dca83aadac9c5dd87/sphinx_markdown_builder-0.6.11.tar.gz", hash = "sha256:ba3bf33e0e42ff30ae686ac73957a95e6d045790dcfbaca012dd8ae01794e577", size = 24020, upload-time = "2026-08-16T06:51:38.158Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c2/8f/9fecf3d081d5cd49eff83a17b9fef50ed741e6223ab3bb906de4ab0068f9/sphinx_markdown_builder-0.6.10-py3-none-any.whl", hash = "sha256:16d86738b9ac69fcbc86e373c31c6402c30af1fa8d98d0f62cc5f38bfe5fc26e", size = 16700, upload-time = "2026-03-11T10:56:56.135Z" },
+    { url = "https://files.pythonhosted.org/packages/c9/71/06b415631c2e494c80546073b46013d1715dceb3abe30bd63b34b4e7d9ca/sphinx_markdown_builder-0.6.11-py3-none-any.whl", hash = "sha256:acfb94d6ee66c7a47da0ca0420578fa16f115812af25b8fd21755d5909aacf51", size = 18088, upload-time = "2026-08-16T06:51:36.81Z" },
 ]
 
 [[package]]
