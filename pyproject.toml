@@ -6,7 +6,7 @@ license = "MIT"
 requires-python = ">=3.10"
 dependencies = [
     "compact-json>=1.1.3",
-    "protobuf>=7.34.0",
+    "protobuf>=7.36.0",
     "python-snappy>=0.7",
     "sigfig>=1.3.3",
     "setuptools>=70.0.0",
