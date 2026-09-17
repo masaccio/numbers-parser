@@ -1007,6 +1007,9 @@ class Table(Cacheable):
     def set_cell_style(self, *args) -> None:
         (row, col, style) = self._validate_cell_coords(*args)
         if isinstance(style, Style):
+            if style.name is None:
+                style.name = self._model.custom_style_name()
+            self._model.styles[style.name] = style
             self._data[row][col]._style = style
         elif isinstance(style, str):
             if style not in self._model.styles:

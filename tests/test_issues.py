@@ -764,12 +764,8 @@ def test_issue_174(configurable_save_file):
     table2 = doc2.sheets[0].tables[0]
     for i in range(4):
         cell = table2.cell(0, i)
-        print(
-            i,
-            id(cell.style),
-            cell.style.font_name,
-            cell.style.bold,
-            cell.style.italic,
-            cell.style.font_size,
-            cell.style.name,
-        )
+        assert cell.style.name == styles[i].name
+        assert cell.style.font_name == styles[i].font_name
+        assert cell.style.bold == styles[i].bold
+        assert cell.style.italic == styles[i].italic
+        assert cell.style.font_size == styles[i].font_size
