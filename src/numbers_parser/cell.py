@@ -142,6 +142,8 @@ class BackgroundImage:
 
 
 class HorizontalJustification(IntEnum):
+    """Horizontal alignment values accepted by :class:`Alignment`."""
+
     LEFT = ParagraphStyle.TextAlignmentType.TATvalue0
     RIGHT = ParagraphStyle.TextAlignmentType.TATvalue1
     CENTER = ParagraphStyle.TextAlignmentType.TATvalue2
@@ -150,6 +152,8 @@ class HorizontalJustification(IntEnum):
 
 
 class VerticalJustification(IntEnum):
+    """Vertical alignment values accepted by :class:`Alignment`."""
+
     TOP = ParagraphStyle.DeprecatedParagraphBorderType.PBTvalue0
     MIDDLE = ParagraphStyle.DeprecatedParagraphBorderType.PBTvalue1
     BOTTOM = ParagraphStyle.DeprecatedParagraphBorderType.PBTvalue2
@@ -178,6 +182,13 @@ class _Alignment(NamedTuple):
 
 
 class Alignment(_Alignment):
+    """
+    Pair of horizontal and vertical cell alignment values.
+
+    Values may be supplied as the corresponding enum members or as the strings
+    accepted by Numbers, such as ``"center"`` and ``"middle"``.
+    """
+
     def __new__(cls, horizontal=DEFAULT_ALIGNMENT[0], vertical=DEFAULT_ALIGNMENT[1]):
         if isinstance(horizontal, str):
             horizontal = horizontal.lower()
@@ -206,7 +217,7 @@ DEFAULT_ALIGNMENT_CLASS = Alignment(*DEFAULT_ALIGNMENT)
 
 
 class RGB(NamedTuple):
-    """A color in RGB."""
+    """A color represented by red, green, and blue integer components."""
 
     r: int
     g: int
@@ -499,6 +510,14 @@ class Border:  # noqa: PLW1641
 
 
 class CellBorder:
+    """
+    The four visible border segments associated with a cell.
+
+    A segment is ``None`` when it is unset or hidden by a merged-cell edge.
+    Border segments can be read directly; use :meth:`Table.set_cell_border`
+    to change them.
+    """
+
     def __init__(
         self,
         top_merged: bool = False,
@@ -1374,7 +1393,10 @@ class NumberCell(Cell):
     """
     .. NOTE::
 
-       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+         Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+
+     A numeric cell exposes its value as a ``float`` and may have a formula,
+     style, border, or number format.
     """
 
     def __init__(self, row: int, col: int, value: float, cell_type=CellType.NUMBER) -> None:
@@ -1387,6 +1409,12 @@ class NumberCell(Cell):
 
 
 class TextCell(Cell):
+    """
+    Cell containing plain text.
+
+    Text cells are created while reading a document or by :meth:`Table.write`.
+    """
+
     def __init__(self, row: int, col: int, value: str) -> None:
         self._type = CellType.TEXT
         super().__init__(row, col, value)
@@ -1429,8 +1457,8 @@ class RichTextCell(Cell):
         return self._bullets
 
     @property
-    def formatted_bullets(self) -> str:
-        """str: The bullets as a formatted multi-line string."""
+    def formatted_bullets(self) -> list[str]:
+        """list[str]: The bullet paragraphs including their bullet markers."""
         return self._formatted_bullets
 
     @property
@@ -1465,6 +1493,8 @@ class EmptyCell(Cell):
     .. NOTE::
 
        Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+
+    Empty cells have a value of ``None`` and an empty formatted value.
     """
 
     def __init__(self, row: int, col: int) -> None:
@@ -1485,6 +1515,8 @@ class BoolCell(Cell):
     .. NOTE::
 
        Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+
+    Boolean cells expose a Python ``bool`` and can use tickbox formatting.
     """
 
     def __init__(self, row: int, col: int, value: bool) -> None:
@@ -1502,6 +1534,8 @@ class DateCell(Cell):
     .. NOTE::
 
        Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+
+    Date cells expose a :class:`datetime.datetime` value.
     """
 
     def __init__(self, row: int, col: int, value: datetime) -> None:
@@ -1514,6 +1548,8 @@ class DateCell(Cell):
 
 
 class DurationCell(Cell):
+    """Cell containing a :class:`datetime.timedelta` value."""
+
     def __init__(self, row: int, col: int, value: timedelta) -> None:
         super().__init__(row, col, value)
         self._type = CellType.DURATION
@@ -1528,6 +1564,9 @@ class ErrorCell(Cell):
     .. NOTE::
 
        Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+
+    Error cells expose ``None`` as their value. Their formatted value preserves
+    the formatted error text when it is available.
     """
 
     def __init__(self, row: int, col: int) -> None:
@@ -1544,6 +1583,10 @@ class MergedCell(Cell):
     .. NOTE::
 
        Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+
+    Merged cells represent non-anchor positions in a merged range. Use
+    :attr:`Cell.merge_range` and the row/column boundary properties to inspect
+    the range.
     """
 
     def __init__(self, row: int, col: int) -> None:
