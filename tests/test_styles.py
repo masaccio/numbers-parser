@@ -97,11 +97,11 @@ def decode_style_attrs(attrs):
         (attr, ref) = attrs.split("=")
         if isinstance(ref, str):
             if "color" in attr:
-                ref = eval(ref.replace(";", ","))
+                ref = eval(ref.replace(";", ","))  # noqa: S307
             elif "alignment" in attr:
-                ref = eval(f'Alignment({ref.replace(";", ",")})')
+                ref = eval(f"Alignment({ref.replace(';', ',')})")  # noqa: S307
             else:
-                ref = eval(ref)
+                ref = eval(ref)  # noqa: S307
 
         return {attr: ref}
     return {attrs: True}
@@ -160,6 +160,38 @@ def test_all_styles(configurable_save_file):
                 continue
             attrs = decode_style_attrs(cell.value)
             assert check_style(cell.style, **attrs)
+
+
+@pytest.mark.experimental
+def test_all_styles_visual_check(configurable_save_file):
+    print("\n\n************** VISUAL CHECKS OF STYLES **************")
+
+    doc = Document("tests/data/test-styles.numbers")
+    table = doc.sheets["Styles"].tables[0]
+
+    new_doc = Document()
+    new_table = new_doc.default_table
+    for row in range(table.num_rows):
+        new_table.row_height(table.row_height(row))
+    for col in range(table.num_cols):
+        new_table.col_width(table.col_width(col))
+
+    for row in range(table.num_rows):
+        for col in range(table.num_cols):
+            cell = table.cell(row, col)
+            if not cell.value:
+                continue
+            attrs = decode_style_attrs(cell.value)
+            if "name" in attrs:
+                del attrs["name"]
+            print(f"@[{cell.row},{cell.col}: {attrs}")
+            cell_str = "\n".join([f"{k}={v}" for k, v in attrs.items()])
+            style = doc.add_style(**attrs)
+            new_table.write(row, col, cell_str)
+            new_table.set_cell_style(row, col, style)
+
+    print(f"\n\n*** Saving {configurable_save_file} for visual check")
+    new_doc.save(configurable_save_file)
 
 
 def test_all_style_changes(configurable_save_file):

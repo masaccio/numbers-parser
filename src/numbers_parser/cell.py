@@ -195,6 +195,12 @@ class Alignment(_Alignment):
 
         return super(_Alignment, cls).__new__(cls, (horizontal, vertical))
 
+    def __repr__(self):
+        return f"[{self.horizontal.name.lower()},{self.vertical.name.lower()}]"
+
+    def __str__(self):
+        return repr(self)
+
 
 DEFAULT_ALIGNMENT_CLASS = Alignment(*DEFAULT_ALIGNMENT)
 
@@ -337,7 +343,7 @@ class Style:
         self.bg_color = rgb_color(self.bg_color)
         self.font_color = rgb_color(self.font_color)
 
-        if not isinstance(self.font_size, float):
+        if not isinstance(self.font_size, (float, int)):
             msg = "size must be a float number of points"
             raise TypeError(msg)
         if not isinstance(self.font_name, str):

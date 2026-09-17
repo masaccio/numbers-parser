@@ -11,6 +11,7 @@ from numbers_parser import (
     Document,
     EmptyCell,
     ErrorCell,
+    Style,
     UnsupportedError,
     UnsupportedWarning,
     xl_rowcol_to_cell,
@@ -739,3 +740,36 @@ def test_issue_152(configurable_save_file):
     table = doc.sheets[0].tables[0]
     assert [table.row_height(x) for x in range(table.num_rows)] == [20, 30, 30, 30, 20]
     assert [table.col_width(x) for x in range(table.num_cols)] == [98, 88, 88, 88, 98]
+
+
+def test_issue_174(configurable_save_file):
+    doc = Document()
+    sheet = doc.sheets[0]
+    table = sheet.tables[0]
+
+    styles = [
+        Style(font_name="Helvetica Neue", bold=False, italic=False, font_size=16.0, name="style_a"),
+        Style(font_name="Helvetica Neue", bold=True, italic=False, font_size=16.0, name="style_b"),
+        Style(font_name="Helvetica Neue", bold=False, italic=True, font_size=16.0, name="style_c"),
+        Style(font_name="Helvetica Neue", bold=True, italic=True, font_size=16.0, name="style_d"),
+    ]
+
+    for i, style in enumerate(styles):
+        table.write(0, i, f"cell{i}")
+        table.set_cell_style(0, i, style)
+
+    doc.save(configurable_save_file)
+
+    doc2 = Document(configurable_save_file)
+    table2 = doc2.sheets[0].tables[0]
+    for i in range(4):
+        cell = table2.cell(0, i)
+        print(
+            i,
+            id(cell.style),
+            cell.style.font_name,
+            cell.style.bold,
+            cell.style.italic,
+            cell.style.font_size,
+            cell.style.name,
+        )
