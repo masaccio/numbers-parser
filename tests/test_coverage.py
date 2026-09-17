@@ -36,7 +36,13 @@ from numbers_parser.experimental import (
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.model import _decode_date_format
 from numbers_parser.numbers_uuid import NumbersUUID
-from numbers_parser.xrefs import xl_col_to_name, xl_col_to_offset, xl_range, xl_rowcol_to_cell
+from numbers_parser.xrefs import (
+    xl_cell_to_rowcol,
+    xl_col_to_name,
+    xl_col_to_offset,
+    xl_range,
+    xl_rowcol_to_cell,
+)
 
 
 def test_containers():
@@ -165,6 +171,16 @@ def test_range_exceptions():
 
     with pytest.raises(IndexError) as e:
         _ = xl_col_to_offset("!!!")
+    assert "invalid cell reference" in str(e)
+    with pytest.raises(IndexError) as e:
+        _ = xl_col_to_offset("ABCD")
+    assert "invalid cell reference" in str(e)
+
+    with pytest.raises(IndexError) as e:
+        _ = xl_cell_to_rowcol("A1junk")
+    assert "invalid cell reference" in str(e)
+    with pytest.raises(IndexError) as e:
+        _ = xl_cell_to_rowcol("A0")
     assert "invalid cell reference" in str(e)
 
     assert xl_col_to_offset(None) == 0
