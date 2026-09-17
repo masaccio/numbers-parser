@@ -16,7 +16,9 @@ from numbers_parser.constants import EPOCH
 
 def local_date(year: int, month: int, day: int) -> datetime:
     """Return a UTC date as the local naive datetime exposed by Numbers."""
-    return EPOCH + (datetime(year, month, day, tzinfo=timezone.utc) - EPOCH.astimezone(timezone.utc))
+    return EPOCH + (
+        datetime(year, month, day, tzinfo=timezone.utc) - EPOCH.astimezone(timezone.utc)
+    )
 
 
 @pytest.mark.script_launch_mode("inprocess")
