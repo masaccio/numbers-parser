@@ -758,6 +758,12 @@ def test_issue_174(configurable_save_file):
         table.write(0, i, f"cell{i}")
         table.set_cell_style(0, i, style)
 
+    with pytest.raises(IndexError) as e:
+        table.set_cell_style(1, 0, Style(font_name="UnknownFont"))
+    assert "font 'UnknownFont' does not exist" in str(e)
+
+    table.write(1, 0, "Avenir")
+    table.set_cell_style(1, 0, Style(font_name=("Avenir", "Heavy Oblique")))
     doc.save(configurable_save_file)
 
     doc2 = Document(configurable_save_file)

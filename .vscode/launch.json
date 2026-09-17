@@ -39,5 +39,18 @@
                 "test.py"
             ]
         }
-    ]
+        {
+            "name": "Debug generate_fontmap.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/build/generate_fontmap.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYDEVD_DISABLE_FILE_VALIDATION": "1"
+            },
+            "justMyCode": true,
+            "args": [
+                "test_fontmap.py",
+            ]
+        }    ]
 }

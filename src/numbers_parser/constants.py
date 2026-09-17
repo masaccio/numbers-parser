@@ -5,6 +5,8 @@ from math import ceil
 
 import enum_tools.documentation
 
+from numbers_parser.generated.fontmap import GENERATED_FONT_MAP
+
 __all__ = [
     "CellPadding",
     "CellType",
@@ -18,6 +20,7 @@ __all__ = [
     "NegativeNumberStyle",
     "PaddingType",
 ]
+
 
 DEFAULT_DOCUMENT = files("numbers_parser") / "data" / "empty.numbers"
 
@@ -447,3 +450,21 @@ class PaddingType(IntEnum):
     """Pad integers with leading spaces and decimals with trailing spaces."""
     SPACES = 2
     """Pad integers with leading zeroes and decimals with trailing zeroes."""
+
+
+FONT_MAP = GENERATED_FONT_MAP
+FONT_TUPLE_MAP = {}
+FONT_FAMILY_DEFAULT = {}
+
+
+def update_font_maps(font_map: dict) -> dict:
+    seen = {}
+    for k, v in font_map.items():
+        family = v["family"]
+        FONT_TUPLE_MAP[(family, v["style"])] = v
+        if family not in seen:
+            FONT_FAMILY_DEFAULT[family] = v
+            seen[family] = True
+
+
+update_font_maps(GENERATED_FONT_MAP)
