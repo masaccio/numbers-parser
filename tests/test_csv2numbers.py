@@ -3,6 +3,7 @@
 import runpy
 import shutil
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -10,6 +11,12 @@ import pytest
 
 from numbers_parser import Document, _get_version
 from numbers_parser._csv2numbers import Transformer
+from numbers_parser.constants import EPOCH
+
+
+def local_date(year: int, month: int, day: int) -> datetime:
+    """Return a UTC date as the local naive datetime exposed by Numbers."""
+    return EPOCH + (datetime(year, month, day, tzinfo=timezone.utc) - EPOCH.astimezone(timezone.utc))
 
 
 @pytest.mark.script_launch_mode("inprocess")
@@ -262,7 +269,7 @@ def test_transforms_format_1(script_runner, tmp_path) -> None:
     doc = Document(str(numbers_path))
     table = doc.sheets[0].tables[0]
     assert table.cell(1, 1).value == "FLOWERS INC. 202-5551234"
-    assert str(table.cell(2, 0).value) == "2008-04-02 00:00:00"
+    assert table.cell(2, 0).value == local_date(2008, 4, 2)
     assert table.cell(6, 2).value == 30.99
 
 
@@ -296,7 +303,7 @@ def test_transforms_format_2(script_runner, tmp_path) -> None:
     assert table.cell(0, 3).value == "Withdrawn"
     assert table.cell(1, 3).value == 1.4
     assert table.cell(3, 2).value == 10.0
-    assert str(table.cell(3, 0).value) == "2003-02-04 00:00:00"
+    assert table.cell(3, 0).value == local_date(2003, 2, 4)
 
 
 @pytest.mark.script_launch_mode("inprocess")
@@ -329,7 +336,7 @@ def test_transforms_format_3(script_runner, tmp_path) -> None:
     doc = Document(str(numbers_path))
     table = doc.sheets[0].tables[0]
     assert table.cell(5, 1).value == "AutoShop.com"
-    assert str(table.cell(7, 0).value) == "2023-09-26 00:00:00"
+    assert table.cell(7, 0).value == local_date(2023, 9, 26)
     assert table.cell(0, 1).value == "Transaction"
     assert table.cell(0, 2).value == "Amount"
     assert table.cell(7, 2).value == -1283.72

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from numbers_parser import Document, EmptyCell
-from numbers_parser.constants import MAX_COL_COUNT, MAX_ROW_COUNT
+from numbers_parser.constants import EPOCH, MAX_COL_COUNT, MAX_ROW_COUNT
 
 
 def test_edit_cell_values(configurable_save_file):
@@ -47,7 +47,10 @@ def test_edit_cell_values(configurable_save_file):
     assert table.cell(2, 2).value == 78.90
     assert table.cell(4, 3).value == datetime(2021, 6, 15)
     assert table.cell(4, 4).value == timedelta(minutes=1891)
-    assert table.cell(5, 3).value == datetime(2020, 12, 25)
+    expected_local_date = EPOCH + (
+        datetime(2020, 12, 25, tzinfo=timezone.utc) - EPOCH.astimezone(timezone.utc)
+    )
+    assert table.cell(5, 3).value == expected_local_date
     assert table.cell(5, 4).value == timedelta(seconds=7890)
     assert table.cell(5, 5).value == "7890"
 
