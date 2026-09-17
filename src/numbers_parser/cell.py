@@ -235,8 +235,8 @@ class Style:
     font_color: RGB, optional, default: RGB(0, 0, 0)) – Font color
     font_size: float, optional, default: DEFAULT_FONT_SIZE
         Font size in points
-    font_name: str, optional, default: DEFAULT_FONT_SIZE
-        Font name
+    font_name: str | tuple[str, str], optional, default: DEFAULT_FONT
+        Font name or a tuple of font family and style
     italic: bool, optional, default: False
         ``True`` if the cell font is italic
     name: str, optional
