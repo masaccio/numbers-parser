@@ -7,7 +7,13 @@ from enum import IntEnum
 
 from numbers_parser.constants import OPERATOR_PRECEDENCE
 
-__all__ = ["xl_cell_to_rowcol", "xl_col_to_name", "xl_range", "xl_rowcol_to_cell"]
+__all__ = [
+    "xl_cell_to_rowcol",
+    "xl_col_to_name",
+    "xl_col_to_offset",
+    "xl_range",
+    "xl_rowcol_to_cell",
+]
 
 
 class TableAxis(IntEnum):
@@ -436,9 +442,9 @@ class ScopedNameRefCache:
 
 # Cell reference conversion from  https://github.com/jmcnamara/XlsxWriter
 # Copyright (c) 2013-2021, John McNamara <jmcnamara@cpan.org>
-range_parts = re.compile(r"(\$?)([A-Z]{1,3})(\$?)(\d+)")
+range_parts = re.compile(r"^(\$?)([A-Z]{1,3})(\$?)(\d+)$")
 
-col_parts = re.compile(r"(\$?)([A-Z]{1,3})")
+col_parts = re.compile(r"^(\$?)([A-Z]{1,3})$")
 
 
 def xl_col_to_offset(col_str: str) -> int:
@@ -502,6 +508,10 @@ def xl_cell_to_rowcol(cell_str: str) -> tuple:
 
     col_str = match.group(2)
     row_str = match.group(4)
+
+    if int(row_str) < 1:
+        msg = f"invalid cell reference {cell_str}"
+        raise IndexError(msg)
 
     # Convert base26 column string to number.
     col = 0
