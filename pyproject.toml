@@ -44,7 +44,6 @@ dev = [
     "ruff",
     "tox<5.0.0,>=4.11.4",
     "python-magic>=0.4",
-    "tqdm>=4.66",
     "colorama<1.0.0,>=0.4.6",
     "pympler<2.0,>=1.1",
 ]
@@ -65,6 +64,7 @@ profile = [
     "pytest-profiling",
 ]
 bootstrap = [
+    "tqdm>=4.66",
     "rich>=14.0",
     "pyobjc-core>=12.0",
     "pyobjc-framework-Cocoa>=10.2",
