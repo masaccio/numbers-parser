@@ -815,13 +815,13 @@ class Table(Cacheable):
         if min_row < 0:
             msg = f"row {min_row} out of range"
             raise IndexError(msg)
-        if max_row > self.num_rows:
+        if max_row >= self.num_rows:
             msg = f"row {max_row} out of range"
             raise IndexError(msg)
         if min_col < 0:
             msg = f"column {min_col} out of range"
             raise IndexError(msg)
-        if max_col > self.num_cols:
+        if max_col >= self.num_cols:
             msg = f"column {max_col} out of range"
             raise IndexError(msg)
 
@@ -892,13 +892,13 @@ class Table(Cacheable):
         if min_row < 0:
             msg = f"row {min_row} out of range"
             raise IndexError(msg)
-        if max_row > self.num_rows:
+        if max_row >= self.num_rows:
             msg = f"row {max_row} out of range"
             raise IndexError(msg)
         if min_col < 0:
             msg = f"column {min_col} out of range"
             raise IndexError(msg)
-        if max_col > self.num_cols:
+        if max_col >= self.num_cols:
             msg = f"column {max_col} out of range"
             raise IndexError(msg)
 
@@ -1007,8 +1007,6 @@ class Table(Cacheable):
     def set_cell_style(self, *args) -> None:
         (row, col, style) = self._validate_cell_coords(*args)
         if isinstance(style, Style):
-            if style.name is None:
-                style.name = self._model.custom_style_name()
             self._model.styles[style.name] = style
             self._data[row][col]._style = style
         elif isinstance(style, str):
@@ -1110,6 +1108,12 @@ class Table(Cacheable):
             If the default value is unsupported by :py:meth:`numbers_parser.Table.write`.
 
         """
+        if not isinstance(num_rows, int) or num_rows < 1:
+            msg = "Number of rows must be a positive integer"
+            raise ValueError(msg)
+        if num_rows > MAX_ROW_COUNT - self.num_rows:
+            msg = f"Number of rows cannot exceed {MAX_ROW_COUNT}"
+            raise ValueError(msg)
         if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
             msg = "Row number not in range for table"
             raise IndexError(msg)
@@ -1174,6 +1178,12 @@ class Table(Cacheable):
             If the default value is unsupported by :py:meth:`numbers_parser.Table.write`.
 
         """
+        if not isinstance(num_cols, int) or num_cols < 1:
+            msg = "Number of columns must be a positive integer"
+            raise ValueError(msg)
+        if num_cols > MAX_COL_COUNT - self.num_cols:
+            msg = f"Number of columns cannot exceed {MAX_COL_COUNT}"
+            raise ValueError(msg)
         if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
             msg = "Column number not in range for table"
             raise IndexError(msg)
@@ -1225,6 +1235,12 @@ class Table(Cacheable):
             If the start_row is out of range for the table.
 
         """
+        if not isinstance(num_rows, int) or num_rows < 1:
+            msg = "Number of rows must be a positive integer"
+            raise ValueError(msg)
+        if num_rows > self.num_rows:
+            msg = "Cannot delete more rows than the table contains"
+            raise ValueError(msg)
         if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
             msg = "Row number not in range for table"
             raise IndexError(msg)
@@ -1265,6 +1281,12 @@ class Table(Cacheable):
             If the start_col is out of range for the table.
 
         """
+        if not isinstance(num_cols, int) or num_cols < 1:
+            msg = "Number of columns must be a positive integer"
+            raise ValueError(msg)
+        if num_cols > self.num_cols:
+            msg = "Cannot delete more columns than the table contains"
+            raise ValueError(msg)
         if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
             msg = "Column number not in range for table"
             raise IndexError(msg)
@@ -1314,8 +1336,10 @@ class Table(Cacheable):
 
             merge_cells = self._model.merge_cells(self._table_id)
             merge_cells.add_anchor(row_start, col_start, (num_rows, num_cols))
-            for row in range(row_start + 1, row_end + 1):
-                for col in range(col_start + 1, col_end + 1):
+            for row in range(row_start, row_end + 1):
+                for col in range(col_start, col_end + 1):
+                    if row == row_start and col == col_start:
+                        continue
                     self._data[row][col] = Cell._merged_cell(self._table_id, row, col, self._model)
                     merge_cells.add_reference(row, col, (row_start, col_start, row_end, col_end))
 

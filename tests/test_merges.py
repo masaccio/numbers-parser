@@ -77,3 +77,18 @@ def test_all_merged_ranges():
     assert table.merge_ranges == ["A2:B2", "B5:E5", "B6:B8", "C4:E4", "D7:E8"]
     table = sheets[1].tables[0]
     assert table.merge_ranges == ["A1:B1", "B4:C5"]
+
+
+def test_create_rectangular_merge():
+    doc = Document(num_rows=4, num_cols=4)
+    table = doc.sheets[0].tables[0]
+
+    table.merge_cells("B2:C3")
+
+    assert table.merge_ranges == ["B2:C3"]
+    assert table.cell("B2").is_merged
+    assert table.cell("C2").merge_range == "B2:C3"
+    assert table.cell("B3").merge_range == "B2:C3"
+    assert table.cell("C3").merge_range == "B2:C3"
+    assert table.cell("B2").size == (2, 2)
+    assert table.cell("C2").merge_range == "B2:C3"

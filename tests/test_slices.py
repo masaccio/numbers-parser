@@ -43,6 +43,12 @@ def test_iter_row_exceptions():
         _ = list(table.iter_rows(max_col=999))
     assert str(e.value) == "column 999 out of range"
     with pytest.raises(IndexError) as e:
+        _ = list(table.iter_rows(max_row=table.num_rows))
+    assert str(e.value) == f"row {table.num_rows} out of range"
+    with pytest.raises(IndexError) as e:
+        _ = list(table.iter_rows(max_col=table.num_cols))
+    assert str(e.value) == f"column {table.num_cols} out of range"
+    with pytest.raises(IndexError) as e:
         _ = list(table.iter_rows(min_col=-1))
     assert str(e.value) == "column -1 out of range"
 
@@ -61,6 +67,12 @@ def test_iter_col_exceptions():
     with pytest.raises(IndexError) as e:
         _ = list(table.iter_cols(max_col=999))
     assert str(e.value) == "column 999 out of range"
+    with pytest.raises(IndexError) as e:
+        _ = list(table.iter_cols(max_row=table.num_rows))
+    assert str(e.value) == f"row {table.num_rows} out of range"
+    with pytest.raises(IndexError) as e:
+        _ = list(table.iter_cols(max_col=table.num_cols))
+    assert str(e.value) == f"column {table.num_cols} out of range"
     with pytest.raises(IndexError) as e:
         _ = list(table.iter_cols(min_col=-1))
     assert str(e.value) == "column -1 out of range"
