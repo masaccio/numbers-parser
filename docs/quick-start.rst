@@ -155,7 +155,7 @@ Cell formats are changed using :pages:`Table.set_cell_formatting() <api/table.ht
    table.set_cell_formatting(
       "C1", 
       "datetime", 
-      format="EEEE, d MMMM yyyy"
+      date_time_format="EEEE, d MMMM yyyy"
    )
    table.set_cell_formatting(
       0,

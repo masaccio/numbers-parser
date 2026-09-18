@@ -687,8 +687,8 @@ class Cell(CellStorageFlags, Cacheable):
 
         Cells that contain bulleted or numbered lists are identified
         by :py:attr:`numbers_parser.Cell.is_bulleted`. For these cells,
-            :py:attr:`numbers_parser.Cell.value` returns the whole cell contents.
-            Bullets can also be extracted into a list of paragraphs without the
+        :py:attr:`numbers_parser.Cell.value` returns the whole cell contents.
+        Bullets can also be extracted into a list of paragraphs without the
         bullet or numbering character. Newlines are not included in the
         bullet list.
 
