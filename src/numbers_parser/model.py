@@ -51,6 +51,8 @@ from numbers_parser.constants import (
     DEFAULT_TILE_SIZE,
     DOCUMENT_ID,
     EPOCH,
+    FONT_FAMILY_DEFAULT,
+    FONT_MAP,
     FORMAT_TYPE_MAP,
     MAX_TILE_SIZE,
     PACKAGE_ID,
@@ -72,7 +74,6 @@ from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSSArchives_pb2 as TSSArchives
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
-from numbers_parser.generated.fontmap import FONT_NAME_TO_FAMILY
 from numbers_parser.generated.TSDArchives_pb2 import (
     StrokePatternArchive as StrokePattern,
 )
@@ -86,17 +87,6 @@ from numbers_parser.xrefs import CellRange, ScopedNameRefCache
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
-
-
-def create_font_name_map(font_map: dict) -> dict:
-    new_font_map = {}
-    for k, v in font_map.items():
-        if v not in new_font_map:
-            new_font_map[v] = k
-    return new_font_map
-
-
-FONT_FAMILY_TO_NAME = create_font_name_map(FONT_NAME_TO_FAMILY)
 
 
 class MergeCells:
@@ -1750,13 +1740,14 @@ class _NumbersModel(Cacheable):
                 ),
                 font_color=self.cell_font_color(v["obj"]),
                 font_size=self.cell_font_size(v["obj"]),
-                font_name=self.cell_font_name(v["obj"]),
+                font_name=self.cell_font_family(v["obj"]),
                 bold=self.cell_is_bold(v["obj"]),
                 italic=self.cell_is_italic(v["obj"]),
                 underline=self.cell_is_underline(v["obj"]),
                 strikethrough=self.cell_is_strikethrough(v["obj"]),
                 name=self.cell_style_name(v["obj"]),
                 _text_style_obj_id=v["id"],
+                _font_details=self.cell_font_details(v["obj"]),
             )
             for k, v in presets_map.items()
         }
@@ -1794,12 +1785,12 @@ class _NumbersModel(Cacheable):
                         "a": 1.0,
                         "rgbspace": "srgb",
                     },
-                    "bold": style.bold,
-                    "italic": style.italic,
+                    "bold": style.bold | style._font_details["bold"],
+                    "italic": style.italic | style._font_details["italic"],
                     "underline": underline,
                     "strikethru": strikethru,
                     "font_size": style.font_size,
-                    "font_name": FONT_FAMILY_TO_NAME[style.font_name],
+                    "font_name": style._font_details["name"],
                     "tsd_fill": {
                         "color": {
                             "model": "rgb",
@@ -1854,7 +1845,7 @@ class _NumbersModel(Cacheable):
         style_obj.char_properties.underline = underline
         style_obj.char_properties.strikethru = strikethru
         style_obj.char_properties.font_size = style.font_size
-        style_obj.char_properties.font_name = FONT_FAMILY_TO_NAME[style.font_name]
+        style_obj.char_properties.font_name = style._font_details["name"]
         style_obj.char_properties.tsd_fill.color.r = style.font_color.r / 255
         style_obj.char_properties.tsd_fill.color.g = style.font_color.g / 255
         style_obj.char_properties.tsd_fill.color.b = style.font_color.b / 255
@@ -2253,10 +2244,10 @@ class _NumbersModel(Cacheable):
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.char_property(style, "font_size")
 
-    def cell_font_name(self, obj: Cell | object) -> str:
+    def cell_font_family(self, obj: Cell | object) -> str:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         font_name = self.char_property(style, "font_name")
-        if font_name not in FONT_NAME_TO_FAMILY:
+        if font_name not in FONT_MAP:
             if font_name not in self.missing_fonts:
                 warn(
                     f"Custom font '{font_name}' unsupported; falling back to {DEFAULT_FONT}",
@@ -2266,7 +2257,14 @@ class _NumbersModel(Cacheable):
                 self.missing_fonts[font_name] = True
             return DEFAULT_FONT
 
-        return FONT_NAME_TO_FAMILY[font_name]
+        return FONT_MAP[font_name]["family"]
+
+    def cell_font_details(self, obj: Cell | object) -> dict[str, str]:
+        style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
+        font_name = self.char_property(style, "font_name")
+        if font_name not in FONT_MAP:
+            return FONT_FAMILY_DEFAULT[DEFAULT_FONT]
+        return FONT_MAP[font_name]
 
     def cell_first_indent(self, obj: Cell | object) -> float:
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj

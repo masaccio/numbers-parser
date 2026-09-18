@@ -35,6 +35,8 @@ from numbers_parser.constants import (
     DEFAULT_TEXT_WRAP,
     EMPTY_STORAGE_BUFFER,
     EPOCH,
+    FONT_FAMILY_DEFAULT,
+    FONT_TUPLE_MAP,
     MAX_BASE,
     MAX_SIGNIFICANT_DIGITS,
     PACKAGE_ID,
@@ -245,8 +247,8 @@ class Style:
         Font color
     font_size: float, optional, default: DEFAULT_FONT_SIZE
         Font size in points
-    font_name: str, optional, default: DEFAULT_FONT_SIZE
-        Font name
+    font_name: str | tuple[str, str], optional, default: DEFAULT_FONT
+        Font name or a tuple of font family and style
     italic: bool, optional, default: False
         ``True`` if the cell font is italic
     name: str, optional
@@ -291,6 +293,7 @@ class Style:
     text_inset: float = DEFAULT_TEXT_INSET
     text_wrap: bool = DEFAULT_TEXT_WRAP
     name: str = None
+    _font_details: dict = None
     _text_style_obj_id: int = None
     _cell_style_obj_id: int = None
     _update_cell_style: bool = False
@@ -336,7 +339,7 @@ class Style:
             bg_color=model.cell_bg_color(cell),
             font_color=model.cell_font_color(cell),
             font_size=model.cell_font_size(cell),
-            font_name=model.cell_font_name(cell),
+            font_name=model.cell_font_family(cell),
             bold=model.cell_is_bold(cell),
             italic=model.cell_is_italic(cell),
             strikethrough=model.cell_is_strikethrough(cell),
@@ -347,6 +350,7 @@ class Style:
             right_indent=model.cell_right_indent(cell),
             text_inset=model.cell_text_inset(cell),
             text_wrap=model.cell_text_wrap(cell),
+            _font_details=model.cell_font_details(cell),
             _text_style_obj_id=model.text_style_object_id(cell),
             _cell_style_obj_id=model.cell_style_object_id(cell),
         )
@@ -358,9 +362,18 @@ class Style:
         if not isinstance(self.font_size, (float, int)):
             msg = "size must be a float number of points"
             raise TypeError(msg)
-        if not isinstance(self.font_name, str):
-            msg = "font name must be a string"
+
+        if not isinstance(self.font_name, (str, tuple)):
+            msg = "font name must be a string or name/style tuple"
             raise TypeError(msg)
+
+        if isinstance(self.font_name, str) and self.font_name in FONT_FAMILY_DEFAULT:
+            self._font_details = FONT_FAMILY_DEFAULT[self.font_name]
+        elif isinstance(self.font_name, tuple) and self.font_name in FONT_TUPLE_MAP:
+            self._font_details = FONT_TUPLE_MAP[self.font_name]
+        else:
+            msg = f"font '{self.font_name}' does not exist"
+            raise IndexError(msg)
 
         for attr in ["bold", "italic", "underline", "strikethrough"]:
             if not isinstance(getattr(self, attr), bool):
