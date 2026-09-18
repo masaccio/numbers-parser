@@ -597,9 +597,10 @@ def test_issue_96():
 def test_issue_99():
     doc = Document("tests/data/issue-99.numbers")
     table = doc.default_table
-    cell = table.cell(0, 0)
-    with pytest.warns(UnsupportedWarning) as record:
-        style = cell.style
+    with pytest.warns(UnsupportedWarning) as record:  # noqa: PT031
+        style = table.cell(1, 0).style
+        # Second time doesn't warn
+        style = table.cell(0, 0).style
     assert len(record) == 1
     assert (
         str(

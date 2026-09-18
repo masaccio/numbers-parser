@@ -1,9 +1,11 @@
 from datetime import datetime
+from struct import pack
 from unittest.mock import patch
 
 import pytest
 
 from numbers_parser import (
+    Alignment,
     Cell,
     CellBorder,
     CustomFormatting,
@@ -20,6 +22,7 @@ from numbers_parser.cell import (
     _auto_units,
     _decode_number_format,
     _float_to_n_digit_fraction,
+    _format_currency,
     _format_decimal,
 )
 from numbers_parser.constants import (
@@ -34,6 +37,7 @@ from numbers_parser.experimental import (
     experimental_features,
 )
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
+from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.model import _decode_date_format
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.xrefs import (
@@ -217,6 +221,29 @@ def test_experimental():
     assert ExperimentalFeatures.TESTING in experimental_features()
     disable_experimental_feature(ExperimentalFeatures.TESTING)
     assert experimental_features() == ExperimentalFeatures.NONE
+
+
+def test_alignment_and_number_format_edges():
+    alignment = Alignment("center", "middle")
+    assert alignment == Alignment("center", "middle")
+    assert str(alignment) == "[center,middle]"
+    assert repr(alignment) == "[center,middle]"
+
+    assert _decode_number_format(None, None, "test", []) is None
+    assert _format_currency(None, None) is None
+
+
+def test_formula_error_storage_flag():
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+    buffer = bytearray(EMPTY_STORAGE_BUFFER)
+    buffer[0] = 5
+    buffer[1] = TSTArchives.genericCellType
+    buffer[8:12] = pack("<i", 0x800)
+    cell = Cell._from_storage(table._table_id, 0, 0, buffer, doc._model)
+    assert cell.row == 0
+    assert cell.col == 0
+    assert cell._flags == 0x800
 
 
 def test_bad_image_filenames():

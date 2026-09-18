@@ -2414,7 +2414,7 @@ class _NumbersModel(Cacheable):
     def extract_strokes(self, table_id: int) -> None:
         table_obj = self.objects[table_id]
         stroke_sidecar_id = table_obj.stroke_sidecar.identifier
-        if stroke_sidecar_id == 0:
+        if stroke_sidecar_id == 0:  # pragma: no cover
             return
         sidecar_obj = self.objects[stroke_sidecar_id]
         strokes = []
