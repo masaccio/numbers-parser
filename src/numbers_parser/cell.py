@@ -226,11 +226,12 @@ class Style:
     ----------
     alignment: Alignment, optional, default: Alignment("auto", "top")
         Horizontal and vertical alignment of the cell
-    bg_color: RGB | List[RGB], optional, default: RGB(0, 0, 0)
+    bg_color: RGB | List[RGB], optional, default: None
         Background color or list of colors for gradients
     bold: bool, optional, default: False
         ``True`` if the cell font is bold
-    font_color: RGB, optional, default: RGB(0, 0, 0)) – Font color
+    font_color: RGB, optional, default: RGB(0, 0, 0)
+        Font color
     font_size: float, optional, default: DEFAULT_FONT_SIZE
         Font size in points
     font_name: str, optional, default: DEFAULT_FONT_SIZE
@@ -239,19 +240,19 @@ class Style:
         ``True`` if the cell font is italic
     name: str, optional
         Style name
-    underline: bool, optional, default: False) – True if the
-        cell font is underline
-    strikethrough: bool, optional, default: False) – True if
-        the cell font is strikethrough
-    first_indent: float, optional, default: 0.0) – First line
-        indent in points
+    underline: bool, optional, default: False
+        ``True`` if the cell font is underlined
+    strikethrough: bool, optional, default: False
+        ``True`` if the cell font uses strikethrough
+    first_indent: float, optional, default: 0.0
+        First-line indent in points
     left_indent: float, optional, default: 0.0
         Left indent in points
     right_indent: float, optional, default: 0.0
         Right indent in points
     text_inset: float, optional, default: DEFAULT_TEXT_INSET
         Text inset in points
-    text_wrap: str, optional, default: True
+    text_wrap: bool, optional, default: True
         ``True`` if text wrapping is enabled
 
     Raises
@@ -430,7 +431,7 @@ class Border:  # noqa: PLW1641
     Parameters
     ----------
     width: float, optional, default: 0.35
-        Number of rows in the first table of a new document.
+        Line width in points.
     color: RGB, optional, default: RGB(0, 0, 0)
         The line color for the border if present
     style: BorderType, optional, default: ``None``
@@ -687,7 +688,7 @@ class Cell(CellStorageFlags, Cacheable):
         Cells that contain bulleted or numbered lists are identified
         by :py:attr:`numbers_parser.Cell.is_bulleted`. For these cells,
         :py:attr:`numbers_parser.Cell.value` returns the whole cell contents.
-        Bullets can also be extracted into a list of paragraphs cell without the
+        Bullets can also be extracted into a list of paragraphs without the
         bullet or numbering character. Newlines are not included in the
         bullet list.
 
@@ -704,7 +705,6 @@ class Cell(CellStorageFlags, Cacheable):
             else:
                 bullets = ["* " + s for s in table.cell(0, 1).bullets]
                 print("\n".join(bullets))
-                    return None
 
         """
         return None
