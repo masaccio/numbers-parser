@@ -192,7 +192,7 @@ class IWork:
         if password is not None:
             verifier_data, key = self._generate_verifier_and_key(password)
             file_store[".iwpv2"] = verifier_data
-            file_store[".iwph"] = b""  # Store an empty password hint string by default
+            file_store[".iwph"] = b"No hints"
 
         if package:
             if filepath.is_dir():
