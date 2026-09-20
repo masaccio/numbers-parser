@@ -10,8 +10,6 @@ Current known limitations of ``numbers-parser`` which may be implemented in the 
 - Formulas cannot be written to a document
 - Pivot tables are unsupported and saving a document with a pivot table issues a `UnsupportedWarning` (see :github:`issue 73 <issues/73>` for details).
 - Tables which have been saved grouped cannot be safely edited as references to written cells refer to the ungrouped cell rows rather than the row number in the groups. 
-- Password-encrypted documents can be read but not re-saved with encryption; they will be re-saved unencrypted.
-
 
 The following limitations are expected to always remain:
 

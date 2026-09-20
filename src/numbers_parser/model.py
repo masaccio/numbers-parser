@@ -239,8 +239,8 @@ class _NumbersModel(Cacheable):
         self.missing_fonts = {}
         self.calculate_table_uuid_map()
 
-    def save(self, filepath: Path, package: bool) -> None:
-        self.objects.save(filepath, package)
+    def save(self, filepath: Path, package: bool, password: str) -> None:
+        self.objects.save(filepath, package, password)
 
     def find_refs(self, ref: str) -> list:
         return self.objects.find_refs(ref)

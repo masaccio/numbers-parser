@@ -110,7 +110,7 @@ Since the return value of ``rows()`` is a list of lists, you can pass this direc
 Writing Numbers Documents
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Whilst support for writing numbers files has been stable since version 3.4.0, you are highly recommended not to overwrite working Numbers files and instead save data to a new file. **Also note that when reading encrypted documents, they are re-saved unencrypted**.
+Whilst support for writing numbers files has been stable since version 3.4.0, you are highly recommended not to overwrite working Numbers files and instead save data to a new file.
 
 Cell values are written using :pages:`Table.write() <api/table.html#numbers_parser.Table.write>` and ``numbers-parser`` will automatically create empty rows and columns for any cell references that are out of range of the current table.
 
@@ -123,6 +123,14 @@ Cell values are written using :pages:`Table.write() <api/table.html#numbers_pars
    table.write(1, 1, "This is new text")
    table.write("B7", datetime(2020, 12, 25))
    doc.save("new-sheet.numbers")
+
+
+Encrypted documents are not automatically re-saved with encryption and you must specify a password on save:
+
+.. code:: python
+
+   doc.save("new-sheet.numbers", password="s3cr3t")
+
 
 Additional tables and worksheets can be added to a ``Document`` before saving using :pages:`Document.add_sheet() <api/document.html#numbers_parser.Document.add_sheet>` and :pages:`Sheet.add_table() <api/sheet.html#numbers_parser.Sheet.add_table>` respectively:
 

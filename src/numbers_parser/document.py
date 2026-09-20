@@ -124,7 +124,12 @@ class Document:
         """
         return self._model.custom_formats
 
-    def save(self, filename: str | Path, package: bool = False) -> None:
+    def save(
+        self,
+        filename: str | Path,
+        package: bool = False,
+        password: str | None = None,
+    ) -> None:
         """
         Save the document in the specified filename.
 
@@ -136,6 +141,8 @@ class Document:
         package: bool, optional, default: False
             If ``True``, create a package format document (a folder) instead
             of a single file
+        password: str, optional, default: None
+            If not `None`, the document is encrypted using the password. No hint is stored.
 
         Raises
         ------
@@ -155,7 +162,7 @@ class Document:
                     )
                 else:
                     self._model.recalculate_table_data(table._table_id, table._data)
-        self._model.save(Path(filename), package)
+        self._model.save(Path(filename), package, password)
 
     def add_sheet(
         self,

@@ -46,6 +46,7 @@ libsnappy
 liststyle
 lldb
 lldbutil
+llys
 Lucida
 makedirs
 multifile
@@ -56,6 +57,7 @@ Neue
 no cover
 nonspace
 numrows
+padder
 pathnames
 pathsource
 pbtype
@@ -95,6 +97,7 @@ Uncategorized
 unpadder
 unpadding
 upsell
+urandom
 urllib
 Varint
 veryclean

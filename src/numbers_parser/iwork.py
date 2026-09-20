@@ -5,6 +5,7 @@ import re
 import struct
 from abc import ABC, abstractmethod
 from io import BytesIO
+from os import urandom
 from pathlib import Path
 from sys import version_info
 from warnings import warn
@@ -43,7 +44,8 @@ class IWorkHandler(ABC):
 class IWPasswordVerifier:
     def __init__(self, data: bytes):
         if len(data) != 104:
-            raise ValueError(f"IWPasswordVerifier: unrecognized format length ({len(data)} bytes)")
+            msg = f"IWPasswordVerifier: unrecognized format length ({len(data)} bytes)"
+            raise ValueError(msg)
 
         # Unpack the 104-byte packed struct as little-endian[cite: 4]
         # uint16_t version, uint16_t format, uint32_t iterations, uint8_t salt[16], uint8_t iv[16], uint8_t data[64][cite: 4]
@@ -53,8 +55,9 @@ class IWPasswordVerifier:
         )
 
         if self.version != 2 or self.format != 1:
+            msg = f"Unsupported version or format: {self.version}, {self.format}[cite: 4]"
             raise ValueError(
-                f"Unsupported version or format: {self.version}, {self.format}[cite: 4]",
+                msg,
             )
 
     def create_key_with_password(self, password: str) -> bytes:
@@ -63,7 +66,7 @@ class IWPasswordVerifier:
 
         # The 16-byte key is created using standard PBKDF2+SHA1[cite: 4]
         kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA1(),
+            algorithm=hashes.SHA1(),  # noqa: S303
             length=16,
             salt=self.salt,
             iterations=self.iterations,
@@ -129,7 +132,7 @@ class IWork:
             if len(metadata) != 2:
                 msg = "invalid Numbers document (missing files)"
                 raise FileFormatError(msg) from None
-            properties_plist = self._zipf.read(sorted(metadata)[-1])
+            properties_plist = self._zipf.read(max(metadata))
 
         try:
             doc_properties = plistlib.loads(properties_plist)
@@ -181,7 +184,19 @@ class IWork:
         else:
             self._read_objects_from_zipfile(self._zipf)
 
-    def save(self, filepath: Path, file_store: dict[str, object], package: bool) -> None:
+    def save(
+        self,
+        filepath: Path,
+        file_store: dict[str, object],
+        package: bool = False,
+        password: str | None = None,
+    ) -> None:
+        key = None
+        if password is not None:
+            verifier_data, key = self._generate_verifier_and_key(password)
+            file_store[".iwpv2"] = verifier_data
+            file_store[".iwph"] = b""  # Store an empty password hint string by default
+
         if package:
             if filepath.is_dir():
                 if filepath.suffix != ".numbers":
@@ -203,7 +218,10 @@ class IWork:
             zipf = ZipFile(filepath / "Index.zip", "w")
             for blob_path, blob in file_store.items():
                 if isinstance(blob, IWAFile):
-                    zipf.writestr(blob_path, blob.to_buffer())
+                    if key:
+                        zipf.writestr(blob_path, self._encrypt_using_iwa_key(blob.to_buffer(), key))
+                    else:
+                        zipf.writestr(blob_path, blob.to_buffer())
                 else:
                     sub_filepath = filepath / blob_path
                     if not sub_filepath.parent.is_dir():
@@ -217,7 +235,13 @@ class IWork:
 
             for filepath_in_zip, blob in file_store.items():
                 if isinstance(blob, IWAFile):
-                    zipf.writestr(filepath_in_zip, blob.to_buffer())
+                    if key:
+                        zipf.writestr(
+                            filepath_in_zip,
+                            self._encrypt_using_iwa_key(blob.to_buffer(), key),
+                        )
+                    else:
+                        zipf.writestr(filepath_in_zip, blob.to_buffer())
                 else:
                     zipf.writestr(filepath_in_zip, blob)
             zipf.close()
@@ -333,3 +357,58 @@ class IWork:
             raise ValueError(msg)
 
         return decrypted[16:]
+
+    def _generate_verifier_and_key(self, password: str) -> tuple[bytes, bytes]:
+        salt = urandom(16)
+        iv = urandom(16)
+        iterations = 100000
+
+        # The 16-byte key is created using standard PBKDF2+SHA1[cite: 4]
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA1(),  # noqa: S303
+            length=16,
+            salt=salt,
+            iterations=iterations,
+            backend=default_backend(),
+        )
+        key = kdf.derive(password.encode("utf-8"))
+
+        verifier_payload = urandom(32)
+        # The last 32 bytes of the block should be equal to the SHA256 of the first 32 bytes
+        hash_val = hashlib.sha256(verifier_payload).digest()
+        decrypted_verifier_block = verifier_payload + hash_val
+
+        # Encrypt the 64-byte block using the derived key[cite: 4]
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+        encryptor = cipher.encryptor()
+        encrypted_verifier_block = encryptor.update(decrypted_verifier_block) + encryptor.finalize()
+
+        # Format layout: uint16_t version, uint16_t format, uint32_t iterations, uint8_t salt[16], uint8_t iv[16], uint8_t data[64][cite: 4]
+        verifier_data = struct.pack(
+            "<HH I 16s 16s 64s",
+            2,
+            1,
+            iterations,
+            salt,
+            iv,
+            encrypted_verifier_block,
+        )
+        return verifier_data, key
+
+    def _encrypt_using_iwa_key(self, data: bytes, key: bytes) -> bytes:
+        iv = urandom(16)
+        # 16 random bytes are placed at the head of the unencrypted payload
+        header = urandom(16)
+        # 20 bytes of garbage appended at the tail after encryption
+        garbage = urandom(20)
+
+        # Apply PKCS7 padding to the merged header and snappy stream prior to encryption
+        padder = padding.PKCS7(128).padder()
+        padded_data = padder.update(header + data) + padder.finalize()
+
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+        encryptor = cipher.encryptor()
+        encrypted_bytes = encryptor.update(padded_data) + encryptor.finalize()
+
+        # The final chunk combines the IV, cipher bytes, and the 20 bytes of garbage[cite: 7]
+        return iv + encrypted_bytes + garbage
