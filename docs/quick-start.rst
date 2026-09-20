@@ -11,8 +11,14 @@ Reading documents:
    >>> tables = sheets[0].tables
    >>> rows = tables[0].rows()
 
-Sheets and tables are iterables that can be indexed using either an
-integer index or using the name of the sheet/table:
+Encrypted documents are also supported for reading:
+
+.. code:: python
+
+   >>> from numbers_parser import Document
+   >>> doc = Document("mydoc.numbers", password="s3cr3t")
+
+Sheets and tables are iterables that can be indexed using either an integer index or using the name of the sheet/table:
 
 .. code:: python
 
@@ -25,9 +31,7 @@ integer index or using the name of the sheet/table:
    >>> doc.sheets[0].tables["Table 1"].name
    'Table 1'
 
-``Table`` objects have a ``rows`` method which contains a nested list
-with an entry for each row of the table. Each row is itself a list of
-the column values.
+``Table`` objects have a ``rows`` method which contains a nested list with an entry for each row of the table. Each row is itself a list of the column values.
 
 .. code:: python
 
@@ -43,9 +47,7 @@ the column values.
 Cell Data
 ^^^^^^^^^
 
-Cells are objects with a common base class of ``Cell``. All cell types
-have a property ``value`` which returns the contents of the cell as a
-python datatype. Available cell types are:
+Cells are objects with a common base class of ``Cell``. All cell types have a property ``value`` which returns the contents of the cell as a python datatype. Available cell types are:
 
 +---------------+------------------------+---------------------------------+
 | Cell type     | value type             | Additional properties           |
@@ -108,7 +110,7 @@ Since the return value of ``rows()`` is a list of lists, you can pass this direc
 Writing Numbers Documents
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Whilst support for writing numbers files has been stable since version 3.4.0, you are highly recommended not to overwrite working Numbers files and instead save data to a new file.
+Whilst support for writing numbers files has been stable since version 3.4.0, you are highly recommended not to overwrite working Numbers files and instead save data to a new file. **Also note that when reading encrypted documents, they are re-saved unencrypted**.
 
 Cell values are written using :pages:`Table.write() <api/table.html#numbers_parser.Table.write>` and ``numbers-parser`` will automatically create empty rows and columns for any cell references that are out of range of the current table.
 

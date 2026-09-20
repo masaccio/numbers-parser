@@ -61,6 +61,8 @@ class Document:
         Number of rows in the first table of a new document.
     num_cols: int, optional, default: 8
         Number of columns in the first table of a new document.
+    password: str, optional, default: None
+        Password for encrypted documents
 
     Raises
     ------
@@ -82,8 +84,9 @@ class Document:
         num_header_cols: int | None = 1,
         num_rows: int | None = DEFAULT_ROW_COUNT,
         num_cols: int | None = DEFAULT_COLUMN_COUNT,
+        password: str | None = None,
     ) -> None:
-        self._model = _NumbersModel(None if filename is None else Path(filename))
+        self._model = _NumbersModel(None if filename is None else Path(filename), password)
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
 

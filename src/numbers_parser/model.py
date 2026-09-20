@@ -214,10 +214,10 @@ class _NumbersModel(Cacheable):
     Not to be used in application code.
     """
 
-    def __init__(self, filepath: Path) -> None:
+    def __init__(self, filepath: Path, password: str | None) -> None:
         if filepath is None:
             filepath = Path(DEFAULT_DOCUMENT)
-        self.objects = ObjectStore(filepath)
+        self.objects = ObjectStore(filepath, password)
         self._merge_cells = defaultdict(MergeCells)
         self._row_heights = {}
         self._col_widths = {}

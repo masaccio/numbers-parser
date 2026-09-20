@@ -369,12 +369,12 @@ Current known limitations of `numbers-parser` which may be implemented in the fu
 - Formulas cannot be written to a document
 - Pivot tables are unsupported and saving a document with a pivot table issues a UnsupportedWarning (see [issue 73](https://github.com/masaccio/numbers-parser/issues/73) for details).
 - Tables which have been saved grouped cannot be safely edited as references to written cells refer to the ungrouped cell rows rather than the row number in the groups.
+- Password-encrypted documents can be read but not re-saved with encryption; they will be resaved unencrypted.
 
 The following limitations are expected to always remain:
 
 - New sheets insert tables with formats copied from the first table in the previous sheet rather than default table formats
 - Due to a limitation in Python’s [ZipFile](https://docs.python.org/3/library/zipfile.html), Python versions older than 3.11 do not support image filenames with UTF-8 characters [Cell.add_style.bg_image()](https://masaccio.github.io/numbers-parser/api/sheet.html#numbers_parser.Style) returns `None` for such files and issues a `RuntimeWarning` (see [issue 69](https://github.com/masaccio/numbers-parser/issues/69) for details).
-- Password-encrypted documents cannot be opened. You must first re-save without a password to read (see [issue 88](https://github.com/masaccio/numbers-parser/issues/88) for details).  A UnsupportedError exception is raised when such documents are opened.
 - Due to changes in the format of Numbers documents, decoding of category groups (introduced in `numbers-parser` version 4.16) is supported only for documents created by Numbers 12.0 and later. No warnings are issued for earlier
   Numbers documents.
 - Only standard macOS fonts are not supported. If a document includes a non-standard font, numbers-parser will issue a UnsupportedWarning and default styles to Helvetica Neue. Reading font names from the system would add additional system-specific dependencies to the package and so this is not planned to changed.

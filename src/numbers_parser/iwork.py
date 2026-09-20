@@ -1,6 +1,8 @@
+import hashlib
 import logging
 import plistlib
 import re
+import struct
 from abc import ABC, abstractmethod
 from io import BytesIO
 from pathlib import Path
@@ -8,7 +10,12 @@ from sys import version_info
 from warnings import warn
 from zipfile import BadZipFile, ZipFile
 
-from numbers_parser.exceptions import FileError, FileFormatError, UnsupportedError
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+from numbers_parser.exceptions import FileError, FileFormatError
 from numbers_parser.iwafile import IWAFile, is_iwa_file
 
 logger = logging.getLogger(__name__)
@@ -31,6 +38,51 @@ class IWorkHandler(ABC):
     @abstractmethod
     def allowed_version(self, version: str) -> bool:
         """bool: Return ``True`` if the document version is allowed."""
+
+
+class IWPasswordVerifier:
+    def __init__(self, data: bytes):
+        if len(data) != 104:
+            raise ValueError(f"IWPasswordVerifier: unrecognized format length ({len(data)} bytes)")
+
+        # Unpack the 104-byte packed struct as little-endian[cite: 4]
+        # uint16_t version, uint16_t format, uint32_t iterations, uint8_t salt[16], uint8_t iv[16], uint8_t data[64][cite: 4]
+        self.version, self.format, self.iterations, self.salt, self.iv, self.data = struct.unpack(
+            "<HH I 16s 16s 64s",
+            data,
+        )
+
+        if self.version != 2 or self.format != 1:
+            raise ValueError(
+                f"Unsupported version or format: {self.version}, {self.format}[cite: 4]",
+            )
+
+    def create_key_with_password(self, password: str) -> bytes:
+        if not password:
+            return None
+
+        # The 16-byte key is created using standard PBKDF2+SHA1[cite: 4]
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA1(),
+            length=16,
+            salt=self.salt,
+            iterations=self.iterations,
+            backend=default_backend(),
+        )
+        key = kdf.derive(password.encode("utf-8"))
+
+        # Use the key to decrypt the 64-byte block[cite: 4]
+        cipher = Cipher(algorithms.AES(key), modes.CBC(self.iv), backend=default_backend())
+        decryptor = cipher.decryptor()
+
+        decrypted = decryptor.update(self.data) + decryptor.finalize()
+
+        # The last 32 bytes of the block should be equal to the SHA256 of the first 32 bytes[cite: 4]
+        hash_val = hashlib.sha256(decrypted[:32]).digest()
+        if hash_val != decrypted[32:64]:
+            return None
+
+        return key
 
 
 class IWork:
@@ -88,7 +140,7 @@ class IWork:
             warn("can't read Numbers version from document", RuntimeWarning, stacklevel=2)
         return doc_version
 
-    def open(self, filepath: Path) -> None:
+    def open(self, filepath: Path, password: str | None) -> None:
         """
         Open an iWork file and read in the files and archives contained in it.
 
@@ -106,6 +158,7 @@ class IWork:
         """
         debug("open: filename=%s", filepath)
         self._filepath = filepath
+        self._password = password
         if not filepath.exists():
             msg = "no such file or directory"
             raise FileError(msg)
@@ -202,13 +255,27 @@ class IWork:
         try:
             _ = zipf.getinfo(".iwph")
         except KeyError:
-            pass
+            self.is_encrypted = False
         else:
-            msg = f"{zipf.filename}: encrypted documents are not supported"
-            raise UnsupportedError(msg)
+            self.is_encrypted = True
+            hint = zipf.read(".iwph").decode()
+            verifier_data = zipf.read(".iwpv2")
+            try:
+                verifier = IWPasswordVerifier(verifier_data)
+            except ValueError as e:
+                msg = "Error initializing encryption verifier"
+                raise FileError(msg) from e
+
+            self._key = verifier.create_key_with_password(self._password)
+            if not self._key:
+                msg = f"Invalid password. Hint is '{hint}'"
+                raise FileError(msg)
 
         for filename in zipf.namelist():
             blob = zipf.read(filename)
+            if self.is_encrypted and filename.endswith(".iwa"):
+                blob = self._decrypt_using_iwa_key(blob, self._key)
+
             if filename.lower().endswith("index.zip"):
                 index_data = BytesIO(blob)
                 self._read_objects_from_zipfile(self._open_zipfile(index_data))
@@ -239,3 +306,30 @@ class IWork:
         else:
             debug("store blob: filename=%s", filename)
             self._handler.store_file(filename, blob)
+
+    def _decrypt_using_iwa_key(self, data: bytes, key: bytes) -> bytes:
+        # The first 16 bytes are the IV and the last 20 bytes are garbage
+        if len(data) < 36:
+            msg = "Data too short to be a valid encrypted IWA file"
+            raise ValueError(msg)
+
+        iv = data[:16]
+        encrypted_bytes = data[16:-20]
+
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+        decryptor = cipher.decryptor()
+
+        decrypted_padded = decryptor.update(encrypted_bytes) + decryptor.finalize()
+
+        unpadder = padding.PKCS7(128).unpadder()
+        try:
+            decrypted = unpadder.update(decrypted_padded) + unpadder.finalize()
+        except ValueError as e:
+            msg = "PKCS7 unpadding failed. Key might be correct but payload is corrupted."
+            raise ValueError(msg) from e
+
+        if len(decrypted) < 16:
+            msg = "Decrypted data is too short to discard the 16-byte header"
+            raise ValueError(msg)
+
+        return decrypted[16:]

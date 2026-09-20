@@ -36,6 +36,7 @@ class Converter:
     reverse: bool = False
     whitespace: bool = None
     encoding: str = "utf-8"
+    password: str | None = None
 
     def __post_init__(self: Converter) -> None:
         """Parse CSV file with Pandas and return a dataframe."""
@@ -128,7 +129,7 @@ class Converter:
 
     def save(self: Converter) -> None:
         """Write dataframe transctions to a Numbers file."""
-        doc = Document(num_rows=2, num_cols=2)
+        doc = Document(num_rows=2, num_cols=2, password=self.password)
         table = doc.sheets[0].tables[0]
 
         data = [] if self.no_header else [self.header]
@@ -372,6 +373,7 @@ def command_line_parser() -> argparse.ArgumentParser:
         metavar="FILENAME",
         help="output filename (default: use source file with .numbers)",
     )
+    parser.add_argument("--password", help="Password for encrypted documents")
     parser.add_argument("csvfile", nargs="*", help="CSV file to convert")
     return parser
 
@@ -409,6 +411,7 @@ def main() -> None:
                 input_filename=input_filename,
                 output_filename=output_filename,
                 encoding=args.encoding,
+                password=args.password,
             )
 
             converter.transform_columns(args.transform)

@@ -76,6 +76,7 @@ def command_line_parser():
         action="append",
         help="Names of table(s) to include in export",
     )
+    parser.add_argument("--password", help="Password for encrypted documents")
     parser.add_argument("document", nargs="*", help="Document(s) to export")
     parser.add_argument("--debug", default=False, action="store_true", help="Enable debug logging")
     experimental_choices = [
@@ -90,13 +91,13 @@ def command_line_parser():
     return parser
 
 
-def print_sheet_names(filename) -> None:
-    for sheet in Document(filename).sheets:
+def print_sheet_names(filename, password) -> None:
+    for sheet in Document(filename, password=password).sheets:
         print(f"{filename}: {sheet.name}")
 
 
-def print_table_names(filename) -> None:
-    for sheet in Document(filename).sheets:
+def print_table_names(filename, password) -> None:
+    for sheet in Document(filename, password=password).sheets:
         for table in sheet.tables:
             print(f"{filename}: {sheet.name}: {table.name}")
 
@@ -115,9 +116,9 @@ def cell_as_string(args, cell):
     return str(cell.value)
 
 
-def print_table(args, filename) -> None:
+def print_table(args, filename, password) -> None:
     writer = csv.writer(sys.stdout, dialect="excel")
-    for sheet in Document(filename).sheets:
+    for sheet in Document(filename, password=password).sheets:
         if args.sheet is not None and sheet.name not in args.sheet:
             continue
         for table in sheet.tables:
@@ -151,11 +152,11 @@ def main() -> None:
         for filename in args.document:
             try:
                 if args.list_sheets:
-                    print_sheet_names(filename)
+                    print_sheet_names(filename, args.password)
                 elif args.list_tables:
-                    print_table_names(filename)
+                    print_table_names(filename, args.password)
                 else:
-                    print_table(args, filename)
+                    print_table(args, filename, args.password)
             except (FileFormatError, FileError, UnsupportedError) as e:  # noqa: PERF203
                 err_str = str(e)
                 if filename in err_str:
