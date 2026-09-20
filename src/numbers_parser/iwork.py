@@ -47,15 +47,14 @@ class IWPasswordVerifier:
             msg = f"IWPasswordVerifier: unrecognized format length ({len(data)} bytes)"
             raise ValueError(msg)
 
-        # Unpack the 104-byte packed struct as little-endian[cite: 4]
-        # uint16_t version, uint16_t format, uint32_t iterations, uint8_t salt[16], uint8_t iv[16], uint8_t data[64][cite: 4]
+        # Unpack the 104-byte packed struct as little-endian
         self.version, self.format, self.iterations, self.salt, self.iv, self.data = struct.unpack(
             "<HH I 16s 16s 64s",
             data,
         )
 
         if self.version != 2 or self.format != 1:
-            msg = f"Unsupported version or format: {self.version}, {self.format}[cite: 4]"
+            msg = f"Unsupported version or format: {self.version}, {self.format}"
             raise ValueError(
                 msg,
             )
@@ -64,7 +63,6 @@ class IWPasswordVerifier:
         if not password:
             return None
 
-        # The 16-byte key is created using standard PBKDF2+SHA1[cite: 4]
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA1(),  # noqa: S303
             length=16,
@@ -74,13 +72,12 @@ class IWPasswordVerifier:
         )
         key = kdf.derive(password.encode("utf-8"))
 
-        # Use the key to decrypt the 64-byte block[cite: 4]
         cipher = Cipher(algorithms.AES(key), modes.CBC(self.iv), backend=default_backend())
         decryptor = cipher.decryptor()
 
         decrypted = decryptor.update(self.data) + decryptor.finalize()
 
-        # The last 32 bytes of the block should be equal to the SHA256 of the first 32 bytes[cite: 4]
+        # The last 32 bytes of the block should be equal to the SHA256 of the first 32 bytes
         hash_val = hashlib.sha256(decrypted[:32]).digest()
         if hash_val != decrypted[32:64]:
             return None
@@ -363,7 +360,6 @@ class IWork:
         iv = urandom(16)
         iterations = 100000
 
-        # The 16-byte key is created using standard PBKDF2+SHA1[cite: 4]
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA1(),  # noqa: S303
             length=16,
@@ -378,12 +374,10 @@ class IWork:
         hash_val = hashlib.sha256(verifier_payload).digest()
         decrypted_verifier_block = verifier_payload + hash_val
 
-        # Encrypt the 64-byte block using the derived key[cite: 4]
         cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
         encryptor = cipher.encryptor()
         encrypted_verifier_block = encryptor.update(decrypted_verifier_block) + encryptor.finalize()
 
-        # Format layout: uint16_t version, uint16_t format, uint32_t iterations, uint8_t salt[16], uint8_t iv[16], uint8_t data[64][cite: 4]
         verifier_data = struct.pack(
             "<HH I 16s 16s 64s",
             2,
@@ -410,5 +404,5 @@ class IWork:
         encryptor = cipher.encryptor()
         encrypted_bytes = encryptor.update(padded_data) + encryptor.finalize()
 
-        # The final chunk combines the IV, cipher bytes, and the 20 bytes of garbage[cite: 7]
+        # The final chunk combines the IV, cipher bytes, and the 20 bytes of garbage
         return iv + encrypted_bytes + garbage
