@@ -19,22 +19,18 @@ class IWorkHandler(ABC):
     @abstractmethod
     def store_file(self, filename: str, blob: bytes) -> None:
         """Store a protobuf archive."""
-        raise NotImplementedError
 
     @abstractmethod
     def store_object(self, filename: str, identifier: int, archive: object) -> None:
         """Store a binary blob of data from the iWork package."""
-        raise NotImplementedError
 
     @abstractmethod
     def allowed_format(self, extension: str) -> bool:
         """bool: Return ``True`` if the filename extension is supported by the handler."""
-        raise NotImplementedError
 
     @abstractmethod
     def allowed_version(self, version: str) -> bool:
         """bool: Return ``True`` if the document version is allowed."""
-        raise NotImplementedError
 
 
 class IWork:

@@ -7,6 +7,7 @@ import contextlib
 import csv
 import re
 import sys
+from abc import abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -154,6 +155,7 @@ class Transformer:
         self.dest = int(dest) if dest.isnumeric() else dest
         self.sources = [int(x) if x.isnumeric() else x for x in source.split(";")]
 
+    @abstractmethod
     def transform_row(self: Transformer, row: list[str]) -> list[str]:
         """Abstract base method for transforming rows using df.apply()."""
         raise NotImplementedError

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Iterator  # noqa: TC003
+from datetime import datetime, timedelta  # noqa: TC003
 from pathlib import Path
-from typing import TYPE_CHECKING
 from warnings import warn
 
 from numbers_parser.cell import (
@@ -32,10 +33,6 @@ from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
 from numbers_parser.numbers_cache import Cacheable
 from numbers_parser.xrefs import xl_cell_to_rowcol, xl_range
-
-if TYPE_CHECKING:  # pragma: no cover
-    from collections.abc import Iterator
-    from datetime import datetime, timedelta
 
 __all__ = ["Document", "Sheet", "Table"]
 
