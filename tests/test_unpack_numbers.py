@@ -83,6 +83,21 @@ def test_unpack_encrypted_file(script_runner, tmp_path):
     ]
     assert "Decryption" in strings
 
+    invalid_ret = script_runner.run(
+        [
+            "unpack-numbers",
+            "--password",
+            "invalid",
+            "--output",
+            str(tmp_path / "invalid-password"),
+            "tests/data/encrypted.numbers",
+        ],
+        print_result=False,
+    )
+    assert not invalid_ret.success
+    assert invalid_ret.stdout == ""
+    assert "tests/data/encrypted.numbers: Invalid password. Hint is 's3cr3t'" in invalid_ret.stderr
+
 
 def test_unpack_dir(script_runner, tmp_path):
     output_dir = tmp_path / "test"
