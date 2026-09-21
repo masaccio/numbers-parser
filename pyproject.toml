@@ -107,9 +107,9 @@ addopts = "--cov=src/numbers_parser --cov-report=html --cov-report=term-missing:
 
 [tool.tox]
 requires = ["tox>=4.0"]
-envlist = ["py310", "py311", "py312", "py313"]
+env_list = ["py310", "py311", "py312", "py313"]
 
-[testenv]
+[tool.tox.env_run_base]
 deps = [
   "pytest",
   "pytest-check",
@@ -121,7 +121,7 @@ deps = [
   "colorama"
 ]
 commands = [
-  "pytest tests/ --import-mode importlib -n logical --no-cov"
+  ["pytest", "tests/", "--import-mode", "importlib", "-n", "logical", "--no-cov"]
 ]
 
 [tool.isort]
