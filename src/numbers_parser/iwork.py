@@ -41,48 +41,123 @@ class IWorkHandler(ABC):
         """bool: Return ``True`` if the document version is allowed."""
 
 
-class IWPasswordVerifier:
-    def __init__(self, data: bytes):
+class IWorkCrypto:
+    def __init__(self, key: bytes):
+        self._key = key
+
+    @classmethod
+    def from_password_verifier(cls, data: bytes, password: str | None):
         if len(data) != 104:
-            msg = f"IWPasswordVerifier: unrecognized format length ({len(data)} bytes)"
+            msg = f"IWorkCrypto: unrecognized verifier format length ({len(data)} bytes)"
             raise ValueError(msg)
 
         # Unpack the 104-byte packed struct as little-endian
-        self.version, self.format, self.iterations, self.salt, self.iv, self.data = struct.unpack(
+        version, format_version, iterations, salt, iv, encrypted_data = struct.unpack(
             "<HH I 16s 16s 64s",
             data,
         )
 
-        if self.version != 2 or self.format != 1:
-            msg = f"Unsupported version or format: {self.version}, {self.format}"
+        if version != 2 or format_version != 1:
+            msg = f"Unsupported version or format: {version}, {format_version}"
             raise ValueError(
                 msg,
             )
 
-    def create_key_with_password(self, password: str) -> bytes:
         if not password:
             return None
 
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA1(),  # noqa: S303
-            length=16,
-            salt=self.salt,
-            iterations=self.iterations,
-            backend=default_backend(),
-        )
-        key = kdf.derive(password.encode("utf-8"))
-
-        cipher = Cipher(algorithms.AES(key), modes.CBC(self.iv), backend=default_backend())
+        key = cls._create_key(password, salt, iterations)
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
         decryptor = cipher.decryptor()
-
-        decrypted = decryptor.update(self.data) + decryptor.finalize()
+        decrypted = decryptor.update(encrypted_data) + decryptor.finalize()
 
         # The last 32 bytes of the block should be equal to the SHA256 of the first 32 bytes
         hash_val = hashlib.sha256(decrypted[:32]).digest()
         if hash_val != decrypted[32:64]:
             return None
 
-        return key
+        return cls(key)
+
+    @classmethod
+    def from_password(cls, password: str):
+        salt = urandom(16)
+        iv = urandom(16)
+        iterations = 100000
+        key = cls._create_key(password, salt, iterations)
+
+        verifier_payload = urandom(32)
+        # The last 32 bytes of the block should be equal to the SHA256 of the first 32 bytes
+        hash_val = hashlib.sha256(verifier_payload).digest()
+        verifier_block = verifier_payload + hash_val
+
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+        encryptor = cipher.encryptor()
+        encrypted_verifier_block = encryptor.update(verifier_block) + encryptor.finalize()
+
+        verifier_data = struct.pack(
+            "<HH I 16s 16s 64s",
+            2,
+            1,
+            iterations,
+            salt,
+            iv,
+            encrypted_verifier_block,
+        )
+        return verifier_data, cls(key)
+
+    @staticmethod
+    def _create_key(password: str, salt: bytes, iterations: int) -> bytes:
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA1(),  # noqa: S303
+            length=16,
+            salt=salt,
+            iterations=iterations,
+            backend=default_backend(),
+        )
+        return kdf.derive(password.encode("utf-8"))
+
+    def decrypt_iwa(self, data: bytes) -> bytes:
+        # The first 16 bytes are the IV and the last 20 bytes are garbage
+        encrypted_length = len(data) - 36
+        if encrypted_length < 16 or encrypted_length % 16:
+            msg = "Data too short to be a valid encrypted IWA file"
+            raise ValueError(msg)
+
+        iv = data[:16]
+        encrypted_bytes = data[16:-20]
+
+        cipher = Cipher(algorithms.AES(self._key), modes.CBC(iv), backend=default_backend())
+        decryptor = cipher.decryptor()
+        decrypted_padded = decryptor.update(encrypted_bytes) + decryptor.finalize()
+
+        unpadder = padding.PKCS7(128).unpadder()
+        try:
+            decrypted = unpadder.update(decrypted_padded) + unpadder.finalize()
+        except ValueError as e:
+            msg = "PKCS7 unpadding failed. Key might be correct but payload is corrupted."
+            raise ValueError(msg) from e
+
+        if len(decrypted) < 16:
+            msg = "Decrypted data is too short to discard the 16-byte header"
+            raise ValueError(msg)
+
+        return decrypted[16:]
+
+    def encrypt_iwa(self, data: bytes) -> bytes:
+        iv = urandom(16)
+        # 16 random bytes are placed at the head of the unencrypted payload
+        header = urandom(16)
+        # 20 bytes of garbage appended at the tail after encryption
+        garbage = urandom(20)
+
+        padder = padding.PKCS7(128).padder()
+        padded_data = padder.update(header + data) + padder.finalize()
+
+        cipher = Cipher(algorithms.AES(self._key), modes.CBC(iv), backend=default_backend())
+        encryptor = cipher.encryptor()
+        encrypted_bytes = encryptor.update(padded_data) + encryptor.finalize()
+
+        return iv + encrypted_bytes + garbage
 
 
 class IWork:
@@ -171,12 +246,14 @@ class IWork:
         else:
             self._is_package = False
             self._zipf = self._open_zipfile(filepath)
+        self.is_encrypted = False
 
         doc_version = self.document_version
         if not self._handler.allowed_version(doc_version):
             warn(f"unsupported version '{doc_version}'", RuntimeWarning, stacklevel=2)
 
         if filepath.is_dir():
+            self._read_package_encryption(self._filepath)
             self._read_objects_from_package(self._filepath)
         else:
             self._read_objects_from_zipfile(self._zipf)
@@ -187,12 +264,14 @@ class IWork:
         file_store: dict[str, object],
         package: bool = False,
         password: str | None = None,
+        hint: str = "No hint",
     ) -> None:
-        key = None
+        file_store = file_store.copy()
+        crypto = None
         if password is not None:
-            verifier_data, key = self._generate_verifier_and_key(password)
+            verifier_data, crypto = IWorkCrypto.from_password(password)
             file_store[".iwpv2"] = verifier_data
-            file_store[".iwph"] = b"No hints"
+            file_store[".iwph"] = hint.encode("utf-8")
 
         if package:
             if filepath.is_dir():
@@ -215,8 +294,8 @@ class IWork:
             zipf = ZipFile(filepath / "Index.zip", "w")
             for blob_path, blob in file_store.items():
                 if isinstance(blob, IWAFile):
-                    if key:
-                        zipf.writestr(blob_path, self._encrypt_using_iwa_key(blob.to_buffer(), key))
+                    if crypto:
+                        zipf.writestr(blob_path, crypto.encrypt_iwa(blob.to_buffer()))
                     else:
                         zipf.writestr(blob_path, blob.to_buffer())
                 else:
@@ -232,11 +311,8 @@ class IWork:
 
             for filepath_in_zip, blob in file_store.items():
                 if isinstance(blob, IWAFile):
-                    if key:
-                        zipf.writestr(
-                            filepath_in_zip,
-                            self._encrypt_using_iwa_key(blob.to_buffer(), key),
-                        )
+                    if crypto:
+                        zipf.writestr(filepath_in_zip, crypto.encrypt_iwa(blob.to_buffer()))
                     else:
                         zipf.writestr(filepath_in_zip, blob.to_buffer())
                 else:
@@ -266,36 +342,58 @@ class IWork:
             elif sub_filepath.name.lower() == "index.zip":
                 zipf = self._open_zipfile(sub_filepath)
                 self._read_objects_from_zipfile(zipf)
+            elif sub_filepath.name in (".iwph", ".iwpv2"):
+                continue
             else:
                 with sub_filepath.open(mode="rb") as fh:
                     blob = fh.read()
                     package_filename = re.sub(r".*\.numbers/*", "", str(sub_filepath))
                     self._store_blob(package_filename, blob)
 
+    def _read_package_encryption(self, filepath: Path) -> None:
+        hint_filename = filepath / ".iwph"
+        verifier_filename = filepath / ".iwpv2"
+        if not hint_filename.exists() and not verifier_filename.exists():
+            return
+        if not hint_filename.is_file() or not verifier_filename.is_file():
+            msg = "invalid Numbers document (missing encryption files)"
+            raise FileError(msg)
+        self._initialize_encryption(
+            hint_filename.read_bytes().decode(),
+            verifier_filename.read_bytes(),
+        )
+
+    def _initialize_encryption(self, hint: str, verifier_data: bytes) -> None:
+        self.is_encrypted = True
+        try:
+            self._crypto = IWorkCrypto.from_password_verifier(verifier_data, self._password)
+        except ValueError as e:
+            msg = "Error initializing encryption verifier"
+            raise FileError(msg) from e
+
+        if not self._crypto:
+            msg = f"Invalid password. Hint is '{hint}'"
+            raise FileError(msg)
+
     def _read_objects_from_zipfile(self, zipf) -> None:
         try:
-            _ = zipf.getinfo(".iwph")
-        except KeyError:
-            self.is_encrypted = False
-        else:
-            self.is_encrypted = True
             hint = zipf.read(".iwph").decode()
-            verifier_data = zipf.read(".iwpv2")
+        except KeyError:
+            pass
+        else:
             try:
-                verifier = IWPasswordVerifier(verifier_data)
-            except ValueError as e:
-                msg = "Error initializing encryption verifier"
+                verifier_data = zipf.read(".iwpv2")
+            except KeyError as e:
+                msg = "invalid Numbers document (missing encryption files)"
                 raise FileError(msg) from e
-
-            self._key = verifier.create_key_with_password(self._password)
-            if not self._key:
-                msg = f"Invalid password. Hint is '{hint}'"
-                raise FileError(msg)
+            self._initialize_encryption(hint, verifier_data)
 
         for filename in zipf.namelist():
+            if filename in (".iwph", ".iwpv2"):
+                continue
             blob = zipf.read(filename)
             if self.is_encrypted and filename.endswith(".iwa"):
-                blob = self._decrypt_using_iwa_key(blob, self._key)
+                blob = self._crypto.decrypt_iwa(blob)
 
             if filename.lower().endswith("index.zip"):
                 index_data = BytesIO(blob)
@@ -327,82 +425,3 @@ class IWork:
         else:
             debug("store blob: filename=%s", filename)
             self._handler.store_file(filename, blob)
-
-    def _decrypt_using_iwa_key(self, data: bytes, key: bytes) -> bytes:
-        # The first 16 bytes are the IV and the last 20 bytes are garbage
-        if len(data) < 36:
-            msg = "Data too short to be a valid encrypted IWA file"
-            raise ValueError(msg)
-
-        iv = data[:16]
-        encrypted_bytes = data[16:-20]
-
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-        decryptor = cipher.decryptor()
-
-        decrypted_padded = decryptor.update(encrypted_bytes) + decryptor.finalize()
-
-        unpadder = padding.PKCS7(128).unpadder()
-        try:
-            decrypted = unpadder.update(decrypted_padded) + unpadder.finalize()
-        except ValueError as e:
-            msg = "PKCS7 unpadding failed. Key might be correct but payload is corrupted."
-            raise ValueError(msg) from e
-
-        if len(decrypted) < 16:
-            msg = "Decrypted data is too short to discard the 16-byte header"
-            raise ValueError(msg)
-
-        return decrypted[16:]
-
-    def _generate_verifier_and_key(self, password: str) -> tuple[bytes, bytes]:
-        salt = urandom(16)
-        iv = urandom(16)
-        iterations = 100000
-
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA1(),  # noqa: S303
-            length=16,
-            salt=salt,
-            iterations=iterations,
-            backend=default_backend(),
-        )
-        key = kdf.derive(password.encode("utf-8"))
-
-        verifier_payload = urandom(32)
-        # The last 32 bytes of the block should be equal to the SHA256 of the first 32 bytes
-        hash_val = hashlib.sha256(verifier_payload).digest()
-        decrypted_verifier_block = verifier_payload + hash_val
-
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-        encryptor = cipher.encryptor()
-        encrypted_verifier_block = encryptor.update(decrypted_verifier_block) + encryptor.finalize()
-
-        verifier_data = struct.pack(
-            "<HH I 16s 16s 64s",
-            2,
-            1,
-            iterations,
-            salt,
-            iv,
-            encrypted_verifier_block,
-        )
-        return verifier_data, key
-
-    def _encrypt_using_iwa_key(self, data: bytes, key: bytes) -> bytes:
-        iv = urandom(16)
-        # 16 random bytes are placed at the head of the unencrypted payload
-        header = urandom(16)
-        # 20 bytes of garbage appended at the tail after encryption
-        garbage = urandom(20)
-
-        # Apply PKCS7 padding to the merged header and snappy stream prior to encryption
-        padder = padding.PKCS7(128).padder()
-        padded_data = padder.update(header + data) + padder.finalize()
-
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-        encryptor = cipher.encryptor()
-        encrypted_bytes = encryptor.update(padded_data) + encryptor.finalize()
-
-        # The final chunk combines the IV, cipher bytes, and the 20 bytes of garbage
-        return iv + encrypted_bytes + garbage
