@@ -59,6 +59,31 @@ def test_unpack_file(script_runner, tmp_path):
     assert "ZZZ_ROW_3" in strings
 
 
+def test_unpack_encrypted_file(script_runner, tmp_path):
+    output_dir = tmp_path / "encrypted"
+    ret = script_runner.run(
+        [
+            "unpack-numbers",
+            "--password",
+            "s3cr3t",
+            "--output",
+            str(output_dir),
+            "tests/data/encrypted.numbers",
+        ],
+        print_result=False,
+    )
+    assert ret.success
+    assert ret.stdout == ""
+    assert ret.stderr == ""
+
+    with open(str(output_dir / "Index/Tables/DataList-904541.json")) as f:
+        data = json.load(f)
+    strings = [
+        entry["string"] for entry in data["chunks"][0]["archives"][0]["objects"][0]["entries"]
+    ]
+    assert "Decryption" in strings
+
+
 def test_unpack_dir(script_runner, tmp_path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
