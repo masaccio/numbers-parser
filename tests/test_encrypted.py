@@ -1,4 +1,6 @@
 import struct
+from io import BytesIO
+from zipfile import ZipFile
 
 import pytest
 from cryptography.hazmat.backends import default_backend
@@ -6,7 +8,7 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from numbers_parser import RGB, Document, FileError, FileFormatError
-from numbers_parser.iwork import IWorkCrypto
+from numbers_parser.iwork import IWork, IWorkCrypto
 
 
 def test_encrypted_read():
@@ -32,6 +34,30 @@ def test_encrypted_non_latin_password():
 def test_encrypted_missing_verifier():
     with pytest.raises(FileFormatError, match=r"invalid Numbers document \(missing files\)"):
         Document("tests/data/encrypted-broken.numbers", password="s3cr3t")  # noqa: S106
+
+
+def test_package_encryption_missing_verifier(tmp_path):
+    (tmp_path / ".iwph").write_bytes(b"No hint")
+
+    with pytest.raises(FileError, match=r"invalid Numbers document \(missing encryption files\)"):
+        IWork()._read_package_encryption(tmp_path)
+
+
+def test_encryption_verifier_initialization_error():
+    with pytest.raises(FileError, match="Error initializing encryption verifier"):
+        work = IWork()
+        work._password = "s3cr3t"  # noqa: S106
+        work._initialize_encryption("No hint", b"invalid")
+
+
+def test_zip_encryption_missing_verifier():
+    archive = BytesIO()
+    with ZipFile(archive, "w") as zipf:
+        zipf.writestr(".iwph", b"No hint")
+    archive.seek(0)
+
+    with pytest.raises(FileError, match=r"invalid Numbers document \(missing encryption files\)"):
+        IWork()._read_objects_from_zipfile(ZipFile(archive))
 
 
 def test_encrypted_save(configurable_save_file):
