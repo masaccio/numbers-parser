@@ -44,9 +44,9 @@ def test_package_encryption_missing_verifier(tmp_path):
 
 
 def test_encryption_verifier_initialization_error():
-    with pytest.raises(FileError, match="Error initializing encryption verifier"):
+    with pytest.raises(FileError, match="Error initializing encryption verifier"):  # noqa: PT012
         work = IWork()
-        work._password = "s3cr3t"  # noqa: S106
+        work._password = "s3cr3t"  # noqa: S105
         work._initialize_encryption("No hint", b"invalid")
 
 
