@@ -5,7 +5,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-from numbers_parser import RGB, Document, FileError
+from numbers_parser import RGB, Document, FileError, FileFormatError
 from numbers_parser.iwork import IWorkCrypto
 
 
@@ -27,6 +27,11 @@ def test_encrypted_non_latin_password():
     doc = Document("tests/data/encrypted-non-latin.numbers", password="秘密")  # noqa: S106
 
     assert doc.sheets[0].tables[0].cell(0, 0).value == "Decryption"
+
+
+def test_encrypted_missing_verifier():
+    with pytest.raises(FileFormatError, match=r"invalid Numbers document \(missing files\)"):
+        Document("tests/data/encrypted-broken.numbers", password="s3cr3t")  # noqa: S106
 
 
 def test_encrypted_save(configurable_save_file):
