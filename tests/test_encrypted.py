@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from numbers_parser import RGB, Document, FileError
-from numbers_parser.iwork import IWork, IWPasswordVerifier
+from numbers_parser.iwork import IWorkCrypto
 
 
 def test_encrypted_read():
@@ -23,6 +23,12 @@ def test_encrypted_read():
     assert "Invalid password. Hint is 's3cr3t'" in str(e)
 
 
+def test_encrypted_non_latin_password():
+    doc = Document("tests/data/encrypted-non-latin.numbers", password="秘密")  # noqa: S106
+
+    assert doc.sheets[0].tables[0].cell(0, 0).value == "Decryption"
+
+
 def test_encrypted_save(configurable_save_file):
     doc = Document("tests/data/encrypted.numbers", password="s3cr3t")  # noqa: S106
     table = doc.sheets[0].tables[0]
@@ -33,63 +39,83 @@ def test_encrypted_save(configurable_save_file):
     new_table = new_doc.sheets[0].tables[0]
     assert new_table.cell(0, 0).value == "Encryption"
 
+    with pytest.raises(FileError, match=r"Invalid password\. Hint is 'No hint'"):
+        Document(configurable_save_file, password="invalid")  # noqa: S106
+
+
+def test_encrypted_save_with_hint(configurable_save_file):
+    doc = Document("tests/data/encrypted.numbers", password="s3cr3t")  # noqa: S106
+    doc.save(configurable_save_file, password="r3@llys3cr3t", hint="Remember me")  # noqa: S106
+
+    with pytest.raises(FileError, match=r"Invalid password\. Hint is 'Remember me'"):
+        Document(configurable_save_file, password="invalid")  # noqa: S106
+
+
+def test_encrypted_package_save(configurable_save_file):
+    doc = Document("tests/data/encrypted.numbers", password="s3cr3t")  # noqa: S106
+    doc.save(configurable_save_file, package=True, password="r3@llys3cr3t")  # noqa: S106
+
+    assert (configurable_save_file / ".iwph").is_file()
+    assert (configurable_save_file / ".iwpv2").is_file()
+    new_doc = Document(configurable_save_file, password="r3@llys3cr3t")  # noqa: S106
+    assert new_doc.sheets[0].tables[0].cell(0, 0).value == "Decryption"
+
 
 def test_password_verifier_rejects_invalid_formats():
-    with pytest.raises(ValueError, match="unrecognized format length"):
-        IWPasswordVerifier(b"too short")
+    with pytest.raises(ValueError, match="unrecognized verifier format length"):
+        IWorkCrypto.from_password_verifier(b"too short", "s3cr3t")
 
     verifier_data = struct.pack("<HH I 16s 16s 64s", 1, 1, 1, b"salt" * 4, b"iv" * 8, b"data" * 16)
     with pytest.raises(ValueError, match="Unsupported version or format"):
-        IWPasswordVerifier(verifier_data)
+        IWorkCrypto.from_password_verifier(verifier_data, "s3cr3t")
 
 
 def test_password_verifier_password_results():
-    work = IWork()
-    verifier_data, key = work._generate_verifier_and_key("s3cr3t")
-    verifier = IWPasswordVerifier(verifier_data)
+    verifier_data, _ = IWorkCrypto.from_password("s3cr3t")
 
-    assert verifier.create_key_with_password("") is None
-    assert verifier.create_key_with_password("wrong") is None
-    assert verifier.create_key_with_password("s3cr3t") == key
+    assert IWorkCrypto.from_password_verifier(verifier_data, "") is None
+    assert IWorkCrypto.from_password_verifier(verifier_data, "wrong") is None
+    assert IWorkCrypto.from_password_verifier(verifier_data, "s3cr3t") is not None
 
     tampered_data = bytearray(verifier_data)
     tampered_data[-1] ^= 1
-    assert IWPasswordVerifier(bytes(tampered_data)).create_key_with_password("s3cr3t") is None
+    assert IWorkCrypto.from_password_verifier(bytes(tampered_data), "s3cr3t") is None
 
 
 def test_iwa_encryption_round_trip():
-    work = IWork()
-    _, key = work._generate_verifier_and_key("s3cr3t")
+    _, crypto = IWorkCrypto.from_password("s3cr3t")
     data = b"encrypted IWA payload"
 
-    encrypted = work._encrypt_using_iwa_key(data, key)
+    encrypted = crypto.encrypt_iwa(data)
 
-    assert work._decrypt_using_iwa_key(encrypted, key) == data
+    assert crypto.decrypt_iwa(encrypted) == data
 
 
 def test_iwa_decryption_rejects_short_data():
     with pytest.raises(ValueError, match="Data too short"):
-        IWork()._decrypt_using_iwa_key(b"x" * 35, b"k" * 16)
+        IWorkCrypto(b"k" * 16).decrypt_iwa(b"x" * 35)
+
+    with pytest.raises(ValueError, match="Data too short"):
+        IWorkCrypto(b"k" * 16).decrypt_iwa(b"x" * 53)
 
 
 def test_iwa_decryption_rejects_invalid_padding():
-    work = IWork()
-    _, key = work._generate_verifier_and_key("s3cr3t")
-    encrypted = bytearray(work._encrypt_using_iwa_key(b"payload", key))
+    _, crypto = IWorkCrypto.from_password("s3cr3t")
+    encrypted = bytearray(crypto.encrypt_iwa(b"payload"))
     encrypted[-21] ^= 1
 
     with pytest.raises(ValueError, match="PKCS7 unpadding failed"):
-        work._decrypt_using_iwa_key(bytes(encrypted), key)
+        crypto.decrypt_iwa(bytes(encrypted))
 
 
 def test_iwa_decryption_rejects_short_decrypted_payload():
-    key = b"k" * 16
+    crypto = IWorkCrypto(b"k" * 16)
     iv = b"i" * 16
     padder = padding.PKCS7(128).padder()
     padded_data = padder.update(b"short") + padder.finalize()
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    cipher = Cipher(algorithms.AES(b"k" * 16), modes.CBC(iv), backend=default_backend())
     encryptor = cipher.encryptor()
     encrypted_payload = encryptor.update(padded_data) + encryptor.finalize()
 
     with pytest.raises(ValueError, match="too short to discard"):
-        IWork()._decrypt_using_iwa_key(iv + encrypted_payload + b"g" * 20, key)
+        crypto.decrypt_iwa(iv + encrypted_payload + b"g" * 20)
