@@ -129,6 +129,7 @@ class Document:
         filename: str | Path,
         package: bool = False,
         password: str | None = None,
+        hint: str = "No hint",
     ) -> None:
         """
         Save the document in the specified filename.
@@ -142,7 +143,9 @@ class Document:
             If ``True``, create a package format document (a folder) instead
             of a single file
         password: str, optional, default: None
-            If not `None`, the document is encrypted using the password. No hint is stored.
+            If not `None`, the document is encrypted using the password.
+        hint: str, optional, default: "No hint"
+            The hint stored with an encrypted document.
 
         Raises
         ------
@@ -162,7 +165,7 @@ class Document:
                     )
                 else:
                     self._model.recalculate_table_data(table._table_id, table._data)
-        self._model.save(Path(filename), package, password)
+        self._model.save(Path(filename), package, password, hint)
 
     def add_sheet(
         self,

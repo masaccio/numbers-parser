@@ -52,8 +52,8 @@ class ObjectStore(IWorkHandler):
         self._max_id = max(self._objects.keys())
         self._max_id = math.ceil(self._max_id / 1000000) * 1000000
 
-    def save(self, filepath: Path, package: bool, password: str | None) -> None:
-        self._iwork.save(filepath, self._file_store, package, password)
+    def save(self, filepath: Path, package: bool, password: str | None, hint: str) -> None:
+        self._iwork.save(filepath, self._file_store, package, password, hint)
 
     def store_object(self, filename: str, identifier: int, archive: object) -> None:
         self._objects[identifier] = archive
