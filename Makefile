@@ -48,7 +48,7 @@ DOCS_SOURCES = $(shell find docs -name \*.rst) \
 			   src/$(package_c)/*.py \
 			   docs/build/_static/custom.css
 
-docs: docs/build/index.html
+docs: docs/build/index.html docs/build/index.md
 
 docs/build/_static/custom.css: docs/custom.css
 	mkdir -p docs/build/_static
@@ -57,8 +57,8 @@ docs/build/_static/custom.css: docs/custom.css
 docs/build/index.html: $(DOCS_SOURCES)
 	@mkdir -p docs/build
 	uv sync --group docs
-	uv run sphinx-build -q -b html -t HtmlDocs docs docs/build
 	uv run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
+	uv run sphinx-build -q -b html -t HtmlDocs docs docs/build
 
 readme:
 	@mkdir -p docs/build

@@ -77,4 +77,8 @@ It supports and is tested against Python versions from 3.10 onwards. It is not c
 License
 =======
 
-All code in this repository is licensed under the :github:`MIT License <blob/master/LICENSE.rst>`.
+All code in this repository is licensed under the :github:`MIT License <blob/main/LICENSE.rst>`.
+
+.. only:: MarkdownDocs
+
+   .. include:: credits.rst
