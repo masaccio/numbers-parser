@@ -93,18 +93,19 @@ def test_encrypted_package_save(configurable_save_file):
 
 
 def test_password_verifier_rejects_invalid_formats():
-    with pytest.raises(ValueError, match="unrecognized verifier format length"):
+    with pytest.raises(FileFormatError, match="Unrecognized verifier format length"):
         IWorkCrypto.from_password_verifier(b"too short", "s3cr3t")
 
     verifier_data = struct.pack("<HH I 16s 16s 64s", 1, 1, 1, b"salt" * 4, b"iv" * 8, b"data" * 16)
-    with pytest.raises(ValueError, match="Unsupported version or format"):
+    with pytest.raises(FileFormatError, match="Unsupported version or format"):
         IWorkCrypto.from_password_verifier(verifier_data, "s3cr3t")
 
 
 def test_password_verifier_password_results():
     verifier_data, _ = IWorkCrypto.from_password("s3cr3t")
 
-    assert IWorkCrypto.from_password_verifier(verifier_data, "") is None
+    with pytest.raises(ValueError, match="No password provided to decrypt document"):
+        IWorkCrypto.from_password_verifier(verifier_data, "")
     assert IWorkCrypto.from_password_verifier(verifier_data, "wrong") is None
     assert IWorkCrypto.from_password_verifier(verifier_data, "s3cr3t") is not None
 
@@ -123,10 +124,10 @@ def test_iwa_encryption_round_trip():
 
 
 def test_iwa_decryption_rejects_short_data():
-    with pytest.raises(ValueError, match="Data too short"):
+    with pytest.raises(FileFormatError, match="Data too short"):
         IWorkCrypto(b"k" * 16).decrypt_iwa(b"x" * 35)
 
-    with pytest.raises(ValueError, match="Data too short"):
+    with pytest.raises(FileFormatError, match="Data too short"):
         IWorkCrypto(b"k" * 16).decrypt_iwa(b"x" * 53)
 
 
@@ -135,7 +136,7 @@ def test_iwa_decryption_rejects_invalid_padding():
     encrypted = bytearray(crypto.encrypt_iwa(b"payload"))
     encrypted[-21] ^= 1
 
-    with pytest.raises(ValueError, match="PKCS7 unpadding failed"):
+    with pytest.raises(FileFormatError, match="PKCS7 unpadding failed"):
         crypto.decrypt_iwa(bytes(encrypted))
 
 
@@ -148,5 +149,5 @@ def test_iwa_decryption_rejects_short_decrypted_payload():
     encryptor = cipher.encryptor()
     encrypted_payload = encryptor.update(padded_data) + encryptor.finalize()
 
-    with pytest.raises(ValueError, match="too short to discard"):
+    with pytest.raises(FileFormatError, match="too short to discard"):
         crypto.decrypt_iwa(iv + encrypted_payload + b"g" * 20)

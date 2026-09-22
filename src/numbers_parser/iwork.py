@@ -47,11 +47,15 @@ class IWorkCrypto:
 
     @classmethod
     def from_password_verifier(cls, data: bytes, password: str | None):
-        if len(data) != 104:
-            msg = f"IWorkCrypto: unrecognized verifier format length ({len(data)} bytes)"
+        if not password:
+            msg = "No password provided to decrypt document"
             raise ValueError(msg)
+            return None
 
-        # Unpack the 104-byte packed struct as little-endian
+        if len(data) != 104:
+            msg = f"Unrecognized verifier format length ({len(data)} bytes)"
+            raise FileFormatError(msg)
+
         version, format_version, iterations, salt, iv, encrypted_data = struct.unpack(
             "<HH I 16s 16s 64s",
             data,
@@ -59,12 +63,7 @@ class IWorkCrypto:
 
         if version != 2 or format_version != 1:
             msg = f"Unsupported version or format: {version}, {format_version}"
-            raise ValueError(
-                msg,
-            )
-
-        if not password:
-            return None
+            raise FileFormatError(msg)
 
         key = cls._create_key(password, salt, iterations)
         cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
@@ -121,7 +120,7 @@ class IWorkCrypto:
         encrypted_length = len(data) - 36
         if encrypted_length < 16 or encrypted_length % 16:
             msg = "Data too short to be a valid encrypted IWA file"
-            raise ValueError(msg)
+            raise FileFormatError(msg)
 
         iv = data[:16]
         encrypted_bytes = data[16:-20]
@@ -135,11 +134,11 @@ class IWorkCrypto:
             decrypted = unpadder.update(decrypted_padded) + unpadder.finalize()
         except ValueError as e:
             msg = "PKCS7 unpadding failed. Key might be correct but payload is corrupted."
-            raise ValueError(msg) from e
+            raise FileFormatError(msg) from e
 
         if len(decrypted) < 16:
             msg = "Decrypted data is too short to discard the 16-byte header"
-            raise ValueError(msg)
+            raise FileFormatError(msg)
 
         return decrypted[16:]
 
@@ -367,7 +366,7 @@ class IWork:
         self.is_encrypted = True
         try:
             self._crypto = IWorkCrypto.from_password_verifier(verifier_data, self._password)
-        except ValueError as e:
+        except FileFormatError as e:
             msg = "Error initializing encryption verifier"
             raise FileError(msg) from e
 
