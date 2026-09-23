@@ -12,7 +12,6 @@ from numbers_parser import (
     EmptyCell,
     ErrorCell,
     Style,
-    UnsupportedError,
     UnsupportedWarning,
     xl_rowcol_to_cell,
 )
@@ -571,20 +570,6 @@ def test_issue_90(configurable_save_file):
     doc.save(configurable_save_file)
     doc = Document(configurable_save_file)
     assert doc.default_table.cell(0, 0).formatted_value == "£1,769,900"
-
-
-def test_issue_93(script_runner):
-    filename = "tests/data/test-issue-93.numbers"
-    with pytest.raises(UnsupportedError) as e:
-        _ = Document(filename)
-    assert str(e.value) == f"{filename}: encrypted documents are not supported"
-
-    ret = script_runner.run(
-        ["cat-numbers", filename],
-        print_result=False,
-    )
-    assert not ret.success
-    assert ret.stderr == f"{filename}: encrypted documents are not supported\n"
 
 
 def test_issue_96():

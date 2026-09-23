@@ -214,10 +214,10 @@ class _NumbersModel(Cacheable):
     Not to be used in application code.
     """
 
-    def __init__(self, filepath: Path) -> None:
+    def __init__(self, filepath: Path, password: str | None) -> None:
         if filepath is None:
             filepath = Path(DEFAULT_DOCUMENT)
-        self.objects = ObjectStore(filepath)
+        self.objects = ObjectStore(filepath, password)
         self._merge_cells = defaultdict(MergeCells)
         self._row_heights = {}
         self._col_widths = {}
@@ -239,8 +239,8 @@ class _NumbersModel(Cacheable):
         self.missing_fonts = {}
         self.calculate_table_uuid_map()
 
-    def save(self, filepath: Path, package: bool) -> None:
-        self.objects.save(filepath, package)
+    def save(self, filepath: Path, package: bool, password: str, hint: str) -> None:
+        self.objects.save(filepath, package, password, hint)
 
     def find_refs(self, ref: str) -> list:
         return self.objects.find_refs(ref)

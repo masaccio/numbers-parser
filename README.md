@@ -41,8 +41,14 @@ Reading documents:
 >>> rows = tables[0].rows()
 ```
 
-Sheets and tables are iterables that can be indexed using either an
-integer index or using the name of the sheet/table:
+Encrypted documents are also supported for reading:
+
+```python
+>>> from numbers_parser import Document
+>>> doc = Document("mydoc.numbers", password="s3cr3t")
+```
+
+Sheets and tables are iterables that can be indexed using either an integer index or using the name of the sheet/table:
 
 ```python
 >>> doc.sheets[0].name
@@ -55,9 +61,7 @@ integer index or using the name of the sheet/table:
 'Table 1'
 ```
 
-`Table` objects have a `rows` method which contains a nested list
-with an entry for each row of the table. Each row is itself a list of
-the column values.
+`Table` objects have a `rows` method which contains a nested list with an entry for each row of the table. Each row is itself a list of the column values.
 
 ```python
 >>> data = sheets["Sheet 1"].tables["Table 1"].rows()
@@ -71,9 +75,7 @@ the column values.
 
 ### Cell Data
 
-Cells are objects with a common base class of `Cell`. All cell types
-have a property `value` which returns the contents of the cell as a
-python datatype. Available cell types are:
+Cells are objects with a common base class of `Cell`. All cell types have a property `value` which returns the contents of the cell as a python datatype. Available cell types are:
 
 | Cell type    | value type           | Additional properties                                                                                  |
 |--------------|----------------------|--------------------------------------------------------------------------------------------------------|
@@ -130,6 +132,12 @@ table = tables[0]
 table.write(1, 1, "This is new text")
 table.write("B7", datetime(2020, 12, 25))
 doc.save("new-sheet.numbers")
+```
+
+Encrypted documents are not automatically re-saved with encryption and you must specify a password on save:
+
+```python
+doc.save("new-sheet.numbers", password="s3cr3t")
 ```
 
 Additional tables and worksheets can be added to a `Document` before saving using [Document.add_sheet()](https://masaccio.github.io/numbers-parser/api/document.html#numbers_parser.Document.add_sheet) and [Sheet.add_table()](https://masaccio.github.io/numbers-parser/api/sheet.html#numbers_parser.Sheet.add_table) respectively:
@@ -374,11 +382,20 @@ The following limitations are expected to always remain:
 
 - New sheets insert tables with formats copied from the first table in the previous sheet rather than default table formats
 - Due to a limitation in Python’s [ZipFile](https://docs.python.org/3/library/zipfile.html), Python versions older than 3.11 do not support image filenames with UTF-8 characters [Cell.add_style.bg_image()](https://masaccio.github.io/numbers-parser/api/sheet.html#numbers_parser.Style) returns `None` for such files and issues a `RuntimeWarning` (see [issue 69](https://github.com/masaccio/numbers-parser/issues/69) for details).
-- Password-encrypted documents cannot be opened. You must first re-save without a password to read (see [issue 88](https://github.com/masaccio/numbers-parser/issues/88) for details).  A UnsupportedError exception is raised when such documents are opened.
 - Due to changes in the format of Numbers documents, decoding of category groups (introduced in `numbers-parser` version 4.16) is supported only for documents created by Numbers 12.0 and later. No warnings are issued for earlier
   Numbers documents.
 - Only standard macOS fonts are not supported. If a document includes a non-standard font, numbers-parser will issue a UnsupportedWarning and default styles to Helvetica Neue. Reading font names from the system would add additional system-specific dependencies to the package and so this is not planned to changed.
 
 ## License
 
-All code in this repository is licensed under the [MIT License](https://github.com/masaccio/numbers-parser/blob/master/LICENSE.rst).
+All code in this repository is licensed under the [MIT License](https://github.com/masaccio/numbers-parser/blob/main/LICENSE.rst).
+
+### Credits
+
+`numbers-parser` was built by [Jon Connell](http://github.com/masaccio) but relies heavily on from [prior work](https://github.com/psobot/keynote-parser) by [Peter Sobot](https://petersobot.com) to read the IWA format archives used by Apple’s iWork family of applications, and to regenerate the mapping files required for Python. Both modules are derived from [previous work](https://github.com/obriensp/iWorkFileFormat/blob/master/Docs/index.md) by [Sean Patrick O’Brien](http://www.obriensp.com).
+
+Decoding the data structures inside Numbers files was helped greatly by [Stingray-Reader](https://github.com/slott56/Stingray-Reader) by [Steven Lott](https://github.com/slott56).
+
+Formula tests were adapted from JavaScript tests used in [fast-formula-parser](https://github.com/LesterLyu/fast-formula-parser).
+
+Decimal128 conversion to and from byte storage was adapted from work done by the [SheetsJS project](https://github.com/SheetJS/sheetjs). SheetJS also helped greatly with some of the steps required to successfully save a Numbers spreadsheet.

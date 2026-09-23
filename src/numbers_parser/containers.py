@@ -41,19 +41,19 @@ class ItemsList:
 
 
 class ObjectStore(IWorkHandler):
-    def __init__(self, filepath: Path) -> int:
+    def __init__(self, filepath: Path, password: str | None) -> int:
         self._objects = {}
         self._file_store = {}
         self._object_to_filename_map = {}
         self._dirty = {}
         self._iwork = IWork(handler=self)
-        self._iwork.open(filepath)
+        self._iwork.open(filepath, password)
         # TODO: why not just use the next available ID, i.e. without the offset?
         self._max_id = max(self._objects.keys())
         self._max_id = math.ceil(self._max_id / 1000000) * 1000000
 
-    def save(self, filepath: Path, package: bool) -> None:
-        self._iwork.save(filepath, self._file_store, package)
+    def save(self, filepath: Path, package: bool, password: str | None, hint: str) -> None:
+        self._iwork.save(filepath, self._file_store, package, password, hint)
 
     def store_object(self, filename: str, identifier: int, archive: object) -> None:
         self._objects[identifier] = archive

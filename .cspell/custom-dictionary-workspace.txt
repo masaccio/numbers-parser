@@ -21,6 +21,7 @@ datalists
 datas
 dateutil
 dayfirst
+decryptor
 docstrings
 dstr
 envlist
@@ -39,11 +40,13 @@ iwaf
 iwafile
 iwork
 iwph
+iwpv
 klass
 libsnappy
 liststyle
 lldb
 lldbutil
+llys
 Lucida
 makedirs
 multifile
@@ -54,6 +57,7 @@ Neue
 no cover
 nonspace
 numrows
+padder
 pathnames
 pathsource
 pbtype
@@ -90,7 +94,10 @@ TSCE
 TSWP
 uids
 Uncategorized
+unpadder
+unpadding
 upsell
+urandom
 urllib
 Varint
 veryclean

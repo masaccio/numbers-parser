@@ -61,6 +61,8 @@ class Document:
         Number of rows in the first table of a new document.
     num_cols: int, optional, default: 8
         Number of columns in the first table of a new document.
+    password: str, optional, default: None
+        Password for encrypted documents
 
     Raises
     ------
@@ -82,8 +84,9 @@ class Document:
         num_header_cols: int | None = 1,
         num_rows: int | None = DEFAULT_ROW_COUNT,
         num_cols: int | None = DEFAULT_COLUMN_COUNT,
+        password: str | None = None,
     ) -> None:
-        self._model = _NumbersModel(None if filename is None else Path(filename))
+        self._model = _NumbersModel(None if filename is None else Path(filename), password)
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
 
@@ -121,7 +124,13 @@ class Document:
         """
         return self._model.custom_formats
 
-    def save(self, filename: str | Path, package: bool = False) -> None:
+    def save(
+        self,
+        filename: str | Path,
+        package: bool = False,
+        password: str | None = None,
+        hint: str = "No hint",
+    ) -> None:
         """
         Save the document in the specified filename.
 
@@ -133,6 +142,10 @@ class Document:
         package: bool, optional, default: False
             If ``True``, create a package format document (a folder) instead
             of a single file
+        password: str, optional, default: None
+            If not `None`, the document is encrypted using the password.
+        hint: str, optional, default: "No hint"
+            The hint stored with an encrypted document.
 
         Raises
         ------
@@ -152,7 +165,7 @@ class Document:
                     )
                 else:
                     self._model.recalculate_table_data(table._table_id, table._data)
-        self._model.save(Path(filename), package)
+        self._model.save(Path(filename), package, password, hint)
 
     def add_sheet(
         self,
