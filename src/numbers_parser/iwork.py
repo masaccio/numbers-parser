@@ -50,7 +50,6 @@ class IWorkCrypto:
         if not password:
             msg = "No password provided to decrypt document"
             raise ValueError(msg)
-            return None
 
         if len(data) != 104:
             msg = f"Unrecognized verifier format length ({len(data)} bytes)"
@@ -172,6 +171,16 @@ class IWork:
 
         """
         self._handler = handler
+        self._crypto = None
+        self._filepath = None
+        self._password = None
+        self._zipf = None
+        self._is_package = False
+
+    @property
+    def is_encrypted(self) -> bool:
+        """Return whether a valid crypto context is active for this document."""
+        return self._crypto is not None
 
     @property
     def document_version(self) -> str:
@@ -245,7 +254,7 @@ class IWork:
         else:
             self._is_package = False
             self._zipf = self._open_zipfile(filepath)
-        self.is_encrypted = False
+        self._crypto = None
 
         doc_version = self.document_version
         if not self._handler.allowed_version(doc_version):
@@ -293,10 +302,7 @@ class IWork:
             zipf = ZipFile(filepath / "Index.zip", "w")
             for blob_path, blob in file_store.items():
                 if isinstance(blob, IWAFile):
-                    if crypto:
-                        zipf.writestr(blob_path, crypto.encrypt_iwa(blob.to_buffer()))
-                    else:
-                        zipf.writestr(blob_path, blob.to_buffer())
+                    zipf.writestr(blob_path, self._encode_blob(blob, crypto))
                 else:
                     sub_filepath = filepath / blob_path
                     if not sub_filepath.parent.is_dir():
@@ -309,14 +315,15 @@ class IWork:
             zipf = ZipFile(filepath, "w")
 
             for filepath_in_zip, blob in file_store.items():
-                if isinstance(blob, IWAFile):
-                    if crypto:
-                        zipf.writestr(filepath_in_zip, crypto.encrypt_iwa(blob.to_buffer()))
-                    else:
-                        zipf.writestr(filepath_in_zip, blob.to_buffer())
-                else:
-                    zipf.writestr(filepath_in_zip, blob)
+                zipf.writestr(filepath_in_zip, self._encode_blob(blob, crypto))
             zipf.close()
+
+    def _encode_blob(self, blob: object, crypto: bool):
+        if isinstance(blob, IWAFile):
+            if crypto:
+                return crypto.encrypt_iwa(blob.to_buffer())
+            return blob.to_buffer()
+        return blob
 
     def _open_zipfile(self, filepath: Path):
         """Open Zip file with the correct filename encoding supported by current python."""
@@ -363,16 +370,17 @@ class IWork:
         )
 
     def _initialize_encryption(self, hint: str, verifier_data: bytes) -> None:
-        self.is_encrypted = True
         try:
-            self._crypto = IWorkCrypto.from_password_verifier(verifier_data, self._password)
+            crypto = IWorkCrypto.from_password_verifier(verifier_data, self._password)
         except FileFormatError as e:
             msg = "Error initializing encryption verifier"
             raise FileError(msg) from e
 
-        if not self._crypto:
+        if crypto is None:
             msg = f"Invalid password. Hint is '{hint}'"
             raise FileError(msg)
+
+        self._crypto = crypto
 
     def _read_objects_from_zipfile(self, zipf) -> None:
         try:
@@ -394,7 +402,7 @@ class IWork:
             if self.is_encrypted and filename.endswith(".iwa"):
                 blob = self._crypto.decrypt_iwa(blob)
 
-            if filename.lower().endswith("index.zip"):
+            if filename.lower().endswith(".zip"):
                 index_data = BytesIO(blob)
                 self._read_objects_from_zipfile(self._open_zipfile(index_data))
             else:

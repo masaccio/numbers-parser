@@ -50,6 +50,15 @@ def test_encryption_verifier_initialization_error():
         work._initialize_encryption("No hint", b"invalid")
 
 
+def test_encryption_state_tracks_crypto_instance():
+    work = IWork()
+    assert not work.is_encrypted
+
+    _, crypto = IWorkCrypto.from_password("s3cr3t")
+    work._crypto = crypto
+    assert work.is_encrypted
+
+
 def test_zip_encryption_missing_verifier():
     archive = BytesIO()
     with ZipFile(archive, "w") as zipf:
