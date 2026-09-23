@@ -5,8 +5,9 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
-    jobs:
-      job1:
+concurrency:
+  group: build-readme-main
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -16,30 +17,33 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v7
-  
+
       - name: Install uv and set the python version
         uses: astral-sh/setup-uv@v7
         with:
           python-version: '3.12'
- 
+
       - name: Install libsnappy
         run: sudo apt-get -y install libsnappy-dev
 
       - name: Install the project
         run: uv sync --locked --all-extras --dev --group docs
-  
+
       - name: Built README with Sphinx
         run: uv run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
 
-      - name: Check in new README
+      - name: Commit README changes
         run: |
           cp docs/build/index.md README.md
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add -A
-          git diff-index --quiet HEAD || git commit -m 'Updating README' README.md
+          git add README.md
+          git diff --cached --quiet || git commit -m "Updating README"
+
+      - name: Rebase on latest main
+        run: |
+          git fetch origin main
+          git rebase origin/main
 
       - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          force_with_lease: true
+        run: git push --force-with-lease origin HEAD:main
