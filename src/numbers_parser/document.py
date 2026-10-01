@@ -936,8 +936,14 @@ class Table(Cacheable):
             (row, col) = args[0:2]
             values = args[2:]
 
+        if row < 0:
+            msg = f"row {row} out of range"
+            raise IndexError(msg)
         if row >= MAX_ROW_COUNT:
             msg = f"{row} exceeds maximum row {MAX_ROW_COUNT - 1}"
+            raise IndexError(msg)
+        if col < 0:
+            msg = f"column {col} out of range"
             raise IndexError(msg)
         if col >= MAX_COL_COUNT:
             msg = f"{col} exceeds maximum column {MAX_COL_COUNT - 1}"

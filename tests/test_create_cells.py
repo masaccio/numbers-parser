@@ -55,6 +55,17 @@ def test_edit_cell_values(configurable_save_file):
     assert table.cell(5, 5).value == "7890"
 
 
+def test_negative_cell_coordinates_are_rejected():
+    doc = Document()
+    table = doc.default_table
+
+    with pytest.raises(IndexError, match="row -1 out of range"):
+        table.write(-1, 0, "negative row")
+
+    with pytest.raises(IndexError, match="column -1 out of range"):
+        table.write(0, -1, "negative column")
+
+
 def test_large_table(configurable_save_file):
     doc = Document()
     sheets = doc.sheets
