@@ -36,6 +36,9 @@ from numbers_parser.xrefs import xl_cell_to_rowcol, xl_range
 
 __all__ = ["Document", "Sheet", "Table"]
 
+HORIZONTAL_BORDER_SIDES = ("top", "bottom")
+VERTICAL_BORDER_SIDES = ("left", "right")
+
 
 class Document:
     """
@@ -1415,6 +1418,9 @@ class Table(Cacheable):
         TypeError:
             If an invalid number of arguments is passed or if the types of the arguments
             are invalid.
+        IndexError:
+            If the length of the stroke extends the border beyond the last row or column
+            of the table.
 
         Warns
         -----
@@ -1465,17 +1471,25 @@ class Table(Cacheable):
             )
             return
 
-        self._model.extract_strokes(self._table_id)
-
-        if side in ["top", "bottom"]:
-            for border_col_num in range(col, col + length):
-                self._model.set_cell_border(self._table_id, row, border_col_num, side, border_value)
-        elif side in ["left", "right"]:
-            for border_row_num in range(row, row + length):
-                self._model.set_cell_border(self._table_id, border_row_num, col, side, border_value)
-        else:
+        if side not in (*HORIZONTAL_BORDER_SIDES, *VERTICAL_BORDER_SIDES):
             msg = "side must be a valid border segment"
             raise TypeError(msg)
+
+        if side in HORIZONTAL_BORDER_SIDES and col + length > self.num_cols:
+            msg = f"column {col + length - 1} out of range (table has {self.num_cols} columns)"
+            raise IndexError(msg)
+        if side in VERTICAL_BORDER_SIDES and row + length > self.num_rows:
+            msg = f"row {row + length - 1} out of range (table has {self.num_rows} rows)"
+            raise IndexError(msg)
+
+        self._model.extract_strokes(self._table_id)
+
+        if side in HORIZONTAL_BORDER_SIDES:
+            for border_col_num in range(col, col + length):
+                self._model.set_cell_border(self._table_id, row, border_col_num, side, border_value)
+        else:
+            for border_row_num in range(row, row + length):
+                self._model.set_cell_border(self._table_id, border_row_num, col, side, border_value)
 
     def set_cell_formatting(self, *args: str, **kwargs) -> None:
         r"""
