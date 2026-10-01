@@ -1405,15 +1405,13 @@ class Table(Cacheable):
             * **param2** (*int*): The column number (zero indexed).
             * **param3** (*str | List[str]*): Which side(s) of the cell to apply the border to.
             * **param4** (:py:class:`Border`): The border to add.
-            * **param5** (*int*, *optional*, default: 1): The length of the stroke to add. The
-              stroke must not extend beyond the last row or column of the table.
+            * **param5** (*int*, *optional*, default: 1): The length of the stroke to add.
 
         :Args (A1):
             * **param1** (*str*): A cell reference using Excel/Numbers-style A1 notation.
             * **param2** (*str | List[str]*): Which side(s) of the cell to apply the border to.
             * **param3** (:py:class:`Border`): The border to add.
-            * **param4** (*int*, *optional*, default: 1): The length of the stroke to add. The
-              stroke must not extend beyond the last row or column of the table.
+            * **param4** (*int*, *optional*, default: 1): The length of the stroke to add.
 
         Raises
         ------
