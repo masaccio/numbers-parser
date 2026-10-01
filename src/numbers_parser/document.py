@@ -1472,11 +1472,11 @@ class Table(Cacheable):
 
         if side in ["top", "bottom"]:
             if col + length > self.num_cols:
-                msg = f"column {col + length - 1} out of range"
+                msg = f"column {col + length - 1} out of range (table has {self.num_cols} columns)"
                 raise IndexError(msg)
         elif side in ["left", "right"]:
             if row + length > self.num_rows:
-                msg = f"row {row + length - 1} out of range"
+                msg = f"row {row + length - 1} out of range (table has {self.num_rows} rows)"
                 raise IndexError(msg)
         else:
             msg = "side must be a valid border segment"

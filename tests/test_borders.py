@@ -115,10 +115,12 @@ def test_exceptions():
     with pytest.raises(IndexError) as e:
         table.set_cell_border(0, 6, "bottom", Border(1.0, RGB(0, 0, 0), "solid"), 5)
     assert "column 10 out of range" in str(e)
+    assert f"table has {table.num_cols} columns" in str(e)
 
     with pytest.raises(IndexError) as e:
         table.set_cell_border(10, 0, "right", Border(1.0, RGB(0, 0, 0), "solid"), 5)
     assert "row 14 out of range" in str(e)
+    assert f"table has {table.num_rows} rows" in str(e)
 
 
 def run_border_tests(filename):
