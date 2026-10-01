@@ -1470,17 +1470,16 @@ class Table(Cacheable):
             )
             return
 
-        if side in ["top", "bottom"]:
-            if col + length > self.num_cols:
-                msg = f"column {col + length - 1} out of range (table has {self.num_cols} columns)"
-                raise IndexError(msg)
-        elif side in ["left", "right"]:
-            if row + length > self.num_rows:
-                msg = f"row {row + length - 1} out of range (table has {self.num_rows} rows)"
-                raise IndexError(msg)
-        else:
+        if side not in ["top", "bottom", "left", "right"]:
             msg = "side must be a valid border segment"
             raise TypeError(msg)
+
+        if side in ["top", "bottom"] and col + length > self.num_cols:
+            msg = f"column {col + length - 1} out of range (table has {self.num_cols} columns)"
+            raise IndexError(msg)
+        if side in ["left", "right"] and row + length > self.num_rows:
+            msg = f"row {row + length - 1} out of range (table has {self.num_rows} rows)"
+            raise IndexError(msg)
 
         self._model.extract_strokes(self._table_id)
 
