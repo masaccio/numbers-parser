@@ -202,7 +202,7 @@ class Document:
         if sheet_name is not None:
             if sheet_name in self._sheets:
                 msg = f"sheet '{sheet_name}' already exists"
-                raise IndexError(msg)
+                raise KeyError(msg)
         else:
             sheet_num = 1
             while f"sheet {sheet_num}" in self._sheets:
@@ -264,7 +264,7 @@ class Document:
         """
         if "name" in kwargs and kwargs["name"] is not None and kwargs["name"] in self._model.styles:
             msg = f"style '{kwargs['name']}' already exists"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         if "bg_image" in kwargs and kwargs["bg_image"] is not None:
             if not isinstance(kwargs["bg_image"], BackgroundImage):
@@ -333,7 +333,7 @@ class Document:
             and kwargs["name"] in self._model.custom_formats
         ):
             msg = f"format '{kwargs['name']}' already exists"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         if "type" in kwargs:
             format_type = kwargs["type"].upper()
@@ -458,7 +458,7 @@ class Sheet:
         if table_name is not None:
             if table_name in self._tables:
                 msg = f"table '{table_name}' already exists"
-                raise IndexError(msg)
+                raise KeyError(msg)
         else:
             table_num = 1
             while f"table {table_num}" in self._tables:
@@ -764,10 +764,10 @@ class Table(Cacheable):
 
         if row >= self.num_rows or row < 0:
             msg = f"row {row} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
         if col >= self.num_cols or col < 0:
             msg = f"column {col} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         self._model.calculate_table_categories(self._table_id)
         row_mapper = self._model._table_categories_row_mapper[self._table_id]
@@ -827,16 +827,16 @@ class Table(Cacheable):
 
         if min_row < 0:
             msg = f"row {min_row} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
         if max_row >= self.num_rows:
             msg = f"row {max_row} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
         if min_col < 0:
             msg = f"column {min_col} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
         if max_col >= self.num_cols:
             msg = f"column {max_col} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         rows = self.rows()
         self._model.calculate_table_categories(self._table_id)
@@ -904,16 +904,16 @@ class Table(Cacheable):
 
         if min_row < 0:
             msg = f"row {min_row} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
         if max_row >= self.num_rows:
             msg = f"row {max_row} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
         if min_col < 0:
             msg = f"column {min_col} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
         if max_col >= self.num_cols:
             msg = f"column {max_col} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         rows = self.rows()
         self._model.calculate_table_categories(self._table_id)
@@ -941,16 +941,16 @@ class Table(Cacheable):
 
         if row < 0:
             msg = f"row {row} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
         if row >= MAX_ROW_COUNT:
             msg = f"{row} exceeds maximum row {MAX_ROW_COUNT - 1}"
-            raise IndexError(msg)
+            raise KeyError(msg)
         if col < 0:
             msg = f"column {col} out of range"
-            raise IndexError(msg)
+            raise KeyError(msg)
         if col >= MAX_COL_COUNT:
             msg = f"{col} exceeds maximum column {MAX_COL_COUNT - 1}"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         for _ in range(self.num_rows, row + 1):
             self.add_row()
@@ -1048,7 +1048,7 @@ class Table(Cacheable):
         elif isinstance(style, str):
             if style not in self._model.styles:
                 msg = f"style '{style}' does not exist"
-                raise IndexError(msg)
+                raise KeyError(msg)
             self._data[row][col]._style = self._model.styles[style]
         else:
             msg = "style must be a Style object or style name"
@@ -1152,7 +1152,7 @@ class Table(Cacheable):
             raise ValueError(msg)
         if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
             msg = "Row number not in range for table"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         if start_row is None:
             start_row = self.num_rows
@@ -1222,7 +1222,7 @@ class Table(Cacheable):
             raise ValueError(msg)
         if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
             msg = "Column number not in range for table"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         if start_col is None:
             start_col = self.num_cols
@@ -1274,7 +1274,7 @@ class Table(Cacheable):
             raise ValueError(msg)
         if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
             msg = "Row number not in range for table"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         if start_row is not None:
             del self._data[start_row : start_row + num_rows]
@@ -1323,7 +1323,7 @@ class Table(Cacheable):
             raise ValueError(msg)
         if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
             msg = "Column number not in range for table"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         for row in range(self.num_rows):
             if start_col is not None:
@@ -1477,10 +1477,10 @@ class Table(Cacheable):
 
         if side in HORIZONTAL_BORDER_SIDES and col + length > self.num_cols:
             msg = f"column {col + length - 1} out of range (table has {self.num_cols} columns)"
-            raise IndexError(msg)
+            raise KeyError(msg)
         if side in VERTICAL_BORDER_SIDES and row + length > self.num_rows:
             msg = f"row {row + length - 1} out of range (table has {self.num_rows} rows)"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         self._model.extract_strokes(self._table_id)
 
@@ -1678,7 +1678,7 @@ class Table(Cacheable):
         elif isinstance(custom_format, str):
             if custom_format not in self._model.custom_formats:
                 msg = f"format '{custom_format}' does not exist"
-                raise IndexError(msg)
+                raise KeyError(msg)
             custom_format = self._model.custom_formats[custom_format]
         else:
             msg = "format must be a CustomFormatting object or format name"
@@ -1737,7 +1737,7 @@ class Table(Cacheable):
         elif format_type_name == "popup":
             if cell.value == "" and not formatting.allow_none:
                 msg = "none value not allowed for popup"
-                raise IndexError(msg)
+                raise KeyError(msg)
             if cell.value != "" and cell.value not in formatting.popup_values:
                 msg = f"current cell value '{cell.value}' does not match any popup values"
                 raise IndexError(

@@ -756,7 +756,7 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(0, 0, "custom", format=object())
     assert "format must be a CustomFormatting object or format name" in str(e)
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(KeyError) as e:
         table.set_cell_formatting(0, 0, "custom", format="invalid")
     assert "format 'invalid' does not exist" in str(e)
 
