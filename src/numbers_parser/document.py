@@ -1678,7 +1678,7 @@ class Table(Cacheable):
         elif isinstance(custom_format, str):
             if custom_format not in self._model.custom_formats:
                 msg = f"format '{custom_format}' does not exist"
-                raise IndexError(msg)
+                raise KeyError(msg)
             custom_format = self._model.custom_formats[custom_format]
         else:
             msg = "format must be a CustomFormatting object or format name"
