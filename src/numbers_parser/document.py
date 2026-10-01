@@ -1402,19 +1402,24 @@ class Table(Cacheable):
             * **param2** (*int*): The column number (zero indexed).
             * **param3** (*str | List[str]*): Which side(s) of the cell to apply the border to.
             * **param4** (:py:class:`Border`): The border to add.
-            * **param5** (*int*, *optional*, default: 1): The length of the stroke to add.
+            * **param5** (*int*, *optional*, default: 1): The length of the stroke to add. The
+              stroke must not extend beyond the last row or column of the table.
 
         :Args (A1):
             * **param1** (*str*): A cell reference using Excel/Numbers-style A1 notation.
             * **param2** (*str | List[str]*): Which side(s) of the cell to apply the border to.
             * **param3** (:py:class:`Border`): The border to add.
-            * **param4** (*int*, *optional*, default: 1): The length of the stroke to add.
+            * **param4** (*int*, *optional*, default: 1): The length of the stroke to add. The
+              stroke must not extend beyond the last row or column of the table.
 
         Raises
         ------
         TypeError:
             If an invalid number of arguments is passed or if the types of the arguments
             are invalid.
+        IndexError:
+            If the length of the stroke extends the border beyond the last row or column
+            of the table.
 
         Warns
         -----
@@ -1465,17 +1470,26 @@ class Table(Cacheable):
             )
             return
 
+        if side in ["top", "bottom"]:
+            if col + length > self.num_cols:
+                msg = f"column {col + length - 1} out of range"
+                raise IndexError(msg)
+        elif side in ["left", "right"]:
+            if row + length > self.num_rows:
+                msg = f"row {row + length - 1} out of range"
+                raise IndexError(msg)
+        else:
+            msg = "side must be a valid border segment"
+            raise TypeError(msg)
+
         self._model.extract_strokes(self._table_id)
 
         if side in ["top", "bottom"]:
             for border_col_num in range(col, col + length):
                 self._model.set_cell_border(self._table_id, row, border_col_num, side, border_value)
-        elif side in ["left", "right"]:
+        else:
             for border_row_num in range(row, row + length):
                 self._model.set_cell_border(self._table_id, border_row_num, col, side, border_value)
-        else:
-            msg = "side must be a valid border segment"
-            raise TypeError(msg)
 
     def set_cell_formatting(self, *args: str, **kwargs) -> None:
         r"""
