@@ -1470,20 +1470,22 @@ class Table(Cacheable):
             )
             return
 
-        if side not in ["top", "bottom", "left", "right"]:
+        horizontal_sides = ("top", "bottom")
+        vertical_sides = ("left", "right")
+        if side not in (*horizontal_sides, *vertical_sides):
             msg = "side must be a valid border segment"
             raise TypeError(msg)
 
-        if side in ["top", "bottom"] and col + length > self.num_cols:
+        if side in horizontal_sides and col + length > self.num_cols:
             msg = f"column {col + length - 1} out of range (table has {self.num_cols} columns)"
             raise IndexError(msg)
-        if side in ["left", "right"] and row + length > self.num_rows:
+        if side in vertical_sides and row + length > self.num_rows:
             msg = f"row {row + length - 1} out of range (table has {self.num_rows} rows)"
             raise IndexError(msg)
 
         self._model.extract_strokes(self._table_id)
 
-        if side in ["top", "bottom"]:
+        if side in horizontal_sides:
             for border_col_num in range(col, col + length):
                 self._model.set_cell_border(self._table_id, row, border_col_num, side, border_value)
         else:
