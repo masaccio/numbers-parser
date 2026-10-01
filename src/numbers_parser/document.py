@@ -764,10 +764,10 @@ class Table(Cacheable):
 
         if row >= self.num_rows or row < 0:
             msg = f"row {row} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
         if col >= self.num_cols or col < 0:
             msg = f"column {col} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
 
         self._model.calculate_table_categories(self._table_id)
         row_mapper = self._model._table_categories_row_mapper[self._table_id]
@@ -827,16 +827,16 @@ class Table(Cacheable):
 
         if min_row < 0:
             msg = f"row {min_row} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
         if max_row >= self.num_rows:
             msg = f"row {max_row} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
         if min_col < 0:
             msg = f"column {min_col} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
         if max_col >= self.num_cols:
             msg = f"column {max_col} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
 
         rows = self.rows()
         self._model.calculate_table_categories(self._table_id)
@@ -904,16 +904,16 @@ class Table(Cacheable):
 
         if min_row < 0:
             msg = f"row {min_row} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
         if max_row >= self.num_rows:
             msg = f"row {max_row} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
         if min_col < 0:
             msg = f"column {min_col} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
         if max_col >= self.num_cols:
             msg = f"column {max_col} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
 
         rows = self.rows()
         self._model.calculate_table_categories(self._table_id)
@@ -941,16 +941,16 @@ class Table(Cacheable):
 
         if row < 0:
             msg = f"row {row} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
         if row >= MAX_ROW_COUNT:
             msg = f"{row} exceeds maximum row {MAX_ROW_COUNT - 1}"
-            raise KeyError(msg)
+            raise IndexError(msg)
         if col < 0:
             msg = f"column {col} out of range"
-            raise KeyError(msg)
+            raise IndexError(msg)
         if col >= MAX_COL_COUNT:
             msg = f"{col} exceeds maximum column {MAX_COL_COUNT - 1}"
-            raise KeyError(msg)
+            raise IndexError(msg)
 
         for _ in range(self.num_rows, row + 1):
             self.add_row()
@@ -1152,7 +1152,7 @@ class Table(Cacheable):
             raise ValueError(msg)
         if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
             msg = "Row number not in range for table"
-            raise KeyError(msg)
+            raise IndexError(msg)
 
         if start_row is None:
             start_row = self.num_rows
@@ -1222,7 +1222,7 @@ class Table(Cacheable):
             raise ValueError(msg)
         if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
             msg = "Column number not in range for table"
-            raise KeyError(msg)
+            raise IndexError(msg)
 
         if start_col is None:
             start_col = self.num_cols
@@ -1274,7 +1274,7 @@ class Table(Cacheable):
             raise ValueError(msg)
         if start_row is not None and (start_row < 0 or start_row >= self.num_rows):
             msg = "Row number not in range for table"
-            raise KeyError(msg)
+            raise IndexError(msg)
 
         if start_row is not None:
             del self._data[start_row : start_row + num_rows]
@@ -1323,7 +1323,7 @@ class Table(Cacheable):
             raise ValueError(msg)
         if start_col is not None and (start_col < 0 or start_col >= self.num_cols):
             msg = "Column number not in range for table"
-            raise KeyError(msg)
+            raise IndexError(msg)
 
         for row in range(self.num_rows):
             if start_col is not None:
@@ -1477,10 +1477,10 @@ class Table(Cacheable):
 
         if side in HORIZONTAL_BORDER_SIDES and col + length > self.num_cols:
             msg = f"column {col + length - 1} out of range (table has {self.num_cols} columns)"
-            raise KeyError(msg)
+            raise IndexError(msg)
         if side in VERTICAL_BORDER_SIDES and row + length > self.num_rows:
             msg = f"row {row + length - 1} out of range (table has {self.num_rows} rows)"
-            raise KeyError(msg)
+            raise IndexError(msg)
 
         self._model.extract_strokes(self._table_id)
 
