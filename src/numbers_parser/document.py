@@ -1365,19 +1365,19 @@ class Table(Cacheable):
         """
         ranges = cell_range if isinstance(cell_range, list) else [cell_range]
         parsed_ranges = []
-        for cell_range in ranges:
-            if not isinstance(cell_range, str):
+        for range_ref in ranges:
+            if not isinstance(range_ref, str):
                 msg = "cell ranges must be strings"
                 raise TypeError(msg)
-            cell_refs = cell_range.split(":")
+            cell_refs = range_ref.split(":")
             if len(cell_refs) != 2:
-                msg = f"invalid cell range {cell_range}"
+                msg = f"invalid cell range {range_ref}"
                 raise ValueError(msg)
             start_cell_ref, end_cell_ref = cell_refs
             row_start, col_start = xl_cell_to_rowcol(start_cell_ref)
             row_end, col_end = xl_cell_to_rowcol(end_cell_ref)
             if row_end < row_start or col_end < col_start:
-                msg = f"invalid cell range {cell_range}: end must not precede start"
+                msg = f"invalid cell range {range_ref}: end must not precede start"
                 raise ValueError(msg)
             if row_end >= self.num_rows:
                 msg = f"row {row_end} out of range"
@@ -1393,13 +1393,13 @@ class Table(Cacheable):
                     and col_start <= other_col_end
                     and col_end >= other_col_start
                 ):
-                    msg = f"cell range {cell_range} overlaps another range"
+                    msg = f"cell range {range_ref} overlaps another range"
                     raise ValueError(msg)
             for row in range(row_start, row_end + 1):
                 for col in range(col_start, col_end + 1):
                     cell = self._data[row][col]
                     if cell.is_merged or cell.merge_range is not None:
-                        msg = f"cell range {cell_range} overlaps an existing merged range"
+                        msg = f"cell range {range_ref} overlaps an existing merged range"
                         raise ValueError(msg)
             parsed_ranges.append((row_start, col_start, row_end, col_end))
 
