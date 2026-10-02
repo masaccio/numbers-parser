@@ -155,6 +155,7 @@ lint.ignore = [
   "ARG003", # Unused class method argument
   "BLE001", # Do not catch blind exception
   "CPY001", # Copyright
+  "COM812", # Conflicts
   "C901", # Code too complex
   "D100", # Missing docstring
   "D101", # Missing docstring

@@ -326,6 +326,11 @@ class Document:
             * **format** (``str``, *optional*, default: ``"%s"``) - Text format.
               The cell value is inserted in place of %s. Only one substitution is allowed by
               Numbers, and multiple %s formatting references raise a TypeError exception
+
+        Raises
+        ------
+            KeyError: If the named custom format already exists.
+
         """
         if (
             "name" in kwargs
@@ -333,7 +338,7 @@ class Document:
             and kwargs["name"] in self._model.custom_formats
         ):
             msg = f"format '{kwargs['name']}' already exists"
-            raise IndexError(msg)
+            raise KeyError(msg)
 
         if "type" in kwargs:
             format_type = kwargs["type"].upper()
@@ -1678,7 +1683,7 @@ class Table(Cacheable):
         elif isinstance(custom_format, str):
             if custom_format not in self._model.custom_formats:
                 msg = f"format '{custom_format}' does not exist"
-                raise IndexError(msg)
+                raise KeyError(msg)
             custom_format = self._model.custom_formats[custom_format]
         else:
             msg = "format must be a CustomFormatting object or format name"

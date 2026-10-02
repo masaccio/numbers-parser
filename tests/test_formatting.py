@@ -735,18 +735,18 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
     doc = Document("tests/data/custom-formats1.numbers")
     custom_formats = doc.custom_formats
     assert list(custom_formats.keys()) == ["Custom Format", "Custom Format 1"]
-    format = doc.add_custom_format()
-    assert format.name == "Custom Format 2"
+    custom_format = doc.add_custom_format()
+    assert custom_format.name == "Custom Format 2"
 
     doc = Document("tests/data/custom-formats2.numbers")
-    with pytest.raises(IndexError) as e:
-        format = doc.add_custom_format(name="Custom Format 1")
+    with pytest.raises(KeyError) as e:
+        custom_format = doc.add_custom_format(name="Custom Format 1")
     assert "'Custom Format 1' already exists" in str(e)
     with pytest.raises(TypeError) as e:
-        format = doc.add_custom_format(type="error")
+        custom_format = doc.add_custom_format(type="error")
     assert "unsupported cell format type 'ERROR'" in str(e)
-    format = doc.add_custom_format()
-    assert format.name == "Custom Format"
+    custom_format = doc.add_custom_format()
+    assert custom_format.name == "Custom Format"
 
     doc = Document(num_header_cols=0, num_header_rows=0)
     table = doc.sheets[0].tables[0]
@@ -756,7 +756,7 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(0, 0, "custom", format=object())
     assert "format must be a CustomFormatting object or format name" in str(e)
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(KeyError) as e:
         table.set_cell_formatting(0, 0, "custom", format="invalid")
     assert "format 'invalid' does not exist" in str(e)
 
