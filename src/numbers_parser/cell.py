@@ -1419,7 +1419,7 @@ class NumberCell(Cell):
         super().__init__(row, col, value)
 
     @property
-    def value(self) -> int:
+    def value(self) -> float:
         return self._value
 
 
@@ -1963,15 +1963,15 @@ def _invert_bit_str(value: str) -> str:
 def _twos_complement(value: int, base: int) -> str:
     """Calculate the twos complement of a negative integer with minimum 32-bit precision."""
     num_bits = max([32, math.ceil(math.log2(abs(value))) + 1])
-    bin_value = bin(abs(value))[2:]
+    bin_value = bin(abs(value))[2:]  # noqa: FURB116
     inverted_bin_value = _invert_bit_str(bin_value).rjust(num_bits, "1")
     twos_complement_dec = int(inverted_bin_value, 2) + 1
 
     if base == 2:
-        return bin(twos_complement_dec)[2:].rjust(num_bits, "1")
+        return f"{twos_complement_dec:b}".rjust(num_bits, "1")
     if base == 8:
-        return oct(twos_complement_dec)[2:]
-    return hex(twos_complement_dec)[2:].upper()
+        return f"{twos_complement_dec:o}"
+    return f"{twos_complement_dec:x}".upper()
 
 
 def _format_base(value: float, number_format) -> str:
