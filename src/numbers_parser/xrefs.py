@@ -483,7 +483,7 @@ def xl_col_to_offset(col_str: str) -> int:
     return col
 
 
-def xl_cell_to_rowcol(cell_str: str) -> tuple:
+def xl_cell_to_rowcol(cell_str: str) -> tuple[int, int]:
     """
     Convert a cell reference in A1 notation to a zero indexed row and column.
 
@@ -491,6 +491,7 @@ def xl_cell_to_rowcol(cell_str: str) -> tuple:
     ----------
     cell_str:  str
         A1 notation cell reference
+        An empty string is treated as the first cell (A1).
 
     Returns
     -------
@@ -525,7 +526,7 @@ def xl_cell_to_rowcol(cell_str: str) -> tuple:
     return row, col
 
 
-def xl_range(first_row, first_col, last_row, last_col):
+def xl_range(first_row: int, first_col: int, last_row: int, last_col: int) -> str:
     """
     Convert zero indexed row and col cell references to a A1:B1 range string.
 
@@ -543,7 +544,8 @@ def xl_range(first_row, first_col, last_row, last_col):
     Returns
     -------
     str:
-        A1:B1 style range string.
+        A1:B1 style range string, or a single-cell reference if both coordinates
+        identify the same cell.
 
     """
     range1 = xl_rowcol_to_cell(first_row, first_col)
@@ -554,7 +556,7 @@ def xl_range(first_row, first_col, last_row, last_col):
     return range1 + ":" + range2
 
 
-def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
+def xl_rowcol_to_cell(row: int, col: int, row_abs: bool = False, col_abs: bool = False) -> str:
     """
     Convert a zero indexed row and column cell reference to a A1 style string.
 
@@ -591,7 +593,7 @@ def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
     return col_str + row_abs + str(row)
 
 
-def xl_col_to_name(col, col_abs=False):
+def xl_col_to_name(col: int, col_abs: bool = False) -> str:
     """
     Convert a zero indexed column cell reference to a string.
 

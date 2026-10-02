@@ -19,7 +19,7 @@ class FileFormatError(NumbersError):
 
 
 class FormulaError(NumbersError):
-    """ "Raise for formula evaluation errors."""
+    """Raised for formula evaluation errors."""
 
 
 class UnsupportedWarning(Warning):
