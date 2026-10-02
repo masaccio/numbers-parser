@@ -274,6 +274,8 @@ class Style:
         If arguments do not match the specified type or for objects have invalid arguments
     IndexError:
         If an image filename already exists in document
+    ValueError:
+        If a font name is not known.
 
     """
 
@@ -373,7 +375,7 @@ class Style:
             self._font_details = FONT_TUPLE_MAP[self.font_name]
         else:
             msg = f"font '{self.font_name}' does not exist"
-            raise IndexError(msg)
+            raise ValueError(msg)
 
         for attr in ["bold", "italic", "underline", "strikethrough"]:
             if not isinstance(getattr(self, attr), bool):

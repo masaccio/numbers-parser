@@ -744,7 +744,7 @@ def test_issue_174(configurable_save_file):
         table.write(0, i, f"cell{i}")
         table.set_cell_style(0, i, style)
 
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(ValueError) as e:  # noqa: PT011
         table.set_cell_style(1, 0, Style(font_name="UnknownFont"))
     assert "font 'UnknownFont' does not exist" in str(e)
 
