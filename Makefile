@@ -13,7 +13,7 @@ LLDB_PYTHON_PATH := ${shell lldb --python-path}
 PACKAGE=numbers-parser
 package_c := $(subst -,_,$(PACKAGE))
 
-.PHONY: clean veryclean test coverage profile dist upload docs
+.PHONY: all readme bootstrap clean veryclean test profile dist upload docs
 
 TTY_GREEN  := $(shell tput setaf 2)
 TTY_RESET  := $(shell tput init)
@@ -54,24 +54,28 @@ docs/build/_static/custom.css: docs/custom.css
 	mkdir -p docs/build/_static
 	cp $< $@
 
-docs/build/index.html: $(DOCS_SOURCES)
+docs/build/index.html: docs/build/index.md $(DOCS_SOURCES)
 	@mkdir -p docs/build
 	uv sync --group docs
-	uv run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
 	uv run sphinx-build -q -b html -t HtmlDocs docs docs/build
 
-readme:
+docs/build/index.md: $(DOCS_SOURCES)
 	@mkdir -p docs/build
 	uv sync --group docs
 	uv run sphinx-build -q -b markdown -t MarkdownDocs docs docs/build docs/index.rst
+
+readme:  README.md
+
+README.md: docs/build/index.md
 	cp docs/build/index.md README.md
 
 profile:
-	@for sub_test in tables borders styles; do \
+	@set -e; \
+	for sub_test in tables borders styles; do \
 		test_name="test_profiling_$$sub_test"; \
 		heat_graph="prof/$$test_name.svg"; \
 		echo "======== Profile run: test_profiling_$$sub_test"; \
-		uv run pytest --profile-svg -q --experimental --no-cov tests/test_large.py -k "$$test_name"; \
+		uv run --group profile pytest --profile-svg -q --experimental --no-cov tests/test_large.py -k "$$test_name"; \
 		mv prof/combined.svg "$$heat_graph"; \
 		echo ">>>>>>>> Saved to $$heat_graph"; \
 	done
