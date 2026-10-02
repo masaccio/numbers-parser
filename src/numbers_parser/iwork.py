@@ -193,26 +193,37 @@ class IWork:
             If document version cannot be read from the document.
 
         """
-        if self._is_package:
-            properties_filename = self._filepath / "Metadata/Properties.plist"
-            build_filename = self._filepath / "Metadata/BuildVersionHistory.plist"
+
+        def read_package_plist(root: Path) -> bytes:
+            properties_filename = root / "Metadata/Properties.plist"
+            build_filename = root / "Metadata/BuildVersionHistory.plist"
             if not properties_filename.exists() or not build_filename.exists():
                 msg = "invalid Numbers document (missing files)"
                 raise FileFormatError(msg) from None
             with open(properties_filename, "rb") as fh:
-                properties_plist = fh.read()
-        else:
-            metadata = [
-                x.filename
-                for x in self._zipf.filelist
-                if x.filename.endswith(
-                    ("Metadata/Properties.plist", "Metadata/BuildVersionHistory.plist"),
+                return fh.read()
+
+        def find_archive_filename(zipf: object, filename: str) -> str:
+            return next(x.filename for x in zipf.filelist if x.filename.endswith(filename))
+
+        def read_archive_plist(zipf: object) -> bytes:
+            # The vast majority of Numbers documents have no root folder, but some
+            # have been seen with roots folders and so we need to be careful about
+            # assuming where the Properties.plist is.
+            try:
+                _ = find_archive_filename(self._zipf, "Metadata/BuildVersionHistory.plist")
+                properties_plist_filename = find_archive_filename(
+                    self._zipf, "Metadata/Properties.plist"
                 )
-            ]
-            if len(metadata) != 2:
+            except Exception as e:
                 msg = "invalid Numbers document (missing files)"
-                raise FileFormatError(msg) from None
-            properties_plist = self._zipf.read(max(metadata))
+                raise FileFormatError(msg) from e
+            return zipf.read(properties_plist_filename)
+
+        if self._is_package:
+            properties_plist = read_package_plist(self._filepath)
+        else:
+            properties_plist = read_archive_plist(self._zipf)
 
         try:
             doc_properties = plistlib.loads(properties_plist)
