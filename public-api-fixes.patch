@@ -1,0 +1,623 @@
+diff --git a/src/numbers_parser/cell.py b/src/numbers_parser/cell.py
+index 264f801..529fd6a 100644
+--- a/src/numbers_parser/cell.py
++++ b/src/numbers_parser/cell.py
+@@ -121,24 +121,24 @@ class BackgroundImage:
+ 
+     Parameters
+     ----------
+-    data: bytes
++    data: bytes | None, optional
+         Raw image data for a cell background image.
+-    filename: str
+-        Path to the image file.
++    filename: str | None, optional
++        Path to the image file. Only the basename is stored.
+ 
+     """
+ 
+     def __init__(self, data: bytes | None = None, filename: str | None = None) -> None:
+         self._data = data
+-        self._filename = basename(filename)
++        self._filename = basename(filename) if filename is not None else None
+ 
+     @property
+-    def data(self) -> bytes:
++    def data(self) -> bytes | None:
+         """bytes: The background image as bytes for a cell, or None if no image."""
+         return self._data
+ 
+     @property
+-    def filename(self) -> str:
++    def filename(self) -> str | None:
+         """str: The image filename for a cell, or None if no image."""
+         return self._filename
+ 
+@@ -281,7 +281,7 @@ class Style:
+ 
+     alignment: Alignment = DEFAULT_ALIGNMENT_CLASS  # : horizontal and vertical alignment
+     bg_image: object = None  # : background image
+-    bg_color: RGB | list[RGB] = None
++    bg_color: RGB | list[RGB] | None = None
+     font_color: RGB = field(default_factory=default_color)
+     font_size: float = DEFAULT_FONT_SIZE
+     font_name: str = DEFAULT_FONT
+@@ -333,7 +333,7 @@ class Style:
+         ]
+ 
+     @classmethod
+-    def from_storage(cls, cell: object, model: object):
++    def from_storage(cls, cell: object, model: object) -> Style:
+         bg_image = BackgroundImage(*cell._image_data) if cell._image_data is not None else None
+         return Style(
+             alignment=model.cell_alignment(cell),
+@@ -1181,7 +1181,7 @@ class Cell(CellStorageFlags, Cacheable):
+ 
+     @property
+     @cache(num_args=0)
+-    def _image_data(self) -> tuple[bytes, str]:
++    def _image_data(self) -> tuple[bytes, str] | None:
+         """Return the background image data for a cell or None if no image."""
+         if self._cell_style_id is None:
+             return None
+@@ -1697,8 +1697,8 @@ def _decode_date_format(date_format, value):
+     return result
+ 
+ 
+-def _decode_text_format(text_format, value: str):
+-    """Parse a custom date format string and return a formatted number value."""
++def _decode_text_format(text_format, value: str) -> str:
++    """Apply a custom text format string and return the formatted text value."""
+     custom_format_string = text_format.custom_format_string
+     return custom_format_string.replace(CUSTOM_TEXT_PLACEHOLDER, value)
+ 
+@@ -1936,7 +1936,7 @@ def _format_decimal(value: float, number_format, percent: bool = False) -> str:
+     return formatted_value
+ 
+ 
+-def _format_currency(value: float, number_format) -> str:
++def _format_currency(value: float, number_format) -> str | None:
+     if value is None:
+         return None
+ 
+@@ -2177,7 +2177,7 @@ class CustomFormatting:
+             raise TypeError(msg)
+ 
+     @classmethod
+-    def from_archive(cls, archive: object):
++    def from_archive(cls, archive: object) -> CustomFormatting:
+         if archive.format_type == FormatType.CUSTOM_DATE:
+             format_type = CustomFormattingType.DATETIME
+         elif archive.format_type == FormatType.CUSTOM_NUMBER:
+diff --git a/src/numbers_parser/constants.py b/src/numbers_parser/constants.py
+index a1ddc70..08ce807 100644
+--- a/src/numbers_parser/constants.py
++++ b/src/numbers_parser/constants.py
+@@ -447,9 +447,9 @@ class PaddingType(IntEnum):
+     NONE = 0
+     """No number padding."""
+     ZEROS = 1
+-    """Pad integers with leading spaces and decimals with trailing spaces."""
+-    SPACES = 2
+     """Pad integers with leading zeroes and decimals with trailing zeroes."""
++    SPACES = 2
++    """Pad integers with leading spaces and decimals with trailing spaces."""
+ 
+ 
+ FONT_MAP = GENERATED_FONT_MAP
+diff --git a/src/numbers_parser/containers.py b/src/numbers_parser/containers.py
+index abe2e07..86ed7d1 100644
+--- a/src/numbers_parser/containers.py
++++ b/src/numbers_parser/containers.py
+@@ -1,28 +1,38 @@
+ import math
+ import re
+ from pathlib import Path
++from typing import Generic, TypeVar, overload
+ 
+ from numbers_parser.constants import DOCUMENT_ID, PACKAGE_ID, SUPPORTED_NUMBERS_VERSIONS
+ from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
+ from numbers_parser.iwork import IWork, IWorkHandler
+ 
+ 
+-class ItemsList:
+-    def __init__(self, model, refs, item_class) -> None:
++_T = TypeVar("_T")
++
++
++class ItemsList(Generic[_T]):
++    def __init__(self, model: object, refs: list[int], item_class: type[_T]) -> None:
+         self._item_name = item_class.__name__.lower()
+         self._items = [item_class(model, x) for x in refs]
+ 
+-    def __getitem__(self, key: int):
++    @overload
++    def __getitem__(self, key: int) -> _T: ...
++
++    @overload
++    def __getitem__(self, key: str) -> _T: ...
++
++    def __getitem__(self, key: int | str) -> _T:
+         if isinstance(key, int):
+             if key < 0:
+                 key += len(self._items)
+-            if key >= len(self._items):
++            if key < 0 or key >= len(self._items):
+                 msg = f"index {key} out of range"
+                 raise IndexError(msg)
+             return self._items[key]
+         if isinstance(key, str):
+             for item in self._items:
+-                if item.name == key:
++                if item.name.lower() == key.lower():
+                     return item
+             msg = f"no {self._item_name} named '{key}'"
+             raise KeyError(msg)
+@@ -33,15 +43,15 @@ class ItemsList:
+     def __len__(self) -> int:
+         return len(self._items)
+ 
+-    def __contains__(self, key) -> bool:
++    def __contains__(self, key: str) -> bool:
+         return key.lower() in [x.name.lower() for x in self._items]
+ 
+-    def append(self, item) -> None:
++    def append(self, item: _T) -> None:
+         self._items.append(item)
+ 
+ 
+ class ObjectStore(IWorkHandler):
+-    def __init__(self, filepath: Path, password: str | None) -> int:
++    def __init__(self, filepath: Path, password: str | None) -> None:
+         self._objects = {}
+         self._file_store = {}
+         self._object_to_filename_map = {}
+@@ -151,10 +161,10 @@ class ObjectStore(IWorkHandler):
+     def file_store(self):
+         return self._file_store
+ 
+-    def __getitem__(self, key: str):
++    def __getitem__(self, key: int):
+         return self._objects[key]
+ 
+-    def __contains__(self, key: str) -> bool:
++    def __contains__(self, key: int) -> bool:
+         return key in self._objects
+ 
+     def __len__(self) -> int:
+diff --git a/src/numbers_parser/document.py b/src/numbers_parser/document.py
+index cfe2831..4c9122d 100644
+--- a/src/numbers_parser/document.py
++++ b/src/numbers_parser/document.py
+@@ -38,6 +38,7 @@ __all__ = ["Document", "Sheet", "Table"]
+ 
+ HORIZONTAL_BORDER_SIDES = ("top", "bottom")
+ VERTICAL_BORDER_SIDES = ("left", "right")
++_CellValue = str | int | float | bool | datetime | timedelta | None
+ 
+ 
+ class Document:
+@@ -99,14 +100,16 @@ class Document:
+             table.name = table_name
+ 
+             # Table starts as 1x1 with no headers
+-            table.add_row(num_rows - 1)
++            if num_rows > 1:
++                table.add_row(num_rows - 1)
+             table.num_header_rows = num_header_rows
+-            table.add_column(num_cols - 1)
++            if num_cols > 1:
++                table.add_column(num_cols - 1)
+             table.num_header_cols = num_header_cols
+ 
+     @property
+-    def sheets(self) -> list[Sheet]:
+-        """List[:class:`Sheet`]: A list of sheets in the document."""
++    def sheets(self) -> ItemsList[Sheet]:
++        """ItemsList[:class:`Sheet`]: Sheets indexed by position or name."""
+         return self._sheets
+ 
+     @property
+@@ -256,6 +259,8 @@ class Document:
+ 
+         Raises
+         ------
++        IndexError:
++            If the style name already exists.
+         TypeError:
+             If ``font_size`` is not a ``float``, ``font_name`` is not a ``str``,
+             ``bg_image`` is not a :py:class:`~numbers_parser.BackgroundImage`,
+@@ -368,8 +373,8 @@ class Sheet:
+         self._tables = ItemsList(self._model, refs, Table)
+ 
+     @property
+-    def tables(self) -> list[Table]:
+-        """List[:class:`Table`]: A list of tables in the sheet."""
++    def tables(self) -> ItemsList[Table]:
++        """ItemsList[:class:`Table`]: Tables indexed by position or name."""
+         return self._tables
+ 
+     @property
+@@ -459,7 +464,7 @@ class Sheet:
+         num_cols,
+         num_header_rows,
+         num_header_cols,
+-    ) -> object:
++    ) -> Table:
+         if table_name is not None:
+             if table_name in self._tables:
+                 msg = f"table '{table_name}' already exists"
+@@ -530,7 +535,7 @@ class Table(Cacheable):
+         self._model.table_name_enabled(self._table_id, enabled)
+ 
+     @property
+-    def caption_enabled(self) -> int:
++    def caption_enabled(self) -> bool:
+         """bool: ``True`` if the table caption is visible, ``False`` otherwise."""
+         return self._model.caption_enabled(self._table_id)
+ 
+@@ -569,7 +574,7 @@ class Table(Cacheable):
+         return self._model.num_header_rows(self._table_id)
+ 
+     @num_header_rows.setter
+-    def num_header_rows(self, num_headers: int):
++    def num_header_rows(self, num_headers: int) -> None:
+         if num_headers < 0:
+             msg = "Number of headers cannot be negative"
+             raise ValueError(msg)
+@@ -579,7 +584,7 @@ class Table(Cacheable):
+         if num_headers > MAX_HEADER_COUNT:
+             msg = f"Number of headers cannot exceed {MAX_HEADER_COUNT} rows"
+             raise ValueError(msg)
+-        return self._model.num_header_rows(self._table_id, num_headers)
++        self._model.num_header_rows(self._table_id, num_headers)
+ 
+     @property
+     def num_header_cols(self) -> int:
+@@ -596,14 +601,14 @@ class Table(Cacheable):
+         Raises
+         ------
+         ValueError:
+-            If the number of headers is negative, exceeds the number of rows in the
++            If the number of headers is negative, exceeds the number of columns in the
+             table, or exceeds Numbers maximum number of headers (``MAX_HEADER_COUNT``).
+ 
+         """
+         return self._model.num_header_cols(self._table_id)
+ 
+     @num_header_cols.setter
+-    def num_header_cols(self, num_headers: int):
++    def num_header_cols(self, num_headers: int) -> None:
+         if num_headers < 0:
+             msg = "Number of headers cannot be negative"
+             raise ValueError(msg)
+@@ -613,7 +618,7 @@ class Table(Cacheable):
+         if num_headers > MAX_HEADER_COUNT:
+             msg = f"Number of headers cannot exceed {MAX_HEADER_COUNT} columns"
+             raise ValueError(msg)
+-        return self._model.num_header_cols(self._table_id, num_headers)
++        self._model.num_header_cols(self._table_id, num_headers)
+ 
+     @property
+     def height(self) -> int:
+@@ -787,7 +792,7 @@ class Table(Cacheable):
+         min_col: int | None = None,
+         max_col: int | None = None,
+         values_only: bool | None = False,
+-    ) -> Iterator[tuple[Cell] | tuple[str]]:
++    ) -> Iterator[tuple[Cell | _CellValue, ...]]:
+         """
+         Produces cells from a table, by row.
+ 
+@@ -808,8 +813,8 @@ class Table(Cacheable):
+ 
+         Yields
+         ------
+-        Tuple[Cell] | Tuple[str]:
+-            :class:`Cell` objects or string values for the row
++        tuple[Cell | _CellValue, ...]:
++            :class:`Cell` objects or cell values for each row
+ 
+         Raises
+         ------
+@@ -821,8 +826,9 @@ class Table(Cacheable):
+ 
+         .. code:: python
+ 
++            total = 0
+             for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
+-                sum += row
++                total += sum(value or 0 for value in row)
+ 
+         """
+         min_row = min_row if min_row is not None else 0
+@@ -864,7 +870,7 @@ class Table(Cacheable):
+         min_row: int | None = None,
+         max_row: int | None = None,
+         values_only: bool | None = False,
+-    ) -> Iterator[tuple[Cell] | tuple[str]]:
++    ) -> Iterator[tuple[Cell | _CellValue, ...]]:
+         """
+         Produces cells from a table, by column.
+ 
+@@ -885,8 +891,8 @@ class Table(Cacheable):
+ 
+         Yields
+         ------
+-        Tuple[Cell] | Tuple[str]:
+-            :class:`Cell` objects or string values for the row
++        tuple[Cell | _CellValue, ...]:
++            :class:`Cell` objects or cell values for each column
+ 
+         Raises
+         ------
+@@ -898,8 +904,9 @@ class Table(Cacheable):
+ 
+         .. code:: python
+ 
+-            for col in table.iter_cols(min_row=2, max_row=7):
+-                sum += col.value
++            total = 0
++            for col in table.iter_cols(min_row=2, max_row=7, values_only=True):
++                total += sum(value or 0 for value in col)
+ 
+         """
+         min_row = min_row if min_row is not None else 0
+@@ -1007,7 +1014,7 @@ class Table(Cacheable):
+         TypeError:
+             If the style parameter is an invalid type.
+         ValueError:
+-            If the cell type cannot be determined from the type of `param3`.
++            If the cell type cannot be determined from the type of ``value``.
+ 
+         """
+         # TODO: write needs to retain/init the border
+@@ -1363,17 +1370,50 @@ class Table(Cacheable):
+             True
+ 
+         """
+-        if isinstance(cell_range, list):
+-            for x in cell_range:
+-                self.merge_cells(x)
+-        else:
+-            (start_cell_ref, end_cell_ref) = cell_range.split(":")
+-            (row_start, col_start) = xl_cell_to_rowcol(start_cell_ref)
+-            (row_end, col_end) = xl_cell_to_rowcol(end_cell_ref)
++        ranges = cell_range if isinstance(cell_range, list) else [cell_range]
++        parsed_ranges = []
++        for range_ref in ranges:
++            if not isinstance(range_ref, str):
++                msg = "cell ranges must be strings"
++                raise TypeError(msg)
++            cell_refs = range_ref.split(":")
++            if len(cell_refs) != 2:
++                msg = f"invalid cell range {range_ref}"
++                raise ValueError(msg)
++            start_cell_ref, end_cell_ref = cell_refs
++            row_start, col_start = xl_cell_to_rowcol(start_cell_ref)
++            row_end, col_end = xl_cell_to_rowcol(end_cell_ref)
++            if row_end < row_start or col_end < col_start:
++                msg = f"invalid cell range {range_ref}: end must not precede start"
++                raise ValueError(msg)
++            if row_end >= self.num_rows:
++                msg = f"row {row_end} out of range"
++                raise IndexError(msg)
++            if col_end >= self.num_cols:
++                msg = f"column {col_end} out of range"
++                raise IndexError(msg)
++
++            for other_row_start, other_col_start, other_row_end, other_col_end in parsed_ranges:
++                if (
++                    row_start <= other_row_end
++                    and row_end >= other_row_start
++                    and col_start <= other_col_end
++                    and col_end >= other_col_start
++                ):
++                    msg = f"cell range {range_ref} overlaps another range"
++                    raise ValueError(msg)
++            for row in range(row_start, row_end + 1):
++                for col in range(col_start, col_end + 1):
++                    cell = self._data[row][col]
++                    if cell.is_merged or cell.merge_range is not None:
++                        msg = f"cell range {range_ref} overlaps an existing merged range"
++                        raise ValueError(msg)
++            parsed_ranges.append((row_start, col_start, row_end, col_end))
++
++        merge_cells = self._model.merge_cells(self._table_id)
++        for row_start, col_start, row_end, col_end in parsed_ranges:
+             num_rows = row_end - row_start + 1
+             num_cols = col_end - col_start + 1
+-
+-            merge_cells = self._model.merge_cells(self._table_id)
+             merge_cells.add_anchor(row_start, col_start, (num_rows, num_cols))
+             for row in range(row_start, row_end + 1):
+                 for col in range(col_start, col_end + 1):
+@@ -1496,7 +1536,7 @@ class Table(Cacheable):
+             for border_row_num in range(row, row + length):
+                 self._model.set_cell_border(self._table_id, border_row_num, col, side, border_value)
+ 
+-    def set_cell_formatting(self, *args: str, **kwargs) -> None:
++    def set_cell_formatting(self, *args: int | str, **kwargs) -> None:
+         r"""
+         Set the data format for a cell.
+ 
+diff --git a/src/numbers_parser/exceptions.py b/src/numbers_parser/exceptions.py
+index f756d5e..2fb31c9 100644
+--- a/src/numbers_parser/exceptions.py
++++ b/src/numbers_parser/exceptions.py
+@@ -19,7 +19,7 @@ class FileFormatError(NumbersError):
+ 
+ 
+ class FormulaError(NumbersError):
+-    """ "Raise for formula evaluation errors."""
++    """Raised for formula evaluation errors."""
+ 
+ 
+ class UnsupportedWarning(Warning):
+diff --git a/src/numbers_parser/xrefs.py b/src/numbers_parser/xrefs.py
+index 4ed4ca6..d5f9a97 100644
+--- a/src/numbers_parser/xrefs.py
++++ b/src/numbers_parser/xrefs.py
+@@ -483,7 +483,7 @@ def xl_col_to_offset(col_str: str) -> int:
+     return col
+ 
+ 
+-def xl_cell_to_rowcol(cell_str: str) -> tuple:
++def xl_cell_to_rowcol(cell_str: str) -> tuple[int, int]:
+     """
+     Convert a cell reference in A1 notation to a zero indexed row and column.
+ 
+@@ -491,6 +491,7 @@ def xl_cell_to_rowcol(cell_str: str) -> tuple:
+     ----------
+     cell_str:  str
+         A1 notation cell reference
++        An empty string is treated as the first cell (A1).
+ 
+     Returns
+     -------
+@@ -525,7 +526,7 @@ def xl_cell_to_rowcol(cell_str: str) -> tuple:
+     return row, col
+ 
+ 
+-def xl_range(first_row, first_col, last_row, last_col):
++def xl_range(first_row: int, first_col: int, last_row: int, last_col: int) -> str:
+     """
+     Convert zero indexed row and col cell references to a A1:B1 range string.
+ 
+@@ -543,7 +544,8 @@ def xl_range(first_row, first_col, last_row, last_col):
+     Returns
+     -------
+     str:
+-        A1:B1 style range string.
++        A1:B1 style range string, or a single-cell reference if both coordinates
++        identify the same cell.
+ 
+     """
+     range1 = xl_rowcol_to_cell(first_row, first_col)
+@@ -554,7 +556,7 @@ def xl_range(first_row, first_col, last_row, last_col):
+     return range1 + ":" + range2
+ 
+ 
+-def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
++def xl_rowcol_to_cell(row: int, col: int, row_abs: bool = False, col_abs: bool = False) -> str:
+     """
+     Convert a zero indexed row and column cell reference to a A1 style string.
+ 
+@@ -591,7 +593,7 @@ def xl_rowcol_to_cell(row, col, row_abs=False, col_abs=False):
+     return col_str + row_abs + str(row)
+ 
+ 
+-def xl_col_to_name(col, col_abs=False):
++def xl_col_to_name(col: int, col_abs: bool = False) -> str:
+     """
+     Convert a zero indexed column cell reference to a string.
+ 
+diff --git a/tests/test_create_cells.py b/tests/test_create_cells.py
+index f206b44..47d9bf9 100644
+--- a/tests/test_create_cells.py
++++ b/tests/test_create_cells.py
+@@ -66,6 +66,13 @@ def test_negative_cell_coordinates_are_rejected():
+         table.write(0, -1, "negative column")
+ 
+ 
++@pytest.mark.parametrize(("num_rows", "num_cols"), [(1, 1), (1, 8), (12, 1)])
++def test_document_supports_single_row_or_column(num_rows, num_cols):
++    doc = Document(num_rows=num_rows, num_cols=num_cols)
++    assert doc.default_table.num_rows == num_rows
++    assert doc.default_table.num_cols == num_cols
++
++
+ def test_large_table(configurable_save_file):
+     doc = Document()
+     sheets = doc.sheets
+diff --git a/tests/test_merges.py b/tests/test_merges.py
+index 27390d2..6bb8255 100644
+--- a/tests/test_merges.py
++++ b/tests/test_merges.py
+@@ -1,3 +1,5 @@
++import pytest
++
+ from numbers_parser import Document
+ 
+ XXX_TABLE_1_REF = [
+@@ -88,6 +90,33 @@ def test_create_rectangular_merge():
+     assert table.merge_ranges == ["B2:C3"]
+     assert table.cell("B2").is_merged
+     assert table.cell("C2").merge_range == "B2:C3"
++
++
++def test_invalid_merge_ranges_do_not_partially_modify_table():
++    doc = Document(num_rows=4, num_cols=4)
++    table = doc.sheets[0].tables[0]
++
++    with pytest.raises(IndexError, match="row 4 out of range"):
++        table.merge_cells(["A1:B2", "C3:E5"])
++
++    assert table.merge_ranges == []
++
++    with pytest.raises(ValueError, match="end must not precede start"):
++        table.merge_cells("C3:B2")
++
++    assert table.merge_ranges == []
++
++
++def test_merge_ranges_cannot_overlap_existing_merges():
++    doc = Document(num_rows=4, num_cols=4)
++    table = doc.sheets[0].tables[0]
++
++    table.merge_cells("A1:B2")
++
++    with pytest.raises(ValueError, match="overlaps an existing merged range"):
++        table.merge_cells("B2:C3")
++
++    assert table.merge_ranges == ["A1:B2"]
+     assert table.cell("B3").merge_range == "B2:C3"
+     assert table.cell("C3").merge_range == "B2:C3"
+     assert table.cell("B2").size == (2, 2)
+diff --git a/tests/test_slices.py b/tests/test_slices.py
+index 0e0e1f8..12b6778 100644
+--- a/tests/test_slices.py
++++ b/tests/test_slices.py
+@@ -90,6 +90,25 @@ def test_cell_lookup():
+     assert table.cell(3, 4).value == "XXX_3_5"
+ 
+ 
++def test_sheet_and_table_lookup_matches_case_insensitive_membership():
++    doc = Document()
++    sheet = doc.sheets[0]
++    table = sheet.tables[0]
++
++    assert doc.sheets["sheet 1"] is sheet
++    assert sheet.tables["table 1"] is table
++    assert "sheet 1" in doc.sheets
++    assert "table 1" in sheet.tables
++
++
++def test_items_list_rejects_out_of_range_negative_indexes():
++    doc = Document()
++    with pytest.raises(IndexError):
++        _ = doc.sheets[-2]
++    with pytest.raises(IndexError):
++        _ = doc.sheets[0].tables[-2]
++
++
+ def test_cell_ref_lookup():
+     doc = Document("tests/data/test-7.numbers")
+     sheets = doc.sheets
+diff --git a/tests/test_styles.py b/tests/test_styles.py
+index 42d3c0c..63a10ff 100644
+--- a/tests/test_styles.py
++++ b/tests/test_styles.py
+@@ -51,6 +51,12 @@ def test_bullets():
+     assert table.cell(9, 2).formatted_bullets == TEST_NUMBERED_REF
+ 
+ 
++def test_background_image_can_omit_filename():
++    image = BackgroundImage(b"image data")
++    assert image.data == b"image data"
++    assert image.filename is None
++
++
+ def test_bg_colors():
+     doc = Document("tests/data/test-bgcolour.numbers")
+     sheets = doc.sheets
