@@ -92,3 +92,30 @@ def test_create_rectangular_merge():
     assert table.cell("C3").merge_range == "B2:C3"
     assert table.cell("B2").size == (2, 2)
     assert table.cell("C2").merge_range == "B2:C3"
+
+
+def test_invalid_merge_ranges_do_not_partially_modify_table():
+    doc = Document(num_rows=4, num_cols=4)
+    table = doc.sheets[0].tables[0]
+
+    with pytest.raises(IndexError, match="row 4 out of range"):
+        table.merge_cells(["A1:B2", "C3:E5"])
+
+    assert table.merge_ranges == []
+
+    with pytest.raises(ValueError, match="end must not precede start"):
+        table.merge_cells("C3:B2")
+
+    assert table.merge_ranges == []
+
+
+def test_merge_ranges_cannot_overlap_existing_merges():
+    doc = Document(num_rows=4, num_cols=4)
+    table = doc.sheets[0].tables[0]
+
+    table.merge_cells("A1:B2")
+
+    with pytest.raises(ValueError, match="overlaps an existing merged range"):
+        table.merge_cells("B2:C3")
+
+    assert table.merge_ranges == ["A1:B2"]

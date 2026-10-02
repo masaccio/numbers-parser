@@ -1363,17 +1363,50 @@ class Table(Cacheable):
             True
 
         """
-        if isinstance(cell_range, list):
-            for x in cell_range:
-                self.merge_cells(x)
-        else:
-            (start_cell_ref, end_cell_ref) = cell_range.split(":")
-            (row_start, col_start) = xl_cell_to_rowcol(start_cell_ref)
-            (row_end, col_end) = xl_cell_to_rowcol(end_cell_ref)
+        ranges = cell_range if isinstance(cell_range, list) else [cell_range]
+        parsed_ranges = []
+        for cell_range in ranges:
+            if not isinstance(cell_range, str):
+                msg = "cell ranges must be strings"
+                raise TypeError(msg)
+            cell_refs = cell_range.split(":")
+            if len(cell_refs) != 2:
+                msg = f"invalid cell range {cell_range}"
+                raise ValueError(msg)
+            start_cell_ref, end_cell_ref = cell_refs
+            row_start, col_start = xl_cell_to_rowcol(start_cell_ref)
+            row_end, col_end = xl_cell_to_rowcol(end_cell_ref)
+            if row_end < row_start or col_end < col_start:
+                msg = f"invalid cell range {cell_range}: end must not precede start"
+                raise ValueError(msg)
+            if row_end >= self.num_rows:
+                msg = f"row {row_end} out of range"
+                raise IndexError(msg)
+            if col_end >= self.num_cols:
+                msg = f"column {col_end} out of range"
+                raise IndexError(msg)
+
+            for other_row_start, other_col_start, other_row_end, other_col_end in parsed_ranges:
+                if (
+                    row_start <= other_row_end
+                    and row_end >= other_row_start
+                    and col_start <= other_col_end
+                    and col_end >= other_col_start
+                ):
+                    msg = f"cell range {cell_range} overlaps another range"
+                    raise ValueError(msg)
+            for row in range(row_start, row_end + 1):
+                for col in range(col_start, col_end + 1):
+                    cell = self._data[row][col]
+                    if cell.is_merged or cell.merge_range is not None:
+                        msg = f"cell range {cell_range} overlaps an existing merged range"
+                        raise ValueError(msg)
+            parsed_ranges.append((row_start, col_start, row_end, col_end))
+
+        merge_cells = self._model.merge_cells(self._table_id)
+        for row_start, col_start, row_end, col_end in parsed_ranges:
             num_rows = row_end - row_start + 1
             num_cols = col_end - col_start + 1
-
-            merge_cells = self._model.merge_cells(self._table_id)
             merge_cells.add_anchor(row_start, col_start, (num_rows, num_cols))
             for row in range(row_start, row_end + 1):
                 for col in range(col_start, col_end + 1):
