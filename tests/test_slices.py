@@ -43,6 +43,12 @@ def test_iter_row_exceptions():
         _ = list(table.iter_rows(max_col=999))
     assert str(e.value) == "column 999 out of range"
     with pytest.raises(IndexError) as e:
+        _ = list(table.iter_rows(max_row=table.num_rows))
+    assert str(e.value) == f"row {table.num_rows} out of range"
+    with pytest.raises(IndexError) as e:
+        _ = list(table.iter_rows(max_col=table.num_cols))
+    assert str(e.value) == f"column {table.num_cols} out of range"
+    with pytest.raises(IndexError) as e:
         _ = list(table.iter_rows(min_col=-1))
     assert str(e.value) == "column -1 out of range"
 
@@ -62,6 +68,12 @@ def test_iter_col_exceptions():
         _ = list(table.iter_cols(max_col=999))
     assert str(e.value) == "column 999 out of range"
     with pytest.raises(IndexError) as e:
+        _ = list(table.iter_cols(max_row=table.num_rows))
+    assert str(e.value) == f"row {table.num_rows} out of range"
+    with pytest.raises(IndexError) as e:
+        _ = list(table.iter_cols(max_col=table.num_cols))
+    assert str(e.value) == f"column {table.num_cols} out of range"
+    with pytest.raises(IndexError) as e:
         _ = list(table.iter_cols(min_col=-1))
     assert str(e.value) == "column -1 out of range"
 
@@ -76,6 +88,25 @@ def test_cell_lookup():
     assert table.cell(0, 1).value == "XXX_COL_2"
     assert table.cell(2, 2).value is None
     assert table.cell(3, 4).value == "XXX_3_5"
+
+
+def test_sheet_and_table_lookup_matches_case_insensitive_membership():
+    doc = Document()
+    sheet = doc.sheets[0]
+    table = sheet.tables[0]
+
+    assert doc.sheets["sheet 1"] is sheet
+    assert sheet.tables["table 1"] is table
+    assert "sheet 1" in doc.sheets
+    assert "table 1" in sheet.tables
+
+
+def test_items_list_rejects_out_of_range_negative_indexes():
+    doc = Document()
+    with pytest.raises(IndexError):
+        _ = doc.sheets[-2]
+    with pytest.raises(IndexError):
+        _ = doc.sheets[0].tables[-2]
 
 
 def test_cell_ref_lookup():

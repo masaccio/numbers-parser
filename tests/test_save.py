@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Optional
 
 import pytest
 
@@ -242,6 +241,19 @@ def test_edit_table_rows_columns(configurable_save_file):
         table.add_column(start_col=-1)
     assert "Column number not in range for table" in str(e)
 
+    with pytest.raises(ValueError, match="positive integer"):
+        table.add_row(0)
+    with pytest.raises(ValueError, match="positive integer"):
+        table.add_column(0)
+    with pytest.raises(ValueError, match="positive integer"):
+        table.delete_row(0)
+    with pytest.raises(ValueError, match="positive integer"):
+        table.delete_column(0)
+    with pytest.raises(ValueError, match="more rows"):
+        table.delete_row(table.num_rows + 1)
+    with pytest.raises(ValueError, match="more columns"):
+        table.delete_column(table.num_cols + 1)
+
     for row, cells in enumerate(table.iter_rows()):
         for col, _ in enumerate(cells):
             table.write(row, col, f"cell[{row},{col}]")
@@ -261,7 +273,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         table: object,
         table_num_rows: int,
         num_rows: int = 1,
-        start_row: Optional[int] = None,
+        start_row: int | None = None,
         default: object = None,
     ) -> int:
         table.add_row(num_rows, start_row, default)
@@ -274,7 +286,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         table: object,
         table_num_cols: int,
         num_cols: int = 1,
-        start_col: Optional[int] = None,
+        start_col: int | None = None,
         default: object = None,
     ) -> int:
         table.add_column(num_cols, start_col, default)
@@ -287,7 +299,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         table: object,
         table_num_rows: int,
         num_rows: int = 1,
-        start_row: Optional[int] = None,
+        start_row: int | None = None,
     ) -> int:
         table.delete_row(num_rows, start_row)
         table_num_rows -= num_rows
@@ -299,7 +311,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         table: object,
         table_num_cols: int,
         num_cols: int = 1,
-        start_col: Optional[int] = None,
+        start_col: int | None = None,
     ) -> int:
         table.delete_column(num_cols, start_col)
         table_num_cols -= num_cols

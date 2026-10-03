@@ -102,6 +102,7 @@ SUPPORTED_NUMBERS_VERSIONS = [
     "26.1",
     "26.2",
     "26.3",
+    "26.4",
 ]
 
 
@@ -447,9 +448,9 @@ class PaddingType(IntEnum):
     NONE = 0
     """No number padding."""
     ZEROS = 1
-    """Pad integers with leading spaces and decimals with trailing spaces."""
-    SPACES = 2
     """Pad integers with leading zeroes and decimals with trailing zeroes."""
+    SPACES = 2
+    """Pad integers with leading spaces and decimals with trailing spaces."""
 
 
 FONT_MAP = GENERATED_FONT_MAP

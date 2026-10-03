@@ -11,8 +11,14 @@ Reading documents:
    >>> tables = sheets[0].tables
    >>> rows = tables[0].rows()
 
-Sheets and tables are iterables that can be indexed using either an
-integer index or using the name of the sheet/table:
+Encrypted documents are also supported for reading:
+
+.. code:: python
+
+   >>> from numbers_parser import Document
+   >>> doc = Document("mydoc.numbers", password="s3cr3t")
+
+Sheets and tables are iterables that can be indexed using either an integer index or using the name of the sheet/table:
 
 .. code:: python
 
@@ -25,9 +31,7 @@ integer index or using the name of the sheet/table:
    >>> doc.sheets[0].tables["Table 1"].name
    'Table 1'
 
-``Table`` objects have a ``rows`` method which contains a nested list
-with an entry for each row of the table. Each row is itself a list of
-the column values.
+``Table`` objects have a ``rows`` method which contains a nested list with an entry for each row of the table. Each row is itself a list of the column values.
 
 .. code:: python
 
@@ -43,9 +47,7 @@ the column values.
 Cell Data
 ^^^^^^^^^
 
-Cells are objects with a common base class of ``Cell``. All cell types
-have a property ``value`` which returns the contents of the cell as a
-python datatype. Available cell types are:
+Cells are objects with a common base class of ``Cell``. All cell types have a property ``value`` which returns the contents of the cell as a python datatype. Available cell types are:
 
 +---------------+------------------------+---------------------------------+
 | Cell type     | value type             | Additional properties           |
@@ -121,6 +123,14 @@ Cell values are written using :pages:`Table.write() <api/table.html#numbers_pars
    table.write(1, 1, "This is new text")
    table.write("B7", datetime(2020, 12, 25))
    doc.save("new-sheet.numbers")
+
+
+Encrypted documents are not automatically re-saved with encryption and you must specify a password on save:
+
+.. code:: python
+
+   doc.save("new-sheet.numbers", password="s3cr3t")
+
 
 Additional tables and worksheets can be added to a ``Document`` before saving using :pages:`Document.add_sheet() <api/document.html#numbers_parser.Document.add_sheet>` and :pages:`Sheet.add_table() <api/sheet.html#numbers_parser.Sheet.add_table>` respectively:
 

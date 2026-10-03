@@ -100,6 +100,42 @@ def test_brief_contents(script_runner):
     assert ret.stderr == ""
 
 
+@pytest.mark.script_launch_mode("subprocess")
+def test_encrypted_contents(script_runner):
+    ret = script_runner.run(
+        [
+            "cat-numbers",
+            "--brief",
+            "--password",
+            "s3cr3t",
+            "tests/data/encrypted.numbers",
+        ],
+        print_result=False,
+    )
+    assert ret.success
+    assert (
+        ret.stdout == "Decryption,Algorithm,Stream\nCiphertext,Iteration,Key\nPadding,Salt,Hash\n"
+    )
+    assert ret.stderr == ""
+
+
+@pytest.mark.script_launch_mode("subprocess")
+def test_encrypted_invalid_password(script_runner):
+    ret = script_runner.run(
+        [
+            "cat-numbers",
+            "--brief",
+            "--password",
+            "invalid",
+            "tests/data/encrypted.numbers",
+        ],
+        print_result=False,
+    )
+    assert not ret.success
+    assert ret.stdout == ""
+    assert "tests/data/encrypted.numbers: Invalid password. Hint is 's3cr3t'" in ret.stderr
+
+
 @pytest.mark.script_launch_mode("inprocess")
 def test_select_sheet(script_runner):
     ref = ""

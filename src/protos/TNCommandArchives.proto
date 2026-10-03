@@ -270,7 +270,7 @@ message DocumentSelectionTransformerArchive {
 message SheetSelectionTransformerArchive {
   optional .TSP.UUID sheet_uuid = 1;
   required bool paginated = 2;
-  optional uint32 sheet_index = 3;
+  optional int32 sheet_index = 3;
 }
 
 message FormSheetSelectionTransformerArchive {

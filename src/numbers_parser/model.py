@@ -214,10 +214,10 @@ class _NumbersModel(Cacheable):
     Not to be used in application code.
     """
 
-    def __init__(self, filepath: Path) -> None:
+    def __init__(self, filepath: Path, password: str | None) -> None:
         if filepath is None:
             filepath = Path(DEFAULT_DOCUMENT)
-        self.objects = ObjectStore(filepath)
+        self.objects = ObjectStore(filepath, password)
         self._merge_cells = defaultdict(MergeCells)
         self._row_heights = {}
         self._col_widths = {}
@@ -239,8 +239,8 @@ class _NumbersModel(Cacheable):
         self.missing_fonts = {}
         self.calculate_table_uuid_map()
 
-    def save(self, filepath: Path, package: bool) -> None:
-        self.objects.save(filepath, package)
+    def save(self, filepath: Path, package: bool, password: str, hint: str) -> None:
+        self.objects.save(filepath, package, password, hint)
 
     def find_refs(self, ref: str) -> list:
         return self.objects.find_refs(ref)
@@ -2414,7 +2414,7 @@ class _NumbersModel(Cacheable):
     def extract_strokes(self, table_id: int) -> None:
         table_obj = self.objects[table_id]
         stroke_sidecar_id = table_obj.stroke_sidecar.identifier
-        if stroke_sidecar_id == 0:
+        if stroke_sidecar_id == 0:  # pragma: no cover
             return
         sidecar_obj = self.objects[stroke_sidecar_id]
         strokes = []
@@ -2719,8 +2719,6 @@ class _NumbersModel(Cacheable):
                 if parent is None:
                     root_children[nodes[uuid]["key"]] = nodes[uuid]
                 else:
-                    if parent not in nodes:
-                        nodes[parent] = {"key": group_uuids[parent], "children": {}, "rows": []}
                     parent_node = nodes[parent]
                     parent_node["children"][nodes[uuid]["key"]] = nodes[uuid]
 

@@ -133,6 +133,7 @@ def main() -> None:
     parser.add_argument("--pretty", action="store_true", help="Enable all prettifying options")
     parser.add_argument("--redact", action="store_true", help="Redact strings in the output")
     parser.add_argument("--output", "-o", help="directory name to unpack into")
+    parser.add_argument("--password", help="Password for encrypted documents")
     parser.add_argument("--debug", default=False, action="store_true", help="Enable debug logging")
     args = parser.parse_args()
     if args.version:
@@ -166,7 +167,7 @@ def main() -> None:
                         output_dir=output_dir,
                     ),
                 )
-                iwork.open(Path(document))
+                iwork.open(Path(document), password=args.password)
             except (FileFormatError, FileError) as e:
                 print(f"{document}:", str(e), file=sys.stderr)
                 sys.exit(1)

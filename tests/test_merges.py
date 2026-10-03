@@ -1,3 +1,5 @@
+import pytest
+
 from numbers_parser import Document
 
 XXX_TABLE_1_REF = [
@@ -77,3 +79,47 @@ def test_all_merged_ranges():
     assert table.merge_ranges == ["A2:B2", "B5:E5", "B6:B8", "C4:E4", "D7:E8"]
     table = sheets[1].tables[0]
     assert table.merge_ranges == ["A1:B1", "B4:C5"]
+
+
+def test_create_rectangular_merge():
+    doc = Document(num_rows=4, num_cols=4)
+    table = doc.sheets[0].tables[0]
+
+    table.merge_cells("B2:C3")
+
+    assert table.merge_ranges == ["B2:C3"]
+    assert table.cell("B2").is_merged
+    assert table.cell("C2").merge_range == "B2:C3"
+
+
+def test_invalid_merge_ranges_exceptions():
+    doc = Document(num_rows=4, num_cols=4)
+    table = doc.sheets[0].tables[0]
+
+    with pytest.raises(TypeError, match="cell ranges must be strings"):
+        table.merge_cells(0.1234)
+
+    with pytest.raises(ValueError, match="invalid cell range A1:A2:A3"):
+        table.merge_cells("A1:A2:A3")
+
+    with pytest.raises(IndexError, match="row 4 out of range"):
+        table.merge_cells("A1:A5")
+
+    with pytest.raises(IndexError, match="column 4 out of range"):
+        table.merge_cells("A1:E1")
+
+    assert table.merge_ranges == []
+
+    with pytest.raises(ValueError, match="end must not precede start"):
+        table.merge_cells("C3:B2")
+
+    assert table.merge_ranges == []
+
+    table.merge_cells("A1:B2")
+    with pytest.raises(ValueError, match="cell range B3:C3 overlaps another range"):
+        table.merge_cells(["B3:B4", "B3:C3"])
+
+    with pytest.raises(ValueError, match="overlaps an existing merged range"):
+        table.merge_cells("B2:C3")
+
+    assert table.merge_ranges == ["A1:B2"]

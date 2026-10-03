@@ -12,7 +12,6 @@ from numbers_parser import (
     EmptyCell,
     ErrorCell,
     Style,
-    UnsupportedError,
     UnsupportedWarning,
     xl_rowcol_to_cell,
 )
@@ -573,20 +572,6 @@ def test_issue_90(configurable_save_file):
     assert doc.default_table.cell(0, 0).formatted_value == "£1,769,900"
 
 
-def test_issue_93(script_runner):
-    filename = "tests/data/test-issue-93.numbers"
-    with pytest.raises(UnsupportedError) as e:
-        _ = Document(filename)
-    assert str(e.value) == f"{filename}: encrypted documents are not supported"
-
-    ret = script_runner.run(
-        ["cat-numbers", filename],
-        print_result=False,
-    )
-    assert not ret.success
-    assert ret.stderr == f"{filename}: encrypted documents are not supported\n"
-
-
 def test_issue_96():
     doc = Document("tests/data/issue-96.numbers")
     table = doc.default_table
@@ -597,9 +582,10 @@ def test_issue_96():
 def test_issue_99():
     doc = Document("tests/data/issue-99.numbers")
     table = doc.default_table
-    cell = table.cell(0, 0)
-    with pytest.warns(UnsupportedWarning) as record:
-        style = cell.style
+    with pytest.warns(UnsupportedWarning) as record:  # noqa: PT031
+        style = table.cell(1, 0).style
+        # Second time doesn't warn
+        style = table.cell(0, 0).style
     assert len(record) == 1
     assert (
         str(
@@ -758,7 +744,7 @@ def test_issue_174(configurable_save_file):
         table.write(0, i, f"cell{i}")
         table.set_cell_style(0, i, style)
 
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(ValueError) as e:  # noqa: PT011
         table.set_cell_style(1, 0, Style(font_name="UnknownFont"))
     assert "font 'UnknownFont' does not exist" in str(e)
 
