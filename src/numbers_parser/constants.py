@@ -102,6 +102,7 @@ SUPPORTED_NUMBERS_VERSIONS = [
     "26.1",
     "26.2",
     "26.3",
+    "26.4",
 ]
 
 

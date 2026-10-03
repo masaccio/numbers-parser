@@ -2719,8 +2719,6 @@ class _NumbersModel(Cacheable):
                 if parent is None:
                     root_children[nodes[uuid]["key"]] = nodes[uuid]
                 else:
-                    if parent not in nodes:
-                        nodes[parent] = {"key": group_uuids[parent], "children": {}, "rows": []}
                     parent_node = nodes[parent]
                     parent_node["children"][nodes[uuid]["key"]] = nodes[uuid]
 

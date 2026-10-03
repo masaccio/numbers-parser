@@ -140,6 +140,7 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 .bootstrap/functionmap.py:
 	@$(call info_message,"extracting function names from Numbers")
 	@mkdir -p .bootstrap
+	@uv sync --group bootstrap
 	uv run python3 src/build/extract_functions.py $(TST_TABLES) $@ >/dev/null
 
 .bootstrap/fontmap.py:
@@ -150,6 +151,7 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 
 .bootstrap/protos/TNArchives.proto:
 	@$(call info_message,"Bootstrap: extracting protobufs from Numbers")
+	@uv sync --group bootstrap
 	uv run python3 src/build/protodump.py $(NUMBERS) .bootstrap/protos
 	uv run python3 src/build/rename_proto_files.py .bootstrap/protos
 
