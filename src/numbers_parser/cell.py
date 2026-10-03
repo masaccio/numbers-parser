@@ -1271,6 +1271,9 @@ class Cell(CellStorageFlags, Cacheable):
         return formatted_value
 
     def _date_format(self) -> str:
+        if self._datetime is None:
+            return ""
+
         date_format = self._model.table_format(self._table_id, self._date_format_id)
         if date_format.HasField("custom_uid"):
             format_uuid = NumbersUUID(date_format.custom_uid).hex

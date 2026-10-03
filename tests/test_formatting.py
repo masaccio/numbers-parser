@@ -354,6 +354,14 @@ def test_date_formatting():
                 check.equal(date, ref)
 
 
+def test_date_formatting_tolerates_missing_datetime():
+    doc = Document("tests/data/date_formats.numbers")
+    cell = doc.sheets[0].tables[0].cell(3, 6)
+    cell._datetime = None
+
+    check.equal(cell.formatted_value, "")
+
+
 def test_custom_formatting(pytestconfig):
     if pytestconfig.getoption("max_check_fails") is not None:
         max_check_fails = pytestconfig.getoption("max_check_fails")
