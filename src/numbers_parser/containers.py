@@ -7,7 +7,6 @@ from numbers_parser.constants import DOCUMENT_ID, PACKAGE_ID, SUPPORTED_NUMBERS_
 from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
 from numbers_parser.iwork import IWork, IWorkHandler
 
-
 _T = TypeVar("_T")
 
 
@@ -17,10 +16,10 @@ class ItemsList(Generic[_T]):
         self._items = [item_class(model, x) for x in refs]
 
     @overload
-    def __getitem__(self, key: int) -> _T: ...
+    def __getitem__(self, key: int) -> _T: ...  # pragma: no cover
 
     @overload
-    def __getitem__(self, key: str) -> _T: ...
+    def __getitem__(self, key: str) -> _T: ...  # pragma: no cover
 
     def __getitem__(self, key: int | str) -> _T:
         if isinstance(key, int):
