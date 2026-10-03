@@ -611,8 +611,11 @@ class CellStorageFlags:
     _rich_id: int = None
     _cell_style_id: int = None
     _text_style_id: int = None
+    _cond_style_id: int = None
+    _cond_rule_style_id: int = None
     _formula_id: int = None
     _control_id: int = None
+    _formula_error_id: int = None
     _suggest_id: int = None
     _num_format_id: int = None
     _currency_format_id: int = None
@@ -879,6 +882,14 @@ class Cell(CellStorageFlags, Cacheable):
         buffer: bytearray,
         model: object,
     ) -> None:
+        def unpack_int(buffer: bytes, offset: int) -> tuple[int, int]:
+            flag = unpack("<i", buffer[offset : offset + 4])[0]
+            return (flag, offset + 4)
+
+        def unpack_double(buffer: bytes, offset: int) -> tuple[int, int]:
+            flag = unpack("<d", buffer[offset : offset + 8])[0]
+            return (flag, offset + 8)
+
         d128 = None
         double = None
         seconds = None
@@ -896,59 +907,41 @@ class Cell(CellStorageFlags, Cacheable):
             d128 = _unpack_decimal128(buffer[offset : offset + 16])
             offset += 16
         if flags & 0x2:
-            double = unpack("<d", buffer[offset : offset + 8])[0]
-            offset += 8
+            double, offset = unpack_double(buffer, offset)
         if flags & 0x4:
-            seconds = unpack("<d", buffer[offset : offset + 8])[0]
-            offset += 8
+            seconds, offset = unpack_double(buffer, offset)
         if flags & 0x8:
-            storage_flags._string_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._string_id, offset = unpack_int(buffer, offset)
         if flags & 0x10:
-            storage_flags._rich_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._rich_id, offset = unpack_int(buffer, offset)
         if flags & 0x20:
-            storage_flags._cell_style_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._cell_style_id, offset = unpack_int(buffer, offset)
         if flags & 0x40:
-            storage_flags._text_style_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._text_style_id, offset = unpack_int(buffer, offset)
         if flags & 0x80:
-            # cond_style_id skipped
-            offset += 4
+            storage_flags._cond_style_id, offset = unpack_int(buffer, offset)
         if flags & 0x100:
-            # cond_rule_style_id skipped
-            offset += 4
+            storage_flags._cond_rule_style_id, offset = unpack_int(buffer, offset)
         if flags & 0x200:
-            storage_flags._formula_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._formula_id, offset = unpack_int(buffer, offset)
         if flags & 0x400:
-            storage_flags._control_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._control_id, offset = unpack_int(buffer, offset)
         if flags & 0x800:
-            # formula_error_id skipped
-            offset += 4
+            storage_flags._formula_error_id, offset = unpack_int(buffer, offset)
         if flags & 0x1000:
-            storage_flags._suggest_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._suggest_id, offset = unpack_int(buffer, offset)
         if flags & 0x2000:
-            storage_flags._num_format_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._num_format_id, offset = unpack_int(buffer, offset)
         if flags & 0x4000:
-            storage_flags._currency_format_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._currency_format_id, offset = unpack_int(buffer, offset)
         if flags & 0x8000:
-            storage_flags._date_format_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._date_format_id, offset = unpack_int(buffer, offset)
         if flags & 0x10000:
-            storage_flags._duration_format_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._duration_format_id, offset = unpack_int(buffer, offset)
         if flags & 0x20000:
-            storage_flags._text_format_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._text_format_id, offset = unpack_int(buffer, offset)
         if flags & 0x40000:
-            storage_flags._bool_format_id = unpack("<i", buffer[offset : offset + 4])[0]
-            offset += 4
+            storage_flags._bool_format_id, offset = unpack_int(buffer, offset)
         # Skip 0x80000 (comment_id) and 0x100000 (import_warning_id)
 
         cell_type = buffer[1]
@@ -1091,9 +1084,8 @@ class Cell(CellStorageFlags, Cacheable):
             return None
         elif isinstance(self, RichTextCell):
             flags = 0
-            length += 4
             cell_type = TSTArchives.automaticCellType
-            value = pack("<i", self._rich_id)
+            value = b""
         else:
             data_type = type(self).__name__
             table_name = self._model.table_name(self._table_id)
@@ -1122,6 +1114,14 @@ class Cell(CellStorageFlags, Cacheable):
             flags |= 0x40
             length += 4
             storage += pack("<i", self._text_style_id)
+        if self._cond_style_id is not None:
+            flags |= 0x80
+            length += 4
+            storage += pack("<i", self._cond_style_id)
+        if self._cond_rule_style_id is not None:
+            flags |= 0x100
+            length += 4
+            storage += pack("<i", self._cond_rule_style_id)
         if self._formula_id is not None:
             flags |= 0x200
             length += 4
@@ -1130,6 +1130,10 @@ class Cell(CellStorageFlags, Cacheable):
             flags |= 0x400
             length += 4
             storage += pack("<i", self._control_id)
+        if self._formula_error_id is not None:
+            flags |= 0x800
+            length += 4
+            storage += pack("<i", self._formula_error_id)
         if self._suggest_id is not None:
             flags |= 0x1000
             length += 4

@@ -233,17 +233,24 @@ def test_alignment_and_number_format_edges():
     assert _format_currency(None, None) is None
 
 
-def test_formula_error_storage_flag():
+def test_additional_flags(configurable_save_file):
     doc = Document()
     table = doc.sheets[0].tables[0]
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
     buffer[0] = 5
     buffer[1] = TSTArchives.genericCellType
     buffer[8:12] = pack("<i", 0x800)
+    buffer[12:16] = pack("<i", 1)
     cell = Cell._from_storage(table._table_id, 0, 0, buffer, doc._model)
     assert cell.row == 0
     assert cell.col == 0
     assert cell._flags == 0x800
+
+    doc = Document("tests/data/test-new-formulas.numbers")
+    doc.save(configurable_save_file)
+    new_doc = Document(configurable_save_file)
+    assert new_doc.default_table.cell(1, 3)._cond_style_id is not None
+    assert new_doc.default_table.cell(1, 3)._cond_rule_style_id is not None
 
 
 def test_bad_image_filenames():
