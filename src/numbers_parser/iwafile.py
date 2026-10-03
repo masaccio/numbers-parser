@@ -197,7 +197,7 @@ class IWAArchiveSegment:
     def from_dict(cls, _dict):
         header = dict_to_header(_dict["header"])
         objects = []
-        for _message_info, o in zip(header.message_infos, _dict["objects"]):
+        for _message_info, o in zip(header.message_infos, _dict["objects"], strict=False):
             objects.append(dict_to_message(o))
         return cls(header, objects)
 
@@ -210,7 +210,7 @@ class IWAArchiveSegment:
     def to_buffer(self):
         # Each message_info as part of the header needs to be updated
         # so that its length matches the object contained within.
-        for obj, message_info in zip(self.objects, self.header.message_infos):
+        for obj, message_info in zip(self.objects, self.header.message_infos, strict=False):
             try:
                 object_length = len(obj.SerializeToString())
                 provided_length = message_info.length

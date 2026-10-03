@@ -77,7 +77,7 @@ class Converter:
         # files with no header.
         if self.no_header:
             self.header = list(range(len(self.data[0])))
-        self.data = [dict(dict(zip(self.header, row)).items()) for row in self.data]
+        self.data = [dict(dict(zip(self.header, row, strict=False)).items()) for row in self.data]
 
         if self.reverse:
             self.data = list(reversed(self.data))
@@ -401,7 +401,7 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        for input_filename, output_filename in zip(args.csvfile, output_filenames):
+        for input_filename, output_filename in zip(args.csvfile, output_filenames, strict=False):
             converter = Converter(
                 day_first=args.day_first,
                 no_header=args.no_header,

@@ -460,7 +460,7 @@ FONT_FAMILY_DEFAULT = {}
 
 def update_font_maps(font_map: dict) -> dict:
     seen = {}
-    for k, v in font_map.items():
+    for v in font_map.values():
         family = v["family"]
         FONT_TUPLE_MAP[(family, v["style"])] = v
         if family not in seen:

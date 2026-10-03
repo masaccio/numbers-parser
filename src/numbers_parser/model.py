@@ -1115,7 +1115,7 @@ class _NumbersModel(Cacheable):
         buckets = self.objects[base_data_store.columnHeaders.identifier]
         clear_field_container(buckets.headers)
         # Transpose data to get columns
-        col_data = [list(x) for x in zip(*data)]
+        col_data = [list(x) for x in zip(*data, strict=False)]
 
         for col, cells in enumerate(col_data):
             num_rows = len(cells) - sum([isinstance(x, MergedCell) for x in cells])
@@ -1394,7 +1394,7 @@ class _NumbersModel(Cacheable):
 
         return self.table_height(table_id) + y_offset
 
-    def create_drawable(
+    def create_drawable(  # noqa: PLR0917
         self,
         sheet_id: int,
         x: float,
@@ -1416,7 +1416,7 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-    def add_table(
+    def add_table(  # noqa: PLR0917
         self,
         sheet_id: int,
         table_name: str,
@@ -2139,6 +2139,7 @@ class _NumbersModel(Cacheable):
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,
                 }
+        return None
 
     def cell_text_style(self, cell: Cell) -> object:
         """
@@ -2576,7 +2577,7 @@ class _NumbersModel(Cacheable):
             else:
                 row += 1
 
-    def add_stroke(
+    def add_stroke(  # noqa: PLR0917
         self,
         table_id: int,
         row: int,
