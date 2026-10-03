@@ -51,6 +51,12 @@ def test_bullets():
     assert table.cell(9, 2).formatted_bullets == TEST_NUMBERED_REF
 
 
+def test_background_image_can_omit_filename():
+    image = BackgroundImage(b"image data")
+    assert image.data == b"image data"
+    assert image.filename is None
+
+
 def test_bg_colors():
     doc = Document("tests/data/test-bgcolour.numbers")
     sheets = doc.sheets

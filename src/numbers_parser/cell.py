@@ -121,24 +121,24 @@ class BackgroundImage:
 
     Parameters
     ----------
-    data: bytes
+    data: bytes | None, optional
         Raw image data for a cell background image.
-    filename: str
-        Path to the image file.
+    filename: str | None, optional
+        Path to the image file. Only the basename is stored.
 
     """
 
     def __init__(self, data: bytes | None = None, filename: str | None = None) -> None:
         self._data = data
-        self._filename = basename(filename)
+        self._filename = basename(filename) if filename is not None else None
 
     @property
-    def data(self) -> bytes:
+    def data(self) -> bytes | None:
         """bytes: The background image as bytes for a cell, or None if no image."""
         return self._data
 
     @property
-    def filename(self) -> str:
+    def filename(self) -> str | None:
         """str: The image filename for a cell, or None if no image."""
         return self._filename
 
@@ -281,7 +281,7 @@ class Style:
 
     alignment: Alignment = DEFAULT_ALIGNMENT_CLASS  # : horizontal and vertical alignment
     bg_image: object = None  # : background image
-    bg_color: RGB | list[RGB] = None
+    bg_color: RGB | list[RGB] | None = None
     font_color: RGB = field(default_factory=default_color)
     font_size: float = DEFAULT_FONT_SIZE
     font_name: str = DEFAULT_FONT
@@ -333,7 +333,7 @@ class Style:
         ]
 
     @classmethod
-    def from_storage(cls, cell: object, model: object):
+    def from_storage(cls, cell: object, model: object) -> Style:
         bg_image = BackgroundImage(*cell._image_data) if cell._image_data is not None else None
         return Style(
             alignment=model.cell_alignment(cell),
@@ -1181,7 +1181,7 @@ class Cell(CellStorageFlags, Cacheable):
 
     @property
     @cache(num_args=0)
-    def _image_data(self) -> tuple[bytes, str]:
+    def _image_data(self) -> tuple[bytes, str] | None:
         """Return the background image data for a cell or None if no image."""
         if self._cell_style_id is None:
             return None
@@ -1697,8 +1697,8 @@ def _decode_date_format(date_format, value):
     return result
 
 
-def _decode_text_format(text_format, value: str):
-    """Parse a custom date format string and return a formatted number value."""
+def _decode_text_format(text_format, value: str) -> str:
+    """Apply a custom text format string and return the formatted text value."""
     custom_format_string = text_format.custom_format_string
     return custom_format_string.replace(CUSTOM_TEXT_PLACEHOLDER, value)
 
@@ -1936,7 +1936,7 @@ def _format_decimal(value: float, number_format, percent: bool = False) -> str:
     return formatted_value
 
 
-def _format_currency(value: float, number_format) -> str:
+def _format_currency(value: float, number_format) -> str | None:
     if value is None:
         return None
 
@@ -2177,7 +2177,7 @@ class CustomFormatting:
             raise TypeError(msg)
 
     @classmethod
-    def from_archive(cls, archive: object):
+    def from_archive(cls, archive: object) -> CustomFormatting:
         if archive.format_type == FormatType.CUSTOM_DATE:
             format_type = CustomFormattingType.DATETIME
         elif archive.format_type == FormatType.CUSTOM_NUMBER:

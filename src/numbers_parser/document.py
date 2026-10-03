@@ -38,6 +38,7 @@ __all__ = ["Document", "Sheet", "Table"]
 
 HORIZONTAL_BORDER_SIDES = ("top", "bottom")
 VERTICAL_BORDER_SIDES = ("left", "right")
+_CellValue = str | int | float | bool | datetime | timedelta | None
 
 
 class Document:
@@ -99,14 +100,16 @@ class Document:
             table.name = table_name
 
             # Table starts as 1x1 with no headers
-            table.add_row(num_rows - 1)
+            if num_rows > 1:
+                table.add_row(num_rows - 1)
             table.num_header_rows = num_header_rows
-            table.add_column(num_cols - 1)
+            if num_cols > 1:
+                table.add_column(num_cols - 1)
             table.num_header_cols = num_header_cols
 
     @property
-    def sheets(self) -> list[Sheet]:
-        """List[:class:`Sheet`]: A list of sheets in the document."""
+    def sheets(self) -> ItemsList[Sheet]:
+        """ItemsList[:class:`Sheet`]: Sheets indexed by position or name."""
         return self._sheets
 
     @property
@@ -256,6 +259,8 @@ class Document:
 
         Raises
         ------
+        IndexError:
+            If the style name already exists.
         TypeError:
             If ``font_size`` is not a ``float``, ``font_name`` is not a ``str``,
             ``bg_image`` is not a :py:class:`~numbers_parser.BackgroundImage`,
@@ -368,8 +373,8 @@ class Sheet:
         self._tables = ItemsList(self._model, refs, Table)
 
     @property
-    def tables(self) -> list[Table]:
-        """List[:class:`Table`]: A list of tables in the sheet."""
+    def tables(self) -> ItemsList[Table]:
+        """ItemsList[:class:`Table`]: Tables indexed by position or name."""
         return self._tables
 
     @property
@@ -459,7 +464,7 @@ class Sheet:
         num_cols,
         num_header_rows,
         num_header_cols,
-    ) -> object:
+    ) -> Table:
         if table_name is not None:
             if table_name in self._tables:
                 msg = f"table '{table_name}' already exists"
@@ -530,7 +535,7 @@ class Table(Cacheable):
         self._model.table_name_enabled(self._table_id, enabled)
 
     @property
-    def caption_enabled(self) -> int:
+    def caption_enabled(self) -> bool:
         """bool: ``True`` if the table caption is visible, ``False`` otherwise."""
         return self._model.caption_enabled(self._table_id)
 
@@ -569,7 +574,7 @@ class Table(Cacheable):
         return self._model.num_header_rows(self._table_id)
 
     @num_header_rows.setter
-    def num_header_rows(self, num_headers: int):
+    def num_header_rows(self, num_headers: int) -> None:
         if num_headers < 0:
             msg = "Number of headers cannot be negative"
             raise ValueError(msg)
@@ -579,7 +584,7 @@ class Table(Cacheable):
         if num_headers > MAX_HEADER_COUNT:
             msg = f"Number of headers cannot exceed {MAX_HEADER_COUNT} rows"
             raise ValueError(msg)
-        return self._model.num_header_rows(self._table_id, num_headers)
+        self._model.num_header_rows(self._table_id, num_headers)
 
     @property
     def num_header_cols(self) -> int:
@@ -596,14 +601,14 @@ class Table(Cacheable):
         Raises
         ------
         ValueError:
-            If the number of headers is negative, exceeds the number of rows in the
+            If the number of headers is negative, exceeds the number of columns in the
             table, or exceeds Numbers maximum number of headers (``MAX_HEADER_COUNT``).
 
         """
         return self._model.num_header_cols(self._table_id)
 
     @num_header_cols.setter
-    def num_header_cols(self, num_headers: int):
+    def num_header_cols(self, num_headers: int) -> None:
         if num_headers < 0:
             msg = "Number of headers cannot be negative"
             raise ValueError(msg)
@@ -613,7 +618,7 @@ class Table(Cacheable):
         if num_headers > MAX_HEADER_COUNT:
             msg = f"Number of headers cannot exceed {MAX_HEADER_COUNT} columns"
             raise ValueError(msg)
-        return self._model.num_header_cols(self._table_id, num_headers)
+        self._model.num_header_cols(self._table_id, num_headers)
 
     @property
     def height(self) -> int:
@@ -787,7 +792,7 @@ class Table(Cacheable):
         min_col: int | None = None,
         max_col: int | None = None,
         values_only: bool | None = False,
-    ) -> Iterator[tuple[Cell] | tuple[str]]:
+    ) -> Iterator[tuple[Cell | _CellValue, ...]]:
         """
         Produces cells from a table, by row.
 
@@ -808,8 +813,8 @@ class Table(Cacheable):
 
         Yields
         ------
-        Tuple[Cell] | Tuple[str]:
-            :class:`Cell` objects or string values for the row
+        tuple[Cell | _CellValue, ...]:
+            :class:`Cell` objects or cell values for each row
 
         Raises
         ------
@@ -821,8 +826,9 @@ class Table(Cacheable):
 
         .. code:: python
 
+            total = 0
             for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
-                sum += row
+                total += sum(value or 0 for value in row)
 
         """
         min_row = min_row if min_row is not None else 0
@@ -864,7 +870,7 @@ class Table(Cacheable):
         min_row: int | None = None,
         max_row: int | None = None,
         values_only: bool | None = False,
-    ) -> Iterator[tuple[Cell] | tuple[str]]:
+    ) -> Iterator[tuple[Cell | _CellValue, ...]]:
         """
         Produces cells from a table, by column.
 
@@ -885,8 +891,8 @@ class Table(Cacheable):
 
         Yields
         ------
-        Tuple[Cell] | Tuple[str]:
-            :class:`Cell` objects or string values for the row
+        tuple[Cell | _CellValue, ...]:
+            :class:`Cell` objects or cell values for each column
 
         Raises
         ------
@@ -898,8 +904,9 @@ class Table(Cacheable):
 
         .. code:: python
 
-            for col in table.iter_cols(min_row=2, max_row=7):
-                sum += col.value
+            total = 0
+            for col in table.iter_cols(min_row=2, max_row=7, values_only=True):
+                total += sum(value or 0 for value in col)
 
         """
         min_row = min_row if min_row is not None else 0
@@ -1007,7 +1014,7 @@ class Table(Cacheable):
         TypeError:
             If the style parameter is an invalid type.
         ValueError:
-            If the cell type cannot be determined from the type of `param3`.
+            If the cell type cannot be determined from the type of ``value``.
 
         """
         # TODO: write needs to retain/init the border
@@ -1363,17 +1370,50 @@ class Table(Cacheable):
             True
 
         """
-        if isinstance(cell_range, list):
-            for x in cell_range:
-                self.merge_cells(x)
-        else:
-            (start_cell_ref, end_cell_ref) = cell_range.split(":")
-            (row_start, col_start) = xl_cell_to_rowcol(start_cell_ref)
-            (row_end, col_end) = xl_cell_to_rowcol(end_cell_ref)
+        ranges = cell_range if isinstance(cell_range, list) else [cell_range]
+        parsed_ranges = []
+        for range_ref in ranges:
+            if not isinstance(range_ref, str):
+                msg = "cell ranges must be strings"
+                raise TypeError(msg)
+            cell_refs = range_ref.split(":")
+            if len(cell_refs) != 2:
+                msg = f"invalid cell range {range_ref}"
+                raise ValueError(msg)
+            start_cell_ref, end_cell_ref = cell_refs
+            row_start, col_start = xl_cell_to_rowcol(start_cell_ref)
+            row_end, col_end = xl_cell_to_rowcol(end_cell_ref)
+            if row_end < row_start or col_end < col_start:
+                msg = f"invalid cell range {range_ref}: end must not precede start"
+                raise ValueError(msg)
+            if row_end >= self.num_rows:
+                msg = f"row {row_end} out of range"
+                raise IndexError(msg)
+            if col_end >= self.num_cols:
+                msg = f"column {col_end} out of range"
+                raise IndexError(msg)
+
+            for other_row_start, other_col_start, other_row_end, other_col_end in parsed_ranges:
+                if (
+                    row_start <= other_row_end
+                    and row_end >= other_row_start
+                    and col_start <= other_col_end
+                    and col_end >= other_col_start
+                ):
+                    msg = f"cell range {range_ref} overlaps another range"
+                    raise ValueError(msg)
+            for row in range(row_start, row_end + 1):
+                for col in range(col_start, col_end + 1):
+                    cell = self._data[row][col]
+                    if cell.is_merged or cell.merge_range is not None:
+                        msg = f"cell range {range_ref} overlaps an existing merged range"
+                        raise ValueError(msg)
+            parsed_ranges.append((row_start, col_start, row_end, col_end))
+
+        merge_cells = self._model.merge_cells(self._table_id)
+        for row_start, col_start, row_end, col_end in parsed_ranges:
             num_rows = row_end - row_start + 1
             num_cols = col_end - col_start + 1
-
-            merge_cells = self._model.merge_cells(self._table_id)
             merge_cells.add_anchor(row_start, col_start, (num_rows, num_cols))
             for row in range(row_start, row_end + 1):
                 for col in range(col_start, col_end + 1):
@@ -1496,7 +1536,7 @@ class Table(Cacheable):
             for border_row_num in range(row, row + length):
                 self._model.set_cell_border(self._table_id, border_row_num, col, side, border_value)
 
-    def set_cell_formatting(self, *args: str, **kwargs) -> None:
+    def set_cell_formatting(self, *args: int | str, **kwargs) -> None:
         r"""
         Set the data format for a cell.
 

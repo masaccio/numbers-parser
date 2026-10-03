@@ -90,6 +90,25 @@ def test_cell_lookup():
     assert table.cell(3, 4).value == "XXX_3_5"
 
 
+def test_sheet_and_table_lookup_matches_case_insensitive_membership():
+    doc = Document()
+    sheet = doc.sheets[0]
+    table = sheet.tables[0]
+
+    assert doc.sheets["sheet 1"] is sheet
+    assert sheet.tables["table 1"] is table
+    assert "sheet 1" in doc.sheets
+    assert "table 1" in sheet.tables
+
+
+def test_items_list_rejects_out_of_range_negative_indexes():
+    doc = Document()
+    with pytest.raises(IndexError):
+        _ = doc.sheets[-2]
+    with pytest.raises(IndexError):
+        _ = doc.sheets[0].tables[-2]
+
+
 def test_cell_ref_lookup():
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets

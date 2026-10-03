@@ -66,6 +66,13 @@ def test_negative_cell_coordinates_are_rejected():
         table.write(0, -1, "negative column")
 
 
+@pytest.mark.parametrize(("num_rows", "num_cols"), [(1, 1), (1, 8), (12, 1)])
+def test_document_supports_single_row_or_column(num_rows, num_cols):
+    doc = Document(num_rows=num_rows, num_cols=num_cols)
+    assert doc.default_table.num_rows == num_rows
+    assert doc.default_table.num_cols == num_cols
+
+
 def test_large_table(configurable_save_file):
     doc = Document()
     sheets = doc.sheets

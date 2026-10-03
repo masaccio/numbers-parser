@@ -1,28 +1,37 @@
 import math
 import re
 from pathlib import Path
+from typing import Generic, TypeVar, overload
 
 from numbers_parser.constants import DOCUMENT_ID, PACKAGE_ID, SUPPORTED_NUMBERS_VERSIONS
 from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
 from numbers_parser.iwork import IWork, IWorkHandler
 
+_T = TypeVar("_T")
 
-class ItemsList:
-    def __init__(self, model, refs, item_class) -> None:
+
+class ItemsList(Generic[_T]):
+    def __init__(self, model: object, refs: list[int], item_class: type[_T]) -> None:
         self._item_name = item_class.__name__.lower()
         self._items = [item_class(model, x) for x in refs]
 
-    def __getitem__(self, key: int):
+    @overload
+    def __getitem__(self, key: int) -> _T: ...  # pragma: no cover
+
+    @overload
+    def __getitem__(self, key: str) -> _T: ...  # pragma: no cover
+
+    def __getitem__(self, key: int | str) -> _T:
         if isinstance(key, int):
             if key < 0:
                 key += len(self._items)
-            if key >= len(self._items):
+            if key < 0 or key >= len(self._items):
                 msg = f"index {key} out of range"
                 raise IndexError(msg)
             return self._items[key]
         if isinstance(key, str):
             for item in self._items:
-                if item.name == key:
+                if item.name.lower() == key.lower():
                     return item
             msg = f"no {self._item_name} named '{key}'"
             raise KeyError(msg)
@@ -33,15 +42,15 @@ class ItemsList:
     def __len__(self) -> int:
         return len(self._items)
 
-    def __contains__(self, key) -> bool:
+    def __contains__(self, key: str) -> bool:
         return key.lower() in [x.name.lower() for x in self._items]
 
-    def append(self, item) -> None:
+    def append(self, item: _T) -> None:
         self._items.append(item)
 
 
 class ObjectStore(IWorkHandler):
-    def __init__(self, filepath: Path, password: str | None) -> int:
+    def __init__(self, filepath: Path, password: str | None) -> None:
         self._objects = {}
         self._file_store = {}
         self._object_to_filename_map = {}
@@ -151,10 +160,10 @@ class ObjectStore(IWorkHandler):
     def file_store(self):
         return self._file_store
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: int):
         return self._objects[key]
 
-    def __contains__(self, key: str) -> bool:
+    def __contains__(self, key: int) -> bool:
         return key in self._objects
 
     def __len__(self) -> int:
