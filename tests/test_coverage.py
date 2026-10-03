@@ -252,6 +252,12 @@ def test_additional_flags(configurable_save_file):
     assert new_doc.default_table.cell(1, 3)._cond_style_id is not None
     assert new_doc.default_table.cell(1, 3)._cond_rule_style_id is not None
 
+    doc = Document("tests/data/formula-syntax-error.numbers")
+    assert doc.default_table.cell("A1")._formula_error_id == 1
+    doc.save(configurable_save_file)
+    new_doc = Document(configurable_save_file)
+    assert new_doc.default_table.cell("A1")._formula_error_id == 1
+
 
 def test_bad_image_filenames():
     doc = Document("tests/data/issue-69b.numbers")

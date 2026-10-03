@@ -1086,6 +1086,10 @@ class Cell(CellStorageFlags, Cacheable):
             flags = 0
             cell_type = TSTArchives.automaticCellType
             value = b""
+        elif isinstance(self, ErrorCell):
+            flags = 0
+            cell_type = TSTArchives.formulaErrorCellType
+            value = b""
         else:
             data_type = type(self).__name__
             table_name = self._model.table_name(self._table_id)
