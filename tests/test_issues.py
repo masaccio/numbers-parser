@@ -761,3 +761,22 @@ def test_issue_174(configurable_save_file):
         assert cell.style.bold == styles[i].bold
         assert cell.style.italic == styles[i].italic
         assert cell.style.font_size == styles[i].font_size
+
+
+def test_issue_236(configurable_save_file):
+    doc = Document("tests/data/formula-syntax-error.numbers")
+    assert doc.default_table.cell("A1")._formula_error_id == 1
+
+    doc.save(configurable_save_file)
+    new_doc = Document(configurable_save_file)
+    assert new_doc.default_table.cell("A1")._formula_error_id == 1
+
+    print("\n\n")
+    for row in range(1, 8):
+        ref_cell = doc.default_table.cell(row, 0)
+        new_cell = new_doc.default_table.cell(row, 0)
+        assert str(new_cell) == str(ref_cell)
+        assert new_cell.border.top == ref_cell.border.top
+        assert new_cell.style == ref_cell.style
+        assert new_cell.formula == ref_cell.formula
+        assert new_cell.formatted_value == ref_cell.formatted_value

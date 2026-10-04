@@ -623,6 +623,7 @@ class CellStorageFlags:
     _duration_format_id: int = None
     _text_format_id: int = None
     _bool_format_id: int = None
+    _extra_bits: int = 0
 
     def __str__(self) -> str:
         fields = [
@@ -659,7 +660,7 @@ class Cell(CellStorageFlags, Cacheable):
         sheet_name = self._model.sheet_name(self._model.table_id_to_sheet_id(self._table_id))
         cell_str = f"{sheet_name}@{table_name}[{self.row},{self.col}]:"
         cell_str += f"table_id={self._table_id}, type={self._type.name}, "
-        cell_str += f"value={self._value}, flags={self._flags:08x}, extras={self._extras:04x}"
+        cell_str += f"value={self._value}, flags={self._flags:08x}, extras={self._extra_bits:04x}"
         return ", ".join([cell_str, super().__str__()])
 
     @property
@@ -975,7 +976,7 @@ class Cell(CellStorageFlags, Cacheable):
         cell._d128 = d128
         cell._double = double
         cell._seconds = seconds
-        cell._extras = unpack("<H", buffer[6:8])[0]
+        cell._extra_bits = unpack("<H", buffer[6:8])[0]
         cell._flags = flags
 
         merge_cells = model.merge_cells(table_id)
@@ -983,7 +984,7 @@ class Cell(CellStorageFlags, Cacheable):
 
         if logging.getLogger(__package__).level == logging.DEBUG:
             # Guard to reduce expense of computing fields
-            debug(str(cell))
+            debug("%s, cell_type=%d", str(cell), cell_type)
 
         return cell
 
@@ -1104,6 +1105,7 @@ class Cell(CellStorageFlags, Cacheable):
         storage = bytearray(12)
         storage[0] = 5
         storage[1] = cell_type
+        storage[6:8] = pack("<H", self._extra_bits)
         storage += value
 
         if self._rich_id is not None:
@@ -1146,22 +1148,18 @@ class Cell(CellStorageFlags, Cacheable):
             flags |= 0x2000
             length += 4
             storage += pack("<i", self._num_format_id)
-            storage[6] |= 1
         if self._currency_format_id is not None:
             flags |= 0x4000
             length += 4
             storage += pack("<i", self._currency_format_id)
-            storage[6] |= 2
         if self._date_format_id is not None:
             flags |= 0x8000
             length += 4
             storage += pack("<i", self._date_format_id)
-            storage[6] |= 8
         if self._duration_format_id is not None:
             flags |= 0x10000
             length += 4
             storage += pack("<i", self._duration_format_id)
-            storage[6] |= 4
         if self._text_format_id is not None:
             flags |= 0x20000
             length += 4
@@ -1170,9 +1168,14 @@ class Cell(CellStorageFlags, Cacheable):
             flags |= 0x40000
             length += 4
             storage += pack("<i", self._bool_format_id)
-            storage[6] |= 0x20
-        if self._string_id is not None:
-            storage[6] |= 0x80
+
+        # TODO: pack extra_bits for newly created cells.
+        #       0x0001 - number
+        #       0x0002 - currency
+        #       0x0004 - duration
+        #       0x0008 - datetime
+        #       0x0020 - bool
+        #       0x0080 - string
 
         storage[8:12] = pack("<i", flags)
         if len(storage) < 32:
