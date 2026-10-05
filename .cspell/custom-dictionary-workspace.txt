@@ -75,6 +75,7 @@ PYTHONPATH
 rgbspace
 Roboto
 rowcol
+scikit
 setaf
 setuptools
 sigfig
