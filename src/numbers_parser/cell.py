@@ -1104,21 +1104,23 @@ class Cell(CellStorageFlags, Cacheable):
 
         # TODO: reason about these bits more as this is entirely built from a
         #       scikit DecisionTreeClassifier based on observations of available
-        #       Numbers documents.
-        self._extra_bits = sum(
-            1 << bit
-            for value, bit in (
-                (self._num_format_id, 0),
-                (self._currency_format_id, 1),
-                (self._duration_format_id, 2),
-                (self._date_format_id, 3),
-                (self._bool_format_id, 5),
-                (self._text_format_id, 7),
-                (self._currency_format_id, 11),
-                (self._formula_id, 15),
-            )
-            if value is not None
-        )
+        #       Numbers documents. A side-effect of this approach is that it
+        #       converts Automatic cells into standard cells which feels wrong.
+        #
+        # self._extra_bits = sum(
+        #     1 << bit
+        #     for value, bit in (
+        #         (self._num_format_id, 0),
+        #         (self._currency_format_id, 1),
+        #         (self._duration_format_id, 2),
+        #         (self._date_format_id, 3),
+        #         (self._bool_format_id, 5),
+        #         (self._text_format_id, 7),
+        #         (self._currency_format_id, 11),
+        #         (self._formula_id, 15),
+        #     )
+        #     if value is not None
+        # )
 
         storage = bytearray(12)
         storage[0] = 5
