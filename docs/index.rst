@@ -61,6 +61,7 @@ It supports and is tested against Python versions from 3.10 onwards. It is not c
      api/development
      api/file-format
      api/changes-4.0
+     credits.rst
 
 .. only:: MarkdownDocs
 

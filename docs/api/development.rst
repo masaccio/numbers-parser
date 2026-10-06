@@ -3,19 +3,6 @@
 Development
 ###########
 
-Numbers File Formats
---------------------
-
-Numbers uses a proprietary, compressed binary format to store its
-tables. This format is comprised of a zip file containing images, as
-well as `Snappy <https://github.com/google/snappy>`__-compressed
-`Protobuf <https://github.com/protocolbuffers/protobuf>`__ ``.iwa``
-files containing metadata, text, and all other definitions used in the
-spreadsheet.
-
-Protobuf updates
-~~~~~~~~~~~~~~~~
-
 As ``numbers-parser`` includes private Protobuf definitions extracted
 from a copy of Numbers, new versions of Numbers will inevitably create
 ``.numbers`` files that cannot be read by ``numbers-parser``. As new
@@ -58,5 +45,3 @@ appreciated).
 this dependency is excluded from default Poetry installs to ensure that tests
 can run on non-Mac OSes. You can run ``poetry install --with bootstrap`` to get
 the required packages.
-
-.. include:: ../credits.rst
