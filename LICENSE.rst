@@ -1,4 +1,4 @@
-Copyright 2021 Jon Connell
+Copyright 2021-2026 Jon Connell
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 and associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,20 +18,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 Third-party acknowledgments
 ---------------------------
 
-The following third-party projects are acknowledged in ``docs/credits.rst``.
-Their respective licenses apply to the referenced third-party work:
+The following third-party projects are acknowledged in ``docs/credits.rst``.  The full license texts and original copyright notices for these dependencies are included in the ``licenses/`` directory of this repository.
 
 * `keynote-parser <https://github.com/psobot/keynote-parser>`__ by Peter Sobot
-  is licensed under the MIT License.
-* `iWorkFileFormat <https://github.com/obriensp/iWorkFileFormat>`__ by Sean
-  Patrick O'Brien is licensed under the MIT License.
-* `Stingray-Reader <https://github.com/slott56/Stingray-Reader>`__ by Steven
-  Lott is licensed under
-  `CC BY-NC-SA 4.0 <https://creativecommons.org/licenses/by-nc-sa/4.0/>`__.
-* `fast-formula-parser <https://github.com/LesterLyu/fast-formula-parser>`__
-  by Dishu (Lester) Lyu is licensed under the MIT License.
-* `SheetJS <https://github.com/SheetJS/sheetjs>`__ is licensed under the
-  `Apache License 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`__.
+  is licensed under the MIT License. See ``licenses/keynote-parser.txt``.
+
+* `Excel reference parsing from <https://github.com/jmcnamara/XlsxWriter>`__ by John McNamara
+  is licensed under the BSD 2-Clause License. See ``licenses/XlsxWriter.txt``.
+
+* `iWorkFileFormat <https://github.com/obriensp/iWorkFileFormat>`__ by Sean Patrick O'Brien 
+  is licensed under the MIT License. See ``licenses/iWorkFileFormat.txt``.
+
+* `Stingray-Reader <https://github.com/slott56/Stingray-Reader>`__ by Steven Lott 
+  is licensed under CC BY-NC-SA 4.0. 
+
+* `fast-formula-parser <https://github.com/LesterLyu/fast-formula-parser>`__ by Dishu (Lester) Lyu 
+  is licensed under the MIT License. See ``licenses/fast-formula-parser.txt``.
+
+* `SheetJS <https://github.com/SheetJS/sheetjs>`__ 
+  is licensed under the Apache License 2.0. See ``licenses/SheetJS.txt``.
 
 ``docs/api/file-format.rst`` is a derivative work based on the iWork format
 research by Sean Patrick O'Brien, the Numbers/IWA documentation in
