@@ -1,0 +1,642 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>5. Sheet Module – Sheet and Row Access &#8212; The Stingray Schema-Based File Reader</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="6. Schema Package – Schema and Attribute Definitions" href="schema.html" />
+    <link rel="prev" title="4. Cell Module – Data Element Containers and Conversions" href="cell.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sheet">
+<span id="sheet-module-sheet-and-row-access"></span><span id="sheets"></span><h1>5. Sheet Module – Sheet and Row Access<a class="headerlink" href="#module-sheet" title="Permalink to this headline">¶</a></h1>
+<p>A <em>Sheet</em> is a generator
+of <em>Row</em> objects.  A <em>Row</em> is a sequence of <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instances,
+identified by position within the row.</p>
+<p>We have three variations on <a class="reference internal" href="#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a>.</p>
+<ul class="simple">
+<li>A simple <a class="reference internal" href="#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a>  lacks a schema.
+(This corresponds with <code class="xref py py-func docutils literal notranslate"><span class="pre">csv.reader()</span></code>.)
+For workbooks with a well-known physical format, the schema can be optional.
+Each <a class="reference internal" href="#sheet.Row" title="sheet.Row"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Row</span></code></a> object can be built eagerly and accessed
+by position.</li>
+<li>A sheet with a schema.  There are two variations.<ul>
+<li><a class="reference internal" href="#sheet.EmbeddedSchemaSheet" title="sheet.EmbeddedSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.EmbeddedSchemaSheet</span></code></a> contains a schema.
+This could be a simple as column titles in the first row.
+(This corresponds to <code class="xref py py-class docutils literal notranslate"><span class="pre">csv.DictReader</span></code>.)
+Or it could be considerably more complex.</li>
+<li><a class="reference internal" href="#sheet.ExternalSchemaSheet" title="sheet.ExternalSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.ExternalSchemaSheet</span></code></a> requires an external schema.
+This schema may be simply a list of column titles supplied externally.
+More often, the schema is a complete physical format description for
+Fixed or COBOL format files.</li>
+</ul>
+</li>
+</ul>
+<p>A known physical format (like a workbook) can build <a class="reference internal" href="#sheet.Row" title="sheet.Row"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Row</span></code></a> objects eagerly with or without a schema.
+In the case of COBOL and fixed-format files, however, a <a class="reference internal" href="#sheet.Row" title="sheet.Row"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Row</span></code></a>
+cannot be built eagerly.  It must be a lazy
+object which only builds <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> as needed.
+See <a class="reference internal" href="cobol.html#cobol"><span class="std std-ref">The COBOL Package</span></a> for details.</p>
+<div class="section" id="get-embedded-schema-use-case">
+<h2>5.1. Get Embedded Schema Use Case<a class="headerlink" href="#get-embedded-schema-use-case" title="Permalink to this headline">¶</a></h2>
+<p>For an <a class="reference internal" href="#sheet.EmbeddedSchemaSheet" title="sheet.EmbeddedSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.EmbeddedSchemaSheet</span></code></a>, the application (or Workbook) must
+do a three-step dance to get the data using schema that is embedded in the sheet.</p>
+<ol class="arabic simple">
+<li>Build a <a class="reference internal" href="#sheet.EmbeddedSchemaSheet" title="sheet.EmbeddedSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.EmbeddedSchemaSheet</span></code></a> with an
+“embedded schema loader” class.  (For example, <a class="reference internal" href="schema_loader.html#schema.loader.HeadingRowSchemaLoader" title="schema.loader.HeadingRowSchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.loader.HeadingRowSchemaLoader</span></code></a>.)
+The loader partitions rows into two sets: header and data.</li>
+<li>Load the schema from the sheet.
+The <a class="reference internal" href="#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a> will build an object of the loader class and use it to
+gather the schema information.
+The schema loading may involve skipping irrelevant rows or
+combining multi-line headings or anything else required to parse the schema.</li>
+<li>Get the rows from the sheet.
+This will, also, invoke the attached loader to filter rows so that the header is not seen as data.</li>
+</ol>
+<p>The code might look like this:</p>
+<pre class="literal-block">
+with <em>open</em> as wb:
+    sheet = EmbeddedSchemaSheet( workbook, 'Sheet1', HeadingRowSchemaLoader )
+    counts= process_sheet( sheet )
+    pprint.pprint( counts )
+</pre>
+<p>The idea is to simply access a sheet with column titles, no matter how complex
+the column titles turn out to be.</p>
+</div>
+<div class="section" id="get-external-schema-use-case">
+<h2>5.2. Get External Schema Use Case<a class="headerlink" href="#get-external-schema-use-case" title="Permalink to this headline">¶</a></h2>
+<p>For an <a class="reference internal" href="#sheet.ExternalSchemaSheet" title="sheet.ExternalSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.ExternalSchemaSheet</span></code></a>, the application (or Workbook)
+must do a four-step dance to get data using schema.</p>
+<ol class="arabic simple">
+<li>Build a <a class="reference internal" href="schema_loader.html#schema.loader.ExternalSchemaLoader" title="schema.loader.ExternalSchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.loader.ExternalSchemaLoader</span></code></a> as a schema loader.
+This loader will require a source workbook, sheet name and a reader object.</li>
+<li>Get the Schema object from the loader.</li>
+<li>Build a <a class="reference internal" href="#sheet.ExternalSchemaSheet" title="sheet.ExternalSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.ExternalSchemaSheet</span></code></a> with the Schema object.</li>
+<li>Get the rows from the sheet.</li>
+</ol>
+<p>And yes, the external source, is another
+spreadsheet!  Worse, the external source could be a fixed file or workbook
+for which a meta-schema is required to read the schema.</p>
+<p>The code might look like this:</p>
+<pre class="literal-block">
+with <em>open schema</em> as swb:
+    esl = ExternalSchemaLoader( swb, sheet_name='Schema' )
+    schema = esl.load()
+with <em>open data</em> as wb:
+    sheet = ExternalSchemaSheet( wb, 'Sheet1', schema )
+    counts= process_sheet( sheet )
+    pprint.pprint( counts )
+</pre>
+<p>The idea is to get a schema and then use the schema to access data.</p>
+</div>
+<div class="section" id="get-rows-use-case">
+<h2>5.3. Get Rows Use Case<a class="headerlink" href="#get-rows-use-case" title="Permalink to this headline">¶</a></h2>
+<p>The essential job of a <a class="reference internal" href="#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a> is to produce <a class="reference internal" href="#sheet.Row" title="sheet.Row"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Row</span></code></a> instances.
+A row is a sequence of <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instances.</p>
+<p>Note that <code class="xref py py-mod docutils literal notranslate"><span class="pre">csv</span></code> is eager about building a row from the source data.
+This isn’t universally appropriate.  COBOL files require lazy construction
+of the row’s cells.</p>
+<p>A <a class="reference internal" href="schema.html#schema.Schema" title="schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Schema</span></code></a> can transform a sequence row into a dictionary row
+or a named tuple row.
+The <a class="reference internal" href="schema.html#schema.Attribute.name" title="schema.Attribute.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">schema.Attribute.name</span></code></a> becomes the key for this row-as-dictionary.</p>
+<p>We specifically delegate the row-as-dictionary interpretation to the <a class="reference internal" href="schema.html#schema.Schema" title="schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Schema</span></code></a>,
+and avoid doing it in the <a class="reference internal" href="#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a>.  This is because most
+workbook schemata are flat.  However, a COBOL schema can have a very complex
+structure, making the row-as-dictionary too simplistic to be useful.</p>
+<p>As noted above, there are two candidate implementations of a Row.</p>
+<ul class="simple">
+<li><strong>Eager</strong>.  Appropriate for most (but not all) Physical Formats.  The
+idea is to apply the schema immediately to create the row as a
+tuple of cells.  <code class="xref py py-mod docutils literal notranslate"><span class="pre">csv</span></code> does this, and it can be applied to
+other workbook formats.  It can be applied to simple, flat
+Fixed format files.</li>
+<li><strong>Lazy</strong>.  This is more appropriate for Fixed format files and COBOL format
+files.  Specifically, the data conversion, redefines and repeating group
+issues force us to wait for cell access rather than immediately create all
+possible cells.  Indeed, for  COBOL files with REDEFINES definitions,
+some of the cells cannot be built eagerly; application logic must determine
+which attributes are valid or invalid.</li>
+</ul>
+<p>Note that the API is the same. The implementation differs.</p>
+<p>Here’s our prototypical code.</p>
+<pre class="literal-block">
+def process_sheet( sheet ):
+    counts= defaultdict( int )
+    for row in sheet.rows():
+        #<em>row is a sequence of</em> Cell <em>instances</em>
+        print( repr(c) for c in row )
+        counts['read'] += 1
+    return counts
+</pre>
+<p>Ultimately, the sequence nature of a row is unsatisfying.   We’ll have to
+wait until <a class="reference internal" href="schema.html#schema"><span class="std std-ref">Schema Package – Schema and Attribute Definitions</span></a> to extend this into something useful.</p>
+</div>
+<div class="section" id="sheet-identification">
+<h2>5.4. Sheet Identification<a class="headerlink" href="#sheet-identification" title="Permalink to this headline">¶</a></h2>
+<p>For CSV and TAB files, as well as COBOL and Flat files, there is one anonymous
+“sheet” that is the entire workbook.</p>
+<p>For XLS, XLSX, and ODS formats, however, there are sheets within the workbook.</p>
+<p>For Numbers, there are “pages” or “workspaces” that have multiple tables. Each
+Numbers <strong>table</strong> is – effectively – a <a class="reference internal" href="#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a>. The
+intermediate organization level, “workspace”, is an additional detail.</p>
+<p>We handle this in the following way.</p>
+<ul class="simple">
+<li>One anonymous sheet has a name either of <code class="docutils literal notranslate"><span class="pre">None</span></code> or the basename of the file.</li>
+<li>Simple sheets have names which are simple strings.</li>
+<li>Numbers workspaces with sheets have names which are two-tuples of
+workspace (“sheet”) and table name.</li>
+</ul>
+</div>
+<div class="section" id="model">
+<h2>5.5. Model<a class="headerlink" href="#model" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>http://yuml.me/diagram/scruffy;dir:td/class/
+#sheet,
+[Workbook]&lt;&gt;-n[Sheet],
+[Sheet]&lt;&gt;-n[Row],
+[Row]^[LazyRow],
+[LazyRow]-gets-&gt;[Workbook],
+[Sheet]^[EmbeddedSchemaSheet],
+[Sheet]^[ExternalSchemaSheet],
+[EmbeddedSchemaSheet]-&gt;[SchemaLoader].
+</pre></div>
+</div>
+<img alt="_images/sheet.png" src="_images/sheet.png" />
+</div>
+<div class="section" id="overheads">
+<h2>5.6. Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h2>
+<p>Sheet and Row are essentially lazy sequences.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;stingray.sheet -- Defines Row as  a collection of Cells and Sheet as a collection of Rows.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Sequence</span>
+</pre></div>
+</div>
+<p>There are two “implicit” dependencies, also.
+A row depends on details of an <a class="reference internal" href="schema.html#schema.Attribute" title="schema.Attribute"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Attribute</span></code></a> and a <a class="reference internal" href="workbook/base.html#workbook.base.Workbook" title="workbook.base.Workbook"><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.base.Workbook</span></code></a>.
+However, there’s no real need to present a formal import for this.
+The Attribute and Workbook are simply opaque
+objects passed around as arguments.</p>
+</div>
+<div class="section" id="sheet-class">
+<h2>5.7. Sheet Class<a class="headerlink" href="#sheet-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sheet.Sheet">
+<em class="property">class </em><code class="descclassname">sheet.</code><code class="descname">Sheet</code><a class="headerlink" href="#sheet.Sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>An iterator over the rows of data in a workbook.
+Subclasses implement different bindings for the sheet’s schema information.</p>
+<p>This is largely abstract, since there’s no schema binding available.
+There are subclasses which have a schema binding.
+See <a class="reference internal" href="#sheet.ExternalSchemaSheet" title="sheet.ExternalSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.ExternalSchemaSheet</span></code></a> and <a class="reference internal" href="#sheet.EmbeddedSchemaSheet" title="sheet.EmbeddedSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.EmbeddedSchemaSheet</span></code></a>.</p>
+<dl class="attribute">
+<dt id="sheet.Sheet.workbook">
+<code class="descname">workbook</code><a class="headerlink" href="#sheet.Sheet.workbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Workbook</span></code> which contains this Sheet.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sheet.Sheet.name">
+<code class="descname">name</code><a class="headerlink" href="#sheet.Sheet.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of this sheet.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Sheet</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An iterator over rows.</span>
+<span class="sd">        A binding to a workbook.</span>
+<span class="sd">        A subclass of Sheet will be bound to a schema.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">workbook</span><span class="p">,</span> <span class="n">sheet_name</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workbook</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">=</span> <span class="n">workbook</span><span class="p">,</span> <span class="n">sheet_name</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">(</span><span class="si">{1!r}</span><span class="s2">,</span><span class="si">{2!r}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__qualname__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">workbook</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">rows</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterate through the rows of this sheet.</span>
+<span class="sd">        This is a convenient interface for ``self.workbook.rows_of(self)``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workbook</span><span class="o">.</span><span class="n">rows_of</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="row-class">
+<h2>5.8. Row Class<a class="headerlink" href="#row-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sheet.Row">
+<em class="property">class </em><code class="descclassname">sheet.</code><code class="descname">Row</code><a class="headerlink" href="#sheet.Row" title="Permalink to this definition">¶</a></dt>
+<dd><p>A single row in Sheet; a sequence of <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instances.</p>
+<p>A Sheet produces this simple row-as-list.  A Schema can transform this
+into row-as-dict or some even more elaborate structure.</p>
+<p>A row depends on details of an <a class="reference internal" href="schema.html#schema.Attribute" title="schema.Attribute"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Attribute</span></code></a>
+and a <a class="reference internal" href="workbook/base.html#workbook.base.Workbook" title="workbook.base.Workbook"><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.base.Workbook</span></code></a>.
+This feels circular. But this Sheet/Row schema definition is really
+just a convenient wrapper around the Workbook details.</p>
+<p>The <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> conversions are handled by the <a class="reference internal" href="workbook/base.html#workbook.base.Workbook" title="workbook.base.Workbook"><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.base.Workbook</span></code></a>.
+Some Workbooks have cell content identified by position.
+Some Workbooks have cell content identified by size, offset and encoding.
+Therefore, we must provide the Attribute details to the Workbook
+to get the Cell’s value.</p>
+<dl class="attribute">
+<dt id="sheet.Row.sheet">
+<code class="descname">sheet</code><a class="headerlink" href="#sheet.Row.sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sheet</span></code></a> which contains this row.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sheet.Row.data">
+<code class="descname">data</code><a class="headerlink" href="#sheet.Row.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>The sequence of <code class="xref py py-class docutils literal notranslate"><span class="pre">Cell</span></code> values for this row.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Row</span><span class="p">(</span> <span class="n">Sequence</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Eager Row: a tuple of Cell values.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Build another Row.</span>
+
+<span class="sd">        :param sheet: the containing sheet.</span>
+<span class="sd">        :param *data: the various Cell values in this row</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span> <span class="n">sheet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">=</span> <span class="n">data</span>
+    <span class="k">def</span> <span class="nf">cell</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a specific cell, based on a schema Attribute.</span>
+
+<span class="sd">        :param attribute: The attribute&#39;s value to return.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">workbook</span><span class="o">.</span><span class="n">row_get</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Basic Sequence features</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">cell</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span> <span class="n">cell</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">d</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">index</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To approach the <code class="xref py py-class docutils literal notranslate"><span class="pre">csv.DictReader</span></code> API (without the eager processing),
+we need make the <code class="docutils literal notranslate"><span class="pre">Row</span></code> API slightly more fluent with a <code class="docutils literal notranslate"><span class="pre">by_name()</span></code>
+method.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">by_name</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="p">):</span>
+    <span class="n">attr</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">attr</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that the presumption in this interface is that the Attribute is
+sufficiently detailed to specify a single <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a>.
+For non-COBOL workbooks, this is perfectly true.</p>
+<p>For COBOL, however, there are groups and occurs clauses, meaning that a single Attribute can
+represent multiple <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instances.
+Which one do we mean?  And how do we specify this selection?</p>
+<ul>
+<li><p class="first">The <code class="xref py py-meth docutils literal notranslate"><span class="pre">sheet.Row.cell()</span></code> method can return a structure with all the values.
+Ordinary Python can then pick apart the instances.
+This requires working up the DDE hierarchy to locate all of the applicable
+“occurs” by to construct the proper dimensionality of an attribute.</p>
+<p>It also means getting all of the values to create a tuple or nested
+tuple-of-tuple structure for the various dimensions. Eager processing isn’t
+going to work out well.</p>
+</li>
+<li><p class="first">The <code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Attribute.index</span></code> method
+selects data from the row in the workbook.  This applies the indices
+to the Attribute to compute the required offset into the source data.</p>
+<p>We’re constrained by the laziness requirement of COBOL to lean toward the
+this implementation.</p>
+</li>
+</ul>
+<dl class="class">
+<dt id="sheet.LazyRow">
+<em class="property">class </em><code class="descclassname">sheet.</code><code class="descname">LazyRow</code><a class="headerlink" href="#sheet.LazyRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>When we can’t eagerly build all <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instances for a given
+row, this class provides the proper API.</p>
+<p>A COBOL REDEFINES clause may make the bytes invalid in all but one of the
+aliases for an attribute.  Also, there’s no formal <code class="docutils literal notranslate"><span class="pre">NULL</span></code> value in COBOL, so
+optional fields can have invalid data.</p>
+<p>Further, we may have Occurs Depending On. This means we can’t set size and
+offset until we can access actual data.</p>
+<p>For these reasons, we have a <a class="reference internal" href="#sheet.LazyRow" title="sheet.LazyRow"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.LazyRow</span></code></a>, which conforms to the
+interface for a <a class="reference internal" href="#sheet.Row" title="sheet.Row"><code class="xref py py-class docutils literal notranslate"><span class="pre">Row</span></code></a>, but isn’t an actual sequence. No data is
+processed until the <code class="xref py py-meth docutils literal notranslate"><span class="pre">LazyRow.__getitem__()</span></code> method is used.</p>
+<dl class="attribute">
+<dt id="sheet.LazyRow.sheet">
+<code class="descname">sheet</code><a class="headerlink" href="#sheet.LazyRow.sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sheet</span></code></a> to which this row belongs.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sheet.LazyRow._state">
+<code class="descname">_state</code><a class="headerlink" href="#sheet.LazyRow._state" title="Permalink to this definition">¶</a></dt>
+<dd><p>The worksheet’s internal state information, required
+to perform lazy extraction of the cell values. The LazyRow
+superclass doesn’t use this. A subclass may need it.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LazyRow</span><span class="p">(</span> <span class="n">Sequence</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Lazy Row: a tuple-like sequence of Cell values.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span><span class="p">,</span> <span class="o">**</span><span class="n">state</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Build another Row.</span>
+
+<span class="sd">        :param sheet: the containing sheet.</span>
+<span class="sd">        :param **state: worksheet-specific state value to save.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span> <span class="n">sheet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="o">=</span> <span class="n">state</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;LazyRow(sheet=</span><span class="si">{0!r}</span><span class="s2">, state=</span><span class="si">{1!r}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">cell</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a specific cell, based on a schema Attribute.</span>
+
+<span class="sd">        :param attribute: The attribute&#39;s value to return.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">workbook</span><span class="o">.</span><span class="n">row_get</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Basic Sequence features</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">workbook</span><span class="o">.</span><span class="n">row_get</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span> <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="kc">None</span>
+<span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">cell</span> <span class="p">):</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">col</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">workbook</span><span class="o">.</span><span class="n">row_get</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span> <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">cell</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+<span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">index</span> <span class="p">):</span>
+    <span class="n">attribute</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">workbook</span><span class="o">.</span><span class="n">row_get</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>To approach the <code class="xref py py-class docutils literal notranslate"><span class="pre">csv.DictReader</span></code> API (without the eager processing),
+we could make the <code class="docutils literal notranslate"><span class="pre">Row</span></code> API slightly more fluent with a <code class="docutils literal notranslate"><span class="pre">by_name()</span></code>
+method.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">by_name</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="p">):</span>
+    <span class="n">attr</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This isn’t implemented, because it doesn’t seem very helpful.</p>
+</div>
+<div class="section" id="externalschemasheet-class">
+<h2>5.9. ExternalSchemaSheet Class<a class="headerlink" href="#externalschemasheet-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sheet.ExternalSchemaSheet">
+<em class="property">class </em><code class="descclassname">sheet.</code><code class="descname">ExternalSchemaSheet</code><a class="headerlink" href="#sheet.ExternalSchemaSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Sheet bound to a schema can be used to fetch data. This is a
+concrete subclass of <a class="reference internal" href="#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sheet</span></code></a>.</p>
+<p>A Sheet with an external schema can have one of two sources for
+the bound schema.</p>
+<ul class="simple">
+<li>An external sheet that doesn’t have row headers to embed the schema information.
+In this case, an eager Workbook Row can eagerly create a Sequence of <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instances.
+The Schema information can be associated by position.</li>
+<li>A Sheet that is really a COBOL or Fixed format file.
+In this case, the Workbook cannot create a sequence of <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instances.
+Instead, the Sheet (which has schema information) must
+provide a LazyRow with deferred Cell conversions.</li>
+</ul>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ExternalSchemaSheet</span><span class="p">(</span> <span class="n">Sheet</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A Sheet with an external Schema.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">workbook</span><span class="p">,</span> <span class="n">sheet_name</span><span class="p">,</span> <span class="n">schema</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize a sheet for processing.</span>
+
+<span class="sd">        :param workbook: the containing workbook</span>
+<span class="sd">        :param sheet_name: the specific sheet to locate within the Workbook</span>
+<span class="sd">        :param schema: the :py:class:`schema.Schema` schema definition.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">workbook</span><span class="p">,</span> <span class="n">sheet_name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">=</span> <span class="n">schema</span>
+    <span class="k">def</span> <span class="nf">rows</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterate through the rows of this sheet.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workbook</span><span class="o">.</span><span class="n">rows_of</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="embeddedschemasheet-class">
+<h2>5.10. EmbeddedSchemaSheet Class<a class="headerlink" href="#embeddedschemasheet-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sheet.EmbeddedSchemaSheet">
+<em class="property">class </em><code class="descclassname">sheet.</code><code class="descname">EmbeddedSchemaSheet</code><a class="headerlink" href="#sheet.EmbeddedSchemaSheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>A sheet bound to a schema can be used to fetch data. This is a
+concrete subclass of <a class="reference internal" href="#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sheet</span></code></a>.</p>
+<p>A sheet with an embedded schema must also have a <a class="reference internal" href="schema_loader.html#schema.loader.SchemaLoader" title="schema.loader.SchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.loader.SchemaLoader</span></code></a> class provided.
+The loader
+is invoked to build the <a class="reference internal" href="schema.html#schema.Schema" title="schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Schema</span></code></a> object that’s bound
+to the sheet.</p>
+<p>The <a class="reference internal" href="schema_loader.html#schema.loader.SchemaLoader" title="schema.loader.SchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.loader.SchemaLoader</span></code></a> is also used to return the rest of the rows;
+those that weren’t used to build the schema.</p>
+<dl class="attribute">
+<dt id="sheet.EmbeddedSchemaSheet.loader">
+<code class="descname">loader</code><a class="headerlink" href="#sheet.EmbeddedSchemaSheet.loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code> used to build schema from rows in this sheet.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">EmbeddedSchemaSheet</span><span class="p">(</span> <span class="n">ExternalSchemaSheet</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A Sheet with a Schema embedded in it.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">workbook</span><span class="p">,</span> <span class="n">sheet_name</span><span class="p">,</span> <span class="n">loader_class</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize a sheet for processing.</span>
+
+<span class="sd">        :param workbook: the containing workbook</span>
+<span class="sd">        :param sheet_name: the specific sheet to locate within the Workbook</span>
+<span class="sd">        :param loader_class: the :py:class:`schema.loader.SchemaLoader`</span>
+<span class="sd">        schema loader to load the schema from the sheet.</span>
+
+<span class="sd">        Apply the loader to the given sheet of the workbook to get schema</span>
+<span class="sd">        and rows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Sheet</span><span class="p">(</span> <span class="n">workbook</span><span class="p">,</span> <span class="n">sheet_name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loader</span> <span class="o">=</span> <span class="n">loader_class</span><span class="p">(</span> <span class="n">s</span> <span class="p">)</span>
+        <span class="n">schema</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">workbook</span><span class="p">,</span> <span class="n">sheet_name</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">rows</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The parser will skip over the headers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">rows</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Since the rows are already properly encoded as <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instances,
+no further processing is required by the Sheet or the Loader.</p>
+</div>
+<div class="section" id="rows-of-a-sheet">
+<h2>5.11. Rows of a Sheet<a class="headerlink" href="#rows-of-a-sheet" title="Permalink to this headline">¶</a></h2>
+<p>Note that the <code class="xref py py-mod docutils literal notranslate"><span class="pre">csv</span></code> design pattern for each row involves two subclasses
+with the same method names but different results.  One
+returns a <code class="docutils literal notranslate"><span class="pre">dict</span></code> of cells, keyed by field names, the other returns a <code class="docutils literal notranslate"><span class="pre">list</span></code> of cells,
+indexed by position.</p>
+<p>The dict-based processing has the advantage of clarity: cells are named row[‘cell’].
+It has the disadvantage of not coping well with duplicate column names or data
+which breaks first normal form.</p>
+<p>We can’t follow the <code class="xref py py-mod docutils literal notranslate"><span class="pre">csv</span></code> design pattern.  Instead we do the following.</p>
+<ul>
+<li><p class="first">A <a class="reference internal" href="#sheet.Row" title="sheet.Row"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Row</span></code></a> is a sequence of <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instances.
+It may be lazy or it may be eager.</p>
+</li>
+<li><p class="first">To use names, a <a class="reference internal" href="schema.html#schema.Schema" title="schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Schema</span></code></a> must be used to fetch <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a>
+instances from the <a class="reference internal" href="#sheet.Row" title="sheet.Row"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Row</span></code></a> object. The schema translates names to positions.</p>
+</li>
+<li><p class="first">To create dict-like access to <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a>  instances,
+the <a class="reference internal" href="schema.html#schema.Schema" title="schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Schema</span></code></a> can be turned into a dictionary.  The row itself
+is not a dictionary, just the schema. The row is still a Sequence.</p>
+<p>This “schema-as-dict” can still be used with a properly
+lazy <a class="reference internal" href="#sheet.Row" title="sheet.Row"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Row</span></code></a> to create <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instances.</p>
+</li>
+</ul>
+<p>We need the lazy evaluation of a row that fetches data based on <a class="reference internal" href="schema.html#schema.Attribute" title="schema.Attribute"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Attribute</span></code></a>
+details in order to cope with COBOL <code class="docutils literal notranslate"><span class="pre">REDEFINES</span></code>.  It also allows us to cope
+with the unfortunately common problem of duplicate column names in conventional
+spreadsheets.</p>
+<p>We can have application programming which looks like this to process a
+Row as sequence:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">rows</span><span class="p">():</span>
+    <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="c1"># instance of Cell</span>
+    <span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="c1"># name attribute of Schema Attribute</span>
+</pre></div>
+</div>
+<p>Row as dict is a common alternative.  If we have unique column names in the schema,
+We can than use application programming that looks like this.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">schema_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">rows</span><span class="p">():</span>
+    <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">schema_dict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span> <span class="c1"># instance of Cell</span>
+    <span class="n">row_as_dict</span><span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+    <span class="n">row_as_dict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="c1"># instance of Cell</span>
+</pre></div>
+</div>
+<p>This handles the COBOL case, where rows must be lazy.
+This includes the <code class="docutils literal notranslate"><span class="pre">REDEFINES</span></code> and occurs clauses.
+This assures proper packed decimal conversion of redefined fields.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/Stingray_belon1553_small.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">The Stingray Schema-Based File Reader, stingray</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">2. Design Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package.html">3. The <code class="docutils literal notranslate"><span class="pre">stingray</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell.html">4. Cell Module – Data Element Containers and Conversions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Sheet Module – Sheet and Row Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema.html">6. Schema Package – Schema and Attribute Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema_loader.html">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workbook/index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iwork13.html">9. The “Other” Modules: snappy and protobuf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cobol.html">10. The COBOL Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">11. The <strong>Stingray</strong> Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo/index.html">12. <strong>Stingray</strong> Demo Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">13. History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">14. Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build.html">15. Stingray Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">17. Licensing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="cell.html" title="previous chapter">4. Cell Module – Data Element Containers and Conversions</a></li>
+      <li>Next: <a href="schema.html" title="next chapter">6. Schema Package – Schema and Attribute Definitions</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2013, S. Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/sheet.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

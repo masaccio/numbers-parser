@@ -4,7 +4,7 @@ import warnings
 
 import pytest
 
-from numbers_parser import Document
+from numbers_parser import BoolCell, Document, MergedCell
 from numbers_parser.constants import DEFAULT_FONT
 
 ALL_DOCS_DIRS = [
@@ -57,12 +57,44 @@ def test_local_docs():
     def allowed_warning(w):
         return f"falling back to {DEFAULT_FONT}" in str(w.message)
 
+    def check_extra_bits(doc: Document):
+        for cell in all_doc_cells(doc):
+            extra_bits_ok = True
+            if (
+                cell._bool_format_id is not None
+                and not (cell._extra_bits & 0x20)
+                and not isinstance(cell, BoolCell)
+            ):
+                extra_bits_ok = False
+            if cell._duration_format_id is not None and not (cell._extra_bits & 0x4):
+                extra_bits_ok = False
+            if not extra_bits_ok:
+                table_id = cell._table_id
+                sheet_id = cell._model.table_id_to_sheet_id(table_id)
+                sheet_name = cell._model.sheet_name(sheet_id)
+                table_name = cell._model.table_name(table_id)
+                ref = f"{doc.filename}:{sheet_name}:{table_name}:[{cell.row},{cell.col}]"
+                print(f"{ref}: extras={cell._extra_bits:#08x}")
+
+    def print_extra_bits(doc: Document):
+        for cell in all_doc_cells(doc):
+            if isinstance(cell, MergedCell):
+                continue
+            table_id = cell._table_id
+            sheet_id = cell._model.table_id_to_sheet_id(table_id)
+            sheet_name = cell._model.sheet_name(sheet_id)
+            table_name = cell._model.table_name(table_id)
+            ref = f"{doc.filename}:{sheet_name}:{table_name}:[{cell.row},{cell.col}]"
+            print(f"{ref}: {cell}")
+
     tests = [
         check_cell_values,
         check_cell_formatted_values,
         check_cell_formulas,
         check_cell_style,
         check_cell_borders,
+        # print_extra_bits,
+        # check_extra_bits,
     ]
 
     print("\n*** Testing local docs")

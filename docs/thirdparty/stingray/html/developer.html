@@ -1,0 +1,900 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>11. The Stingray Developer’s Guide &#8212; The Stingray Schema-Based File Reader</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="12. Stingray Demo Applications" href="demo/index.html" />
+    <link rel="prev" title="10.2.3. COBOL Definitions Module – Handle COBOL DDE’s" href="cobol_defs.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="the-stingray-developer-s-guide">
+<span id="developer"></span><h1>11. The <strong>Stingray</strong> Developer’s Guide<a class="headerlink" href="#the-stingray-developer-s-guide" title="Permalink to this headline">¶</a></h1>
+<p>We use <strong>Stingray</strong> to work with data files where the schema is
+either external or complex (or both). We can tackle this question:</p>
+<blockquote>
+<div><strong>How do we process a file simply and consistently?</strong></div></blockquote>
+<p>Or, more concretely,</p>
+<blockquote>
+<div><strong>How do we make a program independent of Physical Format
+and Logical Layout?</strong></div></blockquote>
+<p>We can also use <strong>Stingray</strong> to answer questions about files, the schema those
+files purport to use, and the data on those files.
+Specifically, we can tackle this question:</p>
+<blockquote>
+<div><strong>How do we assure that a file and an application use the same schema?</strong></div></blockquote>
+<p>There are two sides to schema use:</p>
+<ul class="simple">
+<li><strong>Application Use.</strong> Given a data file, we need to bind schema information to that file.
+For a workbook, the schema may be in the column headings of the sheet.
+Or it may be in a separate sheet, or a separate workbook.
+For a COBOL file, the schema is always in a separate COBOL-language
+data definition.</li>
+<li><strong>Schema Conformance.</strong> Given a data file, how do we confirm that some schema matches the file?
+This is the data quality assurance question.</li>
+</ul>
+<p>We do need to note the following.</p>
+<blockquote>
+<div><strong>If it was simple, we wouldn’t need this package, would we?</strong></div></blockquote>
+<div class="section" id="concepts">
+<h2>11.1. Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h2>
+<p>As noted in <a class="reference internal" href="introduction.html#intro"><span class="std std-ref">Introduction</span></a>, there are three levels of schema that need to be bound to a file.</p>
+<ul>
+<li><p class="first"><strong>Physical Format</strong>.  We can make this transparent to our applications.
+See <a class="reference internal" href="workbook/index.html#workbook"><span class="std std-ref">Workbook Package – Uniform Wrappers for Workbooks</span></a> and <a class="reference internal" href="cobol.html#cobol"><span class="std std-ref">The COBOL Package</span></a> for details. Everything is a workbook
+with a fairly limited API.</p>
+</li>
+<li><p class="first"><strong>Logical Layout</strong>.  This is how an application program will make use
+of the data found in a file.
+Sometimes the Logical layout information can be embedded in a file:
+it might be the top row of a sheet in a workbook, for example.
+Sometimes the logical layout can be separate: a COBOL data definition, or perhaps
+a metadata sheet in a workbook.</p>
+<p>We can’t make the logical layout transparent.
+Our applications and files both need to agree on a logical layout.
+The column names in the metadata, for example, must be agreed to.
+The order or position of the columns, however, need not be fixed.</p>
+</li>
+<li><p class="first"><strong>Conceptual Content</strong>.
+A single conceptual schema may be implemented by a number of physical
+formats and logical layouts.
+An application should be able to tolerate variability in the logical
+layout as long is it matches the expected <strong>conceptual content</strong>.</p>
+<p>Since we’re working in Python, the conceptual schema is often a class
+definition. It might be a namedtuple or a SimpleNamespace, also.</p>
+</li>
+</ul>
+<p>We’ll tackle the schema binding in several pieces.</p>
+<ul class="simple">
+<li><strong>File Schema</strong>.  <a class="reference internal" href="#binding-a-schema-to-a-file">Binding a Schema to a File</a> describes some preliminary
+operational steps that make Stingray work more simply and reliably.</li>
+<li><strong>Processing</strong>. These are the basic concepts. <a class="reference internal" href="#data-attribute-mapping-using-a-schema">Data Attribute Mapping – Using a Schema</a>,
+and <a class="reference internal" href="#data-transformation">Data Transformation</a>.</li>
+<li><strong>Application Design Patterns</strong>. These are more complex issues.
+We can then dig into <strong>Stingray</strong> application programming in <a class="reference internal" href="#stingray-application-design">stingray Application Design</a>,
+<a class="reference internal" href="#variant-records-and-cobol-redefines">Variant Records and COBOL REDEFINES</a>, and <a class="reference internal" href="#big-data-performance">Big Data Performance</a>.</li>
+<li><strong>Data Management</strong>. <a class="reference internal" href="#file-naming-and-external-schema">File Naming and External Schema</a>,
+<a class="reference internal" href="#binding-a-schema-to-an-application">Binding a Schema to an Application</a>, and <a class="reference internal" href="#schema-version-numbering">Schema Version Numbering</a>.</li>
+<li><strong>FAQ</strong>. Some other design questions. <a class="reference internal" href="#frequently-asked-questions">Frequently Asked Questions</a>.</li>
+</ul>
+<p>We’ll look at some demonstration programs in <a class="reference internal" href="demo/index.html#demo"><span class="std std-ref">Stingray Demo Applications</span></a>.</p>
+</div>
+<div class="section" id="binding-a-schema-to-a-file">
+<h2>11.2. Binding a Schema to a File<a class="headerlink" href="#binding-a-schema-to-a-file" title="Permalink to this headline">¶</a></h2>
+<p>We’re only going to bind two levels of schema to a file.  The conceptual schema
+would require some kind of formal ontology, something that’s rarely available.</p>
+<p><strong>Logical Layout</strong>.  We rely on a schema, <a class="reference internal" href="schema.html#schema.Schema" title="schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Schema</span></code></a> to manage
+the logical layout of a file.</p>
+<p>A workbook has two ways to bind logical layout to data values.
+Our <a class="reference internal" href="sheet.html#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a> subclass hierarchy requires a schema object.
+We’ll load the schema using a <a class="reference internal" href="schema_loader.html#module-schema.loader" title="schema.loader"><code class="xref py py-mod docutils literal notranslate"><span class="pre">schema.loader</span></code></a>
+components.</p>
+<ul class="simple">
+<li><strong>Embedded</strong>.  This is commonly seen as column titles within the sheet.  Or
+any variation on that theme. The common case of column titles is handled
+by a built-in schema loader, <a class="reference internal" href="schema_loader.html#schema.loader.HeadingRowSchemaLoader" title="schema.loader.HeadingRowSchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.loader.HeadingRowSchemaLoader</span></code></a>.
+Other variations are managed by building different schema loaders.</li>
+<li><strong>External</strong>.  This is a separate sheet or separate file. In this case, we
+can start with <a class="reference internal" href="schema_loader.html#schema.loader.BareExternalSchemaLoader" title="schema.loader.BareExternalSchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.loader.BareExternalSchemaLoader</span></code></a> to read
+an external schema. In the case of COBOL files, there’s a separate
+<a class="reference internal" href="cobol_loader.html#cobol.loader.COBOLSchemaLoader" title="cobol.loader.COBOLSchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">cobol.loader.COBOLSchemaLoader</span></code></a> that parses COBOL source to create
+a usable schema.</li>
+</ul>
+<p><strong>Physical Format</strong>.  Generally, a file name provides a hint as to the physical file format.
+<code class="file docutils literal notranslate"><span class="pre">.csv</span></code>, <code class="file docutils literal notranslate"><span class="pre">.xls</span></code>, <code class="file docutils literal notranslate"><span class="pre">.xlsx</span></code>, <code class="file docutils literal notranslate"><span class="pre">.xlsm</span></code>, <code class="file docutils literal notranslate"><span class="pre">.ods</span></code>,
+<code class="file docutils literal notranslate"><span class="pre">.numbers</span></code> describe the physical format.</p>
+<p>Our <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a>, <a class="reference internal" href="sheet.html#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a>, and
+<a class="reference internal" href="workbook/base.html#workbook.base.Workbook" title="workbook.base.Workbook"><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.base.Workbook</span></code></a> handles many physical format details nicely.</p>
+</div>
+<div class="section" id="data-attribute-mapping-using-a-schema">
+<h2>11.3. Data Attribute Mapping – Using a Schema<a class="headerlink" href="#data-attribute-mapping-using-a-schema" title="Permalink to this headline">¶</a></h2>
+<p>Using a schema is the heart of the semantic problem.</p>
+<p>We want to have just one application that is adaptable to a number
+of closely-related data file schemata.  Ideally, there’s one,
+but as a practical matter, there
+are often several similar schema.</p>
+<p>We need to provide three pieces of information, minimally.</p>
+<ul class="simple">
+<li>Target attribute within our application.</li>
+<li>Target data type conversion.</li>
+<li>Source attribute based on attribute name or position.</li>
+</ul>
+<p>We could use a number of different encodings for this relationship.
+We could write it as properties, or XML, or some other notation.</p>
+<p>However, that triple is essentially a Python assignment statement
+with <em>target</em>, <em>to_type</em> and <em>source</em>. The simplest description
+is the following:</p>
+<pre class="literal-block">
+<em>target</em> = row.cell( schema['<em>source</em>'] ).<em>to_type</em>()
+</pre>
+<p>There is a tiny bit of boilerplate in this assignment statement.
+When using repeating groups, items with duplicated column names, or REDEFINES clauses,
+the “boilerplate” expands to some additional code required to locate the source
+data.</p>
+<p>For multiple attributes, this is our use case: a <strong>Builder Function</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">build_record</span><span class="p">(</span> <span class="n">aRow</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;some column&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_str</span><span class="p">(),</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;another column&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_str</span><span class="p">(),</span>
+        <span class="nb">zip</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;zip&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+        <span class="n">phone</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;phone&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(),</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>The idea is to build a single function that defines the
+application-specific mapping from a row
+in a file, given the logical layout information buried in the schema
+definition.</p>
+<p>Of course, the schema can lie, and the application can misuse the data.
+Those are inevitable (and therefore insoluble) problems.  This is why
+we must write customized software to handle these data sources.</p>
+<p>In the case of variant schemata, we would like something like this.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">build_record_1</span><span class="p">(</span> <span class="n">aRow</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;some column&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_str</span><span class="p">(),</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;another column&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_str</span><span class="p">(),</span>
+        <span class="nb">zip</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;zip&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+        <span class="n">phone</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;phone&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(),</span>
+    <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">build_record_2</span><span class="p">(</span> <span class="n">aRow</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;variant column&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_str</span><span class="p">(),</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;something different&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_str</span><span class="p">(),</span>
+        <span class="nb">zip</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;zip&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+        <span class="n">phone</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;phone&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(),</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>We can then define a handy factory which picks a builder based on the schema
+version.</p>
+<dl class="function">
+<dt id="make_builder">
+<code class="descname">make_builder</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="headerlink" href="#make_builder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a builder object from the args.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> – schema version</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">appropriate builder function for the schema</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_builder</span><span class="p">(</span> <span class="n">args</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span> <span class="s1">&#39;build_record_</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="#make_builder" title="make_builder"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_builder()</span></code></a> function selects one of the available
+builders based on a run-time option.</p>
+<div class="section" id="adding-fluency">
+<h3>11.3.1. Adding Fluency<a class="headerlink" href="#adding-fluency" title="Permalink to this headline">¶</a></h3>
+<p>In the case where there are no repeating groups, nor REDEFINES clauses, we can make our API
+slightly more fluent by building a row dictionary from row and schema.  This kind of
+eager cell processing is risky for COBOL files. It often works, however, for
+well-known spreadsheet files.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">row_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">schema</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>This allows the following  <em>target</em>, <em>to_type</em> and <em>source</em> triple.</p>
+<pre class="literal-block">
+<em>target</em> = row['<em>source</em>'].<em>to_type</em>()
+</pre>
+<p>This parallels the <code class="xref py py-mod docutils literal notranslate"><span class="pre">csv</span></code> module’s <code class="docutils literal notranslate"><span class="pre">DictReader</span></code> class.</p>
+</div>
+</div>
+<div class="section" id="data-transformation">
+<h2>11.4. Data Transformation<a class="headerlink" href="#data-transformation" title="Permalink to this headline">¶</a></h2>
+<p>In the <a class="reference internal" href="cell.html#cells"><span class="std std-ref">Cell Module – Data Element Containers and Conversions</span></a> chapter, we noted that there are two
+parts to data handling: <strong>Capture</strong> and <strong>Conversion</strong>.  Capture is part
+of parsing the physical format.  Conversion is part of the final
+application, and has nothing to do with the schema that describes
+the data source.</p>
+<p>A target data type transformation (or conversion) could be considerably more complex
+than the trivial case of decoding a floating-point number to a digit
+string.  It could involve any combination of filtering, cleansing,
+conforming to an existing database, or rewriting.</p>
+<p>Here’s a much more complex Builder Function.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">build_record_3</span><span class="p">(</span> <span class="n">aRow</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;flag&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">zip_str</span> <span class="o">=</span> <span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;zip&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s1">&#39;-&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">zip</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="nb">zip</span><span class="o">=</span> <span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;zip&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">zip</span><span class="o">=</span> <span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;zip&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">zip</span><span class="o">=</span> <span class="n">zip_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;variant column&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_str</span><span class="p">(),</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="n">arow</span><span class="p">[</span><span class="s1">&#39;different column&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_str</span><span class="p">(),</span>
+        <span class="nb">zip</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">,</span>
+        <span class="n">phone</span> <span class="o">=</span> <span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;phone&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(),</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>This shows filtering and cleasing operations.  Yes, it’s complex.
+Indeed, it’s complex enough that alternative domain-specific languages (i.e., properties,
+XLST, etc.) are much less clear than the Python.</p>
+</div>
+<div class="section" id="stingray-application-design">
+<h2>11.5. <strong>Stingray</strong> Application Design<a class="headerlink" href="#stingray-application-design" title="Permalink to this headline">¶</a></h2>
+<p>Generally, there are two kinds of testing.  Conventional unit testing
+applies to our application to be sure the schemata
+are used properly. Beyond that, we have data quality testing.</p>
+<p>For application unit testing, our programs should be decomposed into three tiers of
+processing.</p>
+<ul class="simple">
+<li>Row-Level.  Inidividual Python objects built from one row of the input.
+This involves our builder functions.</li>
+<li>Sheet-Level.  Collections of Python objects built from all rows of a sheet.
+This involves sheet processing functions.</li>
+<li>Workbook-Level.  Collections of sheets.</li>
+</ul>
+<p>Each of these tiers should be tested independently.</p>
+<p>In <a class="reference internal" href="demo/data_quality.html#demo-sqa"><span class="std std-ref">Unit Level Validation for Application and Data</span></a>, we’ll look at how we
+validate that the the input files have the expected schema. This is a kind
+of <strong>Data Quality</strong> testing. It can use the unit testing framework, but it applies
+to data, not applications.</p>
+<div class="section" id="row-level-processing">
+<h3>11.5.1. Row-Level Processing<a class="headerlink" href="#row-level-processing" title="Permalink to this headline">¶</a></h3>
+<p>Row-level processing is centered on a suite of builder functions.
+These handle the detailed mapping
+from variant logical layouts to a single, standardized conceptual schema.</p>
+<p>A builder function should create a simple dictionary or <code class="xref py py-class docutils literal notranslate"><span class="pre">types.SimpleNamespace</span></code>.
+Each dictionary key is the standardized
+attribute names used by internal Python class definitions.</p>
+<p><strong>Q</strong>.  Why not build the final Python objects from the source row?</p>
+<p><strong>A</strong>.  The source row needs to be validated to see if a valid object can be built.
+It seems simpler to map the logical layout in the source document to a
+standardized structure that matches the conceptual schema.  This standardized
+structure can be validated. Then the Python object built from that structure.</p>
+<p>This follows the design patterns from the Django project where a <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code>
+is used to validate data before attempting to build a <code class="docutils literal notranslate"><span class="pre">Model</span></code> instance.</p>
+<p>Here’s the three-part operation: <strong>Build, Validate and Construct</strong>.</p>
+<pre class="literal-block">
+def builder_1( row ):
+    return dict(
+        <em>key</em> = row.cell( row.sheet.schema['field'] ).to_type(),
+    )
+
+def is_valid( row_dict ):
+    <em>All present or accounted for?</em>
+    return <em>state</em>
+
+def construct_object( row_dict ):
+    return App_Object( **row_dict )
+</pre>
+<p>The validation rules rarely change. The object construction doesn’t really
+need to be a separate function, it can often be a simple class name.</p>
+<p>Our sheet processing can include a function like this. We’ll look at this
+below.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="o">=</span> <span class="n">make_builder</span><span class="p">(</span> <span class="n">args</span> <span class="p">)</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sheet</span><span class="p">:</span>
+    <span class="n">intermediate</span><span class="o">=</span> <span class="n">builder</span><span class="p">(</span> <span class="n">row</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_valid</span><span class="p">(</span><span class="n">intermediate</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">construct_object</span><span class="p">(</span><span class="n">intermediate</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="n">row</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>The builder, however, varies with the file’s actual schema.
+We need to pick the builder based on a “logical layout” command-line
+option.  Something like the following is used to make an application
+flexible with respect to layout.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_builder</span><span class="p">(</span> <span class="n">args</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">layout</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">builder_1</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">layout</span> <span class="o">==</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">builder_2</span>
+    <span class="k">else</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="s2">&quot;Unknown layout value: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>The builders are tested individually.  They are subject to considerable change.
+New builders are created frequently.</p>
+<p>The validation should be common to all logical layouts.
+It’s not subject to much variation.
+The validation and object construction doesn’t have the change velocity that builders have.</p>
+</div>
+<div class="section" id="configuration-options">
+<h3>11.5.2. Configuration Options<a class="headerlink" href="#configuration-options" title="Permalink to this headline">¶</a></h3>
+<p>We might want to package all builders in a separate module.
+This provides a focused location for change that leaves the application
+untouched when handling Yet Another Logical Layout.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_builder</span><span class="p">(</span> <span class="n">args</span> <span class="p">):</span>
+    <span class="n">builder_name</span> <span class="o">=</span> <span class="s1">&#39;builder_</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">args</span><span class="o">.</span><span class="n">layout</span> <span class="p">)</span>
+    <span class="nb">globals</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">execfile</span><span class="p">(</span> <span class="s1">&#39;builders.py&#39;</span><span class="p">,</span> <span class="nb">globals</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">globals</span><span class="p">[</span><span class="n">builder_name</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Or</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_builder</span><span class="p">(</span> <span class="n">args</span> <span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">builders</span>
+    <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;builders.builder_</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">args</span><span class="o">.</span><span class="n">layout</span> <span class="p">))</span>
+</pre></div>
+</div>
+<p>This allows a single application to be separated into invariant portions
+and the builders which need to be tweaked when the source file layouts
+change.</p>
+</div>
+<div class="section" id="sheet-level-processing">
+<h3>11.5.3. Sheet-Level Processing<a class="headerlink" href="#sheet-level-processing" title="Permalink to this headline">¶</a></h3>
+<p>The next higher layer is sheet-level processing.  For the most part,
+sheets are generally rows of a single logcal type.  In exceptional cases,
+a sheet may have multiple types coincedentally bound into a single sheet.
+We’ll return to the multiple-types-per-sheet issue below.</p>
+<p>For the single-type-per-sheet, we have a processing function like
+the following.</p>
+<dl class="function">
+<dt id="process_sheet">
+<code class="descname">process_sheet</code><span class="sig-paren">(</span><em>sheet</em>, <em>builder</em><span class="sig-paren">)</span><a class="headerlink" href="#process_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the given sheet using the given builder.</p>
+</dd></dl>
+
+<pre class="literal-block">
+def process_sheet( sheet, builder=builder_1 ):
+    counts= defaultdict( int )
+    object_iter = (
+        builder(row))
+        for row in sheet.schema.rows_as_dict_iter(sheet) )
+    for source in object_iter:
+        counts['read'] += 1
+        if is_valid(source):
+            counts['processed'] += 1
+            # <em>The real processing</em>
+            obj= make_app_object( source )
+            obj.save()
+        else:
+            counts['rejected'] += 1
+    return counts
+</pre>
+<p>This kind of sheet is tested two ways.  First, with a test fixture that provides
+specific rows based on requirements, edge-cases and other “white-box” considerations.</p>
+<p>It is also tested with “live-file”.  The counts can be checked.  This actually
+tests the file as much as it tests the sheet processing function.</p>
+</div>
+<div class="section" id="workbook-processing">
+<h3>11.5.4. Workbook Processing<a class="headerlink" href="#workbook-processing" title="Permalink to this headline">¶</a></h3>
+<p>The overall processing of a given workbook input looks like this.</p>
+<dl class="function">
+<dt id="process_workbook">
+<code class="descname">process_workbook</code><span class="sig-paren">(</span><em>source</em>, <em>builder</em><span class="sig-paren">)</span><a class="headerlink" href="#process_workbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process all sheets of the workbook using the given builder.</p>
+</dd></dl>
+
+<pre class="literal-block">
+def process_workbook( source, builder ):
+    for name in source.sheets():
+        # <em>Sheet filter?  Or multi-way elif switch?</em>
+        sheet= source.sheet( name,
+            sheet.EmbeddedSchemaSheet,
+            loader_class=schema.loader.HeadingRowSchemaLoader )
+        counts= process_sheet( sheet, builder )
+        pprint.pprint( counts )
+</pre>
+<p>This makes two claims about the workbook.</p>
+<ul class="simple">
+<li>All sheets in the workbook have the same schema rules.
+In this example, it’s an embedded schema in each sheet and the schema is the heading row.
+We could easily use an <a class="reference internal" href="sheet.html#sheet.ExternalSchemaSheet" title="sheet.ExternalSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.ExternalSchemaSheet</span></code></a> and an external schema.</li>
+<li>A single <a class="reference internal" href="#process_sheet" title="process_sheet"><code class="xref py py-func docutils literal notranslate"><span class="pre">process_sheet()</span></code></a> function is appropriate for all sheets.</li>
+</ul>
+<p>If a workbook doesn’t meet these criteria, then a (potentially) more complex
+workbook processing function is needed.  A sheet filter is usually necessary.</p>
+<p>Sheet name filtering is also subject to the kind of change that
+builders are subject to.  Each variant logical layout may also have
+a variation in sheet names.  It helps to separate the sheet filter functions
+in the same way builders are separated.   New functions are added with
+remarkable regularity</p>
+<pre class="literal-block">
+def sheet_filter_1( name ):
+    return re.match( r'<em>pattern</em>', name )
+</pre>
+<p>Or, perhaps something like this that uses a shell file-name pattern instead of a
+more sophisticated regular expression.</p>
+<pre class="literal-block">
+def sheet_filter_2( name ):
+    return fnmatch.fnmatch( name, '<em>pattern</em>' )
+</pre>
+</div>
+<div class="section" id="command-line-interface">
+<h3>11.5.5. Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h3>
+<p>We have an optional argument for verbosity and a positional argument that
+provides all the files to profile.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parse_args</span><span class="p">():</span>
+    <span class="n">parser</span><span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span> <span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span> <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span> <span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="s1">&#39;--layout&#39;</span> <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span> <span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;verbosity&#39;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_const&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The overall main program looks something like this.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span> <span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="p">)</span>
+    <span class="n">args</span><span class="o">=</span> <span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span> <span class="n">args</span><span class="o">.</span><span class="n">verbosity</span> <span class="p">)</span>
+    <span class="n">builder</span><span class="o">=</span> <span class="n">make_builder</span><span class="p">(</span> <span class="n">args</span> <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">workbook</span><span class="o">.</span><span class="n">open_workbook</span><span class="p">(</span> <span class="nb">input</span> <span class="p">)</span> <span class="k">as</span> <span class="n">source</span><span class="p">:</span>
+                <span class="n">process_workbook</span><span class="p">(</span> <span class="n">source</span><span class="p">,</span> <span class="n">builder</span> <span class="p">)</span>
+        <span class="n">status</span><span class="o">=</span> <span class="mi">0</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span> <span class="n">e</span> <span class="p">)</span>
+        <span class="n">status</span><span class="o">=</span> <span class="mi">3</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span> <span class="n">status</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>This main program switch allows us to test the various functions (<a class="reference internal" href="#process_workbook" title="process_workbook"><code class="xref py py-func docutils literal notranslate"><span class="pre">process_workbook()</span></code></a>, <a class="reference internal" href="#process_sheet" title="process_sheet"><code class="xref py py-func docutils literal notranslate"><span class="pre">process_sheet()</span></code></a>, the builders, etc.) in isolation.</p>
+<p>It also allows us to reuse these functions to build larger (and more complete)
+applications from smaller components.</p>
+<p>In <a class="reference internal" href="demo/index.html#demo"><span class="std std-ref">Stingray Demo Applications</span></a> we’ll look at two demonstration applications, as well as a unit
+test.</p>
+</div>
+</div>
+<div class="section" id="variant-records-and-cobol-redefines">
+<h2>11.6. Variant Records and COBOL REDEFINES<a class="headerlink" href="#variant-records-and-cobol-redefines" title="Permalink to this headline">¶</a></h2>
+<p>Ideally, a data source is in “first normal form”: all the rows are a single type
+of data. We can apply a <strong>Build, Validate, Construct</strong> sequence simply.</p>
+<p>In too many cases, a data source has multiple types of data. In COBOL files, it’s common
+to have header records or trailer records which are summaries of the details
+sandwiched in the middle.</p>
+<p>Similarly, a spreadsheet may be populated with summary rows that must be discarded or
+handled separately. We might, for example, write the summary to a different destination
+and use it to confirm that all rows were properly processed.</p>
+<p>Because of the COBOL REDEFINES clause, there may be invalid data. We can’t assume that
+all attributes have valid data. This makes our processing slightly different because
+we can’t necessarily do eager evaluation of each row of data.</p>
+<p>We’ll look at a number of techniques for handling variant records.</p>
+<div class="section" id="trivial-filtering">
+<h3>11.6.1. Trivial Filtering<a class="headerlink" href="#trivial-filtering" title="Permalink to this headline">¶</a></h3>
+<p>When using an Embedded Schema Loader based on <a class="reference internal" href="schema_loader.html#schema.loader.HeadingRowSchemaLoader" title="schema.loader.HeadingRowSchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.loader.HeadingRowSchemaLoader</span></code></a>
+we can extend this loader to reject rows.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">schema.loader.HeadingRowSchemaLoader.rows()</span></code> method can do simple filtering.
+This is most appropriate for excluding blank rows or summary rows from a spreadsheet.</p>
+</div>
+<div class="section" id="multiple-passes-and-filters">
+<h3>11.6.2. Multiple Passes and Filters<a class="headerlink" href="#multiple-passes-and-filters" title="Permalink to this headline">¶</a></h3>
+<p>When we have multiple data types within a single sheet, we can process this data
+using Multiple Passes and Filters. Each pass uses different filters to separate the
+various types of data.</p>
+<p>This relies on an eager production of an intermediate object from the raw data.
+This may not work well for COBOL files.</p>
+<p>The multiple-pass option looks like this.  Each pass applies a filter and
+then does the appropriate processing.</p>
+<pre class="literal-block">
+def process_sheet_filter_1( sheet ):
+    counts= defaultdict( int )
+    object_iter = (
+        builder(row))
+        for row in sheet.schema.rows_as_dict_iter(sheet) )
+    for source in object_iter:
+        counts['read'] += 1
+        if <em>filter_1(source)</em>:
+            counts['filter_1'] += 1
+            <em>processing_1(source)</em>
+        else:
+            counts['rejected'] += 1
+    return counts
+</pre>
+<p>Each filter is a simple boolean function like this.</p>
+<pre class="literal-block">
+def filter_1( source ):
+    return <em>some condition</em>
+</pre>
+<p>The conditions may be trivial: <code class="docutils literal notranslate"><span class="pre">source['column']</span> <span class="pre">==</span> <span class="pre">value</span></code>. The conditions
+may be more complex. It’s good to encapsulate them as distinct, named functions.</p>
+<p>We could make the filter function and processing function an argument
+to a generic <code class="docutils literal notranslate"><span class="pre">process_sheet()</span></code> function.
+Sometimes this is a good simplification, sometimes it leads to extra
+complexity of little value.</p>
+</div>
+<div class="section" id="one-pass-and-switch">
+<h3>11.6.3. One Pass and Switch<a class="headerlink" href="#one-pass-and-switch" title="Permalink to this headline">¶</a></h3>
+<p>When we have multiple data types within a single sheet,
+We can make  single pass over the data, using an if-elif “switch”
+to distinguish the different types of rows. Each type of row is
+handled separately.</p>
+<p>This relies on an eager production of an intermediate object from the raw data.
+This may not work well for COBOL files.</p>
+<p>The one-pass option looks like this.  A “switch” function is used to
+discriminate each kind of row that is found in the sheet.</p>
+<pre class="literal-block">
+def process_sheet_switch( sheet ):
+    counts= defaultdict( int )
+    object_iter = (
+        builder(row))
+        for row in sheet.schema.rows_as_dict_iter(sheet) )
+    for source in object_iter:
+        counts['read'] += 1
+        if <em>switch_1(source)</em>:
+            <em>processing_1(source)</em>
+            counts['switch_1'] += 1
+        elif <em>switch_2(source)</em>:
+            <em>processing_2(source)</em>
+            counts['switch_2'] += 1
+        <em>elif etc.</em>
+        else:
+            counts['rejected'] += 1
+    return counts
+</pre>
+<p>Each switch function is a simple boolean function like this.</p>
+<pre class="literal-block">
+def switch_1( source ):
+    return <em>some condition</em>
+</pre>
+<p>The conditions may be trivial: <code class="docutils literal notranslate"><span class="pre">source['column']</span> <span class="pre">==</span> <span class="pre">value</span></code>. The conditions
+may be more complex. It’s good to encapsulate them as distinct, named functions.</p>
+<p>We may be able to build a simple mapping from switch function to process function.</p>
+<pre class="literal-block">
+switch_process = (
+    (<em>switch_1</em>, <em>processing_1</em>),
+    (<em>switch_2</em>, <em>processing_2</em>),
+)
+</pre>
+<p>This allows us to write a generic sheet processing function.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">process_sheet_switch</span><span class="p">(</span> <span class="n">sheet</span><span class="p">,</span> <span class="n">mapping</span> <span class="p">):</span>
+    <span class="n">counts</span><span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span> <span class="nb">int</span> <span class="p">)</span>
+    <span class="n">object_iter</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">builder</span><span class="p">(</span><span class="n">row</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">rows_as_dict_iter</span><span class="p">(</span><span class="n">sheet</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">object_iter</span><span class="p">:</span>
+        <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;read&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">processed</span><span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">switch</span><span class="p">,</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">switch</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
+                <span class="n">processed</span><span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="n">process</span><span class="p">(</span> <span class="n">source</span> <span class="p">)</span>
+                <span class="n">counts</span><span class="p">[</span><span class="n">processed</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">processed</span><span class="p">:</span>
+            <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;rejected&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">counts</span>
+</pre></div>
+</div>
+<p>This can more easily be extended by adding to the <code class="docutils literal notranslate"><span class="pre">switch_process</span></code> mapping.</p>
+</div>
+<div class="section" id="lazy-switch-processing">
+<h3>11.6.4. Lazy Switch Processing<a class="headerlink" href="#lazy-switch-processing" title="Permalink to this headline">¶</a></h3>
+<p>The above two examples rely on building an iterator over intermediate objects.
+The <code class="docutils literal notranslate"><span class="pre">object_iter</span></code> builds objects eagerly.
+This may not always work for COBOL files. Here’s a variation that might be helpful.</p>
+<p>We’ll decompose the builders so that the switch is applied first. Then the
+builder and processing can depend on the switch.</p>
+<pre class="literal-block">
+switch_build_process = (
+    (<em>switch_1</em>, <em>builder_1</em>, <em>processing_1</em>),
+    (<em>switch_2</em>, <em>builder_2</em>, <em>processing_2</em>),
+)
+</pre>
+<p>This structure can be used with the following generic sheet processing.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">process_sheet_switch</span><span class="p">(</span> <span class="n">sheet</span><span class="p">,</span> <span class="n">mapping</span> <span class="p">):</span>
+    <span class="n">counts</span><span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span> <span class="nb">int</span> <span class="p">)</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">rows</span><span class="p">(</span><span class="n">sheet</span><span class="p">):</span>
+        <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;read&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">processed</span><span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">switch</span><span class="p">,</span> <span class="n">builder</span><span class="p">,</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">switch</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+                <span class="n">processed</span><span class="o">=</span> <span class="n">switch</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="n">source</span><span class="o">=</span> <span class="n">builder</span><span class="p">(</span> <span class="n">row</span> <span class="p">)</span>
+                <span class="n">process</span><span class="p">(</span> <span class="n">source</span> <span class="p">)</span>
+                <span class="n">counts</span><span class="p">[</span><span class="n">processed</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">processed</span><span class="p">:</span>
+            <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;rejected&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">counts</span>
+</pre></div>
+</div>
+<p>This is slightly more complex. It the advantage of not attempting to process
+a row unless some initial sanity check has been done. Once the switch function
+determines the type of the row, then an appropriate builder can be invoked
+and the row processed.</p>
+<p>In many cases, the processing starts with more complex data quality validation.
+If so, that can be added to the mapping. It would become a
+switch-builder-validator-process mapping that decomposes each step of the
+processing pipeline.</p>
+</div>
+</div>
+<div class="section" id="big-data-performance">
+<h2>11.7. Big Data Performance<a class="headerlink" href="#big-data-performance" title="Permalink to this headline">¶</a></h2>
+<p>We’ve broken our processing down into separate steps which
+work with generic Python data structures. The idea is that we can use
+multiprocessing to spread the pipeline into separate processors or cores.</p>
+<p>Each stage of the <strong>Build, Validate, Construct</strong> sequence can be decomposed.
+We can read raw data from the source file, apply a switch and put the
+raw “Row” objects into a processing queue.</p>
+<p>A builder process can dequeue row objects from the processing queue,
+apply a builder, and put objects into a validation queue.</p>
+<p>A validator process can dequeue built objects (dictionaries, for example) and
+validate them. Invalid objects can be written to a queue for logging.
+Valid objects can be written to another queue for processing.</p>
+<p>The final processing queue will get a sequence of valid objects all of a single type.
+The final processing might involve (slow) database transactions, and there
+may need to be multiple worker processes fetching from this queue.</p>
+</div>
+<div class="section" id="file-naming-and-external-schema">
+<h2>11.8. File Naming and External Schema<a class="headerlink" href="#file-naming-and-external-schema" title="Permalink to this headline">¶</a></h2>
+<p>Some data management discipline is also essential be sure that the schema and file match
+up properly.  Naming conventions and standardized directory structures are
+<em>essential</em> for working with external schema.</p>
+<div class="section" id="well-known-formats">
+<h3>11.8.1. Well Known Formats<a class="headerlink" href="#well-known-formats" title="Permalink to this headline">¶</a></h3>
+<p>For well-known physical formats (<code class="file docutils literal notranslate"><span class="pre">.csv</span></code>, <code class="file docutils literal notranslate"><span class="pre">.xls</span></code>, <code class="file docutils literal notranslate"><span class="pre">.xlsx</span></code>, <code class="file docutils literal notranslate"><span class="pre">.xlsm</span></code>, <code class="file docutils literal notranslate"><span class="pre">.ods</span></code>,
+<code class="file docutils literal notranslate"><span class="pre">.numbers</span></code>) the filename extension describes the physical format. Additional
+information is required to determine the Logical Layout.</p>
+<p>The schema may be loaded from column headers, in which case the binding is handled
+via an embedded schema loader. If the  <a class="reference internal" href="schema_loader.html#schema.loader.HeadingRowSchemaLoader" title="schema.loader.HeadingRowSchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.loader.HeadingRowSchemaLoader</span></code></a>
+is used, no more information is required. If a customized schema loader is used
+(because the headings are not trivially the first row of a sheet), then we must
+– somehow – bind application to external schema. The filename extension doesn’t
+really help with this. The best choice is to use a configuration file of some kind.</p>
+<p>If the schema is external, and we’re working with a well-known physical format, then
+we have an even more complex binding issue. The schema will often require a customized
+schema loader. Each file must be associated with a schema file and a schema loader
+class name. File naming conventions won’t help. This, too, should rely on a configuration
+file.</p>
+</div>
+<div class="section" id="fixed-formats-and-cobol">
+<h3>11.8.2. Fixed Formats and COBOL<a class="headerlink" href="#fixed-formats-and-cobol" title="Permalink to this headline">¶</a></h3>
+<p>For fixed-format files,
+the filename extension does not describe the physical layout.
+Further, a fixed format schema must combine logical layout and physical format into
+a single description.</p>
+<p>For fixed format files, the following conventions help
+bind a file to its schema.</p>
+<ul class="simple">
+<li>The data file extension is the base name of a schema file.
+<code class="file docutils literal notranslate"><span class="pre">mydata.someschema</span></code>. Do not use <code class="docutils literal notranslate"><span class="pre">.dat</span></code> or something else uninformative.</li>
+<li>Schema files must be be either a DDE file or a
+workbook in a well-known format.
+<code class="samp docutils literal notranslate"><span class="pre">someschema.cob</span></code> or <code class="file docutils literal notranslate"><span class="pre">someschema.xlsx</span></code>.</li>
+</ul>
+<p><strong>Examples</strong>.  We might see the following file names.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">september_2001</span><span class="o">.</span><span class="n">exchange_1</span>
+<span class="n">november_2011</span><span class="o">.</span><span class="n">some_dde_name</span>
+<span class="n">october_2011</span><span class="o">.</span><span class="n">some_dde_name</span>
+<span class="n">exchange_1</span><span class="o">.</span><span class="n">xls</span>
+<span class="n">some_dde_name</span><span class="o">.</span><span class="n">cob</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">september_2001.exchange_1</span></code> file is a fixed format file
+which requires the <code class="docutils literal notranslate"><span class="pre">exchange_1.xls</span></code> metadata workbook.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">november_2011.some_dde_name</span></code> and <code class="docutils literal notranslate"><span class="pre">october_2011.some_dde_name</span></code> files
+are fixed format files which require the <code class="docutils literal notranslate"><span class="pre">some_dde_name.cob</span></code> metadata.</p>
+</div>
+<div class="section" id="external-schema-workbooks">
+<h3>11.8.3. External Schema Workbooks<a class="headerlink" href="#external-schema-workbooks" title="Permalink to this headline">¶</a></h3>
+<p>A workbook with an external schema sheet must adhere to a few conventions to be usable.
+These rules form the basis for the <a class="reference internal" href="schema_loader.html#schema.loader.BareExternalSchemaLoader" title="schema.loader.BareExternalSchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.loader.BareExternalSchemaLoader</span></code></a>
+class. To change the rules, extend that class.</p>
+<ul class="simple">
+<li>The standard sheet name <code class="docutils literal notranslate"><span class="pre">&quot;Schema&quot;</span></code>  defines the appropriate sheet.</li>
+<li>There must be an internal meta-schema on line one of the sheet that provides the expected column names.</li>
+<li>The column names “name”, “offset”, “size”, “type” are used.</li>
+<li>Only “name” is required  in general.</li>
+<li>For fixed format files, “offset”, “size” and “type” will also be required.</li>
+<li>Additional columns are allowed, but will be ignored.</li>
+<li>Type definitions are “text”, “number”, “date” and “boolean”.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="binding-a-schema-to-an-application">
+<h2>11.9. Binding a Schema to an Application<a class="headerlink" href="#binding-a-schema-to-an-application" title="Permalink to this headline">¶</a></h2>
+<p>We would like to be sure that our application’s expectations for a
+schema are aligned with the schema actually present.
+An application has several ways to bind its schema information.</p>
+<ul class="simple">
+<li><strong>Implicitly</strong>.  The code simply mentions specific columns
+(either by name or position).</li>
+<li><strong>Explicitly</strong>.   The code has a formal “requires” check to be sure
+that the schema provided by the input file actually matches the
+schema required by the application.</li>
+</ul>
+<p>Explicit schema binding parallels the configuration management issue of module
+dependency. A file can be said to <em>provide</em> a given schema and an
+application <em>requires</em> a given schema.</p>
+<p>Sadly, we don’t always have a pithy summary of a schema.  We can’t trivially examine
+a file to be sure it conforms to a schema. In the case of well-known file formats with an
+embedded schema, we can do a test like this to determine if the schema is what we expect.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">all</span><span class="p">(</span> <span class="n">req</span> <span class="ow">in</span> <span class="n">schema</span> <span class="k">for</span> <span class="n">req</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;some&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;of&#39;</span><span class="p">,</span> <span class="s1">&#39;columns&#39;</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>This covers 80% of the use cases. For all other cases, we don’t have a reliable way
+to confirm the file’s schema.</p>
+<p>If we don’t implement this,
+we’re left with implicit schema binding in our applications.  In short, we have
+to include data validity checks, a debugging log, and some kind of warning technique.</p>
+</div>
+<div class="section" id="schema-version-numbering">
+<h2>11.10. Schema Version Numbering<a class="headerlink" href="#schema-version-numbering" title="Permalink to this headline">¶</a></h2>
+<p>XSD’s can have version numbers.  This is a very cool.</p>
+<p>See <a class="reference external" href="http://www.xfront.com/Versioning.pdf">http://www.xfront.com/Versioning.pdf</a> for detailed discussion of how
+to represent schema version information.</p>
+<p>Databases, however, lack version numbering in the schema.  This leads to potential
+compatibilty issues between application programs that expect version 3 of the
+schema and an older database that implements version 2 of the schema.</p>
+<p>Our file schema, similarly, don’t have a tidy, unambiguous numbering.</p>
+<p>For external schema, we can embed the version in the file names.
+We might want to use something like this <code class="docutils literal notranslate"><span class="pre">econometrics_vendor_1.2</span></code>.
+This identifies the
+generic type of data, the source for that file, and the schema version
+number.</p>
+<blockquote>
+<div>Within a SQL database, we can easily use the schema name to carry
+version information.  We could have a <code class="samp docutils literal notranslate"><span class="pre">name_</span><em><span class="pre">version</span></em></code> kind of
+convention for all schema, allowing an application to confirm schema
+compatibility with a trivial SQL query.</div></blockquote>
+<p>For embedded schema, however, we have no <em>easy</em> to handle schema identification
+and version numbering.  We’re forced to
+build an algorithm to examine the actual names in the embedded schema to deduce
+the version.</p>
+<p>This problem with embedded schema leads to using data profiling to reason out what the file is.
+This may devolve to a manual examination
+of the data profiling results to allow a human to determine the schema.
+Then, once the schema has been identified, command-line options
+can be used to bind the schema to file for correct processing.</p>
+</div>
+<div class="section" id="frequently-asked-questions">
+<h2>11.11. Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="junk-data">
+<h3>11.11.1. Junk Data<a class="headerlink" href="#junk-data" title="Permalink to this headline">¶</a></h3>
+<p>For inexplicable reasons, we can wind up with files that are damaged in some way.</p>
+<blockquote>
+<div>“there is a 65-byte “header” at the start of the file, what would be the best
+(least hacky) way to skip over the first 65 bytes?”</div></blockquote>
+<p>This is one of the reasons why use both a file name and an open file object as
+arguments for opening a workbook.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;file_with_junk.some_schema&quot;</span><span class="p">,</span><span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cobol</span><span class="p">:</span>
+    <span class="n">cobol</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span> <span class="mi">66</span> <span class="p">)</span>
+    <span class="n">wb</span> <span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cobol</span><span class="o">.</span><span class="n">EBCDIC_File</span><span class="p">(</span> <span class="n">cobol</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">file_object</span><span class="o">=</span><span class="n">cobol</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>This should permit skipping past the junk.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/Stingray_belon1553_small.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">The Stingray Schema-Based File Reader, stingray</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">2. Design Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package.html">3. The <code class="docutils literal notranslate"><span class="pre">stingray</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell.html">4. Cell Module – Data Element Containers and Conversions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sheet.html">5. Sheet Module – Sheet and Row Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema.html">6. Schema Package – Schema and Attribute Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema_loader.html">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workbook/index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iwork13.html">9. The “Other” Modules: snappy and protobuf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cobol.html">10. The COBOL Package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">11. The <strong>Stingray</strong> Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo/index.html">12. <strong>Stingray</strong> Demo Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">13. History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">14. Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build.html">15. Stingray Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">17. Licensing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="cobol_defs.html" title="previous chapter">10.2.3. COBOL Definitions Module – Handle COBOL DDE’s</a></li>
+      <li>Next: <a href="demo/index.html" title="next chapter">12. <strong>Stingray</strong> Demo Applications</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2013, S. Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/developer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

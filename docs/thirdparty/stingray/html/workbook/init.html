@@ -1,0 +1,376 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>8.4.1. Workbook __init__ Module – Wrapper for all implementations &#8212; The Stingray Schema-Based File Reader</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="8.4.2. Workbook Base Definition" href="base.html" />
+    <link rel="prev" title="8. Workbook Package – Uniform Wrappers for Workbooks" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="workbook-init-module-wrapper-for-all-implementations">
+<span id="workbook-init"></span><h1>8.4.1. Workbook __init__ Module – Wrapper for all implementations<a class="headerlink" href="#workbook-init-module-wrapper-for-all-implementations" title="Permalink to this headline">¶</a></h1>
+<p>A few Python overheads that we put in the <code class="docutils literal notranslate"><span class="pre">__init__</span></code>
+module of this package. Our goal is to make it so that only
+the top-level package is imported; the individual workbook modules
+are not generally expected to be used by an application.</p>
+<span class="target" id="module-workbook"></span><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;stingray.workbook -- Opens workbooks in various</span>
+<span class="sd">formats, binds their associated schema, accesses them as Sheets with</span>
+<span class="sd">Rows and Cells.</span>
+
+<span class="sd">This is a kind of **Wrapper** or **Facade** that unifies :py:mod:`csv` and</span>
+<span class="sd">:py:mod:`xlrd`. It handles a number of file formats including</span>
+<span class="sd">:file:`.xlsx`, :file:`.ods`, and Numbers.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>In order top open files of various types, we’ll bring in a number of
+helpful modules.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xml.etree.cElementTree</span> <span class="k">as</span> <span class="nn">dom</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="nb">open</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">decimal</span>
+</pre></div>
+</div>
+<p>We’ll rely on definitions of <a class="reference internal" href="../cell.html#module-cell" title="cell"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cell</span></code></a>, <a class="reference internal" href="../sheet.html#module-sheet" title="sheet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sheet</span></code></a>,
+and <a class="reference internal" href="../schema_loader.html#module-schema.loader" title="schema.loader"><code class="xref py py-mod docutils literal notranslate"><span class="pre">schema.loader</span></code></a>. We have an implicit dependency on <a class="reference internal" href="../schema.html#module-schema" title="schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">schema</span></code></a>:
+we’ll be given schema objects to work with.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">stingray.cell</span>
+<span class="kn">import</span> <span class="nn">stingray.sheet</span>
+<span class="kn">import</span> <span class="nn">stingray.schema.loader</span>
+</pre></div>
+</div>
+<p>We’ll explicitly import the top-level class definition for each
+flavor of Workbook we can support. Because we import these here, these
+classes will be available with a simple import of <a class="reference internal" href="#module-workbook" title="workbook"><code class="xref py py-mod docutils literal notranslate"><span class="pre">workbook</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">stingray.workbook.csv</span> <span class="k">import</span> <span class="n">CSV_Workbook</span>
+<span class="kn">from</span> <span class="nn">stingray.workbook.xlsx</span> <span class="k">import</span> <span class="n">XLSX_Workbook</span>
+<span class="kn">from</span> <span class="nn">stingray.workbook.ods</span> <span class="k">import</span> <span class="n">ODS_Workbook</span>
+<span class="kn">from</span> <span class="nn">stingray.workbook.numbers_09</span> <span class="k">import</span> <span class="n">Numbers09_Workbook</span>
+<span class="kn">from</span> <span class="nn">stingray.workbook.numbers_13</span> <span class="k">import</span> <span class="n">Numbers13_Workbook</span>
+<span class="kn">from</span> <span class="nn">stingray.workbook.fixed</span> <span class="k">import</span> <span class="n">Fixed_Workbook</span>
+</pre></div>
+</div>
+<div class="section" id="exceptions">
+<h2>8.4.1.1. Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workbook.UnknownFormat">
+<em class="property">class </em><code class="descclassname">workbook.</code><code class="descname">UnknownFormat</code><a class="headerlink" href="#workbook.UnknownFormat" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#workbook.UnknownFormat" title="workbook.UnknownFormat"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownFormat</span></code></a> exception is raised when a workbook can’t be
+opened.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">UnknownFormat</span><span class="p">(</span> <span class="ne">Exception</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The workbook can&#39;t be opened.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="workbook.No_Schema">
+<em class="property">class </em><code class="descclassname">workbook.</code><code class="descname">No_Schema</code><a class="headerlink" href="#workbook.No_Schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#workbook.No_Schema" title="workbook.No_Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">No_Schema</span></code></a> exception is raised if there’s a problem
+locating an external schema for a workbook.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">No_Schema</span><span class="p">(</span> <span class="ne">Exception</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A valid schema could not be loaded.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="optional-modules">
+<h2>8.4.1.2. Optional Modules<a class="headerlink" href="#optional-modules" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">workbook.package.xls</span></code> module depends on <code class="xref py py-mod docutils literal notranslate"><span class="pre">xlrd</span></code>.
+<a class="reference external" href="https://pypi.python.org/pypi/xlrd/0.9.2">https://pypi.python.org/pypi/xlrd/0.9.2</a> <a class="reference external" href="http://www.lexicon.net/sjmachin/xlrd.htm">http://www.lexicon.net/sjmachin/xlrd.htm</a></p>
+<p>We can’t guarantee that <code class="xref py py-mod docutils literal notranslate"><span class="pre">xlrd</span></code> is available. Also, old <code class="file docutils literal notranslate"><span class="pre">.xls</span></code> files are
+becoming less frequently used, so we’re making this optional.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">stingray.workbook.xls</span> <span class="k">import</span> <span class="n">XLS_Workbook</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">stingray.workbook.base</span> <span class="k">import</span> <span class="n">Workbook</span>
+    <span class="k">class</span> <span class="nc">XLS_Workbook</span><span class="p">(</span> <span class="n">Workbook</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;No ``xlrd`` Available.&quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">):</span>
+            <span class="k">raise</span> <span class="n">UnknownFormat</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="workbook-subclasses">
+<h2>8.4.1.3. Workbook Subclasses<a class="headerlink" href="#workbook-subclasses" title="Permalink to this headline">¶</a></h2>
+<p>We have a number of concrete subclasses of <a class="reference internal" href="base.html#workbook.base.Workbook" title="workbook.base.Workbook"><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.base.Workbook</span></code></a>.
+These are imported from submodules and made visible in this module.</p>
+<ul class="simple">
+<li><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.CSV_Workbook</span></code>.  This is a degenerate case, where the workbook appears to contain
+a single sheet.  This sheet is the CSV file, accessed via the built-in
+<code class="xref py py-func docutils literal notranslate"><span class="pre">csv.reader()</span></code>.</li>
+<li><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.XLS_Workbook</span></code>.  This is the workbook as processed by <code class="xref py py-mod docutils literal notranslate"><span class="pre">xlrd</span></code>.  These classes
+wrap <code class="xref py py-mod docutils literal notranslate"><span class="pre">xlrd</span></code> classes to which the real work is delegated.
+This is optional – if <code class="xref py py-mod docutils literal notranslate"><span class="pre">xlrd</span></code> is not installed, things will work,
+but these files cannot be opened.</li>
+<li><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.XLSX_Workbook</span></code>.  This is the workbook after unzipping and using an XML parser
+on the various document parts.  Mostly, this is a matter of unzipping
+and parsing parts of the document to create a DOM which can be traversed
+as needed.</li>
+<li><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.Numbers09_Workbook</span></code>.
+This handles the iWork ‘09 Numbers files with multiple
+workspaces and multiple tables in each workspace.</li>
+<li><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.Numbers13_Workbook</span></code>
+These handle the iWork ‘13 Numbers files with multiple
+workspaces and multiple tables in each workspace.</li>
+<li><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.ODS_Workbook</span></code>.</li>
+<li><a class="reference internal" href="fixed.html#workbook.Fixed_Workbook" title="workbook.Fixed_Workbook"><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.Fixed_Workbook</span></code></a>.  This is actually a fairly complex case.  The workbook will appear to
+contain a single sheet; this sheet is the fixed format file.  Schema information
+was required up front, unlike the other formats.</li>
+</ul>
+<p>Further extensions will handle various kinds of COBOL files. They’re similar to Fixed Workbooks.
+See <a class="reference internal" href="../cobol.html#cobol"><span class="std std-ref">The COBOL Package</span></a>.</p>
+<p>Each of these is a context manager, so we include the necessary methods.</p>
+<p>Note that workbooks are rarely simple files.  Sometimes they are ZIP archive
+members.  Sometimes, they must be processed via <strong>gzip</strong>. Sometimes they involve
+Snappy compression.</p>
+<p>In order to minimize the assumptions, we try to handle two forms of file processing:</p>
+<ul class="simple">
+<li>By name. In this case, the file name is provided. The file is opened and closed by
+the Workbook using the context manager interface.</li>
+<li>By file-like object. An open file-like object is provided. No additional
+context management is performed. This is appropriate when a workbook is itself
+a member of a larger archive.</li>
+</ul>
+</div>
+<div class="section" id="workbook-factory">
+<h2>8.4.1.4. Workbook Factory<a class="headerlink" href="#workbook-factory" title="Permalink to this headline">¶</a></h2>
+<p>This is the factory which creates a subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">Workbook</span></code> for a
+a given file.</p>
+<dl class="class">
+<dt id="workbook.Opener">
+<em class="property">class </em><code class="descclassname">workbook.</code><code class="descname">Opener</code><a class="headerlink" href="#workbook.Opener" title="Permalink to this definition">¶</a></dt>
+<dd><p>An opener <strong>Factory</strong> class.  A subclass can extend this to handle other file
+extensions and physical formats.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Opener</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An extensible opener that examines the file extension and locates</span>
+<span class="sd">    a proper Workbook subclass.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">schema_path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">schema_sheet</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Open a workbook.</span>
+
+<span class="sd">        :param name: filename to open.</span>
+<span class="sd">        :param file_object: File-like object to process.  If not</span>
+<span class="sd">        provided the named file will be opened.</span>
+<span class="sd">        :keyword schema_path: Directory with external schema files</span>
+<span class="sd">        :keyword schema_sheet: A sheet in an external schema workbook.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span> <span class="n">name</span> <span class="p">)</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.xls&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">XLS_Workbook</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span> <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">(</span> <span class="s2">&quot;.xlsx&quot;</span><span class="p">,</span> <span class="s2">&quot;.xlsm&quot;</span> <span class="p">):</span>
+            <span class="k">return</span> <span class="n">XLSX_Workbook</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span> <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">(</span> <span class="s2">&quot;.csv&quot;</span><span class="p">,</span> <span class="p">):</span>
+            <span class="k">return</span> <span class="n">CSV_Workbook</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">(</span> <span class="s2">&quot;.tab&quot;</span><span class="p">,</span> <span class="p">):</span>
+            <span class="k">return</span> <span class="n">CSV_Workbook</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">(</span> <span class="s2">&quot;.ods&quot;</span><span class="p">,</span> <span class="p">):</span>
+            <span class="k">return</span> <span class="n">ODS_Workbook</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span> <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">(</span> <span class="s2">&quot;.numbers&quot;</span><span class="p">,</span> <span class="p">):</span>
+            <span class="c1"># Directory? It&#39;s Numbers13_Workbook; Zipfile? It&#39;s Numbers09_Workbook</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">(</span> <span class="n">name</span> <span class="p">):</span>
+                <span class="k">return</span> <span class="n">Numbers13_Workbook</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Numbers09_Workbook</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Fixed format files with no specific extension</span>
+            <span class="c1"># Ideally :file:`somefile.schema` is the file</span>
+            <span class="c1"># and :file:`schema.csv` or :file:`schema.xlsx` can be tracked down.</span>
+            <span class="n">schema_pat</span><span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">schema_path</span><span class="p">,</span> <span class="n">ext</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">+</span><span class="s2">&quot;.*&quot;</span><span class="p">)</span>
+            <span class="n">schema_choices</span><span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span> <span class="n">schema_pat</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">schema_choices</span><span class="p">:</span>
+                <span class="n">schema_name</span><span class="o">=</span> <span class="n">schema_choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">schema_wb</span><span class="o">=</span> <span class="n">open_workbook</span><span class="p">(</span> <span class="n">schema_name</span> <span class="p">)</span>
+                <span class="n">esl</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">ExternalSchemaLoader</span><span class="p">(</span> <span class="n">schema_wb</span><span class="p">,</span> <span class="n">schema_sheet</span> <span class="p">)</span>
+                <span class="n">schema</span><span class="o">=</span> <span class="n">esl</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">Fixed_Workbook</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">No_Schema</span><span class="p">(</span> <span class="n">schema_pat</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="workbook.open_workbook">
+<code class="descclassname">workbook.</code><code class="descname">open_workbook</code><span class="sig-paren">(</span><em>name</em>, <em>file_object</em>, <em>schema_path</em>, <em>schema_sheet</em><span class="sig-paren">)</span><a class="headerlink" href="#workbook.open_workbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a workbook.</p>
+<p>For fixed format files, we attempt to track down and load the relevant
+schema file. The idea here is that a file’s extension can map to the schema’s
+filename.</p>
+<p><code class="samp docutils literal notranslate"><span class="pre">somefile.</span><em><span class="pre">schema</span></em></code> would use a <code class="samp docutils literal notranslate"><em><span class="pre">schema</span></em><span class="pre">.csv</span></code> workbook as it’s schema.
+We’ll simply try the first file that matches <code class="samp docutils literal notranslate"><em><span class="pre">schema</span></em><span class="pre">.*</span></code> to see if it’s
+a workbook we can open.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> – The name of the file.</li>
+<li><strong>file_object</strong> – (optional) already opened file object.</li>
+<li><strong>schema_path</strong> – (optional) filename for an external schema file.</li>
+<li><strong>schema_sheet</strong> – (optional) name of a sheet with a schema.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>For fixed format files, we attempt to track down and load the relevant
+schema.  An application might have narrower and more specific rules
+for binding file and schema.</p>
+<p>The default <a class="reference internal" href="#workbook.open_workbook" title="workbook.open_workbook"><code class="xref py py-func docutils literal notranslate"><span class="pre">workbook.open_workbook()</span></code></a> is simply an instance
+of the <a class="reference internal" href="#workbook.Opener" title="workbook.Opener"><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.Opener</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">open_workbook</span><span class="o">=</span> <span class="n">Opener</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>When creating a subclass, use the <strong>Chain of Command</strong> pattern.
+This allows a user to create subclasses to handle the various other file name extensions.
+Here’s an example:</p>
+<pre class="literal-block">
+class MyOpener(workbook.Opener):
+    def __call__(self, name, file_object=None,
+        schema_path='.', schema_sheet=None, **kw ):
+        if fnmatch(name, &quot;*.dat&quot;):
+            esl= stingray.schema.loader.ExternalSchemaLoader(
+                os.path.join(schema_path, &quot;schemafile.csv&quot;) )
+            schema= esl.schema()
+            return CSV_Workbook( name, file_object, schema=schema, delimiter=&quot;|&quot; )
+        return super().__call__(name, file_object, schema_path, schema_sheet, **kw )
+</pre>
+<p>There may be application-specific rules, or command-line options that
+will determine a mapping bewtween filename and physical format or filename and schema.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/Stingray_belon1553_small.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">The Stingray Schema-Based File Reader, stingray</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">2. Design Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../package.html">3. The <code class="docutils literal notranslate"><span class="pre">stingray</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cell.html">4. Cell Module – Data Element Containers and Conversions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sheet.html">5. Sheet Module – Sheet and Row Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema.html">6. Schema Package – Schema and Attribute Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema_loader.html">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../iwork13.html">9. The “Other” Modules: snappy and protobuf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cobol.html">10. The COBOL Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">11. The <strong>Stingray</strong> Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demo/index.html">12. <strong>Stingray</strong> Demo Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">13. History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing/index.html">14. Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build.html">15. Stingray Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">17. Licensing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+      <li>Next: <a href="base.html" title="next chapter">8.4.2. Workbook Base Definition</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2013, S. Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/workbook/init.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

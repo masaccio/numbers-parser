@@ -1,0 +1,375 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>14.2. Cell Module Tests &#8212; The Stingray Schema-Based File Reader</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="14.3. Sheet Module Tests" href="sheet.html" />
+    <link rel="prev" title="14.1. Main Test Script" href="main.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="cell-module-tests">
+<span id="test-cells"></span><h1>14.2. Cell Module Tests<a class="headerlink" href="#cell-module-tests" title="Permalink to this headline">¶</a></h1>
+<p>A Cell is the unit of data.  These unit tests exercise the classes in the
+<a class="reference internal" href="../cell.html#module-cell" title="cell"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cell</span></code></a> module.  For more information, see <a class="reference internal" href="../cell.html#cells"><span class="std std-ref">Cell Module – Data Element Containers and Conversions</span></a>.</p>
+<div class="section" id="overheads">
+<h2>14.2.1. Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;stingray.cell Unit Tests.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">decimal</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">stingray.cell</span>
+<span class="kn">import</span> <span class="nn">locale</span>
+
+<span class="c1"># The locale varies a bit from version to version</span>
+<span class="c1"># and OS to OS.</span>
+<span class="n">SAMPLE_DATE</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2056</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">nl_langinfo</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">D_FMT</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cell-tests">
+<h2>14.2.2. Cell Tests<a class="headerlink" href="#cell-tests" title="Permalink to this headline">¶</a></h2>
+<p>Mocks for sheet and workbook to test <a class="reference internal" href="../cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> features.
+A <a class="reference internal" href="../cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> belongs to a <a class="reference internal" href="../sheet.html#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a> and a <a class="reference internal" href="../sheet.html#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a> belongs
+to a <a class="reference internal" href="../workbook/base.html#workbook.base.Workbook" title="workbook.base.Workbook"><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.base.Workbook</span></code></a>.  We need a mock for <a class="reference internal" href="../sheet.html#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a> and
+<a class="reference internal" href="../workbook/base.html#workbook.base.Workbook" title="workbook.base.Workbook"><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.base.Workbook</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CellMockWorkbook</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">mock_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mock_date_float</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datemode</span><span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mock_date</span><span class="o">=</span> <span class="n">mock_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mock_date_float</span><span class="o">=</span> <span class="n">mock_date_float</span>
+    <span class="k">def</span> <span class="nf">date_to_float</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mock_date_float</span>
+    <span class="k">def</span> <span class="nf">float_to_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mock_date</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../cell.html#cell.EmptyCell" title="cell.EmptyCell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.EmptyCell</span></code></a> is always <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TestEmptyCell</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="n">CellMockWorkbook</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">EmptyCell</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_be_empty</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_refuse</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">to_decimal</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">()</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../cell.html#cell.TextCell" title="cell.TextCell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.TextCell</span></code></a> does conversions from text to other forms.  Text
+can represent a number of things: numbers, dates or proper
+string values.</p>
+<p>In the case of a CSV file, all cells are text cells, and these
+conversions are very important.</p>
+<p>In the case of XLS files or XLSX files, these conversions are less
+important because most cells have sensible type information.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TestTextCell</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="n">CellMockWorkbook</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">TextCell</span><span class="p">(</span> <span class="s1">&#39;123&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_word</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">TextCell</span><span class="p">(</span> <span class="s1">&#39;xyz&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">TextCell</span><span class="p">(</span> <span class="n">SAMPLE_DATE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_be_nonempty</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_word</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_number</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">123</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mf">123.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;123&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">to_decimal</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;00123&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_exception_nonnumber</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_word</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_word</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">decimal</span><span class="o">.</span><span class="n">InvalidOperation</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_word</span><span class="o">.</span><span class="n">to_decimal</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_word</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_string</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;123&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;xyz&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_word</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">SAMPLE_DATE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_date</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2056</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_exception_nondate</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_word</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../cell.html#cell.NumberCell" title="cell.NumberCell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.NumberCell</span></code></a> does some conversions from float to other forms.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TestNumberCell</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="n">CellMockWorkbook</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">20708</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">NumberCell</span><span class="p">(</span> <span class="mf">123.4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">NumberCell</span><span class="p">(</span> <span class="mf">20708.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_be_nonempty</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_number</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">123</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mf">123.4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;123.4&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">to_decimal</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;00123&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;123.4&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_numb</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_date</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../cell.html#cell.FloatDateCell" title="cell.FloatDateCell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.FloatDateCell</span></code></a> does some conversions from a “float that’s really a date” to other forms.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TestFloatDateCell</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="n">CellMockWorkbook</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">20708</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">FloatDateCell</span><span class="p">(</span> <span class="mf">20708.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_be_nonempty</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_number</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">20708</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mf">20708.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;20708.0&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_decimal</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;20708&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;20708.0&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_date</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../cell.html#cell.BooleanCell" title="cell.BooleanCell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.BooleanCell</span></code></a> does some conversions from an “int that’s really a true/false”
+to other forms.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TestBooleanCell</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="n">CellMockWorkbook</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">20708</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_true</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">BooleanCell</span><span class="p">(</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_false</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">BooleanCell</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_be_nonempty</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_true</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_false</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_number</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_true</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mf">1.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_true</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;1.0&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_true</span><span class="o">.</span><span class="n">to_decimal</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;00001&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_true</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_true</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_false</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mf">0.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_false</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;0.0&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_false</span><span class="o">.</span><span class="n">to_decimal</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;00000&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_false</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_false</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_date</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_true</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_false</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../cell.html#cell.ErrorCell" title="cell.ErrorCell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.ErrorCell</span></code></a> doesn’t do many conversions.  Mostly, it raises <code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code>
+when converted to anything other than a string.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TestErrorCell</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="n">CellMockWorkbook</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">20708</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_div0</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">ErrorCell</span><span class="p">(</span> <span class="s1">&#39;#DIV/0!&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_be_nonempty</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_div0</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_string</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;#DIV/0!&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_div0</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_number</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_div0</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_div0</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_div0</span><span class="o">.</span><span class="n">to_decimal</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_div0</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_date</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_div0</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../cell.html#cell.DateCell" title="cell.DateCell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.DateCell</span></code></a> does some conversions from a proper date to other forms.
+A proper date doesn’t arrive from XLS or XLSX, but can arrive
+from CSV or fixed-format sources.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TestDateCell</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="n">CellMockWorkbook</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">20708</span><span class="p">)</span>
+        <span class="n">now</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">DateCell</span><span class="p">(</span> <span class="n">now</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_be_nonempty</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_number</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">20708</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mf">20708.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;20708.0&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_decimal</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;20708&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_digit_str</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s1">&#39;1956-09-10 00:00:00&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_convert_date</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_date</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="other-conversions">
+<h2>14.2.3. Other Conversions<a class="headerlink" href="#other-conversions" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TestDateFromString</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_date_conversion</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">convert</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">date_from_string</span><span class="p">(</span> <span class="s2">&quot;%m/</span><span class="si">%d</span><span class="s2">/%Y&quot;</span> <span class="p">)</span>
+        <span class="n">dt</span><span class="o">=</span> <span class="n">convert</span><span class="p">(</span> <span class="s2">&quot;9/10/1956&quot;</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">dt</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_datecell_conversion</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="n">CellMockWorkbook</span><span class="p">(</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">20708</span> <span class="p">)</span>
+        <span class="n">create</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">datecell_from_string</span><span class="p">(</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="p">)</span>
+        <span class="n">dc</span><span class="o">=</span> <span class="n">create</span><span class="p">(</span> <span class="s2">&quot;1956-09-10&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1956</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">dc</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">20708</span><span class="p">,</span> <span class="n">dc</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-suite-and-runner">
+<h2>14.2.4. Test Suite and Runner<a class="headerlink" href="#test-suite-and-runner" title="Permalink to this headline">¶</a></h2>
+<p>In case we want to build up a larger test suite, we avoid doing
+any real work unless this is the main module being executed.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">test</span>
+<span class="n">suite</span><span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">suite_maker</span><span class="p">(</span> <span class="nb">globals</span><span class="p">()</span> <span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span> <span class="vm">__file__</span> <span class="p">)</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/Stingray_belon1553_small.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">The Stingray Schema-Based File Reader, stingray</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">2. Design Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../package.html">3. The <code class="docutils literal notranslate"><span class="pre">stingray</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cell.html">4. Cell Module – Data Element Containers and Conversions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sheet.html">5. Sheet Module – Sheet and Row Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema.html">6. Schema Package – Schema and Attribute Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema_loader.html">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workbook/index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../iwork13.html">9. The “Other” Modules: snappy and protobuf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cobol.html">10. The COBOL Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">11. The <strong>Stingray</strong> Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demo/index.html">12. <strong>Stingray</strong> Demo Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">13. History</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">14. Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build.html">15. Stingray Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">17. Licensing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">14. Testing</a><ul>
+      <li>Previous: <a href="main.html" title="previous chapter">14.1. Main Test Script</a></li>
+      <li>Next: <a href="sheet.html" title="next chapter">14.3. Sheet Module Tests</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2013, S. Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/testing/cell.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -59,6 +59,7 @@ It supports and is tested against Python versions from 3.10 onwards. It is not c
      api/cellrefs
      api/enumerations
      api/development
+     api/file-format
      api/changes-4.0
 
 .. only:: MarkdownDocs

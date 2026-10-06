@@ -1,0 +1,235 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>8.4.9. Fixed-Format (COBOL-style) Workbook &#8212; The Stingray Schema-Based File Reader</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="9. The “Other” Modules: snappy and protobuf" href="../iwork13.html" />
+    <link rel="prev" title="8.4.8. Apple iWorks Numbers ‘13 Workbook" href="numbers_13.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="fixed-format-cobol-style-workbook">
+<span id="workbook-fixed"></span><h1>8.4.9. Fixed-Format (COBOL-style) Workbook<a class="headerlink" href="#fixed-format-cobol-style-workbook" title="Permalink to this headline">¶</a></h1>
+<p>Like a CSV workbook, this is a kind of degenerate case.  We don’t have
+a lot of sheets, or a lot of data types.</p>
+<p>A subclass might do EBCDIC conversion and possibly even decode
+packed decimal numbers.  To do this, a COBOL-language DDE would be
+required as the schema definition. See <a class="reference internal" href="../cobol.html#cobol"><span class="std std-ref">The COBOL Package</span></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+
+<span class="kn">from</span> <span class="nn">stingray.workbook.base</span> <span class="k">import</span> <span class="n">Workbook</span>
+<span class="kn">import</span> <span class="nn">stingray.sheet</span>
+<span class="kn">import</span> <span class="nn">stingray.cell</span>
+</pre></div>
+</div>
+<span class="target" id="module-workbook"></span><dl class="class">
+<dt id="workbook.Fixed_Workbook">
+<em class="property">class </em><code class="descclassname">workbook.</code><code class="descname">Fixed_Workbook</code><a class="headerlink" href="#workbook.Fixed_Workbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract sheets, rows and cells from a fixed-format file.</p>
+<p>The schema must have size and offset information to locate the fields.</p>
+<p>There’s only a single sheet and it matches the filename.</p>
+<p>In addition to the superclass attributes, some additional unique
+attributes are introduced here.</p>
+<dl class="attribute">
+<dt id="workbook.Fixed_Workbook.wb">
+<code class="descname">wb</code><a class="headerlink" href="#workbook.Fixed_Workbook.wb" title="Permalink to this definition">¶</a></dt>
+<dd><p>The underlying file.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Fixed_Workbook</span><span class="p">(</span> <span class="n">Workbook</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A file with fixed-sized, no-punctuation fields.</span>
+
+<span class="sd">    A schema is **required** to parse the attributes.</span>
+
+<span class="sd">    The rows are defined as :py:class:`stingray.sheet.LazyRow` instances so that</span>
+<span class="sd">    bad data can be gracefully skipped over.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">row_class</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">LazyRow</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prepare the workbook for reading.</span>
+
+<span class="sd">        :param name: File name</span>
+<span class="sd">        :param file_object: Optional file-like object.  If omitted, the named file is opened.</span>
+<span class="sd">        :param schema: Schema required for processing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_obj</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">the_file</span><span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_obj</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">the_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;rt&#39;</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">the_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">=</span> <span class="n">schema</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="workbook.Fixed_Workbook.sheet">
+<code class="descclassname">Fixed_Workbook.</code><code class="descname">sheet</code><span class="sig-paren">(</span><em>sheet</em><span class="sig-paren">)</span><a class="headerlink" href="#workbook.Fixed_Workbook.sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a sheet for this workbook.
+The <code class="xref py py-data docutils literal notranslate"><span class="pre">sheet_type</span></code> attribute of the class ignored.
+This must return a <a class="reference internal" href="../sheet.html#sheet.ExternalSchemaSheet" title="sheet.ExternalSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.ExternalSchemaSheet</span></code></a>.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sheet</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet_name</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;sheet_type is ignored; it must be an external schema.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">ExternalSchemaSheet</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet_name</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>We can build eager <a class="reference internal" href="../sheet.html#sheet.Row" title="sheet.Row"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Row</span></code></a> instances for some
+kinds of flat files.  Eager rows, however, don’t generalize well to COBOL structures.</p>
+<p>Therefore, we must build  <a class="reference internal" href="../sheet.html#sheet.LazyRow" title="sheet.LazyRow"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.LazyRow</span></code></a> objects here and defer the
+data type conversion until <a class="reference internal" href="#workbook.Fixed_Workbook.row_get" title="workbook.Fixed_Workbook.row_get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">workbook.Fixed_Workbook.row_get()</span></code></a>.
+Or <a class="reference internal" href="../cobol_init.html#cobol.COBOL_File.row_get" title="cobol.COBOL_File.row_get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cobol.COBOL_File.row_get()</span></code></a>, which can be more complex still.</p>
+<dl class="method">
+<dt id="workbook.Fixed_Workbook.rows_of">
+<code class="descclassname">Fixed_Workbook.</code><code class="descname">rows_of</code><span class="sig-paren">(</span><em>sheet</em><span class="sig-paren">)</span><a class="headerlink" href="#workbook.Fixed_Workbook.rows_of" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterator through all rows. The sheet’s schema is required to decompose the rows.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">rows_of</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An iterator over all rows of the named sheet.</span>
+<span class="sd">    For Fixed files, the sheet.name is simply ignored.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span> <span class="n">sheet</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span> <span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_class</span><span class="p">(</span> <span class="n">sheet</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span> <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">row</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="workbook.Fixed_Workbook.row_get">
+<code class="descclassname">Fixed_Workbook.</code><code class="descname">row_get</code><span class="sig-paren">(</span><em>row</em>, <em>attribute</em><span class="sig-paren">)</span><a class="headerlink" href="#workbook.Fixed_Workbook.row_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concrete implementation to get an attribute’s value from a given row.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">row_get</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">attr</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a :py:class:`cell.Cell` from the row&#39;s data.&quot;&quot;&quot;</span>
+    <span class="n">extract</span><span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">_state</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">attr</span><span class="o">.</span><span class="n">offset</span><span class="p">:</span><span class="n">attr</span><span class="o">.</span><span class="n">offset</span><span class="o">+</span><span class="n">attr</span><span class="o">.</span><span class="n">size</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">attr</span><span class="o">.</span><span class="n">create</span><span class="p">(</span> <span class="n">extract</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="bp">self</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/Stingray_belon1553_small.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">The Stingray Schema-Based File Reader, stingray</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">2. Design Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../package.html">3. The <code class="docutils literal notranslate"><span class="pre">stingray</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cell.html">4. Cell Module – Data Element Containers and Conversions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sheet.html">5. Sheet Module – Sheet and Row Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema.html">6. Schema Package – Schema and Attribute Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema_loader.html">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../iwork13.html">9. The “Other” Modules: snappy and protobuf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cobol.html">10. The COBOL Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">11. The <strong>Stingray</strong> Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demo/index.html">12. <strong>Stingray</strong> Demo Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">13. History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing/index.html">14. Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build.html">15. Stingray Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">17. Licensing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a><ul>
+      <li>Previous: <a href="numbers_13.html" title="previous chapter">8.4.8. Apple iWorks Numbers ‘13 Workbook</a></li>
+      <li>Next: <a href="../iwork13.html" title="next chapter">9. The “Other” Modules: snappy and protobuf</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2013, S. Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/workbook/fixed.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

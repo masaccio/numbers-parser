@@ -93,6 +93,7 @@ class Document:
         self._model = _NumbersModel(None if filename is None else Path(filename), password)
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
+        self.filename = filename
 
         if filename is None:
             self.sheets[0].name = sheet_name
@@ -160,6 +161,7 @@ class Document:
             existing Numbers document.
 
         """
+        self.filename = filename
         for sheet in self.sheets:
             for table in sheet.tables:
                 if self._model.is_a_pivot_table(table._table_id):

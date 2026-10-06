@@ -1,0 +1,545 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>7. Schema Loader Module – Load Embedded or External Schema &#8212; The Stingray Schema-Based File Reader</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="8. Workbook Package – Uniform Wrappers for Workbooks" href="workbook/index.html" />
+    <link rel="prev" title="6. Schema Package – Schema and Attribute Definitions" href="schema.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-schema.loader">
+<span id="schema-loader-module-load-embedded-or-external-schema"></span><span id="schema-loader"></span><h1>7. Schema Loader Module – Load Embedded or External Schema<a class="headerlink" href="#module-schema.loader" title="Permalink to this headline">¶</a></h1>
+<p>A <em>Schema Loader</em> loads the attributes of a schema from a source document.
+There are a variety of sources.</p>
+<ul class="simple">
+<li>The first row of a sheet within a workbook.
+This version has to be injected into workbook processing
+so that the first row is separated from the data rows.</li>
+<li>A separate sheet of a workbook.
+This version requires a sheet name.</li>
+<li>A separate workbook.  This, too, requires a named sheet.</li>
+<li>COBOL Code.  We’ll set this aside as a subclass
+so complex it requires it’s own module.</li>
+</ul>
+<p>A schema loader is paired with a specific kind of <a class="reference internal" href="sheet.html#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a>.</p>
+<p>A workbook requires a schema, which requires a schema loader.
+A schema loader depends on a meta-workbook.  Ideally that meta-workbook has
+an emedded schema, but it may have an external schema, meaning we could have a
+meta-schema required load the schema for the application data.  Sheesh.</p>
+<p>First, let’s hope that doesn’t happen.  Second, the circularity is resolved by making it the responsibility of the
+the application to handle schema loading.</p>
+<div class="section" id="embedded-schema-use-case">
+<h2>7.1. Embedded Schema Use Case<a class="headerlink" href="#embedded-schema-use-case" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference internal" href="sheet.html#sheet.EmbeddedSchemaSheet" title="sheet.EmbeddedSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.EmbeddedSchemaSheet</span></code></a> requires a loader class.
+The loader will</p>
+<ol class="arabic simple">
+<li>Be built with the sheet as an argument.</li>
+<li>Be interrogated for the schema.</li>
+<li>Be interrogated for the rows.</li>
+</ol>
+<p>The most typical case is the single-header-row case.</p>
+<p>In some cases, the loader is actually a
+a rather sophisticated parser that paritions the data into the embedded schema
+and the data rows.</p>
+<pre class="literal-block">
+with Workbook( name ) as wb:
+    sheet = self.wb.sheet( 'Sheet2',
+        stingray.sheet.EmbeddedSchemaSheet,
+        loader_class= stingray.schema.loader.HeadingRowSchemaLoader )
+
+    for row in sheet.rows():
+        <em>process the row</em>
+</pre>
+</div>
+<div class="section" id="external-schema-use-case">
+<h2>7.2. External Schema Use Case<a class="headerlink" href="#external-schema-use-case" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference internal" href="sheet.html#sheet.ExternalSchemaSheet" title="sheet.ExternalSchemaSheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.ExternalSchemaSheet</span></code></a> requires a schema.</p>
+<p>In the typical case, the external schema file has an emedded meta-schema.
+The first row has appropriate column names.
+This requires a subclass of <a class="reference internal" href="#schema.loader.ExternalSchemaLoader" title="schema.loader.ExternalSchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.loader.ExternalSchemaLoader</span></code></a> to properly map the names that were found onto the attributes of the <a class="reference internal" href="schema.html#schema.Attribute" title="schema.Attribute"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Attribute</span></code></a> class.</p>
+<p>When the embedded meta-schema has unusual names, then a builder must be defined
+to map the names that are found in the schema and build an <a class="reference internal" href="schema.html#schema.Attribute" title="schema.Attribute"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Attribute</span></code></a> instance.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">open_workbook</span><span class="p">(</span> <span class="n">schema_name</span> <span class="p">)</span> <span class="k">as</span> <span class="n">schema_wb</span><span class="p">:</span>
+    <span class="n">esl</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">ExternalSchemaLoader</span><span class="p">(</span> <span class="n">schema_wb</span><span class="p">,</span> <span class="s2">&quot;Schema&quot;</span> <span class="p">)</span>
+    <span class="n">schema</span><span class="o">=</span> <span class="n">esl</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">Workbook</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span> <span class="p">)</span> <span class="k">as</span> <span class="n">wb</span><span class="p">:</span>
+    <span class="n">sheet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">.</span><span class="n">sheet</span><span class="p">(</span> <span class="s1">&#39;Sheet2&#39;</span><span class="p">,</span>
+        <span class="n">stingray</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">ExternalSchemaSheet</span><span class="p">,</span>
+        <span class="n">schema</span><span class="o">=</span> <span class="n">schema</span> <span class="p">)</span>
+    <span class="n">counts</span><span class="o">=</span> <span class="n">process_sheet</span><span class="p">(</span> <span class="n">sheet</span> <span class="p">)</span>
+    <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span> <span class="n">counts</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="manual-schema-use-case">
+<h2>7.3. Manual Schema Use Case<a class="headerlink" href="#manual-schema-use-case" title="Permalink to this headline">¶</a></h2>
+<p>Also, a manually-defined <a class="reference internal" href="schema.html#schema.Schema" title="schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Schema</span></code></a> can be built rather than being loaded.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">schema</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">Schema</span><span class="p">(</span>
+    <span class="n">stingray</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">Attribute</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Column #1&#39;</span> <span class="p">),</span>
+    <span class="n">stingray</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">Attribute</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Key&#39;</span> <span class="p">),</span>
+    <span class="n">stingray</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">Attribute</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Value&#39;</span> <span class="p">),</span>
+    <span class="n">stingray</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">Attribute</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Etc.&#39;</span> <span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="model">
+<h2>7.4. Model<a class="headerlink" href="#model" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>http://yuml.me/diagram/scruffy;/class/
+#schema-loader,
+[Schema]&lt;&gt;-[Attribute],
+[SchemaLoader]-builds-&gt;[Schema],
+[SchemaLoader]^[HeadingRowSchemaLoader],
+[SchemaLoader]^[ExternalSchemaLoader],
+[ExternalSchemaLoader]-reads-&gt;[Workbook],
+[HeadingRowSchemaLoader]-reads-&gt;[Sheet].
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/schema_loader.png"><img alt="_images/schema_loader.png" src="_images/schema_loader.png" style="width: 6in;" /></a>
+</div>
+<div class="section" id="overheads">
+<h2>7.5. Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h2>
+<p>We depend on <a class="reference internal" href="schema.html#module-schema" title="schema"><code class="xref py py-mod docutils literal notranslate"><span class="pre">schema</span></code></a>, <a class="reference internal" href="cell.html#module-cell" title="cell"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cell</span></code></a> and <a class="reference internal" href="sheet.html#module-sheet" title="sheet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sheet</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;stingray.schema.loader -- Loads a Schema from a row of a Sheet or</span>
+<span class="sd">from a separate Sheet.  This is extended to load COBOL schema</span>
+<span class="sd">from DDE files.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">stingray.schema</span> <span class="k">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">Attribute</span>
+<span class="kn">import</span> <span class="nn">stingray.cell</span>
+<span class="kn">import</span> <span class="nn">stingray.sheet</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="no-schema-exception">
+<h2>7.6. No Schema Exception<a class="headerlink" href="#no-schema-exception" title="Permalink to this headline">¶</a></h2>
+<p>In some circumstances, we can’t load a schema. The most common situation
+is a <a class="reference internal" href="#schema.loader.HeadingRowSchemaLoader" title="schema.loader.HeadingRowSchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">HeadingRowSchemaLoader</span></code></a> which is applied to an empty workbook sheet.
+No rows means no schema.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">NoSchemaFound</span><span class="p">(</span> <span class="ne">Exception</span> <span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>The default behavior is to simply write a warning for an empty sheet.
+The lack of a schema means there’s no data, also, and 99% of the time, silently ignoring
+an empty sheet is desirable.</p>
+</div>
+<div class="section" id="id1">
+<h2>7.7. Schema Loader<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="schema.loader.SchemaLoader">
+<em class="property">class </em><code class="descclassname">schema.loader.</code><code class="descname">SchemaLoader</code><a class="headerlink" href="#schema.loader.SchemaLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Schema Loader has one mandatory contract: It must load the schema.</p>
+<p>A subclass may add a second contract, For example,
+an embedded schema loader will also return the non-schema rows.</p>
+<dl class="attribute">
+<dt id="schema.loader.SchemaLoader.sheet">
+<code class="descname">sheet</code><a class="headerlink" href="#schema.loader.SchemaLoader.sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Sheet</span></code> associated with this schema.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="schema.loader.SchemaLoader.row_iter">
+<code class="descname">row_iter</code><a class="headerlink" href="#schema.loader.SchemaLoader.row_iter" title="Permalink to this definition">¶</a></dt>
+<dd><p>An iterator over the rows of this sheet; used to pick rows that
+belong to the header, separate from the rows that belong to data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SchemaLoader</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Locate schema information.  Subclasses handle</span>
+<span class="sd">    all of the variations on schema representation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A simple :py:class:`Sheet` instance.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span> <span class="n">sheet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">row_iter</span><span class="o">=</span> <span class="nb">iter</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">rows</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Scan the sheet to get the schema.</span>
+<span class="sd">        :return: a :py:class:`Schema` object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+    <span class="k">def</span> <span class="nf">rows</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterate all (or remaining) rows.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_iter</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="embedded-schema-loader">
+<h2>7.8. Embedded Schema Loader<a class="headerlink" href="#embedded-schema-loader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="schema.loader.HeadingRowSchemaLoader">
+<em class="property">class </em><code class="descclassname">schema.loader.</code><code class="descname">HeadingRowSchemaLoader</code><a class="headerlink" href="#schema.loader.HeadingRowSchemaLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>In many cases, the schema is first-row column titles or something similar.
+As we noted above, <code class="xref py py-class docutils literal notranslate"><span class="pre">csv.DictReader</span></code> supports this simple case.</p>
+<p>All other cases have to be handled with something a bit more sophisticated.
+The <a class="reference internal" href="#schema.loader.SchemaLoader" title="schema.loader.SchemaLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.loader.SchemaLoader</span></code></a> can be further subclassed to provide for more
+complex schema definitions buried in the rows of a sheet.</p>
+<p>This means that we must make the schema parsing an application-provided
+plug-in that the Workbook uses when instantiating each Sheet.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">HeadingRowSchemaLoader</span><span class="p">(</span> <span class="n">SchemaLoader</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read just the first row of a sheet to get embedded</span>
+<span class="sd">    schema information.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Try to get the schema from row one.  Remaining rows are data.</span>
+<span class="sd">        If the sheet is empty, emit a warning and return ``None``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">row_1</span><span class="o">=</span> <span class="nb">next</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_iter</span> <span class="p">)</span>
+            <span class="n">attributes</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">to_str</span><span class="p">())</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">row_1</span>
+            <span class="p">)</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">(</span>
+                <span class="o">*</span><span class="p">(</span><span class="n">Attribute</span><span class="p">(</span><span class="o">**</span><span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">schema</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span> <span class="s2">&quot;Empty sheet: no schema present&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>We’ll open a <a class="reference internal" href="sheet.html#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a> with a specific loader.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sheet</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">EmbeddedSchemaSheet</span><span class="p">(</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="p">,</span> <span class="s1">&#39;The_Name&#39;</span><span class="p">,</span>
+    <span class="n">loader_class</span><span class="o">=</span><span class="n">HeadingRowSchemaLoader</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="schema.loader.NonBlankHeadingRowSchemaLoader">
+<em class="property">class </em><code class="descclassname">schema.loader.</code><code class="descname">NonBlankHeadingRowSchemaLoader</code><a class="headerlink" href="#schema.loader.NonBlankHeadingRowSchemaLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>In many cases, we’d like to suppress the empty rows that are an inevitable feature of workbook sheets.</p>
+<p>Note that this doesn’t work well for COBOL
+or Fixed format files, since an “empty” row may be difficult to discern.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">NonBlankHeadingRowSchemaLoader</span><span class="p">(</span> <span class="n">HeadingRowSchemaLoader</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A simple :py:class:`Sheet` instance.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span> <span class="n">sheet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">row_iter</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">non_blank</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">rows</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">non_blank</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">rows</span> <span class="p">):</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span> <span class="n">c</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">r</span> <span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">yield</span> <span class="n">r</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="external-schema-loader">
+<h2>7.9. External Schema Loader<a class="headerlink" href="#external-schema-loader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="schema.loader.ExternalSchemaLoader">
+<em class="property">class </em><code class="descclassname">schema.loader.</code><code class="descname">ExternalSchemaLoader</code><a class="headerlink" href="#schema.loader.ExternalSchemaLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>In some cases, the data workbook is described by a separate schema workbook, or a separate
+sheet within the data workbook.  In these cases, the other sheet (or file) must be
+parsed to locate schema information.</p>
+<p>In the case of a fixed format file, we must examine a separate
+file to load schema information.  This additional schems file may be in
+COBOL notation, leading to a more complex parser.  See <a class="reference internal" href="cobol_loader.html#cobol-loader"><span class="std std-ref">COBOL Loader Module – Parse COBOL Source to Load a Schema</span></a>.</p>
+<p>The layout of the schema, of course, will be highly variable,
+so the “meta-schema” must be adjusted to the actual file.</p>
+<p>Note, also, that the schema loader is – itself – a typical of schema-based reader.  It has a number of common features.</p>
+<ol class="arabic simple">
+<li>A dictionary-based “builder”, <a class="reference internal" href="#schema.loader.ExternalSchemaLoader.build_attr" title="schema.loader.ExternalSchemaLoader.build_attr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">schema.loader.ExternalSchemaLoader.build_attr()</span></code></a>, to handle Logical Layout.
+This transforms the input “raw” dictionary of <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instances to an application dictionary of proper Python objects.
+See <a class="reference internal" href="developer.html#developer"><span class="std std-ref">The Stingray Developer’s Guide</span></a>.</li>
+<li>An iterator, <a class="reference internal" href="#schema.loader.ExternalSchemaLoader.attr_dict_iter" title="schema.loader.ExternalSchemaLoader.attr_dict_iter"><code class="xref py py-meth docutils literal notranslate"><span class="pre">schema.loader.ExternalSchemaLoader.attr_dict_iter()</span></code></a>,
+that provides “raw” dictionaries from each row (based on the schema) to the
+builder to create application dictionaries.</li>
+<li>The overall function,
+<a class="reference internal" href="#schema.loader.ExternalSchemaLoader.schema" title="schema.loader.ExternalSchemaLoader.schema"><code class="xref py py-meth docutils literal notranslate"><span class="pre">schema.loader.ExternalSchemaLoader.schema()</span></code></a>,
+that iterates over application objects built from application dictionaries.</li>
+</ol>
+<dl class="attribute">
+<dt id="schema.loader.ExternalSchemaLoader.workbook">
+<code class="descname">workbook</code><a class="headerlink" href="#schema.loader.ExternalSchemaLoader.workbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>The overall Workbook that we’re parsing to locate schema information.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="schema.loader.ExternalSchemaLoader.Sheet">
+<code class="descname">Sheet</code><a class="headerlink" href="#schema.loader.ExternalSchemaLoader.Sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>A specific sheet within that workbook.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ExternalSchemaLoader</span><span class="p">(</span> <span class="n">SchemaLoader</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Open a workbook file in a well-known format.</span>
+<span class="sd">    Build a schema with attribute name, offset, size  and type</span>
+<span class="sd">    information.  The type is a string that names the</span>
+<span class="sd">    type of cell to create.</span>
+
+<span class="sd">    The meta-schema must be embedded as the first line of the schema sheet.</span>
+
+<span class="sd">    The assumed meta-schema is the following::</span>
+
+<span class="sd">        Schema(</span>
+<span class="sd">            Attribute(&quot;name&quot;,create=&quot;TextCell&quot;),</span>
+<span class="sd">            Attribute(&quot;offset&quot;,create=&quot;NumberCell&quot;),</span>
+<span class="sd">            Attribute(&quot;size&quot;,create=&quot;NumberCell&quot;),</span>
+<span class="sd">            Attribute(&quot;type&quot;,create=&quot;TextCell&quot;),</span>
+<span class="sd">        )</span>
+
+<span class="sd">    If the meta-schema has different names, then a subclass with</span>
+<span class="sd">    a different :py:meth:`build_attr` is required to map the actual</span>
+<span class="sd">    source columns to the attributes of a :py:class:`Attribute`.</span>
+
+<span class="sd">    Offsets are typically 1-based.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">workbook</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;Sheet1&#39;</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workbook</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_name</span> <span class="o">=</span> <span class="n">workbook</span><span class="p">,</span> <span class="n">sheet_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workbook</span><span class="o">.</span><span class="n">sheet</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_name</span><span class="p">,</span> <span class="n">stingray</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">EmbeddedSchemaSheet</span><span class="p">,</span>
+        <span class="n">loader_class</span><span class="o">=</span> <span class="n">HeadingRowSchemaLoader</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="schema.loader.ExternalSchemaLoader.build_attr">
+<code class="descclassname">ExternalSchemaLoader.</code><code class="descname">build_attr</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="headerlink" href="#schema.loader.ExternalSchemaLoader.build_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>There’s potential for a great deal of variability in schema definition.
+Consequently, this <code class="docutils literal notranslate"><span class="pre">build_attr</span></code> method is merely a sample that
+covers one common case.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">base</span><span class="o">=</span> <span class="mi">1</span>
+<span class="n">type_to_cell</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s2">&quot;TextCell&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;number&#39;</span><span class="p">:</span> <span class="s2">&quot;NumberCell&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="s2">&quot;DateCell&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;boolean&#39;</span><span class="p">:</span> <span class="s2">&quot;BooleanCell&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">build_attr</span><span class="p">(</span> <span class="n">row</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Build application dictionary from raw dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">offset</span><span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span><span class="o">-</span><span class="n">ExternalSchemaLoader</span><span class="o">.</span><span class="n">base</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">offset</span><span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">size</span><span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">size</span><span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">type_name</span><span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span>
+        <span class="n">create</span><span class="o">=</span> <span class="n">ExternalSchemaLoader</span><span class="o">.</span><span class="n">type_to_cell</span><span class="p">[</span><span class="n">type_name</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">create</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">TextCell</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_str</span><span class="p">(),</span>
+        <span class="n">offset</span><span class="o">=</span> <span class="n">offset</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span> <span class="n">size</span><span class="p">,</span>
+        <span class="n">create</span><span class="o">=</span> <span class="n">create</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>Schema loading involves a process of</p>
+<ol class="arabic simple">
+<li>Iterating through the source rows as dictionaries.<ul>
+<li>Build each raw row as a source dictionary.</li>
+<li>Build an standardized attr dictionary from the source dictionary.
+This mapping, implemented by <a class="reference internal" href="#schema.loader.ExternalSchemaLoader.build_attr" title="schema.loader.ExternalSchemaLoader.build_attr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">schema.loader.ExternalSchemaLoader.build_attr()</span></code></a>
+is subject to a great deal of change without notice.</li>
+</ul>
+</li>
+<li>Building each <a class="reference internal" href="schema.html#schema.Attribute" title="schema.Attribute"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Attribute</span></code></a> from the dictionary.</li>
+</ol>
+<dl class="method">
+<dt id="schema.loader.ExternalSchemaLoader.attr_dict_iter">
+<code class="descclassname">ExternalSchemaLoader.</code><code class="descname">attr_dict_iter</code><span class="sig-paren">(</span><em>sheet</em><span class="sig-paren">)</span><a class="headerlink" href="#schema.loader.ExternalSchemaLoader.attr_dict_iter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over application dicts based on raw dicts built by the schema of the sheet.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">attr_dict_iter</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Iterate over application dicts based on raw dicts</span>
+<span class="sd">    built by the schema of the sheet.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">ExternalSchemaLoader</span><span class="o">.</span><span class="n">build_attr</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">rows_as_dict_iter</span><span class="p">(</span><span class="n">sheet</span><span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="schema.loader.ExternalSchemaLoader.schema">
+<code class="descclassname">ExternalSchemaLoader.</code><code class="descname">schema</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#schema.loader.ExternalSchemaLoader.schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scan a file to get the schema.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a <code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code> object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">schema</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scan a file to get the schema.</span>
+<span class="sd">    :return: a :py:class:`Schema` object.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">row_iter</span><span class="o">=</span> <span class="nb">iter</span><span class="p">(</span> <span class="p">[]</span> <span class="p">)</span>
+    <span class="n">source_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attr_dict_iter</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span> <span class="p">)</span>
+    <span class="n">schema</span><span class="o">=</span> <span class="n">Schema</span><span class="p">(</span>
+        <span class="o">*</span><span class="p">(</span><span class="n">Attribute</span><span class="p">(</span><span class="o">**</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">source_dict</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">schema</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="worst-case-loader">
+<h2>7.10. Worst-Case Loader<a class="headerlink" href="#worst-case-loader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="schema.loader.BareExternalSchemaLoader">
+<em class="property">class </em><code class="descclassname">schema.loader.</code><code class="descname">BareExternalSchemaLoader</code><a class="headerlink" href="#schema.loader.BareExternalSchemaLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a degenerate case loader where the schema sheet (or file) doesn’t have
+an embedded schema on line one of the sheet.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">BareExternalSchemaLoader</span><span class="p">(</span> <span class="n">SchemaLoader</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Open a workbook file in a well-known format.  Apply a schema parser</span>
+<span class="sd">    to the given sheet (or file) to build a schema.</span>
+
+<span class="sd">    The meta-schema is hard-coded in this class because the given</span>
+<span class="sd">    sheet has no headers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">schema</span><span class="o">=</span> <span class="n">Schema</span><span class="p">(</span>
+            <span class="n">Attribute</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span><span class="n">create</span><span class="o">=</span><span class="s2">&quot;TextCell&quot;</span><span class="p">),</span>
+            <span class="n">Attribute</span><span class="p">(</span><span class="s2">&quot;offset&quot;</span><span class="p">,</span><span class="n">create</span><span class="o">=</span><span class="s2">&quot;NumberCell&quot;</span><span class="p">),</span>
+            <span class="n">Attribute</span><span class="p">(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span><span class="n">create</span><span class="o">=</span><span class="s2">&quot;NumberCell&quot;</span><span class="p">),</span>
+            <span class="n">Attribute</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span><span class="n">create</span><span class="o">=</span><span class="s2">&quot;TextCell&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">workbook</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;Sheet1&#39;</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workbook</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_name</span> <span class="o">=</span> <span class="n">workbook</span><span class="p">,</span> <span class="n">sheet_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workbook</span><span class="o">.</span><span class="n">sheet</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_name</span><span class="p">,</span> <span class="n">stingray</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">ExternalSchemaSheet</span><span class="p">,</span>
+        <span class="n">schema</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="parsing-and-loading-a-cobol-schema">
+<h2>7.11. Parsing and Loading a COBOL Schema<a class="headerlink" href="#parsing-and-loading-a-cobol-schema" title="Permalink to this headline">¶</a></h2>
+<p>One logical extension to this is to parse COBOL DDE’s to create
+a schema that allows us to process a COBOL file (in EBCDIC) directly
+as if it were a simple workbook.</p>
+<p>We’ll delegate that to <a class="reference internal" href="cobol_loader.html#cobol-loader"><span class="std std-ref">COBOL Loader Module – Parse COBOL Source to Load a Schema</span></a>, since it’s considerably
+more complex than simply loading rows from a sheet of a workbook.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/Stingray_belon1553_small.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">The Stingray Schema-Based File Reader, stingray</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">2. Design Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package.html">3. The <code class="docutils literal notranslate"><span class="pre">stingray</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell.html">4. Cell Module – Data Element Containers and Conversions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sheet.html">5. Sheet Module – Sheet and Row Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema.html">6. Schema Package – Schema and Attribute Definitions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workbook/index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iwork13.html">9. The “Other” Modules: snappy and protobuf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cobol.html">10. The COBOL Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">11. The <strong>Stingray</strong> Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo/index.html">12. <strong>Stingray</strong> Demo Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">13. History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">14. Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build.html">15. Stingray Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">17. Licensing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="schema.html" title="previous chapter">6. Schema Package – Schema and Attribute Definitions</a></li>
+      <li>Next: <a href="workbook/index.html" title="next chapter">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2013, S. Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/schema_loader.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
