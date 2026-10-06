@@ -711,7 +711,7 @@ coordinates and a ``contains_a_formula`` flag. These records identify
 formula-bearing cells; the cell buffer itself holds each formula's cached
 result, while the formula list holds the expression.
 
-The example documents in :src_root:`docs/Numbers.md` show table-model
+The example documents in ``Numbers.md`` (on the ``feat/format-docs`` branch) show table-model
 dependency archives with spanning ranges for both the whole table and its body. They also show a
 variation in ``tiled_cell_dependencies``: the first example had no tile
 reference, while later examples referred to ``CellRecordTileArchive`` records.

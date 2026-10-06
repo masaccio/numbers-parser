@@ -13,11 +13,10 @@ border of merged cells is not possible unless the edge of the cells is
 at the end of the merged region.
 
 Borders are represented using the
-`Border <https://masaccio.github.io/numbers-parser/border.html>`__
+:pages:`Border <api/border.html>`
 class that can be initialized with line width, color and line style. The
 current state of a cell border is read using the
 `Cell.border <https://masaccio.github.io/numbers-parser/api/cells.html#numbers_parser.Cell.border>`__
-
 property. The
 `Table.set_cell_border <https://masaccio.github.io/numbers-parser/api/table.html#numbers_parser.Table.set_cell_border>`__
 sets the border for a cell edge or a range of cells.
