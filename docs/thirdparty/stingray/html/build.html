@@ -1,0 +1,476 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>15. Stingray Build &#8212; The Stingray Schema-Based File Reader</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="16. Installation via setup.py" href="installation.html" />
+    <link rel="prev" title="14.11. stingray.test __init__.py" href="testing/test_init.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="stingray-build">
+<span id="build"></span><h1>15. Stingray Build<a class="headerlink" href="#stingray-build" title="Permalink to this headline">¶</a></h1>
+<p>The source for <code class="xref py py-mod docutils literal notranslate"><span class="pre">stingray</span></code> is a Sphinx project that depends on PyLit.
+Yes.  The documentation spawns the code.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>PyLit Feature</p>
+<p>The first line of each file must be <code class="docutils literal notranslate"><span class="pre">..</span>&#160;&#160;&#160; <span class="pre">#!/usr/bin/env</span> <span class="pre">python3</span></code>.</p>
+<p>The four spaces between <code class="docutils literal notranslate"><span class="pre">..</span></code> and <code class="docutils literal notranslate"><span class="pre">#!</span></code> defines the indent used for
+each line of code in the file.</p>
+<p class="last">Four spaces.</p>
+</div>
+<p>Stingray depends on the following</p>
+<ul>
+<li><p class="first">xlrd.  <a class="reference external" href="http://www.lexicon.net/sjmachin/xlrd.htm">http://www.lexicon.net/sjmachin/xlrd.htm</a></p>
+<p>Version 0.9.2 is Python 3 compatible. <a class="reference external" href="https://pypi.python.org/pypi/xlrd/0.9.2">https://pypi.python.org/pypi/xlrd/0.9.2</a></p>
+</li>
+</ul>
+<p>In addition to Python 3.3, there are two other projects used to build.</p>
+<ul class="simple">
+<li>PyLit.  <a class="reference external" href="https://github.com/slott56/PyLit-3">https://github.com/slott56/PyLit-3</a></li>
+<li>Sphinx.  <a class="reference external" href="http://sphinx.pocoo.org/">http://sphinx.pocoo.org/</a></li>
+</ul>
+<p>The PyLit install is little more than a download and move the <code class="file docutils literal notranslate"><span class="pre">pylit.py</span></code> file to
+the Python <code class="file docutils literal notranslate"><span class="pre">site-packages</span></code> directory.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m pip install xlrd sphinx
+</pre></div>
+</div>
+<p>The diagrams are done with YUML. See <a class="reference external" href="http://yuml.me">http://yuml.me</a>.</p>
+<div class="section" id="build-procedure">
+<h2>15.1. Build Procedure<a class="headerlink" href="#build-procedure" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Bootstrap the <code class="file docutils literal notranslate"><span class="pre">build.py</span></code> script by running PyLit.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m pylit -t source/build.rst build.py
+</pre></div>
+</div>
+<p>This reports that an extract was written to <code class="file docutils literal notranslate"><span class="pre">build.py</span></code>.</p>
+</li>
+<li><p class="first">Use the <code class="file docutils literal notranslate"><span class="pre">build.py</span></code> script to create the <code class="docutils literal notranslate"><span class="pre">stingray</span></code> source, unit
+tests, demonstration applications.
+Build the Sphinx documentation.
+And run the unit test, too.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 build.py --makepy
+</pre></div>
+</div>
+<p>At the end of this step, the directory tree will include the following.</p>
+<ul class="simple">
+<li><code class="file docutils literal notranslate"><span class="pre">build</span></code>.  The documentation.  In HTML.</li>
+<li><code class="file docutils literal notranslate"><span class="pre">demo</span></code>.   Some demonstration applications that use <code class="docutils literal notranslate"><span class="pre">stingray</span></code>.
+See <a class="reference internal" href="demo/index.html#demo"><span class="std std-ref">Stingray Demo Applications</span></a>.</li>
+<li><code class="file docutils literal notranslate"><span class="pre">stingray</span></code>.  The Python library, ready for installation.</li>
+<li><code class="file docutils literal notranslate"><span class="pre">test</span></code>.  The unit test script.</li>
+</ul>
+<p>This reports, also, that 186 tests were run.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="build-script-design">
+<h2>15.2. Build Script Design<a class="headerlink" href="#build-script-design" title="Permalink to this headline">¶</a></h2>
+<p>This is a platform-independent <code class="file docutils literal notranslate"><span class="pre">build.py</span></code> file for the build script.
+This can use <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">sphinx.application</span> <span class="pre">import</span> <span class="pre">Sphinx</span></code>
+and <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pylit</span></code> to access these modules from within Python
+instead of using command-line shell script techniques.</p>
+<div class="section" id="overheads">
+<h3>15.2.1. Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h3>
+<p>We’re going to make use of some “applications”.</p>
+<ul class="simple">
+<li>Sphinx top-level application.</li>
+<li>PyLit top-level application.</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Platform-independent build script&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">sphinx.application</span> <span class="k">import</span> <span class="n">Sphinx</span>
+<span class="kn">import</span> <span class="nn">pylit</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sphinx-build">
+<h3>15.2.2. Sphinx Build<a class="headerlink" href="#sphinx-build" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="sphinx_build">
+<code class="descname">sphinx_build</code><span class="sig-paren">(</span><em>srcdir</em>, <em>outdir</em>, <em>buildername='html'</em><span class="sig-paren">)</span><a class="headerlink" href="#sphinx_build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle the simple use case for the <code class="docutils literal notranslate"><span class="pre">sphinx-build</span></code> script.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sphinx_build</span><span class="p">(</span> <span class="n">srcdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">buildername</span><span class="o">=</span><span class="s1">&#39;html&#39;</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Essentially: ``sphinx-build $* -b html source docs/html``&quot;&quot;&quot;</span>
+    <span class="n">confdir</span><span class="o">=</span> <span class="n">srcdir</span><span class="o">=</span> <span class="n">Path</span><span class="p">(</span> <span class="n">srcdir</span> <span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="n">outdir</span><span class="o">=</span> <span class="n">Path</span><span class="p">(</span> <span class="n">outdir</span> <span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="n">doctreedir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="s1">&#39;.doctrees&#39;</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">Sphinx</span><span class="p">(</span><span class="n">srcdir</span><span class="p">,</span> <span class="n">confdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">doctreedir</span><span class="p">,</span> <span class="n">buildername</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">force_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">filenames</span><span class="o">=</span><span class="p">[])</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">statuscode</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pylit-build-python">
+<h3>15.2.3. PyLit Build Python<a class="headerlink" href="#pylit-build-python" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pylit_build_py">
+<code class="descname">pylit_build_py</code><span class="sig-paren">(</span><em>srcdir</em>, <em>outdir</em><span class="sig-paren">)</span><a class="headerlink" href="#pylit_build_py" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle the simple use case for PyLit transformation from RST to Python.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">pylit_build_py</span><span class="p">(</span> <span class="n">pyFile</span><span class="p">,</span> <span class="n">rstFile</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Essentially: ``python3 -m pylit -t source/demo/data_quality.rst demo/test.py``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pylit</span><span class="o">.</span><span class="n">main</span><span class="p">(</span> <span class="n">txt2code</span><span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="n">infile</span><span class="o">=</span> <span class="n">pyFile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span> <span class="n">pylit</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[]</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pylit-build-rst">
+<h3>15.2.4. PyLit Build RST<a class="headerlink" href="#pylit-build-rst" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pylit_build_rst">
+<code class="descname">pylit_build_rst</code><span class="sig-paren">(</span><em>srcdir</em>, <em>outdir</em><span class="sig-paren">)</span><a class="headerlink" href="#pylit_build_rst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle the other simple use case for PyLit transformation from Python to RST.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">pylit_build_rst</span><span class="p">(</span> <span class="n">pyFile</span><span class="p">,</span> <span class="n">rstFile</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Essentially: ``python3 -m pylit -c demo/test.py source/demo/data_quality.rst``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pylit</span><span class="o">.</span><span class="n">main</span><span class="p">(</span> <span class="n">txt2code</span><span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="n">infile</span><span class="o">=</span> <span class="n">rstFile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span> <span class="n">pyFile</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[]</span> <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Did not overwrite </span><span class="si">{pyFile}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="copy-data-file">
+<h3>15.2.5. Copy Data File<a class="headerlink" href="#copy-data-file" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="copy_file">
+<code class="descname">copy_file</code><span class="sig-paren">(</span><em>srcdir</em>, <em>outdir</em><span class="sig-paren">)</span><a class="headerlink" href="#copy_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the simple use case for copying a file.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">copy_file</span><span class="p">(</span> <span class="n">srcdir</span><span class="p">,</span> <span class="n">outdir</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Essentially: ``cp $srcdir $outdir``&quot;&quot;&quot;</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span> <span class="n">srcdir</span><span class="p">,</span> <span class="n">outdir</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="copy-data-file-back">
+<h3>15.2.6. Copy Data File Back<a class="headerlink" href="#copy-data-file-back" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="copy_file_back">
+<code class="descname">copy_file_back</code><span class="sig-paren">(</span><em>srcdir</em>, <em>outdir</em><span class="sig-paren">)</span><a class="headerlink" href="#copy_file_back" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the reverse copy use case. This refuses to overwrite a file, unless it’s newer.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">copy_file_back</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="n">srcdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Essentially: ``if [$outdir -nt $srcsrc] then; cp $outdir $srcdir; fi``&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-the-test-script">
+<h3>15.2.7. Run the Test Script<a class="headerlink" href="#run-the-test-script" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="run_test">
+<code class="descname">run_test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#run_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>In effect, this does <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">test/main.py</span></code></p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run_test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">test.main</span>
+    <span class="n">result</span><span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">failures</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">failures</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-forward-build-sequence-from-rst-to-py">
+<h3>15.2.8. The “Forward” Build Sequence from RST to PY<a class="headerlink" href="#the-forward-build-sequence-from-rst-to-py" title="Permalink to this headline">¶</a></h3>
+<p>Because of some file renames and slight changes in structure, this isn’t
+a trivial walk through a directory tree.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">build_py</span><span class="p">():</span>
+    <span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">/</span><span class="s2">&quot;stingray&quot;</span><span class="o">/</span><span class="s2">&quot;schema&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">/</span><span class="s2">&quot;stingray&quot;</span><span class="o">/</span><span class="s2">&quot;cobol&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;stingray&quot;</span> <span class="o">/</span> <span class="s2">&quot;workbook&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/stingray_init.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/__init__.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/cell.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/cell.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/sheet.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/sheet.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/workbook/init.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/__init__.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/workbook/base.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/base.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/workbook/csv.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/csv.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/workbook/xls.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/xls.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/workbook/xlsx.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/xlsx.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/workbook/ods.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/ods.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/workbook/numbers_09.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/numbers_09.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/workbook/numbers_13.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/numbers_13.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/workbook/fixed.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/fixed.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/schema.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/schema/__init__.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/schema_loader.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/schema/loader.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/cobol_init.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/cobol/__init__.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/cobol_loader.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/cobol/loader.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/cobol_defs.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/cobol/defs.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/snappy.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/snappy.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/protobuf.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/protobuf.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/installation.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;setup.py&#39;</span> <span class="p">)</span>
+
+    <span class="n">copy_file</span><span class="p">(</span> <span class="s1">&#39;source/Numbers.json&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/Numbers.json&#39;</span> <span class="p">)</span>
+    <span class="n">copy_file</span><span class="p">(</span> <span class="s1">&#39;source/Common.json&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/Common.json&#39;</span> <span class="p">)</span>
+
+    <span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">/</span><span class="s2">&quot;test&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/testing/test_init.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/__init__.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/testing/main.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/main.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/testing/cell.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/cell.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/testing/sheet.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/sheet.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/testing/schema.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/schema.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/testing/schema_loader.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/schema_loader.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/testing/workbook.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/workbook.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/testing/cobol.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/cobol.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/testing/cobol_loader.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/cobol_loader.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/testing/cobol_2.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/cobol_2.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/testing/snappy_protobuf.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/snappy_protobuf.py&#39;</span> <span class="p">)</span>
+
+    <span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">/</span><span class="s2">&quot;demo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/demo/data_quality.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;demo/test.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/demo/validation.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;demo/app.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/demo/profile.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;demo/profile.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build_py</span><span class="p">(</span> <span class="s1">&#39;source/demo/cobol_reader.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;demo/cobol_reader.py&#39;</span> <span class="p">)</span>
+
+    <span class="n">run_test</span><span class="p">()</span>
+
+    <span class="n">sphinx_build</span><span class="p">(</span> <span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="s1">&#39;docs/html&#39;</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-reverse-build-sequence-from-py-to-rst">
+<h3>15.2.9. The “Reverse” Build Sequence from PY to RST<a class="headerlink" href="#the-reverse-build-sequence-from-py-to-rst" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">build_rst</span><span class="p">():</span>
+    <span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">/</span><span class="s2">&quot;source&quot;</span><span class="o">/</span><span class="s2">&quot;demo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">/</span><span class="s2">&quot;source&quot;</span><span class="o">/</span><span class="s2">&quot;testing&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;source&quot;</span> <span class="o">/</span> <span class="s2">&quot;workbook&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unit test...&quot;</span><span class="p">)</span>
+    <span class="n">run_test</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Building source...&quot;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/installation.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;setup.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/build.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;build.py&#39;</span><span class="p">)</span>
+
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/stingray_init.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/__init__.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/cell.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/cell.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/sheet.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/sheet.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/workbook/init.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/__init__.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/workbook/base.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/base.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/workbook/csv.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/csv.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/workbook/xls.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/xls.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/workbook/xlsx.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/xlsx.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/workbook/ods.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/ods.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/workbook/numbers_09.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/numbers_09.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/workbook/numbers_13.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/numbers_13.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/workbook/fixed.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/workbook/fixed.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/schema.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/schema/__init__.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/schema_loader.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/schema/loader.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/cobol_init.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/cobol/__init__.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/cobol_loader.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/cobol/loader.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/cobol_defs.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/cobol/defs.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/snappy.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/snappy.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/protobuf.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;stingray/protobuf.py&#39;</span><span class="p">)</span>
+
+    <span class="c1"># TODO: special case -- only copy the file back to the source if it&#39;s newer.</span>
+    <span class="c1"># copy_file_back(&#39;source/Numbers.json&#39;, &#39;stingray/Numbers.json&#39;)</span>
+    <span class="c1"># copy_file_back(&#39;source/Common.json&#39;, &#39;stingray/Common.json&#39;)</span>
+
+    <span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;test&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/testing/test_init.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/__init__.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/testing/main.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/main.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/testing/cell.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/cell.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/testing/sheet.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/sheet.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/testing/schema.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/schema.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/testing/schema_loader.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/schema_loader.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/testing/workbook.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/workbook.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/testing/cobol.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/cobol.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/testing/cobol_loader.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/cobol_loader.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/testing/cobol_2.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/cobol_2.py&#39;</span><span class="p">)</span>
+    <span class="n">pylit_build_rst</span><span class="p">(</span><span class="s1">&#39;source/testing/snappy_protobuf.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/snappy_protobuf.py&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Building html...&quot;</span><span class="p">)</span>
+    <span class="n">sphinx_build</span><span class="p">(</span> <span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="s1">&#39;docs/html&#39;</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="which-direction">
+<h3>15.2.10. Which Direction?<a class="headerlink" href="#which-direction" title="Permalink to this headline">¶</a></h3>
+<p>There are two potential directions, depending on where the author was working.
+We don’t try to resolve individual files to allow mixing and matching of changes.</p>
+<p>To do that, we’ll parse one command-line argument to get the direction.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_options</span><span class="p">(</span><span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--makepy&quot;</span><span class="p">,</span> <span class="s2">&quot;-p&quot;</span><span class="p">,</span>
+                        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Makes Python code from RST source&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--makesrc&quot;</span><span class="p">,</span> <span class="s2">&quot;-s&quot;</span><span class="p">,</span>
+                        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Rebuilds RST source after Python changes&quot;</span><span class="p">)</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">makepy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">options</span><span class="o">.</span><span class="n">makesrc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">options</span>
+    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">makesrc</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">options</span><span class="o">.</span><span class="n">makepy</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">options</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Choose one of --makepy or --makesrc&quot;</span><span class="p">)</span>
+    <span class="c1"># Now. Clear out the values so they don&#39;t confuse pylit3</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="main-program-switch">
+<h3>15.2.11. Main Program Switch<a class="headerlink" href="#main-program-switch" title="Permalink to this headline">¶</a></h3>
+<p>When the <code class="file docutils literal notranslate"><span class="pre">build.py</span></code> script is run from the command line,
+it will execute the <code class="xref py py-func docutils literal notranslate"><span class="pre">build()</span></code> function.  When it is imported,
+however, it will do nothing special.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">get_options</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">makepy</span><span class="p">:</span>
+        <span class="n">build_py</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">makesrc</span><span class="p">:</span>
+        <span class="n">build_rst</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;No valid option chosen.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="additional-builds">
+<h2>15.3. Additional Builds<a class="headerlink" href="#additional-builds" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes it’s desriable to refresh the documentation.</p>
+<p>The HTML pages are built with this command.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sphinx-build -b html <span class="nb">source</span> docs/html
+</pre></div>
+</div>
+<p>The LaTeX document is built with this command.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sphinx-build -b latex <span class="nb">source</span> docs/latex
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/Stingray_belon1553_small.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">The Stingray Schema-Based File Reader, stingray</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">2. Design Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package.html">3. The <code class="docutils literal notranslate"><span class="pre">stingray</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell.html">4. Cell Module – Data Element Containers and Conversions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sheet.html">5. Sheet Module – Sheet and Row Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema.html">6. Schema Package – Schema and Attribute Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema_loader.html">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workbook/index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iwork13.html">9. The “Other” Modules: snappy and protobuf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cobol.html">10. The COBOL Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">11. The <strong>Stingray</strong> Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo/index.html">12. <strong>Stingray</strong> Demo Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">13. History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">14. Testing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">15. Stingray Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">17. Licensing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="testing/test_init.html" title="previous chapter">14.11. stingray.test <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code></a></li>
+      <li>Next: <a href="installation.html" title="next chapter">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2013, S. Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/build.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

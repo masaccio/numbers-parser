@@ -1,0 +1,513 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>6. Schema Package – Schema and Attribute Definitions &#8212; The Stingray Schema-Based File Reader</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="7. Schema Loader Module – Load Embedded or External Schema" href="schema_loader.html" />
+    <link rel="prev" title="5. Sheet Module – Sheet and Row Access" href="sheet.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-schema">
+<span id="schema-package-schema-and-attribute-definitions"></span><span id="schema"></span><h1>6. Schema Package – Schema and Attribute Definitions<a class="headerlink" href="#module-schema" title="Permalink to this headline">¶</a></h1>
+<p>A <em>Schema</em> contains data descriptions.  It’s a collection of <em>Attribute</em> specifications.</p>
+<p>For our purposes, we’re trying to cover the following bases:</p>
+<ul>
+<li><p class="first">Workbooks in a variety of forms: CSV, Tab, XLSX, ODS, etc.
+The common feature of these schema is that they’re flat.  A single
+index (or name) identifies each column.</p>
+<p>The schema can be in a variety of places.</p>
+<ul class="simple">
+<li>The schema may be a header row within a sheet.</li>
+<li>The schema may be elsewhere in the sheet.  It may be a header
+that’s not the first row.</li>
+<li>The schema may be in a separate document.</li>
+</ul>
+</li>
+<li><p class="first">COBOL Files. The schema is highly structured: a path must be
+used to unambiguously identify each field. Some COBOL schema are
+designed so that all leaf names are unique.</p>
+<p>The schema is a separate document, encoded in
+COBOL source code.</p>
+</li>
+</ul>
+<p>We’ll also happen to cover relational database table definitions.  However,
+this isn’t our focus.  This is simply coincidence.</p>
+<p>Note that we are not trying to cover XML schemas or a <strong>complete</strong> relational
+database schema. There are a lot of possible features not present here.</p>
+<div class="section" id="load-a-schema-use-case">
+<h2>6.1. Load a Schema Use Case<a class="headerlink" href="#load-a-schema-use-case" title="Permalink to this headline">¶</a></h2>
+<p>The objective of this module is to provide a handy base class family
+that can be used to load schema information from any of a variety
+of sources.</p>
+<ul class="simple">
+<li>Embedded schema in a sheet of a workbook.  Either a header row
+or some more complex parsing.  This implies some kind of schema
+parser that reads a workbook sheet and gets little more than
+column names and ordinal positions.</li>
+<li>External schema in another workbook.  This implies a
+parser that gathers some information (name, type, position, offset,
+or size) from a sheet using a fixed schema.</li>
+<li>External schema in COBOL.  This implies a parser for COBOL source.</li>
+</ul>
+<p>Embedded schema loading would look like this.</p>
+<pre class="literal-block">
+with <em>open</em> as wb:
+    counts= defauldict( int )
+    sheet = EmbeddedSchemaSheet( workbook, 'Sheet1', HeadingRowSchemaLoader )
+    counts= process_sheet( sheet )
+    pprint.pprint( counts )
+</pre>
+<p>The schema object isn’t made explicit.  It’s available in <code class="docutils literal notranslate"><span class="pre">sheet.schema</span></code>.</p>
+<p>External schema loading would look like this.</p>
+<pre class="literal-block">
+with <em>open schema</em> as wb_s:
+    esl = ExternalSchemaLoader( wb_s, 'Schema' )
+    schema = esl.load()
+with <em>open data</em> as wb:
+    sheet = ExternalSchemaSheet( wb, 'Sheet1', schema )
+    counts= process_sheet( sheet )
+    pprint.pprint( counts )
+</pre>
+</div>
+<div class="section" id="use-a-schema-use-case">
+<h2>6.2. Use a Schema Use Case<a class="headerlink" href="#use-a-schema-use-case" title="Permalink to this headline">¶</a></h2>
+<p>We use a schema to access fields by name. Here’s the use case from <a class="reference internal" href="introduction.html#intro"><span class="std std-ref">Introduction</span></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">foo</span><span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span>
+
+<span class="n">bar</span><span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;bar&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This, of course, only works in the cases where the field name
+is unique and the row’s values can be built eagerly.  The good news
+is that 80% of the time this is true.  The other 20% of the time, we
+need something more complex.</p>
+<p>For the 80% case, we can do this.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row_seq</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">rows</span><span class="p">():</span>
+    <span class="n">row</span><span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">row_seq</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">schema</span>
+    <span class="p">)</span>
+    <span class="n">foo</span><span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span>
+    <span class="n">bar</span><span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;bar&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Or this.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">rows_as_dict_iter</span><span class="p">(</span> <span class="n">sheet</span><span class="o">.</span><span class="n">rows</span><span class="p">()</span> <span class="p">):</span>
+    <span class="n">foo</span><span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span>
+    <span class="n">bar</span><span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;bar&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In the 20% case, we can’t build a row eagerly.  In this case, we have to do
+the following to fetch cell values using a properly lazy row.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">schema_dict</span><span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">schema</span> <span class="p">)</span>
+<span class="k">for</span> <span class="n">row_seq</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">rows</span><span class="p">():</span>
+    <span class="n">foo</span><span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema_dict</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span>
+    <span class="n">bar</span><span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">schema_dict</span><span class="p">[</span><span class="s1">&#39;bar&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This involves a three-step dance because a row (and a schema) have a number of ambiguities.
+In particular, names may be duplicated, forcing us to use position or more  complex naming conventions.  Also, the attribute may have repeating groups,
+requiring some indexing, as well as naming.</p>
+<ol class="arabic simple">
+<li>Build a schema mapping by some name.  We can use the attribute name (if it’s unique)
+or (for COBOL schema) a unique path name.  Or, we may have some other, more
+complex naming for attributes.  Really.</li>
+<li>Find the attribute in our mapping.</li>
+<li>Find the cell value based on the attribute.</li>
+</ol>
+</div>
+<div class="section" id="application-object-builder">
+<h2>6.3. Application Object Builder<a class="headerlink" href="#application-object-builder" title="Permalink to this headline">¶</a></h2>
+<p>The whole point of this is to facilitate writing applications that work
+with objects encoded as rows in a spreadsheet. We’re not merely picking
+a value from cells of a row: we’re creating Python objects from the row
+as a whole. These application objects are also based on a common Conceptual Schema;
+they are yet another implementation of the concept.</p>
+<p>Experience indicates that the conceptual schema may have several variant
+logical layouts.  Because of the logical layout variability,
+a two-step dance is
+required between source rows and final Python objects.</p>
+<ol class="arabic simple">
+<li>Transform input row to a standardized dictionary.  The mapping
+from input layout to dictionary changes.  Frequently.  The dictionary
+matches the conceptual schema.  The input is one of the variant
+logical layouts.</li>
+<li>Create the application object from the standardized dictionary.</li>
+</ol>
+<pre class="literal-block">
+def build_dict_1( aRow ):
+    return dict(
+        attribute= aRow['column'].to_str(),
+        another= aRow['data'].to_float(),
+    )
+
+def make_app_object( aDict ):
+    return Object( **aDict )
+
+def process_sheet( sheet, builder=build_dict_1 ):
+    counts= defaultdict( int )
+    object_iter = (
+        make_app_object(builder(row))
+        for row in sheet.schema.rows_as_dict_iter(sheet.rows()) )
+    for obj in object_iter:
+        <em>process object</em>
+    return counts
+</pre>
+<p>This allows us to configure an appropriate builder function depending
+on which variation of the logical layout the file actually has.</p>
+<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">csv</span></code> module offers trivial support for an eager “row-as-dict”
+processing. This can actually introduce problems.  Specifically, COBOL
+record layouts may have a number of fields named <code class="docutils literal notranslate"><span class="pre">Filler</span></code>.  Really.
+Also, it’s common to get data where column names are duplicated in the
+embedded schema.  Finally COBOL redefines means that lazy construction of
+Cell instances is more appropriate.</p>
+<p>Data conversions can become a <span class="math notranslate nohighlight">\(n \times m\)</span> issue.  Each of
+<span class="math notranslate nohighlight">\(n\)</span> input types can be mapped to each of <span class="math notranslate nohighlight">\(m\)</span> output types.  In this instance, we try to keep it to <span class="math notranslate nohighlight">\(n + m\)</span>.  We do this by
+acquiring a Python-specific type from the source.</p>
+<ul class="simple">
+<li>For fixed format files, this may involve decoding characters (not bytes).</li>
+<li>For COBOL format files, this may involve decoding bytes if EBCDIC
+and COMP-3 data are involved.  It may simply involve decoding characters
+if the file happens to be encoded into proper characters.</li>
+<li>For all other physical formats (CSV, XLS, XSLX, etc.) there is no separate
+decoding.   There are about five canonical cell types (mostly floats) with
+decodings defined by the format.</li>
+</ul>
+<p>Byte to Character conversion is not part of the schema problem.  That’s part
+of the physical format.  For the most part, the physical format defines the
+encoding of the bytes.  COBOL files in Unicode (or ASCII) strings,
+require standard, default decoding.  COBOL files in EBCDIC, however, may require
+highly customized decoding.  This will be delegated to that module.</p>
+<p>Output conversions are not part of the schema problem. They’re part of
+the application.  All this module does is get a workbook <a class="reference internal" href="cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> instance.</p>
+<p>It leads us builder functions that might look like this.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">build_dict_2</span><span class="p">(</span> <span class="n">aRow</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;flag&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_str</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;C&quot;</span><span class="p">:</span>
+        <span class="n">value</span><span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">value</span><span class="o">=</span> <span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;l&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span><span class="o">*</span><span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">attribute</span><span class="o">=</span> <span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;column&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_str</span><span class="p">(),</span>
+        <span class="n">another</span><span class="o">=</span> <span class="n">aRow</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_float</span><span class="p">(),</span>
+        <span class="n">value</span><span class="o">=</span> <span class="n">value</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>We’ve applied a number of input transformations to create Python objects. These
+objects are designed to fit as closely as possible to the conceptual schema.
+We can then output these in any required format.</p>
+</div>
+<div class="section" id="model">
+<h2>6.4. Model<a class="headerlink" href="#model" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>http://yuml.me/diagram/scruffy;/class/
+#schema,
+[Schema]&lt;&gt;-[Attribute],
+[Attribute]-&gt;[TextCell],
+[Workbook]-&gt;[Attribute].
+</pre></div>
+</div>
+<img alt="_images/schema.png" src="_images/schema.png" />
+</div>
+<div class="section" id="overheads">
+<h2>6.5. Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h2>
+<p>A schema depends only on the definitions in <a class="reference internal" href="cell.html#module-cell" title="cell"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cell</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;stingray.schema -- Defines an overall Schema of Attributes which can be</span>
+<span class="sd">embedded as a row of a sheet or encoded in a separate sheet.  A</span>
+<span class="sd">schema defines the logical layout of a workbook or flat file.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">stingray.cell</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="schema-class">
+<h2>6.6. Schema Class<a class="headerlink" href="#schema-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="schema.Schema">
+<em class="property">class </em><code class="descclassname">schema.</code><code class="descname">Schema</code><a class="headerlink" href="#schema.Schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>The core Schema definition is an extension to <code class="docutils literal notranslate"><span class="pre">list</span></code>. In addition to
+a sequence of attributes, it also has an “info” object that’s a dictionary
+of additional keywords.</p>
+<p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">schema.Schema.rows_as_dict_iter()</span></code> method uses the sheet’s
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">sheet.Sheet.rows()</span></code> iterator to create simple row-as-list values.
+These are transformed into the row-as-dict values.  If the attribute names
+involve duplicates, then one of the duplicated values will be chosen; the
+choice is arbitrary.</p>
+<dl class="attribute">
+<dt id="schema.Schema.info">
+<code class="descname">info</code><a class="headerlink" href="#schema.Schema.info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dict of additional information about this schema. Meta-metadata.
+For COBOL schema, this includes the source DDE.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="schema.Schema.names">
+<code class="descname">names</code><a class="headerlink" href="#schema.Schema.names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attribute names for rows_as_dict_iter()</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Schema</span><span class="p">(</span> <span class="nb">list</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A Mutable Sequence of attributes.  Order matters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Build a schema from collection of attributes.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">attr</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">position</span><span class="o">=</span> <span class="n">p</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="o">=</span> <span class="n">kw</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">attr_list</span><span class="o">=</span> <span class="nb">map</span><span class="p">(</span> <span class="nb">repr</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;Schema( </span><span class="si">{0}</span><span class="s2"> )&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">attr_list</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">rows_as_dict_iter</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">rows</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">schema</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">child</span> <span class="p">):</span>
+        <span class="n">child</span><span class="o">.</span><span class="n">position</span><span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">child</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Possibly helpful method to expand a row based on the schema information.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">expand</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">aRow</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Expand each attribute to create a dictionary of cells.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">aRow</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">attr</span><span class="p">))</span> <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>For parsing COBOL data, we often need to know the total length of the defined schema.
+This only works for records without an Occurs Depending On.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">lrecl</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span> <span class="n">a</span><span class="o">.</span><span class="n">offset</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>A Schema needs to handle two common use cases.</p>
+<ul>
+<li><p class="first">Cell values are defined by the physical format. Data can be fetched positionally.
+Names map to positions.</p>
+</li>
+<li><p class="first">Fixed and COBOL.  The cell values are not defined by the physical format, but by an external
+schema associated with the <a class="reference internal" href="sheet.html#sheet.Sheet" title="sheet.Sheet"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Sheet</span></code></a>. Names map to offsets and sizes;
+the bytes found there must be converted to Python objects. In the case of
+Occurs Depending On (ODO), the offsets depend on both schema and data.</p>
+<p>COBOL data may have elements which are invalid, but unused due to application
+logic in selecting a proper REDEFINES alias.</p>
+</li>
+</ul>
+<p>The simple positional schema isn’t really appropriate for all purposes.
+For COBOL and fixed format files with external schema, we often
+must process things lazily by field name.</p>
+<p>This is unlike spreadsheets where we can process all fields eagerly and in order.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p>Index by name and path, also.</p>
+<p class="last">This will eliminate some complexity in COBOL schema handling where
+we create the a “schema dictionary” using simple names and path names.</p>
+</div>
+</div>
+<div class="section" id="attribute-class">
+<h2>6.7. Attribute Class<a class="headerlink" href="#attribute-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="schema.Attribute">
+<em class="property">class </em><code class="descclassname">schema.</code><code class="descname">Attribute</code><a class="headerlink" href="#schema.Attribute" title="Permalink to this definition">¶</a></dt>
+<dd><p>An Attribute definition has a required value of a name and a class that will
+be created to hold the data.</p>
+<p>Here are the essential attributes of an Attribute.</p>
+<dl class="attribute">
+<dt id="schema.Attribute.name">
+<code class="descname">name</code><a class="headerlink" href="#schema.Attribute.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The attribute name. Typically always available for most kinds of schema.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="schema.Attribute.create">
+<code class="descname">create</code><a class="headerlink" href="#schema.Attribute.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cell class to create.  If omitted, the class-level
+<code class="xref py py-data docutils literal notranslate"><span class="pre">Attribute.default_cell</span></code> will be used.
+By default, this refers to <code class="xref py py-class docutils literal notranslate"><span class="pre">stingray.cell.TextCell</span></code>.</p>
+</dd></dl>
+
+<p>The additional
+values commonly provided by simple fixed format file schemata.</p>
+<dl class="attribute">
+<dt id="schema.Attribute.offset">
+<code class="descname">offset</code><a class="headerlink" href="#schema.Attribute.offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional offset into a buffer. For simple fixed-layout files,
+this is a constant. For COBOL files with Occurs Depending On,
+however, this must be a function based on the actual record
+being processed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="schema.Attribute.size">
+<code class="descname">size</code><a class="headerlink" href="#schema.Attribute.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional size within the buffer.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="schema.Attribute.position">
+<code class="descname">position</code><a class="headerlink" href="#schema.Attribute.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional sequential position.</p>
+</dd></dl>
+
+<p>A subclass might introduce yet more attributes.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Attribute</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Essential definition of a single source data element.&quot;&quot;&quot;</span>
+    <span class="n">default_cell</span><span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">TextCell</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Build an Attribute.</span>
+<span class="sd">        :param name: The attribute name.</span>
+<span class="sd">        :param offset: Optional offset into a buffer.</span>
+<span class="sd">        :param size: Optional size within the buffer.</span>
+<span class="sd">        :param create: Cell class to create.  If omitted, the class-level</span>
+<span class="sd">            :py:data:`Attribute.default_cell` will be used.</span>
+<span class="sd">        :param position: Optional sequential position.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span>\
+        <span class="n">name</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">create</span><span class="p">,</span> <span class="n">position</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_cell</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">kw</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Attribute( name=</span><span class="si">{0.name!r}</span><span class="s2">, position=</span><span class="si">{0.position}</span><span class="s2">, offset=</span><span class="si">{0.offset}</span><span class="s2">, size=</span><span class="si">{0.size}</span><span class="s2"> )&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>An <a class="reference internal" href="#schema.Attribute" title="schema.Attribute"><code class="xref py py-class docutils literal notranslate"><span class="pre">schema.Attribute</span></code></a> is used by a <a class="reference internal" href="workbook/base.html#workbook.base.Workbook" title="workbook.base.Workbook"><code class="xref py py-class docutils literal notranslate"><span class="pre">workbook.base.Workbook</span></code></a> to
+extract cell data from a row.</p>
+<p>The use case looks like this for a Fixed format workbook.  For other
+workbooks, other kinds of conversion functions might be used.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cell</span><span class="p">(</span> <span class="n">sheet</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">data</span> <span class="p">):</span>
+    <span class="n">a</span><span class="o">=</span> <span class="n">attribute</span>
+    <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">create</span><span class="p">(</span> <span class="n">data</span><span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">offset</span><span class="p">:</span><span class="n">a</span><span class="o">.</span><span class="n">offset</span><span class="o">+</span><span class="n">a</span><span class="o">.</span><span class="n">size</span><span class="p">],</span> <span class="n">sheet</span><span class="o">.</span><span class="n">workbook</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>The attribute might be declared as follows.</p>
+<pre class="literal-block">
+Attribute( name= &quot;mm-dd-yy&quot;, size= <em>n</em>, offset= <em>m</em>,
+    create=SomeCellSubclass )
+</pre>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/Stingray_belon1553_small.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="index.html">The Stingray Schema-Based File Reader, stingray</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">2. Design Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package.html">3. The <code class="docutils literal notranslate"><span class="pre">stingray</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cell.html">4. Cell Module – Data Element Containers and Conversions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sheet.html">5. Sheet Module – Sheet and Row Access</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Schema Package – Schema and Attribute Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schema_loader.html">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workbook/index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iwork13.html">9. The “Other” Modules: snappy and protobuf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cobol.html">10. The COBOL Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">11. The <strong>Stingray</strong> Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo/index.html">12. <strong>Stingray</strong> Demo Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">13. History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">14. Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build.html">15. Stingray Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">17. Licensing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="sheet.html" title="previous chapter">5. Sheet Module – Sheet and Row Access</a></li>
+      <li>Next: <a href="schema_loader.html" title="next chapter">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2013, S. Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/schema.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

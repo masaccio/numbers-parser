@@ -1,0 +1,212 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>8.4.3. CSV Workbook &#8212; The Stingray Schema-Based File Reader</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="8.4.4. XLS Workbook" href="xls.html" />
+    <link rel="prev" title="8.4.2. Workbook Base Definition" href="base.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="csv-workbook">
+<span id="workbook-csv"></span><h1>8.4.3. CSV Workbook<a class="headerlink" href="#csv-workbook" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+
+<span class="kn">from</span> <span class="nn">stingray.workbook.base</span> <span class="k">import</span> <span class="n">Workbook</span>
+<span class="kn">import</span> <span class="nn">stingray.sheet</span>
+<span class="kn">import</span> <span class="nn">stingray.cell</span>
+</pre></div>
+</div>
+<span class="target" id="module-workbook.csv"></span><dl class="class">
+<dt id="workbook.csv.CSV_Workbook">
+<em class="property">class </em><code class="descclassname">workbook.csv.</code><code class="descname">CSV_Workbook</code><a class="headerlink" href="#workbook.csv.CSV_Workbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract sheets, rows and cells from a CSV file.</p>
+<p>A wrapper for <code class="xref py py-func docutils literal notranslate"><span class="pre">csv.reader()</span></code>.  This will create proper
+<a class="reference internal" href="../cell.html#cell.TextCell" title="cell.TextCell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.TextCell</span></code></a> instances instead of the default string values
+that <code class="xref py py-mod docutils literal notranslate"><span class="pre">csv</span></code> normally creates.</p>
+<p>There’s only a single sheet and it matches the filename.</p>
+<p>In addition to the superclass attributes, an additional unique
+attribute is introduced here.</p>
+<dl class="attribute">
+<dt id="workbook.csv.CSV_Workbook.rdr">
+<code class="descname">rdr</code><a class="headerlink" href="#workbook.csv.CSV_Workbook.rdr" title="Permalink to this definition">¶</a></dt>
+<dd><p>The csv reader for this file.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CSV_Workbook</span><span class="p">(</span> <span class="n">Workbook</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Uses ``csv.reader``.  There&#39;s one sheet only.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prepare the workbook for reading.</span>
+<span class="sd">        :param name: File name</span>
+<span class="sd">        :param file_object: Optional file-like object.  If omitted, the named file is opened.</span>
+<span class="sd">            If provided, it must be opened with  newline=&#39;&#39; to permit non-standard</span>
+<span class="sd">            line-endings.</span>
+
+<span class="sd">        The kw are passed to :py:func:`csv.reader`</span>
+<span class="sd">        to provide dialect information.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_obj</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">the_file</span><span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rdr</span><span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">the_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rdr</span><span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">the_file</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>We can build an eager <a class="reference internal" href="../sheet.html#sheet.Row" title="sheet.Row"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Row</span></code></a> or a <a class="reference internal" href="../sheet.html#sheet.LazyRow" title="sheet.LazyRow"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.LazyRow</span></code></a> from
+the available data.
+The eager Row includes the conversions.  The <a class="reference internal" href="../sheet.html#sheet.LazyRow" title="sheet.LazyRow"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.LazyRow</span></code></a> defers
+the conversions until the callback to <a class="reference internal" href="base.html#workbook.base.Workbook.row_get" title="workbook.base.Workbook.row_get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">workbook.base.Workbook.row_get()</span></code></a>.</p>
+<dl class="method">
+<dt id="workbook.csv.CSV_Workbook.rows_of">
+<code class="descclassname">CSV_Workbook.</code><code class="descname">rows_of</code><span class="sig-paren">(</span><em>sheet</em><span class="sig-paren">)</span><a class="headerlink" href="#workbook.csv.CSV_Workbook.rows_of" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterator through all rows. The sheet is ignored.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">rows_of</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An iterator over all rows of the named sheet.</span>
+<span class="sd">    For CSV files, the sheet.name is simply ignored.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rdr</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span> <span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span> <span class="n">sheet</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">TextCell</span><span class="p">(</span><span class="n">col</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">row</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="workbook.csv.CSV_Workbook.row_get">
+<code class="descclassname">CSV_Workbook.</code><code class="descname">row_get</code><span class="sig-paren">(</span><em>row</em>, <em>attribute</em><span class="sig-paren">)</span><a class="headerlink" href="#workbook.csv.CSV_Workbook.row_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concrete implementation to get an attribute’s value from a given row.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">row_get</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">attribute</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a Cell from the row&#39;s data.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">row</span><span class="p">[</span><span class="n">attribute</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Since <code class="xref py py-mod docutils literal notranslate"><span class="pre">csv</span></code> is eager, returning an individual <a class="reference internal" href="../cell.html#cell.TextCell" title="cell.TextCell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.TextCell</span></code></a>
+is easy.</p>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/Stingray_belon1553_small.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">The Stingray Schema-Based File Reader, stingray</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">2. Design Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../package.html">3. The <code class="docutils literal notranslate"><span class="pre">stingray</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cell.html">4. Cell Module – Data Element Containers and Conversions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sheet.html">5. Sheet Module – Sheet and Row Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema.html">6. Schema Package – Schema and Attribute Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema_loader.html">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../iwork13.html">9. The “Other” Modules: snappy and protobuf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cobol.html">10. The COBOL Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">11. The <strong>Stingray</strong> Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demo/index.html">12. <strong>Stingray</strong> Demo Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">13. History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing/index.html">14. Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build.html">15. Stingray Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">17. Licensing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a><ul>
+      <li>Previous: <a href="base.html" title="previous chapter">8.4.2. Workbook Base Definition</a></li>
+      <li>Next: <a href="xls.html" title="next chapter">8.4.4. XLS Workbook</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2013, S. Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/workbook/csv.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

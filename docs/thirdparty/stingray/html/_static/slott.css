@@ -1,0 +1,87 @@
+/* SLott Legacy style */
+BODY
+{
+	background: white url(../GIF/TILE007.GIF);
+	/*width: 750pt;*/
+}
+
+P
+{
+	padding-left: 36pt;
+	text-align: justify;
+	/*width: 538pt;*/
+}
+
+P.menu
+{
+	padding-left: 0pt;
+	font-size: large;
+}
+
+P.menuitem
+{
+	padding-left: 0pt;
+	text-align: left;
+	font-size: x-small;
+}
+
+P.fine
+{
+	padding-left: 144pt;
+	/*width: 394pt;*/
+	font-size: 9pt;
+}
+
+P.title
+{
+	padding-left: 0;
+	/*width: 538pt;*/
+	text-align: center;
+	font-family: sans-serif;
+	font-size: large;
+}
+
+P.subtitle
+{
+	padding-left: 0;
+	/*width: 538pt;*/
+	text-align: center;
+	font-family: sans-serif;
+	font-size: medium;
+}
+
+PRE
+{
+	padding-left: 1in;
+	/*width: 538pt;*/
+	text-align: left;
+}
+
+UL, OL, DL { padding-left: 1in; }
+UL UL { padding-left: 0in; }
+OL UL { padding-left: 0in; }
+OL OL { padding-left: 0in; }
+
+H1, H2, H3, H4, H5, H6 { font-family: sans-serif; }
+H2, H3 { padding-left: 0.25in; }
+H4, H5 { padding-left: 0.5in; }
+
+IMG
+{
+	border-width: 0;
+	vertical-align: middle;
+}
+
+HR { width: 66%; }
+
+DIV.navbar
+{
+	padding-left: 1in;
+	text-align: center;
+}
+
+TABLE { border: 1pt raised; }
+TR { border: 1pt raised; }
+TD { border: 1pt raised; }
+IMG.navbar { border-width: 2pt; }
+

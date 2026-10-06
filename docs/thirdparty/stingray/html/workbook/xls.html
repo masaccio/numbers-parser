@@ -1,0 +1,283 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>8.4.4. XLS Workbook &#8212; The Stingray Schema-Based File Reader</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="8.4.5. XLSX or XLSM Workbook" href="xlsx.html" />
+    <link rel="prev" title="8.4.3. CSV Workbook" href="csv.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="xls-workbook">
+<span id="workbook-xls"></span><h1>8.4.4. XLS Workbook<a class="headerlink" href="#xls-workbook" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+
+<span class="kn">from</span> <span class="nn">stingray.workbook.base</span> <span class="k">import</span> <span class="n">Workbook</span>
+<span class="kn">import</span> <span class="nn">stingray.sheet</span>
+<span class="kn">import</span> <span class="nn">stingray.cell</span>
+
+<span class="kn">import</span> <span class="nn">xlrd</span>
+</pre></div>
+</div>
+<span class="target" id="module-workbook.xls"></span><dl class="class">
+<dt id="workbook.xls.XLS_Workbook">
+<em class="property">class </em><code class="descclassname">workbook.xls.</code><code class="descname">XLS_Workbook</code><a class="headerlink" href="#workbook.xls.XLS_Workbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract sheets, rows and cells from an XLS format file.</p>
+<p>This definition of a workbook wraps <code class="xref py py-mod docutils literal notranslate"><span class="pre">xlrd</span></code> so that it fits the Stingray framework.
+We’ll use proper <a class="reference internal" href="../cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a> subclass instances instead of the default <code class="docutils literal notranslate"><span class="pre">xlrd.Cell</span></code>
+values that <code class="xref py py-mod docutils literal notranslate"><span class="pre">xlrd</span></code> normally creates.</p>
+<p>In addition to the superclass attributes, some additional unique
+attributes are introduced here.</p>
+<dl class="attribute">
+<dt id="workbook.xls.XLS_Workbook.wb">
+<code class="descname">wb</code><a class="headerlink" href="#workbook.xls.XLS_Workbook.wb" title="Permalink to this definition">¶</a></dt>
+<dd><p>A xlrd workbook for this file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="workbook.xls.XLS_Workbook.datemode">
+<code class="descname">datemode</code><a class="headerlink" href="#workbook.xls.XLS_Workbook.datemode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The XLS date mode for this workbook. This is required for converting
+floating-point values to dates and dates to floating-point values.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">XLS_Workbook</span><span class="p">(</span> <span class="n">Workbook</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Uses ``xlrd``.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prepare the workbook for reading.</span>
+<span class="sd">        :param name: File name</span>
+<span class="sd">        :param file_object: Optional file-like object.  If omitted, the named file is opened.</span>
+
+<span class="sd">        The kw arguments are passed to :py:func:`xlrd.open_workbook`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_obj</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">open_workbook</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">file_contents</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_obj</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">=</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">open_workbook</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datemode</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">.</span><span class="n">datemode</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="workbook.xls.XLS_Workbook.sheets">
+<code class="descclassname">XLS_Workbook.</code><code class="descname">sheets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#workbook.xls.XLS_Workbook.sheets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of sheets for this workbook.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sheets</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;List of sheet names.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">.</span><span class="n">sheet_names</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We can build an eager <a class="reference internal" href="../sheet.html#sheet.Row" title="sheet.Row"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.Row</span></code></a> or a <a class="reference internal" href="../sheet.html#sheet.LazyRow" title="sheet.LazyRow"><code class="xref py py-class docutils literal notranslate"><span class="pre">sheet.LazyRow</span></code></a> from the available data.
+The eager Row includes the conversions.  The LazyRow defers the conversions
+until the callback to <a class="reference internal" href="#workbook.xls.XLS_Workbook.row_get" title="workbook.xls.XLS_Workbook.row_get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">XLS_Workbook.row_get()</span></code></a>.</p>
+<dl class="method">
+<dt id="workbook.xls.XLS_Workbook.rows_of">
+<code class="descclassname">XLS_Workbook.</code><code class="descname">rows_of</code><span class="sig-paren">(</span><em>sheet</em><span class="sig-paren">)</span><a class="headerlink" href="#workbook.xls.XLS_Workbook.rows_of" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate through rows of the given sheet.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">rows_of</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An iterator over all rows of the given sheet object.</span>
+<span class="sd">    This uses the XLRD translation to locate the sheet.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_sheet</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wb</span><span class="o">.</span><span class="n">sheet_by_name</span><span class="p">(</span><span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">current_sheet</span><span class="o">.</span><span class="n">nrows</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">current_sheet</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">stingray</span><span class="o">.</span><span class="n">sheet</span><span class="o">.</span><span class="n">Row</span><span class="p">(</span> <span class="n">sheet</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">row</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="workbook.xls.XLS_Workbook.row_get">
+<code class="descclassname">XLS_Workbook.</code><code class="descname">row_get</code><span class="sig-paren">(</span><em>row</em>, <em>attribute</em><span class="sig-paren">)</span><a class="headerlink" href="#workbook.xls.XLS_Workbook.row_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Low-level get of a particular attribute from the given row.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">row_get</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">attribute</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a Cell from the row&#39;s data.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">row</span><span class="p">[</span><span class="n">attribute</span><span class="o">.</span><span class="n">position</span><span class="p">]</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="workbook.xls.XLS_Workbook.cell">
+<code class="descclassname">XLS_Workbook.</code><code class="descname">cell</code><span class="sig-paren">(</span><em>row</em>, <em>xlrd_cell</em><span class="sig-paren">)</span><a class="headerlink" href="#workbook.xls.XLS_Workbook.cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>In <a class="reference internal" href="#workbook.xls.XLS_Workbook.rows_of" title="workbook.xls.XLS_Workbook.rows_of"><code class="xref py py-meth docutils literal notranslate"><span class="pre">XLS_Workbook.rows_of()</span></code></a> we built a row eagerly.
+That way, returning an individual Cell is easy.</p>
+<p>Convert a single <code class="docutils literal notranslate"><span class="pre">xlrd.Cell</span></code> to a proper subclass of <a class="reference internal" href="../cell.html#cell.Cell" title="cell.Cell"><code class="xref py py-class docutils literal notranslate"><span class="pre">cell.Cell</span></code></a></p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cell</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">xlrd_cell</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="n">xlrd_cell</span><span class="o">.</span><span class="n">ctype</span> <span class="o">==</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">XL_CELL_EMPTY</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">EmptyCell</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">xlrd_cell</span><span class="o">.</span><span class="n">ctype</span> <span class="o">==</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">XL_CELL_TEXT</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">TextCell</span><span class="p">(</span> <span class="n">xlrd_cell</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">xlrd_cell</span><span class="o">.</span><span class="n">ctype</span> <span class="o">==</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">XL_CELL_NUMBER</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">NumberCell</span><span class="p">(</span> <span class="n">xlrd_cell</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">xlrd_cell</span><span class="o">.</span><span class="n">ctype</span> <span class="o">==</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">XL_CELL_DATE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">FloatDateCell</span><span class="p">(</span> <span class="n">xlrd_cell</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">xlrd_cell</span><span class="o">.</span><span class="n">ctype</span> <span class="o">==</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">XL_CELL_BOOLEAN</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">BooleanCell</span><span class="p">(</span> <span class="n">xlrd_cell</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">xlrd_cell</span><span class="o">.</span><span class="n">ctype</span> <span class="o">==</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">XL_CELL_ERROR</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">ErrorCell</span><span class="p">(</span>
+            <span class="n">xlrd</span><span class="o">.</span><span class="n">error_text_from_code</span><span class="p">[</span><span class="n">xlrd_cell</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="bp">self</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">xlrd_cell</span><span class="o">.</span><span class="n">ctype</span> <span class="o">==</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">XL_CELL_BLANK</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">EmptyCell</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Damaged Workbook&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>For proper date conversions, we have
+two methods that leverage the datemode to properly convert dates
+and times in <code class="file docutils literal notranslate"><span class="pre">.XLS</span></code> workbooks.</p>
+<dl class="method">
+<dt>
+<code class="descname">Workbook.float_to_date( value ):</code></dt>
+<dd></dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">float_to_date</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">value</span> <span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dt</span><span class="o">=</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">xldate_as_tuple</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datemode</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">xldate</span><span class="o">.</span><span class="n">XLDateAmbiguous</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">ex</span><span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Ambiguous Date: </span><span class="si">{0!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">ex</span> <span class="kn">from</span> <span class="nn">e</span>
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt>
+<code class="descname">Workbook.date_to_float( value ):</code></dt>
+<dd></dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">date_to_float</span><span class="p">(</span> <span class="n">value</span> <span class="p">):</span>
+    <span class="n">timetuple</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()[:</span><span class="mi">6</span><span class="p">]</span>
+    <span class="n">xl</span><span class="o">=</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">xldate</span><span class="o">.</span><span class="n">xldate_from_datetime_tuple</span><span class="p">(</span>
+        <span class="n">timetuple</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datemode</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">xl</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/Stingray_belon1553_small.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">The Stingray Schema-Based File Reader, stingray</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">2. Design Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../package.html">3. The <code class="docutils literal notranslate"><span class="pre">stingray</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cell.html">4. Cell Module – Data Element Containers and Conversions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sheet.html">5. Sheet Module – Sheet and Row Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema.html">6. Schema Package – Schema and Attribute Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema_loader.html">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../iwork13.html">9. The “Other” Modules: snappy and protobuf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cobol.html">10. The COBOL Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">11. The <strong>Stingray</strong> Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demo/index.html">12. <strong>Stingray</strong> Demo Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">13. History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing/index.html">14. Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build.html">15. Stingray Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">17. Licensing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a><ul>
+      <li>Previous: <a href="csv.html" title="previous chapter">8.4.3. CSV Workbook</a></li>
+      <li>Next: <a href="xlsx.html" title="next chapter">8.4.5. XLSX or XLSM Workbook</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2013, S. Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/workbook/xls.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

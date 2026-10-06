@@ -1,0 +1,511 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>8.4.7. Apple iWorks Numbers ‘09 Workbook &#8212; The Stingray Schema-Based File Reader</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="8.4.8. Apple iWorks Numbers ‘13 Workbook" href="numbers_13.html" />
+    <link rel="prev" title="8.4.6. ODS Workbook" href="ods.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="apple-iworks-numbers-09-workbook">
+<span id="workbook-number09"></span><h1>8.4.7. Apple iWorks Numbers ‘09 Workbook<a class="headerlink" href="#apple-iworks-numbers-09-workbook" title="Permalink to this headline">¶</a></h1>
+<p>The Stingray model of sheet/row/cell structure does not
+easily fit the Numbers sheet/table/row/cell structure.
+How can we handle the extra layer of names introduced by
+Numbers?</p>
+<p>Option 1: navigation hierarchy.</p>
+<blockquote>
+<div>Workbook ➞ new layer (Numbers “Workspace”) ➞ Sheet (Numbers “Table”) ➞ Row ➞ Cell</div></blockquote>
+<p>Option 2: navigation hierarchy.</p>
+<blockquote>
+<div><p>Combine (Workspace,Table) into a 2-tuple, and call this a “sheet” name when working
+with Numbers documents.</p>
+<p>This will fit with Stingray acceptably.</p>
+</div></blockquote>
+<p>The imports required to process this kind of file.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">import</span> <span class="nn">xml.etree.cElementTree</span> <span class="k">as</span> <span class="nn">dom</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">decimal</span>
+
+<span class="kn">from</span> <span class="nn">stingray.workbook.base</span> <span class="k">import</span> <span class="n">Workbook</span>
+<span class="kn">import</span> <span class="nn">stingray.sheet</span>
+<span class="kn">import</span> <span class="nn">stingray.cell</span>
+</pre></div>
+</div>
+<span class="target" id="module-workbook.numbers09"></span><p>The iWork Numbers 09 format is a Zip file with an XML document inside it.
+There may be slight variations between native Numbers ‘09 and Numbers ‘13 doing
+a “save as” in Numbers ‘09 format. It’s not clear; we haven’t done
+exhaustive checking.</p>
+<p>Numbers ‘13 is entirely different. See <a class="reference internal" href="numbers_13.html#workbook-number13"><span class="std std-ref">Apple iWorks Numbers ‘13 Workbook</span></a>.</p>
+<dl class="class">
+<dt id="workbook.numbers09.Numbers09_Workbook">
+<em class="property">class </em><code class="descclassname">workbook.numbers09.</code><code class="descname">Numbers09_Workbook</code><a class="headerlink" href="#workbook.numbers09.Numbers09_Workbook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract sheets, rows and cells from a Numbers ‘09 format file.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">.numbers</span></code> “file” is a ZIP file.</p>
+<p>The <code class="file docutils literal notranslate"><span class="pre">index.xml</span></code> element the interesting part of the archive.</p>
+<p>In addition to the superclass attributes, some additional unique
+attributes are introduced here.</p>
+<dl class="attribute">
+<dt id="workbook.numbers09.Numbers09_Workbook.zip_archive">
+<code class="descname">zip_archive</code><a class="headerlink" href="#workbook.numbers09.Numbers09_Workbook.zip_archive" title="Permalink to this definition">¶</a></dt>
+<dd><p>A zip archive for this file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="workbook.numbers09.Numbers09_Workbook.workspace">
+<code class="descname">workspace</code><a class="headerlink" href="#workbook.numbers09.Numbers09_Workbook.workspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>The “workspaces”: pages with tables inside them.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Numbers09_Workbook</span><span class="p">(</span> <span class="n">Workbook</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mac OS X Numbers Workbook for iWork 09.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NUMBERS_NS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;ls&quot;</span><span class="p">:</span><span class="s2">&quot;http://developer.apple.com/namespaces/ls&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sf&quot;</span><span class="p">:</span><span class="s2">&quot;http://developer.apple.com/namespaces/sf&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sfa&quot;</span><span class="p">:</span><span class="s2">&quot;http://developer.apple.com/namespaces/sfa&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">row_debug</span><span class="o">=</span> <span class="kc">False</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prepare the workbook for reading.</span>
+<span class="sd">        :param name: File name</span>
+<span class="sd">        :param file_object: Optional file-like object. Ignored for v3.2 numbers files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_object</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zip_archive</span><span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span> <span class="n">file_object</span> <span class="ow">or</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>As preparation for reading these files, we locate all the sheet names
+and all the number styles.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_prepare</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Locate sheets/tables and styles.&quot;&quot;&quot;</span>
+    <span class="n">root</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">zip_archive</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;index.xml&#39;</span><span class="p">)</span> <span class="p">)</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_locate_sheets</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_get_styles</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Locating all the sheets is a matter of doing an XPath search for
+<code class="samp docutils literal notranslate"><span class="pre">workspace-array/workspace</span></code> and getting the <code class="docutils literal notranslate"><span class="pre">workspace-name</span></code> attribute
+from the  <code class="samp docutils literal notranslate"><span class="pre">&lt;table</span> <span class="pre">name=&quot;</span><em><span class="pre">name</span></em><span class="pre">&quot;&gt;</span></code> tags.</p>
+<p>Within each workspace we have to find <code class="samp docutils literal notranslate"><span class="pre">page-info/tabular-info/tabular-model</span></code> to
+get the tables within the workspaces.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_locate_sheets</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">root</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create ``workspace_table`` map from name to workspace and table.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="n">ws_name_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;ls&quot;</span><span class="p">],</span> <span class="s1">&#39;workspace-name&#39;</span> <span class="p">)</span>
+    <span class="n">name_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;name&#39;</span> <span class="p">)</span>
+    <span class="n">workspace_array</span><span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;ls:workspace-array&quot;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span> <span class="p">)</span>
+    <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="n">workspace_array</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;.//ls:workspace&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span> <span class="p">):</span>
+        <span class="c1"># Populate tables within this workspace.</span>
+        <span class="n">tables</span><span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">page_info</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;ls:page-info&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tabular_info</span> <span class="ow">in</span> <span class="n">page_info</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;.//sf:tabular-info&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">):</span>
+            <span class="n">tabular_model</span> <span class="o">=</span> <span class="n">tabular_info</span><span class="o">.</span><span class="n">find</span><span class="p">(</span> <span class="s1">&#39;sf:tabular-model&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">)</span>
+            <span class="n">tables</span><span class="p">[</span> <span class="n">tabular_model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name_attr</span><span class="p">)</span> <span class="p">]</span> <span class="o">=</span> <span class="n">tabular_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span> <span class="n">workspace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ws_name_attr</span><span class="p">)</span> <span class="p">]</span><span class="o">=</span> <span class="n">workspace</span><span class="p">,</span> <span class="n">tables</span>
+</pre></div>
+</div>
+<p>Locate a “data source” within the XML document. Create <code class="docutils literal notranslate"><span class="pre">Cell</span></code> instances.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_datasource</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">grid</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The data source for cell values within a grid.</span>
+<span class="sd">    This yields each individual cell value, transformed into</span>
+<span class="sd">    string, Decimal, datetime.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">datasource</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;.//sf:datasource&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">cell_doc</span> <span class="ow">in</span> <span class="n">datasource</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span> <span class="n">cell_doc</span> <span class="p">)</span>
+    <span class="c1"># or return map( self.cell, datasource )</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="workbook.numbers09.Numbers09_Workbook.cell">
+<code class="descclassname">Numbers09_Workbook.</code><code class="descname">cell</code><span class="sig-paren">(</span><em>cell</em><span class="sig-paren">)</span><a class="headerlink" href="#workbook.numbers09.Numbers09_Workbook.cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <code class="docutils literal notranslate"><span class="pre">Cell</span></code> instance from the decoded data.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cell</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">cell</span> <span class="p">):</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="n">dom</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="n">date_tag</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;d&#39;</span> <span class="p">)</span>
+    <span class="n">date_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;cell-date&#39;</span> <span class="p">)</span>
+    <span class="n">formula_tag</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;f&#39;</span> <span class="p">)</span>
+    <span class="n">s_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;s&#39;</span> <span class="p">)</span>
+    <span class="n">v_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;v&#39;</span> <span class="p">)</span>
+    <span class="n">general_tag</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;g&#39;</span> <span class="p">)</span>
+    <span class="n">number_tag</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;n&#39;</span> <span class="p">)</span>
+    <span class="n">text_tag</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;t&#39;</span> <span class="p">)</span>
+    <span class="n">o_tag</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;o&#39;</span> <span class="p">)</span>
+    <span class="n">span_tag</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;s&#39;</span> <span class="p">)</span>
+    <span class="n">bool_tag</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span> <span class="p">)</span>
+    <span class="n">popup_menu_tag</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;pm&#39;</span> <span class="p">)</span>
+    <span class="n">IDREF_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sfa&quot;</span><span class="p">],</span> <span class="s1">&#39;IDREF&#39;</span> <span class="p">)</span>
+    <span class="n">ID_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sfa&quot;</span><span class="p">],</span> <span class="s1">&#39;ID&#39;</span> <span class="p">)</span>
+    <span class="n">fs_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span><span class="s2">&quot;fs&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">date_tag</span><span class="p">:</span>
+        <span class="n">seconds</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="n">date_attr</span><span class="p">])</span>
+        <span class="n">epoch</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2001</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">delta</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span> <span class="n">seconds</span><span class="o">=</span><span class="n">seconds</span> <span class="p">)</span>
+        <span class="n">theDate</span><span class="o">=</span> <span class="n">epoch</span> <span class="o">+</span> <span class="n">delta</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">DateCell</span><span class="p">(</span> <span class="n">theDate</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">formula_tag</span><span class="p">:</span> <span class="c1"># formula or error.</span>
+        <span class="n">s</span><span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s_attr</span><span class="p">)</span>
+        <span class="n">fo</span><span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;sf:fo&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">)</span>
+        <span class="c1"># Numeric Result? What about non-numeric results?</span>
+        <span class="n">r</span><span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;sf:r&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span><span class="p">:</span>
+            <span class="c1"># Result:</span>
+            <span class="n">rn</span><span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;sf:rn&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value_txt</span><span class="o">=</span> <span class="n">rn</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="n">v_attr</span><span class="p">]</span>
+                <span class="n">value</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_decimal</span><span class="p">(</span> <span class="n">value_txt</span><span class="p">,</span> <span class="n">s</span> <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="c1">#self._cell_warning(&quot;Formula with no value&quot;, cell)</span>
+                <span class="n">value</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_decimal</span><span class="p">(</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="n">s</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">NumberCell</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Error:</span>
+            <span class="c1">#self._cell_warning(&quot;Formula error&quot;, cell)</span>
+            <span class="n">value</span><span class="o">=</span> <span class="s2">&quot;#Error in </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fs_attr</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">ErrorCell</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">general_tag</span><span class="p">:</span> <span class="c1"># General?</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">EmptyCell</span><span class="p">(</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">number_tag</span><span class="p">:</span> <span class="c1"># Number</span>
+        <span class="n">value</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_number</span><span class="p">(</span> <span class="n">cell</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">NumberCell</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">o_tag</span><span class="p">:</span> <span class="c1">#??</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cell_warning</span><span class="p">(</span><span class="s2">&quot;Unknown cell type&quot;</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">EmptyCell</span><span class="p">(</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">span_tag</span><span class="p">:</span> <span class="c1"># Span?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cell_warning</span><span class="p">(</span><span class="s2">&quot;Unknown cell type&quot;</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">EmptyCell</span><span class="p">(</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">text_tag</span><span class="p">:</span> <span class="c1"># Text</span>
+        <span class="n">value</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_text</span><span class="p">(</span> <span class="n">cell</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">TextCell</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">bool_tag</span><span class="p">:</span> <span class="c1"># Boolean</span>
+        <span class="n">value</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_number</span><span class="p">(</span> <span class="n">cell</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">BooleanCell</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">popup_menu_tag</span><span class="p">:</span> <span class="c1"># popup menu</span>
+        <span class="c1"># TODO:: Better Xpath query: ``menu-choices/*[@ID=&#39;name&#39;]``</span>
+        <span class="n">value</span><span class="o">=</span> <span class="kc">None</span> <span class="c1"># In case we can&#39;t find anything.</span>
+        <span class="n">selected</span><span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;sf:proxied-cell-ref&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">)</span>
+        <span class="n">name</span><span class="o">=</span> <span class="n">selected</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">IDREF_attr</span><span class="p">)</span>
+        <span class="n">mc</span><span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;sf:menu-choices&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">mc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ID_attr</span><span class="p">)</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="c1"># t&#39;s tag cold end in Could be &quot;t&quot;, or &quot;n&quot;.</span>
+                <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">):</span> <span class="c1"># Text</span>
+                    <span class="n">value</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_text</span><span class="p">(</span> <span class="n">t</span> <span class="p">)</span>
+                    <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">TextCell</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">):</span> <span class="c1"># Number</span>
+                    <span class="n">value</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_number</span><span class="p">(</span> <span class="n">t</span> <span class="p">)</span>
+                    <span class="k">return</span> <span class="n">stingray</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">NumberCell</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="s2">&quot;Unknown popup menu </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dom</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">cell</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="s2">&quot;Unknown cell </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">dom</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Some lower-level conversions.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_to_decimal</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">value_txt</span><span class="p">,</span> <span class="n">style_id</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a given numeric value_text using the named style.</span>
+
+<span class="sd">    TODO: From the style, get the number of decimal places, use that to</span>
+<span class="sd">    build a string version of the float value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fdp_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;format-decimal-places&#39;</span> <span class="p">)</span>
+    <span class="n">fs_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;format-string&#39;</span> <span class="p">)</span>
+    <span class="n">cell_style</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_style</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">style_id</span><span class="p">)</span>
+    <span class="c1">#print( &quot;TO_DECIMAL&quot;, value_txt, style_id, &quot;=&quot;, cell_style )</span>
+
+    <span class="n">fs</span><span class="o">=</span> <span class="kc">None</span> <span class="c1"># cell_style.get(fs_attr) # Doesn&#39;t seem correct</span>
+    <span class="n">fdp</span><span class="o">=</span> <span class="kc">None</span> <span class="c1"># cell_style.get(fdp_attr) # Doesn&#39;t seem correct</span>
+
+    <span class="c1"># Transform fs into proper Python format, otherwise, use the number of</span>
+    <span class="c1"># decimal places.</span>
+
+    <span class="k">if</span> <span class="n">fs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fmt</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rewrite_fmt</span><span class="p">(</span> <span class="n">fs</span> <span class="p">)</span>
+        <span class="c1">#print( &quot;Decimal: {{0:{0}}}.format({1}) = &quot;.format( fmt, value_txt ), end=&quot;&quot; )</span>
+        <span class="n">value</span><span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span> <span class="s2">&quot;{:</span><span class="si">{fmt}</span><span class="s2">}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value_txt</span><span class="p">),</span> <span class="n">fmt</span><span class="o">=</span><span class="n">fmt</span><span class="p">)</span> <span class="p">)</span>
+        <span class="c1">#print( value )</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">fdp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1">#fmt= &quot;{{0:.{0}f}}&quot;.format(fdp)</span>
+        <span class="n">value</span><span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span> <span class="s2">&quot;{:.</span><span class="si">{fdp}</span><span class="s2">f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value_txt</span><span class="p">),</span> <span class="n">fdp</span><span class="o">=</span><span class="n">fdp</span><span class="p">)</span> <span class="p">)</span>
+        <span class="c1">#print( &quot;Decimal: {0}.format({1}) = {2!r}&quot;.format( fmt, value_txt, value ) )</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">value</span><span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span> <span class="n">value_txt</span> <span class="p">)</span>
+        <span class="c1">#print( &quot;Decimal: {0} = {1!r}&quot;.format( value_txt, value ) )</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+<span class="k">def</span> <span class="nf">_decode_text</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">cell</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decode a &lt;t&gt; tag&#39;s value.&quot;&quot;&quot;</span>
+    <span class="n">sfa_s_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sfa&quot;</span><span class="p">],</span> <span class="s1">&#39;s&#39;</span> <span class="p">)</span>
+    <span class="n">ct</span><span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">find</span><span class="p">(</span> <span class="s1">&#39;sf:ct&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span> <span class="p">)</span>
+    <span class="n">value</span><span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sfa_s_attr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">value</span><span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">cell</span><span class="o">.</span><span class="n">itertext</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+<span class="k">def</span> <span class="nf">_decode_number</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">cell</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decode a &lt;n&gt; tag&#39;s value, applying the style.&quot;&quot;&quot;</span>
+    <span class="n">s_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;s&#39;</span> <span class="p">)</span>
+    <span class="n">v_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;v&#39;</span> <span class="p">)</span>
+    <span class="n">s</span><span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s_attr</span><span class="p">)</span>
+    <span class="n">cell_style</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_style</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value_txt</span><span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="n">v_attr</span><span class="p">]</span>
+        <span class="n">value</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_decimal</span><span class="p">(</span> <span class="n">value_txt</span><span class="p">,</span> <span class="n">s</span> <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="c1">#self._cell_warning(&quot;Number with no value&quot;, cell)</span>
+        <span class="n">value</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_decimal</span><span class="p">(</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="n">s</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+</pre></div>
+</div>
+<p>The styles are also important because we can use them to parse the numbers more
+precisely.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_get_styles</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">root</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the styles.&quot;&quot;&quot;</span>
+    <span class="n">ID_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sfa&quot;</span><span class="p">],</span> <span class="s1">&#39;ID&#39;</span> <span class="p">)</span>
+    <span class="n">ident_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;ident&#39;</span> <span class="p">)</span>
+    <span class="n">parent_ident_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;parent-ident&#39;</span> <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">cell_style</span><span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;.//sf:cell-style&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">):</span>
+        <span class="c1">#print( &quot;STYLE&quot;, dom.tostring(cs) )</span>
+        <span class="n">ID</span><span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ID_attr</span><span class="p">)</span>
+        <span class="n">ident</span><span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ident_attr</span><span class="p">)</span>
+        <span class="n">parent_ident</span><span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">parent_ident_attr</span><span class="p">)</span>
+        <span class="n">property_number_format</span><span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;.//sf:SFTCellStylePropertyNumberFormat&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">property_number_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">parent_ident</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cell_style</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_style</span><span class="p">[</span><span class="n">parent_ident</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">number_format</span><span class="o">=</span> <span class="n">property_number_format</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;sf:number-format&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">number_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">parent_ident</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cell_style</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_style</span><span class="p">[</span><span class="n">parent_ident</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cell_style</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span><span class="o">=</span> <span class="n">number_format</span><span class="o">.</span><span class="n">attrib</span>
+                <span class="k">if</span> <span class="n">ident</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cell_style</span><span class="p">[</span><span class="n">ident</span><span class="p">]</span><span class="o">=</span> <span class="n">number_format</span><span class="o">.</span><span class="n">attrib</span>
+            <span class="c1">#print( ID, self.cell_style.get(ID,None) )</span>
+</pre></div>
+</div>
+<p>Rewrite a number format from Numbers to Python</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_rewrite_fmt</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">format_string</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse the mini-language: &#39;#,##0.###;-#,##0.###&#39; is an example.</span>
+<span class="sd">    This becomes &quot;{:10,.3f}&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">positive</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">negative</span> <span class="o">=</span> <span class="n">format_string</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+    <span class="n">fmt</span><span class="o">=</span> <span class="n">negative</span> <span class="ow">or</span> <span class="n">positive</span>
+    <span class="n">digits</span><span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+    <span class="n">comma</span><span class="o">=</span> <span class="s2">&quot;,&quot;</span> <span class="k">if</span> <span class="s2">&quot;,&quot;</span> <span class="ow">in</span> <span class="n">fmt</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">whole</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">precision</span><span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frac</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{digits}{comma}</span><span class="s2">.</span><span class="si">{precision}</span><span class="s2">f&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">digits</span><span class="o">=</span> <span class="n">digits</span><span class="p">,</span> <span class="n">comma</span><span class="o">=</span><span class="n">comma</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">precision</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="workbook.numbers09.Numbers09_Workbook.sheets">
+<code class="descclassname">Numbers09_Workbook.</code><code class="descname">sheets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#workbook.numbers09.Numbers09_Workbook.sheets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of “sheets” (actually underlying tables.)</p>
+<p>The “sheets” are <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">(</span></code> <em>workspace</em><cite>,</cite> <em>table</em> <code class="docutils literal notranslate"><span class="pre">),</span> <span class="pre">...</span> <span class="pre">]</span></code> pairs.</p>
+<p>Picking a sheet involves matching a two-part name: (workspace, table).</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sheets</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Build &quot;sheet&quot; names from workspace/table&quot;&quot;&quot;</span>
+    <span class="n">sheet_list</span><span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">w_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="p">:</span>
+        <span class="n">ws</span><span class="p">,</span> <span class="n">tables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="n">w_name</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">t_name</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+            <span class="n">sheet_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">w_name</span><span class="p">,</span> <span class="n">t_name</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">sheet_list</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="workbook.numbers09.Numbers09_Workbook.rows_of">
+<code class="descclassname">Numbers09_Workbook.</code><code class="descname">rows_of</code><span class="sig-paren">(</span><em>sheet</em><span class="sig-paren">)</span><a class="headerlink" href="#workbook.numbers09.Numbers09_Workbook.rows_of" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterator through all rows of a sheet.</p>
+</dd></dl>
+
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">rows_of</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Iterator over rows.</span>
+
+<span class="sd">    Two parallel traversals:</span>
+
+<span class="sd">    Internal iterator over grid/datasource/* has d, t, n, pm, g, o and s</span>
+<span class="sd">        yields individual cell values.</span>
+
+<span class="sd">    Iterator over grid/rows/grid-row may have ``nc``, number of columns in that row.</span>
+<span class="sd">        Each grid-row fetches a number of cell values to assemble a row.</span>
+<span class="sd">        Row&#39;s may be variable length (sigh) but padded to the number of columns</span>
+<span class="sd">        specified in the grid.</span>
+
+<span class="sd">    :param sheet: a Sheet object to retrieve rows from.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;rows of </span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sheet</span><span class="p">,</span> <span class="n">sheet</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">ws_name</span><span class="p">,</span> <span class="n">t_name</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">ws</span><span class="p">,</span> <span class="n">tables</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="n">ws_name</span><span class="p">]</span>
+    <span class="n">tabular_model</span><span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="n">t_name</span><span class="p">]</span>
+
+    <span class="n">grid</span><span class="o">=</span> <span class="n">tabular_model</span><span class="o">.</span><span class="n">find</span><span class="p">(</span> <span class="s1">&#39;sf:grid&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span> <span class="p">)</span>
+    <span class="n">numrows_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;numrows&#39;</span> <span class="p">)</span>
+    <span class="n">numcols_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;numcols&#39;</span> <span class="p">)</span>
+    <span class="n">numrows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="n">numrows_attr</span><span class="p">])</span>
+    <span class="n">numcols</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="n">numcols_attr</span><span class="p">])</span>
+
+    <span class="n">nc_attr</span><span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">QName</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">[</span><span class="s2">&quot;sf&quot;</span><span class="p">],</span> <span class="s1">&#39;nc&#39;</span> <span class="p">)</span>
+
+    <span class="n">datasource</span><span class="o">=</span> <span class="nb">iter</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;sf:rows&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rows</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span> <span class="s1">&#39;sf:grid-row&#39;</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">NUMBERS_NS</span> <span class="p">)):</span>
+        <span class="c1">#print( &quot;ROW&quot;, dom.tostring(r) )</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug_row</span><span class="o">=</span> <span class="n">n</span>
+        <span class="c1"># Is this really relevant for Numbers &#39;09?</span>
+        <span class="n">nc</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nc_attr</span><span class="p">,</span><span class="n">numcols</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">row</span><span class="o">=</span> <span class="p">[</span> <span class="nb">next</span><span class="p">(</span><span class="n">datasource</span><span class="p">)</span> <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug_col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nc</span><span class="p">)</span> <span class="p">]</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">pass</span> <span class="c1"># Last row will exhaust the datasource.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">==</span> <span class="n">numcols</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">row</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">row</span> <span class="o">+</span> <span class="p">(</span><span class="n">numcols</span><span class="o">-</span><span class="n">nc</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/Stingray_belon1553_small.png" alt="Logo"/>
+            </a></p>
+<h1 class="logo"><a href="../index.html">The Stingray Schema-Based File Reader, stingray</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">2. Design Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../package.html">3. The <code class="docutils literal notranslate"><span class="pre">stingray</span></code> Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cell.html">4. Cell Module – Data Element Containers and Conversions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sheet.html">5. Sheet Module – Sheet and Row Access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema.html">6. Schema Package – Schema and Attribute Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../schema_loader.html">7. Schema Loader Module – Load Embedded or External Schema</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../iwork13.html">9. The “Other” Modules: snappy and protobuf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cobol.html">10. The COBOL Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer.html">11. The <strong>Stingray</strong> Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../demo/index.html">12. <strong>Stingray</strong> Demo Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">13. History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing/index.html">14. Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build.html">15. Stingray Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">16. Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">17. Licensing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">8. Workbook Package – Uniform Wrappers for Workbooks</a><ul>
+      <li>Previous: <a href="ods.html" title="previous chapter">8.4.6. ODS Workbook</a></li>
+      <li>Next: <a href="numbers_13.html" title="next chapter">8.4.8. Apple iWorks Numbers ‘13 Workbook</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2013, S. Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/workbook/numbers_09.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
