@@ -386,11 +386,58 @@ the fields currently consumed):
      - Import/compatibility warnings; the current cell decoder skips this field.
 
 The auxiliary word in bytes 6-7 is separate from the mask at bytes 8-11.
-The implementation has observed hints there for number, currency, duration,
-date, boolean-format, and string values (bits ``0x0001``, ``0x0002``,
-``0x0004``, ``0x0008``, ``0x0020``, and ``0x0080`` respectively). These
-auxiliary bits are not the presence mask and are not used by the cell reader
-to locate fields.
+This is a little-endian 16-bit value. Research in ``docs/Numbers.md`` and
+observations in ``cell.py`` suggest that its bits are hints to Numbers about
+cell formats, including for cells whose format is automatic. The proposed
+interpretation is:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 14 38 48
+
+   * - Bit
+     - Hint
+     - Evidence and caveat
+   * - ``0x0001`` (0)
+     - Number format id is present
+     - Observed in files; the writer's heuristic associates it with
+       ``_num_format_id``.
+   * - ``0x0002`` (1)
+     - Currency format id is present
+     - Observed in files; associated with ``_currency_format_id``.
+   * - ``0x0004`` (2)
+     - Duration format id is present
+     - Associated with ``_duration_format_id`` in the writer's heuristic.
+   * - ``0x0008`` (3)
+     - Date format id is present
+     - Observed in files; associated with ``_date_format_id``.
+   * - ``0x0020`` (5)
+     - Boolean format id is present
+     - Observed in files; associated with ``_bool_format_id``.
+   * - ``0x0080`` (7)
+     - String/text format id is present
+     - Observed in files; associated with ``_text_format_id``.
+   * - ``0x0800`` (11)
+     - Currency-format-related hint
+     - The writer's heuristic also associates this bit with
+       ``_currency_format_id``; its distinct role is unclear.
+   * - ``0x8000`` (15)
+     - Formula-related hint
+     - Associated with ``_formula_id`` in the writer's heuristic, but not
+       established by the file observations.
+
+These mappings are tentative: the writer's associations are based on a
+decision-tree classifier trained on available Numbers documents, not a
+complete specification. In particular, research has observed ``0x80`` in
+byte 7 but has not independently established its meaning. The auxiliary word
+is not the presence mask and is not used by the cell reader to locate fields.
+
+Numbers can infer formats for automatically formatted input (for example,
+interpreting ``3 3/4`` as a fraction or displaying ``3.14`` to two decimal
+places). ``numbers-parser`` does not try to reproduce that inference or create
+Automatic-formatted cells from ordinary values; it relies on native Python
+types instead. When reading and writing cells, it preserves the auxiliary word
+from storage bytes 6-7 verbatim, including hints on Automatic-formatted cells.
 
 Cell type byte and value interpretation
 ---------------------------------------
@@ -641,6 +688,109 @@ kept in the file store. ``src/numbers_parser/model.py`` and
 ``src/numbers_parser/iwafile.py`` are the best references for following this
 process end to end.
 
+Appendix: UUIDs, owners, and table relationships
+================================================
+
+The following details extend the formula, merge, and stable-coordinate
+descriptions above with observations from the project's
+`Numbers.md research <https://github.com/masaccio/numbers-parser/blob/main/docs/Numbers.md>`_.
+They describe observed structures, not requirements for every Numbers version.
+The relevant definitions are in
+`TSCEArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSCEArchives.proto>`_,
+`TSTArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSTArchives.proto>`_,
+and `TSPMessages.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSPMessages.proto>`_.
+
+Archive object identifiers, internal owner ids, and UUIDs are distinct
+identifiers. A ``TSP.Reference`` points to an archive object by its numeric
+``identifier``; an owner id map relates an internal integer to a UUID. Do not
+use one as a substitute for another.
+
+Formula owners and table identities
+-----------------------------------
+
+The document's ``TSCE.CalculationEngineArchive`` contains a
+``DependencyTrackerArchive``. Its ``formula_owner_dependencies`` references
+``FormulaOwnerDependenciesArchive`` records, while ``formula_owner_info``
+contains cell and range dependency information. The tracker's
+``owner_id_map`` maps each ``internal_owner_id`` to a UUID. This map is used to
+resolve dependency records that refer to an owner by integer. The
+``owner_kind`` field is a numeric value; the parser names the observed table
+model (1), merge owner (5), and haunted owner (35) kinds in
+`constants.OwnerKind <https://github.com/masaccio/numbers-parser/blob/main/src/numbers_parser/constants.py#L256-L259>`_.
+These values are not declared as an enum alongside the protobuf field.
+
+In observed files, some formula-owner UUIDs share their upper 112 bits while
+their lower 16 bits vary with the formula id. This pattern is an observation,
+not a UUID-generation rule.
+
+For a table, the ``TableModelArchive.haunted_owner.owner_uid`` has been
+observed to match the ``formula_owner_uid`` of a dependency archive whose
+``owner_kind`` is 35. That archive's ``base_owner_uid`` supplies the stable
+UUID used to associate dependencies with the table. In the implementation,
+`calculate_table_uuid_map() in model.py
+<https://github.com/masaccio/numbers-parser/blob/main/src/numbers_parser/model.py#L763-L801>`_
+builds this mapping; documents without these dependency archives can lack it.
+A separate ``owner_kind=1`` dependency archive represents the table model and
+its ``formula_owner`` reference can point to the table's
+``TableInfoArchive``. The table's optional
+``conditional_style_formula_owner_id`` is another UUID field and should not
+be confused with either owner mapping.
+
+Formula-cell locations can also be recovered from each
+``FormulaOwnerInfoArchive.cell_dependencies.cell_record``: records include
+coordinates and a ``contains_a_formula`` flag. These records identify
+formula-bearing cells; the cell buffer itself holds each formula's cached
+result, while the formula list holds the expression.
+
+The example documents in ``Numbers.md`` show table-model dependency archives
+with spanning ranges for both the whole table and its body. They also show a
+variation in ``tiled_cell_dependencies``: the first example had no tile
+reference, while later examples referred to ``CellRecordTileArchive`` records.
+The referenced tiles carry an ``internal_owner_id`` and tile row/column
+origins. Treat this as observed variation, not a rule that all later tables
+must have tiles or that all first tables omit them.
+
+Merge and formula ranges
+------------------------
+
+One observed merge representation is ``RangePrecedentsTileArchive``. Its
+``from_to_range`` entries pair a starting coordinate with a rectangle, and
+``to_owner_id`` identifies the destination owner. Resolve that integer using
+the calculation engine's ``owner_id_map`` before relating the rectangle to a
+table UUID. The current parser also handles merge ranges in
+``FormulaOwnerDependenciesArchive`` records of merge-owner kind: it reads
+their range dependencies, resolves their owner ids, and keeps ranges whose
+base-owner UUID matches the table. These are distinct archive structures
+representing related range information.
+
+Header names and row/column UUIDs
+--------------------------------
+
+The calculation engine can reference a ``TST.HeaderNameMgrArchive``. Its
+``per_tables`` entries associate a table UUID and precedent coordinate with
+header row and column UUIDs. A ``HeaderNameMgrTileArchive`` stores name
+fragments, each with a precedent cell coordinate and optional UUID-based
+references to cells using that fragment. The row and column UUIDs can be
+correlated with ``ColumnRowUIDMapArchive.sorted_row_uids`` and
+``sorted_column_uids``. Research has also observed ``nrm_owner_uid`` matching
+a formula-owner UUID, but its role in that mapping remains unresolved.
+
+Captions and text storage
+-------------------------
+
+Caption text is stored through a nested shape/storage structure rather than
+directly in a caption record. ``TSA.CaptionInfoArchive`` contains a
+``TSWP.ShapeInfoArchive``; its ``owned_storage`` reference points to a
+``TSWP.StorageArchive`` whose ``text`` field contains the text. The shape
+messages also carry drawable and placement information. The
+`TSAArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSAArchives.proto>`_,
+`TSWPArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSWPArchives.proto>`_,
+and `TSDArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSDArchives.proto>`_
+definitions show the required ``super`` chain and storage fields. In the
+observed documents, the storage archive was located through the caption's
+``owned_storage`` reference; the research notes report no direct
+``Metadata.json`` reference except for its ``object_uuid_map_entries`` listing.
+
 Appendix: decoding references
 =============================
 
@@ -657,9 +807,13 @@ Appendix: decoding references
   research; unrelated XLS, COBOL and other format material is outside this
   chapter.
 * Schemas: the ``.proto`` files under ``src/protos``. Start with
-  ``TSPArchiveMessages.proto`` for archive framing metadata,
-  ``TNArchives.proto`` for Numbers document and sheet structure,
-  ``TSTArchives.proto`` for tables/cells/data lists, and ``TSCEArchives.proto``
+  `TSPArchiveMessages.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSPArchiveMessages.proto>`_
+  for archive framing metadata, `TNArchives.proto
+  <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TNArchives.proto>`_
+  for Numbers document and sheet structure, `TSTArchives.proto
+  <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSTArchives.proto>`_
+  for tables/cells/data lists, and `TSCEArchives.proto
+  <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSCEArchives.proto>`_
   for formulas and calculation references.
 * Implementation: ``src/numbers_parser/iwork.py``,
   ``src/numbers_parser/iwafile.py``, ``src/numbers_parser/containers.py``,
