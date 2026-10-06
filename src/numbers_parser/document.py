@@ -327,7 +327,7 @@ class Document:
 
         :``"datetime"``:
             * **format** (``str``, *optional*, default: ``"d MMM y"``) - A POSIX strftime-like
-              formatting string of `Numbers date/time directives <#datetime-formats>`_.
+              formatting string of :ref:`Numbers date/time directives <datetime_formats>`.
 
         :``"text"``:
             * **format** (``str``, *optional*, default: ``"%s"``) - Text format.
@@ -1635,7 +1635,7 @@ class Table(Cacheable):
             * **decimal_places** (*int, optional, default: 2*) - The number of
               decimal places, or ``None`` for automatic.
             * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) - How negative numbers are represented.
-              See `Negative number formats <#negative-formats>`_.
+              See :ref:`Negative number formats <negative_formats>`.
             * **show_thousands_separator** (*bool, optional, default: False*) - ``True``
               if the number should include a thousands separator, e.g. ``,``
             * **use_accounting_style** (*bool, optional, default: False*) -  ``True``
@@ -1644,8 +1644,8 @@ class Table(Cacheable):
 
         :``"datetime"``:
             * **date_time_format** (*str, optional, default: "dd MMM YYY HH:MM"*) - A POSIX
-               strftime-like formatting string of `Numbers date/time
-               directives <#datetime-formats>`_.
+               strftime-like formatting string of :ref:`Numbers date/time
+               directives <datetime_formats>`.
 
         :``"fraction"``:
             * **fraction_accuracy** (*:py:class:`~numbers_parser.FractionAccuracy`, optional, default: FractionAccuracy.THREE* - The
@@ -1655,7 +1655,7 @@ class Table(Cacheable):
             * **decimal_places** (*float, optional, default: None*) -  number of
               decimal places, or ``None`` for automatic.
             * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) - How negative numbers are represented.
-              See `Negative number formats <#negative-formats>`_.
+              See :ref:`Negative number formats <negative_formats>`.
             * **show_thousands_separator** (*bool, optional, default: False*) - ``True``
               if the number should include a thousands separator, e.g. ``,``
 

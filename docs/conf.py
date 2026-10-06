@@ -35,7 +35,7 @@ napoleon_use_admonition_for_notes = True
 
 # sphinx_nefertiti options
 html_theme = "sphinx_nefertiti"
-html_style = ["custom.css", "nftt-pygments.min.css"]
+html_style = ["custom.css"]
 pygments_style = "pastie"
 pygments_dark_style = "dracula"
 html_theme_options = {
@@ -44,6 +44,8 @@ html_theme_options = {
     "repository_url": GITHUB,
     "repository_name": "masaccio/numbers-parser",
     "current_version": _get_version(),
+    "pygments_light_style": "pastie",
+    "pygments_dark_style": "dracula",
     "footer_links": [
         {
             "text": "Documentation",

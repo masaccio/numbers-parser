@@ -92,6 +92,7 @@ srcurl
 srgb
 Standin
 strikethru
+stylesheet
 TICKBOX
 tileid
 Tpng

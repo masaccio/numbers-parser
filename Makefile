@@ -49,6 +49,7 @@ DOCS_SOURCES = $(shell find docs -name \*.rst) \
 			   docs/build/_static/custom.css
 
 docs: docs/build/index.html docs/build/index.md
+	uv run python src/build/check_docs_links.py docs/build
 
 docs/build/_static/custom.css: docs/custom.css
 	mkdir -p docs/build/_static

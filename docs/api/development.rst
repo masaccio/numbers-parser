@@ -20,7 +20,7 @@ this is the case:
 To include the C++ support, download a released version of Google
 protobuf `from github <https://github.com/protocolbuffers/protobuf>`__.
 Build instructions are described in
-```src/README.md`` <https://github.com/protocolbuffers/protobuf/blob/main/src/README>`__.These
+```src/README.md`` <https://github.com/protocolbuffers/protobuf/blob/main/src/README.md>`__.These
 have changed greatly over time, but as of April 2023, this was useful:
 
 .. code:: shell

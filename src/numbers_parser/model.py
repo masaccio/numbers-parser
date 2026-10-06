@@ -761,8 +761,7 @@ class _NumbersModel(Cacheable):
         return owner_id_map
 
     def calculate_table_uuid_map(self) -> None:
-        # Each Table Model has a UUID which is used in references to the table. See
-        # Numbers.md#uuid-mapping for more details.
+        # Each Table Model has a UUID which is used in references to the table.
 
         # For haunted owner archive types, map formula_owner_uids to their base_owner_uids
         haunted_owner_ids = [
@@ -866,7 +865,6 @@ class _NumbersModel(Cacheable):
     @cache()
     def calculate_merges_using_dependency_archives(self, table_id) -> int:
         """Extract all the merge cell ranges for the Table."""
-        # See details in Numbers.md#merge-ranges.
         owner_id_map = self.owner_id_map()
         table_base_id = self.table_base_id(table_id)
 
@@ -1650,8 +1648,6 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-        # See Numbers.md#uuid-mapping for more details on mapping table model
-        # UUID to the formula owner.
         formula_owner_uuid = NumbersUUID()
         base_owner_uuid = NumbersUUID()
         next_owner_id += 1

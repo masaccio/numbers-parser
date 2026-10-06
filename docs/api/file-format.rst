@@ -154,7 +154,7 @@ typed ``TSP.Reference`` and ``TSP.DataReference`` fields in payload
 messages. The schema also permits ``should_merge`` and patch metadata
 (``base_message_index``, ``diff_field_path`` and related fields); this is
 protobuf-level object patching, not a separate cell encoding. The current
-``ProtobufPatch`` support in ``iwafile.py`` is intentionally limited.
+``ProtobufPatch`` support in :src_pkg:`iwafile.py` is intentionally limited.
 
 Document and component graph
 ============================
@@ -173,7 +173,7 @@ For a table, the central chain is::
 
     TN.DocumentArchive
       └── sheets[] ──> TN.SheetArchive
-                       └── drawable_infos[] ──> TST.TableInfoArchive
+                              └── drawable_infos[] ──> TST.TableInfoArchive
                                                 └── tableModel ──> TST.TableModelArchive
                                                                    └── base_data_store ──> TST.DataStore
                                                                                            └── tiles ──> TST.Tile
@@ -189,7 +189,7 @@ pivot tables, and other newer table capabilities. Do not mistake a
 (table's dimensions, data and model properties).
 
 The reader treats object identifiers 1 and 2 as the document and package
-roots (``DOCUMENT_ID`` and ``PACKAGE_ID`` in ``constants.py``). The package
+roots (``DOCUMENT_ID`` and ``PACKAGE_ID`` in :src_pkg:`constants.py`). The package
 metadata describes component locators and versions, referenced external
 components, object-UUID maps, and data resources. On load,
 ``ObjectStore`` indexes protobuf objects by identifier and also keeps the
@@ -236,7 +236,7 @@ custom-format, choice-list-format, rich-text, conditional-style, comment,
 import-warning, and control-cell-spec lists. A string entry contains a
 string; other entries may hold a protobuf value or a reference to another
 archive. The cell's stored key indexes its table's list, not a document-wide
-string table. ``DataLists`` in ``model.py`` caches lookups, reuses existing
+string table. ``DataLists`` in :src_pkg:`model.py` caches lookups, reuses existing
 values, and allocates subsequent keys when writing new entries.
 
 The plain string table and rich-text table are distinct. A plain text cell
@@ -253,8 +253,8 @@ Cell storage: v5 binary records
 The cell protobuf ``TST.Cell`` describes the logical value and formatting,
 but table tiles also store a compact binary record per cell. The current
 ``numbers-parser`` cell reader and writer support the v5 layout (called BNC
-or post-BNC in the research sources). ``model.py`` rejects a tile that is
-not marked as saved in BNC form, and ``cell.py`` rejects a cell record whose
+or post-BNC in the research sources). :src_pkg:`model.py` rejects a tile that is
+not marked as saved in BNC form, and :src_pkg:`cell.py` rejects a cell record whose
 first byte is not 5. The pre-v5 storage buffers are present in the schema for
 compatibility, but are not decoded by this implementation and are omitted
 here.
@@ -276,8 +276,8 @@ bits 4 onward. Integer list keys and identifiers are signed 32-bit values in
 the buffer. Date and double fields use 8-byte IEEE-754 values. The v5
 Decimal128 payload is 16 bytes.
 
-The field mask has these meanings in the v5 layout (``src/protos/TSTArchives.proto``
-and the SheetsJS research describe the storage map; ``cell.py`` implements
+The field mask has these meanings in the v5 layout (:src_proto:`TSTArchives.proto`
+and the SheetsJS research describe the storage map; :src_pkg:`cell.py` implements
 the fields currently consumed):
 
 .. list-table::
@@ -478,8 +478,8 @@ Numbers, dates and durations
 ----------------------------
 
 Numeric and currency cells use a 128-bit decimal payload, not an IEEE double.
-``_unpack_decimal128`` in ``cell.py`` extracts a signed integer mantissa and
-biased base-10 exponent using ``DECIMAL128_BIAS`` from ``constants.py``;
+``_unpack_decimal128`` in :src_pkg:`cell.py` extracts a signed integer mantissa and
+biased base-10 exponent using ``DECIMAL128_BIAS`` from :src_pkg:`constants.py`;
 the API currently exposes the resulting number as a Python numeric value.
 When writing, ``_pack_decimal128`` builds the 16-byte representation and
 numbers are rounded to the library's configured significant-digit limit
@@ -487,14 +487,14 @@ before serialization. The separate double bit is used for boolean values
 and durations.
 
 Numbers dates are represented as seconds relative to 2001-01-01, defined as
-``EPOCH`` in ``constants.py``. Date records carry an eight-byte double
+``EPOCH`` in :src_pkg:`constants.py`. Date records carry an eight-byte double
 seconds value. Durations also carry seconds as a double, but are elapsed
 intervals, not dates relative to the epoch. The format id controls how these
 values are displayed. Number, currency, date, duration, text, and boolean
 format ids are separate optional fields in v5 and resolve through the
 table's format list.
 
-The ``CellType`` enum exported by ``constants.py`` is an API-level
+The ``CellType`` enum exported by :src_pkg:`constants.py` is an API-level
 classification, not a transcription of the storage byte:
 ``EMPTY=1``, ``NUMBER=2``, ``TEXT=3``, ``DATE=4``, ``BOOL=5``,
 ``DURATION=6``, ``ERROR=7``, ``RICH_TEXT=8``, ``CURRENCY=101``, and
@@ -512,14 +512,14 @@ Formulas, formats, styles and controls
 
 A cell's cached result lives in the v5 cell record. A formula is stored
 separately: the formula-id field indexes the table's formula list, whose
-entry contains a :src_proto:`TSCE.FormulaArchive`` (see ``TSCEArchives.proto`). A
+entry contains a ``TSCE.FormulaArchive`` (see :src_proto:`TSCEArchives.proto`). A
 formula archive contains an abstract syntax tree, host row/column and table
 identity, translation flags, and related formula metadata. The AST is made
 of typed nodes for literals, operators, functions, and cell/range
 references. References can be local or cross-table and may use row/column
 UUIDs; these stable identities matter when rows or columns move. The parser
 uses current cell values rather than recalculating formula expressions.
-``cell.py`` resolves a formula id and its coordinates, while ``formula.py``
+:src_pkg:`cell.py` resolves a formula id and its coordinates, while :src_pkg:`formula.py`
 handles formula rendering and references.
 
 Formatting is also indirect. The v5 cell record can carry style ids,
@@ -531,7 +531,7 @@ body, header-row, header-column and footer styles, with per-cell entries
 providing overrides. The document-level stylesheet and theme provide shared
 style definitions and theme context.
 
-``constants.py`` names the API and format enumerations for standard formats
+:src_pkg:`constants.py` names the API and format enumerations for standard formats
 (base, currency, date/time, fraction, number, percentage, scientific, text,
 checkbox, rating, duration and custom formats), interactive controls (popup,
 rating, slider, stepper and tickbox), negative-number style, fraction
@@ -541,11 +541,11 @@ formats, not the type byte or field mask in the cell buffer.
 Controls have their own ``TST.CellSpecArchive``. Its interaction kind and
 optional range limits, increment, or popup-model reference provide the
 behavior behind the cell's control-spec id. ``FormattingType`` and related
-maps in ``constants.py`` connect API formatting choices to protobuf format
+maps in :src_pkg:`constants.py` connect API formatting choices to protobuf format
 archives. Custom formats also have a document-level custom-format list and
 UUIDs, while table entries refer to the corresponding custom format.
 
-The numeric ``FormatType`` codes in ``constants.py`` are: boolean 1, decimal
+The numeric ``FormatType`` codes in :src_pkg:`constants.py` are: boolean 1, decimal
 256, currency 257, percent 258, scientific 259, text 260, date 261, fraction
 262, checkbox 263, rating 267, duration 268, base 269, custom number 270,
 custom text 271, custom date 272, and custom currency 274. These protobuf
@@ -575,7 +575,7 @@ The separate ``constants.CellValueType`` is an internal value-kind enum
 (``NIL_TYPE=1``, boolean 2, date 3, number 4, string 5), used when constructing
 control values such as popup-menu items. It must not be confused with the
 proto ``TST.CellValueType`` enum. The date/time formatting token table in
-``constants.py`` maps Numbers tokens for years, months, days, weekday names,
+:src_pkg:`constants.py` maps Numbers tokens for years, months, days, weekday names,
 week numbers, hours, minutes, seconds, fractional seconds, AM/PM, era, and
 quarter to the display implementation; the supported spellings are listed in
 ``DATETIME_FIELD_MAP``.
@@ -588,15 +588,15 @@ The table has merge ranges and/or merge-owner/formula metadata; the parser
 combines these into a merge anchor and references for the cells covered by
 the merge. ``MergeRegionMapArchive`` stores ranges, while
 ``MergeOperationArchive`` and merge-owner/formula structures are also
-defined in :src_proto:`TSTArchives.proto`. ``model.py`` recognizes the representations
-it encounters, and ``cell.py`` exposes a merged anchor and covered-cell
+defined in :src_proto:`TSTArchives.proto`. :src_pkg:`model.py` recognizes the representations
+it encounters, and :src_pkg:`cell.py` exposes a merged anchor and covered-cell
 references to the higher-level API.
 
 Rows and columns can have numeric indexes and stable UUID identities. The
 schema includes row/column UID maps and UUID-based ranges as well as older
 coordinate-based ranges. Formula references, cell selections, merge maps and
 table category/pivot features may use these stable identifiers. Table UUID
-mapping and formula-owner dependencies are handled in ``model.py``; they are
+mapping and formula-owner dependencies are handled in :src_pkg:`model.py`; they are
 not equivalent to the ``ArchiveInfo.identifier`` used to locate a protobuf
 object.
 
@@ -620,10 +620,10 @@ document:
   colors and shared application-level properties.
 * :src_proto:`TSCEArchives.proto` describes calculation-engine formulas, references,
   cell values, dependencies, spill data and related calculation metadata.
-* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCH3DArchives.proto` describe charts and
+* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCHArchives.proto` describe charts and
   their data/format state. :src_proto:`TNArchives.proto` adds Numbers-specific chart
   mediation and sheet/document details.
-* :src_proto:`TNCommandArchives.proto` and the other ``*CommandArchives.proto`` files
+* :src_proto:`TNCommandArchives.proto` and other command-archive schemas
   describe editing commands/history. Command records are not the canonical
   table-value model, but are useful when investigating archives containing
   edit or patch state.
@@ -658,21 +658,17 @@ formats, styles and formulas are inserted into their relevant table lists.
 The model rebuilds tile-row buffers and offsets, updates protobuf lengths
 and object references, serializes segments, recompresses IWA chunks, and
 writes the ZIP file or package. Non-IWA blobs (for example, image data) are
-kept in the file store. ``src/numbers_parser/model.py`` and
-``src/numbers_parser/iwafile.py`` are the best references for following this
+kept in the file store. :src_pkg:`model.py` and
+:src_pkg:`iwafile.py` are the best references for following this
 process end to end.
 
 Appendix: UUIDs, owners, and table relationships
 ================================================
 
 The following details extend the formula, merge, and stable-coordinate
-descriptions above with observations from the project's
-`Numbers.md research <https://github.com/masaccio/numbers-parser/blob/main/docs/Numbers.md>`_.
-They describe observed structures, not requirements for every Numbers version.
-The relevant definitions are in
-`TSCEArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSCEArchives.proto>`_,
-`TSTArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSTArchives.proto>`_,
-and `TSPMessages.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSPMessages.proto>`_.
+descriptions above with observations. They describe observed structures, not requirements for every Numbers version.
+The relevant definitions are in :src_proto:`TSCEArchives.proto`, :src_proto:`TSTArchives.proto`, and
+:src_proto:`TSPMessages.proto`.
 
 Archive object identifiers, internal owner ids, and UUIDs are distinct
 identifiers. A ``TSP.Reference`` points to an archive object by its numeric
@@ -690,7 +686,7 @@ contains cell and range dependency information. The tracker's
 resolve dependency records that refer to an owner by integer. The
 ``owner_kind`` field is a numeric value; the parser names the observed table
 model (1), merge owner (5), and haunted owner (35) kinds in
-`constants.OwnerKind <https://github.com/masaccio/numbers-parser/blob/main/src/numbers_parser/constants.py#L256-L259>`_.
+:src_pkg:`constants.py` (``OwnerKind``).
 These values are not declared as an enum alongside the protobuf field.
 
 In observed files, some formula-owner UUIDs share their upper 112 bits while
@@ -701,8 +697,7 @@ For a table, the ``TableModelArchive.haunted_owner.owner_uid`` has been
 observed to match the ``formula_owner_uid`` of a dependency archive whose
 ``owner_kind`` is 35. That archive's ``base_owner_uid`` supplies the stable
 UUID used to associate dependencies with the table. In the implementation,
-`calculate_table_uuid_map() in model.py
-<https://github.com/masaccio/numbers-parser/blob/main/src/numbers_parser/model.py#L763-L801>`_
+``calculate_table_uuid_map()`` in :src_pkg:`model.py`
 builds this mapping; documents without these dependency archives can lack it.
 A separate ``owner_kind=1`` dependency archive represents the table model and
 its ``formula_owner`` reference can point to the table's
@@ -716,8 +711,8 @@ coordinates and a ``contains_a_formula`` flag. These records identify
 formula-bearing cells; the cell buffer itself holds each formula's cached
 result, while the formula list holds the expression.
 
-The example documents in ``Numbers.md`` show table-model dependency archives
-with spanning ranges for both the whole table and its body. They also show a
+The example documents in :src_root:`docs/Numbers.md` show table-model
+dependency archives with spanning ranges for both the whole table and its body. They also show a
 variation in ``tiled_cell_dependencies``: the first example had no tile
 reference, while later examples referred to ``CellRecordTileArchive`` records.
 The referenced tiles carry an ``internal_owner_id`` and tile row/column
@@ -757,39 +752,9 @@ directly in a caption record. ``TSA.CaptionInfoArchive`` contains a
 ``TSWP.ShapeInfoArchive``; its ``owned_storage`` reference points to a
 ``TSWP.StorageArchive`` whose ``text`` field contains the text. The shape
 messages also carry drawable and placement information. The
-`TSAArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSAArchives.proto>`_,
-`TSWPArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSWPArchives.proto>`_,
-and `TSDArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSDArchives.proto>`_
-definitions show the required ``super`` chain and storage fields. In the
-observed documents, the storage archive was located through the caption's
+:src_proto:`TSAArchives.proto`, :src_proto:`TSWPArchives.proto`, and
+:src_proto:`TSDArchives.proto` definitions show the required ``super`` chain
+and storage fields. In the observed documents, the storage archive was located
+through the caption's
 ``owned_storage`` reference; the research notes report no direct
 ``Metadata.json`` reference except for its ``object_uuid_map_entries`` listing.
-
-Appendix: decoding references
-=============================
-
-* Original IWA description: ``docs/thirdparty/obriensp_docs.md`` on the
-  ``feat/format-docs`` branch.
-* SheetsJS IWA and v5 cell-format research:
-  ``docs/thirdparty/SheetsJS.html`` on the ``feat/format-docs`` branch. The
-  format discussion is based on that document's v5 section only.
-* Stingray's relevant historical material:
-  ``docs/thirdparty/stingray/html/protobuf.html``,
-  ``docs/thirdparty/stingray/html/snappy.html``, and
-  ``docs/thirdparty/stingray/html/workbook/numbers_13.html``. Its
-  protobuf-format account and Numbers 13 examples supplement the primary
-  research; unrelated XLS, COBOL and other format material is outside this
-  chapter.
-* Schemas: the ``.proto`` files under ``src/protos``. Start with
-  `TSPArchiveMessages.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSPArchiveMessages.proto>`_
-  for archive framing metadata, `TNArchives.proto
-  <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TNArchives.proto>`_
-  for Numbers document and sheet structure, `TSTArchives.proto
-  <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSTArchives.proto>`_
-  for tables/cells/data lists, and `TSCEArchives.proto
-  <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSCEArchives.proto>`_
-  for formulas and calculation references.
-* Implementation: ``src/numbers_parser/iwork.py``,
-  ``src/numbers_parser/iwafile.py``, ``src/numbers_parser/containers.py``,
-  ``src/numbers_parser/model.py``, ``src/numbers_parser/cell.py``, and
-  ``src/numbers_parser/constants.py``.
