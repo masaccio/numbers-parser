@@ -1,6 +1,8 @@
 import os
 import sys
 
+import docutils.nodes
+
 from numbers_parser import _get_version
 
 sys.path.insert(0, os.path.abspath("../"))  # noqa: PTH100
@@ -70,10 +72,27 @@ extlinks = {
 }
 
 
-def setup_extensions(app, docname, source):
+def create_github_role(base_path):
+    """Factory to create roles that link to specific GitHub repository paths."""
+
+    def role(name, rawtext, text, *args):
+        url = f"{GITHUB}/blob/main{base_path}{text}"
+        node = docutils.nodes.reference("", "", internal=False, refuri=url)
+        node += docutils.nodes.literal("", text)
+
+        return [node], []
+
+    return role
+
+
+def setup_extensions(app, *args):
     if app.builder.name == "html":
         extensions.append("sphinx_nefertiti")
 
 
 def setup(app):
+    app.add_role("src_root", create_github_role("/"))
+    app.add_role("src_pkg", create_github_role("/src/numbers_parser/"))
+    app.add_role("src_gen", create_github_role("/src/numbers_parser/generated/"))
+    app.add_role("src_proto", create_github_role("/src/protos/"))
     app.connect("source-read", setup_extensions)
