@@ -716,8 +716,8 @@ contains cell and range dependency information. The tracker's
 resolve dependency records that refer to an owner by integer. The
 ``owner_kind`` field is a numeric value; the parser names the observed table
 model (1), merge owner (5), and haunted owner (35) kinds in
-``constants.OwnerKind``. These values are not declared as an enum alongside
-the protobuf field.
+`constants.OwnerKind <https://github.com/masaccio/numbers-parser/blob/main/src/numbers_parser/constants.py#L256-L259>`_.
+These values are not declared as an enum alongside the protobuf field.
 
 In observed files, some formula-owner UUIDs share their upper 112 bits while
 their lower 16 bits vary with the formula id. This pattern is an observation,
@@ -730,11 +730,11 @@ UUID used to associate dependencies with the table. In the implementation,
 `calculate_table_uuid_map() in model.py
 <https://github.com/masaccio/numbers-parser/blob/main/src/numbers_parser/model.py#L763-L801>`_
 builds this mapping; documents without these dependency archives can lack it.
-A separate
-``owner_kind=1`` dependency archive represents the table model and its
-``formula_owner`` reference can point to the table's ``TableInfoArchive``.
-The table's optional ``conditional_style_formula_owner_id`` is another UUID
-field and should not be confused with either owner mapping.
+A separate ``owner_kind=1`` dependency archive represents the table model and
+its ``formula_owner`` reference can point to the table's
+``TableInfoArchive``. The table's optional
+``conditional_style_formula_owner_id`` is another UUID field and should not
+be confused with either owner mapping.
 
 Formula-cell locations can also be recovered from each
 ``FormulaOwnerInfoArchive.cell_dependencies.cell_record``: records include
