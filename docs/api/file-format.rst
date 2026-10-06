@@ -1,6 +1,19 @@
 Apple Numbers file format
 #########################
 
+.. note::
+
+   This file is a derivative work based on Sean Patrick O'Brien's
+   `iWorkFileFormat research <https://github.com/obriensp/iWorkFileFormat>`__
+   (MIT), Steven Lott's `Stingray-Reader documentation
+   <https://github.com/slott56/Stingray-Reader>`__ (CC BY-NC-SA 4.0), and
+   `SheetJS format research <https://github.com/SheetJS/sheetjs>`__
+   (Apache-2.0). This file is licensed under
+   `CC BY-NC-SA 4.0 <https://creativecommons.org/licenses/by-nc-sa/4.0/>`__;
+   changes and synthesis for this documentation are by the ``numbers-parser``
+   contributors. Other third-party materials remain under their respective
+   licenses.
+
 This chapter describes the on-disk format that ``numbers-parser`` reads and
 writes, following the bytes from the document container down to individual
 cells. The format is proprietary: Apple has not published a complete
@@ -10,7 +23,7 @@ field in the same way.
 
 The description combines the original `iWork file format research
 <https://github.com/masaccio/numbers-parser/blob/feat/format-docs/docs/thirdparty/obriensp_docs.md>`__,
-the bundled `SheetsJS description
+the bundled `SheetJS description
 <https://github.com/masaccio/numbers-parser/blob/feat/format-docs/docs/thirdparty/SheetsJS.html>`__,
 and the ``numbers-parser`` reader and writer. We follow the v5 cell layout
 described by SheetsJS; this is how we work. The older pre-v5 (pre-BNC) cell
