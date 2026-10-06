@@ -688,6 +688,102 @@ kept in the file store. ``src/numbers_parser/model.py`` and
 ``src/numbers_parser/iwafile.py`` are the best references for following this
 process end to end.
 
+Appendix: UUIDs, owners, and table relationships
+================================================
+
+The following details extend the formula, merge, and stable-coordinate
+descriptions above with observations from the project's
+`Numbers.md research <https://github.com/masaccio/numbers-parser/blob/main/docs/Numbers.md>`_.
+They describe observed structures, not requirements for every Numbers version.
+The relevant definitions are in
+`TSCEArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSCEArchives.proto>`_,
+`TSTArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSTArchives.proto>`_,
+and `TSPMessages.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSPMessages.proto>`_.
+
+Archive object identifiers, internal owner ids, and UUIDs are distinct
+identifiers. A ``TSP.Reference`` points to an archive object by its numeric
+``identifier``; an owner id map relates an internal integer to a UUID. Do not
+use one as a substitute for another.
+
+Formula owners and table identities
+-----------------------------------
+
+The document's ``TSCE.CalculationEngineArchive`` contains a
+``DependencyTrackerArchive``. Its ``formula_owner_dependencies`` references
+``FormulaOwnerDependenciesArchive`` records, while ``formula_owner_info``
+contains cell and range dependency information. The tracker's
+``owner_id_map`` maps each ``internal_owner_id`` to a UUID. This map is used to
+resolve dependency records that refer to an owner by integer. The
+``owner_kind`` field is a numeric value; the parser names the observed table
+model (1), merge owner (5), and haunted owner (35) kinds in
+``constants.OwnerKind``. These values are not declared as an enum alongside
+the protobuf field.
+
+For a table, the ``TableModelArchive.haunted_owner.owner_uid`` has been
+observed to match the ``formula_owner_uid`` of a dependency archive whose
+``owner_kind`` is 35. That archive's ``base_owner_uid`` supplies the stable
+UUID used to associate dependencies with the table. In the implementation,
+``model.py`` builds this mapping in ``calculate_table_uuid_map``; documents
+without these dependency archives can lack this mapping. A separate
+``owner_kind=1`` dependency archive represents the table model and its
+``formula_owner`` reference can point to the table's ``TableInfoArchive``.
+The table's optional ``conditional_style_formula_owner_id`` is another UUID
+field and should not be confused with either owner mapping.
+
+Formula-cell locations can also be recovered from each
+``FormulaOwnerInfoArchive.cell_dependencies.cell_record``: records include
+coordinates and a ``contains_a_formula`` flag. These records identify
+formula-bearing cells; the cell buffer itself holds each formula's cached
+result, while the formula list holds the expression.
+
+The example documents in ``Numbers.md`` show table-model dependency archives
+with spanning ranges for both the whole table and its body. They also show a
+variation in ``tiled_cell_dependencies``: the first example had no tile
+reference, while later examples referred to ``CellRecordTileArchive`` records.
+The referenced tiles carry an ``internal_owner_id`` and tile row/column
+origins. Treat this as observed variation, not a rule that all later tables
+must have tiles or that all first tables omit them.
+
+Merge and formula ranges
+------------------------
+
+One observed merge representation is ``RangePrecedentsTileArchive``. Its
+``from_to_range`` entries pair a starting coordinate with a rectangle, and
+``to_owner_id`` identifies the destination owner. Resolve that integer using
+the calculation engine's ``owner_id_map`` before relating the rectangle to a
+table UUID. The current parser also handles merge ranges in
+``FormulaOwnerDependenciesArchive`` records of merge-owner kind: it reads
+their range dependencies, resolves their owner ids, and keeps ranges whose
+base-owner UUID matches the table. These are distinct archive structures
+representing related range information.
+
+Header names and row/column UUIDs
+--------------------------------
+
+The calculation engine can reference a ``TST.HeaderNameMgrArchive``. Its
+``per_tables`` entries associate a table UUID and precedent coordinate with
+header row and column UUIDs. A ``HeaderNameMgrTileArchive`` stores name
+fragments, each with a precedent cell coordinate and optional UUID-based
+references to cells using that fragment. The row and column UUIDs can be
+correlated with ``ColumnRowUIDMapArchive.sorted_row_uids`` and
+``sorted_column_uids``. Research has also observed ``nrm_owner_uid`` matching
+a formula-owner UUID, but its role in that mapping remains unresolved.
+
+Captions and text storage
+-------------------------
+
+Caption text is stored through a nested shape/storage structure rather than
+directly in a caption record. ``TSA.CaptionInfoArchive`` contains a
+``TSWP.ShapeInfoArchive``; its ``owned_storage`` reference points to a
+``TSWP.StorageArchive`` whose ``text`` field contains the text. The shape
+messages also carry drawable and placement information. The
+`TSAArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSAArchives.proto>`_,
+`TSWPArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSWPArchives.proto>`_,
+and `TSDArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSDArchives.proto>`_
+definitions show the required ``super`` chain and storage fields. In the
+observed documents, the storage archive was located through the caption's
+``owned_storage`` reference rather than a direct entry in ``Metadata.json``.
+
 Appendix: decoding references
 =============================
 
@@ -704,9 +800,13 @@ Appendix: decoding references
   research; unrelated XLS, COBOL and other format material is outside this
   chapter.
 * Schemas: the ``.proto`` files under ``src/protos``. Start with
-  ``TSPArchiveMessages.proto`` for archive framing metadata,
-  ``TNArchives.proto`` for Numbers document and sheet structure,
-  ``TSTArchives.proto`` for tables/cells/data lists, and ``TSCEArchives.proto``
+  `TSPArchiveMessages.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSPArchiveMessages.proto>`_
+  for archive framing metadata, `TNArchives.proto
+  <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TNArchives.proto>`_
+  for Numbers document and sheet structure, `TSTArchives.proto
+  <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSTArchives.proto>`_
+  for tables/cells/data lists, and `TSCEArchives.proto
+  <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSCEArchives.proto>`_
   for formulas and calculation references.
 * Implementation: ``src/numbers_parser/iwork.py``,
   ``src/numbers_parser/iwafile.py``, ``src/numbers_parser/containers.py``,
