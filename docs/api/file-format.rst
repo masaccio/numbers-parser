@@ -386,11 +386,58 @@ the fields currently consumed):
      - Import/compatibility warnings; the current cell decoder skips this field.
 
 The auxiliary word in bytes 6-7 is separate from the mask at bytes 8-11.
-The implementation has observed hints there for number, currency, duration,
-date, boolean-format, and string values (bits ``0x0001``, ``0x0002``,
-``0x0004``, ``0x0008``, ``0x0020``, and ``0x0080`` respectively). These
-auxiliary bits are not the presence mask and are not used by the cell reader
-to locate fields.
+This is a little-endian 16-bit value. Research in ``docs/Numbers.md`` and
+observations in ``cell.py`` suggest that its bits are hints to Numbers about
+cell formats, including for cells whose format is automatic. The proposed
+interpretation is:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 14 38 48
+
+   * - Bit
+     - Hint
+     - Evidence and caveat
+   * - ``0x0001`` (0)
+     - Number format id is present
+     - Observed in files; the writer's heuristic associates it with
+       ``_num_format_id``.
+   * - ``0x0002`` (1)
+     - Currency format id is present
+     - Observed in files; associated with ``_currency_format_id``.
+   * - ``0x0004`` (2)
+     - Duration format id is present
+     - Associated with ``_duration_format_id`` in the writer's heuristic.
+   * - ``0x0008`` (3)
+     - Date format id is present
+     - Observed in files; associated with ``_date_format_id``.
+   * - ``0x0020`` (5)
+     - Boolean format id is present
+     - Observed in files; associated with ``_bool_format_id``.
+   * - ``0x0080`` (7)
+     - String/text format id is present
+     - Observed in files; associated with ``_text_format_id``.
+   * - ``0x0800`` (11)
+     - Currency-format-related hint
+     - The writer's heuristic also associates this bit with
+       ``_currency_format_id``; its distinct role is unclear.
+   * - ``0x8000`` (15)
+     - Formula-related hint
+     - Associated with ``_formula_id`` in the writer's heuristic, but not
+       established by the file observations.
+
+These mappings are tentative: the writer's associations are based on a
+decision-tree classifier trained on available Numbers documents, not a
+complete specification. In particular, research has observed ``0x80`` in
+byte 7 but has not independently established its meaning. The auxiliary word
+is not the presence mask and is not used by the cell reader to locate fields.
+
+Numbers can infer formats for automatically formatted input (for example,
+interpreting ``3 3/4`` as a fraction or displaying ``3.14`` to two decimal
+places). ``numbers-parser`` does not try to reproduce that inference or create
+Automatic-formatted cells from ordinary values; it relies on native Python
+types instead. When reading and writing cells, it preserves the auxiliary word
+from storage bytes 6-7 verbatim, including hints on Automatic-formatted cells.
 
 Cell type byte and value interpretation
 ---------------------------------------
