@@ -1,48 +1,37 @@
 Apple Numbers file format
 #########################
 
-.. note::
-
-   This file is a derivative work based on Sean Patrick O'Brien's
-   `iWorkFileFormat research <https://github.com/obriensp/iWorkFileFormat>`__
-   (MIT), Steven Lott's `Stingray-Reader documentation
-   <https://github.com/slott56/Stingray-Reader>`__ (CC BY-NC-SA 4.0), and
-   `SheetJS format research <https://github.com/SheetJS/sheetjs>`__
-   (Apache-2.0). This file is licensed under
-   `CC BY-NC-SA 4.0 <https://creativecommons.org/licenses/by-nc-sa/4.0/>`__;
-   changes and synthesis for this documentation are by the ``numbers-parser``
-   contributors. Other third-party materials remain under their respective
-   licenses.
-
-This chapter describes the on-disk format that ``numbers-parser`` reads and
+This document describes the on-disk format that ``numbers-parser`` reads and
 writes, following the bytes from the document container down to individual
 cells. The format is proprietary: Apple has not published a complete
 specification, and the protobuf schemas in this repository are reverse
 engineered definitions, not a promise that every Numbers release uses every
 field in the same way.
 
-The description combines the original `iWork file format research
-<https://github.com/masaccio/numbers-parser/blob/feat/format-docs/docs/thirdparty/obriensp_docs.md>`__,
-the bundled `SheetJS description
-<https://github.com/masaccio/numbers-parser/blob/feat/format-docs/docs/thirdparty/SheetsJS.html>`__,
-and the ``numbers-parser`` reader and writer. We follow the v5 cell layout
-described by SheetsJS; this is how we work. The older pre-v5 (pre-BNC) cell
-layout is intentionally not documented here. The older `Stingray notes
-<https://github.com/masaccio/numbers-parser/tree/feat/format-docs/docs/thirdparty/stingray/html>`__
-are useful for the general IWA, Snappy, protobuf, and Numbers object-graph
-background, but are five years old and should not override observations from
-the current schemas and implementation.
+.. note::
 
-The main implementation files are ``src/numbers_parser/iwork.py`` (container
-and encryption), ``iwafile.py`` (IWA framing and protobuf segments),
-``containers.py`` (object/file stores), ``model.py`` (Numbers object model and
-table storage), ``cell.py`` (cell interpretation and serialization), and
-``constants.py`` (format constants). The extracted proto2 schemas are in
-``src/protos``. In particular, consult ``TSPArchiveMessages.proto``,
-``TSPMessages.proto``, ``TNArchives.proto``, ``TSTArchives.proto``,
-``TSCEArchives.proto``, ``TSKArchives.proto``, ``TSDArchives.proto``,
-``TSSArchives.proto``, and ``TSWPArchives.proto``. The generated Python
-descriptors in ``src/numbers_parser/generated`` are compiled from these
+   Always check the sources linked to from here as this part of the documentation is created
+   and maintained by AI.
+
+The description combines work from multiple sources, some of which are quite old
+but remain valuable resources and have been invaluable in creating `numbers-parser`
+and this document.
+
+* Sean Patrick O'Brien `iWork file format reader <https://github.com/obriensp/iWorkFileFormat>`__.
+* The SheetsJS Project's `documentation of the IWA file format <https://oss.sheetjs.com/notes/iwa/>`__.
+* An earlier version of the `Stingray-Reader by S.Lott <https://github.com/slott56/Stingray-Reader/tree/V4_Archive/stingray>`__.
+* The author's investigations into Numbers' protobufs.
+
+The main implementation files are :src_root:`src/numbers_parser/iwork.py` (container
+and encryption), :src_pkg:`iwafile.py` (IWA framing and protobuf segments),
+:src_pkg:`containers.py` (object/file stores), :src_pkg:`model.py` (Numbers object model and
+table storage), :src_pkg:`cell.py` (cell interpretation and serialization), and
+:src_pkg:`constants.py` (format constants). The extracted proto2 schemas are in
+:src_root:`src/protos`. In particular, consult :src_proto:`TSPArchiveMessages.proto`,
+:src_proto:`TSPMessages.proto`, :src_proto:`TNArchives.proto`, :src_proto:`TSTArchives.proto`,
+:src_proto:`TSCEArchives.proto`, :src_proto:`TSKArchives.proto`, :src_proto:`TSDArchives.proto`,
+:src_proto:`TSSArchives.proto`, and :src_proto:`TSWPArchives.proto`. The generated Python
+descriptors in :src_root:`src/numbers_parser/generated` are compiled from these
 definitions.
 
 Container and file layout
@@ -79,26 +68,16 @@ In a single-file document these entries are found inside the ZIP container
 rather than as a directory tree. ``Metadata/Properties.plist`` contains the
 ``fileFormatVersion`` used by the reader to identify the Numbers document
 version; ``BuildVersionHistory.plist`` is also expected for normal
-documents. Preview images and other non-IWA resources are payload files, not
-protobuf messages. The document's media entries are identified by
-``TSP.DataInfo`` records (including file names, preferred names, digests, and
-optional remote-storage metadata) in ``TSPArchiveMessages.proto``.
+documents.
 
 The storage hierarchy is not the spreadsheet hierarchy. ZIP entries group
 IWA data into components; the objects inside those IWA files refer to one
 another by numeric identifiers. A sheet can refer to a table whose model is
 stored in a different component, and a table model can refer to a tile, style,
 string list, or formula list elsewhere. ``TSP.Reference`` is the generic
-identifier-only edge in that graph (``TSPMessages.proto``); it does not carry
+identifier-only edge in that graph (:src_proto:`TSPMessages.proto`); it does not carry
 a reliable protobuf type, so the reader must resolve both the identifier and
 the expected schema.
-
-The source research notes that ``Index.zip`` has historically used a minimal
-ZIP profile and that simply unpacking and rebuilding it with arbitrary ZIP
-settings can make a document unreadable by Numbers. The Python writer uses
-``zipfile`` and writes the current supported package forms; do not assume
-every ZIP implementation or every historical iWork package is
-interchangeable.
 
 Password-protected files
 ------------------------
@@ -115,7 +94,7 @@ block-aligned AES-128-CBC ciphertext, and 20 trailing bytes. After decryption,
 PKCS#7 padding is removed and a 16-byte plaintext prefix is discarded before
 the IWA stream is parsed. The encryption wrapper is separate from Snappy and
 protobuf: first decrypt the IWA blob, then process its IWA chunks as below.
-``src/numbers_parser/iwork.py`` contains the exact verifier and stream
+:src_root:`src/numbers_parser/iwork.py` contains the exact verifier and stream
 handling logic.
 
 IWA framing, Snappy, and protobuf
@@ -151,7 +130,7 @@ has this layout::
 
 The length prefix is a protobuf base-128 varint and counts only the
 ``ArchiveInfo`` message. ``TSP.ArchiveInfo`` in
-``TSPArchiveMessages.proto`` supplies the segment's object ``identifier`` and
+:src_proto:`TSPArchiveMessages.proto` supplies the segment's object ``identifier`` and
 one or more ``message_infos``. Each ``TSP.MessageInfo`` gives a numeric
 ``type``, a version tuple, the number of payload bytes, and optional
 ``field_infos``, ``object_references``, and ``data_references``. Payloads
@@ -162,7 +141,7 @@ one to be usual. The implementation handles all listed message payloads.
 
 Protobuf wire data is not self-describing. ``MessageInfo.type`` is resolved
 through the Numbers/common registry extracted from the iWork applications;
-the resulting maps are checked into ``src/numbers_parser/generated/mapping.py``.
+the resulting maps are checked into :src_root:`src/numbers_parser/generated/mapping.py`.
 The same numeric id can mean a different class in another iWork application.
 The schema field types and message definitions live in the ``.proto`` files,
 not in the bytes on disk. Likewise, a ``TSP.Reference`` identifies an object
@@ -177,15 +156,11 @@ messages. The schema also permits ``should_merge`` and patch metadata
 protobuf-level object patching, not a separate cell encoding. The current
 ``ProtobufPatch`` support in ``iwafile.py`` is intentionally limited.
 
-The integers in ``MessageInfo.version`` (commonly ``[1, 0, 5]``) describe the
-encoded message revision, not the product release number in
-``Properties.plist``. These are distinct version axes.
-
 Document and component graph
 ============================
 
 The top-level Numbers protobuf is ``TN.DocumentArchive``
-(``TNArchives.proto``). Its ``sheets`` field points to ``TN.SheetArchive``
+(:src_proto:`TNArchives.proto`). Its ``sheets`` field points to ``TN.SheetArchive``
 objects; it also points to a shared stylesheet, theme, sidebar order,
 calculation engine and optional UI/custom-format metadata. The ``super``
 field is a common ``TSA.DocumentArchive`` object. The sheet's
@@ -198,11 +173,11 @@ For a table, the central chain is::
 
     TN.DocumentArchive
       └── sheets[] ──> TN.SheetArchive
-                         └── drawable_infos[] ──> TST.TableInfoArchive
-                                                       └── tableModel ──> TST.TableModelArchive
-                                                                            └── base_data_store ──> TST.DataStore
-                                                                                                      └── tiles ──> TST.Tile
-                                                                                                                    └── rowInfos[]
+                       └── drawable_infos[] ──> TST.TableInfoArchive
+                                                └── tableModel ──> TST.TableModelArchive
+                                                                   └── base_data_store ──> TST.DataStore
+                                                                                           └── tiles ──> TST.Tile
+                                                                                                         └── rowInfos[]
 
 ``TST.TableInfoArchive`` wraps the drawable and refers to its
 ``TableModelArchive``. The model stores the persistent table UUID, dimensions,
@@ -288,7 +263,7 @@ Every v5 cell record begins with a 12-byte header::
 
     byte 0       storage version (5)
     byte 1       storage cell type
-    bytes 2-5    reserved / format-specific bytes
+    bytes 2-5    format-specific bytes
     bytes 6-7    auxiliary bits (preserved as extras by the reader)
     bytes 8-11   little-endian 32-bit presence mask
     bytes 12...  value fields and flagged fields, in mask order
@@ -399,45 +374,31 @@ the fields currently consumed):
      - Import/compatibility warnings; the current cell decoder skips this field.
 
 The auxiliary word in bytes 6-7 is separate from the mask at bytes 8-11.
-This is a little-endian 16-bit value. Research in ``docs/Numbers.md`` and
-observations in ``cell.py`` suggest that its bits are hints to Numbers about
-cell formats, including for cells whose format is automatic. The proposed
-interpretation is:
+This is a little-endian 16-bit value. Numbers uses these to determine how a cell
+should be rendered when it is formatted as automatic. The encoding is:
 
 .. list-table::
    :header-rows: 1
-   :widths: 14 38 48
+   :widths: 14 48
 
    * - Bit
      - Hint
-     - Evidence and caveat
-   * - ``0x0001`` (0)
+   * - ``0x0001`` 
      - Number format id is present
-     - Observed in files; the writer's heuristic associates it with
-       ``_num_format_id``.
-   * - ``0x0002`` (1)
+   * - ``0x0002`` 
      - Currency format id is present
-     - Observed in files; associated with ``_currency_format_id``.
-   * - ``0x0004`` (2)
+   * - ``0x0004`` 
      - Duration format id is present
-     - Associated with ``_duration_format_id`` in the writer's heuristic.
-   * - ``0x0008`` (3)
+   * - ``0x0008`` 
      - Date format id is present
-     - Observed in files; associated with ``_date_format_id``.
-   * - ``0x0020`` (5)
+   * - ``0x0020`` 
      - Boolean format id is present
-     - Observed in files; associated with ``_bool_format_id``.
-   * - ``0x0080`` (7)
+   * - ``0x0080`` 
      - String/text format id is present
-     - Observed in files; associated with ``_text_format_id``.
-   * - ``0x0800`` (11)
+   * - ``0x0800`` 
      - Currency-format-related hint
-     - The writer's heuristic also associates this bit with
-       ``_currency_format_id``; its distinct role is unclear.
-   * - ``0x8000`` (15)
+   * - ``0x8000`` 
      - Formula-related hint
-     - Associated with ``_formula_id`` in the writer's heuristic, but not
-       established by the file observations.
 
 These mappings are tentative: the writer's associations are based on a
 decision-tree classifier trained on available Numbers documents, not a
@@ -458,7 +419,7 @@ Cell type byte and value interpretation
 The byte at offset 1 is the storage cell type. Do not confuse it with the
 ``TST.CellValueType`` enum used in protobuf messages, or the public
 ``numbers_parser.constants.CellType`` enum: those are separate namespaces.
-The proto storage enum in ``TSTArchives.proto`` defines generic/empty,
+The proto storage enum in :src_proto:`TSTArchives.proto` defines generic/empty,
 span, number, text, formula, date, boolean, duration, formula error, and
 automatic (rich-text) kinds. The implementation also recognizes storage
 type 10 as currency. The type is used together with the mask to interpret
@@ -506,7 +467,7 @@ the value fields:
      - Currency
      - Decimal128 value interpreted as currency; type 10 is a parser constant.
 
-``TSTArchives.proto`` uses a different numeric enum for
+:src_proto:`TSTArchives.proto` uses a different numeric enum for
 ``CellValueType``: empty 0, number 1, string 2, provided 3, date 4, boolean
 5, duration 6, error 7, rich text 8, and currency 9. It also has a storage
 ``CellType`` enum where number is 2, text 3, formula 4, date 5, boolean 6,
@@ -551,7 +512,7 @@ Formulas, formats, styles and controls
 
 A cell's cached result lives in the v5 cell record. A formula is stored
 separately: the formula-id field indexes the table's formula list, whose
-entry contains a ``TSCE.FormulaArchive`` (see ``TSCEArchives.proto``). A
+entry contains a :src_proto:`TSCE.FormulaArchive`` (see ``TSCEArchives.proto`). A
 formula archive contains an abstract syntax tree, host row/column and table
 identity, translation flags, and related formula metadata. The AST is made
 of typed nodes for literals, operators, functions, and cell/range
@@ -627,7 +588,7 @@ The table has merge ranges and/or merge-owner/formula metadata; the parser
 combines these into a merge anchor and references for the cells covered by
 the merge. ``MergeRegionMapArchive`` stores ranges, while
 ``MergeOperationArchive`` and merge-owner/formula structures are also
-defined in ``TSTArchives.proto``. ``model.py`` recognizes the representations
+defined in :src_proto:`TSTArchives.proto`. ``model.py`` recognizes the representations
 it encounters, and ``cell.py`` exposes a merged anchor and covered-cell
 references to the higher-level API.
 
@@ -646,28 +607,28 @@ Numbers archives contain much more than cell values. The following schema
 families explain other content that can be encountered while traversing a
 document:
 
-* ``TSAArchives.proto`` and ``TSDArchives.proto`` describe common document
+* :src_proto:`TSAArchives.proto` and :src_proto:`TSDArchives.proto` describe common document
   and drawable objects, geometry, fills, strokes, images and media placement.
   A sheet's drawings and tables are both drawable objects.
-* ``TSSArchives.proto`` describes styles, style properties, themes and
-  style networks. ``TSTStylePropertyArchiving.proto`` includes cell-specific
+* :src_proto:`TSSArchives.proto` describes styles, style properties, themes and
+  style networks. :src_proto:`TSTStylePropertyArchiving.proto` includes cell-specific
   style properties.
-* ``TSWPArchives.proto`` describes text storage, character/paragraph
+* :src_proto:`TSWPArchives.proto` describes text storage, character/paragraph
   attributes, attachments and hyperlinks used by rich text and other
   document text.
-* ``TSKArchives.proto`` contains formatting structures, custom formats,
+* :src_proto:`TSKArchives.proto` contains formatting structures, custom formats,
   colors and shared application-level properties.
-* ``TSCEArchives.proto`` describes calculation-engine formulas, references,
+* :src_proto:`TSCEArchives.proto` describes calculation-engine formulas, references,
   cell values, dependencies, spill data and related calculation metadata.
-* ``TSCHArchives.proto`` and ``TSCH3DArchives.proto`` describe charts and
-  their data/format state. ``TNArchives.proto`` adds Numbers-specific chart
+* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCH3DArchives.proto` describe charts and
+  their data/format state. :src_proto:`TNArchives.proto` adds Numbers-specific chart
   mediation and sheet/document details.
-* ``TNCommandArchives.proto`` and the other ``*CommandArchives.proto`` files
+* :src_proto:`TNCommandArchives.proto` and the other ``*CommandArchives.proto`` files
   describe editing commands/history. Command records are not the canonical
   table-value model, but are useful when investigating archives containing
   edit or patch state.
-* ``TSPArchiveMessages.proto`` contains package/component/data metadata,
-  object UUID maps and serialization metadata. ``TSPMessages.proto`` defines
+* :src_proto:`TSPArchiveMessages.proto` contains package/component/data metadata,
+  object UUID maps and serialization metadata. :src_proto:`TSPMessages.proto` defines
   generic references, UUIDs, geometry primitives and shared value types.
 
 The protobuf definition named ``TST.Cell`` is a logical/message
@@ -777,7 +738,7 @@ base-owner UUID matches the table. These are distinct archive structures
 representing related range information.
 
 Header names and row/column UUIDs
---------------------------------
+---------------------------------
 
 The calculation engine can reference a ``TST.HeaderNameMgrArchive``. Its
 ``per_tables`` entries associate a table UUID and precedent coordinate with
