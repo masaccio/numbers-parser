@@ -719,12 +719,18 @@ model (1), merge owner (5), and haunted owner (35) kinds in
 ``constants.OwnerKind``. These values are not declared as an enum alongside
 the protobuf field.
 
+In observed files, some formula-owner UUIDs share their upper 112 bits while
+their lower 16 bits vary with the formula id. This pattern is an observation,
+not a UUID-generation rule.
+
 For a table, the ``TableModelArchive.haunted_owner.owner_uid`` has been
 observed to match the ``formula_owner_uid`` of a dependency archive whose
 ``owner_kind`` is 35. That archive's ``base_owner_uid`` supplies the stable
 UUID used to associate dependencies with the table. In the implementation,
-``model.py`` builds this mapping in ``calculate_table_uuid_map``; documents
-without these dependency archives can lack this mapping. A separate
+`calculate_table_uuid_map() in model.py
+<https://github.com/masaccio/numbers-parser/blob/main/src/numbers_parser/model.py#L763-L801>`_
+builds this mapping; documents without these dependency archives can lack it.
+A separate
 ``owner_kind=1`` dependency archive represents the table model and its
 ``formula_owner`` reference can point to the table's ``TableInfoArchive``.
 The table's optional ``conditional_style_formula_owner_id`` is another UUID
@@ -782,7 +788,8 @@ messages also carry drawable and placement information. The
 and `TSDArchives.proto <https://github.com/masaccio/numbers-parser/blob/main/src/protos/TSDArchives.proto>`_
 definitions show the required ``super`` chain and storage fields. In the
 observed documents, the storage archive was located through the caption's
-``owned_storage`` reference rather than a direct entry in ``Metadata.json``.
+``owned_storage`` reference; the research notes report no direct
+``Metadata.json`` reference except for its ``object_uuid_map_entries`` listing.
 
 Appendix: decoding references
 =============================
