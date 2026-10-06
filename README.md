@@ -10,7 +10,7 @@ It supports and is tested against Python versions from 3.10 onwards. It is not c
 
 A pre-requisite for this package is [python-snappy](https://pypi.org/project/python-snappy/) which will be installed by Python automatically, but python-snappy also requires binary libraries for snappy compression.
 
-The most straightforward way to install the binary dependencies is to use [Homebrew](https://brew.sh) and source Python from Homebrew rather than from macOS as described in the [python-snappy github](https://github.com/andrix/python-snappy). Using [pipx](https://pipx.pypa.io/stable/installation/) for package management is also strongly recommended:
+The most straightforward way to install the binary dependencies is to use [Homebrew](https://brew.sh) and source Python from Homebrew rather than from macOS as described in the [python-snappy github](https://github.com/andrix/python-snappy). Using [pipx](https://pipx.pypa.io/stable/how-to/install-pipx.html) for package management is also strongly recommended:
 
 ```bash
 brew install snappy python3 pipx
