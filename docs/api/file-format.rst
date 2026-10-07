@@ -424,9 +424,10 @@ a hyperlink property on each cell.
 The rich-text list is the DataStore's ``rich_text_table`` reference. A list
 entry points to a rich-text payload, which points to its storage; the
 storage's smart-field table points to hyperlink objects at character offsets.
-The ``TableDataList`` excerpt above shows the rich-text entry; the following
-abbreviated protobuf excerpts (``// ...`` marks omitted fields) describe its
-payload, storage, and hyperlink attributes. The same chain is discussed in
+The earlier ``TableDataList`` excerpt shows the entry's
+``rich_text_payload = 9`` field. The following abbreviated protobuf excerpts
+(``// ...`` marks omitted fields) describe that payload, its storage, and
+hyperlink attributes. The same chain is discussed in
 :src_root:`docs/api/sheetsjs.md`; schema definitions are in
 :src_proto:`TSTArchives.proto` and :src_proto:`TSWPArchives.proto`:
 
