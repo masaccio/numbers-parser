@@ -216,24 +216,17 @@ The root and sheet messages are defined in :src_proto:`TNArchives.proto`:
      // ...
    }
 
-For a table, the central chain is::
-
-    TN.DocumentArchive
-      └── sheets[] ──> TN.SheetArchive
-                              └── drawable_infos[] ──> TST.TableInfoArchive
-                                                └── tableModel ──> TST.TableModelArchive
-                                                                   └── base_data_store ──> TST.DataStore
-                                                                                           └── tiles ──> TST.Tile
-                                                                                                         └── rowInfos[]
-
-``TST.TableInfoArchive`` wraps the drawable and refers to its
-``TableModelArchive``. The model stores the persistent table UUID, dimensions,
-name, default row/column sizes, header/footer counts and row/column freezing,
-plus references to default body/header/footer styles. It also carries
-information for sorting, hidden and filtered rows, merges, styles, categories,
-pivot tables, and other newer table capabilities. Do not mistake a
-``TableInfoArchive`` (view/drawable metadata) for the ``TableModelArchive``
-(table's dimensions, data and model properties).
+These protobuf fields define the table traversal: the document's repeated
+``sheets`` references resolve to sheet objects; each sheet's
+``drawable_infos`` can resolve to a ``TableInfoArchive``; and its
+``tableModel`` reference resolves to a ``TableModelArchive``. The model embeds
+``base_data_store``, which contains the table data and tile/list references
+described below. ``TableInfoArchive`` is drawable/view metadata, whereas
+``TableModelArchive`` holds the table's persistent UUID, dimensions, name,
+default styles, and data model. It also carries sorting, hidden and filtered
+rows, merges, categories, pivot tables, and other table capabilities. The
+linked schema excerpts above and below show each edge without conflating
+archive references with the embedded protobuf messages.
 
 The schema expresses that split directly
 (:src_proto:`TSTArchives.proto`):
@@ -663,6 +656,67 @@ uses current cell values rather than recalculating formula expressions.
 :src_pkg:`cell.py` resolves a formula id and its coordinates, while :src_pkg:`formula.py`
 handles formula rendering and references.
 
+Formula AST decoding
+--------------------
+
+The table's ``formula_table`` is a ``TableDataList`` of ``FORMULA`` entries.
+Each cell's formula id selects an entry by key, and that entry embeds a
+``TSCE.FormulaArchive``. Its ``AST_node_array`` is an ordered sequence of
+typed nodes rather than formula text:
+
+.. code-block:: protobuf
+
+   message FormulaArchive {
+     required .TSCE.ASTNodeArrayArchive AST_node_array = 1;
+     optional uint32 host_column = 2;
+     optional uint32 host_row = 3;
+     optional .TSP.UUID host_table_uid = 7;
+     optional .TSP.UUID host_column_uid = 8;
+     optional .TSP.UUID host_row_uid = 9;
+   }
+
+   message ASTNodeArrayArchive {
+     enum ASTNodeType {
+       ADDITION_NODE = 1;
+       FUNCTION_NODE = 16;
+       NUMBER_NODE = 17;
+       STRING_NODE = 19;
+       LOCAL_CELL_REFERENCE_NODE = 27;
+       CROSS_TABLE_CELL_REFERENCE_NODE = 28;
+       // Other operators, values, and reference node types are defined here.
+     }
+     message ASTNodeArchive {
+       required .TSCE.ASTNodeArrayArchive.ASTNodeType AST_node_type = 1;
+       optional uint32 AST_function_node_index = 2;
+       optional uint32 AST_function_node_numArgs = 3;
+       optional double AST_number_node_number = 4;
+       optional string AST_string_node_string = 6;
+       optional .TSCE.ASTNodeArrayArchive.ASTLocalCellReferenceNodeArchive
+         AST_local_cell_reference_node_reference = 15;
+       optional .TSCE.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive
+         AST_cross_table_reference_extra_info = 28;
+     }
+     repeated .TSCE.ASTNodeArrayArchive.ASTNodeArchive AST_node = 1;
+   }
+
+``_NumbersModel.formula_ast`` follows the table model's ``base_data_store`` to
+the formula list and indexes the embedded AST node sequence by ``entry.key``.
+``Cell.formula`` passes its formula id and row/column to ``TableFormulas``.
+That renderer visits the stored nodes and feeds operands and operators to a
+stack: literal nodes push their values, while operators and functions pop
+their arguments and push a rendered expression. Function ids are translated
+through the generated function map; unsupported node or function ids produce
+``UnsupportedWarning`` rather than being evaluated. A missing formula key is
+also reported as unsupported. The result is a formula string for the API,
+not a recalculated cell value.
+
+Cell and range reference nodes are resolved by ``_NumbersModel.node_to_ref``.
+Local row and column coordinates combine their absolute/relative flags with
+the formula cell's location. Cross-table nodes carry a table UUID; the model
+maps that UUID back to a table before building the reference. UUID-based
+coordinate and range nodes preserve stable row/column identities and sticky
+absolute-reference flags where those node forms are present.
+
 Formatting is also indirect. The v5 cell record can carry style ids,
 conditional-style data, format ids and a control-spec id. Table list entries
 map keys to the actual style, format, formula, or control data. A cell style
@@ -816,6 +870,31 @@ identifiers. A ``TSP.Reference`` points to an archive object by its numeric
 ``identifier``; an owner id map relates an internal integer to a UUID. Do not
 use one as a substitute for another.
 
+The schemas use two representations for 128-bit UUID values
+(:src_proto:`TSPMessages.proto`). ``UUID`` stores upper and lower 64-bit words;
+``CFUUIDArchive`` stores four 32-bit words (or optional raw bytes):
+
+.. code-block:: protobuf
+
+   message UUID {
+     required uint64 lower = 1;
+     required uint64 upper = 2;
+   }
+
+   message CFUUIDArchive {
+     optional bytes uuid_bytes = 1;
+     optional uint32 uuid_w0 = 2;
+     optional uint32 uuid_w1 = 3;
+     optional uint32 uuid_w2 = 4;
+     optional uint32 uuid_w3 = 5;
+   }
+
+``NumbersUUID`` converts either protobuf representation to one 128-bit
+integer, and emits the corresponding two-word or four-word representation
+when writing. ``uuid_to_hex`` uses that conversion to normalize identifiers
+for comparisons and maps. This normalization is important because the owner
+map and formula-owner messages use different protobuf UUID types.
+
 Formula owners and table identities
 -----------------------------------
 
@@ -829,6 +908,42 @@ resolve dependency records that refer to an owner by integer. The
 model (1), merge owner (5), and haunted owner (35) kinds in
 :src_pkg:`constants.py` (``OwnerKind``).
 These values are not declared as an enum alongside the protobuf field.
+
+The owner map relates 32-bit internal ids to UUIDs, while the owner
+dependency records carry UUIDs and dependency metadata
+(:src_proto:`TSCEArchives.proto`):
+
+.. code-block:: protobuf
+
+   message OwnerIDMapArchive {
+     message OwnerIDMapArchiveEntry {
+       required uint32 internal_owner_id = 1;
+       required .TSP.CFUUIDArchive owner_id = 2;
+     }
+     repeated .TSCE.OwnerIDMapArchive.OwnerIDMapArchiveEntry map_entry = 1;
+   }
+
+   message FormulaOwnerDependenciesArchive {
+     required .TSP.UUID formula_owner_uid = 1;
+     required uint32 internal_formula_owner_id = 2;
+     optional uint32 owner_kind = 3 [default = 0];
+     optional .TSP.Reference formula_owner = 11;
+     optional .TSP.UUID base_owner_uid = 12;
+   }
+
+   message DependencyTrackerArchive {
+     optional .TSCE.OwnerIDMapArchive owner_id_map = 3;
+     repeated .TSP.Reference formula_owner_dependencies = 6;
+   }
+
+The ``owner_id_map`` accessor reads those map entries into a dictionary from
+internal owner id to normalized UUID hex. The table UUID mapping is separate:
+``calculate_table_uuid_map`` finds haunted-owner dependency archives, maps each
+``formula_owner_uid`` to its ``base_owner_uid``, and matches the table model's
+``haunted_owner.owner_uid`` against that formula-owner UUID. The resulting
+base-owner UUID is the stable table identity used to match cross-table formula
+references. When no haunted-owner records exist (as in some older documents),
+the model leaves this table mapping empty.
 
 In observed files, some formula-owner UUIDs share their upper 112 bits while
 their lower 16 bits vary with the formula id. This pattern is an observation,
