@@ -971,7 +971,7 @@ Each range stores packed origin and size values
 ``self.objects``. It splits the packed origin and size into starting
 column/row and column/row counts, then computes inclusive end coordinates.
 The model also supports formula-store and formula-owner dependency archives:
-the first reads colon-tract ranges from merge-owner formulas, and the second
+the first extracts ranges from merge-owner formulas, and the second
 maps merge-owner range dependencies through the internal-owner-to-UUID map.
 ``merge_cells`` tries those two sources in order and uses the region map if
 neither yields ranges. All decoded coordinates pass to ``add_merge_range``,
@@ -1136,8 +1136,10 @@ dependency records carry UUIDs and dependency metadata
      required .TSP.UUID formula_owner_uid = 1;
      required uint32 internal_formula_owner_id = 2;
      optional uint32 owner_kind = 3 [default = 0];
+     optional .TSCE.RangeDependenciesArchive range_dependencies = 5;
      optional .TSP.Reference formula_owner = 11;
      optional .TSP.UUID base_owner_uid = 12;
+     // ...
    }
 
    message DependencyTrackerArchive {
@@ -1201,15 +1203,13 @@ must have tiles or that all first tables omit them.
 Merge and formula ranges
 ------------------------
 
-One observed merge representation is ``RangePrecedentsTileArchive``. Its
+One range representation is ``RangePrecedentsTileArchive``. Its
 ``from_to_range`` entries pair a starting coordinate with a rectangle, and
 ``to_owner_id`` identifies the destination owner. Resolve that integer using
 the calculation engine's ``owner_id_map`` before relating the rectangle to a
-table UUID. The current parser also handles merge ranges in
-``FormulaOwnerDependenciesArchive`` records of merge-owner kind: it reads
-their range dependencies, resolves their owner ids, and keeps ranges whose
-base-owner UUID matches the table. These are distinct archive structures
-representing related range information.
+table UUID. Separately, merge-owner ``FormulaOwnerDependenciesArchive``
+records carry ``range_dependencies``; the parser resolves their internal owner
+ids and keeps ranges whose base-owner UUID matches the table.
 
 The schemas describe both the formula-owner dependency form and the table's
 merge-owner formula store (:src_proto:`TSCEArchives.proto` and
@@ -1226,15 +1226,6 @@ merge-owner formula store (:src_proto:`TSCEArchives.proto` and
      repeated .TSCE.RangePrecedentsTileArchive.FromToRangeArchive from_to_range = 2;
    }
 
-   message FormulaOwnerDependenciesArchive {
-     required .TSP.UUID formula_owner_uid = 1;
-     required uint32 internal_formula_owner_id = 2;
-     optional uint32 owner_kind = 3 [default = 0];
-     optional .TSCE.RangeDependenciesArchive range_dependencies = 5;
-     optional .TSP.UUID base_owner_uid = 12;
-     // ...
-   }
-
    message RangeDependenciesArchive {
      repeated .TSCE.RangeBackDependencyArchive back_dependency = 2;
    }
@@ -1242,6 +1233,7 @@ merge-owner formula store (:src_proto:`TSCEArchives.proto` and
    message RangeBackDependencyArchive {
      required uint32 cell_coord_row = 1;
      required uint32 cell_coord_column = 2;
+     optional .TSCE.RangeReferenceArchive range_reference = 3;
      optional .TSCE.InternalRangeReferenceArchive internal_range_reference = 4;
    }
 
@@ -1264,40 +1256,23 @@ merge-owner formula store (:src_proto:`TSCEArchives.proto` and
      repeated .TST.FormulaStoreArchive.FormulaStorePair formulas = 3;
    }
 
-The table model links to its merge owner and embeds its data store; the
-``DataStore.merge_region_map`` field references the fallback range list
-(:src_proto:`TSTArchives.proto`):
+The earlier ``Merges and stable coordinates`` section shows the
+``DataStore.merge_region_map`` reference and its ``CellRange`` list. The table
+model's merge-owner reference and the packed coordinate fields are defined in
+:src_proto:`TSTArchives.proto`:
 
 .. code-block:: protobuf
 
    message TableModelArchive {
-     required .TST.DataStore base_data_store = 4;
      optional .TST.MergeOwnerArchive merge_owner = 47;
      // ...
    }
 
-   message DataStore {
-     optional .TSP.Reference merge_region_map = 13;
-     // ...
-   }
-
-That map resolves to a list of
-``TST.CellRange`` values. A range packs its origin and dimensions into the
-``CellID`` and ``TableSize`` fields; ``model.py`` unpacks the high and low
-16-bit halves to obtain column/row starts and counts, then computes inclusive
-ends. These snippets show the schema fields involved
-(:src_proto:`TSTArchives.proto`):
+``CellRange.origin`` and ``CellRange.size`` use ``CellID.packedData`` and
+``TableSize.packedData``. ``model.py`` unpacks their high and low 16-bit halves
+to obtain column/row starts and counts, then computes inclusive ends.
 
 .. code-block:: protobuf
-
-   message MergeRegionMapArchive {
-     repeated .TST.CellRange cell_range = 1;
-   }
-
-   message CellRange {
-     required .TST.CellID origin = 1;
-     required .TST.TableSize size = 2;
-   }
 
    message CellID {
      required fixed32 packedData = 1;
