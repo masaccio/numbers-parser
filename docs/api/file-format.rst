@@ -987,82 +987,6 @@ mapping and formula-owner dependencies are handled in :src_pkg:`model.py`; they 
 not equivalent to the ``ArchiveInfo.identifier`` used to locate a protobuf
 object.
 
-Other archive content
-=====================
-
-Numbers archives contain much more than cell values. The following schema
-families explain other content that can be encountered while traversing a
-document:
-
-* :src_proto:`TSAArchives.proto` and :src_proto:`TSDArchives.proto` describe common document
-  and drawable objects, geometry, fills, strokes, images and media placement.
-  A sheet's drawings and tables are both drawable objects.
-* :src_proto:`TSSArchives.proto` describes styles, style properties, themes and
-  style networks. :src_proto:`TSTStylePropertyArchiving.proto` includes cell-specific
-  style properties.
-* :src_proto:`TSWPArchives.proto` describes text storage, character/paragraph
-  attributes, attachments and hyperlinks used by rich text and other
-  document text.
-* :src_proto:`TSKArchives.proto` contains formatting structures, custom formats,
-  colors and shared application-level properties.
-* :src_proto:`TSCEArchives.proto` describes calculation-engine formulas, references,
-  cell values, dependencies, spill data and related calculation metadata.
-* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCHArchives_GEN.proto` describe charts and
-  their data/format state. :src_proto:`TNArchives.proto` adds Numbers-specific chart
-  mediation and sheet/document details.
-* :src_proto:`TNCommandArchives.proto` and other command-archive schemas
-  describe editing commands/history. Command records are not the canonical
-  table-value model, but are useful when investigating archives containing
-  edit or patch state.
-* :src_proto:`TSPArchiveMessages.proto` contains package/component/data metadata,
-  object UUID maps and serialization metadata. :src_proto:`TSPMessages.proto` defines
-  generic references, UUIDs, geometry primitives and shared value types.
-
-The protobuf definition named ``TST.Cell`` is a logical/message
-representation with fields such as ``valueType``, ``numberValue``,
-``stringValue``, ``richText``, ``formulaError``, styles, formats, comments,
-and decimal high/low words. It is important not to assume that this message
-is the literal encoding of cells in the table's primary tile buffers. The
-v5 tile cell buffers use the compact byte layout described above; related
-``TST.Cell`` messages also occur in command, change, pasteboard, and
-concurrent-cell archives.
-
-Reader and writer path
-======================
-
-On read, ``IWork.open`` opens a ZIP file or package, reads metadata and
-optional encryption state, and stores resources. ``ObjectStore`` identifies
-IWA files, decompresses their chunks, parses archive segments using the
-generated type registry, and indexes each typed protobuf by its
-``ArchiveInfo.identifier``. ``_NumbersModel`` then follows references from
-the document and tables, builds cached lookup tables for strings, styles,
-formats and formulas, and extracts individual cell records from tile rows.
-The public ``Document``, ``Sheet`` and ``Table`` classes project that model
-into the higher-level API.
-
-``ObjectStore`` keeps decoded protobuf archives in its object map, keyed by
-``ArchiveInfo.identifier``. Its ``store_object`` handler records each typed
-archive, and ``__getitem__`` exposes lookup by id; the model calls this
-``self.objects`` and follows a protobuf reference with expressions such as
-``self.objects[reference.identifier]``. The store's file cache separately
-retains IWA blobs and other package files. In the public API,
-:src_pkg:`document.py` delegates table, caption, header, and merge operations
-to the model; :src_pkg:`cell.py` interprets cell records and asks the model
-for styles and borders; :src_pkg:`model.py` resolves those structures through
-the object store. For example, caption text follows the table-info caption
-reference to a caption archive, then follows its owned-storage reference to
-the text archive. These APIs expose interpreted values, not the raw protobuf
-objects.
-
-On write, updated cell values are encoded as v5 cell buffers; strings,
-formats, styles and formulas are inserted into their relevant table lists.
-The model rebuilds tile-row buffers and offsets, updates protobuf lengths
-and object references, serializes segments, recompresses IWA chunks, and
-writes the ZIP file or package. Non-IWA blobs (for example, image data) are
-kept in the file store. :src_pkg:`model.py` and
-:src_pkg:`iwafile.py` are the best references for following this
-process end to end.
-
 UUIDs, owners, and table relationships
 ======================================
 
@@ -1402,3 +1326,175 @@ archives and connects their references. The public ``Table.caption`` and
 ``Table.caption_enabled`` properties in :src_pkg:`document.py` delegate to
 these model operations; visibility is represented by the drawable's
 ``caption_hidden`` flag.
+
+Other archive content
+=====================
+
+Numbers archives contain much more than cell values. The following schema
+families explain other content that can be encountered while traversing a
+document:
+
+* :src_proto:`TSAArchives.proto` and :src_proto:`TSDArchives.proto` describe common document
+  and drawable objects, geometry, fills, strokes, images and media placement.
+  A sheet's drawings and tables are both drawable objects.
+* :src_proto:`TSSArchives.proto` describes styles, style properties, themes and
+  style networks. :src_proto:`TSTStylePropertyArchiving.proto` includes cell-specific
+  style properties.
+* :src_proto:`TSWPArchives.proto` describes text storage, character/paragraph
+  attributes, attachments and hyperlinks used by rich text and other
+  document text.
+* :src_proto:`TSKArchives.proto` contains formatting structures, custom formats,
+  colors and shared application-level properties.
+* :src_proto:`TSCEArchives.proto` describes calculation-engine formulas, references,
+  cell values, dependencies, spill data and related calculation metadata.
+* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCHArchives_GEN.proto` describe charts and
+  their data/format state. :src_proto:`TNArchives.proto` adds Numbers-specific chart
+  mediation and sheet/document details.
+* :src_proto:`TNCommandArchives.proto` and other command-archive schemas
+  describe editing commands/history. Command records are not the canonical
+  table-value model, but are useful when investigating archives containing
+  edit or patch state.
+* :src_proto:`TSPArchiveMessages.proto` contains package/component/data metadata,
+  object UUID maps and serialization metadata. :src_proto:`TSPMessages.proto` defines
+  generic references, UUIDs, geometry primitives and shared value types.
+
+The protobuf definition named ``TST.Cell`` is a logical/message
+representation with fields such as ``valueType``, ``numberValue``,
+``stringValue``, ``richText``, ``formulaError``, styles, formats, comments,
+and decimal high/low words. It is important not to assume that this message
+is the literal encoding of cells in the table's primary tile buffers. The
+v5 tile cell buffers use the compact byte layout described above; related
+``TST.Cell`` messages also occur in command, change, pasteboard, and
+concurrent-cell archives.
+
+Reader and writer path
+======================
+
+On read, ``IWork.open`` opens a ZIP file or package, reads metadata and
+optional encryption state, and stores resources. ``ObjectStore`` identifies
+IWA files, decompresses their chunks, parses archive segments using the
+generated type registry, and indexes each typed protobuf by its
+``ArchiveInfo.identifier``. ``_NumbersModel`` then follows references from
+the document and tables, builds cached lookup tables for strings, styles,
+formats and formulas, and extracts individual cell records from tile rows.
+The public ``Document``, ``Sheet`` and ``Table`` classes project that model
+into the higher-level API.
+
+``ObjectStore`` keeps decoded protobuf archives in its object map, keyed by
+``ArchiveInfo.identifier``. Its ``store_object`` handler records each typed
+archive, and ``__getitem__`` exposes lookup by id; the model calls this
+``self.objects`` and follows a protobuf reference with expressions such as
+``self.objects[reference.identifier]``. The store's file cache separately
+retains IWA blobs and other package files. In the public API,
+:src_pkg:`document.py` delegates table, caption, header, and merge operations
+to the model; :src_pkg:`cell.py` interprets cell records and asks the model
+for styles and borders; :src_pkg:`model.py` resolves those structures through
+the object store. For example, caption text follows the table-info caption
+reference to a caption archive, then follows its owned-storage reference to
+the text archive. These APIs expose interpreted values, not the raw protobuf
+objects.
+
+On write, updated cell values are encoded as v5 cell buffers; strings,
+formats, styles and formulas are inserted into their relevant table lists.
+The model rebuilds tile-row buffers and offsets, updates protobuf lengths
+and object references, serializes segments, recompresses IWA chunks, and
+writes the ZIP file or package. Non-IWA blobs (for example, image data) are
+kept in the file store. :src_pkg:`model.py` and
+:src_pkg:`iwafile.py` are the best references for following this
+process end to end.
+
+Remaining concepts to document
+==============================
+
+The following lookups are made through ``ObjectStore`` (``self.objects`` in
+:src_pkg:`model.py`) but are not yet described above. Each entry names the
+protobuf fields followed and the code that follows them.
+
+Object store queries
+--------------------
+
+* ``ObjectStore.find_refs`` (:src_pkg:`containers.py`) returns the identifiers of
+  every archive whose Python class name matches a string. It is used through
+  ``_NumbersModel.find_refs`` to locate ``TableInfoArchive``,
+  ``StylesheetArchive``, ``ParagraphStyleArchive``,
+  ``FormulaOwnerDependenciesArchive``, ``CalculationEngineArchive`` and
+  ``GroupNodeArchive`` objects. The results are not cached because tables and
+  sheets can be added at run time. The relationship between a class name,
+  its ``.proto`` message and its ``ArchiveInfo`` type id is not described.
+* ``ObjectStore.remove_unreferenced_objects`` (:src_pkg:`containers.py`) walks
+  every ``TSP.Reference`` in every archive to find objects that can be dropped
+  on save. The rules for which fields count as references are not documented.
+* ``ObjectStore.new_message_id`` and ``create_object_from_dict``
+  (:src_pkg:`containers.py`) allocate identifiers and register new archives in
+  a component. How a new object is assigned to an ``.iwa`` file and recorded
+  in the package component list (``PACKAGE_ID`` in ``components``) is only
+  partly described.
+* ``find_extension`` (:src_pkg:`iwafile.py`) reads protobuf extension fields
+  such as ``paragraph_style_presets`` from ``TSS.ThemeArchive.super``
+  (:src_proto:`TSSArchives.proto`). Protobuf extensions are not covered.
+
+Stylesheet and theme
+--------------------
+
+* ``TN.DocumentArchive.stylesheet`` and ``theme`` references resolve to
+  ``TSS.StylesheetArchive`` and ``TSS.ThemeArchive``
+  (:src_proto:`TSSArchives.proto`). ``StylesheetArchive.styles`` and
+  ``identifier_to_style_map`` are appended to and searched by name when
+  paragraph and cell styles are created (``add_paragraph_style``,
+  ``add_cell_style`` and ``find_style_id`` and ``custom_style_name`` in :src_pkg:`model.py`).
+* ``ParagraphStyleArchive`` (:src_proto:`TSWPArchives.proto`) and
+  ``CellStyleArchive`` (:src_proto:`TSTArchives.proto`) are linked to their
+  parents through ``super.parent``. The inheritance chain followed when
+  resolving a style property is not described.
+* ``TableModelArchive.body_text_style``, ``header_row_text_style``,
+  ``header_column_text_style`` and ``footer_row_text_style``
+  (:src_proto:`TSTArchives.proto`) select the default text style for a cell
+  based on its position.
+
+Custom formats
+--------------
+
+* ``TSK.DocumentArchive.custom_format_list`` resolves to a
+  ``TSK.CustomFormatListArchive`` (:src_proto:`TSKArchives.proto`) whose
+  ``custom_formats`` and parallel ``uuids`` lists are read and extended
+  by the format lookups in :src_pkg:`model.py`. The pairing between a table's
+  format entries and this list is only summarized above.
+
+Rich text and bullets
+---------------------
+
+* ``TableDataList`` rich text entries follow ``rich_text_table`` to
+  ``RichTextPayloadArchive`` (:src_proto:`TSTArchives.proto`), then
+  ``payload.storage`` to ``TSWP.StorageArchive``
+  (:src_proto:`TSWPArchives.proto`), then the storage's attribute tables to
+  ``ListStyleArchive`` objects for bullets and numbering. Hyperlinks are
+  mentioned above but the list-style traversal is not.
+
+Categories and grouping
+-----------------------
+
+* ``TableModelArchive.category_owner`` resolves to
+  ``TST.CategoryOwnerArchive``, whose ``group_by`` reference leads to a
+  ``GroupByArchive``. ``TableInfoArchive.category_order`` resolves to a
+  ``CategoryOrderArchive`` whose ``uid_map`` maps row UUIDs to display
+  order. ``GroupNodeArchive`` objects are found with ``find_refs`` and give
+  group UUIDs and cell values (all in :src_proto:`TSTArchives.proto`). The
+  decoding is in ``calculate_table_categories`` and ``group_uuid_values``
+  in :src_pkg:`model.py` and is not documented.
+
+Strokes
+-------
+
+* The stroke sidecar traversal is described, but not the ordering of
+  ``StrokeLayerArchive.row_column_index`` lookups used when a layer for a given
+  row or column is found or created in :src_pkg:`model.py`.
+
+Package-level data
+------------------
+
+* ``PACKAGE_ID`` ``datas`` entries (``TSP.PackageMetadata`` in
+  :src_proto:`TSPArchiveMessages.proto`) map image data identifiers to stored
+  file names and are searched and extended when images are added in
+  :src_pkg:`model.py`. ``Cell`` image lookup in :src_pkg:`cell.py` reads
+  ``ObjectStore.file_store`` directly. The naming rules for stored data files
+  are not documented.
