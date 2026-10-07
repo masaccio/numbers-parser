@@ -285,11 +285,11 @@ The ``DataStore`` schema links the tile hierarchy and shared lists
 .. code-block:: protobuf
 
    message DataStore {
-    required .TST.HeaderStorage rowHeaders = 1;
-    required .TSP.Reference columnHeaders = 2;
-    required .TST.TileStorage tiles = 3;
-    required .TSP.Reference stringTable = 4;
-    required .TSP.Reference styleTable = 5;
+     required .TST.HeaderStorage rowHeaders = 1;
+     required .TSP.Reference columnHeaders = 2;
+     required .TST.TileStorage tiles = 3;
+     required .TSP.Reference stringTable = 4;
+     required .TSP.Reference styleTable = 5;
      required .TSP.Reference formula_table = 6;
      required .TST.TableRBTree rowTileTree = 9;
      required .TSP.Reference format_table_pre_bnc = 11;
@@ -299,8 +299,8 @@ The ``DataStore`` schema links the tile hierarchy and shared lists
      // ...
    }
 
-Row and column headers
-----------------------
+DataStore headers
+-----------------
 
 Header metadata is kept in bucket objects rather than in the tile records.
 ``DataStore`` points to ``HeaderStorage`` for row buckets and to one
@@ -427,6 +427,9 @@ storage's smart-field table points to hyperlink objects at character offsets.
 These are the same structures shown in the SheetsJS hyperlink discussion
 (:src_proto:`TSTArchives.proto` and :src_proto:`TSWPArchives.proto`):
 
+The protobuf excerpts below are abbreviated; ``// ...`` represents omitted
+fields.
+
 .. code-block:: protobuf
 
    message TableDataList {
@@ -446,6 +449,7 @@ These are the same structures shown in the SheetsJS hyperlink discussion
    message StorageArchive {
      repeated string text = 3;
      optional .TSWP.ObjectAttributeTable table_smartfield = 11;
+     // ...
    }
 
    message ObjectAttributeTable {
@@ -1234,12 +1238,13 @@ directly in a caption record. ``TSA.CaptionInfoArchive`` contains a
 messages also carry drawable and placement information. The
 :src_proto:`TSAArchives.proto`, :src_proto:`TSWPArchives.proto`, and
 :src_proto:`TSDArchives.proto` definitions show the required ``super`` chain
-and storage fields. In the observed documents, the storage archive was located
-through the caption's
-``owned_storage`` reference; the research notes report no direct
-``Metadata.json`` reference except for its ``object_uuid_map_entries`` listing.
+and storage fields. The caption's ``owned_storage`` reference is what connects
+the caption metadata to its text content.
 
 The relevant messages are:
+
+The protobuf snippets below are abbreviated; ``// ...`` stands for other
+fields that are not relevant to the reference chain.
 
 .. code-block:: protobuf
 
@@ -1258,6 +1263,7 @@ The relevant messages are:
    message StorageArchive {
      repeated string text = 3;
      optional .TSWP.ObjectAttributeTable table_para_style = 5;
+     // ...
    }
 
 In :src_pkg:`model.py`, ``caption_text`` starts from the table's
