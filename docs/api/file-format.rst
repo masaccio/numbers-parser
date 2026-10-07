@@ -381,6 +381,52 @@ to rich-text fragments (for example a ``TSWP.HyperlinkFieldArchive``), not
 stored as an independent cell-level URL. This differs from formats that have
 a hyperlink property on each cell.
 
+The rich-text list is the DataStore's ``rich_text_table`` reference. A list
+entry points to a rich-text payload, which points to its storage; the
+storage's smart-field table points to hyperlink objects at character offsets.
+These are the same structures shown in the SheetsJS hyperlink discussion
+(:src_proto:`TSTArchives.proto` and :src_proto:`TSWPArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableDataList {
+     message ListEntry {
+       required uint32 key = 1;
+       required uint32 refcount = 2;
+       optional .TSP.Reference rich_text_payload = 9;
+     }
+     required .TST.TableDataList.ListType listType = 1;
+     repeated .TST.TableDataList.ListEntry entries = 3;
+   }
+
+   message RichTextPayloadArchive {
+     required .TSP.Reference storage = 1;
+   }
+
+   message StorageArchive {
+     repeated string text = 3;
+     optional .TSWP.ObjectAttributeTable table_smartfield = 11;
+   }
+
+   message ObjectAttributeTable {
+     message ObjectAttribute {
+       required uint32 character_index = 1;
+       optional .TSP.Reference object = 2;
+     }
+     repeated .TSWP.ObjectAttributeTable.ObjectAttribute entries = 1;
+   }
+
+   message HyperlinkFieldArchive {
+     optional string url_ref = 2;
+   }
+
+``_NumbersModel.table_rich_text`` follows those references through
+``self.objects`` and recognizes ``HyperlinkFieldArchive`` objects. Each
+``character_index`` begins a linked text run that ends at the next smart-field
+entry or at the end of the text; the model returns the run text together with
+``url_ref``. This is a rich-text extraction path, not a separate URL field on
+the compact cell record.
+
 Cell storage: v5 binary records
 ===============================
 
