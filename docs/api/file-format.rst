@@ -224,9 +224,10 @@ These protobuf fields define the table traversal: the document's repeated
 described below. ``TableInfoArchive`` is drawable/view metadata, whereas
 ``TableModelArchive`` holds the table's persistent UUID, dimensions, name,
 default styles, and data model. It also carries sorting, hidden and filtered
-rows, merges, categories, pivot tables, and other table capabilities. The
-linked schema excerpts above and below show each edge without conflating
-archive references with the embedded protobuf messages.
+rows, merges, categories, pivot tables, and other table capabilities.
+``TSP.Reference`` fields such as ``tableModel`` identify separate archive
+objects resolved through ``ObjectStore``; ``base_data_store`` is an embedded
+``TST.DataStore`` protobuf message, not another archive reference.
 
 The schema expresses that split directly
 (:src_proto:`TSTArchives.proto`):
@@ -423,22 +424,13 @@ a hyperlink property on each cell.
 The rich-text list is the DataStore's ``rich_text_table`` reference. A list
 entry points to a rich-text payload, which points to its storage; the
 storage's smart-field table points to hyperlink objects at character offsets.
-The following abbreviated protobuf excerpts (``// ...`` marks omitted fields)
-show these structures, also discussed in :src_root:`docs/api/sheetsjs.md`,
-with definitions in :src_proto:`TSTArchives.proto` and
-:src_proto:`TSWPArchives.proto`:
+The ``TableDataList`` excerpt above shows the rich-text entry; the following
+abbreviated protobuf excerpts (``// ...`` marks omitted fields) describe its
+payload, storage, and hyperlink attributes. The same chain is discussed in
+:src_root:`docs/api/sheetsjs.md`; schema definitions are in
+:src_proto:`TSTArchives.proto` and :src_proto:`TSWPArchives.proto`:
 
 .. code-block:: protobuf
-
-   message TableDataList {
-     message ListEntry {
-       required uint32 key = 1;
-       required uint32 refcount = 2;
-       optional .TSP.Reference rich_text_payload = 9;
-     }
-     required .TST.TableDataList.ListType listType = 1;
-     repeated .TST.TableDataList.ListEntry entries = 3;
-   }
 
    message RichTextPayloadArchive {
      required .TSP.Reference storage = 1;
