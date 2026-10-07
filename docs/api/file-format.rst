@@ -1327,46 +1327,6 @@ archives and connects their references. The public ``Table.caption`` and
 these model operations; visibility is represented by the drawable's
 ``caption_hidden`` flag.
 
-Other archive content
-=====================
-
-Numbers archives contain much more than cell values. The following schema
-families explain other content that can be encountered while traversing a
-document:
-
-* :src_proto:`TSAArchives.proto` and :src_proto:`TSDArchives.proto` describe common document
-  and drawable objects, geometry, fills, strokes, images and media placement.
-  A sheet's drawings and tables are both drawable objects.
-* :src_proto:`TSSArchives.proto` describes styles, style properties, themes and
-  style networks. :src_proto:`TSTStylePropertyArchiving.proto` includes cell-specific
-  style properties.
-* :src_proto:`TSWPArchives.proto` describes text storage, character/paragraph
-  attributes, attachments and hyperlinks used by rich text and other
-  document text.
-* :src_proto:`TSKArchives.proto` contains formatting structures, custom formats,
-  colors and shared application-level properties.
-* :src_proto:`TSCEArchives.proto` describes calculation-engine formulas, references,
-  cell values, dependencies, spill data and related calculation metadata.
-* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCHArchives_GEN.proto` describe charts and
-  their data/format state. :src_proto:`TNArchives.proto` adds Numbers-specific chart
-  mediation and sheet/document details.
-* :src_proto:`TNCommandArchives.proto` and other command-archive schemas
-  describe editing commands/history. Command records are not the canonical
-  table-value model, but are useful when investigating archives containing
-  edit or patch state.
-* :src_proto:`TSPArchiveMessages.proto` contains package/component/data metadata,
-  object UUID maps and serialization metadata. :src_proto:`TSPMessages.proto` defines
-  generic references, UUIDs, geometry primitives and shared value types.
-
-The protobuf definition named ``TST.Cell`` is a logical/message
-representation with fields such as ``valueType``, ``numberValue``,
-``stringValue``, ``richText``, ``formulaError``, styles, formats, comments,
-and decimal high/low words. It is important not to assume that this message
-is the literal encoding of cells in the table's primary tile buffers. The
-v5 tile cell buffers use the compact byte layout described above; related
-``TST.Cell`` messages also occur in command, change, pasteboard, and
-concurrent-cell archives.
-
 Reader and writer path
 ======================
 
@@ -1488,6 +1448,25 @@ Strokes
 * The stroke sidecar traversal is described, but not the ordering of
   ``StrokeLayerArchive.row_column_index`` lookups used when a layer for a given
   row or column is found or created in :src_pkg:`model.py`.
+
+Logical cell messages
+---------------------
+
+* ``TST.Cell`` (:src_proto:`TSTArchives.proto`) has fields such as
+  ``valueType``, ``numberValue``, ``stringValue``, ``richText``,
+  ``formulaError``, styles, formats, comments and decimal high/low words. It
+  is not the encoding used in the primary tile buffers, which use the v5 byte
+  layout described above. It occurs in command, change, pasteboard and
+  concurrent-cell archives, which are not yet covered
+  (:src_proto:`TNCommandArchives.proto` and other command-archive schemas).
+
+Style property archiving
+------------------------
+
+* :src_proto:`TSTStylePropertyArchiving.proto` holds the cell-specific style
+  properties read by ``cell_property`` and related accessors in
+  :src_pkg:`model.py`. :src_proto:`TSKArchives.proto` shared formatting
+  structures and colors are only touched on above.
 
 Package-level data
 ------------------
