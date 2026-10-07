@@ -139,6 +139,25 @@ follow the header immediately, concatenated in ``message_infos`` order; the
 schema allows multiple payloads in one segment, the historic research found
 one to be usual. The implementation handles all listed message payloads.
 
+The segment header is defined in :src_proto:`TSPArchiveMessages.proto`:
+
+.. code-block:: protobuf
+
+   message ArchiveInfo {
+     optional uint64 identifier = 1;
+     repeated .TSP.MessageInfo message_infos = 2;
+     optional bool should_merge = 3;
+   }
+
+   message MessageInfo {
+     required uint32 type = 1;
+     repeated uint32 version = 2 [packed = true];
+     required uint32 length = 3;
+     repeated .TSP.FieldInfo field_infos = 4;
+     repeated uint64 object_references = 5 [packed = true];
+     repeated uint64 data_references = 6 [packed = true];
+   }
+
 Protobuf wire data is not self-describing. ``MessageInfo.type`` is resolved
 through the Numbers/common registry extracted from the iWork applications;
 the resulting maps are checked into :src_root:`src/numbers_parser/generated/mapping.py`.
@@ -146,6 +165,17 @@ The same numeric id can mean a different class in another iWork application.
 The schema field types and message definitions live in the ``.proto`` files,
 not in the bytes on disk. Likewise, a ``TSP.Reference`` identifies an object
 but does not say what kind it points to.
+
+The reference itself contains only the archive identifier
+(:src_proto:`TSPMessages.proto`):
+
+.. code-block:: protobuf
+
+   message Reference {
+     required uint64 identifier = 1;
+     optional int32 deprecated_type = 2;
+     optional bool deprecated_is_external = 3;
+   }
 
 ``ArchiveInfo.identifier`` is the object's numeric identity within the
 document. ``MessageInfo.object_references`` and ``data_references`` record
