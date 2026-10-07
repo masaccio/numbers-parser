@@ -424,8 +424,7 @@ The rich-text list is the DataStore's ``rich_text_table`` reference. A list
 entry points to a rich-text payload, which points to its storage; the
 storage's smart-field table points to hyperlink objects at character offsets.
 The following abbreviated protobuf excerpts (``// ...`` marks omitted fields)
-show these structures, also discussed in the
-`SheetsJS hyperlink guide <https://github.com/masaccio/numbers-parser/blob/main/docs/api/sheetsjs.md>`__,
+show these structures, also discussed in :src_root:`docs/api/sheetsjs.md`,
 with definitions in :src_proto:`TSTArchives.proto` and
 :src_proto:`TSWPArchives.proto`:
 
@@ -1239,6 +1238,9 @@ messages also carry drawable and placement information. The
 :src_proto:`TSDArchives.proto` definitions show the required ``super`` chain
 and storage fields. The caption's ``owned_storage`` reference is what connects
 the caption metadata to its text content.
+In the sample files examined for this guide, the storage archive was reached
+through this ``owned_storage`` reference. ``Metadata.json`` exposed the
+object-UUID-map listing, but not a direct caption-storage reference.
 
 The following abbreviated protobuf snippets (``// ...`` marks omitted fields)
 show the relevant messages:
