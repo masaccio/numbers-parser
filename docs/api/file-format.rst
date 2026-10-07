@@ -889,11 +889,13 @@ The schemas use two representations for 128-bit UUID values
      optional uint32 uuid_w3 = 5;
    }
 
-``NumbersUUID`` converts either protobuf representation to one 128-bit
-integer, and emits the corresponding two-word or four-word representation
-when writing. ``uuid_to_hex`` uses that conversion to normalize identifiers
-for comparisons and maps. This normalization is important because the owner
-map and formula-owner messages use different protobuf UUID types.
+``NumbersUUID`` converts ``UUID`` values from their upper/lower words and
+``CFUUIDArchive`` values from their four 32-bit word fields to one 128-bit
+integer; it emits the corresponding word representation when writing.
+Although the schema also permits ``CFUUIDArchive.uuid_bytes``, this conversion
+uses the word fields. ``uuid_to_hex`` normalizes these values for comparisons
+and maps, which is important because owner-map and formula-owner messages use
+different protobuf UUID types.
 
 Formula owners and table identities
 -----------------------------------
@@ -944,6 +946,20 @@ internal owner id to normalized UUID hex. The table UUID mapping is separate:
 base-owner UUID is the stable table identity used to match cross-table formula
 references. When no haunted-owner records exist (as in some older documents),
 the model leaves this table mapping empty.
+
+The table model's schema supplies the haunted-owner UUID that participates in
+this match (:src_proto:`TSTArchives.proto` and :src_proto:`TSCEArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableModelArchive {
+     optional .TSCE.HauntedOwnerArchive haunted_owner = 84;
+     // ...
+   }
+
+   message HauntedOwnerArchive {
+     required .TSP.UUID owner_uid = 1;
+   }
 
 In observed files, some formula-owner UUIDs share their upper 112 bits while
 their lower 16 bits vary with the formula id. This pattern is an observation,
