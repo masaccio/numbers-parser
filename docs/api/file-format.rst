@@ -228,6 +228,9 @@ rows, merges, categories, pivot tables, and other table capabilities.
 ``TSP.Reference`` fields such as ``tableModel`` identify separate archive
 objects resolved through ``ObjectStore``; ``base_data_store`` is an embedded
 ``TST.DataStore`` protobuf message, not another archive reference.
+The data path continues from ``DataStore.tiles`` to ``TileStorage`` entries
+that reference ``Tile`` archives; each tile's ``rowInfos`` contains
+``TileRowInfo`` records with the row's cell-storage bytes and offsets.
 
 The schema expresses that split directly
 (:src_proto:`TSTArchives.proto`):
