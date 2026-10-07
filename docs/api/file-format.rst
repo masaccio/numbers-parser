@@ -297,8 +297,52 @@ The ``DataStore`` schema links the tile hierarchy and shared lists
      // ...
    }
 
-``TST.TileRowInfo`` contains a ``cell_count``, row index, cell storage bytes,
-cell offsets, a storage version, and an optional ``has_wide_offsets`` flag.
+   Row and column headers
+   ----------------------
+
+   Header metadata is kept in bucket objects rather than in the tile records.
+   The table model points to ``HeaderStorage`` for row buckets and to one
+   column-header bucket; each header stores its index, size, hidden state, cell
+   count, and optional cell/text style references
+   (:src_proto:`TSTArchives.proto`):
+
+   .. code-block:: protobuf
+
+     message HeaderStorage {
+       required uint32 bucketHashFunction = 1;
+       repeated .TSP.Reference buckets = 2;
+     }
+
+     message HeaderStorageBucket {
+       message Header {
+         required uint32 index = 1;
+         required float size = 2;
+         required uint32 hidingState = 3;
+         required uint32 numberOfCells = 4;
+         optional .TSP.Reference cell_style = 5;
+         optional .TSP.Reference text_style = 6;
+       }
+       required uint32 bucketHashFunction = 1;
+       repeated .TST.HeaderStorageBucket.Header headers = 2;
+     }
+
+     message DataStore {
+       required .TST.HeaderStorage rowHeaders = 1;
+       required .TSP.Reference columnHeaders = 2;
+       // ...
+     }
+
+   ``_NumbersModel.row_storage_map`` follows the row-bucket references through
+   ``self.objects`` and maps header indexes to corresponding row storage
+   positions. Empty rows can have header metadata but no tile row. The public
+   ``Table`` header-count and dimension properties in :src_pkg:`document.py`
+   delegate to model methods, which read or update the table model archive;
+   header count fields and frozen-header flags are also defined on
+   ``TableModelArchive``. Header style references feed the same style resolution
+   paths described below.
+
+   ``TST.TileRowInfo`` contains a ``cell_count``, row index, cell storage bytes,
+   cell offsets, a storage version, and an optional ``has_wide_offsets`` flag.
 The offsets map column positions to the corresponding cell record in the
 row's storage byte buffer. A negative offset marks a column with no cell
 record. A wide-offset row stores offsets in units of four bytes; the parser
@@ -772,6 +816,82 @@ body, header-row, header-column and footer styles, with per-cell entries
 providing overrides. The document-level stylesheet and theme provide shared
 style definitions and theme context.
 
+Style information is a graph of style archives. The table's ``styleTable``
+maps a cell's stored style key to an archive reference; cell and text styles
+then inherit unset properties from their parent style
+(:src_proto:`TSSArchives.proto`, :src_proto:`TSTArchives.proto`, and
+:src_proto:`TSTStylePropertyArchiving.proto`):
+
+.. code-block:: protobuf
+
+   message StyleArchive {
+     optional string name = 1;
+     optional string style_identifier = 2;
+     optional .TSP.Reference parent = 3;
+     optional .TSP.Reference stylesheet = 5;
+   }
+
+   message CellStyleArchive {
+     required .TSS.StyleArchive super = 1;
+     optional .TST.CellStylePropertiesArchive cell_properties = 11;
+   }
+
+   message CellStylePropertiesArchive {
+     optional .TSD.FillArchive cell_fill = 1;
+     optional bool text_wrap = 3;
+     optional .TSD.StrokeArchive top_stroke = 10;
+     optional .TSD.StrokeArchive right_stroke = 11;
+     optional .TSD.StrokeArchive bottom_stroke = 12;
+     optional .TSD.StrokeArchive left_stroke = 13;
+   }
+
+``_NumbersModel.table_style`` follows the style-list entry's reference through
+``self.objects``. ``cell_text_style`` chooses a cell-specific text-style key,
+or falls back to the table's header-row, header-column, footer-row, or body
+default. Its ``char_property``, ``para_property`` and ``cell_property``
+helpers retrieve explicitly set values and otherwise follow the style's
+parent. :src_pkg:`cell.py` exposes the resolved properties through the cell's
+lazy ``style`` object.
+
+Cell borders also occur in ``CellStylePropertiesArchive``, but the grid
+strokes reported by ``Cell.border`` are extracted from a table stroke sidecar.
+The model follows the table's sidecar and layer references, then converts
+ordered stroke runs to border values (:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableModelArchive {
+     optional .TSP.Reference stroke_sidecar = 49;
+     // ...
+   }
+
+   message StrokeSidecarArchive {
+     repeated .TSP.Reference left_column_stroke_layers = 4;
+     repeated .TSP.Reference right_column_stroke_layers = 5;
+     repeated .TSP.Reference top_row_stroke_layers = 6;
+     repeated .TSP.Reference bottom_row_stroke_layers = 7;
+   }
+
+   message StrokeLayerArchive {
+     message StrokeRunArchive {
+       optional int32 origin = 1;
+       optional uint32 length = 2;
+       optional .TSD.StrokeArchive stroke = 3;
+       optional uint32 order = 4;
+     }
+     optional uint32 row_column_index = 1;
+     repeated .TST.StrokeLayerArchive.StrokeRunArchive stroke_runs = 2;
+   }
+
+Each run's orientation comes from its containing sidecar list; ``origin`` and
+``length`` locate the run along a row or column, while the ``TSD.StrokeArchive``
+provides the visual stroke. ``extract_strokes`` sorts runs by order, resolves
+their layers through ``self.objects``, and sets matching edges on adjacent
+cells. Setting borders reverses this process by consolidating equal edges into
+stroke runs. The separate ``CellBorderArchive`` schema is also present for
+logical cell messages, but is not the source of the table-grid sidecar strokes
+used by the current border accessor.
+
 :src_pkg:`constants.py` names the API and format enumerations for standard formats
 (base, currency, date/time, fraction, number, percentage, scientific, text,
 checkbox, rating, duration and custom formats), interactive controls (popup,
@@ -833,6 +953,38 @@ defined in :src_proto:`TSTArchives.proto`. :src_pkg:`model.py` recognizes the re
 it encounters, and :src_pkg:`cell.py` exposes a merged anchor and covered-cell
 references to the higher-level API.
 
+The DataStore can point to a ``MergeRegionMapArchive`` containing cell ranges.
+Each range stores packed origin and size values
+(:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message DataStore {
+     optional .TSP.Reference merge_region_map = 13;
+     // ...
+   }
+
+   message MergeRegionMapArchive {
+     repeated .TST.CellRange cell_range = 1;
+   }
+
+   message CellRange {
+     required .TST.CellID origin = 1;
+     required .TST.TableSize size = 2;
+   }
+
+``calculate_merges_using_region_map`` resolves the map reference through
+``self.objects``. It splits the packed origin and size into starting
+column/row and column/row counts, then computes inclusive end coordinates.
+The model also supports formula-store and formula-owner dependency archives:
+the first reads colon-tract ranges from merge-owner formulas, and the second
+maps merge-owner range dependencies through the internal-owner-to-UUID map.
+``merge_cells`` tries those two sources in order and uses the region map if
+neither yields ranges. All decoded coordinates pass to ``add_merge_range``,
+which builds a map of anchor and covered cells; ``Table.merge_ranges`` in
+:src_pkg:`document.py` turns anchors into A1 ranges, and :src_pkg:`cell.py`
+returns ``MergedCell`` objects for covered positions.
+
 Rows and columns can have numeric indexes and stable UUID identities. The
 schema includes row/column UID maps and UUID-based ranges as well as older
 coordinate-based ranges. Formula references, cell selections, merge maps and
@@ -893,6 +1045,20 @@ the document and tables, builds cached lookup tables for strings, styles,
 formats and formulas, and extracts individual cell records from tile rows.
 The public ``Document``, ``Sheet`` and ``Table`` classes project that model
 into the higher-level API.
+
+``ObjectStore`` keeps decoded protobuf archives in its object map, keyed by
+``ArchiveInfo.identifier``. Its ``store_object`` handler records each typed
+archive, and ``__getitem__`` exposes lookup by id; the model calls this
+``self.objects`` and follows a protobuf reference with expressions such as
+``self.objects[reference.identifier]``. The store's file cache separately
+retains IWA blobs and other package files. In the public API,
+:src_pkg:`document.py` delegates table, caption, header, and merge operations
+to the model; :src_pkg:`cell.py` interprets cell records and asks the model
+for styles and borders; :src_pkg:`model.py` resolves those structures through
+the object store. For example, caption text follows the table-info caption
+reference to a caption archive, then follows its owned-storage reference to
+the text archive. These APIs expose interpreted values, not the raw protobuf
+objects.
 
 On write, updated cell values are encoded as v5 cell buffers; strings,
 formats, styles and formulas are inserted into their relevant table lists.
@@ -1076,3 +1242,34 @@ and storage fields. In the observed documents, the storage archive was located
 through the caption's
 ``owned_storage`` reference; the research notes report no direct
 ``Metadata.json`` reference except for its ``object_uuid_map_entries`` listing.
+
+The relevant messages are:
+
+.. code-block:: protobuf
+
+   message CaptionInfoArchive {
+     required .TSWP.ShapeInfoArchive super = 1;
+     optional .TSP.Reference placement = 2;
+     optional .TSD.CaptionOrTitleKind childInfoKind = 3;
+   }
+
+   message ShapeInfoArchive {
+     required .TSD.ShapeArchive super = 1;
+     optional .TSP.Reference owned_storage = 4;
+     optional bool is_text_box = 6;
+   }
+
+   message StorageArchive {
+     repeated string text = 3;
+     optional .TSWP.ObjectAttributeTable table_para_style = 5;
+   }
+
+In :src_pkg:`model.py`, ``caption_text`` starts from the table's
+``TableInfoArchive`` and resolves its caption through ``self.objects``. It
+then reads or replaces the first string in the owned ``StorageArchive.text``.
+If the document has a stand-in caption and a caption is assigned,
+``create_caption_archive`` creates the placement, caption, and storage
+archives and connects their references. The public ``Table.caption`` and
+``Table.caption_enabled`` properties in :src_pkg:`document.py` delegate to
+these model operations; visibility is represented by the drawable's
+``caption_hidden`` flag.
