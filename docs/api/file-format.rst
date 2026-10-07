@@ -299,8 +299,7 @@ The ``DataStore`` schema links the tile hierarchy and shared lists
      // ...
    }
 
-DataStore headers
------------------
+**DataStore headers**
 
 Header metadata is kept in bucket objects rather than in the tile records.
 ``DataStore`` points to ``HeaderStorage`` for row buckets and to one
@@ -424,11 +423,11 @@ a hyperlink property on each cell.
 The rich-text list is the DataStore's ``rich_text_table`` reference. A list
 entry points to a rich-text payload, which points to its storage; the
 storage's smart-field table points to hyperlink objects at character offsets.
-These are the same structures shown in the SheetsJS hyperlink discussion
-(:src_proto:`TSTArchives.proto` and :src_proto:`TSWPArchives.proto`):
-
-The protobuf excerpts below are abbreviated; ``// ...`` represents omitted
-fields.
+The following abbreviated protobuf excerpts (``// ...`` marks omitted fields)
+show these structures, also discussed in the
+`SheetsJS hyperlink guide <https://github.com/masaccio/numbers-parser/blob/main/docs/api/sheetsjs.md>`__,
+with definitions in :src_proto:`TSTArchives.proto` and
+:src_proto:`TSWPArchives.proto`:
 
 .. code-block:: protobuf
 
@@ -1241,10 +1240,8 @@ messages also carry drawable and placement information. The
 and storage fields. The caption's ``owned_storage`` reference is what connects
 the caption metadata to its text content.
 
-The relevant messages are:
-
-The protobuf snippets below are abbreviated; ``// ...`` stands for other
-fields that are not relevant to the reference chain.
+The following abbreviated protobuf snippets (``// ...`` marks omitted fields)
+show the relevant messages:
 
 .. code-block:: protobuf
 
@@ -1252,17 +1249,18 @@ fields that are not relevant to the reference chain.
      required .TSWP.ShapeInfoArchive super = 1;
      optional .TSP.Reference placement = 2;
      optional .TSD.CaptionOrTitleKind childInfoKind = 3;
+     // ...
    }
 
    message ShapeInfoArchive {
      required .TSD.ShapeArchive super = 1;
      optional .TSP.Reference owned_storage = 4;
      optional bool is_text_box = 6;
+     // ...
    }
 
    message StorageArchive {
      repeated string text = 3;
-     optional .TSWP.ObjectAttributeTable table_para_style = 5;
      // ...
    }
 
