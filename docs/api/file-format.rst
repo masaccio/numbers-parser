@@ -139,6 +139,25 @@ follow the header immediately, concatenated in ``message_infos`` order; the
 schema allows multiple payloads in one segment, the historic research found
 one to be usual. The implementation handles all listed message payloads.
 
+The segment header is defined in :src_proto:`TSPArchiveMessages.proto`:
+
+.. code-block:: protobuf
+
+   message ArchiveInfo {
+     optional uint64 identifier = 1;
+     repeated .TSP.MessageInfo message_infos = 2;
+     optional bool should_merge = 3;
+   }
+
+   message MessageInfo {
+     required uint32 type = 1;
+     repeated uint32 version = 2 [packed = true];
+     required uint32 length = 3;
+     repeated .TSP.FieldInfo field_infos = 4;
+     repeated uint64 object_references = 5 [packed = true];
+     repeated uint64 data_references = 6 [packed = true];
+   }
+
 Protobuf wire data is not self-describing. ``MessageInfo.type`` is resolved
 through the Numbers/common registry extracted from the iWork applications;
 the resulting maps are checked into :src_root:`src/numbers_parser/generated/mapping.py`.
@@ -146,6 +165,17 @@ The same numeric id can mean a different class in another iWork application.
 The schema field types and message definitions live in the ``.proto`` files,
 not in the bytes on disk. Likewise, a ``TSP.Reference`` identifies an object
 but does not say what kind it points to.
+
+The reference itself contains only the archive identifier
+(:src_proto:`TSPMessages.proto`):
+
+.. code-block:: protobuf
+
+   message Reference {
+     required uint64 identifier = 1;
+     optional int32 deprecated_type = 2;
+     optional bool deprecated_is_external = 3;
+   }
 
 ``ArchiveInfo.identifier`` is the object's numeric identity within the
 document. ``MessageInfo.object_references`` and ``data_references`` record
@@ -169,24 +199,58 @@ field is a common ``TSA.DocumentArchive`` object. The sheet's
 fields describe page orientation, headers and footers, printing, tab style,
 visibility, and layout.
 
-For a table, the central chain is::
+The root and sheet messages are defined in :src_proto:`TNArchives.proto`:
 
-    TN.DocumentArchive
-      └── sheets[] ──> TN.SheetArchive
-                              └── drawable_infos[] ──> TST.TableInfoArchive
-                                                └── tableModel ──> TST.TableModelArchive
-                                                                   └── base_data_store ──> TST.DataStore
-                                                                                           └── tiles ──> TST.Tile
-                                                                                                         └── rowInfos[]
+.. code-block:: protobuf
 
-``TST.TableInfoArchive`` wraps the drawable and refers to its
-``TableModelArchive``. The model stores the persistent table UUID, dimensions,
-name, default row/column sizes, header/footer counts and row/column freezing,
-plus references to default body/header/footer styles. It also carries
-information for sorting, hidden and filtered rows, merges, styles, categories,
-pivot tables, and other newer table capabilities. Do not mistake a
-``TableInfoArchive`` (view/drawable metadata) for the ``TableModelArchive``
-(table's dimensions, data and model properties).
+   message DocumentArchive {
+     repeated .TSP.Reference sheets = 1;
+     required .TSA.DocumentArchive super = 8;
+     optional .TSP.Reference calculation_engine = 3 [deprecated = true];
+     // ...
+   }
+
+   message SheetArchive {
+     required string name = 1;
+     repeated .TSP.Reference drawable_infos = 2;
+     // ...
+   }
+
+These protobuf fields define the table traversal: the document's repeated
+``sheets`` references resolve to sheet objects; each sheet's
+``drawable_infos`` can resolve to a ``TableInfoArchive``; and its
+``tableModel`` reference resolves to a ``TableModelArchive``. The model embeds
+``base_data_store``, which contains the table data and tile/list references
+described below. ``TableInfoArchive`` is drawable/view metadata, whereas
+``TableModelArchive`` holds the table's persistent UUID, dimensions, name,
+default styles, and data model. It also carries sorting, hidden and filtered
+rows, merges, categories, pivot tables, and other table capabilities.
+``TSP.Reference`` fields such as ``tableModel`` identify separate archive
+objects resolved through ``ObjectStore``; ``base_data_store`` is an embedded
+``TST.DataStore`` protobuf message, not another archive reference.
+The data path continues from ``DataStore.tiles`` to ``TileStorage`` entries
+that reference ``Tile`` archives; each tile's ``rowInfos`` contains
+``TileRowInfo`` records with the row's cell-storage bytes and offsets.
+
+The schema expresses that split directly
+(:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableInfoArchive {
+     required .TSD.DrawableArchive super = 1;
+     required .TSP.Reference tableModel = 2;
+     // ...
+   }
+
+   message TableModelArchive {
+     required .TSP.Reference table_style = 3;
+     required .TST.DataStore base_data_store = 4;
+     required uint32 number_of_rows = 6;
+     required uint32 number_of_columns = 7;
+     required string table_name = 8;
+     // ...
+   }
 
 The reader treats object identifiers 1 and 2 as the document and package
 roots (``DOCUMENT_ID`` and ``PACKAGE_ID`` in :src_pkg:`constants.py`). The package
@@ -219,6 +283,63 @@ The ``TST.DataStore`` inside a table model connects its data structures:
   cell specifications, and merge information. The DataStore has separate
   references for these lists; optional lists may be absent.
 
+The ``DataStore`` schema links the tile hierarchy and shared lists
+(:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message DataStore {
+     required .TST.HeaderStorage rowHeaders = 1;
+     required .TSP.Reference columnHeaders = 2;
+     required .TST.TileStorage tiles = 3;
+     required .TSP.Reference stringTable = 4;
+     required .TSP.Reference styleTable = 5;
+     required .TSP.Reference formula_table = 6;
+     required .TST.TableRBTree rowTileTree = 9;
+     required .TSP.Reference format_table_pre_bnc = 11;
+     optional .TSP.Reference rich_text_table = 17;
+     optional .TSP.Reference control_cell_spec_table = 21;
+     optional .TSP.Reference format_table = 22;
+     // ...
+   }
+
+**DataStore headers**
+
+Header metadata is kept in bucket objects rather than in the tile records.
+``DataStore`` points to ``HeaderStorage`` for row buckets and to one
+column-header bucket; each header stores its index, size, hidden state, cell
+count, and optional cell/text style references
+(:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message HeaderStorage {
+     required uint32 bucketHashFunction = 1;
+     repeated .TSP.Reference buckets = 2;
+   }
+
+   message HeaderStorageBucket {
+     message Header {
+       required uint32 index = 1;
+       required float size = 2;
+       required uint32 hidingState = 3;
+       required uint32 numberOfCells = 4;
+       optional .TSP.Reference cell_style = 5;
+       optional .TSP.Reference text_style = 6;
+     }
+     required uint32 bucketHashFunction = 1;
+     repeated .TST.HeaderStorageBucket.Header headers = 2;
+   }
+
+``_NumbersModel.row_storage_map`` follows the row-bucket references through
+``self.objects`` and maps header indexes to corresponding row storage
+positions. Empty rows can have header metadata but no tile row. The public
+``Table`` header-count and dimension properties in :src_pkg:`document.py`
+delegate to model methods, which read or update the table model archive;
+header count fields and frozen-header flags are also defined on
+``TableModelArchive``. Header style references feed the same style resolution
+paths described below.
+
 ``TST.TileRowInfo`` contains a ``cell_count``, row index, cell storage bytes,
 cell offsets, a storage version, and an optional ``has_wide_offsets`` flag.
 The offsets map column positions to the corresponding cell record in the
@@ -228,6 +349,22 @@ scales those offsets before slicing the byte buffer. Empty columns between
 stored cells therefore do not consume a cell record. ``get_storage_buffers_for_row``
 uses the next nonnegative offset (or the end of the buffer) to delimit each
 cell.
+
+The schema keeps row metadata and the two storage layouts together
+(:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TileRowInfo {
+     required uint32 tile_row_index = 1;
+     required uint32 cell_count = 2;
+     required bytes cell_storage_buffer_pre_bnc = 3;
+     required bytes cell_offsets_pre_bnc = 4;
+     optional uint32 storage_version = 5;
+     optional bytes cell_storage_buffer = 6;
+     optional bytes cell_offsets = 7;
+     optional bool has_wide_offsets = 8;
+   }
 
 The shared values are represented by ``TST.TableDataList`` entries. Each
 entry has a numeric ``key`` and ``refcount``; its payload depends on the list
@@ -239,6 +376,46 @@ archive. The cell's stored key indexes its table's list, not a document-wide
 string table. ``DataLists`` in :src_pkg:`model.py` caches lookups, reuses existing
 values, and allocates subsequent keys when writing new entries.
 
+The protobuf declares the list kind separately from each entry's optional
+value fields (:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableDataList {
+     enum ListType {
+       STRING = 1;
+       FORMAT = 2;
+       FORMULA = 3;
+       STYLE = 4;
+       FORMULA_ERROR = 5;
+       RICH_TEXT_PAYLOAD = 8;
+       CONTROL_CELL_SPEC = 12;
+     }
+     message ListEntry {
+       required uint32 key = 1;
+       required uint32 refcount = 2;
+       optional string string = 3;
+       optional .TSP.Reference reference = 4;
+       optional .TSCE.FormulaArchive formula = 5;
+       optional .TSK.FormatStructArchive format = 6;
+       optional .TSP.Reference rich_text_payload = 9;
+       optional .TST.CellSpecArchive cell_spec = 12;
+     }
+     required .TST.TableDataList.ListType listType = 1;
+     required uint32 nextListID = 2;
+     repeated .TST.TableDataList.ListEntry entries = 3;
+   }
+
+In the implementation, ``_NumbersModel`` creates a ``DataLists`` cache for
+the table's string, style, formula, format, and control-spec references.
+Lookups use both the table id and list key: ``table_string`` resolves a text
+cell's string id, ``table_style`` resolves a style reference, and
+``formula_ast`` follows formula entries. When writing, ``lookup_key`` reuses
+an equal value or appends a ``ListEntry`` with the next key; reusing a value
+increments its ``refcount``. Rich-text payloads and other list kinds are also
+decoded through their specific model paths; not every ``ListType`` has a
+``DataLists`` cache.
+
 The plain string table and rich-text table are distinct. A plain text cell
 looks up its string id in ``stringTable``. Rich text uses a rich-text payload
 reference and ``TSWP.StorageArchive`` text runs, with character-indexed
@@ -246,6 +423,47 @@ attribute tables for paragraph and character styling. Hyperlinks are attached
 to rich-text fragments (for example a ``TSWP.HyperlinkFieldArchive``), not
 stored as an independent cell-level URL. This differs from formats that have
 a hyperlink property on each cell.
+
+The rich-text list is the DataStore's ``rich_text_table`` reference. A list
+entry points to a rich-text payload, which points to its storage; the
+storage's smart-field table points to hyperlink objects at character offsets.
+The earlier ``TableDataList`` excerpt shows the entry's
+``rich_text_payload = 9`` field. The following abbreviated protobuf excerpts
+(``// ...`` marks omitted fields) describe that payload, its storage, and
+hyperlink attributes. The same chain is discussed in
+:src_root:`docs/api/sheetsjs.md`; schema definitions are in
+:src_proto:`TSTArchives.proto` and :src_proto:`TSWPArchives.proto`:
+
+.. code-block:: protobuf
+
+   message RichTextPayloadArchive {
+     required .TSP.Reference storage = 1;
+   }
+
+   message StorageArchive {
+     repeated string text = 3;
+     optional .TSWP.ObjectAttributeTable table_smartfield = 11;
+     // ...
+   }
+
+   message ObjectAttributeTable {
+     message ObjectAttribute {
+       required uint32 character_index = 1;
+       optional .TSP.Reference object = 2;
+     }
+     repeated .TSWP.ObjectAttributeTable.ObjectAttribute entries = 1;
+   }
+
+   message HyperlinkFieldArchive {
+     optional string url_ref = 2;
+   }
+
+``_NumbersModel.table_rich_text`` follows those references through
+``self.objects`` and recognizes ``HyperlinkFieldArchive`` objects. Each
+``character_index`` begins a linked text run that ends at the next smart-field
+entry or at the end of the text; the model returns the run text together with
+``url_ref``. This is a rich-text extraction path, not a separate URL field on
+the compact cell record.
 
 Cell storage: v5 binary records
 ===============================
@@ -522,6 +740,67 @@ uses current cell values rather than recalculating formula expressions.
 :src_pkg:`cell.py` resolves a formula id and its coordinates, while :src_pkg:`formula.py`
 handles formula rendering and references.
 
+Formula AST decoding
+--------------------
+
+The table's ``formula_table`` is a ``TableDataList`` of ``FORMULA`` entries.
+Each cell's formula id selects an entry by key, and that entry embeds a
+``TSCE.FormulaArchive``. Its ``AST_node_array`` is an ordered sequence of
+typed nodes rather than formula text:
+
+.. code-block:: protobuf
+
+   message FormulaArchive {
+     required .TSCE.ASTNodeArrayArchive AST_node_array = 1;
+     optional uint32 host_column = 2;
+     optional uint32 host_row = 3;
+     optional .TSP.UUID host_table_uid = 7;
+     optional .TSP.UUID host_column_uid = 8;
+     optional .TSP.UUID host_row_uid = 9;
+   }
+
+   message ASTNodeArrayArchive {
+     enum ASTNodeType {
+       ADDITION_NODE = 1;
+       FUNCTION_NODE = 16;
+       NUMBER_NODE = 17;
+       STRING_NODE = 19;
+       LOCAL_CELL_REFERENCE_NODE = 27;
+       CROSS_TABLE_CELL_REFERENCE_NODE = 28;
+       // Other operators, values, and reference node types are defined here.
+     }
+     message ASTNodeArchive {
+       required .TSCE.ASTNodeArrayArchive.ASTNodeType AST_node_type = 1;
+       optional uint32 AST_function_node_index = 2;
+       optional uint32 AST_function_node_numArgs = 3;
+       optional double AST_number_node_number = 4;
+       optional string AST_string_node_string = 6;
+       optional .TSCE.ASTNodeArrayArchive.ASTLocalCellReferenceNodeArchive
+         AST_local_cell_reference_node_reference = 15;
+       optional .TSCE.ASTNodeArrayArchive.ASTCrossTableReferenceExtraInfoArchive
+         AST_cross_table_reference_extra_info = 28;
+     }
+     repeated .TSCE.ASTNodeArrayArchive.ASTNodeArchive AST_node = 1;
+   }
+
+``_NumbersModel.formula_ast`` follows the table model's ``base_data_store`` to
+the formula list and indexes the embedded AST node sequence by ``entry.key``.
+``Cell.formula`` passes its formula id and row/column to ``TableFormulas``.
+That renderer visits the stored nodes and feeds operands and operators to a
+stack: literal nodes push their values, while operators and functions pop
+their arguments and push a rendered expression. Function ids are translated
+through the generated function map; unsupported node or function ids produce
+``UnsupportedWarning`` rather than being evaluated. A missing formula key is
+also reported as unsupported. The result is a formula string for the API,
+not a recalculated cell value.
+
+Cell and range reference nodes are resolved by ``_NumbersModel.node_to_ref``.
+Local row and column coordinates combine their absolute/relative flags with
+the formula cell's location. Cross-table nodes carry a table UUID; the model
+maps that UUID back to a table before building the reference. UUID-based
+coordinate and range nodes preserve stable row/column identities and sticky
+absolute-reference flags where those node forms are present.
+
 Formatting is also indirect. The v5 cell record can carry style ids,
 conditional-style data, format ids and a control-spec id. Table list entries
 map keys to the actual style, format, formula, or control data. A cell style
@@ -530,6 +809,82 @@ properties use the TSWP text/style messages. The table model supplies default
 body, header-row, header-column and footer styles, with per-cell entries
 providing overrides. The document-level stylesheet and theme provide shared
 style definitions and theme context.
+
+Style information is a graph of style archives. The table's ``styleTable``
+maps a cell's stored style key to an archive reference; cell and text styles
+then inherit unset properties from their parent style
+(:src_proto:`TSSArchives.proto`, :src_proto:`TSTArchives.proto`, and
+:src_proto:`TSTStylePropertyArchiving.proto`):
+
+.. code-block:: protobuf
+
+   message StyleArchive {
+     optional string name = 1;
+     optional string style_identifier = 2;
+     optional .TSP.Reference parent = 3;
+     optional .TSP.Reference stylesheet = 5;
+   }
+
+   message CellStyleArchive {
+     required .TSS.StyleArchive super = 1;
+     optional .TST.CellStylePropertiesArchive cell_properties = 11;
+   }
+
+   message CellStylePropertiesArchive {
+     optional .TSD.FillArchive cell_fill = 1;
+     optional bool text_wrap = 3;
+     optional .TSD.StrokeArchive top_stroke = 10;
+     optional .TSD.StrokeArchive right_stroke = 11;
+     optional .TSD.StrokeArchive bottom_stroke = 12;
+     optional .TSD.StrokeArchive left_stroke = 13;
+   }
+
+``_NumbersModel.table_style`` follows the style-list entry's reference through
+``self.objects``. ``cell_text_style`` chooses a cell-specific text-style key,
+or falls back to the table's header-row, header-column, footer-row, or body
+default. Its ``char_property``, ``para_property`` and ``cell_property``
+helpers retrieve explicitly set values and otherwise follow the style's
+parent. :src_pkg:`cell.py` exposes the resolved properties through the cell's
+lazy ``style`` object.
+
+Cell borders also occur in ``CellStylePropertiesArchive``, but the grid
+strokes reported by ``Cell.border`` are extracted from a table stroke sidecar.
+The model follows the table's sidecar and layer references, then converts
+ordered stroke runs to border values (:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableModelArchive {
+     optional .TSP.Reference stroke_sidecar = 49;
+     // ...
+   }
+
+   message StrokeSidecarArchive {
+     repeated .TSP.Reference left_column_stroke_layers = 4;
+     repeated .TSP.Reference right_column_stroke_layers = 5;
+     repeated .TSP.Reference top_row_stroke_layers = 6;
+     repeated .TSP.Reference bottom_row_stroke_layers = 7;
+   }
+
+   message StrokeLayerArchive {
+     message StrokeRunArchive {
+       optional int32 origin = 1;
+       optional uint32 length = 2;
+       optional .TSD.StrokeArchive stroke = 3;
+       optional uint32 order = 4;
+     }
+     optional uint32 row_column_index = 1;
+     repeated .TST.StrokeLayerArchive.StrokeRunArchive stroke_runs = 2;
+   }
+
+Each run's orientation comes from its containing sidecar list; ``origin`` and
+``length`` locate the run along a row or column, while the ``TSD.StrokeArchive``
+provides the visual stroke. ``extract_strokes`` sorts runs by order, resolves
+their layers through ``self.objects``, and sets matching edges on adjacent
+cells. Setting borders reverses this process by consolidating equal edges into
+stroke runs. The separate ``CellBorderArchive`` schema is also present for
+logical cell messages, but is not the source of the table-grid sidecar strokes
+used by the current border accessor.
 
 :src_pkg:`constants.py` names the API and format enumerations for standard formats
 (base, currency, date/time, fraction, number, percentage, scientific, text,
@@ -592,6 +947,38 @@ defined in :src_proto:`TSTArchives.proto`. :src_pkg:`model.py` recognizes the re
 it encounters, and :src_pkg:`cell.py` exposes a merged anchor and covered-cell
 references to the higher-level API.
 
+The DataStore can point to a ``MergeRegionMapArchive`` containing cell ranges.
+Each range stores packed origin and size values
+(:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message DataStore {
+     optional .TSP.Reference merge_region_map = 13;
+     // ...
+   }
+
+   message MergeRegionMapArchive {
+     repeated .TST.CellRange cell_range = 1;
+   }
+
+   message CellRange {
+     required .TST.CellID origin = 1;
+     required .TST.TableSize size = 2;
+   }
+
+``calculate_merges_using_region_map`` resolves the map reference through
+``self.objects``. It splits the packed origin and size into starting
+column/row and column/row counts, then computes inclusive end coordinates.
+The model also supports formula-store and formula-owner dependency archives:
+the first extracts ranges from merge-owner formulas, and the second
+maps merge-owner range dependencies through the internal-owner-to-UUID map.
+``merge_cells`` tries those two sources in order and uses the region map if
+neither yields ranges. All decoded coordinates pass to ``add_merge_range``,
+which builds a map of anchor and covered cells; ``Table.merge_ranges`` in
+:src_pkg:`document.py` turns anchors into A1 ranges, and :src_pkg:`cell.py`
+returns ``MergedCell`` objects for covered positions.
+
 Rows and columns can have numeric indexes and stable UUID identities. The
 schema includes row/column UID maps and UUID-based ranges as well as older
 coordinate-based ranges. Formula references, cell selections, merge maps and
@@ -620,7 +1007,7 @@ document:
   colors and shared application-level properties.
 * :src_proto:`TSCEArchives.proto` describes calculation-engine formulas, references,
   cell values, dependencies, spill data and related calculation metadata.
-* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCHArchives.proto` describe charts and
+* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCHArchives_GEN.proto` describe charts and
   their data/format state. :src_proto:`TNArchives.proto` adds Numbers-specific chart
   mediation and sheet/document details.
 * :src_proto:`TNCommandArchives.proto` and other command-archive schemas
@@ -653,6 +1040,20 @@ formats and formulas, and extracts individual cell records from tile rows.
 The public ``Document``, ``Sheet`` and ``Table`` classes project that model
 into the higher-level API.
 
+``ObjectStore`` keeps decoded protobuf archives in its object map, keyed by
+``ArchiveInfo.identifier``. Its ``store_object`` handler records each typed
+archive, and ``__getitem__`` exposes lookup by id; the model calls this
+``self.objects`` and follows a protobuf reference with expressions such as
+``self.objects[reference.identifier]``. The store's file cache separately
+retains IWA blobs and other package files. In the public API,
+:src_pkg:`document.py` delegates table, caption, header, and merge operations
+to the model; :src_pkg:`cell.py` interprets cell records and asks the model
+for styles and borders; :src_pkg:`model.py` resolves those structures through
+the object store. For example, caption text follows the table-info caption
+reference to a caption archive, then follows its owned-storage reference to
+the text archive. These APIs expose interpreted values, not the raw protobuf
+objects.
+
 On write, updated cell values are encoded as v5 cell buffers; strings,
 formats, styles and formulas are inserted into their relevant table lists.
 The model rebuilds tile-row buffers and offsets, updates protobuf lengths
@@ -662,11 +1063,12 @@ kept in the file store. :src_pkg:`model.py` and
 :src_pkg:`iwafile.py` are the best references for following this
 process end to end.
 
-Appendix: UUIDs, owners, and table relationships
-================================================
+UUIDs, owners, and table relationships
+======================================
 
-The following details extend the formula, merge, and stable-coordinate
-descriptions above with observations. They describe observed structures, not requirements for every Numbers version.
+These protobuf structures extend the formula, merge, and stable-coordinate
+descriptions above. Some behaviors described here are observations from sample
+documents, not requirements for every Numbers version.
 The relevant definitions are in :src_proto:`TSCEArchives.proto`, :src_proto:`TSTArchives.proto`, and
 :src_proto:`TSPMessages.proto`.
 
@@ -674,6 +1076,33 @@ Archive object identifiers, internal owner ids, and UUIDs are distinct
 identifiers. A ``TSP.Reference`` points to an archive object by its numeric
 ``identifier``; an owner id map relates an internal integer to a UUID. Do not
 use one as a substitute for another.
+
+The schemas use two representations for 128-bit UUID values
+(:src_proto:`TSPMessages.proto`). ``UUID`` stores upper and lower 64-bit words;
+``CFUUIDArchive`` stores four 32-bit words (or optional raw bytes):
+
+.. code-block:: protobuf
+
+   message UUID {
+     required uint64 lower = 1;
+     required uint64 upper = 2;
+   }
+
+   message CFUUIDArchive {
+     optional bytes uuid_bytes = 1;
+     optional uint32 uuid_w0 = 2;
+     optional uint32 uuid_w1 = 3;
+     optional uint32 uuid_w2 = 4;
+     optional uint32 uuid_w3 = 5;
+   }
+
+``NumbersUUID`` converts ``UUID`` values from their upper/lower words and
+``CFUUIDArchive`` values from their four 32-bit word fields to one 128-bit
+integer; it emits the corresponding word representation when writing.
+Although the schema also permits ``CFUUIDArchive.uuid_bytes``, this conversion
+uses the word fields. ``uuid_to_hex`` normalizes these values for comparisons
+and maps, which is important because owner-map and formula-owner messages use
+different protobuf UUID types.
 
 Formula owners and table identities
 -----------------------------------
@@ -688,6 +1117,58 @@ resolve dependency records that refer to an owner by integer. The
 model (1), merge owner (5), and haunted owner (35) kinds in
 :src_pkg:`constants.py` (``OwnerKind``).
 These values are not declared as an enum alongside the protobuf field.
+
+The owner map relates 32-bit internal ids to UUIDs, while the owner
+dependency records carry UUIDs and dependency metadata
+(:src_proto:`TSCEArchives.proto`):
+
+.. code-block:: protobuf
+
+   message OwnerIDMapArchive {
+     message OwnerIDMapArchiveEntry {
+       required uint32 internal_owner_id = 1;
+       required .TSP.CFUUIDArchive owner_id = 2;
+     }
+     repeated .TSCE.OwnerIDMapArchive.OwnerIDMapArchiveEntry map_entry = 1;
+   }
+
+   message FormulaOwnerDependenciesArchive {
+     required .TSP.UUID formula_owner_uid = 1;
+     required uint32 internal_formula_owner_id = 2;
+     optional uint32 owner_kind = 3 [default = 0];
+     optional .TSCE.RangeDependenciesArchive range_dependencies = 5;
+     optional .TSP.Reference formula_owner = 11;
+     optional .TSP.UUID base_owner_uid = 12;
+     // ...
+   }
+
+   message DependencyTrackerArchive {
+     optional .TSCE.OwnerIDMapArchive owner_id_map = 3;
+     repeated .TSP.Reference formula_owner_dependencies = 6;
+   }
+
+The ``owner_id_map`` accessor reads those map entries into a dictionary from
+internal owner id to normalized UUID hex. The table UUID mapping is separate:
+``calculate_table_uuid_map`` finds haunted-owner dependency archives, maps each
+``formula_owner_uid`` to its ``base_owner_uid``, and matches the table model's
+``haunted_owner.owner_uid`` against that formula-owner UUID. The resulting
+base-owner UUID is the stable table identity used to match cross-table formula
+references. When no haunted-owner records exist (as in some older documents),
+the model leaves this table mapping empty.
+
+The table model's schema supplies the haunted-owner UUID that participates in
+this match (:src_proto:`TSTArchives.proto` and :src_proto:`TSCEArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableModelArchive {
+     optional .TSCE.HauntedOwnerArchive haunted_owner = 84;
+     // ...
+   }
+
+   message HauntedOwnerArchive {
+     required .TSP.UUID owner_uid = 1;
+   }
 
 In observed files, some formula-owner UUIDs share their upper 112 bits while
 their lower 16 bits vary with the formula id. This pattern is an observation,
@@ -722,15 +1203,93 @@ must have tiles or that all first tables omit them.
 Merge and formula ranges
 ------------------------
 
-One observed merge representation is ``RangePrecedentsTileArchive``. Its
+One range representation is ``RangePrecedentsTileArchive``. Its
 ``from_to_range`` entries pair a starting coordinate with a rectangle, and
 ``to_owner_id`` identifies the destination owner. Resolve that integer using
 the calculation engine's ``owner_id_map`` before relating the rectangle to a
-table UUID. The current parser also handles merge ranges in
-``FormulaOwnerDependenciesArchive`` records of merge-owner kind: it reads
-their range dependencies, resolves their owner ids, and keeps ranges whose
-base-owner UUID matches the table. These are distinct archive structures
-representing related range information.
+table UUID. Separately, merge-owner ``FormulaOwnerDependenciesArchive``
+records carry ``range_dependencies``; the parser resolves their internal owner
+ids and keeps ranges whose base-owner UUID matches the table.
+
+The schemas describe both the formula-owner dependency form and the table's
+merge-owner formula store (:src_proto:`TSCEArchives.proto` and
+:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message RangePrecedentsTileArchive {
+     message FromToRangeArchive {
+       required .TSCE.CellCoordinateArchive from_coord = 1;
+       required .TSCE.CellRectArchive refers_to_rect = 2;
+     }
+     required uint32 to_owner_id = 1;
+     repeated .TSCE.RangePrecedentsTileArchive.FromToRangeArchive from_to_range = 2;
+   }
+
+   message RangeDependenciesArchive {
+     repeated .TSCE.RangeBackDependencyArchive back_dependency = 2;
+   }
+
+   message RangeBackDependencyArchive {
+     required uint32 cell_coord_row = 1;
+     required uint32 cell_coord_column = 2;
+     optional .TSCE.RangeReferenceArchive range_reference = 3;
+     optional .TSCE.InternalRangeReferenceArchive internal_range_reference = 4;
+   }
+
+   message InternalRangeReferenceArchive {
+     required uint32 owner_id = 1;
+     required .TSCE.RangeCoordinateArchive range = 2;
+   }
+
+   message MergeOwnerArchive {
+     required .TSP.CFUUIDArchive owner_id = 1;
+     optional .TST.FormulaStoreArchive formula_store = 2;
+   }
+
+   message FormulaStoreArchive {
+     message FormulaStorePair {
+       required uint32 formula_index = 1;
+       required .TSCE.FormulaArchive formula = 2;
+     }
+     required uint32 next_formula_index = 2;
+     repeated .TST.FormulaStoreArchive.FormulaStorePair formulas = 3;
+   }
+
+The earlier ``Merges and stable coordinates`` section shows the
+``DataStore.merge_region_map`` reference and its ``CellRange`` list. The table
+model's merge-owner reference and the packed coordinate fields are defined in
+:src_proto:`TSTArchives.proto`:
+
+.. code-block:: protobuf
+
+   message TableModelArchive {
+     optional .TST.MergeOwnerArchive merge_owner = 47;
+     // ...
+   }
+
+``CellRange.origin`` and ``CellRange.size`` use ``CellID.packedData`` and
+``TableSize.packedData``. ``model.py`` unpacks their high and low 16-bit halves
+to obtain column/row starts and counts, then computes inclusive ends.
+
+.. code-block:: protobuf
+
+   message CellID {
+     required fixed32 packedData = 1;
+     // ...
+   }
+
+   message TableSize {
+     required fixed32 packedData = 1;
+     // ...
+   }
+
+In :src_pkg:`model.py`, merge extraction tries the merge owner's formula store
+first, then formula-owner dependency archives, then ``merge_region_map``.
+``add_merge_range`` records each anchor and covered cell; the public
+``Table.merge_ranges`` property in :src_pkg:`document.py` converts anchors to
+A1-style ranges. The packed map representation is also used when writing
+updated merges.
 
 Header names and row/column UUIDs
 ---------------------------------
@@ -744,6 +1303,56 @@ correlated with ``ColumnRowUIDMapArchive.sorted_row_uids`` and
 ``sorted_column_uids``. Research has also observed ``nrm_owner_uid`` matching
 a formula-owner UUID, but its role in that mapping remains unresolved.
 
+The header-name manager associates per-table header identities with coordinate
+context, and stores name-fragment tiles by reference. Each fragment includes
+its text and precedent coordinate; its optional UUID reference set identifies
+cells using that fragment. The table's UID map contains sorted UUID arrays and
+index translation arrays (:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message HeaderNameMgrArchive {
+     message PerTableArchive {
+       required .TSP.UUID table_uid = 1;
+       required .TSCE.CellCoordinateArchive per_table_precedent = 2;
+       repeated .TSP.UUID header_row_uids = 5;
+       repeated .TSP.UUID header_column_uids = 6;
+       // ...
+     }
+     required .TSP.UUID owner_uid = 1;
+     optional .TSP.UUID nrm_owner_uid = 2;
+     repeated .TST.HeaderNameMgrArchive.PerTableArchive per_tables = 3;
+     repeated .TSP.Reference name_frag_tiles = 4;
+     // ...
+   }
+
+   message HeaderNameMgrTileArchive {
+     message NameFragmentArchive {
+       required string name_fragment = 1;
+       required .TSCE.CellCoordinateArchive name_precedent = 2;
+       optional .TSCE.UidCellRefSetArchive uses_of_name_fragment = 3;
+     }
+     required string first_fragment = 1;
+     required string last_fragment = 2;
+     repeated .TST.HeaderNameMgrTileArchive.NameFragmentArchive name_frag_entries = 3;
+   }
+
+   message ColumnRowUIDMapArchive {
+     repeated .TSP.UUID sorted_column_uids = 1;
+     repeated uint32 column_index_for_uid = 2;
+     repeated uint32 column_uid_for_index = 3;
+     repeated .TSP.UUID sorted_row_uids = 4;
+     repeated uint32 row_index_for_uid = 5;
+     repeated uint32 row_uid_for_index = 6;
+   }
+
+The ``*_uid_for_index`` arrays translate table positions to entries in the
+sorted UUID arrays; the ``*_index_for_uid`` arrays provide the reverse lookup.
+The model uses ``ColumnRowUIDMapArchive.row_uid_for_index`` while reconstructing
+category row relationships. Header names and row/column UUIDs therefore form
+stable identities alongside coordinate-based references, rather than replacing
+the archive identifiers used by ``TSP.Reference``.
+
 Captions and text storage
 -------------------------
 
@@ -754,7 +1363,42 @@ directly in a caption record. ``TSA.CaptionInfoArchive`` contains a
 messages also carry drawable and placement information. The
 :src_proto:`TSAArchives.proto`, :src_proto:`TSWPArchives.proto`, and
 :src_proto:`TSDArchives.proto` definitions show the required ``super`` chain
-and storage fields. In the observed documents, the storage archive was located
-through the caption's
-``owned_storage`` reference; the research notes report no direct
-``Metadata.json`` reference except for its ``object_uuid_map_entries`` listing.
+and storage fields. The caption's ``owned_storage`` reference is what connects
+the caption metadata to its text content.
+In the sample files examined for this guide, the storage archive was reached
+through this ``owned_storage`` reference. ``Metadata.json`` exposed the
+object-UUID-map listing, but not a direct caption-storage reference.
+
+The following abbreviated protobuf snippets (``// ...`` marks omitted fields)
+show the relevant messages:
+
+.. code-block:: protobuf
+
+   message CaptionInfoArchive {
+     required .TSWP.ShapeInfoArchive super = 1;
+     optional .TSP.Reference placement = 2;
+     optional .TSD.CaptionOrTitleKind childInfoKind = 3;
+     // ...
+   }
+
+   message ShapeInfoArchive {
+     required .TSD.ShapeArchive super = 1;
+     optional .TSP.Reference owned_storage = 4;
+     optional bool is_text_box = 6;
+     // ...
+   }
+
+   message StorageArchive {
+     repeated string text = 3;
+     // ...
+   }
+
+In :src_pkg:`model.py`, ``caption_text`` starts from the table's
+``TableInfoArchive`` and resolves its caption through ``self.objects``. It
+then reads or replaces the first string in the owned ``StorageArchive.text``.
+If the document has a stand-in caption and a caption is assigned,
+``create_caption_archive`` creates the placement, caption, and storage
+archives and connects their references. The public ``Table.caption`` and
+``Table.caption_enabled`` properties in :src_pkg:`document.py` delegate to
+these model operations; visibility is represented by the drawable's
+``caption_hidden`` flag.
