@@ -186,6 +186,42 @@ messages. The schema also permits ``should_merge`` and patch metadata
 protobuf-level object patching, not a separate cell encoding. The current
 ``ProtobufPatch`` support in :src_pkg:`iwafile.py` is intentionally limited.
 
+Reader and writer path
+======================
+
+On read, ``IWork.open`` opens a ZIP file or package, reads metadata and
+optional encryption state, and stores resources. ``ObjectStore`` identifies
+IWA files, decompresses their chunks, parses archive segments using the
+generated type registry, and indexes each typed protobuf by its
+``ArchiveInfo.identifier``. ``_NumbersModel`` then follows references from
+the document and tables, builds cached lookup tables for strings, styles,
+formats and formulas, and extracts individual cell records from tile rows.
+The public ``Document``, ``Sheet`` and ``Table`` classes project that model
+into the higher-level API.
+
+``ObjectStore`` keeps decoded protobuf archives in its object map, keyed by
+``ArchiveInfo.identifier``. Its ``store_object`` handler records each typed
+archive, and ``__getitem__`` exposes lookup by id; the model calls this
+``self.objects`` and follows a protobuf reference with expressions such as
+``self.objects[reference.identifier]``. The store's file cache separately
+retains IWA blobs and other package files. In the public API,
+:src_pkg:`document.py` delegates table, caption, header, and merge operations
+to the model; :src_pkg:`cell.py` interprets cell records and asks the model
+for styles and borders; :src_pkg:`model.py` resolves those structures through
+the object store. For example, caption text follows the table-info caption
+reference to a caption archive, then follows its owned-storage reference to
+the text archive. These APIs expose interpreted values, not the raw protobuf
+objects.
+
+On write, updated cell values are encoded as v5 cell buffers; strings,
+formats, styles and formulas are inserted into their relevant table lists.
+The model rebuilds tile-row buffers and offsets, updates protobuf lengths
+and object references, serializes segments, recompresses IWA chunks, and
+writes the ZIP file or package. Non-IWA blobs (for example, image data) are
+kept in the file store. :src_pkg:`model.py` and
+:src_pkg:`iwafile.py` are the best references for following this
+process end to end.
+
 Document and component graph
 ============================
 
@@ -1326,42 +1362,6 @@ archives and connects their references. The public ``Table.caption`` and
 ``Table.caption_enabled`` properties in :src_pkg:`document.py` delegate to
 these model operations; visibility is represented by the drawable's
 ``caption_hidden`` flag.
-
-Reader and writer path
-======================
-
-On read, ``IWork.open`` opens a ZIP file or package, reads metadata and
-optional encryption state, and stores resources. ``ObjectStore`` identifies
-IWA files, decompresses their chunks, parses archive segments using the
-generated type registry, and indexes each typed protobuf by its
-``ArchiveInfo.identifier``. ``_NumbersModel`` then follows references from
-the document and tables, builds cached lookup tables for strings, styles,
-formats and formulas, and extracts individual cell records from tile rows.
-The public ``Document``, ``Sheet`` and ``Table`` classes project that model
-into the higher-level API.
-
-``ObjectStore`` keeps decoded protobuf archives in its object map, keyed by
-``ArchiveInfo.identifier``. Its ``store_object`` handler records each typed
-archive, and ``__getitem__`` exposes lookup by id; the model calls this
-``self.objects`` and follows a protobuf reference with expressions such as
-``self.objects[reference.identifier]``. The store's file cache separately
-retains IWA blobs and other package files. In the public API,
-:src_pkg:`document.py` delegates table, caption, header, and merge operations
-to the model; :src_pkg:`cell.py` interprets cell records and asks the model
-for styles and borders; :src_pkg:`model.py` resolves those structures through
-the object store. For example, caption text follows the table-info caption
-reference to a caption archive, then follows its owned-storage reference to
-the text archive. These APIs expose interpreted values, not the raw protobuf
-objects.
-
-On write, updated cell values are encoded as v5 cell buffers; strings,
-formats, styles and formulas are inserted into their relevant table lists.
-The model rebuilds tile-row buffers and offsets, updates protobuf lengths
-and object references, serializes segments, recompresses IWA chunks, and
-writes the ZIP file or package. Non-IWA blobs (for example, image data) are
-kept in the file store. :src_pkg:`model.py` and
-:src_pkg:`iwafile.py` are the best references for following this
-process end to end.
 
 Remaining concepts to document
 ==============================
