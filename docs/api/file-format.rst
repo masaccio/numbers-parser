@@ -1063,11 +1063,12 @@ kept in the file store. :src_pkg:`model.py` and
 :src_pkg:`iwafile.py` are the best references for following this
 process end to end.
 
-Appendix: UUIDs, owners, and table relationships
-================================================
+UUIDs, owners, and table relationships
+======================================
 
-The following details extend the formula, merge, and stable-coordinate
-descriptions above with observations. They describe observed structures, not requirements for every Numbers version.
+These protobuf structures extend the formula, merge, and stable-coordinate
+descriptions above. Some behaviors described here are observations from sample
+documents, not requirements for every Numbers version.
 The relevant definitions are in :src_proto:`TSCEArchives.proto`, :src_proto:`TSTArchives.proto`, and
 :src_proto:`TSPMessages.proto`.
 
@@ -1210,6 +1211,111 @@ their range dependencies, resolves their owner ids, and keeps ranges whose
 base-owner UUID matches the table. These are distinct archive structures
 representing related range information.
 
+The schemas describe both the formula-owner dependency form and the table's
+merge-owner formula store (:src_proto:`TSCEArchives.proto` and
+:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message RangePrecedentsTileArchive {
+     message FromToRangeArchive {
+       required .TSCE.CellCoordinateArchive from_coord = 1;
+       required .TSCE.CellRectArchive refers_to_rect = 2;
+     }
+     required uint32 to_owner_id = 1;
+     repeated .TSCE.RangePrecedentsTileArchive.FromToRangeArchive from_to_range = 2;
+   }
+
+   message FormulaOwnerDependenciesArchive {
+     required .TSP.UUID formula_owner_uid = 1;
+     required uint32 internal_formula_owner_id = 2;
+     optional uint32 owner_kind = 3 [default = 0];
+     optional .TSCE.RangeDependenciesArchive range_dependencies = 5;
+     optional .TSP.UUID base_owner_uid = 12;
+     // ...
+   }
+
+   message RangeDependenciesArchive {
+     repeated .TSCE.RangeBackDependencyArchive back_dependency = 2;
+   }
+
+   message RangeBackDependencyArchive {
+     required uint32 cell_coord_row = 1;
+     required uint32 cell_coord_column = 2;
+     optional .TSCE.InternalRangeReferenceArchive internal_range_reference = 4;
+   }
+
+   message InternalRangeReferenceArchive {
+     required uint32 owner_id = 1;
+     required .TSCE.RangeCoordinateArchive range = 2;
+   }
+
+   message MergeOwnerArchive {
+     required .TSP.CFUUIDArchive owner_id = 1;
+     optional .TST.FormulaStoreArchive formula_store = 2;
+   }
+
+   message FormulaStoreArchive {
+     message FormulaStorePair {
+       required uint32 formula_index = 1;
+       required .TSCE.FormulaArchive formula = 2;
+     }
+     required uint32 next_formula_index = 2;
+     repeated .TST.FormulaStoreArchive.FormulaStorePair formulas = 3;
+   }
+
+The table model links to its merge owner and embeds its data store; the
+``DataStore.merge_region_map`` field references the fallback range list
+(:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableModelArchive {
+     required .TST.DataStore base_data_store = 4;
+     optional .TST.MergeOwnerArchive merge_owner = 47;
+     // ...
+   }
+
+   message DataStore {
+     optional .TSP.Reference merge_region_map = 13;
+     // ...
+   }
+
+That map resolves to a list of
+``TST.CellRange`` values. A range packs its origin and dimensions into the
+``CellID`` and ``TableSize`` fields; ``model.py`` unpacks the high and low
+16-bit halves to obtain column/row starts and counts, then computes inclusive
+ends. These snippets show the schema fields involved
+(:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message MergeRegionMapArchive {
+     repeated .TST.CellRange cell_range = 1;
+   }
+
+   message CellRange {
+     required .TST.CellID origin = 1;
+     required .TST.TableSize size = 2;
+   }
+
+   message CellID {
+     required fixed32 packedData = 1;
+     // ...
+   }
+
+   message TableSize {
+     required fixed32 packedData = 1;
+     // ...
+   }
+
+In :src_pkg:`model.py`, merge extraction tries the merge owner's formula store
+first, then formula-owner dependency archives, then ``merge_region_map``.
+``add_merge_range`` records each anchor and covered cell; the public
+``Table.merge_ranges`` property in :src_pkg:`document.py` converts anchors to
+A1-style ranges. The packed map representation is also used when writing
+updated merges.
+
 Header names and row/column UUIDs
 ---------------------------------
 
@@ -1221,6 +1327,56 @@ references to cells using that fragment. The row and column UUIDs can be
 correlated with ``ColumnRowUIDMapArchive.sorted_row_uids`` and
 ``sorted_column_uids``. Research has also observed ``nrm_owner_uid`` matching
 a formula-owner UUID, but its role in that mapping remains unresolved.
+
+The header-name manager associates per-table header identities with coordinate
+context, and stores name-fragment tiles by reference. Each fragment includes
+its text and precedent coordinate; its optional UUID reference set identifies
+cells using that fragment. The table's UID map contains sorted UUID arrays and
+index translation arrays (:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message HeaderNameMgrArchive {
+     message PerTableArchive {
+       required .TSP.UUID table_uid = 1;
+       required .TSCE.CellCoordinateArchive per_table_precedent = 2;
+       repeated .TSP.UUID header_row_uids = 5;
+       repeated .TSP.UUID header_column_uids = 6;
+       // ...
+     }
+     required .TSP.UUID owner_uid = 1;
+     optional .TSP.UUID nrm_owner_uid = 2;
+     repeated .TST.HeaderNameMgrArchive.PerTableArchive per_tables = 3;
+     repeated .TSP.Reference name_frag_tiles = 4;
+     // ...
+   }
+
+   message HeaderNameMgrTileArchive {
+     message NameFragmentArchive {
+       required string name_fragment = 1;
+       required .TSCE.CellCoordinateArchive name_precedent = 2;
+       optional .TSCE.UidCellRefSetArchive uses_of_name_fragment = 3;
+     }
+     required string first_fragment = 1;
+     required string last_fragment = 2;
+     repeated .TST.HeaderNameMgrTileArchive.NameFragmentArchive name_frag_entries = 3;
+   }
+
+   message ColumnRowUIDMapArchive {
+     repeated .TSP.UUID sorted_column_uids = 1;
+     repeated uint32 column_index_for_uid = 2;
+     repeated uint32 column_uid_for_index = 3;
+     repeated .TSP.UUID sorted_row_uids = 4;
+     repeated uint32 row_index_for_uid = 5;
+     repeated uint32 row_uid_for_index = 6;
+   }
+
+The ``*_uid_for_index`` arrays translate table positions to entries in the
+sorted UUID arrays; the ``*_index_for_uid`` arrays provide the reverse lookup.
+The model uses ``ColumnRowUIDMapArchive.row_uid_for_index`` while reconstructing
+category row relationships. Header names and row/column UUIDs therefore form
+stable identities alongside coordinate-based references, rather than replacing
+the archive identifiers used by ``TSP.Reference``.
 
 Captions and text storage
 -------------------------
