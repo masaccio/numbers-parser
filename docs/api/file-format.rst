@@ -285,9 +285,11 @@ The ``DataStore`` schema links the tile hierarchy and shared lists
 .. code-block:: protobuf
 
    message DataStore {
-     required .TST.TileStorage tiles = 3;
-     required .TSP.Reference stringTable = 4;
-     required .TSP.Reference styleTable = 5;
+    required .TST.HeaderStorage rowHeaders = 1;
+    required .TSP.Reference columnHeaders = 2;
+    required .TST.TileStorage tiles = 3;
+    required .TSP.Reference stringTable = 4;
+    required .TSP.Reference styleTable = 5;
      required .TSP.Reference formula_table = 6;
      required .TST.TableRBTree rowTileTree = 9;
      required .TSP.Reference format_table_pre_bnc = 11;
@@ -297,52 +299,46 @@ The ``DataStore`` schema links the tile hierarchy and shared lists
      // ...
    }
 
-   Row and column headers
-   ----------------------
+Row and column headers
+----------------------
 
-   Header metadata is kept in bucket objects rather than in the tile records.
-   The table model points to ``HeaderStorage`` for row buckets and to one
-   column-header bucket; each header stores its index, size, hidden state, cell
-   count, and optional cell/text style references
-   (:src_proto:`TSTArchives.proto`):
+Header metadata is kept in bucket objects rather than in the tile records.
+``DataStore`` points to ``HeaderStorage`` for row buckets and to one
+column-header bucket; each header stores its index, size, hidden state, cell
+count, and optional cell/text style references
+(:src_proto:`TSTArchives.proto`):
 
-   .. code-block:: protobuf
+.. code-block:: protobuf
 
-     message HeaderStorage {
-       required uint32 bucketHashFunction = 1;
-       repeated .TSP.Reference buckets = 2;
+   message HeaderStorage {
+     required uint32 bucketHashFunction = 1;
+     repeated .TSP.Reference buckets = 2;
+   }
+
+   message HeaderStorageBucket {
+     message Header {
+       required uint32 index = 1;
+       required float size = 2;
+       required uint32 hidingState = 3;
+       required uint32 numberOfCells = 4;
+       optional .TSP.Reference cell_style = 5;
+       optional .TSP.Reference text_style = 6;
      }
+     required uint32 bucketHashFunction = 1;
+     repeated .TST.HeaderStorageBucket.Header headers = 2;
+   }
 
-     message HeaderStorageBucket {
-       message Header {
-         required uint32 index = 1;
-         required float size = 2;
-         required uint32 hidingState = 3;
-         required uint32 numberOfCells = 4;
-         optional .TSP.Reference cell_style = 5;
-         optional .TSP.Reference text_style = 6;
-       }
-       required uint32 bucketHashFunction = 1;
-       repeated .TST.HeaderStorageBucket.Header headers = 2;
-     }
+``_NumbersModel.row_storage_map`` follows the row-bucket references through
+``self.objects`` and maps header indexes to corresponding row storage
+positions. Empty rows can have header metadata but no tile row. The public
+``Table`` header-count and dimension properties in :src_pkg:`document.py`
+delegate to model methods, which read or update the table model archive;
+header count fields and frozen-header flags are also defined on
+``TableModelArchive``. Header style references feed the same style resolution
+paths described below.
 
-     message DataStore {
-       required .TST.HeaderStorage rowHeaders = 1;
-       required .TSP.Reference columnHeaders = 2;
-       // ...
-     }
-
-   ``_NumbersModel.row_storage_map`` follows the row-bucket references through
-   ``self.objects`` and maps header indexes to corresponding row storage
-   positions. Empty rows can have header metadata but no tile row. The public
-   ``Table`` header-count and dimension properties in :src_pkg:`document.py`
-   delegate to model methods, which read or update the table model archive;
-   header count fields and frozen-header flags are also defined on
-   ``TableModelArchive``. Header style references feed the same style resolution
-   paths described below.
-
-   ``TST.TileRowInfo`` contains a ``cell_count``, row index, cell storage bytes,
-   cell offsets, a storage version, and an optional ``has_wide_offsets`` flag.
+``TST.TileRowInfo`` contains a ``cell_count``, row index, cell storage bytes,
+cell offsets, a storage version, and an optional ``has_wide_offsets`` flag.
 The offsets map column positions to the corresponding cell record in the
 row's storage byte buffer. A negative offset marks a column with no cell
 record. A wide-offset row stores offsets in units of four bytes; the parser
@@ -1013,7 +1009,7 @@ document:
   colors and shared application-level properties.
 * :src_proto:`TSCEArchives.proto` describes calculation-engine formulas, references,
   cell values, dependencies, spill data and related calculation metadata.
-* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCHArchives.GEN.proto` describe charts and
+* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCHArchives_GEN.proto` describe charts and
   their data/format state. :src_proto:`TNArchives.proto` adds Numbers-specific chart
   mediation and sheet/document details.
 * :src_proto:`TNCommandArchives.proto` and other command-archive schemas
