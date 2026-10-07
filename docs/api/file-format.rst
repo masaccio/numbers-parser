@@ -199,6 +199,23 @@ field is a common ``TSA.DocumentArchive`` object. The sheet's
 fields describe page orientation, headers and footers, printing, tab style,
 visibility, and layout.
 
+The root and sheet messages are defined in :src_proto:`TNArchives.proto`:
+
+.. code-block:: protobuf
+
+   message DocumentArchive {
+     repeated .TSP.Reference sheets = 1;
+     required .TSA.DocumentArchive super = 8;
+     optional .TSP.Reference calculation_engine = 3 [deprecated = true];
+     // ...
+   }
+
+   message SheetArchive {
+     required string name = 1;
+     repeated .TSP.Reference drawable_infos = 2;
+     // ...
+   }
+
 For a table, the central chain is::
 
     TN.DocumentArchive
@@ -217,6 +234,26 @@ information for sorting, hidden and filtered rows, merges, styles, categories,
 pivot tables, and other newer table capabilities. Do not mistake a
 ``TableInfoArchive`` (view/drawable metadata) for the ``TableModelArchive``
 (table's dimensions, data and model properties).
+
+The schema expresses that split directly
+(:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableInfoArchive {
+     required .TSD.DrawableArchive super = 1;
+     required .TSP.Reference tableModel = 2;
+     // ...
+   }
+
+   message TableModelArchive {
+     required .TSP.Reference table_style = 3;
+     required .TST.DataStore base_data_store = 4;
+     required uint32 number_of_rows = 6;
+     required uint32 number_of_columns = 7;
+     required string table_name = 8;
+     // ...
+   }
 
 The reader treats object identifiers 1 and 2 as the document and package
 roots (``DOCUMENT_ID`` and ``PACKAGE_ID`` in :src_pkg:`constants.py`). The package
@@ -249,6 +286,24 @@ The ``TST.DataStore`` inside a table model connects its data structures:
   cell specifications, and merge information. The DataStore has separate
   references for these lists; optional lists may be absent.
 
+The ``DataStore`` schema links the tile hierarchy and shared lists
+(:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message DataStore {
+     required .TST.TileStorage tiles = 3;
+     required .TSP.Reference stringTable = 4;
+     required .TSP.Reference styleTable = 5;
+     required .TSP.Reference formula_table = 6;
+     required .TST.TableRBTree rowTileTree = 9;
+     required .TSP.Reference format_table_pre_bnc = 11;
+     optional .TSP.Reference rich_text_table = 17;
+     optional .TSP.Reference control_cell_spec_table = 21;
+     optional .TSP.Reference format_table = 22;
+     // ...
+   }
+
 ``TST.TileRowInfo`` contains a ``cell_count``, row index, cell storage bytes,
 cell offsets, a storage version, and an optional ``has_wide_offsets`` flag.
 The offsets map column positions to the corresponding cell record in the
@@ -259,6 +314,22 @@ stored cells therefore do not consume a cell record. ``get_storage_buffers_for_r
 uses the next nonnegative offset (or the end of the buffer) to delimit each
 cell.
 
+The schema keeps row metadata and the two storage layouts together
+(:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TileRowInfo {
+     required uint32 tile_row_index = 1;
+     required uint32 cell_count = 2;
+     required bytes cell_storage_buffer_pre_bnc = 3;
+     required bytes cell_offsets_pre_bnc = 4;
+     optional uint32 storage_version = 5;
+     optional bytes cell_storage_buffer = 6;
+     optional bytes cell_offsets = 7;
+     optional bool has_wide_offsets = 8;
+   }
+
 The shared values are represented by ``TST.TableDataList`` entries. Each
 entry has a numeric ``key`` and ``refcount``; its payload depends on the list
 type. The proto enumerates string, format, formula, style, formula-error,
@@ -268,6 +339,46 @@ string; other entries may hold a protobuf value or a reference to another
 archive. The cell's stored key indexes its table's list, not a document-wide
 string table. ``DataLists`` in :src_pkg:`model.py` caches lookups, reuses existing
 values, and allocates subsequent keys when writing new entries.
+
+The protobuf declares the list kind separately from each entry's optional
+value fields (:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableDataList {
+     enum ListType {
+       STRING = 1;
+       FORMAT = 2;
+       FORMULA = 3;
+       STYLE = 4;
+       FORMULA_ERROR = 5;
+       RICH_TEXT_PAYLOAD = 8;
+       CONTROL_CELL_SPEC = 12;
+     }
+     message ListEntry {
+       required uint32 key = 1;
+       required uint32 refcount = 2;
+       optional string string = 3;
+       optional .TSP.Reference reference = 4;
+       optional .TSCE.FormulaArchive formula = 5;
+       optional .TSK.FormatStructArchive format = 6;
+       optional .TSP.Reference rich_text_payload = 9;
+       optional .TST.CellSpecArchive cell_spec = 12;
+     }
+     required .TST.TableDataList.ListType listType = 1;
+     required uint32 nextListID = 2;
+     repeated .TST.TableDataList.ListEntry entries = 3;
+   }
+
+In the implementation, ``_NumbersModel`` creates a ``DataLists`` cache for
+the table's string, style, formula, format, and control-spec references.
+Lookups use both the table id and list key: ``table_string`` resolves a text
+cell's string id, ``table_style`` resolves a style reference, and
+``formula_ast`` follows formula entries. When writing, ``lookup_key`` reuses
+an equal value or appends a ``ListEntry`` with the next key; reusing a value
+increments its ``refcount``. Rich-text payloads and other list kinds are also
+decoded through their specific model paths; not every ``ListType`` has a
+``DataLists`` cache.
 
 The plain string table and rich-text table are distinct. A plain text cell
 looks up its string id in ``stringTable``. Rich text uses a rich-text payload
@@ -650,7 +761,7 @@ document:
   colors and shared application-level properties.
 * :src_proto:`TSCEArchives.proto` describes calculation-engine formulas, references,
   cell values, dependencies, spill data and related calculation metadata.
-* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCHArchives.proto` describe charts and
+* :src_proto:`TSCHArchives.proto` and :src_proto:`TSCHArchives.GEN.proto` describe charts and
   their data/format state. :src_proto:`TNArchives.proto` adds Numbers-specific chart
   mediation and sheet/document details.
 * :src_proto:`TNCommandArchives.proto` and other command-archive schemas
