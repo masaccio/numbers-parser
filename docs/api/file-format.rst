@@ -11,7 +11,8 @@ field in the same way.
 .. note::
 
    Always check the sources linked to from here as this part of the documentation is created
-   and maintained by AI.
+   and maintained by AI. The protobuf examples are tested during the docs build, but the
+   format descriptions may still be complete nonsense.
 
 The description combines work from multiple sources, some of which are quite old
 but remain valuable resources and have been invaluable in creating `numbers-parser`
