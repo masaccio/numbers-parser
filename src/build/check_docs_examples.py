@@ -28,7 +28,6 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from google.protobuf import descriptor_pb2  # noqa: F401
 from google.protobuf.descriptor import FieldDescriptor as FD
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -54,11 +53,35 @@ SCALARS = {
     "string": FD.TYPE_STRING,
     "bytes": FD.TYPE_BYTES,
 }
-LABELS = {
-    "optional": FD.LABEL_OPTIONAL,
-    "required": FD.LABEL_REQUIRED,
-    "repeated": FD.LABEL_REPEATED,
-}
+LABELS = {"optional", "required", "repeated"}
+
+
+def is_repeated(fd) -> bool:
+    """Protobuf >= 6 removed FieldDescriptor.label; support both APIs."""
+    if hasattr(fd, "is_repeated"):
+        return bool(fd.is_repeated)
+    return fd.label == FD.LABEL_REPEATED
+
+
+def is_required(fd) -> bool:
+    if hasattr(fd, "is_required"):
+        return bool(fd.is_required)
+    return fd.label == FD.LABEL_REQUIRED
+
+
+def label_of(fd) -> str:
+    if is_repeated(fd):
+        return "repeated"
+    if is_required(fd):
+        return "required"
+    return "optional"
+
+
+def is_packed(fd) -> bool:
+    if hasattr(fd, "is_packed"):
+        return bool(fd.is_packed)
+    opts = fd.GetOptions()
+    return bool(opts.packed) if opts.HasField("packed") else False
 
 
 # --------------------------------------------------------------------------
@@ -109,7 +132,9 @@ def extract_snippets(rst_path: Path) -> list[Snippet]:
     return snippets
 
 
-TOKEN_RE = re.compile(r"\s*(//[^\n]*|[A-Za-z_][\w.]*|\.[A-Za-z_][\w.]*|-?\d+|0x[0-9a-fA-F]+|[{}=;\[\],])")
+TOKEN_RE = re.compile(
+    r"\s*(//[^\n]*|[A-Za-z_][\w.]*|\.[A-Za-z_][\w.]*|-?\d+|0x[0-9a-fA-F]+|[{}=;\[\],])"
+)
 
 
 def tokenize(text: str) -> list[str]:
@@ -215,13 +240,6 @@ def load_generated():
     return registry
 
 
-def candidates(registry, path: list[str]):
-    """All descriptors whose full name is <package>.<path joined by '.'>"""
-    suffix = "." + ".".join(path)
-    return [d for n, d in registry.items() if ("." + n).endswith(suffix) and
-            n.count(".") >= len(path) - 1 and n.split(".", 1)[-1].endswith(".".join(path))]
-
-
 def check_field(desc, f: Field, errors: list[str]) -> None:
     fd = desc.fields_by_name.get(f.name)
     if fd is None:
@@ -229,8 +247,7 @@ def check_field(desc, f: Field, errors: list[str]) -> None:
         return
     if fd.number != f.number:
         errors.append(f"{desc.full_name}.{f.name}: number {fd.number} != documented {f.number}")
-    actual_label = {FD.LABEL_OPTIONAL: "optional", FD.LABEL_REQUIRED: "required",
-                    FD.LABEL_REPEATED: "repeated"}[fd.label]
+    actual_label = label_of(fd)
     if actual_label != f.label:
         errors.append(f"{desc.full_name}.{f.name}: label {actual_label} != documented {f.label}")
     if f.type in SCALARS:
@@ -246,7 +263,7 @@ def check_field(desc, f: Field, errors: list[str]) -> None:
                 errors.append(f"{desc.full_name}.{f.name}: type {target.full_name} != {doc_name}")
             elif not f.type.startswith(".") and target.name != doc_name.split(".")[-1]:
                 errors.append(f"{desc.full_name}.{f.name}: type {target.full_name} != {doc_name}")
-    if "packed=true" in f.options and not fd.is_packed:
+    if "packed=true" in f.options and not is_packed(fd):
         errors.append(f"{desc.full_name}.{f.name}: documented packed but field is not packed")
 
 
@@ -272,8 +289,7 @@ def check_message(desc, spec: Message, errors: list[str]) -> None:
 
 def match_descriptor(registry, spec: Message):
     """Return (descriptor, errors) for the best-matching candidate of a top-level spec."""
-    cands = [d for d in registry.values()
-             if d.containing_type is None and d.name == spec.name]
+    cands = [d for d in registry.values() if d.containing_type is None and d.name == spec.name]
     best = None
     for d in cands:
         errs: list[str] = []
@@ -290,14 +306,16 @@ def match_descriptor(registry, spec: Message):
 # --------------------------------------------------------------------------
 # Live document checks
 # --------------------------------------------------------------------------
-def iter_messages(msg, seen_depth=0):
+def iter_messages(msg):
     """Yield msg and all embedded sub-messages."""
     yield msg
     for fdesc, value in msg.ListFields():
         if fdesc.type != FD.TYPE_MESSAGE:
             continue
-        for item in (value if fdesc.label == FD.LABEL_REPEATED else [value]):
-            yield from iter_messages(item)
+        for item in value if is_repeated(fdesc) else [value]:
+            # map fields yield keys; only descend into real messages
+            if hasattr(item, "ListFields"):
+                yield from iter_messages(item)
 
 
 def collect_instances(doc) -> dict[str, list]:
@@ -320,13 +338,16 @@ def check_live(desc, spec: Message, instances, store, errors: list[str]) -> int:
     live = instances.get(desc.full_name, [])
     for inst in live:
         for f in spec.fields:
-            fd = desc.fields_by_name[f.name]
+            fd = desc.fields_by_name.get(f.name)
+            if fd is None:
+                continue
             if f.label == "required" and not inst.HasField(f.name):
                 errors.append(f"{desc.full_name}: required field {f.name} unset")
             if fd.type == FD.TYPE_MESSAGE and fd.message_type.full_name == "TSP.Reference":
-                refs = getattr(inst, f.name)
-                refs = refs if fd.label == FD.LABEL_REPEATED else (
-                    [refs] if inst.HasField(f.name) else [])
+                if is_repeated(fd):
+                    refs = list(getattr(inst, f.name))
+                else:
+                    refs = [getattr(inst, f.name)] if inst.HasField(f.name) else []
                 for ref in refs:
                     if ref.identifier not in store:
                         errors.append(
@@ -348,8 +369,9 @@ def check_live(desc, spec: Message, instances, store, errors: list[str]) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--rst", type=Path, default=ROOT / "docs/api/file-format.rst")
-    ap.add_argument("--doc", type=Path,
-                    default=ROOT / "src/numbers_parser/data/empty.numbers")
+    ap.add_argument(
+        "--doc", type=Path, default=ROOT / "src/numbers_parser/data/empty.numbers"
+    )
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
 
@@ -389,10 +411,7 @@ def main() -> int:
                     print(f"     {e}")
             else:
                 status = f"{n} live instance(s)" if n else "schema only, no instance in doc"
-                if args.verbose or not n:
-                    print(f"PASS {where} -> {desc.full_name} ({status})")
-                else:
-                    print(f"PASS {where} -> {desc.full_name} ({status})")
+                print(f"PASS {where} -> {desc.full_name} ({status})")
 
     print(f"\n{len(snippets)} snippets checked, {failures} failure(s)")
     return 1 if failures else 0
