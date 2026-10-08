@@ -35,6 +35,7 @@ It supports and is tested against Python versions from 3.10 onwards. It is not c
   Start with these documents to get you up and running:
 
   .. toctree::
+     :maxdepth: 2
      :includehidden:
 
      quick-start
