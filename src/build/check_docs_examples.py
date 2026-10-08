@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Check the protobuf snippets in docs/api/file-format.rst against the real
 protobuf descriptors and against a document loaded by numbers-parser.
@@ -28,13 +27,9 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from google.protobuf.descriptor import FieldDescriptor as FD
+from google.protobuf.descriptor import FieldDescriptor as FD  # noqa: N817
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "src"))
-
-from numbers_parser import Document  # noqa: E402
-import numbers_parser.generated as generated  # noqa: E402
+from numbers_parser import Document, generated
 
 SCALARS = {
     "double": FD.TYPE_DOUBLE,
@@ -146,7 +141,7 @@ def tokenize(text: str) -> list[str]:
         if not m:
             if text[pos:].strip() == "":
                 break
-            msg = f"cannot tokenize near {text[pos:pos + 30]!r}"
+            msg = f"cannot tokenize near {text[pos : pos + 30]!r}"
             raise SyntaxError(msg)
         pos = m.end()
         tok = m.group(1)
@@ -259,9 +254,9 @@ def check_field(desc, f: Field, errors: list[str]) -> None:
             errors.append(f"{desc.full_name}.{f.name}: documented {f.type} but field is scalar")
         else:
             doc_name = f.type.lstrip(".")
-            if f.type.startswith(".") and target.full_name != doc_name:
-                errors.append(f"{desc.full_name}.{f.name}: type {target.full_name} != {doc_name}")
-            elif not f.type.startswith(".") and target.name != doc_name.split(".")[-1]:
+            if (f.type.startswith(".") and target.full_name != doc_name) or (
+                not f.type.startswith(".") and target.name != doc_name.split(".")[-1]
+            ):
                 errors.append(f"{desc.full_name}.{f.name}: type {target.full_name} != {doc_name}")
     if "packed=true" in f.options and not is_packed(fd):
         errors.append(f"{desc.full_name}.{f.name}: documented packed but field is not packed")
@@ -368,10 +363,8 @@ def check_live(desc, spec: Message, instances, store, errors: list[str]) -> int:
 # --------------------------------------------------------------------------
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--rst", type=Path, default=ROOT / "docs/api/file-format.rst")
-    ap.add_argument(
-        "--doc", type=Path, default=ROOT / "src/numbers_parser/data/empty.numbers"
-    )
+    ap.add_argument("--rst", type=Path, default=Path("docs/api/file-format.rst"))
+    ap.add_argument("--doc", type=Path, default=Path("src/numbers_parser/data/empty.numbers"))
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
 
@@ -386,7 +379,9 @@ def main() -> int:
     instances = collect_instances(doc)
 
     failures = 0
-    for snip in snippets:
+    for snip_num, snip in enumerate(snippets, start=1):
+        if args.verbose:
+            print(f"Snippet #{snip_num}:\n------ BEGINS ------\n{snip.text}\n------ ENDS ------")
         try:
             compile_snippet(snip)
         except SyntaxError as e:
