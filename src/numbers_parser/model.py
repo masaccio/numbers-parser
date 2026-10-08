@@ -12,6 +12,16 @@ from pathlib import Path
 from struct import pack
 from warnings import warn
 
+from betterproto2 import Message
+
+from numbers_parser._pb import (
+    clear_field,
+    has_field,
+    list_fields,
+    merge_field,
+    mutable,
+    set_path,
+)
 from numbers_parser.bullets import (
     BULLET_CONVERSION,
     BULLET_PREFIXES,
@@ -162,7 +172,7 @@ class DataLists(Cacheable):
         return self._datalists[table_id]["by_key"][key]
 
     def value_key(self, value):
-        if hasattr(value, "DESCRIPTOR"):
+        if isinstance(value, Message):
             return repr(value)
         return value
 
@@ -334,11 +344,11 @@ class _NumbersModel(Cacheable):
     def caption_enabled(self, table_id: int, enabled: bool | None = None) -> bool:
         table_info = self.objects[self.table_info_id(table_id)]
         if enabled is not None:
-            table_info.super.caption_hidden = not enabled
+            set_path(table_info, "super.caption_hidden", not enabled)
             return None
         caption_info_id = table_info.super.caption.identifier
         caption_archive = self.objects[caption_info_id]
-        if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":
+        if type(caption_archive).__name__ == "StandinCaptionArchive":
             return False
         return not table_info.super.caption_hidden
 
@@ -361,8 +371,8 @@ class _NumbersModel(Cacheable):
     def stylesheet_id(self):
         return self.find_refs("StylesheetArchive")[0]
 
-    def set_reference(self, obj: object, ref_id: int) -> None:
-        obj.MergeFrom(TSPMessages.Reference(identifier=ref_id))
+    def set_reference(self, parent: object, name: str, ref_id: int) -> None:
+        merge_field(parent, name, TSPMessages.Reference(identifier=ref_id))
 
     def create_path_source_archive(self, table_id):
         box_size = 100.0
@@ -456,7 +466,9 @@ class _NumbersModel(Cacheable):
                 location="CalculationEngine",
                 component_id=self.stylesheet_id(),
             )
-        caption_info.super.MergeFrom(
+        merge_field(
+            caption_info,
+            "super",
             TSWPArchives.ShapeInfoArchive(
                 is_text_box=True,
                 owned_storage=TSPMessages.Reference(identifier=storage_id),
@@ -470,7 +482,7 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-        self.set_reference(table_info.super.caption, caption_info_id)
+        self.set_reference(mutable(table_info, "super"), "caption", caption_info_id)
         component = self.metadata_component(self.calc_engine_id())
         component.object_uuid_map_entries.append(
             TSPArchiveMessages.ObjectUUIDMapEntry(
@@ -484,7 +496,7 @@ class _NumbersModel(Cacheable):
         caption_info_id = table_info.super.caption.identifier
         caption_archive = self.objects[caption_info_id]
 
-        if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":
+        if type(caption_archive).__name__ == "StandinCaptionArchive":
             if caption is None:
                 return "Caption"
             self.create_caption_archive(table_id)
@@ -838,7 +850,7 @@ class _NumbersModel(Cacheable):
     def calculate_merges_using_formula_stores(self, table_id) -> int:
         def range_end(archive: object) -> int:
             # range_end is optional
-            return archive.range_end if archive.HasField("range_end") else archive.range_begin
+            return archive.range_end if has_field(archive, "range_end") else archive.range_begin
 
         table_model = self.objects[table_id]
         formulas = table_model.merge_owner.formula_store.formulas
@@ -962,13 +974,13 @@ class _NumbersModel(Cacheable):
                 return max_val
             return offset + range_end(relative_list[0])
 
-        if node.HasField("AST_cross_table_reference_extra_info"):
+        if has_field(node, "AST_cross_table_reference_extra_info"):
             table_uuid = NumbersUUID(node.AST_cross_table_reference_extra_info.table_id).hex
             to_table_id = self.table_uuids_to_id(table_uuid)
         else:
             to_table_id = None
 
-        if node.HasField("AST_colon_tract"):
+        if has_field(node, "AST_colon_tract"):
             row_begin = resolve_range(
                 node.AST_sticky_bits.begin_row_is_absolute,
                 node.AST_colon_tract.absolute_row,
@@ -1017,7 +1029,7 @@ class _NumbersModel(Cacheable):
 
         row = node.AST_row.row if node.AST_row.absolute else row + node.AST_row.row
         col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
-        if node.HasField("AST_row") and not node.HasField("AST_column"):
+        if has_field(node, "AST_row") and not has_field(node, "AST_column"):
             return CellRange(
                 model=self,
                 row_start=row,
@@ -1026,7 +1038,7 @@ class _NumbersModel(Cacheable):
                 to_table_id=to_table_id,
             )
 
-        if node.HasField("AST_column") and not node.HasField("AST_row"):
+        if has_field(node, "AST_column") and not has_field(node, "AST_row"):
             return CellRange(
                 model=self,
                 col_start=col,
@@ -1144,7 +1156,7 @@ class _NumbersModel(Cacheable):
             merge_map.cell_range.append(cell_range)
 
         base_data_store = self.objects[table_id].base_data_store
-        self.set_reference(base_data_store.merge_region_map, merge_map_id)
+        self.set_reference(base_data_store, "merge_region_map", merge_map_id)
 
     def recalculate_row_info(
         self,
@@ -1240,14 +1252,14 @@ class _NumbersModel(Cacheable):
         self.update_cell_borders(table_id, data)
 
         self.objects.remove_unreferenced_objects()
-        table_model.ClearField("base_column_row_uids")
+        clear_field(table_model, "base_column_row_uids")
 
         tile_idx = 0
         max_tile_idx = len(data) >> 8
         base_data_store = self.objects[table_id].base_data_store
-        base_data_store.tiles.ClearField("tiles")
+        clear_field(base_data_store.tiles, "tiles")
         if len(data[0]) > MAX_TILE_SIZE:
-            base_data_store.tiles.should_use_wide_rows = True
+            set_path(base_data_store, "tiles.should_use_wide_rows", True)
 
         while tile_idx <= max_tile_idx:
             row_start = tile_idx * MAX_TILE_SIZE
@@ -1279,9 +1291,9 @@ class _NumbersModel(Cacheable):
 
             tile_ref = TSTArchives.TileStorage.Tile()
             tile_ref.tileid = tile_idx
-            tile_ref.tile.MergeFrom(TSPMessages.Reference(identifier=tile_id))
+            merge_field(tile_ref, "tile", TSPMessages.Reference(identifier=tile_id))
             base_data_store.tiles.tiles.append(tile_ref)
-            base_data_store.tiles.tile_size = MAX_TILE_SIZE
+            set_path(base_data_store, "tiles.tile_size", MAX_TILE_SIZE)
 
             self.add_component_metadata(tile_id, "CalculationEngine", "Tables/Tile-{}")
 
@@ -1451,7 +1463,7 @@ class _NumbersModel(Cacheable):
             TSTArchives.TableModelArchive,
         )
         # Suppress Numbers assertions for tables sharing the same data
-        table_model.category_owner.identifier = 0
+        set_path(table_model, "category_owner.identifier", 0)
 
         column_headers_id, _ = self.objects.create_object_from_dict(
             "Index/Tables/HeaderStorageBucket-{}",
@@ -1469,7 +1481,7 @@ class _NumbersModel(Cacheable):
             {"max_order": 1, "column_count": 0, "row_count": 0},
             TSTArchives.StrokeSidecarArchive,
         )
-        self.set_reference(table_model.stroke_sidecar, sidecar_id)
+        self.set_reference(table_model, "stroke_sidecar", sidecar_id)
 
         style_table_id, _ = self.objects.create_object_from_dict(
             "Index/Tables/DataList-{}",
@@ -1506,7 +1518,9 @@ class _NumbersModel(Cacheable):
         data_store_refs["styleTable"] = {"identifier": style_table_id}
         data_store_refs["formula_table"] = {"identifier": formula_table_id}
         data_store_refs["format_table_pre_bnc"] = {"identifier": format_table_pre_bnc_id}
-        table_model.base_data_store.MergeFrom(
+        merge_field(
+            table_model,
+            "base_data_store",
             TSTArchives.DataStore(
                 rowHeaders=TSTArchives.HeaderStorage(bucketHashFunction=1),
                 nextRowStripID=1,
@@ -1541,8 +1555,8 @@ class _NumbersModel(Cacheable):
             {},
             TSTArchives.TableInfoArchive,
         )
-        table_info.tableModel.MergeFrom(TSPMessages.Reference(identifier=table_model_id))
-        table_info.super.MergeFrom(self.create_drawable(sheet_id, x, y))
+        merge_field(table_info, "tableModel", TSPMessages.Reference(identifier=table_model_id))
+        merge_field(table_info, "super", self.create_drawable(sheet_id, x, y))
 
         haunted_owner_uuid = self.add_formula_owner(
             table_info_id,
@@ -1551,7 +1565,9 @@ class _NumbersModel(Cacheable):
             number_of_header_rows,
             number_of_header_columns,
         )
-        table_model.haunted_owner.owner_uid.MergeFrom(haunted_owner_uuid.protobuf2)
+        merge_field(
+            mutable(table_model, "haunted_owner"), "owner_uid", haunted_owner_uuid.protobuf2
+        )
         self.calculate_table_uuid_map()
 
         self._table_data[table_model_id] = [
@@ -1808,7 +1824,11 @@ class _NumbersModel(Cacheable):
             TSWPArchives.ParagraphStyleArchive,
         )
         stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
-        para_style.super.stylesheet.MergeFrom(TSPMessages.Reference(identifier=stylesheet_id))
+        merge_field(
+            mutable(para_style, "super"),
+            "stylesheet",
+            TSPMessages.Reference(identifier=stylesheet_id),
+        )
         self.objects[stylesheet_id].styles.append(TSPMessages.Reference(identifier=para_style_id))
         self.objects[stylesheet_id].identifier_to_style_map.append(
             TSSArchives.StylesheetArchive.IdentifiedStyleEntry(
@@ -1833,22 +1853,22 @@ class _NumbersModel(Cacheable):
         else:
             strikethru = CharacterStyle.StrikethruType.kNoStrikethru
         style_obj = self.objects[style._text_style_obj_id]
-        style_obj.char_properties.font_color.r = style.font_color.r / 255
-        style_obj.char_properties.font_color.g = style.font_color.g / 255
-        style_obj.char_properties.font_color.b = style.font_color.b / 255
-        style_obj.char_properties.bold = style.bold
-        style_obj.char_properties.italic = style.italic
-        style_obj.char_properties.underline = underline
-        style_obj.char_properties.strikethru = strikethru
-        style_obj.char_properties.font_size = style.font_size
-        style_obj.char_properties.font_name = style._font_details["name"]
-        style_obj.char_properties.tsd_fill.color.r = style.font_color.r / 255
-        style_obj.char_properties.tsd_fill.color.g = style.font_color.g / 255
-        style_obj.char_properties.tsd_fill.color.b = style.font_color.b / 255
-        style_obj.para_properties.alignment = style.alignment.horizontal
-        style_obj.para_properties.first_line_indent = style.first_indent
-        style_obj.para_properties.left_indent = style.left_indent
-        style_obj.para_properties.right_indent = style.right_indent
+        set_path(style_obj, "char_properties.font_color.r", style.font_color.r / 255)
+        set_path(style_obj, "char_properties.font_color.g", style.font_color.g / 255)
+        set_path(style_obj, "char_properties.font_color.b", style.font_color.b / 255)
+        set_path(style_obj, "char_properties.bold", style.bold)
+        set_path(style_obj, "char_properties.italic", style.italic)
+        set_path(style_obj, "char_properties.underline", underline)
+        set_path(style_obj, "char_properties.strikethru", strikethru)
+        set_path(style_obj, "char_properties.font_size", style.font_size)
+        set_path(style_obj, "char_properties.font_name", style._font_details["name"])
+        set_path(style_obj, "char_properties.tsd_fill.color.r", style.font_color.r / 255)
+        set_path(style_obj, "char_properties.tsd_fill.color.g", style.font_color.g / 255)
+        set_path(style_obj, "char_properties.tsd_fill.color.b", style.font_color.b / 255)
+        set_path(style_obj, "para_properties.alignment", style.alignment.horizontal)
+        set_path(style_obj, "para_properties.first_line_indent", style.first_indent)
+        set_path(style_obj, "para_properties.left_indent", style.left_indent)
+        set_path(style_obj, "para_properties.right_indent", style.right_indent)
 
     def update_paragraph_styles(self) -> None:
         """
@@ -1962,10 +1982,14 @@ class _NumbersModel(Cacheable):
             TSTArchives.CellStyleArchive,
         )
         style_id_name = f"numbers-parser-custom-{cell_style_id}"
-        cell_style.super.style_identifier = style_id_name
+        set_path(cell_style, "super.style_identifier", style_id_name)
 
         stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
-        cell_style.super.stylesheet.MergeFrom(TSPMessages.Reference(identifier=stylesheet_id))
+        merge_field(
+            mutable(cell_style, "super"),
+            "stylesheet",
+            TSPMessages.Reference(identifier=stylesheet_id),
+        )
         self.objects[stylesheet_id].styles.append(TSPMessages.Reference(identifier=cell_style_id))
         self.objects[stylesheet_id].identifier_to_style_map.append(
             TSSArchives.StylesheetArchive.IdentifiedStyleEntry(
@@ -2175,9 +2199,9 @@ class _NumbersModel(Cacheable):
         style = self.table_style(cell._table_id, cell._cell_style_id)
         cell_properties = style.cell_properties.cell_fill
 
-        if cell_properties.HasField("color"):
+        if has_field(cell_properties, "color"):
             return rgb(cell_properties.color)
-        if cell_properties.HasField("gradient"):
+        if has_field(cell_properties, "gradient"):
             return [(rgb(s.color)) for s in cell_properties.gradient.stops]
         return None
 
@@ -2186,7 +2210,7 @@ class _NumbersModel(Cacheable):
         Return a char_property field from a style if present
         in the style, or from the parent if not.
         """
-        if not style.char_properties.HasField(field):
+        if not has_field(style.char_properties, field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.char_properties, field)
         return getattr(style.char_properties, field)
@@ -2196,7 +2220,7 @@ class _NumbersModel(Cacheable):
         Return a para_property field from a style if present
         in the style, or from the parent if not.
         """
-        if not style.para_properties.HasField(field):
+        if not has_field(style.para_properties, field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.para_properties, field)
         return getattr(style.para_properties, field)
@@ -2206,7 +2230,7 @@ class _NumbersModel(Cacheable):
         Return a cell_property field from a style if present
         in the style, or from the parent if not.
         """
-        if not style.cell_properties.HasField(field):
+        if not has_field(style.cell_properties, field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.cell_properties, field)
         return getattr(style.cell_properties, field)
@@ -2757,7 +2781,7 @@ def rgb(obj) -> RGB:
 
 def range_end(obj):
     """Select end range for a IndexSetArchive.IndexSetEntry."""
-    if obj.HasField("range_end"):
+    if has_field(obj, "range_end"):
         return obj.range_end
     return obj.range_begin
 
@@ -2834,7 +2858,7 @@ def clear_field_container(obj) -> None:
 def field_references(obj: object) -> dict:
     """Return a dict of all fields in an object that are references to other objects."""
     return {
-        x[0].name: {"identifier": getattr(obj, x[0].name).identifier}
-        for x in obj.ListFields()
-        if isinstance(getattr(obj, x[0].name), TSPMessages.Reference)
+        name: {"identifier": value.identifier}
+        for name, _, value in list_fields(obj)
+        if isinstance(value, TSPMessages.Reference)
     }

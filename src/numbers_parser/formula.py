@@ -2,6 +2,7 @@ import re
 import warnings
 from datetime import datetime, timedelta
 
+from numbers_parser._pb import has_field
 from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCE as TSCEArchives
 from numbers_parser.generated.functionmap import FUNCTION_MAP
@@ -57,7 +58,7 @@ class Formula(list):
 
     def boolean(self, *args) -> None:
         node = args[2]
-        if node.HasField("AST_token_node_boolean"):
+        if has_field(node, "AST_token_node_boolean"):
             self.push(str(node.AST_token_node_boolean).upper())
         else:
             self.push(str(node.AST_boolean_node_boolean).upper())
@@ -231,8 +232,7 @@ class TableFormulas:
         self._model = model
         self._table_id = table_id
         self._formula_type_lookup = {
-            k: v.name
-            for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
+            e.value: e.name for e in TSCEArchives.AstNodeArrayArchiveAstNodeType
         }
 
     def formula(self, formula_key, row, col):

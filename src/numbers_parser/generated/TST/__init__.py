@@ -628,9 +628,9 @@ class ArgumentPlaceholderNodeArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    function_index: "int | None" = betterproto2.field(2, betterproto2.TYPE_UINT32, optional=True)
+    functionIndex: "int | None" = betterproto2.field(2, betterproto2.TYPE_UINT32, optional=True)
 
-    argument_index: "int | None" = betterproto2.field(3, betterproto2.TYPE_UINT32, optional=True)
+    argumentIndex: "int | None" = betterproto2.field(3, betterproto2.TYPE_UINT32, optional=True)
 
     mode: "int | None" = betterproto2.field(4, betterproto2.TYPE_UINT32, optional=True)
 
@@ -686,7 +686,7 @@ class CategoryInfoArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    table_model: "_tsp__.Reference | None" = betterproto2.field(
+    tableModel: "_tsp__.Reference | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -734,7 +734,7 @@ default_message_pool.register_message("TST", "CategoryOwnerRefArchive", Category
 
 @dataclass(eq=False, repr=False)
 class Cell(betterproto2.Message):
-    value_type: "CellValueType" = betterproto2.field(
+    valueType: "CellValueType" = betterproto2.field(
         2, betterproto2.TYPE_ENUM, default_factory=lambda: CellValueType(0)
     )
 
@@ -746,17 +746,17 @@ class Cell(betterproto2.Message):
         4, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    number_value: "float | None" = betterproto2.field(5, betterproto2.TYPE_DOUBLE, optional=True)
+    numberValue: "float | None" = betterproto2.field(5, betterproto2.TYPE_DOUBLE, optional=True)
 
-    string_value: "str | None" = betterproto2.field(6, betterproto2.TYPE_STRING, optional=True)
+    stringValue: "str | None" = betterproto2.field(6, betterproto2.TYPE_STRING, optional=True)
 
-    bool_value: "bool | None" = betterproto2.field(7, betterproto2.TYPE_BOOL, optional=True)
+    boolValue: "bool | None" = betterproto2.field(7, betterproto2.TYPE_BOOL, optional=True)
 
     current_format: "_tsk__.FormatStructArchive | None" = betterproto2.field(
         9, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    formula_error: "_tsp__.Reference | None" = betterproto2.field(
+    formulaError: "_tsp__.Reference | None" = betterproto2.field(
         10, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -788,7 +788,7 @@ class Cell(betterproto2.Message):
         19, betterproto2.TYPE_UINT32, optional=True
     )
 
-    rich_text: "_tsp__.Reference | None" = betterproto2.field(
+    richText: "_tsp__.Reference | None" = betterproto2.field(
         20, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1014,17 +1014,17 @@ default_message_pool.register_message("TST", "CellFillStandIn", CellFillStandIn)
 
 @dataclass(eq=False, repr=False)
 class CellFormatAndValueArchive(betterproto2.Message):
-    value_type: "CellValueType" = betterproto2.field(
+    valueType: "CellValueType" = betterproto2.field(
         1, betterproto2.TYPE_ENUM, default_factory=lambda: CellValueType(0)
     )
 
-    number_value: "float | None" = betterproto2.field(2, betterproto2.TYPE_DOUBLE, optional=True)
+    numberValue: "float | None" = betterproto2.field(2, betterproto2.TYPE_DOUBLE, optional=True)
 
-    string_value: "str | None" = betterproto2.field(3, betterproto2.TYPE_STRING, optional=True)
+    stringValue: "str | None" = betterproto2.field(3, betterproto2.TYPE_STRING, optional=True)
 
-    bool_value: "bool | None" = betterproto2.field(4, betterproto2.TYPE_BOOL, optional=True)
+    boolValue: "bool | None" = betterproto2.field(4, betterproto2.TYPE_BOOL, optional=True)
 
-    rich_text_storage: "_tsp__.Reference | None" = betterproto2.field(
+    richTextStorage: "_tsp__.Reference | None" = betterproto2.field(
         5, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1082,7 +1082,7 @@ default_message_pool.register_message("TST", "CellFormatAndValueArchive", CellFo
 
 @dataclass(eq=False, repr=False)
 class CellId(betterproto2.Message):
-    packed_data: "int" = betterproto2.field(1, betterproto2.TYPE_FIXED32)
+    packedData: "int" = betterproto2.field(1, betterproto2.TYPE_FIXED32)
 
     expanded_coord: "_tsce__.CellCoordinateArchive | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
@@ -4122,11 +4122,11 @@ class CompletionTokenAttachmentArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    completion_text: "str | None" = betterproto2.field(2, betterproto2.TYPE_STRING, optional=True)
+    completionText: "str | None" = betterproto2.field(2, betterproto2.TYPE_STRING, optional=True)
 
-    caret_position: "int | None" = betterproto2.field(3, betterproto2.TYPE_UINT32, optional=True)
+    caretPosition: "int | None" = betterproto2.field(3, betterproto2.TYPE_UINT32, optional=True)
 
-    prefix_start: "int | None" = betterproto2.field(4, betterproto2.TYPE_UINT32, optional=True)
+    prefixStart: "int | None" = betterproto2.field(4, betterproto2.TYPE_UINT32, optional=True)
 
 
 default_message_pool.register_message(
@@ -4198,7 +4198,7 @@ default_message_pool.register_message("TST", "ConcurrentCellMapArchive", Concurr
 
 @dataclass(eq=False, repr=False)
 class ConditionalStyleSetArchive(betterproto2.Message):
-    rule_count: "int" = betterproto2.field(1, betterproto2.TYPE_UINT32)
+    ruleCount: "int" = betterproto2.field(1, betterproto2.TYPE_UINT32)
 
     rules_prepivot: "list[ConditionalStyleSetArchiveConditionalStyleRulePrePivot]" = (
         betterproto2.field(2, betterproto2.TYPE_MESSAGE, repeated=True)
@@ -4308,21 +4308,21 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class DataStore(betterproto2.Message):
-    row_headers: "HeaderStorage | None" = betterproto2.field(
+    rowHeaders: "HeaderStorage | None" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    column_headers: "_tsp__.Reference | None" = betterproto2.field(
+    columnHeaders: "_tsp__.Reference | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
     tiles: "TileStorage | None" = betterproto2.field(3, betterproto2.TYPE_MESSAGE, optional=True)
 
-    string_table: "_tsp__.Reference | None" = betterproto2.field(
+    stringTable: "_tsp__.Reference | None" = betterproto2.field(
         4, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    style_table: "_tsp__.Reference | None" = betterproto2.field(
+    styleTable: "_tsp__.Reference | None" = betterproto2.field(
         5, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -4330,7 +4330,7 @@ class DataStore(betterproto2.Message):
         6, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    formula_error_table: "_tsp__.Reference | None" = betterproto2.field(
+    formulaErrorTable: "_tsp__.Reference | None" = betterproto2.field(
         12, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -4338,7 +4338,7 @@ class DataStore(betterproto2.Message):
         11, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    multiple_choice_list_format_table: "_tsp__.Reference | None" = betterproto2.field(
+    multipleChoiceListFormatTable: "_tsp__.Reference | None" = betterproto2.field(
         16, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -4350,15 +4350,15 @@ class DataStore(betterproto2.Message):
         15, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    next_row_strip_id: "int" = betterproto2.field(7, betterproto2.TYPE_UINT32)
+    nextRowStripID: "int" = betterproto2.field(7, betterproto2.TYPE_UINT32)
 
-    next_column_strip_id: "int" = betterproto2.field(8, betterproto2.TYPE_UINT32)
+    nextColumnStripID: "int" = betterproto2.field(8, betterproto2.TYPE_UINT32)
 
-    row_tile_tree: "TableRbTree | None" = betterproto2.field(
+    rowTileTree: "TableRbTree | None" = betterproto2.field(
         9, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    column_tile_tree: "TableRbTree | None" = betterproto2.field(
+    columnTileTree: "TableRbTree | None" = betterproto2.field(
         10, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -4374,11 +4374,11 @@ class DataStore(betterproto2.Message):
         18, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    comment_storage_table: "_tsp__.Reference | None" = betterproto2.field(
+    commentStorageTable: "_tsp__.Reference | None" = betterproto2.field(
         19, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    import_warning_set_table: "_tsp__.Reference | None" = betterproto2.field(
+    importWarningSetTable: "_tsp__.Reference | None" = betterproto2.field(
         20, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -4701,21 +4701,21 @@ class FormulaEditingCommandGroupArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    undo_selection_valid: "bool" = betterproto2.field(2, betterproto2.TYPE_BOOL)
+    undoSelectionValid: "bool" = betterproto2.field(2, betterproto2.TYPE_BOOL)
 
-    undo_selection_start: "int" = betterproto2.field(3, betterproto2.TYPE_UINT32)
+    undoSelectionStart: "int" = betterproto2.field(3, betterproto2.TYPE_UINT32)
 
-    undo_selection_length: "int" = betterproto2.field(4, betterproto2.TYPE_UINT32)
+    undoSelectionLength: "int" = betterproto2.field(4, betterproto2.TYPE_UINT32)
 
-    undo_active_token: "int" = betterproto2.field(5, betterproto2.TYPE_UINT32)
+    undoActiveToken: "int" = betterproto2.field(5, betterproto2.TYPE_UINT32)
 
-    redo_selection_valid: "bool" = betterproto2.field(6, betterproto2.TYPE_BOOL)
+    redoSelectionValid: "bool" = betterproto2.field(6, betterproto2.TYPE_BOOL)
 
-    redo_selection_start: "int" = betterproto2.field(7, betterproto2.TYPE_UINT32)
+    redoSelectionStart: "int" = betterproto2.field(7, betterproto2.TYPE_UINT32)
 
-    redo_selection_length: "int" = betterproto2.field(8, betterproto2.TYPE_UINT32)
+    redoSelectionLength: "int" = betterproto2.field(8, betterproto2.TYPE_UINT32)
 
-    redo_active_token: "int" = betterproto2.field(9, betterproto2.TYPE_UINT32)
+    redoActiveToken: "int" = betterproto2.field(9, betterproto2.TYPE_UINT32)
 
 
 default_message_pool.register_message(
@@ -4729,9 +4729,9 @@ class FormulaEditingCommandSelectionBehaviorArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    undo_active_token: "int | None" = betterproto2.field(2, betterproto2.TYPE_UINT32, optional=True)
+    undoActiveToken: "int | None" = betterproto2.field(2, betterproto2.TYPE_UINT32, optional=True)
 
-    redo_active_token: "int | None" = betterproto2.field(3, betterproto2.TYPE_UINT32, optional=True)
+    redoActiveToken: "int | None" = betterproto2.field(3, betterproto2.TYPE_UINT32, optional=True)
 
 
 default_message_pool.register_message(
@@ -4957,7 +4957,7 @@ class FormulaSelectionArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    active_token_char_index: "int | None" = betterproto2.field(
+    activeTokenCharIndex: "int | None" = betterproto2.field(
         2, betterproto2.TYPE_UINT32, optional=True
     )
 
@@ -5007,9 +5007,9 @@ class FunctionNodeArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    function_index: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
+    functionIndex: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
 
-    invalid_function_name: "str | None" = betterproto2.field(
+    invalidFunctionName: "str | None" = betterproto2.field(
         3, betterproto2.TYPE_STRING, optional=True
     )
 
@@ -5329,7 +5329,7 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class HeaderStorage(betterproto2.Message):
-    bucket_hash_function: "int" = betterproto2.field(1, betterproto2.TYPE_UINT32)
+    bucketHashFunction: "int" = betterproto2.field(1, betterproto2.TYPE_UINT32)
 
     buckets: "list[_tsp__.Reference]" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, repeated=True
@@ -5341,7 +5341,7 @@ default_message_pool.register_message("TST", "HeaderStorage", HeaderStorage)
 
 @dataclass(eq=False, repr=False)
 class HeaderStorageBucket(betterproto2.Message):
-    bucket_hash_function: "int" = betterproto2.field(1, betterproto2.TYPE_UINT32)
+    bucketHashFunction: "int" = betterproto2.field(1, betterproto2.TYPE_UINT32)
 
     headers: "list[HeaderStorageBucketHeader]" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, repeated=True
@@ -5357,9 +5357,9 @@ class HeaderStorageBucketHeader(betterproto2.Message):
 
     size: "float" = betterproto2.field(2, betterproto2.TYPE_FLOAT)
 
-    hiding_state: "int" = betterproto2.field(3, betterproto2.TYPE_UINT32)
+    hidingState: "int" = betterproto2.field(3, betterproto2.TYPE_UINT32)
 
-    number_of_cells: "int" = betterproto2.field(4, betterproto2.TYPE_UINT32)
+    numberOfCells: "int" = betterproto2.field(4, betterproto2.TYPE_UINT32)
 
     cell_style: "_tsp__.Reference | None" = betterproto2.field(
         5, betterproto2.TYPE_MESSAGE, optional=True
@@ -5715,25 +5715,25 @@ default_message_pool.register_message("TST", "LayoutEngineArchive", LayoutEngine
 
 @dataclass(eq=False, repr=False)
 class LayoutHintArchive(betterproto2.Message):
-    is_valid: "bool" = betterproto2.field(1, betterproto2.TYPE_BOOL)
+    isValid: "bool" = betterproto2.field(1, betterproto2.TYPE_BOOL)
 
-    cell_range: "CellRange | None" = betterproto2.field(2, betterproto2.TYPE_MESSAGE, optional=True)
+    cellRange: "CellRange | None" = betterproto2.field(2, betterproto2.TYPE_MESSAGE, optional=True)
 
-    hint_id: "CellId | None" = betterproto2.field(3, betterproto2.TYPE_MESSAGE, optional=True)
+    hintID: "CellId | None" = betterproto2.field(3, betterproto2.TYPE_MESSAGE, optional=True)
 
-    maximum_size: "_tsp__.Size | None" = betterproto2.field(
+    maximumSize: "_tsp__.Size | None" = betterproto2.field(
         4, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    partition_position: "int" = betterproto2.field(5, betterproto2.TYPE_UINT32)
+    partitionPosition: "int" = betterproto2.field(5, betterproto2.TYPE_UINT32)
 
     horizontal: "bool" = betterproto2.field(6, betterproto2.TYPE_BOOL)
 
-    effective_size: "_tsp__.Size | None" = betterproto2.field(
+    effectiveSize: "_tsp__.Size | None" = betterproto2.field(
         7, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    partitioning_pass: "int | None" = betterproto2.field(8, betterproto2.TYPE_UINT32, optional=True)
+    partitioningPass: "int | None" = betterproto2.field(8, betterproto2.TYPE_UINT32, optional=True)
 
 
 default_message_pool.register_message("TST", "LayoutHintArchive", LayoutHintArchive)
@@ -5841,7 +5841,7 @@ class OperatorNodeArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    operator_char: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
+    operatorChar: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
 
 
 default_message_pool.register_message("TST", "OperatorNodeArchive", OperatorNodeArchive)
@@ -6048,13 +6048,13 @@ class ReferenceNodeArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    range_reference: "_tsce__.RangeReferenceArchive | None" = betterproto2.field(
+    rangeReference: "_tsce__.RangeReferenceArchive | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
     preserve_flags: "int" = betterproto2.field(3, betterproto2.TYPE_UINT32)
 
-    host_table_id: "str | None" = betterproto2.field(4, betterproto2.TYPE_STRING, optional=True)
+    hostTableID: "str | None" = betterproto2.field(4, betterproto2.TYPE_STRING, optional=True)
 
     host_cell_ref: "_tsce__.CellReferenceArchive | None" = betterproto2.field(
         10, betterproto2.TYPE_MESSAGE, optional=True
@@ -6152,7 +6152,7 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class SelectionArchive(betterproto2.Message):
-    table_model: "_tsp__.Reference | None" = betterproto2.field(
+    tableModel: "_tsp__.Reference | None" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -6190,8 +6190,8 @@ class SelectionArchive(betterproto2.Message):
 
     def __post_init__(self) -> None:
         super().__post_init__()
-        if self.is_set("table_model"):
-            warnings.warn("SelectionArchive.table_model is deprecated", DeprecationWarning)
+        if self.is_set("tableModel"):
+            warnings.warn("SelectionArchive.tableModel is deprecated", DeprecationWarning)
 
 
 default_message_pool.register_message("TST", "SelectionArchive", SelectionArchive)
@@ -6499,11 +6499,11 @@ default_message_pool.register_message("TST", "SummaryCellVendorArchive", Summary
 
 @dataclass(eq=False, repr=False)
 class SummaryCellVendorArchiveSummaryCellEntry(betterproto2.Message):
-    wildcard_uid: "_tsp__.Uuid | None" = betterproto2.field(
+    wildcardUID: "_tsp__.Uuid | None" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    column_uid: "_tsp__.Uuid | None" = betterproto2.field(
+    columnUID: "_tsp__.Uuid | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -6769,11 +6769,11 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class TableDataList(betterproto2.Message):
-    list_type: "TableDataListListType" = betterproto2.field(
+    listType: "TableDataListListType" = betterproto2.field(
         1, betterproto2.TYPE_ENUM, default_factory=lambda: TableDataListListType(0)
     )
 
-    next_list_id: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
+    nextListID: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
 
     entries: "list[TableDataListListEntry]" = betterproto2.field(
         3, betterproto2.TYPE_MESSAGE, repeated=True
@@ -6891,7 +6891,7 @@ class TableInfoArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    table_model: "_tsp__.Reference | None" = betterproto2.field(
+    tableModel: "_tsp__.Reference | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -7331,13 +7331,13 @@ default_message_pool.register_message("TST", "TableRBTree.Node", TableRbTreeNode
 
 @dataclass(eq=False, repr=False)
 class TableSelection(betterproto2.Message):
-    cell_range: "CellRange | None" = betterproto2.field(1, betterproto2.TYPE_MESSAGE, optional=True)
+    cellRange: "CellRange | None" = betterproto2.field(1, betterproto2.TYPE_MESSAGE, optional=True)
 
-    extended_cell_range: "CellRange | None" = betterproto2.field(
+    extendedCellRange: "CellRange | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    extended_cell_range_valid: "bool" = betterproto2.field(3, betterproto2.TYPE_BOOL)
+    extendedCellRangeValid: "bool" = betterproto2.field(3, betterproto2.TYPE_BOOL)
 
     selection_type: "SelectionTypeArchive" = betterproto2.field(
         4, betterproto2.TYPE_ENUM, default_factory=lambda: SelectionTypeArchive(0)
@@ -7349,7 +7349,7 @@ default_message_pool.register_message("TST", "TableSelection", TableSelection)
 
 @dataclass(eq=False, repr=False)
 class TableSize(betterproto2.Message):
-    packed_data: "int" = betterproto2.field(1, betterproto2.TYPE_FIXED32)
+    packedData: "int" = betterproto2.field(1, betterproto2.TYPE_FIXED32)
 
     num_columns: "int | None" = betterproto2.field(2, betterproto2.TYPE_UINT32, optional=True)
 
@@ -7957,15 +7957,15 @@ default_message_pool.register_message("TST", "ThemePresetsArchive", ThemePresets
 
 @dataclass(eq=False, repr=False)
 class Tile(betterproto2.Message):
-    max_column: "int" = betterproto2.field(1, betterproto2.TYPE_UINT32)
+    maxColumn: "int" = betterproto2.field(1, betterproto2.TYPE_UINT32)
 
-    max_row: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
+    maxRow: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
 
-    num_cells: "int" = betterproto2.field(3, betterproto2.TYPE_UINT32)
+    numCells: "int" = betterproto2.field(3, betterproto2.TYPE_UINT32)
 
     numrows: "int" = betterproto2.field(4, betterproto2.TYPE_UINT32)
 
-    row_infos: "list[TileRowInfo]" = betterproto2.field(5, betterproto2.TYPE_MESSAGE, repeated=True)
+    rowInfos: "list[TileRowInfo]" = betterproto2.field(5, betterproto2.TYPE_MESSAGE, repeated=True)
 
     storage_version: "int | None" = betterproto2.field(6, betterproto2.TYPE_UINT32, optional=True)
 
@@ -8035,7 +8035,7 @@ class TokenAttachmentArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    expression_node: "_tsp__.Reference | None" = betterproto2.field(
+    expressionNode: "_tsp__.Reference | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -8311,3 +8311,7 @@ ColumnRowTypeBodyColumn = ColumnRowBundleItemTypeEnum.ColumnRowTypeBodyColumn
 WPSelectionTransformerArchive = WpSelectionTransformerArchive
 CommandRewritePencilAnnotationFormulasArchive.AnnotationPair = CommandRewritePencilAnnotationFormulasArchiveAnnotationPair
 CommandExtendTableIDHistoryArchive = CommandExtendTableIdHistoryArchive
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {'ImportWarningSetArchive': {'cond_format_above_avg_equal_avg': False, 'cond_format_above_avg_std_dev': False, 'cond_format_complex_formula': False, 'cond_format_contains_errors': False, 'cond_format_expr': False, 'cond_format_not_contains_errors': False, 'cond_format_parameters_not_all_same_type': False, 'cond_format_stop_if_true': False, 'cond_format_unsupported_operator': False, 'cond_format_unsupported_styling': False, 'cond_format_unsupported_time_period': False, 'error_cell_with_no_formula': False, 'unsupported_cond_format': False, 'formula_warning_filtered_column_formula_not_copied': False, 'duration_format_range_changed': False}, 'CellMapArchive': {'may_modify_formulas_in_cells': True, 'may_modify_values_referenced_by_formulas': True, 'should_reset_spill_formulas': True}, 'ConcurrentCellMapArchive': {'may_modify_formulas_in_cells': True, 'may_modify_values_referenced_by_formulas': True, 'affects_cell_borders': True, 'skip_dirtying_ranges': False, 'should_reset_spill_formulas': True}, 'TableStyleArchive': {'override_count': 0}, 'CellStyleArchive': {'override_count': 0}, 'FilterSetArchive': {'type': ('enum', 0), 'is_enabled': True, 'needs_formula_rewrite_for_import': False}, 'HiddenStateExtentArchive': {'needs_to_update_filter_set_for_import': False}, 'ExpressionNodeArchive': {'first_index': 0, 'last_index': 0}, 'HiddenStateFormulaOwnerArchive': {'needs_to_update_filter_set_for_import': False}, 'GroupByArchive': {'owner_index': 8}})

@@ -36,8 +36,8 @@ from numbers_parser.experimental import (
     enable_experimental_feature,
     experimental_features,
 )
-from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
-from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
+from numbers_parser.generated import TSK as TSKArchives
+from numbers_parser.generated import TST as TSTArchives
 from numbers_parser.model import _decode_date_format
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.xrefs import (

@@ -16,6 +16,7 @@ from warnings import warn
 from sigfig import round as sigfig
 
 from numbers_parser import __name__ as numbers_parser_name
+from numbers_parser._pb import has_field
 from numbers_parser.constants import (
     CHECKBOX_FALSE_VALUE,
     CHECKBOX_TRUE_VALUE,
@@ -1217,7 +1218,7 @@ class Cell(CellStorageFlags, Cacheable):
         if self._cell_style_id is None:
             return None
         style = self._model.table_style(self._table_id, self._cell_style_id)
-        if not style.cell_properties.cell_fill.HasField("image"):
+        if not has_field(style.cell_properties.cell_fill, "image"):
             return None
 
         image_id = style.cell_properties.cell_fill.image.imagedata.identifier
@@ -1260,7 +1261,7 @@ class Cell(CellStorageFlags, Cacheable):
             custom_format.format_type,
         )
 
-        if custom_format.HasField("custom_uid"):
+        if has_field(custom_format, "custom_uid"):
             format_uuid = NumbersUUID(custom_format.custom_uid).hex
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
@@ -1303,7 +1304,7 @@ class Cell(CellStorageFlags, Cacheable):
 
     def _date_format(self) -> str:
         date_format = self._model.table_format(self._table_id, self._date_format_id)
-        if date_format.HasField("custom_uid"):
+        if has_field(date_format, "custom_uid"):
             format_uuid = NumbersUUID(date_format.custom_uid).hex
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format

@@ -435,19 +435,19 @@ class ThemeArchive(betterproto2.Message):
         100, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    extension: "_tsch__.ChartPresetsArchive | None" = betterproto2.field(
+    extension_TSCH: "_tsch__.ChartPresetsArchive | None" = betterproto2.field(
         120, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    extension: "_tswp__.ThemePresetsArchive | None" = betterproto2.field(
+    extension_TSWP: "_tswp__.ThemePresetsArchive | None" = betterproto2.field(
         110, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    extension: "_tst__.ThemePresetsArchive | None" = betterproto2.field(
+    extension_TST: "_tst__.ThemePresetsArchive | None" = betterproto2.field(
         200, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    extension: "_tsa__.ThemePresetsArchive | None" = betterproto2.field(
+    extension_TSA: "_tsa__.ThemePresetsArchive | None" = betterproto2.field(
         210, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -543,7 +543,7 @@ class ThemeReplacePresetCommandArchive(betterproto2.Message):
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_preset: "_tsp__.Reference | None" = betterproto2.field(
+    oldPreset: "_tsp__.Reference | None" = betterproto2.field(
         4, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -600,3 +600,7 @@ TSPObjectPropertyType = PropertyType.TSPObjectPropertyType
 StylesheetArchive.IdentifiedStyleEntry = StylesheetArchiveIdentifiedStyleEntry
 StylesheetArchive.StyleChildrenEntry = StylesheetArchiveStyleChildrenEntry
 StylesheetArchive.VersionedStyles = StylesheetArchiveVersionedStyles
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {'StyleArchive': {'is_variation': False}, 'StylesheetArchive': {'is_locked': True, 'can_cull_styles': False}, 'StyleUpdatePropertyMapCommandArchive': {'notify_for_style_clients': True}})

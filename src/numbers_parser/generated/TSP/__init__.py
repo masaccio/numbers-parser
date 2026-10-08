@@ -1528,3 +1528,7 @@ DatabaseImageDataArchive.ImageType = DatabaseImageDataArchiveImageType
 DatabaseImageDataArchive.unknown = DatabaseImageDataArchiveImageType.unknown
 DatabaseImageDataArchive.bitmap = DatabaseImageDataArchiveImageType.bitmap
 DatabaseImageDataArchive.pdf = DatabaseImageDataArchiveImageType.pdf
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {'Color': {'a': 1.0, 'headroom': 1.0}, 'PasteboardObject': {'is_text_primary': False, 'is_smart': False}, 'FieldInfo': {'type': ('enum', 0), 'unknown_field_rule': ('enum', 0), 'known_field_rule': ('enum', 0)}, 'ComponentInfo': {'is_stored_outside_object_archive': False, 'save_token': 0}, 'PackageMetadata': {'save_token': 0, 'preferred_package_type': ('enum', 0)}, 'DocumentRevision': {'sequence_32': 0, 'sequence_64': 0}, 'DataInfo': {'can_download': False, 'download_priority': ('enum', 1), 'remote_data_has_package_storage': False, 'upload_status': ('enum', 0)}, 'SupportMetadataDataCollaborationProperties': {'acknowledged_by_server': False, 'materialized_on_server': False, 'revision_sequence_for_materialized_on_server': 0, 'upload_status': ('enum', 0), 'is_remote_data_ever': False, 'revision_sequence_for_acknowledged_by_server': 0}})

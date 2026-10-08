@@ -11,7 +11,9 @@ mapping_py = sys.argv[2]
 
 module_import_output = ""
 for name in sorted(
-    d.name for d in os.scandir("src/numbers_parser/generated") if d.is_dir() and d.name.startswith("T")
+    d.name
+    for d in os.scandir("src/numbers_parser/generated")
+    if d.is_dir() and d.name.startswith("T")
 ):
     module_import_output += f"    {name},\n"
 mapping_output = ""
@@ -49,6 +51,7 @@ def compute_maps():
 
 
 NAME_CLASS_MAP, ID_NAME_MAP, NAME_ID_MAP = compute_maps()
+CLASS_NAME_MAP = {{klass: name for name, klass in NAME_CLASS_MAP.items()}}
 """
 
 with open(mapping_py, "w") as fh:

@@ -607,3 +607,7 @@ from .. import TSWPSOS as _tswpsos__
 
 
 
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {})

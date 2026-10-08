@@ -2378,3 +2378,7 @@ from ... import TSP as __tsp__
 
 
 
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {})

@@ -123,7 +123,7 @@ class CaptionInfoArchive(betterproto2.Message):
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    child_info_kind: "_tsd__.CaptionOrTitleKind | None" = betterproto2.field(
+    childInfoKind: "_tsd__.CaptionOrTitleKind | None" = betterproto2.field(
         3, betterproto2.TYPE_ENUM, optional=True
     )
 
@@ -625,7 +625,7 @@ class Object3DInfo(betterproto2.Message):
 
     pose3d: "_tsp__.Pose3D | None" = betterproto2.field(3, betterproto2.TYPE_MESSAGE, optional=True)
 
-    bounding_rect: "_tsp__.Rect | None" = betterproto2.field(
+    boundingRect: "_tsp__.Rect | None" = betterproto2.field(
         4, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -637,7 +637,7 @@ class Object3DInfo(betterproto2.Message):
         6, betterproto2.TYPE_BOOL, optional=True
     )
 
-    traced_path: "_tsp__.Path | None" = betterproto2.field(
+    tracedPath: "_tsp__.Path | None" = betterproto2.field(
         7, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -673,19 +673,19 @@ class Object3DInfoCommandArchive(betterproto2.Message):
         7, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    bounding_rect: "_tsp__.Rect | None" = betterproto2.field(
+    boundingRect: "_tsp__.Rect | None" = betterproto2.field(
         8, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_bounding_rect: "_tsp__.Rect | None" = betterproto2.field(
+    oldBoundingRect: "_tsp__.Rect | None" = betterproto2.field(
         9, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    traced_path: "_tsp__.Path | None" = betterproto2.field(
+    tracedPath: "_tsp__.Path | None" = betterproto2.field(
         10, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_traced_path: "_tsp__.Path | None" = betterproto2.field(
+    oldTracedPath: "_tsp__.Path | None" = betterproto2.field(
         11, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -963,3 +963,7 @@ Object3DInfoSetValueCommandArchive.Property = Object3DInfoSetValueCommandArchive
 Object3DInfoSetValueCommandArchive.PlaysAnimations = Object3DInfoSetValueCommandArchiveProperty.PlaysAnimations
 Object3DInfoSetValueCommandArchive.Opacity = Object3DInfoSetValueCommandArchiveProperty.Opacity
 Object3DInfoSetValueCommandArchive.PropertyValue = Object3DInfoSetValueCommandArchivePropertyValue
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {'GalleryItemSetGeometryCommand': {'scale': 1.0}})

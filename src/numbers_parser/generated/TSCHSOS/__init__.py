@@ -3222,3 +3222,7 @@ SpecSetChart3dLightingPackageArchive = SpecSetChart3DLightingPackageArchive
 SpecSetChart3dVectorArchive = SpecSetChart3DVectorArchive
 SpecChart3dLightingPackageArchive = SpecChart3DLightingPackageArchive
 SpecChart3dVectorArchive = SpecChart3DVectorArchive
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {})

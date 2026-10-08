@@ -130,3 +130,7 @@ from .. import TSP as _tsp__
 
 
 
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {})

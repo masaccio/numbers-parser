@@ -351,7 +351,7 @@ class CommandDocumentInsertSheetArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    args_list: "list[_tsck__.AddIdOperationArgs]" = betterproto2.field(
+    argsList: "list[_tsck__.AddIdOperationArgs]" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
@@ -385,7 +385,7 @@ class CommandDocumentRemoveSheetArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    args_list: "list[_tsck__.RemoveIdOperationArgs]" = betterproto2.field(
+    argsList: "list[_tsck__.RemoveIdOperationArgs]" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
@@ -393,7 +393,7 @@ class CommandDocumentRemoveSheetArchive(betterproto2.Message):
         3, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
-    rescue_id: "str" = betterproto2.field(4, betterproto2.TYPE_STRING)
+    rescueId: "str" = betterproto2.field(4, betterproto2.TYPE_STRING)
 
     sheet_uistates: "list[UuidSheetUiStateDictionaryArchive]" = betterproto2.field(
         5, betterproto2.TYPE_MESSAGE, repeated=True
@@ -409,7 +409,7 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class CommandDocumentReorderSheetArchive(betterproto2.Message):
-    args_list: "list[_tsck__.RearrangeIdOperationArgs]" = betterproto2.field(
+    argsList: "list[_tsck__.RearrangeIdOperationArgs]" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
@@ -693,7 +693,7 @@ class CommandSetSheetDirectionArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    new_direction: "PageLayoutDirection" = betterproto2.field(
+    newDirection: "PageLayoutDirection" = betterproto2.field(
         2, betterproto2.TYPE_ENUM, default_factory=lambda: PageLayoutDirection(0)
     )
 
@@ -701,7 +701,7 @@ class CommandSetSheetDirectionArchive(betterproto2.Message):
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_direction: "PageLayoutDirection | None" = betterproto2.field(
+    oldDirection: "PageLayoutDirection | None" = betterproto2.field(
         4, betterproto2.TYPE_ENUM, optional=True
     )
 
@@ -825,7 +825,7 @@ class CommandSheetInsertDrawablesArchive(betterproto2.Message):
         4, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
-    for_paste: "bool | None" = betterproto2.field(5, betterproto2.TYPE_BOOL, optional=True)
+    forPaste: "bool | None" = betterproto2.field(5, betterproto2.TYPE_BOOL, optional=True)
 
     custom_format_keys: "list[_tsp__.Uuid]" = betterproto2.field(
         6, betterproto2.TYPE_MESSAGE, repeated=True
@@ -1252,7 +1252,7 @@ class SheetArchive(betterproto2.Message):
         16, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    user_defined_guide_storage: "_tsp__.Reference | None" = betterproto2.field(
+    userDefinedGuideStorage: "_tsp__.Reference | None" = betterproto2.field(
         17, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1662,3 +1662,7 @@ UIStateArchive = UiStateArchive
 UiStateArchive.InspectorPaneViewMode = UiStateArchiveInspectorPaneViewMode
 UiStateArchive.kInspectorPaneViewModeFormat = UiStateArchiveInspectorPaneViewMode.kInspectorPaneViewModeFormat
 UiStateArchive.kInspectorPaneViewModeFilter = UiStateArchiveInspectorPaneViewMode.kInspectorPaneViewModeFilter
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {'UiStateArchive': {'inspector_pane_visible': True, 'inspector_pane_view_mode': ('enum', 0)}, 'SheetArchive': {'layout_direction': ('enum', 0)}})

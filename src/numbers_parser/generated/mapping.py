@@ -629,3 +629,4 @@ def compute_maps():
 
 
 NAME_CLASS_MAP, ID_NAME_MAP, NAME_ID_MAP = compute_maps()
+CLASS_NAME_MAP = {klass: name for name, klass in NAME_CLASS_MAP.items()}

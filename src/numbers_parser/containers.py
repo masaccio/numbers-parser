@@ -3,7 +3,11 @@ import re
 from pathlib import Path
 from typing import Generic, TypeVar, overload
 
+from betterproto2 import TYPE_MESSAGE
+
+from numbers_parser._pb import list_fields
 from numbers_parser.constants import DOCUMENT_ID, PACKAGE_ID, SUPPORTED_NUMBERS_VERSIONS
+from numbers_parser.generated.mapping import CLASS_NAME_MAP
 from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
 from numbers_parser.iwork import IWork, IWorkHandler
 
@@ -105,7 +109,7 @@ class ObjectStore(IWorkHandler):
         else:
             self._file_store[iwa_pathname].chunks[0].archives.append(iwa_segment)
 
-        self._objects[new_id] = cls(**object_dict)
+        self._objects[new_id] = cls.from_dict(object_dict)
         self._object_to_filename_map[new_id] = iwa_pathname
         return new_id, self._objects[new_id]
 
@@ -127,13 +131,13 @@ class ObjectStore(IWorkHandler):
 
         def find_references(msg):
             """Recursively find all TSP.Reference messages in protobuf."""
-            if hasattr(msg, "identifier") and msg.DESCRIPTOR.name == "Reference":
+            if hasattr(msg, "identifier") and type(msg).__name__ == "Reference":
                 referenced_ids.add(msg.identifier)
 
-            for field_desc, value in msg.ListFields():
-                if field_desc.type != field_desc.TYPE_MESSAGE:
+            for _, meta, value in list_fields(msg):
+                if meta.proto_type != TYPE_MESSAGE:
                     continue
-                if field_desc.is_repeated:
+                if meta.repeated:
                     for item in value:
                         find_references(item)
                 else:
@@ -171,4 +175,8 @@ class ObjectStore(IWorkHandler):
 
     # Don't cache: new tables and sheets can be added at runtime
     def find_refs(self, ref_name) -> list:
-        return [k for k, v in self._objects.items() if type(v).__name__ == ref_name]
+        return [
+            k
+            for k, v in self._objects.items()
+            if CLASS_NAME_MAP.get(type(v), type(v).__name__).rsplit(".", 1)[-1] == ref_name
+        ]

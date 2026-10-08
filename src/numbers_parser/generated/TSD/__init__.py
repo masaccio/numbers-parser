@@ -455,7 +455,7 @@ default_message_pool.register_message(
 class BezierPathSourceArchive(betterproto2.Message):
     path_string: "str | None" = betterproto2.field(1, betterproto2.TYPE_STRING, optional=True)
 
-    natural_size: "_tsp__.Size | None" = betterproto2.field(
+    naturalSize: "_tsp__.Size | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1047,7 +1047,7 @@ class DrawablesCommandGroupArchive(betterproto2.Message):
         4, betterproto2.TYPE_ENUM, optional=True
     )
 
-    for_drag: "bool | None" = betterproto2.field(5, betterproto2.TYPE_BOOL, optional=True)
+    forDrag: "bool | None" = betterproto2.field(5, betterproto2.TYPE_BOOL, optional=True)
 
     archivedselection: "_tsp__.Reference | None" = betterproto2.field(
         6, betterproto2.TYPE_MESSAGE, optional=True
@@ -1117,7 +1117,7 @@ class EditableBezierPathSourceArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
-    natural_size: "_tsp__.Size | None" = betterproto2.field(
+    naturalSize: "_tsp__.Size | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1129,15 +1129,15 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class EditableBezierPathSourceArchiveNode(betterproto2.Message):
-    in_control_point: "_tsp__.Point | None" = betterproto2.field(
+    inControlPoint: "_tsp__.Point | None" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    node_point: "_tsp__.Point | None" = betterproto2.field(
+    nodePoint: "_tsp__.Point | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    out_control_point: "_tsp__.Point | None" = betterproto2.field(
+    outControlPoint: "_tsp__.Point | None" = betterproto2.field(
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1235,9 +1235,9 @@ default_message_pool.register_message("TSD", "FillArchive", FillArchive)
 
 @dataclass(eq=False, repr=False)
 class FrameArchive(betterproto2.Message):
-    frame_name: "str | None" = betterproto2.field(2, betterproto2.TYPE_STRING, optional=True)
+    frameName: "str | None" = betterproto2.field(2, betterproto2.TYPE_STRING, optional=True)
 
-    asset_scale: "float | None" = betterproto2.field(3, betterproto2.TYPE_FLOAT, optional=True)
+    assetScale: "float | None" = betterproto2.field(3, betterproto2.TYPE_FLOAT, optional=True)
 
 
 default_message_pool.register_message("TSD", "FrameArchive", FrameArchive)
@@ -1428,7 +1428,7 @@ class GradientArchive(betterproto2.Message):
 
     opacity: "float | None" = betterproto2.field(3, betterproto2.TYPE_FLOAT, optional=True)
 
-    advanced_gradient: "bool | None" = betterproto2.field(4, betterproto2.TYPE_BOOL, optional=True)
+    advancedGradient: "bool | None" = betterproto2.field(4, betterproto2.TYPE_BOOL, optional=True)
 
     anglegradient: "AngleGradientArchive | None" = betterproto2.field(
         5, betterproto2.TYPE_MESSAGE, optional=True
@@ -1584,7 +1584,7 @@ default_message_pool.register_message("TSD", "GuideCommandArchive", GuideCommand
 
 @dataclass(eq=False, repr=False)
 class GuideStorageArchive(betterproto2.Message):
-    user_defined_guides: "list[UserDefinedGuideArchive]" = betterproto2.field(
+    userDefinedGuides: "list[UserDefinedGuideArchive]" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
@@ -1642,27 +1642,27 @@ class ImageAdjustmentsCommandArchive(betterproto2.Message):
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    adjusted_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    adjustedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         4, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    replaced_adjusted_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    replacedAdjustedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         5, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    enhanced_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    enhancedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         6, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    replaced_enhanced_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    replacedEnhancedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         7, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    thumbnail_adjusted_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    thumbnailAdjustedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         8, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    replaced_thumbnail_adjusted_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    replacedThumbnailAdjustedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         9, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1686,7 +1686,7 @@ class ImageArchive(betterproto2.Message):
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    original_size: "_tsp__.Size | None" = betterproto2.field(
+    originalSize: "_tsp__.Size | None" = betterproto2.field(
         4, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1694,45 +1694,45 @@ class ImageArchive(betterproto2.Message):
         5, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    thumbnail_data: "_tsp__.DataReference | None" = betterproto2.field(
+    thumbnailData: "_tsp__.DataReference | None" = betterproto2.field(
         12, betterproto2.TYPE_MESSAGE, optional=True
     )
 
     flags: "int | None" = betterproto2.field(7, betterproto2.TYPE_UINT32, optional=True)
 
-    original_data: "_tsp__.DataReference | None" = betterproto2.field(
+    originalData: "_tsp__.DataReference | None" = betterproto2.field(
         13, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    original_svg_data: "_tsp__.DataReference | None" = betterproto2.field(
+    originalSVGData: "_tsp__.DataReference | None" = betterproto2.field(
         23, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    natural_size: "_tsp__.Size | None" = betterproto2.field(
+    naturalSize: "_tsp__.Size | None" = betterproto2.field(
         9, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    instant_alpha_path: "_tsp__.Path | None" = betterproto2.field(
+    instantAlphaPath: "_tsp__.Path | None" = betterproto2.field(
         10, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    image_adjustments: "ImageAdjustmentsArchive | None" = betterproto2.field(
+    imageAdjustments: "ImageAdjustmentsArchive | None" = betterproto2.field(
         14, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    enhanced_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    enhancedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         17, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    adjusted_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    adjustedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         15, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    thumbnail_adjusted_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    thumbnailAdjustedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         16, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    interprets_untagged_image_data_as_generic: "bool | None" = betterproto2.field(
+    interpretsUntaggedImageDataAsGeneric: "bool | None" = betterproto2.field(
         18, betterproto2.TYPE_BOOL, optional=True
     )
 
@@ -1834,7 +1834,7 @@ class ImageFillArchive(betterproto2.Message):
         7, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    interprets_untagged_image_data_as_generic: "bool | None" = betterproto2.field(
+    interpretsUntaggedImageDataAsGeneric: "bool | None" = betterproto2.field(
         8, betterproto2.TYPE_BOOL, optional=True
     )
 
@@ -1941,11 +1941,11 @@ class ImageMaskCommandArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    new_mask_info: "_tsp__.Reference | None" = betterproto2.field(
+    newMaskInfo: "_tsp__.Reference | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_mask_info: "_tsp__.Reference | None" = betterproto2.field(
+    oldMaskInfo: "_tsp__.Reference | None" = betterproto2.field(
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1965,63 +1965,63 @@ class ImageMediaCommandArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    new_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    newImageData: "_tsp__.DataReference | None" = betterproto2.field(
         8, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    oldImageData: "_tsp__.DataReference | None" = betterproto2.field(
         9, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_original_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    oldOriginalImageData: "_tsp__.DataReference | None" = betterproto2.field(
         10, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_natural_size: "_tsp__.Size | None" = betterproto2.field(
+    oldNaturalSize: "_tsp__.Size | None" = betterproto2.field(
         6, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    new_original_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    newOriginalImageData: "_tsp__.DataReference | None" = betterproto2.field(
         11, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_image_adjustments: "ImageAdjustmentsArchive | None" = betterproto2.field(
+    oldImageAdjustments: "ImageAdjustmentsArchive | None" = betterproto2.field(
         12, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_adjusted_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    oldAdjustedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         13, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_enhanced_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    oldEnhancedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         14, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    image_adjustments: "ImageAdjustmentsArchive | None" = betterproto2.field(
+    imageAdjustments: "ImageAdjustmentsArchive | None" = betterproto2.field(
         15, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    adjusted_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    adjustedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         16, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    enhanced_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    enhancedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         17, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    new_thumbnail_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    newThumbnailImageData: "_tsp__.DataReference | None" = betterproto2.field(
         18, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_thumbnail_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    oldThumbnailImageData: "_tsp__.DataReference | None" = betterproto2.field(
         19, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    thumbnail_adjusted_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    thumbnailAdjustedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         20, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_thumbnail_adjusted_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    oldThumbnailAdjustedImageData: "_tsp__.DataReference | None" = betterproto2.field(
         21, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -2207,27 +2207,27 @@ class InfoGeometryCommandArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    new_geometry: "GeometryArchive | None" = betterproto2.field(
+    newGeometry: "GeometryArchive | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_geometry: "GeometryArchive | None" = betterproto2.field(
+    oldGeometry: "GeometryArchive | None" = betterproto2.field(
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    match_object_placeholder_geometry: "bool | None" = betterproto2.field(
+    matchObjectPlaceholderGeometry: "bool | None" = betterproto2.field(
         4, betterproto2.TYPE_BOOL, optional=True
     )
 
-    old_match_object_placeholder_geometry: "bool | None" = betterproto2.field(
+    oldMatchObjectPlaceholderGeometry: "bool | None" = betterproto2.field(
         5, betterproto2.TYPE_BOOL, optional=True
     )
 
-    should_trigger_rtu_animation: "bool | None" = betterproto2.field(
+    shouldTriggerRtuAnimation: "bool | None" = betterproto2.field(
         6, betterproto2.TYPE_BOOL, optional=True
     )
 
-    initiated_on_web: "bool | None" = betterproto2.field(7, betterproto2.TYPE_BOOL, optional=True)
+    initiatedOnWeb: "bool | None" = betterproto2.field(7, betterproto2.TYPE_BOOL, optional=True)
 
 
 default_message_pool.register_message(
@@ -2375,11 +2375,11 @@ class MediaInfoGeometryCommandArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    new_original_size: "_tsp__.Size | None" = betterproto2.field(
+    newOriginalSize: "_tsp__.Size | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_original_size: "_tsp__.Size | None" = betterproto2.field(
+    oldOriginalSize: "_tsp__.Size | None" = betterproto2.field(
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -2395,15 +2395,15 @@ class MediaOriginalSizeCommandArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    new_original_size: "_tsp__.Size | None" = betterproto2.field(
+    newOriginalSize: "_tsp__.Size | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_original_size: "_tsp__.Size | None" = betterproto2.field(
+    oldOriginalSize: "_tsp__.Size | None" = betterproto2.field(
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    property_name: "str" = betterproto2.field(4, betterproto2.TYPE_STRING)
+    propertyName: "str" = betterproto2.field(4, betterproto2.TYPE_STRING)
 
 
 default_message_pool.register_message(
@@ -2467,11 +2467,11 @@ class MovieArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    movie_data: "_tsp__.DataReference | None" = betterproto2.field(
+    movieData: "_tsp__.DataReference | None" = betterproto2.field(
         14, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    imported_auxiliary_movie_data: "_tsp__.DataReference | None" = betterproto2.field(
+    importedAuxiliaryMovieData: "_tsp__.DataReference | None" = betterproto2.field(
         22, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -2479,15 +2479,15 @@ class MovieArchive(betterproto2.Message):
         25, betterproto2.TYPE_STRING, optional=True
     )
 
-    movie_remote_url: "str | None" = betterproto2.field(17, betterproto2.TYPE_STRING, optional=True)
+    movieRemoteURL: "str | None" = betterproto2.field(17, betterproto2.TYPE_STRING, optional=True)
 
-    start_time: "float | None" = betterproto2.field(3, betterproto2.TYPE_FLOAT, optional=True)
+    startTime: "float | None" = betterproto2.field(3, betterproto2.TYPE_FLOAT, optional=True)
 
-    end_time: "float | None" = betterproto2.field(4, betterproto2.TYPE_FLOAT, optional=True)
+    endTime: "float | None" = betterproto2.field(4, betterproto2.TYPE_FLOAT, optional=True)
 
-    poster_time: "float | None" = betterproto2.field(5, betterproto2.TYPE_FLOAT, optional=True)
+    posterTime: "float | None" = betterproto2.field(5, betterproto2.TYPE_FLOAT, optional=True)
 
-    loop_option_as_integer: "int | None" = betterproto2.field(
+    loopOptionAsInteger: "int | None" = betterproto2.field(
         6, betterproto2.TYPE_UINT32, optional=True
     )
 
@@ -2497,25 +2497,23 @@ class MovieArchive(betterproto2.Message):
 
     volume: "float | None" = betterproto2.field(7, betterproto2.TYPE_FLOAT, optional=True)
 
-    auto_play: "bool | None" = betterproto2.field(8, betterproto2.TYPE_BOOL, optional=True)
+    autoPlay: "bool | None" = betterproto2.field(8, betterproto2.TYPE_BOOL, optional=True)
 
-    audio_only: "bool | None" = betterproto2.field(9, betterproto2.TYPE_BOOL, optional=True)
+    audioOnly: "bool | None" = betterproto2.field(9, betterproto2.TYPE_BOOL, optional=True)
 
     streaming: "bool | None" = betterproto2.field(18, betterproto2.TYPE_BOOL, optional=True)
 
-    native_audio_recording: "bool | None" = betterproto2.field(
+    nativeAudioRecording: "bool | None" = betterproto2.field(
         27, betterproto2.TYPE_BOOL, optional=True
     )
 
-    plays_across_slides: "bool | None" = betterproto2.field(
-        28, betterproto2.TYPE_BOOL, optional=True
-    )
+    playsAcrossSlides: "bool | None" = betterproto2.field(28, betterproto2.TYPE_BOOL, optional=True)
 
-    poster_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    posterImageData: "_tsp__.DataReference | None" = betterproto2.field(
         15, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    audio_only_image_data: "_tsp__.DataReference | None" = betterproto2.field(
+    audioOnlyImageData: "_tsp__.DataReference | None" = betterproto2.field(
         16, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -2523,7 +2521,7 @@ class MovieArchive(betterproto2.Message):
         23, betterproto2.TYPE_BOOL, optional=True
     )
 
-    playable_state: "int | None" = betterproto2.field(12, betterproto2.TYPE_UINT32, optional=True)
+    playableState: "int | None" = betterproto2.field(12, betterproto2.TYPE_UINT32, optional=True)
 
     flags: "int | None" = betterproto2.field(13, betterproto2.TYPE_UINT32, optional=True)
 
@@ -2543,11 +2541,11 @@ class MovieArchive(betterproto2.Message):
         19, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    original_size: "_tsp__.Size | None" = betterproto2.field(
+    originalSize: "_tsp__.Size | None" = betterproto2.field(
         20, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    natural_size: "_tsp__.Size | None" = betterproto2.field(
+    naturalSize: "_tsp__.Size | None" = betterproto2.field(
         21, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -2567,10 +2565,10 @@ class MovieArchive(betterproto2.Message):
 
     def __post_init__(self) -> None:
         super().__post_init__()
-        if self.is_set("loop_option_as_integer"):
-            warnings.warn("MovieArchive.loop_option_as_integer is deprecated", DeprecationWarning)
-        if self.is_set("auto_play"):
-            warnings.warn("MovieArchive.auto_play is deprecated", DeprecationWarning)
+        if self.is_set("loopOptionAsInteger"):
+            warnings.warn("MovieArchive.loopOptionAsInteger is deprecated", DeprecationWarning)
+        if self.is_set("autoPlay"):
+            warnings.warn("MovieArchive.autoPlay is deprecated", DeprecationWarning)
 
 
 default_message_pool.register_message("TSD", "MovieArchive", MovieArchive)
@@ -2680,7 +2678,7 @@ class MovieSetValueCommandArchive(betterproto2.Message):
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    old_value: "MovieSetValueCommandArchivePropertyValue | None" = betterproto2.field(
+    oldValue: "MovieSetValueCommandArchivePropertyValue | None" = betterproto2.field(
         4, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -2712,7 +2710,7 @@ class MovieSetValueCommandArchivePropertyValue(betterproto2.Message):
 
     autoplay: "bool | None" = betterproto2.field(5, betterproto2.TYPE_BOOL, optional=True)
 
-    loop_option: "MovieSetValueCommandArchiveLoopOption | None" = betterproto2.field(
+    loopOption: "MovieSetValueCommandArchiveLoopOption | None" = betterproto2.field(
         6, betterproto2.TYPE_ENUM, optional=True
     )
 
@@ -2722,9 +2720,7 @@ class MovieSetValueCommandArchivePropertyValue(betterproto2.Message):
         8, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    plays_across_slides: "bool | None" = betterproto2.field(
-        9, betterproto2.TYPE_BOOL, optional=True
-    )
+    playsAcrossSlides: "bool | None" = betterproto2.field(9, betterproto2.TYPE_BOOL, optional=True)
 
 
 default_message_pool.register_message(
@@ -2772,9 +2768,9 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class PathSourceArchive(betterproto2.Message):
-    horizontal_flip: "bool | None" = betterproto2.field(1, betterproto2.TYPE_BOOL, optional=True)
+    horizontalFlip: "bool | None" = betterproto2.field(1, betterproto2.TYPE_BOOL, optional=True)
 
-    vertical_flip: "bool | None" = betterproto2.field(2, betterproto2.TYPE_BOOL, optional=True)
+    verticalFlip: "bool | None" = betterproto2.field(2, betterproto2.TYPE_BOOL, optional=True)
 
     point_path_source: "PointPathSourceArchive | None" = betterproto2.field(
         3, betterproto2.TYPE_MESSAGE, optional=True
@@ -2800,11 +2796,9 @@ class PathSourceArchive(betterproto2.Message):
         8, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    localization_key: "str | None" = betterproto2.field(9, betterproto2.TYPE_STRING, optional=True)
+    localizationKey: "str | None" = betterproto2.field(9, betterproto2.TYPE_STRING, optional=True)
 
-    user_defined_name: "str | None" = betterproto2.field(
-        10, betterproto2.TYPE_STRING, optional=True
-    )
+    userDefinedName: "str | None" = betterproto2.field(10, betterproto2.TYPE_STRING, optional=True)
 
 
 default_message_pool.register_message("TSD", "PathSourceArchive", PathSourceArchive)
@@ -2960,7 +2954,7 @@ class PointPathSourceArchive(betterproto2.Message):
 
     point: "_tsp__.Point | None" = betterproto2.field(2, betterproto2.TYPE_MESSAGE, optional=True)
 
-    natural_size: "_tsp__.Size | None" = betterproto2.field(
+    naturalSize: "_tsp__.Size | None" = betterproto2.field(
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -3032,7 +3026,7 @@ class ScalarPathSourceArchive(betterproto2.Message):
 
     scalar: "float | None" = betterproto2.field(2, betterproto2.TYPE_FLOAT, optional=True)
 
-    natural_size: "_tsp__.Size | None" = betterproto2.field(
+    naturalSize: "_tsp__.Size | None" = betterproto2.field(
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -3082,15 +3076,15 @@ class ShadowArchive(betterproto2.Message):
         7, betterproto2.TYPE_ENUM, optional=True
     )
 
-    drop_shadow: "DropShadowArchive | None" = betterproto2.field(
+    dropShadow: "DropShadowArchive | None" = betterproto2.field(
         8, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    contact_shadow: "ContactShadowArchive | None" = betterproto2.field(
+    contactShadow: "ContactShadowArchive | None" = betterproto2.field(
         9, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    curved_shadow: "CurvedShadowArchive | None" = betterproto2.field(
+    curvedShadow: "CurvedShadowArchive | None" = betterproto2.field(
         10, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -3132,7 +3126,7 @@ class ShapeArchive(betterproto2.Message):
         5, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    stroke_pattern_offset_distance: "float | None" = betterproto2.field(
+    strokePatternOffsetDistance: "float | None" = betterproto2.field(
         6, betterproto2.TYPE_FLOAT, optional=True
     )
 
@@ -3225,7 +3219,7 @@ class SmartStrokeArchive(betterproto2.Message):
 
     random_seed: "int | None" = betterproto2.field(3, betterproto2.TYPE_UINT32, optional=True)
 
-    parameter_values: "_tsp__.ReferenceDictionary | None" = betterproto2.field(
+    parameterValues: "_tsp__.ReferenceDictionary | None" = betterproto2.field(
         4, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -3517,7 +3511,7 @@ class TransformGradientArchive(betterproto2.Message):
 
     end: "_tsp__.Point | None" = betterproto2.field(2, betterproto2.TYPE_MESSAGE, optional=True)
 
-    base_natural_size: "_tsp__.Size | None" = betterproto2.field(
+    baseNaturalSize: "_tsp__.Size | None" = betterproto2.field(
         3, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -3663,3 +3657,7 @@ DrawablesCommandGroupArchive.DrawablesCommandGroupType = DrawablesCommandGroupAr
 DrawablesCommandGroupArchive.Constructive = DrawablesCommandGroupArchiveDrawablesCommandGroupType.Constructive
 DrawablesCommandGroupArchive.Destructive = DrawablesCommandGroupArchiveDrawablesCommandGroupType.Destructive
 DrawablesCommandGroupArchive.InPlace = DrawablesCommandGroupArchiveDrawablesCommandGroupType.InPlace
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {'ImageFillArchive': {'technique': ('enum', 0)}, 'LineEndArchive': {'line_join': ('enum', 0)}, 'ShadowArchive': {'angle': 315.0, 'offset': 5.0, 'radius': 1, 'opacity': 1.0, 'is_enabled': True, 'type': ('enum', 0)}, 'ContactShadowArchive': {'height': 0.2, 'offset': 0.0}, 'CurvedShadowArchive': {'curve': 0.6}, 'ReflectionArchive': {'opacity': 0.5}, 'ImageAdjustmentsArchive': {'top_level': 1.0, 'enhance': False, 'represents_sage_adjustments': False}, 'ShapeStyleArchive': {'override_count': 0}, 'MediaStyleArchive': {'override_count': 0}, 'MovieArchive': {'loop_option': ('enum', 0), 'is_live_video': False}, 'FreehandDrawingToolkitUiState': {'most_recent_restorable_tool_type': ('enum', 0)}})

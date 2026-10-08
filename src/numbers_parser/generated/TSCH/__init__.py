@@ -608,7 +608,7 @@ class Chart3DEnvironmentMaterialArchive(betterproto2.Message):
         2, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
-    decal_mode: "bool | None" = betterproto2.field(3, betterproto2.TYPE_BOOL, optional=True)
+    decalMode: "bool | None" = betterproto2.field(3, betterproto2.TYPE_BOOL, optional=True)
 
     tilings: "list[Chart3DImageTextureTilingArchive]" = betterproto2.field(
         4, betterproto2.TYPE_MESSAGE, repeated=True
@@ -1350,7 +1350,7 @@ class ChartGridArchive(betterproto2.Message):
 
     grid_row: "list[GridRow]" = betterproto2.field(3, betterproto2.TYPE_MESSAGE, repeated=True)
 
-    id_map: "ChartGridArchiveChartGridRowColumnIdMap | None" = betterproto2.field(
+    idMap: "ChartGridArchiveChartGridRowColumnIdMap | None" = betterproto2.field(
         4, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1376,7 +1376,7 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class ChartGridArchiveChartGridRowColumnIdMapEntry(betterproto2.Message):
-    unique_id: "str" = betterproto2.field(1, betterproto2.TYPE_STRING)
+    uniqueId: "str" = betterproto2.field(1, betterproto2.TYPE_STRING)
 
     index: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
 
@@ -2326,7 +2326,7 @@ class CommandMutatePropertiesArchive(betterproto2.Message):
         betterproto2.field(4, betterproto2.TYPE_MESSAGE, repeated=True)
     )
 
-    initiated_on_web: "bool | None" = betterproto2.field(5, betterproto2.TYPE_BOOL, optional=True)
+    initiatedOnWeb: "bool | None" = betterproto2.field(5, betterproto2.TYPE_BOOL, optional=True)
 
 
 default_message_pool.register_message(
@@ -2668,15 +2668,13 @@ class CommandSetCategoryNameArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    category_index: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
+    categoryIndex: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
 
-    old_name: "str | None" = betterproto2.field(3, betterproto2.TYPE_STRING, optional=True)
+    oldName: "str | None" = betterproto2.field(3, betterproto2.TYPE_STRING, optional=True)
 
-    new_name: "str" = betterproto2.field(4, betterproto2.TYPE_STRING)
+    newName: "str" = betterproto2.field(4, betterproto2.TYPE_STRING)
 
-    is_multi_data_index: "bool | None" = betterproto2.field(
-        5, betterproto2.TYPE_BOOL, optional=True
-    )
+    isMultiDataIndex: "bool | None" = betterproto2.field(5, betterproto2.TYPE_BOOL, optional=True)
 
 
 default_message_pool.register_message(
@@ -2944,11 +2942,11 @@ class CommandSetSeriesNameArchive(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    series_index: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
+    seriesIndex: "int" = betterproto2.field(2, betterproto2.TYPE_UINT32)
 
-    old_name: "str | None" = betterproto2.field(3, betterproto2.TYPE_STRING, optional=True)
+    oldName: "str | None" = betterproto2.field(3, betterproto2.TYPE_STRING, optional=True)
 
-    new_name: "str" = betterproto2.field(4, betterproto2.TYPE_STRING)
+    newName: "str" = betterproto2.field(4, betterproto2.TYPE_STRING)
 
 
 default_message_pool.register_message(
@@ -3393,3 +3391,7 @@ CommandReplaceThemePresetArchive.StyleAndIdentifierPair = CommandReplaceThemePre
 CommandInvalidateWPCaches = CommandInvalidateWpCaches
 CommandReplaceCustomFormatArchive.FormatObjectMutation = CommandReplaceCustomFormatArchiveFormatObjectMutation
 CDESelectionTransformerArchive = CdeSelectionTransformerArchive
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {'CommandChartApplyPreset': {'behavior': ('enum', 1)}})

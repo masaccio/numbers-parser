@@ -1681,7 +1681,7 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class HighlightArchive(betterproto2.Message):
-    comment_storage: "_tsp__.Reference | None" = betterproto2.field(
+    commentStorage: "_tsp__.Reference | None" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1769,7 +1769,7 @@ class LineSpacingArchive(betterproto2.Message):
 
     amount: "float | None" = betterproto2.field(2, betterproto2.TYPE_FLOAT, optional=True)
 
-    baseline_rule: "float | None" = betterproto2.field(3, betterproto2.TYPE_FLOAT, optional=True)
+    baselineRule: "float | None" = betterproto2.field(3, betterproto2.TYPE_FLOAT, optional=True)
 
 
 default_message_pool.register_message("TSWP", "LineSpacingArchive", LineSpacingArchive)
@@ -2565,11 +2565,11 @@ class SelectionArchive(betterproto2.Message):
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    style_insertion_behavior: "StyleInsertionBehavior" = betterproto2.field(
+    styleInsertionBehavior: "StyleInsertionBehavior" = betterproto2.field(
         3, betterproto2.TYPE_ENUM, default_factory=lambda: StyleInsertionBehavior(0)
     )
 
-    caret_affinity: "CaretAffinity" = betterproto2.field(
+    caretAffinity: "CaretAffinity" = betterproto2.field(
         4, betterproto2.TYPE_ENUM, default_factory=lambda: CaretAffinity(0)
     )
 
@@ -3433,7 +3433,7 @@ default_message_pool.register_message("TSWP", "TOCInfoArchive", TocInfoArchive)
 
 @dataclass(eq=False, repr=False)
 class TocLayoutHintArchive(betterproto2.Message):
-    char_range: "_tsp__.Range | None" = betterproto2.field(
+    charRange: "_tsp__.Range | None" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -4212,3 +4212,7 @@ ContainedObjectsCommandArchive.RemoveBehaviorArgs = ContainedObjectsCommandArchi
 ContainedObjectsCommandArchive.RearrangeBehaviorArgs = ContainedObjectsCommandArchiveRearrangeBehaviorArgs
 CharacterStyleChangePropertyCommand_GArchive = CharacterStyleChangePropertyCommandGArchive
 ParagraphStyleChangePropertyCommand_GArchive = ParagraphStyleChangePropertyCommandGArchive
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {'StorageArchive': {'kind': ('enum', 3), 'has_itext': False, 'in_document': False}, 'CharacterStylePropertiesArchive': {'writing_direction': ('enum', -1)}, 'CharacterStyleArchive': {'override_count': 0}, 'ParagraphStylePropertiesArchive': {'writing_direction': ('enum', -1)}, 'ParagraphStyleArchive': {'override_count': 0}, 'ListStyleArchive': {'override_count': 0, 'writing_direction': ('enum', -1)}, 'ListStyleArchiveLabelGeometry': {'scale': 1.0, 'baseline_offset': 0.0, 'scale_with_text': True}, 'ColumnStylePropertiesArchive': {'writing_direction': ('enum', -1)}, 'ColumnStyleArchive': {'override_count': 0}, 'ShapeStyleArchive': {'override_count': 0}, 'DateTimeSmartFieldArchive': {'custom_format': ('enum', 0)}, 'DropCapArchive': {'type': ('enum', 0), 'number_of_lines': 3, 'number_of_raised_lines': 0, 'outdent': 0.0, 'padding': 0.0, 'wrap_type': ('enum', 0), 'shape_enabled': False, 'corner_radius': 0.0, 'character_scale': 1.0, 'number_of_characters': 1}, 'DropCapStyleArchive': {'override_count': 0}, 'TextCommandArchive': {'kind': 0}, 'StorageActionCommandArchive': {'kind': 0}, 'UpdateFlowInfoCommandArchive': {'command_mode': ('enum', 0)}})

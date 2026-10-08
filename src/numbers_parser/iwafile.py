@@ -6,13 +6,16 @@ from functools import partial
 from struct import unpack
 
 import snappy
-from google.protobuf.internal.decoder import _DecodeVarint32
-from google.protobuf.internal.encoder import _VarintBytes
-from google.protobuf.json_format import MessageToDict, ParseDict
-from google.protobuf.message import EncodeError
+from betterproto2 import TYPE_MESSAGE, TYPE_STRING, Message, decode_varint, encode_varint
 
+from numbers_parser._pb import copy_from, identity_casing, list_fields
 from numbers_parser.exceptions import NotImplementedError
-from numbers_parser.generated.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_ID_MAP
+from numbers_parser.generated.mapping import (
+    CLASS_NAME_MAP,
+    ID_NAME_MAP,
+    NAME_CLASS_MAP,
+    NAME_ID_MAP,
+)
 from numbers_parser.generated.TSP import ArchiveInfo
 
 logger = logging.getLogger(__name__)
@@ -132,10 +135,10 @@ class ProtobufPatch:
         # Note versus Peter Sobot's implementation: we can ignore some of
         # the unimplemented patching of Protobufs. Specifically deserializing
         # when len(diff_field_path) > 1 or when fields_to_remove is present.
-        return cls(proto_klass.FromString(data))
+        return cls(proto_klass.parse(data))
 
-    def SerializeToString(self):  # noqa: N802
-        return self.data.SerializePartialToString()
+    def __bytes__(self) -> bytes:
+        return bytes(self.data)
 
 
 class IWAArchiveSegment:
@@ -179,8 +182,8 @@ class IWAArchiveSegment:
                 ) from None
             try:
                 message_payload = payload[n : n + message_info.length]
-                if hasattr(klass, "FromString"):
-                    output = klass.FromString(message_payload)
+                if isinstance(klass, type):
+                    output = klass.parse(message_payload)
                 else:
                     output = klass(message_payload)
             except Exception as e:  # pragma: no cover
@@ -212,11 +215,11 @@ class IWAArchiveSegment:
         # so that its length matches the object contained within.
         for obj, message_info in zip(self.objects, self.header.message_infos, strict=False):
             try:
-                object_length = len(obj.SerializeToString())
+                object_length = len(bytes(obj))
                 provided_length = message_info.length
                 if object_length != provided_length:
                     message_info.length = object_length
-            except EncodeError as e:  # pragma: no cover  # noqa: PERF203
+            except (ValueError, TypeError, OverflowError) as e:  # pragma: no cover  # noqa: PERF203
                 msg = (
                     f"Failed to encode object: {e}\nObject: '{obj!r}'\nMessage info: {message_info}"
                 )
@@ -224,8 +227,8 @@ class IWAArchiveSegment:
                     msg,
                 ) from None
         return b"".join(
-            [_VarintBytes(self.header.ByteSize()), self.header.SerializeToString()]
-            + [obj.SerializeToString() for obj in self.objects],
+            [encode_varint(len(bytes(self.header))), bytes(self.header)]
+            + [bytes(obj) for obj in self.objects],
         )
 
     def redact_strings(self) -> None:
@@ -237,21 +240,21 @@ class IWAArchiveSegment:
             if isinstance(message, ProtobufPatch):
                 message = message.data
 
-            for field, value in message.ListFields():
-                if field.type == field.TYPE_MESSAGE:
-                    if field.is_repeated:
+            for name, meta, value in list_fields(message):
+                if meta.proto_type == TYPE_MESSAGE:
+                    if meta.repeated:
                         for item in value:
                             redact_message(item)
                     else:
                         redact_message(value)
-                elif field.type == field.TYPE_STRING:
-                    if field.is_repeated:
+                elif meta.proto_type == TYPE_STRING:
+                    if meta.repeated:
                         for i in range(len(value)):
                             str_index += 1
                             value[i] = f"REDACT-{str_index}"
                     else:
                         str_index += 1
-                        setattr(message, field.name, f"REDACT-{str_index}")
+                        setattr(message, name, f"REDACT-{str_index}")
 
         for obj in self.objects:
             redact_message(obj)
@@ -259,24 +262,24 @@ class IWAArchiveSegment:
 
 
 def message_to_dict(message):
-    if hasattr(message, "to_dict"):
+    if isinstance(message, ProtobufPatch):
         return message.to_dict()
-    output = MessageToDict(message, preserving_proto_field_name=True)
-    output["_pbtype"] = type(message).DESCRIPTOR.full_name
+    output = message.to_dict(casing=identity_casing)
+    output["_pbtype"] = CLASS_NAME_MAP[type(message)]
     return output
 
 
 def header_to_dict(message):
     output = message_to_dict(message)
     for message_info in output["message_infos"]:
-        del message_info["length"]
+        message_info.pop("length", None)
     return output
 
 
 def dict_to_message(_dict):
     _type = _dict["_pbtype"]
     del _dict["_pbtype"]
-    return ParseDict(_dict, NAME_CLASS_MAP[_type](), ignore_unknown_fields=True)
+    return NAME_CLASS_MAP[_type].from_dict(_dict, ignore_unknown_fields=True)
 
 
 def dict_to_header(_dict):
@@ -287,15 +290,15 @@ def dict_to_header(_dict):
 
 
 def get_archive_info_and_remainder(buf):
-    msg_len, new_pos = _DecodeVarint32(buf, 0)
+    msg_len, new_pos = decode_varint(buf, 0)
     n = new_pos
     msg_buf = buf[n : n + msg_len]
     n += msg_len
-    return ArchiveInfo.FromString(msg_buf), buf[n:]
+    return ArchiveInfo.parse(msg_buf), buf[n:]
 
 
 def create_iwa_segment(obj_id: int, cls: object, object_dict: dict) -> object:
-    full_name = cls.DESCRIPTOR.full_name
+    full_name = CLASS_NAME_MAP[cls]
     type_id = NAME_ID_MAP[full_name]
     header = {
         "_pbtype": "TSP.ArchiveInfo",
@@ -314,26 +317,25 @@ def create_iwa_segment(obj_id: int, cls: object, object_dict: dict) -> object:
 
 
 def find_references(obj, references=list) -> None:
-    if not hasattr(obj, "DESCRIPTOR"):
+    if not isinstance(obj, Message):
         return
     if type(obj).__name__ == "Reference":
         references.append(obj.identifier)
         return
-    for field_desc in obj.ListFields():
-        _, field = field_desc
-        if type(field).__name__ == "Reference":
-            references.append(field.identifier)
-        elif "Repeated" in type(field).__name__:
+    for _, meta, field in list_fields(obj):
+        if meta.proto_type != TYPE_MESSAGE:
+            continue
+        if meta.repeated:
             for item in field:
                 find_references(item, references)
-        elif hasattr(field, "DESCRIPTOR"):
+        else:
             find_references(field, references)
 
 
 def copy_object_to_iwa_file(iwa_file: IWAFile, obj: object, obj_id: int) -> None:
     for archive in iwa_file.chunks[0].archives:
         if archive.header.identifier == obj_id:
-            archive.objects[0].CopyFrom(obj)
+            copy_from(archive.objects[0], obj)
             references = []
             find_references(archive.objects[0], references)
             if len(references) > 0:
@@ -360,11 +362,13 @@ def is_iwa_file(data):
     return length == data_length
 
 
-def extensions(obj) -> list[object]:
-    return [obj.Extensions[field] for field, _ in obj.ListFields() if field.is_extension]
-
-
 def find_extension(obj, name: str) -> object:
-    all_extensions = extensions(obj)
-    filtered = [getattr(x, name) for x in all_extensions if getattr(x, name, None) is not None]
-    return filtered[0]
+    """
+    Return the first populated field called ``name`` of any message-typed field of ``obj``.
+
+    Extensions are compiled as ordinary fields of the extended message.
+    """
+    for _, meta, value in list_fields(obj):
+        if meta.proto_type == TYPE_MESSAGE and not meta.repeated and getattr(value, name, None):
+            return getattr(value, name)
+    raise IndexError(name)

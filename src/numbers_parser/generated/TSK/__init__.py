@@ -178,11 +178,11 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class CommandArchive(betterproto2.Message):
-    undo_redo_state: "_tsp__.Reference | None" = betterproto2.field(
+    undoRedoState: "_tsp__.Reference | None" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    undo_collection: "_tsp__.Reference | None" = betterproto2.field(
+    undoCollection: "_tsp__.Reference | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -202,8 +202,8 @@ class CommandArchive(betterproto2.Message):
 
     def __post_init__(self) -> None:
         super().__post_init__()
-        if self.is_set("undo_redo_state"):
-            warnings.warn("CommandArchive.undo_redo_state is deprecated", DeprecationWarning)
+        if self.is_set("undoRedoState"):
+            warnings.warn("CommandArchive.undoRedoState is deprecated", DeprecationWarning)
 
 
 default_message_pool.register_message("TSK", "CommandArchive", CommandArchive)
@@ -1416,3 +1416,7 @@ PencilAnnotationUIState = PencilAnnotationUiState
 PencilAnnotationUiState.PencilAnnotationToolType = PencilAnnotationUiStatePencilAnnotationToolType
 PencilAnnotationUiState.Pen = PencilAnnotationUiStatePencilAnnotationToolType.Pen
 PencilAnnotationUiState.Highlighter = PencilAnnotationUiStatePencilAnnotationToolType.Highlighter
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {'DocumentSupportArchive': {'is_in_collaboration_mode': False}, 'PropagatedCommandCollectionArchive': {'propagatable_command_process_result': False, 'propagating_command_process_result': False}, 'FinalCommandPairArchive': {'command_process_result': False, 'final_command_process_result': False}, 'Operation': {'type': ('enum', 6), 'noop': False, 'insert_length': 1, 'preserve_lower_priority_location': False, 'transform_behavior': 7, 'from_index': -1, 'to_index': -1, 'dominating': False, 'object_count': -1, 'object_counter_space': 0}, 'PencilAnnotationUiState': {'current_tool_type': ('enum', 0)}})

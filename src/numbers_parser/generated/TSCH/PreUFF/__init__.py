@@ -1537,3 +1537,7 @@ from ... import TSS as __tss__
 
 
 ChartGridArchive.ValueRow = ChartGridArchiveValueRow
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {})

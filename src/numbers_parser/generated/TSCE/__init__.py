@@ -845,11 +845,11 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class AstNodeArrayArchiveAstUidTract(betterproto2.Message):
-    column_uids: "AstNodeArrayArchiveAstUidList | None" = betterproto2.field(
+    columnUids: "AstNodeArrayArchiveAstUidList | None" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    row_uids: "AstNodeArrayArchiveAstUidList | None" = betterproto2.field(
+    rowUids: "AstNodeArrayArchiveAstUidList | None" = betterproto2.field(
         2, betterproto2.TYPE_MESSAGE, optional=True
     )
 
@@ -1033,7 +1033,7 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class CellCoordinateArchive(betterproto2.Message):
-    packed_data: "int | None" = betterproto2.field(1, betterproto2.TYPE_FIXED32, optional=True)
+    packedData: "int | None" = betterproto2.field(1, betterproto2.TYPE_FIXED32, optional=True)
 
     column: "int | None" = betterproto2.field(2, betterproto2.TYPE_UINT32, optional=True)
 
@@ -3288,7 +3288,7 @@ default_message_pool.register_message(
 
 @dataclass(eq=False, repr=False)
 class UuidSetStoreArchive(betterproto2.Message):
-    uuid_set: "list[UuidSetStoreArchiveUuidSet]" = betterproto2.field(
+    uuidSet: "list[UuidSetStoreArchiveUuidSet]" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
@@ -3663,3 +3663,7 @@ CellValueArchive.BOOLEAN_TYPE = CellValueArchiveCellValueType.BOOLEAN_TYPE
 CellValueArchive.DATE_TYPE = CellValueArchiveCellValueType.DATE_TYPE
 CellValueArchive.NUMBER_TYPE = CellValueArchiveCellValueType.NUMBER_TYPE
 CellValueArchive.STRING_TYPE = CellValueArchiveCellValueType.STRING_TYPE
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {'ColumnRowSize': {'num_columns': 1, 'num_rows': 1}, 'CellRecordArchive': {'dirty_self_plus_precedents_count': 0, 'is_in_a_cycle': False, 'contains_a_formula': True, 'has_calculated_precedents': False, 'calculate_precedents_on_next_recalc': False, 'translate_for_excel_import_on_next_recalc': False}, 'CellRecordExpandedArchive': {'dirty_self_plus_precedents_count': 0, 'is_in_a_cycle': False, 'has_calculated_precedents': False}, 'FormulaOwnerDependenciesArchive': {'owner_kind': 0}, 'CalculationEngineArchive': {'excel_import_date_mode': ('enum', 1)}, 'AstNodeArrayArchiveAstColumnCoordinateArchive': {'absolute': False}, 'AstNodeArrayArchiveAstRowCoordinateArchive': {'absolute': False}, 'AstNodeArrayArchiveAstUidTract': {'preserve_rectangular': True}, 'AstNodeArrayArchiveAstColonTractArchive': {'preserve_rectangular': True}, 'AstNodeArrayArchiveAstNodeArchive': {'AST_let_is_continuation': False}, 'FormulaTranslationFlagsArchive': {'excel_import_translation': False, 'number_to_date_coercion_removal_translation': False, 'contains_uid_form_references': False, 'contains_frozen_references': False, 'returns_percent_formatted': False}, 'FormulaArchive': {'host_column_is_negative': False, 'host_row_is_negative': False}, 'FormulaAtCoordArchive': {'repeat_previous_formula': False}, 'BooleanCellValueArchive': {'format_is_explicit': False}, 'DateCellValueArchive': {'format_is_explicit': False}, 'NumberCellValueArchive': {'format_is_explicit': False}, 'StringCellValueArchive': {'format_is_explicit': False, 'is_regex': False, 'is_case_sensitive_regex': False}})

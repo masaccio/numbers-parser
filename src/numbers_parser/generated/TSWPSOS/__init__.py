@@ -1585,3 +1585,7 @@ from .. import TSWP as _tswp__
 
 
 TOCEntryStylePropertyChangeSetArchive = TocEntryStylePropertyChangeSetArchive
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {})

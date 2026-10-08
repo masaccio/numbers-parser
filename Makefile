@@ -86,7 +86,7 @@ test:
 	uv run pytest -n logical
 
 BOOTSTRAP_FILES = src/protos/TNArchives.proto \
-				  src/$(package_c)/generated/TNArchives_pb2.py \
+				  src/$(package_c)/generated/TN/__init__.py \
 				  src/$(package_c)/generated/__init__.py \
 				  src/$(package_c)/generated/mapping.py \
 				  src/$(package_c)/generated/functionmap.py \
@@ -159,12 +159,11 @@ TST_TABLES=$(NUMBERS)/Contents/Frameworks/TSTables.framework/Versions/A/TSTables
 src/$(package_c)/generated/mapping.py: .bootstrap/mapping.py
 	@cp $< $@
 
-src/$(package_c)/generated/TNArchives_pb2.py: .bootstrap/protos/TNArchives.proto
-	@$(call info_message,"Bootstrap: compiling Python packages from protobufs")
+src/$(package_c)/generated/TN/__init__.py: src/protos/TNArchives.proto
+	@$(call info_message,"Bootstrap: compiling python-betterproto2 packages from protobufs")
+	@uv sync --group bootstrap
 	@mkdir -p src/$(package_c)/generated
-	@for proto in .bootstrap/protos/*.proto; do \
-	    $(PROTOC) -I=.bootstrap/protos --proto_path .bootstrap/protos --python_out=src/$(package_c)/generated $$proto; \
-	done
+	uv run python3 src/build/generate_betterproto.py src/protos src/$(package_c)/generated
 
 src/protos/TNArchives.proto: .bootstrap/protos/TNArchives.proto
 	@$(call info_message,"Bootstrap: creating git-tracked copies of protos")
@@ -173,9 +172,7 @@ src/protos/TNArchives.proto: .bootstrap/protos/TNArchives.proto
 		cp $$proto src/protos; \
 	done
 
-src/$(package_c)/generated/__init__.py: src/$(package_c)/generated/TNArchives_pb2.py
-	@$(call info_message,"Bootstrap: patching paths in generated protobuf files")
-	uv run python3 src/build/replace_paths.py src/$(package_c)/generated/T*.py
+src/$(package_c)/generated/__init__.py: src/$(package_c)/generated/TN/__init__.py
 	@touch $@
 
 veryclean:
@@ -183,7 +180,7 @@ veryclean:
 	rm -rf .bootstrap
 	rm -f src/$(package_c)/generated/__init__.py
 	rm -f src/$(package_c)/generated/mapping.py
-	rm -f src/$(package_c)/generated/*_pb2.py
+	rm -rf src/$(package_c)/generated/T* src/$(package_c)/generated/message_pool.py
 	rm -rf $(TMP_NUMBERS_APP)
 
 clean:

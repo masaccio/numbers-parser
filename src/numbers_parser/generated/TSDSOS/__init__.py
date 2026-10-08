@@ -285,3 +285,7 @@ from .. import TSSSOS as _tsssos__
 
 
 
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {})

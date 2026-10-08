@@ -1459,3 +1459,7 @@ ActivityStreamTransformationStateArchive.Coalesce = ActivityStreamTransformation
 ActivityStreamActivityCounterArchive.ActionTypeCounter = ActivityStreamActivityCounterArchiveActionTypeCounter
 ActivityStreamActivityCounterArchive.CursorTypeCounter = ActivityStreamActivityCounterArchiveCursorTypeCounter
 ActivityStreamRemovedAuthorAuditorPendingStateArchive.DateToAuditAndType = ActivityStreamRemovedAuthorAuditorPendingStateArchiveDateToAuditAndType
+
+from numbers_parser._pb import install_message_fields
+
+install_message_fields(globals(), {'CollaborationCommandHistoryCoalescingGroup': {'did_coalesce_all_commands': False}, 'ActivityCommitCommandArchive': {'was_activity_committed': True}, 'CollaborationDocumentSessionState': {'last_send_pending_command_queue_item_was_moved_from_rsvp_command_queue': False, 'count_of_send_pending_command_queue_items_moved_from_rsvp_queue': 0, 'count_of_command_queue_items_in_last_outgoing_command_group': 0}, 'ActivityArchive': {'action_sub_type': 0}, 'CommandActivityBehaviorArchive': {'action_sub_type': ('enum', 0)}})
