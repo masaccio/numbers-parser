@@ -406,9 +406,10 @@ def main() -> int:
                     print(f"     {e}")
             else:
                 status = f"{n} live instance(s)" if n else "schema only, no instance in doc"
-                print(f"PASS {where} -> {desc.full_name} ({status})")
+                if args.verbose:
+                    print(f"PASS {where} -> {desc.full_name} ({status})")
 
-    print(f"\n{len(snippets)} snippets checked, {failures} failure(s)")
+    print(f"check_docs_examples: {len(snippets)} snippets checked, {failures} failure(s)")
     return 1 if failures else 0
 
 
