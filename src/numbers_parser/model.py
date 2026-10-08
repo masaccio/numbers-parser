@@ -64,20 +64,20 @@ from numbers_parser.constants import (
 from numbers_parser.containers import ObjectStore
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
-from numbers_parser.generated import TNArchives_pb2 as TNArchives
-from numbers_parser.generated import TSAArchives_pb2 as TSAArchives
-from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
-from numbers_parser.generated import TSDArchives_pb2 as TSDArchives
-from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
-from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
-from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
-from numbers_parser.generated import TSSArchives_pb2 as TSSArchives
-from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-from numbers_parser.generated import TSWPArchives_pb2 as TSWPArchives
-from numbers_parser.generated.TSDArchives_pb2 import (
+from numbers_parser.generated import TN as TNArchives
+from numbers_parser.generated import TSA as TSAArchives
+from numbers_parser.generated import TSCE as TSCEArchives
+from numbers_parser.generated import TSD as TSDArchives
+from numbers_parser.generated import TSK as TSKArchives
+from numbers_parser.generated import TSP as TSPArchiveMessages
+from numbers_parser.generated import TSP as TSPMessages
+from numbers_parser.generated import TSS as TSSArchives
+from numbers_parser.generated import TST as TSTArchives
+from numbers_parser.generated import TSWP as TSWPArchives
+from numbers_parser.generated.TSD import (
     StrokePatternArchive as StrokePattern,
 )
-from numbers_parser.generated.TSWPArchives_pb2 import (
+from numbers_parser.generated.TSWP import (
     CharacterStylePropertiesArchive as CharacterStyle,
 )
 from numbers_parser.iwafile import find_extension

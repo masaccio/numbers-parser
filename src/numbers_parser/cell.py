@@ -59,10 +59,10 @@ from numbers_parser.constants import (
 )
 from numbers_parser.currencies import CURRENCIES, CURRENCY_SYMBOLS
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
-from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
-from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
-from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-from numbers_parser.generated.TSWPArchives_pb2 import (
+from numbers_parser.generated import TSK as TSKArchives
+from numbers_parser.generated import TSP as TSPMessages
+from numbers_parser.generated import TST as TSTArchives
+from numbers_parser.generated.TSWP import (
     ParagraphStylePropertiesArchive as ParagraphStyle,
 )
 from numbers_parser.numbers_cache import Cacheable, cache

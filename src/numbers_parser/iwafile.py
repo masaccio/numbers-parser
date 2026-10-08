@@ -13,7 +13,7 @@ from google.protobuf.message import EncodeError
 
 from numbers_parser.exceptions import NotImplementedError
 from numbers_parser.generated.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_ID_MAP
-from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
+from numbers_parser.generated.TSP import ArchiveInfo
 
 logger = logging.getLogger(__name__)
 debug = logger.debug

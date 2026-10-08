@@ -1,7 +1,7 @@
 from uuid import UUID, uuid1
 
 from numbers_parser.exceptions import UnsupportedError
-from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
+from numbers_parser.generated import TSP as TSPMessages
 
 
 class NumbersUUID(UUID):
