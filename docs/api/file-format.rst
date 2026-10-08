@@ -983,9 +983,58 @@ defined in :src_proto:`TSTArchives.proto`. :src_pkg:`model.py` recognizes the re
 it encounters, and :src_pkg:`cell.py` exposes a merged anchor and covered-cell
 references to the higher-level API.
 
-The DataStore can point to a ``MergeRegionMapArchive`` containing cell ranges.
-Each range stores packed origin and size values
-(:src_proto:`TSTArchives.proto`):
+Numbers has stored merges in three different places, and ``_NumbersModel.merge_cells``
+tries them in this order, stopping at the first one that yields any ranges:
+
+1. **Merge-owner formula store** (current Numbers). ``TableModelArchive.merge_owner``
+   holds a ``TST.FormulaStoreArchive``. Each merge is a formula whose first AST node
+   is a ``COLON_TRACT_NODE``; the rows and columns are ranges in the node's
+   ``AST_colon_tract``.
+2. **Merge-owner dependency archives**. A ``TSCE.FormulaOwnerDependenciesArchive``
+   with ``owner_kind`` of ``MERGE_OWNER`` records each merge as a back-dependency
+   whose ``internal_range_reference`` names the owning table and the range.
+3. **Merge region map** (legacy fallback). ``DataStore.merge_region_map`` points to a
+   ``MergeRegionMapArchive`` of packed cell ranges.
+
+The merge-owner formula store is defined in :src_proto:`TSTArchives.proto`:
+
+.. code-block:: protobuf
+
+   message TableModelArchive {
+     optional .TST.MergeOwnerArchive merge_owner = 47;
+     // ...
+   }
+
+   message MergeOwnerArchive {
+     required .TSP.CFUUIDArchive owner_id = 1;
+     optional .TST.FormulaStoreArchive formula_store = 2;
+   }
+
+   message FormulaStoreArchive {
+     message FormulaStorePair {
+       required uint32 formula_index = 1;
+       required .TSCE.FormulaArchive formula = 2;
+     }
+     required uint32 next_formula_index = 2;
+     repeated .TST.FormulaStoreArchive.FormulaStorePair formulas = 3;
+   }
+
+The dependency-archive form is defined in :src_proto:`TSCEArchives.proto`:
+
+.. code-block:: protobuf
+
+   message RangeBackDependencyArchive {
+     required uint32 cell_coord_row = 1;
+     required uint32 cell_coord_column = 2;
+     optional .TSCE.RangeReferenceArchive range_reference = 3;
+     optional .TSCE.InternalRangeReferenceArchive internal_range_reference = 4;
+   }
+
+   message RangeDependenciesArchive {
+     repeated .TSCE.RangeBackDependencyArchive back_dependency = 2;
+   }
+
+The legacy region map, which only matters for older documents, is:
 
 .. code-block:: protobuf
 
@@ -1003,25 +1052,11 @@ Each range stores packed origin and size values
      required .TST.TableSize size = 2;
    }
 
-``calculate_merges_using_region_map`` resolves the map reference through
-``self.objects``. It splits the packed origin and size into starting
-column/row and column/row counts, then computes inclusive end coordinates.
-The model also supports formula-store and formula-owner dependency archives:
-the first extracts ranges from merge-owner formulas, and the second
-maps merge-owner range dependencies through the internal-owner-to-UUID map.
-``merge_cells`` tries those two sources in order and uses the region map if
-neither yields ranges. All decoded coordinates pass to ``add_merge_range``,
-which builds a map of anchor and covered cells; ``Table.merge_ranges`` in
-:src_pkg:`document.py` turns anchors into A1 ranges, and :src_pkg:`cell.py`
-returns ``MergedCell`` objects for covered positions.
-
-Rows and columns can have numeric indexes and stable UUID identities. The
-schema includes row/column UID maps and UUID-based ranges as well as older
-coordinate-based ranges. Formula references, cell selections, merge maps and
-table category/pivot features may use these stable identifiers. Table UUID
-mapping and formula-owner dependencies are handled in :src_pkg:`model.py`; they are
-not equivalent to the ``ArchiveInfo.identifier`` used to locate a protobuf
-object.
+``calculate_merges_using_region_map`` splits ``packedData`` into column
+(``>> 16``) and row (``& 0xFFFF``) and computes inclusive end coordinates. All three
+paths call ``add_merge_range``, which builds the map of anchor and covered cells;
+``Table.merge_ranges`` turns anchors into A1 ranges, and :src_pkg:`cell.py` returns
+``MergedCell`` objects for covered positions.
 
 UUIDs, owners, and table relationships
 ======================================
