@@ -467,9 +467,7 @@ storage's smart-field table points to hyperlink objects at character offsets.
 The earlier ``TableDataList`` excerpt shows the entry's
 ``rich_text_payload = 9`` field. The following abbreviated protobuf excerpts
 (``// ...`` marks omitted fields) describe that payload, its storage, and
-hyperlink attributes. The same chain is discussed in
-:src_root:`docs/api/sheetsjs.md`; schema definitions are in
-:src_proto:`TSTArchives.proto` and :src_proto:`TSWPArchives.proto`:
+hyperlink attributes.
 
 .. code-block:: protobuf
 
