@@ -983,13 +983,13 @@ class Table(Cacheable):
 
         .. code:: python
 
-            doc = Document("write.numbers")
+            doc = Document("mydoc.numbers")
             sheets = doc.sheets
             tables = sheets[0].tables
             table = tables[0]
             table.write(1, 1, "This is new text")
             table.write("B7", datetime(2020, 12, 25))
-            doc.save("new-sheet.numbers")
+            doc.save("mydoc.numbers")
 
         Parameters
         ----------

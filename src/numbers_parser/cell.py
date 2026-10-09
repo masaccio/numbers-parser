@@ -734,7 +734,7 @@ class Cell(CellStorageFlags, Cacheable):
         -------
         .. code-block:: python
 
-            doc = Document("bullets.numbers")
+            doc = Document("mydoc.numbers")
             sheets = doc.sheets
             tables = sheets[0].tables
             table = tables[0]
