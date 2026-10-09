@@ -36,11 +36,11 @@ Sheets and tables are iterables that can be indexed using either an integer inde
 .. code:: python
 
 
-   >>> data = sheets["Sheet 1"].tables["Table 1"].rows()
+   >>> data = doc.sheets["Sheet 1"].tables["Table 1"].rows()
    >>> data[0][0]
-   <numbers_parser.cell.EmptyCell object at 0x1022b5710>
+   numbers_parser.cell.EmptyCell(sheet_name='Sheet 1', table_name='Table 1', value='None')
    >>> data[1][0]
-   <numbers_parser.cell.TextCell object at 0x101eb6790>
+   numbers_parser.cell.TextCell(sheet_name='Sheet 1', table_name='Table 1', value='Debit')
    >>> data[1][0].value
    'Debit'
 
@@ -82,11 +82,11 @@ Cell references can be either zero-offset row/column integers or an Excel/Number
 .. code:: python
 
    >>> table.cell(1,0)
-   <numbers_parser.cell.TextCell object at 0x1019ade50>
+   numbers_parser.cell.TextCell(sheet_name='Sheet 1', table_name='Examples', value='Debit')
    >>> table.cell(1,0).value
    'Debit'
    >>> table.cell("B2")
-   <numbers_parser.cell.NumberCell object at 0x103a99790>
+   numbers_parser.cell.NumberCell(sheet_name='Sheet 1', table_name='Examples', value='1234.5')
    >>> table.cell("B2").value
    1234.5
    >>> table.cell("B2").formatted_value

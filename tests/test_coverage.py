@@ -343,10 +343,11 @@ def test_custom_format_from_archive(configurable_save_file):
 def test_cell_repr():
     doc = Document("tests/data/test-1.numbers")
     cell = doc.default_table.cell(1, 1)
-    assert str(cell) == (
-        "ZZZ_Sheet_1@ZZZ_Table_1[1,1]:table_id=874482, type=TEXT, value=YYY_1_1, "
-        "flags=00021008, extras=0000, string_id=4, suggest_id=5, text_format_id=1"
+    assert (
+        repr(cell)
+        == "numbers_parser.cell.TextCell(sheet_name='ZZZ_Sheet_1', table_name='ZZZ_Table_1', value='YYY_1_1', row=1, col=1)"
     )
+    assert str(cell) == "YYY_1_1"
 
 
 def test_invalid_format():

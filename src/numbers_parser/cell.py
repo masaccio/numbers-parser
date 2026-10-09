@@ -625,7 +625,7 @@ class CellStorageFlags:
     _bool_format_id: int = None
     _extra_bits: int = 0
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         fields = [
             f"{k[1:]}={v}" for k, v in asdict(self).items() if k.endswith("_id") and v is not None
         ]
@@ -655,13 +655,26 @@ class Cell(CellStorageFlags, Cacheable):
         self._seconds = None
         super().__init__()
 
+    @property
+    def sheet_name(self) -> str:
+        """str: The name of the sheet the cell resides in."""
+        return self._model.sheet_name(self._model.table_id_to_sheet_id(self._table_id))
+
+    @property
+    def table_name(self) -> str:
+        """str: The name of the table the cell resides in."""
+        return self._model.table_name(self._table_id)
+
     def __str__(self) -> str:
-        table_name = self._model.table_name(self._table_id)
-        sheet_name = self._model.sheet_name(self._model.table_id_to_sheet_id(self._table_id))
-        cell_str = f"{sheet_name}@{table_name}[{self.row},{self.col}]:"
-        cell_str += f"table_id={self._table_id}, type={self._type.name}, "
-        cell_str += f"value={self._value}, flags={self._flags:08x}, extras={self._extra_bits:04x}"
-        return ", ".join([cell_str, super().__str__()])
+        return str(self.value)
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__module__}.{self.__class__.__name__}"
+            + f"(sheet_name='{self.sheet_name}', "
+            + f"table_name='{self.table_name}', value='{self.value}', "
+            + f"row={self.row}, col={self.col})"
+        )
 
     @property
     def image_filename(self):

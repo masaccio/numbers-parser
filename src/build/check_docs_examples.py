@@ -115,7 +115,7 @@ def open_from_data(file, *args, **kwargs):
     """open() replacement that resolves relative filenames in tests/data."""
     if isinstance(file, (str, os.PathLike)) and not Path(file).is_absolute():
         file = DATA_DIR / file
-    return open(file, *args, **kwargs)  # noqa: SIM115
+    return open(file, *args, **kwargs)
 
 
 def stored_and_loaded(code: str) -> tuple[set[str], set[str]]:
@@ -151,7 +151,7 @@ def build_namespace(example: Example, document_cls) -> dict:
     ns["sheets"] = doc.sheets
     ns["sheet"] = doc.sheets[0]
     ns["tables"] = doc.sheets[0].tables
-    ns["table"] = doc.default_table
+    ns["table"] = doc.sheets[0].tables["Examples"]
     return ns
 
 

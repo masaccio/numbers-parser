@@ -384,6 +384,10 @@ class Sheet:
         """str: The name of the sheet."""
         return self._model.sheet_name(self._sheet_id)
 
+    def __repr__(self) -> str:
+        class_name = f"{self.__class__.__module__}.{self.__class__.__name__}"
+        return f"{class_name}(name='{self.name}')"
+
     @name.setter
     def name(self, value: str) -> None:
         self._model.sheet_name(self._sheet_id, value)
@@ -526,6 +530,10 @@ class Table(Cacheable):
     @name.setter
     def name(self, value: str) -> None:
         self._model.table_name(self._table_id, value)
+
+    def __repr__(self) -> str:
+        class_name = f"{self.__class__.__module__}.{self.__class__.__name__}"
+        return f"{class_name}(name='{self.name}')"
 
     @property
     def table_name_enabled(self) -> bool:
@@ -757,12 +765,8 @@ class Table(Cacheable):
             >>> sheets = doc.sheets
             >>> tables = sheets["Sheet 1"].tables
             >>> table = tables["Table 1"]
-            >>> table.cell(1,0)
-            <numbers_parser.cell.TextCell object at 0x105a80a10>
             >>> table.cell(1,0).value
             'Debit'
-            >>> table.cell("B2")
-            <numbers_parser.cell.TextCell object at 0x105a80b90>
             >>> table.cell("B2").value
             1234.50
 
@@ -1362,7 +1366,7 @@ class Table(Cacheable):
         .. code:: python
 
             >>> table.cell("B2")
-            <numbers_parser.cell.TextCell object at 0x102c0d390>
+            numbers_parser.cell.NumberCell(sheet_name='Sheet 1', table_name='Examples', value='1234.5')
             >>> table.cell("B2").is_merged
             False
             >>> table.merge_cells("B2:C2")
