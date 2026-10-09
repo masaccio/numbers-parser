@@ -1056,9 +1056,14 @@ class _NumbersModel(Cacheable):
         return formulas
 
     @cache()
-    def storage_buffers(self, table_id: int) -> list:
-        buffers = []
-        for tile in self.table_tiles(table_id):
+    def storage_buffers(self, table_id: int) -> dict:
+        # Keyed by absolute row index: rows without data have no rowInfo
+        # so the position in rowInfos is not the row number.
+        buffers = {}
+        bds = self.objects[table_id].base_data_store
+        tile_size = bds.tiles.tile_size or DEFAULT_TILE_SIZE
+        for tile_ref in bds.tiles.tiles:
+            tile = self.objects[tile_ref.tile.identifier]
             if not tile.last_saved_in_BNC:
                 msg = "Pre-BNC storage is unsupported"
                 raise UnsupportedError(msg)
@@ -1069,20 +1074,15 @@ class _NumbersModel(Cacheable):
                     self.number_of_columns(table_id),
                     r.has_wide_offsets,
                 )
-                buffers.append(buffer)
+                buffers[tile_ref.tileid * tile_size + r.tile_row_index] = buffer
         return buffers
 
     @cache(num_args=3)
     def storage_buffer(self, table_id: int, row: int, col: int) -> bytes:
-        row_offset = self.row_storage_map(table_id)[row]
-        if row_offset is None:
+        row_buffers = self.storage_buffers(table_id).get(row)
+        if row_buffers is None or col >= len(row_buffers):
             return None
-        storage_buffers = self.storage_buffers(table_id)
-        if row_offset >= len(storage_buffers):
-            return None
-        if col >= len(storage_buffers[row_offset]):
-            return None
-        return storage_buffers[row_offset][col]
+        return row_buffers[col]
 
     def recalculate_row_headers(self, table_id: int, data: list) -> None:
         current_row_heights = {}
