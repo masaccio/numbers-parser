@@ -768,7 +768,7 @@ class Table(Cacheable):
             >>> table.cell(1,0).value
             'Debit'
             >>> table.cell("B2").value
-            1234.50
+            1234.5
 
         """
         if isinstance(args[0], str):
@@ -833,7 +833,7 @@ class Table(Cacheable):
         .. code:: python
 
             total = 0
-            for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
+            for row in table.iter_rows(min_row=9, max_row=13, values_only=True):
                 total += sum(value or 0 for value in row)
 
         """
