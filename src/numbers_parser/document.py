@@ -384,6 +384,10 @@ class Sheet:
         """str: The name of the sheet."""
         return self._model.sheet_name(self._sheet_id)
 
+    def __repr__(self) -> str:
+        class_name = f"{self.__class__.__module__}.{self.__class__.__name__}"
+        return f"{class_name}(name='{self.name}')"
+
     @name.setter
     def name(self, value: str) -> None:
         self._model.sheet_name(self._sheet_id, value)
@@ -526,6 +530,10 @@ class Table(Cacheable):
     @name.setter
     def name(self, value: str) -> None:
         self._model.table_name(self._table_id, value)
+
+    def __repr__(self) -> str:
+        class_name = f"{self.__class__.__module__}.{self.__class__.__name__}"
+        return f"{class_name}(name='{self.name}')"
 
     @property
     def table_name_enabled(self) -> bool:
@@ -711,9 +719,9 @@ class Table(Cacheable):
             >>> table.merge_ranges
             ['A4:A10']
             >>> table.cell("A4")
-            <numbers_parser.cell.TextCell object at 0x1035f4a90>
+            numbers_parser.cell.TextCell(sheet_name='Sheet 1', table_name='Examples', value='Merged', row=3, col=0)
             >>> table.cell("A5")
-            <numbers_parser.cell.MergedCell object at 0x1035f5310>
+            numbers_parser.cell.MergedCell(sheet_name='Sheet 1', table_name='Examples', value='None', row=4, col=0)
 
         """
         merge_cells = set()
@@ -756,15 +764,11 @@ class Table(Cacheable):
             >>> doc = Document("mydoc.numbers")
             >>> sheets = doc.sheets
             >>> tables = sheets["Sheet 1"].tables
-            >>> table = tables["Table 1"]
-            >>> table.cell(1,0)
-            <numbers_parser.cell.TextCell object at 0x105a80a10>
+            >>> table = tables["Examples"]
             >>> table.cell(1,0).value
             'Debit'
-            >>> table.cell("B2")
-            <numbers_parser.cell.TextCell object at 0x105a80b90>
             >>> table.cell("B2").value
-            1234.50
+            1234.5
 
         """
         if isinstance(args[0], str):
@@ -829,7 +833,7 @@ class Table(Cacheable):
         .. code:: python
 
             total = 0
-            for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
+            for row in table.iter_rows(min_row=9, max_row=13, values_only=True):
                 total += sum(value or 0 for value in row)
 
         """
@@ -907,8 +911,9 @@ class Table(Cacheable):
         .. code:: python
 
             total = 0
-            for col in table.iter_cols(min_row=2, max_row=7, values_only=True):
+            for col in table.iter_cols(min_row=10, max_row=14, values_only=True):
                 total += sum(value or 0 for value in col)
+            assert total == 80
 
         """
         min_row = min_row if min_row is not None else 0
@@ -983,13 +988,13 @@ class Table(Cacheable):
 
         .. code:: python
 
-            doc = Document("write.numbers")
+            doc = Document("mydoc.numbers")
             sheets = doc.sheets
             tables = sheets[0].tables
             table = tables[0]
             table.write(1, 1, "This is new text")
             table.write("B7", datetime(2020, 12, 25))
-            doc.save("new-sheet.numbers")
+            doc.save("mydoc.numbers")
 
         Parameters
         ----------
@@ -1094,15 +1099,12 @@ class Table(Cacheable):
         -------
         .. code:: python
 
-            "Transport": [
-                {"Airplane", "Air": 5 },
-                {"Helicopter": "Air", 2 },
-                {"Bus": "Road", 10 },
-            ],
-            "Fruit": [
-                {"Apple", "Green": 7 },
-                {"Banana", "Yellow", 6 },
-            ],
+            >>> table = doc.sheets[0].tables['Categories']
+            >>> pprint.pp(table.categorized_data(values_only=True))
+            {'Fruit': [['Apple', 'Fruit', 40.0], ['Banana', 'Fruit', 40.0]],
+             'Transport': [['Airplane', 'Transport', 5.0],
+                           ['Bus', 'Transport', 5.0],
+                           ['Helicopter', 'Transport', 5.0]]}
 
         For tables with multiple categories, the top-level dictionary is nested.
 
@@ -1364,7 +1366,7 @@ class Table(Cacheable):
         .. code:: python
 
             >>> table.cell("B2")
-            <numbers_parser.cell.TextCell object at 0x102c0d390>
+            numbers_parser.cell.NumberCell(sheet_name='Sheet 1', table_name='Examples', value='1234.5', row=1, col=1)
             >>> table.cell("B2").is_merged
             False
             >>> table.merge_cells("B2:C2")
@@ -1552,15 +1554,15 @@ class Table(Cacheable):
                 date_time_format="EEEE, d MMMM yyyy"
             )
             table.set_cell_formatting(
-                0,
-                4,
+                1,
+                1,
                 "number",
                 decimal_places=3,
                 negative_style=NegativeNumberStyle.RED
             )
             table.set_cell_formatting(
-                3,
-                0,
+                6,
+                1,
                 "popup",
                 popup_values=["Cat", "Dog", "Rabbit"],
                 allow_none=True

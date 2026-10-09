@@ -368,10 +368,7 @@ count, and optional cell/text style references
      repeated .TST.HeaderStorageBucket.Header headers = 2;
    }
 
-``_NumbersModel.row_storage_map`` follows the row-bucket references through
-``self.objects`` and maps header indexes to corresponding row storage
-positions. Empty rows can have header metadata but no tile row. The public
-``Table`` header-count and dimension properties in :src_pkg:`document.py`
+The public ``Table`` header-count and dimension properties in :src_pkg:`document.py`
 delegate to model methods, which read or update the table model archive;
 header count fields and frozen-header flags are also defined on
 ``TableModelArchive``. Header style references feed the same style resolution
@@ -467,9 +464,7 @@ storage's smart-field table points to hyperlink objects at character offsets.
 The earlier ``TableDataList`` excerpt shows the entry's
 ``rich_text_payload = 9`` field. The following abbreviated protobuf excerpts
 (``// ...`` marks omitted fields) describe that payload, its storage, and
-hyperlink attributes. The same chain is discussed in
-:src_root:`docs/api/sheetsjs.md`; schema definitions are in
-:src_proto:`TSTArchives.proto` and :src_proto:`TSWPArchives.proto`:
+hyperlink attributes.
 
 .. code-block:: protobuf
 

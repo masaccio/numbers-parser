@@ -111,7 +111,7 @@ Since the return value of `rows()` is a list of lists, you can pass this directl
 ```python
 import pandas as pd
 
-doc = Document("simple.numbers")
+doc = Document("mydoc.numbers")
 sheets = doc.sheets
 tables = sheets[0].tables
 data = tables[0].rows(values_only=True)
@@ -125,19 +125,19 @@ Whilst support for writing numbers files has been stable since version 3.4.0, yo
 Cell values are written using [Table.write()](https://masaccio.github.io/numbers-parser/api/table.html#numbers_parser.Table.write) and `numbers-parser` will automatically create empty rows and columns for any cell references that are out of range of the current table.
 
 ```python
-doc = Document("write.numbers")
+doc = Document("mydoc.numbers")
 sheets = doc.sheets
 tables = sheets[0].tables
 table = tables[0]
 table.write(1, 1, "This is new text")
 table.write("B7", datetime(2020, 12, 25))
-doc.save("new-sheet.numbers")
+doc.save("mydoc.numbers")
 ```
 
 Encrypted documents are not automatically re-saved with encryption and you must specify a password on save:
 
 ```python
-doc.save("new-sheet.numbers", password="s3cr3t")
+doc.save("mydoc.numbers", password="s3cr3t")
 ```
 
 Additional tables and worksheets can be added to a `Document` before saving using [Document.add_sheet()](https://masaccio.github.io/numbers-parser/api/document.html#numbers_parser.Document.add_sheet) and [Sheet.add_table()](https://masaccio.github.io/numbers-parser/api/sheet.html#numbers_parser.Sheet.add_table) respectively:
@@ -150,7 +150,7 @@ table = sheet.tables["New Table"]
 table.write(1, 1, 1000)
 table.write(1, 2, 2000)
 table.write(1, 3, 3000)
-doc.save("sheet.numbers")
+doc.save("mydoc.numbers")
 ```
 
 ### Styles
