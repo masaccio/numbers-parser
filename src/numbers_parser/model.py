@@ -2024,7 +2024,7 @@ class _NumbersModel(Cacheable):
     def table_formulas(self, table_id: int):
         return TableFormulas(self, table_id)
 
-    @cache(num_args=2)
+    @cache(num_args=2)  # noqa: RET503
     def table_rich_text(self, table_id: int, string_key: int) -> dict:
         """Extract bullets and hyperlinks from a rich text data cell."""
         # The table model base data store contains a richTextTable field
@@ -2114,7 +2114,6 @@ class _NumbersModel(Cacheable):
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,
                 }
-        return None
 
     def cell_text_style(self, cell: Cell) -> object:
         """
@@ -2414,7 +2413,7 @@ class _NumbersModel(Cacheable):
                 "bottom",
             ),
         )
-        for _, table_id, row, col, side, border_value in sorted(
+        for _, table_id, row, col, side, border_value in sorted(  # noqa: PLR1704
             strokes,
             key=lambda value: value[0],
         ):
@@ -2487,12 +2486,11 @@ class _NumbersModel(Cacheable):
 
         # Clear existing stroke layers to prepare for rebuilt, optimized strokes
         table_obj = self.objects[table_id]
-        if table_obj.stroke_sidecar.identifier != 0:
-            sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]
-            clear_field_container(sidecar_obj.top_row_stroke_layers)
-            clear_field_container(sidecar_obj.bottom_row_stroke_layers)
-            clear_field_container(sidecar_obj.left_column_stroke_layers)
-            clear_field_container(sidecar_obj.right_column_stroke_layers)
+        sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]
+        clear_field_container(sidecar_obj.top_row_stroke_layers)
+        clear_field_container(sidecar_obj.bottom_row_stroke_layers)
+        clear_field_container(sidecar_obj.left_column_stroke_layers)
+        clear_field_container(sidecar_obj.right_column_stroke_layers)
 
         # Horizontal strokes (all but bottom of table)
         for row in range(num_rows):
