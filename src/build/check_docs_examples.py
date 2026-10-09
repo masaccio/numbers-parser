@@ -25,6 +25,7 @@ import contextlib
 import doctest
 import io
 import os
+import pprint
 import re
 import sys
 import tempfile
@@ -136,7 +137,7 @@ def source_of(example: Example) -> str:
 
 def build_namespace(example: Example, document_cls) -> dict:
     ns = {name: getattr(numbers_parser, name) for name in dir(numbers_parser)}
-    ns.update({"Document": document_cls, "open": open_from_data, "datetime": datetime})
+    ns.update({"Document": document_cls, "open": open_from_data, "pprint": pprint, "datetime": datetime})
     try:
         src = source_of(example)
         stored, loaded = stored_and_loaded(src)
