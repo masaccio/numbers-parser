@@ -286,22 +286,6 @@ class _NumbersModel(Cacheable):
         ]
         return ids[0]
 
-    @cache()
-    def row_storage_map(self, table_id):
-        # The base data store contains a reference to rowHeaders.buckets
-        # which is an ordered list that matches the storage buffers, but
-        # identifies which row a storage buffer belongs to (empty rows have
-        # no storage buffers).
-        row_bucket_map = dict.fromkeys(range(self.objects[table_id].number_of_rows))
-        bds = self.objects[table_id].base_data_store
-        bucket_ids = [x.identifier for x in bds.rowHeaders.buckets]
-        idx = 0
-        for bucket_id in bucket_ids:
-            for header in self.objects[bucket_id].headers:
-                row_bucket_map[header.index] = idx
-                idx += 1
-        return row_bucket_map
-
     def number_of_rows(self, table_id, num_rows=None):
         if num_rows is not None:
             self.objects[table_id].number_of_rows = num_rows

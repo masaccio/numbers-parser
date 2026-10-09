@@ -995,7 +995,13 @@ class Cell(CellStorageFlags, Cacheable):
 
         if logging.getLogger(__package__).level == logging.DEBUG:
             # Guard to reduce expense of computing fields
-            debug("%s, cell_type=%d", str(cell), cell_type)
+            debug(
+                "%s, cell_type=%d, flags=0x%0x, %s",
+                repr(cell),
+                cell_type,
+                flags,
+                repr(storage_flags),
+            )
 
         return cell
 

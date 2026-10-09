@@ -342,6 +342,8 @@ def test_custom_format_from_archive(configurable_save_file):
 
 def test_cell_repr():
     doc = Document("tests/data/test-1.numbers")
+    assert repr(doc.sheets[0]) == "numbers_parser.document.Sheet(name='ZZZ_Sheet_1')"
+    assert repr(doc.sheets[0].tables[0]) == "numbers_parser.document.Table(name='ZZZ_Table_1')"
     cell = doc.default_table.cell(1, 1)
     assert (
         repr(cell)
