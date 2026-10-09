@@ -748,9 +748,7 @@ class Cell(CellStorageFlags, Cacheable):
         .. code-block:: python
 
             doc = Document("mydoc.numbers")
-            sheets = doc.sheets
-            tables = sheets[0].tables
-            table = tables[0]
+            table = doc.sheets[0].tables["Examples"]
             if not table.cell(0, 1).is_bulleted:
                 print(table.cell(0, 1).value)
             else:
@@ -774,18 +772,18 @@ class Cell(CellStorageFlags, Cacheable):
 
         .. code-block:: python
 
-            >>> table = doc.default_table
-            >>> table.cell(0,0).value
+            >>> table = doc.sheets[0].tables["Examples"]
+            >>> table.cell("B4").value
             False
-            >>> table.cell(0,0).formatted_value
+            >>> table.cell("B4").formatted_value
             '☐'
-            >>> table.cell(0,1).value
+            >>> table.cell("B5").value
             True
-            >>> table.cell(0,1).formatted_value
+            >>> table.cell("B5").formatted_value
             '☑'
-            >>> table.cell(1,1).value
+            >>> table.cell("B6").value
             3.0
-            >>> table.cell(1,1).formatted_value
+            >>> table.cell("B6").formatted_value
             '★★★'
         """
         if self._duration_format_id is not None and self._double is not None:
