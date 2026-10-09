@@ -484,11 +484,6 @@ class _NumbersModel(Cacheable):
             return "Caption"
         return self.objects[caption_storage_id].text[0]
 
-    @cache()
-    def table_tiles(self, table_id):
-        bds = self.objects[table_id].base_data_store
-        return [self.objects[t.tile.identifier] for t in bds.tiles.tiles]
-
     @cache(num_args=0)
     def custom_format_map(self):
         custom_format_list_id = self.objects[DOCUMENT_ID].super.custom_format_list.identifier
