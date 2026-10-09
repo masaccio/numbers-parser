@@ -286,22 +286,6 @@ class _NumbersModel(Cacheable):
         ]
         return ids[0]
 
-    @cache()
-    def row_storage_map(self, table_id):
-        # The base data store contains a reference to rowHeaders.buckets
-        # which is an ordered list that matches the storage buffers, but
-        # identifies which row a storage buffer belongs to (empty rows have
-        # no storage buffers).
-        row_bucket_map = dict.fromkeys(range(self.objects[table_id].number_of_rows))
-        bds = self.objects[table_id].base_data_store
-        bucket_ids = [x.identifier for x in bds.rowHeaders.buckets]
-        idx = 0
-        for bucket_id in bucket_ids:
-            for header in self.objects[bucket_id].headers:
-                row_bucket_map[header.index] = idx
-                idx += 1
-        return row_bucket_map
-
     def number_of_rows(self, table_id, num_rows=None):
         if num_rows is not None:
             self.objects[table_id].number_of_rows = num_rows
@@ -1056,33 +1040,37 @@ class _NumbersModel(Cacheable):
         return formulas
 
     @cache()
-    def storage_buffers(self, table_id: int) -> list:
-        buffers = []
-        for tile in self.table_tiles(table_id):
+    def storage_buffers(self, table_id: int) -> dict[int, list]:
+        """Return cell storage buffers keyed by table row number.
+
+        Rows with no cells have no TileRowInfo, so rows are identified by each
+        tile's row offset plus ``tile_row_index`` rather than by position.
+        """
+        buffers = {}
+        bds = self.objects[table_id].base_data_store
+        tile_size = bds.tiles.tile_size
+        for tile_ref in bds.tiles.tiles:
+            tile = self.objects[tile_ref.tile.identifier]
             if not tile.last_saved_in_BNC:
                 msg = "Pre-BNC storage is unsupported"
                 raise UnsupportedError(msg)
             for r in tile.rowInfos:
-                buffer = get_storage_buffers_for_row(
-                    r.cell_storage_buffer,
-                    r.cell_offsets,
-                    self.number_of_columns(table_id),
-                    r.has_wide_offsets,
+                buffers[tile_ref.tileid * tile_size + r.tile_row_index] = (
+                    get_storage_buffers_for_row(
+                        r.cell_storage_buffer,
+                        r.cell_offsets,
+                        self.number_of_columns(table_id),
+                        r.has_wide_offsets,
+                    )
                 )
-                buffers.append(buffer)
         return buffers
 
     @cache(num_args=3)
     def storage_buffer(self, table_id: int, row: int, col: int) -> bytes:
-        row_offset = self.row_storage_map(table_id)[row]
-        if row_offset is None:
+        row_buffers = self.storage_buffers(table_id).get(row)
+        if row_buffers is None or col >= len(row_buffers):
             return None
-        storage_buffers = self.storage_buffers(table_id)
-        if row_offset >= len(storage_buffers):
-            return None
-        if col >= len(storage_buffers[row_offset]):
-            return None
-        return storage_buffers[row_offset][col]
+        return row_buffers[col]
 
     def recalculate_row_headers(self, table_id: int, data: list) -> None:
         current_row_heights = {}
