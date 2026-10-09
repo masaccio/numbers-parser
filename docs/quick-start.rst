@@ -29,7 +29,7 @@ Sheets and tables are iterables that can be indexed using either an integer inde
    >>> doc.sheets[0].tables[0].name
    'Categories'
    >>> doc.sheets[0].tables["Categories"].name
-   'Categories
+   'Categories'
 
 ``Table`` objects have a ``rows`` method which contains a nested list with an entry for each row of the table. Each row is itself a list of the column values.
 
@@ -168,8 +168,8 @@ Cell formats are changed using :pages:`Table.set_cell_formatting() <api/table.ht
       date_time_format="EEEE, d MMMM yyyy"
    )
    table.set_cell_formatting(
-      0,
-      4,
+      1,
+      1,
       "number", 
       decimal_places=3, 
       negative_style=NegativeNumberStyle.RED
@@ -182,7 +182,7 @@ Custom formats are shared across a Document and can be applied to multiple cells
    long_date = doc.add_custom_format(
       name="Long Date", 
       type="datetime", 
-      date_time_format="EEEE, d MMMM yyyy"
+      format="EEEE, d MMMM yyyy"
    )
    table.set_cell_formatting("C1", "custom", format=long_date)
 

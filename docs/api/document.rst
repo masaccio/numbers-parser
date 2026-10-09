@@ -15,7 +15,7 @@ once on construction of a :class:`Document`:
    >>> doc = Document("mydoc.numbers")
    >>> doc.sheets[0].name
    'Sheet 1'
-   >>> table = doc.sheets[0].tables[]
+   >>> table = doc.sheets[0].tables[0]
    >>> table.name
    'Categories'
 
