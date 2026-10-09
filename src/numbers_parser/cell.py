@@ -107,13 +107,13 @@ class BackgroundImage:
 
     .. code-block:: python
 
-        fh = open("cats.png", mode="rb")
+        fh = open("cat.jpg", mode="rb")
         image_data = fh.read()
-        cats_bg = doc.add_style(
-            name="Cats",
-            bg_image=BackgroundImage(image_data, "cats.png")
+        cat_bg = doc.add_style(
+            name="Cat",
+            bg_image=BackgroundImage(image_data, "cat.jpg")
         )
-        table.write(0, 0, "❤️ cats", style=cats_bg)
+        table.write(0, 0, "❤️ cats", style=cat_bg)
 
     Currently only standard image files and not 'advanced' image fills are
     supported. Tiling and scaling is not reported back and cannot be changed
