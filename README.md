@@ -269,6 +269,7 @@ options:
                         Names of sheet(s) to include in export
   -t TABLE, --table TABLE
                         Names of table(s) to include in export
+  --password PASSWORD   Password for encrypted documents
   --debug               Enable debug logging
 ```
 
@@ -278,7 +279,7 @@ Note: `--formatting` will return different capitalization for 12-hour times due 
 
 This script converts Excel-compatible CSV files into Numbers documents. Output files can optionally be provided, but is none are provided, the output is created by replacing the input’s files suffix with .numbers. For example:
 
-```text
+```bash
 csv2numbers file1.csv file2.csv -o file1.numbers file2.numbers
 ```
 
@@ -305,6 +306,7 @@ options:
   --no-header           CSV file has no header row (default: false)
   --day-first           dates are represented day first in the CSV file
                         (default: false)
+  --encoding ENCODING   python-style text encoding of the CSV file (default: utf-8)
   --date COLUMNS        comma-separated list of column names/indexes to
                         parse as dates
   --rename COLUMNS-MAP  comma-separated list of column names/indexes to
@@ -317,6 +319,7 @@ options:
   -o [FILENAME ...], --output [FILENAME ...]
                         output filename (default: use source file with
                         .numbers)
+  --password PASSWORD   Password for encrypted documents
 ```
 
 The following options affecting the output of the entire file. The default for each is always false.
@@ -332,7 +335,7 @@ The following options affecting the output of the entire file. The default for e
 
 Delete columns using `--delete`. The names or indices of the columns to delete are specified as comma-separated values:
 
-```text
+```bash
 csv2numbers file1.csv --delete=Account,3
 ```
 
@@ -340,28 +343,28 @@ csv2numbers file1.csv --delete=Account,3
 
 Rename columns using `--rename`. The current column name and new column name are separated by a `:` and each renaming is specified as comma-separated values:
 
-```text
+```bash
 csv2numbers file1.csv --rename=2:Account,"Paid In":Amount
 ```
 
 #### Date columns
 
-The `--date` option identifies a comma-separated list of columns that should be parsed as dates. Use `--day-first` where the day and month is ambiguous anf the day comes first rather than the month.
+The `--date` option identifies a comma-separated list of columns that should be parsed as dates. Use `--day-first` where the day and month is ambiguous and the day comes first rather than the month.
 
 #### Transforming columns
 
-Columns can be merged and new columns created using simple functions. The –transform option takes a comma-seperated list of transformations of the form NEW:FUNC=OLD. Supported functions are:
+Columns can be merged and new columns created using simple functions. The –transform option takes a comma-separated list of transformations of the form NEW:FUNC=OLD. Supported functions are:
 
-| Function   | Arguments                   | Description                                                                                                                                                                                                                                                                                                                                           |
-|------------|-----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| MERGE      | dest=MERGE:source           | The dest column is writen with values from one or more columns<br/>indicated by source. For multiple columns, which are separated<br/>by ;, the first empty value is chosen.                                                                                                                                                                          |
-| NEG        | dest=NEG:source             | The dest column contains absolute values of any column that is<br/>negative. This is useful for isolating debits from account<br/>exports.                                                                                                                                                                                                            |
-| POS        | dest=NEG:source             | The dest column contains values of any column that is<br/>positive. This is useful for isolating credits from account<br/>exports.                                                                                                                                                                                                                    |
-| LOOKUP     | dest=LOOKUP:source;filename | A lookup map is read from filename which must be an Apple<br/>Numbers file containing a single table of two columns. The table<br/>is used to match agsinst source, searching the first column<br/>for matches and writing the corresponding value from the second<br/>column to dest. Values are chosen based on the longest<br/>matching substring. |
+| Function   | Arguments                     | Description                                                                                                                                                                                                                                                                                                                                                 |
+|------------|-------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `MERGE`    | `dest=MERGE:source`           | The `dest` column is written with values from one or more columns<br/>indicated by `source`. For multiple columns, which are separated<br/>by `;`, the first empty value is chosen.                                                                                                                                                                         |
+| `NEG`      | `dest=NEG:source`             | The `dest` column contains absolute values of any column that is<br/>negative. This is useful for isolating debits from account<br/>exports.                                                                                                                                                                                                                |
+| `POS`      | `dest=NEG:source`             | The `dest` column contains values of any column that is<br/>positive. This is useful for isolating credits from account<br/>exports.                                                                                                                                                                                                                        |
+| `LOOKUP`   | `dest=LOOKUP:source;filename` | A lookup map is read from `filename` which must be an Apple<br/>Numbers file containing a single table of two columns. The table<br/>is used to match against `source`, searching the first column<br/>for matches and writing the corresponding value from the second<br/>column to `dest`. Values are chosen based on the longest<br/>matching substring. |
 
 Examples:
 
-```text
+```bash
 csv2numbers --transform="Paid In"=POS:Amount,Withdrawn=NEG:Amount file1.csv
 csv2numbers --transform='Category=LOOKUP:Transaction;mapping.numbers' file1.csv
 ```
