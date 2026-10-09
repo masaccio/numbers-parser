@@ -27,20 +27,20 @@ Sheets and tables are iterables that can be indexed using either an integer inde
    >>> doc.sheets["Sheet 1"].name
    'Sheet 1'
    >>> doc.sheets[0].tables[0].name
-   'Table 1'
-   >>> doc.sheets[0].tables["Table 1"].name
-   'Table 1'
+   'Categories'
+   >>> doc.sheets[0].tables["Categories"].name
+   'Categories
 
 ``Table`` objects have a ``rows`` method which contains a nested list with an entry for each row of the table. Each row is itself a list of the column values.
 
 .. code:: python
 
 
-   >>> data = doc.sheets["Sheet 1"].tables["Table 1"].rows()
+   >>> data = doc.sheets["Sheet 1"].tables["Examples"].rows()
    >>> data[0][0]
-   numbers_parser.cell.EmptyCell(sheet_name='Sheet 1', table_name='Table 1', value='None')
+   numbers_parser.cell.EmptyCell(sheet_name='Sheet 1', table_name='Examples', value='None', row=0, col=0)
    >>> data[1][0]
-   numbers_parser.cell.TextCell(sheet_name='Sheet 1', table_name='Table 1', value='Debit')
+   numbers_parser.cell.TextCell(sheet_name='Sheet 1', table_name='Examples', value='Debit', row=1, col=0)
    >>> data[1][0].value
    'Debit'
 
@@ -82,11 +82,11 @@ Cell references can be either zero-offset row/column integers or an Excel/Number
 .. code:: python
 
    >>> table.cell(1,0)
-   numbers_parser.cell.TextCell(sheet_name='Sheet 1', table_name='Examples', value='Debit')
+   numbers_parser.cell.TextCell(sheet_name='Sheet 1', table_name='Examples', value='Debit', row=1, col=0)
    >>> table.cell(1,0).value
    'Debit'
    >>> table.cell("B2")
-   numbers_parser.cell.NumberCell(sheet_name='Sheet 1', table_name='Examples', value='1234.5')
+   numbers_parser.cell.NumberCell(sheet_name='Sheet 1', table_name='Examples', value='1234.5', row=1, col=1)
    >>> table.cell("B2").value
    1234.5
    >>> table.cell("B2").formatted_value

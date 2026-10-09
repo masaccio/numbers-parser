@@ -15,9 +15,9 @@ once on construction of a :class:`Document`:
    >>> doc = Document("mydoc.numbers")
    >>> doc.sheets[0].name
    'Sheet 1'
-   >>> table = doc.sheets[0].tables[0]
+   >>> table = doc.sheets[0].tables[]
    >>> table.name
-   'Table 1'
+   'Categories'
 
 A new document is created when :class:`Document` is constructed without a filename argument:
 

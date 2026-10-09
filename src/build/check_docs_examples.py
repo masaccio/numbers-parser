@@ -137,7 +137,9 @@ def source_of(example: Example) -> str:
 
 def build_namespace(example: Example, document_cls) -> dict:
     ns = {name: getattr(numbers_parser, name) for name in dir(numbers_parser)}
-    ns.update({"Document": document_cls, "open": open_from_data, "pprint": pprint, "datetime": datetime})
+    ns.update(
+        {"Document": document_cls, "open": open_from_data, "pprint": pprint, "datetime": datetime}
+    )
     try:
         src = source_of(example)
         stored, loaded = stored_and_loaded(src)
@@ -202,13 +204,11 @@ def main() -> int:
             err = run_session(ex, ns) if ex.is_session else run_code(ex, ns)
             if err is not None:
                 failures += 1
-            if args.verbose:
-                if err is not None:
-                    print(f"FAIL {ex.where} ({kind})")
-                    print(textwrap.indent(err.rstrip(), "     "))
-                else:
-                    print(f"PASS {ex.where} ({kind})")
-                    print(textwrap.indent(ex.text, "     "))
+                print(f"FAIL {ex.where} ({kind})")
+                print(textwrap.indent(err.rstrip(), "     "))
+            elif args.verbose:
+                print(f"PASS {ex.where} ({kind})")
+                print(textwrap.indent(ex.text, "     "))
 
     argv0 = os.path.basename(__file__)
     print(f"{argv0}: {len(examples)} examples checked, {failures} problems")

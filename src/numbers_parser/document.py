@@ -1366,7 +1366,7 @@ class Table(Cacheable):
         .. code:: python
 
             >>> table.cell("B2")
-            numbers_parser.cell.NumberCell(sheet_name='Sheet 1', table_name='Examples', value='1234.5')
+            numbers_parser.cell.NumberCell(sheet_name='Sheet 1', table_name='Examples', value='1234.5', row=1, col=1)
             >>> table.cell("B2").is_merged
             False
             >>> table.merge_cells("B2:C2")

@@ -60,6 +60,7 @@ docs = [
     "urllib3>=2.7.0",
     "filelock>=3.20.1",
     "docutils>=0.21.2",
+    "pandas>=2.3.3",
 ]
 profile = [
     "gprof2dot>=2022.7.29,<2026.0.0",
