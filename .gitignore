@@ -17,7 +17,6 @@ __pycache__/
 
 # Setuptools
 dist
-build
 *.egg-info
 src/*.egg-info
 

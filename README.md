@@ -56,19 +56,19 @@ Sheets and tables are iterables that can be indexed using either an integer inde
 >>> doc.sheets["Sheet 1"].name
 'Sheet 1'
 >>> doc.sheets[0].tables[0].name
-'Table 1'
->>> doc.sheets[0].tables["Table 1"].name
-'Table 1'
+'Categories'
+>>> doc.sheets[0].tables["Categories"].name
+'Categories'
 ```
 
 `Table` objects have a `rows` method which contains a nested list with an entry for each row of the table. Each row is itself a list of the column values.
 
 ```python
->>> data = sheets["Sheet 1"].tables["Table 1"].rows()
+>>> data = doc.sheets["Sheet 1"].tables["Examples"].rows()
 >>> data[0][0]
-<numbers_parser.cell.EmptyCell object at 0x1022b5710>
+numbers_parser.cell.EmptyCell(sheet_name='Sheet 1', table_name='Examples', value='None', row=0, col=0)
 >>> data[1][0]
-<numbers_parser.cell.TextCell object at 0x101eb6790>
+numbers_parser.cell.TextCell(sheet_name='Sheet 1', table_name='Examples', value='Debit', row=1, col=0)
 >>> data[1][0].value
 'Debit'
 ```
@@ -93,11 +93,11 @@ Cell references can be either zero-offset row/column integers or an Excel/Number
 
 ```python
 >>> table.cell(1,0)
-<numbers_parser.cell.TextCell object at 0x1019ade50>
+numbers_parser.cell.TextCell(sheet_name='Sheet 1', table_name='Examples', value='Debit', row=1, col=0)
 >>> table.cell(1,0).value
 'Debit'
 >>> table.cell("B2")
-<numbers_parser.cell.NumberCell object at 0x103a99790>
+numbers_parser.cell.NumberCell(sheet_name='Sheet 1', table_name='Examples', value='1234.5', row=1, col=1)
 >>> table.cell("B2").value
 1234.5
 >>> table.cell("B2").formatted_value
@@ -111,7 +111,7 @@ Since the return value of `rows()` is a list of lists, you can pass this directl
 ```python
 import pandas as pd
 
-doc = Document("simple.numbers")
+doc = Document("mydoc.numbers")
 sheets = doc.sheets
 tables = sheets[0].tables
 data = tables[0].rows(values_only=True)
@@ -125,19 +125,19 @@ Whilst support for writing numbers files has been stable since version 3.4.0, yo
 Cell values are written using [Table.write()](https://masaccio.github.io/numbers-parser/api/table.html#numbers_parser.Table.write) and `numbers-parser` will automatically create empty rows and columns for any cell references that are out of range of the current table.
 
 ```python
-doc = Document("write.numbers")
+doc = Document("mydoc.numbers")
 sheets = doc.sheets
 tables = sheets[0].tables
 table = tables[0]
 table.write(1, 1, "This is new text")
 table.write("B7", datetime(2020, 12, 25))
-doc.save("new-sheet.numbers")
+doc.save("mydoc.numbers")
 ```
 
 Encrypted documents are not automatically re-saved with encryption and you must specify a password on save:
 
 ```python
-doc.save("new-sheet.numbers", password="s3cr3t")
+doc.save("mydoc.numbers", password="s3cr3t")
 ```
 
 Additional tables and worksheets can be added to a `Document` before saving using [Document.add_sheet()](https://masaccio.github.io/numbers-parser/api/document.html#numbers_parser.Document.add_sheet) and [Sheet.add_table()](https://masaccio.github.io/numbers-parser/api/sheet.html#numbers_parser.Sheet.add_table) respectively:
@@ -150,7 +150,7 @@ table = sheet.tables["New Table"]
 table.write(1, 1, 1000)
 table.write(1, 2, 2000)
 table.write(1, 3, 3000)
-doc.save("sheet.numbers")
+doc.save("mydoc.numbers")
 ```
 
 ### Styles
@@ -201,8 +201,8 @@ table.set_cell_formatting(
    date_time_format="EEEE, d MMMM yyyy"
 )
 table.set_cell_formatting(
-   0,
-   4,
+   1,
+   1,
    "number",
    decimal_places=3,
    negative_style=NegativeNumberStyle.RED
@@ -215,7 +215,7 @@ Custom formats are shared across a Document and can be applied to multiple cells
 long_date = doc.add_custom_format(
    name="Long Date",
    type="datetime",
-   date_time_format="EEEE, d MMMM yyyy"
+   format="EEEE, d MMMM yyyy"
 )
 table.set_cell_formatting("C1", "custom", format=long_date)
 ```

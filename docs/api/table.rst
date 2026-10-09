@@ -14,12 +14,12 @@ and can be indexed using either list style or dict style indexes:
    >>> from numbers_parser import Document
    >>> doc = Document("mydoc.numbers")
    >>> sheet = doc.sheets["Sheet 1"]
-   >>> sheet.tables[0]
-   <numbers_parser.document.Table object at 0x1063e5d10>
-   >>> sheet.tables[0].name
-   'Table 1'
-   >>> sheet.tables["Table 1"].name
-   'Table 1'
+   >>> sheet.tables[1]
+   numbers_parser.document.Table(name='Examples')
+   >>> sheet.tables[1].name
+   'Examples'
+   >>> sheet.tables["Examples"].name
+   'Examples'
 
 .. NOTE::
 

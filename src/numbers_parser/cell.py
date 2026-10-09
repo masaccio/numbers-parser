@@ -107,13 +107,13 @@ class BackgroundImage:
 
     .. code-block:: python
 
-        fh = open("cats.png", mode="rb")
+        fh = open("cat.jpg", mode="rb")
         image_data = fh.read()
-        cats_bg = doc.add_style(
-            name="Cats",
-            bg_image=BackgroundImage(image_data, "cats.png")
+        cat_bg = doc.add_style(
+            name="Cat",
+            bg_image=BackgroundImage(image_data, "cat.jpg")
         )
-        table.write(0, 0, "❤️ cats", style=cats_bg)
+        table.write(0, 0, "❤️ cats", style=cat_bg)
 
     Currently only standard image files and not 'advanced' image fills are
     supported. Tiling and scaling is not reported back and cannot be changed
@@ -625,7 +625,7 @@ class CellStorageFlags:
     _bool_format_id: int = None
     _extra_bits: int = 0
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         fields = [
             f"{k[1:]}={v}" for k, v in asdict(self).items() if k.endswith("_id") and v is not None
         ]
@@ -655,13 +655,26 @@ class Cell(CellStorageFlags, Cacheable):
         self._seconds = None
         super().__init__()
 
+    @property
+    def sheet_name(self) -> str:
+        """str: The name of the sheet the cell resides in."""
+        return self._model.sheet_name(self._model.table_id_to_sheet_id(self._table_id))
+
+    @property
+    def table_name(self) -> str:
+        """str: The name of the table the cell resides in."""
+        return self._model.table_name(self._table_id)
+
     def __str__(self) -> str:
-        table_name = self._model.table_name(self._table_id)
-        sheet_name = self._model.sheet_name(self._model.table_id_to_sheet_id(self._table_id))
-        cell_str = f"{sheet_name}@{table_name}[{self.row},{self.col}]:"
-        cell_str += f"table_id={self._table_id}, type={self._type.name}, "
-        cell_str += f"value={self._value}, flags={self._flags:08x}, extras={self._extra_bits:04x}"
-        return ", ".join([cell_str, super().__str__()])
+        return str(self.value)
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__module__}.{self.__class__.__name__}"
+            + f"(sheet_name='{self.sheet_name}', "
+            + f"table_name='{self.table_name}', value='{self.value}', "
+            + f"row={self.row}, col={self.col})"
+        )
 
     @property
     def image_filename(self):
@@ -734,10 +747,8 @@ class Cell(CellStorageFlags, Cacheable):
         -------
         .. code-block:: python
 
-            doc = Document("bullets.numbers")
-            sheets = doc.sheets
-            tables = sheets[0].tables
-            table = tables[0]
+            doc = Document("mydoc.numbers")
+            table = doc.sheets[0].tables["Examples"]
             if not table.cell(0, 1).is_bulleted:
                 print(table.cell(0, 1).value)
             else:
@@ -761,18 +772,18 @@ class Cell(CellStorageFlags, Cacheable):
 
         .. code-block:: python
 
-            >>> table = doc.default_table
-            >>> table.cell(0,0).value
+            >>> table = doc.sheets[0].tables["Examples"]
+            >>> table.cell("B4").value
             False
-            >>> table.cell(0,0).formatted_value
+            >>> table.cell("B4").formatted_value
             '☐'
-            >>> table.cell(0,1).value
+            >>> table.cell("B5").value
             True
-            >>> table.cell(0,1).formatted_value
+            >>> table.cell("B5").formatted_value
             '☑'
-            >>> table.cell(1,1).value
+            >>> table.cell("B6").value
             3.0
-            >>> table.cell(1,1).formatted_value
+            >>> table.cell("B6").formatted_value
             '★★★'
         """
         if self._duration_format_id is not None and self._double is not None:
@@ -984,7 +995,13 @@ class Cell(CellStorageFlags, Cacheable):
 
         if logging.getLogger(__package__).level == logging.DEBUG:
             # Guard to reduce expense of computing fields
-            debug("%s, cell_type=%d", str(cell), cell_type)
+            debug(
+                "%s, cell_type=%d, flags=0x%0x, %s",
+                repr(cell),
+                cell_type,
+                flags,
+                repr(storage_flags),
+            )
 
         return cell
 
@@ -1522,8 +1539,10 @@ class RichTextCell(Cell):
         -------
         .. code-block:: python
 
-            cell = table.cell(0, 0)
-            (text, url) = cell.hyperlinks[0]
+            >>> table.cell(1, 2)
+            numbers_parser.cell.RichTextCell(sheet_name='Sheet 1', table_name='Examples', value='example.com', row=1, col=2)
+            >>> table.cell(1, 2).hyperlinks
+            [('example.com', 'http://example.com')]
 
         """
         return self._hyperlinks

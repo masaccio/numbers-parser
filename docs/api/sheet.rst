@@ -14,7 +14,7 @@ and can be indexed using either list style or dict style indexes:
    >>> from numbers_parser import Document
    >>> doc = Document("mydoc.numbers")
    >>> doc.sheets[0]
-   <numbers_parser.document.Sheet object at 0x105f12390>
+   numbers_parser.document.Sheet(name='Sheet 1')
    >>> doc.sheets[0].name
    'Sheet 1'
    >>> doc.sheets["Sheet 1"].name
