@@ -9,7 +9,11 @@ blocks. Two kinds of block are recognised:
   the documented output, ignoring memory addresses, and
 * full code, which is simply executed.
 
-Usage: python src/build/check_code_examples.py [--create-data] [-v]
+Document.__init__ is monkey patched so any filename opens
+tests/data/check-docs-examples.numbers; Document.save is redirected to a
+temporary directory.
+
+Usage: python src/build/check_docs_examples.py [-v]
 Exit status is non-zero if any example fails.
 """
 
@@ -176,7 +180,7 @@ def main() -> int:
     args = ap.parse_args()
 
     if not DATA_FILE.exists():
-        print(f"{DATA_FILE} missing: run with --create-data")
+        print(f"{DATA_FILE} missing")
         return 1
 
     examples = find_examples()
