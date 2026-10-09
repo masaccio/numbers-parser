@@ -1533,8 +1533,10 @@ class RichTextCell(Cell):
         -------
         .. code-block:: python
 
-            cell = table.cell(0, 0)
-            (text, url) = cell.hyperlinks[0]
+            >>> table.cell(1, 2)
+            numbers_parser.cell.RichTextCell(sheet_name='Sheet 1', table_name='Examples', value='example.com', row=1, col=2)
+            >>> table.cell(1, 2).hyperlinks
+            [('example.com', 'http://example.com')]
 
         """
         return self._hyperlinks

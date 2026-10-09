@@ -719,9 +719,9 @@ class Table(Cacheable):
             >>> table.merge_ranges
             ['A4:A10']
             >>> table.cell("A4")
-            <numbers_parser.cell.TextCell object at 0x1035f4a90>
+            numbers_parser.cell.TextCell(sheet_name='Sheet 1', table_name='Examples', value='Merged', row=3, col=0)
             >>> table.cell("A5")
-            <numbers_parser.cell.MergedCell object at 0x1035f5310>
+            numbers_parser.cell.MergedCell(sheet_name='Sheet 1', table_name='Examples', value='None', row=4, col=0)
 
         """
         merge_cells = set()
@@ -764,7 +764,7 @@ class Table(Cacheable):
             >>> doc = Document("mydoc.numbers")
             >>> sheets = doc.sheets
             >>> tables = sheets["Sheet 1"].tables
-            >>> table = tables["Table 1"]
+            >>> table = tables["Examples"]
             >>> table.cell(1,0).value
             'Debit'
             >>> table.cell("B2").value
