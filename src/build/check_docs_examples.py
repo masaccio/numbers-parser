@@ -39,7 +39,8 @@ from numbers_parser import *  # noqa: F403
 from numbers_parser import Document as RealDocument
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA_FILE = ROOT / "tests" / "data" / "check-docs-examples.numbers"
+DATA_DIR = ROOT / "tests" / "data"
+DATA_FILE = DATA_DIR / "check-docs-examples.numbers"
 DIRECTIVE_RE = re.compile(r"^(\s*)\.\. code(?:-block)?::\s+python\s*$")
 ADDRESS_RE = re.compile(r"0x[0-9a-fA-F]+")
 
@@ -110,6 +111,13 @@ def make_document_shim(tmpdir: Path):
     return RealDocument
 
 
+def open_from_data(file, *args, **kwargs):
+    """open() replacement that resolves relative filenames in tests/data."""
+    if isinstance(file, (str, os.PathLike)) and not Path(file).is_absolute():
+        file = DATA_DIR / file
+    return open(file, *args, **kwargs)  # noqa: SIM115
+
+
 def stored_and_loaded(code: str) -> tuple[set[str], set[str]]:
     tree = ast.parse(code)
     stored, loaded = set(), set()
@@ -128,7 +136,7 @@ def source_of(example: Example) -> str:
 
 def build_namespace(example: Example, document_cls) -> dict:
     ns = {name: getattr(numbers_parser, name) for name in dir(numbers_parser)}
-    ns.update({"Document": document_cls, "datetime": datetime})
+    ns.update({"Document": document_cls, "open": open_from_data, "datetime": datetime})
     try:
         src = source_of(example)
         stored, loaded = stored_and_loaded(src)
