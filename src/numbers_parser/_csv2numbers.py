@@ -119,7 +119,7 @@ class Converter:
                 del row[col]
 
     def transform_columns(self: Converter, columns: list[ColumnTransform]) -> None:
-        """Perform column transformationstransformations."""
+        """Perform column transformations."""
         if columns is None:
             return
         for transform in columns:

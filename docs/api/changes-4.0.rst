@@ -1,6 +1,6 @@
 :hidetoc: 1
 
-Changes in version 4.0
+Changes in version 4.x
 ======================
 
 To better partition cell styles, background image data which was supported in earlier versions
@@ -20,3 +20,6 @@ available using the properties of the same name (see examples in this README).
 
 From version 4.15, a number of dependencies have been removed to simplify installation and
 to remove some large dependencies such as Rust for Pendulum.
+
+From version 4.20, exceptions have been made more consistent and objects have `__repr__` methods
+which should consistently provide short, text-based summaries of top-level API objects.

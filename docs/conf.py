@@ -39,8 +39,8 @@ html_style = ["custom.css"]
 pygments_style = "pastie"
 pygments_dark_style = "dracula"
 html_theme_options = {
-    "monospace_font": "Ubuntu Sans",
-    "monospace_font_size": "1.1rem",
+    "monospace_font": "Ubuntu Sans Mono",
+    "monospace_font_size": "0.85rem",
     "repository_url": GITHUB,
     "repository_name": "masaccio/numbers-parser",
     "current_version": _get_version(),

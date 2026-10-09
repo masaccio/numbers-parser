@@ -39,6 +39,7 @@ This script dumps Numbers spreadsheets into Excel-compatible CSV format, iterati
                             Names of sheet(s) to include in export
       -t TABLE, --table TABLE
                             Names of table(s) to include in export
+      --password PASSWORD   Password for encrypted documents
       --debug               Enable debug logging
 
 Note: ``--formatting`` will return different capitalization for 12-hour times due to differences between Numbers’ representation of these dates and ``datetime.strftime``. Numbers in English locales displays 12-hour times with ‘am’ and ‘pm’, but ``datetime.strftime`` on macOS at least cannot return lower-case versions of AM/PM.
@@ -48,13 +49,13 @@ csv2numbers
 
 This script converts Excel-compatible CSV files into Numbers documents. Output files can optionally be provided, but is none are provided, the output is created by replacing the input's files suffix with `.numbers`. For example:
 
-.. code:: text
+.. code:: bash
 
   csv2numbers file1.csv file2.csv -o file1.numbers file2.numbers
 
 Columns of data can have a number of transformations applied to them. The primary use- case intended for ``csv2numbers`` is converting banking exports to well-formatted spreadsheets.
 
-.. code:: text
+.. code-block:: text
 
   usage: csv2numbers [-h] [-V] [--whitespace] [--reverse] [--no-header]
                      [--day-first] [--date COLUMNS] [--rename COLUMNS-MAP]
@@ -76,6 +77,7 @@ Columns of data can have a number of transformations applied to them. The primar
     --no-header           CSV file has no header row (default: false)
     --day-first           dates are represented day first in the CSV file
                           (default: false)
+    --encoding ENCODING   python-style text encoding of the CSV file (default: utf-8)
     --date COLUMNS        comma-separated list of column names/indexes to
                           parse as dates
     --rename COLUMNS-MAP  comma-separated list of column names/indexes to
@@ -88,6 +90,7 @@ Columns of data can have a number of transformations applied to them. The primar
     -o [FILENAME ...], --output [FILENAME ...]
                           output filename (default: use source file with
                           .numbers)
+    --password PASSWORD   Password for encrypted documents
 
 The following options affecting the output of the entire file. The default for each is always false.
 
@@ -103,7 +106,7 @@ Deleting columns
 
 Delete columns using ``--delete``. The names or indices of the columns to delete are specified as comma-separated values:
 
-.. code:: text
+.. code:: bash
 
   csv2numbers file1.csv --delete=Account,3
 
@@ -112,46 +115,46 @@ Renaming columns
 
 Rename columns using ``--rename``. The current column name and new column name are separated by a ``:`` and each renaming is specified as comma-separated values:
 
-.. code:: text
+.. code:: bash
 
   csv2numbers file1.csv --rename=2:Account,"Paid In":Amount
 
 Date columns
 """""""""""""
 
-The ``--date`` option identifies a comma-separated list of columns that should be parsed as dates. Use ``--day-first`` where the day and month is ambiguous anf the day comes first rather than the month.
+The ``--date`` option identifies a comma-separated list of columns that should be parsed as dates. Use ``--day-first`` where the day and month is ambiguous and the day comes first rather than the month.
 
 Transforming columns
 """""""""""""""""""""
 
-Columns can be merged and new columns created using simple functions. The `--transform` option takes a comma-seperated list of transformations of the form `NEW:FUNC=OLD`. Supported functions are:
+Columns can be merged and new columns created using simple functions. The `--transform` option takes a comma-separated list of transformations of the form `NEW:FUNC=OLD`. Supported functions are:
 
-+-------------+-------------------------------+------------------------------------------------------------------+
-| Function    | Arguments                     | Description                                                      |
-+-------------+-------------------------------+------------------------------------------------------------------+
-| `MERGE`     | `dest=MERGE:source`           | The `dest` column is writen with values from one or more columns |
-|             |                               | indicated by `source`. For multiple columns, which are separated |
-|             |                               | by `;`, the first empty value is chosen.                         |
-+-------------+-------------------------------+------------------------------------------------------------------+
-| `NEG`       | `dest=NEG:source`             | The `dest` column contains absolute values of any column that is |
-|             |                               | negative. This is useful for isolating debits from account       |
-|             |                               | exports.                                                         |
-+-------------+-------------------------------+------------------------------------------------------------------+
-| `POS`       | `dest=NEG:source`             | The `dest` column contains values of any column that is          |
-|             |                               | positive. This is useful for isolating credits from account      |
-|             |                               | exports.                                                         |
-+-------------+-------------------------------+------------------------------------------------------------------+
-| `LOOKUP`    | `dest=LOOKUP:source;filename` | A lookup map is read from `filename` which must be an Apple      |
-|             |                               | Numbers file containing a single table of two columns. The table |
-|             |                               | is used to match agsinst `source`, searching the first column    |
-|             |                               | for matches and writing the corresponding value from the second  |
-|             |                               | column to `dest`. Values are chosen based on the longest         |
-|             |                               | matching substring.                                              |
-+-------------+-------------------------------+------------------------------------------------------------------+
++-------------+---------------------------------+---------------------------------------------------------------------+
+| Function    | Arguments                       | Description                                                         |
++-------------+---------------------------------+---------------------------------------------------------------------+
+| ``MERGE``   | ``dest=MERGE:source``           | The ``dest`` column is written with values from one or more columns |
+|             |                                 | indicated by ``source``. For multiple columns, which are separated  |
+|             |                                 | by ``;``, the first empty value is chosen.                          |
++-------------+---------------------------------+---------------------------------------------------------------------+
+| ``NEG``     | ``dest=NEG:source``             | The ``dest`` column contains absolute values of any column that is  |
+|             |                                 | negative. This is useful for isolating debits from account          |
+|             |                                 | exports.                                                            |
++-------------+---------------------------------+---------------------------------------------------------------------+
+| ``POS``     | ``dest=NEG:source``             | The ``dest`` column contains values of any column that is           |
+|             |                                 | positive. This is useful for isolating credits from account         |
+|             |                                 | exports.                                                            |
++-------------+---------------------------------+---------------------------------------------------------------------+
+| ``LOOKUP``  | ``dest=LOOKUP:source;filename`` | A lookup map is read from ``filename`` which must be an Apple       |
+|             |                                 | Numbers file containing a single table of two columns. The table    |
+|             |                                 | is used to match against ``source``, searching the first column     |
+|             |                                 | for matches and writing the corresponding value from the second     |
+|             |                                 | column to ``dest``. Values are chosen based on the longest          |
+|             |                                 | matching substring.                                                 |
++-------------+---------------------------------+---------------------------------------------------------------------+
 
 Examples:
 
-.. code:: text
+.. code:: bash
 
   csv2numbers --transform="Paid In"=POS:Amount,Withdrawn=NEG:Amount file1.csv
   csv2numbers --transform='Category=LOOKUP:Transaction;mapping.numbers' file1.csv

@@ -69,7 +69,7 @@ pathnames
 pathsource
 pbtype
 popn
-profobuf
+protobuf
 PROTOC
 protodump
 pstats
@@ -92,6 +92,7 @@ Sobot
 srcurl
 srgb
 Standin
+strftime
 strikethru
 stylesheet
 TICKBOX
@@ -100,7 +101,6 @@ Tpng
 tput
 tqdm
 transctions
-transformationstransformations
 TSCE
 TSWP
 uids

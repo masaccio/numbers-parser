@@ -116,3 +116,12 @@ whitespace. Supported directives are:
 | ``SSSSS`` | Seconds to five decimal   | 00000 - 9999           |
 |           | places                    |                        |
 +-----------+---------------------------+------------------------+
+| ``QQQ``   | Quarter in the year       | Q1-Q4                  |
+|           | (used in categories only) |                        |            
++-----------+---------------------------+------------------------+
+| ``LLLL``  | Full month name (used in  | January, February, ... |
+|           | categories only)          |                        |            
++-----------+---------------------------+------------------------+
+| ``w``     | Week number (used in      | 0-52                   |
+|           | categories only)          |                        |            
++-----------+---------------------------+------------------------+

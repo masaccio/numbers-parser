@@ -34,7 +34,7 @@ class NumbersUnpacker(IWorkHandler):
     output_dir: str = None
 
     def store_file(self, filename: str, blob: bytes) -> None:
-        """Store a profobuf archive."""
+        """Store a protobuf archive."""
         filename = re.sub(r".*\.numbers/", "", str(filename))
         self.ensure_directory_exists(filename)
         target_path = os.path.join(self.output_dir, filename)
