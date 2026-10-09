@@ -1094,15 +1094,13 @@ class Table(Cacheable):
         -------
         .. code:: python
 
-            "Transport": [
-                {"Airplane", "Air": 5 },
-                {"Helicopter": "Air", 2 },
-                {"Bus": "Road", 10 },
-            ],
-            "Fruit": [
-                {"Apple", "Green": 7 },
-                {"Banana", "Yellow", 6 },
-            ],
+            >>> table = doc.sheets[0].tables['Categories']
+            >>> table.categorized_data(values_only=True)
+            >>> pprint.pp(table.categorized_data(values_only=True))
+            {'Fruit': [['Apple', 'Fruit', 40.0], ['Banana', 'Fruit', 40.0]],
+             'Transport': [['Airplane', 'Transport', 5.0],
+                           ['Bus', 'Transport', 5.0],
+                           ['Helicopter', 'Transport', 5.0]]}
 
         For tables with multiple categories, the top-level dictionary is nested.
 

@@ -9,11 +9,6 @@ blocks. Two kinds of block are recognised:
   the documented output, ignoring memory addresses, and
 * full code, which is simply executed.
 
-Examples refer to ``mydoc.numbers``. In the checker ``Document(filename)`` is
-shimmed to read tests/data/check-examples-2.numbers and ``Document.save()`` is
-redirected to a temporary directory. Where a block uses ``doc``, ``table`` etc.
-without defining them they are created from that document.
-
 Usage: python src/build/check_code_examples.py [--create-data] [-v]
 Exit status is non-zero if any example fails.
 """
@@ -131,8 +126,10 @@ def build_namespace(example: Example, document_cls) -> dict:
     ns = {name: getattr(numbers_parser, name) for name in dir(numbers_parser)}
     ns.update({"Document": document_cls, "datetime": datetime})
     try:
-        stored, loaded = stored_and_loaded(source_of(example))
+        src = source_of(example)
+        stored, loaded = stored_and_loaded(src)
     except SyntaxError:
+        print(f"FAIL (syntax error): {src}")
         return ns
     needed = {"doc", "sheets", "sheet", "tables", "table"} & loaded - stored
     if not needed:
