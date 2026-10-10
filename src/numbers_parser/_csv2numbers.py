@@ -15,7 +15,7 @@ from typing import NamedTuple
 
 from dateutil.parser import parse
 
-from numbers_parser import Document, NumbersError, _get_version
+from numbers_parser import Document, NumbersError, _get_version, xl_rowcol_to_cell
 
 
 class ColumnTransform(NamedTuple):
@@ -123,7 +123,7 @@ class Converter:
         if columns is None:
             return
         for transform in columns:
-            transform.transform(self.header, self.data)
+            transform.transform(self.header, self.data, self.no_header)
             if transform.dest not in self.header:
                 self.header.append(transform.dest)
 
@@ -156,18 +156,29 @@ class Transformer:
         self.dest = int(dest) if dest.isnumeric() else dest
         self.sources = [int(x) if x.isnumeric() else x for x in source.split(";")]
 
-    @abstractmethod
-    def transform_row(self: Transformer, row: list[str]) -> list[str]:
-        """Abstract base method for transforming rows using df.apply()."""
-        raise NotImplementedError
-
-    def transform(self: Transformer, header: list[str], data: list[list[str]]) -> list[list[str]]:
-        """Column transform to merge columns."""
+    def _check_sources(self: Transformer, header: list[str]) -> None:
+        """Check that all source columns exist in the CSV."""
         if not all(x in header for x in self.sources):
             missing = list(set(self.sources) - set(header))
             msg = "'" + "', '".join([str(x) for x in missing]) + "'"
             msg += ": transform failed: column(s) do not exist in CSV"
             raise RuntimeError(msg)
+
+    @abstractmethod
+    def transform_row(self: Transformer, row: list[str]) -> list[str]:
+        """Abstract base method for transforming rows using df.apply()."""
+        raise NotImplementedError
+
+    def transform(
+        self: Transformer, header: list[str], data: list[list[str]], no_header: bool = False
+    ) -> list[list[str]]:
+        """
+        Column transform to merge columns.
+
+        ``no_header`` is used by subclasses that report output cell
+        references, which are shifted by the CSV header row if present.
+        """
+        self._check_sources(header)
         for row in data:
             self.transform_row(row)
 
@@ -175,13 +186,36 @@ class Transformer:
 class MergeTransformer(Transformer):
     """Transformer for column MERGE operations."""
 
+    def _source_values(self: MergeTransformer, row: list[str]) -> list[str]:
+        """Return the values of all source columns that are not empty."""
+        return [row[col] for col in self.sources if row[col] != ""]
+
     def transform_row(self: MergeTransformer, row: list[str]) -> list[str]:
         """Merge data in a single row."""
-        value = ""
-        for col in self.sources:
-            if row[col] and not value:
-                value = row[col]
-        row[self.dest] = value
+        values = self._source_values(row)
+        row[self.dest] = values[0] if values else ""
+
+    def transform(
+        self: MergeTransformer, header: list[str], data: list[list[str]], no_header: bool = False
+    ) -> list[list[str]]:
+        """
+        Column transform to merge columns.
+
+        Warn for rows where more than one source column had a value as
+        MERGE keeps only the first of them.
+        """
+        self._check_sources(header)
+        # Output is always written to the default table of the new document
+        # csv2numbers creates, whose name is "Table 1". New destination
+        # columns are appended to the header by the caller after the
+        # transform runs, so their eventual index is len(header).
+        dest_col = header.index(self.dest) if self.dest in header else len(header)
+        for row_num, row in enumerate(data):
+            values = self._source_values(row)
+            if len(values) > 1:
+                cell = xl_rowcol_to_cell(row_num + (0 if no_header else 1), dest_col)
+                print(f"Warning: merge found multiple values for 'Table 1: {cell}'")
+            self.transform_row(row)
 
 
 class NegTransformer(Transformer):
