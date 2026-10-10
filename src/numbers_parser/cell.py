@@ -860,7 +860,9 @@ class Cell(CellStorageFlags, Cacheable):
     @classmethod
     def _from_value(cls, row: int, col: int, value):
         # TODO: write needs to retain/init the border
-        if isinstance(value, str):
+        if value is None:
+            cell = EmptyCell(row, col)
+        elif isinstance(value, str):
             cell = TextCell(row, col, value)
         elif isinstance(value, bool):
             cell = BoolCell(row, col, value)

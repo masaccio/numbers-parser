@@ -1076,9 +1076,9 @@ class Table(Cacheable):
             The row number (zero indexed)
         col: int
             The column number (zero indexed)
-        value: str | int | float | bool | DateTime | Duration
-            The value to write to the cell. The generated cell type is automatically
-            created based on the type of ``value``.
+        value: str | int | float | bool | DateTime | Duration | None
+            The value to write to the cell. Pass ``None`` to clear it. The generated
+            cell type is automatically created based on the type of ``value``.
         style: Style | str | None
             The name of a document custom style or a :py:class:`~numbers_parser.cell.Style` object.
 
