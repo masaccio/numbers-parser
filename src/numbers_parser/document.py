@@ -955,7 +955,7 @@ class Table(Cacheable):
         min_col: int | None = None,
         max_col: int | None = None,
         values_only: bool | None = False,
-    ) -> Iterator[tuple[Cell | _CellValue, ...]]:
+    ) -> Iterator[Cell | _CellValue]:
         """
         Produces cells from a table, by row and by column.
 
@@ -976,7 +976,7 @@ class Table(Cacheable):
 
         Yields
         ------
-        tuple[Cell | _CellValue, ...]:
+        Cell | _CellValue:
             :class:`Cell` objects or cell values for each row
 
         Raises
@@ -989,9 +989,7 @@ class Table(Cacheable):
 
         .. code:: python
 
-            total = 0
-            for cell in table.iter_cols(min_row=9, max_row=13, values_only=True):
-                total += cell.value
+            total = sum(val or 0.0 for val in table.iter_cells(min_row=9, max_row=13, values_only=True))
 
         """
         min_row = min_row if min_row is not None else 0
