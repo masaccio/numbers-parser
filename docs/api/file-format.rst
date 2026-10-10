@@ -80,23 +80,30 @@ identifier-only edge in that graph (:src_proto:`TSPMessages.proto`); it does not
 a reliable protobuf type, so the reader must resolve both the identifier and
 the expected schema.
 
+Package-level data
+------------------
+
+Image media and other package resources are managed in the ``TSP.PackageMetadata`` archive, which is identified by the root ``PACKAGE_ID`` (2). 
+
+* The metadata's ``datas`` field contains a list of ``TSP.DataInfo`` records. 
+* Each record maps an internal ``identifier`` to a SHA-1 ``digest`` and a ``preferred_file_name``. 
+* The actual file bytes are stored inside the package directory under the ``Data/`` folder using the file name stored in the ``DataInfo`` record.
+
 Password-protected files
 ------------------------
 
-Encrypted documents use the ``.iwpv2`` verifier and ``.iwph`` hint entries.
-The implementation checks a 104-byte verifier record with version 2 and
-format version 1, derives a 16-byte key with PBKDF2-HMAC-SHA1, and verifies a
-SHA-256 value in the decrypted verifier block. In the current implementation
-the derivation uses the verifier's iteration count (the writer creates it
-with 100,000 iterations).
+Encrypted documents use the ``.iwpv2`` verifier and ``.iwph`` hint entries. The implementation checks a 104-byte verifier record packed via the struct format ``<HH I 16s 16s 64s``. This byte sequence breaks down into:
 
-An encrypted IWA blob has a 16-byte initialization vector at the front, a
-block-aligned AES-128-CBC ciphertext, and 20 trailing bytes. After decryption,
-PKCS#7 padding is removed and a 16-byte plaintext prefix is discarded before
-the IWA stream is parsed. The encryption wrapper is separate from Snappy and
-protobuf: first decrypt the IWA blob, then process its IWA chunks as below.
-:src_root:`src/numbers_parser/iwork.py` contains the exact verifier and stream
-handling logic.
+* **Version**: Must be version 2.
+* **Format Version**: Must be format version 1.
+* **Iterations**: The iteration count (the writer defaults to 100,000 iterations).
+* **Salt**: A 16-byte random salt.
+* **IV**: A 16-byte initialization vector.
+* **Payload**: A 64-byte encrypted verifier payload.
+
+The reader derives a 16-byte key using PBKDF2-HMAC-SHA1 combined with the parsed iteration count and salt. Decrypting the 64-byte payload with AES-128-CBC yields a plaintext block where the final 32 bytes must exactly match the SHA-256 hash of the first 32 bytes to verify the password. 
+
+An encrypted IWA blob begins with a 16-byte initialization vector, followed by a block-aligned AES-128-CBC ciphertext, and ends with 20 trailing bytes of discarded padding. After decryption, PKCS#7 padding is stripped, and an additional 16-byte plaintext header prefix is discarded before the remaining IWA stream is parsed.
 
 IWA framing, Snappy, and protobuf
 =================================
@@ -222,6 +229,15 @@ writes the ZIP file or package. Non-IWA blobs (for example, image data) are
 kept in the file store. :src_pkg:`model.py` and
 :src_pkg:`iwafile.py` are the best references for following this
 process end to end.
+
+Object store management
+-----------------------
+
+The ``ObjectStore`` abstracts the reading, tracking, caching, and identifier allocation for protobuf archives:
+
+* **Reference Discovery**: The ``find_refs`` method isolates cached objects by evaluating their Python class name (e.g., checking ``type(v).__name__``), removing the need for a separate hardcoded index of Protobuf message types.
+* **Garbage Collection**: The ``remove_unreferenced_objects`` method recursively walks every field in every cached object using the Protobuf ``ListFields()`` method to hunt for active ``TSP.Reference`` pointers. It safely preserves structural root identifiers like ``DOCUMENT_ID`` (1) and ``PACKAGE_ID`` (2), as well as any components explicitly listed in the package metadata, before deleting abandoned archives.
+* **ID Allocation**: When allocating new message identifiers via ``new_message_id``, the object store identifies the current maximum ID, rounds it up to the next multiple of 1,000,000, and sequentially increments from there to avoid collisions.
 
 Document and component graph
 ============================
@@ -450,21 +466,22 @@ increments its ``refcount``. Rich-text payloads and other list kinds are also
 decoded through their specific model paths; not every ``ListType`` has a
 ``DataLists`` cache.
 
-The plain string table and rich-text table are distinct. A plain text cell
-looks up its string id in ``stringTable``. Rich text uses a rich-text payload
-reference and ``TSWP.StorageArchive`` text runs, with character-indexed
-attribute tables for paragraph and character styling. Hyperlinks are attached
-to rich-text fragments (for example a ``TSWP.HyperlinkFieldArchive``), not
-stored as an independent cell-level URL. This differs from formats that have
-a hyperlink property on each cell.
+Rich text and bullets
+---------------------
 
-The rich-text list is the DataStore's ``rich_text_table`` reference. A list
-entry points to a rich-text payload, which points to its storage; the
-storage's smart-field table points to hyperlink objects at character offsets.
-The earlier ``TableDataList`` excerpt shows the entry's
-``rich_text_payload = 9`` field. The following abbreviated protobuf excerpts
+The plain string table and rich-text table are structurally distinct. A plain text cell
+simply looks up its string id in the ``stringTable``. In contrast, rich text relies on the table model's ``rich_text_table`` reference pointing to a ``TST.TableDataList``. 
+
+* This list contains payload entries, which are completely empty if the table only contains plaintext. 
+* Each active entry uses a ``richTextPayload.identifier`` to reference a ``TST.RichTextPayloadArchive``. 
+* This payload archive possesses a ``storage`` field that links out to a ``TSWP.StorageArchive``, holding the actual text runs and character attributes. 
+* Hyperlinks are embedded within these rich-text fragments (via a ``TSWP.HyperlinkFieldArchive`` at a specific character offset) rather than being stored as an independent cell URL.
+
+Bullet characters are managed by a ``TSWP.ListStyleArchive``. Every bullet paragraph can reference its own list style through the ``table_list_style.entries`` in the ``StorageArchive``. If none is defined for a paragraph, the bullet character from the preceding paragraph continues seamlessly. While every ``StorageArchive`` references a ``ListStyleArchive``, not all list styles actively define a new bullet character.
+
+The following abbreviated protobuf excerpts
 (``// ...`` marks omitted fields) describe that payload, its storage, and
-hyperlink attributes.
+hyperlink attributes:
 
 .. code-block:: protobuf
 
@@ -494,8 +511,7 @@ hyperlink attributes.
 ``self.objects`` and recognizes ``HyperlinkFieldArchive`` objects. Each
 ``character_index`` begins a linked text run that ends at the next smart-field
 entry or at the end of the text; the model returns the run text together with
-``url_ref``. This is a rich-text extraction path, not a separate URL field on
-the compact cell record.
+``url_ref``. 
 
 Cell storage: v5 binary records
 ===============================
@@ -650,11 +666,7 @@ should be rendered when it is formatted as automatic. The encoding is:
    * - ``0x8000`` 
      - Formula-related hint
 
-These mappings are tentative: the writer's associations are based on a
-decision-tree classifier trained on available Numbers documents, not a
-complete specification. In particular, research has observed ``0x80`` in
-byte 7 but has not independently established its meaning. The auxiliary word
-is not the presence mask and is not used by the cell reader to locate fields.
+These mappings are tentative based on classification of available Numbers documents.
 
 Numbers can infer formats for automatically formatted input (for example,
 interpreting ``3 3/4`` as a fraction or displaying ``3.14`` to two decimal
@@ -757,6 +769,11 @@ cells. It adds each optional field after the base value in mask order. Merged
 cells are represented by merge metadata rather than a normal cell value
 record.
 
+Logical cell messages
+---------------------
+
+The ``TST.Cell`` protobuf message features discrete logical fields such as ``valueType``, ``numberValue``, ``stringValue``, ``richText``, ``formulaError``, and handles styles and formats extensively. This verbose representation is typically reserved for command, change, pasteboard, and concurrent-cell archives, separating it from the highly compact binary v5 layout utilized within the primary table tile buffers.
+
 Formulas, formats, styles and controls
 ======================================
 
@@ -839,10 +856,14 @@ map keys to the actual style, format, formula, or control data. A cell style
 can reference ``TST.CellStyleArchive`` and its cell properties; text
 properties use the TSWP text/style messages. The table model supplies default
 body, header-row, header-column and footer styles, with per-cell entries
-providing overrides. The document-level stylesheet and theme provide shared
-style definitions and theme context.
+providing overrides.
 
-Style information is a graph of style archives. The table's ``styleTable``
+Stylesheet and theme
+--------------------
+
+The document's ``stylesheet`` and ``theme`` references point to a ``TSS.StylesheetArchive`` and a ``TSS.ThemeArchive``. When a new paragraph or cell style is added, it is appended to the stylesheet's ``styles`` list and tracked in its ``identifier_to_style_map``. For paragraph styles, a reference is also seamlessly appended to the theme's ``paragraph_style_presets`` extension. 
+
+Style information forms a graph of style archives. The table's ``styleTable``
 maps a cell's stored style key to an archive reference; cell and text styles
 then inherit unset properties from their parent style
 (:src_proto:`TSSArchives.proto`, :src_proto:`TSTArchives.proto`, and
@@ -871,52 +892,22 @@ then inherit unset properties from their parent style
      optional .TSD.StrokeArchive left_stroke = 13;
    }
 
-``_NumbersModel.table_style`` follows the style-list entry's reference through
+``ParagraphStyleArchive`` and ``CellStyleArchive`` both link to parent styles via their ``super.parent`` references, inheriting any styling attributes that are not explicitly overridden. The table model automatically maps cells to default text styles based on region via the ``body_text_style``, ``header_row_text_style``, ``header_column_text_style``, and ``footer_row_text_style`` references. ``_NumbersModel.table_style`` follows the style-list entry's reference through
 ``self.objects``. ``cell_text_style`` chooses a cell-specific text-style key,
-or falls back to the table's header-row, header-column, footer-row, or body
-default. Its ``char_property``, ``para_property`` and ``cell_property``
+or falls back to the table defaults. Its ``char_property``, ``para_property`` and ``cell_property``
 helpers retrieve explicitly set values and otherwise follow the style's
 parent. :src_pkg:`cell.py` exposes the resolved properties through the cell's
 lazy ``style`` object.
 
-Cell borders also occur in ``CellStylePropertiesArchive``, but the grid
-strokes reported by ``Cell.border`` are extracted from a table stroke sidecar.
-The model follows the table's sidecar and layer references, then converts
-ordered stroke runs to border values (:src_proto:`TSTArchives.proto`):
+Style property archiving
+------------------------
 
-.. code-block:: protobuf
+Granular styling attributes for cells—like padding (text inset), text wrap settings, vertical alignment, and fill properties—are defined in a ``TST.CellStylePropertiesArchive`` embedded inside the ``TST.CellStyleArchive``. For background images, the ``cell_fill`` property utilizes an ``image`` block with a ``ScaleToFill`` technique, referencing the image data directly via an identifier.
 
-   message TableModelArchive {
-     optional .TSP.Reference stroke_sidecar = 49;
-     // ...
-   }
+Custom formats
+--------------
 
-   message StrokeSidecarArchive {
-     repeated .TSP.Reference left_column_stroke_layers = 4;
-     repeated .TSP.Reference right_column_stroke_layers = 5;
-     repeated .TSP.Reference top_row_stroke_layers = 6;
-     repeated .TSP.Reference bottom_row_stroke_layers = 7;
-   }
-
-   message StrokeLayerArchive {
-     message StrokeRunArchive {
-       optional int32 origin = 1;
-       optional uint32 length = 2;
-       optional .TSD.StrokeArchive stroke = 3;
-       optional uint32 order = 4;
-     }
-     optional uint32 row_column_index = 1;
-     repeated .TST.StrokeLayerArchive.StrokeRunArchive stroke_runs = 2;
-   }
-
-Each run's orientation comes from its containing sidecar list; ``origin`` and
-``length`` locate the run along a row or column, while the ``TSD.StrokeArchive``
-provides the visual stroke. ``extract_strokes`` sorts runs by order, resolves
-their layers through ``self.objects``, and sets matching edges on adjacent
-cells. Setting borders reverses this process by consolidating equal edges into
-stroke runs. The separate ``CellBorderArchive`` schema is also present for
-logical cell messages, but is not the source of the table-grid sidecar strokes
-used by the current border accessor.
+Document-wide custom formats are tracked in a ``TSK.CustomFormatListArchive`` accessed from the document root. This archive synchronizes two parallel arrays: ``custom_formats`` (the format definitions) and ``uuids`` (their persistent 128-bit identifiers). Within a specific table's format data list, a custom format entry relies on a ``TSK.FormatStructArchive`` carrying a ``custom_uid`` field. This UUID securely bridges the cell's table format reference back to the document-level custom format definition.
 
 :src_pkg:`constants.py` names the API and format enumerations for standard formats
 (base, currency, date/time, fraction, number, percentage, scientific, text,
@@ -929,8 +920,7 @@ Controls have their own ``TST.CellSpecArchive``. Its interaction kind and
 optional range limits, increment, or popup-model reference provide the
 behavior behind the cell's control-spec id. ``FormattingType`` and related
 maps in :src_pkg:`constants.py` connect API formatting choices to protobuf format
-archives. Custom formats also have a document-level custom-format list and
-UUIDs, while table entries refer to the corresponding custom format.
+archives. 
 
 The numeric ``FormatType`` codes in :src_pkg:`constants.py` are: boolean 1, decimal
 256, currency 257, percent 258, scientific 259, text 260, date 261, fraction
@@ -966,6 +956,50 @@ proto ``TST.CellValueType`` enum. The date/time formatting token table in
 week numbers, hours, minutes, seconds, fractional seconds, AM/PM, era, and
 quarter to the display implementation; the supported spellings are listed in
 ``DATETIME_FIELD_MAP``.
+
+Table borders and strokes
+=========================
+
+Table borders are orchestrated by a ``StrokeSidecarArchive`` referenced directly by the table model. The sidecar segregates grid lines into distinct layer arrays: ``top_row_stroke_layers``, ``bottom_row_stroke_layers``, ``left_column_stroke_layers``, and ``right_column_stroke_layers``. 
+
+Cell borders also occur in ``CellStylePropertiesArchive``, but the grid
+strokes reported by ``Cell.border`` are extracted from a table stroke sidecar.
+The model follows the table's sidecar and layer references, then converts
+ordered stroke runs to border values (:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableModelArchive {
+     optional .TSP.Reference stroke_sidecar = 49;
+     // ...
+   }
+
+   message StrokeSidecarArchive {
+     repeated .TSP.Reference left_column_stroke_layers = 4;
+     repeated .TSP.Reference right_column_stroke_layers = 5;
+     repeated .TSP.Reference top_row_stroke_layers = 6;
+     repeated .TSP.Reference bottom_row_stroke_layers = 7;
+   }
+
+   message StrokeLayerArchive {
+     message StrokeRunArchive {
+       optional int32 origin = 1;
+       optional uint32 length = 2;
+       optional .TSD.StrokeArchive stroke = 3;
+       optional uint32 order = 4;
+     }
+     optional uint32 row_column_index = 1;
+     repeated .TST.StrokeLayerArchive.StrokeRunArchive stroke_runs = 2;
+   }
+
+Each layer targets a specific row or column index, and contains a collection of ``stroke_runs``. Each run's orientation comes from its containing sidecar list; ``origin`` specifies the starting cell index along that row or column, and ``length`` dictates how many cells the stroke spans. The attached ``TSD.StrokeArchive`` provides the visual stroke attributes (width, color, and pattern type such as solid, dashed, or dotted). 
+
+``extract_strokes`` sorts runs by order, resolves
+their layers through ``self.objects``, and sets matching edges on adjacent
+cells. Setting borders reverses this process by consolidating equal edges into
+stroke runs. The separate ``CellBorderArchive`` schema is also present for
+logical cell messages, but is not the source of the table-grid sidecar strokes
+used by the current border accessor.
 
 Merges and stable coordinates
 =============================
@@ -1183,14 +1217,6 @@ coordinates and a ``contains_a_formula`` flag. These records identify
 formula-bearing cells; the cell buffer itself holds each formula's cached
 result, while the formula list holds the expression.
 
-The example documents in ``Numbers.md`` (on the ``feat/format-docs`` branch) show table-model
-dependency archives with spanning ranges for both the whole table and its body. They also show a
-variation in ``tiled_cell_dependencies``: the first example had no tile
-reference, while later examples referred to ``CellRecordTileArchive`` records.
-The referenced tiles carry an ``internal_owner_id`` and tile row/column
-origins. Treat this as observed variation, not a rule that all later tables
-must have tiles or that all first tables omit them.
-
 Merge and formula ranges
 ------------------------
 
@@ -1344,8 +1370,13 @@ category row relationships. Header names and row/column UUIDs therefore form
 stable identities alongside coordinate-based references, rather than replacing
 the archive identifiers used by ``TSP.Reference``.
 
+Categories and grouping
+=======================
+
+Table categorization is heavily driven by the table model's ``category_owner`` reference, which resolves to a ``TST.CategoryOwnerArchive``. This archive's ``group_by`` list actively directs to a ``GroupByArchive`` detailing the row mappings and grouping rules. Independently, the visual order is managed via the table's ``TableInfoArchive.category_order`` reference, pointing to a ``CategoryOrderArchive``. The embedded ``uid_map`` precisely correlates sorted row UUIDs to their rendered display order. Group headers and aggregated summary values are represented by ``GroupNodeArchive`` objects.
+
 Captions and text storage
--------------------------
+=========================
 
 Caption text is stored through a nested shape/storage structure rather than
 directly in a caption record. ``TSA.CaptionInfoArchive`` contains a
@@ -1393,118 +1424,3 @@ archives and connects their references. The public ``Table.caption`` and
 ``Table.caption_enabled`` properties in :src_pkg:`document.py` delegate to
 these model operations; visibility is represented by the drawable's
 ``caption_hidden`` flag.
-
-Remaining concepts to document
-==============================
-
-The following lookups are made through ``ObjectStore`` (``self.objects`` in
-:src_pkg:`model.py`) but are not yet described above. Each entry names the
-protobuf fields followed and the code that follows them.
-
-Object store queries
---------------------
-
-* ``ObjectStore.find_refs`` (:src_pkg:`containers.py`) returns the identifiers of
-  every archive whose Python class name matches a string. It is used through
-  ``_NumbersModel.find_refs`` to locate ``TableInfoArchive``,
-  ``StylesheetArchive``, ``ParagraphStyleArchive``,
-  ``FormulaOwnerDependenciesArchive``, ``CalculationEngineArchive`` and
-  ``GroupNodeArchive`` objects. The results are not cached because tables and
-  sheets can be added at run time. The relationship between a class name,
-  its ``.proto`` message and its ``ArchiveInfo`` type id is not described.
-* ``ObjectStore.remove_unreferenced_objects`` (:src_pkg:`containers.py`) walks
-  every ``TSP.Reference`` in every archive to find objects that can be dropped
-  on save. The rules for which fields count as references are not documented.
-* ``ObjectStore.new_message_id`` and ``create_object_from_dict``
-  (:src_pkg:`containers.py`) allocate identifiers and register new archives in
-  a component. How a new object is assigned to an ``.iwa`` file and recorded
-  in the package component list (``PACKAGE_ID`` in ``components``) is only
-  partly described.
-* ``find_extension`` (:src_pkg:`iwafile.py`) reads protobuf extension fields
-  such as ``paragraph_style_presets`` from ``TSS.ThemeArchive.super``
-  (:src_proto:`TSSArchives.proto`). Protobuf extensions are not covered.
-
-Stylesheet and theme
---------------------
-
-* ``TN.DocumentArchive.stylesheet`` and ``theme`` references resolve to
-  ``TSS.StylesheetArchive`` and ``TSS.ThemeArchive``
-  (:src_proto:`TSSArchives.proto`). ``StylesheetArchive.styles`` and
-  ``identifier_to_style_map`` are appended to and searched by name when
-  paragraph and cell styles are created (``add_paragraph_style``,
-  ``add_cell_style`` and ``find_style_id`` and ``custom_style_name`` in :src_pkg:`model.py`).
-* ``ParagraphStyleArchive`` (:src_proto:`TSWPArchives.proto`) and
-  ``CellStyleArchive`` (:src_proto:`TSTArchives.proto`) are linked to their
-  parents through ``super.parent``. The inheritance chain followed when
-  resolving a style property is not described.
-* ``TableModelArchive.body_text_style``, ``header_row_text_style``,
-  ``header_column_text_style`` and ``footer_row_text_style``
-  (:src_proto:`TSTArchives.proto`) select the default text style for a cell
-  based on its position.
-
-Custom formats
---------------
-
-* ``TSK.DocumentArchive.custom_format_list`` resolves to a
-  ``TSK.CustomFormatListArchive`` (:src_proto:`TSKArchives.proto`) whose
-  ``custom_formats`` and parallel ``uuids`` lists are read and extended
-  by the format lookups in :src_pkg:`model.py`. The pairing between a table's
-  format entries and this list is only summarized above.
-
-Rich text and bullets
----------------------
-
-* ``TableDataList`` rich text entries follow ``rich_text_table`` to
-  ``RichTextPayloadArchive`` (:src_proto:`TSTArchives.proto`), then
-  ``payload.storage`` to ``TSWP.StorageArchive``
-  (:src_proto:`TSWPArchives.proto`), then the storage's attribute tables to
-  ``ListStyleArchive`` objects for bullets and numbering. Hyperlinks are
-  mentioned above but the list-style traversal is not.
-
-Categories and grouping
------------------------
-
-* ``TableModelArchive.category_owner`` resolves to
-  ``TST.CategoryOwnerArchive``, whose ``group_by`` reference leads to a
-  ``GroupByArchive``. ``TableInfoArchive.category_order`` resolves to a
-  ``CategoryOrderArchive`` whose ``uid_map`` maps row UUIDs to display
-  order. ``GroupNodeArchive`` objects are found with ``find_refs`` and give
-  group UUIDs and cell values (all in :src_proto:`TSTArchives.proto`). The
-  decoding is in ``calculate_table_categories`` and ``group_uuid_values``
-  in :src_pkg:`model.py` and is not documented.
-
-Strokes
--------
-
-* The stroke sidecar traversal is described, but not the ordering of
-  ``StrokeLayerArchive.row_column_index`` lookups used when a layer for a given
-  row or column is found or created in :src_pkg:`model.py`.
-
-Logical cell messages
----------------------
-
-* ``TST.Cell`` (:src_proto:`TSTArchives.proto`) has fields such as
-  ``valueType``, ``numberValue``, ``stringValue``, ``richText``,
-  ``formulaError``, styles, formats, comments and decimal high/low words. It
-  is not the encoding used in the primary tile buffers, which use the v5 byte
-  layout described above. It occurs in command, change, pasteboard and
-  concurrent-cell archives, which are not yet covered
-  (:src_proto:`TNCommandArchives.proto` and other command-archive schemas).
-
-Style property archiving
-------------------------
-
-* :src_proto:`TSTStylePropertyArchiving.proto` holds the cell-specific style
-  properties read by ``cell_property`` and related accessors in
-  :src_pkg:`model.py`. :src_proto:`TSKArchives.proto` shared formatting
-  structures and colors are only touched on above.
-
-Package-level data
-------------------
-
-* ``PACKAGE_ID`` ``datas`` entries (``TSP.PackageMetadata`` in
-  :src_proto:`TSPArchiveMessages.proto`) map image data identifiers to stored
-  file names and are searched and extended when images are added in
-  :src_pkg:`model.py`. ``Cell`` image lookup in :src_pkg:`cell.py` reads
-  ``ObjectStore.file_store`` directly. The naming rules for stored data files
-  are not documented.
