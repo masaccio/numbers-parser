@@ -11,6 +11,7 @@ from numbers_parser import (
     Document,
     EmptyCell,
     ErrorCell,
+    PaddingType,
     Style,
     UnsupportedWarning,
     xl_rowcol_to_cell,
@@ -789,3 +790,80 @@ def test_issue_236(configurable_save_file):
         assert new_cell._flags == ref_cell._flags
         assert new_cell._extra_bits == ref_cell._extra_bits
         assert CellStorageFlags.__repr__(ref_cell) == CellStorageFlags.__repr__(new_cell)
+
+
+@pytest.mark.experimental
+def test_issue_249(configurable_save_file):
+    doc = Document()
+    doc.sheets[0].tables[0].write(0, 0, 1.999)
+    custom_format = doc.add_custom_format(
+        type="number",
+        name="Two Decimals",
+        num_decimals=2,
+        integer_format=PaddingType.ZEROS,
+    )
+    doc.sheets[0].tables[0].set_cell_formatting(0, 0, "custom", format=custom_format)
+    doc.save(configurable_save_file)
+
+    new_doc = Document(configurable_save_file)
+    assert new_doc.default_table.cell("A1").formatted_value == "2.00"
+
+
+@pytest.mark.experimental
+def test_issue_250(configurable_save_file):
+    doc = Document()
+    doc.sheets[0].tables[0].write(0, 0, 0.00001)
+
+    custom_format = doc.add_custom_format(
+        type="number",
+        name="Standard",
+        num_decimals=2,
+        integer_format=PaddingType.ZEROS,
+    )
+
+    doc.sheets[0].tables[0].set_cell_formatting(0, 0, "custom", format=custom_format)
+    doc.save(configurable_save_file)
+
+    new_doc = Document(configurable_save_file)
+    assert new_doc.default_table.cell("A1").formatted_value == "0.0"
+
+
+@pytest.mark.experimental
+def test_issue_251(script_runner, tmp_path, configurable_save_file):
+    csv_path = tmp_path / "dummy.csv"
+    with open(csv_path, "w") as f:
+        f.write("Account,Amount,Date\nChecking,100,2026-10-10\n")
+
+    ret = script_runner.run(["csv2numbers", csv_path, "--delete=1", "-o", configurable_save_file])
+    assert ret.stderr == ""
+    assert ret.success
+
+    doc = Document(configurable_save_file)
+    assert doc.default_table.cell(1, 0).value == "Checking"
+    assert doc.default_table.cell(1, 1).value == "2026-10-10"
+
+
+@pytest.mark.experimental
+def test_issue_252(script_runner, tmp_path, configurable_save_file):
+    csv_path = tmp_path / "dummy.csv"
+    with open(csv_path, "w") as f:
+        f.write("Val1,Val2\n,5\n0,10\n")
+
+    # The MERGE command intends to take Val1, falling back to Val2 if empty.
+    # For the second row, it will erroneously skip '0' and take '10'.
+    ret = script_runner.run(
+        [
+            "csv2numbers",
+            csv_path,
+            "--transform=Merged=MERGE:Val1;Val2",
+            "-o",
+            configurable_save_file,
+        ]
+    )
+    assert ret.stderr == ""
+    assert "Warning: merge found multiple values for 'Table 1: C3'" in ret.stdout
+    assert ret.success
+
+    doc = Document(configurable_save_file)
+    assert doc.default_table.cell(1, 2).value == 5
+    assert doc.default_table.cell(2, 2).value == 0
