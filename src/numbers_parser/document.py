@@ -948,6 +948,82 @@ class Table(Cacheable):
             else:
                 yield tuple(row[col] for row in rows)
 
+    def iter_cells(
+        self,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        values_only: bool | None = False,
+    ) -> Iterator[tuple[Cell | _CellValue, ...]]:
+        """
+        Produces cells from a table, by row and by column.
+
+        Specify the iteration range using the indexes of the rows and columns.
+
+        Parameters
+        ----------
+        min_row: int, optional
+            Starting row number (zero indexed), or ``0`` if ``None``.
+        max_row: int, optional
+            Inclusive end row number (zero indexed), or all rows if ``None``.
+        min_col: int, optional
+            Starting column number (zero indexed) or ``0`` if ``None``.
+        max_col: int, optional
+            Inclusive end column number (zero indexed), or all columns if ``None``.
+        values_only: bool, optional
+            If ``True``, yield cell values rather than :class:`Cell` objects
+
+        Yields
+        ------
+        tuple[Cell | _CellValue, ...]:
+            :class:`Cell` objects or cell values for each row
+
+        Raises
+        ------
+        IndexError:
+            If row or column values are out of range for the table
+
+        Example
+        -------
+
+        .. code:: python
+
+            total = 0
+            for cell in table.iter_cols(min_row=9, max_row=13, values_only=True):
+                total += cell.value
+
+        """
+        min_row = min_row if min_row is not None else 0
+        max_row = max_row if max_row is not None else self.num_rows - 1
+        min_col = min_col if min_col is not None else 0
+        max_col = max_col if max_col is not None else self.num_cols - 1
+
+        if min_row < 0:
+            msg = f"row {min_row} out of range"
+            raise IndexError(msg)
+        if max_row >= self.num_rows:
+            msg = f"row {max_row} out of range"
+            raise IndexError(msg)
+        if min_col < 0:
+            msg = f"column {min_col} out of range"
+            raise IndexError(msg)
+        if max_col >= self.num_cols:
+            msg = f"column {max_col} out of range"
+            raise IndexError(msg)
+
+        rows = self.rows()
+        self._model.calculate_table_categories(self._table_id)
+        row_mapper = self._model._table_categories_row_mapper[self._table_id]
+        if row_mapper is not None:
+            rows = [rows[row_mapper[row]] for row in range(min_row, max_row + 1)]
+        else:
+            rows = rows[min_row : max_row + 1]
+
+        for row in rows:
+            for cell in row[min_col : max_col + 1]:
+                yield cell.value if values_only else cell
+
     def _validate_cell_coords(self, *args):
         if isinstance(args[0], str):
             (row, col) = xl_cell_to_rowcol(args[0])

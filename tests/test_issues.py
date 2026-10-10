@@ -771,7 +771,6 @@ def test_issue_236(configurable_save_file):
     new_doc = Document(configurable_save_file)
     assert new_doc.default_table.cell("A1")._formula_error_id == 1
 
-    print("\n\n")
     for row in range(1, 8):
         ref_cell = doc.default_table.cell(row, 0)
         new_cell = new_doc.default_table.cell(row, 0)
