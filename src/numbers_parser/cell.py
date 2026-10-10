@@ -2051,10 +2051,10 @@ def _format_base(value: float, number_format) -> str:
 
 
 def _format_fraction_parts_to(whole: int, numerator: int, denominator: int):
-    if whole > 0:
+    if whole != 0:
         if numerator == 0:
             return str(whole)
-        return f"{whole} {numerator}/{denominator}"
+        return f"{whole} {abs(numerator)}/{denominator}"
     if numerator == 0:
         return "0"
     if numerator == denominator:
