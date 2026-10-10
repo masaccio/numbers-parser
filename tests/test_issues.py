@@ -15,6 +15,7 @@ from numbers_parser import (
     UnsupportedWarning,
     xl_rowcol_to_cell,
 )
+from numbers_parser.cell import CellStorageFlags
 from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
     DEFAULT_COLUMN_WIDTH,
@@ -779,3 +780,12 @@ def test_issue_236(configurable_save_file):
         assert new_cell.style == ref_cell.style
         assert new_cell.formula == ref_cell.formula
         assert new_cell.formatted_value == ref_cell.formatted_value
+
+    cells = list(doc.default_table.iter_cells())
+    for ii, new_cell in enumerate(new_doc.default_table.iter_cells()):
+        ref_cell = cells[ii]
+        assert type(new_cell) is type(ref_cell)
+        assert new_cell.value == ref_cell.value
+        assert new_cell._flags == ref_cell._flags
+        assert new_cell._extra_bits == ref_cell._extra_bits
+        assert CellStorageFlags.__repr__(ref_cell) == CellStorageFlags.__repr__(new_cell)
