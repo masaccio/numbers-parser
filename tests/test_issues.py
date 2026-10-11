@@ -828,7 +828,6 @@ def test_issue_250(configurable_save_file):
     assert new_doc.default_table.cell("A1").formatted_value == "0.0"
 
 
-@pytest.mark.experimental
 def test_issue_251(script_runner, tmp_path, configurable_save_file):
     csv_path = tmp_path / "dummy.csv"
     with open(csv_path, "w") as f:
@@ -841,6 +840,63 @@ def test_issue_251(script_runner, tmp_path, configurable_save_file):
     doc = Document(configurable_save_file)
     assert doc.default_table.cell(1, 0).value == "Checking"
     assert doc.default_table.cell(1, 1).value == "2026-10-10"
+
+
+def test_issue_251_rename_with_header(script_runner, tmp_path, configurable_save_file):
+    csv_path = tmp_path / "named.csv"
+    csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
+    ret = script_runner.run(
+        ["csv2numbers", csv_path, "--rename=1:Total", "-o", configurable_save_file]
+    )
+    assert ret.success, ret.stderr
+    table = Document(configurable_save_file).default_table
+    assert [table.cell(0, col).value for col in range(3)] == ["Account", "Total", "Date"]
+    assert table.cell(1, 1).value == 100
+
+
+def test_issue_251_date_with_header(script_runner, tmp_path, configurable_save_file):
+    csv_path = tmp_path / "named.csv"
+    csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
+    ret = script_runner.run(["csv2numbers", csv_path, "--date=2", "-o", configurable_save_file])
+    assert ret.success, ret.stderr
+    assert isinstance(Document(configurable_save_file).default_table.cell(1, 2).value, datetime)
+
+
+def test_issue_251_transform_with_header(script_runner, tmp_path, configurable_save_file):
+    csv_path = tmp_path / "named.csv"
+    csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
+    ret = script_runner.run(
+        ["csv2numbers", csv_path, "--transform=Paid=POS:1", "-o", configurable_save_file]
+    )
+    assert ret.success, ret.stderr
+    table = Document(configurable_save_file).default_table
+    assert table.cell(0, 3).value == "Paid"
+    assert table.cell(1, 3).value == 100
+
+
+def test_issue_251_rename_then_delete_index(script_runner, tmp_path, configurable_save_file):
+    csv_path = tmp_path / "named.csv"
+    csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
+    ret = script_runner.run(
+        ["csv2numbers", csv_path, "--rename=1:Total", "--delete=1", "-o", configurable_save_file]
+    )
+    assert ret.success, ret.stderr
+    table = Document(configurable_save_file).default_table
+    assert [table.cell(0, col).value for col in range(2)] == ["Account", "Date"]
+    assert table.cell(1, 1).value == "2026-10-10"
+
+
+def test_issue_251_transform_index_across_files(script_runner, tmp_path):
+    first = tmp_path / "first.csv"
+    second = tmp_path / "second.csv"
+    first.write_text("Account,Amount\nChecking,100\n")
+    second.write_text("Account,Cost\nChecking,200\n")
+    outputs = [tmp_path / "first.numbers", tmp_path / "second.numbers"]
+    ret = script_runner.run(
+        ["csv2numbers", first, second, "--transform=Paid=POS:1", "-o", *outputs]
+    )
+    assert ret.success, ret.stderr
+    assert [Document(output).default_table.cell(1, 2).value for output in outputs] == [100, 200]
 
 
 @pytest.mark.experimental
