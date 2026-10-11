@@ -1,29 +1,25 @@
-import pytest
-
 from numbers_parser import Document, EmptyCell
 
 
-@pytest.mark.parametrize("coordinate", [(1, 1), ("B2",)])
-def test_write_none_clears_cell_and_survives_save(coordinate, tmp_path):
+def test_issue_255(configurable_save_file):
     doc = Document()
     table = doc.sheets[0].tables[0]
-    table.write(*coordinate, "old value")
+    table.write(1, 1, "old value")
+    table.write("C3", "another value")
 
-    table.write(*coordinate, None)
+    table.write(1, 1, None)
+    table.write("C3", None)
+    table.write("D4", None)
 
-    cell = table.cell(1, 1)
-    assert isinstance(cell, EmptyCell)
-    assert cell.value is None
-    assert cell.formatted_value == ""
+    for coordinate in ("B2", "C3", "D4"):
+        cell = table.cell(coordinate)
+        assert isinstance(cell, EmptyCell)
+        assert cell.value is None
+        assert cell.formatted_value == ""
 
-    path = tmp_path / "cleared.numbers"
-    doc.save(path)
-    reloaded_cell = Document(path).sheets[0].tables[0].cell(1, 1)
-    assert isinstance(reloaded_cell, EmptyCell)
-    assert reloaded_cell.value is None
-
-
-def test_write_none_on_existing_empty_cell():
-    table = Document().sheets[0].tables[0]
-    table.write("B2", None)
-    assert isinstance(table.cell("B2"), EmptyCell)
+    doc.save(configurable_save_file)
+    reloaded = Document(configurable_save_file).sheets[0].tables[0]
+    for coordinate in ("B2", "C3", "D4"):
+        cell = reloaded.cell(coordinate)
+        assert isinstance(cell, EmptyCell)
+        assert cell.value is None
