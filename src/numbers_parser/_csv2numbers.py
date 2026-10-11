@@ -8,6 +8,7 @@ import csv
 import re
 import sys
 from abc import abstractmethod
+from copy import copy
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -82,7 +83,8 @@ class Converter:
         if self.reverse:
             self.data = list(reversed(self.data))
         if self.date_columns is not None:
-            is_date_column = {x: x in self.date_columns for x in self.header}
+            date_columns = [self._column_key(col) for col in self.date_columns]
+            is_date_column = {x: x in date_columns for x in self.header}
         for row in self.data:
             for k, v in row.items():
                 if self.whitespace:
@@ -94,18 +96,30 @@ class Converter:
                     with contextlib.suppress(ValueError):
                         row[k] = float(v.replace(",", ""))
 
+    def _column_key(self, column: str | int) -> str | int:
+        """Resolve an index against named headers; retain keys for headerless CSVs."""
+        header = self.header or []
+        if isinstance(column, int) and column not in header and 0 <= column < len(header):
+            return header[column]
+        return column
+
     def rename_columns(self: Converter, mapper: dict) -> None:
         """Rename columns using column map."""
         if mapper is None:
             return
+        mapper = {self._column_key(key): value for key, value in mapper.items()}
         self.no_header = False
         self.header = [mapper.get(x, x) for x in self.header]
+        self.data = [
+            {mapper.get(key, key): value for key, value in row.items()} for row in self.data
+        ]
 
     def delete_columns(self: Converter, columns: list) -> None:
         """Delete columns from the data."""
         if columns is None:
             return
 
+        columns = [self._column_key(col) for col in columns]
         missing_columns = list(set(columns) - set(self.header))
         if len(missing_columns) > 0:
             msg = "'" + "', '".join([str(x) for x in missing_columns]) + "'"
@@ -123,9 +137,12 @@ class Converter:
         if columns is None:
             return
         for transform in columns:
-            transform.transform(self.header, self.data)
-            if transform.dest not in self.header:
-                self.header.append(transform.dest)
+            resolved = copy(transform)
+            resolved.sources = [self._column_key(source) for source in transform.sources]
+            resolved.dest = self._column_key(transform.dest)
+            resolved.transform(self.header, self.data)
+            if resolved.dest not in self.header:
+                self.header.append(resolved.dest)
 
     def save(self: Converter) -> None:
         """Write dataframe transctions to a Numbers file."""
