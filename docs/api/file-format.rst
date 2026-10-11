@@ -666,8 +666,6 @@ should be rendered when it is formatted as automatic. The encoding is:
    * - ``0x8000`` 
      - Formula-related hint
 
-These mappings are tentative based on classification of available Numbers documents.
-
 Numbers can infer formats for automatically formatted input (for example,
 interpreting ``3 3/4`` as a fraction or displaying ``3.14`` to two decimal
 places). ``numbers-parser`` does not try to reproduce that inference or create
