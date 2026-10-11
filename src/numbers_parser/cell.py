@@ -883,7 +883,7 @@ class Cell(CellStorageFlags, Cacheable):
             cell = DurationCell(row, col, value)
         else:
             msg = "Can't determine cell type from type " + type(value).__name__
-            raise ValueError(msg)  # noqa: TRY004
+            raise ValueError(msg)
 
         return cell
 
@@ -1866,6 +1866,8 @@ def _decode_number_format(  # noqa: PLR0912
     else:
         dec_pad = None
     dec_width = num_decimals
+
+    value = round(float(value), num_decimals) if num_decimals > 0 else round(float(value))
 
     (integer, decimal) = str(float(value)).split(".")
     if num_decimals > 0:

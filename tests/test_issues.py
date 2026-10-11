@@ -792,7 +792,6 @@ def test_issue_236(configurable_save_file):
         assert CellStorageFlags.__repr__(ref_cell) == CellStorageFlags.__repr__(new_cell)
 
 
-@pytest.mark.experimental
 def test_issue_249(configurable_save_file):
     doc = Document()
     doc.sheets[0].tables[0].write(0, 0, 1.999)
@@ -800,7 +799,7 @@ def test_issue_249(configurable_save_file):
         type="number",
         name="Two Decimals",
         num_decimals=2,
-        integer_format=PaddingType.ZEROS,
+        decimal_format=PaddingType.ZEROS,
     )
     doc.sheets[0].tables[0].set_cell_formatting(0, 0, "custom", format=custom_format)
     doc.save(configurable_save_file)
