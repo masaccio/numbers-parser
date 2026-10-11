@@ -1860,7 +1860,8 @@ def _decode_number_format(  # noqa: PLR0912
 
     value = round(float(value), num_decimals) if num_decimals > 0 else round(float(value))
 
-    (integer, decimal) = str(float(value)).split(".")
+    # Custom formats have a maximum of 10 decimals
+    (integer, decimal) = f"{value:.10f}".split(".")
     if num_decimals > 0:
         integer = int(integer)
         decimal = round(float(f"0.{decimal}"), num_decimals)
@@ -1931,10 +1932,16 @@ def _decode_number_format(  # noqa: PLR0912
         elif dec_pad == CellPadding.SPACE and decimal == 0 and num_integers > 0:
             formatted_value += ".".ljust(dec_width + 1)
         elif dec_pad == CellPadding.SPACE:
-            decimal_str = str(decimal)[2:]
+            if "e" in str(decimal):
+                decimal_str = f"{decimal:.{num_decimals}f}"[2:]
+            else:
+                decimal_str = str(decimal)[2:]
             formatted_value += "." + decimal_str.ljust(dec_width)
         elif decimal or num_integers == 0:
-            formatted_value += "." + str(decimal)[2:]
+            if "e" in str(decimal):
+                formatted_value += "." + f"{decimal:.{num_decimals}f}"[2:]
+            else:
+                formatted_value += "." + str(decimal)[2:]
 
     formatted_value = custom_format_string.replace(format_spec, formatted_value)
     return sign + _expand_quotes(formatted_value)

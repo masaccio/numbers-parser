@@ -809,23 +809,45 @@ def test_issue_249(configurable_save_file):
     assert new_doc.default_table.cell("A1").formatted_value == "2.00"
 
 
-@pytest.mark.experimental
 def test_issue_250(configurable_save_file):
     doc = Document()
     doc.sheets[0].tables[0].write(0, 0, 0.00001)
+    doc.sheets[0].tables[0].write(1, 0, 0.00001)
+    doc.sheets[0].tables[0].write(2, 0, 0.00001)
 
-    custom_format = doc.add_custom_format(
+    custom_format_1 = doc.add_custom_format(
         type="number",
-        name="Standard",
-        num_decimals=2,
+        name="Decimal 5DP Zeroes",
+        num_decimals=6,
+        num_integers=2,
         integer_format=PaddingType.ZEROS,
+        decimal_format=PaddingType.ZEROS,
+    )
+    custom_format_2 = doc.add_custom_format(
+        type="number",
+        name="Decimal 5DP Spaces",
+        num_integers=2,
+        num_decimals=6,
+        integer_format=PaddingType.SPACES,
+        decimal_format=PaddingType.SPACES,
+    )
+    custom_format_3 = doc.add_custom_format(
+        type="number",
+        name="Decimal 5DP",
+        num_decimals=6,
+        integer_format=None,
+        decimal_format=None,
     )
 
-    doc.sheets[0].tables[0].set_cell_formatting(0, 0, "custom", format=custom_format)
+    doc.sheets[0].tables[0].set_cell_formatting(0, 0, "custom", format=custom_format_1)
+    doc.sheets[0].tables[0].set_cell_formatting(1, 0, "custom", format=custom_format_2)
+    doc.sheets[0].tables[0].set_cell_formatting(2, 0, "custom", format=custom_format_3)
     doc.save(configurable_save_file)
 
     new_doc = Document(configurable_save_file)
-    assert new_doc.default_table.cell("A1").formatted_value == "0.0"
+    assert new_doc.default_table.cell(0, 0).formatted_value == "00.000010"
+    assert new_doc.default_table.cell(1, 0).formatted_value == "  .000010"
+    assert new_doc.default_table.cell(2, 0).formatted_value == ".000010"
 
 
 @pytest.mark.experimental
