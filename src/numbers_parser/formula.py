@@ -271,8 +271,12 @@ def number_to_str(v: int) -> str:
     v_str = repr(v)
     if "e" in v_str:
         number, exp = v_str.split("e")
-        number = re.sub(r"[,-.]", "", number)
-        zeroes = "0" * (abs(int(exp)) - 1)
+        number = re.sub(r"[,-]", "", number)
+        num_zeroes = abs(int(exp)) - 1
+        if "." in number:
+            num_zeroes -= len(number.split(".")[1]) - 1
+            number = number.replace(".", "")
+        zeroes = "0" * num_zeroes
         if int(exp) > 0:
             return f"{number}{zeroes}"
         return f"0.{zeroes}{number}"

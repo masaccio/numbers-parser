@@ -947,6 +947,13 @@ def test_issue_252(script_runner, tmp_path, configurable_save_file):
     assert doc.default_table.cell(2, 2).value == 0
 
 
+def test_issue_253():
+    doc = Document("tests/data/test-issue-253.numbers")
+    table = doc.sheets[0].tables[0]
+    assert table.cell(0, 0).formula == "12340000000000000"
+    assert table.cell(1, 0).formula == "12345670000000000"
+
+
 def test_issue_256():
     table = Document().default_table
     cases = [
