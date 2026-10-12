@@ -23,6 +23,7 @@ from numbers_parser.cell import (
     Border,
     BorderType,
     Cell,
+    Comment,
     CustomFormatting,
     Formatting,
     FormattingType,
@@ -224,6 +225,7 @@ class _NumbersModel(Cacheable):
         self._table_formats = DataLists(self, "format_table", "format")
         self._table_styles = DataLists(self, "styleTable", "reference")
         self._table_strings = DataLists(self, "stringTable", "string")
+        self._table_comments = DataLists(self, "commentStorageTable", "comment_storage")
         self._control_specs = DataLists(self, "control_cell_spec_table", "cell_spec")
         self._formulas = DataLists(self, "formula_table", "formula")
         self._table_data = {}
@@ -2114,6 +2116,34 @@ class _NumbersModel(Cacheable):
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,
                 }
+
+    def table_comments(self, table_id: int, key: int) -> list[Comment]:
+        """Resolve a comment ID to a list of Comment objects."""
+        try:
+            entry = self._table_comments.lookup_value(table_id, key)
+            if not entry.HasField("comment_storage"):
+                return []
+            storage_id = entry.comment_storage.identifier
+            return [self._resolve_comment_storage(storage_id)]
+        except (KeyError, AttributeError):
+            # Raised if comment_storage_table is missing or identifier == 0
+            return []
+
+    def _resolve_comment_storage(self, storage_id: int) -> Comment:
+        """Recursively fetch a comment and its replies into a Comment object."""
+        storage = self.objects[storage_id]
+
+        author_id = storage.author.identifier
+        author_name = self.objects[author_id].name if author_id in self.objects else "Unknown"
+        creation_date = EPOCH + timedelta(seconds=storage.creation_date.seconds)
+
+        replies = []
+        for reply_ref in getattr(storage, "replies", []):
+            replies.append(self._resolve_comment_storage(reply_ref.identifier))
+
+        return Comment(
+            author=author_name, text=storage.text, creation_date=creation_date, replies=replies
+        )
 
     def cell_text_style(self, cell: Cell) -> object:
         """
