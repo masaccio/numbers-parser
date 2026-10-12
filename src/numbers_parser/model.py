@@ -2119,15 +2119,9 @@ class _NumbersModel(Cacheable):
 
     def table_comments(self, table_id: int, key: int) -> list[Comment]:
         """Resolve a comment ID to a list of Comment objects."""
-        try:
-            entry = self._table_comments.lookup_value(table_id, key)
-            if not entry.HasField("comment_storage"):
-                return []
-            storage_id = entry.comment_storage.identifier
-            return [self._resolve_comment_storage(storage_id)]
-        except (KeyError, AttributeError):
-            # Raised if comment_storage_table is missing or identifier == 0
-            return []
+        entry = self._table_comments.lookup_value(table_id, key)
+        storage_id = entry.comment_storage.identifier
+        return [self._resolve_comment_storage(storage_id)]
 
     def _resolve_comment_storage(self, storage_id: int) -> Comment:
         """Recursively fetch a comment and its replies into a Comment object."""
