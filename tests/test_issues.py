@@ -921,7 +921,6 @@ def test_issue_251_transform_index_across_files(script_runner, tmp_path):
     assert [Document(output).default_table.cell(1, 2).value for output in outputs] == [100, 200]
 
 
-@pytest.mark.experimental
 def test_issue_252(script_runner, tmp_path, configurable_save_file):
     csv_path = tmp_path / "dummy.csv"
     with open(csv_path, "w") as f:
@@ -939,7 +938,7 @@ def test_issue_252(script_runner, tmp_path, configurable_save_file):
         ]
     )
     assert ret.stderr == ""
-    assert "Warning: merge found multiple values for 'Table 1: C3'" in ret.stdout
+    assert "merge found multiple values for cell 'B2'" in ret.stdout
     assert ret.success
 
     doc = Document(configurable_save_file)

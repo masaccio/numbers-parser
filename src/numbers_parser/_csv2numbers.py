@@ -16,7 +16,7 @@ from typing import NamedTuple
 
 from dateutil.parser import parse
 
-from numbers_parser import Document, NumbersError, _get_version
+from numbers_parser import Document, NumbersError, _get_version, xl_rowcol_to_cell
 
 
 class ColumnTransform(NamedTuple):
@@ -170,6 +170,7 @@ class Transformer:
     """Base class for column transformations."""
 
     def __init__(self: Transformer, source: str, dest: str) -> None:
+        self.row_num = 0
         self.dest = int(dest) if dest.isnumeric() else dest
         self.sources = [int(x) if x.isnumeric() else x for x in source.split(";")]
 
@@ -185,6 +186,7 @@ class Transformer:
             msg = "'" + "', '".join([str(x) for x in missing]) + "'"
             msg += ": transform failed: column(s) do not exist in CSV"
             raise RuntimeError(msg)
+        self.row_num = len(header) - 1
         for row in data:
             self.transform_row(row)
 
@@ -194,11 +196,15 @@ class MergeTransformer(Transformer):
 
     def transform_row(self: MergeTransformer, row: list[str]) -> list[str]:
         """Merge data in a single row."""
-        value = ""
-        for col in self.sources:
-            if row[col] and not value:
-                value = row[col]
-        row[self.dest] = value
+        value = None
+        for col, col_name in enumerate(self.sources):
+            if row[col_name] != "":
+                if value is not None:
+                    ref = xl_rowcol_to_cell(self.row_num, col)
+                    print(f"Warning: merge found multiple values for cell '{ref}'")
+                else:
+                    value = row[col_name]
+        row[self.dest] = value if value is not None else ""
 
 
 class NegTransformer(Transformer):
