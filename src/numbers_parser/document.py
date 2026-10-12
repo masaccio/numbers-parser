@@ -1504,6 +1504,44 @@ class Table(Cacheable):
                 for col, cell in enumerate(cells):
                     cell._set_merge(merge_cells.get((row, col)))
 
+    def add_comment(
+        self,
+        *args,
+        author: str = "Unknown",
+        is_reply: bool = False,
+    ) -> None:
+        """
+        Add a comment or reply to a cell.
+
+        Parameters
+        ----------
+        *args:
+            Either a cell reference (e.g., "A1") and the comment text, or
+            row and column integers followed by the comment text.
+        author: str, optional, default: "Unknown"
+            The author name for the comment.
+        is_reply: bool, optional, default: ``False``
+            If ``True``, adds the comment as a reply to an existing comment thread.
+
+        Raises
+        ------
+        TypeError:
+            If no comments exist and ``is_reply`` is ``True``, or of adding a
+            comment to a cell that already has comments and ``is_reply`` is ``False``.
+
+        """
+        if len(args) == 2 and isinstance(args[0], str):
+            row, col = xl_cell_to_rowcol(args[0])
+            text = args[1]
+        elif len(args) == 3 and isinstance(args[0], int) and isinstance(args[1], int):
+            row, col = args[0], args[1]
+            text = args[2]
+        else:
+            msg = "add_comment() takes either row, col, text or cell_ref, text"
+            raise TypeError(msg)
+
+        self._model.add_comment_to_cell(self._table_id, row, col, text, author, is_reply)
+
     def set_cell_border(self, *args) -> None:
         """
         Set the borders for a cell.

@@ -1174,16 +1174,20 @@ class _NumbersModel(Cacheable):
 
     def add_component_metadata(self, object_id: int, parent: str, locator: str) -> None:
         """Add a new ComponentInfo record to the parent object in the document metadata."""
-        locator = locator.format(object_id)
-        preferred_locator = re.sub(r"\-\d+.*", "", locator)
+        if locator is not None:
+            args = {
+                "locator": locator.format(object_id),
+                "preferred_locator": re.sub(r"\-\d+.*", "", locator),
+            }
+        else:
+            args = {"preferred_locator": parent}
         component_info = TSPArchiveMessages.ComponentInfo(
             identifier=object_id,
-            locator=locator,
-            preferred_locator=preferred_locator,
             is_stored_outside_object_archive=False,
             document_read_version=[2, 0, 0],
             document_write_version=[2, 0, 0],
             save_token=1,
+            **args,
         )
         self.objects[PACKAGE_ID].components.append(component_info)
         self.add_component_reference(object_id, location=parent)
@@ -2138,6 +2142,104 @@ class _NumbersModel(Cacheable):
         return Comment(
             author=author_name, text=storage.text, creation_date=creation_date, replies=replies
         )
+
+    def author_id(self, author_name: str) -> int:
+        """Get or create an annotation author."""
+        author_storages = self.find_refs("AnnotationAuthorStorageArchive")
+        # if not author_storages:
+        #     # Append to the main Document file if the storage array is missing
+        #     doc_file = self.objects._object_to_filename_map[DOCUMENT_ID]
+        #     storage_id, storage = self.objects.create_object_from_dict(
+        #         doc_file, {}, TSKArchives.AnnotationAuthorStorageArchive, append=True
+        #     )
+        #     author_storages = [storage_id]
+
+        storage_id = author_storages[0]
+        storage = self.objects[storage_id]
+
+        for author_ref in storage.annotation_author:
+            author = self.objects[author_ref.identifier]
+            if getattr(author, "name", "") == author_name:
+                return author_ref.identifier
+
+        # Append new authors to the same file that holds the Author Storage array
+        new_author_id, _ = self.objects.create_object_from_dict(
+            "Index/AnnotationAuthorStorage",
+            {
+                "name": author_name,
+                "color": {
+                    "model": "rgb",
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 1.0,
+                    "rgbspace": "srgb",
+                },
+            },
+            TSKArchives.AnnotationAuthorArchive,
+            append=True,
+        )
+        storage.annotation_author.append(TSPMessages.Reference(identifier=new_author_id))
+        self.add_component_metadata(new_author_id, "AnnotationAuthorStorage", None)
+        return new_author_id
+
+    def add_comment_to_cell(  # noqa: PLR0917
+        self, table_id: int, row: int, col: int, text: str, author_name: str, is_reply: bool
+    ) -> None:
+        cell = self._table_data[table_id][row][col]
+
+        if is_reply and cell._comment_id is None:
+            msg = "Cannot add a reply to a cell with no comments."
+            raise ValueError(msg)
+        if not is_reply and cell._comment_id is not None:
+            msg_0 = "Cell already has a comment. Use is_reply=True to add a reply."
+            raise ValueError(msg_0)
+
+        self._ensure_comment_datalist(table_id)
+        author_id = self.author_id(author_name)
+        creation_date = (datetime.now() - EPOCH).total_seconds()  # noqa: DTZ005
+
+        # Target the exact same IWA file where the Comment DataList lives
+        datalist_id = self._table_comments.id(table_id)
+        datalist_file = self.objects._object_to_filename_map[datalist_id]
+
+        new_comment_id, _ = self.objects.create_object_from_dict(
+            datalist_file,
+            {
+                "text": text,
+                "creation_date": {"seconds": creation_date},
+                "author": {"identifier": author_id},
+                "storage_uuid": NumbersUUID().dict2,
+            },
+            TSDArchives.CommentStorageArchive,
+            append=True,
+        )
+        new_comment_ref = TSPMessages.Reference(identifier=new_comment_id)
+
+        if is_reply:
+            entry = self._table_comments.lookup_value(table_id, cell._comment_id)
+            root_comment_id = entry.comment_storage.identifier
+            root_comment = self.objects[root_comment_id]
+            root_comment.replies.append(new_comment_ref)
+        else:
+            key = self._table_comments.lookup_key(table_id, new_comment_ref)
+            cell._comment_id = key
+
+    def _ensure_comment_datalist(self, table_id: int):
+        """Ensure the table has a datalist for comment storage."""
+        bds = self.objects[table_id].base_data_store
+        if bds.commentStorageTable.identifier == 0:
+            datalist_id, _ = self.objects.create_object_from_dict(
+                "Index/Tables/DataList-{}",
+                {"listType": TSTArchives.TableDataList.ListType.COMMENT_STORAGE, "nextListID": 1},
+                TSTArchives.TableDataList,
+            )
+            self.add_component_metadata(datalist_id, "CalculationEngine", "Tables/DataList-{}")
+            self.set_reference(bds.commentStorageTable, datalist_id)
+
+            # Clear datalist cache so it picks up the newly created object immediately
+            if table_id in self._table_comments._datalists:
+                del self._table_comments._datalists[table_id]
 
     def cell_text_style(self, cell: Cell) -> object:
         """
