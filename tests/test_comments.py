@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from numbers_parser import Document
+from numbers_parser import Comment, Document
 
 
 def test_comments():
@@ -52,3 +52,14 @@ def test_comments():
     assert c3.replies[1].text == "Comment #3, Reply #2"
     assert c3.replies[1].author == "Jon Connell"
     assert isinstance(c3.replies[1].creation_date, datetime)
+
+
+def test_passthrough_comments(configurable_save_file):
+    doc = Document("tests/data/test-comments.numbers")
+    doc.save(configurable_save_file)
+
+    new_doc = Document(configurable_save_file)
+    comments = new_doc.default_table.cell(0, 0).comments
+    assert isinstance(comments[0], Comment)
+    assert comments[0].author == "Jon Connell"
+    assert comments[0].replies[0].text == "Reply to comment #1"
