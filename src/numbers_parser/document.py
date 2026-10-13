@@ -1507,8 +1507,9 @@ class Table(Cacheable):
     def add_comment(
         self,
         *args,
-        author: str = "Unknown",
-        is_reply: bool = False,
+        author: str = __package__,
+        reply: bool = False,
+        update: bool = False,
     ) -> None:
         """
         Add a comment or reply to a cell.
@@ -1518,16 +1519,18 @@ class Table(Cacheable):
         *args:
             Either a cell reference (e.g., "A1") and the comment text, or
             row and column integers followed by the comment text.
-        author: str, optional, default: "Unknown"
+        author: str, optional, default: "numbers_parser"
             The author name for the comment.
-        is_reply: bool, optional, default: ``False``
+        reply: bool, optional, default: ``False``
             If ``True``, adds the comment as a reply to an existing comment thread.
+        update: bool, optional, default: ``False``
+            If ``True``, replaces the existing comment(s)
 
         Raises
         ------
         TypeError:
-            If no comments exist and ``is_reply`` is ``True``, or of adding a
-            comment to a cell that already has comments and ``is_reply`` is ``False``.
+            If no comments exist and ``reply`` is ``True``, or of adding a
+            comment to a cell that already has comments and ``reply`` is ``False``.
 
         """
         if len(args) == 2 and isinstance(args[0], str):
@@ -1540,7 +1543,7 @@ class Table(Cacheable):
             msg = "add_comment() takes either row, col, text or cell_ref, text"
             raise TypeError(msg)
 
-        self._model.add_comment_to_cell(self._table_id, row, col, text, author, is_reply)
+        self._model.add_comment_to_cell(self._table_id, row, col, text, author, update, reply)
 
     def set_cell_border(self, *args) -> None:
         """

@@ -67,13 +67,15 @@ def test_passthrough_comments(configurable_save_file):
 
 
 def test_write_comments(configurable_save_file):
-    doc = Document()
+    doc = Document("/Users/jon/Downloads/empty-with-author.numbers")
     table = doc.sheets[0].tables[0]
-
-    table.add_comment("A1", "Root comment on A1", author="numbers-parser")
-    table.add_comment("A1", "First reply to A1", author="numbers-parser", is_reply=True)
-
-    table.add_comment(1, 1, "Root comment on B2", author="numbers-parser")
+    table.write(0, 0, "Test #1")
+    table.write(1, 1, "Test #2")
+    author = "Test User"
+    table.add_comment("A1", "Root comment on A1", author=author)
+    table.add_comment("B2", "Root comment on B2")
+    table.add_comment("A1", "First reply to A1", author=author, reply=True)
+    table.add_comment("A1", "Second reply to A1", author=author, reply=True)
 
     doc.save(configurable_save_file)
 
@@ -85,14 +87,16 @@ def test_write_comments(configurable_save_file):
 
     assert len(a1_comments) == 1
     assert a1_comments[0].text == "Root comment on A1"
-    assert a1_comments[0].author == "numbers-parser"
-    assert len(a1_comments[0].replies) == 1
+    assert a1_comments[0].author == author
+    assert len(a1_comments[0].replies) == 2
     assert a1_comments[0].replies[0].text == "First reply to A1"
-    assert a1_comments[0].replies[0].author == "numbers-parser"
+    assert a1_comments[0].replies[0].author == author
+    assert a1_comments[0].replies[1].text == "Second reply to A1"
+    assert a1_comments[0].replies[1].author == author
 
     assert len(b2_comments) == 1
     assert b2_comments[0].text == "Root comment on B2"
-    assert b2_comments[0].author == "numbers-parser"
+    assert b2_comments[0].author == "numbers_parser"
     assert len(b2_comments[0].replies) == 0
 
 
@@ -100,11 +104,12 @@ def test_comment_exceptions():
     doc = Document()
     table = doc.sheets[0].tables[0]
 
-    with pytest.raises(ValueError, match="Cannot add a reply to a cell with no comments."):
-        table.add_comment("C3", "Invalid reply", is_reply=True)
+    with pytest.raises(ValueError, match="Cannot update or reply in a cell with no comments"):
+        table.add_comment("C3", "Invalid reply", reply=True)
+
+    with pytest.raises(ValueError, match="Cannot update or reply in a cell with no comments"):
+        table.add_comment("C3", "Invalid update", update=True)
 
     table.add_comment("D4", "Valid root comment")
-    with pytest.raises(
-        ValueError, match="Cell already has a comment. Use is_reply=True to add a reply."
-    ):
+    with pytest.raises(ValueError, match="Cannot update or reply existing comment"):
         table.add_comment("D4", "Invalid second root comment")
