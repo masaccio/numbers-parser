@@ -28,6 +28,7 @@ from numbers_parser.cell import (
 from numbers_parser.constants import (
     DECIMAL_PLACES_AUTO,
     EMPTY_STORAGE_BUFFER,
+    PACKAGE_ID,
     NegativeNumberStyle,
 )
 from numbers_parser.experimental import (
@@ -365,9 +366,9 @@ def test_invalid_format():
 
 @pytest.mark.script_launch_mode("inprocess")
 def test_cli_main_blocks(capsys):
-    from numbers_parser._cat_numbers import main as cat_main
-    from numbers_parser._csv2numbers import main as csv2_main
-    from numbers_parser._unpack_numbers import main as unpack_main
+    from numbers_parser._cat_numbers import main as cat_main  # noqa: PLC0415
+    from numbers_parser._csv2numbers import main as csv2_main  # noqa: PLC0415
+    from numbers_parser._unpack_numbers import main as unpack_main  # noqa: PLC0415
 
     with (
         patch("numbers_parser._cat_numbers.__name__", "test"),
@@ -406,3 +407,18 @@ def test_xref_quoting():
     table = doc.default_table
     assert table.cell("C2").formula == "SUM(Column '''A''')"
     assert table.cell("C3").formula == "COUNTA('Column X & Y')"
+
+
+def test_add_component_metadata_none_locator():
+    doc = Document()
+    model = doc._model
+
+    test_id = 999999
+    model.add_component_metadata(test_id, "CalculationEngine", None)
+
+    components = model.objects[PACKAGE_ID].components
+    added_component = next((c for c in components if c.identifier == test_id), None)
+
+    assert added_component is not None
+    assert added_component.preferred_locator == "CalculationEngine"
+    assert added_component.locator == ""

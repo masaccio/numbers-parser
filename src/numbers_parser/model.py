@@ -2180,15 +2180,15 @@ class _NumbersModel(Cacheable):
         return new_author_id
 
     def add_comment_to_cell(  # noqa: PLR0917
-        self, table_id: int, row: int, col: int, text: str, author: str, update: bool, reply: bool
+        self, table_id: int, row: int, col: int, text: str, author: str, reply: bool
     ) -> None:
         cell = self._table_data[table_id][row][col]
 
-        if any([reply, update]) and cell._comment_id is None:
-            msg = "Cannot update or reply in a cell with no comments"
+        if reply and cell._comment_id is None:
+            msg = "Cannot reply to a comment in a cell with no comments"
             raise ValueError(msg)
         if not reply and cell._comment_id is not None:
-            msg = "Cannot update or reply existing comment without update=True or reply=True"
+            msg = "Cannot reply to existing comment without reply=True"
             raise ValueError(msg)
 
         author_id = self.author_id(author, table_id)

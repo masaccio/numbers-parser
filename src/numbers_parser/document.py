@@ -1509,7 +1509,6 @@ class Table(Cacheable):
         *args,
         author: str = __package__,
         reply: bool = False,
-        update: bool = False,
     ) -> None:
         """
         Add a comment or reply to a cell.
@@ -1523,8 +1522,6 @@ class Table(Cacheable):
             The author name for the comment.
         reply: bool, optional, default: ``False``
             If ``True``, adds the comment as a reply to an existing comment thread.
-        update: bool, optional, default: ``False``
-            If ``True``, replaces the existing comment(s)
 
         Raises
         ------
@@ -1533,17 +1530,21 @@ class Table(Cacheable):
             comment to a cell that already has comments and ``reply`` is ``False``.
 
         """
-        if len(args) == 2 and isinstance(args[0], str):
-            row, col = xl_cell_to_rowcol(args[0])
-            text = args[1]
-        elif len(args) == 3 and isinstance(args[0], int) and isinstance(args[1], int):
-            row, col = args[0], args[1]
-            text = args[2]
+        (row, col, *args) = self._validate_cell_coords(*args)
+        if len(args) == 1:
+            text = args[0]
+        elif len(args) > 1:
+            msg = "too many positional arguments to add_comment"
+            raise TypeError(msg)
         else:
-            msg = "add_comment() takes either row, col, text or cell_ref, text"
+            msg = "no text defined for comment"
             raise TypeError(msg)
 
-        self._model.add_comment_to_cell(self._table_id, row, col, text, author, update, reply)
+        if isinstance(self._data[row][col], MergedCell):
+            msg = "Cannot add a comment to a merged cell; add it to the merge anchor instead"
+            raise TypeError(msg)
+
+        self._model.add_comment_to_cell(self._table_id, row, col, text, author, reply)
 
     def set_cell_border(self, *args) -> None:
         """
