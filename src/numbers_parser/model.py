@@ -23,6 +23,7 @@ from numbers_parser.cell import (
     Border,
     BorderType,
     Cell,
+    Comment,
     CustomFormatting,
     Formatting,
     FormattingType,
@@ -224,6 +225,7 @@ class _NumbersModel(Cacheable):
         self._table_formats = DataLists(self, "format_table", "format")
         self._table_styles = DataLists(self, "styleTable", "reference")
         self._table_strings = DataLists(self, "stringTable", "string")
+        self._table_comments = DataLists(self, "commentStorageTable", "comment_storage")
         self._control_specs = DataLists(self, "control_cell_spec_table", "cell_spec")
         self._formulas = DataLists(self, "formula_table", "formula")
         self._table_data = {}
@@ -1172,16 +1174,20 @@ class _NumbersModel(Cacheable):
 
     def add_component_metadata(self, object_id: int, parent: str, locator: str) -> None:
         """Add a new ComponentInfo record to the parent object in the document metadata."""
-        locator = locator.format(object_id)
-        preferred_locator = re.sub(r"\-\d+.*", "", locator)
+        if locator is not None:
+            args = {
+                "locator": locator.format(object_id),
+                "preferred_locator": re.sub(r"\-\d+.*", "", locator),
+            }
+        else:
+            args = {"preferred_locator": parent}
         component_info = TSPArchiveMessages.ComponentInfo(
             identifier=object_id,
-            locator=locator,
-            preferred_locator=preferred_locator,
             is_stored_outside_object_archive=False,
             document_read_version=[2, 0, 0],
             document_write_version=[2, 0, 0],
             save_token=1,
+            **args,
         )
         self.objects[PACKAGE_ID].components.append(component_info)
         self.add_component_reference(object_id, location=parent)
@@ -2114,6 +2120,101 @@ class _NumbersModel(Cacheable):
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,
                 }
+
+    def table_comments(self, table_id: int, key: int) -> list[Comment]:
+        """Resolve a comment ID to a list of Comment objects."""
+        entry = self._table_comments.lookup_value(table_id, key)
+        storage_id = entry.comment_storage.identifier
+        return [self._resolve_comment_storage(storage_id)]
+
+    def _resolve_comment_storage(self, storage_id: int) -> Comment:
+        """Recursively fetch a comment and its replies into a Comment object."""
+        storage = self.objects[storage_id]
+
+        author_id = storage.author.identifier
+        author_name = self.objects[author_id].name if author_id in self.objects else "Unknown"
+        creation_date = EPOCH + timedelta(seconds=storage.creation_date.seconds)
+
+        replies = []
+        for reply_ref in getattr(storage, "replies", []):
+            replies.append(self._resolve_comment_storage(reply_ref.identifier))
+
+        return Comment(
+            author=author_name, text=storage.text, creation_date=creation_date, replies=replies
+        )
+
+    def author_id(self, author_name: str, table_id: int) -> int:
+        """Get or create an annotation author."""
+        storage_id = self.find_refs("AnnotationAuthorStorageArchive")[0]
+        storage = self.objects[storage_id]
+
+        for author_ref in storage.annotation_author:
+            author = self.objects[author_ref.identifier]
+            if author.name == author_name:
+                return author_ref.identifier
+
+        # Append new authors to the same file that holds the Author Storage array
+        new_author_id, _ = self.objects.create_object_from_dict(
+            "AnnotationAuthorStorage",
+            {
+                "name": author_name,
+                "color": {
+                    "model": "rgb",
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 1.0,
+                    "rgbspace": "srgb",
+                },
+            },
+            TSKArchives.AnnotationAuthorArchive,
+            append=True,
+        )
+        storage.annotation_author.append(TSPMessages.Reference(identifier=new_author_id))
+        bds = self.objects[table_id].base_data_store
+        self.add_component_reference(
+            object_id=new_author_id,
+            location=bds.commentStorageTable.identifier,
+            component_id=storage_id,
+        )
+        return new_author_id
+
+    def add_comment_to_cell(  # noqa: PLR0917
+        self, table_id: int, row: int, col: int, text: str, author: str, reply: bool
+    ) -> None:
+        cell = self._table_data[table_id][row][col]
+
+        if reply and cell._comment_id is None:
+            msg = "Cannot reply to a comment in a cell with no comments"
+            raise ValueError(msg)
+        if not reply and cell._comment_id is not None:
+            msg = "Cannot reply to existing comment without reply=True"
+            raise ValueError(msg)
+
+        author_id = self.author_id(author, table_id)
+        creation_date = (datetime.now() - EPOCH).total_seconds()  # noqa: DTZ005
+        datalist_id = self._table_comments.id(table_id)
+        datalist_file = self.objects._object_to_filename_map[datalist_id].strip(".iwa")
+        new_comment_id, _ = self.objects.create_object_from_dict(
+            datalist_file,
+            {
+                "text": text,
+                "creation_date": {"seconds": creation_date},
+                "author": {"identifier": author_id},
+                "storage_uuid": NumbersUUID().dict2,
+            },
+            TSDArchives.CommentStorageArchive,
+            append=True,
+        )
+        new_comment_ref = TSPMessages.Reference(identifier=new_comment_id)
+        if reply:
+            entry = self._table_comments.lookup_value(table_id, cell._comment_id)
+            root_comment_id = entry.comment_storage.identifier
+            root_comment = self.objects[root_comment_id]
+            root_comment.replies.append(new_comment_ref)
+        else:
+            key = self._table_comments.lookup_key(table_id, new_comment_ref)
+            cell._comment_id = key
 
     def cell_text_style(self, cell: Cell) -> object:
         """

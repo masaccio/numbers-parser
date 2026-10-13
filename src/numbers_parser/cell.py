@@ -83,6 +83,7 @@ __all__ = [
     "BulletedTextCell",
     "Cell",
     "CellBorder",
+    "Comment",
     "CustomFormatting",
     "DateCell",
     "DurationCell",
@@ -606,6 +607,16 @@ class MergeAnchor:
 
 
 @dataclass
+class Comment:
+    """A comment associated with a cell."""
+
+    author: str
+    text: str
+    creation_date: datetime
+    replies: list[Comment] = field(default_factory=list)
+
+
+@dataclass
 class CellStorageFlags:
     _string_id: int = None
     _rich_id: int = None
@@ -623,6 +634,7 @@ class CellStorageFlags:
     _duration_format_id: int = None
     _text_format_id: int = None
     _bool_format_id: int = None
+    _comment_id: int = None
     _extra_bits: int = 0
 
     def __repr__(self) -> str:
@@ -842,6 +854,13 @@ class Cell(CellStorageFlags, Cacheable):
             stacklevel=2,
         )
 
+    @property
+    def comments(self) -> list[Comment]:
+        """Return a list of (comment, author) tuples for the cell."""
+        if self._comment_id is None:
+            return []
+        return self._model.table_comments(self._table_id, self._comment_id)
+
     @classmethod
     def _empty_cell(cls, table_id: int, row: int, col: int, model: object):
         return Cell._from_storage(table_id, row, col, EMPTY_STORAGE_BUFFER, model)
@@ -954,7 +973,9 @@ class Cell(CellStorageFlags, Cacheable):
             storage_flags._text_format_id, offset = unpack_int(buffer, offset)
         if flags & 0x40000:
             storage_flags._bool_format_id, offset = unpack_int(buffer, offset)
-        # Skip 0x80000 (comment_id) and 0x100000 (import_warning_id)
+        if flags & 0x80000:
+            storage_flags._comment_id, offset = unpack_int(buffer, offset)
+        # Skip 0x100000 (import_warning_id)
 
         cell_type = buffer[1]
         if cell_type == TSTArchives.genericCellType:
@@ -1198,14 +1219,10 @@ class Cell(CellStorageFlags, Cacheable):
             flags |= 0x40000
             length += 4
             storage += pack("<i", self._bool_format_id)
-
-        # TODO: pack extra_bits for newly created cells.
-        #       0x0001 - number
-        #       0x0002 - currency
-        #       0x0004 - duration
-        #       0x0008 - datetime
-        #       0x0020 - bool
-        #       0x0080 - string
+        if self._comment_id is not None:
+            flags |= 0x80000
+            length += 4
+            storage += pack("<i", self._comment_id)
 
         storage[8:12] = pack("<i", flags)
         if len(storage) < 32:
