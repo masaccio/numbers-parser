@@ -242,6 +242,7 @@ class _NumbersModel(Cacheable):
         self.calculate_table_uuid_map()
 
     def save(self, filepath: Path, package: bool, password: str, hint: str) -> None:
+        self.refresh_pivot_tables()
         self.objects.save(filepath, package, password, hint)
 
     def find_refs(self, ref: str) -> list:
@@ -1225,7 +1226,7 @@ class _NumbersModel(Cacheable):
         self.update_cell_borders(table_id, data)
 
         self.objects.remove_unreferenced_objects()
-        table_model.ClearField("base_column_row_uids")
+        self.update_table_metadata_ranges(table_id, len(data), len(data[0]))
 
         tile_idx = 0
         max_tile_idx = len(data) >> 8
@@ -2826,6 +2827,111 @@ class _NumbersModel(Cacheable):
                 uuid for uuid in row_uid_for_index if uuid not in group_uuids
             )
         }
+
+    def refresh_pivot_tables(self) -> None:
+        """
+        Signal a data refresh for pivot tables on next load by bumping their
+        refresh UUIDs and timestamps, while leaving rule UUIDs intact to
+        preserve layout and styling.
+        """
+        for sheet_id in self.sheet_ids():
+            for table_id in self.table_ids(sheet_id):
+                if not self.is_a_pivot_table(table_id):
+                    continue
+
+                table_model = self.objects[table_id]
+                if not table_model.HasField("pivot_owner"):
+                    continue
+
+                pivot_owner_id = table_model.pivot_owner.identifier
+                if pivot_owner_id == 0 or pivot_owner_id not in self.objects:
+                    continue
+
+                pivot_owner = self.objects[pivot_owner_id]
+
+                # Only touch the data refresh trackers. Do not alter rule UUIDs.
+                pivot_owner.refresh_uid.CopyFrom(NumbersUUID().protobuf2)
+                pivot_owner.refresh_timestamp = (datetime.now() - EPOCH).total_seconds()  # noqa: DTZ005
+
+    def update_table_metadata_ranges(self, table_id: int, num_rows: int, num_cols: int) -> None:
+        """Keep UID maps and dependency bounds in sync with data dimensions."""
+        table_model = self.objects[table_id]
+
+        def _update_map(uid_map_ref):
+            if not uid_map_ref or uid_map_ref.identifier == 0:
+                return
+            uid_map = self.objects[uid_map_ref.identifier]
+
+            col_uuids = [
+                NumbersUUID(uid_map.sorted_column_uids[i]) for i in uid_map.column_uid_for_index
+            ]
+            row_uuids = [NumbersUUID(uid_map.sorted_row_uids[i]) for i in uid_map.row_uid_for_index]
+
+            if num_cols > len(col_uuids):
+                col_uuids.extend([NumbersUUID() for _ in range(num_cols - len(col_uuids))])
+            elif num_cols < len(col_uuids):
+                col_uuids = col_uuids[:num_cols]
+
+            if num_rows > len(row_uuids):
+                row_uuids.extend([NumbersUUID() for _ in range(num_rows - len(row_uuids))])
+            elif num_rows < len(row_uuids):
+                row_uuids = row_uuids[:num_rows]
+
+            sorted_col_uuids = sorted(col_uuids, key=lambda x: x.int)
+            sorted_row_uuids = sorted(row_uuids, key=lambda x: x.int)
+
+            clear_field_container(uid_map.sorted_column_uids)
+            for u in sorted_col_uuids:
+                uid_map.sorted_column_uids.append(u.protobuf2)
+
+            clear_field_container(uid_map.column_uid_for_index)
+            clear_field_container(uid_map.column_index_for_uid)
+            for _ in sorted_col_uuids:
+                uid_map.column_index_for_uid.append(0)
+            for col_idx, u in enumerate(col_uuids):
+                sorted_idx = sorted_col_uuids.index(u)
+                uid_map.column_uid_for_index.append(sorted_idx)
+                uid_map.column_index_for_uid[sorted_idx] = col_idx
+
+            clear_field_container(uid_map.sorted_row_uids)
+            for u in sorted_row_uuids:
+                uid_map.sorted_row_uids.append(u.protobuf2)
+
+            clear_field_container(uid_map.row_uid_for_index)
+            clear_field_container(uid_map.row_index_for_uid)
+            for _ in sorted_row_uuids:
+                uid_map.row_index_for_uid.append(0)
+            for row_idx, u in enumerate(row_uuids):
+                sorted_idx = sorted_row_uuids.index(u)
+                uid_map.row_uid_for_index.append(sorted_idx)
+                uid_map.row_index_for_uid[sorted_idx] = row_idx
+
+        if table_model.HasField("base_column_row_uids"):
+            _update_map(table_model.base_column_row_uids)
+
+        table_info_id = self.table_info_id(table_id)
+        table_info = self.objects[table_info_id]
+        if table_info.HasField("view_column_row_uids"):
+            _update_map(table_info.view_column_row_uids)
+
+        # Update Calculation Engine bounding boxes so formulas/pivots evaluate new rows
+        calc_engine = self.calc_engine()
+        if not calc_engine:
+            return
+
+        for dep_ref in calc_engine.dependency_tracker.formula_owner_dependencies:
+            dep_archive = self.objects[dep_ref.identifier]
+            if getattr(dep_archive, "owner_kind", None) == OwnerKind.TABLE_MODEL:
+                if getattr(dep_archive.formula_owner, "identifier", 0) == table_info_id:
+                    for field in ["spanning_column_dependencies", "spanning_row_dependencies"]:
+                        if dep_archive.HasField(field):
+                            spanning = getattr(dep_archive, field)
+                            if spanning.HasField("total_range_for_table"):
+                                spanning.total_range_for_table.bottom_right_row = num_rows - 1
+                                spanning.total_range_for_table.bottom_right_column = num_cols - 1
+                            if spanning.HasField("body_range_for_table"):
+                                spanning.body_range_for_table.bottom_right_row = num_rows - 1
+                                spanning.body_range_for_table.bottom_right_column = num_cols - 1
 
 
 def rgb(obj) -> RGB:

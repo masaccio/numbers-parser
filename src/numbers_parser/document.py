@@ -17,7 +17,6 @@ from numbers_parser.cell import (
     MergedCell,
     Style,
     TextCell,
-    UnsupportedWarning,
 )
 from numbers_parser.constants import (
     CUSTOM_FORMATTING_ALLOWED_CELLS,
@@ -167,12 +166,11 @@ class Document:
                 if self._model.is_a_pivot_table(table._table_id):
                     table_name = self._model.table_name(table._table_id)
                     warn(
-                        f"Not modifying pivot table '{table_name}'",
-                        UnsupportedWarning,
+                        f"Pivot table '{table_name}' may be corrupted by save.",
+                        RuntimeWarning,
                         stacklevel=2,
                     )
-                else:
-                    self._model.recalculate_table_data(table._table_id, table._data)
+                self._model.recalculate_table_data(table._table_id, table._data)
         self._model.save(Path(filename), package, password, hint)
 
     def add_sheet(
