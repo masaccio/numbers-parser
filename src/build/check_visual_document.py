@@ -9,7 +9,6 @@ import pymupdf
 from PIL import Image
 from pixelmatch.contrib.PIL import pixelmatch
 from rich import print  # noqa: A004
-from rich.traceback import install
 
 from numbers_parser import (
     RGB,
@@ -33,9 +32,6 @@ from numbers_parser import (
 )
 from numbers_parser.cell import CustomFormattingType
 from numbers_parser.constants import CHECKBOX_TRUE_VALUE, STAR_RATING_VALUE
-
-# Hijack the default exception hook to print beautiful tracebacks with local variables
-install(show_locals=True)
 
 
 def generate_doc_with_all_apis(filename: Path):
@@ -399,7 +395,6 @@ def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path):
     tell application "Numbers"
         activate
         open POSIX file "{doc_filepath.resolve()}"
-        
         -- Robust wait loop with timeout
         set waitCounter to 0
         repeat until exists front window
@@ -409,7 +404,6 @@ def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path):
                 error "Timeout: Numbers took too long to open the window."
             end if
         end repeat
-        
         set targetDoc to front document
         export targetDoc to POSIX file "{pdf_filepath.resolve()}" as PDF
         close front document saving no
@@ -418,7 +412,7 @@ def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path):
     """
 
     try:
-        subprocess.run(["osascript", "-e", applescript], check=True, capture_output=True, text=True)
+        subprocess.run(["osascript", "-e", applescript], check=True, capture_output=True, text=True)  # noqa: S603, S607
     except subprocess.CalledProcessError as e:
         print(f"[bold red]AppleScript execution failed:[/bold red]\n{e.stderr}")
         raise
