@@ -1789,7 +1789,7 @@ def _expand_quotes(value: str) -> str:
     return formatted_value
 
 
-def _decode_number_format(  # noqa: PLR0912
+def _decode_number_format(  # noqa: PLR0912, PLR0915
     number_format: TSKArchives.FormatStructArchive,
     value: float,
     name: str,
@@ -2169,6 +2169,7 @@ class Formatting:
     control_format: ControlFormattingType = ControlFormattingType.NUMBER
     currency_code: str = "GBP"
     date_time_format: str = DEFAULT_DATETIME_FORMAT
+    duration_style: DurationStyle = DurationStyle.COMPACT
     decimal_places: int = None
     fraction_accuracy: FractionAccuracy = FractionAccuracy.THREE
     increment: float = 1.0
