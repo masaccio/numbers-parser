@@ -74,6 +74,9 @@ bootstrap = [
     "pyobjc-framework-Cocoa>=10.2",
     "py2app>=0.28",
 ]
+visual = [
+    "rich>=15.0.0",
+]
 
 [build-system]
 requires = ["setuptools >= 61.0"]

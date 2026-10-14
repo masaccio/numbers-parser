@@ -1104,6 +1104,9 @@ profile = [
     { name = "line-profiler" },
     { name = "pytest-profiling" },
 ]
+visual = [
+    { name = "rich" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -1157,6 +1160,7 @@ profile = [
     { name = "line-profiler", specifier = ">=5.0.0" },
     { name = "pytest-profiling" },
 ]
+visual = [{ name = "rich", specifier = ">=15.0.0" }]
 
 [[package]]
 name = "numpy"
