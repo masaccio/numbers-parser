@@ -1,12 +1,20 @@
 # ruff: noqa: S101, DTZ001
 
+import subprocess
 import tempfile
+import warnings
 from datetime import datetime, timedelta
 from pathlib import Path
 
-# ruff: noqa: S101
-from rich.traceback import install
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*swigvarlink.*")
+    import pymupdf
+from PIL import Image
+from pixelmatch.contrib.PIL import pixelmatch
+from rich import print  # noqa: A004
 
+# ruff: noqa: S101
+# from rich.traceback import install
 from numbers_parser import (
     # xl_rowcol_to_cell
     RGB,
@@ -56,19 +64,19 @@ from numbers_parser.constants import CHECKBOX_TRUE_VALUE, STAR_RATING_VALUE
 
 def generate_doc_with_all_apis(filename):
     # 2. Generate the document exercising all options
-    doc = Document(num_cols=3)
+    doc = Document(num_header_rows=0, num_header_cols=0, num_cols=2)
     sheet = doc.sheets[0]
     sheet.name = "API Test Sheet"
     table = sheet.tables[0]
     table.name = "API Exporter Reference"
 
-    # Ensure enough rows and columns for all examples
-    table.add_column(2)
-    table.add_row(20)
-
-    # Widen columns so explanations are easily readable in Apple Numbers
+    table.add_row(10)
     table.col_width(0, 150)
-    table.col_width(1, 800)
+    table.col_width(1, 420)
+    table.col_width(2, 420)
+    table.row_height(1, 64)
+    for row in range(2, table.num_rows):
+        table.row_height(row, 32)
 
     row = 1  # Skip header row visually
     table.write(0, 0, "Rendered Feature")
@@ -150,8 +158,8 @@ def generate_doc_with_all_apis(filename):
 
     # --- Duration Formatting ---
     table.write(row, 0, timedelta(days=1, hours=2))
-    table.set_cell_formatting(row, 0, "duration", duration_style=DurationStyle.COMPACT)
-    table.write(row, 1, "DURATION: duration_style=DurationStyle.COMPACT")
+    table.set_cell_formatting(row, 0, "duration", duration_style=DurationStyle.LONG)
+    table.write(row, 1, "DURATION: duration_style=DurationStyle.LONG")
     row += 1
 
     # --- Tickbox Formatting ---
@@ -249,15 +257,15 @@ def generate_doc_with_all_apis(filename):
 
     # --- Merging and Comments ---
     table.write(row, 0, "Merged Anchor")
-    table.merge_cells(f"A{row + 1}:B{row + 1}")
+    table.merge_cells(f"A{row + 1}:A{row + 2}")
     table.add_comment(f"A{row + 1}", "Comment on merged anchor", author="API Tester")
     table.add_comment(f"A{row + 1}", "Reply to comment", author="API Tester", reply=True)
     table.write(
         row,
-        2,
+        1,
         f'table.merge_cells("A{row + 1}:B{row + 1}"), table.add_comment(..., author="API Tester", reply=True)',
     )
-    row += 1
+    row += 2
 
     # --- XREFs and Utilities ---
     table.write(row, 0, "Xrefs test")
@@ -372,11 +380,11 @@ def check_saved_document(filename):
     assert "Prefix: Test string" in c_text_cell.formatted_value
 
     # Check Merging
-    assert "A17:B17" in table.merge_ranges
+    assert "A17:A18" in table.merge_ranges
     anchor_cell = table.cell("A17")
-    merged_cell = table.cell("B17")
+    merged_cell = table.cell("A18")
     assert merged_cell.is_merged is False
-    assert anchor_cell.size == (1, 2)
+    assert anchor_cell.size == (2, 1)
     assert isinstance(merged_cell, MergedCell)
 
     # Check Comments
@@ -389,12 +397,83 @@ def check_saved_document(filename):
     assert comments[0].replies[0].author == "API Tester"
 
 
+def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path):
+    """Open a document in Apple Numbers and maximize the window."""
+    applescript = f"""
+    tell application "Numbers"
+        activate
+        open POSIX file "{doc_filepath.resolve()}"
+        repeat until exists front window
+            delay 0.1
+        end repeat
+        set targetDoc to front document
+        export targetDoc to POSIX file "{pdf_filepath.resolve()}" as PDF
+        close front document saving no
+    end tell
+    """
+
+    subprocess.run(["osascript", "-e", applescript], check=False)  # noqa: S603, S607
+
+
+def compare_pdfs_visually(
+    ref_pdf_path: str, test_pdf_path: str, diff_out_path: str, threshold: float = 0.1
+) -> bool:
+    ref_doc = pymupdf.open(ref_pdf_path)
+    test_doc = pymupdf.open(test_pdf_path)
+    all_pages_match = True
+
+    if len(ref_doc) != len(test_doc):
+        print(f"Page count mismatch: {len(ref_doc)} vs {len(test_doc)}")
+        return False
+
+    for page_num in range(len(ref_doc)):
+        matrix = pymupdf.Matrix(2.0, 2.0)
+
+        ref_pix = ref_doc[page_num].get_pixmap(matrix=matrix, alpha=True)
+        test_pix = test_doc[page_num].get_pixmap(matrix=matrix, alpha=True)
+
+        ref_img = Image.frombytes("RGBA", [ref_pix.width, ref_pix.height], ref_pix.samples)
+        test_img = Image.frombytes("RGBA", [test_pix.width, test_pix.height], test_pix.samples)
+
+        # Force the test image to exactly match the reference image dimensions
+        if ref_img.size != test_img.size:
+            normalized_test_img = Image.new("RGBA", ref_img.size, (255, 255, 255, 0))
+            normalized_test_img.paste(test_img, (0, 0))
+            test_img = normalized_test_img
+
+        diff_img = Image.new("RGBA", ref_img.size)
+
+        mismatch_pixels = pixelmatch(
+            ref_img, test_img, diff_img, threshold=threshold, includeAA=True
+        )
+
+        if mismatch_pixels > 0:
+            print(
+                f"Visual difference found on page {page_num + 1} ({mismatch_pixels} pixels mismatched)"
+            )
+            diff_file = f"{diff_out_path}_page_{page_num + 1}.png"
+            diff_img.save(diff_file)
+            all_pages_match = False
+
+    return all_pages_match
+
+
 # Hijack the default exception hook and force it to print local variables
-install(show_locals=True)
+# install(show_locals=True)
 
 tempdir = Path(tempfile.gettempdir())
-filename = tempdir / "api-test.numbers"
-save_file = generate_doc_with_all_apis(filename)
-check_saved_document(filename)
+doc_filepath = tempdir / "api-test.numbers"
+pdf_filepath = tempdir / "api-test.pdf"
 
-print("Save and re-read completed successfully. Complete visual check:", filename)
+print("[green]Generating doc using all APIs[/green]")
+save_file = generate_doc_with_all_apis(doc_filepath)
+print("[green]Generation complete:[/green]", doc_filepath)
+check_saved_document(doc_filepath)
+print("[green]Document check passed[/green]")
+open_numbers_and_export_pdf(doc_filepath, pdf_filepath)
+
+match = compare_pdfs_visually(pdf_filepath, "tests/data/visual-test.pdf", "diff_output")
+if match:
+    print("[green]Visual test passed[/green]")
+else:
+    print("[red]Visual test failed[/red]")

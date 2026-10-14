@@ -74,7 +74,11 @@ bootstrap = [
     "pyobjc-framework-Cocoa>=10.2",
     "py2app>=0.28",
 ]
-visual = [
+visualcheck = [
+    "osascript>=0.0.27",
+    "pillow>=12.3.0",
+    "pixelmatch>=0.4.0",
+    "pymupdf>=1.28.2",
     "rich>=15.0.0",
 ]
 
