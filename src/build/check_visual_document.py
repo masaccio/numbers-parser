@@ -14,6 +14,7 @@ from rich.traceback import install
 from numbers_parser import (
     RGB,
     Alignment,
+    BackgroundImage,
     Border,
     BorderType,
     ControlFormattingType,
@@ -38,25 +39,24 @@ install(show_locals=True)
 
 
 def generate_doc_with_all_apis(filename: Path):
-    doc = Document(num_header_rows=0, num_header_cols=0, num_cols=2)
+    doc = Document(num_header_rows=0, num_header_cols=0, num_cols=2, num_rows=20)
     sheet = doc.sheets[0]
     sheet.name = "API Test Sheet"
     table = sheet.tables[0]
     table.name = "API Exporter Reference"
 
-    table.add_row(10)
+    # Pre-allocate rows to avoid auto-expansion resizing issues
     table.col_width(0, 150)
     table.col_width(1, 420)
-    table.col_width(2, 420)
     table.row_height(1, 64)
-    for row in range(2, table.num_rows):
-        table.row_height(row, 32)
+    for r in range(2, table.num_rows):
+        table.row_height(r, 32)
 
     row = 1  # Skip header row visually
     table.write(0, 0, "Rendered Feature")
     table.write(0, 1, "Explanation / API Usage")
 
-    # --- Styles and Background Images ---
+    # --- Styles (without Background Image) ---
     style1 = doc.add_style(
         name="CustomStyle1",
         font_color=RGB(29, 177, 0),
@@ -235,7 +235,7 @@ def generate_doc_with_all_apis(filename: Path):
     table.write(
         row,
         1,
-        f'table.merge_cells("A{row + 1}:B{row + 1}"), table.add_comment(..., author="API Tester", reply=True)',
+        f'table.merge_cells("A{row + 1}:A{row + 2}"), table.add_comment(..., author="API Tester", reply=True)',
     )
     row += 2
 
@@ -246,6 +246,20 @@ def generate_doc_with_all_apis(filename: Path):
         1,
         f"xl_cell_to_rowcol('A1')={xl_cell_to_rowcol('A1')}, xl_col_to_name(2)={xl_col_to_name(2)}, xl_range(0,0,1,1)={xl_range(0, 0, 1, 1)}, xl_col_to_offset('B')={xl_col_to_offset('B')}",
     )
+    row += 1
+
+    # --- Background Image ---
+    with open("tests/data/cat.jpg", "rb") as f:
+        cat_data = f.read()
+    cat_bg = BackgroundImage(cat_data, "cat.jpg")
+    style_cat = doc.add_style(name="CatBackground", bg_image=cat_bg)
+    table.write(row, 0, "Cat Image", style=style_cat)
+    table.write(
+        row,
+        1,
+        'doc.add_style(name="CatBackground", bg_image=BackgroundImage(cat_data, "cat.jpg"))',
+    )
+    table.row_height(row, 100)  # Give the cat room to breathe visually
     row += 1
 
     doc.save(filename)
@@ -363,6 +377,16 @@ def check_saved_document(filename: Path):
     assert len(comments[0].replies) == 1
     assert comments[0].replies[0].text == "Reply to comment"
     assert comments[0].replies[0].author == "API Tester"
+
+    # Check Background Image
+    bg_cell = table.cell(19, 0)
+    assert bg_cell.value == "Cat Image"
+    s_bg = bg_cell.style
+    assert s_bg.name == "CatBackground"
+    assert s_bg.bg_image is not None
+    assert s_bg.bg_image.filename == "cat.jpg"
+    with open("tests/data/cat.jpg", "rb") as f:
+        assert s_bg.bg_image.data == f.read()
 
 
 def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path):
