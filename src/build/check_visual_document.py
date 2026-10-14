@@ -133,14 +133,14 @@ def generate_doc_with_all_apis(filename):
         "currency",
         currency_code="USD",
         decimal_places=2,
-        negative_style=NegativeNumberStyle.RED,
+        negative_style=NegativeNumberStyle.MINUS,
         show_thousands_separator=True,
         use_accounting_style=True,
     )
     table.write(
         row,
         1,
-        'FormattingType.CURRENCY: currency_code="USD", decimal_places=2, negative_style=NegativeNumberStyle.RED, show_thousands_separator=True, use_accounting_style=True',
+        'FormattingType.CURRENCY: currency_code="USD", decimal_places=2, negative_style=NegativeNumberStyle.MINUS, show_thousands_separator=True, use_accounting_style=True',
     )
     row += 1
 
@@ -449,7 +449,7 @@ def compare_pdfs_visually(
 
         if mismatch_pixels > 0:
             print(
-                f"Visual difference found on page {page_num + 1} ({mismatch_pixels} pixels mismatched)"
+                f"[red]Visual difference found on page {page_num + 1} ({mismatch_pixels} pixels mismatched)[/red]"
             )
             diff_file = f"{diff_out_path}_page_{page_num + 1}.png"
             diff_img.save(diff_file)
@@ -472,7 +472,7 @@ check_saved_document(doc_filepath)
 print("[green]Document check passed[/green]")
 open_numbers_and_export_pdf(doc_filepath, pdf_filepath)
 
-match = compare_pdfs_visually(pdf_filepath, "tests/data/visual-test.pdf", "diff_output")
+match = compare_pdfs_visually(pdf_filepath, "tests/data/visual-test.pdf", "visual_check")
 if match:
     print("[green]Visual test passed[/green]")
 else:

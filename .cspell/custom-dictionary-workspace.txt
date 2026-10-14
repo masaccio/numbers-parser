@@ -2,6 +2,7 @@ abstractmethod
 addopts
 adipiscing
 amet
+applescript
 ASTNODEARRAYARCHIVE
 ASTNODETYPE
 Avenir
@@ -34,6 +35,7 @@ extlinks
 FCFA
 filelock
 filname
+fitz
 fontmap
 functionmap
 FURB
@@ -66,10 +68,13 @@ nftt
 no cover
 nonspace
 numrows
+osascript
 padder
 pathnames
 pathsource
 pbtype
+pdfs
+pixmap
 popn
 protobuf
 PROTOC
@@ -114,6 +119,7 @@ urandom
 urllib
 Varint
 veryclean
+visualcheck
 xattr
 xcrun
 xdist

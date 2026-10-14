@@ -13,7 +13,7 @@ LLDB_PYTHON_PATH := ${shell lldb --python-path}
 PACKAGE=numbers-parser
 package_c := $(subst -,_,$(PACKAGE))
 
-.PHONY: all readme bootstrap clean veryclean test profile dist upload docs
+.PHONY: all readme bootstrap clean veryclean test profile dist upload docs visualcheck
 
 TTY_GREEN  := $(shell tput setaf 2)
 TTY_RESET  := $(shell tput init)
@@ -23,15 +23,16 @@ error_message = echo "$(TTY_RED)Bootstrap: $(1)$(TTY_RESET)"
 
 all:
 	@echo "make targets:"
-	@echo "    test       - run pytest with all tests"
-	@echo "    readme     - rebuild README.md from source"
-	@echo "    docs       - rebuild markdown and HTML docs from source"
-	@echo "    profile    - run pytest and generate a profile graph"
-	@echo "    dist       - build distributions"
-	@echo "    upload     - upload package to PyPI"
-	@echo "    clean      - delete temporary files for test, coverage, etc."
-	@echo "    veryclean  - delete all auto-generated files (requires new bootstrap)"
-	@echo "    bootstrap  - rebuild all auto-generated files for new Numbers version"
+	@echo "    test        - run pytest with all tests"
+	@echo "    readme      - rebuild README.md from source"
+	@echo "    docs        - rebuild markdown and HTML docs from source"
+	@echo "    profile     - run pytest and generate a profile graph"
+	@echo "    dist        - build distributions"
+	@echo "    upload      - upload package to PyPI"
+	@echo "    clean       - delete temporary files for test, coverage, etc."
+	@echo "    veryclean   - delete all auto-generated files (requires new bootstrap)"
+	@echo "    bootstrap   - rebuild all auto-generated files for new Numbers version"
+	@echo "    visualcheck - Generate a PDF from Numbers and check visual matches (macOS only)"
 
 dist: readme
 	-rm -rf dist
@@ -179,6 +180,10 @@ src/$(package_c)/generated/__init__.py: src/$(package_c)/generated/TNArchives_pb
 	@$(call info_message,"Bootstrap: patching paths in generated protobuf files")
 	uv run python3 src/build/replace_paths.py src/$(package_c)/generated/T*.py
 	@touch $@
+
+visualcheck:
+	uv sync --group visualcheck
+	uv run python3 src/build/check_visual_document.py
 
 veryclean:
 	make clean
