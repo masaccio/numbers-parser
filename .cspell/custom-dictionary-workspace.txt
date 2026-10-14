@@ -37,6 +37,7 @@ filelock
 filname
 fitz
 fontmap
+frombytes
 functionmap
 FURB
 gprof
@@ -74,6 +75,7 @@ pathnames
 pathsource
 pbtype
 pdfs
+pixelmatch
 pixmap
 popn
 protobuf
