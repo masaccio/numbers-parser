@@ -78,7 +78,7 @@ class Document:
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0917
         self,
         filename: str | Path | None = None,
         sheet_name: str | None = "Sheet 1",
@@ -458,7 +458,7 @@ class Sheet:
             num_header_cols,
         )
 
-    def _add_table(
+    def _add_table(  # noqa: PLR0917
         self,
         table_name,
         from_table_id,
@@ -1762,6 +1762,9 @@ class Table(Cacheable):
             * **date_time_format** (*str, optional, default: "dd MMM YYY HH:MM"*) - A POSIX
                strftime-like formatting string of :ref:`Numbers date/time
                directives <datetime_formats>`.
+
+        :``"duration"``:
+            * **duration_style** (*DurationStyle, optional, default: DurationStyle.COMPACT*) - How the duration units are rendered.
 
         :``"fraction"``:
             * **fraction_accuracy** (*:py:class:`~numbers_parser.FractionAccuracy`, optional, default: FractionAccuracy.THREE* - The
