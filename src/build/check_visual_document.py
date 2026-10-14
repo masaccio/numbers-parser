@@ -2,56 +2,28 @@
 
 import subprocess
 import tempfile
-import warnings
 from datetime import datetime, timedelta
 from pathlib import Path
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*swigvarlink.*")
-    import pymupdf
+import pymupdf
 from PIL import Image
 from pixelmatch.contrib.PIL import pixelmatch
 from rich import print  # noqa: A004
+from rich.traceback import install
 
-# ruff: noqa: S101
-# from rich.traceback import install
 from numbers_parser import (
-    # xl_rowcol_to_cell
     RGB,
     Alignment,
     Border,
     BorderType,
-    # constants.py
     ControlFormattingType,
     Document,
     DurationStyle,
-    # DurationUnits,
     FractionAccuracy,
-    # BulletedTextCell,
-    # Cell,
-    # CellBorder,
-    # Comment,
-    # CustomFormatting,
-    # DateCell,
-    # DurationCell,
-    # EmptyCell,
-    # ErrorCell,
-    # Formatting,
     HorizontalJustification,
-    # MergeAnchor,
-    # MergeReference,
     MergedCell,
     NegativeNumberStyle,
     PaddingType,
-    # Sheet,
-    # Table,
-    # exceptions.py
-    # NumbersError,
-    # UnsupportedError,
-    # NotImplementedError,
-    # FileError,
-    # FileFormatError,
-    # FormulaError,
     VerticalJustification,
     xl_cell_to_rowcol,
     xl_col_to_name,
@@ -61,9 +33,11 @@ from numbers_parser import (
 from numbers_parser.cell import CustomFormattingType
 from numbers_parser.constants import CHECKBOX_TRUE_VALUE, STAR_RATING_VALUE
 
+# Hijack the default exception hook to print beautiful tracebacks with local variables
+install(show_locals=True)
 
-def generate_doc_with_all_apis(filename):
-    # 2. Generate the document exercising all options
+
+def generate_doc_with_all_apis(filename: Path):
     doc = Document(num_header_rows=0, num_header_cols=0, num_cols=2)
     sheet = doc.sheets[0]
     sheet.name = "API Test Sheet"
@@ -83,8 +57,6 @@ def generate_doc_with_all_apis(filename):
     table.write(0, 1, "Explanation / API Usage")
 
     # --- Styles and Background Images ---
-    # We provide dummy bytes for the background image to satisfy the API locally
-    # bg_image = BackgroundImage(b"dummy image data", "dummy.png")
     style1 = doc.add_style(
         name="CustomStyle1",
         font_color=RGB(29, 177, 0),
@@ -276,11 +248,10 @@ def generate_doc_with_all_apis(filename):
     )
     row += 1
 
-    # Save to the parameterized configurable test file
     doc.save(filename)
 
 
-def check_saved_document(filename):
+def check_saved_document(filename: Path):
     doc = Document(filename)
     sheet = doc.sheets["API Test Sheet"]
     table = sheet.tables["API Exporter Reference"]
@@ -295,8 +266,6 @@ def check_saved_document(filename):
     assert s.strikethrough is True
     assert s.font_name == "Menlo"
     assert s.bg_color == RGB(240, 240, 240)
-    # assert s.bg_image is not None
-    # assert s.bg_image.filename == "dummy.png"
     assert s.alignment.horizontal == HorizontalJustification.CENTER
     assert s.alignment.vertical == VerticalJustification.MIDDLE
     assert s.bold is True
@@ -323,7 +292,6 @@ def check_saved_document(filename):
     # Check Currency Formatting
     curr_cell = table.cell(4, 0)
     assert curr_cell.value == -100.5
-    # assert "100.50" in curr_cell.formatted_value
 
     # Check Fraction Formatting
     frac_cell = table.cell(5, 0)
@@ -398,21 +366,38 @@ def check_saved_document(filename):
 
 
 def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path):
-    """Open a document in Apple Numbers and maximize the window."""
+    """Open a document in Apple Numbers and export as PDF."""
+    # Remove stale PDF to prevent false positives if export silently fails
+    if pdf_filepath.exists():
+        pdf_filepath.unlink()
+
     applescript = f"""
     tell application "Numbers"
         activate
         open POSIX file "{doc_filepath.resolve()}"
+        
+        -- Robust wait loop with timeout
+        set waitCounter to 0
         repeat until exists front window
-            delay 0.1
+            delay 0.5
+            set waitCounter to waitCounter + 1
+            if waitCounter > 20 then
+                error "Timeout: Numbers took too long to open the window."
+            end if
         end repeat
+        
         set targetDoc to front document
         export targetDoc to POSIX file "{pdf_filepath.resolve()}" as PDF
         close front document saving no
+        quit
     end tell
     """
 
-    subprocess.run(["osascript", "-e", applescript], check=False)  # noqa: S603, S607
+    try:
+        subprocess.run(["osascript", "-e", applescript], check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as e:
+        print(f"[bold red]AppleScript execution failed:[/bold red]\n{e.stderr}")
+        raise
 
 
 def compare_pdfs_visually(
@@ -458,22 +443,37 @@ def compare_pdfs_visually(
     return all_pages_match
 
 
-# Hijack the default exception hook and force it to print local variables
-# install(show_locals=True)
+def main():
+    tempdir = Path(tempfile.gettempdir())
+    doc_filepath = tempdir / "api-test.numbers"
+    pdf_filepath = tempdir / "api-test.pdf"
 
-tempdir = Path(tempfile.gettempdir())
-doc_filepath = tempdir / "api-test.numbers"
-pdf_filepath = tempdir / "api-test.pdf"
+    print(f"[green]Generating doc using all APIs to: {doc_filepath}[/green]")
+    generate_doc_with_all_apis(doc_filepath)
 
-print("[green]Generating doc using all APIs[/green]")
-save_file = generate_doc_with_all_apis(doc_filepath)
-print("[green]Generation complete:[/green]", doc_filepath)
-check_saved_document(doc_filepath)
-print("[green]Document check passed[/green]")
-open_numbers_and_export_pdf(doc_filepath, pdf_filepath)
+    print("[green]Running API read assertions...[/green]")
+    check_saved_document(doc_filepath)
+    print("[green]Document API check passed[/green]")
 
-match = compare_pdfs_visually(pdf_filepath, "tests/data/visual-test.pdf", "visual_check")
-if match:
-    print("[green]Visual test passed[/green]")
-else:
-    print("[red]Visual test failed[/red]")
+    print(f"[green]Triggering AppleScript PDF Export to: {pdf_filepath}[/green]")
+    open_numbers_and_export_pdf(doc_filepath, pdf_filepath)
+
+    if not pdf_filepath.exists():
+        print(f"[bold red]Failed to locate exported PDF at {pdf_filepath}[/bold red]")
+        return
+
+    print("[green]Comparing generated PDF against visual reference...[/green]")
+    match = compare_pdfs_visually(
+        ref_pdf_path="tests/data/visual-test.pdf",
+        test_pdf_path=str(pdf_filepath),
+        diff_out_path="visual_check",
+    )
+
+    if match:
+        print("[bold green]Visual test passed flawlessly![/bold green]")
+    else:
+        print("[bold red]Visual test failed. Check the generated diff images.[/bold red]")
+
+
+if __name__ == "__main__":
+    main()
