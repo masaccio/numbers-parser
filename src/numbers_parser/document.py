@@ -17,7 +17,6 @@ from numbers_parser.cell import (
     MergedCell,
     Style,
     TextCell,
-    UnsupportedWarning,
 )
 from numbers_parser.constants import (
     CUSTOM_FORMATTING_ALLOWED_CELLS,
@@ -79,7 +78,7 @@ class Document:
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0917
         self,
         filename: str | Path | None = None,
         sheet_name: str | None = "Sheet 1",
@@ -167,12 +166,11 @@ class Document:
                 if self._model.is_a_pivot_table(table._table_id):
                     table_name = self._model.table_name(table._table_id)
                     warn(
-                        f"Not modifying pivot table '{table_name}'",
-                        UnsupportedWarning,
+                        f"Pivot table '{table_name}' may be corrupted by save.",
+                        RuntimeWarning,
                         stacklevel=2,
                     )
-                else:
-                    self._model.recalculate_table_data(table._table_id, table._data)
+                self._model.recalculate_table_data(table._table_id, table._data)
         self._model.save(Path(filename), package, password, hint)
 
     def add_sheet(
@@ -460,7 +458,7 @@ class Sheet:
             num_header_cols,
         )
 
-    def _add_table(
+    def _add_table(  # noqa: PLR0917
         self,
         table_name,
         from_table_id,
@@ -1764,6 +1762,11 @@ class Table(Cacheable):
             * **date_time_format** (*str, optional, default: "dd MMM YYY HH:MM"*) - A POSIX
                strftime-like formatting string of :ref:`Numbers date/time
                directives <datetime_formats>`.
+
+        :``"duration"``:
+            * **duration_style** (*:py:class:`~numbers_parser.DurationStyle`, optional, default: DurationStyle.COMPACT*) - How the duration units are rendered.
+            * **duration_unit_largest** (*:py:class:`~numbers_parser.DurationUnits`, optional, default: None*) - the first and largest duration unit to display
+            * **duration_unit_smallest** (*:py:class:`~numbers_parser.DurationUnits`, optional, default: None*) - the last and smallest duration unit to display
 
         :``"fraction"``:
             * **fraction_accuracy** (*:py:class:`~numbers_parser.FractionAccuracy`, optional, default: FractionAccuracy.THREE* - The

@@ -1422,3 +1422,102 @@ archives and connects their references. The public ``Table.caption`` and
 ``Table.caption_enabled`` properties in :src_pkg:`document.py` delegate to
 these model operations; visibility is represented by the drawable's
 ``caption_hidden`` flag.
+
+Pivot tables and metadata ranges
+================================
+
+``numbers-parser`` does not recalculate pivot table aggregations in Python when
+source cells change. Instead, modifying a source table updates the table's
+coordinate metadata and marks any pivot tables in the document for refresh
+(:src_pkg:`model.py`).
+
+A table's ``TableInfoArchive.is_a_pivot_table`` flag identifies whether a
+drawable is a pivot table, while ``TableModelArchive.pivot_owner`` references
+its ``TST.PivotOwnerArchive`` (:src_proto:`TSTArchives.proto`):
+
+.. code-block:: protobuf
+
+   message TableInfoArchive {
+     optional bool is_a_pivot_table = 16;
+     optional .TSP.Reference view_column_row_uids = 6;
+     // ...
+   }
+
+   message TableModelArchive {
+     optional .TSP.Reference base_column_row_uids = 46;
+     optional .TSP.Reference pivot_owner = 85;
+     // ...
+   }
+
+   message PivotOwnerArchive {
+     optional .TSP.UUID refresh_uid = 18;
+     optional double refresh_timestamp = 9;
+     // ...
+   }
+
+On save, ``_NumbersModel.refresh_pivot_tables`` walks all tables in the
+document and locates those where ``is_a_pivot_table`` is true. For each pivot
+table, it resolves the ``pivot_owner`` reference and assigns a newly generated
+``refresh_uid`` alongside an updated ``refresh_timestamp`` (seconds relative to
+``EPOCH`` in :src_pkg:`constants.py`). Rule and grouping UUIDs inside the
+``PivotOwnerArchive`` are left untouched so that layout, field mappings, and
+visual styling are preserved when Numbers refreshes the table.
+
+Synchronizing UID maps and dependency bounds
+--------------------------------------------
+
+Pivot tables and whole-column formulas track their source data through row and
+column UUID maps and calculation-engine spanning ranges rather than raw tile
+dimensions alone. When rows or columns are added to or removed from a table,
+``recalculate_table_data`` calls ``update_table_metadata_ranges`` to keep those
+structures synchronized with the new table size.
+
+Both ``TableModelArchive.base_column_row_uids`` and
+``TableInfoArchive.view_column_row_uids`` reference ``TST.ColumnRowUIDMapArchive``
+objects. For each present map:
+
+* Existing row and column UUIDs are reconstructed in table-index order using
+  ``row_uid_for_index`` and ``column_uid_for_index``.
+* If the table has grown, new ``NumbersUUID`` values are appended; if it has
+  shrunk, the lists are truncated to the new dimensions.
+* The UUID lists are re-sorted by their 128-bit integer value to populate
+  ``sorted_row_uids`` and ``sorted_column_uids``, and the bidirectional index
+  lookup arrays (``*_uid_for_index`` and ``*_index_for_uid``) are rebuilt to
+  match.
+
+Finally, ``update_table_metadata_ranges`` updates the table's spanning range
+bounds in the calculation engine (:src_proto:`TSCEArchives.proto`):
+
+.. code-block:: protobuf
+
+   message FormulaOwnerDependenciesArchive {
+     optional uint32 owner_kind = 3 [default = 0];
+     optional .TSCE.SpanningDependenciesExpandedArchive spanning_column_dependencies = 7;
+     optional .TSCE.SpanningDependenciesExpandedArchive spanning_row_dependencies = 8;
+     optional .TSP.Reference formula_owner = 11;
+     // ...
+   }
+
+   message SpanningDependenciesExpandedArchive {
+     optional .TSCE.RangeCoordinateArchive total_range_for_table = 2;
+     optional .TSCE.RangeCoordinateArchive body_range_for_table = 3;
+     // ...
+   }
+
+   message RangeCoordinateArchive {
+     required uint32 top_left_column = 1;
+     required uint32 top_left_row = 2;
+     required uint32 bottom_right_column = 3;
+     required uint32 bottom_right_row = 4;
+   }
+
+The model scans ``dependency_tracker.formula_owner_dependencies`` for the
+``FormulaOwnerDependenciesArchive`` whose ``owner_kind`` is
+``OwnerKind.TABLE_MODEL`` (1) and whose ``formula_owner`` reference matches the
+table's ``TableInfoArchive`` identifier. In both
+``spanning_column_dependencies`` and ``spanning_row_dependencies``, it updates
+``bottom_right_row`` and ``bottom_right_column`` on ``total_range_for_table``
+and ``body_range_for_table`` to ``num_rows - 1`` and ``num_cols - 1``. Keeping
+both the UID maps and the spanning dependency rectangles aligned ensures that
+newly added rows or columns are included when Numbers refreshes dependent pivot
+tables and evaluates spanning formulas.

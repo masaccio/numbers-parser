@@ -1456,6 +1456,8 @@ class Cell(CellStorageFlags, Cacheable):
             self._control_id = control_id
         elif format_type in [FormattingType.DATETIME, CustomFormattingType.DATETIME]:
             self._date_format_id = format_id
+        elif format_type == FormattingType.DURATION:
+            self._duration_format_id = format_id
         elif format_type in [FormattingType.TEXT, CustomFormattingType.TEXT]:
             self._text_format_id = format_id
         else:
@@ -1789,7 +1791,7 @@ def _expand_quotes(value: str) -> str:
     return formatted_value
 
 
-def _decode_number_format(  # noqa: PLR0912
+def _decode_number_format(  # noqa: PLR0912, PLR0915
     number_format: TSKArchives.FormatStructArchive,
     value: float,
     name: str,
@@ -2169,6 +2171,9 @@ class Formatting:
     control_format: ControlFormattingType = ControlFormattingType.NUMBER
     currency_code: str = "GBP"
     date_time_format: str = DEFAULT_DATETIME_FORMAT
+    duration_style: DurationStyle = DurationStyle.COMPACT
+    duration_unit_largest: DurationUnits = None
+    duration_unit_smallest: DurationUnits = None
     decimal_places: int = None
     fraction_accuracy: FractionAccuracy = FractionAccuracy.THREE
     increment: float = 1.0

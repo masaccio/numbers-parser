@@ -423,9 +423,15 @@ def test_issue_69():
 
 def test_issue_73(configurable_save_file):
     doc = Document("tests/data/issue-73.numbers")
-    with pytest.warns(UnsupportedWarning) as record:
+    table = doc.sheets[0].tables["Table 1"]
+    table.write("A4", "foo")
+    table.write("B4", 10)
+
+    with pytest.warns(
+        RuntimeWarning, match="Pivot table 'Table 1 Pivot' may be corrupted by save."
+    ):
         doc.save(configurable_save_file)
-    assert str(record[0].message) == "Not modifying pivot table 'Table 1 Pivot'"
+    doc.save(configurable_save_file)
 
 
 def test_issue_74_1(configurable_save_file):

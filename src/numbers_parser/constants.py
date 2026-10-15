@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import IntEnum
+from enum import IntEnum, auto
 from importlib.resources import files
 from math import ceil
 
@@ -229,28 +229,29 @@ class FormatType(IntEnum):
 
 
 class FormattingType(IntEnum):
-    BASE = 1
-    CURRENCY = 2
-    DATETIME = 3
-    FRACTION = 4
-    NUMBER = 5
-    PERCENTAGE = 6
-    SCIENTIFIC = 7
-    TICKBOX = 8
-    RATING = 9
-    SLIDER = 10
-    STEPPER = 11
-    POPUP = 12
-    TEXT = 13
+    BASE = auto()
+    CURRENCY = auto()
+    DATETIME = auto()
+    DURATION = auto()
+    FRACTION = auto()
+    NUMBER = auto()
+    PERCENTAGE = auto()
+    SCIENTIFIC = auto()
+    TICKBOX = auto()
+    RATING = auto()
+    SLIDER = auto()
+    STEPPER = auto()
+    POPUP = auto()
+    TEXT = auto()
 
 
 class ControlFormattingType(IntEnum):
-    BASE = 1
-    CURRENCY = 2
-    FRACTION = 4
-    NUMBER = 5
-    PERCENTAGE = 6
-    SCIENTIFIC = 7
+    BASE = auto()
+    CURRENCY = auto()
+    FRACTION = auto()
+    NUMBER = auto()
+    PERCENTAGE = auto()
+    SCIENTIFIC = auto()
 
 
 class OwnerKind(IntEnum):
@@ -263,6 +264,7 @@ FORMATTING_ALLOWED_CELLS = {
     "base": ["NumberCell"],
     "currency": ["NumberCell"],
     "datetime": ["DateCell"],
+    "duration": ["DurationCell"],
     "fraction": ["NumberCell"],
     "number": ["NumberCell"],
     "percentage": ["NumberCell"],
@@ -352,6 +354,7 @@ ALLOWED_FORMATTING_PARAMETERS = {
         "use_accounting_style",
     ],
     FormattingType.DATETIME: ["date_time_format"],
+    FormattingType.DURATION: ["duration_style", "duration_unit_largest", "duration_unit_smallest"],
     FormattingType.FRACTION: ["fraction_accuracy"],
     FormattingType.NUMBER: [
         "decimal_places",
@@ -386,6 +389,7 @@ FORMAT_TYPE_MAP = {
     FormattingType.BASE: FormatType.BASE,
     FormattingType.CURRENCY: FormatType.CURRENCY,
     FormattingType.DATETIME: FormatType.DATE,
+    FormattingType.DURATION: FormatType.DURATION,
     FormattingType.FRACTION: FormatType.FRACTION,
     FormattingType.NUMBER: FormatType.DECIMAL,
     FormattingType.PERCENTAGE: FormatType.PERCENT,
