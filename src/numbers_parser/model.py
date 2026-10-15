@@ -564,6 +564,13 @@ class _NumbersModel(Cacheable):
                 range_control_max=formatting.maximum,
                 range_control_inc=formatting.increment,
             )
+        elif format_type == FormattingType.STEPPER:
+            cell_spec = TSTArchives.CellSpecArchive(
+                interaction_type=CellInteractionType.STEPPER,
+                range_control_min=formatting.minimum,
+                range_control_max=formatting.maximum,
+                range_control_inc=formatting.increment,
+            )
         else:  # POPUP
             popup_id = self.cell_popup_model(self._control_specs.id(table_id), formatting)
             cell_spec = TSTArchives.CellSpecArchive(
