@@ -2907,28 +2907,25 @@ class _NumbersModel(Cacheable):
                 uid_map.row_uid_for_index.append(sorted_idx)
                 uid_map.row_index_for_uid[sorted_idx] = row_idx
 
-        if table_model.HasField("base_column_row_uids"):
-            _update_map(table_model.base_column_row_uids)
+        _update_map(table_model.base_column_row_uids)
 
         table_info_id = self.table_info_id(table_id)
         table_info = self.objects[table_info_id]
-        if table_info.HasField("view_column_row_uids"):
-            _update_map(table_info.view_column_row_uids)
+        _update_map(table_info.view_column_row_uids)
 
         calc_engine = self.calc_engine()
         for dep_ref in calc_engine.dependency_tracker.formula_owner_dependencies:
             dep_archive = self.objects[dep_ref.identifier]
-            if getattr(dep_archive, "owner_kind", None) == OwnerKind.TABLE_MODEL:
-                if getattr(dep_archive.formula_owner, "identifier", 0) == table_info_id:
-                    for field in ["spanning_column_dependencies", "spanning_row_dependencies"]:
-                        if dep_archive.HasField(field):
-                            spanning = getattr(dep_archive, field)
-                            if spanning.HasField("total_range_for_table"):
-                                spanning.total_range_for_table.bottom_right_row = num_rows - 1
-                                spanning.total_range_for_table.bottom_right_column = num_cols - 1
-                            if spanning.HasField("body_range_for_table"):
-                                spanning.body_range_for_table.bottom_right_row = num_rows - 1
-                                spanning.body_range_for_table.bottom_right_column = num_cols - 1
+            if (
+                dep_archive.owner_kind == OwnerKind.TABLE_MODEL
+                and dep_archive.formula_owner.identifier == table_info_id
+            ):
+                for field in ["spanning_column_dependencies", "spanning_row_dependencies"]:
+                    spanning = getattr(dep_archive, field)
+                    spanning.total_range_for_table.bottom_right_row = num_rows - 1
+                    spanning.total_range_for_table.bottom_right_column = num_cols - 1
+                    spanning.body_range_for_table.bottom_right_row = num_rows - 1
+                    spanning.body_range_for_table.bottom_right_column = num_cols - 1
 
 
 def rgb(obj) -> RGB:
