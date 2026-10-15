@@ -209,7 +209,7 @@ def generate_doc_with_all_apis(filename: Path):
     table.write(
         row,
         1,
-        "NUMBER: integer_format=ZEROS, decimal_format=SPACES, num_integers=4, num_decimals=2",
+        "NUMBER: name='MyCustomNum', integer_format=ZEROS, decimal_format=SPACES, num_integers=4, num_decimals=2",
     )
     row += 1
 
