@@ -19,10 +19,10 @@ from numbers_parser import (
     ControlFormattingType,
     Document,
     DurationStyle,
+    DurationUnits,
     FractionAccuracy,
     HorizontalJustification,
     MergedCell,
-    NegativeNumberStyle,
     PaddingType,
     VerticalJustification,
     xl_cell_to_rowcol,
@@ -52,14 +52,14 @@ def generate_doc_with_all_apis(filename: Path):
     table.write(0, 0, "Rendered Feature")
     table.write(0, 1, "Explanation / API Usage")
 
-    # --- Styles (without Background Image) ---
+    # --- Styles ---
     style1 = doc.add_style(
         name="CustomStyle1",
         font_color=RGB(29, 177, 0),
         font_size=10.0,
         strikethrough=True,
         font_name="Menlo",
-        bg_color=RGB(240, 240, 240),
+        bg_color=RGB(240, 240, 120),
         alignment=Alignment(HorizontalJustification.CENTER, VerticalJustification.MIDDLE),
         bold=True,
         italic=True,
@@ -74,23 +74,21 @@ def generate_doc_with_all_apis(filename: Path):
     table.write(
         row,
         1,
-        'name="CustomStyle1", font_color=RGB(29, 177, 0), font_size=10.0, strikethrough=True, font_name="Menlo", bg_color=RGB(240, 240, 240), alignment=Alignment(HorizontalJustification.CENTER, VerticalJustification.MIDDLE), bold=True, italic=True, underline=True',
+        'font_color=RGB(29, 177, 0), font_size=10.0, strikethrough=True, font_name="Menlo", bg_color=RGB(240, 240, 120), alignment=Alignment(CENTER, MIDDLE), bold=True, italic=True, underline=True',
     )
     row += 1
 
     # --- Borders ---
-    border1 = Border(width=2.5, color=RGB(255, 0, 0), style=BorderType.DASHES)
+    border1 = Border(width=5.0, color=RGB(255, 0, 0), style=BorderType.DASHES)
     table.write(row, 0, "Bordered Top")
     table.set_cell_border(row, 0, "top", border1)
-    table.write(
-        row, 1, 'Border(width=2.5, color=RGB(255, 0, 0), style=BorderType.DASHES) applied to "top"'
-    )
+    table.write(row, 1, "Border(width=5, color=RGB(255, 0, 0), [top]style=BorderType.DASHES)")
     row += 1
 
     # --- Base Formatting ---
-    table.write(row, 0, 255)
+    table.write(row, 0, -255)
     table.set_cell_formatting(row, 0, "base", base=16, base_places=4, base_use_minus_sign=True)
-    table.write(row, 1, "FormattingType.BASE: base=16, base_places=4, base_use_minus_sign=True")
+    table.write(row, 1, "type=BASE, base=16, base_places=4, base_use_minus_sign=True")
     row += 1
 
     # --- Currency Formatting ---
@@ -101,45 +99,55 @@ def generate_doc_with_all_apis(filename: Path):
         "currency",
         currency_code="USD",
         decimal_places=2,
-        negative_style=NegativeNumberStyle.MINUS,
         show_thousands_separator=True,
         use_accounting_style=True,
     )
     table.write(
         row,
         1,
-        'FormattingType.CURRENCY: currency_code="USD", decimal_places=2, negative_style=NegativeNumberStyle.MINUS, show_thousands_separator=True, use_accounting_style=True',
+        'type=CURRENCY: currency_code="USD", decimal_places=2,show_thousands_separator=True, use_accounting_style=True',
     )
     row += 1
 
     # --- Fraction Formatting ---
     table.write(row, 0, 0.75)
     table.set_cell_formatting(row, 0, "fraction", fraction_accuracy=FractionAccuracy.QUARTERS)
-    table.write(row, 1, "FormattingType.FRACTION: fraction_accuracy=FractionAccuracy.QUARTERS")
+    table.write(row, 1, "type=FRACTION: fraction_accuracy=FractionAccuracy.QUARTERS")
     row += 1
 
     # --- Datetime Formatting ---
     table.write(row, 0, datetime(2026, 1, 1, 12, 0))
     table.set_cell_formatting(row, 0, "datetime", date_time_format="yyyy-MM-dd HH:mm")
-    table.write(row, 1, 'FormattingType.DATETIME: date_time_format="yyyy-MM-dd HH:mm"')
+    table.write(row, 1, 'type=DATETIME: date_time_format="yyyy-MM-dd HH:mm"')
     row += 1
 
     # --- Duration Formatting ---
     table.write(row, 0, timedelta(days=1, hours=2))
-    table.set_cell_formatting(row, 0, "duration", duration_style=DurationStyle.LONG)
-    table.write(row, 1, "DURATION: duration_style=DurationStyle.LONG")
+    table.set_cell_formatting(
+        row,
+        0,
+        "duration",
+        duration_style=DurationStyle.LONG,
+        duration_unit_largest=DurationUnits.DAY,
+        duration_unit_smallest=DurationUnits.MINUTE,
+    )
+    table.write(
+        row,
+        1,
+        "type=duration_style=LONG, duration_unit_largest=DAY, duration_unit_smallest=MINUTE]",
+    )
     row += 1
 
     # --- Tickbox Formatting ---
     table.write(row, 0, True)
     table.set_cell_formatting(row, 0, "tickbox")
-    table.write(row, 1, 'FormattingType.TICKBOX: bool value (True) with "tickbox" format')
+    table.write(row, 1, 'type=TICKBOX: bool value (True) with "tickbox" format')
     row += 1
 
     # --- Rating Formatting ---
     table.write(row, 0, 3)
     table.set_cell_formatting(row, 0, "rating")
-    table.write(row, 1, 'FormattingType.RATING: numeric value (3) with "rating" format')
+    table.write(row, 1, 'type=RATING: numeric value (3) with "rating" format')
     row += 1
 
     # --- Slider Formatting ---
@@ -156,7 +164,7 @@ def generate_doc_with_all_apis(filename: Path):
     table.write(
         row,
         1,
-        "FormattingType.SLIDER: control_format=ControlFormattingType.NUMBER, minimum=0.0, maximum=100.0, increment=10.0",
+        "type=SLIDER: control_format=NUMBER, minimum=0.0, maximum=100.0, increment=10.0",
     )
     row += 1
 
@@ -174,7 +182,7 @@ def generate_doc_with_all_apis(filename: Path):
     table.write(
         row,
         1,
-        "FormattingType.STEPPER: control_format=ControlFormattingType.NUMBER, minimum=0.0, maximum=10.0, increment=1.0",
+        "type=STEPPER: control_format=NUMBER, minimum=0.0, maximum=10.0, increment=1.0",
     )
     row += 1
 
@@ -183,9 +191,7 @@ def generate_doc_with_all_apis(filename: Path):
     table.set_cell_formatting(
         row, 0, "popup", popup_values=["Option A", "Option B"], allow_none=False
     )
-    table.write(
-        row, 1, 'FormattingType.POPUP: popup_values=["Option A", "Option B"], allow_none=False'
-    )
+    table.write(row, 1, 'type=POPUP: popup_values=["Option A", "Option B"], allow_none=False')
     row += 1
 
     # --- Custom Number Formatting ---
@@ -203,7 +209,7 @@ def generate_doc_with_all_apis(filename: Path):
     table.write(
         row,
         1,
-        "NUMBER: integer_format=PaddingType.ZEROS, decimal_format=PaddingType.SPACES, num_integers=4, num_decimals=2",
+        "NUMBER: integer_format=ZEROS, decimal_format=SPACES, num_integers=4, num_decimals=2",
     )
     row += 1
 
@@ -275,7 +281,7 @@ def check_saved_document(filename: Path):
     assert s.font_size == 10.0
     assert s.strikethrough is True
     assert s.font_name == "Menlo"
-    assert s.bg_color == RGB(240, 240, 240)
+    assert s.bg_color == RGB(240, 240, 120)
     assert s.alignment.horizontal == HorizontalJustification.CENTER
     assert s.alignment.vertical == VerticalJustification.MIDDLE
     assert s.bold is True
@@ -290,18 +296,19 @@ def check_saved_document(filename: Path):
     # Check Borders
     border_cell = table.cell(2, 0)
     b = border_cell.border.top
-    assert b.width == 2.5
+    assert b.width == 5
     assert b.color == RGB(255, 0, 0)
     assert b.style == BorderType.DASHES
 
     # Check Base Formatting
     base_cell = table.cell(3, 0)
-    assert base_cell.value == 255
-    assert base_cell.formatted_value == "00FF"
+    assert base_cell.value == -255
+    assert base_cell.formatted_value == "-00FF"
 
     # Check Currency Formatting
     curr_cell = table.cell(4, 0)
     assert curr_cell.value == -100.5
+    assert curr_cell.formatted_value == "$\t(100.50)"
 
     # Check Fraction Formatting
     frac_cell = table.cell(5, 0)
@@ -314,8 +321,8 @@ def check_saved_document(filename: Path):
 
     # Check Duration Formatting
     dur_cell = table.cell(7, 0)
-    assert isinstance(dur_cell.value, timedelta)
-    assert ":" in dur_cell.formatted_value
+    assert dur_cell.value == timedelta(days=1, hours=2)
+    assert dur_cell.formatted_value == "1 day 2 hours 0 minutes"
 
     # Check Tickbox Formatting
     tick_cell = table.cell(8, 0)
@@ -488,7 +495,7 @@ def main():
     )
 
     if match:
-        print("[bold green]Visual test passed flawlessly![/bold green]")
+        print("[bold green]Visual test passed![/bold green]")
     else:
         print("[bold red]Visual test failed. Check the generated diff images.[/bold red]")
 
