@@ -267,7 +267,7 @@ def generate_doc_with_all_apis(filename: Path):
     doc.save(filename)
 
 
-def check_saved_document(filename: Path):
+def check_api_tests(filename: Path):
     doc = Document(filename)
     sheet = doc.sheets["API Test Sheet"]
     table = sheet.tables["API Exporter Reference"]
@@ -392,31 +392,101 @@ def check_saved_document(filename: Path):
         assert s_bg.bg_image.data == f.read()
 
 
-def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path):
+def update_pivot_tables_doc(doc_filepath: Path, new_doc_filepath: Path):
+    """Update some tables to force pivot tables to change."""
+    doc = Document("tests/data/test-pivot.numbers")
+    align_left = doc.add_style(
+        name="Align Left",
+        alignment=Alignment("left", "middle"),
+        font_size=10.0,
+    )
+    table = doc.sheets["Sales"].tables["Sales"]
+    table.add_row(4, start_row=13)
+    table.write(13, 0, "SA")
+    table.write(14, 0, "SA")
+    table.write(15, 0, "SA")
+    table.write(16, 0, "SA")
+    table.write(13, 1, "Q1")
+    table.write(14, 1, "Q2")
+    table.write(15, 1, "Q3")
+    table.write(16, 1, "Q4")
+    table.write(13, 2, 29700, style=align_left)
+    table.write(14, 2, 17200, style=align_left)
+    table.write(15, 2, 11400, style=align_left)
+    table.write(16, 2, 28200, style=align_left)
+    table.set_cell_formatting(13, 2, "number", show_thousands_separator=True)
+    table.set_cell_formatting(14, 2, "number", show_thousands_separator=True)
+    table.set_cell_formatting(15, 2, "number", show_thousands_separator=True)
+    table.set_cell_formatting(16, 2, "number", show_thousands_separator=True)
+    doc.save(new_doc_filepath)
+
+
+def open_numbers_and_export_pdf(
+    doc_filepath: Path, pdf_filepath: Path, refresh_pivot: bool = False, pivot_table_name: str = ""
+):
     """Open a document in Apple Numbers and export as PDF."""
     # Remove stale PDF to prevent false positives if export silently fails
     if pdf_filepath.exists():
         pdf_filepath.unlink()
 
+    refresh_pivot_str = str(refresh_pivot).lower()
     applescript = f"""
     tell application "Numbers"
         activate
-        open POSIX file "{doc_filepath.resolve()}"
-        -- Robust wait loop with timeout
+        set targetDoc to open POSIX file "{doc_filepath.resolve()}"
+
+        -- Wait for the document window to finish loading
         set waitCounter to 0
         repeat until exists front window
-            delay 0.5
+            delay 0.2
             set waitCounter to waitCounter + 1
-            if waitCounter > 20 then
-                error "Timeout: Numbers took too long to open the window."
+            if waitCounter > 50 then
+                error "Timeout waiting for Numbers window to appear."
             end if
         end repeat
-        set targetDoc to front document
-        export targetDoc to POSIX file "{pdf_filepath.resolve()}" as PDF
+
+        if {refresh_pivot_str} then
+            -- Select a cell inside the Pivot Table so the Refresh menu item is enabled
+            tell targetDoc
+                tell active sheet
+                    set selection range of table "{pivot_table_name}" to range "A1" of table "{pivot_table_name}"
+                end tell
+            end tell
+        end if
+    end tell
+
+    if {refresh_pivot_str} then
+        -- Trigger 'Refresh Pivot Table' from the Organise/Organize menu
+        tell application "System Events"
+            tell process "Numbers"
+                set frontmost to true
+                if exists menu bar item "Organise" of menu bar 1 then
+                    set orgMenu to menu 1 of menu bar item "Organise" of menu bar 1
+                else
+                    set orgMenu to menu 1 of menu bar item "Organize" of menu bar 1
+                end if
+
+                -- Wait briefly for Numbers to enable the menu item after selection
+                repeat 15 times
+                    if enabled of menu item "Refresh Pivot Table" of orgMenu then
+                        click menu item "Refresh Pivot Table" of orgMenu
+                        exit repeat
+                    end if
+                    delay 0.2
+                end repeat
+            end tell
+        end tell
+    end if
+
+    -- Allow the pivot table layout and calculation engine to settle before export
+    delay 0.5
+
+    tell application "Numbers"
+        export front document to POSIX file "{pdf_filepath.resolve()}" as PDF
         close front document saving no
         quit
     end tell
-    """
+    """  # noqa: S608
 
     try:
         subprocess.run(["osascript", "-e", applescript], check=True, capture_output=True, text=True)  # noqa: S603, S607
@@ -470,28 +540,43 @@ def compare_pdfs_visually(
 
 def main():
     tempdir = Path(tempfile.gettempdir())
-    doc_filepath = tempdir / "api-test.numbers"
-    pdf_filepath = tempdir / "api-test.pdf"
+    api_doc_filepath = tempdir / "api-test.numbers"
+    api_pdf_filepath = tempdir / "api-test.pdf"
 
-    print(f"[green]Generating doc using all APIs to: {doc_filepath}[/green]")
-    generate_doc_with_all_apis(doc_filepath)
+    print("[green]Generating doc using all APIs to:[/green]", api_doc_filepath)
+    generate_doc_with_all_apis(api_doc_filepath)
 
-    print("[green]Running API read assertions...[/green]")
-    check_saved_document(doc_filepath)
+    print("[green]Running API read assertions[/green]")
+    check_api_tests(api_doc_filepath)
     print("[green]Document API check passed[/green]")
 
-    print(f"[green]Triggering AppleScript PDF Export to: {pdf_filepath}[/green]")
-    open_numbers_and_export_pdf(doc_filepath, pdf_filepath)
+    print("[green]Triggering AppleScript PDF Export to:[/green]", api_pdf_filepath)
+    open_numbers_and_export_pdf(api_doc_filepath, api_pdf_filepath)
 
-    if not pdf_filepath.exists():
-        print(f"[bold red]Failed to locate exported PDF at {pdf_filepath}[/bold red]")
+    if not api_pdf_filepath.exists():
+        print("[bold red]Failed to locate exported PDF:[/bold red]", api_pdf_filepath)
         return
 
-    print("[green]Comparing generated PDF against visual reference...[/green]")
+    print("[green]Comparing generated API PDF against visual reference...[/green]")
     match = compare_pdfs_visually(
-        ref_pdf_path="tests/data/visual-test.pdf",
-        test_pdf_path=str(pdf_filepath),
-        diff_out_path="visual_check",
+        ref_pdf_path="tests/data/api-visual-test.pdf",
+        test_pdf_path=str(api_pdf_filepath),
+        diff_out_path="api-visual-check",
+    )
+
+    pivot_doc_filepath = tempdir / "pivot-test.numbers"
+    pivot_pdf_filepath = tempdir / "pivot-test.pdf"
+    print("[green]Generating updated pivot table sources:[/green]", pivot_doc_filepath)
+    update_pivot_tables_doc("tests/data/test-pivot.numbers", pivot_doc_filepath)
+
+    print("[green]Triggering AppleScript PDF Export to:[/green]", pivot_pdf_filepath)
+    open_numbers_and_export_pdf(pivot_doc_filepath, pivot_pdf_filepath, True, "Sales Pivot")
+
+    print("[green]Comparing generated API PDF against visual reference...[/green]")
+    match = match and compare_pdfs_visually(
+        ref_pdf_path="tests/data/pivot-visual-test.pdf",
+        test_pdf_path=str(pivot_pdf_filepath),
+        diff_out_path="pivot-visual-check",
     )
 
     if match:
