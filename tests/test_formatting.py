@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 import pytest_check as check
@@ -6,6 +6,8 @@ import pytest_check as check
 from numbers_parser import (
     ControlFormattingType,
     Document,
+    DurationStyle,
+    DurationUnits,
     EmptyCell,
     FractionAccuracy,
     NegativeNumberStyle,
@@ -434,6 +436,15 @@ def test_write_date_format(configurable_save_file):
             table.write(row, col, ref_date)
             table.set_cell_formatting(row, col, "datetime", date_time_format=date_time_format)
 
+    table.write(row + 1, 0, timedelta(days=1, hours=2))
+    table.set_cell_formatting(
+        row + 1,
+        0,
+        "duration",
+        duration_style=DurationStyle.LONG,
+        duration_unit_largest=DurationUnits.DAY,
+        duration_unit_smallest=DurationUnits.MINUTE,
+    )
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
@@ -442,6 +453,9 @@ def test_write_date_format(configurable_save_file):
         for col, ref_value in enumerate(cells):
             check.equal(table.cell(row, col).value, ref_date)
             check.equal(table.cell(row, col).formatted_value, ref_value)
+
+    check.equal(table.cell(row + 1, 0).value, timedelta(days=1, hours=2))
+    check.equal(table.cell(row + 1, 0).formatted_value, "1 day 2 hours 0 minutes")
 
 
 def test_write_numbers_format(configurable_save_file):
