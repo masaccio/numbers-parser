@@ -2847,13 +2847,7 @@ class _NumbersModel(Cacheable):
                     continue
 
                 table_model = self.objects[table_id]
-                if not table_model.HasField("pivot_owner"):
-                    continue
-
                 pivot_owner_id = table_model.pivot_owner.identifier
-                if pivot_owner_id == 0 or pivot_owner_id not in self.objects:
-                    continue
-
                 pivot_owner = self.objects[pivot_owner_id]
 
                 # Only touch the data refresh trackers. Do not alter rule UUIDs.
@@ -2921,11 +2915,7 @@ class _NumbersModel(Cacheable):
         if table_info.HasField("view_column_row_uids"):
             _update_map(table_info.view_column_row_uids)
 
-        # Update Calculation Engine bounding boxes so formulas/pivots evaluate new rows
         calc_engine = self.calc_engine()
-        if not calc_engine:
-            return
-
         for dep_ref in calc_engine.dependency_tracker.formula_owner_dependencies:
             dep_archive = self.objects[dep_ref.identifier]
             if getattr(dep_archive, "owner_kind", None) == OwnerKind.TABLE_MODEL:
