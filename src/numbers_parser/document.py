@@ -1764,7 +1764,9 @@ class Table(Cacheable):
                directives <datetime_formats>`.
 
         :``"duration"``:
-            * **duration_style** (*DurationStyle, optional, default: DurationStyle.COMPACT*) - How the duration units are rendered.
+            * **duration_style** (*:py:class:`~numbers_parser.DurationStyle`, optional, default: DurationStyle.COMPACT*) - How the duration units are rendered.
+            * **duration_unit_largest** (*:py:class:`~numbers_parser.DurationUnits`, optional, default: None - the first and largest duration unit to display
+            * **duration_unit_smallest** (*:py:class:`~numbers_parser.DurationUnits`, optional, default: None - the last and smallest duration unit to display
 
         :``"fraction"``:
             * **fraction_accuracy** (*:py:class:`~numbers_parser.FractionAccuracy`, optional, default: FractionAccuracy.THREE* - The

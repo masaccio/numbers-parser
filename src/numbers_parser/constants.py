@@ -354,7 +354,7 @@ ALLOWED_FORMATTING_PARAMETERS = {
         "use_accounting_style",
     ],
     FormattingType.DATETIME: ["date_time_format"],
-    FormattingType.DURATION: ["duration_style"],
+    FormattingType.DURATION: ["duration_style", "duration_unit_largest", "duration_unit_smallest"],
     FormattingType.FRACTION: ["fraction_accuracy"],
     FormattingType.NUMBER: [
         "decimal_places",
