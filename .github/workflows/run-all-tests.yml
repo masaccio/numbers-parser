@@ -35,7 +35,7 @@ jobs:
         run: sudo apt-get -y install libsnappy-dev
 
       - name: Install the project
-        run: uv sync --locked --all-extras --dev
+        run: PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 uv sync --locked --all-extras --dev
 
       - name: Run tests
         run: uv run pytest -n logical
