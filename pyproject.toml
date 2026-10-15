@@ -24,7 +24,7 @@ classifiers = [
 description = "Read and write Apple Numbers spreadsheets"
 name = "numbers-parser"
 readme = "README.md"
-version = "4.21.0"
+version = "4.22.0"
 
 [project.urls]
 repository = "https://github.com/masaccio/numbers-parser"
@@ -114,7 +114,7 @@ addopts = "--cov=src/numbers_parser --cov-report=html --cov-report=term-missing:
 
 [tool.tox]
 requires = ["tox>=4.0"]
-env_list = ["py310", "py311", "py312", "py313"]
+env_list = ["py310", "py311", "py312", "py313", "py314", "py315"]
 
 [tool.tox.env_run_base]
 deps = [
