@@ -92,6 +92,7 @@ rgbspace
 Roboto
 rowcol
 scikit
+scpt
 setaf
 setuptools
 sigfig

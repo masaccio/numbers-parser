@@ -395,11 +395,7 @@ def check_api_tests(filename: Path):
 def update_pivot_tables_doc(doc_filepath: Path, new_doc_filepath: Path):
     """Update some tables to force pivot tables to change."""
     doc = Document("tests/data/test-pivot.numbers")
-    align_left = doc.add_style(
-        name="Align Left",
-        alignment=Alignment("left", "middle"),
-        font_size=10.0,
-    )
+    align_left = doc.add_style(alignment=Alignment("left", "middle"), font_size=10.0)
     table = doc.sheets["Sales"].tables["Sales"]
     table.add_row(4, start_row=13)
     table.write(13, 0, "SA")
@@ -421,75 +417,30 @@ def update_pivot_tables_doc(doc_filepath: Path, new_doc_filepath: Path):
     doc.save(new_doc_filepath)
 
 
-def open_numbers_and_export_pdf(
-    doc_filepath: Path, pdf_filepath: Path, refresh_pivot: bool = False, pivot_table_name: str = ""
-):
+def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path, pivot_table_name: str = ""):
     """Open a document in Apple Numbers and export as PDF."""
-    # Remove stale PDF to prevent false positives if export silently fails
     if pdf_filepath.exists():
         pdf_filepath.unlink()
 
-    refresh_pivot_str = str(refresh_pivot).lower()
-    applescript = f"""
-    tell application "Numbers"
-        activate
-        set targetDoc to open POSIX file "{doc_filepath.resolve()}"
+    script_dir = Path(__file__).parent
+    applescript_path = script_dir / "export_numbers_pdf.scpt"
 
-        -- Wait for the document window to finish loading
-        set waitCounter to 0
-        repeat until exists front window
-            delay 0.2
-            set waitCounter to waitCounter + 1
-            if waitCounter > 50 then
-                error "Timeout waiting for Numbers window to appear."
-            end if
-        end repeat
+    if not applescript_path.exists():
+        msg = f"Could not find AppleScript at: {applescript_path}"
+        raise FileNotFoundError(msg)
 
-        if {refresh_pivot_str} then
-            -- Select a cell inside the Pivot Table so the Refresh menu item is enabled
-            tell targetDoc
-                tell active sheet
-                    set selection range of table "{pivot_table_name}" to range "A1" of table "{pivot_table_name}"
-                end tell
-            end tell
-        end if
-    end tell
-
-    if {refresh_pivot_str} then
-        -- Trigger 'Refresh Pivot Table' from the Organise/Organize menu
-        tell application "System Events"
-            tell process "Numbers"
-                set frontmost to true
-                if exists menu bar item "Organise" of menu bar 1 then
-                    set orgMenu to menu 1 of menu bar item "Organise" of menu bar 1
-                else
-                    set orgMenu to menu 1 of menu bar item "Organize" of menu bar 1
-                end if
-
-                -- Wait briefly for Numbers to enable the menu item after selection
-                repeat 15 times
-                    if enabled of menu item "Refresh Pivot Table" of orgMenu then
-                        click menu item "Refresh Pivot Table" of orgMenu
-                        exit repeat
-                    end if
-                    delay 0.2
-                end repeat
-            end tell
-        end tell
-    end if
-
-    -- Allow the pivot table layout and calculation engine to settle before export
-    delay 0.5
-
-    tell application "Numbers"
-        export front document to POSIX file "{pdf_filepath.resolve()}" as PDF
-        close front document saving no
-        quit
-    end tell
-    """  # noqa: S608
+    args = [
+        "osascript",
+        str(applescript_path.resolve()),
+        str(doc_filepath.resolve()),
+        str(pdf_filepath.resolve()),
+        "true" if pivot_table_name else "false",
+        pivot_table_name,
+        "Metrics",
+    ]
 
     try:
-        subprocess.run(["osascript", "-e", applescript], check=True, capture_output=True, text=True)  # noqa: S603, S607
+        subprocess.run(args, check=True, capture_output=True, text=True)  # noqa: S603
     except subprocess.CalledProcessError as e:
         print(f"[bold red]AppleScript execution failed:[/bold red]\n{e.stderr}")
         raise
@@ -570,7 +521,7 @@ def main():
     update_pivot_tables_doc("tests/data/test-pivot.numbers", pivot_doc_filepath)
 
     print("[green]Triggering AppleScript PDF Export to:[/green]", pivot_pdf_filepath)
-    open_numbers_and_export_pdf(pivot_doc_filepath, pivot_pdf_filepath, True, "Sales Pivot")
+    open_numbers_and_export_pdf(pivot_doc_filepath, pivot_pdf_filepath, "Sales Pivot")
 
     print("[green]Comparing generated API PDF against visual reference...[/green]")
     match = match and compare_pdfs_visually(
