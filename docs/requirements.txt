@@ -12,4 +12,5 @@ sphinx>=8.0,<9.0
 sphinx_copybutton
 sphinx_toolbox
 sphinx_nefertiti
+sphinxcontrib-mermaid
 wcwidth
