@@ -46,24 +46,63 @@ documents wrap an ``Index.zip`` inside an outer ZIP. The reader handles nested
 ZIP files and package directories.
 
 A typical package has the following broad shape (the exact set of entries
-varies by document and Numbers version)::
+varies by document and Numbers version):
 
-    Example.numbers/
-        Index.zip
-            Index/
-                Document.iwa
-                CalculationEngine.iwa
-                DocumentStylesheet.iwa
-                ...other IWA components...
-        Data/
-            ...image and other resource files...
-        Metadata/
-            Properties.plist
-            BuildVersionHistory.plist
-            DocumentIdentifier
-        preview.jpg
-        preview-web.jpg
-        preview-micro.jpg
+.. mermaid::
+   :name: Numbers Document Structure
+
+    flowchart TD
+        subgraph Container [".numbers Package / Container"]
+            direction TB
+            Meta["Metadata/Properties.plist<br/>(Format Version)"]
+            Data["Data/<br/>(Images/Media)"]
+            Index["Index.zip / Index/<br/>(IWA Components)"]
+        end
+
+        Index --> IWA[".iwa File Stream"]
+
+        subgraph Framing ["IWA Framing & Compression"]
+            direction TB
+            IWA --> Chunk["IWA Chunk<br/>(4-byte length header)"]
+            Chunk --> Snappy["Snappy Decompressed Payload"]
+            Snappy --> Segment["Archive Segment"]
+        end
+
+        subgraph Protobuf ["Protobuf Decoding"]
+            direction TB
+            Segment --> ArchInfo["TSP.ArchiveInfo<br/>(Object Identifier & Message Infos)"]
+            ArchInfo --> Payload["Protobuf Messages<br/>(e.g., TN / TST / TSWP namespaces)"]
+        end
+
+        subgraph Model ["Object Model"]
+            direction TB
+            Payload --> Doc["TN.DocumentArchive"]
+            Doc --> Sheet["TN.SheetArchive"]
+            Sheet --> TableInfo["TST.TableInfoArchive<br/>(Drawable Metadata)"]
+            TableInfo --> TableModel["TST.TableModelArchive<br/>(Dimensions, Merges, Rules)"]
+            
+            TableModel --> DataStore["TST.DataStore"]
+            
+            DataStore --> Lists["TST.TableDataList<br/>(Strings, Styles, Formulas)"]
+            DataStore --> Headers["TST.HeaderStorage<br/>(Row/Col Sizes & Hiding)"]
+            DataStore --> Tiles["TST.TileStorage<br/>(Max 256 rows per tile)"]
+            
+            Tiles --> TileObj["TST.Tile"]
+            TileObj --> RowInfo["TST.TileRowInfo<br/>(Binary Buffer & Offsets)"]
+            RowInfo --> Cell["v5 Binary Cell Record<br/>(12-byte header + value)"]
+            
+            Lists -.->|ID Lookups| Cell
+        end
+
+        classDef container fill:#f9f9f9,stroke:#333,stroke-width:2px,color:#000;
+        classDef file fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#000;
+        classDef proto fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#000;
+        classDef logic fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000;
+
+        class Container,Framing,Protobuf,Model container;
+        class Index,IWA,Chunk,Snappy,Segment file;
+        class ArchInfo,Payload proto;
+        class Doc,Sheet,TableInfo,TableModel,DataStore,Lists,Headers,Tiles,TileObj,RowInfo,Cell logic;
 
 In a single-file document these entries are found inside the ZIP container
 rather than as a directory tree. ``Metadata/Properties.plist`` contains the

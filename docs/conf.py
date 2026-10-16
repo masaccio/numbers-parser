@@ -17,6 +17,7 @@ extensions = [
     "sphinx.ext.extlinks",
     "enum_tools.autoenum",
     "sphinx_copybutton",
+    "sphinxcontrib.mermaid",
 ]
 # Standard Sphinx configuration
 templates_path = ["_templates"]
@@ -32,6 +33,12 @@ napoleon_numpy_docstring = True
 napoleon_include_special_with_doc = False
 # napoleon_use_admonition_for_examples = True
 napoleon_use_admonition_for_notes = True
+
+# sphinxcontrib.mermaid
+mermaid_output_format = "raw"
+mermaid_d3_zoom = False
+mermaid_fullscreen = False
+
 
 # sphinx_nefertiti options
 html_theme = "sphinx_nefertiti"

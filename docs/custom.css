@@ -1,3 +1,8 @@
 .nftt-layout .nftt-main {
     grid-template-columns: 4fr 1.5fr;
 }
+.mermaid svg {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+}

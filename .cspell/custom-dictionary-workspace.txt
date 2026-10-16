@@ -99,6 +99,7 @@ sigfig
 sigfigs
 smartfield
 Sobot
+sphinxcontrib
 srcurl
 srgb
 Standin
