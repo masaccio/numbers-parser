@@ -159,6 +159,13 @@ class Document:
             If attempting to write a package into a folder that is not an
             existing Numbers document.
 
+        Warns
+        -----
+        RuntimeWarning:
+            If saving a document that contains a pivot table. ``numbers-parser`` will
+            automatically update the coordinate metadata so that pivot tables can be
+            safely refreshed in Numbers, but this is considered unproven functionality.
+
         """
         self.filename = filename
         for sheet in self.sheets:

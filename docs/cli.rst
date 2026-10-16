@@ -58,9 +58,9 @@ Columns of data can have a number of transformations applied to them. The primar
 .. code-block:: text
 
   usage: csv2numbers [-h] [-V] [--whitespace] [--reverse] [--no-header]
-                     [--day-first] [--date COLUMNS] [--rename COLUMNS-MAP]
-                     [--transform COLUMNS-MAP] [--delete COLUMNS]
-                     [-o [FILENAME ...]]
+                     [--day-first] [--date COLUMNS] [--encoding ENCODING]
+                     [--rename COLUMNS-MAP] [--transform COLUMNS-MAP]
+                     [--delete COLUMNS] [-o [FILENAME ...]]
                      [csvfile ...]
 
   positional arguments:
