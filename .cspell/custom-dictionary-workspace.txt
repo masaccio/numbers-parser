@@ -86,6 +86,7 @@ pylint
 pympler
 pyobjc
 pytest
+pytestconfig
 PYTHONPATH
 refuri
 rgbspace
