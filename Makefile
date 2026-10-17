@@ -195,8 +195,9 @@ veryclean:
 
 clean:
 	rm -rf src/$(package_c).egg-info
-	rm -rf coverage_html_report
+	rm -rf coverage_html_report coverage.xml
 	rm -rf dist
 	rm -rf docs/build
 	rm -rf .tox
 	rm -rf .pytest_cache
+	rm -f *.txt *.numbers *.png
