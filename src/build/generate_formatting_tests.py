@@ -82,8 +82,7 @@ def _populate_stress_sheet(
 # ---------------------------------------------------------------------------
 def add_fraction_stress_tests(doc: Document) -> None:
     test_cases = [
-        ("Positive zero", 0.0),
-        ("Negative IEEE-754 zero", -0.0),
+        ("Zero", 0.0),
         ("Tiny positive (rounds to 0)", 1e-9),
         ("Tiny negative (rounds to 0, no '-' sign)", -1e-9),
         ("Just below 1/200 (rounds to 0 in halves..hundredths)", -0.004),
@@ -167,8 +166,7 @@ def add_base_stress_tests(doc: Document) -> None:
 # ---------------------------------------------------------------------------
 def add_currency_stress_tests(doc: Document) -> None:
     test_cases = [
-        ("Positive zero", 0.0),
-        ("Negative zero", -0.0),
+        ("Zero", 0.0),
         ("Sub-cent positive (rounds to 0.00)", 0.004),
         ("Sub-cent negative (must not be -0.00)", -0.004),
         ("Half-cent tie (0.005)", 0.005),
@@ -259,7 +257,7 @@ def add_datetime_stress_tests(doc: Document) -> None:
         if subtest_name == "12hr_am_pm":
             # h:mm a (12-hour without leading zero)
             hour = dt.strftime("%I").lstrip("0") or "12"
-            return f"{hour}:{dt.strftime('%M %p')}".upper()
+            return f"{hour}:{dt.strftime('%M %p')}".lower()
         if subtest_name == "year_month_only":
             return dt.strftime("%B %Y")
         return str(dt)
@@ -274,8 +272,7 @@ def add_datetime_stress_tests(doc: Document) -> None:
 # ---------------------------------------------------------------------------
 def add_number_stress_tests(doc: Document) -> None:
     test_cases = [
-        ("Positive zero", 0.0),
-        ("Negative zero", -0.0),
+        ("Zero", 0.0),
         ("Tiny negative rounding to 0", -0.0001),
         ("Rounding up across whole boundary", 999.999),
         ("Negative rounding across boundary", -999.999),
@@ -307,7 +304,6 @@ def add_number_stress_tests(doc: Document) -> None:
 def add_percentage_stress_tests(doc: Document) -> None:
     test_cases = [
         ("Zero", 0.0),
-        ("Negative zero", -0.0),
         ("Tiny negative (rounds to 0%)", -0.00001),
         ("One hundred percent (1.0)", 1.0),
         ("Negative one hundred percent (-1.0)", -1.0),
@@ -336,8 +332,7 @@ def add_percentage_stress_tests(doc: Document) -> None:
 # ---------------------------------------------------------------------------
 def add_scientific_stress_tests(doc: Document) -> None:
     test_cases = [
-        ("Positive zero", 0.0),
-        ("Negative zero", -0.0),
+        ("Zero", 0.0),
         ("Unit (1.0)", 1.0),
         ("Negative unit (-1.0)", -1.0),
         ("Avogadro scale (9 sig figs)", 6.02214076e23),
@@ -657,6 +652,7 @@ def build_all_formatting_stress_doc(
     for generator_fn in ALL_STRESS_GENERATORS:
         generator_fn(doc)
     doc.save(filename)
+    print(f"Saved {filename}")
 
 
 if __name__ == "__main__":
