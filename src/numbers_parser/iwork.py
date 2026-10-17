@@ -364,7 +364,7 @@ class IWork:
             else:
                 with sub_filepath.open(mode="rb") as fh:
                     blob = fh.read()
-                    package_filename = re.sub(r".*\.numbers/*", "", str(sub_filepath))
+                    package_filename = re.sub(r".*?\.numbers/*", "", str(sub_filepath))
                     self._store_blob(package_filename, blob)
 
     def _read_package_encryption(self, filepath: Path) -> None:

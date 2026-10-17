@@ -100,7 +100,7 @@ class NumbersUnpacker(IWorkHandler):
                 elif k in ["cell_storage_buffer", "cell_storage_buffer_pre_bnc"]:
                     obj[k] = str(hexlify(b64decode(obj[k]), sep=":"))
                     obj[k] = obj[k].replace("b'", "").replace("'", "")
-                elif k in ["cell_offsets", k == "cell_offsets_pre_bnc"]:
+                elif k in ["cell_offsets", "cell_offsets_pre_bnc"]:
                     offsets = array("h", b64decode(obj[k])).tolist()
                     obj[k] = ",".join([str(x) for x in offsets])
                     obj[k] = re.sub(r"(?:,-1)+$", ",[...]", obj[k])

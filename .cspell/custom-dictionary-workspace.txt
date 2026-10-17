@@ -86,11 +86,13 @@ pylint
 pympler
 pyobjc
 pytest
+pytestconfig
 PYTHONPATH
 refuri
 rgbspace
 Roboto
 rowcol
+rowinfo
 scikit
 scpt
 setaf

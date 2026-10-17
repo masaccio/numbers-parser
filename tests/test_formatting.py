@@ -1,9 +1,11 @@
+from collections.abc import Generator
 from datetime import datetime, timedelta
 
 import pytest
 import pytest_check as check
 
 from numbers_parser import (
+    Cell,
     ControlFormattingType,
     Document,
     DurationStyle,
@@ -975,3 +977,17 @@ def test_no_space_date_formats():
         if row[0].formula is None:
             continue
         assert row[0].formatted_value == row[1].value
+
+
+def test_fraction_stress():
+    def chunks(cells: list[Cell]) -> Generator[tuple[Cell, str]]:
+        for ii in range(0, len(cells), 2):
+            yield (cells[ii], cells[ii + 1].formatted_value)
+
+    doc = Document("tests/fraction_stress_test.numbers")
+    for cells in doc.default_table.iter_rows(min_row=1):
+        test_name = cells[0].value
+        raw_value = cells[1].value
+        for cell, formatted_value in chunks(cells[2:]):
+            assert cell.value == raw_value, f"{test_name}, raw value"
+            assert formatted_value == cell.formatted_value, f"{test_name}, formatted value"

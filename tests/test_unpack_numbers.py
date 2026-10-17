@@ -195,8 +195,11 @@ def test_pretty_storage(script_runner, tmp_path):
     with open(str(output_dir / "Index/Tables/Tile-875165.json")) as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"][0]
-    assert objects["rowInfos"][0]["cell_offsets"] == "-1,0,24,48,72,96,[...]"
-    assert objects["rowInfos"][0]["cell_storage_buffer"][0:26] == "05:03:00:00:00:00:00:00:08"
+    rowinfo = objects["rowInfos"][0]
+    assert rowinfo["cell_offsets"] == "-1,0,24,48,72,96,[...]"
+    assert rowinfo["cell_offsets_pre_bnc"] == "-1,0,20,40,60,80,[...]"
+    assert rowinfo["cell_storage_buffer"][0:26] == "05:03:00:00:00:00:00:00:08"
+    assert rowinfo["cell_storage_buffer_pre_bnc"][0:26] == "04:03:00:00:14:00:00:00:00"
 
 
 def test_compact_json(script_runner, tmp_path):
