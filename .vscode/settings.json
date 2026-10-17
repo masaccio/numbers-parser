@@ -31,7 +31,8 @@
             "scope": "workspace"
         }
     },
-    "python-envs.defaultEnvManager": "ms-python.python:venv",
+    "python.defaultInterpreterPath": "${env:HOME}/Library/Caches/uv/virtualenvs/numbers-parser/bin/python",
+    "python.terminal.activateEnvironment": true,
     "cSpell.words": [
         "encryptor"
     ]
