@@ -981,3 +981,10 @@ def test_issue_256():
         "-1/2",
         "-2",
     ]
+
+
+def test_issue_266():
+    doc = Document("tests/data/issue-266.numbers")
+    table = doc.default_table
+    for row in range(table.num_rows):
+        assert table.cell(row, 1).formatted_value == table.cell(row, 2).value

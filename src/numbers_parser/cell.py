@@ -2071,23 +2071,32 @@ def _format_base(value: float, number_format) -> str:
     return formatted_value.zfill(number_format.base_places)
 
 
-def _format_fraction_parts_to(whole: int, numerator: int, denominator: int):
+def _format_fraction_parts_to(whole: int, numerator: int, denominator: int) -> str:
+    whole = abs(whole)
+    numerator = abs(numerator)
     if whole != 0:
         if numerator == 0:
             return str(whole)
-        return f"{whole} {abs(numerator)}/{denominator}"
+        return f"{whole} {numerator}/{denominator}"
     if numerator == 0:
         return "0"
-    if numerator == denominator:
-        return "1"
     return f"{numerator}/{denominator}"
 
 
 def _float_to_fraction(value: float, denominator: int) -> str:
     """Convert a float to the nearest fraction and return as a string."""
-    whole = int(value)
-    numerator = round(denominator * (value - whole))
-    return _format_fraction_parts_to(whole, numerator, denominator)
+    is_negative = value < 0
+    val = abs(value)
+    whole = int(val)
+    numerator = round(denominator * (val - whole))
+    if numerator >= denominator:
+        whole += 1
+        numerator = 0
+
+    result = _format_fraction_parts_to(whole, numerator, denominator)
+    if is_negative and result != "0":
+        return f"-{result}"
+    return result
 
 
 def _float_to_n_digit_fraction(value: float, max_digits: int) -> str:
@@ -2095,11 +2104,16 @@ def _float_to_n_digit_fraction(value: float, max_digits: int) -> str:
     Convert a float to a fraction of a maximum number of digits
     and return as a string.
     """
+    is_negative = value < 0
+    val = abs(value)
     max_denominator = 10**max_digits - 1
-    (numerator, denominator) = Fraction(value).limit_denominator(max_denominator).as_integer_ratio()
-    whole = int(value)
-    numerator -= whole * denominator
-    return _format_fraction_parts_to(whole, numerator, denominator)
+    fraction = Fraction(val).limit_denominator(max_denominator)
+    whole, numerator = divmod(fraction.numerator, fraction.denominator)
+
+    result = _format_fraction_parts_to(whole, numerator, fraction.denominator)
+    if is_negative and result != "0":
+        return f"-{result}"
+    return result
 
 
 def _format_fraction(value: float, number_format) -> str:
