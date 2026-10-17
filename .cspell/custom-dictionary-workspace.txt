@@ -91,6 +91,7 @@ refuri
 rgbspace
 Roboto
 rowcol
+rowinfo
 scikit
 scpt
 setaf
