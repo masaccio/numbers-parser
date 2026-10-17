@@ -1049,7 +1049,7 @@ wheels = [
 
 [[package]]
 name = "numbers-parser"
-version = "4.22.0"
+version = "4.22.1"
 source = { editable = "." }
 dependencies = [
     { name = "compact-json" },
