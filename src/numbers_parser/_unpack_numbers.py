@@ -36,7 +36,15 @@ class NumbersUnpacker(IWorkHandler):
     def store_file(self, filename: str, blob: bytes) -> None:
         """Store a protobuf archive."""
         filename = re.sub(r".*\.numbers/", "", str(filename))
-        self.ensure_directory_exists(filename)
+
+        # Resolve absolute paths to prevent Zip Slip
+        out_abs = os.path.realpath(self.output_dir)
+        target_abs = os.path.realpath(os.path.join(out_abs, filename))
+        if os.path.commonpath([out_abs, target_abs]) != out_abs:
+            msg = f"Path traversal attempt detected in archive member: {filename}"
+            raise FileFormatError(msg)
+
+        self.ensure_directory_exists(target_abs)
         target_path = os.path.join(self.output_dir, filename)
         if isinstance(blob, IWAFile):
             target_path = target_path.replace(".iwa", "")
