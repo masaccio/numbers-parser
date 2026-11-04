@@ -147,10 +147,21 @@ exclude = [
   "**/src/debug/lldbutil.py",
 ]
 fix = true
-# Temporary lint backlog: Pylint below is the active missing-docstring check.
-# Remove this suppression as the remaining Ruff findings are fixed.
-lint.ignore = ["ALL"]
 lint.select = [ "ALL" ]
+lint.ignore = [
+  "CPY001",   # Missing copyright notice at top of file
+  "FBT001",   # Boolean-typed positional argument in function definition
+  "FBT002",   # Boolean default positional argument in function definition
+  "PTH103",   # os.makedirs() should be replaced by Path.mkdir(parents=True)
+  "PTH118",   # os.path.join() should be replaced by Path.joinpath()
+  "PTH118",   # os.path.join() should be replaced by Path with / operator
+  "PTH119",   # os.path.basename() should be replaced by Path.name
+  "PTH123",   # open() should be replaced by Path.open()
+  # Conflicts with other rules
+  "D212",     # Multiline summary first line
+  "D203",     # Blank lines before class docstrings
+  "D416",     # Colon after after section titles
+]
 lint.unfixable = [
   "ERA", # do not autoremove commented out code
 ]
@@ -173,13 +184,26 @@ ban-relative-imports = "all"
 "tests/**" = ["PLR2004", "S101", "D103", "ANN201", "ANN001", "DTZ001"]
 
 [tool.pylint."messages control"]
-# Temporary lint backlog: keep docstring coverage active while deferring all
-# other Pylint diagnostics. Re-enable checks incrementally as their debt is fixed.
-disable = ["all"]
-enable = [
-  "missing-module-docstring",
-  "missing-class-docstring",
-  "missing-function-docstring",
+disable = [
+  # Pylint cannot infer dynamic protobuf fields or internal model relationships.
+  "attribute-defined-outside-init",
+  "no-member",
+  "no-name-in-module",
+  "protected-access",
+  "too-many-lines",
+  # These checks duplicate Ruff or flag established implementation patterns.
+  "duplicate-code",
+  "fixme",
+  "redefined-builtin",
+  "too-few-public-methods",
+  "too-many-boolean-expressions",
+  "too-many-branches",
+  "too-many-instance-attributes",
+  "too-many-locals",
+  "too-many-nested-blocks",
+  "too-many-public-methods",
+  "too-many-return-statements",
+  "too-many-statements",
 ]
 
 [tool.pylint.main]
