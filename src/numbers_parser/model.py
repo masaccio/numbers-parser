@@ -2220,7 +2220,7 @@ class _NumbersModel(Cacheable):
             replies.append(self._resolve_comment_storage(reply_ref.identifier))
 
         return Comment(
-            author=author_name, text=storage.text, creation_date=creation_date, replies=replies
+            author=author_name, text=storage.text, creation_date=creation_date, replies=replies,
         )
 
     def author_id(self, author_name: str, table_id: int) -> int:
@@ -2260,7 +2260,7 @@ class _NumbersModel(Cacheable):
         return new_author_id
 
     def add_comment_to_cell(  # noqa: PLR0917
-        self, table_id: int, row: int, col: int, text: str, author: str, reply: bool
+        self, table_id: int, row: int, col: int, text: str, author: str, reply: bool,
     ) -> None:
         """Add comment to cell."""
         cell = self._table_data[table_id][row][col]

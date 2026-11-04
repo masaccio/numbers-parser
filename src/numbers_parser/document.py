@@ -588,14 +588,14 @@ class Table(Cacheable):
         """
         int: The number of header rows.
 
-        Example
+        Example:
         -------
         .. code-block:: python
 
             # Add an extra header row
             table.num_header_rows += 1
 
-        Raises
+        Raises:
         ------
         ValueError:
             If the number of headers is negative, exceeds the number of rows in the
@@ -623,14 +623,14 @@ class Table(Cacheable):
         """
         int: The number of header columns.
 
-        Example
+        Example:
         -------
         .. code-block:: python
 
             # Add an extra header column
             table.num_header_cols += 1
 
-        Raises
+        Raises:
         ------
         ValueError:
             If the number of headers is negative, exceeds the number of columns in the
@@ -735,7 +735,7 @@ class Table(Cacheable):
         """
         List[str]: The merge ranges of cells in A1 notation.
 
-        Example
+        Example:
         -------
         .. code-block:: python
 

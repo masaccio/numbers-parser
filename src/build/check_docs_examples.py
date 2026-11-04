@@ -150,7 +150,7 @@ def build_namespace(example: Example, document_cls) -> dict:
     """Build namespace."""
     ns = {name: getattr(numbers_parser, name) for name in dir(numbers_parser)}
     ns.update(
-        {"Document": document_cls, "open": open_from_data, "pprint": pprint, "datetime": datetime}
+        {"Document": document_cls, "open": open_from_data, "pprint": pprint, "datetime": datetime},
     )
     try:
         src = source_of(example)
@@ -176,7 +176,7 @@ class AddressChecker(doctest.OutputChecker):
     def check_output(self, want, got, optionflags):
         """Check output."""
         return super().check_output(
-            ADDRESS_RE.sub("0xADDR", want), ADDRESS_RE.sub("0xADDR", got), optionflags
+            ADDRESS_RE.sub("0xADDR", want), ADDRESS_RE.sub("0xADDR", got), optionflags,
         )
 
 
@@ -186,7 +186,7 @@ def run_session(example: Example, ns: dict) -> str | None:
     test = parser.get_doctest(example.text, ns, example.where, str(example.path), example.line)
     out = io.StringIO()
     runner = doctest.DocTestRunner(
-        checker=AddressChecker(), verbose=False, optionflags=doctest.NORMALIZE_WHITESPACE
+        checker=AddressChecker(), verbose=False, optionflags=doctest.NORMALIZE_WHITESPACE,
     )
     runner.run(test, out=out.write, clear_globs=False)
     return out.getvalue() if runner.failures else None

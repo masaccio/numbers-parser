@@ -139,7 +139,7 @@ def extract_snippets(rst_path: Path) -> list[Snippet]:
 
 
 TOKEN_RE = re.compile(
-    r"\s*(//[^\n]*|[A-Za-z_][\w.]*|\.[A-Za-z_][\w.]*|-?\d+|0x[0-9a-fA-F]+|[{}=;\[\],])"
+    r"\s*(//[^\n]*|[A-Za-z_][\w.]*|\.[A-Za-z_][\w.]*|-?\d+|0x[0-9a-fA-F]+|[{}=;\[\],])",
 )
 
 
@@ -365,7 +365,7 @@ def check_live(desc, spec: Message, instances, store, errors: list[str]) -> int:
                     if ref.identifier not in store:
                         errors.append(
                             f"{desc.full_name}.{f.name}: reference {ref.identifier} "
-                            "not found in doc._model.objects"
+                            "not found in doc._model.objects",
                         )
         if desc.full_name == "TSP.ArchiveInfo":
             total = sum(mi.length for mi in inst.message_infos)

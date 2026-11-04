@@ -1,4 +1,4 @@
-""" cat numbers module helpers."""
+"""cat numbers module helpers."""
 import argparse
 import csv
 import logging

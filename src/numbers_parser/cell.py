@@ -680,7 +680,7 @@ class Cell(CellStorageFlags, Cacheable):
     """
     .. NOTE::
 
-       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, row: int, col: int, value) -> None:
@@ -715,9 +715,9 @@ class Cell(CellStorageFlags, Cacheable):
         """Return a developer-friendly representation."""
         return (
             f"{self.__class__.__module__}.{self.__class__.__name__}"
-            + f"(sheet_name='{self.sheet_name}', "
-            + f"table_name='{self.table_name}', value='{self.value}', "
-            + f"row={self.row}, col={self.col})"
+             f"(sheet_name='{self.sheet_name}', "
+             f"table_name='{self.table_name}', value='{self.value}', "
+             f"row={self.row}, col={self.col})"
         )
 
     @property
@@ -725,7 +725,7 @@ class Cell(CellStorageFlags, Cacheable):
         """Return the image filename stored with the cell."""
         warn(
             "image_filename is deprecated and will be removed in the future. "
-            + "Please use the style property",
+             "Please use the style property",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -738,7 +738,7 @@ class Cell(CellStorageFlags, Cacheable):
         """Return the image data stored with the cell."""
         warn(
             "image_data is deprecated and will be removed in the future. "
-            + "Please use the style property",
+             "Please use the style property",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -789,7 +789,7 @@ class Cell(CellStorageFlags, Cacheable):
         bullet or numbering character. Newlines are not included in the
         bullet list.
 
-        Example
+        Example:
         -------
         .. code-block:: python
 
@@ -1521,10 +1521,10 @@ class NumberCell(Cell):
     """
     .. NOTE::
 
-         Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+        Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
 
-     A numeric cell exposes its value as a ``float`` and may have a formula,
-     style, border, or number format.
+    A numeric cell exposes its value as a ``float`` and may have a formula,
+    style, border, or number format.
     """
 
     def __init__(self, row: int, col: int, value: float, cell_type=CellType.NUMBER) -> None:
@@ -1560,7 +1560,7 @@ class RichTextCell(Cell):
     """
     .. NOTE::
 
-       Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
+    Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
     def __init__(self, row: int, col: int, value) -> None:
@@ -1606,7 +1606,7 @@ class RichTextCell(Cell):
         of cells where :py:attr:`numbers_parser.Cell.is_bulleted` is ``True`` is a
         list of text and URL tuples.
 
-        Example
+        Example:
         -------
         .. code-block:: python
 

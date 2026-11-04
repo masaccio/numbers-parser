@@ -229,7 +229,7 @@ class IWork:
             try:
                 _ = find_archive_filename(self._zipf, "Metadata/BuildVersionHistory.plist")
                 properties_plist_filename = find_archive_filename(
-                    self._zipf, "Metadata/Properties.plist"
+                    self._zipf, "Metadata/Properties.plist",
                 )
             except Exception as e:
                 msg = "invalid Numbers document (missing files)"

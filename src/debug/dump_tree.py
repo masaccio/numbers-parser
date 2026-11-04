@@ -35,9 +35,9 @@ def deep_print(objects, obj, indent=0, max_depth=MAX_DEPTH):
                 deep_print(objects, value, indent=indent + 1, max_depth=max_depth)
         elif descriptor.type == descriptor.TYPE_ENUM:
             if type(value).__name__ == "RepeatedScalarContainer":
-                enum_str = [descriptor.enum_type.values[x].name for x in value]  # noqa: PD011
+                enum_str = [descriptor.enum_type.values[x].name for x in value]
             else:
-                enum_str = descriptor.enum_type.values[value - 1].name  # noqa: PD011
+                enum_str = descriptor.enum_type.values[value - 1].name
             print("  " * indent + f"{descriptor.name}={enum_str}")
         else:
             print("  " * indent + f"{descriptor.name}={value}")

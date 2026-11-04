@@ -54,7 +54,7 @@ def check_external(url, timeout):
     """Return an error string, or None if the URL resolves."""
     for method in ("HEAD", "GET"):
         request = urllib.request.Request(  # noqa: S310
-            url, method=method, headers={"User-Agent": USER_AGENT}
+            url, method=method, headers={"User-Agent": USER_AGENT},
         )
         try:
             with urllib.request.urlopen(request, timeout=timeout):  # noqa: S310

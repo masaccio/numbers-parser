@@ -191,7 +191,7 @@ def generate_doc_with_all_apis(filename: Path):
     # --- Popup Formatting ---
     table.write(row, 0, "Option A")
     table.set_cell_formatting(
-        row, 0, "popup", popup_values=["Option A", "Option B"], allow_none=False
+        row, 0, "popup", popup_values=["Option A", "Option B"], allow_none=False,
     )
     table.write(row, 1, 'type=POPUP: popup_values=["Option A", "Option B"], allow_none=False')
     row += 1
@@ -217,7 +217,7 @@ def generate_doc_with_all_apis(filename: Path):
 
     # --- Custom Datetime Formatting ---
     custom_date = doc.add_custom_format(
-        name="MyCustomDate", type="datetime", format="EEEE, d MMMM yyyy"
+        name="MyCustomDate", type="datetime", format="EEEE, d MMMM yyyy",
     )
     table.write(row, 0, datetime(2026, 10, 14))
     table.set_cell_formatting(row, 0, "custom", format=custom_date)
@@ -450,7 +450,7 @@ def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path, pivot_ta
 
 
 def compare_pdfs_visually(
-    ref_pdf_path: str, test_pdf_path: str, diff_out_path: str, threshold: float = 0.1
+    ref_pdf_path: str, test_pdf_path: str, diff_out_path: str, threshold: float = 0.1,
 ) -> bool:
     """Compare pdfs visually."""
     ref_doc = pymupdf.open(ref_pdf_path)
@@ -479,12 +479,12 @@ def compare_pdfs_visually(
         diff_img = Image.new("RGBA", ref_img.size)
 
         mismatch_pixels = pixelmatch(
-            ref_img, test_img, diff_img, threshold=threshold, includeAA=True
+            ref_img, test_img, diff_img, threshold=threshold, includeAA=True,
         )
 
         if mismatch_pixels > 0:
             print(
-                f"[red]Visual difference found on page {page_num + 1} ({mismatch_pixels} pixels mismatched)[/red]"
+                f"[red]Visual difference found on page {page_num + 1} ({mismatch_pixels} pixels mismatched)[/red]",
             )
             diff_file = f"{diff_out_path}_page_{page_num + 1}.png"
             diff_img.save(diff_file)

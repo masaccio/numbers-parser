@@ -428,7 +428,7 @@ def test_issue_73(configurable_save_file):
     table.write("B4", 10)
 
     with pytest.warns(
-        RuntimeWarning, match="Pivot table 'Table 1 Pivot' may be corrupted by save."
+        RuntimeWarning, match="Pivot table 'Table 1 Pivot' may be corrupted by save.",
     ):
         doc.save(configurable_save_file)
     doc.save(configurable_save_file)
@@ -874,7 +874,7 @@ def test_issue_251_rename_with_header(script_runner, tmp_path, configurable_save
     csv_path = tmp_path / "named.csv"
     csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
     ret = script_runner.run(
-        ["csv2numbers", csv_path, "--rename=1:Total", "-o", configurable_save_file]
+        ["csv2numbers", csv_path, "--rename=1:Total", "-o", configurable_save_file],
     )
     assert ret.success, ret.stderr
     table = Document(configurable_save_file).default_table
@@ -894,7 +894,7 @@ def test_issue_251_transform_with_header(script_runner, tmp_path, configurable_s
     csv_path = tmp_path / "named.csv"
     csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
     ret = script_runner.run(
-        ["csv2numbers", csv_path, "--transform=Paid=POS:1", "-o", configurable_save_file]
+        ["csv2numbers", csv_path, "--transform=Paid=POS:1", "-o", configurable_save_file],
     )
     assert ret.success, ret.stderr
     table = Document(configurable_save_file).default_table
@@ -906,7 +906,7 @@ def test_issue_251_rename_then_delete_index(script_runner, tmp_path, configurabl
     csv_path = tmp_path / "named.csv"
     csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
     ret = script_runner.run(
-        ["csv2numbers", csv_path, "--rename=1:Total", "--delete=1", "-o", configurable_save_file]
+        ["csv2numbers", csv_path, "--rename=1:Total", "--delete=1", "-o", configurable_save_file],
     )
     assert ret.success, ret.stderr
     table = Document(configurable_save_file).default_table
@@ -921,7 +921,7 @@ def test_issue_251_transform_index_across_files(script_runner, tmp_path):
     second.write_text("Account,Cost\nChecking,200\n")
     outputs = [tmp_path / "first.numbers", tmp_path / "second.numbers"]
     ret = script_runner.run(
-        ["csv2numbers", first, second, "--transform=Paid=POS:1", "-o", *outputs]
+        ["csv2numbers", first, second, "--transform=Paid=POS:1", "-o", *outputs],
     )
     assert ret.success, ret.stderr
     assert [Document(output).default_table.cell(1, 2).value for output in outputs] == [100, 200]
@@ -941,7 +941,7 @@ def test_issue_252(script_runner, tmp_path, configurable_save_file):
             "--transform=Merged=MERGE:Val1;Val2",
             "-o",
             configurable_save_file,
-        ]
+        ],
     )
     assert ret.stderr == ""
     assert "merge found multiple values for cell 'B2'" in ret.stdout

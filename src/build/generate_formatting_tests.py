@@ -269,7 +269,7 @@ def add_datetime_stress_tests(doc: Document) -> None:
         return str(dt)
 
     _populate_stress_sheet(
-        doc, "datetime", "datetime", test_cases, subtests, ref_generator=datetime_ref_generator
+        doc, "datetime", "datetime", test_cases, subtests, ref_generator=datetime_ref_generator,
     )
 
 
@@ -617,7 +617,7 @@ def add_custom_stress_tests(doc: Document) -> None:
         return dt.strftime("%Y/%m/%d %H:%M")
 
     _populate_stress_sheet(
-        doc, "custom_datetime", "custom", dt_cases, dt_subtests, ref_generator=custom_dt_ref
+        doc, "custom_datetime", "custom", dt_cases, dt_subtests, ref_generator=custom_dt_ref,
     )
 
     txt_custom = doc.add_custom_format(
@@ -638,7 +638,7 @@ def add_custom_stress_tests(doc: Document) -> None:
         return f"Prefix [{val}] Suffix"
 
     _populate_stress_sheet(
-        doc, "custom_text", "custom", txt_cases, txt_subtests, ref_generator=custom_txt_ref
+        doc, "custom_text", "custom", txt_cases, txt_subtests, ref_generator=custom_txt_ref,
     )
 
 
