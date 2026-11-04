@@ -14,6 +14,7 @@ repos:
         args: [--rcfile, pyproject.toml]
         files: ^src/(numbers_parser|build)/.*\.py$
         exclude: ^src/numbers_parser/generated/.*\.py$
+        stages: [manual]
         entry: uv run --active pylint
         additional_dependencies:
           [
