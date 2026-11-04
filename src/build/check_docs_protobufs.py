@@ -60,12 +60,14 @@ def is_repeated(fd) -> bool:
 
 
 def is_required(fd) -> bool:
+    """Return whether required is available."""
     if hasattr(fd, "is_required"):
         return bool(fd.is_required)
     return fd.label == FD.LABEL_REQUIRED
 
 
 def label_of(fd) -> str:
+    """Return the proto2 label name for a field descriptor."""
     if is_repeated(fd):
         return "repeated"
     if is_required(fd):
@@ -74,6 +76,7 @@ def label_of(fd) -> str:
 
 
 def is_packed(fd) -> bool:
+    """Return whether packed is available."""
     if hasattr(fd, "is_packed"):
         return bool(fd.is_packed)
     opts = fd.GetOptions()
@@ -85,6 +88,8 @@ def is_packed(fd) -> bool:
 # --------------------------------------------------------------------------
 @dataclass
 class Field:
+    """Represent a protobuf field documented in an RST snippet."""
+
     label: str
     type: str
     name: str
@@ -94,6 +99,8 @@ class Field:
 
 @dataclass
 class Message:
+    """Represent a protobuf message and its documented members."""
+
     name: str
     fields: list[Field] = field(default_factory=list)
     messages: list[Message] = field(default_factory=list)
@@ -102,6 +109,8 @@ class Message:
 
 @dataclass
 class Snippet:
+    """Represent one documented protobuf code block."""
+
     index: int
     line: int
     text: str
@@ -109,6 +118,7 @@ class Snippet:
 
 
 def extract_snippets(rst_path: Path) -> list[Snippet]:
+    """Extract snippets."""
     lines = rst_path.read_text(encoding="utf-8").splitlines()
     snippets = []
     i = 0
@@ -134,6 +144,7 @@ TOKEN_RE = re.compile(
 
 
 def tokenize(text: str) -> list[str]:
+    """Tokenize the value."""
     tokens = []
     pos = 0
     text = text.rstrip()
@@ -158,6 +169,7 @@ def compile_snippet(snippet: Snippet) -> None:
     pos = 0
 
     def expect(value=None):
+        """Consume and return the next expected protobuf token."""
         nonlocal pos
         if pos >= len(toks) or (value is not None and toks[pos] != value):
             got = toks[pos] if pos < len(toks) else "EOF"
@@ -167,6 +179,7 @@ def compile_snippet(snippet: Snippet) -> None:
         return toks[pos - 1]
 
     def parse_enum():
+        """Parse enum."""
         name = expect()
         expect("{")
         values = {}
@@ -179,6 +192,7 @@ def compile_snippet(snippet: Snippet) -> None:
         return name, values
 
     def parse_message():
+        """Parse message."""
         msg = Message(expect())
         expect("{")
         while toks[pos] != "}":
@@ -223,6 +237,7 @@ def load_generated():
     registry = {}
 
     def walk(desc):
+        """Traverse the value."""
         registry[desc.full_name] = desc
         for nested in desc.nested_types:
             walk(nested)
@@ -237,6 +252,7 @@ def load_generated():
 
 
 def check_field(desc, f: Field, errors: list[str]) -> None:
+    """Check field."""
     fd = desc.fields_by_name.get(f.name)
     if fd is None:
         errors.append(f"{desc.full_name}: no field {f.name!r}")
@@ -264,6 +280,7 @@ def check_field(desc, f: Field, errors: list[str]) -> None:
 
 
 def check_message(desc, spec: Message, errors: list[str]) -> None:
+    """Check message."""
     for f in spec.fields:
         check_field(desc, f, errors)
     for ename, values in spec.enums.items():
@@ -363,6 +380,7 @@ def check_live(desc, spec: Message, instances, store, errors: list[str]) -> int:
 
 # --------------------------------------------------------------------------
 def main() -> int:
+    """Run the command-line operation."""
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--rst", type=Path, default=Path("docs/api/file-format.rst"))
     ap.add_argument("--doc", type=Path, default=Path("src/numbers_parser/data/empty.numbers"))

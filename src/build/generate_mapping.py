@@ -1,3 +1,4 @@
+"""Generate Python protobuf mappings from extracted registry data."""
 import json
 import os
 import sys

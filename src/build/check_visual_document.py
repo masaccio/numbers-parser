@@ -1,3 +1,4 @@
+"""Generate and visually compare an Apple Numbers document."""
 # ruff: noqa: S101, DTZ001
 
 import subprocess
@@ -35,6 +36,7 @@ from numbers_parser.constants import CHECKBOX_TRUE_VALUE, STAR_RATING_VALUE
 
 
 def generate_doc_with_all_apis(filename: Path):
+    """Generate doc with all apis."""
     doc = Document(num_header_rows=0, num_header_cols=0, num_cols=2, num_rows=20)
     sheet = doc.sheets[0]
     sheet.name = "API Test Sheet"
@@ -268,6 +270,7 @@ def generate_doc_with_all_apis(filename: Path):
 
 
 def check_api_tests(filename: Path):
+    """Check api tests."""
     doc = Document(filename)
     sheet = doc.sheets["API Test Sheet"]
     table = sheet.tables["API Exporter Reference"]
@@ -449,6 +452,7 @@ def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path, pivot_ta
 def compare_pdfs_visually(
     ref_pdf_path: str, test_pdf_path: str, diff_out_path: str, threshold: float = 0.1
 ) -> bool:
+    """Compare pdfs visually."""
     ref_doc = pymupdf.open(ref_pdf_path)
     test_doc = pymupdf.open(test_pdf_path)
     all_pages_match = True
@@ -490,6 +494,7 @@ def compare_pdfs_visually(
 
 
 def main():
+    """Run the command-line operation."""
     tempdir = Path(tempfile.gettempdir())
     api_doc_filepath = tempdir / "api-test.numbers"
     api_pdf_filepath = tempdir / "api-test.pdf"

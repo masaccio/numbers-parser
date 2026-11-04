@@ -1,3 +1,4 @@
+""" unpack numbers module helpers."""
 import contextlib
 import json
 import logging
@@ -26,6 +27,8 @@ logger = logging.getLogger(numbers_parser_name)
 
 @dataclass
 class NumbersUnpacker(IWorkHandler):
+    """Extract and format the contents of a Numbers document."""
+
     hex_uuids: bool = False
     pretty_storage: bool = False
     pretty: bool = False
@@ -72,7 +75,7 @@ class NumbersUnpacker(IWorkHandler):
                 out.write(blob)
 
     def store_object(self, filename: str, identifier: int, archive: object) -> None:
-        pass
+        """Store object."""
 
     def ensure_directory_exists(self, path: str) -> None:
         """Ensure that a path's directory exists."""
@@ -81,6 +84,7 @@ class NumbersUnpacker(IWorkHandler):
             os.makedirs(os.path.join(*([self.output_dir, *list(parts[:-1])])))
 
     def prettify_uuids(self, obj: object) -> None:
+        """Replace UUID values with readable labels in extracted data."""
         if isinstance(obj, dict):
             for k, v in obj.items():
                 if isinstance(v, dict):
@@ -101,6 +105,7 @@ class NumbersUnpacker(IWorkHandler):
                     self.prettify_uuids(v)
 
     def prettify_cell_storage(self, obj: object) -> None:
+        """Format cell storage fields for readable output."""
         if isinstance(obj, dict):
             for k, v in obj.items():
                 if isinstance(v, (dict, list)):
@@ -128,6 +133,7 @@ class NumbersUnpacker(IWorkHandler):
 
 
 def main() -> None:
+    """Run the command-line operation."""
     parser = ArgumentParser()
     parser.add_argument("document", help="Apple Numbers file(s)", nargs="*")
     parser.add_argument("-V", "--version", action="store_true")

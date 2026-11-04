@@ -38,6 +38,7 @@ PROTO_TYPES = {
 
 
 def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
+    """Convert a single-file descriptor set to proto source text."""
     if len(fds.file) != 1:
         msg = "Only one file per fds."
         raise NotImplementedError(msg)
@@ -54,6 +55,7 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
     lines.append("")
 
     def generate_enum_lines(f, lines: list[str], indent: int = 0):
+        """Generate enum lines."""
         prefix = "  " * indent
         for enum in f.enum_type:
             lines.append(prefix + f"enum {enum.name} " + "{")
@@ -62,6 +64,7 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
             lines.append(prefix + "}")
 
     def generate_field_line(field, in_oneof: bool = False) -> str:
+        """Generate field line."""
         line = []
         if field.label == 1:
             if not in_oneof:
@@ -99,6 +102,7 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
         return f"  {' '.join(line)};"
 
     def generate_extension_lines(message, lines: list[str], indent: int = 0):
+        """Generate extension lines."""
         prefix = "  " * indent
         extensions_grouped_by_extendee = defaultdict(list)
         for extension in message.extension:
@@ -110,6 +114,7 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
             lines.append(prefix + "}")
 
     def generate_message_lines(f, lines: list[str], indent: int = 0):
+        """Generate message lines."""
         prefix = "  " * indent
 
         submessages = f.message_type if hasattr(f, "message_type") else f.nested_type
@@ -157,7 +162,10 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
 
 
 class ProtoFile:
+    """Represent a protobuf file descriptor and its resolved dependencies."""
+
     def __init__(self, data, pool):
+        """Initialize the instance state."""
         self.data = data
         self.pool = pool
         self.file_descriptor_proto = descriptor_pb2.FileDescriptorProto.FromString(data)
@@ -166,13 +174,16 @@ class ProtoFile:
         self.attempt_to_load()
 
     def __hash__(self):
+        """Return a hash derived from the instance data."""
         return hash(self.data)
 
     def __eq__(self, other):
+        """Compare this instance with another value."""
         return isinstance(other, ProtoFile) and self.data == other.data
 
     def attempt_to_load(self):
         # This method will fail if this file is missing dependencies (imports)
+        """Add the descriptor to the pool, returning None when dependencies are missing."""
         try:
             return self.pool.Add(self.file_descriptor_proto)
         except Exception as e:
@@ -182,13 +193,16 @@ class ProtoFile:
 
     @property
     def descriptor(self):
+        """Return the resolved descriptor, attempting to load it first."""
         return self.attempt_to_load()
 
     def __repr__(self):
+        """Return a developer-friendly representation."""
         return f'<{self.__class__.__name__}: path="{self.path}">'
 
     @property
     def source(self):
+        """Return proto source text when the descriptor dependencies resolve."""
         if self.descriptor:
             fds = descriptor_pb2.FileDescriptorSet()
             fds.file.append(descriptor_pb2.FileDescriptorProto())
@@ -198,6 +212,7 @@ class ProtoFile:
 
 
 def read_until_null_tag(data: bytes):
+    """Read until null tag."""
     position = 0
     while position < len(data):
         try:
@@ -226,6 +241,7 @@ def read_until_null_tag(data: bytes):
 
 
 def extract_proto_from_file(filename, descriptor_pool):
+    """Extract proto from file."""
     with open(filename, "rb") as f:
         data = f.read()
     offset = 0
@@ -283,6 +299,7 @@ def extract_proto_from_file(filename, descriptor_pool):
 
 
 def find_missing_dependencies(all_files, source_file):
+    """Find missing dependencies."""
     matches = [f for f in all_files if f.path == source_file]
     if not matches:
         return {source_file}
@@ -300,6 +317,7 @@ def find_missing_dependencies(all_files, source_file):
 
 
 def main():
+    """Run the command-line operation."""
     import argparse
 
     parser = argparse.ArgumentParser(

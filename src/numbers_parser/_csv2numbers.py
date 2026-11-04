@@ -29,6 +29,8 @@ class ColumnTransform(NamedTuple):
 
 @dataclass
 class Converter:
+    """Convert CSV data and formatting into a Numbers document."""
+
     input_filename: str = None
     output_filename: str = None
     date_columns: list = None
@@ -170,6 +172,7 @@ class Transformer:
     """Base class for column transformations."""
 
     def __init__(self: Transformer, source: str, dest: str) -> None:
+        """Initialize the instance state."""
         self.row_num = 0
         self.dest = int(dest) if dest.isnumeric() else dest
         self.sources = [int(x) if x.isnumeric() else x for x in source.split(";")]
@@ -235,6 +238,7 @@ class LookupTransformer(Transformer):
     """Transformer for column LOOKUP operations."""
 
     def __init__(self: Transformer, source: str, dest: str) -> None:
+        """Initialize the instance state."""
         super().__init__(source, dest)
 
         if len(self.sources) != 2:

@@ -1,3 +1,4 @@
+""" cat numbers module helpers."""
 import argparse
 import csv
 import logging
@@ -22,6 +23,7 @@ logger = logging.getLogger(numbers_parser_name)
 
 
 def experimental_feature_choice(s: str) -> ExperimentalFeatures:
+    """Parse an experimental feature name supplied on the command line."""
     try:
         return ExperimentalFeatures[s]
     except KeyError:
@@ -30,6 +32,7 @@ def experimental_feature_choice(s: str) -> ExperimentalFeatures:
 
 
 def command_line_parser():
+    """Create the argument parser for the cat-numbers command."""
     parser = argparse.ArgumentParser(
         description="Export data from Apple Numbers spreadsheet tables",
     )
@@ -92,17 +95,20 @@ def command_line_parser():
 
 
 def print_sheet_names(filename, password) -> None:
+    """Print sheet names."""
     for sheet in Document(filename, password=password).sheets:
         print(f"{filename}: {sheet.name}")
 
 
 def print_table_names(filename, password) -> None:
+    """Print table names."""
     for sheet in Document(filename, password=password).sheets:
         for table in sheet.tables:
             print(f"{filename}: {sheet.name}: {table.name}")
 
 
 def cell_as_string(args, cell):
+    """Return the cell as string."""
     if isinstance(cell, ErrorCell) and not (args.formulas):
         return "#REF!"
     if args.formulas and cell.formula is not None:
@@ -117,6 +123,7 @@ def cell_as_string(args, cell):
 
 
 def print_table(args, filename, password) -> None:
+    """Print table."""
     writer = csv.writer(sys.stdout, dialect="excel")
     for sheet in Document(filename, password=password).sheets:
         if args.sheet is not None and sheet.name not in args.sheet:
@@ -132,6 +139,7 @@ def print_table(args, filename, password) -> None:
 
 
 def main() -> None:
+    """Run the command-line operation."""
     parser = command_line_parser()
     args = parser.parse_args()
 

@@ -1,3 +1,4 @@
+"""Iwafile module helpers."""
 # Forked from https://github.com/psobot/keynote-parser/blob/master/keynote_parser/codec.py
 
 import logging
@@ -20,12 +21,16 @@ debug = logger.debug
 
 
 class IWAFile:
+    """Represent an IWA file and its compressed archive chunks."""
+
     def __init__(self, chunks, filename=None) -> None:
+        """Initialize the instance state."""
         self.chunks = chunks
         self.filename = filename
 
     @classmethod
     def from_buffer(cls, data, filename=None):
+        """Decode an archive object from a serialized byte buffer."""
         try:
             chunks = []
             while data:
@@ -41,9 +46,11 @@ class IWAFile:
 
     @classmethod
     def from_dict(cls, _dict):
+        """Create an archive object from its dictionary representation."""
         return cls([IWACompressedChunk.from_dict(chunk) for chunk in _dict["chunks"]])
 
     def to_dict(self):
+        """Return the protobuf message as a dictionary."""
         try:
             return {"chunks": [chunk.to_dict() for chunk in self.chunks]}
         except Exception as e:  # pragma: no cover
@@ -52,18 +59,24 @@ class IWAFile:
             raise
 
     def to_buffer(self):
+        """Serialize the archive object to a byte buffer."""
         return b"".join([chunk.to_buffer() for chunk in self.chunks])
 
 
 class IWACompressedChunk:
+    """Represent a compressed IWA chunk and its decoded archives."""
+
     def __init__(self, archives) -> None:
+        """Initialize the instance state."""
         self.archives = archives
 
     def __eq__(self, other):
+        """Compare this instance with another value."""
         return self.archives == other.archives  # pragma: no cover
 
     @classmethod
     def _decompress_all(cls, data):
+        """Yield each chunk after decompressing the input buffer."""
         while data:
             header = data[:4]
 
@@ -88,6 +101,7 @@ class IWACompressedChunk:
 
     @classmethod
     def from_buffer(cls, data, filename=None):
+        """Decode an archive object from a serialized byte buffer."""
         data = b"".join(cls._decompress_all(data))
         archives = []
         while data:
@@ -98,12 +112,15 @@ class IWACompressedChunk:
 
     @classmethod
     def from_dict(cls, _dict):
+        """Create an archive object from its dictionary representation."""
         return cls([IWAArchiveSegment.from_dict(d) for d in _dict["archives"]])
 
     def to_dict(self):
+        """Return the protobuf message as a dictionary."""
         return {"archives": [archive.to_dict() for archive in self.archives]}
 
     def to_buffer(self):
+        """Serialize the archive object to a byte buffer."""
         uncompressed = b"".join([archive.to_buffer() for archive in self.archives])
         payloads = []
         while uncompressed:
@@ -115,16 +132,22 @@ class IWACompressedChunk:
 
 
 class ProtobufPatch:
+    """Represent a protobuf message patch in an archive."""
+
     def __init__(self, data) -> None:
+        """Initialize the instance state."""
         self.data = data
 
     def __eq__(self, other):
+        """Compare this instance with another value."""
         return self.data == other.data  # pragma: no cover
 
     def __repr__(self) -> str:
+        """Return a developer-friendly representation."""
         return f"<{self.__class__.__name__} {self.data}>"  # pragma: no cover
 
     def to_dict(self):
+        """Return the protobuf message as a dictionary."""
         return message_to_dict(self.data)
 
     @classmethod
@@ -132,26 +155,34 @@ class ProtobufPatch:
         # Note versus Peter Sobot's implementation: we can ignore some of
         # the unimplemented patching of Protobufs. Specifically deserializing
         # when len(diff_field_path) > 1 or when fields_to_remove is present.
+        """Parse a protobuf message from its serialized representation."""
         return cls(proto_klass.FromString(data))
 
     def SerializeToString(self):  # noqa: N802
+        """Serialize the protobuf message to bytes."""
         return self.data.SerializePartialToString()
 
 
 class IWAArchiveSegment:
+    """Represent a decoded IWA archive segment."""
+
     def __init__(self, header, objects) -> None:
+        """Initialize the instance state."""
         self.header = header
         self.objects = objects
 
     def __eq__(self, other):
+        """Compare this instance with another value."""
         return self.header == other.header and self.objects == other.objects  # pragma: no cover
 
     def __repr__(self) -> str:  # pragma: no cover
+        """Return a developer-friendly representation."""
         self_str = repr(self.objects).replace("\n", " ").replace("  ", " ")
         return f"<{self.__class__.__name__} identifier={self.header.identifier} objects={self_str}>"
 
     @classmethod
     def from_buffer(cls, buf, filename=None):
+        """Decode an archive object from a serialized byte buffer."""
         archive_info, payload = get_archive_info_and_remainder(buf)
         if not repr(archive_info):
             msg = "Segment doesn't seem to start with an ArchiveInfo!"
@@ -195,6 +226,7 @@ class IWAArchiveSegment:
 
     @classmethod
     def from_dict(cls, _dict):
+        """Create an archive object from its dictionary representation."""
         header = dict_to_header(_dict["header"])
         objects = []
         for _message_info, o in zip(header.message_infos, _dict["objects"], strict=False):
@@ -202,6 +234,7 @@ class IWAArchiveSegment:
         return cls(header, objects)
 
     def to_dict(self):
+        """Return the protobuf message as a dictionary."""
         return {
             "header": header_to_dict(self.header),
             "objects": [message_to_dict(message) for message in self.objects],
@@ -210,6 +243,7 @@ class IWAArchiveSegment:
     def to_buffer(self):
         # Each message_info as part of the header needs to be updated
         # so that its length matches the object contained within.
+        """Serialize the archive object to a byte buffer."""
         for obj, message_info in zip(self.objects, self.header.message_infos, strict=False):
             try:
                 object_length = len(obj.SerializeToString())
@@ -229,9 +263,11 @@ class IWAArchiveSegment:
         )
 
     def redact_strings(self) -> None:
+        """Redact string fields in the archive payload."""
         str_index = 0
 
         def redact_message(message):
+            """Return the message with its string fields redacted."""
             nonlocal str_index
 
             if isinstance(message, ProtobufPatch):
@@ -259,6 +295,7 @@ class IWAArchiveSegment:
 
 
 def message_to_dict(message):
+    """Convert a protobuf message to a dictionary."""
     if hasattr(message, "to_dict"):
         return message.to_dict()
     output = MessageToDict(message, preserving_proto_field_name=True)
@@ -267,6 +304,7 @@ def message_to_dict(message):
 
 
 def header_to_dict(message):
+    """Convert an archive header to a dictionary."""
     output = message_to_dict(message)
     for message_info in output["message_infos"]:
         del message_info["length"]
@@ -274,12 +312,14 @@ def header_to_dict(message):
 
 
 def dict_to_message(_dict):
+    """Create a protobuf message from a dictionary."""
     _type = _dict["_pbtype"]
     del _dict["_pbtype"]
     return ParseDict(_dict, NAME_CLASS_MAP[_type](), ignore_unknown_fields=True)
 
 
 def dict_to_header(_dict):
+    """Create an archive header from a dictionary."""
     for message_info in _dict["message_infos"]:
         # set a dummy length value that we'll overwrite later
         message_info["length"] = 0
@@ -287,6 +327,7 @@ def dict_to_header(_dict):
 
 
 def get_archive_info_and_remainder(buf):
+    """Return the archive info and remainder."""
     msg_len, new_pos = _DecodeVarint32(buf, 0)
     n = new_pos
     msg_buf = buf[n : n + msg_len]
@@ -295,6 +336,7 @@ def get_archive_info_and_remainder(buf):
 
 
 def create_iwa_segment(obj_id: int, cls: object, object_dict: dict) -> object:
+    """Create iwa segment."""
     full_name = cls.DESCRIPTOR.full_name
     type_id = NAME_ID_MAP[full_name]
     header = {
@@ -314,6 +356,7 @@ def create_iwa_segment(obj_id: int, cls: object, object_dict: dict) -> object:
 
 
 def find_references(obj, references=list) -> None:
+    """Find references."""
     if not hasattr(obj, "DESCRIPTOR"):
         return
     if type(obj).__name__ == "Reference":
@@ -331,6 +374,7 @@ def find_references(obj, references=list) -> None:
 
 
 def copy_object_to_iwa_file(iwa_file: IWAFile, obj: object, obj_id: int) -> None:
+    """Copy object to iwa file."""
     for archive in iwa_file.chunks[0].archives:
         if archive.header.identifier == obj_id:
             archive.objects[0].CopyFrom(obj)
@@ -345,6 +389,7 @@ def copy_object_to_iwa_file(iwa_file: IWAFile, obj: object, obj_id: int) -> None
 
 
 def is_iwa_file(data):
+    """Return whether iwa file is available."""
     data_length = len(data)
     length = 0
     while data:
@@ -361,10 +406,12 @@ def is_iwa_file(data):
 
 
 def extensions(obj) -> list[object]:
+    """Return the file extensions recognized by the archive reader."""
     return [obj.Extensions[field] for field, _ in obj.ListFields() if field.is_extension]
 
 
 def find_extension(obj, name: str) -> object:
+    """Find extension."""
     all_extensions = extensions(obj)
     filtered = [getattr(x, name) for x in all_extensions if getattr(x, name, None) is not None]
     return filtered[0]

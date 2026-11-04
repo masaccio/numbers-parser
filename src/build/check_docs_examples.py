@@ -48,20 +48,25 @@ ADDRESS_RE = re.compile(r"0x[0-9a-fA-F]+")
 
 @dataclass
 class Example:
+    """Represent one extracted documentation code example."""
+
     path: Path
     line: int
     text: str
 
     @property
     def is_session(self) -> bool:
+        """Return whether session is available."""
         return any(x.lstrip().startswith(">>>") for x in self.text.splitlines())
 
     @property
     def where(self) -> str:
+        """Return the source file and line containing the example."""
         return f"{self.path.relative_to(ROOT)}:{self.line}"
 
 
 def extract_examples(path: Path) -> list[Example]:
+    """Extract examples."""
     lines = path.read_text(encoding="utf-8").splitlines()
     examples = []
     i = 0
@@ -87,6 +92,7 @@ def extract_examples(path: Path) -> list[Example]:
 
 
 def find_examples() -> list[Example]:
+    """Find examples."""
     files = sorted(p for p in (ROOT / "src" / "numbers_parser").glob("*.py"))
     files += sorted((ROOT / "docs").rglob("*.rst"))
     examples = []
@@ -96,9 +102,11 @@ def find_examples() -> list[Example]:
 
 
 def make_document_shim(tmpdir: Path):
+    """Create document shim."""
     original_save = RealDocument.save
 
     def save(self, filename, *args, **kwargs):
+        """Save the value."""
         return original_save(self, tmpdir / Path(str(filename)).name, *args, **kwargs)
 
     RealDocument.save = save
@@ -106,6 +114,7 @@ def make_document_shim(tmpdir: Path):
     original_init = RealDocument.__init__
 
     def init(self, filename=None, *args, **kwargs):
+        """Redirect document construction to the example fixture."""
         original_init(self, None if filename is None else DATA_FILE, *args, **kwargs)
 
     RealDocument.__init__ = init
@@ -120,6 +129,7 @@ def open_from_data(file, *args, **kwargs):
 
 
 def stored_and_loaded(code: str) -> tuple[set[str], set[str]]:
+    """Return names assigned and referenced by a code block."""
     tree = ast.parse(code)
     stored, loaded = set(), set()
     for node in ast.walk(tree):
@@ -129,6 +139,7 @@ def stored_and_loaded(code: str) -> tuple[set[str], set[str]]:
 
 
 def source_of(example: Example) -> str:
+    """Return executable statements from a code or doctest example."""
     if not example.is_session:
         return example.text
     parser = doctest.DocTestParser()
@@ -136,6 +147,7 @@ def source_of(example: Example) -> str:
 
 
 def build_namespace(example: Example, document_cls) -> dict:
+    """Build namespace."""
     ns = {name: getattr(numbers_parser, name) for name in dir(numbers_parser)}
     ns.update(
         {"Document": document_cls, "open": open_from_data, "pprint": pprint, "datetime": datetime}
@@ -159,13 +171,17 @@ def build_namespace(example: Example, document_cls) -> dict:
 
 
 class AddressChecker(doctest.OutputChecker):
+    """Compare doctest output while ignoring memory addresses."""
+
     def check_output(self, want, got, optionflags):
+        """Check output."""
         return super().check_output(
             ADDRESS_RE.sub("0xADDR", want), ADDRESS_RE.sub("0xADDR", got), optionflags
         )
 
 
 def run_session(example: Example, ns: dict) -> str | None:
+    """Run session."""
     parser = doctest.DocTestParser()
     test = parser.get_doctest(example.text, ns, example.where, str(example.path), example.line)
     out = io.StringIO()
@@ -177,6 +193,7 @@ def run_session(example: Example, ns: dict) -> str | None:
 
 
 def run_code(example: Example, ns: dict) -> str | None:
+    """Run code."""
     try:
         with contextlib.redirect_stdout(io.StringIO()):
             exec(compile(example.text, example.where, "exec"), ns)  # noqa: S102
@@ -186,6 +203,7 @@ def run_code(example: Example, ns: dict) -> str | None:
 
 
 def main() -> int:
+    """Run the command-line operation."""
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()

@@ -1,9 +1,11 @@
+"""Rename protobuf files to import-safe names and update imports."""
 import os
 import sys
 from glob import glob
 
 
 def rename_proto_files(_dir):
+    """Rename proto files."""
     replacements = {}
     for old_path in glob(os.path.join(_dir, "*.proto")):
         old_file_no_ext = os.path.basename(old_path).replace(".proto", "")

@@ -1,3 +1,4 @@
+"""Document, sheet, and table interfaces for Numbers spreadsheets."""
 from __future__ import annotations
 
 from collections.abc import Iterator  # noqa: TC003
@@ -89,6 +90,7 @@ class Document:
         num_cols: int | None = DEFAULT_COLUMN_COUNT,
         password: str | None = None,
     ) -> None:
+        """Initialize the instance state."""
         self._model = _NumbersModel(None if filename is None else Path(filename), password)
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
@@ -373,7 +375,10 @@ class Document:
 
 
 class Sheet:
+    """Represent a sheet and its tables in a Numbers document."""
+
     def __init__(self, model, sheet_id) -> None:
+        """Initialize the instance state."""
         self._sheet_id = sheet_id
         self._model = model
         refs = self._model.table_ids(self._sheet_id)
@@ -390,11 +395,13 @@ class Sheet:
         return self._model.sheet_name(self._sheet_id)
 
     def __repr__(self) -> str:
+        """Return a developer-friendly representation."""
         class_name = f"{self.__class__.__module__}.{self.__class__.__name__}"
         return f"{class_name}(name='{self.name}')"
 
     @name.setter
     def name(self, value: str) -> None:
+        """Return or update the name of the sheet or table."""
         self._model.sheet_name(self._sheet_id, value)
 
     def add_table(
@@ -476,6 +483,7 @@ class Sheet:
         num_header_rows,
         num_header_cols,
     ) -> Table:
+        """Add table."""
         if table_name is not None:
             if table_name in self._tables:
                 msg = f"table '{table_name}' already exists"
@@ -502,7 +510,10 @@ class Sheet:
 
 
 class Table(Cacheable):
+    """Represent a table and its cells in a Numbers sheet."""
+
     def __init__(self, model, table_id) -> None:
+        """Initialize the instance state."""
         super().__init__()
         self._model = model
         self._table_id = table_id
@@ -534,9 +545,11 @@ class Table(Cacheable):
 
     @name.setter
     def name(self, value: str) -> None:
+        """Return or update the name of the sheet or table."""
         self._model.table_name(self._table_id, value)
 
     def __repr__(self) -> str:
+        """Return a developer-friendly representation."""
         class_name = f"{self.__class__.__module__}.{self.__class__.__name__}"
         return f"{class_name}(name='{self.name}')"
 
@@ -547,6 +560,7 @@ class Table(Cacheable):
 
     @table_name_enabled.setter
     def table_name_enabled(self, enabled: bool) -> None:
+        """Return whether the table name is displayed."""
         self._model.table_name_enabled(self._table_id, enabled)
 
     @property
@@ -556,6 +570,7 @@ class Table(Cacheable):
 
     @caption_enabled.setter
     def caption_enabled(self, enabled: bool) -> None:
+        """Return whether the table caption is displayed."""
         self._model.caption_enabled(self._table_id, enabled)
 
     @property
@@ -565,6 +580,7 @@ class Table(Cacheable):
 
     @caption.setter
     def caption(self, caption: str) -> None:
+        """Return or update the table caption."""
         self._model.caption_text(self._table_id, caption)
 
     @property
@@ -590,6 +606,7 @@ class Table(Cacheable):
 
     @num_header_rows.setter
     def num_header_rows(self, num_headers: int) -> None:
+        """Return or update the number of header rows."""
         if num_headers < 0:
             msg = "Number of headers cannot be negative"
             raise ValueError(msg)
@@ -624,6 +641,7 @@ class Table(Cacheable):
 
     @num_header_cols.setter
     def num_header_cols(self, num_headers: int) -> None:
+        """Return or update the number of header columns."""
         if num_headers < 0:
             msg = "Number of headers cannot be negative"
             raise ValueError(msg)
@@ -1028,6 +1046,7 @@ class Table(Cacheable):
                 yield cell.value if values_only else cell
 
     def _validate_cell_coords(self, *args):
+        """Validate cell coords."""
         if isinstance(args[0], str):
             (row, col) = xl_cell_to_rowcol(args[0])
             values = args[1:]
@@ -1190,6 +1209,7 @@ class Table(Cacheable):
         """
 
         def data_to_values(item):
+            """Convert a row of cells to their Python values."""
             if isinstance(item, dict):
                 return {k: data_to_values(v) for k, v in item.items()}
 
@@ -1843,6 +1863,7 @@ class Table(Cacheable):
             self._set_cell_data_format(row, col, format_type, **kwargs)
 
     def _set_cell_custom_format(self, row: int, col: int, **kwargs) -> None:
+        """Set cell custom format."""
         if "format" not in kwargs:
             msg = "no format provided for custom format"
             raise TypeError(msg)
@@ -1872,6 +1893,7 @@ class Table(Cacheable):
         cell._set_formatting(format_id, custom_format.type)
 
     def _set_cell_data_format(self, row: int, col: int, format_type_name: str, **kwargs) -> None:
+        """Set cell data format."""
         try:
             format_type = FormattingType[format_type_name.upper()]
             _ = FORMATTING_ALLOWED_CELLS[format_type_name]

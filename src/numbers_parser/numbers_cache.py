@@ -1,9 +1,13 @@
+"""Numbers cache module helpers."""
 from collections import defaultdict
 from functools import wraps
 
 
 class Cacheable:
+    """Provide per-instance storage for cached method results."""
+
     def __new__(cls, *_args, **_kwargs):
+        """Create an instance and initialize its cache."""
         obj = object.__new__(cls)
         obj._cache = defaultdict(lambda: defaultdict(dict))
         return obj
@@ -16,8 +20,11 @@ def cache(num_args=1):
     """
 
     def cache_decorator(func):
+        """Wrap a method with argument-aware cache lookups."""
+
         @wraps(func)
         def inner_multi_args(self, *args, **kwargs):
+            """Return a cached result keyed by the selected arguments."""
             method = func.__name__
             key = ".".join([str(args[x]) for x in range(num_args)])
             if key in self._cache[method]:
@@ -27,6 +34,7 @@ def cache(num_args=1):
             return value
 
         def inner_no_args(self):
+            """Return a cached result for a method without arguments."""
             method = func.__name__
             if method not in self._cache:
                 self._cache[method] = func(self)

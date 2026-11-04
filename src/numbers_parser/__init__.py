@@ -22,10 +22,12 @@ _VERSION_PLIST_PATH = "Contents/version.plist"
 
 
 def _get_version() -> str:
+    """Return the version."""
     return __version__
 
 
 def _check_installed_numbers_version() -> str:
+    """Check installed numbers version."""
     try:
         fp = open(os.path.join(_DEFAULT_NUMBERS_INSTALL_PATH, _VERSION_PLIST_PATH), "rb")
     except OSError:

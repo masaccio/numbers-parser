@@ -1,3 +1,4 @@
+"""Exceptions module helpers."""
 class NumbersError(Exception):
     """Base class for other exceptions."""
 
