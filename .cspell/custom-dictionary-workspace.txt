@@ -5,6 +5,7 @@ amet
 applescript
 ASTNODEARRAYARCHIVE
 ASTNODETYPE
+autoremove
 Avenir
 capsys
 CFPF
@@ -63,6 +64,7 @@ Menlo
 multifile
 muppy
 mydoc
+mypy
 nconsectetur
 Neue
 nftt
@@ -84,10 +86,13 @@ protodump
 pstats
 pylint
 pympler
+pymupdf
 pyobjc
+pyproject
 pytest
 pytestconfig
 PYTHONPATH
+rcfile
 refuri
 rgbspace
 Roboto

@@ -48,6 +48,7 @@ dev = [
     "python-magic>=0.4",
     "colorama<1.0.0,>=0.4.6",
     "pympler<2.0,>=1.1",
+    "pre-commit>=4.6.2",
 ]
 docs = [
     "sphinx<9.0,>=7.3",
