@@ -34,25 +34,3 @@ repos:
             rich,
             tqdm,
           ]
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.4.1
-    hooks:
-      - id: mypy
-        args: [--config-file, pyproject.toml]
-        files: ^src/(numbers_parser|build)/.*\.py$
-        exclude: ^src/numbers_parser/generated/.*\.py$
-        stages: [manual]
-        additional_dependencies:
-          [
-            compact-json,
-            protobuf,
-            python-snappy,
-            sigfig,
-            setuptools,
-            importlib-resources,
-            enum-tools,
-            python-dateutil,
-            security,
-            cryptography,
-          ]

@@ -217,8 +217,3 @@ disable = [
 
 [tool.pylint.main]
 ignored-modules = ["Cocoa", "lldb"]
-
-[tool.mypy]
-# Temporary lint backlog: defer type errors until the documented APIs are annotated.
-ignore_errors = true
-ignore_missing_imports = true
