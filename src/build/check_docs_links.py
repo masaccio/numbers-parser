@@ -72,7 +72,7 @@ def check_external(url: str, timeout: float) -> str | None:
     return "unresolved"  # pragma: no cover
 
 
-def main() -> int:
+def main() -> int:  # noqa: C901
     """Run the command-line operation."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("build_dir", nargs="?", default="docs/build", type=Path)

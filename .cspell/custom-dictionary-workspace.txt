@@ -32,6 +32,7 @@ drawables
 dstr
 envlist
 excinfo
+extendee
 extlinks
 FCFA
 filelock
@@ -72,6 +73,7 @@ nftt
 no cover
 nonspace
 numrows
+optionflags
 osascript
 padder
 pathnames
@@ -103,6 +105,7 @@ scikit
 scpt
 setaf
 setuptools
+sfixed
 sigfig
 sigfigs
 smartfield
@@ -114,8 +117,10 @@ Standin
 strftime
 strikethru
 stylesheet
+submessages
 TICKBOX
 tileid
+toks
 Tpng
 tput
 tqdm

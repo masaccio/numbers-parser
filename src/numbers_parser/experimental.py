@@ -1,4 +1,5 @@
 """Experimental module helpers."""
+
 import logging
 from enum import Flag, auto
 
@@ -19,14 +20,14 @@ EXPERIMENTAL_FEATURES = ExperimentalFeatures.NONE
 
 def enable_experimental_feature(flags: ExperimentalFeatures) -> None:
     """Enable experimental feature."""
-    global EXPERIMENTAL_FEATURES
+    global EXPERIMENTAL_FEATURES  # noqa: PLW0603
     EXPERIMENTAL_FEATURES |= flags
     debug("Experimental features: enabling %s, flags=%s", flags, EXPERIMENTAL_FEATURES)
 
 
 def disable_experimental_feature(flags: ExperimentalFeatures) -> None:
     """Disable experimental feature."""
-    global EXPERIMENTAL_FEATURES
+    global EXPERIMENTAL_FEATURES  # noqa: PLW0603
     EXPERIMENTAL_FEATURES ^= flags
     debug("Experimental features: disabling %s, flags=%s", flags, EXPERIMENTAL_FEATURES)
 

@@ -5,7 +5,8 @@ repos:
       - id: ruff-check
         args: [--config, pyproject.toml, --fix]
         files: ^src/(numbers_parser|build)/.*\.py$
-        exclude: ^src/numbers_parser/generated/.*\.py$
+        exclude: ^(src/numbers_parser/generated/.*\.py|src/build/protodump\.py)$
+        
 
   - repo: https://github.com/pylint-dev/pylint
     rev: v4.1.3

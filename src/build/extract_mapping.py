@@ -8,6 +8,8 @@ Copyright 2022 Jon Connell
 Copyright 2022 SheetJS LLC
 """
 
+# ruff: noqa: FBT003, ERA001
+
 import json
 import os
 import sys
@@ -40,8 +42,10 @@ target.BreakpointCreateByName("_handleAEOpenEvent:")
 # To get around the fact that we don't have iCloud entitlements when running re-signed code,
 # let's break in the CloudKit code and early exit the function before it can raise an exception:
 target.BreakpointCreateByName("[CKContainer containerWithIdentifier:]")
-# In later Keynote versions, 'containerWithIdentifier' isn't called directly, but we can break on similar methods:
-# Note: this __lldb_unnamed_symbol hack was determined by painstaking experimentation. It will break again for sure.
+# In later Keynote versions, 'containerWithIdentifier' isn't called directly, but we can
+# break on similar methods:
+# Note: this __lldb_unnamed_symbol hack was determined by painstaking experimentation.
+# It will break again for sure.
 target.BreakpointCreateByRegex("___lldb_unnamed_symbol[0-9]+", "CloudKit")
 
 

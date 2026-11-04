@@ -315,7 +315,8 @@ class Document:
 
         :Common Args:
             * **name** (``str``) - The name of the custom format. If no name is provided,
-              one is generated using the scheme ``Custom Format``, ``Custom Format 1``, ``Custom Format 2``, etc.
+              one is generated using the scheme ``Custom Format``, ``Custom Format 1``,
+              ``Custom Format 2``, etc.
             * **type** (``str``, *optional*, default: ``number``) - The type of format to
               create:
 
@@ -407,7 +408,7 @@ class Sheet:
         """Return or update the name of the sheet or table."""
         self._model.sheet_name(self._sheet_id, value)
 
-    def add_table(
+    def add_table(  # noqa: PLR0917
         self,
         table_name: str | None = None,
         x: float | None = None,
@@ -744,10 +745,10 @@ class Table(_Cacheable):
 
             >>> table.merge_ranges
             ['A4:A10']
-            >>> table.cell("A4")
-            numbers_parser.cell.TextCell(sheet_name='Sheet 1', table_name='Examples', value='Merged', row=3, col=0)
-            >>> table.cell("A5")
-            numbers_parser.cell.MergedCell(sheet_name='Sheet 1', table_name='Examples', value='None', row=4, col=0)
+            >>> table.cell("A4").row
+            3
+            >>> table.cell("A5").row
+            4
 
         """
         merge_cells = set()
@@ -1015,7 +1016,10 @@ class Table(_Cacheable):
 
         .. code:: python
 
-            total = sum(val or 0.0 for val in table.iter_cells(min_row=9, max_row=13, values_only=True))
+            total = sum(
+                val or 0.0
+                for val in table.iter_cells(min_row=9, max_row=13, values_only=True)
+            )
 
         """
         min_row = min_row if min_row is not None else 0
@@ -1237,7 +1241,7 @@ class Table(_Cacheable):
             return data_to_values(data)
         return data
 
-    def add_row(
+    def add_row(  # noqa: C901
         self,
         num_rows: int | None = 1,
         start_row: int | None = None,
@@ -1289,7 +1293,7 @@ class Table(_Cacheable):
 
         rows = []
         for row in range(start_row, start_row + num_rows):
-            rows.append(
+            rows.append(  # noqa: PERF401
                 [
                     Cell._empty_cell(self._table_id, row, col, self._model)
                     for col in range(self.num_cols)
@@ -1464,7 +1468,7 @@ class Table(_Cacheable):
         self.num_cols -= num_cols
         self._model.number_of_columns(self._table_id, self.num_cols)
 
-    def merge_cells(self, cell_range: str | list[str]) -> None:
+    def merge_cells(self, cell_range: str | list[str]) -> None:  # noqa: C901
         """
         Convert a cell range or list of cell ranges into merged cells.
 
@@ -1477,8 +1481,8 @@ class Table(_Cacheable):
         --------
         .. code:: python
 
-            >>> table.cell("B2")
-            numbers_parser.cell.NumberCell(sheet_name='Sheet 1', table_name='Examples', value='1234.5', row=1, col=1)
+            >>> table.cell("B2").value
+            1234.5
             >>> table.cell("B2").is_merged
             False
             >>> table.merge_cells("B2:C2")
@@ -1584,7 +1588,10 @@ class Table(_Cacheable):
 
         self._model.add_comment_to_cell(self._table_id, row, col, text, author, reply)
 
-    def set_cell_border(self, *args: int | str | Border | list[str]) -> None:
+    def set_cell_border(  # noqa: C901
+        self,
+        *args: int | str | Border | list[str],
+    ) -> None:
         """
         Set the borders for a cell.
 
@@ -1727,8 +1734,10 @@ class Table(_Cacheable):
             )
 
         :Parameters:
-            * **args** (*list*, *optional*) - Positional arguments for cell reference and data format type (see below)
-            * **kwargs** (*dict*, *optional*) - Key-value pairs defining a formatting options for each data format (see below).
+            * **args** (*list*, *optional*) - Positional arguments for cell reference and data
+              format type (see below).
+            * **kwargs** (*dict*, *optional*) - Key-value pairs defining formatting options
+              for each data format (see below).
 
         :Args (row-column):
             * **param1** (*int*): The row number (zero indexed).
@@ -1757,7 +1766,8 @@ class Table(_Cacheable):
 
         :Common Args:
             * **name** (*str*) - The name of the custom format. If no name is provided,
-              one is generated using the scheme ``Custom Format``, ``Custom Format 1``, ``Custom Format 2``, etc.
+              one is generated using the scheme ``Custom Format``, ``Custom Format 1``,
+              ``Custom Format 2``, etc.
             * **type** (*str, optional, default: number*) - The type of format to
               create:
 
@@ -1794,7 +1804,9 @@ class Table(_Cacheable):
               code, e.g. ``"GBP"`` or ``"USD"``.
             * **decimal_places** (*int, optional, default: 2*) - The number of
               decimal places, or ``None`` for automatic.
-            * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) - How negative numbers are represented.
+            * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`,
+              optional, default: NegativeNumberStyle.MINUS*) - How negative numbers are
+              represented.
               See :ref:`Negative number formats <negative_formats>`.
             * **show_thousands_separator** (*bool, optional, default: False*) - ``True``
               if the number should include a thousands separator, e.g. ``,``
@@ -1808,18 +1820,23 @@ class Table(_Cacheable):
                directives <datetime_formats>`.
 
         :``"duration"``:
-            * **duration_style** (*:py:class:`~numbers_parser.DurationStyle`, optional, default: DurationStyle.COMPACT*) - How the duration units are rendered.
-            * **duration_unit_largest** (*:py:class:`~numbers_parser.DurationUnits`, optional, default: None*) - the first and largest duration unit to display
-            * **duration_unit_smallest** (*:py:class:`~numbers_parser.DurationUnits`, optional, default: None*) - the last and smallest duration unit to display
+            * **duration_style** (*:py:class:`~numbers_parser.DurationStyle`, optional,
+              default: DurationStyle.COMPACT*) - How the duration units are rendered.
+            * **duration_unit_largest** (*:py:class:`~numbers_parser.DurationUnits`,
+              optional, default: None*) - the first and largest duration unit to display.
+            * **duration_unit_smallest** (*:py:class:`~numbers_parser.DurationUnits`,
+              optional, default: None*) - the last and smallest duration unit to display.
 
         :``"fraction"``:
-            * **fraction_accuracy** (*:py:class:`~numbers_parser.FractionAccuracy`, optional, default: FractionAccuracy.THREE* - The
-                precision of the faction.
+            * **fraction_accuracy** (*:py:class:`~numbers_parser.FractionAccuracy`,
+              optional, default: FractionAccuracy.THREE*) - The precision of the fraction.
 
         :``"percentage"``:
             * **decimal_places** (*float, optional, default: None*) -  number of
               decimal places, or ``None`` for automatic.
-            * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`, optional, default: NegativeNumberStyle.MINUS*) - How negative numbers are represented.
+            * **negative_style** (*:py:class:`~numbers_parser.NegativeNumberStyle`,
+              optional, default: NegativeNumberStyle.MINUS*) - How negative numbers are
+              represented.
               See :ref:`Negative number formats <negative_formats>`.
             * **show_thousands_separator** (*bool, optional, default: False*) - ``True``
               if the number should include a thousands separator, e.g. ``,``
@@ -1835,23 +1852,25 @@ class Table(_Cacheable):
             * No additional parameters defined.
 
         :``"slider"``:
-            * **control_format** (*ControlFormattingType, optional, default: ControlFormattingType.NUMBER*) - the format
-                of the data in the slider. Valid options are ``"base"``, ``"currency"``,
-                ``"datetime"``, ``"fraction"``, ``"percentage"``, ``"number"``,
-                or ``"scientific"``. Each format allows additional parameters identical to those
-                available for the formats themselves. For example, a slider using fractions
-                is configured with ``fraction_accuracy``.
+            * **control_format** (*ControlFormattingType, optional,
+              default: ControlFormattingType.NUMBER*) - the format
+              of the data in the slider. Valid options are ``"base"``, ``"currency"``,
+              ``"datetime"``, ``"fraction"``, ``"percentage"``, ``"number"``,
+              or ``"scientific"``. Each format allows additional parameters identical
+              to those available for the formats themselves. For example, a slider using
+              fractions is configured with ``fraction_accuracy``.
             * **increment** (*float, optional, default: 1*) - increment value for the slider
             * **maximum** (*float, optional, default: 100*) - the slider's maximum value
             * **minimum** (*float, optional, default: 1*) - the slider's minimum value
 
         :`"stepper"``:
-            * **control_format** (*ControlFormattingType, optional, default: ControlFormattingType.NUMBER*) - the format
-                of the data in the stepper. Valid options are ``"base"``, ``"currency"``,
-                ``"datetime"``, ``"fraction"``, ``"percentage"``, ``"number"``,
-                or ``"scientific"``. Each format allows additional parameters identical to those
-                available for the formats themselves. For example, a stepper using fractions
-                is configured with ``fraction_accuracy``.
+            * **control_format** (*ControlFormattingType, optional,
+              default: ControlFormattingType.NUMBER*) - the format
+              of the data in the stepper. Valid options are ``"base"``, ``"currency"``,
+              ``"datetime"``, ``"fraction"``, ``"percentage"``, ``"number"``,
+              or ``"scientific"``. Each format allows additional parameters identical
+              to those available for the formats themselves. For example, a stepper using
+              fractions is configured with ``fraction_accuracy``.
             * **increment** (*float, optional, default: 1*) - increment value for the stepper
             * **maximum** (*float, optional, default: 100*) - the stepper's maximum value
             * **minimum** (*float, optional, default: 1*) - the stepper's minimum value

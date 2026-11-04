@@ -1,4 +1,7 @@
 """Extract formula function names and identifiers from framework binaries."""
+
+# ruff: noqa: T201
+
 import re
 import sys
 from subprocess import PIPE, Popen

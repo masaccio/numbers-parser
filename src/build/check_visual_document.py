@@ -76,7 +76,9 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     table.write(
         row,
         1,
-        'font_color=RGB(29, 177, 0), font_size=10.0, strikethrough=True, font_name="Menlo", bg_color=RGB(240, 240, 120), alignment=Alignment(CENTER, MIDDLE), bold=True, italic=True, underline=True',
+        "font_color=RGB(29, 177, 0), font_size=10.0, strikethrough=True, "
+        'font_name="Menlo", bg_color=RGB(240, 240, 120), '
+        "alignment=Alignment(CENTER, MIDDLE), bold=True, italic=True, underline=True",
     )
     row += 1
 
@@ -107,7 +109,8 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     table.write(
         row,
         1,
-        'type=CURRENCY: currency_code="USD", decimal_places=2,show_thousands_separator=True, use_accounting_style=True',
+        'type=CURRENCY: currency_code="USD", decimal_places=2, '
+        "show_thousands_separator=True, use_accounting_style=True",
     )
     row += 1
 
@@ -141,7 +144,7 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     row += 1
 
     # --- Tickbox Formatting ---
-    table.write(row, 0, True)
+    table.write(row, 0, True)  # noqa: FBT003
     table.set_cell_formatting(row, 0, "tickbox")
     table.write(row, 1, 'type=TICKBOX: bool value (True) with "tickbox" format')
     row += 1
@@ -191,7 +194,11 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     # --- Popup Formatting ---
     table.write(row, 0, "Option A")
     table.set_cell_formatting(
-        row, 0, "popup", popup_values=["Option A", "Option B"], allow_none=False,
+        row,
+        0,
+        "popup",
+        popup_values=["Option A", "Option B"],
+        allow_none=False,
     )
     table.write(row, 1, 'type=POPUP: popup_values=["Option A", "Option B"], allow_none=False')
     row += 1
@@ -211,13 +218,16 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     table.write(
         row,
         1,
-        "NUMBER: name='MyCustomNum', integer_format=ZEROS, decimal_format=SPACES, num_integers=4, num_decimals=2",
+        "NUMBER: name='MyCustomNum', integer_format=ZEROS, decimal_format=SPACES, "
+        "num_integers=4, num_decimals=2",
     )
     row += 1
 
     # --- Custom Datetime Formatting ---
     custom_date = doc.add_custom_format(
-        name="MyCustomDate", type="datetime", format="EEEE, d MMMM yyyy",
+        name="MyCustomDate",
+        type="datetime",
+        format="EEEE, d MMMM yyyy",
     )
     table.write(row, 0, datetime(2026, 10, 14))
     table.set_cell_formatting(row, 0, "custom", format=custom_date)
@@ -239,7 +249,8 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     table.write(
         row,
         1,
-        f'table.merge_cells("A{row + 1}:A{row + 2}"), table.add_comment(..., author="API Tester", reply=True)',
+        f'table.merge_cells("A{row + 1}:A{row + 2}"), '
+        'table.add_comment(..., author="API Tester", reply=True)',
     )
     row += 2
 
@@ -248,7 +259,10 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     table.write(
         row,
         1,
-        f"xl_cell_to_rowcol('A1')={xl_cell_to_rowcol('A1')}, xl_col_to_name(2)={xl_col_to_name(2)}, xl_range(0,0,1,1)={xl_range(0, 0, 1, 1)}, xl_col_to_offset('B')={xl_col_to_offset('B')}",
+        f"xl_cell_to_rowcol('A1')={xl_cell_to_rowcol('A1')}, "
+        f"xl_col_to_name(2)={xl_col_to_name(2)}, "
+        f"xl_range(0,0,1,1)={xl_range(0, 0, 1, 1)}, "
+        f"xl_col_to_offset('B')={xl_col_to_offset('B')}",
     )
     row += 1
 
@@ -421,7 +435,11 @@ def update_pivot_tables_doc(doc_filepath: Path, new_doc_filepath: Path) -> None:
     doc.save(new_doc_filepath)
 
 
-def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path, pivot_table_name: str = "") -> None:
+def open_numbers_and_export_pdf(
+    doc_filepath: Path,
+    pdf_filepath: Path,
+    pivot_table_name: str = "",
+) -> None:
     """Open a document in Apple Numbers and export as PDF."""
     if pdf_filepath.exists():
         pdf_filepath.unlink()
@@ -451,7 +469,10 @@ def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path, pivot_ta
 
 
 def compare_pdfs_visually(
-    ref_pdf_path: str, test_pdf_path: str, diff_out_path: str, threshold: float = 0.1,
+    ref_pdf_path: str,
+    test_pdf_path: str,
+    diff_out_path: str,
+    threshold: float = 0.1,
 ) -> bool:
     """Compare pdfs visually."""
     ref_doc = pymupdf.open(ref_pdf_path)
@@ -480,12 +501,17 @@ def compare_pdfs_visually(
         diff_img = Image.new("RGBA", ref_img.size)
 
         mismatch_pixels = pixelmatch(
-            ref_img, test_img, diff_img, threshold=threshold, includeAA=True,
+            ref_img,
+            test_img,
+            diff_img,
+            threshold=threshold,
+            includeAA=True,
         )
 
         if mismatch_pixels > 0:
             print(
-                f"[red]Visual difference found on page {page_num + 1} ({mismatch_pixels} pixels mismatched)[/red]",
+                f"[red]Visual difference found on page {page_num + 1} "
+                f"({mismatch_pixels} pixels mismatched)[/red]",
             )
             diff_file = f"{diff_out_path}_page_{page_num + 1}.png"
             diff_img.save(diff_file)

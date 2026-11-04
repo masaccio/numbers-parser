@@ -31,13 +31,13 @@ def _get_or_create_table(doc: Document, sheet_name: str, table_name: str = "Corn
     return doc.sheets[sheet_name].tables[table_name]
 
 
-def _populate_stress_sheet(
+def _populate_stress_sheet(  # noqa: PLR0917
     doc: Document,
     sheet_name: str,
     fmt_type: str,
     test_cases: list[tuple[str, Any]],
     subtests: list[tuple[str, dict[str, Any]]],
-    ref_generator: callable = None,
+    ref_generator: callable | None = None,
 ) -> None:
     """
     Populate a sheet using the paired-column layout expected by test_fraction_stress.
@@ -235,11 +235,11 @@ def add_currency_stress_tests(doc: Document) -> None:
 def add_datetime_stress_tests(doc: Document) -> None:
     """Add datetime stress tests."""
     test_cases = [
-        ("Unix epoch", datetime(1970, 1, 1, 0, 0, 0)),
-        ("Apple Numbers 2001 epoch", datetime(2001, 1, 1, 0, 0, 0)),
-        ("Leap day 2024", datetime(2024, 2, 29, 12, 30, 45)),
-        ("End of year midnight", datetime(2026, 12, 31, 23, 59, 59)),
-        ("Single digit day and month", datetime(2026, 3, 5, 8, 4, 9)),
+        ("Unix epoch", datetime(1970, 1, 1, 0, 0, 0)),  # noqa: DTZ001
+        ("Apple Numbers 2001 epoch", datetime(2001, 1, 1, 0, 0, 0)),  # noqa: DTZ001
+        ("Leap day 2024", datetime(2024, 2, 29, 12, 30, 45)),  # noqa: DTZ001
+        ("End of year midnight", datetime(2026, 12, 31, 23, 59, 59)),  # noqa: DTZ001
+        ("Single digit day and month", datetime(2026, 3, 5, 8, 4, 9)),  # noqa: DTZ001
     ]
     subtests = [
         ("iso_date", {"date_time_format": "yyyy-MM-dd"}),
@@ -270,7 +270,12 @@ def add_datetime_stress_tests(doc: Document) -> None:
         return str(dt)
 
     _populate_stress_sheet(
-        doc, "datetime", "datetime", test_cases, subtests, ref_generator=datetime_ref_generator,
+        doc,
+        "datetime",
+        "datetime",
+        test_cases,
+        subtests,
+        ref_generator=datetime_ref_generator,
     )
 
 
@@ -606,8 +611,8 @@ def add_custom_stress_tests(doc: Document) -> None:
         format="yyyy/MM/dd HH:mm",
     )
     dt_cases = [
-        ("Leap day", datetime(2024, 2, 29, 9, 5)),
-        ("Year end", datetime(2026, 12, 31, 23, 45)),
+        ("Leap day", datetime(2024, 2, 29, 9, 5)),  # noqa: DTZ001
+        ("Year end", datetime(2026, 12, 31, 23, 45)),  # noqa: DTZ001
     ]
     dt_subtests = [
         ("custom_datetime_iso", {"format": dt_custom}),
@@ -618,7 +623,12 @@ def add_custom_stress_tests(doc: Document) -> None:
         return dt.strftime("%Y/%m/%d %H:%M")
 
     _populate_stress_sheet(
-        doc, "custom_datetime", "custom", dt_cases, dt_subtests, ref_generator=custom_dt_ref,
+        doc,
+        "custom_datetime",
+        "custom",
+        dt_cases,
+        dt_subtests,
+        ref_generator=custom_dt_ref,
     )
 
     txt_custom = doc.add_custom_format(
@@ -639,7 +649,12 @@ def add_custom_stress_tests(doc: Document) -> None:
         return f"Prefix [{val}] Suffix"
 
     _populate_stress_sheet(
-        doc, "custom_text", "custom", txt_cases, txt_subtests, ref_generator=custom_txt_ref,
+        doc,
+        "custom_text",
+        "custom",
+        txt_cases,
+        txt_subtests,
+        ref_generator=custom_txt_ref,
     )
 
 
@@ -671,7 +686,6 @@ def build_all_formatting_stress_doc(
     for generator_fn in ALL_STRESS_GENERATORS:
         generator_fn(doc)
     doc.save(filename)
-    print(f"Saved {filename}")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 """
-Super hacky script to parse compiled Protobuf definitions out of one or more binary files in a directory tree.
+Super hacky script to parse compiled Protobuf definitions out of one or more binary files
+in a directory tree.
 
 Requires `pip install 'protobuf>=3.20.0rc1'`.
 Example usage:
@@ -39,7 +40,7 @@ PROTO_TYPES = {
 }
 
 
-def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
+def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:  # noqa: C901
     """Convert a single-file descriptor set to proto source text."""
     if len(fds.file) != 1:
         msg = "Only one file per fds."
@@ -69,7 +70,7 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
                 lines.append(prefix + f"  {value.name} = {value.number};")
             lines.append(prefix + "}")
 
-    def generate_field_line(
+    def generate_field_line(  # noqa: C901
         field: descriptor_pb2.FieldDescriptorProto,
         in_oneof: bool = False,
     ) -> str:
@@ -287,7 +288,7 @@ def extract_proto_from_file(
             offset = suffix_position + len(PROTO_MARKER)
             continue
 
-        # Length = 1 byte for the marker (0x0A) + length of the varint + length of the descriptor name
+        # Length = marker (0x0A) + varint length + descriptor name length + 7 bytes.
         expected_length = 1 + (new_pos - marker_start) + name_length + 7
         current_length = (suffix_position + len(PROTO_MARKER)) - marker_start
 
@@ -355,12 +356,16 @@ def main() -> None:
     all_filenames = [str(path) for path in Path(args.input_path).rglob("*") if not path.is_dir()]
 
     print(
-        f"Scanning {len(all_filenames):,} files under {args.input_path} for protobuf definitions...",
+        f"Scanning {len(all_filenames):,} files under {args.input_path} "
+        "for protobuf definitions...",
     )
 
     proto_files_found = set()
     for path in tqdm(all_filenames):
-        for proto in extract_proto_from_file(path, GLOBAL_DESCRIPTOR_POOL):
+        for proto in extract_proto_from_file(
+            path,
+            GLOBAL_DESCRIPTOR_POOL,
+        ):
             proto_files_found.add(proto)
 
     print(f"Found what look like {len(proto_files_found):,} protobuf definitions.")

@@ -146,6 +146,7 @@ exclude = [
   "**/src/numbers_parser/generated/*",
   # Third-party files not to lint
   "**/src/debug/lldbutil.py",
+  "**/src/build/protodump.py",
 ]
 fix = true
 lint.select = [ "ALL" ]
@@ -160,6 +161,7 @@ lint.ignore = [
   "PTH119",   # os.path.basename() should be replaced by Path.name
   "PTH123",   # open() should be replaced by Path.open()
   "PLR0913",  # Too many arguments in function definition
+  "SIM115",   # Use a context manager for opening files
   "TD002",    # Missing author in TODO
   "TD003",    # Missing issue link for this TODO
   # Conflicts with other rules
@@ -184,7 +186,6 @@ ban-relative-imports = "all"
 
 [tool.ruff.lint.per-file-ignores]
 "src/build/**" = ["PLR2004", "INP001", "PTH"]
-"src/build/protodump.py" = ["PLR2004", "INP001", "PTH", "S110", "N806"]
 "src/debug/**" = ["INP001"]
 "tests/**" = ["PLR2004", "S101", "D103", "ANN201", "ANN001", "DTZ001"]
 

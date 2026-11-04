@@ -29,16 +29,21 @@ import os
 import pkgutil
 import re
 import sys
-from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from google.protobuf.descriptor import Descriptor
-from google.protobuf.descriptor import FieldDescriptor as FD
-from google.protobuf.message import Message as ProtoMessage
+from google.protobuf.descriptor import FieldDescriptor as FD  # noqa: N817
 
 from numbers_parser import Document, generated
-from numbers_parser.containers import ObjectStore
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator, Mapping
+
+    from google.protobuf.message import Message as ProtoMessage
+
+    from numbers_parser.containers import ObjectStore
 
 SCALARS = {
     "double": FD.TYPE_DOUBLE,
@@ -171,7 +176,7 @@ def tokenize(text: str) -> list[str]:
     return tokens
 
 
-def compile_snippet(snippet: Snippet) -> None:
+def compile_snippet(snippet: Snippet) -> None:  # noqa: C901
     """Parse the protobuf snippet into Message specs."""
     toks = tokenize(snippet.text)
     pos = 0
@@ -357,7 +362,7 @@ def collect_instances(doc: Document) -> dict[str, list[ProtoMessage]]:
     return instances
 
 
-def check_live(
+def check_live(  # noqa: C901
     desc: Descriptor,
     spec: Message,
     instances: Mapping[str, list[ProtoMessage]],
@@ -380,7 +385,7 @@ def check_live(
                     refs = [getattr(inst, f.name)] if inst.HasField(f.name) else []
                 for ref in refs:
                     if ref.identifier not in store:
-                        errors.append(
+                        errors.append(  # noqa: PERF401
                             f"{desc.full_name}.{f.name}: reference {ref.identifier} "
                             "not found in doc._model.objects",
                         )
@@ -396,7 +401,7 @@ def check_live(
 
 
 # --------------------------------------------------------------------------
-def main() -> int:
+def main() -> int:  # noqa: C901
     """Run the command-line operation."""
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--rst", type=Path, default=Path("docs/api/file-format.rst"))

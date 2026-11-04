@@ -3,7 +3,7 @@ Check the Python code examples in the numbers-parser sources and docs.
 
 Scans the hand-written modules in src/numbers_parser (not ``generated``) and
 the RST files in docs/ for ``.. code:: python`` / ``.. code-block:: python``
-blocks. Two kinds of block are recognised:
+blocks. Two kinds of block are recognized:
 
 * interpreter sessions (lines prefixed ``>>>``) whose output is compared with
   the documented output, ignoring memory addresses, and
@@ -218,7 +218,7 @@ def run_code(example: Example, ns: dict) -> str | None:
     try:
         with contextlib.redirect_stdout(io.StringIO()):
             exec(compile(example.text, example.where, "exec"), ns)  # noqa: S102
-    except BaseException:
+    except BaseException:  # noqa: BLE001
         return traceback.format_exc(limit=-2)
     return None
 

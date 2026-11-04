@@ -590,7 +590,7 @@ class _NumbersModel(_Cacheable):
             f"Index/Tables/DataList-{parent_id}",
             {"tsce_item": tsce_items},
             TSTArchives.PopUpMenuModel,
-            True,
+            True,  # noqa: FBT003
         )
         return popup_menu_id
 
@@ -647,7 +647,7 @@ class _NumbersModel(_Cacheable):
             format_string = "#" * num_integers
         else:
             format_string = "0" * num_integers
-        if num_integers > 6:
+        if num_integers > 6:  # noqa: PLR2004
             format_string = re.sub(r"(...)(...)$", r",\1,\2", format_string)
         elif num_integers > 3:
             format_string = re.sub(r"(...)$", r",\1", format_string)
@@ -784,18 +784,6 @@ class _NumbersModel(_Cacheable):
 
         Return the mapping from integer owner IDs to 128-bit UUID strings.
         """
-        # The TSCE.CalculationEngineArchive contains a list of mapping entries
-        # in dependencyTracker.formulaOwnerDependencies from the root level
-        # of the protobuf. Each mapping contains a 32-bit style UUID:
-        #
-        # "owner_id_map": {
-        #     "map_entry": [
-        #     {
-        #         "internal_ownerId": 33,
-        #         "owner_id": 0x3cb03f23_c26dda92_1e4bfcc0_8750e563
-        #     },
-        #
-        #
         calc_engine = self.calc_engine()
         if calc_engine is None:
             return {}
@@ -1008,7 +996,7 @@ class _NumbersModel(_Cacheable):
             None,
         )
 
-    def node_to_ref(
+    def node_to_ref(  # noqa: C901
         self,
         table_id: int,
         row: int,
@@ -1086,10 +1074,10 @@ class _NumbersModel(_Cacheable):
 
             return CellRange(
                 model=self,
-                row_start=None if row_begin == 0x7FFFFFFF else row_begin,
-                row_end=None if row_end == 0x7FFFFFFF else row_end,
-                col_start=None if col_begin == 0x7FFF else col_begin,
-                col_end=None if col_end == 0x7FFF else col_end,
+                row_start=None if row_begin == 0x7FFFFFFF else row_begin,  # noqa: PLR2004
+                row_end=None if row_end == 0x7FFFFFFF else row_end,  # noqa: PLR2004
+                col_start=None if col_begin == 0x7FFF else col_begin,  # noqa: PLR2004
+                col_end=None if col_end == 0x7FFF else col_end,  # noqa: PLR2004
                 row_start_is_abs=node.AST_sticky_bits.begin_row_is_absolute,
                 row_end_is_abs=node.AST_sticky_bits.end_row_is_absolute,
                 col_start_is_abs=node.AST_sticky_bits.begin_column_is_absolute,
@@ -1666,7 +1654,7 @@ class _NumbersModel(_Cacheable):
             component_id=self.calc_engine_id(),
         )
         self.create_caption_archive(table_model_id)
-        self.caption_enabled(table_model_id, False)
+        self.caption_enabled(table_model_id, False)  # noqa: FBT003
 
         self.objects[sheet_id].drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id),
@@ -2158,39 +2146,8 @@ class _NumbersModel(_Cacheable):
         return TableFormulas(self, table_id)
 
     @cache(num_args=2)  # noqa: RET503
-    def table_rich_text(self, table_id: int, string_key: int) -> dict:
+    def table_rich_text(self, table_id: int, string_key: int) -> dict:  # noqa: C901
         """Extract bullets and hyperlinks from a rich text data cell."""
-        # The table model base data store contains a richTextTable field
-        # which is a reference to a TST.TableDataList. The TableDataList
-        # has a list of payloads in a field called entries. This will be
-        # empty if there is no rich text, i.e. text contents are plaintext.
-        #
-        # "entries": [
-        #     { "key": 1,
-        #       "refcount": 1,
-        #       "richTextPayload": { "identifier": "2035264" }
-        #     },
-        #     ...
-        #
-        # entries[n].richTextPayload.identifier is a reference to a
-        # TST.RichTextPayloadArchive that contains a field called storage
-        # that itself is a reference to a TSWP.StorageArchive that contains
-        # the actual paragraph data:
-        #
-        # "tableParaStyle": {
-        #     "entries": [
-        #         { "characterIndex": 0, "object": { "identifier": "1566948" } },
-        #         { "characterIndex": 6 },
-        #         { "characterIndex": 12 }
-        #     ]
-        # },
-        # "text": [ "Lorem\nipsum\ndolor" ]
-        #
-        # The bullet character is stored in a TSWP.ListStyleArchive. Each bullet
-        # paragraph can have its own reference to a list style or, if none is
-        # defined, the previous bullet character is used. All StorageArchives
-        # reference a ListStyleArchive but not all those ListStyleArchives have
-        # a string with a new bullet character
         bds = self.objects[table_id].base_data_store
         rich_text_table = self.objects[bds.rich_text_table.identifier]
         for entry in rich_text_table.entries:  # pragma: no branch
@@ -2262,9 +2219,9 @@ class _NumbersModel(_Cacheable):
         author_name = self.objects[author_id].name if author_id in self.objects else "Unknown"
         creation_date = EPOCH + timedelta(seconds=storage.creation_date.seconds)
 
-        replies = []
-        for reply_ref in getattr(storage, "replies", []):
-            replies.append(self._resolve_comment_storage(reply_ref.identifier))
+        replies = [
+            self._resolve_comment_storage(ref.identifier) for ref in getattr(storage, "replies", [])
+        ]
 
         return Comment(
             author=author_name,
@@ -2548,7 +2505,7 @@ class _NumbersModel(_Cacheable):
             return cell
         return None
 
-    def set_cell_border(
+    def set_cell_border(  # noqa: C901
         self,
         table_id: int,
         row: int,
@@ -2603,7 +2560,7 @@ class _NumbersModel(_Cacheable):
                     start_row = stroke_layer.row_column_index
                     start_column = stroke_run.origin
                     for col in range(start_column, start_column + stroke_run.length):
-                        strokes.append(
+                        strokes.append(  # noqa: PERF401
                             (
                                 stroke_run.order,
                                 table_id,
@@ -2617,7 +2574,7 @@ class _NumbersModel(_Cacheable):
                     start_row = stroke_run.origin
                     start_column = stroke_layer.row_column_index
                     for row in range(start_row, start_row + stroke_run.length):
-                        strokes.append(
+                        strokes.append(  # noqa: PERF401
                             (
                                 stroke_run.order,
                                 table_id,
@@ -2722,7 +2679,7 @@ class _NumbersModel(_Cacheable):
             ),
         )
 
-    def update_cell_borders(self, table_id: int, data: list) -> None:
+    def update_cell_borders(self, table_id: int, data: list) -> None:  # noqa: C901
         """Consolidate identical strokes and then generate stoke archives."""
         if table_id not in self._update_strokes:
             return
@@ -2892,7 +2849,10 @@ class _NumbersModel(_Cacheable):
         }
 
     @cache()
-    def calculate_table_categories(self, table_id: int) -> tuple[dict[int, int], dict] | None:
+    def calculate_table_categories(  # noqa: C901
+        self,
+        table_id: int,
+    ) -> tuple[dict[int, int], dict] | None:
         """Calculate table categories."""
         category_owner_id = self.objects[table_id].category_owner.identifier
         if not category_owner_id:
@@ -2998,11 +2958,16 @@ class _NumbersModel(_Cacheable):
                 pivot_owner.refresh_uid.CopyFrom(NumbersUUID().protobuf2)
                 pivot_owner.refresh_timestamp = (datetime.now() - EPOCH).total_seconds()  # noqa: DTZ005
 
-    def update_table_metadata_ranges(self, table_id: int, num_rows: int, num_cols: int) -> None:
+    def update_table_metadata_ranges(  # noqa: C901
+        self,
+        table_id: int,
+        num_rows: int,
+        num_cols: int,
+    ) -> None:
         """Keep UID maps and dependency bounds in sync with data dimensions."""
         table_model = self.objects[table_id]
 
-        def _update_map(uid_map_ref: Sequence[ProtoMessage]) -> None:
+        def _update_map(uid_map_ref: Sequence[ProtoMessage]) -> None:  # noqa: C901
             """Update map."""
             if not uid_map_ref or uid_map_ref.identifier == 0:
                 return

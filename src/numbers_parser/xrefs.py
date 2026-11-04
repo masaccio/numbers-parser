@@ -259,7 +259,14 @@ class CellRange:
     ) -> str:
         """Format a range of columns."""
         if col_range.get(col_start, None) is None:
-            return f"{self.expand_ref(xl_col_to_name(col_start, col_abs=self.col_start_is_abs))}:{self.expand_ref(xl_col_to_name(col_end, col_abs=self.col_end_is_abs), no_prefix=True)}"
+            start_ref = self.expand_ref(
+                xl_col_to_name(col_start, col_abs=self.col_start_is_abs),
+            )
+            end_ref = self.expand_ref(
+                xl_col_to_name(col_end, col_abs=self.col_end_is_abs),
+                no_prefix=True,
+            )
+            return f"{start_ref}:{end_ref}"
         return ":".join(
             [
                 self.expand_ref(

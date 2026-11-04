@@ -993,7 +993,7 @@ class Cell(_CellStorageFlags, _Cacheable):
         seconds = None
 
         version = buffer[0]
-        if version != 5:
+        if version != 5:  # noqa: PLR2004
             msg = f"Cell storage version {version} is unsupported"
             raise UnsupportedError(msg)
 
@@ -1128,7 +1128,7 @@ class Cell(_CellStorageFlags, _Cacheable):
             if getattr(self, "_border", None) is None:
                 self._border = CellBorder()
 
-    def _to_buffer(self) -> bytearray:  # noqa: PLR0912, PLR0915
+    def _to_buffer(self) -> bytearray:  # noqa: C901, PLR0912, PLR0915
         """Create a storage buffer for a cell using v5 (modern) layout."""
         if self._style is not None:
             if self._style._text_style_obj_id is not None:
@@ -1294,7 +1294,7 @@ class Cell(_CellStorageFlags, _Cacheable):
             storage += pack("<i", self._comment_id)
 
         storage[8:12] = pack("<i", flags)
-        if len(storage) < 32:
+        if len(storage) < 32:  # noqa: PLR2004
             storage += bytearray(32 - length)
 
         return storage[0:length]
@@ -1338,7 +1338,7 @@ class Cell(_CellStorageFlags, _Cacheable):
 
         return (image_data, preferred_filename)
 
-    def _custom_format(self) -> str:  # noqa: PLR0911
+    def _custom_format(self) -> str:  # noqa: C901, PLR0911
         """Return the formatted value using its custom format."""
         if self._text_format_id is not None and self._type == CellType.TEXT:
             custom_format = self._model.table_format(self._table_id, self._text_format_id)
@@ -1420,7 +1420,7 @@ class Cell(_CellStorageFlags, _Cacheable):
             formatted_value = _decode_date_format(date_format.date_time_format, self._datetime)
         return formatted_value
 
-    def _duration_format(self) -> str:
+    def _duration_format(self) -> str:  # noqa: C901
         """Return the formatted duration value."""
         duration_format = self._model.table_format(self._table_id, self._duration_format_id)
         debug(
@@ -1457,7 +1457,7 @@ class Cell(_CellStorageFlags, _Cacheable):
             unit_type: DurationUnits,
         ) -> bool:
             """Pad the number with the required leading digits."""
-            return (largest == unit_type and smallest == unit_type) or d >= 10
+            return (largest == unit_type and smallest == unit_type) or d >= 10  # noqa: PLR2004
 
         if unit_largest == DurationUnits.WEEK:
             dd = int(d / SECONDS_IN_WEEK)
@@ -1500,8 +1500,8 @@ class Cell(_CellStorageFlags, _Cacheable):
         if unit_smallest >= DurationUnits.MILLISECOND:
             dd = round(1000 * d)
             if duration_style == DurationStyle.COMPACT:
-                padding = "0" if dd >= 10 else "00"
-                padding = "" if dd >= 100 else padding
+                padding = "0" if dd >= 10 else "00"  # noqa: PLR2004
+                padding = "" if dd >= 100 else padding  # noqa: PLR2004
                 dstr.append(f"{padding}{dd}")
             else:
                 dstr.append(str(dd) + _unit_format("millisecond", dd, duration_style, "ms"))
@@ -1511,7 +1511,7 @@ class Cell(_CellStorageFlags, _Cacheable):
 
         return duration_str
 
-    def _set_formatting(
+    def _set_formatting(  # noqa: C901
         self,
         format_id: int,
         format_type: FormattingType | CustomFormattingType,
@@ -1652,8 +1652,8 @@ class RichTextCell(Cell):
         -------
         .. code-block:: python
 
-            >>> table.cell(1, 2)
-            numbers_parser.cell.RichTextCell(sheet_name='Sheet 1', table_name='Examples', value='example.com', row=1, col=2)
+            >>> table.cell(1, 2).value
+            'example.com'
             >>> table.cell(1, 2).hyperlinks
             [('example.com', 'http://example.com')]
 
@@ -1830,7 +1830,7 @@ def _unpack_decimal128(buffer: bytearray) -> float:
     return float(value)
 
 
-def _decode_date_format(date_format: str, value: datetime) -> str:
+def _decode_date_format(date_format: str, value: datetime) -> str:  # noqa: C901
     """Parse a custom date format string and return a formatted datetime value."""
     chars = [*date_format]
     index = 0
@@ -1921,7 +1921,7 @@ def _expand_quotes(value: str) -> str:
     return formatted_value
 
 
-def _decode_number_format(  # noqa: PLR0912, PLR0915
+def _decode_number_format(  # noqa: C901, PLR0912, PLR0915
     number_format: TSKArchives.FormatStructArchive,
     value: float | None,
     _name: str,
@@ -2179,7 +2179,7 @@ def _twos_complement(value: int, base: int) -> str:
 
     if base == 2:
         return f"{twos_complement_dec:b}".rjust(num_bits, "1")
-    if base == 8:
+    if base == 8:  # noqa: PLR2004
         return f"{twos_complement_dec:o}"
     return f"{twos_complement_dec:x}".upper()
 
@@ -2270,7 +2270,7 @@ def _unit_format(
     return f" {unit}" + plural
 
 
-def _auto_units(
+def _auto_units(  # noqa: C901
     cell_value: float,
     number_format: TSKArchives.FormatStructArchive,
 ) -> tuple[DurationUnits, DurationUnits]:
@@ -2288,7 +2288,7 @@ def _auto_units(
             unit_largest = DurationUnits.DAY
         elif cell_value >= SECONDS_IN_HOUR:
             unit_largest = DurationUnits.HOUR
-        elif cell_value >= 60:
+        elif cell_value >= 60:  # noqa: PLR2004
             unit_largest = DurationUnits.MINUTE
         elif cell_value >= 1:
             unit_largest = DurationUnits.SECOND
@@ -2336,7 +2336,7 @@ class Formatting:
     use_accounting_style: bool = False
     _format_id = None
 
-    def __post_init__(self) -> None:
+    def __post_init__(self) -> None:  # noqa: C901
         """Validate and initialize the instance state."""
         if not isinstance(self.type, FormattingType):
             type_name = type(self.type).__name__

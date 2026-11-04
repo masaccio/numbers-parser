@@ -68,7 +68,7 @@ class IWorkCrypto:
             msg = "No password provided to decrypt document"
             raise ValueError(msg)
 
-        if len(data) != 104:
+        if len(data) != 104:  # noqa: PLR2004
             msg = f"Unrecognized verifier format length ({len(data)} bytes)"
             raise FileFormatError(msg)
 
@@ -137,7 +137,7 @@ class IWorkCrypto:
         # The first 16 bytes are the IV and the last 20 bytes are garbage
         """Decrypt an encrypted IWA payload."""
         encrypted_length = len(data) - 36
-        if encrypted_length < 16 or encrypted_length % 16:
+        if encrypted_length < 16 or encrypted_length % 16:  # noqa: PLR2004
             msg = "Data too short to be a valid encrypted IWA file"
             raise FileFormatError(msg)
 
@@ -155,7 +155,7 @@ class IWorkCrypto:
             msg = "PKCS7 unpadding failed. Key might be correct but payload is corrupted."
             raise FileFormatError(msg) from e
 
-        if len(decrypted) < 16:
+        if len(decrypted) < 16:  # noqa: PLR2004
             msg = "Decrypted data is too short to discard the 16-byte header"
             raise FileFormatError(msg)
 
@@ -304,7 +304,7 @@ class IWork:
         else:
             self._read_objects_from_zipfile(self._zipf)
 
-    def save(
+    def save(  # noqa: C901
         self,
         filepath: Path,
         file_store: dict[str, object],
