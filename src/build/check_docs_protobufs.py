@@ -19,6 +19,8 @@ Usage: python src/build/check_docs_examples.py [--rst PATH] [--doc PATH] [-v]
 Exit status is non-zero if any check fails.
 """
 
+# ruff: noqa: T201, SLF001
+
 from __future__ import annotations
 
 import argparse

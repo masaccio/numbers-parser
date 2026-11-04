@@ -1,5 +1,6 @@
 """Document, sheet, and table interfaces for Numbers spreadsheets."""
 
+# ruff: noqa: SLF001
 from __future__ import annotations
 
 from collections.abc import Iterator  # noqa: TC003
@@ -32,7 +33,7 @@ from numbers_parser.constants import (
 )
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import _NumbersModel
-from numbers_parser.numbers_cache import Cacheable
+from numbers_parser.numbers_cache import _Cacheable
 from numbers_parser.xrefs import xl_cell_to_rowcol, xl_range
 
 __all__ = ["Document", "Sheet", "Table"]
@@ -511,7 +512,7 @@ class Sheet:
         return self._tables[-1]
 
 
-class Table(Cacheable):
+class Table(_Cacheable):
     """Represent a table and its cells in a Numbers sheet."""
 
     def __init__(self, model: _NumbersModel, table_id: int) -> None:

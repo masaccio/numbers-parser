@@ -1,21 +1,20 @@
 """Internal data model and archive operations for Numbers documents."""
 
+# ruff: noqa: SLF001
 from __future__ import annotations
 
 import logging
 import re
 from array import array
 from collections import defaultdict
-from collections.abc import MutableSequence, Sequence
 from datetime import datetime, timedelta
 from hashlib import sha1
 from itertools import chain
 from math import floor
 from pathlib import Path
 from struct import pack
+from typing import TYPE_CHECKING
 from warnings import warn
-
-from google.protobuf.message import Message as ProtoMessage
 
 from numbers_parser.bullets import (
     BULLET_CONVERSION,
@@ -87,9 +86,14 @@ from numbers_parser.generated.TSWPArchives_pb2 import (
     CharacterStylePropertiesArchive as CharacterStyle,
 )
 from numbers_parser.iwafile import find_extension
-from numbers_parser.numbers_cache import Cacheable, cache
+from numbers_parser.numbers_cache import _Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID, uuid_to_hex
 from numbers_parser.xrefs import CellRange, ScopedNameRefCache
+
+if TYPE_CHECKING:
+    from collections.abc import MutableSequence, Sequence
+
+    from google.protobuf.message import Message as ProtoMessage
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
@@ -137,7 +141,7 @@ class MergeCells:
         return [k for k, v in self._references.items() if self.is_merge_anchor(k)]
 
 
-class DataLists(Cacheable):
+class DataLists(_Cacheable):
     """Model for TST.DataList with caching and key generation for new values."""
 
     def __init__(self, model: object, datalist_name: str, value_attr: str | None = None) -> None:
@@ -230,7 +234,7 @@ class DataLists(Cacheable):
         return key
 
 
-class _NumbersModel(Cacheable):
+class _NumbersModel(_Cacheable):
     """
     Load Numbers document objects and abstract their internal structures.
 

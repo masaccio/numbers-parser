@@ -1,5 +1,7 @@
 """Command-line utility to convert CSV files to Apple Numbers spreadsheets."""
 
+# ruff: noqa: T201
+
 from __future__ import annotations
 
 import argparse

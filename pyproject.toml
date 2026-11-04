@@ -150,6 +150,7 @@ fix = true
 lint.select = [ "ALL" ]
 lint.ignore = [
   "CPY001",   # Missing copyright notice at top of file
+  "FIX002",   # Line contains TODO
   "FBT001",   # Boolean-typed positional argument in function definition
   "FBT002",   # Boolean default positional argument in function definition
   "PTH103",   # os.makedirs() should be replaced by Path.mkdir(parents=True)
@@ -157,6 +158,9 @@ lint.ignore = [
   "PTH118",   # os.path.join() should be replaced by Path with / operator
   "PTH119",   # os.path.basename() should be replaced by Path.name
   "PTH123",   # open() should be replaced by Path.open()
+  "PLR0913",  # Too many arguments in function definition
+  "TD002",    # Missing author in TODO
+  "TD003",    # Missing issue link for this TODO
   # Conflicts with other rules
   "D212",     # Multiline summary first line
   "D203",     # Blank lines before class docstrings
@@ -170,6 +174,7 @@ src = ["src", "tests"]
 target-version = "py310"
 
 [tool.ruff.lint.pylint]
+extend-allow-magic-values = [2, 3]
 max-statements = 100
 max-branches = 20
 
@@ -177,14 +182,10 @@ max-branches = 20
 ban-relative-imports = "all"
 
 [tool.ruff.lint.per-file-ignores]
-"docs/conf.py" = ["INP001"]
 "src/build/**" = ["PLR2004", "INP001", "PTH"]
 "src/build/protodump.py" = ["PLR2004", "INP001", "PTH", "S110", "N806"]
-"src/build/check_docs_protobufs.py" = ["SLF001"]
 "src/debug/**" = ["INP001"]
 "tests/**" = ["PLR2004", "S101", "D103", "ANN201", "ANN001", "DTZ001"]
-"tests/test_coverage.py" = ["SLF001"]
-
 
 [tool.pylint."messages control"]
 disable = [

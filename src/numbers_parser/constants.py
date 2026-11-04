@@ -1,4 +1,5 @@
 """Constants module helpers."""
+
 from datetime import datetime
 from enum import IntEnum, auto
 from importlib.resources import files
@@ -50,7 +51,17 @@ DEFAULT_DATETIME_FORMAT = "dd MMM YYY HH:MM"
 CHECKBOX_FALSE_VALUE = "☐"
 CHECKBOX_TRUE_VALUE = "☑"
 STAR_RATING_VALUE = "★"
-OPERATOR_PRECEDENCE = {"%": 6, "^": 5, "×": 4, "*": 4, "/": 4, "÷": 4, "+": 3, "-": 3, "&": 2}
+OPERATOR_PRECEDENCE = {
+    "%": 6,
+    "^": 5,
+    "×": 4,  # noqa: RUF001
+    "*": 4,
+    "/": 4,
+    "÷": 4,
+    "+": 3,
+    "-": 3,
+    "&": 2,
+}
 
 
 # Numbers limits
@@ -71,6 +82,7 @@ SECONDS_IN_HOUR = 60 * 60
 SECONDS_IN_DAY = SECONDS_IN_HOUR * 24
 SECONDS_IN_WEEK = SECONDS_IN_DAY * 7
 DECIMAL128_BIAS = 0x1820
+NUMBER_NODE_DECIMAL_HIGH = 0x3040000000000000
 
 # File format enumerations
 DECIMAL_PLACES_AUTO = 253

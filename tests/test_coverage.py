@@ -1,3 +1,5 @@
+# ruff: noqa: SLF001
+
 from datetime import datetime
 from struct import pack
 from unittest.mock import patch
@@ -80,7 +82,7 @@ def test_cell_storage(tmp_path):
     assert "Cell storage version 4 is unsupported" in str(e)
 
     class DummyCell(Cell):
-        def __init__(self, *args):
+        def __init__(self, *args) -> None:
             super().__init__(*args)
             self._border = CellBorder()
 

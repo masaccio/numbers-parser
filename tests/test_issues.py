@@ -17,7 +17,7 @@ from numbers_parser import (
     UnsupportedWarning,
     xl_rowcol_to_cell,
 )
-from numbers_parser.cell import CellStorageFlags
+from numbers_parser.cell import _CellStorageFlags
 from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
     DEFAULT_COLUMN_WIDTH,
@@ -428,7 +428,8 @@ def test_issue_73(configurable_save_file):
     table.write("B4", 10)
 
     with pytest.warns(
-        RuntimeWarning, match="Pivot table 'Table 1 Pivot' may be corrupted by save.",
+        RuntimeWarning,
+        match="Pivot table 'Table 1 Pivot' may be corrupted by save.",
     ):
         doc.save(configurable_save_file)
     doc.save(configurable_save_file)
@@ -796,7 +797,7 @@ def test_issue_236(configurable_save_file):
         assert new_cell.value == ref_cell.value
         assert new_cell._flags == ref_cell._flags
         assert new_cell._extra_bits == ref_cell._extra_bits
-        assert CellStorageFlags.__repr__(ref_cell) == CellStorageFlags.__repr__(new_cell)
+        assert _CellStorageFlags.__repr__(ref_cell) == _CellStorageFlags.__repr__(new_cell)
 
 
 def test_issue_249(configurable_save_file):

@@ -1,9 +1,9 @@
 """Parse and resolve cell references and named ranges."""
+
 from __future__ import annotations
 
 import re
 from collections import defaultdict
-from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from enum import IntEnum
 from typing import TYPE_CHECKING
@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING
 from numbers_parser.constants import OPERATOR_PRECEDENCE
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from numbers_parser.model import _NumbersModel
 
 __all__ = [
@@ -342,12 +344,12 @@ class ScopedNameRefCache:
     def _row_data(self, table_id: int, row: int) -> int | str | bool | None:
         """Collect row reference names and their scopes."""
         num_header_cols = self.model.num_header_cols(table_id)
-        return self.model._table_data[table_id][row][num_header_cols - 1].formatted_value
+        return self.model._table_data[table_id][row][num_header_cols - 1].formatted_value  # noqa: SLF001
 
     def _column_data(self, table_id: int, col: int) -> int | str | bool | None:
         """Collect column reference names and their scopes."""
         num_header_rows = self.model.num_header_rows(table_id)
-        return self.model._table_data[table_id][num_header_rows - 1][col].formatted_value
+        return self.model._table_data[table_id][num_header_rows - 1][col].formatted_value  # noqa: SLF001
 
     def _calculate_name_scopes(
         self,

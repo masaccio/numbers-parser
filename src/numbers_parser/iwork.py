@@ -1,4 +1,5 @@
 """Iwork module helpers."""
+
 from __future__ import annotations
 
 import hashlib
@@ -9,8 +10,8 @@ import struct
 from abc import ABC, abstractmethod
 from io import BytesIO
 from os import urandom
-from pathlib import Path
 from sys import version_info
+from typing import TYPE_CHECKING
 from warnings import warn
 from zipfile import BadZipFile, ZipFile
 
@@ -21,6 +22,9 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from numbers_parser.exceptions import FileError, FileFormatError
 from numbers_parser.iwafile import IWAFile, is_iwa_file
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
@@ -235,7 +239,8 @@ class IWork:
             try:
                 _ = find_archive_filename(self._zipf, "Metadata/BuildVersionHistory.plist")
                 properties_plist_filename = find_archive_filename(
-                    self._zipf, "Metadata/Properties.plist",
+                    self._zipf,
+                    "Metadata/Properties.plist",
                 )
             except Exception as e:
                 msg = "invalid Numbers document (missing files)"

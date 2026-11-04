@@ -1,4 +1,7 @@
 """cat numbers module helpers."""
+
+# ruff: noqa: T201
+
 import argparse
 import csv
 import logging

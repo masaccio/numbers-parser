@@ -1,4 +1,5 @@
 """Convert Numbers formula archives into readable formula strings."""
+
 from __future__ import annotations
 
 import re
@@ -6,6 +7,7 @@ import warnings
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
+from numbers_parser.constants import NUMBER_NODE_DECIMAL_HIGH
 from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated.functionmap import FUNCTION_MAP
@@ -177,7 +179,7 @@ class Formula(list):
     def mul(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Combine the top two formula values with the multiplication operator."""
         arg2, arg1 = self.popn(2)
-        self.push(f"{arg1}×{arg2}")
+        self.push(f"{arg1}×{arg2}")  # noqa: RUF001
 
     def negate(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Negate the top formula value."""
@@ -192,7 +194,7 @@ class Formula(list):
     def number(self, *args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Format a numeric literal as formula text."""
         node = args[2]
-        if node.AST_number_node_decimal_high == 0x3040000000000000:
+        if node.AST_number_node_decimal_high == NUMBER_NODE_DECIMAL_HIGH:
             # Integer: don't use decimals
             self.push(str(node.AST_number_node_decimal_low))
         else:
@@ -285,7 +287,7 @@ class TableFormulas:
         self._table_id = table_id
         self._formula_type_lookup = {
             k: v.name
-            for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
+            for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()  # noqa: SLF001
         }
 
     def formula(self, formula_key: int, row: int, col: int) -> str:

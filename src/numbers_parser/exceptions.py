@@ -1,4 +1,6 @@
 """Exceptions module helpers."""
+
+
 class NumbersError(Exception):
     """Base class for other exceptions."""
 
@@ -7,7 +9,7 @@ class UnsupportedError(NumbersError):
     """Raised for unsupported file format features."""
 
 
-class NotImplementedError(NumbersError):
+class NotImplementedError(NumbersError):  # noqa: A001
     """Raised for unsupported Protobufs/Formats."""
 
 

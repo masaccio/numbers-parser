@@ -1,4 +1,7 @@
 """unpack numbers module helpers."""
+
+# ruff: noqa: T201
+
 import contextlib
 import json
 import logging

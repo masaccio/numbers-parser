@@ -1,5 +1,7 @@
 """Cell values, formatting, and display helpers for Numbers documents."""
 
+# ruff: noqa: SLF001
+
 from __future__ import annotations
 
 import logging
@@ -16,6 +18,7 @@ from typing import NamedTuple
 from warnings import warn
 
 from sigfig import round as sigfig
+from typing_extensions import Self
 
 from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser.constants import (
@@ -67,7 +70,7 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
     ParagraphStylePropertiesArchive as ParagraphStyle,
 )
-from numbers_parser.numbers_cache import Cacheable, cache
+from numbers_parser.numbers_cache import _Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.xrefs import xl_range
 
@@ -199,7 +202,7 @@ class Alignment(_Alignment):
         cls,
         horizontal: str | HorizontalJustification = DEFAULT_ALIGNMENT[0],
         vertical: str | VerticalJustification = DEFAULT_ALIGNMENT[1],
-    ) -> Alignment:
+    ) -> Self:
         """Create a cell-related value with the requested attributes."""
         if isinstance(horizontal, str):
             horizontal = horizontal.lower()
@@ -349,7 +352,9 @@ class Style:
     @classmethod
     def from_storage(cls, cell: object, model: object) -> Style:
         """Create a Style from the cell archive and model."""
-        bg_image = BackgroundImage(*cell._image_data) if cell._image_data is not None else None
+        bg_image = None
+        if cell._image_data is not None:
+            bg_image = BackgroundImage(*cell._image_data)
         return Style(
             alignment=model.cell_alignment(cell),
             bg_image=bg_image,
@@ -649,7 +654,7 @@ class Comment:
 
 
 @dataclass
-class CellStorageFlags:
+class _CellStorageFlags:
     """Represent flags stored with a cell archive."""
 
     _string_id: int = None
@@ -681,7 +686,7 @@ class CellStorageFlags:
         return [x.name for x in fields(self)]
 
 
-class Cell(CellStorageFlags, Cacheable):
+class Cell(_CellStorageFlags, _Cacheable):
     """
     Represent a cell in a Numbers table.
 
@@ -963,7 +968,7 @@ class Cell(CellStorageFlags, Cacheable):
         return cell
 
     @classmethod
-    def _from_storage(  # noqa: PLR0912
+    def _from_storage(  # noqa: C901, PLR0912
         cls,
         table_id: int,
         row: int,
@@ -993,7 +998,7 @@ class Cell(CellStorageFlags, Cacheable):
             raise UnsupportedError(msg)
 
         offset = 12
-        storage_flags = CellStorageFlags()
+        storage_flags = _CellStorageFlags()
         flags = unpack("<i", buffer[8:12])[0]
 
         if flags & 0x1:
@@ -1088,7 +1093,7 @@ class Cell(CellStorageFlags, Cacheable):
 
         return cell
 
-    def _copy_flags(self, storage_flags: CellStorageFlags) -> None:
+    def _copy_flags(self, storage_flags: _CellStorageFlags) -> None:
         """Copy flags."""
         for flag in storage_flags.flags():
             setattr(self, flag, getattr(storage_flags, flag))

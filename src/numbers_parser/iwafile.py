@@ -1,12 +1,13 @@
 """Iwafile module helpers."""
+
 # Forked from https://github.com/psobot/keynote-parser/blob/master/keynote_parser/codec.py
 from __future__ import annotations
 
 import logging
 import struct
-from collections.abc import Iterator
 from functools import partial
 from struct import unpack
+from typing import TYPE_CHECKING
 
 import snappy
 from google.protobuf.internal.decoder import _DecodeVarint32
@@ -15,9 +16,12 @@ from google.protobuf.json_format import MessageToDict, ParseDict
 from google.protobuf.message import EncodeError
 from google.protobuf.message import Message as ProtoMessage
 
-from numbers_parser.exceptions import NotImplementedError
+from numbers_parser.exceptions import NotImplementedError  # noqa: A004
 from numbers_parser.generated.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_ID_MAP
 from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
@@ -66,7 +70,7 @@ class IWAFile:
         return b"".join([chunk.to_buffer() for chunk in self.chunks])
 
 
-class IWACompressedChunk:
+class IWACompressedChunk:  # noqa: PLW1641
     """Represent a compressed IWA chunk and its decoded archives."""
 
     def __init__(self, archives: list[IWAArchiveSegment]) -> None:
@@ -96,7 +100,7 @@ class IWACompressedChunk:
 
             try:
                 yield snappy.uncompress(chunk)
-            except Exception:  # pragma: no cover
+            except Exception:  # pragma: no cover  # noqa: BLE001
                 # Try to see if this data isn't compressed in the first place.
                 # If this data is still compressed, parsing it as Protobuf
                 # will almost definitely fail anyways.
@@ -138,7 +142,7 @@ class IWACompressedChunk:
         )
 
 
-class ProtobufPatch:
+class ProtobufPatch:  # noqa: PLW1641
     """Represent a protobuf message patch in an archive."""
 
     def __init__(self, data: ProtoMessage) -> None:
@@ -158,7 +162,7 @@ class ProtobufPatch:
         return message_to_dict(self.data)
 
     @classmethod
-    def FromString(
+    def FromString(  # noqa: N802
         cls,
         message_info: object,
         proto_klass: type[ProtoMessage],
@@ -176,7 +180,7 @@ class ProtobufPatch:
         return self.data.SerializePartialToString()
 
 
-class IWAArchiveSegment:
+class IWAArchiveSegment:  # noqa: PLW1641
     """Represent a decoded IWA archive segment."""
 
     def __init__(
@@ -236,7 +240,7 @@ class IWAArchiveSegment:
                     output = klass.FromString(message_payload)
                 else:
                     output = klass(message_payload)
-            except Exception as e:  # pragma: no cover
+            except Exception as e:  # pragma: no cover  # noqa: BLE001
                 raise ValueError(
                     "Failed to deserialize %s payload of length %d: %s"  # noqa: UP031
                     % (klass, message_info.length, e),
@@ -284,7 +288,7 @@ class IWAArchiveSegment:
             + [obj.SerializeToString() for obj in self.objects],
         )
 
-    def redact_strings(self) -> None:
+    def redact_strings(self) -> None:  # noqa: C901
         """Redact string fields in the archive payload."""
         str_index = 0
 

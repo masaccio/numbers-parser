@@ -1,19 +1,25 @@
 """Numbers cache module helpers."""
+
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Callable
 from functools import wraps
+from typing import TYPE_CHECKING
+
+from typing_extensions import Self
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
-class Cacheable:
+class _Cacheable:
     """Provide per-instance storage for cached method results."""
 
     def __new__(
         cls,
         *_args: object,
         **_kwargs: object,
-    ) -> Cacheable:
+    ) -> Self:
         """Create an instance and initialize its cache."""
         obj = object.__new__(cls)
         obj._cache = defaultdict(lambda: defaultdict(dict))
@@ -34,7 +40,7 @@ def cache(
 
         @wraps(func)
         def inner_multi_args(
-            self: Cacheable,
+            self: _Cacheable,
             *args: object,
             **kwargs: object,
         ) -> object:
@@ -47,7 +53,7 @@ def cache(
             self._cache[method][key] = value
             return value
 
-        def inner_no_args(self: Cacheable) -> object:
+        def inner_no_args(self: _Cacheable) -> object:
             """Return a cached result for a method without arguments."""
             method = func.__name__
             if method not in self._cache:
