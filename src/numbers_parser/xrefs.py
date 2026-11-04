@@ -3,10 +3,15 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
+from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from enum import IntEnum
+from typing import TYPE_CHECKING
 
 from numbers_parser.constants import OPERATOR_PRECEDENCE
+
+if TYPE_CHECKING:
+    from numbers_parser.model import _NumbersModel
 
 __all__ = [
     "xl_cell_to_rowcol",
@@ -63,7 +68,7 @@ class CellRangeType(IntEnum):
 class CellRange:
     """Parse and format a cell or named-reference range."""
 
-    model: object = None
+    model: _NumbersModel | None = None
     row_start: int | str = None
     row_end: int = None
     col_start: int | str = None
@@ -79,7 +84,7 @@ class CellRange:
     _do_init: bool = True
     _table_names: list[str] = field(init=False, default=None, repr=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and initialize the instance state."""
         if (self.row_start is not None and self.row_start < 0) or (
             self.col_start is not None and self.col_start < 0
@@ -90,21 +95,26 @@ class CellRange:
             self.model.name_ref_cache.refresh()
             self._set_sheet_ids()
 
-    def _initialize_table_data(self):
+    def _initialize_table_data(self) -> None:
         """Initialize table data."""
         self._table_names = self.model.table_names()
         self.table_name_unique = {
             name: self._table_names.count(name) == 1 for name in self._table_names
         }
 
-    def _set_sheet_ids(self):
+    def _set_sheet_ids(self) -> None:
         """Determine the sheet IDs for the referenced tables."""
         if self.to_table_id is None:
             self.to_table_id = self.from_table_id
         self.from_sheet_id = self.model.table_id_to_sheet_id(self.from_table_id)
         self.to_sheet_id = self.model.table_id_to_sheet_id(self.to_table_id)
 
-    def expand_ref(self, ref: str, is_abs: bool = False, no_prefix=False) -> str:
+    def expand_ref(
+        self,
+        ref: str | ScopedNameRef,
+        is_abs: bool = False,
+        no_prefix: bool = False,
+    ) -> str:
         """Expand ref."""
         if self._ref_error:
             return "#REF!"
@@ -143,7 +153,7 @@ class CellRange:
         sheet_name = self.model.sheet_name(self.to_sheet_id)
         return f"{sheet_name}::{table_name}::{ref_str}"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return the string representation."""
         if self._ref_error:
             return "#REF!"
@@ -162,20 +172,29 @@ class CellRange:
         # Handle full cell ranges
         return self._format_cell_range(self.row_start, self.col_start, self.row_end, self.col_end)
 
-    def _format_row_range(self, row_start, row_end, row_range):
-        """Formats a row-only range."""
+    def _format_row_range(
+        self,
+        row_start: int | None,
+        row_end: int | None,
+        row_range: Mapping[int, ScopedNameRef | None],
+    ) -> str:
+        """Format a row-only range."""
         if row_end is None:
             return self._format_single_row(row_start, row_range)
         return self._format_row_span(row_start, row_end, row_range)
 
-    def _format_single_row(self, row_start, row_range):
-        """Formats a single row, either numeric or named."""
+    def _format_single_row(
+        self,
+        row_start: int,
+        row_range: Mapping[int, ScopedNameRef | None],
+    ) -> str:
+        """Format a single row, either numeric or named."""
         if row_range[row_start] is None:
             return self._format_numeric_row(row_start)
         return self.expand_ref(row_range[row_start], self.row_start_is_abs)
 
-    def _format_numeric_row(self, row_start):
-        """Formats a single numeric row."""
+    def _format_numeric_row(self, row_start: int) -> str:
+        """Format a single numeric row."""
         return ":".join(
             [
                 self.expand_ref(str(row_start + 1), self.row_start_is_abs),
@@ -183,8 +202,13 @@ class CellRange:
             ],
         )
 
-    def _format_row_span(self, row_start, row_end, row_range):
-        """Formats a range of rows."""
+    def _format_row_span(
+        self,
+        row_start: int,
+        row_end: int,
+        row_range: Mapping[int, ScopedNameRef | None],
+    ) -> str:
+        """Format a range of rows."""
         if row_range[row_start] is None:
             return ":".join(
                 [
@@ -204,20 +228,34 @@ class CellRange:
             ],
         )
 
-    def _format_col_range(self, col_start, col_end, col_range):
-        """Formats a column-only range."""
+    def _format_col_range(
+        self,
+        col_start: int | str,
+        col_end: int | str | None,
+        col_range: Mapping[int, ScopedNameRef | None],
+    ) -> str:
+        """Format a column-only range."""
         if col_end is None:
             return self._format_single_column(col_start, col_range)
         return self._format_column_span(col_start, col_end, col_range)
 
-    def _format_single_column(self, col_start, col_range):
-        """Formats a single column, either numeric or named."""
+    def _format_single_column(
+        self,
+        col_start: int | str,
+        col_range: Mapping[int, ScopedNameRef | None],
+    ) -> str:
+        """Format a single column, either numeric or named."""
         if col_range.get(col_start, None) is None:
             return self.expand_ref(xl_col_to_name(col_start, col_abs=self.col_start_is_abs))
         return self.expand_ref(col_range[col_start], self.col_start_is_abs)
 
-    def _format_column_span(self, col_start, col_end, col_range):
-        """Formats a range of columns."""
+    def _format_column_span(
+        self,
+        col_start: int | str,
+        col_end: int | str,
+        col_range: Mapping[int, ScopedNameRef | None],
+    ) -> str:
+        """Format a range of columns."""
         if col_range.get(col_start, None) is None:
             return f"{self.expand_ref(xl_col_to_name(col_start, col_abs=self.col_start_is_abs))}:{self.expand_ref(xl_col_to_name(col_end, col_abs=self.col_end_is_abs), no_prefix=True)}"
         return ":".join(
@@ -232,8 +270,14 @@ class CellRange:
             ],
         )
 
-    def _format_cell_range(self, row_start, col_start, row_end, col_end):
-        """Formats a full cell range."""
+    def _format_cell_range(
+        self,
+        row_start: int | str,
+        col_start: int | str,
+        row_end: int | str | None,
+        col_end: int | str | None,
+    ) -> str:
+        """Format a full cell range."""
         if row_end is None or col_end is None:
             return self.expand_ref(
                 xl_rowcol_to_cell(
@@ -269,7 +313,7 @@ class CellRange:
 class ScopedNameRefCache:
     """Cache named row, column, and table references."""
 
-    def __init__(self, model):
+    def __init__(self, model: _NumbersModel) -> None:
         """Initialize the instance state."""
         self.model = model
         self.doc_name_refs = {}
@@ -280,18 +324,18 @@ class ScopedNameRefCache:
         self._dirty_cache = True
         self.table_names = []
 
-    def mark_dirty(self):
+    def mark_dirty(self) -> None:
         """Mark dirty."""
         self._dirty_cache = True
 
-    def refresh(self):
+    def refresh(self) -> None:
         """Refresh the value."""
         if self._dirty_cache:
             self.calculate_named_ranges()
             self._dirty_cache = False
 
     @staticmethod
-    def _exact_count(pool: list, value: int | str | bool):
+    def _exact_count(pool: list[object], value: int | str | bool) -> int:
         """Return the number of exact references to a name."""
         return sum(1 for x in pool if type(x) is type(value) and x == value)
 
@@ -359,10 +403,11 @@ class ScopedNameRefCache:
         table_id: int,
         axis: TableAxis,
         scopes: dict[int, CellRange | None],
-    ):
+    ) -> None:
         """
-        For any locally unique row/column names, tag whether they are table-unique,
-        sheet-unique or document-unique names.
+        Classify locally unique row and column names by their scope.
+
+        A name may be unique to a table, sheet, or document.
         """
         if axis == TableAxis.ROW:
             axis_range = range(self.model.number_of_rows(table_id))
@@ -406,12 +451,11 @@ class ScopedNameRefCache:
             for sid in self.model.sheet_ids()
         }
 
-    def calculate_named_ranges(self):
+    def calculate_named_ranges(self) -> None:
         """
-        Find the globally unique row and column headers and the table unique
-        row and column headers for use in range references. Returns a dict
-        mapping table ID to lists of rows and columns and their names if
-        they are unique.
+        Find unique row and column headers for range references.
+
+        Record document-wide and table-specific names by table ID.
         """
         self.doc_name_refs = defaultdict(int)
         self.sheet_name_refs = {}

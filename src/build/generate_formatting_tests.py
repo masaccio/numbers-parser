@@ -40,11 +40,12 @@ def _populate_stress_sheet(
     ref_generator: callable = None,
 ) -> None:
     """
-    Populate a sheet using the paired-column layout expected by test_fraction_stress:
+    Populate a sheet using the paired-column layout expected by test_fraction_stress.
+
     Col 0: Test Case Name
     Col 1: Raw Value
     Col 2 + 2*idx: Formatted Cell
-    Col 2 + 2*idx + 1: Expected formatted_value string
+    Col 2 + 2*idx + 1: Expected formatted_value string.
     """
     table = _get_or_create_table(doc, sheet_name)
 
@@ -612,7 +613,7 @@ def add_custom_stress_tests(doc: Document) -> None:
         ("custom_datetime_iso", {"format": dt_custom}),
     ]
 
-    def custom_dt_ref(subtest_name: str, dt: datetime) -> str:
+    def custom_dt_ref(_subtest_name: str, dt: datetime) -> str:
         """Format a datetime using the custom ISO reference format."""
         return dt.strftime("%Y/%m/%d %H:%M")
 
@@ -633,7 +634,7 @@ def add_custom_stress_tests(doc: Document) -> None:
         ("custom_text_wrap", {"format": txt_custom}),
     ]
 
-    def custom_txt_ref(subtest_name: str, val: str) -> str:
+    def custom_txt_ref(_subtest_name: str, val: str) -> str:
         """Wrap a text value using the custom-format reference pattern."""
         return f"Prefix [{val}] Suffix"
 

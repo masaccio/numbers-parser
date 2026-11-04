@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from typing import Generic, TypeVar, overload
 
+from google.protobuf.message import Message as ProtoMessage
+
 from numbers_parser.constants import DOCUMENT_ID, PACKAGE_ID, SUPPORTED_NUMBERS_VERSIONS
 from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
 from numbers_parser.iwork import IWork, IWorkHandler
@@ -21,13 +23,11 @@ class ItemsList(Generic[_T]):
 
     @overload
     def __getitem__(self, key: int) -> _T:
-        """Return an item by its numeric index."""
-        # pragma: no cover
+        ...  # pragma: no cover
 
     @overload
     def __getitem__(self, key: str) -> _T:
-        """Return an item by its name."""
-        # pragma: no cover
+        ...  # pragma: no cover
 
     def __getitem__(self, key: int | str) -> _T:
         """Return the item at the requested key or index."""
@@ -98,17 +98,23 @@ class ObjectStore(IWorkHandler):
         version = re.sub(r"(\d+)\.(\d+)\.\d+", r"\1.\2", version)
         return version in SUPPORTED_NUMBERS_VERSIONS
 
-    def new_message_id(self):
+    def new_message_id(self) -> int:
         """Return the next available message ID for object creation."""
         self._max_id += 1
         self._objects[PACKAGE_ID].last_object_identifier = self._max_id
         return self._max_id
 
-    def create_object_from_dict(self, iwa_file: str, object_dict: dict, cls: object, append=False):
+    def create_object_from_dict(
+        self,
+        iwa_file: str,
+        object_dict: dict[str, object],
+        cls: type[ProtoMessage],
+        append: bool = False,
+    ) -> tuple[int, ProtoMessage]:
         """
-        Create a new object and store the associated IWA segment. Return the
-        message ID for the object and the newly created object. If the IWA
-        file cannot be found, it will be created.
+        Create and store an object with its IWA segment.
+
+        Return the message ID and object. Create the IWA file if it is missing.
         """
         paths = [k for k, v in self._file_store.items() if iwa_file in k]
         iwa_pathname = None if len(paths) == 0 else paths[0]
@@ -129,8 +135,9 @@ class ObjectStore(IWorkHandler):
 
     def update_object_file_store(self) -> None:
         """
-        Copy the protobuf messages from any updated object to the cached
-        version in the file store so this can be saved to a new document.
+        Update cached IWA files from modified protobuf messages.
+
+        This keeps the file store ready for saving to a new document.
         """
         for obj_id in self._objects:
             copy_object_to_iwa_file(
@@ -140,10 +147,10 @@ class ObjectStore(IWorkHandler):
             )
 
     def remove_unreferenced_objects(self) -> None:
-        """Removes all objects from the ObjectStore that are not referenced."""
+        """Remove objects from the ObjectStore that are not referenced."""
         referenced_ids = {DOCUMENT_ID, PACKAGE_ID}
 
-        def find_references(msg):
+        def find_references(msg: ProtoMessage) -> None:
             """Recursively find all TSP.Reference messages in protobuf."""
             if hasattr(msg, "identifier") and msg.DESCRIPTOR.name == "Reference":
                 referenced_ids.add(msg.identifier)
@@ -175,11 +182,11 @@ class ObjectStore(IWorkHandler):
                 ]
 
     @property
-    def file_store(self):
+    def file_store(self) -> dict[str, bytes | IWAFile]:
         """Return or update the IWA files associated with the object store."""
         return self._file_store
 
-    def __getitem__(self, key: int):
+    def __getitem__(self, key: int) -> ProtoMessage:
         """Return the item at the requested key or index."""
         return self._objects[key]
 
@@ -192,6 +199,6 @@ class ObjectStore(IWorkHandler):
         return len(self._objects)
 
     # Don't cache: new tables and sheets can be added at runtime
-    def find_refs(self, ref_name) -> list:
+    def find_refs(self, ref_name: str) -> list[int]:
         """Find refs."""
         return [k for k, v in self._objects.items() if type(v).__name__ == ref_name]

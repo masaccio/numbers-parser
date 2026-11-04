@@ -70,7 +70,7 @@ class Converter:
             msg = f"{self.input_filename}@{lineno}: {e.args[0]}"
             raise RuntimeError(msg) from e
 
-    def _parse_date(self, x) -> datetime:
+    def _parse_date(self, x: str) -> datetime:
         """Parse a date string and return a datetime."""
         return parse(x, dayfirst=self.day_first).replace(tzinfo=timezone.utc)
 

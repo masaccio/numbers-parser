@@ -1,10 +1,12 @@
 """Internal data model and archive operations for Numbers documents."""
+
 from __future__ import annotations
 
 import logging
 import re
 from array import array
 from collections import defaultdict
+from collections.abc import MutableSequence, Sequence
 from datetime import datetime, timedelta
 from hashlib import sha1
 from itertools import chain
@@ -12,6 +14,8 @@ from math import floor
 from pathlib import Path
 from struct import pack
 from warnings import warn
+
+from google.protobuf.message import Message as ProtoMessage
 
 from numbers_parser.bullets import (
     BULLET_CONVERSION,
@@ -128,7 +132,7 @@ class MergeCells:
         """Return the coordinates covered by the merged cell range."""
         return self._references[row_col].rect
 
-    def merge_cells(self):
+    def merge_cells(self) -> list[tuple[int, int]]:
         """Merge cells."""
         return [k for k, v in self._references.items() if self.is_merge_anchor(k)]
 
@@ -171,12 +175,16 @@ class DataLists(Cacheable):
         self.add_table(table_id)
         return self._datalists[table_id]["id"]
 
-    def lookup_value(self, table_id: int, key: int):
+    def lookup_value(
+        self,
+        table_id: int,
+        key: int,
+    ) -> TSTArchives.TableDataList.ListEntry:
         """Return the an entry in a table's datalist matching a key."""
         self.add_table(table_id)
         return self._datalists[table_id]["by_key"][key]
 
-    def value_key(self, value):
+    def value_key(self, value: str | ProtoMessage) -> str:
         """Return the key used to identify this cell value."""
         if hasattr(value, "DESCRIPTOR"):
             return repr(value)
@@ -192,9 +200,10 @@ class DataLists(Cacheable):
         self._datalists[table_id]["datalist"].nextListID = 1
         clear_field_container(self._datalists[table_id]["datalist"].entries)
 
-    def lookup_key(self, table_id: int, value) -> int:
+    def lookup_key(self, table_id: int, value: str | ProtoMessage) -> int:
         """
         Return the key associated with a value for a particular table entry.
+
         If the value is not in the datalist, allocate a new entry with the
         next available key.
         """
@@ -223,11 +232,9 @@ class DataLists(Cacheable):
 
 class _NumbersModel(Cacheable):
     """
-    Loads all objects from Numbers document and provides decoding
-    methods for other classes in the module to abstract away the
-    internal structures of Numbers document data structures.
+    Load Numbers document objects and abstract their internal structures.
 
-    Not to be used in application code.
+    Do not use this class in application code.
     """
 
     def __init__(self, filepath: Path, password: str | None) -> None:
@@ -239,17 +246,17 @@ class _NumbersModel(Cacheable):
         self._row_heights = {}
         self._col_widths = {}
         self._table_formats = DataLists(self, "format_table", "format")
-        self._table_styles = DataLists(self, "styleTable", "reference")
+        self.table_styles = DataLists(self, "styleTable", "reference")
         self._table_strings = DataLists(self, "stringTable", "string")
         self._table_comments = DataLists(self, "commentStorageTable", "comment_storage")
         self._control_specs = DataLists(self, "control_cell_spec_table", "cell_spec")
         self._formulas = DataLists(self, "formula_table", "formula")
         self._table_data = {}
-        self._table_categories_data = {}
-        self._table_categories_row_mapper = {}
+        self.table_categories_data = {}
+        self.table_categories_row_mapper = {}
         self._styles = None
         self._update_strokes = {}
-        self._images = {}
+        self.images = {}
         self._custom_formats = None
         self._custom_format_archives = None
         self._custom_format_ids = None
@@ -266,7 +273,7 @@ class _NumbersModel(Cacheable):
         """Find refs."""
         return self.objects.find_refs(ref)
 
-    def sheet_ids(self):
+    def sheet_ids(self) -> list[int]:
         """Return the sheet identifiers associated with this table."""
         return [
             o.identifier
@@ -274,7 +281,7 @@ class _NumbersModel(Cacheable):
             if isinstance(self.objects[o.identifier], TNArchives.SheetArchive)
         ]
 
-    def sheet_name(self, sheet_id, value=None):
+    def sheet_name(self, sheet_id: int, value: str | None = None) -> str | None:
         """Return the name of the sheet containing the table."""
         if value is None:
             if sheet_id not in self.objects:
@@ -290,8 +297,9 @@ class _NumbersModel(Cacheable):
     # Don't cache: new tables can be added at runtime
     def table_ids(self, sheet_id: int | None = None) -> list:
         """
-        Return a list of table IDs for a given sheet ID or all table
-        IDs id the sheet ID is None
+        Return table IDs for a sheet or for the whole document.
+
+        If ``sheet_id`` is ``None``, return IDs for all tables.
         """
         table_info_ids = self.find_refs("TableInfoArchive")
         return [
@@ -310,26 +318,26 @@ class _NumbersModel(Cacheable):
         ]
         return ids[0]
 
-    def number_of_rows(self, table_id, num_rows=None):
+    def number_of_rows(self, table_id: int, num_rows: int | None = None) -> int | None:
         """Return the table row count."""
         if num_rows is not None:
             self.objects[table_id].number_of_rows = num_rows
         return self.objects[table_id].number_of_rows
 
-    def number_of_columns(self, table_id, num_cols=None):
+    def number_of_columns(self, table_id: int, num_cols: int | None = None) -> int | None:
         """Return the table column count."""
         if num_cols is not None:
             self.objects[table_id].number_of_columns = num_cols
         return self.objects[table_id].number_of_columns
 
-    def table_name(self, table_id, value=None):
+    def table_name(self, table_id: int, value: str | None = None) -> str | None:
         """Return the name of a table."""
         if value is None:
             return self.objects[table_id].table_name
         self.objects[table_id].table_name = value
         return None
 
-    def table_names(self):
+    def table_names(self) -> list[str]:
         """Return the names of all tables in the model."""
         return list(
             chain.from_iterable(
@@ -337,7 +345,7 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-    def table_name_enabled(self, table_id: int, enabled: bool | None = None):
+    def table_name_enabled(self, table_id: int, enabled: bool | None = None) -> bool | None:
         """Return whether the table name is displayed."""
         if enabled is not None:
             self.objects[table_id].table_name_enabled = enabled
@@ -356,7 +364,7 @@ class _NumbersModel(Cacheable):
             return False
         return not table_info.super.caption_hidden
 
-    def find_style_id(self, style_substr: str):
+    def find_style_id(self, style_substr: str) -> int:
         """Find style id."""
         stylesheet = self.objects[self.stylesheet_id()]
         caption_styles = [
@@ -364,7 +372,7 @@ class _NumbersModel(Cacheable):
         ]
         return caption_styles[0].style.identifier
 
-    def caption_paragraph_style_id(self):
+    def caption_paragraph_style_id(self) -> int:
         """Return the paragraph style identifier for the table caption."""
         style_map = {
             x: self.objects[x]
@@ -374,7 +382,7 @@ class _NumbersModel(Cacheable):
         return next(iter(style_map.keys()))
 
     @cache(num_args=0)
-    def stylesheet_id(self):
+    def stylesheet_id(self) -> int:
         """Return the identifier of the table stylesheet."""
         return self.find_refs("StylesheetArchive")[0]
 
@@ -382,7 +390,7 @@ class _NumbersModel(Cacheable):
         """Set reference."""
         obj.MergeFrom(TSPMessages.Reference(identifier=ref_id))
 
-    def create_path_source_archive(self, table_id):
+    def create_path_source_archive(self, table_id: int) -> TSDArchives.PathSourceArchive:
         """Create path source archive."""
         box_size = 100.0
         return TSDArchives.PathSourceArchive(
@@ -420,7 +428,7 @@ class _NumbersModel(Cacheable):
             ),
         )
 
-    def create_caption_archive(self, table_id) -> None:
+    def create_caption_archive(self, table_id: int) -> None:
         """Create caption archive."""
         table_info_id = self.table_info_id(table_id)
         table_info = self.objects[table_info_id]
@@ -522,7 +530,7 @@ class _NumbersModel(Cacheable):
         return self.objects[caption_storage_id].text[0]
 
     @cache(num_args=0)
-    def custom_format_map(self):
+    def custom_format_map(self) -> dict[str, ProtoMessage]:
         """Return the custom-format mapping for the document."""
         custom_format_list_id = self.objects[DOCUMENT_ID].super.custom_format_list.identifier
         custom_format_list = self.objects[custom_format_list_id]
@@ -537,7 +545,12 @@ class _NumbersModel(Cacheable):
         return self._table_formats.lookup_value(table_id, key).format
 
     @cache(num_args=3)
-    def format_archive(self, table_id: int, format_type: FormattingType, formatting: Formatting):
+    def format_archive(
+        self,
+        table_id: int,
+        format_type: FormattingType,
+        formatting: Formatting,
+    ) -> int:
         """Create a table format from a Formatting spec and return the table format ID."""
         attrs = {x: getattr(formatting, x) for x in ALLOWED_FORMATTING_PARAMETERS[format_type]}
         attrs["format_type"] = FORMAT_TYPE_MAP[format_type]
@@ -545,7 +558,7 @@ class _NumbersModel(Cacheable):
         format_archive = TSKArchives.FormatStructArchive(**attrs)
         return self._table_formats.lookup_key(table_id, format_archive)
 
-    def cell_popup_model(self, parent_id: int, formatting: Formatting):
+    def cell_popup_model(self, parent_id: int, formatting: Formatting) -> int:
         """Return the popup-menu model for a cell."""
         tsce_items = [{"cell_value_type": "NIL_TYPE"}]
         for item in formatting.popup_values:
@@ -582,7 +595,7 @@ class _NumbersModel(Cacheable):
         table_id: int,
         format_type: FormattingType,
         formatting: Formatting,
-    ):
+    ) -> int:
         """Create control cell archive from a Formatting spec and return the table format ID."""
         if format_type == FormattingType.TICKBOX:
             cell_spec = TSTArchives.CellSpecArchive(interaction_type=CellInteractionType.TOGGLE)
@@ -737,7 +750,7 @@ class _NumbersModel(Cacheable):
     @cache(num_args=2)
     def table_style(self, table_id: int, key: int) -> str:
         """Return the style associated with a style ID for a particular table."""
-        style_entry = self._table_styles.lookup_value(table_id, key)
+        style_entry = self.table_styles.lookup_value(table_id, key)
         return self.objects[style_entry.reference.identifier]
 
     @cache(num_args=2)
@@ -754,18 +767,18 @@ class _NumbersModel(Cacheable):
 
     def table_string_key(self, table_id: int, value: str) -> int:
         """
-        Return the key associated with a string for a particular table. If
-        the string is not in the strings table, allocate a new entry with the
-        next available key.
+        Return the key for a string in a table's string list.
+
+        If the string is absent, allocate an entry with the next available key.
         """
         return self._table_strings.lookup_key(table_id, value)
 
     @cache(num_args=0)
-    def owner_id_map(self):
+    def owner_id_map(self) -> dict[int, str]:
         """
-        "
-        Extracts the mapping table from Owner IDs to UUIDs. Returns a
-        dictionary mapping the owner ID int to a 128-bit UUID.
+        Map owner IDs to their UUIDs.
+
+        Return the mapping from integer owner IDs to 128-bit UUID strings.
         """
         # The TSCE.CalculationEngineArchive contains a list of mapping entries
         # in dependencyTracker.formulaOwnerDependencies from the root level
@@ -823,13 +836,13 @@ class _NumbersModel(Cacheable):
         }
 
     @cache()
-    def table_base_id(self, table_id: int) -> int:
-        """ "Finds the UUID of a table."""
+    def table_base_id(self, table_id: int) -> str | None:
+        """Find the base UUID for a table."""
         # Table can be empty if the document does not use FormulaOwnerDependenciesArchive
         return self._table_id_to_base_id.get(table_id)
 
     @cache(num_args=0)
-    def calc_engine_id(self):
+    def calc_engine_id(self) -> int:
         """Return the CalculationEngine ID for the current document."""
         ce_id = self.find_refs("CalculationEngineArchive")
         if len(ce_id) == 0:
@@ -837,14 +850,21 @@ class _NumbersModel(Cacheable):
         return ce_id[0]
 
     @cache(num_args=0)
-    def calc_engine(self):
+    def calc_engine(self) -> ProtoMessage | None:
         """Return the CalculationEngine object for the current document."""
         ce_id = self.calc_engine_id()
         if ce_id == 0:
             return None
         return self.objects[ce_id]
 
-    def add_merge_range(self, table_id, row_start, row_end, col_start, col_end) -> None:
+    def add_merge_range(
+        self,
+        table_id: int,
+        row_start: int,
+        row_end: int,
+        col_start: int,
+        col_end: int,
+    ) -> None:
         """Add merge range."""
         debug(
             "Add merge: table_id=%d, [%d,%d]->[%d,%d]",
@@ -865,8 +885,9 @@ class _NumbersModel(Cacheable):
         self._merge_cells[table_id].add_anchor(row_start, col_start, size)
 
     @cache()
-    def calculate_merges_using_formula_stores(self, table_id) -> int:
+    def calculate_merges_using_formula_stores(self, table_id: int) -> int:
         """Calculate merges using formula stores."""
+
         def range_end(archive: object) -> int:
             # range_end is optional
             """Return the end coordinate of a range, or its start if unset."""
@@ -895,7 +916,7 @@ class _NumbersModel(Cacheable):
         return merge_count
 
     @cache()
-    def calculate_merges_using_dependency_archives(self, table_id) -> int:
+    def calculate_merges_using_dependency_archives(self, table_id: int) -> int:
         """Extract all the merge cell ranges for the Table."""
         owner_id_map = self.owner_id_map()
         table_base_id = self.table_base_id(table_id)
@@ -926,7 +947,7 @@ class _NumbersModel(Cacheable):
         return merge_count
 
     @cache()
-    def calculate_merges_using_region_map(self, table_id) -> None:
+    def calculate_merges_using_region_map(self, table_id: int) -> None:
         """Calculate merges using region map."""
         base_data_store = self.objects[table_id].base_data_store
         if base_data_store.merge_region_map.identifier == 0:
@@ -954,7 +975,7 @@ class _NumbersModel(Cacheable):
             merge_count,
         )
 
-    def merge_cells(self, table_id):
+    def merge_cells(self, table_id: int) -> MergeCells:
         """Merge cells."""
         if self.calculate_merges_using_formula_stores(table_id) > 0:
             return self._merge_cells[table_id]
@@ -971,7 +992,7 @@ class _NumbersModel(Cacheable):
         )
 
     @cache()
-    def table_uuids_to_id(self, table_uuid) -> int | None:
+    def table_uuids_to_id(self, table_uuid: str) -> int | None:
         """Map table UUIDs to their model identifiers."""
         return next(
             (
@@ -983,9 +1004,22 @@ class _NumbersModel(Cacheable):
             None,
         )
 
-    def node_to_ref(self, table_id: int, row: int, col: int, node):
+    def node_to_ref(
+        self,
+        table_id: int,
+        row: int,
+        col: int,
+        node: TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive,
+    ) -> CellRange:
         """Convert a formula node into a cell reference."""
-        def resolve_range(is_absolute, absolute_list, relative_list, offset, max_val):
+
+        def resolve_range(
+            is_absolute: bool,
+            absolute_list: Sequence[ProtoMessage],
+            relative_list: Sequence[ProtoMessage],
+            offset: int,
+            max_val: int,
+        ) -> int:
             """Resolve range."""
             if is_absolute:
                 return absolute_list[0].range_begin
@@ -993,7 +1027,13 @@ class _NumbersModel(Cacheable):
                 return max_val
             return offset + relative_list[0].range_begin
 
-        def resolve_range_end(is_absolute, absolute_list, relative_list, offset, max_val):
+        def resolve_range_end(
+            is_absolute: bool,
+            absolute_list: Sequence[ProtoMessage],
+            relative_list: Sequence[ProtoMessage],
+            offset: int,
+            max_val: int,
+        ) -> int:
             """Resolve range end."""
             if is_absolute:
                 return range_end(absolute_list[0])
@@ -1085,7 +1125,7 @@ class _NumbersModel(Cacheable):
         )
 
     @cache()
-    def formula_ast(self, table_id: int):
+    def formula_ast(self, table_id: int) -> dict[int, Sequence[ProtoMessage]]:
         """Return the parsed formula AST for a table."""
         bds = self.objects[table_id].base_data_store
         formula_table_id = bds.formula_table.identifier
@@ -1193,7 +1233,7 @@ class _NumbersModel(Cacheable):
 
     def recalculate_row_info(
         self,
-        table_id: int,
+        _table_id: int,
         data: list,
         tile_row_offset: int,
         row: int,
@@ -1340,7 +1380,7 @@ class _NumbersModel(Cacheable):
 
         self.objects.update_object_file_store()
 
-    def create_string_table(self):
+    def create_string_table(self) -> tuple[int, TSTArchives.TableDataList]:
         """Create string table."""
         table_strings_id, table_strings = self.objects.create_object_from_dict(
             "Index/Tables/DataList-{}",
@@ -1436,7 +1476,7 @@ class _NumbersModel(Cacheable):
         table_info = self.objects[self.table_info_id(table_id)]
         return table_info.is_a_pivot_table
 
-    def last_table_offset(self, sheet_id):
+    def last_table_offset(self, sheet_id: int) -> float:
         """Y offset of the last table in a sheet."""
         table_id = self.table_ids(sheet_id)[-1]
         y_offset = next(
@@ -1478,8 +1518,8 @@ class _NumbersModel(Cacheable):
         y: float,
         num_rows: int,
         num_cols: int,
-        number_of_header_rows=1,
-        number_of_header_columns=1,
+        number_of_header_rows: int = 1,
+        number_of_header_columns: int = 1,
     ) -> int:
         """Add table."""
         from_table = self.objects[from_table_id]
@@ -1640,9 +1680,11 @@ class _NumbersModel(Cacheable):
         number_of_header_columns: int,
     ) -> NumbersUUID:
         """
-        Create a FormulaOwnerDependenciesArchive that references a TableInfoArchive
-        so that cross-references to cells in this table will work.
+        Create formula-owner metadata for a table.
+
+        This archive enables cross-references to cells in the table.
         """
+        _ = num_rows
         formula_owner_uuid = NumbersUUID()
         calc_engine = self.calc_engine()
         owner_id_map = calc_engine.dependency_tracker.owner_id_map.map_entry
@@ -1768,7 +1810,7 @@ class _NumbersModel(Cacheable):
         return sheet_id
 
     @property
-    def styles(self):
+    def styles(self) -> dict[str, Style]:
         """Return the styles available in the document."""
         if self._styles is None:
             self._styles = self.available_paragraph_styles()
@@ -1912,8 +1954,9 @@ class _NumbersModel(Cacheable):
 
     def update_paragraph_styles(self) -> None:
         """
-        Create new paragraph style archives for any new styles that
-        have been created for this document.
+        Create paragraph style archives for newly added styles.
+
+        Update existing archives for styles that have changed.
         """
         new_styles = [x for x in self.styles.values() if x._text_style_obj_id is None]
         updated_styles = [
@@ -1928,11 +1971,9 @@ class _NumbersModel(Cacheable):
         for style in updated_styles:
             self.update_paragraph_style(style)
 
-    def update_cell_styles(self, table_id: int, data: list) -> None:
-        """
-        Create new cell style archives for any cells whose styles
-        have changes that require a cell style.
-        """
+    def update_cell_styles(self, table_id: int, data: list[list[Cell]]) -> None:
+        """Create or update archives for cells with changed styles."""
+        _ = table_id
         cell_styles = {}
         for _, cells in enumerate(data):
             for _, cell in enumerate(cells):
@@ -1961,8 +2002,8 @@ class _NumbersModel(Cacheable):
         """Add cell style."""
         if style.bg_image is not None:
             digest = sha1(style.bg_image.data).digest()  # noqa: S324
-            if digest in self._images:
-                image_id = self._images[digest]
+            if digest in self.images:
+                image_id = self.images[digest]
             else:
                 datas = self.objects[PACKAGE_ID].datas
                 image_id = self.next_image_identifier()
@@ -1975,7 +2016,7 @@ class _NumbersModel(Cacheable):
                         materialized_length=len(style.bg_image.data),
                     ),
                 )
-                self._images[digest] = image_id
+                self.images[digest] = image_id
             color_attrs = {
                 "cell_fill": {
                     "image": {
@@ -2041,20 +2082,21 @@ class _NumbersModel(Cacheable):
         """Return the archive identifier for a cell text style."""
         if cell._text_style_id is None:
             return None
-        entry = self._table_styles.lookup_value(cell._table_id, cell._text_style_id)
+        entry = self.table_styles.lookup_value(cell._table_id, cell._text_style_id)
         return entry.reference.identifier
 
     def cell_style_object_id(self, cell: Cell) -> int:
         """Return the archive identifier for a cell style."""
         if cell._cell_style_id is None:
             return None
-        entry = self._table_styles.lookup_value(cell._table_id, cell._cell_style_id)
+        entry = self.table_styles.lookup_value(cell._table_id, cell._cell_style_id)
         return entry.reference.identifier
 
     def custom_style_name(self) -> str:
         """
-        Find custom styles in the current document and return the next
-        highest numbered style.
+        Return the next available custom style name.
+
+        Names use the highest available number in the current document.
         """
         stylesheet_id = self.objects[DOCUMENT_ID].stylesheet.identifier
         current_styles = self.styles.keys()
@@ -2091,8 +2133,9 @@ class _NumbersModel(Cacheable):
 
     def custom_format_name(self) -> str:
         """
-        Find custom formats in the current document and return the next
-        highest numbered format.
+        Return the next available custom format name.
+
+        Names use the highest available number in the current document.
         """
         current_formats = self.custom_formats.keys()
         if "Custom Format" not in current_formats:
@@ -2106,7 +2149,7 @@ class _NumbersModel(Cacheable):
         return "Custom Format 1"
 
     @cache()
-    def table_formulas(self, table_id: int):
+    def table_formulas(self, table_id: int) -> TableFormulas:
         """Return the formula collection for a table."""
         return TableFormulas(self, table_id)
 
@@ -2220,7 +2263,10 @@ class _NumbersModel(Cacheable):
             replies.append(self._resolve_comment_storage(reply_ref.identifier))
 
         return Comment(
-            author=author_name, text=storage.text, creation_date=creation_date, replies=replies,
+            author=author_name,
+            text=storage.text,
+            creation_date=creation_date,
+            replies=replies,
         )
 
     def author_id(self, author_name: str, table_id: int) -> int:
@@ -2260,7 +2306,13 @@ class _NumbersModel(Cacheable):
         return new_author_id
 
     def add_comment_to_cell(  # noqa: PLR0917
-        self, table_id: int, row: int, col: int, text: str, author: str, reply: bool,
+        self,
+        table_id: int,
+        row: int,
+        col: int,
+        text: str,
+        author: str,
+        reply: bool,
     ) -> None:
         """Add comment to cell."""
         cell = self._table_data[table_id][row][col]
@@ -2298,10 +2350,7 @@ class _NumbersModel(Cacheable):
             cell._comment_id = key
 
     def cell_text_style(self, cell: Cell) -> object:
-        """
-        Return the text style object for the cell or, if none
-        is defined, the default header, footer or body style.
-        """
+        """Return the cell's text style or default header, footer, or body style."""
         if cell._text_style_id is not None:
             return self.table_style(cell._table_id, cell._text_style_id)
 
@@ -2343,31 +2392,22 @@ class _NumbersModel(Cacheable):
             return [(rgb(s.color)) for s in cell_properties.gradient.stops]
         return None
 
-    def char_property(self, style: object, field: str):
-        """
-        Return a char_property field from a style if present
-        in the style, or from the parent if not.
-        """
+    def char_property(self, style: object, field: str) -> object:
+        """Return a character property from the style or its parent."""
         if not style.char_properties.HasField(field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.char_properties, field)
         return getattr(style.char_properties, field)
 
     def para_property(self, style: object, field: str) -> float:
-        """
-        Return a para_property field from a style if present
-        in the style, or from the parent if not.
-        """
+        """Return a paragraph property from the style or its parent."""
         if not style.para_properties.HasField(field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.para_properties, field)
         return getattr(style.para_properties, field)
 
     def cell_property(self, style: object, field: str) -> float:
-        """
-        Return a cell_property field from a style if present
-        in the style, or from the parent if not.
-        """
+        """Return a cell property from the style or its parent."""
         if not style.cell_properties.HasField(field):
             parent = self.objects[style.super.parent.identifier]
             return getattr(parent.cell_properties, field)
@@ -2620,7 +2660,7 @@ class _NumbersModel(Cacheable):
         ):
             self.set_cell_border(table_id, row, col, side, border_value)
 
-    def create_stroke(self, origin: int, length: int, border_value: Border):
+    def create_stroke(self, origin: int, length: int, border_value: Border) -> int:
         """Create stroke."""
         line_cap = TSDArchives.StrokeArchive.LineCap.ButtCap
         line_join = TSDArchives.LineJoin.MiterJoin
@@ -2811,7 +2851,7 @@ class _NumbersModel(Cacheable):
             raise IndexError(msg)
         self.objects.file_store[stored_filename] = data
 
-    def next_image_identifier(self):
+    def next_image_identifier(self) -> int:
         """Return the next available ID in the list of images in the document."""
         datas = self.objects[PACKAGE_ID].datas
         image_ids = [x.identifier for x in datas]
@@ -2819,8 +2859,9 @@ class _NumbersModel(Cacheable):
         return max(image_ids) + 1
 
     @cache(num_args=0)
-    def group_uuid_values(self):
+    def group_uuid_values(self) -> dict[NumbersUUID, str | int | bool | datetime | None]:
         """Group cell values by their associated UUID identifiers."""
+
         def cell_value_to_key(
             cell_value: TSCEArchives.CellValueArchive,
         ) -> str | int | bool | datetime:
@@ -2851,15 +2892,15 @@ class _NumbersModel(Cacheable):
         """Calculate table categories."""
         category_owner_id = self.objects[table_id].category_owner.identifier
         if not category_owner_id:
-            self._table_categories_data[table_id] = None
-            self._table_categories_row_mapper[table_id] = None
+            self.table_categories_data[table_id] = None
+            self.table_categories_row_mapper[table_id] = None
             return
 
         category_archive_id = self.objects[category_owner_id].group_by[0].identifier
         category_archive = self.objects[category_archive_id]
         if not category_archive.is_enabled:
-            self._table_categories_data[table_id] = None
-            self._table_categories_row_mapper[table_id] = None
+            self.table_categories_data[table_id] = None
+            self.table_categories_row_mapper[table_id] = None
             return
 
         table_info = self.objects[self.table_info_id(table_id)]
@@ -2874,7 +2915,7 @@ class _NumbersModel(Cacheable):
             NumbersUUID(row_uid_map.sorted_row_uids[i]) for i in row_uid_map.row_uid_for_index
         ]
 
-        def parent_relationships(parent: NumbersUUID, children: list, group_parents: dict):
+        def parent_relationships(parent: NumbersUUID, children: list, group_parents: dict) -> None:
             """Map model objects to their parent relationships."""
             for child in children:
                 child_uuid = NumbersUUID(child.group_uid)
@@ -2913,7 +2954,7 @@ class _NumbersModel(Cacheable):
                 row_mapper[row] = mapped_row
                 row += 1
 
-        def node_to_structure(node: dict):
+        def node_to_structure(node: dict[str, object]) -> dict[str, object]:
             """Convert a protobuf node into a structured representation."""
             if not node["children"]:
                 return node["rows"]
@@ -2922,11 +2963,11 @@ class _NumbersModel(Cacheable):
                 out[child_key] = node_to_structure(child_node)
             return out
 
-        self._table_categories_data[table_id] = {}
+        self.table_categories_data[table_id] = {}
         for key, node in root_children.items():
-            self._table_categories_data[table_id][key] = node_to_structure(node)
+            self.table_categories_data[table_id][key] = node_to_structure(node)
 
-        self._table_categories_row_mapper[table_id] = {
+        self.table_categories_row_mapper[table_id] = {
             row: row_uuid_to_offset[uuid]
             for row, uuid in enumerate(
                 uuid for uuid in row_uid_for_index if uuid not in group_uuids
@@ -2935,9 +2976,10 @@ class _NumbersModel(Cacheable):
 
     def refresh_pivot_tables(self) -> None:
         """
-        Signal a data refresh for pivot tables on next load by bumping their
-        refresh UUIDs and timestamps, while leaving rule UUIDs intact to
-        preserve layout and styling.
+        Signal a pivot-table data refresh for the next document load.
+
+        Bump refresh UUIDs and timestamps while preserving rule UUIDs to keep
+        layout and styling unchanged.
         """
         for sheet_id in self.sheet_ids():
             for table_id in self.table_ids(sheet_id):
@@ -2956,7 +2998,7 @@ class _NumbersModel(Cacheable):
         """Keep UID maps and dependency bounds in sync with data dimensions."""
         table_model = self.objects[table_id]
 
-        def _update_map(uid_map_ref):
+        def _update_map(uid_map_ref: Sequence[ProtoMessage]) -> None:
             """Update map."""
             if not uid_map_ref or uid_map_ref.identifier == 0:
                 return
@@ -3027,20 +3069,20 @@ class _NumbersModel(Cacheable):
                     spanning.body_range_for_table.bottom_right_column = num_cols - 1
 
 
-def rgb(obj) -> RGB:
+def rgb(obj: ProtoMessage) -> RGB:
     """Convert a TSPArchives.Color into an RGB tuple."""
     return RGB(round(obj.r * 255), round(obj.g * 255), round(obj.b * 255))
 
 
-def range_end(obj):
+def range_end(obj: ProtoMessage) -> int:
     """Select end range for a IndexSetArchive.IndexSetEntry."""
     if obj.HasField("range_end"):
         return obj.range_end
     return obj.range_begin
 
 
-def formatted_number(number_type, index):
-    """Returns the numbered index bullet formatted for different types."""
+def formatted_number(number_type: int, index: int) -> str:
+    """Format an index bullet for the requested type."""
     bullet_char = BULLET_PREFIXES[number_type]
     bullet_char += BULLET_CONVERSION[number_type](index)
     bullet_char += BULLET_SUFFIXES[number_type]
@@ -3099,10 +3141,11 @@ def get_storage_buffers_for_row(
     return data
 
 
-def clear_field_container(obj) -> None:
+def clear_field_container(obj: MutableSequence[object]) -> None:
     """
-    Remove all entries from a protobuf RepeatedCompositeFieldContainer
-    in a portable fashion.
+    Remove every entry from a protobuf repeated-field container.
+
+    Use a portable approach that works across protobuf container versions.
     """
     while len(obj) > 0:
         _ = obj.pop()

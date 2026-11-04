@@ -4,7 +4,7 @@ import sys
 from glob import glob
 
 
-def rename_proto_files(_dir):
+def rename_proto_files(_dir: str | os.PathLike[str]) -> None:
     """Rename proto files."""
     replacements = {}
     for old_path in glob(os.path.join(_dir, "*.proto")):

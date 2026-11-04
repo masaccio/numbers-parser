@@ -1,29 +1,43 @@
 """Numbers cache module helpers."""
+from __future__ import annotations
+
 from collections import defaultdict
+from collections.abc import Callable
 from functools import wraps
 
 
 class Cacheable:
     """Provide per-instance storage for cached method results."""
 
-    def __new__(cls, *_args, **_kwargs):
+    def __new__(
+        cls,
+        *_args: object,
+        **_kwargs: object,
+    ) -> Cacheable:
         """Create an instance and initialize its cache."""
         obj = object.__new__(cls)
         obj._cache = defaultdict(lambda: defaultdict(dict))
         return obj
 
 
-def cache(num_args=1):
+def cache(
+    num_args: int = 1,
+) -> Callable[[Callable[..., object]], Callable[..., object]]:
     """
-    Decorator to memoize a class method using a precise subset of
-    its arguments.
+    Cache a method using a selected subset of its arguments.
+
+    The returned decorator memoizes results for each instance and argument key.
     """
 
-    def cache_decorator(func):
+    def cache_decorator(func: Callable[..., object]) -> Callable[..., object]:
         """Wrap a method with argument-aware cache lookups."""
 
         @wraps(func)
-        def inner_multi_args(self, *args, **kwargs):
+        def inner_multi_args(
+            self: Cacheable,
+            *args: object,
+            **kwargs: object,
+        ) -> object:
             """Return a cached result keyed by the selected arguments."""
             method = func.__name__
             key = ".".join([str(args[x]) for x in range(num_args)])
@@ -33,7 +47,7 @@ def cache(num_args=1):
             self._cache[method][key] = value
             return value
 
-        def inner_no_args(self):
+        def inner_no_args(self: Cacheable) -> object:
             """Return a cached result for a method without arguments."""
             method = func.__name__
             if method not in self._cache:

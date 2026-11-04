@@ -1,5 +1,7 @@
 """
-Check the protobuf snippets in docs/api/file-format.rst against the real
+Check documented protobuf snippets against descriptors and live documents.
+
+The protobuf snippets in docs/api/file-format.rst are checked against the real
 protobuf descriptors and against a document loaded by numbers-parser.
 
 For every ``.. code-block:: protobuf`` block in the RST file this script:
@@ -25,12 +27,16 @@ import os
 import pkgutil
 import re
 import sys
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from google.protobuf.descriptor import FieldDescriptor as FD  # noqa: N817
+from google.protobuf.descriptor import Descriptor
+from google.protobuf.descriptor import FieldDescriptor as FD
+from google.protobuf.message import Message as ProtoMessage
 
 from numbers_parser import Document, generated
+from numbers_parser.containers import ObjectStore
 
 SCALARS = {
     "double": FD.TYPE_DOUBLE,
@@ -52,21 +58,21 @@ SCALARS = {
 LABELS = {"optional", "required", "repeated"}
 
 
-def is_repeated(fd) -> bool:
+def is_repeated(fd: FD) -> bool:
     """Protobuf >= 6 removed FieldDescriptor.label; support both APIs."""
     if hasattr(fd, "is_repeated"):
         return bool(fd.is_repeated)
     return fd.label == FD.LABEL_REPEATED
 
 
-def is_required(fd) -> bool:
+def is_required(fd: FD) -> bool:
     """Return whether required is available."""
     if hasattr(fd, "is_required"):
         return bool(fd.is_required)
     return fd.label == FD.LABEL_REQUIRED
 
 
-def label_of(fd) -> str:
+def label_of(fd: FD) -> str:
     """Return the proto2 label name for a field descriptor."""
     if is_repeated(fd):
         return "repeated"
@@ -75,7 +81,7 @@ def label_of(fd) -> str:
     return "optional"
 
 
-def is_packed(fd) -> bool:
+def is_packed(fd: FD) -> bool:
     """Return whether packed is available."""
     if hasattr(fd, "is_packed"):
         return bool(fd.is_packed)
@@ -168,7 +174,7 @@ def compile_snippet(snippet: Snippet) -> None:
     toks = tokenize(snippet.text)
     pos = 0
 
-    def expect(value=None):
+    def expect(value: str | None = None) -> str:
         """Consume and return the next expected protobuf token."""
         nonlocal pos
         if pos >= len(toks) or (value is not None and toks[pos] != value):
@@ -178,7 +184,7 @@ def compile_snippet(snippet: Snippet) -> None:
         pos += 1
         return toks[pos - 1]
 
-    def parse_enum():
+    def parse_enum() -> tuple[str, dict[str, int]]:
         """Parse enum."""
         name = expect()
         expect("{")
@@ -191,7 +197,7 @@ def compile_snippet(snippet: Snippet) -> None:
         expect("}")
         return name, values
 
-    def parse_message():
+    def parse_message() -> Message:
         """Parse message."""
         msg = Message(expect())
         expect("{")
@@ -232,11 +238,11 @@ def compile_snippet(snippet: Snippet) -> None:
 # --------------------------------------------------------------------------
 # Descriptor registry
 # --------------------------------------------------------------------------
-def load_generated():
+def load_generated() -> dict[str, Descriptor]:
     """Import every generated *_pb2 module; return {full_name: descriptor}."""
     registry = {}
 
-    def walk(desc):
+    def walk(desc: Descriptor) -> None:
         """Traverse the value."""
         registry[desc.full_name] = desc
         for nested in desc.nested_types:
@@ -251,7 +257,7 @@ def load_generated():
     return registry
 
 
-def check_field(desc, f: Field, errors: list[str]) -> None:
+def check_field(desc: Descriptor, f: Field, errors: list[str]) -> None:
     """Check field."""
     fd = desc.fields_by_name.get(f.name)
     if fd is None:
@@ -279,7 +285,7 @@ def check_field(desc, f: Field, errors: list[str]) -> None:
         errors.append(f"{desc.full_name}.{f.name}: documented packed but field is not packed")
 
 
-def check_message(desc, spec: Message, errors: list[str]) -> None:
+def check_message(desc: Descriptor, spec: Message, errors: list[str]) -> None:
     """Check message."""
     for f in spec.fields:
         check_field(desc, f, errors)
@@ -300,7 +306,10 @@ def check_message(desc, spec: Message, errors: list[str]) -> None:
             check_message(nd, nested, errors)
 
 
-def match_descriptor(registry, spec: Message):
+def match_descriptor(
+    registry: Mapping[str, Descriptor],
+    spec: Message,
+) -> tuple[Descriptor | None, list[str]]:
     """Return (descriptor, errors) for the best-matching candidate of a top-level spec."""
     cands = [d for d in registry.values() if d.containing_type is None and d.name == spec.name]
     best = None
@@ -319,7 +328,7 @@ def match_descriptor(registry, spec: Message):
 # --------------------------------------------------------------------------
 # Live document checks
 # --------------------------------------------------------------------------
-def iter_messages(msg):
+def iter_messages(msg: ProtoMessage) -> Iterator[ProtoMessage]:
     """Yield msg and all embedded sub-messages."""
     yield msg
     for fdesc, value in msg.ListFields():
@@ -331,10 +340,10 @@ def iter_messages(msg):
                 yield from iter_messages(item)
 
 
-def collect_instances(doc) -> dict[str, list]:
+def collect_instances(doc: Document) -> dict[str, list[ProtoMessage]]:
     """Index every message (including embedded and IWA header messages) by full name."""
     store = doc._model.objects
-    instances: dict[str, list] = {}
+    instances: dict[str, list[ProtoMessage]] = {}
     for obj_id in store._objects:
         for m in iter_messages(store[obj_id]):
             instances.setdefault(m.DESCRIPTOR.full_name, []).append(m)
@@ -346,7 +355,13 @@ def collect_instances(doc) -> dict[str, list]:
     return instances
 
 
-def check_live(desc, spec: Message, instances, store, errors: list[str]) -> int:
+def check_live(
+    desc: Descriptor,
+    spec: Message,
+    instances: Mapping[str, list[ProtoMessage]],
+    store: ObjectStore,
+    errors: list[str],
+) -> int:
     """Check documented functionality on live instances; return count checked."""
     live = instances.get(desc.full_name, [])
     for inst in live:

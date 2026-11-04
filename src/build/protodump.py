@@ -11,9 +11,11 @@ Inspired by Sean Patrick O'Brien (@obriensp)'s 2013 "proto-dump": https://github
 
 import sys
 from collections import defaultdict
+from collections.abc import Collection, Iterator
 from pathlib import Path
 
 from google.protobuf import descriptor_pb2
+from google.protobuf.descriptor import FileDescriptor
 from google.protobuf.descriptor_pool import DescriptorPool
 from google.protobuf.internal.decoder import _DecodeVarint
 from tqdm import tqdm
@@ -54,7 +56,11 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
     lines.append(f"package {f.package};")
     lines.append("")
 
-    def generate_enum_lines(f, lines: list[str], indent: int = 0):
+    def generate_enum_lines(
+        f: descriptor_pb2.FileDescriptorProto | descriptor_pb2.DescriptorProto,
+        lines: list[str],
+        indent: int = 0,
+    ) -> None:
         """Generate enum lines."""
         prefix = "  " * indent
         for enum in f.enum_type:
@@ -63,7 +69,10 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
                 lines.append(prefix + f"  {value.name} = {value.number};")
             lines.append(prefix + "}")
 
-    def generate_field_line(field, in_oneof: bool = False) -> str:
+    def generate_field_line(
+        field: descriptor_pb2.FieldDescriptorProto,
+        in_oneof: bool = False,
+    ) -> str:
         """Generate field line."""
         line = []
         if field.label == 1:
@@ -101,7 +110,11 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
             line.append(f"[{', '.join(options)}]")
         return f"  {' '.join(line)};"
 
-    def generate_extension_lines(message, lines: list[str], indent: int = 0):
+    def generate_extension_lines(
+        message: descriptor_pb2.FileDescriptorProto | descriptor_pb2.DescriptorProto,
+        lines: list[str],
+        indent: int = 0,
+    ) -> None:
         """Generate extension lines."""
         prefix = "  " * indent
         extensions_grouped_by_extendee = defaultdict(list)
@@ -113,7 +126,11 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
                 lines.append(prefix + generate_field_line(extension))
             lines.append(prefix + "}")
 
-    def generate_message_lines(f, lines: list[str], indent: int = 0):
+    def generate_message_lines(
+        f: descriptor_pb2.FileDescriptorProto | descriptor_pb2.DescriptorProto,
+        lines: list[str],
+        indent: int = 0,
+    ) -> None:
         """Generate message lines."""
         prefix = "  " * indent
 
@@ -164,7 +181,7 @@ def to_proto_file(fds: descriptor_pb2.FileDescriptorSet) -> str:
 class ProtoFile:
     """Represent a protobuf file descriptor and its resolved dependencies."""
 
-    def __init__(self, data, pool):
+    def __init__(self, data: bytes, pool: DescriptorPool) -> None:
         """Initialize the instance state."""
         self.data = data
         self.pool = pool
@@ -173,15 +190,15 @@ class ProtoFile:
         self.imports = list(self.file_descriptor_proto.dependency)
         self.attempt_to_load()
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return a hash derived from the instance data."""
         return hash(self.data)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """Compare this instance with another value."""
         return isinstance(other, ProtoFile) and self.data == other.data
 
-    def attempt_to_load(self):
+    def attempt_to_load(self) -> FileDescriptor | None:
         # This method will fail if this file is missing dependencies (imports)
         """Add the descriptor to the pool, returning None when dependencies are missing."""
         try:
@@ -192,16 +209,16 @@ class ProtoFile:
             return None
 
     @property
-    def descriptor(self):
+    def descriptor(self) -> FileDescriptor | None:
         """Return the resolved descriptor, attempting to load it first."""
         return self.attempt_to_load()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a developer-friendly representation."""
         return f'<{self.__class__.__name__}: path="{self.path}">'
 
     @property
-    def source(self):
+    def source(self) -> str | None:
         """Return proto source text when the descriptor dependencies resolve."""
         if self.descriptor:
             fds = descriptor_pb2.FileDescriptorSet()
@@ -211,7 +228,7 @@ class ProtoFile:
         return None
 
 
-def read_until_null_tag(data: bytes):
+def read_until_null_tag(data: bytes) -> int:
     """Read until null tag."""
     position = 0
     while position < len(data):
@@ -240,7 +257,10 @@ def read_until_null_tag(data: bytes):
     return position
 
 
-def extract_proto_from_file(filename, descriptor_pool):
+def extract_proto_from_file(
+    filename: str | Path,
+    descriptor_pool: DescriptorPool,
+) -> Iterator[ProtoFile]:
     """Extract proto from file."""
     with open(filename, "rb") as f:
         data = f.read()
@@ -298,7 +318,7 @@ def extract_proto_from_file(filename, descriptor_pool):
         offset = marker_start + descriptor_length
 
 
-def find_missing_dependencies(all_files, source_file):
+def find_missing_dependencies(all_files: Collection[ProtoFile], source_file: str) -> set[str]:
     """Find missing dependencies."""
     matches = [f for f in all_files if f.path == source_file]
     if not matches:
@@ -316,7 +336,7 @@ def find_missing_dependencies(all_files, source_file):
     return to_return
 
 
-def main():
+def main() -> None:
     """Run the command-line operation."""
     import argparse
 

@@ -35,7 +35,7 @@ from numbers_parser.cell import CustomFormattingType
 from numbers_parser.constants import CHECKBOX_TRUE_VALUE, STAR_RATING_VALUE
 
 
-def generate_doc_with_all_apis(filename: Path):
+def generate_doc_with_all_apis(filename: Path) -> None:
     """Generate doc with all apis."""
     doc = Document(num_header_rows=0, num_header_cols=0, num_cols=2, num_rows=20)
     sheet = doc.sheets[0]
@@ -269,7 +269,7 @@ def generate_doc_with_all_apis(filename: Path):
     doc.save(filename)
 
 
-def check_api_tests(filename: Path):
+def check_api_tests(filename: Path) -> None:
     """Check api tests."""
     doc = Document(filename)
     sheet = doc.sheets["API Test Sheet"]
@@ -395,8 +395,9 @@ def check_api_tests(filename: Path):
         assert s_bg.bg_image.data == f.read()
 
 
-def update_pivot_tables_doc(doc_filepath: Path, new_doc_filepath: Path):
+def update_pivot_tables_doc(doc_filepath: Path, new_doc_filepath: Path) -> None:
     """Update some tables to force pivot tables to change."""
+    _ = doc_filepath
     doc = Document("tests/data/test-pivot.numbers")
     align_left = doc.add_style(alignment=Alignment("left", "middle"), font_size=10.0)
     table = doc.sheets["Sales"].tables["Sales"]
@@ -420,7 +421,7 @@ def update_pivot_tables_doc(doc_filepath: Path, new_doc_filepath: Path):
     doc.save(new_doc_filepath)
 
 
-def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path, pivot_table_name: str = ""):
+def open_numbers_and_export_pdf(doc_filepath: Path, pdf_filepath: Path, pivot_table_name: str = "") -> None:
     """Open a document in Apple Numbers and export as PDF."""
     if pdf_filepath.exists():
         pdf_filepath.unlink()
@@ -493,7 +494,7 @@ def compare_pdfs_visually(
     return all_pages_match
 
 
-def main():
+def main() -> None:
     """Run the command-line operation."""
     tempdir = Path(tempfile.gettempdir())
     api_doc_filepath = tempdir / "api-test.numbers"

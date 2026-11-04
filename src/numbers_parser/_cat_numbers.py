@@ -7,6 +7,7 @@ import sys
 from sigfig import round as sigfig
 
 from numbers_parser import (
+    Cell,
     Document,
     ErrorCell,
     FileError,
@@ -31,7 +32,7 @@ def experimental_feature_choice(s: str) -> ExperimentalFeatures:
         raise argparse.ArgumentTypeError(msg)  # noqa: B904
 
 
-def command_line_parser():
+def command_line_parser() -> argparse.ArgumentParser:
     """Create the argument parser for the cat-numbers command."""
     parser = argparse.ArgumentParser(
         description="Export data from Apple Numbers spreadsheet tables",
@@ -94,20 +95,20 @@ def command_line_parser():
     return parser
 
 
-def print_sheet_names(filename, password) -> None:
+def print_sheet_names(filename: str, password: str | None) -> None:
     """Print sheet names."""
     for sheet in Document(filename, password=password).sheets:
         print(f"{filename}: {sheet.name}")
 
 
-def print_table_names(filename, password) -> None:
+def print_table_names(filename: str, password: str | None) -> None:
     """Print table names."""
     for sheet in Document(filename, password=password).sheets:
         for table in sheet.tables:
             print(f"{filename}: {sheet.name}: {table.name}")
 
 
-def cell_as_string(args, cell):
+def cell_as_string(args: argparse.Namespace, cell: Cell) -> str:
     """Return the cell as string."""
     if isinstance(cell, ErrorCell) and not (args.formulas):
         return "#REF!"
@@ -122,7 +123,11 @@ def cell_as_string(args, cell):
     return str(cell.value)
 
 
-def print_table(args, filename, password) -> None:
+def print_table(
+    args: argparse.Namespace,
+    filename: str,
+    password: str | None,
+) -> None:
     """Print table."""
     writer = csv.writer(sys.stdout, dialect="excel")
     for sheet in Document(filename, password=password).sheets:

@@ -1,11 +1,17 @@
 """Convert Numbers formula archives into readable formula strings."""
+from __future__ import annotations
+
 import re
 import warnings
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
 
 from numbers_parser.exceptions import UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated.functionmap import FUNCTION_MAP
+
+if TYPE_CHECKING:
+    from numbers_parser.model import _NumbersModel
 
 FUNCTION_NAME_TO_ID = {v: k for k, v in FUNCTION_MAP.items()}
 
@@ -13,7 +19,13 @@ FUNCTION_NAME_TO_ID = {v: k for k, v in FUNCTION_MAP.items()}
 class Formula(list):
     """Convert a cell formula into readable text."""
 
-    def __init__(self, model, table_id, row, col) -> None:
+    def __init__(
+        self,
+        model: _NumbersModel,
+        table_id: int,
+        row: int,
+        col: int,
+    ) -> None:
         """Initialize the instance state."""
         self._stack = []
         self._model = model
@@ -29,7 +41,7 @@ class Formula(list):
         """Pop the value."""
         return self._stack.pop()
 
-    def popn(self, num_args: int) -> tuple:
+    def popn(self, num_args: int) -> tuple[str, ...]:
         """Pop and return the requested number of values from the formula stack."""
         values = ()
         for _ in range(num_args):
@@ -40,12 +52,12 @@ class Formula(list):
         """Push the value."""
         self._stack.append(val)
 
-    def add(self, *args) -> None:
+    def add(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Add the value."""
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}+{arg2}")
 
-    def array(self, *args) -> None:
+    def array(self, *args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Build formula text for a one- or two-dimensional array."""
         node = args[2]
         num_rows = node.AST_array_node_numRow
@@ -65,7 +77,7 @@ class Formula(list):
             args = ";".join(reversed(rows))
             self.push(f"{{{args}}}")
 
-    def boolean(self, *args) -> None:
+    def boolean(self, *args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Push the formula text for a Boolean value onto the stack."""
         node = args[2]
         if node.HasField("AST_token_node_boolean"):
@@ -73,34 +85,34 @@ class Formula(list):
         else:
             self.push(str(node.AST_boolean_node_boolean).upper())
 
-    def concat(self, *args) -> None:
+    def concat(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Join the top two formula values with the concatenation operator."""
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}&{arg2}")
 
-    def date(self, *args) -> None:
+    def date(self, *args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         # Date literals exported as DATE()
         """Format a Numbers date literal as a DATE() formula."""
         node = args[2]
         dt = datetime(2001, 1, 1) + timedelta(seconds=node.AST_date_node_dateNum)  # noqa: DTZ001
         self.push(f"DATE({dt.year},{dt.month},{dt.day})")
 
-    def div(self, *args) -> None:
+    def div(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Combine the top two formula values with the division operator."""
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}÷{arg2}")
 
-    def empty(self, *args) -> None:
+    def empty(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Push an empty formula value onto the stack."""
         self.push("")
 
-    def equals(self, *args) -> None:
+    def equals(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         # Arguments appear to be reversed
         """Compare the top two formula values for equality."""
         arg1, arg2 = self.popn(2)
         self.push(f"{arg2}={arg1}")
 
-    def function(self, *args) -> None:
+    def function(self, *args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Format a function node and its arguments as formula text."""
         node = args[2]
         num_args = node.AST_function_node_numArgs
@@ -129,49 +141,55 @@ class Formula(list):
         args = ",".join(reversed([str(x) for x in args]))
         self.push(f"{func_name}({args})")
 
-    def greater_than(self, *args) -> None:
+    def greater_than(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Compare the top two formula values with the greater-than operator."""
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}>{arg2}")
 
-    def greater_than_or_equal(self, *args) -> None:
+    def greater_than_or_equal(
+        self,
+        *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive,
+    ) -> None:
         """Compare the top two formula values with the greater-than-or-equal operator."""
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}≥{arg2}")
 
-    def less_than(self, *args) -> None:
+    def less_than(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Compare the top two formula values with the less-than operator."""
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}<{arg2}")
 
-    def less_than_or_equal(self, *args) -> None:
+    def less_than_or_equal(
+        self,
+        *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive,
+    ) -> None:
         """Compare the top two formula values with the less-than-or-equal operator."""
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}≤{arg2}")
 
-    def list(self, *args) -> None:
+    def list(self, *args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Format a list node and its values as formula text."""
         node = args[2]
         args = self.popn(node.AST_list_node_numArgs)
         args = ",".join(reversed([str(x) for x in args]))
         self.push(f"({args})")
 
-    def mul(self, *args) -> None:
+    def mul(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Combine the top two formula values with the multiplication operator."""
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}×{arg2}")
 
-    def negate(self, *args) -> None:
+    def negate(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Negate the top formula value."""
         arg1 = self.pop()
         self.push(f"-{arg1}")
 
-    def not_equals(self, *args) -> None:
+    def not_equals(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Compare the top two formula values for inequality."""
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}≠{arg2}")
 
-    def number(self, *args) -> None:
+    def number(self, *args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Format a numeric literal as formula text."""
         node = args[2]
         if node.AST_number_node_decimal_high == 0x3040000000000000:
@@ -180,17 +198,17 @@ class Formula(list):
         else:
             self.push(number_to_str(node.AST_number_node_number))
 
-    def percent(self, *args) -> None:
+    def percent(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Append the percent operator to the top formula value."""
         arg1 = self.pop()
         self.push(f"{arg1}%")
 
-    def power(self, *args) -> None:
+    def power(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Combine the top two formula values with the exponentiation operator."""
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}^{arg2}")
 
-    def range(self, *args) -> None:
+    def range(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Format two cell references as a cell range."""
         arg2, arg1 = [str(x) for x in self.popn(2)]
         func_range = "(" in arg1 or "(" in arg2
@@ -202,7 +220,7 @@ class Formula(list):
         else:
             self.push(f"{arg1}:{arg2}")
 
-    def string(self, *args) -> None:
+    def string(self, *args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Format a string literal, escaping embedded quotation marks."""
         node = args[2]
         # Numbers does not escape quotes in the AST; in the app, they are
@@ -210,12 +228,12 @@ class Formula(list):
         value = node.AST_string_node_string.replace('"', '""')
         self.push(f'"{value}"')
 
-    def sub(self, *args) -> None:
+    def sub(self, *_args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Combine the top two formula values with the subtraction operator."""
         arg2, arg1 = self.popn(2)
         self.push(f"{arg1}-{arg2}")
 
-    def xref(self, *args) -> None:
+    def xref(self, *args: int | TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive) -> None:
         """Push the cell reference for a formula node onto the stack."""
         (row, col, node) = args
         self.push(self._model.node_to_ref(self._table_id, row, col, node))
@@ -261,7 +279,7 @@ NODE_FUNCTION_MAP = {
 class TableFormulas:
     """Convert table formula records into readable formulas."""
 
-    def __init__(self, model, table_id) -> None:
+    def __init__(self, model: _NumbersModel, table_id: int) -> None:
         """Initialize the instance state."""
         self._model = model
         self._table_id = table_id
@@ -270,7 +288,7 @@ class TableFormulas:
             for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()
         }
 
-    def formula(self, formula_key, row, col):
+    def formula(self, formula_key: int, row: int, col: int) -> str:
         """Return the formula text for a cell in the table."""
         all_formulas = self._model.formula_ast(self._table_id)
         if formula_key not in all_formulas:

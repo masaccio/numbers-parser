@@ -25,13 +25,13 @@ SKIPPED_FILES = {"genindex.html", "py-modindex.html", "search.html"}
 class LinkParser(HTMLParser):
     """Collect links and fragment identifiers from an HTML page."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the instance state."""
         super().__init__()
-        self.links = []
-        self.anchors = set()
+        self.links: list[str] = []
+        self.anchors: set[str] = set()
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         """Collect links, resources, and anchors from an HTML start tag."""
         attrs = dict(attrs)
         for name in ("id", "name"):
@@ -43,14 +43,14 @@ class LinkParser(HTMLParser):
             self.links.append(attrs["src"])
 
 
-def parse(path):
+def parse(path: Path) -> LinkParser:
     """Parse the value."""
     parser = LinkParser()
     parser.feed(path.read_text(encoding="utf-8", errors="replace"))
     return parser
 
 
-def check_external(url, timeout):
+def check_external(url: str, timeout: float) -> str | None:
     """Return an error string, or None if the URL resolves."""
     for method in ("HEAD", "GET"):
         request = urllib.request.Request(  # noqa: S310
@@ -68,7 +68,7 @@ def check_external(url, timeout):
     return "unresolved"  # pragma: no cover
 
 
-def main():
+def main() -> int:
     """Run the command-line operation."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("build_dir", nargs="?", default="docs/build", type=Path)
@@ -89,7 +89,7 @@ def main():
     errors = []
     external = {}  # url -> [source files]
 
-    def anchors_for(path):
+    def anchors_for(path: Path) -> set[str]:
         """Return the fragment identifiers defined in an HTML page."""
         if path not in parsed:
             parsed[path] = parse(path)

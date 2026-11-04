@@ -34,6 +34,7 @@ import traceback
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import BinaryIO, TextIO
 
 import numbers_parser
 from numbers_parser import *  # noqa: F403
@@ -101,11 +102,16 @@ def find_examples() -> list[Example]:
     return examples
 
 
-def make_document_shim(tmpdir: Path):
+def make_document_shim(tmpdir: Path) -> type[RealDocument]:
     """Create document shim."""
     original_save = RealDocument.save
 
-    def save(self, filename, *args, **kwargs):
+    def save(
+        self: RealDocument,
+        filename: str | Path,
+        *args: object,
+        **kwargs: object,
+    ) -> None:
         """Save the value."""
         return original_save(self, tmpdir / Path(str(filename)).name, *args, **kwargs)
 
@@ -113,7 +119,12 @@ def make_document_shim(tmpdir: Path):
 
     original_init = RealDocument.__init__
 
-    def init(self, filename=None, *args, **kwargs):
+    def init(
+        self: RealDocument,
+        filename: str | Path | None = None,
+        *args: object,
+        **kwargs: object,
+    ) -> None:
         """Redirect document construction to the example fixture."""
         original_init(self, None if filename is None else DATA_FILE, *args, **kwargs)
 
@@ -121,7 +132,11 @@ def make_document_shim(tmpdir: Path):
     return RealDocument
 
 
-def open_from_data(file, *args, **kwargs):
+def open_from_data(
+    file: str | os.PathLike[str] | int,
+    *args: object,
+    **kwargs: object,
+) -> TextIO | BinaryIO:
     """open() replacement that resolves relative filenames in tests/data."""
     if isinstance(file, (str, os.PathLike)) and not Path(file).is_absolute():
         file = DATA_DIR / file
@@ -146,9 +161,9 @@ def source_of(example: Example) -> str:
     return "\n".join(e.source for e in parser.get_examples(example.text))
 
 
-def build_namespace(example: Example, document_cls) -> dict:
+def build_namespace(example: Example, document_cls: type[RealDocument]) -> dict[str, object]:
     """Build namespace."""
-    ns = {name: getattr(numbers_parser, name) for name in dir(numbers_parser)}
+    ns: dict[str, object] = {name: getattr(numbers_parser, name) for name in dir(numbers_parser)}
     ns.update(
         {"Document": document_cls, "open": open_from_data, "pprint": pprint, "datetime": datetime},
     )
@@ -173,7 +188,7 @@ def build_namespace(example: Example, document_cls) -> dict:
 class AddressChecker(doctest.OutputChecker):
     """Compare doctest output while ignoring memory addresses."""
 
-    def check_output(self, want, got, optionflags):
+    def check_output(self, want: str, got: str, optionflags: int) -> bool:
         """Check output."""
         return super().check_output(
             ADDRESS_RE.sub("0xADDR", want), ADDRESS_RE.sub("0xADDR", got), optionflags,
