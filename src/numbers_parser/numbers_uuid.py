@@ -1,3 +1,4 @@
+"""Numbers uuid module helpers."""
 from uuid import UUID, uuid1
 
 from numbers_parser.exceptions import UnsupportedError
@@ -5,7 +6,10 @@ from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 
 
 class NumbersUUID(UUID):
+    """Convert UUIDs between archive representations."""
+
     def __init__(self, uuid=None) -> None:
+        """Initialize the instance state."""
         if uuid is None:
             super().__init__(int=uuid1().int)
         elif isinstance(uuid, int):
@@ -41,12 +45,14 @@ class NumbersUUID(UUID):
 
     @property
     def dict2(self) -> dict:
+        """Create a UUID from the two-part dictionary representation."""
         upper = self.int >> 64
         lower = self.int & 0xFFFFFFFFFFFFFFFF
         return {"upper": upper, "lower": lower}
 
     @property
     def dict4(self) -> object:
+        """Create a UUID from the four-part dictionary representation."""
         uuid_w3 = self.int >> 96
         uuid_w2 = (self.int >> 64) & 0xFFFFFFFF
         uuid_w1 = (self.int >> 32) & 0xFFFFFFFF
@@ -60,12 +66,14 @@ class NumbersUUID(UUID):
 
     @property
     def protobuf2(self) -> object:
+        """Create the two-part protobuf representation of the UUID."""
         upper = self.int >> 64
         lower = self.int & 0xFFFFFFFFFFFFFFFF
         return TSPMessages.UUID(upper=upper, lower=lower)
 
     @property
     def protobuf4(self) -> object:
+        """Create the four-part protobuf representation of the UUID."""
         uuid_w3 = self.int >> 96
         uuid_w2 = (self.int >> 64) & 0xFFFFFFFF
         uuid_w1 = (self.int >> 32) & 0xFFFFFFFF

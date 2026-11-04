@@ -1,3 +1,4 @@
+"""Generate Numbers documents covering formatting corner cases."""
 # pragma: noqa: DTZ001
 
 from datetime import datetime
@@ -81,6 +82,7 @@ def _populate_stress_sheet(
 # 1. "fraction"
 # ---------------------------------------------------------------------------
 def add_fraction_stress_tests(doc: Document) -> None:
+    """Add fraction stress tests."""
     test_cases = [
         ("Zero", 0.0),
         ("Tiny positive (rounds to 0)", 1e-9),
@@ -135,6 +137,7 @@ def add_fraction_stress_tests(doc: Document) -> None:
 # 2. "base"
 # ---------------------------------------------------------------------------
 def add_base_stress_tests(doc: Document) -> None:
+    """Add base stress tests."""
     test_cases = [
         ("Zero", 0),
         ("One", 1),
@@ -165,6 +168,7 @@ def add_base_stress_tests(doc: Document) -> None:
 # 3. "currency"
 # ---------------------------------------------------------------------------
 def add_currency_stress_tests(doc: Document) -> None:
+    """Add currency stress tests."""
     test_cases = [
         ("Zero", 0.0),
         ("Sub-cent positive (rounds to 0.00)", 0.004),
@@ -228,6 +232,7 @@ def add_currency_stress_tests(doc: Document) -> None:
 # 4. "datetime" (Using original ICU format strings + Python datetime reference formatting)
 # ---------------------------------------------------------------------------
 def add_datetime_stress_tests(doc: Document) -> None:
+    """Add datetime stress tests."""
     test_cases = [
         ("Unix epoch", datetime(1970, 1, 1, 0, 0, 0)),
         ("Apple Numbers 2001 epoch", datetime(2001, 1, 1, 0, 0, 0)),
@@ -244,6 +249,7 @@ def add_datetime_stress_tests(doc: Document) -> None:
     ]
 
     def datetime_ref_generator(subtest_name: str, dt: datetime) -> str:
+        """Format a datetime using the reference pattern for a stress case."""
         if subtest_name == "iso_date":
             return dt.strftime("%Y-%m-%d")
         if subtest_name == "uk_long_date":
@@ -271,6 +277,7 @@ def add_datetime_stress_tests(doc: Document) -> None:
 # 5. "number"
 # ---------------------------------------------------------------------------
 def add_number_stress_tests(doc: Document) -> None:
+    """Add number stress tests."""
     test_cases = [
         ("Zero", 0.0),
         ("Tiny negative rounding to 0", -0.0001),
@@ -302,6 +309,7 @@ def add_number_stress_tests(doc: Document) -> None:
 # 6. "percentage"
 # ---------------------------------------------------------------------------
 def add_percentage_stress_tests(doc: Document) -> None:
+    """Add percentage stress tests."""
     test_cases = [
         ("Zero", 0.0),
         ("Tiny negative (rounds to 0%)", -0.00001),
@@ -331,6 +339,7 @@ def add_percentage_stress_tests(doc: Document) -> None:
 # 7. "scientific"
 # ---------------------------------------------------------------------------
 def add_scientific_stress_tests(doc: Document) -> None:
+    """Add scientific stress tests."""
     test_cases = [
         ("Zero", 0.0),
         ("Unit (1.0)", 1.0),
@@ -354,6 +363,7 @@ def add_scientific_stress_tests(doc: Document) -> None:
 # 8. "tickbox"
 # ---------------------------------------------------------------------------
 def add_tickbox_stress_tests(doc: Document) -> None:
+    """Add tickbox stress tests."""
     test_cases = [
         ("False boolean", False),
         ("True boolean", True),
@@ -368,6 +378,7 @@ def add_tickbox_stress_tests(doc: Document) -> None:
 # 9. "rating"
 # ---------------------------------------------------------------------------
 def add_rating_stress_tests(doc: Document) -> None:
+    """Add rating stress tests."""
     test_cases = [
         ("Zero stars", 0),
         ("One star", 1),
@@ -384,6 +395,7 @@ def add_rating_stress_tests(doc: Document) -> None:
 # 10. "slider"
 # ---------------------------------------------------------------------------
 def add_slider_stress_tests(doc: Document) -> None:
+    """Add slider stress tests."""
     test_cases = [
         ("Minimum bound (0.0)", 0.0),
         ("Midpoint fraction (5.5)", 5.5),
@@ -460,6 +472,7 @@ def add_slider_stress_tests(doc: Document) -> None:
 # 11. "stepper"
 # ---------------------------------------------------------------------------
 def add_stepper_stress_tests(doc: Document) -> None:
+    """Add stepper stress tests."""
     test_cases = [
         ("Negative value (-10.0)", -10.0),
         ("Zero (0.0)", 0.0),
@@ -537,6 +550,7 @@ def add_stepper_stress_tests(doc: Document) -> None:
 # 12. "popup"
 # ---------------------------------------------------------------------------
 def add_popup_stress_tests(doc: Document) -> None:
+    """Add popup stress tests."""
     test_cases = [
         ("First item", "Alpha"),
         ("Middle item", "Beta"),
@@ -554,6 +568,7 @@ def add_popup_stress_tests(doc: Document) -> None:
 # 13. "custom"
 # ---------------------------------------------------------------------------
 def add_custom_stress_tests(doc: Document) -> None:
+    """Add custom stress tests."""
     num_pad_zeros = doc.add_custom_format(
         name="NumPadZeros",
         type="number",
@@ -598,6 +613,7 @@ def add_custom_stress_tests(doc: Document) -> None:
     ]
 
     def custom_dt_ref(subtest_name: str, dt: datetime) -> str:
+        """Format a datetime using the custom ISO reference format."""
         return dt.strftime("%Y/%m/%d %H:%M")
 
     _populate_stress_sheet(
@@ -618,6 +634,7 @@ def add_custom_stress_tests(doc: Document) -> None:
     ]
 
     def custom_txt_ref(subtest_name: str, val: str) -> str:
+        """Wrap a text value using the custom-format reference pattern."""
         return f"Prefix [{val}] Suffix"
 
     _populate_stress_sheet(
@@ -648,6 +665,7 @@ ALL_STRESS_GENERATORS = [
 def build_all_formatting_stress_doc(
     filename: str = "tests/data/standard-format-stress.numbers",
 ) -> None:
+    """Build all formatting stress doc."""
     doc = Document()
     for generator_fn in ALL_STRESS_GENERATORS:
         generator_fn(doc)

@@ -1,3 +1,4 @@
+"""Extract formula function names and identifiers from framework binaries."""
 import re
 import sys
 from subprocess import PIPE, Popen

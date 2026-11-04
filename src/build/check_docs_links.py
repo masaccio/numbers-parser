@@ -23,12 +23,16 @@ SKIPPED_FILES = {"genindex.html", "py-modindex.html", "search.html"}
 
 
 class LinkParser(HTMLParser):
+    """Collect links and fragment identifiers from an HTML page."""
+
     def __init__(self):
+        """Initialize the instance state."""
         super().__init__()
         self.links = []
         self.anchors = set()
 
     def handle_starttag(self, tag, attrs):
+        """Collect links, resources, and anchors from an HTML start tag."""
         attrs = dict(attrs)
         for name in ("id", "name"):
             if attrs.get(name):
@@ -40,6 +44,7 @@ class LinkParser(HTMLParser):
 
 
 def parse(path):
+    """Parse the value."""
     parser = LinkParser()
     parser.feed(path.read_text(encoding="utf-8", errors="replace"))
     return parser
@@ -64,6 +69,7 @@ def check_external(url, timeout):
 
 
 def main():
+    """Run the command-line operation."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("build_dir", nargs="?", default="docs/build", type=Path)
     ap.add_argument("--timeout", type=float, default=15.0)
@@ -84,6 +90,7 @@ def main():
     external = {}  # url -> [source files]
 
     def anchors_for(path):
+        """Return the fragment identifiers defined in an HTML page."""
         if path not in parsed:
             parsed[path] = parse(path)
         return parsed[path].anchors

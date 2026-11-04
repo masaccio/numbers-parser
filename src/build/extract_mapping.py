@@ -66,7 +66,7 @@ try:
         if stop_reason == lldb.eStopReasonException:
             print_stacktrace(thread)
             function = frame.GetFunction()
-            function_or_symbol = function if function else frame.GetSymbol()
+            function_or_symbol = function or frame.GetSymbol()
             msg = f"Exception at {frame.name}"
             raise ValueError(msg)
         if stop_reason != lldb.eStopReasonBreakpoint:

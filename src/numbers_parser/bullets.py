@@ -1,3 +1,4 @@
+"""Bullets module helpers."""
 from numbers_parser.generated.TSWPArchives_pb2 import ListStyleArchive
 from numbers_parser.roman import to_roman
 

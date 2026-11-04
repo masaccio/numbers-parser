@@ -1,3 +1,4 @@
+"""Generate the bundled font map using macOS font metadata."""
 import sys
 
 import Cocoa

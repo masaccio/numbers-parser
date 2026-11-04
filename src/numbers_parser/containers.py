@@ -1,3 +1,4 @@
+"""Containers module helpers."""
 import math
 import re
 from pathlib import Path
@@ -11,17 +12,25 @@ _T = TypeVar("_T")
 
 
 class ItemsList(Generic[_T]):
+    """Provide indexed and named access to model-backed items."""
+
     def __init__(self, model: object, refs: list[int], item_class: type[_T]) -> None:
+        """Initialize the instance state."""
         self._item_name = item_class.__name__.lower()
         self._items = [item_class(model, x) for x in refs]
 
     @overload
-    def __getitem__(self, key: int) -> _T: ...  # pragma: no cover
+    def __getitem__(self, key: int) -> _T:
+        """Return an item by its numeric index."""
+        # pragma: no cover
 
     @overload
-    def __getitem__(self, key: str) -> _T: ...  # pragma: no cover
+    def __getitem__(self, key: str) -> _T:
+        """Return an item by its name."""
+        # pragma: no cover
 
     def __getitem__(self, key: int | str) -> _T:
+        """Return the item at the requested key or index."""
         if isinstance(key, int):
             if key < 0:
                 key += len(self._items)
@@ -40,17 +49,23 @@ class ItemsList(Generic[_T]):
         raise LookupError(msg)
 
     def __len__(self) -> int:
+        """Return the number of contained items."""
         return len(self._items)
 
     def __contains__(self, key: str) -> bool:
+        """Return whether the value is present."""
         return key.lower() in [x.name.lower() for x in self._items]
 
     def append(self, item: _T) -> None:
+        """Append the value."""
         self._items.append(item)
 
 
 class ObjectStore(IWorkHandler):
+    """Store and retrieve archive objects and their IWA files."""
+
     def __init__(self, filepath: Path, password: str | None) -> None:
+        """Initialize the instance state."""
         self._objects = {}
         self._file_store = {}
         self._object_to_filename_map = {}
@@ -62,13 +77,16 @@ class ObjectStore(IWorkHandler):
         self._max_id = math.ceil(self._max_id / 1000000) * 1000000
 
     def save(self, filepath: Path, package: bool, password: str | None, hint: str) -> None:
+        """Save the value."""
         self._iwork.save(filepath, self._file_store, package, password, hint)
 
     def store_object(self, filename: str, identifier: int, archive: object) -> None:
+        """Store object."""
         self._objects[identifier] = archive
         self._object_to_filename_map[identifier] = filename
 
     def store_file(self, filename: str, blob: bytes) -> None:
+        """Store file."""
         self._file_store[filename] = blob
 
     def allowed_format(self, extension: str) -> bool:
@@ -158,17 +176,22 @@ class ObjectStore(IWorkHandler):
 
     @property
     def file_store(self):
+        """Return or update the IWA files associated with the object store."""
         return self._file_store
 
     def __getitem__(self, key: int):
+        """Return the item at the requested key or index."""
         return self._objects[key]
 
     def __contains__(self, key: int) -> bool:
+        """Return whether the value is present."""
         return key in self._objects
 
     def __len__(self) -> int:
+        """Return the number of contained items."""
         return len(self._objects)
 
     # Don't cache: new tables and sheets can be added at runtime
     def find_refs(self, ref_name) -> list:
+        """Find refs."""
         return [k for k, v in self._objects.items() if type(v).__name__ == ref_name]

@@ -1,3 +1,4 @@
+"""Parse and resolve cell references and named ranges."""
 from __future__ import annotations
 
 import re
@@ -38,6 +39,8 @@ class RefScope(IntEnum):
 
 @dataclass
 class ScopedNameRef:
+    """Represent a named reference and the scope where it is unique."""
+
     name: str
     offset: int = None
     axis: TableAxis = None
@@ -46,6 +49,8 @@ class ScopedNameRef:
 
 
 class CellRangeType(IntEnum):
+    """Enumerate supported cell-reference range forms."""
+
     ROW_RANGE = 1
     COL_RANGE = 2
     RANGE = 3
@@ -56,6 +61,8 @@ class CellRangeType(IntEnum):
 
 @dataclass
 class CellRange:
+    """Parse and format a cell or named-reference range."""
+
     model: object = None
     row_start: int | str = None
     row_end: int = None
@@ -73,6 +80,7 @@ class CellRange:
     _table_names: list[str] = field(init=False, default=None, repr=False)
 
     def __post_init__(self):
+        """Validate and initialize the instance state."""
         if (self.row_start is not None and self.row_start < 0) or (
             self.col_start is not None and self.col_start < 0
         ):
@@ -83,6 +91,7 @@ class CellRange:
             self._set_sheet_ids()
 
     def _initialize_table_data(self):
+        """Initialize table data."""
         self._table_names = self.model.table_names()
         self.table_name_unique = {
             name: self._table_names.count(name) == 1 for name in self._table_names
@@ -96,6 +105,7 @@ class CellRange:
         self.to_sheet_id = self.model.table_id_to_sheet_id(self.to_table_id)
 
     def expand_ref(self, ref: str, is_abs: bool = False, no_prefix=False) -> str:
+        """Expand ref."""
         if self._ref_error:
             return "#REF!"
 
@@ -134,6 +144,7 @@ class CellRange:
         return f"{sheet_name}::{table_name}::{ref_str}"
 
     def __str__(self):
+        """Return the string representation."""
         if self._ref_error:
             return "#REF!"
 
@@ -256,7 +267,10 @@ class CellRange:
 
 
 class ScopedNameRefCache:
+    """Cache named row, column, and table references."""
+
     def __init__(self, model):
+        """Initialize the instance state."""
         self.model = model
         self.doc_name_refs = {}
         self.sheet_name_refs = {}
@@ -267,22 +281,27 @@ class ScopedNameRefCache:
         self.table_names = []
 
     def mark_dirty(self):
+        """Mark dirty."""
         self._dirty_cache = True
 
     def refresh(self):
+        """Refresh the value."""
         if self._dirty_cache:
             self.calculate_named_ranges()
             self._dirty_cache = False
 
     @staticmethod
     def _exact_count(pool: list, value: int | str | bool):
+        """Return the number of exact references to a name."""
         return sum(1 for x in pool if type(x) is type(value) and x == value)
 
     def _row_data(self, table_id: int, row: int) -> int | str | bool | None:
+        """Collect row reference names and their scopes."""
         num_header_cols = self.model.num_header_cols(table_id)
         return self.model._table_data[table_id][row][num_header_cols - 1].formatted_value
 
     def _column_data(self, table_id: int, col: int) -> int | str | bool | None:
+        """Collect column reference names and their scopes."""
         num_header_rows = self.model.num_header_rows(table_id)
         return self.model._table_data[table_id][num_header_rows - 1][col].formatted_value
 
@@ -292,6 +311,7 @@ class ScopedNameRefCache:
         table_id: int,
         axis: TableAxis,
     ) -> dict[int, str | None]:
+        """Calculate name scopes."""
         num_header_rows = self.model.num_header_rows(table_id)
         num_header_cols = self.model.num_header_cols(table_id)
 
@@ -371,6 +391,7 @@ class ScopedNameRefCache:
                 self.table_name_refs[table_id][name] = scopes[idx]
 
     def _calculate_table_name_maps(self) -> dict[str, int]:
+        """Calculate table name maps."""
         self.sheet_name_to_id = {self.model.sheet_name(sid): sid for sid in self.model.sheet_ids()}
         self.sheet_id_to_name = {sid: self.model.sheet_name(sid) for sid in self.model.sheet_ids()}
         self.unique_table_name_to_id = {

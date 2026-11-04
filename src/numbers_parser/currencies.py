@@ -1,3 +1,4 @@
+"""Currencies module helpers."""
 CURRENCIES = [
     "ADP",
     "AED",
