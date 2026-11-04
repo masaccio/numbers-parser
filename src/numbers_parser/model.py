@@ -880,7 +880,7 @@ class _NumbersModel(_Cacheable):
     def calculate_merges_using_formula_stores(self, table_id: int) -> int:
         """Calculate merges using formula stores."""
 
-        def range_end(archive: object) -> int:
+        def get_range_end(archive: object) -> int:
             # range_end is optional
             """Return the end coordinate of a range, or its start if unset."""
             return archive.range_end if archive.HasField("range_end") else archive.range_begin
@@ -900,9 +900,9 @@ class _NumbersModel(_Cacheable):
             self.add_merge_range(
                 table_id,
                 node.AST_colon_tract.absolute_row[0].range_begin,
-                range_end(node.AST_colon_tract.absolute_row[0]),
+                get_range_end(node.AST_colon_tract.absolute_row[0]),
                 node.AST_colon_tract.absolute_column[0].range_begin,
-                range_end(node.AST_colon_tract.absolute_column[0]),
+                get_range_end(node.AST_colon_tract.absolute_column[0]),
             )
         debug("table=%s: %d formula store merges found", self.table_name(table_id), merge_count)
         return merge_count
@@ -1169,7 +1169,7 @@ class _NumbersModel(_Cacheable):
         clear_field_container(buckets.headers)
 
         for row, cells in enumerate(data):
-            num_cols = len(data) - sum([isinstance(x, MergedCell) for x in cells])
+            num_cols = len(data) - sum(isinstance(x, MergedCell) for x in cells)
             height = current_row_heights[row]
             header = TSTArchives.HeaderStorageBucket.Header(
                 index=row,
@@ -1192,7 +1192,7 @@ class _NumbersModel(_Cacheable):
         col_data = [list(x) for x in zip(*data, strict=False)]
 
         for col, cells in enumerate(col_data):
-            num_rows = len(cells) - sum([isinstance(x, MergedCell) for x in cells])
+            num_rows = len(cells) - sum(isinstance(x, MergedCell) for x in cells)
             width = current_column_widths[col]
             header = TSTArchives.HeaderStorageBucket.Header(
                 index=col,
@@ -1215,8 +1215,8 @@ class _NumbersModel(_Cacheable):
         merge_cells = self.merge_cells(table_id)
         for row_col in merge_cells.merge_cells():
             size = merge_cells.size(row_col)
-            cell_id = TSTArchives.CellID(packedData=(row_col[1] << 16 | row_col[0]))
-            table_size = TSTArchives.TableSize(packedData=(size[1] << 16 | size[0]))
+            cell_id = TSTArchives.CellID(packedData=row_col[1] << 16 | row_col[0])
+            table_size = TSTArchives.TableSize(packedData=size[1] << 16 | size[0])
             cell_range = TSTArchives.CellRange(origin=cell_id, size=table_size)
             merge_map.cell_range.append(cell_range)
 
@@ -1680,7 +1680,7 @@ class _NumbersModel(_Cacheable):
         formula_owner_uuid = NumbersUUID()
         calc_engine = self.calc_engine()
         owner_id_map = calc_engine.dependency_tracker.owner_id_map.map_entry
-        next_owner_id = max([x.internal_owner_id for x in owner_id_map]) + 1
+        next_owner_id = max(x.internal_owner_id for x in owner_id_map) + 1
         volatile_dependencies = {
             "volatile_time_cells": {},
             "volatile_random_cells": {},
@@ -2145,8 +2145,10 @@ class _NumbersModel(_Cacheable):
         """Return the formula collection for a table."""
         return TableFormulas(self, table_id)
 
-    @cache(num_args=2)  # noqa: RET503
-    def table_rich_text(self, table_id: int, string_key: int) -> dict:  # noqa: C901
+    @cache(num_args=2)
+    def table_rich_text(  # noqa: C901
+        self, table_id: int, string_key: int,
+    ) -> dict | None:
         """Extract bullets and hyperlinks from a rich text data cell."""
         bds = self.objects[table_id].base_data_store
         rich_text_table = self.objects[bds.rich_text_table.identifier]
@@ -2175,6 +2177,7 @@ class _NumbersModel(_Cacheable):
                 payload_entries = payload_storage.table_para_style.entries
                 table_list_styles = payload_storage.table_list_style.entries
                 offsets = [e.character_index for e in payload_entries]
+                table_list_style = None
                 for i, offset in enumerate(offsets):
                     if i == len(offsets) - 1:
                         bullets.append(cell_text[offset:])
@@ -2186,14 +2189,17 @@ class _NumbersModel(_Cacheable):
                     if i < len(table_list_styles):
                         table_list_style = table_list_styles[i]
 
-                    bullet_style = self.objects[table_list_style.object.identifier]
-                    if len(bullet_style.strings) > 0:
-                        bullet_char = bullet_style.strings[0]
-                    elif len(bullet_style.number_types) > 0:
-                        number_type = bullet_style.number_types[0]
-                        bullet_char = formatted_number(number_type, i)
-                    else:
+                    if table_list_style is None:
                         bullet_char = None
+                    else:
+                        bullet_style = self.objects[table_list_style.object.identifier]
+                        if len(bullet_style.strings) > 0:
+                            bullet_char = bullet_style.strings[0]
+                        elif len(bullet_style.number_types) > 0:
+                            number_type = bullet_style.number_types[0]
+                            bullet_char = formatted_number(number_type, i)
+                        else:
+                            bullet_char = None
 
                     bullet_chars.append(bullet_char)
 
@@ -2204,6 +2210,7 @@ class _NumbersModel(_Cacheable):
                     "bullet_chars": bullet_chars,
                     "hyperlinks": hyperlinks,
                 }
+        return None
 
     def table_comments(self, table_id: int, key: int) -> list[Comment]:
         """Resolve a comment ID to a list of Comment objects."""
@@ -2615,11 +2622,11 @@ class _NumbersModel(_Cacheable):
                 "bottom",
             ),
         )
-        for _, table_id, row, col, side, border_value in sorted(  # noqa: PLR1704
+        for _, stroke_table_id, row, col, side, border_value in sorted(
             strokes,
             key=lambda value: value[0],
         ):
-            self.set_cell_border(table_id, row, col, side, border_value)
+            self.set_cell_border(stroke_table_id, row, col, side, border_value)
 
     def create_stroke(self, origin: int, length: int, border_value: Border) -> int:
         """Create stroke."""

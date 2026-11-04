@@ -483,10 +483,10 @@ def compare_pdfs_visually(
         print(f"Page count mismatch: {len(ref_doc)} vs {len(test_doc)}")
         return False
 
-    for page_num in range(len(ref_doc)):
+    for page_num, ref_page in enumerate(ref_doc):
         matrix = pymupdf.Matrix(2.0, 2.0)
 
-        ref_pix = ref_doc[page_num].get_pixmap(matrix=matrix, alpha=True)
+        ref_pix = ref_page.get_pixmap(matrix=matrix, alpha=True)
         test_pix = test_doc[page_num].get_pixmap(matrix=matrix, alpha=True)
 
         ref_img = Image.frombytes("RGBA", [ref_pix.width, ref_pix.height], ref_pix.samples)

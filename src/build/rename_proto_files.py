@@ -16,12 +16,13 @@ def rename_proto_files(_dir: str | os.PathLike[str]) -> None:
             os.rename(old_path, new_path)
 
     for proto_file in glob(os.path.join(_dir, "*.proto")):
-        original_contents = open(proto_file).read()
+        with open(proto_file, encoding="utf-8") as f:
+            original_contents = f.read()
         contents = original_contents
         for old, new in replacements.items():
             contents = contents.replace(f'import "{old}";', f'import "{new}";')
         if contents != original_contents:
-            with open(proto_file, "w") as f:
+            with open(proto_file, "w", encoding="utf-8") as f:
                 f.write(contents)
 
 

@@ -338,24 +338,21 @@ class IWork:
                 filepath.mkdir()
 
             # OSError possible exception; allow it to propagate up
-            zipf = ZipFile(filepath / "Index.zip", "w")
-            for blob_path, blob in file_store.items():
-                if isinstance(blob, IWAFile):
-                    zipf.writestr(blob_path, self._encode_blob(blob, crypto))
-                else:
-                    sub_filepath = filepath / blob_path
-                    if not sub_filepath.parent.is_dir():
-                        sub_filepath.parent.mkdir()
-                    with sub_filepath.open(mode="wb") as fh:
-                        fh.write(blob)
-            zipf.close()
+            with ZipFile(filepath / "Index.zip", "w") as zipf:
+                for blob_path, blob in file_store.items():
+                    if isinstance(blob, IWAFile):
+                        zipf.writestr(blob_path, self._encode_blob(blob, crypto))
+                    else:
+                        sub_filepath = filepath / blob_path
+                        if not sub_filepath.parent.is_dir():
+                            sub_filepath.parent.mkdir()
+                        with sub_filepath.open(mode="wb") as fh:
+                            fh.write(blob)
         else:
             # OSError possible exception; allow it to propagate up
-            zipf = ZipFile(filepath, "w")
-
-            for filepath_in_zip, blob in file_store.items():
-                zipf.writestr(filepath_in_zip, self._encode_blob(blob, crypto))
-            zipf.close()
+            with ZipFile(filepath, "w") as zipf:
+                for filepath_in_zip, blob in file_store.items():
+                    zipf.writestr(filepath_in_zip, self._encode_blob(blob, crypto))
 
     def _encode_blob(self, blob: bytes | IWAFile, crypto: IWorkCrypto | None) -> bytes:
         """Encode blob."""

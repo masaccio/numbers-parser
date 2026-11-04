@@ -32,7 +32,7 @@ def experimental_feature_choice(s: str) -> ExperimentalFeatures:
         return ExperimentalFeatures[s]
     except KeyError:
         msg = f"invalid experimental feature: {s}"
-        raise argparse.ArgumentTypeError(msg)  # noqa: B904
+        raise argparse.ArgumentTypeError(msg)  # noqa: B904  # pylint: disable=raise-missing-from
 
 
 def command_line_parser() -> argparse.ArgumentParser:
@@ -113,7 +113,7 @@ def print_table_names(filename: str, password: str | None) -> None:
 
 def cell_as_string(args: argparse.Namespace, cell: Cell) -> str:
     """Return the cell as string."""
-    if isinstance(cell, ErrorCell) and not (args.formulas):
+    if isinstance(cell, ErrorCell) and not args.formulas:
         return "#REF!"
     if args.formulas and cell.formula is not None:
         return cell.formula

@@ -139,10 +139,10 @@ class ObjectStore(IWorkHandler):
 
         This keeps the file store ready for saving to a new document.
         """
-        for obj_id in self._objects:
+        for obj_id, obj in self._objects.items():
             copy_object_to_iwa_file(
                 self._file_store[self._object_to_filename_map[obj_id]],
-                self._objects[obj_id],
+                obj,
                 obj_id,
             )
 

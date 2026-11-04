@@ -319,17 +319,18 @@ def match_descriptor(
 ) -> tuple[Descriptor | None, list[str]]:
     """Return (descriptor, errors) for the best-matching candidate of a top-level spec."""
     cands = [d for d in registry.values() if d.containing_type is None and d.name == spec.name]
-    best = None
+    best_desc: Descriptor | None = None
+    best_errs: list[str] = []
     for d in cands:
         errs: list[str] = []
         check_message(d, spec, errs)
         if not errs:
             return d, []
-        if best is None or len(errs) < len(best[1]):
-            best = (d, errs)
-    if best is None:
+        if best_desc is None or len(errs) < len(best_errs):
+            best_desc, best_errs = d, errs
+    if best_desc is None:
         return None, [f"no generated message named {spec.name!r}"]
-    return best
+    return best_desc, best_errs
 
 
 # --------------------------------------------------------------------------
@@ -403,7 +404,7 @@ def check_live(  # noqa: C901
 # --------------------------------------------------------------------------
 def main() -> int:  # noqa: C901
     """Run the command-line operation."""
-    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n", maxsplit=1)[0])
     ap.add_argument("--rst", type=Path, default=Path("docs/api/file-format.rst"))
     ap.add_argument("--doc", type=Path, default=Path("src/numbers_parser/data/empty.numbers"))
     ap.add_argument("-v", "--verbose", action="store_true")

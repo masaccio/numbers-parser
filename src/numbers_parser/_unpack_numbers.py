@@ -55,7 +55,7 @@ class NumbersUnpacker(IWorkHandler):
         if isinstance(blob, IWAFile):
             target_path = target_path.replace(".iwa", "")
             target_path += ".json"
-            with open(target_path, "w") as out:
+            with open(target_path, "w", encoding="utf-8") as out:
                 if self.redact_strings:
                     for chunk in blob.chunks:
                         for archive in chunk.archives:

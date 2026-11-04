@@ -86,6 +86,7 @@ class Converter:
 
         if self.reverse:
             self.data = list(reversed(self.data))
+        is_date_column = {}
         if self.date_columns is not None:
             date_columns = [self._column_key(col) for col in self.date_columns]
             is_date_column = {x: x in date_columns for x in self.header}
@@ -309,8 +310,7 @@ def parse_column_renames(arg: str) -> dict:
     except csv.Error as e:
         msg = f"'{arg}': malformed CSV string"
         raise argparse.ArgumentTypeError(msg) from e
-    else:
-        return mapper
+    return mapper
 
 
 def parse_column_transforms(arg: str) -> list[ColumnTransform]:
@@ -332,8 +332,7 @@ def parse_column_transforms(arg: str) -> list[ColumnTransform]:
     except csv.Error as e:
         msg = f"'{arg}': malformed CSV string"
         raise argparse.ArgumentTypeError(msg) from e
-    else:
-        return transforms
+    return transforms
 
 
 def command_line_parser() -> argparse.ArgumentParser:

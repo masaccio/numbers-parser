@@ -100,7 +100,7 @@ class IWACompressedChunk:  # noqa: PLW1641
 
             try:
                 yield snappy.uncompress(chunk)
-            except Exception:  # pragma: no cover  # noqa: BLE001
+            except Exception:  # pragma: no cover  # noqa: BLE001  # pylint: disable=broad-exception-caught
                 # Try to see if this data isn't compressed in the first place.
                 # If this data is still compressed, parsing it as Protobuf
                 # will almost definitely fail anyways.
@@ -162,7 +162,7 @@ class ProtobufPatch:  # noqa: PLW1641
         return message_to_dict(self.data)
 
     @classmethod
-    def FromString(  # noqa: N802
+    def FromString(  # noqa: N802  # pylint: disable=invalid-name
         cls,
         message_info: object,
         proto_klass: type[ProtoMessage],
@@ -175,7 +175,7 @@ class ProtobufPatch:  # noqa: PLW1641
         _ = message_info
         return cls(proto_klass.FromString(data))
 
-    def SerializeToString(self) -> bytes:  # noqa: N802
+    def SerializeToString(self) -> bytes:  # noqa: N802  # pylint: disable=invalid-name
         """Serialize the protobuf message to bytes."""
         return self.data.SerializePartialToString()
 
@@ -241,10 +241,8 @@ class IWAArchiveSegment:  # noqa: PLW1641
                 else:
                     output = klass(message_payload)
             except Exception as e:  # pragma: no cover  # noqa: BLE001
-                raise ValueError(
-                    "Failed to deserialize %s payload of length %d: %s"  # noqa: UP031
-                    % (klass, message_info.length, e),
-                ) from None
+                msg = f"Failed to deserialize {klass} payload of length {message_info.length}: {e}"
+                raise ValueError(msg) from None
             payloads.append(output)
             n += message_info.length
 
@@ -308,7 +306,7 @@ class IWAArchiveSegment:  # noqa: PLW1641
                         redact_message(value)
                 elif field.type == field.TYPE_STRING:
                     if field.is_repeated:
-                        for i in range(len(value)):
+                        for i, _ in enumerate(value):
                             str_index += 1
                             value[i] = f"REDACT-{str_index}"
                     else:

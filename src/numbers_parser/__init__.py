@@ -31,13 +31,13 @@ def _get_version() -> str:
 def _check_installed_numbers_version() -> str:
     """Check installed numbers version."""
     try:
-        fp = open(
+        with open(
             os.path.join(_DEFAULT_NUMBERS_INSTALL_PATH, _VERSION_PLIST_PATH),
             "rb",
-        )
+        ) as fp:
+            version_dict = plistlib.load(fp)
     except OSError:
         return None
-    version_dict = plistlib.load(fp)
     installed_version = version_dict["CFBundleShortVersionString"]
 
     installed_version = re.sub(r"(\d+)\.(\d+)\.\d+", r"\1.\2", installed_version)
@@ -46,7 +46,6 @@ def _check_installed_numbers_version() -> str:
             f"Numbers version {installed_version} not tested with this version",
             stacklevel=2,
         )
-    fp.close()
     return installed_version
 
 

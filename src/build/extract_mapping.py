@@ -20,7 +20,7 @@ from debug.lldbutil import print_stacktrace
 
 if len(sys.argv) != 3:
     msg = f"Usage: {sys.argv[0]} exe-file output.json"
-    raise (ValueError(msg))
+    raise ValueError(msg)
 
 exe = sys.argv[1]
 output = sys.argv[2]
@@ -97,7 +97,7 @@ try:
                 dict(sorted([(int(a), b.split(" ")[-1]) for a, b in split if "null" not in b])),
                 indent=2,
             )
-            with open(output, "w") as fh:
+            with open(output, "w", encoding="utf-8") as fh:
                 fh.write(json_str)
             break
         else:

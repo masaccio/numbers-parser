@@ -39,7 +39,6 @@ from pathlib import Path
 from typing import BinaryIO, TextIO
 
 import numbers_parser
-from numbers_parser import *  # noqa: F403
 from numbers_parser import Document as RealDocument
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -96,10 +95,10 @@ def extract_examples(path: Path) -> list[Example]:
 
 def find_examples() -> list[Example]:
     """Find examples."""
-    files = sorted(p for p in (ROOT / "src" / "numbers_parser").glob("*.py"))
-    files += sorted((ROOT / "docs").rglob("*.rst"))
+    doc_files = sorted(p for p in (ROOT / "src" / "numbers_parser").glob("*.py"))
+    doc_files += sorted((ROOT / "docs").rglob("*.rst"))
     examples = []
-    for f in files:
+    for f in doc_files:
         examples.extend(extract_examples(f))
     return examples
 
@@ -121,7 +120,7 @@ def make_document_shim(tmpdir: Path) -> type[RealDocument]:
 
     original_init = RealDocument.__init__
 
-    def init(
+    def init(  # pylint: disable=keyword-arg-before-vararg
         self: RealDocument,
         filename: str | Path | None = None,
         *args: object,
@@ -217,15 +216,15 @@ def run_code(example: Example, ns: dict) -> str | None:
     """Run code."""
     try:
         with contextlib.redirect_stdout(io.StringIO()):
-            exec(compile(example.text, example.where, "exec"), ns)  # noqa: S102
-    except BaseException:  # noqa: BLE001
+            exec(compile(example.text, example.where, "exec"), ns)  # noqa: S102  # pylint: disable=exec-used
+    except BaseException:  # noqa: BLE001  # pylint: disable=broad-exception-caught
         return traceback.format_exc(limit=-2)
     return None
 
 
 def main() -> int:
     """Run the command-line operation."""
-    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n", maxsplit=1)[0])
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
 

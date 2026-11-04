@@ -7,9 +7,11 @@ Example usage:
  python3 protodump.py /Applications/SomeAppBundle.app ./proto_files_go_here/
 
 (c) Peter Sobot (@psobot), March 13, 2022
-Inspired by Sean Patrick O'Brien (@obriensp)'s 2013 "proto-dump": https://github.com/obriensp/proto-dump
+Inspired by Sean Patrick O'Brien (@obriensp)'s 2013 "proto-dump":
+https://github.com/obriensp/proto-dump
 """
 
+import argparse
 import sys
 from collections import defaultdict
 from collections.abc import Collection, Iterator
@@ -204,7 +206,7 @@ class ProtoFile:
         """Add the descriptor to the pool, returning None when dependencies are missing."""
         try:
             return self.pool.Add(self.file_descriptor_proto)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             if "duplicate file name" in str(e):
                 return self.pool.FindFileByName(e.args[0].split("duplicate file name")[1].strip())
             return None
@@ -235,7 +237,7 @@ def read_until_null_tag(data: bytes) -> int:
     while position < len(data):
         try:
             tag, position = _DecodeVarint(data, position)
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             return position
 
         if tag == 0:
@@ -250,7 +252,7 @@ def read_until_null_tag(data: bytes) -> int:
             try:
                 length, position = _DecodeVarint(data, position)
                 position += length
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 return position
         elif wire_type == 5:
             position += 4
@@ -267,34 +269,34 @@ def extract_proto_from_file(
         data = f.read()
     offset = 0
 
-    PROTO_MARKER = b".proto"
+    proto_marker = b".proto"
 
     while True:
         # Look for ".proto"
-        suffix_position = data.find(PROTO_MARKER, offset)
+        suffix_position = data.find(proto_marker, offset)
         if suffix_position == -1:
             break
 
         marker_start = data.rfind(b"\x0a", offset, suffix_position)
         if marker_start == -1:
             # Doesn't look like a proto descriptor
-            offset = suffix_position + len(PROTO_MARKER)
+            offset = suffix_position + len(proto_marker)
             continue
 
         try:
             name_length, new_pos = _DecodeVarint(data, marker_start)
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             # Expected a VarInt here, so if not, continue
-            offset = suffix_position + len(PROTO_MARKER)
+            offset = suffix_position + len(proto_marker)
             continue
 
         # Length = marker (0x0A) + varint length + descriptor name length + 7 bytes.
         expected_length = 1 + (new_pos - marker_start) + name_length + 7
-        current_length = (suffix_position + len(PROTO_MARKER)) - marker_start
+        current_length = (suffix_position + len(proto_marker)) - marker_start
 
         # Huge margin of error here - my calculations above are probably just wrong.
         if current_length > expected_length + 30:
-            offset = suffix_position + len(PROTO_MARKER)
+            offset = suffix_position + len(proto_marker)
             continue
 
         # Split the data starting at the marker byte and try to read it as a
@@ -313,7 +315,7 @@ def extract_proto_from_file(
                 and proto_file.path != "google/protobuf/descriptor.proto"
             ):
                 yield proto_file
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             pass
 
         offset = marker_start + descriptor_length
@@ -339,8 +341,6 @@ def find_missing_dependencies(all_files: Collection[ProtoFile], source_file: str
 
 def main() -> None:
     """Run the command-line operation."""
-    import argparse
-
     parser = argparse.ArgumentParser(
         description=(
             "Read all files in a given directory and scan each file for protobuf definitions,"
@@ -351,7 +351,7 @@ def main() -> None:
     parser.add_argument("output_path", help="Output directory to dump .protoc files to.")
 
     args = parser.parse_args()
-    GLOBAL_DESCRIPTOR_POOL = DescriptorPool()
+    global_descriptor_pool = DescriptorPool()
 
     all_filenames = [str(path) for path in Path(args.input_path).rglob("*") if not path.is_dir()]
 
@@ -364,7 +364,7 @@ def main() -> None:
     for path in tqdm(all_filenames):
         for proto in extract_proto_from_file(
             path,
-            GLOBAL_DESCRIPTOR_POOL,
+            global_descriptor_pool,
         ):
             proto_files_found.add(proto)
 
@@ -388,7 +388,7 @@ def main() -> None:
     else:
         for proto_file in tqdm(proto_files_found):
             Path(args.output_path).mkdir(parents=True, exist_ok=True)
-            with open(Path(args.output_path) / proto_file.path, "w") as f:
+            with open(Path(args.output_path) / proto_file.path, "w", encoding="utf-8") as f:
                 source = proto_file.source
                 if source:
                     f.write(source)

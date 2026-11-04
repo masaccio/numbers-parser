@@ -34,13 +34,13 @@ class TableAxis(IntEnum):
 class RefScope(IntEnum):
     """The required scope for a name reference in a document."""
 
-    """Name is unique to the document."""
+    # Name is unique to the document.
     DOCUMENT = 1
-    """Name is unique to a sheet."""
+    # Name is unique to a sheet.
     SHEET = 2
-    """Name is unique to a table and that table is uniquely named."""
+    # Name is unique to a table and that table is uniquely named.
     TABLE = 3
-    """All other names."""
+    # All other names.
     NONE = 4
 
 
@@ -223,8 +223,8 @@ class CellRange:
                 self.expand_ref(
                     row_range[row_start],
                     self.row_start_is_abs,
-                    no_prefix=row_range[row_start].scope == RefScope.DOCUMENT
-                    or row_range[row_end].scope == RefScope.DOCUMENT,
+                    no_prefix=RefScope.DOCUMENT
+                    in (row_range[row_start].scope, row_range[row_end].scope),
                 ),
                 self.expand_ref(row_range[row_end], self.row_end_is_abs, no_prefix=True),
             ],
@@ -272,8 +272,8 @@ class CellRange:
                 self.expand_ref(
                     col_range[col_start],
                     self.col_start_is_abs,
-                    no_prefix=col_range[col_start].scope == RefScope.DOCUMENT
-                    or col_range[col_end].scope == RefScope.DOCUMENT,
+                    no_prefix=RefScope.DOCUMENT
+                    in (col_range[col_start].scope, col_range[col_end].scope),
                 ),
                 self.expand_ref(col_range[col_end], self.col_end_is_abs, no_prefix=True),
             ],

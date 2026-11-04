@@ -5,10 +5,10 @@ import Cocoa
 
 if len(sys.argv) != 2:
     msg = f"Usage: {sys.argv[0]} fontmap.py"
-    raise (ValueError(msg))
+    raise ValueError(msg)
 
 mapping_py = sys.argv[1]
-with open(mapping_py, "w") as fh:
+with open(mapping_py, "w", encoding="utf-8") as fh:
     print("GENERATED_FONT_MAP = {", file=fh)
 
     manager = Cocoa.NSFontManager.sharedFontManager()

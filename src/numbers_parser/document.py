@@ -1063,7 +1063,7 @@ class Table(_Cacheable):
         elif len(args) < 2:
             raise IndexError("invalid cell reference " + str(args))
         else:
-            (row, col) = args[0:2]
+            (row, col) = args[0:2]  # pylint: disable=unbalanced-tuple-unpacking
             values = args[2:]
 
         if row < 0:
@@ -1139,7 +1139,7 @@ class Table(_Cacheable):
 
         """
         # TODO: write needs to retain/init the border
-        (row, col, value) = self._validate_cell_coords(*args)
+        (row, col, value) = self._validate_cell_coords(*args)  # pylint: disable=unbalanced-tuple-unpacking
         self._data[row][col] = Cell._from_value(row, col, value)
         self._data[row][col]._update_value(value, self._data[row][col])
 
@@ -1172,7 +1172,7 @@ class Table(_Cacheable):
             If the style is neither a :class:`Style` nor a style name.
 
         """
-        (row, col, style) = self._validate_cell_coords(*args)
+        (row, col, style) = self._validate_cell_coords(*args)  # pylint: disable=unbalanced-tuple-unpacking
         if isinstance(style, Style):
             if style.name is None:
                 style.name = self._model.custom_style_name()
@@ -1640,10 +1640,10 @@ class Table(_Cacheable):
         """
         (row, col, *args) = self._validate_cell_coords(*args)
         if len(args) == 2:
-            (side, border_value) = args
+            (side, border_value) = args  # pylint: disable=unbalanced-tuple-unpacking
             length = 1
         elif len(args) == 3:
-            (side, border_value, length) = args
+            (side, border_value, length) = args  # pylint: disable=unbalanced-tuple-unpacking
         else:
             msg = "invalid number of arguments to border_value()"
             raise TypeError(msg)

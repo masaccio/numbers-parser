@@ -46,7 +46,7 @@ if framework.endswith(".s"):
     with open(framework, "rb") as fh:
         disassembly = fh.readlines()
 else:
-    objdump = Popen(  # noqa: S603
+    with Popen(  # noqa: S603, SIM117
         [  # noqa: S607
             "objdump",
             "--disassemble",
@@ -58,10 +58,10 @@ else:
             framework,
         ],
         stdout=PIPE,
-    )
-    cxxfilt = Popen(["c++filt"], stdin=objdump.stdout, stdout=PIPE)  # noqa: S607
-    objdump.stdout.close()
-    disassembly = str(cxxfilt.communicate()[0]).split("\\n")
+    ) as objdump:
+        with Popen(["c++filt"], stdin=objdump.stdout, stdout=PIPE) as cxxfilt:  # noqa: S607
+            objdump.stdout.close()
+            disassembly = str(cxxfilt.communicate()[0]).split("\\n")
 
 formula_creation_name = None
 formula_creation_name_to_id = {}
@@ -111,7 +111,7 @@ for func_id, func_name in function_refs.items():
     if func_id not in FUNCTION_MAP:
         print(f"*** {func_id} is new: function is '{func_name}'")
 
-with open(output_map, "w") as fh:
+with open(output_map, "w", encoding="utf-8") as fh:
     fh.write("FUNCTION_MAP = {\n")
     fh.writelines(
         f'    {func_id}: "{func_name}",\n' for func_id, func_name in function_refs.items()

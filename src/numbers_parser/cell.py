@@ -20,7 +20,6 @@ from warnings import warn
 from sigfig import round as sigfig
 from typing_extensions import Self
 
-from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser.constants import (
     CHECKBOX_FALSE_VALUE,
     CHECKBOX_TRUE_VALUE,
@@ -74,6 +73,7 @@ from numbers_parser.numbers_cache import _Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.xrefs import xl_range
 
+numbers_parser_name = __package__  # pylint: disable=invalid-name
 logger = logging.getLogger(numbers_parser_name)
 debug = logger.debug
 
@@ -218,7 +218,7 @@ class Alignment(_Alignment):
                 raise TypeError(msg)
             vertical = VERTICAL_MAP[vertical]
 
-        return super(_Alignment, cls).__new__(cls, (horizontal, vertical))
+        return tuple.__new__(cls, (horizontal, vertical))
 
     def __repr__(self) -> str:
         """Return a developer-friendly representation."""
@@ -678,8 +678,8 @@ class _CellStorageFlags:
 
     def __repr__(self) -> str:
         """Return a developer-friendly representation."""
-        fields = [f"{k[1:]}={v}" for k, v in asdict(self).items() if v is not None]
-        return ", ".join([x for x in fields if x if not None])
+        flag_fields = [f"{k[1:]}={v}" for k, v in asdict(self).items() if v is not None]
+        return ", ".join([x for x in flag_fields if x if not None])
 
     def flags(self) -> list[str]:
         """Return the set of cell-storage flags."""
@@ -1448,7 +1448,7 @@ class Cell(_CellStorageFlags, _Cacheable):
             unit_type: DurationUnits,
         ) -> bool:
             """Return whether a duration unit is within the requested range."""
-            return largest <= unit_type and smallest >= unit_type
+            return largest <= unit_type <= smallest
 
         def pad_digits(
             d: float,
@@ -1836,7 +1836,6 @@ def _decode_date_format(date_format: str, value: datetime) -> str:  # noqa: C901
     index = 0
     in_string = False
     result = ""
-    field = ""
     while index < len(chars):
         current_char = chars[index]
         next_char = chars[index + 1] if index < len(chars) - 1 else None
@@ -1859,14 +1858,14 @@ def _decode_date_format(date_format: str, value: datetime) -> str:  # noqa: C901
             remaining_str = date_format[index:]
             matched_field = None
 
-            for field in DATETIME_FIELD_MAP:
+            for date_field in DATETIME_FIELD_MAP:
                 # Greedily match the longest possible valid field
-                if remaining_str.startswith(field):
-                    matched_field = field
+                if remaining_str.startswith(date_field):
+                    matched_field = date_field
                     break
 
             if matched_field:
-                s = DATETIME_FIELD_MAP[field]
+                s = DATETIME_FIELD_MAP[matched_field]
                 if callable(s):
                     result += s(value)
                 else:

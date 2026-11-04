@@ -5,7 +5,7 @@ import sys
 
 if len(sys.argv) != 3:
     msg = f"Usage: {sys.argv[0]} mapping.json mapping.py"
-    raise (ValueError(msg))
+    raise ValueError(msg)
 
 mapping_json = sys.argv[1]
 mapping_py = sys.argv[2]
@@ -21,7 +21,7 @@ for filename in os.listdir("src/numbers_parser/generated"):
         module_import_output += f"from numbers_parser.generated import {module}_pb2 as {module}\n"
         module_files_output += f"    {module},\n"
 
-with open(mapping_json) as fh:
+with open(mapping_json, encoding="utf-8") as fh:
     mappings = json.load(fh)
 
 for index, symbol in sorted(mappings.items(), key=lambda x: int(x[0])):
@@ -67,5 +67,5 @@ def compute_maps():
 NAME_CLASS_MAP, ID_NAME_MAP, NAME_ID_MAP = compute_maps()
 """
 
-with open(mapping_py, "w") as fh:
+with open(mapping_py, "w", encoding="utf-8") as fh:
     fh.write(OUTPUT_CODE)
