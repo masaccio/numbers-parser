@@ -180,8 +180,11 @@ ban-relative-imports = "all"
 "docs/conf.py" = ["INP001"]
 "src/build/**" = ["PLR2004", "INP001", "PTH"]
 "src/build/protodump.py" = ["PLR2004", "INP001", "PTH", "S110", "N806"]
+"src/build/check_docs_protobufs.py" = ["SLF001"]
 "src/debug/**" = ["INP001"]
 "tests/**" = ["PLR2004", "S101", "D103", "ANN201", "ANN001", "DTZ001"]
+"tests/test_coverage.py" = ["SLF001"]
+
 
 [tool.pylint."messages control"]
 disable = [
