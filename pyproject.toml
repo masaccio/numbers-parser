@@ -109,6 +109,7 @@ show_contexts = false
 exclude_lines = [
     "pragma: no cover",
     "raise NotImplementedError",
+    "TYPE_CHECKING",
 ]
 
 [tool.pytest.ini_options]
