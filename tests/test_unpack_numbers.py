@@ -1,6 +1,8 @@
 import json
+import plistlib
 import runpy
 import sys
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -8,6 +10,8 @@ import magic
 import pytest
 
 from numbers_parser import __version__
+from numbers_parser._unpack_numbers import NumbersUnpacker
+from numbers_parser.exceptions import FileFormatError
 
 
 def test_version(script_runner):
@@ -290,3 +294,25 @@ def test_default_output_dir(script_runner, tmp_path):
     assert ret.stdout == ""
     assert ret.stderr == ""
     assert Path.exists(tmp_path / "test-1/Metadata/Properties.plist")
+
+
+def test_unpack_path_traversal_prevention(tmp_path):
+    evil_file = tmp_path / "evil.numbers"
+    with zipfile.ZipFile(evil_file, "w") as z:
+        z.writestr("Metadata/Properties.plist", plistlib.dumps({}))
+        z.writestr("Metadata/BuildVersionHistory.plist", plistlib.dumps([]))
+        z.writestr("../escape_target/PWNED", b"marker")
+
+    output_dir = tmp_path / "out"
+    output_dir.mkdir()
+    escape_target_dir = tmp_path / "escape_target"
+
+    unpacker = NumbersUnpacker(output_dir=str(output_dir))
+
+    with pytest.raises(FileFormatError, match="Path traversal attempt detected"):  # noqa: PT012, SIM117
+        with zipfile.ZipFile(evil_file, "r") as z:
+            for filename in z.namelist():
+                blob = z.read(filename)
+                unpacker.store_file(filename, blob)
+
+    assert not (escape_target_dir / "PWNED").exists()
