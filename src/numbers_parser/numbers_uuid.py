@@ -1,4 +1,5 @@
 """Numbers uuid module helpers."""
+
 from uuid import UUID, uuid1
 
 from numbers_parser.exceptions import UnsupportedError
@@ -94,7 +95,7 @@ class NumbersUUID(UUID):
         )
 
 
-def uuid_to_hex(archive: object) -> str:
+def uuid_to_hex(archive: TSPMessages.UUID) -> str:
     """Convert a protobuf UUID to a hex string."""
     uuid = NumbersUUID(archive)
     return uuid.hex
