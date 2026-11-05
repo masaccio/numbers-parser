@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from functools import wraps
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from typing_extensions import Self
 
@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 
 class _Cacheable:
     """Provide per-instance storage for cached method results."""
+
+    _cache: defaultdict[str, Any]
 
     def __new__(
         cls,
