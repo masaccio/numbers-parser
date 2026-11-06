@@ -322,24 +322,24 @@ class _NumbersModel(_Cacheable):
         ]
         return ids[0]
 
-    def number_of_rows(self, table_id: int, num_rows: int | None = None) -> int | None:
+    def number_of_rows(self, table_id: int, num_rows: int | None = None) -> int:
         """Return the table row count."""
         if num_rows is not None:
             self.objects[table_id].number_of_rows = num_rows
         return self.objects[table_id].number_of_rows
 
-    def number_of_columns(self, table_id: int, num_cols: int | None = None) -> int | None:
+    def number_of_columns(self, table_id: int, num_cols: int | None = None) -> int:
         """Return the table column count."""
         if num_cols is not None:
             self.objects[table_id].number_of_columns = num_cols
         return self.objects[table_id].number_of_columns
 
-    def table_name(self, table_id: int, value: str | None = None) -> str | None:
+    def table_name(self, table_id: int, value: str | None = None) -> str:
         """Return the name of a table."""
         if value is None:
             return self.objects[table_id].table_name
         self.objects[table_id].table_name = value
-        return None
+        return value
 
     def table_names(self) -> list[str]:
         """Return the names of all tables in the model."""
@@ -349,7 +349,7 @@ class _NumbersModel(_Cacheable):
             ),
         )
 
-    def table_name_enabled(self, table_id: int, enabled: bool | None = None) -> bool | None:
+    def table_name_enabled(self, table_id: int, enabled: bool | None = None) -> bool:
         """Return whether the table name is displayed."""
         if enabled is not None:
             self.objects[table_id].table_name_enabled = enabled
@@ -1073,7 +1073,7 @@ class _NumbersModel(_Cacheable):
             )
 
             return CellRange(
-                model=self,
+                _model=self,
                 row_start=None if row_begin == 0x7FFFFFFF else row_begin,  # noqa: PLR2004
                 row_end=None if row_end == 0x7FFFFFFF else row_end,  # noqa: PLR2004
                 col_start=None if col_begin == 0x7FFF else col_begin,  # noqa: PLR2004
@@ -1090,7 +1090,7 @@ class _NumbersModel(_Cacheable):
         col = node.AST_column.column if node.AST_column.absolute else col + node.AST_column.column
         if node.HasField("AST_row") and not node.HasField("AST_column"):
             return CellRange(
-                model=self,
+                _model=self,
                 row_start=row,
                 row_start_is_abs=node.AST_row.absolute,
                 from_table_id=table_id,
@@ -1099,7 +1099,7 @@ class _NumbersModel(_Cacheable):
 
         if node.HasField("AST_column") and not node.HasField("AST_row"):
             return CellRange(
-                model=self,
+                _model=self,
                 col_start=col,
                 col_start_is_abs=node.AST_column.absolute,
                 from_table_id=table_id,
@@ -1107,7 +1107,7 @@ class _NumbersModel(_Cacheable):
             )
 
         return CellRange(
-            model=self,
+            _model=self,
             row_start=row,
             col_start=col,
             row_start_is_abs=node.AST_row.absolute,
@@ -2147,7 +2147,9 @@ class _NumbersModel(_Cacheable):
 
     @cache(num_args=2)
     def table_rich_text(  # noqa: C901
-        self, table_id: int, string_key: int,
+        self,
+        table_id: int,
+        string_key: int,
     ) -> dict | None:
         """Extract bullets and hyperlinks from a rich text data cell."""
         bds = self.objects[table_id].base_data_store
