@@ -166,7 +166,9 @@ src/$(package_c)/generated/TNArchives_pb2.py: .bootstrap/protos/TNArchives.proto
 	@$(call info_message,"Bootstrap: compiling Python packages from protobufs")
 	@mkdir -p src/$(package_c)/generated
 	@for proto in .bootstrap/protos/*.proto; do \
-	    $(PROTOC) -I=.bootstrap/protos --proto_path .bootstrap/protos --python_out=src/$(package_c)/generated $$proto; \
+	    uv run $(PROTOC) -I=.bootstrap/protos --proto_path .bootstrap/protos \
+			--python_out=src/$(package_c)/generated \
+			--mypy_out=src/$(package_c)/generated $$proto; \
 	done
 
 src/protos/TNArchives.proto: .bootstrap/protos/TNArchives.proto
