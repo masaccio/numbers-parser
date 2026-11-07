@@ -13,7 +13,7 @@ from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated.functionmap import FUNCTION_MAP
 
 if TYPE_CHECKING:
-    from numbers_parser.model import _NumbersModel
+    from numbers_parser.model import NumbersModel
 
 FUNCTION_NAME_TO_ID = {v: k for k, v in FUNCTION_MAP.items()}
 
@@ -23,7 +23,7 @@ class Formula(list):
 
     def __init__(
         self,
-        model: _NumbersModel,
+        model: NumbersModel,
         table_id: int,
         row: int,
         col: int,
@@ -281,7 +281,7 @@ NODE_FUNCTION_MAP = {
 class TableFormulas:
     """Convert table formula records into readable formulas."""
 
-    def __init__(self, model: _NumbersModel, table_id: int) -> None:
+    def __init__(self, model: NumbersModel, table_id: int) -> None:
         """Initialize the instance state."""
         self._model = model
         self._table_id = table_id

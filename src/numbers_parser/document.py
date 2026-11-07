@@ -32,8 +32,8 @@ from numbers_parser.constants import (
     MAX_ROW_COUNT,
 )
 from numbers_parser.containers import ItemsList
-from numbers_parser.model import _NumbersModel
-from numbers_parser.numbers_cache import _Cacheable
+from numbers_parser.model import NumbersModel
+from numbers_parser.numbers_cache import Cacheable
 from numbers_parser.xrefs import xl_cell_to_rowcol, xl_range
 
 __all__ = ["Document", "Sheet", "Table"]
@@ -93,7 +93,7 @@ class Document:
         password: str | None = None,
     ) -> None:
         """Initialize the instance state."""
-        self._model = _NumbersModel(None if filename is None else Path(filename), password)
+        self._model = NumbersModel(None if filename is None else Path(filename), password)
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
         self.filename = filename
@@ -381,7 +381,7 @@ class Document:
 class Sheet:
     """Represent a sheet and its tables in a Numbers document."""
 
-    def __init__(self, model: _NumbersModel, sheet_id: int) -> None:
+    def __init__(self, model: NumbersModel, sheet_id: int) -> None:
         """Initialize the instance state."""
         self._sheet_id = sheet_id
         self._model = model
@@ -513,10 +513,10 @@ class Sheet:
         return self._tables[-1]
 
 
-class Table(_Cacheable):
+class Table(Cacheable):
     """Represent a table and its cells in a Numbers sheet."""
 
-    def __init__(self, model: _NumbersModel, table_id: int) -> None:
+    def __init__(self, model: NumbersModel, table_id: int) -> None:
         """Initialize the instance state."""
         super().__init__()
         self._model = model

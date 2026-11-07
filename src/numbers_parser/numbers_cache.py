@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
-class _Cacheable:
+class Cacheable:
     """Provide per-instance storage for cached method results."""
 
     _cache: defaultdict[str, Any]
@@ -42,7 +42,7 @@ def cache(
 
         @wraps(func)
         def inner_multi_args(
-            self: _Cacheable,
+            self: Cacheable,
             *args: object,
             **kwargs: object,
         ) -> object:
@@ -55,7 +55,7 @@ def cache(
             self._cache[method][key] = value
             return value
 
-        def inner_no_args(self: _Cacheable) -> object:
+        def inner_no_args(self: Cacheable) -> object:
             """Return a cached result for a method without arguments."""
             method = func.__name__
             if method not in self._cache:

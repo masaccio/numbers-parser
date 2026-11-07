@@ -21,7 +21,7 @@ from sigfig import round as sigfig
 from typing_extensions import Self
 
 if TYPE_CHECKING:
-    from numbers_parser.model import _NumbersModel
+    from numbers_parser.model import NumbersModel
 
 from numbers_parser.constants import (
     CHECKBOX_FALSE_VALUE,
@@ -46,7 +46,6 @@ from numbers_parser.constants import (
     FONT_TUPLE_MAP,
     MAX_BASE,
     MAX_SIGNIFICANT_DIGITS,
-    PACKAGE_ID,
     SECONDS_IN_DAY,
     SECONDS_IN_HOUR,
     SECONDS_IN_WEEK,
@@ -72,7 +71,7 @@ from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.generated.TSWPArchives_pb2 import (
     ParagraphStylePropertiesArchive as ParagraphStyle,
 )
-from numbers_parser.numbers_cache import _Cacheable, cache
+from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.xrefs import xl_range
 
@@ -353,7 +352,7 @@ class Style:
         ]
 
     @classmethod
-    def from_storage(cls, cell: Cell, model: _NumbersModel) -> Style:
+    def from_storage(cls, cell: Cell, model: NumbersModel) -> Style:
         """Create a Style from the cell archive and model."""
         bg_image = None
         if cell._image_data is not None:
@@ -689,7 +688,7 @@ class _CellStorageFlags:
         return [x.name for x in fields(self)]
 
 
-class Cell(_CellStorageFlags, _Cacheable):
+class Cell(_CellStorageFlags, Cacheable):
     """
     Represent a cell in a Numbers table.
 
@@ -716,7 +715,7 @@ class Cell(_CellStorageFlags, _Cacheable):
         self._double: float | None = None
         self._seconds: float | None = None
         self._datetime: datetime | None = None
-        self._model: _NumbersModel = None
+        self._model: NumbersModel = None
         self._table_id: int = 0
         self._buffer: bytes | bytearray | None = None
         super().__init__()
@@ -1334,7 +1333,7 @@ class Cell(_CellStorageFlags, _Cacheable):
             return None
 
         image_id = style.cell_properties.cell_fill.image.imagedata.identifier
-        datas = self._model.objects[PACKAGE_ID].datas
+        datas = self._model.package_metadata.datas
         stored_filename = next(x.file_name for x in datas if x.identifier == image_id)
         preferred_filename = next(x.preferred_file_name for x in datas if x.identifier == image_id)
         all_paths = self._model.objects.file_store.keys()

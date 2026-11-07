@@ -13,7 +13,7 @@ from numbers_parser.constants import OPERATOR_PRECEDENCE
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
-    from numbers_parser.model import _NumbersModel
+    from numbers_parser.model import NumbersModel
 
 __all__ = [
     "xl_cell_to_rowcol",
@@ -70,7 +70,7 @@ class CellRangeType(IntEnum):
 class CellRange:
     """Parse and format a cell or named-reference range."""
 
-    _model: _NumbersModel
+    _model: NumbersModel
 
     row_start: int | None = None
     row_end: int | None = None
@@ -330,7 +330,7 @@ class CellRange:
 class ScopedNameRefCache:
     """Cache named row, column, and table references."""
 
-    def __init__(self, model: _NumbersModel) -> None:
+    def __init__(self, model: NumbersModel) -> None:
         """Initialize the instance state."""
         self._model = model
         self.doc_name_refs: dict[str, ScopedNameRef | None] = {}

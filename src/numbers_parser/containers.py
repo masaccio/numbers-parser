@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from google.protobuf.message import Message as ProtoMessage  # noqa: TC004
 
     import numbers_parser.generated.TSPArchiveMessages_pb2 as TSPArchiveMessage
-    from numbers_parser.model import _NumbersModel
+    from numbers_parser.model import NumbersModel
 
 
 class _NamedItem(Protocol):
@@ -30,7 +30,7 @@ _T = TypeVar("_T", bound=_NamedItem)
 class ItemsList(Generic[_T]):
     """Provide indexed and named access to model-backed items."""
 
-    def __init__(self, model: "_NumbersModel", refs: list[int], item_class: type[_T]) -> None:
+    def __init__(self, model: "NumbersModel", refs: list[int], item_class: type[_T]) -> None:
         """Initialize the instance state."""
         self._item_name = item_class.__name__.lower()
         self._items = [item_class(model, x) for x in refs]  # type: ignore[call-arg]
