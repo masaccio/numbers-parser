@@ -7,7 +7,7 @@ import logging
 import struct
 from functools import partial
 from struct import unpack
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import snappy
 from google.protobuf.internal.decoder import _DecodeVarint32
@@ -52,11 +52,11 @@ class IWAFile:
             raise
 
     @classmethod
-    def from_dict(cls, _dict: dict[str, object]) -> IWAFile:
+    def from_dict(cls, _dict: dict[str, Any]) -> IWAFile:
         """Create an archive object from its dictionary representation."""
         return cls([IWACompressedChunk.from_dict(chunk) for chunk in _dict["chunks"]])
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the protobuf message as a dictionary."""
         try:
             return {"chunks": [chunk.to_dict() for chunk in self.chunks]}

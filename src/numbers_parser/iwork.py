@@ -307,7 +307,7 @@ class IWork:
     def save(  # noqa: C901
         self,
         filepath: Path,
-        file_store: dict[str, object],
+        file_store: dict[str, IWAFile | bytes],
         package: bool = False,
         password: str | None = None,
         hint: str = "No hint",
