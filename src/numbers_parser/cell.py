@@ -14,11 +14,14 @@ from fractions import Fraction
 from hashlib import sha1
 from os.path import basename
 from struct import pack, unpack
-from typing import NamedTuple
+from typing import TYPE_CHECKING, Any, NamedTuple, cast
 from warnings import warn
 
 from sigfig import round as sigfig
 from typing_extensions import Self
+
+if TYPE_CHECKING:
+    from numbers_parser.model import _NumbersModel
 
 from numbers_parser.constants import (
     CHECKBOX_FALSE_VALUE,
@@ -186,8 +189,8 @@ VERTICAL_MAP = {
 class _Alignment(NamedTuple):
     """Class for internal alignment type."""
 
-    horizontal: str
-    vertical: str
+    horizontal: HorizontalJustification
+    vertical: VerticalJustification
 
 
 class Alignment(_Alignment):
@@ -295,7 +298,7 @@ class Style:
     """
 
     alignment: Alignment = DEFAULT_ALIGNMENT_CLASS  # : horizontal and vertical alignment
-    bg_image: object = None  # : background image
+    bg_image: BackgroundImage | None = None
     bg_color: RGB | list[RGB] | None = None
     font_color: RGB = field(default_factory=default_color)
     font_size: float = DEFAULT_FONT_SIZE
@@ -309,10 +312,10 @@ class Style:
     right_indent: float = 0
     text_inset: float = DEFAULT_TEXT_INSET
     text_wrap: bool = DEFAULT_TEXT_WRAP
-    name: str = None
-    _font_details: dict = None
-    _text_style_obj_id: int = None
-    _cell_style_obj_id: int = None
+    name: str | None = None
+    _font_details: dict | None = None
+    _text_style_obj_id: int | None = None
+    _cell_style_obj_id: int | None = None
     _update_cell_style: bool = False
     _update_text_style: bool = False
 
@@ -350,31 +353,31 @@ class Style:
         ]
 
     @classmethod
-    def from_storage(cls, cell: object, model: object) -> Style:
+    def from_storage(cls, cell: Cell, model: _NumbersModel) -> Style:
         """Create a Style from the cell archive and model."""
         bg_image = None
         if cell._image_data is not None:
             bg_image = BackgroundImage(*cell._image_data)
         return Style(
-            alignment=model.cell_alignment(cell),
+            alignment=cast("Alignment", model.cell_alignment(cell)),
             bg_image=bg_image,
-            bg_color=model.cell_bg_color(cell),
-            font_color=model.cell_font_color(cell),
-            font_size=model.cell_font_size(cell),
-            font_name=model.cell_font_family(cell),
-            bold=model.cell_is_bold(cell),
-            italic=model.cell_is_italic(cell),
-            strikethrough=model.cell_is_strikethrough(cell),
-            underline=model.cell_is_underline(cell),
-            name=model.cell_style_name(cell),
-            first_indent=model.cell_first_indent(cell),
-            left_indent=model.cell_left_indent(cell),
-            right_indent=model.cell_right_indent(cell),
-            text_inset=model.cell_text_inset(cell),
-            text_wrap=model.cell_text_wrap(cell),
-            _font_details=model.cell_font_details(cell),
-            _text_style_obj_id=model.text_style_object_id(cell),
-            _cell_style_obj_id=model.cell_style_object_id(cell),
+            bg_color=cast("RGB | list[RGB] | None", model.cell_bg_color(cell)),
+            font_color=cast("RGB", model.cell_font_color(cell)),
+            font_size=cast("float", model.cell_font_size(cell)),
+            font_name=cast("str", model.cell_font_family(cell)),
+            bold=cast("bool", model.cell_is_bold(cell)),
+            italic=cast("bool", model.cell_is_italic(cell)),
+            strikethrough=cast("bool", model.cell_is_strikethrough(cell)),
+            underline=cast("bool", model.cell_is_underline(cell)),
+            name=cast("str", model.cell_style_name(cell)),
+            first_indent=cast("float", model.cell_first_indent(cell)),
+            left_indent=cast("float", model.cell_left_indent(cell)),
+            right_indent=cast("float", model.cell_right_indent(cell)),
+            text_inset=cast("float", model.cell_text_inset(cell)),
+            text_wrap=cast("bool", model.cell_text_wrap(cell)),
+            _font_details=cast("dict", model.cell_font_details(cell)),
+            _text_style_obj_id=cast("int | None", model.text_style_object_id(cell)),
+            _cell_style_obj_id=cast("int | None", model.cell_style_object_id(cell)),
         )
 
     def __post_init__(self) -> None:
@@ -499,8 +502,8 @@ class Border:  # noqa: PLW1641
     """
 
     width: float = DEFAULT_BORDER_WIDTH
-    color: RGB = None
-    style: BorderType = None
+    color: RGB | None = None
+    style: BorderType | None = None
 
     def __post_init__(self) -> None:
         """Validate and initialize the instance state."""
@@ -543,7 +546,7 @@ class Border:  # noqa: PLW1641
         style_name = BorderType(self.style).name.lower()
         return f"Border(width={self.width}, color={self.color}, style={style_name})"
 
-    def __eq__(self, value: object) -> bool:
+    def __eq__(self, value: Border) -> bool:
         """Compare this instance with another value."""
         if value is None:
             return False
@@ -657,23 +660,23 @@ class Comment:
 class _CellStorageFlags:
     """Represent flags stored with a cell archive."""
 
-    _string_id: int = None
-    _rich_id: int = None
-    _cell_style_id: int = None
-    _text_style_id: int = None
-    _cond_style_id: int = None
-    _cond_rule_style_id: int = None
-    _formula_id: int = None
-    _control_id: int = None
-    _formula_error_id: int = None
-    _suggest_id: int = None
-    _num_format_id: int = None
-    _currency_format_id: int = None
-    _date_format_id: int = None
-    _duration_format_id: int = None
-    _text_format_id: int = None
-    _bool_format_id: int = None
-    _comment_id: int = None
+    _string_id: int | None = None
+    _rich_id: int | None = None
+    _cell_style_id: int | None = None
+    _text_style_id: int | None = None
+    _cond_style_id: int | None = None
+    _cond_rule_style_id: int | None = None
+    _formula_id: int | None = None
+    _control_id: int | None = None
+    _formula_error_id: int | None = None
+    _suggest_id: int | None = None
+    _num_format_id: int | None = None
+    _currency_format_id: int | None = None
+    _date_format_id: int | None = None
+    _duration_format_id: int | None = None
+    _text_format_id: int | None = None
+    _bool_format_id: int | None = None
+    _comment_id: int | None = None
     _extra_bits: int = 0
 
     def __repr__(self) -> str:
@@ -702,16 +705,20 @@ class Cell(_CellStorageFlags, _Cacheable):
         value: str | float | bool | datetime | timedelta | None,
     ) -> None:
         """Initialize the instance state."""
-        self._value = value
         self.row = row
         self.col = col
+        self._value = value
         self._is_bulleted = False
-        self._formula_id = None
-        self._storage = None
-        self._style = None
-        self._d128 = None
-        self._double = None
-        self._seconds = None
+        self._formula_id: int | None = None
+        self._storage: Any = None
+        self._style: Style | None = None
+        self._d128: float | None = None
+        self._double: float | None = None
+        self._seconds: float | None = None
+        self._datetime: datetime | None = None
+        self._model: _NumbersModel = None
+        self._table_id: int = 0
+        self._buffer: bytes | bytearray | None = None
         super().__init__()
 
     @property
@@ -1048,22 +1055,31 @@ class Cell(_CellStorageFlags, _Cacheable):
         if cell_type == TSTArchives.genericCellType:
             cell = EmptyCell(row, col)
         elif cell_type == TSTArchives.numberCellType:
-            cell = NumberCell(row, col, d128)
+            cell = NumberCell(row, col, float(d128) if d128 is not None else 0.0)
         elif cell_type == TSTArchives.textCellType:
-            cell = TextCell(row, col, model.table_string(table_id, storage_flags._string_id))
+            cell = TextCell(row, col, model.table_string(table_id, storage_flags._string_id or 0))
         elif cell_type == TSTArchives.dateCellType:
-            cell = DateCell(row, col, EPOCH + timedelta(seconds=seconds))
+            cell = DateCell(row, col, EPOCH + timedelta(seconds=seconds or 0.0))
             cell._datetime = cell._value
         elif cell_type == TSTArchives.boolCellType:
-            cell = BoolCell(row, col, double > 0.0)
+            cell = BoolCell(row, col, (double or 0.0) > 0.0)
         elif cell_type == TSTArchives.durationCellType:
-            cell = DurationCell(row, col, timedelta(seconds=double))
+            cell = DurationCell(row, col, timedelta(seconds=double or 0.0))
         elif cell_type == TSTArchives.formulaErrorCellType:
             cell = ErrorCell(row, col)
         elif cell_type == TSTArchives.automaticCellType:
-            cell = RichTextCell(row, col, model.table_rich_text(table_id, storage_flags._rich_id))
+            cell = RichTextCell(
+                row,
+                col,
+                model.table_rich_text(table_id, storage_flags._rich_id or 0) or {},
+            )
         elif cell_type == CURRENCY_CELL_TYPE:
-            cell = NumberCell(row, col, d128, cell_type=CellType.CURRENCY)
+            cell = NumberCell(
+                row,
+                col,
+                float(d128) if d128 is not None else 0.0,
+                cell_type=CellType.CURRENCY,
+            )
         else:
             msg = f"Cell type ID {cell_type} is not recognized"
             raise UnsupportedError(msg)
@@ -1575,7 +1591,7 @@ class NumberCell(Cell):
     @property
     def value(self) -> float:
         """Return or update the value represented by the cell."""
-        return self._value
+        return cast("float", self._value)
 
 
 class TextCell(Cell):
@@ -1593,7 +1609,7 @@ class TextCell(Cell):
     @property
     def value(self) -> str:
         """Return or update the value represented by the cell."""
-        return self._value
+        return cast("str", self._value)
 
 
 class RichTextCell(Cell):
@@ -1605,7 +1621,7 @@ class RichTextCell(Cell):
         Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
-    def __init__(self, row: int, col: int, value: dict[str, object]) -> None:
+    def __init__(self, row: int, col: int, value: dict[str, Any]) -> None:
         """Initialize the instance state."""
         super().__init__(row, col, value["text"])
         self._type = CellType.RICH_TEXT
@@ -1625,7 +1641,7 @@ class RichTextCell(Cell):
     @property
     def value(self) -> str:
         """Return or update the value represented by the cell."""
-        return self._value
+        return cast("str", self._value)
 
     @property
     def bullets(self) -> list[str]:
@@ -1713,7 +1729,7 @@ class BoolCell(Cell):
     @property
     def value(self) -> bool:
         """Return or update the value represented by the cell."""
-        return self._value
+        return cast("bool", self._value)
 
 
 class DateCell(Cell):
@@ -1735,7 +1751,7 @@ class DateCell(Cell):
     @property
     def value(self) -> datetime:
         """Return or update the value represented by the cell."""
-        return self._value
+        return cast("datetime", self._value)
 
 
 class DurationCell(Cell):
@@ -1749,7 +1765,7 @@ class DurationCell(Cell):
     @property
     def value(self) -> timedelta:
         """Return or update the value represented by the cell."""
-        return self._value
+        return cast("timedelta", self._value)
 
 
 class ErrorCell(Cell):

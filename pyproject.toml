@@ -220,3 +220,16 @@ disable = [
 
 [tool.pylint.main]
 ignored-modules = ["Cocoa", "lldb"]
+
+[tool.mypy]
+exclude = [
+    "^src/numbers_parser/generated/",
+]
+
+[[tool.mypy.overrides]]
+module = [
+  "snappy",
+  "compact_json",
+  "sigfig",
+]
+ignore_missing_imports = true
