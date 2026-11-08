@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from collections import defaultdict
 from functools import wraps
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 
 from typing_extensions import Self
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 class Cacheable:
@@ -28,23 +31,21 @@ class Cacheable:
         return obj
 
 
-def cache(
-    num_args: int = 1,
-) -> Callable[[Callable[..., object]], Callable[..., object]]:
+def cache(num_args: int = 1) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """
     Cache a method using a selected subset of its arguments.
 
     The returned decorator memoizes results for each instance and argument key.
     """
 
-    def cache_decorator(func: Callable[..., object]) -> Callable[..., object]:
+    def cache_decorator(func: Callable[P, R]) -> Callable[P, R]:
         """Wrap a method with argument-aware cache lookups."""
 
         @wraps(func)
         def inner_multi_args(
             self: Cacheable,
-            *args: object,
-            **kwargs: object,
+            *args: P.args,
+            **kwargs: P.kwargs,
         ) -> object:
             """Return a cached result keyed by the selected arguments."""
             method = func.__name__
