@@ -14,6 +14,7 @@ from numbers_parser import (
     FractionAccuracy,
     PaddingType,
     Style,
+    UnsupportedError,
     UnsupportedWarning,
     xl_rowcol_to_cell,
 )
@@ -148,16 +149,19 @@ def test_issue_14():
 
 
 def test_issue_17():
-    with pytest.warns(RuntimeWarning) as record:
-        doc = Document("tests/data/issue-17.numbers")
+
+    with (
+        pytest.raises(
+            UnsupportedError,
+            match="Documents without a CalculationEngine archive are unsupported",
+        ),
+        pytest.warns(RuntimeWarning) as record,
+    ):
+        _ = Document("tests/data/issue-17.numbers")
+
     assert len(record) == 2
     assert "can't read Numbers version from document" in str(record[0].message)
     assert "unsupported version ''" in str(record[1].message)
-    sheets = doc.sheets
-    table = sheets[0].tables[0]
-    assert table.cell(0, 0).value == 123.0
-    assert not table.cell(0, 0).is_merged
-    assert table.cell(0, 0).formula is None
 
 
 def test_issue_18():

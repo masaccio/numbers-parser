@@ -348,6 +348,9 @@ def test_new_styles(configurable_save_file):
     assert table.cell("D2").style.bg_color == RGB(29, 177, 0)
     assert table.cell("D2").style.font_name == "Helvetica Neue"
 
+    gradient_bg = doc.add_style(bg_color=[RGB(86, 193, 255), RGB(0, 77, 128)])
+    table.set_cell_style("D3", gradient_bg)
+
     table.set_cell_style("E2", "Heading Red")
     assert table.cell("E2").style.font_color == RGB(238, 34, 12)
     assert table.cell("E2").style.bold
@@ -382,6 +385,8 @@ def test_new_styles(configurable_save_file):
     assert new_table.cell("D2").style.bg_color == RGB(29, 177, 0)
     assert new_table.cell("D2").style.font_name == "Helvetica Neue"
 
+    assert new_table.cell("D3").style.bg_color == [RGB(86, 193, 255), RGB(0, 77, 128)]
+
     assert new_table.cell("E2").style.name == "Heading Red"
     assert new_table.cell("E2").style.font_color == RGB(238, 34, 12)
     assert new_table.cell("E2").style.bold
@@ -391,7 +396,7 @@ def test_new_styles(configurable_save_file):
     assert new_table.cell("F2").style.bg_color == RGB(238, 34, 12)
     assert new_table.cell("F2").style.alignment == Alignment("right", "middle")
 
-    assert not table.cell("F3").style.text_wrap
+    assert not new_table.cell("F3").style.text_wrap
 
 
 def test_empty_styles(configurable_save_file):

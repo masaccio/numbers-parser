@@ -306,18 +306,19 @@ class NumbersModel(Cacheable):
     @cache(num_args=0)
     def calc_engine_id(self) -> int:
         """Return the CalculationEngine ID for the current document."""
-        ce_id = self.find_refs("CalculationEngineArchive")
-        if len(ce_id) == 0:
-            return 0
-        return ce_id[0]
+        try:
+            ce_id = self.find_refs("CalculationEngineArchive")
+            return ce_id[0]
+        except IndexError as e:
+            # Issue #17 breaks but the CalculationEngine is fundamental
+            # to the function of numbers-parser
+            msg = "Documents without a CalculationEngine archive are unsupported"
+            raise UnsupportedError(msg) from e
 
     @cache(num_args=0)
-    def calc_engine(self) -> TSCEArchives.CalculationEngineArchive | None:
+    def calc_engine(self) -> TSCEArchives.CalculationEngineArchive:
         """Return the CalculationEngine object for the current document."""
-        ce_id = self.calc_engine_id()
-        if ce_id == 0:
-            return None
-        return cast("TSCEArchives.CalculationEngineArchive", self.objects[ce_id])
+        return self.get_object(self.calc_engine_id(), TSCEArchives.CalculationEngineArchive)
 
     def sheet_ids(self) -> list[int]:
         """Return the sheet identifiers associated with this table."""
@@ -1478,8 +1479,10 @@ class NumbersModel(Cacheable):
 
         table_model = self.table_model(table_id)
         bds = self.table_model(table_id).base_data_store
-        bucket_id = bds.rowHeaders.buckets[0].identifier
-        buckets = self.objects[bucket_id].headers
+        buckets = self.get_object(
+            bds.rowHeaders.buckets[0].identifier,
+            TSTArchives.HeaderStorageBucket,
+        ).headers
         bucket_map = {x.index: x for x in buckets}
         if row in bucket_map and bucket_map[row].size != 0.0:
             height = round(bucket_map[row].size)
@@ -1508,8 +1511,10 @@ class NumbersModel(Cacheable):
 
         table_model = self.table_model(table_id)
         bds = self.table_model(table_id).base_data_store
-        bucket_id = bds.columnHeaders.identifier
-        buckets = self.objects[bucket_id].headers
+        buckets = self.get_object(
+            bds.columnHeaders.identifier,
+            TSTArchives.HeaderStorageBucket,
+        ).headers
         bucket_map = {x.index: x for x in buckets}
         if col in bucket_map and bucket_map[col].size != 0.0:
             width = round(bucket_map[col].size)
@@ -1590,7 +1595,7 @@ class NumbersModel(Cacheable):
         number_of_header_columns: int = 1,
     ) -> int:
         """Add table."""
-        from_table = self.objects[from_table_id]
+        from_table = self.get_object(from_table_id, TSTArchives.TableModelArchive)
 
         table_strings_id, _ = self.create_string_table()
 
@@ -1732,7 +1737,7 @@ class NumbersModel(Cacheable):
         self.create_caption_archive(table_model_id)
         self.caption_enabled(table_model_id, False)  # noqa: FBT003
 
-        self.objects[sheet_id].drawable_infos.append(
+        self.get_object(sheet_id, TNArchives.SheetArchive).drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id),
         )
 
@@ -1890,9 +1895,9 @@ class NumbersModel(Cacheable):
         theme_id = self.document_archive.theme.identifier
         presets = find_extension(self.objects[theme_id].super, "paragraph_style_presets")
         presets_map = {
-            self.objects[x.identifier].super.name: {
+            self.get_object(x.identifier, TSWPArchives.ParagraphStyleArchive).super.name: {
                 "id": x.identifier,
-                "obj": self.objects[x.identifier],
+                "obj": self.get_object(x.identifier, TSWPArchives.ParagraphStyleArchive),
             }
             for x in presets
         }
@@ -2002,7 +2007,7 @@ class NumbersModel(Cacheable):
             strikethru = CharacterStyle.StrikethruType.kSingleStrikethru
         else:
             strikethru = CharacterStyle.StrikethruType.kNoStrikethru
-        style_obj = self.objects[style._text_style_obj_id]
+        style_obj = self.get_object(style._text_style_obj_id, TSWPArchives.ParagraphStyleArchive)
         style_obj.char_properties.font_color.r = style.font_color.r / 255
         style_obj.char_properties.font_color.g = style.font_color.g / 255
         style_obj.char_properties.font_color.b = style.font_color.b / 255
@@ -2047,21 +2052,28 @@ class NumbersModel(Cacheable):
             for _, cell in enumerate(cells):
                 if cell._style is not None and cell._style._update_cell_style:
                     fingerprint = (
-                        str(cell.style.alignment.vertical)
-                        + str(cell.style.first_indent)
-                        + str(cell.style.left_indent)
-                        + str(cell.style.right_indent)
-                        + str(cell.style.text_inset)
-                        + str(cell.style.text_wrap)
+                        str(cell._style.alignment.vertical)
+                        + str(cell._style.first_indent)
+                        + str(cell._style.left_indent)
+                        + str(cell._style.right_indent)
+                        + str(cell._style.text_inset)
+                        + str(cell._style.text_wrap)
                     )
+
                     if cell._style.bg_color is not None:
-                        fingerprint = fingerprint + (
-                            str(cell.style.bg_color.r)
-                            + str(cell.style.bg_color.g)
-                            + str(cell.style.bg_color.b)
-                        )
+                        if isinstance(cell._style.bg_color, list):
+                            for color in cell._style.bg_color:
+                                fingerprint += str(color.r) + str(color.g) + str(color.b)
+                        else:
+                            fingerprint += (
+                                str(cell._style.bg_color.r)
+                                + str(cell._style.bg_color.g)
+                                + str(cell._style.bg_color.b)
+                            )
+
                     if cell._style.bg_image is not None:
                         fingerprint += cell._style.bg_image.filename
+
                     if fingerprint not in cell_styles:
                         cell_styles[fingerprint] = self.add_cell_style(cell._style)
                     cell._style._cell_style_obj_id = cell_styles[fingerprint]
@@ -2095,20 +2107,51 @@ class NumbersModel(Cacheable):
                 },
             }
         elif style.bg_color is not None:
-            color_attrs = {
-                "cell_fill": {
-                    "color": {
-                        "model": "rgb",
-                        "r": style.bg_color.r / 255,
-                        "g": style.bg_color.g / 255,
-                        "b": style.bg_color.b / 255,
-                        "a": 1.0,
-                        "rgbspace": "srgb",
+            if isinstance(style.bg_color, list):
+                stops = []
+                for i, color in enumerate(style.bg_color):
+                    fraction = i / (len(style.bg_color) - 1) if len(style.bg_color) > 1 else 1.0
+                    stops.append(
+                        {
+                            "color": {
+                                "model": "rgb",
+                                "r": color.r / 255,
+                                "g": color.g / 255,
+                                "b": color.b / 255,
+                                "a": 1.0,
+                                "rgbspace": "srgb",
+                            },
+                            "fraction": float(fraction),
+                            "inflection": 0.5,
+                        },
+                    )
+                color_attrs = {
+                    "cell_fill": {
+                        "gradient": {
+                            "type": "Linear",
+                            "opacity": 1.0,
+                            "advancedGradient": True,
+                            "anglegradient": {"gradientangle": 0.0},
+                            "stops": stops,
+                        },
                     },
-                },
-            }
+                }
+            else:
+                color_attrs = {
+                    "cell_fill": {
+                        "color": {
+                            "model": "rgb",
+                            "r": style.bg_color.r / 255,
+                            "g": style.bg_color.g / 255,
+                            "b": style.bg_color.b / 255,
+                            "a": 1.0,
+                            "rgbspace": "srgb",
+                        },
+                    },
+                }
         else:
             color_attrs = {}
+
         cell_style_id, cell_style = self.objects.create_object_from_dict(
             "DocumentStylesheet",
             {
