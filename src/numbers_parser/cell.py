@@ -468,7 +468,7 @@ class BorderType(IntEnum):
     NONE = BORDER_STYLE_MAP["none"]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class Border:  # noqa: PLW1641
     """
     Create a cell border for the :py:meth:`~numbers_parser.Table.set_cell_border` method.
@@ -500,26 +500,32 @@ class Border:  # noqa: PLW1641
 
     """
 
-    width: float = DEFAULT_BORDER_WIDTH
-    color: RGB | None = None
-    style: BorderType | None = None
+    width: float
+    color: RGB
+    style: BorderType
 
-    def __post_init__(self) -> None:
+    def __init__(
+        self,
+        width: float = DEFAULT_BORDER_WIDTH,
+        color: RGB | tuple | None = None,
+        style: BorderType | str | None = None,
+    ) -> None:
         """Validate and initialize the instance state."""
-        if not isinstance(self.width, float):
+        if not isinstance(width, float):
             msg = "width must be a float number of points"
             raise TypeError(msg)
 
-        if self.color is None:
+        object.__setattr__(self, "width", width)
+
+        if color is None:
             object.__setattr__(self, "color", RGB(*DEFAULT_BORDER_COLOR))
         else:
-            object.__setattr__(self, "color", rgb_color(self.color))
+            object.__setattr__(self, "color", rgb_color(color))
 
-        current_style = self.style
+        current_style = style
         if current_style is None:
             # Default fallback
             current_style = BorderType(BORDER_STYLE_MAP[DEFAULT_BORDER_STYLE])
-
         elif isinstance(current_style, str):
             # String conversion (e.g., "dashes" -> BorderType.DASHES)
             current_style = current_style.lower()
