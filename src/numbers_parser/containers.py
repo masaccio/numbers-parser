@@ -124,9 +124,9 @@ class ObjectStore(IWorkHandler):
         self,
         iwa_file: str,
         object_dict: dict[str, Any],
-        cls: type[ProtoMessage],
+        cls: type[_ProtoT],
         append: bool = False,
-    ) -> tuple[int, ProtoMessage]:
+    ) -> tuple[int, _ProtoT]:
         """
         Create and store an object with its IWA segment.
 
@@ -147,9 +147,11 @@ class ObjectStore(IWorkHandler):
             iwa_obj = cast("IWAFile", self._file_store[iwa_pathname])
             iwa_obj.chunks[0].archives.append(iwa_segment)
 
-        self._objects[new_id] = cls(**object_dict)
+        new_obj = cls(**object_dict)
+        self._objects[new_id] = new_obj
         self._object_to_filename_map[new_id] = iwa_pathname
-        return new_id, self._objects[new_id]
+
+        return new_id, new_obj
 
     def update_object_file_store(self) -> None:
         """
