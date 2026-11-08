@@ -13,7 +13,7 @@ from itertools import chain
 from math import floor
 from pathlib import Path
 from struct import pack
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 from warnings import warn
 
 from numbers_parser.bullets import (
@@ -545,7 +545,7 @@ class NumbersModel(Cacheable):
                 location="CalculationEngine",
                 component_id=self.stylesheet_id(),
             )
-        cast("TSAArchives.CaptionInfoArchive", caption_info).super.MergeFrom(
+        caption_info.super.MergeFrom(
             TSWPArchives.ShapeInfoArchive(
                 is_text_box=True,
                 owned_storage=TSPMessages.Reference(identifier=storage_id),
@@ -560,10 +560,7 @@ class NumbersModel(Cacheable):
         )
 
         self.set_reference(table_info.super.caption, caption_info_id)
-        component = cast(
-            "TSPArchiveMessages.ComponentInfo",
-            self.metadata_component_info(self.calc_engine_id()),
-        )
+        component = self.metadata_component_info(self.calc_engine_id())
         component.object_uuid_map_entries.append(
             TSPArchiveMessages.ObjectUUIDMapEntry(
                 identifier=caption_info_id,
@@ -823,7 +820,7 @@ class NumbersModel(Cacheable):
         self.add_custom_format_archive(formatting, format_archive)
 
     @cache(num_args=2)
-    def table_style(self, table_id: int, key: int) -> str:
+    def table_style(self, table_id: int, key: int) -> TSTArchives.CellStyleArchive:
         """Return the style associated with a style ID for a particular table."""
         style_entry = self.table_styles.lookup_value(table_id, key)
         return self.get_object(style_entry.reference.identifier, TSTArchives.CellStyleArchive)
@@ -2341,7 +2338,10 @@ class NumbersModel(Cacheable):
                     if table_list_style is None:
                         bullet_char = None
                     else:
-                        bullet_style = self.objects[table_list_style.object.identifier]
+                        bullet_style = self.get_object(
+                            table_list_style.object.identifier,
+                            TSWPArchives.ListStyleArchive,
+                        )
                         if len(bullet_style.strings) > 0:
                             bullet_char = bullet_style.strings[0]
                         elif len(bullet_style.number_types) > 0:
@@ -2369,10 +2369,14 @@ class NumbersModel(Cacheable):
 
     def _resolve_comment_storage(self, storage_id: int) -> Comment:
         """Recursively fetch a comment and its replies into a Comment object."""
-        storage = self.objects[storage_id]
+        storage = self.get_object(storage_id, TSDArchives.CommentStorageArchive)
 
         author_id = storage.author.identifier
-        author_name = self.objects[author_id].name if author_id in self.objects else "Unknown"
+        author_name = (
+            self.get_object(author_id, TSKArchives.AnnotationAuthorArchive).name
+            if author_id in self.objects
+            else "Unknown"
+        )
         creation_date = EPOCH + timedelta(seconds=storage.creation_date.seconds)
 
         replies = [
@@ -2389,10 +2393,10 @@ class NumbersModel(Cacheable):
     def author_id(self, author_name: str, table_id: int) -> int:
         """Get or create an annotation author."""
         storage_id = self.find_refs("AnnotationAuthorStorageArchive")[0]
-        storage = self.objects[storage_id]
+        storage = self.get_object(storage_id, TSKArchives.AnnotationAuthorStorageArchive)
 
         for author_ref in storage.annotation_author:
-            author = self.objects[author_ref.identifier]
+            author = self.get_object(author_ref.identifier, TSKArchives.AnnotationAuthorArchive)
             if author.name == author_name:
                 return author_ref.identifier
 
@@ -2460,18 +2464,18 @@ class NumbersModel(Cacheable):
         if reply:
             entry = self._table_comments.lookup_value(table_id, cell._comment_id)
             root_comment_id = entry.comment_storage.identifier
-            root_comment = self.objects[root_comment_id]
+            root_comment = self.get_object(root_comment_id, TSDArchives.CommentStorageArchive)
             root_comment.replies.append(new_comment_ref)
         else:
             key = self._table_comments.lookup_key(table_id, new_comment_ref)
             cell._comment_id = key
 
-    def cell_text_style(self, cell: Cell) -> object:
+    def cell_text_style(self, cell: Cell) -> TSWPArchives.ParagraphStyleArchive:
         """Return the cell's text style or default header, footer, or body style."""
         if cell._text_style_id is not None:
             return self.table_style(cell._table_id, cell._text_style_id)
 
-        table_model = self.objects[cell._table_id]
+        table_model = self.table_model(cell._table_id)
         if cell.row in range(table_model.number_of_header_rows):
             return self.objects[table_model.header_row_text_style.identifier]
         if cell.col in range(table_model.number_of_header_columns):
@@ -2509,65 +2513,78 @@ class NumbersModel(Cacheable):
             return [(rgb(s.color)) for s in cell_properties.gradient.stops]
         return None
 
-    def char_property(self, style: object, field: str) -> object:
+    def char_property(self, style: TSWPArchives.ParagraphStyleArchive, field: str) -> object:
         """Return a character property from the style or its parent."""
         if not style.char_properties.HasField(field):
-            parent = self.objects[style.super.parent.identifier]
+            parent = self.get_object(
+                style.super.parent.identifier,
+                TSWPArchives.ParagraphStyleArchive,
+            )
             return getattr(parent.char_properties, field)
         return getattr(style.char_properties, field)
 
-    def para_property(self, style: object, field: str) -> float:
+    def para_property(self, style: TSWPArchives.ParagraphStyleArchive, field: str) -> float:
         """Return a paragraph property from the style or its parent."""
         if not style.para_properties.HasField(field):
-            parent = self.objects[style.super.parent.identifier]
+            parent = self.get_object(
+                style.super.parent.identifier,
+                TSWPArchives.ParagraphStyleArchive,
+            )
             return getattr(parent.para_properties, field)
         return getattr(style.para_properties, field)
 
-    def cell_property(self, style: object, field: str) -> float:
+    def cell_property(
+        self,
+        style: TSTArchives.CellStyleArchive,
+        field: str,
+    ) -> int | bool | TSWPArchives.PaddingArchive:
         """Return a cell property from the style or its parent."""
         if not style.cell_properties.HasField(field):
-            parent = self.objects[style.super.parent.identifier]
+            parent = self.get_object(
+                style.super.parent.identifier,
+                TSTArchives.CellStyleArchive,
+            )
             return getattr(parent.cell_properties, field)
         return getattr(style.cell_properties, field)
 
-    def cell_is_bold(self, obj: Cell | object) -> bool:
+    def cell_is_bold(self, obj: Cell | TSTArchives.CellStyleArchive) -> bool:
         """Return whether the cell is bold."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.char_property(style, "bold")
 
-    def cell_is_italic(self, obj: Cell | object) -> bool:
+    def cell_is_italic(self, obj: Cell | TSTArchives.CellStyleArchive) -> bool:
         """Return whether the cell is italic."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.char_property(style, "italic")
 
-    def cell_is_underline(self, obj: Cell | object) -> bool:
+    def cell_is_underline(self, obj: Cell | TSTArchives.CellStyleArchive) -> bool:
         """Return whether the cell is underline."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         underline = self.char_property(style, "underline")
         return underline != CharacterStyle.UnderlineType.kNoUnderline
 
-    def cell_is_strikethrough(self, obj: Cell | object) -> bool:
+    def cell_is_strikethrough(self, obj: Cell | TSTArchives.CellStyleArchive) -> bool:
         """Return whether the cell is strikethrough."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         strikethru = self.char_property(style, "strikethru")
         return strikethru != CharacterStyle.StrikethruType.kNoStrikethru
 
-    def cell_style_name(self, obj: Cell | object) -> bool:
+    def cell_style_name(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> bool:
         """Return the cell style name."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return style.super.name
 
-    def cell_font_color(self, obj: Cell | object) -> tuple:
+    def cell_font_color(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> tuple:
         """Return the cell font color."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return rgb(self.char_property(style, "font_color"))
 
-    def cell_font_size(self, obj: Cell | object) -> float:
+    def cell_font_size(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> float:
         """Return the cell font size."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.char_property(style, "font_size")
 
-    def cell_font_family(self, obj: Cell | object) -> str:
+    def cell_font_family(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> str:
         """Return the cell font family."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         font_name = self.char_property(style, "font_name")
@@ -2583,7 +2600,7 @@ class NumbersModel(Cacheable):
 
         return FONT_MAP[font_name]["family"]
 
-    def cell_font_details(self, obj: Cell | object) -> dict[str, str]:
+    def cell_font_details(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> dict[str, str]:
         """Return the cell font details."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         font_name = self.char_property(style, "font_name")
@@ -2591,17 +2608,17 @@ class NumbersModel(Cacheable):
             return FONT_FAMILY_DEFAULT[DEFAULT_FONT]
         return FONT_MAP[font_name]
 
-    def cell_first_indent(self, obj: Cell | object) -> float:
+    def cell_first_indent(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> float:
         """Return the cell first indent."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.para_property(style, "first_line_indent")
 
-    def cell_left_indent(self, obj: Cell | object) -> float:
+    def cell_left_indent(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> float:
         """Return the cell left indent."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.para_property(style, "left_indent")
 
-    def cell_right_indent(self, obj: Cell | object) -> float:
+    def cell_right_indent(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> float:
         """Return the cell right indent."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return self.para_property(style, "right_indent")
@@ -2611,7 +2628,7 @@ class NumbersModel(Cacheable):
         if cell._cell_style_id is None:
             return DEFAULT_TEXT_INSET
         style = self.table_style(cell._table_id, cell._cell_style_id)
-        padding = self.cell_property(style, "padding")
+        padding = cast("TSWPArchives.PaddingArchive", self.cell_property(style, "padding"))
         # Padding is always identical (only one UI setting)
         return padding.left
 
@@ -2622,7 +2639,7 @@ class NumbersModel(Cacheable):
         style = self.table_style(cell._table_id, cell._cell_style_id)
         return self.cell_property(style, "text_wrap")
 
-    def stroke_type(self, stroke_run: object) -> str:
+    def stroke_type(self, stroke_run: TSTArchives.StrokeLayerArchive.StrokeRunArchive) -> str:
         """Return the stroke type for a stroke run."""
         stroke_type = stroke_run.stroke.pattern.type
         if stroke_type == StrokePattern.StrokePatternType.TSDSolidPattern:
@@ -2633,7 +2650,7 @@ class NumbersModel(Cacheable):
             return "dashes"
         return "none"
 
-    def cell_for_stroke(self, table_id: int, side: str, row: int, col: int) -> object:
+    def cell_for_stroke(self, table_id: int, side: str, row: int, col: int) -> Cell:
         """Return the cell for stroke."""
         data = self._table_data[table_id]
         if row < 0 or col < 0:
@@ -2705,7 +2722,7 @@ class NumbersModel(Cacheable):
         """Extract strokes in layers."""
         strokes = []
         for layer_id in layer_ids:
-            stroke_layer = self.objects[layer_id.identifier]
+            stroke_layer = self.get_object(layer_id.identifier, TSTArchives.StrokeLayerArchive)
             for stroke_run in stroke_layer.stroke_runs:
                 border_value = Border(
                     width=round(stroke_run.stroke.width, 2),
@@ -2745,29 +2762,28 @@ class NumbersModel(Cacheable):
     @cache()
     def extract_strokes(self, table_id: int) -> None:
         """Extract strokes."""
-        table_obj = self.table_model(table_id)
-        stroke_sidecar_id = table_obj.stroke_sidecar.identifier
-        if stroke_sidecar_id == 0:  # pragma: no cover
-            return
-        sidecar_obj = self.objects[stroke_sidecar_id]
+        sidecar = self.get_object(
+            self.table_model(table_id).stroke_sidecar.identifier,
+            TSTArchives.StrokeSidecarArchive,
+        )
         strokes = []
         strokes.extend(
-            self.extract_strokes_in_layers(table_id, sidecar_obj.top_row_stroke_layers, "top"),
+            self.extract_strokes_in_layers(table_id, sidecar.top_row_stroke_layers, "top"),
         )
         strokes.extend(
-            self.extract_strokes_in_layers(table_id, sidecar_obj.left_column_stroke_layers, "left"),
+            self.extract_strokes_in_layers(table_id, sidecar.left_column_stroke_layers, "left"),
         )
         strokes.extend(
             self.extract_strokes_in_layers(
                 table_id,
-                sidecar_obj.right_column_stroke_layers,
+                sidecar.right_column_stroke_layers,
                 "right",
             ),
         )
         strokes.extend(
             self.extract_strokes_in_layers(
                 table_id,
-                sidecar_obj.bottom_row_stroke_layers,
+                sidecar.bottom_row_stroke_layers,
                 "bottom",
             ),
         )
@@ -2844,12 +2860,15 @@ class NumbersModel(Cacheable):
         num_cols = self.table_model(table_id).number_of_columns
 
         # Clear existing stroke layers to prepare for rebuilt, optimized strokes
-        table_obj = self.table_model(table_id)
-        sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]
-        clear_field_container(sidecar_obj.top_row_stroke_layers)
-        clear_field_container(sidecar_obj.bottom_row_stroke_layers)
-        clear_field_container(sidecar_obj.left_column_stroke_layers)
-        clear_field_container(sidecar_obj.right_column_stroke_layers)
+        table_model = self.table_model(table_id)
+        sidecar = self.get_object(
+            table_model.stroke_sidecar.identifier,
+            TSTArchives.StrokeSidecarArchive,
+        )
+        clear_field_container(sidecar.top_row_stroke_layers)
+        clear_field_container(sidecar.bottom_row_stroke_layers)
+        clear_field_container(sidecar.left_column_stroke_layers)
+        clear_field_container(sidecar.right_column_stroke_layers)
 
         # Horizontal strokes (all but bottom of table)
         for row in range(num_rows):
@@ -2919,33 +2938,37 @@ class NumbersModel(Cacheable):
         length: int,
     ) -> None:
         """Add stroke."""
-        table_obj = self.table_model(table_id)
-        sidecar_obj = self.objects[table_obj.stroke_sidecar.identifier]
-        sidecar_obj.row_count = table_obj.number_of_rows
-        sidecar_obj.column_count = table_obj.number_of_columns
-        sidecar_obj.max_order = 2
+        table_model = self.table_model(table_id)
+        sidecar = self.get_object(
+            table_model.stroke_sidecar.identifier,
+            TSTArchives.StrokeSidecarArchive,
+        )
+        sidecar.row_count = table_model.number_of_rows
+        sidecar.column_count = table_model.number_of_columns
+        sidecar.max_order = 2
 
         if side == "top":
-            layer_ids = sidecar_obj.top_row_stroke_layers
+            layer_ids = sidecar.top_row_stroke_layers
             row_column_index = row
             origin = col
         elif side == "right":
-            layer_ids = sidecar_obj.right_column_stroke_layers
+            layer_ids = sidecar.right_column_stroke_layers
             row_column_index = col
             origin = row
         elif side == "bottom":
-            layer_ids = sidecar_obj.bottom_row_stroke_layers
+            layer_ids = sidecar.bottom_row_stroke_layers
             row_column_index = row
             origin = col
         else:  # left border
-            layer_ids = sidecar_obj.left_column_stroke_layers
+            layer_ids = sidecar.left_column_stroke_layers
             row_column_index = col
             origin = row
 
         stroke_layer = None
         for layer_id in layer_ids:
-            if self.objects[layer_id.identifier].row_column_index == row_column_index:
-                stroke_layer = self.objects[layer_id.identifier]
+            tmp_stroke_layer = self.get_object(layer_id.identifier, TSTArchives.StrokeLayerArchive)
+            if tmp_stroke_layer.row_column_index == row_column_index:
+                stroke_layer = tmp_stroke_layer
         if stroke_layer is not None:
             stroke_layer.stroke_runs.append(self.create_stroke(origin, length, border_value))
             stroke_layer.stroke_runs.sort(key=lambda x: x.origin)
@@ -2998,10 +3021,18 @@ class NumbersModel(Cacheable):
             return None
 
         return {
-            NumbersUUID(self.objects[_id].group_uid): cell_value_to_key(
-                self.objects[_id].group_cell_value,
+            NumbersUUID(
+                self.get_object(
+                    group_id,
+                    TSTArchives.GroupByArchive.GroupNodeArchive,
+                ).group_uid,
+            ): cell_value_to_key(
+                self.get_object(
+                    group_id,
+                    TSTArchives.GroupByArchive.GroupNodeArchive,
+                ).group_cell_value,
             )
-            for _id in self.find_refs("GroupNodeArchive")
+            for group_id in self.find_refs("GroupNodeArchive")
         }
 
     @cache()
@@ -3016,16 +3047,26 @@ class NumbersModel(Cacheable):
             self.table_categories_row_mapper[table_id] = None
             return
 
-        category_archive_id = self.objects[category_owner_id].group_by[0].identifier
-        category_archive = self.objects[category_archive_id]
+        category_archive_id = (
+            self.get_object(category_owner_id, TSTArchives.CategoryOwnerRefArchive)
+            .group_by[0]
+            .identifier
+        )
+        category_archive = self.get_object(category_archive_id, TSTArchives.GroupByArchive)
         if not category_archive.is_enabled:
             self.table_categories_data[table_id] = None
             self.table_categories_row_mapper[table_id] = None
             return
 
         table_info = self.table_info(table_id=table_id)
-        category_order = self.objects[table_info.category_order.identifier]
-        row_uid_map = self.objects[category_order.uid_map.identifier]
+        category_order = self.get_object(
+            table_info.category_order.identifier,
+            TSTArchives.CategoryOrderArchive,
+        )
+        row_uid_map = self.get_object(
+            category_order.uid_map.identifier,
+            TSTArchives.ColumnRowUIDMapArchive,
+        )
 
         group_uuids = self.group_uuid_values()
         row_uuid_to_offset = {
@@ -3074,7 +3115,7 @@ class NumbersModel(Cacheable):
                 row_mapper[row] = mapped_row
                 row += 1
 
-        def node_to_structure(node: dict[str, object]) -> dict[str, object]:
+        def node_to_structure(node: dict[str, Any]) -> dict[str, Any]:
             """Convert a protobuf node into a structured representation."""
             if not node["children"]:
                 return node["rows"]
@@ -3107,8 +3148,10 @@ class NumbersModel(Cacheable):
                     continue
 
                 table_model = self.table_model(table_id)
-                pivot_owner_id = table_model.pivot_owner.identifier
-                pivot_owner = self.objects[pivot_owner_id]
+                pivot_owner = self.get_object(
+                    table_model.pivot_owner.identifier,
+                    TSTArchives.PivotOwnerArchive,
+                )
 
                 # Only touch the data refresh trackers. Do not alter rule UUIDs.
                 pivot_owner.refresh_uid.CopyFrom(NumbersUUID().protobuf2)
@@ -3123,11 +3166,11 @@ class NumbersModel(Cacheable):
         """Keep UID maps and dependency bounds in sync with data dimensions."""
         table_model = self.table_model(table_id)
 
-        def _update_map(uid_map_ref: Sequence[ProtoMessage]) -> None:  # noqa: C901
+        def _update_map(uid_map_ref: TSPMessages.Reference) -> None:  # noqa: C901
             """Update map."""
             if not uid_map_ref or uid_map_ref.identifier == 0:
                 return
-            uid_map = self.objects[uid_map_ref.identifier]
+            uid_map = self.get_object(uid_map_ref.identifier, TSTArchives.ColumnRowUIDMapArchive)
 
             col_uuids = [
                 NumbersUUID(uid_map.sorted_column_uids[i]) for i in uid_map.column_uid_for_index
@@ -3181,7 +3224,10 @@ class NumbersModel(Cacheable):
 
         calc_engine = self.calc_engine()
         for dep_ref in calc_engine.dependency_tracker.formula_owner_dependencies:
-            dep_archive = self.objects[dep_ref.identifier]
+            dep_archive = self.get_object(
+                dep_ref.identifier,
+                TSCEArchives.FormulaOwnerDependenciesArchive,
+            )
             if (
                 dep_archive.owner_kind == OwnerKind.TABLE_MODEL
                 and dep_archive.formula_owner.identifier == table_info_id
@@ -3194,12 +3240,15 @@ class NumbersModel(Cacheable):
                     spanning.body_range_for_table.bottom_right_column = num_cols - 1
 
 
-def rgb(obj: ProtoMessage) -> RGB:
+def rgb(obj: TSPMessages.Color) -> RGB:
     """Convert a TSPArchives.Color into an RGB tuple."""
     return RGB(round(obj.r * 255), round(obj.g * 255), round(obj.b * 255))
 
 
-def range_end(obj: ProtoMessage) -> int:
+def range_end(
+    obj: ASTColonTractArchive.ASTColonTractRelativeRangeArchive
+    | ASTColonTractArchive.ASTColonTractAbsoluteRangeArchive,
+) -> int:
     """Select end range for a IndexSetArchive.IndexSetEntry."""
     if obj.HasField("range_end"):
         return obj.range_end
@@ -3276,7 +3325,7 @@ def clear_field_container(obj: MutableSequence[object]) -> None:
         _ = obj.pop()
 
 
-def field_references(obj: object) -> dict:
+def field_references(obj: ProtoMessage) -> dict[str, dict[str, int]]:
     """Return a dict of all fields in an object that are references to other objects."""
     return {
         x[0].name: {"identifier": getattr(obj, x[0].name).identifier}
