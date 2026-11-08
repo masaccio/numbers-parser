@@ -306,18 +306,19 @@ class NumbersModel(Cacheable):
     @cache(num_args=0)
     def calc_engine_id(self) -> int:
         """Return the CalculationEngine ID for the current document."""
-        ce_id = self.find_refs("CalculationEngineArchive")
-        if len(ce_id) == 0:
-            return 0
-        return ce_id[0]
+        try:
+            ce_id = self.find_refs("CalculationEngineArchive")
+            return ce_id[0]
+        except IndexError as e:
+            # Issue #17 breaks but the CalculationEngine is fundamental
+            # to the function of numbers-parser
+            msg = "Documents without a CalculationEngine archive are unsupported"
+            raise UnsupportedError(msg) from e
 
     @cache(num_args=0)
-    def calc_engine(self) -> TSCEArchives.CalculationEngineArchive | None:
+    def calc_engine(self) -> TSCEArchives.CalculationEngineArchive:
         """Return the CalculationEngine object for the current document."""
-        ce_id = self.calc_engine_id()
-        if ce_id == 0:
-            return None
-        return cast("TSCEArchives.CalculationEngineArchive", self.objects[ce_id])
+        return self.get_object(self.calc_engine_id(), TSCEArchives.CalculationEngineArchive)
 
     def sheet_ids(self) -> list[int]:
         """Return the sheet identifiers associated with this table."""
@@ -1478,8 +1479,10 @@ class NumbersModel(Cacheable):
 
         table_model = self.table_model(table_id)
         bds = self.table_model(table_id).base_data_store
-        bucket_id = bds.rowHeaders.buckets[0].identifier
-        buckets = self.objects[bucket_id].headers
+        buckets = self.get_object(
+            bds.rowHeaders.buckets[0].identifier,
+            TSTArchives.HeaderStorageBucket,
+        ).headers
         bucket_map = {x.index: x for x in buckets}
         if row in bucket_map and bucket_map[row].size != 0.0:
             height = round(bucket_map[row].size)
@@ -1508,8 +1511,10 @@ class NumbersModel(Cacheable):
 
         table_model = self.table_model(table_id)
         bds = self.table_model(table_id).base_data_store
-        bucket_id = bds.columnHeaders.identifier
-        buckets = self.objects[bucket_id].headers
+        buckets = self.get_object(
+            bds.columnHeaders.identifier,
+            TSTArchives.HeaderStorageBucket,
+        ).headers
         bucket_map = {x.index: x for x in buckets}
         if col in bucket_map and bucket_map[col].size != 0.0:
             width = round(bucket_map[col].size)
@@ -1590,7 +1595,7 @@ class NumbersModel(Cacheable):
         number_of_header_columns: int = 1,
     ) -> int:
         """Add table."""
-        from_table = self.objects[from_table_id]
+        from_table = self.get_object(from_table_id, TSTArchives.TableModelArchive)
 
         table_strings_id, _ = self.create_string_table()
 
@@ -1732,7 +1737,7 @@ class NumbersModel(Cacheable):
         self.create_caption_archive(table_model_id)
         self.caption_enabled(table_model_id, False)  # noqa: FBT003
 
-        self.objects[sheet_id].drawable_infos.append(
+        self.get_object(sheet_id, TNArchives.SheetArchive).drawable_infos.append(
             TSPMessages.Reference(identifier=table_info_id),
         )
 
