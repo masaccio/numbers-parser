@@ -66,7 +66,7 @@ from numbers_parser.constants import (
     FormatType,
     OwnerKind,
 )
-from numbers_parser.containers import ObjectStore
+from numbers_parser.containers import ObjectStore, _ProtobufType
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
@@ -94,6 +94,12 @@ if TYPE_CHECKING:
     from collections.abc import MutableSequence, Sequence
 
     from google.protobuf.message import Message as ProtoMessage
+
+    from numbers_parser.generated.TSCEArchives_pb2 import ASTNodeArrayArchive
+
+    ASTNodeArchive = ASTNodeArrayArchive.ASTNodeArchive
+    ASTColonTractArchive = ASTNodeArrayArchive.ASTColonTractArchive
+
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
@@ -162,7 +168,7 @@ class DataLists(Cacheable):
         table_model = self._model.table_model(table_id)
         base_data_store = table_model.base_data_store
         datalist_id = getattr(base_data_store, self._datalist_name).identifier
-        datalist = cast("TSTArchives.TableDataList", self._model.objects[datalist_id])
+        datalist = self._model.get_object(datalist_id, TSTArchives.TableDataList)
 
         max_key = 0
         self._datalists[table_id] = {}
@@ -279,6 +285,10 @@ class NumbersModel(Cacheable):
         self.refresh_pivot_tables()
         self.objects.save(filepath, package, password, hint)
 
+    def get_object(self, key: int, expected_type: type[_ProtobufType]) -> _ProtobufType:
+        """Fetch an object from the object store and cast it to the expected Protobuf class."""
+        return self.objects.get_as(key, expected_type)
+
     def find_refs(self, ref: str) -> list[int]:
         """Find refs."""
         return self.objects.find_refs(ref)
@@ -286,12 +296,28 @@ class NumbersModel(Cacheable):
     @property
     def document_archive(self) -> TNArchives.DocumentArchive:
         """Return the Document protobuf archive for the current document."""
-        return cast("TNArchives.DocumentArchive", self.objects[DOCUMENT_ID])
+        return self.get_object(DOCUMENT_ID, TNArchives.DocumentArchive)
 
     @property
     def package_metadata(self) -> TSPArchiveMessages.PackageMetadata:
         """Return the metadata archive for the current document."""
-        return cast("TSPArchiveMessages.PackageMetadata", self.objects[PACKAGE_ID])
+        return self.get_object(PACKAGE_ID, TSPArchiveMessages.PackageMetadata)
+
+    @cache(num_args=0)
+    def calc_engine_id(self) -> int:
+        """Return the CalculationEngine ID for the current document."""
+        ce_id = self.find_refs("CalculationEngineArchive")
+        if len(ce_id) == 0:
+            return 0
+        return ce_id[0]
+
+    @cache(num_args=0)
+    def calc_engine(self) -> TSCEArchives.CalculationEngineArchive | None:
+        """Return the CalculationEngine object for the current document."""
+        ce_id = self.calc_engine_id()
+        if ce_id == 0:
+            return None
+        return cast("TSCEArchives.CalculationEngineArchive", self.objects[ce_id])
 
     def sheet_ids(self) -> list[int]:
         """Return the sheet identifiers associated with this table."""
@@ -305,7 +331,7 @@ class NumbersModel(Cacheable):
         """Return the name of the sheet containing the table."""
         if sheet_id not in self.objects:
             return None
-        sheet_archive = cast("TNArchives.SheetArchive", self.objects[sheet_id])
+        sheet_archive = self.get_object(sheet_id, TNArchives.SheetArchive)
         if value is None:
             if sheet_id not in self.objects:
                 return None
@@ -320,9 +346,9 @@ class NumbersModel(Cacheable):
     def table_info_id(self, table_id: int) -> int:
         """Return the TableInfoArchive ID for a given tale ID."""
         ids = [
-            x
-            for x in self.objects.find_refs("TableInfoArchive")
-            if cast("TSTArchives.TableInfoArchive", self.objects[x]).tableModel.identifier
+            table_info_id
+            for table_info_id in self.objects.find_refs("TableInfoArchive")
+            if self.get_object(table_info_id, TSTArchives.TableInfoArchive).tableModel.identifier
             == table_id
         ]
         return ids[0]
@@ -331,11 +357,11 @@ class NumbersModel(Cacheable):
         """Return the TableInfo archive given its ID."""
         if not table_info_id:
             table_info_id = self.table_info_id(table_id)
-        return cast("TSTArchives.TableInfoArchive", self.objects[table_info_id])
+        return self.get_object(table_info_id, TSTArchives.TableInfoArchive)
 
     def table_model(self, table_id: int) -> TSTArchives.TableModelArchive:
         """Return the TableModel archive for a table ID."""
-        return cast("TSTArchives.TableModelArchive", self.objects[table_id])
+        return self.get_object(table_id, TSTArchives.TableModelArchive)
 
     def table_ids(self, sheet_id: int | None = None) -> list:
         """
@@ -394,14 +420,14 @@ class NumbersModel(Cacheable):
             table_info.super.caption_hidden = not enabled
             return None
         caption_info_id = table_info.super.caption.identifier
-        caption_archive = cast("TSDArchives.StandinCaptionArchive", self.objects[caption_info_id])
+        caption_archive = self.get_object(caption_info_id, TSDArchives.StandinCaptionArchive)
         if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":
             return False
         return not table_info.super.caption_hidden
 
     def find_style_id(self, style_substr: str) -> int:
         """Find style id."""
-        stylesheet = self.objects[self.stylesheet_id()]
+        stylesheet = self.get_object(self.stylesheet_id(), TSSArchives.StylesheetArchive)
         caption_styles = [
             x for x in stylesheet.identifier_to_style_map if style_substr in x.identifier.lower()
         ]
@@ -410,9 +436,9 @@ class NumbersModel(Cacheable):
     def caption_paragraph_style_id(self) -> int:
         """Return the paragraph style identifier for the table caption."""
         style_map = {
-            x: self.objects[x]
-            for x in self.find_refs("ParagraphStyleArchive")
-            if "Caption" in self.objects[x].super.name
+            style_id: self.get_object(style_id, TSWPArchives.ParagraphStyleArchive)
+            for style_id in self.find_refs("ParagraphStyleArchive")
+            if "Caption" in self.get_object(style_id, TSWPArchives.ParagraphStyleArchive).super.name
         }
         return next(iter(style_map.keys()))
 
@@ -421,7 +447,7 @@ class NumbersModel(Cacheable):
         """Return the identifier of the table stylesheet."""
         return self.find_refs("StylesheetArchive")[0]
 
-    def set_reference(self, obj: object, ref_id: int) -> None:
+    def set_reference(self, obj: TSPMessages.Reference, ref_id: int) -> None:
         """Set reference."""
         obj.MergeFrom(TSPMessages.Reference(identifier=ref_id))
 
@@ -518,7 +544,7 @@ class NumbersModel(Cacheable):
                 location="CalculationEngine",
                 component_id=self.stylesheet_id(),
             )
-        caption_info.super.MergeFrom(
+        cast("TSAArchives.CaptionInfoArchive", caption_info).super.MergeFrom(
             TSWPArchives.ShapeInfoArchive(
                 is_text_box=True,
                 owned_storage=TSPMessages.Reference(identifier=storage_id),
@@ -533,7 +559,10 @@ class NumbersModel(Cacheable):
         )
 
         self.set_reference(table_info.super.caption, caption_info_id)
-        component = self.metadata_component(self.calc_engine_id())
+        component = cast(
+            "TSPArchiveMessages.ComponentInfo",
+            self.metadata_component_info(self.calc_engine_id()),
+        )
         component.object_uuid_map_entries.append(
             TSPArchiveMessages.ObjectUUIDMapEntry(
                 identifier=caption_info_id,
@@ -551,23 +580,32 @@ class NumbersModel(Cacheable):
             if caption is None:
                 return "Caption"
             self.create_caption_archive(table_id)
-            caption_info_id = table_info.super.caption.identifier
-            caption_archive = self.objects[caption_info_id]
+            caption_archive = self.get_object(
+                table_info.super.caption.identifier,
+                TSDArchives.StandinCaptionArchive,
+            )
+        else:
+            caption_archive = cast("TSAArchives.CaptionInfoArchive", caption_archive)
 
-        caption_storage_id = caption_archive.super.owned_storage.identifier
+        storage_archive = self.get_object(
+            caption_archive.super.owned_storage.identifier,
+            TSWPArchives.StorageArchive,
+        )
         if caption is not None:
-            clear_field_container(self.objects[caption_storage_id].text)
-            self.objects[caption_storage_id].text.append(caption)
+            clear_field_container(storage_archive.text)
+            storage_archive.text.append(caption)
             return None
-        if len(self.objects[caption_storage_id].text) == 0:
+        if len(storage_archive.text) == 0:
             return "Caption"
-        return self.objects[caption_storage_id].text[0]
+        return storage_archive.text[0]
 
     @cache(num_args=0)
     def custom_format_map(self) -> dict[str, ProtoMessage]:
         """Return the custom-format mapping for the document."""
-        custom_format_list_id = self.document_archive.super.custom_format_list.identifier
-        custom_format_list = self.objects[custom_format_list_id]
+        custom_format_list = self.get_object(
+            self.document_archive.super.custom_format_list.identifier,
+            TSKArchives.CustomFormatListArchive,
+        )
         return {
             NumbersUUID(u).hex: custom_format_list.custom_formats[i]
             for i, u in enumerate(custom_format_list.uuids)
@@ -752,8 +790,10 @@ class NumbersModel(Cacheable):
         self._custom_format_archives[formatting.name] = format_archive
         self._custom_format_uuids[formatting.name] = format_uuid
 
-        custom_format_list_id = self.document_archive.super.custom_format_list.identifier
-        custom_format_list = self.objects[custom_format_list_id]
+        custom_format_list = self.get_object(
+            self.document_archive.super.custom_format_list.identifier,
+            TSKArchives.CustomFormatListArchive,
+        )
         custom_format_list.custom_formats.append(format_archive)
         custom_format_list.uuids.append(format_uuid)
 
@@ -785,7 +825,7 @@ class NumbersModel(Cacheable):
     def table_style(self, table_id: int, key: int) -> str:
         """Return the style associated with a style ID for a particular table."""
         style_entry = self.table_styles.lookup_value(table_id, key)
-        return self.objects[style_entry.reference.identifier]
+        return self.get_object(style_entry.reference.identifier, TSTArchives.CellStyleArchive)
 
     @cache(num_args=2)
     def table_string(self, table_id: int, key: int) -> str:
@@ -829,21 +869,25 @@ class NumbersModel(Cacheable):
         # For haunted owner archive types, map formula_owner_uids to their base_owner_uids
         """Calculate table uuid map."""
         haunted_owner_ids = [
-            obj_id
-            for obj_id in self.find_refs("FormulaOwnerDependenciesArchive")
-            if self.objects[obj_id].owner_kind == OwnerKind.HAUNTED_OWNER
+            dependency_id
+            for dependency_id in self.find_refs("FormulaOwnerDependenciesArchive")
+            if self.get_object(
+                dependency_id,
+                TSCEArchives.FormulaOwnerDependenciesArchive,
+            ).owner_kind
+            == OwnerKind.HAUNTED_OWNER
         ]
         if len(haunted_owner_ids) == 0:
             # Some older documents (see issue-18) do not use FormulaOwnerDependenciesArchive
             self._table_id_to_base_id = {}
             return
 
-        formula_owner_to_base_owner_map = {
-            uuid_to_hex(self.objects[obj_id].formula_owner_uid): uuid_to_hex(
-                self.objects[obj_id].base_owner_uid,
-            )
-            for obj_id in haunted_owner_ids
-        }
+        formula_owner_to_base_owner_map = {}
+        for obj_id in haunted_owner_ids:
+            archive = self.get_object(obj_id, TSCEArchives.FormulaOwnerDependenciesArchive)
+            formula_owner_uid = uuid_to_hex(archive.formula_owner_uid)
+            base_owner_uid = uuid_to_hex(archive.base_owner_uid)
+            formula_owner_to_base_owner_map[formula_owner_uid] = base_owner_uid
 
         # Map table IDs to the base_owner_uids of the formula owners that match
         # the table model's haunted owner
@@ -854,7 +898,13 @@ class NumbersModel(Cacheable):
             for table_id in self.table_ids()
         }
         self._table_base_id_to_formula_owner_id = {
-            uuid_to_hex(self.objects[obj_id].base_owner_uid): obj_id for obj_id in haunted_owner_ids
+            uuid_to_hex(
+                self.get_object(
+                    obj_id,
+                    TSCEArchives.FormulaOwnerDependenciesArchive,
+                ).base_owner_uid,
+            ): obj_id
+            for obj_id in haunted_owner_ids
         }
 
     @cache()
@@ -862,22 +912,6 @@ class NumbersModel(Cacheable):
         """Find the base UUID for a table."""
         # Table can be empty if the document does not use FormulaOwnerDependenciesArchive
         return self._table_id_to_base_id.get(table_id)
-
-    @cache(num_args=0)
-    def calc_engine_id(self) -> int:
-        """Return the CalculationEngine ID for the current document."""
-        ce_id = self.find_refs("CalculationEngineArchive")
-        if len(ce_id) == 0:
-            return 0
-        return ce_id[0]
-
-    @cache(num_args=0)
-    def calc_engine(self) -> ProtoMessage | None:
-        """Return the CalculationEngine object for the current document."""
-        ce_id = self.calc_engine_id()
-        if ce_id == 0:
-            return None
-        return self.objects[ce_id]
 
     def add_merge_range(
         self,
@@ -910,7 +944,9 @@ class NumbersModel(Cacheable):
     def calculate_merges_using_formula_stores(self, table_id: int) -> int:
         """Calculate merges using formula stores."""
 
-        def get_range_end(archive: object) -> int:
+        def get_range_end(
+            archive: ASTColonTractArchive.ASTColonTractAbsoluteRangeArchive,
+        ) -> int:
             # range_end is optional
             """Return the end coordinate of a range, or its start if unset."""
             return archive.range_end if archive.HasField("range_end") else archive.range_begin
@@ -946,7 +982,7 @@ class NumbersModel(Cacheable):
         formula_table_ids = self.find_refs("FormulaOwnerDependenciesArchive")
         merge_count = 0
         for formula_id in formula_table_ids:
-            dependencies = self.objects[formula_id]
+            dependencies = self.get_object(formula_id, TSCEArchives.FormulaOwnerDependenciesArchive)
             if dependencies.owner_kind != OwnerKind.MERGE_OWNER:
                 continue
             for record in dependencies.range_dependencies.back_dependency:
@@ -977,7 +1013,10 @@ class NumbersModel(Cacheable):
             return
 
         merge_count = 0
-        cell_ranges = self.objects[base_data_store.merge_region_map.identifier]
+        cell_ranges = self.get_object(
+            base_data_store.merge_region_map.identifier,
+            TSTArchives.MergeRegionMapArchive,
+        )
         for cell_range in cell_ranges.cell_range:
             (col_start, row_start) = (
                 cell_range.origin.packedData >> 16,
@@ -1031,14 +1070,14 @@ class NumbersModel(Cacheable):
         table_id: int,
         row: int,
         col: int,
-        node: TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive,
+        node: ASTNodeArchive,
     ) -> CellRange:
         """Convert a formula node into a cell reference."""
 
         def resolve_range(
             is_absolute: bool,
-            absolute_list: Sequence[ProtoMessage],
-            relative_list: Sequence[ProtoMessage],
+            absolute_list: Sequence[ASTColonTractArchive.ASTColonTractAbsoluteRangeArchive],
+            relative_list: Sequence[ASTColonTractArchive.ASTColonTractRelativeRangeArchive],
             offset: int,
             max_val: int,
         ) -> int:
@@ -1051,8 +1090,8 @@ class NumbersModel(Cacheable):
 
         def resolve_range_end(
             is_absolute: bool,
-            absolute_list: Sequence[ProtoMessage],
-            relative_list: Sequence[ProtoMessage],
+            absolute_list: Sequence[ASTColonTractArchive.ASTColonTractAbsoluteRangeArchive],
+            relative_list: Sequence[ASTColonTractArchive.ASTColonTractRelativeRangeArchive],
             offset: int,
             max_val: int,
         ) -> int:
@@ -1147,18 +1186,20 @@ class NumbersModel(Cacheable):
         )
 
     @cache()
-    def formula_ast(self, table_id: int) -> dict[int, Sequence[ProtoMessage]]:
+    def formula_ast(
+        self,
+        table_id: int,
+    ) -> dict[int, Sequence[TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive]]:
         """Return the parsed formula AST for a table."""
         bds = self.table_model(table_id).base_data_store
-        formula_table_id = bds.formula_table.identifier
-        formula_table = self.objects[formula_table_id]
+        formula_table = self.get_object(bds.formula_table.identifier, TSTArchives.TableDataList)
         formulas = {}
         for formula in formula_table.entries:
             formulas[formula.key] = formula.formula.AST_node_array.AST_node
         return formulas
 
     @cache()
-    def storage_buffers(self, table_id: int) -> dict:
+    def storage_buffers(self, table_id: int) -> dict[int, list[bytes]]:
         # Keyed by absolute row index: rows without data have no rowInfo
         # so the position in rowInfos is not the row number.
         """Return the cell storage buffers for a table."""
@@ -1166,7 +1207,7 @@ class NumbersModel(Cacheable):
         bds = self.table_model(table_id).base_data_store
         tile_size = bds.tiles.tile_size or DEFAULT_TILE_SIZE
         for tile_ref in bds.tiles.tiles:
-            tile = self.objects[tile_ref.tile.identifier]
+            tile = self.get_object(tile_ref.tile.identifier, TSTArchives.Tile)
             if not tile.last_saved_in_BNC:
                 msg = "Pre-BNC storage is unsupported"
                 raise UnsupportedError(msg)
@@ -1195,7 +1236,8 @@ class NumbersModel(Cacheable):
             current_row_heights[row] = self.row_height(table_id, row)
 
         base_data_store = self.table_model(table_id).base_data_store
-        buckets = self.objects[base_data_store.rowHeaders.buckets[0].identifier]
+        bucket_id = base_data_store.rowHeaders.buckets[0].identifier
+        buckets = cast("TSTArchives.HeaderStorageBucket", self.objects[bucket_id])
         clear_field_container(buckets.headers)
 
         for row, cells in enumerate(data):
@@ -1216,7 +1258,8 @@ class NumbersModel(Cacheable):
             current_column_widths[col] = self.col_width(table_id, col)
 
         base_data_store = self.table_model(table_id).base_data_store
-        buckets = self.objects[base_data_store.columnHeaders.identifier]
+        bucket_id = base_data_store.columnHeaders.identifier
+        buckets = cast("TSTArchives.HeaderStorageBucket", self.objects[bucket_id])
         clear_field_container(buckets.headers)
         # Transpose data to get columns
         col_data = [list(x) for x in zip(*data, strict=False)]
@@ -1288,8 +1331,11 @@ class NumbersModel(Cacheable):
         return row_info
 
     @cache()
-    def metadata_component(self, reference: str | int | None = None) -> int:
-        """Return the ID of an object in the document metadata given it's name or ID."""
+    def metadata_component_info(
+        self,
+        reference: str | int | None = None,
+    ) -> TSPArchiveMessages.ComponentInfo:
+        """Return the component info of an object in the document metadata given it's name or ID."""
         component_map = {c.identifier: c for c in self.package_metadata.components}
         if isinstance(reference, str):
             component_ids = [
@@ -1297,7 +1343,7 @@ class NumbersModel(Cacheable):
             ]
         else:
             component_ids = [x for x, c in component_map.items() if c.identifier == reference]
-        return component_map[component_ids[0]]
+        return cast("TSPArchiveMessages.ComponentInfo", component_map[component_ids[0]])
 
     def add_component_metadata(self, object_id: int, parent: str, locator: str) -> None:
         """Add a new ComponentInfo record to the parent object in the document metadata."""
@@ -1327,7 +1373,7 @@ class NumbersModel(Cacheable):
         is_weak: bool = False,
     ) -> None:
         """Add an external reference to an object in a metadata component."""
-        component = self.metadata_component(location or component_id)
+        component = self.metadata_component_info(location or component_id)
         if component_id is not None:
             params = {"object_identifier": object_id, "component_identifier": component_id}
         else:
