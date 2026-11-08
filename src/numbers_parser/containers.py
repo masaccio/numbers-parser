@@ -5,15 +5,18 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, cast, overload
 
+from google.protobuf.message import Message as ProtoMessage
+
 from numbers_parser.constants import DOCUMENT_ID, PACKAGE_ID, SUPPORTED_NUMBERS_VERSIONS
 from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
 from numbers_parser.iwork import IWork, IWorkHandler
 
 if TYPE_CHECKING:
-    from google.protobuf.message import Message as ProtoMessage  # noqa: TC004
-
     import numbers_parser.generated.TSPArchiveMessages_pb2 as TSPArchiveMessage
     from numbers_parser.model import NumbersModel
+
+
+_ProtoT = TypeVar("_ProtoT", bound=ProtoMessage)
 
 
 class _NamedItem(Protocol):
@@ -24,24 +27,24 @@ class _NamedItem(Protocol):
         """str: The name of the item."""
 
 
-_T = TypeVar("_T", bound=_NamedItem)
+_ItemT = TypeVar("_ItemT", bound=_NamedItem)
 
 
-class ItemsList(Generic[_T]):
+class ItemsList(Generic[_ItemT]):
     """Provide indexed and named access to model-backed items."""
 
-    def __init__(self, model: "NumbersModel", refs: list[int], item_class: type[_T]) -> None:
+    def __init__(self, model: "NumbersModel", refs: list[int], item_class: type[_ItemT]) -> None:
         """Initialize the instance state."""
         self._item_name = item_class.__name__.lower()
         self._items = [item_class(model, x) for x in refs]  # type: ignore[call-arg]
 
     @overload
-    def __getitem__(self, key: int) -> _T: ...  # pragma: no cover
+    def __getitem__(self, key: int) -> _ItemT: ...  # pragma: no cover
 
     @overload
-    def __getitem__(self, key: str) -> _T: ...  # pragma: no cover
+    def __getitem__(self, key: str) -> _ItemT: ...  # pragma: no cover
 
-    def __getitem__(self, key: int | str) -> _T:
+    def __getitem__(self, key: int | str) -> _ItemT:
         """Return the item at the requested key or index."""
         if isinstance(key, int):
             if key < 0:
@@ -68,7 +71,7 @@ class ItemsList(Generic[_T]):
         """Return whether the value is present."""
         return key.lower() in [x.name.lower() for x in self._items]
 
-    def append(self, item: _T) -> None:
+    def append(self, item: _ItemT) -> None:
         """Append the value."""
         self._items.append(item)
 
@@ -199,8 +202,8 @@ class ObjectStore(IWorkHandler):
         """Return or update the IWA files associated with the object store."""
         return self._file_store
 
-    def __getitem__(self, key: int) -> ProtoMessage:
-        """Return the item at the requested key or index."""
+    def __getitem__(self, key: int) -> "ProtoMessage":
+        """Return a generically typed object from the store."""
         return self._objects[key]
 
     def __contains__(self, key: int) -> bool:
@@ -211,7 +214,10 @@ class ObjectStore(IWorkHandler):
         """Return the number of contained items."""
         return len(self._objects)
 
-    # Don't cache: new tables and sheets can be added at runtime
+    def get_as(self, key: int, _expected_type: type[_ProtoT]) -> _ProtoT:
+        """Fetch an object from the store and cast it to the expected Protobuf class."""
+        return cast("_expected_type", self._objects[key])
+
     def find_refs(self, ref_name: str) -> list[int]:
         """Find refs."""
         return [k for k, v in self._objects.items() if type(v).__name__ == ref_name]
