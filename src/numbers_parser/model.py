@@ -580,7 +580,7 @@ class NumbersModel(Cacheable):
             self.create_caption_archive(table_id)
             caption_archive = self.get_object(
                 table_info.super.caption.identifier,
-                TSDArchives.StandinCaptionArchive,
+                TSAArchives.CaptionInfoArchive,
             )
         else:
             caption_archive = cast("TSAArchives.CaptionInfoArchive", caption_archive)
@@ -1897,36 +1897,33 @@ class NumbersModel(Cacheable):
             self.get_object(self.document_archive.theme.identifier, TNArchives.ThemeArchive).super,
             "paragraph_style_presets",
         )
-        presets_map = {
-            self.get_object(x.identifier, TSWPArchives.ParagraphStyleArchive).super.name: {
-                "id": x.identifier,
-                "obj": self.get_object(x.identifier, TSWPArchives.ParagraphStyleArchive),
-            }
-            for x in presets
-        }
-        styles = {
-            k: Style(
+
+        styles = {}
+        for x in presets:
+            style_obj = self.get_object(x.identifier, TSWPArchives.ParagraphStyleArchive)
+            name = style_obj.super.name
+            styles[name] = Style(
                 alignment=Alignment(
-                    HorizontalJustification(v["obj"].para_properties.alignment),
+                    HorizontalJustification(style_obj.para_properties.alignment),
                     VerticalJustification(0),
                 ),
-                font_color=self.cell_font_color(v["obj"]),
-                font_size=self.cell_font_size(v["obj"]),
-                font_name=self.cell_font_family(v["obj"]),
-                bold=self.cell_is_bold(v["obj"]),
-                italic=self.cell_is_italic(v["obj"]),
-                underline=self.cell_is_underline(v["obj"]),
-                strikethrough=self.cell_is_strikethrough(v["obj"]),
-                name=self.cell_style_name(v["obj"]),
-                _text_style_obj_id=v["id"],
-                _font_details=self.cell_font_details(v["obj"]),
+                font_color=self.cell_font_color(style_obj),
+                font_size=self.cell_font_size(style_obj),
+                font_name=self.cell_font_family(style_obj),
+                bold=self.cell_is_bold(style_obj),
+                italic=self.cell_is_italic(style_obj),
+                underline=self.cell_is_underline(style_obj),
+                strikethrough=self.cell_is_strikethrough(style_obj),
+                name=self.cell_style_name(style_obj),
+                _text_style_obj_id=x.identifier,
+                _font_details=self.cell_font_details(style_obj),
             )
-            for k, v in presets_map.items()
-        }
+
         for style in styles.values():
             # Override __setattr__ behavior for builtin styles
             style.__dict__["_update_text_style"] = False
             style.__dict__["_update_cell_style"] = False
+
         return styles
 
     def add_paragraph_style(self, style: Style) -> int:
@@ -1940,7 +1937,8 @@ class NumbersModel(Cacheable):
         else:
             strikethru = CharacterStyle.StrikethruType.kNoStrikethru
 
-        style_id_name = "numbers-parser-" + style.name.lower().replace(" ", "-")
+        name_str = style.name if style.name is not None else "Custom Style"
+        style_id_name = "numbers-parser-" + name_str.lower().replace(" ", "-")
         para_style_id, para_style = self.objects.create_object_from_dict(
             "DocumentStylesheet",
             {
