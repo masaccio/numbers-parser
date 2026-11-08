@@ -214,9 +214,13 @@ class ObjectStore(IWorkHandler):
         """Return the number of contained items."""
         return len(self._objects)
 
-    def get_as(self, key: int, _expected_type: type[_ProtoT]) -> _ProtoT:
+    def get_as(
+        self,
+        key: int,
+        expected_type: type[_ProtoT],  # noqa: ARG002, pylint: disable=unused-argument
+    ) -> _ProtoT:
         """Fetch an object from the store and cast it to the expected Protobuf class."""
-        return cast("_expected_type", self._objects[key])
+        return cast("_ProtoT", self._objects[key])
 
     def find_refs(self, ref_name: str) -> list[int]:
         """Find refs."""

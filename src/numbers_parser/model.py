@@ -66,7 +66,7 @@ from numbers_parser.constants import (
     FormatType,
     OwnerKind,
 )
-from numbers_parser.containers import ObjectStore, _ProtobufType
+from numbers_parser.containers import ObjectStore, _ProtoT
 from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.formula import TableFormulas
 from numbers_parser.generated import TNArchives_pb2 as TNArchives
@@ -285,7 +285,7 @@ class NumbersModel(Cacheable):
         self.refresh_pivot_tables()
         self.objects.save(filepath, package, password, hint)
 
-    def get_object(self, key: int, expected_type: type[_ProtobufType]) -> _ProtobufType:
+    def get_object(self, key: int, expected_type: type[_ProtoT]) -> _ProtoT:
         """Fetch an object from the object store and cast it to the expected Protobuf class."""
         return self.objects.get_as(key, expected_type)
 
