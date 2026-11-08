@@ -1895,9 +1895,9 @@ class NumbersModel(Cacheable):
         theme_id = self.document_archive.theme.identifier
         presets = find_extension(self.objects[theme_id].super, "paragraph_style_presets")
         presets_map = {
-            self.objects[x.identifier].super.name: {
+            self.get_object(x.identifier, TSWPArchives.ParagraphStyleArchive).super.name: {
                 "id": x.identifier,
-                "obj": self.objects[x.identifier],
+                "obj": self.get_object(x.identifier, TSWPArchives.ParagraphStyleArchive),
             }
             for x in presets
         }
@@ -2007,7 +2007,7 @@ class NumbersModel(Cacheable):
             strikethru = CharacterStyle.StrikethruType.kSingleStrikethru
         else:
             strikethru = CharacterStyle.StrikethruType.kNoStrikethru
-        style_obj = self.objects[style._text_style_obj_id]
+        style_obj = self.get_object(style._text_style_obj_id, TSWPArchives.ParagraphStyleArchive)
         style_obj.char_properties.font_color.r = style.font_color.r / 255
         style_obj.char_properties.font_color.g = style.font_color.g / 255
         style_obj.char_properties.font_color.b = style.font_color.b / 255
@@ -2052,21 +2052,28 @@ class NumbersModel(Cacheable):
             for _, cell in enumerate(cells):
                 if cell._style is not None and cell._style._update_cell_style:
                     fingerprint = (
-                        str(cell.style.alignment.vertical)
-                        + str(cell.style.first_indent)
-                        + str(cell.style.left_indent)
-                        + str(cell.style.right_indent)
-                        + str(cell.style.text_inset)
-                        + str(cell.style.text_wrap)
+                        str(cell._style.alignment.vertical)
+                        + str(cell._style.first_indent)
+                        + str(cell._style.left_indent)
+                        + str(cell._style.right_indent)
+                        + str(cell._style.text_inset)
+                        + str(cell._style.text_wrap)
                     )
+
                     if cell._style.bg_color is not None:
-                        fingerprint = fingerprint + (
-                            str(cell.style.bg_color.r)
-                            + str(cell.style.bg_color.g)
-                            + str(cell.style.bg_color.b)
-                        )
+                        if isinstance(cell._style.bg_color, list):
+                            for color in cell._style.bg_color:
+                                fingerprint += str(color.r) + str(color.g) + str(color.b)
+                        else:
+                            fingerprint += (
+                                str(cell._style.bg_color.r)
+                                + str(cell._style.bg_color.g)
+                                + str(cell._style.bg_color.b)
+                            )
+
                     if cell._style.bg_image is not None:
                         fingerprint += cell._style.bg_image.filename
+
                     if fingerprint not in cell_styles:
                         cell_styles[fingerprint] = self.add_cell_style(cell._style)
                     cell._style._cell_style_obj_id = cell_styles[fingerprint]
@@ -2100,20 +2107,51 @@ class NumbersModel(Cacheable):
                 },
             }
         elif style.bg_color is not None:
-            color_attrs = {
-                "cell_fill": {
-                    "color": {
-                        "model": "rgb",
-                        "r": style.bg_color.r / 255,
-                        "g": style.bg_color.g / 255,
-                        "b": style.bg_color.b / 255,
-                        "a": 1.0,
-                        "rgbspace": "srgb",
+            if isinstance(style.bg_color, list):
+                stops = []
+                for i, color in enumerate(style.bg_color):
+                    fraction = i / (len(style.bg_color) - 1) if len(style.bg_color) > 1 else 1.0
+                    stops.append(
+                        {
+                            "color": {
+                                "model": "rgb",
+                                "r": color.r / 255,
+                                "g": color.g / 255,
+                                "b": color.b / 255,
+                                "a": 1.0,
+                                "rgbspace": "srgb",
+                            },
+                            "fraction": float(fraction),
+                            "inflection": 0.5,
+                        },
+                    )
+                color_attrs = {
+                    "cell_fill": {
+                        "gradient": {
+                            "type": "Linear",
+                            "opacity": 1.0,
+                            "advancedGradient": True,
+                            "anglegradient": {"gradientangle": 0.0},
+                            "stops": stops,
+                        },
                     },
-                },
-            }
+                }
+            else:
+                color_attrs = {
+                    "cell_fill": {
+                        "color": {
+                            "model": "rgb",
+                            "r": style.bg_color.r / 255,
+                            "g": style.bg_color.g / 255,
+                            "b": style.bg_color.b / 255,
+                            "a": 1.0,
+                            "rgbspace": "srgb",
+                        },
+                    },
+                }
         else:
             color_attrs = {}
+
         cell_style_id, cell_style = self.objects.create_object_from_dict(
             "DocumentStylesheet",
             {
