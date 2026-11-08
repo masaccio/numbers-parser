@@ -1237,8 +1237,10 @@ class NumbersModel(Cacheable):
             current_row_heights[row] = self.row_height(table_id, row)
 
         base_data_store = self.table_model(table_id).base_data_store
-        bucket_id = base_data_store.rowHeaders.buckets[0].identifier
-        buckets = cast("TSTArchives.HeaderStorageBucket", self.objects[bucket_id])
+        buckets = self.get_object(
+            base_data_store.rowHeaders.buckets[0].identifier,
+            TSTArchives.HeaderStorageBucket,
+        )
         clear_field_container(buckets.headers)
 
         for row, cells in enumerate(data):
@@ -1259,8 +1261,10 @@ class NumbersModel(Cacheable):
             current_column_widths[col] = self.col_width(table_id, col)
 
         base_data_store = self.table_model(table_id).base_data_store
-        bucket_id = base_data_store.columnHeaders.identifier
-        buckets = cast("TSTArchives.HeaderStorageBucket", self.objects[bucket_id])
+        buckets = self.get_object(
+            base_data_store.columnHeaders.identifier,
+            TSTArchives.HeaderStorageBucket,
+        )
         clear_field_container(buckets.headers)
         # Transpose data to get columns
         col_data = [list(x) for x in zip(*data, strict=False)]
@@ -1892,8 +1896,10 @@ class NumbersModel(Cacheable):
     @cache(num_args=0)
     def available_paragraph_styles(self) -> dict[str, Style]:
         """Return the paragraph styles available in the document."""
-        theme_id = self.document_archive.theme.identifier
-        presets = find_extension(self.objects[theme_id].super, "paragraph_style_presets")
+        presets = find_extension(
+            self.get_object(self.document_archive.theme.identifier, TNArchives.ThemeArchive).super,
+            "paragraph_style_presets",
+        )
         presets_map = {
             self.get_object(x.identifier, TSWPArchives.ParagraphStyleArchive).super.name: {
                 "id": x.identifier,
@@ -1983,16 +1989,19 @@ class NumbersModel(Cacheable):
         )
         stylesheet_id = self.document_archive.stylesheet.identifier
         para_style.super.stylesheet.MergeFrom(TSPMessages.Reference(identifier=stylesheet_id))
-        self.objects[stylesheet_id].styles.append(TSPMessages.Reference(identifier=para_style_id))
-        self.objects[stylesheet_id].identifier_to_style_map.append(
+        stylesheet_archive = self.get_object(stylesheet_id, TSSArchives.StylesheetArchive)
+        stylesheet_archive.styles.append(TSPMessages.Reference(identifier=para_style_id))
+        stylesheet_archive.identifier_to_style_map.append(
             TSSArchives.StylesheetArchive.IdentifiedStyleEntry(
                 identifier=style_id_name,
                 style=TSPMessages.Reference(identifier=para_style_id),
             ),
         )
 
-        theme_id = self.document_archive.theme.identifier
-        presets = find_extension(self.objects[theme_id].super, "paragraph_style_presets")
+        presets = find_extension(
+            self.get_object(self.document_archive.theme.identifier, TNArchives.ThemeArchive).super,
+            "paragraph_style_presets",
+        )
         presets.append(TSPMessages.Reference(identifier=para_style_id))
         self._styles[style.name] = style
         return para_style_id
@@ -2179,8 +2188,9 @@ class NumbersModel(Cacheable):
 
         stylesheet_id = self.document_archive.stylesheet.identifier
         cell_style.super.stylesheet.MergeFrom(TSPMessages.Reference(identifier=stylesheet_id))
-        self.objects[stylesheet_id].styles.append(TSPMessages.Reference(identifier=cell_style_id))
-        self.objects[stylesheet_id].identifier_to_style_map.append(
+        stylesheet_archive = self.get_object(stylesheet_id, TSSArchives.StylesheetArchive)
+        stylesheet_archive.styles.append(TSPMessages.Reference(identifier=cell_style_id))
+        stylesheet_archive.identifier_to_style_map.append(
             TSSArchives.StylesheetArchive.IdentifiedStyleEntry(
                 identifier=style_id_name,
                 style=TSPMessages.Reference(identifier=cell_style_id),
@@ -2212,9 +2222,16 @@ class NumbersModel(Cacheable):
         stylesheet_id = self.document_archive.stylesheet.identifier
         current_styles = self.styles.keys()
         custom_styles = [x for x in current_styles if re.fullmatch(r"Custom Style \d+", x)]
-        for style_entry in self.objects[stylesheet_id].identifier_to_style_map:
+        for style_entry in self.get_object(
+            stylesheet_id,
+            TSSArchives.StylesheetArchive,
+        ).identifier_to_style_map:
             style_id = style_entry.style.identifier
-            style_name = getattr(self.objects[style_id].super, "name", "")
+            style_name = getattr(
+                self.get_object(style_id, TSWPArchives.ShapeStyleArchive).super,
+                "name",
+                "",
+            )
             if re.fullmatch(r"Custom Style \d+", style_name):
                 custom_styles.append(style_name)
 
@@ -2228,10 +2245,13 @@ class NumbersModel(Cacheable):
     def custom_formats(self) -> dict[str, CustomFormatting]:
         """Return the custom formats defined in the document."""
         if self._custom_formats is None:
-            custom_format_list_id = self.document_archive.super.custom_format_list.identifier
-            custom_formats = self.objects[custom_format_list_id].custom_formats
+            custom_format_list = self.get_object(
+                self.document_archive.super.custom_format_list.identifier,
+                TSKArchives.CustomFormatListArchive,
+            )
+            custom_formats = custom_format_list.custom_formats
             custom_format_names = [x.name for x in custom_formats]
-            custom_format_uuids = list(self.objects[custom_format_list_id].uuids)
+            custom_format_uuids = list(custom_format_list.uuids)
             self._custom_formats = {}
             self._custom_format_archives = {}
             self._custom_format_uuids = {}
@@ -2271,12 +2291,20 @@ class NumbersModel(Cacheable):
         string_key: int,
     ) -> dict | None:
         """Extract bullets and hyperlinks from a rich text data cell."""
-        bds = self.table_model(table_id).base_data_store
-        rich_text_table = self.objects[bds.rich_text_table.identifier]
+        rich_text_table = self.get_object(
+            self.table_model(table_id).base_data_store.rich_text_table.identifier,
+            TSTArchives.TableDataList,
+        )
         for entry in rich_text_table.entries:  # pragma: no branch
             if string_key == entry.key:
-                payload = self.objects[entry.rich_text_payload.identifier]
-                payload_storage = self.objects[payload.storage.identifier]
+                payload = self.get_object(
+                    entry.rich_text_payload.identifier,
+                    TSTArchives.RichTextPayloadArchive,
+                )
+                payload_storage = self.get_object(
+                    payload.storage.identifier,
+                    TSWPArchives.StorageArchive,
+                )
                 smartfield_entries = payload_storage.table_smartfield.entries
                 cell_text = payload_storage.text[0] if len(payload_storage.text) > 0 else ""
 

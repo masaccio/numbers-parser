@@ -21,7 +21,9 @@ from numbers_parser.generated.mapping import ID_NAME_MAP, NAME_CLASS_MAP, NAME_I
 from numbers_parser.generated.TSPArchiveMessages_pb2 import ArchiveInfo
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterator, MutableSequence
+
+    from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 
 logger = logging.getLogger(__name__)
 debug = logger.debug
@@ -452,7 +454,7 @@ def extensions(obj: ProtoMessage) -> list[ProtoMessage]:
     return [extensions_dict[field] for field, _ in obj.ListFields() if field.is_extension]
 
 
-def find_extension(obj: ProtoMessage, name: str) -> object:
+def find_extension(obj: ProtoMessage, name: str) -> MutableSequence[TSPMessages.Reference]:
     """Find extension."""
     all_extensions = extensions(obj)
     filtered = [getattr(x, name) for x in all_extensions if getattr(x, name, None) is not None]
