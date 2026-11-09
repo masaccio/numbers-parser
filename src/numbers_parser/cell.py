@@ -990,12 +990,12 @@ class Cell(_CellStorageFlags, Cacheable):
     ) -> None:
         """Create a cell instance from its archive storage."""
 
-        def unpack_int(buffer: bytes, offset: int) -> tuple[int, int]:
+        def unpack_int(buffer: bytearray, offset: int) -> tuple[int, int]:
             """Read an integer value from the cell storage buffer."""
             flag = unpack("<i", buffer[offset : offset + 4])[0]
             return (flag, offset + 4)
 
-        def unpack_double(buffer: bytes, offset: int) -> tuple[int, int]:
+        def unpack_double(buffer: bytearray, offset: int) -> tuple[int, int]:
             """Read a floating-point value from the cell storage buffer."""
             flag = unpack("<d", buffer[offset : offset + 8])[0]
             return (flag, offset + 8)
