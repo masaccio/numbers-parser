@@ -6,9 +6,12 @@ from __future__ import annotations
 from collections.abc import Iterator  # noqa: TC003
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any, TypeVarTuple, Unpack, overload
 from warnings import warn
 
 from numbers_parser.cell import (
+    RGB,
+    Alignment,
     BackgroundImage,
     Border,
     Cell,
@@ -35,6 +38,8 @@ from numbers_parser.containers import ItemsList
 from numbers_parser.model import NumbersModel
 from numbers_parser.numbers_cache import Cacheable
 from numbers_parser.xrefs import xl_cell_to_rowcol, xl_range
+
+Ts = TypeVarTuple("Ts")
 
 __all__ = ["Document", "Sheet", "Table"]
 
@@ -243,7 +248,26 @@ class Document:
         )
         self._sheets.append(new_sheet)
 
-    def add_style(self, **kwargs: object) -> Style:
+    def add_style(  # pylint: disable=unused-argument
+        self,
+        *,
+        alignment: Alignment | None = None,
+        bg_image: BackgroundImage | None = None,
+        bg_color: RGB | list[RGB] | None = None,
+        font_color: RGB | None = None,
+        font_size: float | None = None,
+        font_name: str | None = None,
+        bold: bool | None = None,
+        italic: bool | None = None,
+        strikethrough: bool | None = None,
+        underline: bool | None = None,
+        first_indent: float | None = None,
+        left_indent: float | None = None,
+        right_indent: float | None = None,
+        text_inset: float | None = None,
+        text_wrap: bool | None = None,
+        name: str | None = None,
+    ) -> Style:
         r"""
         Add a new style to the current document.
 
@@ -266,8 +290,38 @@ class Document:
 
         Parameters
         ----------
-        kwargs: dict, optional
-            Key-value pairs to pass to the :py:class:`~numbers_parser.Style` constructor.
+        alignment: Alignment, optional, default: Alignment("auto", "top")
+            Horizontal and vertical alignment of the cell
+        bg_image: BackgroundImage, optional, default: None
+            Background image for the cell
+        bg_color: RGB | List[RGB], optional, default: None
+            Background color or list of colors for gradients
+        bold: bool, optional, default: False
+            ``True`` if the cell font is bold
+        font_color: RGB, optional, default: RGB(0, 0, 0)
+            Font color
+        font_size: float, optional, default: DEFAULT_FONT_SIZE
+            Font size in points
+        font_name: str | tuple[str, str], optional, default: DEFAULT_FONT
+            Font name or a tuple of font family and style
+        italic: bool, optional, default: False
+            ``True`` if the cell font is italic
+        name: str, optional
+            Style name
+        underline: bool, optional, default: False
+            ``True`` if the cell font is underlined
+        strikethrough: bool, optional, default: False
+            ``True`` if the cell font uses strikethrough
+        first_indent: float, optional, default: 0.0
+            First-line indent in points
+        left_indent: float, optional, default: 0.0
+            Left indent in points
+        right_indent: float, optional, default: 0.0
+            Right indent in points
+        text_inset: float, optional, default: DEFAULT_TEXT_INSET
+            Text inset in points
+        text_wrap: bool, optional, default: True
+            ``True`` if text wrapping is enabled
 
         Raises
         ------
@@ -279,6 +333,7 @@ class Document:
             or if any of the ``bool`` parameters are invalid.
 
         """
+        kwargs = {k: v for k, v in locals().items() if k != "self" and v is not None}
         if "name" in kwargs and kwargs["name"] is not None and kwargs["name"] in self._model.styles:
             msg = f"style '{kwargs['name']}' already exists"
             raise IndexError(msg)
@@ -1052,10 +1107,22 @@ class Table(Cacheable):
             for cell in row[min_col : max_col + 1]:
                 yield cell.value if values_only else cell
 
-    def _validate_cell_coords(
+    @overload
+    def _validate_cell_coords(  # pragma: no cover
         self,
-        *args: int | str | _CellValue | Style | Border | list[str],
-    ) -> tuple[int | str | _CellValue | Style | Border | list[str], ...]:
+        cell_ref: str,
+        *args: Unpack[Ts],
+    ) -> tuple[int, int, Unpack[Ts]]: ...
+
+    @overload
+    def _validate_cell_coords(  # pragma: no cover
+        self,
+        row: int,
+        col: int,
+        *args: Unpack[Ts],
+    ) -> tuple[int, int, Unpack[Ts]]: ...
+
+    def _validate_cell_coords(self, *args: Any) -> Any:
         """Validate cell coords."""
         if isinstance(args[0], str):
             (row, col) = xl_cell_to_rowcol(args[0])
@@ -1085,7 +1152,7 @@ class Table(Cacheable):
         for _ in range(self.num_cols, col + 1):
             self.add_column()
 
-        return (row, col, *tuple(values))
+        return (row, col, *values)
 
     def write(
         self,
