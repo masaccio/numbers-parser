@@ -14,6 +14,7 @@ from base64 import b64decode
 from binascii import hexlify
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 from compact_json import Formatter
 
@@ -86,7 +87,7 @@ class NumbersUnpacker(IWorkHandler):
         with contextlib.suppress(OSError):
             os.makedirs(os.path.join(*([str(self.output_dir), *list(parts[:-1])])))
 
-    def prettify_uuids(self, obj: dict | list) -> None:  # noqa: C901
+    def prettify_uuids(self, obj: dict | list) -> None:
         """Replace UUID values with readable labels in extracted data."""
         if isinstance(obj, dict):
             for k, v in obj.items():
@@ -97,8 +98,8 @@ class NumbersUnpacker(IWorkHandler):
                         self.prettify_uuids(v)
                 elif isinstance(v, list):
                     self.prettify_uuids(v)
-        elif isinstance(obj, list):
-            for i, v in enumerate(obj):
+        else:  # must be a list
+            for i, v in enumerate(cast("list", obj)):
                 if isinstance(v, dict):
                     try:
                         obj[i] = str(NumbersUUID(v))
@@ -120,8 +121,8 @@ class NumbersUnpacker(IWorkHandler):
                     offsets = array("h", b64decode(obj[k])).tolist()
                     obj[k] = ",".join([str(x) for x in offsets])
                     obj[k] = re.sub(r"(?:,-1)+$", ",[...]", obj[k])
-        elif isinstance(obj, list):
-            for v in obj:
+        else:  # must be a list
+            for v in cast("list", obj):
                 if isinstance(v, (dict, list)):
                     self.prettify_cell_storage(v)
 

@@ -92,7 +92,7 @@ def command_line_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--experimental",
         type=experimental_feature_choice,
-        choices=[ExperimentalFeatures[name] for name in experimental_choices],
+        choices=[ExperimentalFeatures[str(name)] for name in experimental_choices],
         help=argparse.SUPPRESS,
     )
     return parser
@@ -100,13 +100,13 @@ def command_line_parser() -> argparse.ArgumentParser:
 
 def print_sheet_names(filename: str, password: str | None) -> None:
     """Print sheet names."""
-    for sheet in Document(filename, password=password).sheets:
+    for sheet in Document(filename, password=password).sheets:  # type: ignore[attr-defined]
         print(f"{filename}: {sheet.name}")
 
 
 def print_table_names(filename: str, password: str | None) -> None:
     """Print table names."""
-    for sheet in Document(filename, password=password).sheets:
+    for sheet in Document(filename, password=password).sheets:  # type: ignore[attr-defined]
         for table in sheet.tables:
             print(f"{filename}: {sheet.name}: {table.name}")
 
@@ -121,9 +121,9 @@ def cell_as_string(args: argparse.Namespace, cell: Cell) -> str:
         return cell.formatted_value
     if isinstance(cell, NumberCell):
         return sigfig(cell.value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
-    if cell.value is None:
+    if getattr(cell, "value", None) is None:
         return ""
-    return str(cell.value)
+    return str(getattr(cell, "value", ""))
 
 
 def print_table(
@@ -133,7 +133,7 @@ def print_table(
 ) -> None:
     """Print table."""
     writer = csv.writer(sys.stdout, dialect="excel")
-    for sheet in Document(filename, password=password).sheets:
+    for sheet in Document(filename, password=password).sheets:  # type: ignore[attr-defined]
         if args.sheet is not None and sheet.name not in args.sheet:
             continue
         for table in sheet.tables:
