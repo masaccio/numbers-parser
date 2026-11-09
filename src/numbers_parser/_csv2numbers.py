@@ -9,41 +9,34 @@ import contextlib
 import csv
 import re
 import sys
-from abc import abstractmethod
 from copy import copy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import NamedTuple
+from typing import Any, cast
 
-from dateutil.parser import parse
+from dateutil.parser import parse  # type: ignore[import-untyped]
 
 from numbers_parser import Document, NumbersError, _get_version, xl_rowcol_to_cell
-
-
-class ColumnTransform(NamedTuple):
-    """Class for holding a column transformation rule."""
-
-    source: list[str]
-    dest: str
-    func: callable
 
 
 @dataclass
 class Converter:
     """Convert CSV data and formatting into a Numbers document."""
 
-    input_filename: str = None
-    output_filename: str = None
-    date_columns: list = None
+    input_filename: str | None = None
+    output_filename: str | None = None
+    date_columns: list | None = None
     day_first: bool = False
     no_header: bool = False
     reverse: bool = False
-    whitespace: bool = None
+    whitespace: bool | None = None
     encoding: str = "utf-8"
     password: str | None = None
+    header: list[Any] | None = field(init=False, default=None)
+    data: list[Any] = field(init=False, default_factory=list)
 
-    def __post_init__(self: Converter) -> None:
+    def __post_init__(self) -> None:
         """Parse CSV file with Pandas and return a dataframe."""
         self._read_csv()
         self._transform_data()
@@ -54,16 +47,16 @@ class Converter:
             dialect = csv.excel
             dialect.strict = True
             lineno = 1
-            with open(self.input_filename, encoding=self.encoding) as csvfile:
+            with open(str(self.input_filename), encoding=self.encoding) as csvfile:
                 csvreader = csv.reader(csvfile, dialect=dialect)
                 if self.no_header:
                     self.header = None
                 else:
-                    self.header = next(csvreader)
+                    self.header = [str(col or "") for col in next(csvreader)]
                     lineno += 1
                 self.data = []
                 for row in csvreader:
-                    self.data += [row]
+                    self.data.append([str(col or "") for col in row])
                     lineno += 1
         except FileNotFoundError as e:
             msg = f"{self.input_filename}: file not found"
@@ -78,23 +71,21 @@ class Converter:
 
     def _transform_data(self) -> None:
         """Apply type transformations to the data based in current configuration."""
-        # Convert data rows to dicts. csv.DictReader is not enough as we support CSV
-        # files with no header.
         if self.no_header:
             self.header = list(range(len(self.data[0])))
+        self.header = cast("list[str]", self.header)
         self.data = [dict(dict(zip(self.header, row, strict=False)).items()) for row in self.data]
-
         if self.reverse:
             self.data = list(reversed(self.data))
         is_date_column = {}
-        if self.date_columns is not None:
+        if self.date_columns is not None and self.header is not None:
             date_columns = [self._column_key(col) for col in self.date_columns]
             is_date_column = {x: x in date_columns for x in self.header}
         for row in self.data:
             for k, v in row.items():
                 if self.whitespace:
                     row[k] = re.sub(r"\s+", " ", v.strip())
-                if self.date_columns is not None and is_date_column[k]:
+                if self.date_columns is not None and is_date_column.get(k):
                     row[k] = self._parse_date(v)
                 else:
                     # Attempt to coerce value into float
@@ -108,22 +99,24 @@ class Converter:
             return header[column]
         return column
 
-    def rename_columns(self: Converter, mapper: dict) -> None:
+    def rename_columns(self, mapper: dict | None) -> None:
         """Rename columns using column map."""
         if mapper is None:
             return
         mapper = {self._column_key(key): value for key, value in mapper.items()}
         self.no_header = False
+        self.header = cast("list[str]", self.header)
         self.header = [mapper.get(x, x) for x in self.header]
         self.data = [
             {mapper.get(key, key): value for key, value in row.items()} for row in self.data
         ]
 
-    def delete_columns(self: Converter, columns: list) -> None:
+    def delete_columns(self, columns: list | None) -> None:
         """Delete columns from the data."""
         if columns is None:
             return
 
+        self.header = cast("list[str]", self.header)
         columns = [self._column_key(col) for col in columns]
         missing_columns = list(set(columns) - set(self.header))
         if len(missing_columns) > 0:
@@ -132,12 +125,12 @@ class Converter:
             raise RuntimeError(msg) from None
 
         for col in columns:
-            del self.header[self.header.index(col)]
+            self.header.remove(col)
         for row in self.data:
             for col in columns:
                 del row[col]
 
-    def transform_columns(self: Converter, columns: list[ColumnTransform]) -> None:
+    def transform_columns(self, columns: list[Transformer] | None) -> None:
         """Perform column transformations."""
         if columns is None:
             return
@@ -145,17 +138,17 @@ class Converter:
             resolved = copy(transform)
             resolved.sources = [self._column_key(source) for source in transform.sources]
             resolved.dest = self._column_key(transform.dest)
-            resolved.transform(self.header, self.data)
-            if resolved.dest not in self.header:
+            resolved.transform(self.header or [], self.data)
+            if self.header is not None and resolved.dest not in self.header:
                 self.header.append(resolved.dest)
 
-    def save(self: Converter) -> None:
+    def save(self) -> None:
         """Write dataframe transctions to a Numbers file."""
         doc = Document(num_rows=2, num_cols=2, password=self.password)
         table = doc.sheets[0].tables[0]
 
-        data = [] if self.no_header else [self.header]
-        data += [row.values() for row in self.data]
+        data: list[Any] = [] if self.no_header or self.header is None else [self.header]
+        data += [list(row.values()) for row in self.data]
 
         for row_num, row in enumerate(data):
             for col_num, value in enumerate(row):
@@ -168,24 +161,25 @@ class Converter:
                         date_time_format="d MMM yyyy",
                     )
 
-        doc.save(self.output_filename)
+        doc.save(str(self.output_filename))
 
 
 class Transformer:
     """Base class for column transformations."""
 
-    def __init__(self: Transformer, source: str, dest: str) -> None:
+    def __init__(self, source: str, dest: str | int) -> None:
         """Initialize the instance state."""
         self.row_num = 0
-        self.dest = int(dest) if dest.isnumeric() else dest
-        self.sources = [int(x) if x.isnumeric() else x for x in source.split(";")]
+        self.dest: str | int = int(dest) if isinstance(dest, str) and dest.isnumeric() else dest
+        self.sources: list[str | int] = [
+            int(x) if isinstance(x, str) and x.isnumeric() else x for x in str(source).split(";")
+        ]
 
-    @abstractmethod
-    def transform_row(self: Transformer, row: list[str]) -> list[str]:
+    def transform_row(self, row: dict) -> None:
         """Abstract base method for transforming rows using df.apply()."""
         raise NotImplementedError
 
-    def transform(self: Transformer, header: list[str], data: list[list[str]]) -> list[list[str]]:
+    def transform(self, header: list[str | int], data: list[dict]) -> None:
         """Column transform to merge columns."""
         if not all(x in header for x in self.sources):
             missing = list(set(self.sources) - set(header))
@@ -200,11 +194,11 @@ class Transformer:
 class MergeTransformer(Transformer):
     """Transformer for column MERGE operations."""
 
-    def transform_row(self: MergeTransformer, row: list[str]) -> list[str]:
+    def transform_row(self, row: dict) -> None:
         """Merge data in a single row."""
         value = None
         for col, col_name in enumerate(self.sources):
-            if row[col_name] != "":
+            if row.get(col_name, "") != "":
                 if value is not None:
                     ref = xl_rowcol_to_cell(self.row_num, col)
                     print(f"Warning: merge found multiple values for cell '{ref}'")
@@ -216,11 +210,11 @@ class MergeTransformer(Transformer):
 class NegTransformer(Transformer):
     """Transformer for column NEG operations."""
 
-    def transform_row(self: NegTransformer, row: list[str]) -> list[str]:
+    def transform_row(self, row: dict) -> None:
         """Select negative values for a row."""
-        value = ""
+        value: float | str = ""
         for col in self.sources:
-            if row[col] and not value and float(row[col]) < 0:
+            if row.get(col, "") and not value and float(row[col]) < 0:
                 value = abs(float(row[col]))
         row[self.dest] = value
 
@@ -228,11 +222,11 @@ class NegTransformer(Transformer):
 class PosTransformer(Transformer):
     """Transformer for column POS operations."""
 
-    def transform_row(self: PosTransformer, row: list[str]) -> list[str]:
+    def transform_row(self, row: dict) -> None:
         """Select positive values for a row."""
-        value = ""
+        value: float | str = ""
         for col in self.sources:
-            if row[col] and not value and float(row[col]) > 0:
+            if row.get(col, "") and not value and float(row[col]) > 0:
                 value = float(row[col])
         row[self.dest] = value
 
@@ -240,7 +234,7 @@ class PosTransformer(Transformer):
 class LookupTransformer(Transformer):
     """Transformer for column LOOKUP operations."""
 
-    def __init__(self: Transformer, source: str, dest: str) -> None:
+    def __init__(self, source: str, dest: str | int) -> None:
         """Initialize the instance state."""
         super().__init__(source, dest)
 
@@ -248,30 +242,31 @@ class LookupTransformer(Transformer):
             msg = f"'{self.sources}' LOOKUP must have exactly 2 arguments"
             raise RuntimeError(msg) from None
 
-        (source, map_filname) = self.sources
-        self.sources = [source]
+        source_val = self.sources[0]
+        map_filename = str(self.sources[1])
+        self.sources = [source_val]
 
-        if not Path(map_filname).exists():
-            msg = f"{map_filname}: no such file or directory"
+        if not Path(map_filename).exists():
+            msg = f"{map_filename}: no such file or directory"
             raise RuntimeError(msg) from None
 
         try:
-            doc = Document(map_filname)
+            doc = Document(map_filename)
             table = doc.sheets[0].tables[0]
             self.lookup_map = {
-                table.cell(row_num, 0).value: table.cell(row_num, 1).value
+                table.cell(row_num, 0).value: table.cell(row_num, 1).value  # type: ignore[attr-defined]
                 for row_num in range(table.num_rows)
             }
         except NumbersError as e:
-            msg = f"{map_filname}: {e!r}"
+            msg = f"{map_filename}: {e!r}"
             raise RuntimeError(msg) from e
 
-    def transform_row(self: LookupTransformer, row: list[str]) -> list[str]:
+    def transform_row(self, row: dict) -> None:
         """Column transform to map values based on a lookup table."""
         matches = [
             {"value": v, "len": len(k)}
             for k, v in self.lookup_map.items()
-            if re.search(k.lower(), row[self.sources[0]].lower())
+            if re.search(str(k).lower(), str(row.get(self.sources[0], "")).lower())
         ]
         if len(matches) > 0:
             row[self.dest] = max(matches, key=lambda x: x["len"])["value"]
@@ -305,15 +300,15 @@ def parse_column_renames(arg: str) -> dict:
                 msg = f"'{mapping}': column rename maps must be formatted 'OLD:NEW'"
                 raise argparse.ArgumentTypeError(msg)
             (old, new) = mapping.split(":")
-            old = int(old) if old.isnumeric() else old
-            mapper[old] = new
+            old_key = int(old) if old.isnumeric() else old
+            mapper[old_key] = new
     except csv.Error as e:
         msg = f"'{arg}': malformed CSV string"
         raise argparse.ArgumentTypeError(msg) from e
     return mapper
 
 
-def parse_column_transforms(arg: str) -> list[ColumnTransform]:
+def parse_column_transforms(arg: str) -> list[Transformer]:
     """Parse a list of column renames in Excel-compatible CSV format."""
     transforms = []
     try:
@@ -328,7 +323,7 @@ def parse_column_transforms(arg: str) -> list[ColumnTransform]:
             if func not in TRANSFORMERS:
                 msg = f"'{m.group(2)}': invalid transformation"
                 raise argparse.ArgumentTypeError(msg)
-            transforms.append(TRANSFORMERS[func.lower()](source, dest))
+            transforms.append(TRANSFORMERS[func.lower()](source, dest))  # type: ignore[abstract]
     except csv.Error as e:
         msg = f"'{arg}': malformed CSV string"
         raise argparse.ArgumentTypeError(msg) from e
@@ -406,10 +401,10 @@ def command_line_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> None:
+def main(args_list: list[str] | None = None) -> None:
     """Convert the document and exit."""
     parser = command_line_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args_list)
 
     if args.version:
         print(_get_version())
@@ -437,7 +432,7 @@ def main() -> None:
                 reverse=args.reverse,
                 date_columns=args.date,
                 input_filename=input_filename,
-                output_filename=output_filename,
+                output_filename=str(output_filename),
                 encoding=args.encoding,
                 password=args.password,
             )
