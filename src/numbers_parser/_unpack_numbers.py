@@ -37,21 +37,21 @@ class NumbersUnpacker(IWorkHandler):
     pretty: bool = False
     compact_json: bool = False
     redact_strings: bool = False
-    output_dir: str = None
+    output_dir: str | None = None
 
     def store_file(self, filename: str, blob: bytes) -> None:
         """Store a protobuf archive."""
         filename = re.sub(r".*\.numbers/", "", str(filename))
 
         # Resolve absolute paths to prevent Zip Slip
-        out_abs = os.path.realpath(self.output_dir)
+        out_abs = os.path.realpath(str(self.output_dir))
         target_abs = os.path.realpath(os.path.join(out_abs, filename))
         if os.path.commonpath([out_abs, target_abs]) != out_abs:
             msg = f"Path traversal attempt detected in archive member: {filename}"
             raise FileFormatError(msg)
 
         self.ensure_directory_exists(target_abs)
-        target_path = os.path.join(self.output_dir, filename)
+        target_path = os.path.join(str(self.output_dir), filename)
         if isinstance(blob, IWAFile):
             target_path = target_path.replace(".iwa", "")
             target_path += ".json"
@@ -84,9 +84,9 @@ class NumbersUnpacker(IWorkHandler):
         """Ensure that a path's directory exists."""
         parts = os.path.split(path)
         with contextlib.suppress(OSError):
-            os.makedirs(os.path.join(*([self.output_dir, *list(parts[:-1])])))
+            os.makedirs(os.path.join(*([str(self.output_dir), *list(parts[:-1])])))
 
-    def prettify_uuids(self, obj: object) -> None:
+    def prettify_uuids(self, obj: dict | list) -> None:  # noqa: C901
         """Replace UUID values with readable labels in extracted data."""
         if isinstance(obj, dict):
             for k, v in obj.items():
@@ -97,7 +97,7 @@ class NumbersUnpacker(IWorkHandler):
                         self.prettify_uuids(v)
                 elif isinstance(v, list):
                     self.prettify_uuids(v)
-        else:  # list
+        elif isinstance(obj, list):
             for i, v in enumerate(obj):
                 if isinstance(v, dict):
                     try:
@@ -107,7 +107,7 @@ class NumbersUnpacker(IWorkHandler):
                 elif isinstance(v, list):
                     self.prettify_uuids(v)
 
-    def prettify_cell_storage(self, obj: object) -> None:
+    def prettify_cell_storage(self, obj: dict | list) -> None:
         """Format cell storage fields for readable output."""
         if isinstance(obj, dict):
             for k, v in obj.items():
@@ -120,7 +120,7 @@ class NumbersUnpacker(IWorkHandler):
                     offsets = array("h", b64decode(obj[k])).tolist()
                     obj[k] = ",".join([str(x) for x in offsets])
                     obj[k] = re.sub(r"(?:,-1)+$", ",[...]", obj[k])
-        else:  # list
+        elif isinstance(obj, list):
             for v in obj:
                 if isinstance(v, (dict, list)):
                     self.prettify_cell_storage(v)
