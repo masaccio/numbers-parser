@@ -2,6 +2,7 @@
 
 import math
 import re
+from collections.abc import Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, cast, overload
 
@@ -70,6 +71,10 @@ class ItemsList(Generic[_ItemT]):
     def __contains__(self, key: str) -> bool:
         """Return whether the value is present."""
         return key.lower() in [x.name.lower() for x in self._items]
+
+    def __iter__(self) -> Iterator[_ItemT]:
+        """Return an iterator for the items."""
+        return iter(self._items)
 
     def append(self, item: _ItemT) -> None:
         """Append the value."""

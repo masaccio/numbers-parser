@@ -129,26 +129,26 @@ class BackgroundImage:
 
     Parameters
     ----------
-    data: bytes | None, optional
+    data: bytes
         Raw image data for a cell background image.
-    filename: str | None, optional
+    filename: str
         Path to the image file. Only the basename is stored.
 
     """
 
-    def __init__(self, data: bytes | None = None, filename: str | None = None) -> None:
+    def __init__(self, data: bytes, filename: str) -> None:
         """Initialize the instance state."""
         self._data = data
-        self._filename = basename(filename) if filename is not None else None
+        self._filename = basename(filename)
 
     @property
-    def data(self) -> bytes | None:
-        """bytes: The background image as bytes for a cell, or None if no image."""
+    def data(self) -> bytes:
+        """bytes: The background image as bytes for a cell."""
         return self._data
 
     @property
-    def filename(self) -> str | None:
-        """str: The image filename for a cell, or None if no image."""
+    def filename(self) -> str:
+        """str: The image filename for a cell."""
         return self._filename
 
 
@@ -987,7 +987,7 @@ class Cell(_CellStorageFlags, Cacheable):
         col: int,
         buffer: bytearray,
         model: object,
-    ) -> None:
+    ) -> Cell:
         """Create a cell instance from its archive storage."""
 
         def unpack_int(buffer: bytearray, offset: int) -> tuple[int, int]:

@@ -253,7 +253,7 @@ class NumbersModel(Cacheable):
     Do not use this class in application code.
     """
 
-    def __init__(self, filepath: Path, password: str | None) -> None:
+    def __init__(self, filepath: Path | None, password: str | None) -> None:
         """Initialize the instance state."""
         if filepath is None:
             filepath = Path(DEFAULT_DOCUMENT)
@@ -280,7 +280,7 @@ class NumbersModel(Cacheable):
         self.missing_fonts = {}
         self.calculate_table_uuid_map()
 
-    def save(self, filepath: Path, package: bool, password: str, hint: str) -> None:
+    def save(self, filepath: Path, package: bool, password: str | None, hint: str | None) -> None:
         """Save the value."""
         self.refresh_pivot_tables()
         self.objects.save(filepath, package, password, hint)
@@ -1537,7 +1537,7 @@ class NumbersModel(Cacheable):
             table_model.number_of_header_columns = num_headers
         return table_model.number_of_header_columns
 
-    def table_coordinates(self, table_id: int) -> tuple[float]:
+    def table_coordinates(self, table_id: int) -> tuple[float, float]:
         """Return the coordinates and dimensions of a table."""
         table_info = self.table_info(table_id=table_id)
         return (

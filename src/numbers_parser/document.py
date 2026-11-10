@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Iterator  # noqa: TC003
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, TypeVarTuple, Unpack, overload
+from typing import Any, TypeVarTuple, Unpack, cast, overload
 from warnings import warn
 
 from numbers_parser.cell import (
@@ -89,12 +89,12 @@ class Document:
     def __init__(  # noqa: PLR0917
         self,
         filename: str | Path | None = None,
-        sheet_name: str | None = "Sheet 1",
-        table_name: str | None = "Table 1",
-        num_header_rows: int | None = 1,
-        num_header_cols: int | None = 1,
-        num_rows: int | None = DEFAULT_ROW_COUNT,
-        num_cols: int | None = DEFAULT_COLUMN_COUNT,
+        sheet_name: str = "Sheet 1",
+        table_name: str = "Table 1",
+        num_header_rows: int = 1,
+        num_header_cols: int = 1,
+        num_rows: int = DEFAULT_ROW_COUNT,
+        num_cols: int = DEFAULT_COLUMN_COUNT,
         password: str | None = None,
     ) -> None:
         """Initialize the instance state."""
@@ -193,9 +193,9 @@ class Document:
     def add_sheet(
         self,
         sheet_name: str | None = None,
-        table_name: str | None = "Table 1",
-        num_rows: int | None = DEFAULT_ROW_COUNT,
-        num_cols: int | None = DEFAULT_COLUMN_COUNT,
+        table_name: str = "Table 1",
+        num_rows: int = DEFAULT_ROW_COUNT,
+        num_cols: int = DEFAULT_COLUMN_COUNT,
     ) -> None:
         """
         Add a new sheet to the current document.
@@ -342,7 +342,8 @@ class Document:
             if not isinstance(kwargs["bg_image"], BackgroundImage):
                 msg = "bg_image must be a BackgroundImage object"
                 raise TypeError(msg)
-            self._model.store_image((kwargs["bg_image"].data), kwargs["bg_image"].filename)
+            bg_image = cast("BackgroundImage", kwargs["bg_image"])
+            self._model.store_image(bg_image.data, bg_image.filename)
 
         style = Style(**kwargs)
         if style.name is None:
@@ -351,7 +352,7 @@ class Document:
         self._model.styles[style.name] = style
         return style
 
-    def add_custom_format(self, **kwargs: object) -> CustomFormatting:
+    def add_custom_format(self, **kwargs: dict[str, Any]) -> CustomFormatting:
         r"""
         Add a new custom format to the current document.
 
@@ -414,7 +415,7 @@ class Document:
             raise KeyError(msg)
 
         if "type" in kwargs:
-            format_type = kwargs["type"].upper()
+            format_type = cast("str", kwargs["type"]).upper()
             try:
                 kwargs["type"] = CustomFormattingType[format_type]
             except (KeyError, AttributeError):
@@ -443,6 +444,11 @@ class Sheet:
         refs = self._model.table_ids(self._sheet_id)
         self._tables = ItemsList(self._model, refs, Table)
 
+    def __repr__(self) -> str:
+        """Return a developer-friendly representation."""
+        class_name = f"{self.__class__.__module__}.{self.__class__.__name__}"
+        return f"{class_name}(name='{self.name}')"
+
     @property
     def tables(self) -> ItemsList[Table]:
         """ItemsList[:class:`Table`]: Tables indexed by position or name."""
@@ -452,11 +458,6 @@ class Sheet:
     def name(self) -> str:
         """str: The name of the sheet."""
         return self._model.sheet_name(self._sheet_id)
-
-    def __repr__(self) -> str:
-        """Return a developer-friendly representation."""
-        class_name = f"{self.__class__.__module__}.{self.__class__.__name__}"
-        return f"{class_name}(name='{self.name}')"
 
     @name.setter
     def name(self, value: str) -> None:
