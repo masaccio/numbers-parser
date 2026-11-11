@@ -328,17 +328,13 @@ class NumbersModel(Cacheable):
             if isinstance(self.objects[o.identifier], TNArchives.SheetArchive)
         ]
 
-    def sheet_name(self, sheet_id: int, value: str | None = None) -> str | None:
+    def sheet_name(self, sheet_id: int, value: str | None = None) -> str:
         """Return the name of the sheet containing the table."""
-        if sheet_id not in self.objects:
-            return None
         sheet_archive = self.get_object(sheet_id, TNArchives.SheetArchive)
         if value is None:
-            if sheet_id not in self.objects:
-                return None
             return sheet_archive.name
         sheet_archive.name = value
-        return None
+        return value
 
     def set_table_data(self, table_id: int, data: list) -> None:
         """Set table data."""

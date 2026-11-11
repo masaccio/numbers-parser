@@ -503,9 +503,6 @@ def test_issue_78(configurable_save_file):
         == doc.sheets[0].tables[1].cell(0, 0).style.bg_image.data
     )
 
-    # Coverage for Github debug log guard
-    assert doc._model.sheet_name(99999999) is None
-
 
 def test_issue_80():
     doc = Document("tests/data/issue-80.numbers")
