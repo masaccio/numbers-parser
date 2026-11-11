@@ -721,7 +721,7 @@ class Cell(_CellStorageFlags, Cacheable):
         self._double: float | None = None
         self._seconds: float | None = None
         self._datetime: datetime | None = None
-        self._model: NumbersModel = None
+        self._model: NumbersModel = None  # type: ignore[assignment]
         self._table_id: int = 0
         self._buffer: bytes | None = None
         super().__init__()
@@ -802,7 +802,7 @@ class Cell(_CellStorageFlags, Cacheable):
         """
         if self._formula_id is not None:
             table_formulas = self._model.table_formulas(self._table_id)
-            return table_formulas.formula(self._formula_id, self.row, self.col)
+            return str(table_formulas.formula(self._formula_id, self.row, self.col))
         return None
 
     @property
@@ -935,7 +935,10 @@ class Cell(_CellStorageFlags, Cacheable):
     @classmethod
     def _empty_cell(cls, table_id: int, row: int, col: int, model: NumbersModel) -> EmptyCell:
         """Create an empty cell at the specified table coordinate."""
-        return Cell._from_storage(table_id, row, col, EMPTY_STORAGE_BUFFER, model)
+        return cast(
+            "EmptyCell",
+            Cell._from_storage(table_id, row, col, EMPTY_STORAGE_BUFFER, model),
+        )
 
     @classmethod
     def _merged_cell(cls, table_id: int, row: int, col: int, model: NumbersModel) -> MergedCell:
@@ -957,13 +960,13 @@ class Cell(_CellStorageFlags, Cacheable):
         # TODO: write needs to retain/init the border
         """Create a cell instance for the supplied value."""
         if value is None:
-            cell = EmptyCell(row, col)
+            cell: Cell = EmptyCell(row, col)
         elif isinstance(value, str):
             cell = TextCell(row, col, value)
         elif isinstance(value, bool):
             cell = BoolCell(row, col, value)
         elif isinstance(value, int):
-            cell = NumberCell(row, col, value)
+            cell = NumberCell(row, col, float(value))
         elif isinstance(value, float):
             rounded_value = sigfig(value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
             if rounded_value != value:
@@ -1194,10 +1197,11 @@ class Cell(_CellStorageFlags, Cacheable):
             flags = 4
             length += 8
             cell_type = TSTArchives.dateCellType
-            if self._value.tzinfo is None:
-                date_delta = self._value - EPOCH
+            date_val = cast("datetime", self._value)
+            if date_val.tzinfo is None:
+                date_delta = date_val - EPOCH
             else:
-                date_delta = self._value - EPOCH.astimezone(self._value.tzinfo)
+                date_delta = date_val - EPOCH.astimezone(date_val.tzinfo)
             value = pack("<d", float(date_delta.total_seconds()))
         elif isinstance(self, BoolCell):
             flags = 2
@@ -1208,7 +1212,8 @@ class Cell(_CellStorageFlags, Cacheable):
             flags = 2
             length += 8
             cell_type = TSTArchives.durationCellType
-            value = pack("<d", float(self.value.total_seconds()))
+            duration_val = cast("timedelta", self.value)
+            value = pack("<d", float(duration_val.total_seconds()))
         elif isinstance(self, EmptyCell):
             flags = 0
             cell_type = TSTArchives.emptyCellValueType
@@ -1232,7 +1237,7 @@ class Cell(_CellStorageFlags, Cacheable):
                 UnsupportedWarning,
                 stacklevel=1,
             )
-            return None
+            return b""
 
         for field_id, bit in (
             (self._num_format_id, 0),
@@ -1320,12 +1325,12 @@ class Cell(_CellStorageFlags, Cacheable):
 
         return storage[0:length]
 
-    def _update_value(self, value: object, cell: Cell) -> None:
+    def _update_value(self, value: Any, cell: Cell) -> None:  # noqa: ANN401
         """Update value."""
         if cell._type == CellType.NUMBER:
-            self._d128 = value
+            self._d128 = cast("float", value)
         elif cell._type == CellType.DATE:
-            self._datetime = value
+            self._datetime = cast("datetime", value)
         self._value = value
 
     @property
@@ -1635,9 +1640,9 @@ class RichTextCell(Cell):
         if value["bulleted"]:
             self._formatted_bullets = [
                 (
-                    value["bullet_chars"][i] + " " + value["bullets"][i]
+                    str(value["bullet_chars"][i]) + " " + str(value["bullets"][i])
                     if value["bullet_chars"][i] is not None
-                    else value["bullets"][i]
+                    else str(value["bullets"][i])
                 )
                 for i in range(len(self._bullets))
             ]
@@ -1891,7 +1896,7 @@ def _decode_date_format(date_format: str, value: datetime) -> str:  # noqa: C901
                 if callable(s):
                     result += s(value)
                 else:
-                    result += value.strftime(s)
+                    result += value.strftime(str(s))
                 index += len(matched_field)
             else:
                 unknown_field = ""
@@ -2343,8 +2348,8 @@ class Formatting:
     currency_code: str = "GBP"
     date_time_format: str = DEFAULT_DATETIME_FORMAT
     duration_style: DurationStyle = DurationStyle.COMPACT
-    duration_unit_largest: DurationUnits = None
-    duration_unit_smallest: DurationUnits = None
+    duration_unit_largest: DurationUnits | None = None
+    duration_unit_smallest: DurationUnits | None = None
     decimal_places: int = None
     fraction_accuracy: FractionAccuracy = FractionAccuracy.THREE
     increment: float = 1.0
