@@ -606,7 +606,7 @@ class NumbersModel(Cacheable):
         }
 
     @cache(num_args=2)
-    def table_format(self, table_id: int, key: int) -> str:
+    def table_format(self, table_id: int, key: int) -> TSKArchives.FormatStructArchive:
         """Return the format associated with a format ID for a particular table."""
         return self._table_formats.lookup_value(table_id, key).format
 

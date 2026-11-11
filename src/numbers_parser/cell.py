@@ -551,12 +551,12 @@ class Border:  # noqa: PLW1641
         style_name = BorderType(self.style).name.lower()
         return f"Border(width={self.width}, color={self.color}, style={style_name})"
 
-    def __eq__(self, value: Border) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Compare this instance with another value."""
-        if value is None:
-            return False
+        if not isinstance(other, Border):
+            return NotImplemented
         return all(
-            [self.width == value.width, self.color == value.color, self.style == value.style],
+            [self.width == other.width, self.color == other.color, self.style == other.style],
         )
 
 
@@ -724,6 +724,7 @@ class Cell(_CellStorageFlags, Cacheable):
         self._model: NumbersModel = None  # type: ignore[assignment]
         self._table_id: int = 0
         self._buffer: bytes | None = None
+        self._flags: int = 0
         super().__init__()
 
     @property
@@ -1063,6 +1064,7 @@ class Cell(_CellStorageFlags, Cacheable):
             storage_flags._comment_id, offset = unpack_int(buffer, offset)
         # Skip 0x100000 (import_warning_id)
 
+        cell: Cell
         cell_type = buffer[1]
         if cell_type == TSTArchives.genericCellType:
             cell = EmptyCell(row, col)
@@ -1458,14 +1460,14 @@ class Cell(_CellStorageFlags, Cacheable):
             duration_format.duration_style,
         )
 
-        duration_style = duration_format.duration_style
-        unit_largest = duration_format.duration_unit_largest
-        unit_smallest = duration_format.duration_unit_smallest
+        duration_style = DurationStyle(duration_format.duration_style)
+        unit_largest = DurationUnits(duration_format.duration_unit_largest)
+        unit_smallest = DurationUnits(duration_format.duration_unit_smallest)
         if duration_format.use_automatic_duration_units:
             unit_smallest, unit_largest = _auto_units(self._double, duration_format)
 
-        d = self._double
-        dd = int(self._double)
+        d = self._double or 0.0
+        dd = int(self._double or 0.0)
         dstr = []
 
         def unit_in_range(
@@ -2431,7 +2433,7 @@ class CustomFormatting:
             raise TypeError(msg)
 
     @classmethod
-    def from_archive(cls, archive: object) -> CustomFormatting:
+    def from_archive(cls, archive: TSKArchives.CustomFormatArchive) -> CustomFormatting:
         """Create a Style from an archived style definition."""
         if archive.format_type == FormatType.CUSTOM_DATE:
             format_type = CustomFormattingType.DATETIME
