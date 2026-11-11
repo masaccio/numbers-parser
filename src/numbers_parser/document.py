@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Iterator  # noqa: TC003
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, TypeVarTuple, Unpack, cast, overload
+from typing import Any, Literal, TypeVarTuple, Unpack, cast, overload
 from warnings import warn
 
 from numbers_parser.cell import (
@@ -469,10 +469,10 @@ class Sheet:
         table_name: str | None = None,
         x: float | None = None,
         y: float | None = None,
-        num_rows: int | None = DEFAULT_ROW_COUNT,
-        num_cols: int | None = DEFAULT_COLUMN_COUNT,
-        num_header_rows: int | None = 1,
-        num_header_cols: int | None = 1,
+        num_rows: int = DEFAULT_ROW_COUNT,
+        num_cols: int = DEFAULT_COLUMN_COUNT,
+        num_header_rows: int = 1,
+        num_header_cols: int = 1,
     ) -> Table:
         """
         Add a new table to the current sheet.
@@ -538,10 +538,10 @@ class Sheet:
         from_table_id: int,
         x: float | None,
         y: float | None,
-        num_rows: int | None,
-        num_cols: int | None,
-        num_header_rows: int | None,
-        num_header_cols: int | None,
+        num_rows: int,
+        num_cols: int,
+        num_header_rows: int,
+        num_header_cols: int,
     ) -> Table:
         """Add table."""
         if table_name is not None:
@@ -771,7 +771,13 @@ class Table(Cacheable):
         """tuple[float, float]: The table's x and y offsets in points."""
         return self._model.table_coordinates(self._table_id)
 
-    def rows(self, values_only: bool = False) -> list[list[Cell]] | list[list[object]]:
+    @overload
+    def rows(self, values_only: Literal[False] = False) -> list[list[Cell]]: ...
+
+    @overload
+    def rows(self, values_only: Literal[True]) -> list[list[_CellValue]]: ...
+
+    def rows(self, values_only: bool = False) -> list[list[Cell]] | list[list[_CellValue]]:
         """
         Return all rows of cells for the Table.
 
@@ -782,7 +788,7 @@ class Table(Cacheable):
 
         Returns
         -------
-        List[List[Cell]] | List[List[object]]:
+        list[list[Cell]] | list[list[Any]]:
             List of rows; each row is a list of :class:`Cell` objects, or cell values.
 
         """
@@ -1293,7 +1299,7 @@ class Table(Cacheable):
 
         """
 
-        def data_to_values(item: dict[object, object] | list[object] | Cell) -> object:
+        def data_to_values(item: list | dict | Cell) -> list | dict | Cell:
             """Convert a row of cells to their Python values."""
             if isinstance(item, dict):
                 return {k: data_to_values(v) for k, v in item.items()}
@@ -1966,7 +1972,7 @@ class Table(Cacheable):
         else:
             self._set_cell_data_format(row, col, format_type, **kwargs)
 
-    def _set_cell_custom_format(self, row: int, col: int, **kwargs: object) -> None:
+    def _set_cell_custom_format(self, row: int, col: int, **kwargs: Any) -> None:  # noqa: ANN401
         """Set cell custom format."""
         if "format" not in kwargs:
             msg = "no format provided for custom format"
@@ -2001,7 +2007,7 @@ class Table(Cacheable):
         row: int,
         col: int,
         format_type_name: str,
-        **kwargs: object,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Set cell data format."""
         try:
