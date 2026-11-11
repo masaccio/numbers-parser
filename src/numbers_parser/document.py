@@ -591,7 +591,7 @@ class Table(Cacheable):
         self.num_cols = self._model.number_of_columns(self._table_id)
         # Cache all data now to facilitate write(). Performance impact
         # of computing all cells is minimal compared to file IO
-        self._data = []
+        self._data: list[list[Cell]] = []
         self._model.set_table_data(table_id, self._data)
         merge_cells = self._model.merge_cells(table_id)
 
@@ -599,13 +599,13 @@ class Table(Cacheable):
             self._data.append([])
             for col in range(self.num_cols):
                 if merge_cells.is_merge_reference((row, col)):
-                    cell = Cell._merged_cell(table_id, row, col, model)
+                    cell = cast("Cell", Cell._merged_cell(table_id, row, col, model))
                 else:
                     buffer = self._model.storage_buffer(table_id, row, col)
                     if buffer is None:
-                        cell = Cell._empty_cell(table_id, row, col, model)
+                        cell = cast("Cell", Cell._empty_cell(table_id, row, col, model))
                     else:
-                        cell = Cell._from_storage(table_id, row, col, buffer, model)
+                        cell = cast("Cell", Cell._from_storage(table_id, row, col, buffer, model))
                 self._data[row].append(cell)
 
     @property
@@ -831,6 +831,12 @@ class Table(Cacheable):
                     merge_cells.add(xl_range(row, col, row + size[0] - 1, col + size[1] - 1))
         return sorted(merge_cells)
 
+    @overload
+    def cell(self, row: int, col: int, /) -> Cell | MergedCell: ...
+
+    @overload
+    def cell(self, rc: str, /) -> Cell | MergedCell: ...
+
     def cell(self, *args: int | str) -> Cell | MergedCell:  # noqa: D417
         """
         Return a single cell in the table.
@@ -875,7 +881,8 @@ class Table(Cacheable):
         elif len(args) != 2:
             raise IndexError("invalid cell reference " + str(args))
         else:
-            (row, col) = args
+            row = cast("int", args[0])
+            col = cast("int", args[1])
 
         if row >= self.num_rows or row < 0:
             msg = f"row {row} out of range"
@@ -1294,7 +1301,7 @@ class Table(Cacheable):
             msg = "style must be a Style object or style name"
             raise TypeError(msg)
 
-    def categorized_data(self, values_only: bool = False) -> dict | None:
+    def categorized_data(self, values_only: bool = False) -> dict[str, dict | list] | None:
         """
         Return the table's categorized data, or ``None`` if categories are disabled.
 
@@ -1332,7 +1339,7 @@ class Table(Cacheable):
 
         """
 
-        def data_to_values(item: list | dict | Cell) -> list | dict | Cell:
+        def data_to_values(item: list | dict | Cell) -> dict[str, dict | list] | Any:  # noqa: ANN401
             """Convert a row of cells to their Python values."""
             if isinstance(item, dict):
                 return {k: data_to_values(v) for k, v in item.items()}
@@ -1406,7 +1413,7 @@ class Table(Cacheable):
                     for col in range(self.num_cols)
                 ],
             )
-        self._data[start_row:start_row] = rows
+        self._data[start_row:start_row] = cast("list[list[Cell]]", rows)
 
         for row in range(start_row, self.num_rows):
             for col in range(self.num_cols):
@@ -1598,7 +1605,7 @@ class Table(Cacheable):
 
         """
         ranges = cell_range if isinstance(cell_range, list) else [cell_range]
-        parsed_ranges = []
+        parsed_ranges: list[tuple[int, int, int, int]] = []
         for range_ref in ranges:
             if not isinstance(range_ref, str):
                 msg = "cell ranges must be strings"

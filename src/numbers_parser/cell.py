@@ -933,12 +933,12 @@ class Cell(_CellStorageFlags, Cacheable):
         return self._model.table_comments(self._table_id, self._comment_id)
 
     @classmethod
-    def _empty_cell(cls, table_id: int, row: int, col: int, model: object) -> EmptyCell:
+    def _empty_cell(cls, table_id: int, row: int, col: int, model: NumbersModel) -> EmptyCell:
         """Create an empty cell at the specified table coordinate."""
         return Cell._from_storage(table_id, row, col, EMPTY_STORAGE_BUFFER, model)
 
     @classmethod
-    def _merged_cell(cls, table_id: int, row: int, col: int, model: object) -> MergedCell:
+    def _merged_cell(cls, table_id: int, row: int, col: int, model: NumbersModel) -> MergedCell:
         """Create a merged-cell reference at the specified coordinate."""
         cell = MergedCell(row, col)
         cell._model = model
@@ -989,8 +989,8 @@ class Cell(_CellStorageFlags, Cacheable):
         table_id: int,
         row: int,
         col: int,
-        buffer: bytearray,
-        model: object,
+        buffer: bytes,
+        model: NumbersModel,
     ) -> Cell:
         """Create a cell instance from its archive storage."""
 
