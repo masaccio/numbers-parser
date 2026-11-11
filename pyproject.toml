@@ -113,9 +113,10 @@ show_contexts = false
 
 [tool.coverage.report]
 exclude_lines = [
-    "pragma: no cover",
-    "raise NotImplementedError",
-    "TYPE_CHECKING",
+  "overload",
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "TYPE_CHECKING",
 ]
 
 [tool.pytest.ini_options]

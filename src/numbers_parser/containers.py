@@ -40,10 +40,10 @@ class ItemsList(Generic[_ItemT]):
         self._items = [item_class(model, x) for x in refs]  # type: ignore[call-arg]
 
     @overload
-    def __getitem__(self, key: int) -> _ItemT: ...  # pragma: no cover
+    def __getitem__(self, key: int) -> _ItemT: ...
 
     @overload
-    def __getitem__(self, key: str) -> _ItemT: ...  # pragma: no cover
+    def __getitem__(self, key: str) -> _ItemT: ...
 
     def __getitem__(self, key: int | str) -> _ItemT:
         """Return the item at the requested key or index."""
