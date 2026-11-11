@@ -594,7 +594,7 @@ class NumbersModel(Cacheable):
         return storage_archive.text[0]
 
     @cache(num_args=0)
-    def custom_format_map(self) -> dict[str, ProtoMessage]:
+    def custom_format_map(self) -> dict[str, TSKArchives.CustomFormatArchive]:
         """Return the custom-format mapping for the document."""
         custom_format_list = self.get_object(
             self.document_archive.super.custom_format_list.identifier,
@@ -2493,7 +2493,7 @@ class NumbersModel(Cacheable):
             vertical = VerticalJustification(self.cell_property(style, "vertical_alignment"))
         return Alignment(horizontal, vertical)
 
-    def cell_bg_color(self, cell: Cell) -> tuple | list[tuple]:
+    def cell_bg_color(self, cell: Cell) -> RGB | list[RGB]:
         """Return the cell bg color."""
         if cell._cell_style_id is None:
             return None
@@ -2568,7 +2568,7 @@ class NumbersModel(Cacheable):
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return style.super.name
 
-    def cell_font_color(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> tuple:
+    def cell_font_color(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> RGB:
         """Return the cell font color."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return rgb(self.char_property(style, "font_color"))
@@ -2626,7 +2626,7 @@ class NumbersModel(Cacheable):
         # Padding is always identical (only one UI setting)
         return padding.left
 
-    def cell_text_wrap(self, cell: Cell) -> float:
+    def cell_text_wrap(self, cell: Cell) -> bool:
         """Return the cell text wrap."""
         if cell._cell_style_id is None:
             return DEFAULT_TEXT_WRAP

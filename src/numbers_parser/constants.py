@@ -495,8 +495,8 @@ class PaddingType(IntEnum):
 
 
 FONT_MAP = GENERATED_FONT_MAP
-FONT_TUPLE_MAP: dict[tuple[str, str], str] = {}
-FONT_FAMILY_DEFAULT: dict[str, str] = {}
+FONT_TUPLE_MAP: dict[tuple[str, str], dict[str, str]] = {}
+FONT_FAMILY_DEFAULT: dict[str, dict[str, str]] = {}
 
 
 def update_font_maps(font_map: dict) -> None:

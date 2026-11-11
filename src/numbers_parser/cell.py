@@ -312,7 +312,7 @@ class Style:
     text_inset: float = DEFAULT_TEXT_INSET
     text_wrap: bool = DEFAULT_TEXT_WRAP
     name: str | None = None
-    _font_details: dict | None = None
+    _font_details: dict[str, str] | None = None
     _text_style_obj_id: int | None = None
     _cell_style_obj_id: int | None = None
     _update_cell_style: bool = False
@@ -358,31 +358,31 @@ class Style:
         if cell._image_data is not None:
             bg_image = BackgroundImage(*cell._image_data)
         return Style(
-            alignment=cast("Alignment", model.cell_alignment(cell)),
+            alignment=model.cell_alignment(cell),
             bg_image=bg_image,
-            bg_color=cast("RGB | list[RGB] | None", model.cell_bg_color(cell)),
-            font_color=cast("RGB", model.cell_font_color(cell)),
-            font_size=cast("float", model.cell_font_size(cell)),
-            font_name=cast("str", model.cell_font_family(cell)),
-            bold=cast("bool", model.cell_is_bold(cell)),
-            italic=cast("bool", model.cell_is_italic(cell)),
-            strikethrough=cast("bool", model.cell_is_strikethrough(cell)),
-            underline=cast("bool", model.cell_is_underline(cell)),
+            bg_color=model.cell_bg_color(cell),
+            font_color=model.cell_font_color(cell),
+            font_size=model.cell_font_size(cell),
+            font_name=model.cell_font_family(cell),
+            bold=model.cell_is_bold(cell),
+            italic=model.cell_is_italic(cell),
+            strikethrough=model.cell_is_strikethrough(cell),
+            underline=model.cell_is_underline(cell),
             name=cast("str", model.cell_style_name(cell)),
-            first_indent=cast("float", model.cell_first_indent(cell)),
-            left_indent=cast("float", model.cell_left_indent(cell)),
-            right_indent=cast("float", model.cell_right_indent(cell)),
-            text_inset=cast("float", model.cell_text_inset(cell)),
-            text_wrap=cast("bool", model.cell_text_wrap(cell)),
-            _font_details=cast("dict", model.cell_font_details(cell)),
-            _text_style_obj_id=cast("int | None", model.text_style_object_id(cell)),
-            _cell_style_obj_id=cast("int | None", model.cell_style_object_id(cell)),
+            first_indent=model.cell_first_indent(cell),
+            left_indent=model.cell_left_indent(cell),
+            right_indent=model.cell_right_indent(cell),
+            text_inset=model.cell_text_inset(cell),
+            text_wrap=model.cell_text_wrap(cell),
+            _font_details=model.cell_font_details(cell),
+            _text_style_obj_id=model.text_style_object_id(cell),
+            _cell_style_obj_id=model.cell_style_object_id(cell),
         )
 
     def __post_init__(self) -> None:
         """Validate and initialize the instance state."""
         self.bg_color = rgb_color(self.bg_color)
-        self.font_color = rgb_color(self.font_color)
+        self.font_color = cast("RGB", rgb_color(self.font_color))
 
         if not isinstance(self.font_size, (float, int)):
             msg = "size must be a float number of points"
@@ -436,7 +436,7 @@ def rgb_color(color: object) -> RGB | list[RGB] | None:
             raise TypeError(msg)
         return RGB(*color)
     if isinstance(color, list):
-        return [rgb_color(c) for c in color]
+        return [cast("RGB", rgb_color(c)) for c in color]
     msg = "RGB color must be an RGB or a tuple of 3 integers"
     raise TypeError(msg)
 
@@ -577,10 +577,10 @@ class CellBorder:
         left_merged: bool = False,
     ) -> None:
         """Initialize the instance state."""
-        self._top = None
-        self._right = None
-        self._bottom = None
-        self._left = None
+        self._top: Border | None = None
+        self._right: Border | None = None
+        self._bottom: Border | None = None
+        self._left: Border | None = None
         self._top_merged = top_merged
         self._right_merged = right_merged
         self._bottom_merged = bottom_merged
@@ -786,7 +786,7 @@ class Cell(_CellStorageFlags, Cacheable):
         return self._formula_id is not None
 
     @property
-    def formula(self) -> str:
+    def formula(self) -> str | None:
         """
         str: The formula in a cell.
 
