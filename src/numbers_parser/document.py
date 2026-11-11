@@ -2116,7 +2116,9 @@ class Table(Cacheable):
                     msg,
                 )
 
-            popup_format_type = FormattingType.TEXT if isinstance(cell, TextCell) else True
+            popup_format_type = (
+                FormattingType.TEXT if isinstance(cell, TextCell) else FormattingType.NUMBER
+            )
             format_id = self._model.format_archive(self._table_id, popup_format_type, formatting)
         else:
             format_id = self._model.format_archive(self._table_id, format_type, formatting)
