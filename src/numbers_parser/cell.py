@@ -723,7 +723,7 @@ class Cell(_CellStorageFlags, Cacheable):
         self._datetime: datetime | None = None
         self._model: NumbersModel = None
         self._table_id: int = 0
-        self._buffer: bytes | bytearray | None = None
+        self._buffer: bytes | None = None
         super().__init__()
 
     @property
@@ -994,12 +994,12 @@ class Cell(_CellStorageFlags, Cacheable):
     ) -> Cell:
         """Create a cell instance from its archive storage."""
 
-        def unpack_int(buffer: bytearray, offset: int) -> tuple[int, int]:
+        def unpack_int(buffer: bytes, offset: int) -> tuple[int, int]:
             """Read an integer value from the cell storage buffer."""
             flag = unpack("<i", buffer[offset : offset + 4])[0]
             return (flag, offset + 4)
 
-        def unpack_double(buffer: bytearray, offset: int) -> tuple[int, int]:
+        def unpack_double(buffer: bytes, offset: int) -> tuple[int, int]:
             """Read a floating-point value from the cell storage buffer."""
             flag = unpack("<d", buffer[offset : offset + 8])[0]
             return (flag, offset + 8)
@@ -1153,7 +1153,7 @@ class Cell(_CellStorageFlags, Cacheable):
             if getattr(self, "_border", None) is None:
                 self._border = CellBorder()
 
-    def _to_buffer(self) -> bytearray:  # noqa: C901, PLR0912, PLR0915
+    def _to_buffer(self) -> bytes:  # noqa: C901, PLR0912, PLR0915
         """Create a storage buffer for a cell using v5 (modern) layout."""
         if self._style is not None:
             if self._style._text_style_obj_id is not None:
@@ -1247,80 +1247,76 @@ class Cell(_CellStorageFlags, Cacheable):
             if field_id is not None:
                 self._extra_bits |= 1 << bit
 
-        storage = bytearray(12)
-        storage[0] = 5
-        storage[1] = cell_type
-        storage[6:8] = pack("<H", self._extra_bits)
-        storage += value
-
+        extensions = b""
         if self._rich_id is not None:
             flags |= 0x10
             length += 4
-            storage += pack("<i", self._rich_id)
+            extensions += pack("<i", self._rich_id)
         if self._cell_style_id is not None:
             flags |= 0x20
             length += 4
-            storage += pack("<i", self._cell_style_id)
+            extensions += pack("<i", self._cell_style_id)
         if self._text_style_id is not None:
             flags |= 0x40
             length += 4
-            storage += pack("<i", self._text_style_id)
+            extensions += pack("<i", self._text_style_id)
         if self._cond_style_id is not None:
             flags |= 0x80
             length += 4
-            storage += pack("<i", self._cond_style_id)
+            extensions += pack("<i", self._cond_style_id)
         if self._cond_rule_style_id is not None:
             flags |= 0x100
             length += 4
-            storage += pack("<i", self._cond_rule_style_id)
+            extensions += pack("<i", self._cond_rule_style_id)
         if self._formula_id is not None:
             flags |= 0x200
             length += 4
-            storage += pack("<i", self._formula_id)
+            extensions += pack("<i", self._formula_id)
         if self._control_id is not None:
             flags |= 0x400
             length += 4
-            storage += pack("<i", self._control_id)
+            extensions += pack("<i", self._control_id)
         if self._formula_error_id is not None:
             flags |= 0x800
             length += 4
-            storage += pack("<i", self._formula_error_id)
+            extensions += pack("<i", self._formula_error_id)
         if self._suggest_id is not None:
             flags |= 0x1000
             length += 4
-            storage += pack("<i", self._suggest_id)
+            extensions += pack("<i", self._suggest_id)
         if self._num_format_id is not None:
             flags |= 0x2000
             length += 4
-            storage += pack("<i", self._num_format_id)
+            extensions += pack("<i", self._num_format_id)
         if self._currency_format_id is not None:
             flags |= 0x4000
             length += 4
-            storage += pack("<i", self._currency_format_id)
+            extensions += pack("<i", self._currency_format_id)
         if self._date_format_id is not None:
             flags |= 0x8000
             length += 4
-            storage += pack("<i", self._date_format_id)
+            extensions += pack("<i", self._date_format_id)
         if self._duration_format_id is not None:
             flags |= 0x10000
             length += 4
-            storage += pack("<i", self._duration_format_id)
+            extensions += pack("<i", self._duration_format_id)
         if self._text_format_id is not None:
             flags |= 0x20000
             length += 4
-            storage += pack("<i", self._text_format_id)
+            extensions += pack("<i", self._text_format_id)
         if self._bool_format_id is not None:
             flags |= 0x40000
             length += 4
-            storage += pack("<i", self._bool_format_id)
+            extensions += pack("<i", self._bool_format_id)
         if self._comment_id is not None:
             flags |= 0x80000
             length += 4
-            storage += pack("<i", self._comment_id)
+            extensions += pack("<i", self._comment_id)
 
-        storage[8:12] = pack("<i", flags)
+        header = pack("<BB4xHi", 5, cell_type, self._extra_bits, flags)
+        storage = header + value + extensions
         if len(storage) < 32:  # noqa: PLR2004
-            storage += bytearray(32 - length)
+            storage = storage.ljust(32, b"\x00")
 
         return storage[0:length]
 
@@ -1824,7 +1820,7 @@ class MergedCell(Cell):
         return None
 
 
-def _pack_decimal128(value: float) -> bytearray:
+def _pack_decimal128(value: float) -> bytes:
     """Encode a decimal value in the archive decimal128 format."""
     buffer = bytearray(16)
     exp = math.floor(math.log10(math.e) * math.log(abs(value))) if value != 0.0 else 0
@@ -1839,10 +1835,11 @@ def _pack_decimal128(value: float) -> bytearray:
         mantissa = int(mantissa / 256)
     if value < 0:
         buffer[15] |= 0x80
-    return buffer
+
+    return bytes(buffer)
 
 
-def _unpack_decimal128(buffer: bytearray) -> float:
+def _unpack_decimal128(buffer: bytes) -> float:
     """Decode a decimal128 value from the archive bytes."""
     exp = (((buffer[15] & 0x7F) << 7) | (buffer[14] >> 1)) - DECIMAL128_BIAS
     mantissa = buffer[14] & 1
