@@ -21,6 +21,7 @@ from numbers_parser.cell import (
     Formatting,
     FormattingType,
     MergedCell,
+    PaddingType,
     Style,
     TextCell,
 )
@@ -352,7 +353,18 @@ class Document:
         self._model.styles[style.name] = style
         return style
 
-    def add_custom_format(self, **kwargs: dict[str, Any]) -> CustomFormatting:
+    def add_custom_format(  # pylint: disable=unused-argument
+        self,
+        *,
+        type: str = "number",  # noqa: A002
+        name: str | None = None,
+        integer_format: PaddingType = PaddingType.NONE,
+        decimal_format: PaddingType = PaddingType.NONE,
+        num_integers: int = 0,
+        num_decimals: int = 0,
+        show_thousands_separator: bool = False,
+        format: str = "%s",  # noqa: A002
+    ) -> CustomFormatting:
         r"""
         Add a new custom format to the current document.
 
@@ -406,6 +418,7 @@ class Document:
             KeyError: If the named custom format already exists.
 
         """
+        kwargs = {k: v for k, v in locals().items() if k != "self" and v is not None}
         if (
             "name" in kwargs
             and kwargs["name"] is not None
@@ -414,13 +427,12 @@ class Document:
             msg = f"format '{kwargs['name']}' already exists"
             raise KeyError(msg)
 
-        if "type" in kwargs:
-            format_type = cast("str", kwargs["type"]).upper()
-            try:
-                kwargs["type"] = CustomFormattingType[format_type]
-            except (KeyError, AttributeError):
-                msg = f"unsupported cell format type '{format_type}'"
-                raise TypeError(msg) from None
+        try:
+            format_type = kwargs["type"].upper()
+            kwargs["type"] = CustomFormattingType[format_type]
+        except (KeyError, AttributeError):
+            msg = f"unsupported cell format type '{format_type}'"
+            raise TypeError(msg) from None
 
         custom_format = CustomFormatting(**kwargs)
         if custom_format.name is None:

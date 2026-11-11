@@ -819,9 +819,9 @@ def test_issue_249(configurable_save_file):
 
 def test_issue_250(configurable_save_file):
     doc = Document()
-    doc.sheets[0].tables[0].write(0, 0, 0.00001)
-    doc.sheets[0].tables[0].write(1, 0, 0.00001)
-    doc.sheets[0].tables[0].write(2, 0, 0.00001)
+    doc.default_table.write(0, 0, 0.00001)
+    doc.default_table.write(1, 0, 0.00001)
+    doc.default_table.write(2, 0, 0.00001)
 
     custom_format_1 = doc.add_custom_format(
         type="number",
@@ -843,8 +843,6 @@ def test_issue_250(configurable_save_file):
         type="number",
         name="Decimal 5DP",
         num_decimals=6,
-        integer_format=None,
-        decimal_format=None,
     )
 
     doc.sheets[0].tables[0].set_cell_formatting(0, 0, "custom", format=custom_format_1)
@@ -855,7 +853,7 @@ def test_issue_250(configurable_save_file):
     new_doc = Document(configurable_save_file)
     assert new_doc.default_table.cell(0, 0).formatted_value == "00.000010"
     assert new_doc.default_table.cell(1, 0).formatted_value == "  .000010"
-    assert new_doc.default_table.cell(2, 0).formatted_value == ".000010"
+    assert new_doc.default_table.cell(2, 0).formatted_value == "0.000010"
 
 
 def test_issue_251(script_runner, tmp_path, configurable_save_file):
