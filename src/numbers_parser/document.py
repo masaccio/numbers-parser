@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Iterator  # noqa: TC003
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Literal, TypeVarTuple, Unpack, cast, overload
+from typing import Any, Literal, cast, overload
 from warnings import warn
 
 from numbers_parser.cell import (
@@ -39,8 +39,6 @@ from numbers_parser.containers import ItemsList
 from numbers_parser.model import NumbersModel
 from numbers_parser.numbers_cache import Cacheable
 from numbers_parser.xrefs import xl_cell_to_rowcol, xl_range
-
-Ts = TypeVarTuple("Ts")
 
 __all__ = ["Document", "Sheet", "Table"]
 
@@ -1126,22 +1124,7 @@ class Table(Cacheable):
             for cell in row[min_col : max_col + 1]:
                 yield cell.value if values_only else cell
 
-    @overload
-    def _validate_cell_coords(  # pragma: no cover
-        self,
-        cell_ref: str,
-        *args: Unpack[Ts],
-    ) -> tuple[int, int, Unpack[Ts]]: ...
-
-    @overload
-    def _validate_cell_coords(  # pragma: no cover
-        self,
-        row: int,
-        col: int,
-        *args: Unpack[Ts],
-    ) -> tuple[int, int, Unpack[Ts]]: ...
-
-    def _validate_cell_coords(self, *args: Any) -> Any:
+    def _validate_cell_coords(self, *args: Any) -> Any:  # noqa: ANN401
         """Validate cell coords."""
         if isinstance(args[0], str):
             (row, col) = xl_cell_to_rowcol(args[0])
@@ -1173,9 +1156,28 @@ class Table(Cacheable):
 
         return (row, col, *values)
 
+    @overload
     def write(
         self,
-        *args: int | str | _CellValue,
+        row: int,
+        col: int,
+        value: _CellValue,
+        /,
+        style: Style | str | None = None,
+    ) -> None: ...
+
+    @overload
+    def write(
+        self,
+        rc: str,
+        value: _CellValue,
+        /,
+        style: Style | str | None = None,
+    ) -> None: ...
+
+    def write(
+        self,
+        *args: Any,
         style: Style | str | None = None,
     ) -> None:
         """
@@ -1225,7 +1227,8 @@ class Table(Cacheable):
 
         """
         # TODO: write needs to retain/init the border
-        (row, col, value) = self._validate_cell_coords(*args)  # pylint: disable=unbalanced-tuple-unpacking
+        (row, col, *rest) = self._validate_cell_coords(*args)
+        value = rest[0]
         self._data[row][col] = Cell._from_value(row, col, value)
         self._data[row][col]._update_value(value, self._data[row][col])
 
@@ -1241,6 +1244,23 @@ class Table(Cacheable):
 
         if style is not None:
             self.set_cell_style(row, col, style)
+
+    @overload
+    def set_cell_style(
+        self,
+        row: int,
+        col: int,
+        style: Style | str,
+        /,
+    ) -> None: ...
+
+    @overload
+    def set_cell_style(
+        self,
+        rc: str,
+        style: Style | str,
+        /,
+    ) -> None: ...
 
     def set_cell_style(self, *args: int | str | Style) -> None:
         """
@@ -1258,7 +1278,8 @@ class Table(Cacheable):
             If the style is neither a :class:`Style` nor a style name.
 
         """
-        (row, col, style) = self._validate_cell_coords(*args)  # pylint: disable=unbalanced-tuple-unpacking
+        (row, col, *rest) = self._validate_cell_coords(*args)
+        style = rest[0]
         if isinstance(style, Style):
             if style.name is None:
                 style.name = self._model.custom_style_name()
@@ -1632,6 +1653,25 @@ class Table(Cacheable):
                 for col, cell in enumerate(cells):
                     cell._set_merge(merge_cells.get((row, col)))
 
+    @overload
+    def add_comment(
+        self,
+        row: int,
+        col: int,
+        author: str = __package__,
+        reply: bool = False,
+        /,
+    ) -> None: ...
+
+    @overload
+    def add_comment(
+        self,
+        rc: str,
+        author: str = __package__,
+        reply: bool = False,
+        /,
+    ) -> None: ...
+
     def add_comment(
         self,
         *args: int | str,
@@ -1658,10 +1698,10 @@ class Table(Cacheable):
             comment to a cell that already has comments and ``reply`` is ``False``.
 
         """
-        (row, col, *args) = self._validate_cell_coords(*args)
-        if len(args) == 1:
-            text = args[0]
-        elif len(args) > 1:
+        (row, col, *rest) = self._validate_cell_coords(*args)
+        if len(rest) == 1:
+            text = rest[0]
+        elif len(rest) > 1:
             msg = "too many positional arguments to add_comment"
             raise TypeError(msg)
         else:
@@ -1724,12 +1764,12 @@ class Table(Cacheable):
             If any of the sides to which the border is applied have been merged.
 
         """
-        (row, col, *args) = self._validate_cell_coords(*args)
-        if len(args) == 2:
-            (side, border_value) = args  # pylint: disable=unbalanced-tuple-unpacking
+        (row, col, *rest) = self._validate_cell_coords(*args)
+        if len(rest) == 2:
+            (side, border_value) = rest  # pylint: disable=unbalanced-tuple-unpacking
             length = 1
-        elif len(args) == 3:
-            (side, border_value, length) = args  # pylint: disable=unbalanced-tuple-unpacking
+        elif len(rest) == 3:
+            (side, border_value, length) = rest  # pylint: disable=unbalanced-tuple-unpacking
         else:
             msg = "invalid number of arguments to border_value()"
             raise TypeError(msg)
@@ -1969,10 +2009,10 @@ class Table(Cacheable):
 
 
         """
-        (row, col, *args) = self._validate_cell_coords(*args)
-        if len(args) == 1:
-            format_type = args[0]
-        elif len(args) > 1:
+        (row, col, *rest) = self._validate_cell_coords(*args)
+        if len(rest) == 1:
+            format_type = rest[0]
+        elif len(rest) > 1:
             msg = "too many positional arguments to set_cell_formatting"
             raise TypeError(msg)
         else:
