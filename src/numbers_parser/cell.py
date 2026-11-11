@@ -750,6 +750,10 @@ class Cell(_CellStorageFlags, Cacheable):
         )
 
     @property
+    def value(self) -> Any:  # noqa: ANN401
+        """Base class method."""
+
+    @property
     def image_filename(self) -> str | None:
         """Return the image filename stored with the cell."""
         warn(
