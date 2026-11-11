@@ -21,6 +21,8 @@ from sigfig import round as sigfig
 from typing_extensions import Self
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from numbers_parser.model import NumbersModel
 
 from numbers_parser.constants import (
@@ -839,7 +841,7 @@ class Cell(_CellStorageFlags, Cacheable):
         return None
 
     @property
-    def formatted_value(self) -> str:
+    def formatted_value(self) -> str | None:
         """
         str: The formatted value of the cell as it appears in Numbers.
 
@@ -1074,7 +1076,7 @@ class Cell(_CellStorageFlags, Cacheable):
             cell = TextCell(row, col, model.table_string(table_id, storage_flags._string_id or 0))
         elif cell_type == TSTArchives.dateCellType:
             cell = DateCell(row, col, EPOCH + timedelta(seconds=seconds or 0.0))
-            cell._datetime = cell._value
+            cell._datetime = cast("datetime", cell._value)
         elif cell_type == TSTArchives.boolCellType:
             cell = BoolCell(row, col, (double or 0.0) > 0.0)
         elif cell_type == TSTArchives.durationCellType:
@@ -1130,6 +1132,7 @@ class Cell(_CellStorageFlags, Cacheable):
 
     def _set_merge(self, merge_ref: MergeAnchor | MergeReference | None) -> None:
         """Set merge."""
+        self.size: tuple[int, int] | None
         if isinstance(merge_ref, MergeAnchor):
             self.is_merged = True
             self.size = merge_ref.size
@@ -1158,7 +1161,7 @@ class Cell(_CellStorageFlags, Cacheable):
             if getattr(self, "_border", None) is None:
                 self._border = CellBorder()
 
-    def _to_buffer(self) -> bytes:  # noqa: C901, PLR0912, PLR0915
+    def _to_buffer(self) -> bytes | None:  # noqa: C901, PLR0912, PLR0915
         """Create a storage buffer for a cell using v5 (modern) layout."""
         if self._style is not None:
             if self._style._text_style_obj_id is not None:
@@ -1330,7 +1333,7 @@ class Cell(_CellStorageFlags, Cacheable):
     def _update_value(self, value: Any, cell: Cell) -> None:  # noqa: ANN401
         """Update value."""
         if cell._type == CellType.NUMBER:
-            self._d128 = cast("float", value)
+            self._d128 = value or 0.0
         elif cell._type == CellType.DATE:
             self._datetime = cast("datetime", value)
         self._value = value
@@ -1359,14 +1362,14 @@ class Cell(_CellStorageFlags, Cacheable):
                 stacklevel=3,
             )
             return None
-        image_data = self._model.objects.file_store[image_pathnames[0]]
+        image_data = cast("bytes", self._model.objects.file_store[image_pathnames[0]])
         digest = sha1(image_data).digest()  # noqa: S324
         if digest not in self._model.images:
             self._model.images[digest] = image_id
 
         return (image_data, preferred_filename)
 
-    def _custom_format(self) -> str:  # noqa: C901, PLR0911
+    def _custom_format(self) -> str | None:  # noqa: C901, PLR0911
         """Return the formatted value using its custom format."""
         if self._text_format_id is not None and self._type == CellType.TEXT:
             custom_format = self._model.table_format(self._table_id, self._text_format_id)
@@ -1386,57 +1389,60 @@ class Cell(_CellStorageFlags, Cacheable):
             custom_format.format_type,
         )
 
+        d128 = self._d128 or 0.0
         if custom_format.HasField("custom_uid"):
             format_uuid = NumbersUUID(custom_format.custom_uid).hex
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
             if custom_format.requires_fraction_replacement:
-                formatted_value = _format_fraction(self._d128, custom_format)
+                formatted_value = _format_fraction(d128, custom_format)
             elif custom_format.format_type == FormatType.CUSTOM_TEXT:
                 formatted_value = _decode_text_format(
                     custom_format,
-                    self._model.table_string(self._table_id, self._string_id),
+                    self._model.table_string(self._table_id, cast("int", self._string_id)),
                 )
             else:
-                formatted_value = _decode_number_format(
+                return _decode_number_format(
                     custom_format,
-                    self._d128,
+                    d128,
                     format_map[format_uuid].name,
                     format_map[format_uuid].conditions,
                 )
         elif custom_format.format_type == FormatType.DECIMAL:
-            return _format_decimal(self._d128, custom_format)
+            return _format_decimal(d128, custom_format)
         elif custom_format.format_type == FormatType.CURRENCY:
-            return _format_currency(self._d128, custom_format)
+            return cast("str", _format_currency(d128, custom_format))
         elif custom_format.format_type == FormatType.BOOLEAN:
             return "TRUE" if self.value else "FALSE"
         elif custom_format.format_type == FormatType.PERCENT:
-            d128 = self._d128 or 0.0
             return _format_decimal(d128 * 100, custom_format, percent=True)
         elif custom_format.format_type == FormatType.BASE:
-            return _format_base(self._d128, custom_format)
+            return _format_base(d128, custom_format)
         elif custom_format.format_type == FormatType.FRACTION:
-            return _format_fraction(self._d128, custom_format)
+            return _format_fraction(d128, custom_format)
         elif custom_format.format_type == FormatType.SCIENTIFIC:
-            return _format_scientific(self._d128, custom_format)
+            return _format_scientific(d128, custom_format)
         elif custom_format.format_type == FormatType.CHECKBOX:
             return CHECKBOX_TRUE_VALUE if self.value else CHECKBOX_FALSE_VALUE
         elif custom_format.format_type == FormatType.RATING:
-            return STAR_RATING_VALUE * int(self._d128)
+            return STAR_RATING_VALUE * int(d128)
         else:
             formatted_value = str(self.value)
         return formatted_value
 
     def _date_format(self) -> str:
         """Return the formatted date or time value."""
-        date_format = self._model.table_format(self._table_id, self._date_format_id)
+        date_format = self._model.table_format(self._table_id, cast("int", self._date_format_id))
         if date_format.HasField("custom_uid"):
             format_uuid = NumbersUUID(date_format.custom_uid).hex
             format_map = self._model.custom_format_map()
             custom_format = format_map[format_uuid].default_format
             custom_format_string = custom_format.custom_format_string
             if custom_format.format_type == FormatType.CUSTOM_DATE:
-                formatted_value = _decode_date_format(custom_format_string, self._datetime)
+                formatted_value = _decode_date_format(
+                    custom_format_string,
+                    cast("datetime", self._datetime),
+                )
             else:
                 warn(
                     f"Unexpected custom format type {custom_format.format_type}",
@@ -1445,12 +1451,18 @@ class Cell(_CellStorageFlags, Cacheable):
                 )
                 return ""
         else:
-            formatted_value = _decode_date_format(date_format.date_time_format, self._datetime)
+            formatted_value = _decode_date_format(
+                date_format.date_time_format,
+                cast("datetime", self._datetime),
+            )
         return formatted_value
 
     def _duration_format(self) -> str:  # noqa: C901
         """Return the formatted duration value."""
-        duration_format = self._model.table_format(self._table_id, self._duration_format_id)
+        duration_format = self._model.table_format(
+            self._table_id,
+            cast("int", self._duration_format_id),
+        )
         debug(
             "duration_format: @[%d,%d]: table_id=%d, duration_format_id=%d, duration_style=%s",
             self.row,
@@ -1464,7 +1476,7 @@ class Cell(_CellStorageFlags, Cacheable):
         unit_largest = DurationUnits(duration_format.duration_unit_largest)
         unit_smallest = DurationUnits(duration_format.duration_unit_smallest)
         if duration_format.use_automatic_duration_units:
-            unit_smallest, unit_largest = _auto_units(self._double, duration_format)
+            unit_smallest, unit_largest = _auto_units(self._double or 0.0, duration_format)
 
         d = self._double or 0.0
         dd = int(self._double or 0.0)
@@ -1953,7 +1965,7 @@ def _decode_number_format(  # noqa: C901, PLR0912, PLR0915
     number_format: TSKArchives.FormatStructArchive,
     value: float | None,
     _name: str,
-    conditions: list[TSKArchives.CustomFormatArchive.Condition],
+    conditions: Sequence[TSKArchives.CustomFormatArchive.Condition],
 ) -> str | None:
     """Parse a custom date format string and return a formatted number value."""
     if value is None:
@@ -2038,13 +2050,13 @@ def _decode_number_format(  # noqa: C901, PLR0912, PLR0915
     value = round(float(value), num_decimals) if num_decimals > 0 else round(float(value))
 
     # Custom formats have a maximum of 10 decimals
-    (integer, decimal) = f"{value:.10f}".split(".")
+    (integer_str, decimal_str) = f"{value:.10f}".split(".")
     if num_decimals > 0:
-        integer = int(integer)
-        decimal = round(float(f"0.{decimal}"), num_decimals)
+        integer = int(integer_str)
+        decimal = round(float(f"0.{decimal_str}"), num_decimals)
     else:
         integer = round(value)
-        decimal = float(f"0.{decimal}")
+        decimal = float(f"0.{decimal_str}")
 
     num_integers = len(int_part.replace(",", ""))
     if not number_format.show_thousands_separator:
@@ -2232,11 +2244,11 @@ def _format_base(value: float, number_format: TSKArchives.FormatStructArchive) -
     while value:
         formatted_value.append(int(value % number_format.base))
         value //= number_format.base
-    formatted_value = "".join([INT_TO_BASE_CHAR[x] for x in formatted_value[::-1]])
+    formatted_value_str = "".join([INT_TO_BASE_CHAR[x] for x in formatted_value[::-1]])
 
     if is_negative:
-        return "-" + formatted_value.zfill(number_format.base_places)
-    return formatted_value.zfill(number_format.base_places)
+        return "-" + formatted_value_str.zfill(number_format.base_places)
+    return formatted_value_str.zfill(number_format.base_places)
 
 
 def _format_fraction_parts(whole: int, numerator: int, denominator: int) -> str:
@@ -2333,7 +2345,7 @@ def _auto_units(  # noqa: C901
             unit_smallest = DurationUnits.HOUR
         elif cell_value % SECONDS_IN_WEEK:
             unit_smallest = DurationUnits.DAY
-        unit_smallest = max(unit_smallest, unit_largest)
+        unit_smallest = DurationUnits(max(unit_smallest, unit_largest))
 
     return unit_smallest, unit_largest
 
@@ -2352,7 +2364,7 @@ class Formatting:
     duration_style: DurationStyle = DurationStyle.COMPACT
     duration_unit_largest: DurationUnits | None = None
     duration_unit_smallest: DurationUnits | None = None
-    decimal_places: int = None
+    decimal_places: int | None = None
     fraction_accuracy: FractionAccuracy = FractionAccuracy.THREE
     increment: float = 1.0
     maximum: float = 100.0
@@ -2413,7 +2425,7 @@ class CustomFormatting:
     """Represent a named custom cell format."""
 
     type: CustomFormattingType = CustomFormattingType.NUMBER
-    name: str = None
+    name: str | None = None
     integer_format: PaddingType = PaddingType.NONE
     decimal_format: PaddingType = PaddingType.NONE
     num_integers: int = 0
