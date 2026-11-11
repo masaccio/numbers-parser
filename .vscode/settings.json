@@ -1,4 +1,12 @@
 {
+    "cSpell.customDictionaries": {
+        "custom-dictionary-workspace": {
+            "name": "custom-dictionary-workspace",
+            "path": "${workspaceFolder}/.cspell/custom-dictionary-workspace.txt",
+            "addWords": true,
+            "scope": "workspace"
+        }
+    },
     "[python]": {
         "editor.formatOnSave": true,
         "editor.wordWrap": "wordWrapColumn",
@@ -11,7 +19,6 @@
     },
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
-    "ruff.importStrategy": "fromEnvironment",
     "python.analysis.typeCheckingMode": "off",
     "python.testing.pytestArgs": [
         "--experimental",
@@ -20,21 +27,14 @@
         "log_cli=True",
         "--log-cli-level=ERROR",
     ],
+    "python.defaultInterpreterPath": "${env:HOME}/Library/Caches/uv/virtualenvs/numbers-parser/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "ruff.importStrategy": "fromEnvironment",
+    "ruff.interpreter": [
+        "${env:HOME}/Library/Caches/uv/virtualenvs/numbers-parse/bin/python"
+    ],
     "todo-tree.general.tags": [
         "TODO",
         "FIXME"
-    ],
-    "cSpell.customDictionaries": {
-        "custom-dictionary-workspace": {
-            "name": "custom-dictionary-workspace",
-            "path": "${workspaceFolder}/.cspell/custom-dictionary-workspace.txt",
-            "addWords": true,
-            "scope": "workspace"
-        }
-    },
-    "python.defaultInterpreterPath": "${env:HOME}/Library/Caches/uv/virtualenvs/numbers-parser/bin/python",
-    "python.terminal.activateEnvironment": true,
-    "cSpell.words": [
-        "encryptor"
     ]
 }

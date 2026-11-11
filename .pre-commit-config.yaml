@@ -3,6 +3,7 @@ repos:
     rev: v0.17.3
     hooks:
       - id: ruff-check
+        entry: uv run --active ruff
         args: [--config, pyproject.toml, --fix]
         files: ^src/(numbers_parser|build)/.*\.py$
         exclude: ^(src/numbers_parser/generated/.*\.py|src/build/protodump\.py)$
@@ -12,10 +13,10 @@ repos:
     rev: v4.1.3
     hooks:
       - id: pylint
+        entry: uv run --active pylint
         args: [--rcfile, pyproject.toml]
         files: ^src/(numbers_parser|build)/.*\.py$
         exclude: ^(src/numbers_parser/generated/.*\.py|src/build/protodump\.py)$
-        entry: uv run --active pylint
         additional_dependencies:
           [
             compact-json,
