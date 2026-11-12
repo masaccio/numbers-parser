@@ -137,12 +137,12 @@ class MergeCells:
         """Return the merge marker stored at the row and column."""
         return self._references[row_col]
 
-    def size(self, row_col: tuple) -> tuple | None:
+    def size(self, row_col: tuple) -> tuple[int, int]:
         """Return the dimensions of the merged cell range."""
         ref = self._references[row_col]
         if isinstance(ref, MergeAnchor):
             return ref.size
-        return None
+        return (0, 0)
 
     def rect(self, row_col: tuple) -> tuple | None:
         """Return the coordinates covered by the merged cell range."""
@@ -281,14 +281,14 @@ class NumbersModel(Cacheable):
         self._control_specs = DataLists(self, "control_cell_spec_table", "cell_spec")
         self._formulas = DataLists(self, "formula_table", "formula")
         self._table_data: dict[int, list[list[Cell]]] = {}
-        self.table_categories_data: dict[int, dict[str, Any]] = {}
-        self.table_categories_row_mapper: dict[int, int] = {}
-        self._styles = None
+        self.table_categories_data: dict[int, dict[str, Any] | None] = {}
+        self.table_categories_row_mapper: dict[int, dict[int, int] | None] = {}
+        self._styles: dict[str, Style] = {}
         self._update_strokes: dict[int, bool] = {}
         self.images: dict[bytes, int] = {}
-        self._custom_formats = None
-        self._custom_format_archives = None
-        self._custom_format_ids = None
+        self._custom_formats: dict[str, CustomFormatting] = {}
+        self._custom_format_archives: dict[str, TSKArchives.CustomFormatArchive] = {}
+        self._custom_format_uuids: dict[str, TSPMessages.UUID] = {}
         self.name_ref_cache = ScopedNameRefCache(self)
         self.missing_fonts: dict[str, bool] = {}
         self.calculate_table_uuid_map()
@@ -607,7 +607,7 @@ class NumbersModel(Cacheable):
         if caption is not None:
             storage_archive.text.clear()
             storage_archive.text.append(caption)
-            return None
+            return "Caption"
         if len(storage_archive.text) == 0:
             return "Caption"
         return storage_archive.text[0]
@@ -645,7 +645,7 @@ class NumbersModel(Cacheable):
 
     def cell_popup_model(self, parent_id: int, formatting: Formatting) -> int:
         """Return the popup-menu model for a cell."""
-        tsce_items = [{"cell_value_type": "NIL_TYPE"}]
+        tsce_items: list[dict[str, Any]] = [{"cell_value_type": "NIL_TYPE"}]
         for item in formatting.popup_values:
             if isinstance(item, str):
                 tsce_items.append(
@@ -795,13 +795,14 @@ class NumbersModel(Cacheable):
     def add_custom_format_archive(
         self,
         formatting: CustomFormatting,
-        format_archive: object,
+        format_archive: TSKArchives.CustomFormatArchive,
     ) -> None:
         """Add custom format archive."""
         format_uuid = NumbersUUID().protobuf2
-        self._custom_formats[formatting.name] = formatting
-        self._custom_format_archives[formatting.name] = format_archive
-        self._custom_format_uuids[formatting.name] = format_uuid
+        formatting_name = formatting.name or ""
+        self.custom_formats[formatting_name] = formatting
+        self._custom_format_archives[formatting_name] = format_archive
+        self._custom_format_uuids[formatting_name] = format_uuid
 
         custom_format_list = self.get_object(
             self.document_archive.super.custom_format_list.identifier,
@@ -813,7 +814,7 @@ class NumbersModel(Cacheable):
     def custom_format_id(self, table_id: int, formatting: CustomFormatting) -> int:
         """Look up the custom format and return the format ID for the table."""
         format_type = CUSTOM_FORMAT_TYPE_MAP[formatting.type]
-        format_uuid = self._custom_format_uuids[formatting.name]
+        format_uuid = self._custom_format_uuids[formatting.name or ""]
         custom_format = TSKArchives.FormatStructArchive(
             format_type=format_type,
             custom_uid=TSPMessages.UUID(lower=format_uuid.lower, upper=format_uuid.upper),
@@ -1061,8 +1062,7 @@ class NumbersModel(Cacheable):
     def table_id_to_sheet_id(self, table_id: int) -> int:
         """Return the sheet identifier containing a table."""
         return next(
-            (sheet_id for sheet_id in self.sheet_ids() if table_id in self.table_ids(sheet_id)),
-            None,
+            sheet_id for sheet_id in self.sheet_ids() if table_id in self.table_ids(sheet_id)
         )
 
     @cache()
@@ -1212,7 +1212,7 @@ class NumbersModel(Cacheable):
         return formulas
 
     @cache()
-    def storage_buffers(self, table_id: int) -> dict[int, list[bytes]]:
+    def storage_buffers(self, table_id: int) -> dict[int, list[bytes | None]]:
         # Keyed by absolute row index: rows without data have no rowInfo
         # so the position in rowInfos is not the row number.
         """Return the cell storage buffers for a table."""
@@ -1235,7 +1235,7 @@ class NumbersModel(Cacheable):
         return buffers
 
     @cache(num_args=3)
-    def storage_buffer(self, table_id: int, row: int, col: int) -> bytes:
+    def storage_buffer(self, table_id: int, row: int, col: int) -> bytes | None:
         """Return the storage buffer for a cell."""
         row_buffers = self.storage_buffers(table_id).get(row)
         if row_buffers is None or col >= len(row_buffers):
@@ -1389,16 +1389,17 @@ class NumbersModel(Cacheable):
     def add_component_reference(
         self,
         object_id: int,
-        location: str | None = None,
+        location: str | int | None = None,
         component_id: int | None = None,
         is_weak: bool = False,
     ) -> None:
         """Add an external reference to an object in a metadata component."""
         component = self.metadata_component_info(location or component_id)
-        if component_id is not None:
-            params = {"object_identifier": object_id, "component_identifier": component_id}
-        else:
-            params = {"component_identifier": object_id}
+        params: dict[str, Any] = (
+            {"object_identifier": object_id, "component_identifier": component_id}
+            if component_id is not None
+            else {"component_identifier": object_id}
+        )
         if is_weak:
             params["is_weak"] = True
         component.external_references.append(
@@ -1588,7 +1589,7 @@ class NumbersModel(Cacheable):
         flags: int = 3,
         height: float = 231.0,
         width: float = 494.0,
-    ) -> object:
+    ) -> TSDArchives.DrawableArchive:
         """Create a DrawableArchive for a new table in a sheet."""
         table_x = x if x is not None else 0.0
         table_y = y if y is not None else self.last_table_offset(sheet_id) + DEFAULT_TABLE_OFFSET
@@ -1782,7 +1783,7 @@ class NumbersModel(Cacheable):
         calc_engine = self.calc_engine()
         owner_id_map = calc_engine.dependency_tracker.owner_id_map.map_entry
         next_owner_id = max(x.internal_owner_id for x in owner_id_map) + 1
-        volatile_dependencies = {
+        volatile_dependencies: dict[str, dict[str, Any]] = {
             "volatile_time_cells": {},
             "volatile_random_cells": {},
             "volatile_locale_cells": {},
@@ -1905,7 +1906,7 @@ class NumbersModel(Cacheable):
     @property
     def styles(self) -> dict[str, Style]:
         """Return the styles available in the document."""
-        if self._styles is None:
+        if not self._styles:
             self._styles = self.available_paragraph_styles()
         return self._styles
 
@@ -1975,12 +1976,12 @@ class NumbersModel(Cacheable):
                         "a": 1.0,
                         "rgbspace": "srgb",
                     },
-                    "bold": style.bold or style._font_details["bold"],
-                    "italic": style.italic or style._font_details["italic"],
+                    "bold": style.bold or (style._font_details or {})["bold"],
+                    "italic": style.italic or (style._font_details or {})["italic"],
                     "underline": underline,
                     "strikethru": strikethru,
                     "font_size": style.font_size,
-                    "font_name": style._font_details["name"],
+                    "font_name": (style._font_details or {})["name"],
                     "tsd_fill": {
                         "color": {
                             "model": "rgb",
@@ -2017,7 +2018,7 @@ class NumbersModel(Cacheable):
             "paragraph_style_presets",
         )
         presets.append(TSPMessages.Reference(identifier=para_style_id))
-        self._styles[style.name] = style
+        self.styles[name_str] = style
         return para_style_id
 
     def update_paragraph_style(self, style: Style) -> None:
@@ -2030,7 +2031,10 @@ class NumbersModel(Cacheable):
             strikethru = CharacterStyle.StrikethruType.kSingleStrikethru
         else:
             strikethru = CharacterStyle.StrikethruType.kNoStrikethru
-        style_obj = self.get_object(style._text_style_obj_id, TSWPArchives.ParagraphStyleArchive)
+        style_obj = self.get_object(
+            style._text_style_obj_id or 0,
+            TSWPArchives.ParagraphStyleArchive,
+        )
         style_obj.char_properties.font_color.r = style.font_color.r / 255
         style_obj.char_properties.font_color.g = style.font_color.g / 255
         style_obj.char_properties.font_color.b = style.font_color.b / 255
@@ -2039,11 +2043,14 @@ class NumbersModel(Cacheable):
         style_obj.char_properties.underline = underline
         style_obj.char_properties.strikethru = strikethru
         style_obj.char_properties.font_size = style.font_size
-        style_obj.char_properties.font_name = style._font_details["name"]
+        style_obj.char_properties.font_name = (style._font_details or {})["name"]
         style_obj.char_properties.tsd_fill.color.r = style.font_color.r / 255
         style_obj.char_properties.tsd_fill.color.g = style.font_color.g / 255
         style_obj.char_properties.tsd_fill.color.b = style.font_color.b / 255
-        style_obj.para_properties.alignment = style.alignment.horizontal
+        style_obj.para_properties.alignment = cast(
+            "TSWPArchives.ParagraphStylePropertiesArchive.TextAlignmentType.ValueType",
+            int(style.alignment.horizontal),
+        )
         style_obj.para_properties.first_line_indent = style.first_indent
         style_obj.para_properties.left_indent = style.left_indent
         style_obj.para_properties.right_indent = style.right_indent
@@ -2213,14 +2220,14 @@ class NumbersModel(Cacheable):
 
         return cell_style_id
 
-    def text_style_object_id(self, cell: Cell) -> int:
+    def text_style_object_id(self, cell: Cell) -> int | None:
         """Return the archive identifier for a cell text style."""
         if cell._text_style_id is None:
             return None
         entry = self.table_styles.lookup_value(cell._table_id, cell._text_style_id)
         return entry.reference.identifier
 
-    def cell_style_object_id(self, cell: Cell) -> int:
+    def cell_style_object_id(self, cell: Cell) -> int | None:
         """Return the archive identifier for a cell style."""
         if cell._cell_style_id is None:
             return None
@@ -2258,7 +2265,7 @@ class NumbersModel(Cacheable):
     @property
     def custom_formats(self) -> dict[str, CustomFormatting]:
         """Return the custom formats defined in the document."""
-        if self._custom_formats is None:
+        if not self._custom_formats:
             custom_format_list = self.get_object(
                 self.document_archive.super.custom_format_list.identifier,
                 TSKArchives.CustomFormatListArchive,
@@ -2266,9 +2273,6 @@ class NumbersModel(Cacheable):
             custom_formats = custom_format_list.custom_formats
             custom_format_names = [x.name for x in custom_formats]
             custom_format_uuids = list(custom_format_list.uuids)
-            self._custom_formats = {}
-            self._custom_format_archives = {}
-            self._custom_format_uuids = {}
             for i, format_name in enumerate(custom_format_names):
                 self._custom_formats[format_name] = CustomFormatting.from_archive(custom_formats[i])
                 self._custom_format_archives[format_name] = custom_formats[i]
@@ -2285,11 +2289,11 @@ class NumbersModel(Cacheable):
         current_formats = self.custom_formats.keys()
         if "Custom Format" not in current_formats:
             return "Custom Format"
-        current_formats = [
+        format_ids = [
             m.group(1) for x in current_formats if (m := re.fullmatch(r"Custom Format (\d+)", x))
         ]
-        if len(current_formats) > 0:
-            last_id = int(current_formats[-1])
+        if len(format_ids) > 0:
+            last_id = int(format_ids[-1])
             return f"Custom Format {last_id + 1}"
         return "Custom Format 1"
 
@@ -2479,7 +2483,7 @@ class NumbersModel(Cacheable):
         )
         new_comment_ref = TSPMessages.Reference(identifier=new_comment_id)
         if reply:
-            entry = self._table_comments.lookup_value(table_id, cell._comment_id)
+            entry = self._table_comments.lookup_value(table_id, cell._comment_id or 0)
             root_comment_id = entry.comment_storage.identifier
             root_comment = self.get_object(root_comment_id, TSDArchives.CommentStorageArchive)
             root_comment.replies.append(new_comment_ref)
@@ -2490,7 +2494,11 @@ class NumbersModel(Cacheable):
     def cell_text_style(self, cell: Cell) -> TSWPArchives.ParagraphStyleArchive:
         """Return the cell's text style or default header, footer, or body style."""
         if cell._text_style_id is not None:
-            return self.table_style(cell._table_id, cell._text_style_id)
+            style_entry = self.table_styles.lookup_value(cell._table_id, cell._text_style_id)
+            return self.get_object(
+                style_entry.reference.identifier,
+                TSWPArchives.ParagraphStyleArchive,
+            )
 
         table_model = self.table_model(cell._table_id)
         if cell.row in range(table_model.number_of_header_rows):
@@ -2518,17 +2526,19 @@ class NumbersModel(Cacheable):
 
     def cell_alignment(self, cell: Cell) -> Alignment:
         """Return the cell alignment."""
-        style = self.cell_text_style(cell)
-        horizontal = HorizontalJustification(self.para_property(style, "alignment"))
+        text_style = self.cell_text_style(cell)
+        horizontal = HorizontalJustification(int(self.para_property(text_style, "alignment")))
 
         if cell._cell_style_id is None:
             vertical = VerticalJustification.TOP
         else:
-            style = self.table_style(cell._table_id, cell._cell_style_id)
-            vertical = VerticalJustification(self.cell_property(style, "vertical_alignment"))
+            cell_style = self.table_style(cell._table_id, cell._cell_style_id)
+            vertical = VerticalJustification(
+                cast("int", self.cell_property(cell_style, "vertical_alignment")),
+            )
         return Alignment(horizontal, vertical)
 
-    def cell_bg_color(self, cell: Cell) -> RGB | list[RGB]:
+    def cell_bg_color(self, cell: Cell) -> RGB | list[RGB] | None:
         """Return the cell bg color."""
         if cell._cell_style_id is None:
             return None
@@ -2546,7 +2556,7 @@ class NumbersModel(Cacheable):
         self,
         style: TSWPArchives.ParagraphStyleArchive,
         field: str,
-    ) -> TSPMessages.Color | bool | float | int | str:
+    ) -> Any:  # noqa: ANN401
         """Return a character property from the style or its parent."""
         if not style.char_properties.HasField(field):  # type: ignore[arg-type]
             parent = self.get_object(
@@ -2556,7 +2566,11 @@ class NumbersModel(Cacheable):
             return getattr(parent.char_properties, field)
         return getattr(style.char_properties, field)
 
-    def para_property(self, style: TSWPArchives.ParagraphStyleArchive, field: str) -> float:
+    def para_property(
+        self,
+        style: TSWPArchives.ParagraphStyleArchive,
+        field: str,
+    ) -> Any:  # noqa: ANN401
         """Return a paragraph property from the style or its parent."""
         if not style.para_properties.HasField(field):  # type: ignore[arg-type]
             parent = self.get_object(
@@ -2570,9 +2584,9 @@ class NumbersModel(Cacheable):
         self,
         style: TSTArchives.CellStyleArchive,
         field: str,
-    ) -> int | bool | TSWPArchives.PaddingArchive:
+    ) -> Any:  # noqa: ANN401
         """Return a cell property from the style or its parent."""
-        if not style.cell_properties.HasField(field):
+        if not style.cell_properties.HasField(field):  # type: ignore[arg-type]
             parent = self.get_object(
                 style.super.parent.identifier,
                 TSTArchives.CellStyleArchive,
@@ -2602,7 +2616,7 @@ class NumbersModel(Cacheable):
         strikethru = self.char_property(style, "strikethru")
         return strikethru != CharacterStyle.StrikethruType.kNoStrikethru
 
-    def cell_style_name(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> bool:
+    def cell_style_name(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> str:
         """Return the cell style name."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         return style.super.name
@@ -2631,9 +2645,9 @@ class NumbersModel(Cacheable):
                 self.missing_fonts[font_name] = True
             return DEFAULT_FONT
 
-        return FONT_MAP[font_name]["family"]
+        return cast("str", FONT_MAP[font_name]["family"])
 
-    def cell_font_details(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> dict[str, str]:
+    def cell_font_details(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> dict[str, Any]:
         """Return the cell font details."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         font_name = self.char_property(style, "font_name")
@@ -2670,7 +2684,7 @@ class NumbersModel(Cacheable):
         if cell._cell_style_id is None:
             return DEFAULT_TEXT_WRAP
         style = self.table_style(cell._table_id, cell._cell_style_id)
-        return self.cell_property(style, "text_wrap")
+        return bool(self.cell_property(style, "text_wrap"))
 
     def stroke_type(self, stroke_run: TSTArchives.StrokeLayerArchive.StrokeRunArchive) -> str:
         """Return the stroke type for a stroke run."""
@@ -2683,7 +2697,7 @@ class NumbersModel(Cacheable):
             return "dashes"
         return "none"
 
-    def cell_for_stroke(self, table_id: int, side: str, row: int, col: int) -> Cell:
+    def cell_for_stroke(self, table_id: int, side: str, row: int, col: int) -> Cell | None:
         """Return the cell for stroke."""
         data = self._table_data[table_id]
         if row < 0 or col < 0:
@@ -2701,10 +2715,11 @@ class NumbersModel(Cacheable):
                 return cell
         elif cell.is_merged:
             # No borders for merged edges of anchor cells
+            size = cell.size or (1, 1)
             if (
                 side in ["top", "left"]
-                or (side == "right" and cell.size[1] == 1)
-                or (side == "bottom" and cell.size[0] == 1)
+                or (side == "right" and size[1] == 1)
+                or (side == "bottom" and size[0] == 1)
             ):
                 return cell
         else:
@@ -2826,7 +2841,12 @@ class NumbersModel(Cacheable):
         ):
             self.set_cell_border(stroke_table_id, row, col, side, border_value)
 
-    def create_stroke(self, origin: int, length: int, border_value: Border) -> int:
+    def create_stroke(
+        self,
+        origin: int,
+        length: int,
+        border_value: Border,
+    ) -> TSTArchives.StrokeLayerArchive.StrokeRunArchive:
         """Create stroke."""
         line_cap = TSDArchives.StrokeArchive.LineCap.ButtCap
         line_join = TSDArchives.LineJoin.MiterJoin
@@ -3032,12 +3052,12 @@ class NumbersModel(Cacheable):
         return max(image_ids) + 1
 
     @cache(num_args=0)
-    def group_uuid_values(self) -> dict[NumbersUUID, str | int | bool | datetime | None]:
+    def group_uuid_values(self) -> dict[NumbersUUID, str | float | bool | datetime | None]:
         """Group cell values by their associated UUID identifiers."""
 
         def cell_value_to_key(
             cell_value: TSCEArchives.CellValueArchive,
-        ) -> str | int | bool | datetime:
+        ) -> str | float | bool | datetime | None:
             """Convert a CellValueArchive to a key."""
             cell_value_type = cell_value.cell_value_type
             if cell_value_type == CellValueType.STRING_TYPE:
@@ -3072,7 +3092,7 @@ class NumbersModel(Cacheable):
     def calculate_table_categories(  # noqa: C901
         self,
         table_id: int,
-    ) -> tuple[dict[int, int], dict] | None:
+    ) -> None:
         """Calculate table categories."""
         category_owner_id = self.table_model(table_id).category_owner.identifier
         if not category_owner_id:
@@ -3109,7 +3129,11 @@ class NumbersModel(Cacheable):
             NumbersUUID(row_uid_map.sorted_row_uids[i]) for i in row_uid_map.row_uid_for_index
         ]
 
-        def parent_relationships(parent: NumbersUUID, children: list, group_parents: dict) -> None:
+        def parent_relationships(
+            parent: NumbersUUID | None,
+            children: Sequence[TSTArchives.GroupByArchive.GroupNodeArchive],
+            group_parents: dict[NumbersUUID, NumbersUUID | None],
+        ) -> None:
             """Map model objects to their parent relationships."""
             for child in children:
                 child_uuid = NumbersUUID(child.group_uid)
@@ -3117,14 +3141,14 @@ class NumbersModel(Cacheable):
                 if len(child.child) > 0:
                     parent_relationships(child_uuid, child.child, group_parents)
 
-        group_parents = {}
+        group_parents: dict[NumbersUUID, NumbersUUID | None] = {}
         parent_relationships(None, category_archive.group_node_root.child, group_parents)
 
         row = 0
         row_mapper: dict[int, int] = {}
-        nodes: dict[NumbersUUID, dict] = {}
-        root_children: dict = {}
-        stack: list[NumbersUUID | None] = []
+        nodes: dict[NumbersUUID, dict[str, Any]] = {}
+        root_children: dict[Any, Any] = {}
+        stack: list[NumbersUUID] = []
 
         for uuid in row_uid_for_index:
             if uuid in group_uuids:
@@ -3288,7 +3312,10 @@ def range_end(
     return obj.range_begin
 
 
-def formatted_number(number_type: int, index: int) -> str:
+def formatted_number(
+    number_type: TSWPArchives.ListStyleArchive.LabelType.ValueType,
+    index: int,
+) -> str:
     """Format an index bullet for the requested type."""
     bullet_char = BULLET_PREFIXES[number_type]
     bullet_char += BULLET_CONVERSION[number_type](index)
@@ -3299,10 +3326,10 @@ def formatted_number(number_type: int, index: int) -> str:
 
 def get_storage_buffers_for_row(
     storage_buffer: bytes,
-    offsets: list,
+    offsets: bytes,
     num_cols: int,
     has_wide_offsets: bool,
-) -> list[bytes]:
+) -> list[bytes | None]:
     """
     Extract storage buffers for each cell in a table row.
 
@@ -3318,28 +3345,28 @@ def get_storage_buffers_for_row(
          data: list of bytes for each cell in a row, or None if empty
 
     """
-    offsets = array("h", offsets).tolist()
+    offset_list = array("h", offsets).tolist()
     if has_wide_offsets:
-        offsets = [o * 4 for o in offsets]
+        offset_list = [o * 4 for o in offset_list]
 
-    data = []
+    data: list[bytes | None] = []
     for col in range(num_cols):
-        if col >= len(offsets):
+        if col >= len(offset_list):
             break
 
-        start = offsets[col]
+        start = offset_list[col]
         if start < 0:
             data.append(None)
             continue
 
-        if col == (len(offsets) - 1):
+        if col == (len(offset_list) - 1):
             end = len(storage_buffer)
         else:
             end = None
             # Find next positive offset
-            for i, x in enumerate(offsets[col + 1 :]):
+            for i, x in enumerate(offset_list[col + 1 :]):
                 if x >= 0:
-                    end = offsets[col + i + 1]
+                    end = offset_list[col + i + 1]
                     break
             if end is None:
                 end = len(storage_buffer)
@@ -3348,7 +3375,7 @@ def get_storage_buffers_for_row(
     return data
 
 
-def field_references(obj: ProtoMessage) -> dict[str, dict[str, int]]:
+def field_references(obj: ProtoMessage) -> dict[str, Any]:
     """Return a dict of all fields in an object that are references to other objects."""
     return {
         x[0].name: {"identifier": getattr(obj, x[0].name).identifier}
