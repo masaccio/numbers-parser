@@ -48,6 +48,7 @@ from numbers_parser.constants import (
     DEFAULT_COLUMN_WIDTH,
     DEFAULT_DOCUMENT,
     DEFAULT_FONT,
+    DEFAULT_PASSWORD_HINT,
     DEFAULT_PRE_BNC_BYTES,
     DEFAULT_ROW_HEIGHT,
     DEFAULT_TABLE_OFFSET,
@@ -166,7 +167,7 @@ class DataLists(Cacheable):
         self,
         model: NumbersModel,
         datalist_name: str,
-        value_attr: str | None = None,
+        value_attr: str,
     ) -> None:
         """Initialize the instance state."""
         self._model = model
@@ -270,29 +271,35 @@ class NumbersModel(Cacheable):
         if filepath is None:
             filepath = Path(DEFAULT_DOCUMENT)
         self.objects = ObjectStore(filepath, password)
-        self._merge_cells = defaultdict(MergeCells)
-        self._row_heights = {}
-        self._col_widths = {}
+        self._merge_cells: dict[int, MergeCells] = defaultdict(MergeCells)
+        self._row_heights: dict[int, dict[int, int]] = {}
+        self._col_widths: dict[int, dict[int, int]] = {}
         self._table_formats = DataLists(self, "format_table", "format")
         self.table_styles = DataLists(self, "styleTable", "reference")
         self._table_strings = DataLists(self, "stringTable", "string")
         self._table_comments = DataLists(self, "commentStorageTable", "comment_storage")
         self._control_specs = DataLists(self, "control_cell_spec_table", "cell_spec")
         self._formulas = DataLists(self, "formula_table", "formula")
-        self._table_data = {}
-        self.table_categories_data = {}
-        self.table_categories_row_mapper = {}
+        self._table_data: dict[int, list[list[Cell]]] = {}
+        self.table_categories_data: dict[int, dict[str, Any]] = {}
+        self.table_categories_row_mapper: dict[int, int] = {}
         self._styles = None
-        self._update_strokes = {}
-        self.images = {}
+        self._update_strokes: dict[int, bool] = {}
+        self.images: dict[bytes, int] = {}
         self._custom_formats = None
         self._custom_format_archives = None
         self._custom_format_ids = None
         self.name_ref_cache = ScopedNameRefCache(self)
-        self.missing_fonts = {}
+        self.missing_fonts: dict[str, bool] = {}
         self.calculate_table_uuid_map()
 
-    def save(self, filepath: Path, package: bool, password: str | None, hint: str | None) -> None:
+    def save(
+        self,
+        filepath: Path,
+        package: bool,
+        password: str | None,
+        hint: str = DEFAULT_PASSWORD_HINT,
+    ) -> None:
         """Save the value."""
         self.refresh_pivot_tables()
         self.objects.save(filepath, package, password, hint)
@@ -419,7 +426,7 @@ class NumbersModel(Cacheable):
         """Return whether the table name is displayed."""
         if enabled is not None:
             self.table_model(table_id).table_name_enabled = enabled
-            return None
+            return False
         return self.table_model(table_id).table_name_enabled
 
     def caption_enabled(self, table_id: int, enabled: bool | None = None) -> bool:
@@ -427,7 +434,7 @@ class NumbersModel(Cacheable):
         table_info = self.table_info(table_id=table_id)
         if enabled is not None:
             table_info.super.caption_hidden = not enabled
-            return None
+            return False
         caption_info_id = table_info.super.caption.identifier
         caption_archive = self.get_object(caption_info_id, TSDArchives.StandinCaptionArchive)
         if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":

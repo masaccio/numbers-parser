@@ -28,6 +28,7 @@ from numbers_parser.cell import (
 from numbers_parser.constants import (
     CUSTOM_FORMATTING_ALLOWED_CELLS,
     DEFAULT_COLUMN_COUNT,
+    DEFAULT_PASSWORD_HINT,
     DEFAULT_ROW_COUNT,
     FORMATTING_ACTION_CELLS,
     FORMATTING_ALLOWED_CELLS,
@@ -144,7 +145,7 @@ class Document:
         filename: str | Path,
         package: bool = False,
         password: str | None = None,
-        hint: str = "No hint",
+        hint: str = DEFAULT_PASSWORD_HINT,
     ) -> None:
         """
         Save the document in the specified filename.

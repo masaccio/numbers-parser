@@ -8,7 +8,12 @@ from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, cast, overloa
 
 from google.protobuf.message import Message as ProtoMessage
 
-from numbers_parser.constants import DOCUMENT_ID, PACKAGE_ID, SUPPORTED_NUMBERS_VERSIONS
+from numbers_parser.constants import (
+    DEFAULT_PASSWORD_HINT,
+    DOCUMENT_ID,
+    PACKAGE_ID,
+    SUPPORTED_NUMBERS_VERSIONS,
+)
 from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
 from numbers_parser.iwork import IWork, IWorkHandler
 
@@ -96,7 +101,13 @@ class ObjectStore(IWorkHandler):
         self._max_id = max(self._objects.keys())
         self._max_id = math.ceil(self._max_id / 1000000) * 1000000
 
-    def save(self, filepath: Path, package: bool, password: str | None, hint: str) -> None:
+    def save(
+        self,
+        filepath: Path,
+        package: bool,
+        password: str | None,
+        hint: str = DEFAULT_PASSWORD_HINT,
+    ) -> None:
         """Save the value."""
         self._iwork.save(filepath, self._file_store, package, password, hint)
 

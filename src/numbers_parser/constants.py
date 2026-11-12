@@ -2,8 +2,8 @@
 
 from datetime import datetime
 from enum import IntEnum, auto
-from importlib.resources import files
 from math import ceil
+from pathlib import Path
 
 import enum_tools.documentation
 
@@ -24,7 +24,7 @@ __all__ = [
 ]
 
 
-DEFAULT_DOCUMENT = files("numbers_parser") / "data" / "empty.numbers"
+DEFAULT_DOCUMENT = Path(__file__).resolve().parent / "data" / "empty.numbers"
 
 # New document defaults
 DEFAULT_COLUMN_COUNT = 8
@@ -34,6 +34,7 @@ DEFAULT_ROW_COUNT = 12
 DEFAULT_ROW_HEIGHT = 20.0
 DEFAULT_TABLE_OFFSET = 80.0
 DEFAULT_TILE_SIZE = 256
+DEFAULT_PASSWORD_HINT = "No hint"  # noqa: S105
 
 # Style defaults
 DEFAULT_ALIGNMENT = ("auto", "top")
