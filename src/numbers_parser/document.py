@@ -1354,7 +1354,7 @@ class Table(Cacheable):
 
         self._model.calculate_table_categories(self._table_id)
         data = self._model.table_categories_data[self._table_id]
-        if values_only:
+        if values_only and data is not None:
             return data_to_values(data)
         return data
 

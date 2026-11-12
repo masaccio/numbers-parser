@@ -3181,9 +3181,9 @@ class NumbersModel(Cacheable):
                 out[child_key] = node_to_structure(child_node)
             return out
 
-        self.table_categories_data[table_id] = {}
-        for key, node in root_children.items():
-            self.table_categories_data[table_id][key] = node_to_structure(node)
+        self.table_categories_data[table_id] = {
+            key: node_to_structure(node) for key, node in root_children.items()
+        }
 
         self.table_categories_row_mapper[table_id] = {
             row: row_uuid_to_offset[uuid]
@@ -3313,7 +3313,7 @@ def range_end(
 
 
 def formatted_number(
-    number_type: TSWPArchives.ListStyleArchive.LabelType.ValueType,
+    number_type: TSWPArchives.ListStyleArchive.NumberType.ValueType,
     index: int,
 ) -> str:
     """Format an index bullet for the requested type."""
