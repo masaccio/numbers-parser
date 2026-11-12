@@ -2,6 +2,7 @@ abstractmethod
 addopts
 adipiscing
 amet
+anglegradient
 applescript
 ASTNODEARRAYARCHIVE
 ASTNODETYPE

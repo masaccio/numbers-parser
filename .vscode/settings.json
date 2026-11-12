@@ -12,8 +12,8 @@
         "editor.wordWrap": "wordWrapColumn",
         "editor.wordWrapColumn": 100,
         "editor.codeActionsOnSave": {
-            "source.fixAll": "explicit",
-            "source.organizeImports": "explicit"
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
         },
         "editor.defaultFormatter": "charliermarsh.ruff"
     },
@@ -25,13 +25,34 @@
         "--no-cov",
         "-o",
         "log_cli=True",
-        "--log-cli-level=ERROR",
+        "--log-cli-level=ERROR"
     ],
     "python.defaultInterpreterPath": "${env:HOME}/Library/Caches/uv/virtualenvs/numbers-parser/bin/python",
     "python.terminal.activateEnvironment": true,
     "ruff.importStrategy": "fromEnvironment",
     "ruff.interpreter": [
-        "${env:HOME}/Library/Caches/uv/virtualenvs/numbers-parse/bin/python"
+        "${env:HOME}/Library/Caches/uv/virtualenvs/numbers-parser/bin/python"
+    ],
+    "ruff.exclude": [
+        "src/numbers_parser/generated/**",
+        "src/build/protodump.py"
+    ],
+    "mypy-type-checker.importStrategy": "fromEnvironment",
+    "mypy-type-checker.args": [
+        "--config-file=${workspaceFolder}/pyproject.toml"
+    ],
+    "mypy-type-checker.ignorePatterns": [
+        "src/numbers_parser/generated/**",
+        "src/build/**",
+        "tests/**"
+    ],
+    "pylint.importStrategy": "fromEnvironment",
+    "pylint.args": [
+        "--rcfile=${workspaceFolder}/pyproject.toml"
+    ],
+    "pylint.ignorePatterns": [
+        "src/numbers_parser/generated/*.py",
+        "src/build/protodump.py"
     ],
     "todo-tree.general.tags": [
         "TODO",

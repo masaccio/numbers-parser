@@ -7,7 +7,6 @@ repos:
         args: [--config, pyproject.toml, --fix]
         files: ^src/(numbers_parser|build)/.*\.py$
         exclude: ^(src/numbers_parser/generated/.*\.py|src/build/protodump\.py)$
-        
 
   - repo: https://github.com/pylint-dev/pylint
     rev: v4.1.3
@@ -35,3 +34,11 @@ repos:
             rich,
             tqdm,
           ]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy
+        entry: uv run --active mypy
+        args: [--config-file, pyproject.toml]
+        files: ^src/numbers_parser/[^/]+\.py$
