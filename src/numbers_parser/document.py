@@ -827,8 +827,10 @@ class Table(Cacheable):
         for row, cells in enumerate(self._data):
             for col, cell in enumerate(cells):
                 if cell.is_merged:
-                    size = cell.size
-                    merge_cells.add(xl_range(row, col, row + size[0] - 1, col + size[1] - 1))
+                    size = cast("tuple[int, int]", cell.size)
+                    merge_cells.add(
+                        xl_range(row, col, row + size[0] - 1, col + size[1] - 1),
+                    )
         return sorted(merge_cells)
 
     @overload

@@ -91,7 +91,7 @@ from numbers_parser.numbers_uuid import NumbersUUID, uuid_to_hex
 from numbers_parser.xrefs import CellRange, ScopedNameRefCache
 
 if TYPE_CHECKING:
-    from collections.abc import MutableSequence, Sequence
+    from collections.abc import Sequence
 
     from google.protobuf.message import Message as ProtoMessage
 
@@ -108,9 +108,11 @@ debug = logger.debug
 class MergeCells:
     """Track merged-cell anchors and references in a table."""
 
+    _references: dict[tuple[int, int], MergeReference | MergeAnchor | None]
+
     def __init__(self) -> None:
         """Initialize the instance state."""
-        self._references = defaultdict(lambda: False)
+        self._references = defaultdict(lambda: None)
 
     def add_reference(self, row: int, col: int, rect: tuple) -> None:
         """Add reference."""
@@ -130,17 +132,23 @@ class MergeCells:
         """Return whether merge anchor is available."""
         return isinstance(self._references[row_col], MergeAnchor)
 
-    def get(self, row_col: tuple) -> MergeAnchor | MergeReference:
+    def get(self, row_col: tuple) -> MergeAnchor | MergeReference | None:
         """Return the merge marker stored at the row and column."""
         return self._references[row_col]
 
-    def size(self, row_col: tuple) -> tuple:
+    def size(self, row_col: tuple) -> tuple | None:
         """Return the dimensions of the merged cell range."""
-        return self._references[row_col].size
+        ref = self._references[row_col]
+        if isinstance(ref, MergeAnchor):
+            return ref.size
+        return None
 
-    def rect(self, row_col: tuple) -> tuple:
+    def rect(self, row_col: tuple) -> tuple | None:
         """Return the coordinates covered by the merged cell range."""
-        return self._references[row_col].rect
+        ref = self._references[row_col]
+        if isinstance(ref, MergeReference):
+            return ref.rect
+        return None
 
     def merge_cells(self) -> list[tuple[int, int]]:
         """Merge cells."""
@@ -149,6 +157,10 @@ class MergeCells:
 
 class DataLists(Cacheable):
     """Model for TST.DataList with caching and key generation for new values."""
+
+    _model: NumbersModel
+    _datalists: dict[int, dict]
+    _datalist_name: str
 
     def __init__(
         self,
@@ -214,7 +226,7 @@ class DataLists(Cacheable):
         self._datalists[table_id]["key_index"] = {}
         self._datalists[table_id]["next_key"] = 1
         self._datalists[table_id]["datalist"].nextListID = 1
-        clear_field_container(self._datalists[table_id]["datalist"].entries)
+        self._datalists[table_id]["datalist"].entries.clear()
 
     def lookup_key(self, table_id: int, value: str | ProtoMessage) -> int:
         """
@@ -568,7 +580,7 @@ class NumbersModel(Cacheable):
         """Return the text displayed in the table caption."""
         table_info = self.table_info(table_id=table_id)
         caption_info_id = table_info.super.caption.identifier
-        caption_archive = self.objects[caption_info_id]
+        caption_archive = self.get_object(caption_info_id, TSAArchives.CaptionInfoArchive)
 
         if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":
             if caption is None:
@@ -586,7 +598,7 @@ class NumbersModel(Cacheable):
             TSWPArchives.StorageArchive,
         )
         if caption is not None:
-            clear_field_container(storage_archive.text)
+            storage_archive.text.clear()
             storage_archive.text.append(caption)
             return None
         if len(storage_archive.text) == 0:
@@ -1047,7 +1059,7 @@ class NumbersModel(Cacheable):
         )
 
     @cache()
-    def table_uuids_to_id(self, table_uuid: str) -> int | None:
+    def table_uuids_to_id(self, table_uuid: str) -> int:
         """Map table UUIDs to their model identifiers."""
         return next(
             (
@@ -1056,7 +1068,7 @@ class NumbersModel(Cacheable):
                 for table_id in self.table_ids(sheet_id)
                 if table_uuid == self.table_base_id(table_id)
             ),
-            None,
+            0,
         )
 
     def node_to_ref(  # noqa: C901
@@ -1100,7 +1112,7 @@ class NumbersModel(Cacheable):
             table_uuid = NumbersUUID(node.AST_cross_table_reference_extra_info.table_id).hex
             to_table_id = self.table_uuids_to_id(table_uuid)
         else:
-            to_table_id = None
+            to_table_id = table_id
 
         if node.HasField("AST_colon_tract"):
             row_begin = resolve_range(
@@ -1234,7 +1246,7 @@ class NumbersModel(Cacheable):
             base_data_store.rowHeaders.buckets[0].identifier,
             TSTArchives.HeaderStorageBucket,
         )
-        clear_field_container(buckets.headers)
+        buckets.headers.clear()
 
         for row, cells in enumerate(data):
             num_cols = len(data) - sum(isinstance(x, MergedCell) for x in cells)
@@ -1258,7 +1270,7 @@ class NumbersModel(Cacheable):
             base_data_store.columnHeaders.identifier,
             TSTArchives.HeaderStorageBucket,
         )
-        clear_field_container(buckets.headers)
+        buckets.headers.clear()
         # Transpose data to get columns
         col_data = [list(x) for x in zip(*data, strict=False)]
 
@@ -1346,20 +1358,24 @@ class NumbersModel(Cacheable):
     def add_component_metadata(self, object_id: int, parent: str, locator: str) -> None:
         """Add a new ComponentInfo record to the parent object in the document metadata."""
         if locator is not None:
-            args = {
-                "locator": locator.format(object_id),
-                "preferred_locator": re.sub(r"\-\d+.*", "", locator),
-            }
+            component_info = TSPArchiveMessages.ComponentInfo(
+                identifier=object_id,
+                is_stored_outside_object_archive=False,
+                document_read_version=[2, 0, 0],
+                document_write_version=[2, 0, 0],
+                save_token=1,
+                locator=locator.format(object_id),
+                preferred_locator=re.sub(r"\-\d+.*", "", locator),
+            )
         else:
-            args = {"preferred_locator": parent}
-        component_info = TSPArchiveMessages.ComponentInfo(
-            identifier=object_id,
-            is_stored_outside_object_archive=False,
-            document_read_version=[2, 0, 0],
-            document_write_version=[2, 0, 0],
-            save_token=1,
-            **args,
-        )
+            component_info = TSPArchiveMessages.ComponentInfo(
+                identifier=object_id,
+                is_stored_outside_object_archive=False,
+                document_read_version=[2, 0, 0],
+                document_write_version=[2, 0, 0],
+                save_token=1,
+                preferred_locator=parent,
+            )
         self.package_metadata.components.append(component_info)
         self.add_component_reference(object_id, location=parent)
 
@@ -1952,8 +1968,8 @@ class NumbersModel(Cacheable):
                         "a": 1.0,
                         "rgbspace": "srgb",
                     },
-                    "bold": style.bold | style._font_details["bold"],
-                    "italic": style.italic | style._font_details["italic"],
+                    "bold": style.bold or style._font_details["bold"],
+                    "italic": style.italic or style._font_details["italic"],
                     "underline": underline,
                     "strikethru": strikethru,
                     "font_size": style.font_size,
@@ -2471,15 +2487,27 @@ class NumbersModel(Cacheable):
 
         table_model = self.table_model(cell._table_id)
         if cell.row in range(table_model.number_of_header_rows):
-            return self.objects[table_model.header_row_text_style.identifier]
+            return self.get_object(
+                table_model.header_row_text_style.identifier,
+                TSWPArchives.ParagraphStyleArchive,
+            )
         if cell.col in range(table_model.number_of_header_columns):
-            return self.objects[table_model.header_column_text_style.identifier]
+            return self.get_object(
+                table_model.header_column_text_style.identifier,
+                TSWPArchives.ParagraphStyleArchive,
+            )
         if table_model.number_of_footer_rows > 0:
             start_row_num = table_model.number_of_rows - table_model.number_of_footer_rows
             end_row_num = start_row_num + table_model.number_of_footer_rows
             if cell.row in range(start_row_num, end_row_num):
-                return self.objects[table_model.footer_row_text_style.identifier]
-        return self.objects[table_model.body_text_style.identifier]
+                return self.get_object(
+                    table_model.footer_row_text_style.identifier,
+                    TSWPArchives.ParagraphStyleArchive,
+                )
+        return self.get_object(
+            table_model.body_text_style.identifier,
+            TSWPArchives.ParagraphStyleArchive,
+        )
 
     def cell_alignment(self, cell: Cell) -> Alignment:
         """Return the cell alignment."""
@@ -2507,9 +2535,13 @@ class NumbersModel(Cacheable):
             return [(rgb(s.color)) for s in cell_properties.gradient.stops]
         return None
 
-    def char_property(self, style: TSWPArchives.ParagraphStyleArchive, field: str) -> object:
+    def char_property(
+        self,
+        style: TSWPArchives.ParagraphStyleArchive,
+        field: str,
+    ) -> TSPMessages.Color | bool | float | int | str:
         """Return a character property from the style or its parent."""
-        if not style.char_properties.HasField(field):
+        if not style.char_properties.HasField(field):  # type: ignore[arg-type]
             parent = self.get_object(
                 style.super.parent.identifier,
                 TSWPArchives.ParagraphStyleArchive,
@@ -2519,7 +2551,7 @@ class NumbersModel(Cacheable):
 
     def para_property(self, style: TSWPArchives.ParagraphStyleArchive, field: str) -> float:
         """Return a paragraph property from the style or its parent."""
-        if not style.para_properties.HasField(field):
+        if not style.para_properties.HasField(field):  # type: ignore[arg-type]
             parent = self.get_object(
                 style.super.parent.identifier,
                 TSWPArchives.ParagraphStyleArchive,
@@ -2541,23 +2573,23 @@ class NumbersModel(Cacheable):
             return getattr(parent.cell_properties, field)
         return getattr(style.cell_properties, field)
 
-    def cell_is_bold(self, obj: Cell | TSTArchives.CellStyleArchive) -> bool:
+    def cell_is_bold(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> bool:
         """Return whether the cell is bold."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
-        return self.char_property(style, "bold")
+        return bool(self.char_property(style, "bold"))
 
-    def cell_is_italic(self, obj: Cell | TSTArchives.CellStyleArchive) -> bool:
+    def cell_is_italic(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> bool:
         """Return whether the cell is italic."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
-        return self.char_property(style, "italic")
+        return bool(self.char_property(style, "italic"))
 
-    def cell_is_underline(self, obj: Cell | TSTArchives.CellStyleArchive) -> bool:
+    def cell_is_underline(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> bool:
         """Return whether the cell is underline."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         underline = self.char_property(style, "underline")
         return underline != CharacterStyle.UnderlineType.kNoUnderline
 
-    def cell_is_strikethrough(self, obj: Cell | TSTArchives.CellStyleArchive) -> bool:
+    def cell_is_strikethrough(self, obj: Cell | TSWPArchives.ParagraphStyleArchive) -> bool:
         """Return whether the cell is strikethrough."""
         style = self.cell_text_style(obj) if isinstance(obj, Cell) else obj
         strikethru = self.char_property(style, "strikethru")
@@ -2710,7 +2742,7 @@ class NumbersModel(Cacheable):
     def extract_strokes_in_layers(
         self,
         table_id: int,
-        layer_ids: list,
+        layer_ids: Sequence,
         side: str,
     ) -> list[tuple[int, int, int, int, str, Border]]:
         """Extract strokes in layers."""
@@ -2859,10 +2891,10 @@ class NumbersModel(Cacheable):
             table_model.stroke_sidecar.identifier,
             TSTArchives.StrokeSidecarArchive,
         )
-        clear_field_container(sidecar.top_row_stroke_layers)
-        clear_field_container(sidecar.bottom_row_stroke_layers)
-        clear_field_container(sidecar.left_column_stroke_layers)
-        clear_field_container(sidecar.right_column_stroke_layers)
+        sidecar.top_row_stroke_layers.clear()
+        sidecar.bottom_row_stroke_layers.clear()
+        sidecar.left_column_stroke_layers.clear()
+        sidecar.right_column_stroke_layers.clear()
 
         # Horizontal strokes (all but bottom of table)
         for row in range(num_rows):
@@ -3184,12 +3216,12 @@ class NumbersModel(Cacheable):
             sorted_col_uuids = sorted(col_uuids, key=lambda x: x.int)
             sorted_row_uuids = sorted(row_uuids, key=lambda x: x.int)
 
-            clear_field_container(uid_map.sorted_column_uids)
+            uid_map.sorted_column_uids.clear()
             for u in sorted_col_uuids:
                 uid_map.sorted_column_uids.append(u.protobuf2)
 
-            clear_field_container(uid_map.column_uid_for_index)
-            clear_field_container(uid_map.column_index_for_uid)
+            uid_map.column_uid_for_index.clear()
+            uid_map.column_index_for_uid.clear()
             for _ in sorted_col_uuids:
                 uid_map.column_index_for_uid.append(0)
             for col_idx, u in enumerate(col_uuids):
@@ -3197,12 +3229,12 @@ class NumbersModel(Cacheable):
                 uid_map.column_uid_for_index.append(sorted_idx)
                 uid_map.column_index_for_uid[sorted_idx] = col_idx
 
-            clear_field_container(uid_map.sorted_row_uids)
+            uid_map.sorted_row_uids.clear()
             for u in sorted_row_uuids:
                 uid_map.sorted_row_uids.append(u.protobuf2)
 
-            clear_field_container(uid_map.row_uid_for_index)
-            clear_field_container(uid_map.row_index_for_uid)
+            uid_map.row_uid_for_index.clear()
+            uid_map.row_index_for_uid.clear()
             for _ in sorted_row_uuids:
                 uid_map.row_index_for_uid.append(0)
             for row_idx, u in enumerate(row_uuids):
@@ -3307,16 +3339,6 @@ def get_storage_buffers_for_row(
         data.append(storage_buffer[start:end])
 
     return data
-
-
-def clear_field_container(obj: MutableSequence[object]) -> None:
-    """
-    Remove every entry from a protobuf repeated-field container.
-
-    Use a portable approach that works across protobuf container versions.
-    """
-    while len(obj) > 0:
-        _ = obj.pop()
 
 
 def field_references(obj: ProtoMessage) -> dict[str, dict[str, int]]:

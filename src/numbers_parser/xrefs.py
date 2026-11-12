@@ -106,8 +106,6 @@ class CellRange:
 
     def _set_sheet_ids(self) -> None:
         """Determine the sheet IDs for the referenced tables."""
-        if self.to_table_id is None:
-            self.to_table_id = self.from_table_id
         self.from_sheet_id = self._model.table_id_to_sheet_id(self.from_table_id)
         self.to_sheet_id = self._model.table_id_to_sheet_id(self.to_table_id)
 
