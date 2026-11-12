@@ -8,7 +8,23 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from numbers_parser import RGB, Document, FileError, FileFormatError
-from numbers_parser.iwork import IWork, IWorkCrypto
+from numbers_parser.iwork import IWork, IWorkCrypto, IWorkHandler
+
+
+class NullHandler(IWorkHandler):
+    """Dummy handler for testing."""
+
+    def store_file(self, filename: str, blob: bytes) -> None:
+        """Dummy handler for testing."""  # noqa: D401
+
+    def store_object(self, filename: str, identifier: int, archive: object) -> None:
+        """Dummy handler for testing."""  # noqa: D401
+
+    def allowed_format(self, extension: str) -> bool:
+        """Dummy handler for testing."""  # noqa: D401
+
+    def allowed_version(self, version: str) -> bool:
+        """Dummy handler for testing."""  # noqa: D401
 
 
 def test_encrypted_read():
@@ -40,22 +56,22 @@ def test_package_encryption_missing_verifier(tmp_path):
     (tmp_path / ".iwph").write_bytes(b"No hint")
 
     with pytest.raises(FileError, match=r"invalid Numbers document \(missing encryption files\)"):
-        IWork()._read_package_encryption(tmp_path)
+        IWork(NullHandler())._read_package_encryption(tmp_path)  # noqa: SLF001
 
 
 def test_encryption_verifier_initialization_error():
     with pytest.raises(FileError, match="Error initializing encryption verifier"):  # noqa: PT012
-        work = IWork()
-        work._password = "s3cr3t"  # noqa: S105
-        work._initialize_encryption("No hint", b"invalid")
+        work = IWork(NullHandler())
+        work._password = "s3cr3t"  # noqa: S105, SLF001
+        work._initialize_encryption("No hint", b"invalid")  # noqa: SLF001
 
 
 def test_encryption_state_tracks_crypto_instance():
-    work = IWork()
+    work = IWork(NullHandler())
     assert not work.is_encrypted
 
     _, crypto = IWorkCrypto.from_password("s3cr3t")
-    work._crypto = crypto
+    work._crypto = crypto  # noqa: SLF001
     assert work.is_encrypted
 
 
@@ -66,7 +82,7 @@ def test_zip_encryption_missing_verifier():
     archive.seek(0)
 
     with pytest.raises(FileError, match=r"invalid Numbers document \(missing encryption files\)"):
-        IWork()._read_objects_from_zipfile(ZipFile(archive))
+        IWork(NullHandler())._read_objects_from_zipfile(ZipFile(archive))  # noqa: SLF001
 
 
 def test_encrypted_save(configurable_save_file):
