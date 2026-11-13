@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import pytest
 import pytest_check as check
@@ -424,7 +425,7 @@ def test_standard_formatting_stress():
                 )
 
 
-def test_write_date_format(configurable_save_file):
+def test_write_date_format(configurable_save_file: Path):
     doc = Document(
         num_header_cols=0,
         num_header_rows=0,
@@ -485,7 +486,7 @@ def test_write_date_format(configurable_save_file):
     check.equal(table.cell(row + 1, 0).formatted_value, "1 day 2 hours 0 minutes")
 
 
-def test_write_numbers_format(configurable_save_file):
+def test_write_numbers_format(configurable_save_file: Path):
     doc = Document(num_header_cols=0, num_header_rows=0, num_cols=8, num_rows=10)
     table = doc.sheets[0].tables[0]
 
@@ -624,7 +625,7 @@ def test_write_numbers_format(configurable_save_file):
             check.equal(table.cell(row + 10, col).formatted_value, ref_value)
 
 
-def test_write_mixed_number_formats(configurable_save_file):
+def test_write_mixed_number_formats(configurable_save_file: Path):
     doc = Document(
         num_header_cols=0,
         num_header_rows=0,
@@ -767,7 +768,7 @@ def test_currency_symbols():
     assert table.cell(0, 0).formatted_value == "€\t(12.5)"
 
 
-def test_write_custom_numbers(configurable_save_file, pytestconfig):
+def test_write_custom_numbers(configurable_save_file: Path, pytestconfig):
     if pytestconfig.getoption("max_check_fails") is not None:
         max_check_fails = pytestconfig.getoption("max_check_fails")
     else:
@@ -877,7 +878,7 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
             raise AssertionError
 
 
-def test_write_text_custom_formatting(configurable_save_file):
+def test_write_text_custom_formatting(configurable_save_file: Path):
     doc = Document(num_header_cols=0, num_header_rows=0)
 
     with pytest.raises(TypeError) as e:
@@ -895,7 +896,7 @@ def test_write_text_custom_formatting(configurable_save_file):
     assert table.cell(0, 0).formatted_value == "before test after"
 
 
-def test_write_datetime_custom_formatting(configurable_save_file):
+def test_write_datetime_custom_formatting(configurable_save_file: Path):
     doc = Document(num_header_cols=0, num_header_rows=0)
     string_format = doc.add_custom_format(type="datetime", format="dd MMMM, yyyy")
     table = doc.sheets[0].tables[0]
@@ -927,11 +928,11 @@ def run_test_interactive_formats(filename):
     assert table.cell(1, 2).formatted_value == STAR_RATING_VALUE * 5
 
 
-def test_interactive_formats(configurable_save_file):
+def test_interactive_formats(configurable_save_file: Path):
     run_test_interactive_formats("tests/data/test-actions.numbers")
 
 
-def test_write_interactive_formats(configurable_save_file):
+def test_write_interactive_formats(configurable_save_file: Path):
     doc = Document()
     table = doc.sheets[0].tables[0]
 

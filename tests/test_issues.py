@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 from sys import version_info
 
 import magic
 import pytest
+from pytest_console_scripts import ScriptRunner
 
 from numbers_parser import (
     RGB,
@@ -198,7 +200,7 @@ def test_issue_37():
         assert row[-1].formatted_value == ISSUE_37_REF[i][1]
 
 
-def test_issue_42(script_runner):
+def test_issue_42(script_runner: ScriptRunner):
     doc = Document("tests/data/issue-42.numbers")
     table = doc.sheets[0].tables[0]
     assert isinstance(table.cell(6, 1), ErrorCell)
@@ -245,7 +247,7 @@ def test_issue_43():
     assert table.cell("C1").style.bg_image is None
 
 
-def test_issue_44(script_runner):
+def test_issue_44(script_runner: ScriptRunner):
     doc = Document("tests/data/issue-44.numbers")
     table = doc.sheets[0].tables[0]
     for row, ref in enumerate(ISSUE_44_REF):
@@ -266,7 +268,7 @@ def test_issue_44(script_runner):
         assert test_str == ref_str
 
 
-def test_issue_49(configurable_save_file):
+def test_issue_49(configurable_save_file: Path):
     doc = Document("tests/data/issue-49.numbers")
     doc.save(configurable_save_file)
 
@@ -283,7 +285,7 @@ def test_issue_50():
     assert table.cell(65552, 0).value == "string 262161"
 
 
-def test_issue_51(script_runner):
+def test_issue_51(script_runner: ScriptRunner):
     doc = Document("tests/data/issue-51.numbers")
 
     table = doc.sheets[0].tables[0]
@@ -327,7 +329,7 @@ def test_issue_54():
         assert table.cell(6, col).formula == table.cell(7, col).value
 
 
-def test_issue_56(tmp_path):
+def test_issue_56(tmp_path: Path):
     doc = Document("tests/data/issue-56.numbers")
     table = doc.sheets[0].tables[0]
     assert table.cell("A2").style.bg_color == (255, 149, 202)
@@ -336,7 +338,6 @@ def test_issue_56(tmp_path):
 
     new_filename = tmp_path / "issue-56-new.numbers"
     doc.save(new_filename)
-    print(new_filename)
 
     new_doc = Document(new_filename)
     new_table = new_doc.sheets[0].tables[0]
@@ -425,7 +426,7 @@ def test_issue_69():
         assert str(record[0].message) == "Cannot find file 'sssssss的副本.jpeg' in Numbers archive"
 
 
-def test_issue_73(configurable_save_file):
+def test_issue_73(configurable_save_file: Path):
     doc = Document("tests/data/issue-73.numbers")
     table = doc.sheets[0].tables["Table 1"]
     table.write("A4", "foo")
@@ -439,7 +440,7 @@ def test_issue_73(configurable_save_file):
     doc.save(configurable_save_file)
 
 
-def test_issue_74_1(configurable_save_file):
+def test_issue_74_1(configurable_save_file: Path):
     doc = Document("tests/data/test-issue-74.numbers")
     doc.save(configurable_save_file)
 
@@ -455,7 +456,7 @@ def test_issue_74_2():
     table.set_cell_formatting(1, 0, "popup", popup_values=["Cat", "Dog", "Rabbit"], allow_none=True)
 
 
-def test_issue_75(configurable_save_file):
+def test_issue_75(configurable_save_file: Path):
     doc = Document("tests/data/test-issue-75.numbers")
     doc.save(configurable_save_file)
 
@@ -465,7 +466,7 @@ def test_issue_75(configurable_save_file):
     assert all(table.cell(2, col).style.bg_image.filename == "cat.jpg" for col in range(1, 6))
 
 
-def test_issue_76(configurable_save_file):
+def test_issue_76(configurable_save_file: Path):
     doc = Document("tests/data/test-issue-76.numbers")
     doc.save(configurable_save_file)
 
@@ -481,7 +482,7 @@ def test_issue_77():
     assert sheet.tables[1].merge_ranges == ["C1:D2"]
 
 
-def test_issue_78(configurable_save_file):
+def test_issue_78(configurable_save_file: Path):
     doc = Document()
     doc.sheets[0].add_table()
     table1 = doc.sheets[0].tables[0]
@@ -568,7 +569,7 @@ def test_issue_85():
     assert table0.col_width(3) == 98.0
 
 
-def test_issue_90(configurable_save_file):
+def test_issue_90(configurable_save_file: Path):
     doc = Document(num_header_rows=0, num_header_cols=0)
     doc.default_table.write(0, 0, 1769900.26)
     doc.default_table.set_cell_formatting(
@@ -651,7 +652,7 @@ def test_issue_131():
     assert table.cell(9, 1).formula == "-SUM(B1:B6)"
 
 
-def test_issue_152(configurable_save_file):
+def test_issue_152(configurable_save_file: Path):
     black = Border(4.0, RGB(0, 0, 0), "solid")
     cyan_dashed = Border(4.0, RGB(0, 240, 255), "dashes")
     magenta_dashed = Border(4.0, RGB(255, 0, 180), "dashes")
@@ -739,7 +740,7 @@ def test_issue_152(configurable_save_file):
     assert [table.col_width(x) for x in range(table.num_cols)] == [98, 88, 88, 88, 98]
 
 
-def test_issue_174(configurable_save_file):
+def test_issue_174(configurable_save_file: Path):
     doc = Document()
     sheet = doc.sheets[0]
     table = sheet.tables[0]
@@ -774,7 +775,7 @@ def test_issue_174(configurable_save_file):
         assert cell.style.font_size == styles[i].font_size
 
 
-def test_issue_236(configurable_save_file):
+def test_issue_236(configurable_save_file: Path):
     doc = Document("tests/data/formula-syntax-error.numbers")
     assert doc.default_table.cell("A1")._formula_error_id == 1
 
@@ -801,7 +802,7 @@ def test_issue_236(configurable_save_file):
         assert _CellStorageFlags.__repr__(ref_cell) == _CellStorageFlags.__repr__(new_cell)
 
 
-def test_issue_249(configurable_save_file):
+def test_issue_249(configurable_save_file: Path):
     doc = Document()
     doc.sheets[0].tables[0].write(0, 0, 1.999)
     custom_format = doc.add_custom_format(
@@ -817,7 +818,7 @@ def test_issue_249(configurable_save_file):
     assert new_doc.default_table.cell("A1").formatted_value == "2.00"
 
 
-def test_issue_250(configurable_save_file):
+def test_issue_250(configurable_save_file: Path):
     doc = Document()
     doc.default_table.write(0, 0, 0.00001)
     doc.default_table.write(1, 0, 0.00001)
@@ -856,7 +857,11 @@ def test_issue_250(configurable_save_file):
     assert new_doc.default_table.cell(2, 0).formatted_value == "0.000010"
 
 
-def test_issue_251(script_runner, tmp_path, configurable_save_file):
+def test_issue_251(
+    script_runner: pytest_console_scripts.ScriptRunner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+):
     csv_path = tmp_path / "dummy.csv"
     with open(csv_path, "w") as f:
         f.write("Account,Amount,Date\nChecking,100,2026-10-10\n")
@@ -870,7 +875,11 @@ def test_issue_251(script_runner, tmp_path, configurable_save_file):
     assert doc.default_table.cell(1, 1).value == "2026-10-10"
 
 
-def test_issue_251_rename_with_header(script_runner, tmp_path, configurable_save_file):
+def test_issue_251_rename_with_header(
+    script_runner: pytest_console_scripts.ScriptRunner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+):
     csv_path = tmp_path / "named.csv"
     csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
     ret = script_runner.run(
@@ -882,7 +891,11 @@ def test_issue_251_rename_with_header(script_runner, tmp_path, configurable_save
     assert table.cell(1, 1).value == 100
 
 
-def test_issue_251_date_with_header(script_runner, tmp_path, configurable_save_file):
+def test_issue_251_date_with_header(
+    script_runner: pytest_console_scripts.ScriptRunner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+):
     csv_path = tmp_path / "named.csv"
     csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
     ret = script_runner.run(["csv2numbers", csv_path, "--date=2", "-o", configurable_save_file])
@@ -890,7 +903,11 @@ def test_issue_251_date_with_header(script_runner, tmp_path, configurable_save_f
     assert isinstance(Document(configurable_save_file).default_table.cell(1, 2).value, datetime)
 
 
-def test_issue_251_transform_with_header(script_runner, tmp_path, configurable_save_file):
+def test_issue_251_transform_with_header(
+    script_runner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+):
     csv_path = tmp_path / "named.csv"
     csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
     ret = script_runner.run(
@@ -902,7 +919,11 @@ def test_issue_251_transform_with_header(script_runner, tmp_path, configurable_s
     assert table.cell(1, 3).value == 100
 
 
-def test_issue_251_rename_then_delete_index(script_runner, tmp_path, configurable_save_file):
+def test_issue_251_rename_then_delete_index(
+    script_runner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+):
     csv_path = tmp_path / "named.csv"
     csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
     ret = script_runner.run(
@@ -914,7 +935,10 @@ def test_issue_251_rename_then_delete_index(script_runner, tmp_path, configurabl
     assert table.cell(1, 1).value == "2026-10-10"
 
 
-def test_issue_251_transform_index_across_files(script_runner, tmp_path):
+def test_issue_251_transform_index_across_files(
+    script_runner: pytest_console_scripts.ScriptRunner,
+    tmp_path: Path,
+):
     first = tmp_path / "first.csv"
     second = tmp_path / "second.csv"
     first.write_text("Account,Amount\nChecking,100\n")
@@ -927,7 +951,11 @@ def test_issue_251_transform_index_across_files(script_runner, tmp_path):
     assert [Document(output).default_table.cell(1, 2).value for output in outputs] == [100, 200]
 
 
-def test_issue_252(script_runner, tmp_path, configurable_save_file):
+def test_issue_252(
+    script_runner: pytest_console_scripts.ScriptRunner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+):
     csv_path = tmp_path / "dummy.csv"
     with open(csv_path, "w") as f:
         f.write("Val1,Val2\n,5\n0,10\n")
@@ -959,7 +987,7 @@ def test_issue_253():
     assert table.cell(1, 0).formula == "12345670000000000"
 
 
-def test_issue_255(configurable_save_file):
+def test_issue_255(configurable_save_file: Path):
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.write(1, 1, "old value")

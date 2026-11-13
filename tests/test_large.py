@@ -1,3 +1,4 @@
+from pathlib import Path
 from random import randint
 
 import pytest
@@ -44,7 +45,7 @@ def test_large_table():
 
 
 @pytest.mark.experimental
-def test_profiling_tables(configurable_save_file):
+def test_profiling_tables(configurable_save_file: Path):
     doc = Document()
     for _ in range(10):
         doc.add_sheet()

@@ -1,9 +1,11 @@
+from pathlib import Path
+
 import pytest
 
 from numbers_parser import RGB, Document, FileFormatError
 
 
-def test_invalid_packages(configurable_save_file):
+def test_invalid_packages(configurable_save_file: Path):
     with pytest.raises(FileFormatError) as e:
         _ = Document("tests/data/corrupted-zip.numbers")
     assert "invalid Numbers document" in str(e)
@@ -44,7 +46,7 @@ def test_invalid_packages(configurable_save_file):
     assert "cannot overwrite Numbers document file with package" in str(e)
 
 
-def test_package_save(configurable_save_file):
+def test_package_save(configurable_save_file: Path):
     doc = Document("tests/data/test-package.numbers")
     doc.save(configurable_save_file, package=True)
 

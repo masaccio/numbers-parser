@@ -1,6 +1,5 @@
-# ruff: noqa: SLF001
-
 from datetime import datetime
+from pathlib import Path
 from struct import pack
 from unittest.mock import patch
 
@@ -63,7 +62,7 @@ def test_ranges():
     assert xl_col_to_name(26) == "AA"
 
 
-def test_cell_storage(tmp_path):
+def test_cell_storage(tmp_path: Path):
     doc = Document()
     doc.sheets[0].tables[0]
 
@@ -157,7 +156,6 @@ def test_formatting_exceptions():
         result = _decode_date_format("ZZZ YYY", datetime(2001, 1, 1))
     assert len(record) == 2
     assert str(record[0].message) == "Unsupported field code 'ZZZ'"
-    print(result)
 
 
 def test_pretty_uuids():
@@ -207,7 +205,7 @@ def test_datalists():
     assert doc._model._table_strings.lookup_value(table_id, 19).string == "TEST"
 
 
-def test_merge(configurable_save_file):
+def test_merge(configurable_save_file: Path):
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.merge_cells("A1:A4")
@@ -236,7 +234,7 @@ def test_alignment_and_number_format_edges():
     assert _format_currency(None, None) is None
 
 
-def test_additional_flags(configurable_save_file):
+def test_additional_flags(configurable_save_file: Path):
     doc = Document()
     table = doc.sheets[0].tables[0]
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
@@ -304,7 +302,7 @@ def test_formatting_empty_cell():
     assert _format_decimal(None, object()) == ""
 
 
-def test_custom_format_from_archive(configurable_save_file):
+def test_custom_format_from_archive(configurable_save_file: Path):
     doc = Document()
     doc.add_custom_format(type="datetime", name="date_format")
     doc.add_custom_format(type="text", name="text_format")

@@ -8,20 +8,21 @@ from unittest.mock import patch
 
 import magic
 import pytest
+from pytest_console_scripts import ScriptRunner
 
 from numbers_parser import __version__
 from numbers_parser._unpack_numbers import NumbersUnpacker
 from numbers_parser.exceptions import FileFormatError
 
 
-def test_version(script_runner):
+def test_version(script_runner: ScriptRunner):
     ret = script_runner.run(["unpack-numbers", "--version"], print_result=False)
     assert ret.stdout == __version__ + "\n"
     assert ret.stderr == ""
     assert ret.success
 
 
-def test_help(script_runner):
+def test_help(script_runner: ScriptRunner):
     ret = script_runner.run(["unpack-numbers", "--help"], print_result=False)
     assert "directory name to unpack into" in ret.stdout
     assert "document" in ret.stdout
@@ -35,14 +36,14 @@ def test_help(script_runner):
     assert ret.success
 
 
-def test_multi_doc_error(script_runner):
+def test_multi_doc_error(script_runner: ScriptRunner):
     ret = script_runner.run(["unpack-numbers", "--output", "tmp", "foo", "bar"], print_result=False)
     assert not ret.success
     assert ret.stdout == ""
     assert "output directory only valid" in ret.stderr
 
 
-def test_unpack_file(script_runner, tmp_path):
+def test_unpack_file(script_runner: ScriptRunner, tmp_path: Path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         ["unpack-numbers", "--output", str(output_dir), "tests/data/test-1.numbers"],
@@ -63,7 +64,7 @@ def test_unpack_file(script_runner, tmp_path):
     assert "ZZZ_ROW_3" in strings
 
 
-def test_unpack_encrypted_file(script_runner, tmp_path):
+def test_unpack_encrypted_file(script_runner: ScriptRunner, tmp_path: Path):
     output_dir = tmp_path / "encrypted"
     ret = script_runner.run(
         [
@@ -103,7 +104,7 @@ def test_unpack_encrypted_file(script_runner, tmp_path):
     assert "tests/data/encrypted.numbers: Invalid password. Hint is 's3cr3t'" in invalid_ret.stderr
 
 
-def test_unpack_dir(script_runner, tmp_path):
+def test_unpack_dir(script_runner: ScriptRunner, tmp_path: Path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         ["unpack-numbers", "--output", str(output_dir), "tests/data/test-5.numbers"],
@@ -125,7 +126,7 @@ def test_unpack_dir(script_runner, tmp_path):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_unpack_redacted(script_runner, tmp_path):
+def test_unpack_redacted(script_runner: ScriptRunner, tmp_path: Path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         [
@@ -156,7 +157,7 @@ def test_unpack_redacted(script_runner, tmp_path):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_unpack_hex(script_runner, tmp_path):
+def test_unpack_hex(script_runner: ScriptRunner, tmp_path: Path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         [
@@ -181,7 +182,7 @@ def test_unpack_hex(script_runner, tmp_path):
     )
 
 
-def test_pretty_storage(script_runner, tmp_path):
+def test_pretty_storage(script_runner: ScriptRunner, tmp_path: Path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         [
@@ -206,7 +207,7 @@ def test_pretty_storage(script_runner, tmp_path):
     assert rowinfo["cell_storage_buffer_pre_bnc"][0:26] == "04:03:00:00:14:00:00:00:00"
 
 
-def test_compact_json(script_runner, tmp_path):
+def test_compact_json(script_runner: ScriptRunner, tmp_path: Path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         [
@@ -243,7 +244,7 @@ def test_main(capsys):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_corrupted(script_runner, tmp_path):
+def test_corrupted(script_runner: ScriptRunner, tmp_path: Path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         ["unpack-numbers", "--output", str(output_dir), "tests/data/corrupted.numbers"],
@@ -262,7 +263,7 @@ def test_corrupted(script_runner, tmp_path):
     assert ret.stdout == ""
 
 
-def test_debug(script_runner, tmp_path):
+def test_debug(script_runner: ScriptRunner, tmp_path: Path):
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         [
@@ -280,7 +281,7 @@ def test_debug(script_runner, tmp_path):
 
 
 @pytest.mark.script_launch_mode("subprocess")
-def test_default_output_dir(script_runner, tmp_path):
+def test_default_output_dir(script_runner: ScriptRunner, tmp_path: Path):
     tmp_file = tmp_path / "test-1.numbers"
     src_file = Path("tests/data/test-1.numbers")
     tmp_file.write_bytes(src_file.read_bytes())
@@ -296,7 +297,7 @@ def test_default_output_dir(script_runner, tmp_path):
     assert Path.exists(tmp_path / "test-1/Metadata/Properties.plist")
 
 
-def test_unpack_path_traversal_prevention(tmp_path):
+def test_unpack_path_traversal_prevention(tmp_path: Path):
     evil_file = tmp_path / "evil.numbers"
     with zipfile.ZipFile(evil_file, "w") as z:
         z.writestr("Metadata/Properties.plist", plistlib.dumps({}))

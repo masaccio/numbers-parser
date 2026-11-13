@@ -1,5 +1,6 @@
 import struct
 from io import BytesIO
+from pathlib import Path
 from zipfile import ZipFile
 
 import pytest
@@ -52,18 +53,18 @@ def test_encrypted_missing_verifier():
         Document("tests/data/encrypted-broken.numbers", password="s3cr3t")  # noqa: S106
 
 
-def test_package_encryption_missing_verifier(tmp_path):
+def test_package_encryption_missing_verifier(tmp_path: Path):
     (tmp_path / ".iwph").write_bytes(b"No hint")
 
     with pytest.raises(FileError, match=r"invalid Numbers document \(missing encryption files\)"):
-        IWork(NullHandler())._read_package_encryption(tmp_path)  # noqa: SLF001
+        IWork(NullHandler())._read_package_encryption(tmp_path)
 
 
 def test_encryption_verifier_initialization_error():
     with pytest.raises(FileError, match="Error initializing encryption verifier"):  # noqa: PT012
         work = IWork(NullHandler())
-        work._password = "s3cr3t"  # noqa: S105, SLF001
-        work._initialize_encryption("No hint", b"invalid")  # noqa: SLF001
+        work._password = "s3cr3t"  # noqa: S105
+        work._initialize_encryption("No hint", b"invalid")
 
 
 def test_encryption_state_tracks_crypto_instance():
@@ -71,7 +72,7 @@ def test_encryption_state_tracks_crypto_instance():
     assert not work.is_encrypted
 
     _, crypto = IWorkCrypto.from_password("s3cr3t")
-    work._crypto = crypto  # noqa: SLF001
+    work._crypto = crypto
     assert work.is_encrypted
 
 
@@ -82,10 +83,10 @@ def test_zip_encryption_missing_verifier():
     archive.seek(0)
 
     with pytest.raises(FileError, match=r"invalid Numbers document \(missing encryption files\)"):
-        IWork(NullHandler())._read_objects_from_zipfile(ZipFile(archive))  # noqa: SLF001
+        IWork(NullHandler())._read_objects_from_zipfile(ZipFile(archive))
 
 
-def test_encrypted_save(configurable_save_file):
+def test_encrypted_save(configurable_save_file: Path):
     doc = Document("tests/data/encrypted.numbers", password="s3cr3t")  # noqa: S106
     table = doc.sheets[0].tables[0]
     table.write(0, 0, "Encryption")
@@ -99,7 +100,7 @@ def test_encrypted_save(configurable_save_file):
         Document(configurable_save_file, password="invalid")  # noqa: S106
 
 
-def test_encrypted_save_with_hint(configurable_save_file):
+def test_encrypted_save_with_hint(configurable_save_file: Path):
     doc = Document("tests/data/encrypted.numbers", password="s3cr3t")  # noqa: S106
     doc.save(configurable_save_file, password="r3@llys3cr3t", hint="Remember me")  # noqa: S106
 
@@ -107,7 +108,7 @@ def test_encrypted_save_with_hint(configurable_save_file):
         Document(configurable_save_file, password="invalid")  # noqa: S106
 
 
-def test_encrypted_package_save(configurable_save_file):
+def test_encrypted_package_save(configurable_save_file: Path):
     doc = Document("tests/data/encrypted.numbers", password="s3cr3t")  # noqa: S106
     doc.save(configurable_save_file, package=True, password="r3@llys3cr3t")  # noqa: S106
 

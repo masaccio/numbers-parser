@@ -1,9 +1,11 @@
+from pathlib import Path
+
 import pytest
 
 from numbers_parser import Document
 
 
-def test_row_col_sizes(configurable_save_file):
+def test_row_col_sizes(configurable_save_file: Path):
     doc = Document("tests/data/test-1.numbers")
     table = doc.sheets[0].tables[0]
 
@@ -39,7 +41,7 @@ def test_row_col_sizes(configurable_save_file):
     assert table.width == 348
 
 
-def test_header_size(configurable_save_file):
+def test_header_size(configurable_save_file: Path):
     doc = Document()
     table = doc.sheets[0].tables[0]
 
@@ -85,7 +87,7 @@ def test_header_size(configurable_save_file):
     assert int(table.coordinates[1]) == 0
 
 
-def test_new_doc(configurable_save_file):
+def test_new_doc(configurable_save_file: Path):
     doc = Document(
         sheet_name="Test Sheet",
         table_name="Test Table",
@@ -107,7 +109,7 @@ def test_new_doc(configurable_save_file):
     assert not new_doc.sheets[0].tables[0].cell("C3").style.bold
 
 
-def test_table_options(configurable_save_file):
+def test_table_options(configurable_save_file: Path):
     doc = Document()
     doc.sheets[0].tables[0].table_name_enabled = False
     doc.save(configurable_save_file)

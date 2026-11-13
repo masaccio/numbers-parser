@@ -1,4 +1,5 @@
 from collections import defaultdict
+from pathlib import Path
 
 import pytest
 from pytest_check import check
@@ -196,7 +197,7 @@ def test_empty_borders():
     assert table.cell("H13").border.top is None
 
 
-def test_edit_borders(configurable_save_file):
+def test_edit_borders(configurable_save_file: Path):
     doc = Document()
     sheet = doc.sheets[0]
     table = sheet.tables[0]
@@ -288,7 +289,7 @@ def invert_tests(tests):
     return test_string.strip(), new_borders
 
 
-def test_extra_borders(configurable_save_file):
+def test_extra_borders(configurable_save_file: Path):
     doc = Document("tests/data/test-extra-borders.numbers")
     table = doc.sheets[0].tables[0]
     dots_border = Border(3.0, RGB(0, 162, 255), "dots")
@@ -329,7 +330,7 @@ def test_extra_borders(configurable_save_file):
             assert getattr(table.cell(row, col).border, side) == border
 
 
-def test_resave_borders(configurable_save_file):
+def test_resave_borders(configurable_save_file: Path):
     doc = Document("tests/data/test-styles.numbers")
 
     style = doc.add_style(font_size=8.0, bold=False, name="Border Test Style")

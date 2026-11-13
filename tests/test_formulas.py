@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 import pytest_check as check
 
@@ -61,7 +63,7 @@ def test_table_functions():
     compare_tables(table, TABLE_2_FORMULAS)
 
 
-def test_exceptions(configurable_save_file):
+def test_exceptions(configurable_save_file: Path):
     def get_formula(doc):
         table_id = doc.sheets[0].tables[0]._table_id
         base_data_store = doc._model.objects[table_id].base_data_store

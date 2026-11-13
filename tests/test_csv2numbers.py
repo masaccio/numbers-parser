@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from pytest_console_scripts import ScriptRunner
 
 from numbers_parser import Document, _get_version
 from numbers_parser._csv2numbers import Transformer
@@ -22,7 +23,7 @@ def local_date(year: int, month: int, day: int) -> datetime:
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_help(script_runner) -> None:
+def test_help(script_runner: ScriptRunner) -> None:
     """Test conversion with no transforms."""
     ret = script_runner.run(["csv2numbers"], print_result=False)
     assert not ret.success
@@ -34,14 +35,14 @@ def test_help(script_runner) -> None:
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_version(script_runner) -> None:
+def test_version(script_runner: ScriptRunner) -> None:
     """Test Version number."""
     ret = script_runner.run(["csv2numbers", "-V"], print_result=False)
     assert ret.stderr == ""
     assert ret.stdout.strip() == _get_version()
 
 
-def test_defaults(script_runner, tmp_path) -> None:
+def test_defaults(script_runner: ScriptRunner, tmp_path: Path) -> None:
     """Test conversion with no options."""
     csv_path = str(tmp_path / "format-1.csv")
     shutil.copy("tests/data/format-1.csv", csv_path)
@@ -59,7 +60,7 @@ def test_defaults(script_runner, tmp_path) -> None:
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_defaults_no_header(script_runner, tmp_path) -> None:
+def test_defaults_no_header(script_runner: ScriptRunner, tmp_path: Path) -> None:
     """Test conversion with no options."""
     csv_path = str(tmp_path / "format-1.csv")
     shutil.copy("tests/data/format-1.csv", csv_path)
@@ -77,7 +78,7 @@ def test_defaults_no_header(script_runner, tmp_path) -> None:
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_errors(script_runner) -> None:
+def test_errors(script_runner: ScriptRunner) -> None:
     """Test error detection in command line."""
     ret = script_runner.run(
         ["csv2numbers", "--delete=XX", "tests/data/format-1.csv"],
@@ -175,7 +176,7 @@ def test_errors(script_runner) -> None:
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_multifile(script_runner, tmp_path) -> None:
+def test_multifile(script_runner: ScriptRunner, tmp_path: Path) -> None:
     """Test conversion with no options."""
     csv_path_1 = str(tmp_path / "format-1.csv")
     shutil.copy("tests/data/format-1.csv", csv_path_1)
@@ -225,7 +226,7 @@ def test_main(capsys):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_arg_len_mismatch(script_runner) -> None:
+def test_arg_len_mismatch(script_runner: ScriptRunner) -> None:
     """Test conversion with no transforms."""
     ret = script_runner.run(
         ["csv2numbers", "tests/data/format-1.csv", "tests/data/format-2.csv", "-o", "test.numbers"],
@@ -235,7 +236,7 @@ def test_arg_len_mismatch(script_runner) -> None:
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_parse_error(script_runner) -> None:
+def test_parse_error(script_runner: ScriptRunner) -> None:
     """Test conversion with no transforms."""
     ret = script_runner.run(
         ["csv2numbers", "tests/data/error.csv"],
@@ -245,7 +246,7 @@ def test_parse_error(script_runner) -> None:
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_transforms_format_1(script_runner, tmp_path) -> None:
+def test_transforms_format_1(script_runner: ScriptRunner, tmp_path: Path) -> None:
     """Test conversion with transformation."""
     csv_path = str(tmp_path / "format-1.csv")
     shutil.copy("tests/data/format-1.csv", csv_path)
@@ -276,7 +277,7 @@ def test_transforms_format_1(script_runner, tmp_path) -> None:
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_transforms_format_2(script_runner, tmp_path) -> None:
+def test_transforms_format_2(script_runner: ScriptRunner, tmp_path: Path) -> None:
     """Test conversion with transformation."""
     csv_path = str(tmp_path / "format-2.csv")
     shutil.copy("tests/data/format-2.csv", csv_path)
@@ -309,7 +310,7 @@ def test_transforms_format_2(script_runner, tmp_path) -> None:
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_transforms_format_3(script_runner, tmp_path) -> None:
+def test_transforms_format_3(script_runner: ScriptRunner, tmp_path: Path) -> None:
     """Test conversion with transformation."""
     csv_path = str(tmp_path / "format-3.csv")
     shutil.copy("tests/data/format-3.csv", csv_path)
@@ -345,7 +346,7 @@ def test_transforms_format_3(script_runner, tmp_path) -> None:
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_transforms_lookup(script_runner, tmp_path) -> None:
+def test_transforms_lookup(script_runner: ScriptRunner, tmp_path: Path) -> None:
     """Test conversion with transformation."""
     csv_path = str(tmp_path / "matches.csv")
     shutil.copy("tests/data/matches.csv", csv_path)

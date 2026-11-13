@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 
@@ -50,7 +51,7 @@ def test_comments():
     assert c4.text == "Comment on merged cells"
 
 
-def test_passthrough_comments(configurable_save_file):
+def test_passthrough_comments(configurable_save_file: Path):
     doc = Document("tests/data/test-comments.numbers")
     doc.save(configurable_save_file)
 
@@ -61,7 +62,7 @@ def test_passthrough_comments(configurable_save_file):
     assert comments[0].replies[0].text == "Reply to comment #1"
 
 
-def test_write_comments(configurable_save_file):
+def test_write_comments(configurable_save_file: Path):
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.write(0, 0, "Test #1")
@@ -112,7 +113,7 @@ def test_comment_exceptions():
         table.add_comment("D4", "Too", "Many", "Arguments")
 
 
-def test_comment_auto_expand(configurable_save_file):
+def test_comment_auto_expand(configurable_save_file: Path):
     doc = Document()
     table = doc.sheets[0].tables[0]
 

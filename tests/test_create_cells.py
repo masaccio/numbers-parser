@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 
@@ -6,7 +7,7 @@ from numbers_parser import Document, EmptyCell
 from numbers_parser.constants import EPOCH, MAX_COL_COUNT, MAX_ROW_COUNT
 
 
-def test_edit_cell_values(configurable_save_file):
+def test_edit_cell_values(configurable_save_file: Path):
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -73,7 +74,7 @@ def test_document_supports_single_row_or_column(num_rows, num_cols):
     assert doc.default_table.num_cols == num_cols
 
 
-def test_large_table(configurable_save_file):
+def test_large_table(configurable_save_file: Path):
     doc = Document()
     sheets = doc.sheets
     tables = sheets[0].tables

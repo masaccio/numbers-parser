@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import pytest
 
@@ -11,7 +12,7 @@ from numbers_parser.constants import (
 )
 
 
-def test_empty_document(configurable_save_file):
+def test_empty_document(configurable_save_file: Path):
     doc = Document()
     data = doc.sheets[0].tables[0].rows()
     assert len(data) == DEFAULT_ROW_COUNT
@@ -29,7 +30,7 @@ def test_empty_document(configurable_save_file):
     assert doc.sheets[0].tables[0].num_header_cols == 1
 
 
-def test_save_document(tmp_path):
+def test_save_document(tmp_path: Path):
     doc = Document("tests/data/test-1.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -49,7 +50,7 @@ def test_save_document(tmp_path):
     assert cell_values == new_cell_values
 
 
-def test_save_merges(configurable_save_file):
+def test_save_merges(configurable_save_file: Path):
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets
     table = sheets[0].tables[0]
@@ -87,7 +88,7 @@ def test_save_merges(configurable_save_file):
     assert all(isinstance(table.cell(row, 4), MergedCell) for row in range(1, 4))
 
 
-def test_create_table(configurable_save_file):
+def test_create_table(configurable_save_file: Path):
     doc = Document()
     sheets = doc.sheets
 
@@ -119,7 +120,7 @@ def test_create_table(configurable_save_file):
     assert table.cell("D2").value == "lamb"
 
 
-def test_create_sheet(configurable_save_file):
+def test_create_sheet(configurable_save_file: Path):
     doc = Document()
     sheets = doc.sheets
 
@@ -154,7 +155,7 @@ def test_create_sheet(configurable_save_file):
     assert table.cell(1, 3).value == 3000
 
 
-def test_create_multi(configurable_save_file):
+def test_create_multi(configurable_save_file: Path):
     doc = Document()
 
     doc.sheets[0].tables[0].write(0, 0, "S0T1 A1")
@@ -197,7 +198,7 @@ def test_duplicate_name():
     assert "table 'Test' already exists" in str(e)
 
 
-def test_save_formats(configurable_save_file):
+def test_save_formats(configurable_save_file: Path):
     doc = Document("tests/data/test-format-save.numbers")
     doc.save(configurable_save_file)
     doc = Document(configurable_save_file)
@@ -211,7 +212,7 @@ def test_save_formats(configurable_save_file):
 NUM_ROW_COLS = 12
 
 
-def test_edit_table_rows_columns(configurable_save_file):
+def test_edit_table_rows_columns(configurable_save_file: Path):
     doc = Document(num_cols=12, num_rows=NUM_ROW_COLS, num_header_cols=0, num_header_rows=0)
     table = doc.sheets[0].tables[0]
 

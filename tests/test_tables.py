@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from numbers_parser import Document, TextCell
@@ -149,7 +151,7 @@ def table_titles_test_runner(doc):
             assert table.caption == "test: caption"
 
 
-def test_table_titles(configurable_save_file):
+def test_table_titles(configurable_save_file: Path):
     doc = Document("tests/data/test-titles.numbers")
     table_titles_test_runner(doc)
 
@@ -182,7 +184,7 @@ def test_table_titles(configurable_save_file):
     table_titles_test_runner(new_doc)
 
 
-def test_stub_captions(configurable_save_file):
+def test_stub_captions(configurable_save_file: Path):
     doc = Document("tests/data/test-1.numbers")
     table0 = doc.sheets[0].tables[0]
     assert table0.caption == "Caption"

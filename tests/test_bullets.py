@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from numbers_parser import Document
 
 TEST_REF_0 = "some\nnewline\ntext"
@@ -25,7 +27,7 @@ def test_bullets():
     assert table.cell(0, 0).bullets is None
 
 
-def test_hyperlinks(configurable_save_file):
+def test_hyperlinks(configurable_save_file: Path):
     def check_doc_links(doc):
         sheets = doc.sheets
         tables = sheets[0].tables

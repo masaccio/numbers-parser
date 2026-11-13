@@ -191,8 +191,16 @@ ban-relative-imports = "all"
 
 [tool.ruff.lint.per-file-ignores]
 "src/build/**" = ["PLR2004", "INP001", "PTH"]
-"src/debug/**" = ["INP001"]
-"tests/**" = ["PLR2004", "S101", "D103", "ANN201", "ANN001", "DTZ001"]
+"src/debug/**" = [
+  "T201",     # print() allowed in debug scripts
+  "SLF001",   # Debug internal data
+  "INP001",
+  ]
+"tests/**" = [
+  "PLR2004",  # Allow checking for specific numbers
+  "S101",     # Allow assert in tests
+  "SLF001",   # Tests need to access internal data for coverage
+  ]
 
 [tool.pylint."messages control"]
 disable = [
@@ -224,7 +232,8 @@ ignored-modules = ["Cocoa", "lldb"]
 
 [tool.mypy]
 exclude = [
-    "^src/numbers_parser/generated/",
+    "src/numbers_parser/generated/",
+    "src/debug/lldbutil.py",
 ]
 
 [[tool.mypy.overrides]]

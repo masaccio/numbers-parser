@@ -1,4 +1,5 @@
 from collections import ChainMap
+from pathlib import Path
 
 import pytest
 from pytest_check import check
@@ -137,7 +138,7 @@ def invert_style_attrs(attrs):
     return attrs
 
 
-def test_all_styles(configurable_save_file):
+def test_all_styles(configurable_save_file: Path):
     doc = Document("tests/data/test-styles.numbers")
     table = doc.sheets["Styles"].tables[0]
     for row in range(table.num_rows):
@@ -162,7 +163,7 @@ def test_all_styles(configurable_save_file):
             assert check_style(cell.style, **attrs)
 
 
-def test_all_style_changes(configurable_save_file):
+def test_all_style_changes(configurable_save_file: Path):
     # Flip styles and re-save as new custom styles
     doc = Document("tests/data/test-styles.numbers")
     table = doc.sheets["Styles"].tables[0]
@@ -313,7 +314,7 @@ def test_style_exceptions():
         assert f"{field} argument must be boolean" in str(e)
 
 
-def test_new_styles(configurable_save_file):
+def test_new_styles(configurable_save_file: Path):
     doc = Document()
     table = doc.sheets[0].tables[0]
     red_text = doc.add_style(
@@ -393,7 +394,7 @@ def test_new_styles(configurable_save_file):
     assert not new_table.cell("F3").style.text_wrap
 
 
-def test_empty_styles(configurable_save_file):
+def test_empty_styles(configurable_save_file: Path):
     doc = Document()
     red_text = doc.add_style(
         name="Red Text",
@@ -424,7 +425,7 @@ def test_empty_styles(configurable_save_file):
                 assert new_table.cell(row, col).style.name == body_style
 
 
-def test_add_bg_image(configurable_save_file):
+def test_add_bg_image(configurable_save_file: Path):
     doc = Document()
     table = doc.sheets[0].tables[0]
     image_filename = "tests/data/cat.jpg"
