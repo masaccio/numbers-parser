@@ -1,3 +1,5 @@
+"""Tests for merged cells."""
+
 import pytest
 
 from numbers_parser import Document
@@ -26,7 +28,8 @@ XXX_TABLE_1_CLASSES = [
 ]
 
 
-def test_table_contents():
+def test_table_contents() -> None:
+    """Test cell values in a table with merged cells."""
     doc = Document("tests/data/test-9.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -34,7 +37,8 @@ def test_table_contents():
     assert data == XXX_TABLE_1_REF
 
 
-def test_cell_classes():
+def test_cell_classes() -> None:
+    """Test cell class types in a table with merged cells."""
     doc = Document("tests/data/test-9.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -44,7 +48,8 @@ def test_cell_classes():
     assert data == XXX_TABLE_1_CLASSES
 
 
-def test_merge_references():
+def test_merge_references() -> None:
+    """Test merge range properties on cells."""
     doc = Document("tests/data/test-9.numbers")
     sheets = doc.sheets
     table = sheets[0].tables[0]
@@ -72,7 +77,8 @@ def test_merge_references():
     assert table.cell("B4").size == (2, 2)
 
 
-def test_all_merged_ranges():
+def test_all_merged_ranges() -> None:
+    """Test retrieving all merged ranges on tables."""
     doc = Document("tests/data/test-9.numbers")
     sheets = doc.sheets
     table = sheets[0].tables[0]
@@ -81,7 +87,8 @@ def test_all_merged_ranges():
     assert table.merge_ranges == ["A1:B1", "B4:C5"]
 
 
-def test_create_rectangular_merge():
+def test_create_rectangular_merge() -> None:
+    """Test creating a rectangular cell merge."""
     doc = Document(num_rows=4, num_cols=4)
     table = doc.sheets[0].tables[0]
 
@@ -92,7 +99,8 @@ def test_create_rectangular_merge():
     assert table.cell("C2").merge_range == "B2:C3"
 
 
-def test_invalid_merge_ranges_exceptions():
+def test_invalid_merge_ranges_exceptions() -> None:
+    """Test exceptions raised by invalid merge range specifications."""
     doc = Document(num_rows=4, num_cols=4)
     table = doc.sheets[0].tables[0]
 

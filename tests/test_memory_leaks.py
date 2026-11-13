@@ -1,3 +1,5 @@
+"""Tests for memory leaks when loading and discarding documents."""
+
 import gc
 from sys import version_info
 
@@ -6,7 +8,7 @@ from pympler import muppy, summary
 from numbers_parser import Document
 
 
-def test_memory_leaks():
+def test_memory_leaks() -> None:
     """Memory leak test (see issue-67)."""
     if version_info < (3, 11):
         return

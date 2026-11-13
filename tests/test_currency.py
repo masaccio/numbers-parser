@@ -1,3 +1,5 @@
+"""Tests for currency cell values."""
+
 from datetime import datetime
 
 from numbers_parser import Document
@@ -17,7 +19,8 @@ STATEMENT_REF = [
 ]
 
 
-def test_currencies():
+def test_currencies() -> None:
+    """Test reading currency values from a table."""
     doc = Document("tests/data/test-2.numbers")
     sheets = doc.sheets
     tables = sheets["Account"].tables

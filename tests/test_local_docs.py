@@ -1,10 +1,13 @@
+"""Tests for local Numbers documents on the filesystem."""
+
 import os
 import traceback
 import warnings
+from collections.abc import Generator
 
 import pytest
 
-from numbers_parser import Document
+from numbers_parser import Cell, Document
 from numbers_parser.constants import DEFAULT_FONT
 
 ALL_DOCS_DIRS = [
@@ -17,14 +20,16 @@ ALL_DOCS_DIRS = [
 
 
 @pytest.mark.experimental
-def test_local_docs():
-    def all_doc_cells(doc: Document):
+def test_local_docs() -> None:
+    """Test reading all local Numbers documents in user directories."""
+
+    def all_doc_cells(doc: Document) -> Generator[Cell, None, None]:
         for sheet in doc.sheets:
             for table in sheet.tables:
                 for row in table.rows():
                     yield from row
 
-    def all_docs_paths():
+    def all_docs_paths() -> Generator[str, None, None]:
         for docs_dir in ALL_DOCS_DIRS:
             for root, dirs, files in os.walk(docs_dir):
                 for file in files + dirs:
@@ -33,28 +38,28 @@ def test_local_docs():
                     path = os.path.join(root, file)
                     yield path
 
-    def check_cell_values(doc: Document):
+    def check_cell_values(doc: Document) -> None:
         for cell in all_doc_cells(doc):
             _ = cell.value
 
-    def check_cell_formatted_values(doc: Document):
+    def check_cell_formatted_values(doc: Document) -> None:
         for cell in all_doc_cells(doc):
             _ = cell.formatted_value
 
-    def check_cell_formulas(doc: Document):
+    def check_cell_formulas(doc: Document) -> None:
         for cell in all_doc_cells(doc):
             if cell.is_formula:
                 _ = cell.formula
 
-    def check_cell_style(doc: Document):
+    def check_cell_style(doc: Document) -> None:
         for cell in all_doc_cells(doc):
             _ = cell.style
 
-    def check_cell_borders(doc: Document):
+    def check_cell_borders(doc: Document) -> None:
         for cell in all_doc_cells(doc):
             _ = cell.border
 
-    def allowed_warning(w):
+    def allowed_warning(w: warnings.WarningMessage) -> bool:
         return f"falling back to {DEFAULT_FONT}" in str(w.message)
 
     tests = [

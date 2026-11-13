@@ -1,3 +1,5 @@
+"""Tests for cell formatting."""
+
 from collections.abc import Generator
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -335,7 +337,8 @@ OTHER_FORMAT_REF = [
 ]
 
 
-def test_duration_formatting():
+def test_duration_formatting() -> None:
+    """Test duration cell formatting."""
     doc = Document("tests/data/duration_112.numbers")
     for sheet in doc.sheets:
         table = sheet.tables[0]
@@ -346,7 +349,8 @@ def test_duration_formatting():
                 check.equal(duration, ref)
 
 
-def test_date_formatting():
+def test_date_formatting() -> None:
+    """Test date cell formatting."""
     doc = Document("tests/data/date_formats.numbers")
     for sheet in doc.sheets:
         table = sheet.tables[0]
@@ -359,7 +363,8 @@ def test_date_formatting():
                 check.equal(date, ref)
 
 
-def test_custom_formatting(pytestconfig):
+def test_custom_formatting(pytestconfig: pytest.Config) -> None:
+    """Test custom cell formatting."""
     if pytestconfig.getoption("max_check_fails") is not None:
         max_check_fails = pytestconfig.getoption("max_check_fails")
     else:
@@ -379,7 +384,8 @@ def test_custom_formatting(pytestconfig):
                 raise AssertionError
 
 
-def test_custom_formatting_stress(pytestconfig):
+def test_custom_formatting_stress(pytestconfig: pytest.Config) -> None:
+    """Stress test custom number formatting."""
     if pytestconfig.getoption("max_check_fails") is not None:
         max_check_fails = pytestconfig.getoption("max_check_fails")
     else:
@@ -400,7 +406,9 @@ def test_custom_formatting_stress(pytestconfig):
             raise AssertionError
 
 
-def test_standard_formatting_stress():
+def test_standard_formatting_stress() -> None:
+    """Stress test standard cell formatting."""
+
     def chunks(cells: list[Cell]) -> Generator[tuple[int, Cell, str]]:
         for ii in range(0, len(cells), 2):
             yield (ii, cells[ii], cells[ii + 1].formatted_value)
@@ -425,7 +433,8 @@ def test_standard_formatting_stress():
                 )
 
 
-def test_write_date_format(configurable_save_file: Path):
+def test_write_date_format(configurable_save_file: Path) -> None:
+    """Test writing and saving date and duration formats."""
     doc = Document(
         num_header_cols=0,
         num_header_rows=0,
@@ -486,7 +495,8 @@ def test_write_date_format(configurable_save_file: Path):
     check.equal(table.cell(row + 1, 0).formatted_value, "1 day 2 hours 0 minutes")
 
 
-def test_write_numbers_format(configurable_save_file: Path):
+def test_write_numbers_format(configurable_save_file: Path) -> None:
+    """Test writing and saving number and currency formats."""
     doc = Document(num_header_cols=0, num_header_rows=0, num_cols=8, num_rows=10)
     table = doc.sheets[0].tables[0]
 
@@ -625,7 +635,8 @@ def test_write_numbers_format(configurable_save_file: Path):
             check.equal(table.cell(row + 10, col).formatted_value, ref_value)
 
 
-def test_write_mixed_number_formats(configurable_save_file: Path):
+def test_write_mixed_number_formats(configurable_save_file: Path) -> None:
+    """Test writing percentage, base, fraction, and scientific formats."""
     doc = Document(
         num_header_cols=0,
         num_header_rows=0,
@@ -753,7 +764,8 @@ def test_write_mixed_number_formats(configurable_save_file: Path):
             check.equal(f"[{row},{col}]:{value}", f"[{row},{col}]:{ref_value}")
 
 
-def test_currency_symbols():
+def test_currency_symbols() -> None:
+    """Test currency symbol and accounting style formatting."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.write(0, 0, -12.50)
@@ -768,7 +780,8 @@ def test_currency_symbols():
     assert table.cell(0, 0).formatted_value == "€\t(12.5)"
 
 
-def test_write_custom_numbers(configurable_save_file: Path, pytestconfig):
+def test_write_custom_numbers(configurable_save_file: Path, pytestconfig: pytest.Config) -> None:
+    """Test creating, saving, and validating custom number formats."""
     if pytestconfig.getoption("max_check_fails") is not None:
         max_check_fails = pytestconfig.getoption("max_check_fails")
     else:
@@ -878,7 +891,8 @@ def test_write_custom_numbers(configurable_save_file: Path, pytestconfig):
             raise AssertionError
 
 
-def test_write_text_custom_formatting(configurable_save_file: Path):
+def test_write_text_custom_formatting(configurable_save_file: Path) -> None:
+    """Test creating and saving custom text formats."""
     doc = Document(num_header_cols=0, num_header_rows=0)
 
     with pytest.raises(TypeError) as e:
@@ -896,7 +910,8 @@ def test_write_text_custom_formatting(configurable_save_file: Path):
     assert table.cell(0, 0).formatted_value == "before test after"
 
 
-def test_write_datetime_custom_formatting(configurable_save_file: Path):
+def test_write_datetime_custom_formatting(configurable_save_file: Path) -> None:
+    """Test creating and saving custom datetime formats."""
     doc = Document(num_header_cols=0, num_header_rows=0)
     string_format = doc.add_custom_format(type="datetime", format="dd MMMM, yyyy")
     table = doc.sheets[0].tables[0]
@@ -912,7 +927,8 @@ def test_write_datetime_custom_formatting(configurable_save_file: Path):
     assert table.cell(0, 1).formatted_value == "02 April, 2023"
 
 
-def run_test_interactive_formats(filename):
+def run_test_interactive_formats(filename: str | Path) -> None:
+    """Verify interactive control formatting in a document."""
     doc = Document(filename)
     table = doc.sheets[0].tables[0]
     assert table.cell(0, 0).value is False
@@ -928,11 +944,13 @@ def run_test_interactive_formats(filename):
     assert table.cell(1, 2).formatted_value == STAR_RATING_VALUE * 5
 
 
-def test_interactive_formats(configurable_save_file: Path):
+def test_interactive_formats(configurable_save_file: Path) -> None:
+    """Test reading interactive control formats."""
     run_test_interactive_formats("tests/data/test-actions.numbers")
 
 
-def test_write_interactive_formats(configurable_save_file: Path):
+def test_write_interactive_formats(configurable_save_file: Path) -> None:
+    """Test writing and saving interactive control formats."""
     doc = Document()
     table = doc.sheets[0].tables[0]
 
@@ -997,7 +1015,8 @@ def test_write_interactive_formats(configurable_save_file: Path):
     run_test_interactive_formats(configurable_save_file)
 
 
-def test_no_space_date_formats():
+def test_no_space_date_formats() -> None:
+    """Test date formats without spaces."""
     doc = Document("tests/data/date-format-nospace.numbers")
     for row in doc.default_table.rows():
         if row[0].formula is None:

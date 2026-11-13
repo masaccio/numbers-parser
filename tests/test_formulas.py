@@ -1,9 +1,12 @@
+"""Tests for cell formulas."""
+
 from pathlib import Path
+from typing import Any
 
 import pytest
 import pytest_check as check
 
-from numbers_parser import Document, UnsupportedWarning
+from numbers_parser import Document, Table, UnsupportedWarning
 
 TABLE_1_FORMULAS = [
     [None, "A1", "$B$1=1"],
@@ -32,7 +35,8 @@ TABLE_2_FORMULAS = [
 ]
 
 
-def compare_tables(table, ref):
+def compare_tables(table: Table, ref: list[list[str | None]]) -> None:
+    """Compare table formulas against a reference matrix."""
     for row in range(table.num_rows):
         for col in range(table.num_cols):
             if ref[row][col] is None:
@@ -53,7 +57,8 @@ def compare_tables(table, ref):
                 )
 
 
-def test_table_functions():
+def test_table_functions() -> None:
+    """Test formulas in sample tables."""
     doc = Document("tests/data/test-10.numbers")
     sheets = doc.sheets
     table = sheets[0].tables[0]
@@ -63,8 +68,10 @@ def test_table_functions():
     compare_tables(table, TABLE_2_FORMULAS)
 
 
-def test_exceptions(configurable_save_file: Path):
-    def get_formula(doc):
+def test_exceptions(configurable_save_file: Path) -> None:
+    """Test warnings for unsupported or malformed formula AST nodes."""
+
+    def get_formula(doc: Document) -> Any:
         table_id = doc.sheets[0].tables[0]._table_id
         base_data_store = doc._model.objects[table_id].base_data_store
         formula_table_id = base_data_store.formula_table.identifier
@@ -108,7 +115,8 @@ def test_exceptions(configurable_save_file: Path):
     assert str(record[0].message) == "Table 1@[0,1]: key #999 not found"
 
 
-def test_named_ranges():
+def test_named_ranges() -> None:
+    """Test formulas using named ranges."""
     doc = Document("tests/data/create-formulas.numbers")
     table = doc.sheets["Main Sheet"].tables["Reference Tests"]
     for row_num, row in enumerate(table.iter_rows(min_row=1), start=1):

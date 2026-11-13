@@ -1,3 +1,5 @@
+"""Tests for encrypted Numbers documents."""
+
 import struct
 from io import BytesIO
 from pathlib import Path
@@ -28,7 +30,8 @@ class NullHandler(IWorkHandler):
         """Dummy handler for testing."""  # noqa: D401
 
 
-def test_encrypted_read():
+def test_encrypted_read() -> None:
+    """Test reading an encrypted document and handling invalid passwords."""
     doc = Document("tests/data/encrypted.numbers", password="s3cr3t")  # noqa: S106
     sheets = doc.sheets
     table = sheets[0].tables[0]
@@ -42,32 +45,37 @@ def test_encrypted_read():
     assert "Invalid password. Hint is 's3cr3t'" in str(e)
 
 
-def test_encrypted_non_latin_password():
+def test_encrypted_non_latin_password() -> None:
+    """Test reading an encrypted document with a non-Latin password."""
     doc = Document("tests/data/encrypted-non-latin.numbers", password="秘密")  # noqa: S106
 
     assert doc.sheets[0].tables[0].cell(0, 0).value == "Decryption"
 
 
-def test_encrypted_missing_verifier():
+def test_encrypted_missing_verifier() -> None:
+    """Test error when reading an encrypted document missing its verifier."""
     with pytest.raises(FileFormatError, match=r"invalid Numbers document \(missing files\)"):
         Document("tests/data/encrypted-broken.numbers", password="s3cr3t")  # noqa: S106
 
 
-def test_package_encryption_missing_verifier(tmp_path: Path):
+def test_package_encryption_missing_verifier(tmp_path: Path) -> None:
+    """Test error when reading package encryption with a missing verifier file."""
     (tmp_path / ".iwph").write_bytes(b"No hint")
 
     with pytest.raises(FileError, match=r"invalid Numbers document \(missing encryption files\)"):
         IWork(NullHandler())._read_package_encryption(tmp_path)
 
 
-def test_encryption_verifier_initialization_error():
+def test_encryption_verifier_initialization_error() -> None:
+    """Test error when initializing an invalid encryption verifier."""
     with pytest.raises(FileError, match="Error initializing encryption verifier"):  # noqa: PT012
         work = IWork(NullHandler())
         work._password = "s3cr3t"  # noqa: S105
         work._initialize_encryption("No hint", b"invalid")
 
 
-def test_encryption_state_tracks_crypto_instance():
+def test_encryption_state_tracks_crypto_instance() -> None:
+    """Test that IWork encryption state tracks the crypto instance."""
     work = IWork(NullHandler())
     assert not work.is_encrypted
 
@@ -76,7 +84,8 @@ def test_encryption_state_tracks_crypto_instance():
     assert work.is_encrypted
 
 
-def test_zip_encryption_missing_verifier():
+def test_zip_encryption_missing_verifier() -> None:
+    """Test error when reading zip encryption with a missing verifier file."""
     archive = BytesIO()
     with ZipFile(archive, "w") as zipf:
         zipf.writestr(".iwph", b"No hint")
@@ -86,7 +95,8 @@ def test_zip_encryption_missing_verifier():
         IWork(NullHandler())._read_objects_from_zipfile(ZipFile(archive))
 
 
-def test_encrypted_save(configurable_save_file: Path):
+def test_encrypted_save(configurable_save_file: Path) -> None:
+    """Test saving and reloading an encrypted document."""
     doc = Document("tests/data/encrypted.numbers", password="s3cr3t")  # noqa: S106
     table = doc.sheets[0].tables[0]
     table.write(0, 0, "Encryption")
@@ -100,7 +110,8 @@ def test_encrypted_save(configurable_save_file: Path):
         Document(configurable_save_file, password="invalid")  # noqa: S106
 
 
-def test_encrypted_save_with_hint(configurable_save_file: Path):
+def test_encrypted_save_with_hint(configurable_save_file: Path) -> None:
+    """Test saving an encrypted document with a password hint."""
     doc = Document("tests/data/encrypted.numbers", password="s3cr3t")  # noqa: S106
     doc.save(configurable_save_file, password="r3@llys3cr3t", hint="Remember me")  # noqa: S106
 
@@ -108,7 +119,8 @@ def test_encrypted_save_with_hint(configurable_save_file: Path):
         Document(configurable_save_file, password="invalid")  # noqa: S106
 
 
-def test_encrypted_package_save(configurable_save_file: Path):
+def test_encrypted_package_save(configurable_save_file: Path) -> None:
+    """Test saving an encrypted document as a package."""
     doc = Document("tests/data/encrypted.numbers", password="s3cr3t")  # noqa: S106
     doc.save(configurable_save_file, package=True, password="r3@llys3cr3t")  # noqa: S106
 
@@ -118,7 +130,8 @@ def test_encrypted_package_save(configurable_save_file: Path):
     assert new_doc.sheets[0].tables[0].cell(0, 0).value == "Decryption"
 
 
-def test_password_verifier_rejects_invalid_formats():
+def test_password_verifier_rejects_invalid_formats() -> None:
+    """Test that password verifier rejects invalid data formats."""
     with pytest.raises(FileFormatError, match="Unrecognized verifier format length"):
         IWorkCrypto.from_password_verifier(b"too short", "s3cr3t")
 
@@ -127,7 +140,8 @@ def test_password_verifier_rejects_invalid_formats():
         IWorkCrypto.from_password_verifier(verifier_data, "s3cr3t")
 
 
-def test_password_verifier_password_results():
+def test_password_verifier_password_results() -> None:
+    """Test password verifier validation with valid, wrong, and tampered data."""
     verifier_data, _ = IWorkCrypto.from_password("s3cr3t")
 
     with pytest.raises(ValueError, match="No password provided to decrypt document"):
@@ -140,7 +154,8 @@ def test_password_verifier_password_results():
     assert IWorkCrypto.from_password_verifier(bytes(tampered_data), "s3cr3t") is None
 
 
-def test_iwa_encryption_round_trip():
+def test_iwa_encryption_round_trip() -> None:
+    """Test encrypting and decrypting an IWA payload."""
     _, crypto = IWorkCrypto.from_password("s3cr3t")
     data = b"encrypted IWA payload"
 
@@ -149,7 +164,8 @@ def test_iwa_encryption_round_trip():
     assert crypto.decrypt_iwa(encrypted) == data
 
 
-def test_iwa_decryption_rejects_short_data():
+def test_iwa_decryption_rejects_short_data() -> None:
+    """Test that IWA decryption rejects truncated data."""
     with pytest.raises(FileFormatError, match="Data too short"):
         IWorkCrypto(b"k" * 16).decrypt_iwa(b"x" * 35)
 
@@ -157,7 +173,8 @@ def test_iwa_decryption_rejects_short_data():
         IWorkCrypto(b"k" * 16).decrypt_iwa(b"x" * 53)
 
 
-def test_iwa_decryption_rejects_invalid_padding():
+def test_iwa_decryption_rejects_invalid_padding() -> None:
+    """Test that IWA decryption rejects corrupted PKCS7 padding."""
     _, crypto = IWorkCrypto.from_password("s3cr3t")
     encrypted = bytearray(crypto.encrypt_iwa(b"payload"))
     encrypted[-21] ^= 1
@@ -166,7 +183,8 @@ def test_iwa_decryption_rejects_invalid_padding():
         crypto.decrypt_iwa(bytes(encrypted))
 
 
-def test_iwa_decryption_rejects_short_decrypted_payload():
+def test_iwa_decryption_rejects_short_decrypted_payload() -> None:
+    """Test that IWA decryption rejects payloads too short after unpadding."""
     crypto = IWorkCrypto(b"k" * 16)
     iv = b"i" * 16
     padder = padding.PKCS7(128).padder()
