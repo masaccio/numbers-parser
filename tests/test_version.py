@@ -1,3 +1,5 @@
+"""Test version handling."""
+
 import importlib
 from unittest import mock
 
@@ -8,7 +10,8 @@ from numbers_parser import _check_installed_numbers_version, _get_version
 builtin_open = open
 
 
-def test_version():
+def test_version() -> None:
+    """Test current version."""
     version = _get_version()
     assert version.count(".") == 2
 
@@ -31,7 +34,8 @@ def mock_invalid_plist(file, mode):
     return builtin_open(file, mode)
 
 
-def test_numbers_version_check():
+def test_numbers_version_check() -> None:
+    """Test version handling."""
     with mock.patch("builtins.open", side_effect=mock_valid_plist):
         import numbers_parser
 

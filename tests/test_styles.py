@@ -1,5 +1,8 @@
+"""Tests for cell and table styles."""
+
 from collections import ChainMap
 from pathlib import Path
+from typing import Any
 
 import pytest
 from pytest_check import check
@@ -35,7 +38,8 @@ TEST_NUMBERED_REF = [
 ]
 
 
-def test_bullets():
+def test_bullets() -> None:
+    """Test formatted bullets in cells."""
     doc = Document("tests/data/test-formats.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -52,7 +56,8 @@ def test_bullets():
     assert table.cell(9, 2).formatted_bullets == TEST_NUMBERED_REF
 
 
-def test_bg_colors():
+def test_bg_colors() -> None:
+    """Test cell background colors and gradients."""
     doc = Document("tests/data/test-bgcolour.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -83,7 +88,8 @@ STYLE_DEFAULTS = {
 }
 
 
-def check_style(style, **kwargs):
+def check_style(style: Style, **kwargs) -> bool:
+    """Check if a Style object matches expected attributes."""
     matches = []
     for attr in STYLE_DEFAULTS:
         ref = kwargs[attr] if attr in kwargs else STYLE_DEFAULTS[attr]
@@ -91,7 +97,8 @@ def check_style(style, **kwargs):
     return all(matches)
 
 
-def decode_style_attrs(attrs):
+def decode_style_attrs(attrs: str) -> dict[str, Any]:
+    """Decode style test specification string into an attribute dictionary."""
     if "," in attrs:
         return dict(ChainMap(*[decode_style_attrs(x) for x in attrs.split(",")]))
     if "=" in attrs:
@@ -108,7 +115,8 @@ def decode_style_attrs(attrs):
     return {attrs: True}
 
 
-def invert_style_attrs(attrs):
+def invert_style_attrs(attrs: dict[str, Any]) -> dict[str, Any]:
+    """Invert style attributes for modification testing."""
     for attr, default in STYLE_DEFAULTS.items():
         if attr not in attrs:
             attrs[attr] = default
@@ -138,7 +146,8 @@ def invert_style_attrs(attrs):
     return attrs
 
 
-def test_all_styles(configurable_save_file: Path):
+def test_all_styles(configurable_save_file: Path) -> None:
+    """Test reading and resaving all cell styles."""
     doc = Document("tests/data/test-styles.numbers")
     table = doc.sheets["Styles"].tables[0]
     for row in range(table.num_rows):
@@ -163,7 +172,8 @@ def test_all_styles(configurable_save_file: Path):
             assert check_style(cell.style, **attrs)
 
 
-def test_all_style_changes(configurable_save_file: Path):
+def test_all_style_changes(configurable_save_file: Path) -> None:
+    """Test inverting, applying, and saving custom styles."""
     # Flip styles and re-save as new custom styles
     doc = Document("tests/data/test-styles.numbers")
     table = doc.sheets["Styles"].tables[0]
@@ -199,7 +209,8 @@ def test_all_style_changes(configurable_save_file: Path):
     assert style.name == f"Custom Style {style_num}"
 
 
-def test_header_styles():
+def test_header_styles() -> None:
+    """Test styles in header rows and columns."""
     doc = Document("tests/data/test-styles.numbers")
     sheets = doc.sheets
     table = sheets["Headers"].tables[0]
@@ -236,7 +247,8 @@ def test_header_styles():
     assert not table.cell("E9").style.bold
 
 
-def test_style_exceptions():
+def test_style_exceptions() -> None:
+    """Test exceptions raised by invalid style parameters."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     with pytest.raises(TypeError) as e:
@@ -314,7 +326,8 @@ def test_style_exceptions():
         assert f"{field} argument must be boolean" in str(e)
 
 
-def test_new_styles(configurable_save_file: Path):
+def test_new_styles(configurable_save_file: Path) -> None:
+    """Test creating, applying, and saving new styles."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     red_text = doc.add_style(
@@ -394,7 +407,8 @@ def test_new_styles(configurable_save_file: Path):
     assert not new_table.cell("F3").style.text_wrap
 
 
-def test_empty_styles(configurable_save_file: Path):
+def test_empty_styles(configurable_save_file: Path) -> None:
+    """Test preserving default styles on empty cells."""
     doc = Document()
     red_text = doc.add_style(
         name="Red Text",
@@ -425,7 +439,8 @@ def test_empty_styles(configurable_save_file: Path):
                 assert new_table.cell(row, col).style.name == body_style
 
 
-def test_add_bg_image(configurable_save_file: Path):
+def test_add_bg_image(configurable_save_file: Path) -> None:
+    """Test adding background images to styles."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     image_filename = "tests/data/cat.jpg"

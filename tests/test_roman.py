@@ -1,9 +1,12 @@
+"""Tests for Roman numeral conversion."""
+
 import pytest
 
 from numbers_parser.roman import to_roman
 
 
-def test_to_roman():
+def test_to_roman() -> None:
+    """Test converting integers to Roman numerals."""
     assert to_roman(1) == "I"
     assert to_roman(4) == "IV"
     assert to_roman(9) == "IX"

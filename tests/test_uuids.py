@@ -1,10 +1,13 @@
+"""Test Numbers UUID class."""
+
 import pytest
 
 from numbers_parser import UnsupportedError
 from numbers_parser.numbers_uuid import NumbersUUID
 
 
-def test_uuid():
+def test_uuid() -> None:
+    """Test Numbers UUID class."""
     uuid = NumbersUUID()
     assert str(uuid).count("-") == 4
 

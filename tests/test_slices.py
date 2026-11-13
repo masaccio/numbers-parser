@@ -1,9 +1,12 @@
+"""Tests for cell lookups and table iterators."""
+
 import pytest
 
 from numbers_parser import Document
 
 
-def test_exceptions():
+def test_exceptions() -> None:
+    """Test exceptions raised by invalid cell coordinates."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -28,7 +31,8 @@ def test_exceptions():
     assert "column -1 out of range" in str(e.value)
 
 
-def test_iter_row_exceptions():
+def test_iter_row_exceptions() -> None:
+    """Test exceptions raised by out-of-range iter_rows bounds."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -53,7 +57,8 @@ def test_iter_row_exceptions():
     assert str(e.value) == "column -1 out of range"
 
 
-def test_iter_col_exceptions():
+def test_iter_col_exceptions() -> None:
+    """Test exceptions raised by out-of-range iter_cols bounds."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -78,7 +83,8 @@ def test_iter_col_exceptions():
     assert str(e.value) == "column -1 out of range"
 
 
-def test_cell_lookup():
+def test_cell_lookup() -> None:
+    """Test cell lookup by row and column index."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -90,7 +96,8 @@ def test_cell_lookup():
     assert table.cell(3, 4).value == "XXX_3_5"
 
 
-def test_sheet_and_table_lookup_matches_case_insensitive_membership():
+def test_sheet_and_table_lookup_matches_case_insensitive_membership() -> None:
+    """Test case-insensitive lookup and membership for sheets and tables."""
     doc = Document()
     sheet = doc.sheets[0]
     table = sheet.tables[0]
@@ -101,7 +108,8 @@ def test_sheet_and_table_lookup_matches_case_insensitive_membership():
     assert "table 1" in sheet.tables
 
 
-def test_items_list_rejects_out_of_range_negative_indexes():
+def test_items_list_rejects_out_of_range_negative_indexes() -> None:
+    """Test that out-of-range negative indexes raise IndexError."""
     doc = Document()
     with pytest.raises(IndexError):
         _ = doc.sheets[-2]
@@ -109,7 +117,8 @@ def test_items_list_rejects_out_of_range_negative_indexes():
         _ = doc.sheets[0].tables[-2]
 
 
-def test_cell_ref_lookup():
+def test_cell_ref_lookup() -> None:
+    """Test cell lookup by A1-style reference."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -125,19 +134,21 @@ def test_cell_ref_lookup():
     assert "out of range" in str(e.value)
 
 
-def test_cell_wide_ref():
+def test_cell_wide_ref() -> None:
+    """Test cell lookup across multi-letter column references."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_2"].tables
     table = tables["XXX_Table_1"]
-    assert table.cell("").value == "excepteur"  #  defaults to [0, 0]
+    assert table.cell("").value == "excepteur"  #  defaults to [0, 0]
     assert table.cell("A1").value == "excepteur"
     assert table.cell("Z1").value == "ea"
     assert table.cell("BA1").value == "veniam"
     assert table.cell("CZ1").value == "dolore"
 
 
-def test_row_iterator():
+def test_row_iterator() -> None:
+    """Test iterating over table rows."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -156,7 +167,8 @@ def test_row_iterator():
     assert val == 522.108
 
 
-def test_col_iterator():
+def test_col_iterator() -> None:
+    """Test iterating over table columns."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -175,7 +187,8 @@ def test_col_iterator():
     assert val == 522.108
 
 
-def test_cell_iterator():
+def test_cell_iterator() -> None:
+    """Test iterating over individual table cells."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -201,7 +214,8 @@ def test_cell_iterator():
     assert list(data) == ["Bus", "Car", "Helicopter"]
 
 
-def test_iter_cell_exceptions():
+def test_iter_cell_exceptions() -> None:
+    """Test exceptions raised by out-of-range iter_cells bounds."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
