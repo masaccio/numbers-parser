@@ -190,13 +190,18 @@ max-branches = 20
 ban-relative-imports = "all"
 
 [tool.ruff.lint.per-file-ignores]
-"src/build/**" = ["PLR2004", "INP001", "PTH"]
+"src/build/**" = [
+  "INP001",   # Not a namespace; just a folder to hold non-production files
+  "PLR2004",  # Allow checking for specific numbers
+  "PTH",      # Build scripts are find to use os instead of Path
+]
 "src/debug/**" = [
-  "T201",     # print() allowed in debug scripts
+  "INP001",   # Not a namespace; just a folder to hold non-production files
   "SLF001",   # Debug internal data
-  "INP001",
+  "T201",     # print() allowed in debug scripts
   ]
 "tests/**" = [
+  "C901",     # Function complexity can be high
   "DTZ001",   # Numbers stores data in UTC
   "PLR2004",  # Allow checking for specific numbers
   "S101",     # Allow assert in tests

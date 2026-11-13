@@ -1,4 +1,6 @@
 abstractmethod
+addinivalue
+addoption
 addopts
 adipiscing
 amet
@@ -65,6 +67,7 @@ llys
 Lucida
 makedirs
 Menlo
+modifyitems
 multifile
 muppy
 mydoc
