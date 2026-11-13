@@ -197,6 +197,7 @@ ban-relative-imports = "all"
   "INP001",
   ]
 "tests/**" = [
+  "DTZ001",   # Numbers stores data in UTC
   "PLR2004",  # Allow checking for specific numbers
   "S101",     # Allow assert in tests
   "SLF001",   # Tests need to access internal data for coverage

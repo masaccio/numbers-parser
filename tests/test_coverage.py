@@ -1,3 +1,5 @@
+"""Additional tests to ensure code coverage."""
+
 from datetime import datetime
 from pathlib import Path
 from struct import pack
@@ -51,18 +53,21 @@ from numbers_parser.xrefs import (
 )
 
 
-def test_containers():
+def test_containers() -> None:
+    """Test model object container count."""
     doc = Document("tests/data/test-1.numbers")
     assert len(doc._model.objects) == 738
 
 
-def test_ranges():
+def test_ranges() -> None:
+    """Test Excel range and column name conversions."""
     assert xl_range(2, 2, 2, 2) == "C3"
     assert xl_col_to_name(25) == "Z"
     assert xl_col_to_name(26) == "AA"
 
 
-def test_cell_storage(tmp_path: Path):
+def test_cell_storage(tmp_path: Path) -> None:
+    """Test cell storage edge cases and unsupported types."""
     doc = Document()
     doc.sheets[0].tables[0]
 
@@ -137,7 +142,8 @@ def test_cell_storage(tmp_path: Path):
     assert str(e.value) == "Pre-BNC storage is unsupported"
 
 
-def test_formatting_exceptions():
+def test_formatting_exceptions() -> None:
+    """Test warnings for unsupported custom and date formats."""
     doc = Document("tests/data/test-custom-formats.numbers")
 
     cell = doc.sheets[0].tables[0].cell("B4")
@@ -158,14 +164,16 @@ def test_formatting_exceptions():
     assert str(record[0].message) == "Unsupported field code 'ZZZ'"
 
 
-def test_pretty_uuids():
+def test_pretty_uuids() -> None:
+    """Test prettifying UUIDs in nested lists."""
     obj = [[1, 2, 3], [4, 5, 6]]
     unpacker = NumbersUnpacker()
     unpacker.prettify_uuids(obj)
     assert str(obj) == "[[1, 2, 3], [4, 5, 6]]"
 
 
-def test_range_exceptions():
+def test_range_exceptions() -> None:
+    """Test exceptions raised by invalid cell and column references."""
     with pytest.raises(IndexError) as e:
         _ = xl_rowcol_to_cell(-2, 0)
     assert "row reference -2 below zero" in str(e)
@@ -196,7 +204,8 @@ def test_range_exceptions():
     assert "column reference -2 below zero" in str(e)
 
 
-def test_datalists():
+def test_datalists() -> None:
+    """Test table string lookup operations."""
     doc = Document("tests/data/test-1.numbers")
     table_id = doc.sheets[0].tables[0]._table_id
     assert doc._model.table_string(table_id, 1) == "YYY_2_1"
@@ -205,7 +214,8 @@ def test_datalists():
     assert doc._model._table_strings.lookup_value(table_id, 19).string == "TEST"
 
 
-def test_merge(configurable_save_file: Path):
+def test_merge(configurable_save_file: Path) -> None:
+    """Test merging cells and verifying the merge rectangle."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.merge_cells("A1:A4")
@@ -216,7 +226,8 @@ def test_merge(configurable_save_file: Path):
     assert new_doc._model.merge_cells(table._table_id).rect((3, 0)) == (0, 0, 3, 0)
 
 
-def test_experimental():
+def test_experimental() -> None:
+    """Test enabling and disabling experimental features."""
     assert experimental_features() == ExperimentalFeatures.NONE
     enable_experimental_feature(ExperimentalFeatures.TESTING)
     assert ExperimentalFeatures.TESTING in experimental_features()
@@ -224,7 +235,8 @@ def test_experimental():
     assert experimental_features() == ExperimentalFeatures.NONE
 
 
-def test_alignment_and_number_format_edges():
+def test_alignment_and_number_format_edges() -> None:
+    """Test Alignment representation and number format edge cases."""
     alignment = Alignment("center", "middle")
     assert alignment == Alignment("center", "middle")
     assert str(alignment) == "[center,middle]"
@@ -234,7 +246,8 @@ def test_alignment_and_number_format_edges():
     assert _format_currency(None, None) is None
 
 
-def test_additional_flags(configurable_save_file: Path):
+def test_additional_flags(configurable_save_file: Path) -> None:
+    """Test cell storage flags and conditional style IDs."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
@@ -254,7 +267,8 @@ def test_additional_flags(configurable_save_file: Path):
     assert new_doc.default_table.cell(1, 3)._cond_rule_style_id is not None
 
 
-def test_bad_image_filenames():
+def test_bad_image_filenames() -> None:
+    """Test missing background image file warning."""
     doc = Document("tests/data/issue-69b.numbers")
     table = doc.sheets[0].tables[0]
     _ = table._model.objects.file_store.pop("Data/numbers_1-16.png")
@@ -264,7 +278,8 @@ def test_bad_image_filenames():
     assert str(record[0].message) == "Cannot find file 'numbers_1.png' in Numbers archive"
 
 
-def test_set_number_defaults():
+def test_set_number_defaults() -> None:
+    """Test default cell formatting settings and invalid format types."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.write(0, 0, 0.0)
@@ -296,13 +311,15 @@ def test_set_number_defaults():
     assert "Invalid format type 'object'" in str(e)
 
 
-def test_formatting_empty_cell():
+def test_formatting_empty_cell() -> None:
+    """Test formatting of an empty cell."""
     doc = Document()
     assert doc.default_table.cell(0, 0).formatted_value == ""
     assert _format_decimal(None, object()) == ""
 
 
-def test_custom_format_from_archive(configurable_save_file: Path):
+def test_custom_format_from_archive(configurable_save_file: Path) -> None:
+    """Test adding, saving, and applying custom formats."""
     doc = Document()
     doc.add_custom_format(type="datetime", name="date_format")
     doc.add_custom_format(type="text", name="text_format")
@@ -341,7 +358,8 @@ def test_custom_format_from_archive(configurable_save_file: Path):
     assert table.cell(0, 4).formatted_value == "0000001"
 
 
-def test_cell_repr():
+def test_cell_repr() -> None:
+    """Test string and repr outputs for Sheet, Table, and Cell."""
     doc = Document("tests/data/test-1.numbers")
     assert repr(doc.sheets[0]) == "numbers_parser.document.Sheet(name='ZZZ_Sheet_1')"
     assert repr(doc.sheets[0].tables[0]) == "numbers_parser.document.Table(name='ZZZ_Table_1')"
@@ -353,7 +371,8 @@ def test_cell_repr():
     assert str(cell) == "YYY_1_1"
 
 
-def test_invalid_format():
+def test_invalid_format() -> None:
+    """Test custom format fallback and invalid zip file error."""
     doc = Document("tests/data/test-1.numbers")
     cell = doc.default_table.cell(1, 1)
     cell._text_format_id = None
@@ -365,7 +384,8 @@ def test_invalid_format():
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_cli_main_blocks(capsys):
+def test_cli_main_blocks(capsys: pytest.CaptureFixture[str]) -> None:
+    """Test CLI main entry points."""
     from numbers_parser._cat_numbers import main as cat_main  # noqa: PLC0415
     from numbers_parser._csv2numbers import main as csv2_main  # noqa: PLC0415
     from numbers_parser._unpack_numbers import main as unpack_main  # noqa: PLC0415
@@ -402,14 +422,16 @@ def test_cli_main_blocks(capsys):
     assert callable(unpack_main)
 
 
-def test_xref_quoting():
+def test_xref_quoting() -> None:
+    """Test quoting of column names in formulas."""
     doc = Document("tests/data/test-xref-coverage.numbers")
     table = doc.default_table
     assert table.cell("C2").formula == "SUM(Column '''A''')"
     assert table.cell("C3").formula == "COUNTA('Column X & Y')"
 
 
-def test_add_component_metadata_none_locator():
+def test_add_component_metadata_none_locator() -> None:
+    """Test adding component metadata with a None locator."""
     doc = Document()
     model = doc._model
 

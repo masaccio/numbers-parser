@@ -1,3 +1,5 @@
+"""Tests for creating and editing cells."""
+
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -7,7 +9,8 @@ from numbers_parser import Document, EmptyCell
 from numbers_parser.constants import EPOCH, MAX_COL_COUNT, MAX_ROW_COUNT
 
 
-def test_edit_cell_values(configurable_save_file: Path):
+def test_edit_cell_values(configurable_save_file: Path) -> None:
+    """Test editing cell values and saving the document."""
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -56,7 +59,8 @@ def test_edit_cell_values(configurable_save_file: Path):
     assert table.cell(5, 5).value == "7890"
 
 
-def test_negative_cell_coordinates_are_rejected():
+def test_negative_cell_coordinates_are_rejected() -> None:
+    """Test that negative row and column coordinates raise IndexError."""
     doc = Document()
     table = doc.default_table
 
@@ -68,13 +72,15 @@ def test_negative_cell_coordinates_are_rejected():
 
 
 @pytest.mark.parametrize(("num_rows", "num_cols"), [(1, 1), (1, 8), (12, 1)])
-def test_document_supports_single_row_or_column(num_rows, num_cols):
+def test_document_supports_single_row_or_column(num_rows: int, num_cols: int) -> None:
+    """Test creating documents with a single row or column."""
     doc = Document(num_rows=num_rows, num_cols=num_cols)
     assert doc.default_table.num_rows == num_rows
     assert doc.default_table.num_cols == num_cols
 
 
-def test_large_table(configurable_save_file: Path):
+def test_large_table(configurable_save_file: Path) -> None:
+    """Test writing and saving a large table."""
     doc = Document()
     sheets = doc.sheets
     tables = sheets[0].tables

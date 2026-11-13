@@ -1,3 +1,5 @@
+"""Tests for bulleted text and hyperlinks."""
+
 from pathlib import Path
 
 from numbers_parser import Document
@@ -8,7 +10,8 @@ TEST_REF_2 = "this\nis some\nnumbered\ntext"
 TEST_REF_3 = "this\nis some\nlettered\ntext"
 
 
-def test_bullets():
+def test_bullets() -> None:
+    """Test bulleted text extraction."""
     doc = Document("tests/data/test-bullets.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -27,8 +30,10 @@ def test_bullets():
     assert table.cell(0, 0).bullets is None
 
 
-def test_hyperlinks(configurable_save_file: Path):
-    def check_doc_links(doc):
+def test_hyperlinks(configurable_save_file: Path) -> None:
+    """Test hyperlinks in cells."""
+
+    def check_doc_links(doc: Document) -> None:
         sheets = doc.sheets
         tables = sheets[0].tables
         table = tables[0]

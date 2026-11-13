@@ -1,5 +1,8 @@
+"""Tests for cell borders."""
+
 from collections import defaultdict
 from pathlib import Path
+from typing import Any
 
 import pytest
 from pytest_check import check
@@ -8,6 +11,7 @@ from numbers_parser import RGB, Border, BorderType, Cell, Document, MergedCell, 
 
 
 def check_border(cell: Cell, side: str, test_value: str) -> bool:
+    """Check if a cell's border matches the expected test value."""
     border_value = getattr(cell.border, side, None)
     if test_value == "None":
         valid = check.is_none(border_value)
@@ -34,7 +38,8 @@ BORDER_TO_TAG_MAP = {v: k for k, v in TAG_TO_BORDER_MAP.items()}
 ALL_BORDERS = ["top", "right", "bottom", "left"]
 
 
-def unpack_test_string(test_value):
+def unpack_test_string(test_value: str) -> dict[str, Any]:
+    """Unpack border test specification string into a dictionary."""
     # Cell test values are of the form:
     #
     # T=1,(0;162;255),dashes
@@ -57,7 +62,8 @@ def unpack_test_string(test_value):
     return test_values
 
 
-def test_exceptions():
+def test_exceptions() -> None:
+    """Test exceptions raised by invalid border parameters."""
     with pytest.raises(TypeError) as e:
         _ = Border(width="invalid")
     assert "width must be a float number" in str(e)
@@ -134,7 +140,8 @@ def test_exceptions():
     assert f"table has {table.num_rows} rows" in str(e)
 
 
-def run_border_tests(filename):
+def run_border_tests(filename: str | Path) -> None:
+    """Run border verification tests against a Numbers document."""
     doc = Document(filename)
 
     for sheet_name in ["Borders", "Large Borders"]:
@@ -178,11 +185,13 @@ def run_border_tests(filename):
                 assert valid
 
 
-def test_borders():
+def test_borders() -> None:
+    """Test borders in standard test document."""
     run_border_tests("tests/data/test-styles.numbers")
 
 
-def test_empty_borders():
+def test_empty_borders() -> None:
+    """Test cells with empty borders."""
     doc = Document("tests/data/test-styles.numbers")
     sheet = doc.sheets["Large Borders"]
     table = sheet.tables[0]
@@ -197,7 +206,8 @@ def test_empty_borders():
     assert table.cell("H13").border.top is None
 
 
-def test_edit_borders(configurable_save_file: Path):
+def test_edit_borders(configurable_save_file: Path) -> None:
+    """Test editing and saving cell borders."""
     doc = Document()
     sheet = doc.sheets[0]
     table = sheet.tables[0]
@@ -241,7 +251,8 @@ def test_edit_borders(configurable_save_file: Path):
     assert table.cell("F5").border.bottom == Border(4.0, RGB(212, 24, 118), "solid")
 
 
-def invert_border_test(test):
+def invert_border_test(test: str) -> tuple[str | None, Border | None]:
+    """Invert a single border test specification."""
     if test == "None":
         return None, None
     values = test.split(",")
@@ -270,7 +281,8 @@ def invert_border_test(test):
     return test_value, border
 
 
-def invert_tests(tests):
+def invert_tests(tests: dict[str, Any]) -> tuple[str, list[Border | None]]:
+    """Invert all border test specifications for a cell."""
     new_tests = []
     new_borders = []
     test_string = ""
@@ -289,7 +301,8 @@ def invert_tests(tests):
     return test_string.strip(), new_borders
 
 
-def test_extra_borders(configurable_save_file: Path):
+def test_extra_borders(configurable_save_file: Path) -> None:
+    """Test setting and saving extra border configurations."""
     doc = Document("tests/data/test-extra-borders.numbers")
     table = doc.sheets[0].tables[0]
     dots_border = Border(3.0, RGB(0, 162, 255), "dots")
@@ -330,7 +343,8 @@ def test_extra_borders(configurable_save_file: Path):
             assert getattr(table.cell(row, col).border, side) == border
 
 
-def test_resave_borders(configurable_save_file: Path):
+def test_resave_borders(configurable_save_file: Path) -> None:
+    """Test inverting, resaving, and re-verifying all borders."""
     doc = Document("tests/data/test-styles.numbers")
 
     style = doc.add_style(font_size=8.0, bold=False, name="Border Test Style")

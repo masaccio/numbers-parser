@@ -1,3 +1,5 @@
+"""Tests for cell comments and replies."""
+
 from datetime import datetime
 from pathlib import Path
 
@@ -6,7 +8,8 @@ import pytest
 from numbers_parser import Comment, Document
 
 
-def test_comments():
+def test_comments() -> None:
+    """Test reading cell comments and replies."""
     doc = Document("tests/data/test-comments.numbers")
     table = doc.sheets[0].tables[0]
 
@@ -51,7 +54,8 @@ def test_comments():
     assert c4.text == "Comment on merged cells"
 
 
-def test_passthrough_comments(configurable_save_file: Path):
+def test_passthrough_comments(configurable_save_file: Path) -> None:
+    """Test preserving comments when resaving a document."""
     doc = Document("tests/data/test-comments.numbers")
     doc.save(configurable_save_file)
 
@@ -62,7 +66,8 @@ def test_passthrough_comments(configurable_save_file: Path):
     assert comments[0].replies[0].text == "Reply to comment #1"
 
 
-def test_write_comments(configurable_save_file: Path):
+def test_write_comments(configurable_save_file: Path) -> None:
+    """Test adding new comments and replies to cells."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.write(0, 0, "Test #1")
@@ -94,7 +99,8 @@ def test_write_comments(configurable_save_file: Path):
     assert len(b2_comments[0].replies) == 0
 
 
-def test_comment_exceptions():
+def test_comment_exceptions() -> None:
+    """Test exceptions raised by invalid add_comment calls."""
     doc = Document()
     table = doc.sheets[0].tables[0]
 
@@ -113,7 +119,8 @@ def test_comment_exceptions():
         table.add_comment("D4", "Too", "Many", "Arguments")
 
 
-def test_comment_auto_expand(configurable_save_file: Path):
+def test_comment_auto_expand(configurable_save_file: Path) -> None:
+    """Test automatic table expansion when adding a comment out of bounds."""
     doc = Document()
     table = doc.sheets[0].tables[0]
 
@@ -131,7 +138,8 @@ def test_comment_auto_expand(configurable_save_file: Path):
     assert comments[0].text == "Out of bounds comment"
 
 
-def test_comment_on_merged_cell():
+def test_comment_on_merged_cell() -> None:
+    """Test adding comments to merged cells."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.merge_cells("A1:B2")

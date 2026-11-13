@@ -1,4 +1,7 @@
+"""Tests for categorized tables."""
+
 from datetime import datetime
+from typing import Any
 
 from numbers_parser import BoolCell, DateCell, Document, NumberCell, RichTextCell, TextCell
 
@@ -284,7 +287,8 @@ MAXIMALLY_NESTED_CATEGORIES = {
 }
 
 
-def test_group_lookups():
+def test_group_lookups() -> None:
+    """Test cell and range lookups in categorized tables."""
     doc = Document("tests/data/test-categories.numbers")
 
     ungrouped_table = doc.sheets[0].tables["Uncategorized"]
@@ -315,7 +319,8 @@ def test_group_lookups():
     assert table.cell("C10").value == datetime(2011, 1, 30)
 
 
-def ref_data_to_types(item):
+def ref_data_to_types(item: Any) -> Any:
+    """Convert reference data recursively into Python types."""
     if isinstance(item, dict):
         return {k: ref_data_to_types(v) for k, v in item.items()}
 
@@ -325,7 +330,8 @@ def ref_data_to_types(item):
     return type(item)
 
 
-def data_to_types(item):  # noqa: PLR0911
+def data_to_types(item: Any) -> Any:  # noqa: PLR0911
+    """Convert cell data recursively into corresponding value types."""
     if isinstance(item, dict):
         return {k: data_to_types(v) for k, v in item.items()}
 
@@ -345,7 +351,8 @@ def data_to_types(item):  # noqa: PLR0911
     return None
 
 
-def data_to_values(item):
+def data_to_values(item: Any) -> Any:
+    """Convert cell data recursively into raw cell values."""
     if isinstance(item, dict):
         return {k: data_to_values(v) for k, v in item.items()}
 
@@ -355,7 +362,8 @@ def data_to_values(item):
     return item.value
 
 
-def test_category_trees():
+def test_category_trees() -> None:
+    """Test categorized data structures across various grouping configurations."""
     doc = Document("tests/data/test-categories.numbers")
     sheet = doc.sheets["Categories"]
 

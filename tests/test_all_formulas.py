@@ -1,3 +1,5 @@
+"""Tests for all formula functions."""
+
 import pytest_check as check
 
 from numbers_parser import BoolCell, Document, ErrorCell, TextCell
@@ -6,7 +8,8 @@ DOCUMENT = "tests/data/test-all-formulas.numbers"
 DOCUMENT_13_1 = "tests/data/test-all-formulas-13.1.numbers"
 
 
-def compare_table_functions(sheet_name, filename):
+def compare_table_functions(sheet_name: str, filename: str) -> None:
+    """Compare table functions against reference values."""
     doc = Document(filename)
     sheet = doc.sheets[sheet_name]
     table = sheet.tables["Tests"]
@@ -32,57 +35,71 @@ def compare_table_functions(sheet_name, filename):
             check.equal(formula_result, formula_ref_value, f"value@{i}")
 
 
-def test_information_functions():
+def test_information_functions() -> None:
+    """Test information functions."""
     compare_table_functions("Information", DOCUMENT)
 
 
-def test_information_functions_new_version():
+def test_information_functions_new_version() -> None:
+    """Test information functions in new version."""
     compare_table_functions("Information", DOCUMENT_13_1)
 
 
-def test_text_functions():
+def test_text_functions() -> None:
+    """Test text functions."""
     compare_table_functions("Text", DOCUMENT)
 
 
-def test_text_functions_new_version():
+def test_text_functions_new_version() -> None:
+    """Test text functions in new version."""
     compare_table_functions("Text", DOCUMENT_13_1)
 
 
-def test_math_functions():
+def test_math_functions() -> None:
+    """Test math functions."""
     compare_table_functions("Math", DOCUMENT)
 
 
-def test_math_functions_new_version():
+def test_math_functions_new_version() -> None:
+    """Test math functions in new version."""
     compare_table_functions("Math", DOCUMENT_13_1)
 
 
-def test_reference_functions():
+def test_reference_functions() -> None:
+    """Test reference functions."""
     compare_table_functions("Reference", DOCUMENT)
 
 
-def test_reference_functions_new_version():
+def test_reference_functions_new_version() -> None:
+    """Test reference functions in new version."""
     compare_table_functions("Reference", DOCUMENT_13_1)
 
 
-def test_date_functions():
+def test_date_functions() -> None:
+    """Test date functions."""
     compare_table_functions("Date", DOCUMENT)
 
 
-def test_date_functions_new_version():
+def test_date_functions_new_version() -> None:
+    """Test date functions in new version."""
     compare_table_functions("Date", DOCUMENT_13_1)
 
 
-def test_statistical_functions():
+def test_statistical_functions() -> None:
+    """Test statistical functions."""
     compare_table_functions("Statistical", DOCUMENT)
 
 
-def test_statistical_functions_new_version():
+def test_statistical_functions_new_version() -> None:
+    """Test statistical functions in new version."""
     compare_table_functions("Statistical", DOCUMENT_13_1)
 
 
-def test_extra_functions():
+def test_extra_functions() -> None:
+    """Test extra functions."""
     compare_table_functions("Formulas", "tests/data/test-extra-formulas.numbers")
 
 
-def test_new_functions():
+def test_new_functions() -> None:
+    """Test new functions."""
     compare_table_functions("Formulas", "tests/data/test-new-formulas.numbers")

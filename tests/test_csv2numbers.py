@@ -212,7 +212,8 @@ def test_multifile(script_runner: ScriptRunner, tmp_path: Path) -> None:
 @pytest.mark.filterwarnings(
     "ignore:'numbers_parser._csv2numbers' found in sys.modules:RuntimeWarning",
 )
-def test_main(capsys):
+def test_main(capsys: pytest.CaptureFixture[str]) -> None:
+    """Test running _csv2numbers module as __main__."""
     with patch.object(sys, "argv", ["_csv2numbers.py", "--help"]):
         with pytest.raises(SystemExit) as excinfo:
             # Use runpy instead of script_runner to ensure coverage

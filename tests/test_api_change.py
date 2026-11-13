@@ -1,9 +1,12 @@
+"""Tests for deprecated API changes."""
+
 import pytest
 
 from numbers_parser import Document
 
 
-def test_api_change():
+def test_api_change() -> None:
+    """Test deprecation warnings for cell image properties."""
     doc = Document("tests/data/issue-43.numbers")
     table = doc.sheets[0].tables[0]
 
