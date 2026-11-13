@@ -217,8 +217,8 @@ def test_issue_42(script_runner: ScriptRunner) -> None:
     doc = Document("tests/data/issue-42.numbers")
     table = doc.sheets[0].tables[0]
     assert isinstance(table.cell(6, 1), ErrorCell)
-    assert table.cell(3, 1).formula == "#REF!×A4:A6"
-    assert table.cell(4, 1).formula == "#REF!×A5:A6"
+    assert table.cell(3, 1).formula == "#REF!×A4:A6"  # noqa: RUF001
+    assert table.cell(4, 1).formula == "#REF!×A5:A6"  # noqa: RUF001
 
     ret = script_runner.run(
         ["cat-numbers", "--brief", "tests/data/issue-42.numbers"],
@@ -237,8 +237,8 @@ def test_issue_42(script_runner: ScriptRunner) -> None:
     assert ret.stderr == ""
     assert ret.success
     lines = ret.stdout.split("\r\n")
-    assert lines[4] == "3.0,#REF!×A5:A6"
-    assert lines[5] == ",#REF!×A6:A6"
+    assert lines[4] == "3.0,#REF!×A5:A6"  # noqa: RUF001
+    assert lines[5] == ",#REF!×A6:A6"  # noqa: RUF001
     assert lines[6] == "SUM(sum),PRODUCT(prod)"
 
 

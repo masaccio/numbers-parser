@@ -11,7 +11,7 @@ from numbers_parser import Document, Table, UnsupportedWarning
 TABLE_1_FORMULAS = [
     [None, "A1", "$B$1=1"],
     [None, "A1+A2", "A$2&B2"],
-    [None, "A1×A2", "NOW()"],
+    [None, "A1×A2", "NOW()"],  # noqa: RUF001
     [None, "A1-A2", "NOW()+0.1"],
     [None, "A1÷A2", "$C4-C3"],
     [None, "SUM(A1:A2)", "IF(A6>6,TRUE,FALSE)"],
@@ -29,7 +29,7 @@ TABLE_2_FORMULAS = [
     [None, 'FIND("_",A6)'],
     [None, 'FIND("YYY",A7)'],
     [None, 'IF(FIND("_",A8)>2,A1,A2)'],
-    [None, "100×(A9×2)%"],
+    [None, "100×(A9×2)%"],  # noqa: RUF001
     [None, 'IF(A10<5,"smaller","larger")'],
     [None, 'IF(A11≤5,"smaller","larger")'],
 ]

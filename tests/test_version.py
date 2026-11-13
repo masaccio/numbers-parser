@@ -1,6 +1,7 @@
 """Test version handling."""
 
 import importlib
+from typing import IO, Any
 from unittest import mock
 
 import pytest
@@ -16,19 +17,22 @@ def test_version() -> None:
     assert version.count(".") == 2
 
 
-def mock_valid_plist(file, mode):
+def mock_valid_plist(file: str, mode: str) -> IO[Any]:
+    """Mock opening a valid Numbers version.plist."""
     if file.endswith("version.plist"):
         return builtin_open("tests/data/numbers-version-13.0.plist", mode)
     return builtin_open(file, mode)
 
 
-def mock_newer_plist(file, mode):
+def mock_newer_plist(file: str, mode: str) -> IO[Any]:
+    """Mock opening a newer Numbers version.plist."""
     if file.endswith("version.plist"):
         return builtin_open("tests/data/numbers-version-99.0.plist", mode)
     return builtin_open(file, mode)
 
 
-def mock_invalid_plist(file, mode):
+def mock_invalid_plist(file: str, mode: str) -> IO[Any]:
+    """Mock opening an invalid Numbers version.plist."""
     if file.endswith("version.plist"):
         return builtin_open("tests/data/XXXX.plist", mode)
     return builtin_open(file, mode)
@@ -37,20 +41,20 @@ def mock_invalid_plist(file, mode):
 def test_numbers_version_check() -> None:
     """Test version handling."""
     with mock.patch("builtins.open", side_effect=mock_valid_plist):
-        import numbers_parser
+        import numbers_parser  # noqa: PLC0415
 
         importlib.reload(numbers_parser)
         assert _check_installed_numbers_version() == "13.0"
 
     with mock.patch("builtins.open", side_effect=mock_invalid_plist):
-        import numbers_parser
+        import numbers_parser  # pylint: disable=import-outside-toplevel, ruff: noqa: PLC0415
 
         importlib.reload(numbers_parser)
         assert _check_installed_numbers_version() is None
 
     with mock.patch("builtins.open", side_effect=mock_newer_plist):
         with pytest.warns(match="Numbers version 99.0 not tested with this version") as record:
-            import numbers_parser
+            import numbers_parser  # noqa: PLC0415
 
             importlib.reload(numbers_parser)
         assert len(record) == 1

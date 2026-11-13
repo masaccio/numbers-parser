@@ -1,3 +1,5 @@
+"""Tests for table dimensions, row heights, column widths, and header counts."""
+
 from pathlib import Path
 
 import pytest
@@ -5,7 +7,8 @@ import pytest
 from numbers_parser import Document
 
 
-def test_row_col_sizes(configurable_save_file: Path):
+def test_row_col_sizes(configurable_save_file: Path) -> None:
+    """Test getting and setting row heights and column widths."""
     doc = Document("tests/data/test-1.numbers")
     table = doc.sheets[0].tables[0]
 
@@ -41,7 +44,8 @@ def test_row_col_sizes(configurable_save_file: Path):
     assert table.width == 348
 
 
-def test_header_size(configurable_save_file: Path):
+def test_header_size(configurable_save_file: Path) -> None:
+    """Test getting, setting, and validating header row and column counts."""
     doc = Document()
     table = doc.sheets[0].tables[0]
 
@@ -87,7 +91,8 @@ def test_header_size(configurable_save_file: Path):
     assert int(table.coordinates[1]) == 0
 
 
-def test_new_doc(configurable_save_file: Path):
+def test_new_doc(configurable_save_file: Path) -> None:
+    """Test creating a new document with custom dimensions and header counts."""
     doc = Document(
         sheet_name="Test Sheet",
         table_name="Test Table",
@@ -109,7 +114,8 @@ def test_new_doc(configurable_save_file: Path):
     assert not new_doc.sheets[0].tables[0].cell("C3").style.bold
 
 
-def test_table_options(configurable_save_file: Path):
+def test_table_options(configurable_save_file: Path) -> None:
+    """Test disabling table name display."""
     doc = Document()
     doc.sheets[0].tables[0].table_name_enabled = False
     doc.save(configurable_save_file)
