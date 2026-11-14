@@ -37,6 +37,8 @@ from numbers_parser.constants import (
     MAX_ROW_COUNT,
 )
 from numbers_parser.containers import ItemsList
+from numbers_parser.exceptions import UnsupportedError
+from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.model import NumbersModel
 from numbers_parser.numbers_cache import Cacheable
 from numbers_parser.xrefs import xl_cell_to_rowcol, xl_range
@@ -608,6 +610,40 @@ class Table(Cacheable):
                     else:
                         cell = cast("Cell", Cell._from_storage(table_id, row, col, buffer, model))
                 self._data[row].append(cell)
+
+    @property
+    def has_grouping(self) -> bool:
+        """Return whether either stored category owner enables grouping.
+
+        Raises
+        ------
+        UnsupportedError:
+            If the available owner records do not establish grouping state.
+
+        Both modern and legacy owners are checked so a missing or conflicting
+        reference cannot conceal an enabled grouping.
+        """
+        msg = "table grouping state is unavailable"
+        try:
+            table = self._model.table_model(self._table_id)
+            groups = []
+            if table.HasField("category_owner_deprecated"):
+                groups.extend(table.category_owner_deprecated.group_by)
+            if table.HasField("category_owner") and table.category_owner.identifier:
+                owner = self._model.get_object(
+                    table.category_owner.identifier, TSTArchives.CategoryOwnerRefArchive
+                )
+                if not owner.group_by:
+                    raise UnsupportedError(msg)
+                groups.extend(
+                    self._model.get_object(item.identifier, TSTArchives.GroupByArchive)
+                    for item in owner.group_by
+                )
+            if not groups or any(not group.HasField("is_enabled") for group in groups):
+                raise UnsupportedError(msg)
+            return any(group.is_enabled for group in groups)
+        except (AttributeError, IndexError, KeyError, TypeError, ValueError) as error:
+            raise UnsupportedError(msg) from error
 
     @property
     def name(self) -> str:
