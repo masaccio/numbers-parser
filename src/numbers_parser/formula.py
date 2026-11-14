@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import re
 import warnings
 from datetime import datetime, timedelta
+from decimal import Decimal
 from typing import TYPE_CHECKING, cast
 
 from numbers_parser.constants import NUMBER_NODE_DECIMAL_HIGH
@@ -429,18 +429,6 @@ class TableFormulas:
 
 
 def number_to_str(v: float) -> str:
-    """Format a float as a string."""
+    """Format the observed float without losing its decimal exponent."""
     # Number is never negative; formula will use NEGATION_NODE
-    v_str = repr(v)
-    if "e" in v_str:
-        number, exp = v_str.split("e")
-        number = re.sub(r"[,-]", "", number)
-        num_zeroes = abs(int(exp)) - 1
-        if "." in number:
-            num_zeroes -= len(number.split(".")[1]) - 1
-            number = number.replace(".", "")
-        zeroes = "0" * num_zeroes
-        if int(exp) > 0:
-            return f"{number}{zeroes}"
-        return f"0.{zeroes}{number}"
-    return v_str
+    return format(Decimal(repr(v)), "f")
