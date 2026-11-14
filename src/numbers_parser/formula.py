@@ -28,11 +28,14 @@ class Formula:
         table_id: int,
         row: int,
         col: int,
+        *,
+        reject_named_references: bool = False,
     ) -> None:
         """Initialize the instance state."""
         self._stack: list[str | CellRange] = []
         self._model = model
         self._table_id = table_id
+        self._reject_named_references = reject_named_references
         self.row = row
         self.col = col
 
@@ -351,7 +354,9 @@ class Formula:
         node: TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive,
     ) -> None:
         """Push the cell reference for a formula node onto the stack."""
-        self.push(self._model.node_to_ref(self._table_id, row, col, node))
+        reference = self._model.node_to_ref(self._table_id, row, col, node)
+        reference.reject_named_references = self._reject_named_references
+        self.push(reference)
 
 
 NODE_FUNCTION_MAP = {
@@ -403,7 +408,9 @@ class TableFormulas:
             for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()  # type: ignore[attr-defined] # noqa: SLF001
         }
 
-    def formula(self, formula_key: int, row: int, col: int) -> str:
+    def formula(
+        self, formula_key: int, row: int, col: int, *, reject_named_references: bool = False
+    ) -> str:
         """Return the formula text for a cell in the table."""
         all_formulas = self._model.formula_ast(self._table_id)
         if formula_key not in all_formulas:
@@ -415,7 +422,9 @@ class TableFormulas:
             )
             return "INVALID_KEY!(" + str(formula_key) + ")"
 
-        formula = Formula(self._model, self._table_id, row, col)
+        formula = Formula(
+            self._model, self._table_id, row, col, reject_named_references=reject_named_references
+        )
         for node in all_formulas[formula_key]:
             node_type = self._formula_type_lookup[node.AST_node_type]
             if node_type == "REFERENCE_ERROR_WITH_UIDS":
