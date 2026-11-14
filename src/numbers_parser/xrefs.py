@@ -9,6 +9,7 @@ from enum import IntEnum
 from typing import TYPE_CHECKING, Any, cast
 
 from numbers_parser.constants import OPERATOR_PRECEDENCE
+from numbers_parser.exceptions import UnsupportedError
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
@@ -82,6 +83,7 @@ class CellRange:
     col_end_is_abs: bool = False
     from_table_id: int = 0
     to_table_id: int = 0
+    reject_named_references: bool = False
     _ref_error: bool = False
     _do_init: bool = True
     _table_names: list[str] | None = field(init=False, default=None, repr=False)
@@ -118,6 +120,10 @@ class CellRange:
         """Expand ref."""
         if self._ref_error:
             return "#REF!"
+
+        if self.reject_named_references and isinstance(ref, ScopedNameRef):
+            msg = "formula uses a named header reference"
+            raise UnsupportedError(msg)
 
         self._model.name_ref_cache.refresh()
         is_document_unique = (

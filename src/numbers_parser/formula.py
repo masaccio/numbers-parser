@@ -8,9 +8,10 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, cast
 
 from numbers_parser.constants import NUMBER_NODE_DECIMAL_HIGH
-from numbers_parser.exceptions import UnsupportedWarning
+from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSCEArchives_pb2 as TSCEArchives
 from numbers_parser.generated.functionmap import FUNCTION_MAP
+from numbers_parser.xrefs import CellRange
 
 if TYPE_CHECKING:
     from numbers_parser.model import NumbersModel
@@ -27,11 +28,14 @@ class Formula:
         table_id: int,
         row: int,
         col: int,
+        *,
+        reject_named_references: bool = False,
     ) -> None:
         """Initialize the instance state."""
-        self._stack: list[str] = []
+        self._stack: list[str | CellRange] = []
         self._model = model
         self._table_id = table_id
+        self._reject_named_references = reject_named_references
         self.row = row
         self.col = col
 
@@ -39,18 +43,18 @@ class Formula:
         """Return the string representation."""
         return "".join(reversed([str(x) for x in self._stack]))
 
-    def pop(self) -> str:
+    def pop(self) -> str | CellRange:
         """Pop the value."""
         return self._stack.pop()
 
-    def popn(self, num_args: int) -> tuple[str, ...]:
+    def popn(self, num_args: int) -> tuple[str | CellRange, ...]:
         """Pop and return the requested number of values from the formula stack."""
-        values: tuple[str, ...] = ()
+        values: tuple[str | CellRange, ...] = ()
         for _ in range(num_args):
             values += (self._stack.pop(),)
         return values
 
-    def push(self, val: str) -> None:
+    def push(self, val: str | CellRange) -> None:
         """Push the value."""
         self._stack.append(val)
 
@@ -76,14 +80,14 @@ class Formula:
         if num_rows == 1:
             # 1-dimensional array: {a,b,c,d}
             pop_args = self.popn(num_cols)
-            joined_args = ",".join(reversed(pop_args))
+            joined_args = ",".join(str(value) for value in reversed(pop_args))
             self.push(f"{{{joined_args}}}")
         else:
             # 2-dimensional array: {a,b;c,d}
             rows = []
             for _row_num in range(num_rows):
                 pop_args = self.popn(num_cols)
-                joined_args = ",".join(reversed(pop_args))
+                joined_args = ",".join(str(value) for value in reversed(pop_args))
                 rows.append(f"{joined_args}")
             joined_rows = ";".join(reversed(rows))
             self.push(f"{{{joined_rows}}}")
@@ -305,15 +309,21 @@ class Formula:
         _node: TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive,
     ) -> None:
         """Format two cell references as a cell range."""
-        arg2, arg1 = [str(x) for x in self.popn(2)]
-        func_range = "(" in arg1 or "(" in arg2
-        if "::" in arg1 and not func_range:
-            # Assumes references are not cross-table
-            arg1_parts = arg1.split("::")
-            arg2_parts = arg2.split("::")
-            self.push(f"{arg1_parts[0]}::{arg1_parts[1]}:{arg2_parts[1]}")
-        else:
-            self.push(f"{arg1}:{arg2}")
+        end, start = self.popn(2)
+        if isinstance(start, CellRange) and isinstance(end, CellRange):
+            if start._ref_error or end._ref_error or start.to_table_id != end.to_table_id:
+                msg = "range endpoints target different or unavailable tables"
+                raise UnsupportedError(msg)
+            left, right = str(start), str(end)
+            left_prefix, left_separator, left_cell = left.rpartition("::")
+            right_prefix, right_separator, right_cell = right.rpartition("::")
+            if left_separator or right_separator:
+                if not left_separator or not right_separator or left_prefix != right_prefix:
+                    msg = "range endpoint names cannot be combined safely"
+                    raise UnsupportedError(msg)
+                self.push(f"{left_prefix}::{left_cell}:{right_cell}")
+                return
+        self.push(f"{start}:{end}")
 
     def string(
         self,
@@ -344,7 +354,9 @@ class Formula:
         node: TSCEArchives.ASTNodeArrayArchive.ASTNodeArchive,
     ) -> None:
         """Push the cell reference for a formula node onto the stack."""
-        self.push(str(self._model.node_to_ref(self._table_id, row, col, node)))
+        reference = self._model.node_to_ref(self._table_id, row, col, node)
+        reference.reject_named_references = self._reject_named_references
+        self.push(reference)
 
 
 NODE_FUNCTION_MAP = {
@@ -396,7 +408,9 @@ class TableFormulas:
             for k, v in TSCEArchives._ASTNODEARRAYARCHIVE_ASTNODETYPE.values_by_number.items()  # type: ignore[attr-defined] # noqa: SLF001
         }
 
-    def formula(self, formula_key: int, row: int, col: int) -> str:
+    def formula(
+        self, formula_key: int, row: int, col: int, *, reject_named_references: bool = False
+    ) -> str:
         """Return the formula text for a cell in the table."""
         all_formulas = self._model.formula_ast(self._table_id)
         if formula_key not in all_formulas:
@@ -408,7 +422,9 @@ class TableFormulas:
             )
             return "INVALID_KEY!(" + str(formula_key) + ")"
 
-        formula = Formula(self._model, self._table_id, row, col)
+        formula = Formula(
+            self._model, self._table_id, row, col, reject_named_references=reject_named_references
+        )
         for node in all_formulas[formula_key]:
             node_type = self._formula_type_lookup[node.AST_node_type]
             if node_type == "REFERENCE_ERROR_WITH_UIDS":
