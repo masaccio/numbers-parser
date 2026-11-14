@@ -8,7 +8,12 @@ DOCUMENT = "tests/data/test-all-formulas.numbers"
 DOCUMENT_13_1 = "tests/data/test-all-formulas-13.1.numbers"
 
 
-def compare_table_functions(sheet_name: str, filename: str) -> None:
+def compare_table_functions(
+    sheet_name: str,
+    filename: str,
+    *,
+    corrected_formulae: dict[int, str] | None = None,
+) -> None:
     """Compare table functions against reference values."""
     doc = Document(filename)
     sheet = doc.sheets[sheet_name]
@@ -23,6 +28,8 @@ def compare_table_functions(sheet_name: str, filename: str) -> None:
             formula_text = str(row[0].value).upper()
         else:
             formula_text = row[0].value
+        if corrected_formulae:
+            formula_text = corrected_formulae.get(i, formula_text)
         formula_result = row[1].value
         formula_ref_value = row[2].value
         check.is_not_none(row[1].formula, f"exists@{i}")
@@ -97,7 +104,17 @@ def test_statistical_functions_new_version() -> None:
 
 def test_extra_functions() -> None:
     """Test extra functions."""
-    compare_table_functions("Formulas", "tests/data/test-extra-formulas.numbers")
+    # The reference-text cells in rows 134 and 135 omit one zero. Numbers
+    # reports the authored formula literals as 1E+21 and -1E+21 respectively;
+    # the formula results in the same fixture also have those magnitudes.
+    compare_table_functions(
+        "Formulas",
+        "tests/data/test-extra-formulas.numbers",
+        corrected_formulae={
+            133: "SUM(1.2,-1.4,1000000000000000000000)",
+            134: "SUM(1.2,-1.4,-1000000000000000000000)",
+        },
+    )
 
 
 def test_new_functions() -> None:
