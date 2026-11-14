@@ -276,7 +276,8 @@ class Formula:
             # Integer: don't use decimals
             self.push(str(node.AST_number_node_decimal_low))
         else:
-            self.push(number_to_str(node.AST_number_node_number))
+            # Number is never negative; formula will use NEGATION_NODE
+            self.push(format(Decimal(repr(node.AST_number_node_number)), "f"))
 
     def percent(
         self,
@@ -426,9 +427,3 @@ class TableFormulas:
                 func(row, col, node)
 
         return str(formula)
-
-
-def number_to_str(v: float) -> str:
-    """Format the observed float without losing its decimal exponent."""
-    # Number is never negative; formula will use NEGATION_NODE
-    return format(Decimal(repr(v)), "f")
