@@ -11,8 +11,6 @@ DOCUMENT_13_1 = "tests/data/test-all-formulas-13.1.numbers"
 def compare_table_functions(
     sheet_name: str,
     filename: str,
-    *,
-    corrected_formulae: dict[int, str] | None = None,
 ) -> None:
     """Compare table functions against reference values."""
     doc = Document(filename)
@@ -28,8 +26,6 @@ def compare_table_functions(
             formula_text = str(row[0].value).upper()
         else:
             formula_text = row[0].value
-        if corrected_formulae:
-            formula_text = corrected_formulae.get(i, formula_text)
         formula_result = row[1].value
         formula_ref_value = row[2].value
         check.is_not_none(row[1].formula, f"exists@{i}")
@@ -110,10 +106,6 @@ def test_extra_functions() -> None:
     compare_table_functions(
         "Formulas",
         "tests/data/test-extra-formulas.numbers",
-        corrected_formulae={
-            133: "SUM(1.2,-1.4,1000000000000000000000)",
-            134: "SUM(1.2,-1.4,-1000000000000000000000)",
-        },
     )
 
 
