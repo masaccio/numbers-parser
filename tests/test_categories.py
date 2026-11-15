@@ -3,7 +3,15 @@
 from datetime import datetime
 from typing import Any
 
-from numbers_parser import BoolCell, DateCell, Document, NumberCell, RichTextCell, TextCell
+from numbers_parser import (
+    RGB,
+    BoolCell,
+    DateCell,
+    Document,
+    NumberCell,
+    RichTextCell,
+    TextCell,
+)
 
 TEXT_CATEGORIES = {
     "Transport": [
@@ -351,7 +359,7 @@ def data_to_types(item: Any) -> Any:  # noqa: PLR0911
     return None
 
 
-def data_to_values(item: Any) -> Any:
+def data_to_values(item: Any) -> Any:  # noqa: ANN401
     """Convert cell data recursively into raw cell values."""
     if isinstance(item, dict):
         return {k: data_to_values(v) for k, v in item.items()}
@@ -397,3 +405,31 @@ def test_category_trees() -> None:
     for table_name, ref_data in table_to_ref_data.items():
         categories = sheet.tables[table_name].categorized_data()
         assert list(categories.keys())[0:3] == ref_data
+
+
+def test_old_numbers() -> None:
+    """Test first version of Numbers with categories."""
+    doc = Document("tests/data/test-4.2.3.numbers")
+
+    table = doc.sheets["Formatting"].tables[0]
+
+    assert table.cell(0, 0).value == "Styled text"
+    style = table.cell(0, 0).style
+    assert repr(style.alignment) == "[center,middle]"
+    assert style.bg_color == RGB(253, 199, 0)
+    assert style.font_color == RGB(181, 26, 0)
+    assert style.bold
+    assert style.italic
+    assert style.strikethrough
+    assert style.underline
+    assert table.cell(0, 0).border.bottom.width == 5.0
+
+    # TODO: these should pass
+    # assert table.cell(1, 0).formatted_value == "2.55E+02"
+    # assert table.cell(2, 0).formatted_value == "US$  100.50"
+    assert table.cell(3, 0).formatted_value == "3/4"
+
+    sheet = doc.sheets["Categories"]
+    categories = sheet.tables["Categories"].categorized_data()
+    # TODO: these should pass
+    # assert categories == TEXT_CATEGORIES
