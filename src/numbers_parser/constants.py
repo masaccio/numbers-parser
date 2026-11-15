@@ -92,6 +92,7 @@ CUSTOM_TEXT_PLACEHOLDER = "\ue421"
 
 # Supported versions
 SUPPORTED_NUMBERS_VERSIONS = [
+    "4.2",
     "10.0",
     "10.1",
     "10.2",
@@ -111,6 +112,7 @@ SUPPORTED_NUMBERS_VERSIONS = [
     "14.3",
     "14.4",
     "14.5",
+    "15.4",
     # Numbers Creator Studio
     "26.0",
     "26.1",
