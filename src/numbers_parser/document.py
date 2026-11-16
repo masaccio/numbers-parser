@@ -1688,18 +1688,20 @@ class Table(Cacheable):
         self,
         row: int,
         col: int,
-        author: str = __package__,
-        reply: bool = False,
+        text: str = ...,
         /,
+        author: str = ...,
+        reply: bool = ...,
     ) -> None: ...
 
     @overload
     def add_comment(
         self,
-        rc: str,
-        author: str = __package__,
-        reply: bool = False,
+        cell_ref: str,
+        text: str = ...,
         /,
+        author: str = ...,
+        reply: bool = ...,
     ) -> None: ...
 
     def add_comment(

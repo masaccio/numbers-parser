@@ -116,7 +116,7 @@ def test_comment_exceptions() -> None:
         table.add_comment("D4", "Invalid second root comment")
 
     with pytest.raises(TypeError, match="too many positional arguments to add_comment"):
-        table.add_comment("D4", "Too", "Many", "Arguments")
+        table.add_comment("D4", "Too", "Many", "Arguments")  # type: ignore[call-overload]
 
 
 def test_comment_auto_expand(configurable_save_file: Path) -> None:
