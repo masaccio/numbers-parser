@@ -11,7 +11,7 @@ from pytest_console_scripts import ScriptRunner
 
 from numbers_parser import __version__
 
-ZZZ_TABLE_1_REF = [
+ZZZ_TABLE_1_REF: list[list[str | None]] = [
     [None, "YYY_COL_1", "YYY_COL_2"],
     ["YYY_ROW_1", "YYY_1_1", "YYY_1_2"],
     ["YYY_ROW_2", "YYY_2_1", "YYY_2_2"],
@@ -19,14 +19,14 @@ ZZZ_TABLE_1_REF = [
     ["YYY_ROW_4", "YYY_4_1", "YYY_4_2"],
 ]
 
-ZZZ_TABLE_2_REF = [
+ZZZ_TABLE_2_REF: list[list[str | None]] = [
     [None, "ZZZ_COL_1", "ZZZ_COL_2", "ZZZ_COL_3"],
     ["ZZZ_ROW_1", "ZZZ_1_1", "ZZZ_1_2", "ZZZ_1_3"],
     ["ZZZ_ROW_2", "ZZZ_2_1", "ZZZ_2_2", "ZZZ_2_3"],
     ["ZZZ_ROW_3", "ZZZ_3_1", "ZZZ_3_2", "ZZZ_3_3"],
 ]
 
-XXX_TABLE_1_REF = [
+XXX_TABLE_1_REF: list[list[str | None]] = [
     [None, "XXX_COL_1", "XXX_COL_2", "XXX_COL_3", "XXX_COL_4", "XXX_COL_5"],
     ["XXX_ROW_1", "XXX_1_1", "XXX_1_2", "XXX_1_3", "XXX_1_4", "XXX_1_5"],
     ["XXX_ROW_2", "XXX_2_1", "XXX_2_2", None, "XXX_2_4", "XXX_2_5"],

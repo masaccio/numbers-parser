@@ -42,3 +42,4 @@ repos:
         entry: uv run --active mypy
         args: [--config-file, pyproject.toml]
         files: ^src/numbers_parser/[^/]+\.py$
+        exclude: ^(src/numbers_parser/generated/.*\.py|src/build/protodump\.py)$
