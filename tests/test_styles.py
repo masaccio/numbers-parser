@@ -121,7 +121,6 @@ STYLE_DEFAULTS = {
 def check_style(style: Style, **kwargs: Any) -> bool:  # noqa: ANN401
     """Check if a Style object matches expected attributes."""
     matches = []
-    matches = []
     for attr, default_val in STYLE_DEFAULTS.items():
         matches.append(check.equal(getattr(style, attr), kwargs.get(attr, default_val)))
     return all(matches)

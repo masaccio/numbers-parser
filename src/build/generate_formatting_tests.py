@@ -72,6 +72,7 @@ def _populate_stress_sheet(  # noqa: PLR0917
             table.write(row_idx, val_col, canonical_val)
             table.set_cell_formatting(row_idx, val_col, fmt_type, **kwargs)
 
+            formatted: str
             if ref_generator is not None:
                 formatted = ref_generator(subtest_name, canonical_val)
             else:

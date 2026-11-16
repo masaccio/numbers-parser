@@ -3,10 +3,14 @@
 from datetime import datetime
 from pathlib import Path
 from struct import pack
-from typing import Any, cast
+from typing import TYPE_CHECKING, cast
 from unittest.mock import patch
 
 import pytest
+
+if TYPE_CHECKING:
+    from typing import Any
+
 
 from numbers_parser import (
     Alignment,

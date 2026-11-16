@@ -1,10 +1,13 @@
 """Tests for cell lookups and table iterators."""
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import pytest
 
-from numbers_parser import Cell, Document
+from numbers_parser import Document
+
+if TYPE_CHECKING:
+    from numbers_parser import Cell
 
 
 def test_exceptions() -> None:

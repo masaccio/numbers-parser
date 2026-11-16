@@ -246,6 +246,7 @@ exclude = [
 
 [[tool.mypy.overrides]]
 module = [
+  "Cocoa",
   "snappy",
   "compact_json",
   "sigfig",

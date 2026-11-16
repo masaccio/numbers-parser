@@ -113,6 +113,7 @@ ISSUE_44_REF = [
 
 def test_issue_3() -> None:
     """Test issue 3."""
+    # pylint: disable=consider-using-generator
     doc = Document("tests/data/issue-3.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -397,8 +398,6 @@ def test_issue_56(tmp_path: Path) -> None:
 
 def test_issue_59() -> None:
     """Test issue 59."""
-    from numbers_parser import Document  # noqa: PLC0415
-
     doc = Document("tests/data/issue-59.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -943,7 +942,7 @@ def test_issue_251(
 ) -> None:
     """Test issue 251."""
     csv_path = tmp_path / "dummy.csv"
-    with open(csv_path, "w") as f:
+    with open(csv_path, "w", encoding="ascii") as f:
         f.write("Account,Amount,Date\nChecking,100,2026-10-10\n")
 
     ret = script_runner.run(["csv2numbers", csv_path, "--delete=1", "-o", configurable_save_file])
@@ -1043,7 +1042,7 @@ def test_issue_252(
 ) -> None:
     """Test issue 252."""
     csv_path = tmp_path / "dummy.csv"
-    with open(csv_path, "w") as f:
+    with open(csv_path, "w", encoding="ascii") as f:
         f.write("Val1,Val2\n,5\n0,10\n")
 
     # The MERGE command intends to take Val1, falling back to Val2 if empty.

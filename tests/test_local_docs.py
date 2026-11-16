@@ -84,7 +84,7 @@ def test_local_docs() -> None:
                 for test in tests:
                     test(doc)
                     test_ok_count += 1
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:  # pylint: disable=broad-exception-caught # noqa: BLE001
             exc = e
         else:
             captured_warnings = [w for w in captured_warnings if not allowed_warning(w)]

@@ -1,6 +1,7 @@
 """Test version handling."""
 
 # ruff: noqa: PLC0415
+# pylint: disable=import-outside-toplevel
 
 import importlib
 from typing import IO, Any
@@ -49,7 +50,7 @@ def test_numbers_version_check() -> None:
         assert _check_installed_numbers_version() == "13.0"
 
     with mock.patch("builtins.open", side_effect=mock_invalid_plist):
-        import numbers_parser  # pylint: disable=import-outside-toplevel
+        import numbers_parser
 
         importlib.reload(numbers_parser)
         assert _check_installed_numbers_version() is None

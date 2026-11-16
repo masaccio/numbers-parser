@@ -362,8 +362,7 @@ def test_edit_table_rows_columns(configurable_save_file: Path) -> None:
         del ref_values[row][6:8]
         del ref_values[row][-2:]
     ref_values.append(["1.234" for _ in ref_values[0]])
-    for row, _ in enumerate(ref_values):
-        ref_values[row].append("5.678")
+    ref_values = [[*row, "5.678"] for row in ref_values]
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]

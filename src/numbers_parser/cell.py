@@ -841,7 +841,7 @@ class Cell(_CellStorageFlags, Cacheable):
         return None
 
     @property
-    def formatted_value(self) -> str | None:
+    def formatted_value(self) -> str:
         """
         str: The formatted value of the cell as it appears in Numbers.
 
@@ -1369,7 +1369,7 @@ class Cell(_CellStorageFlags, Cacheable):
 
         return (image_data, preferred_filename)
 
-    def _custom_format(self) -> str | None:  # noqa: C901, PLR0911
+    def _custom_format(self) -> str:  # noqa: C901, PLR0911
         """Return the formatted value using its custom format."""
         if self._text_format_id is not None and self._type == CellType.TEXT:
             custom_format = self._model.table_format(self._table_id, self._text_format_id)
@@ -1402,11 +1402,14 @@ class Cell(_CellStorageFlags, Cacheable):
                     self._model.table_string(self._table_id, cast("int", self._string_id)),
                 )
             else:
-                return _decode_number_format(
-                    custom_format,
-                    d128,
-                    format_map[format_uuid].name,
-                    format_map[format_uuid].conditions,
+                return (
+                    _decode_number_format(
+                        custom_format,
+                        d128,
+                        format_map[format_uuid].name,
+                        format_map[format_uuid].conditions,
+                    )
+                    or ""
                 )
         elif custom_format.format_type == FormatType.DECIMAL:
             return _format_decimal(d128, custom_format)

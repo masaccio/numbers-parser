@@ -374,4 +374,4 @@ def test_transforms_lookup(script_runner: ScriptRunner, tmp_path: Path) -> None:
 
     cls = Transformer("XX", "YY")
     with pytest.raises(NotImplementedError):
-        cls.transform_row(None)
+        cls.transform_row({})

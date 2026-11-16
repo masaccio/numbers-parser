@@ -61,7 +61,7 @@ def test_unpack_file(script_runner: ScriptRunner, tmp_path: Path) -> None:
     assert "JPEG image data" in magic.from_file(str(output_dir / "preview.jpg"))
     assert (output_dir / "Index/CalculationEngine.json").exists()
     assert (output_dir / "Index/Tables/DataList-954857.json").exists()
-    with open(str(output_dir / "Index/Tables/DataList-954857.json")) as f:
+    with open(str(output_dir / "Index/Tables/DataList-954857.json"), encoding="utf-8") as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"]
     strings = [x["string"] for x in objects[0]["entries"]]
@@ -88,7 +88,7 @@ def test_unpack_encrypted_file(script_runner: ScriptRunner, tmp_path: Path) -> N
     assert ret.stdout == ""
     assert ret.stderr == ""
 
-    with open(str(output_dir / "Index/Tables/DataList-904541.json")) as f:
+    with open(str(output_dir / "Index/Tables/DataList-904541.json"), encoding="utf-8") as f:
         data = json.load(f)
     strings = [
         entry["string"] for entry in data["chunks"][0]["archives"][0]["objects"][0]["entries"]
@@ -124,7 +124,7 @@ def test_unpack_dir(script_runner: ScriptRunner, tmp_path: Path) -> None:
     assert "JPEG image data" in magic.from_file(str(output_dir / "preview.jpg"))
     assert (output_dir / "Index/CalculationEngine.json").exists()
     assert (output_dir / "Index/Tables/DataList-875166.json").exists()
-    with open(str(output_dir / "Index/Tables/DataList-875166.json")) as f:
+    with open(str(output_dir / "Index/Tables/DataList-875166.json"), encoding="utf-8") as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"]
     strings = [x["string"] for x in objects[0]["entries"]]
@@ -149,7 +149,7 @@ def test_unpack_redacted(script_runner: ScriptRunner, tmp_path: Path) -> None:
     )
     assert ret.success
     assert ret.stdout == ""
-    with open(str(output_dir / "Index/CalculationEngine.json")) as f:
+    with open(str(output_dir / "Index/CalculationEngine.json"), encoding="utf-8") as f:
         data = json.load(f)
     table_model_archive = next(
         x["objects"][0]
@@ -159,7 +159,10 @@ def test_unpack_redacted(script_runner: ScriptRunner, tmp_path: Path) -> None:
     assert table_model_archive["table_name"].startswith("REDACT-")
 
     string_table_id = table_model_archive["base_data_store"]["stringTable"]["identifier"]
-    with open(str(output_dir / f"Index/Tables/DataList-{string_table_id}.json")) as f:
+    with open(
+        str(output_dir / f"Index/Tables/DataList-{string_table_id}.json"),
+        encoding="utf-8",
+    ) as f:
         data = json.load(f)
     string_table = data["chunks"][0]["archives"][0]["objects"][0]
     assert all(x["string"].startswith("REDACT-") for x in string_table["entries"])
@@ -181,7 +184,7 @@ def test_unpack_hex(script_runner: ScriptRunner, tmp_path: Path) -> None:
     )
     assert ret.success
     assert ret.stdout == ""
-    with open(str(output_dir / "Index/CalculationEngine.json")) as f:
+    with open(str(output_dir / "Index/CalculationEngine.json"), encoding="utf-8") as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][1]["objects"][0]
     assert objects["base_owner_uid"] == "83aa364c-869c-498a-b749-dbddb35f99d7"
@@ -208,7 +211,7 @@ def test_pretty_storage(script_runner: ScriptRunner, tmp_path: Path) -> None:
     assert ret.stderr == ""
     assert ret.stdout == ""
     assert ret.success
-    with open(str(output_dir / "Index/Tables/Tile-875165.json")) as f:
+    with open(str(output_dir / "Index/Tables/Tile-875165.json"), encoding="utf-8") as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"][0]
     rowinfo = objects["rowInfos"][0]
@@ -234,7 +237,7 @@ def test_compact_json(script_runner: ScriptRunner, tmp_path: Path) -> None:
     assert ret.success
     assert ret.stdout == ""
 
-    with open(str(output_dir / "Index/CalculationEngine.json")) as f:
+    with open(str(output_dir / "Index/CalculationEngine.json"), encoding="utf-8") as f:
         data = f.read()
     assert '"formula_owner_id": {"uuid_w0": 666, "uuid_w1": 0, "uuid_w2": 0, "uuid_w3": 0},' in data
 
