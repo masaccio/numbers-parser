@@ -900,6 +900,26 @@ class Table(Cacheable):
             return self._data[row_mapper[row]][col]
         return self._data[row][col]
 
+    @overload
+    def iter_rows(
+        self,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        values_only: Literal[False] = False,
+    ) -> Iterator[tuple[Cell, ...]]: ...
+
+    @overload
+    def iter_rows(
+        self,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        values_only: Literal[True] = True,
+    ) -> Iterator[tuple[_CellValue, ...]]: ...
+
     def iter_rows(
         self,
         min_row: int | None = None,
