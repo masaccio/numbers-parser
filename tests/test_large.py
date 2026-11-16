@@ -14,8 +14,7 @@ def test_many_rows() -> None:
     sheets = doc.sheets
     tables = sheets["Sheet_1"].tables
     data = tables[0].rows(values_only=True)
-    ref = []
-    _ = [ref.append(["ROW" + str(x)]) for x in range(1, 601)]
+    ref = [["ROW" + str(x)] for x in range(1, 601)]
     assert data == ref
 
 
@@ -36,8 +35,8 @@ def ref_cell_text(row: int, col: int) -> str:
 
 def test_large_table() -> None:
     """Test reading a large multi-row, multi-column table."""
-    row = [None for i in range(270)]
-    ref = [row.copy() for i in range(90)]
+    row: list[str | None] = [None for _ in range(270)]
+    ref = [row.copy() for _ in range(90)]
     for i in range(90):
         ref[i][i] = ref_cell_text(i, i)
         ref[i][90 + i] = ref_cell_text(i, 90 + i)

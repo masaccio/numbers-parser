@@ -23,11 +23,13 @@ class NullHandler(IWorkHandler):
     def store_object(self, filename: str, identifier: int, archive: object) -> None:
         """Dummy handler for testing."""  # noqa: D401
 
-    def allowed_format(self, extension: str) -> bool:
+    def allowed_format(self, _extension: str) -> bool:
         """Dummy handler for testing."""  # noqa: D401
+        return True
 
-    def allowed_version(self, version: str) -> bool:
+    def allowed_version(self, _version: str) -> bool:
         """Dummy handler for testing."""  # noqa: D401
+        return True
 
 
 def test_encrypted_read() -> None:
@@ -36,9 +38,16 @@ def test_encrypted_read() -> None:
     sheets = doc.sheets
     table = sheets[0].tables[0]
     assert table.cell(0, 0).value == "Decryption"
-    assert table.cell(0, 0).style.bold
-    assert table.cell(0, 1).style.italic
-    assert table.cell(1, 1).style.font_color == RGB(255, 0, 0)
+
+    style_0_0 = table.cell(0, 0).style
+    style_0_1 = table.cell(0, 1).style
+    style_1_1 = table.cell(1, 1).style
+    assert style_0_0 is not None
+    assert style_0_1 is not None
+    assert style_1_1 is not None
+    assert style_0_0.bold
+    assert style_0_1.italic
+    assert style_1_1.font_color == RGB(255, 0, 0)
 
     with pytest.raises(FileError) as e:
         _ = Document("tests/data/encrypted.numbers", password="invalid")  # noqa: S106

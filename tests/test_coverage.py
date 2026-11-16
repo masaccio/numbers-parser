@@ -3,6 +3,7 @@
 from datetime import datetime
 from pathlib import Path
 from struct import pack
+from typing import Any, cast
 from unittest.mock import patch
 
 import pytest
@@ -75,18 +76,18 @@ def test_cell_storage(tmp_path: Path) -> None:
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
     buffer[1] = 255
     with pytest.raises(UnsupportedError) as e:
-        _ = Cell._from_storage(table_id, 0, 0, buffer, model)
+        _ = Cell._from_storage(table_id, 0, 0, bytes(buffer), model)
     assert "Cell type ID 255 is not recognized" in str(e)
 
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
     buffer[0] = 4
     with pytest.raises(UnsupportedError) as e:
-        _ = Cell._from_storage(table_id, 0, 0, buffer, model)
+        _ = Cell._from_storage(table_id, 0, 0, bytes(buffer), model)
     assert "Cell storage version 4 is unsupported" in str(e)
 
     class DummyCell(Cell):  # pylint: disable=missing-class-docstring
-        def __init__(self, *args) -> None:  # noqa: ANN002
-            super().__init__(*args)
+        def __init__(self, *args: object) -> None:
+            super().__init__(*args)  # type: ignore[arg-type]
             self._border = CellBorder()
 
     doc = Document()
@@ -146,6 +147,7 @@ def test_formatting_exceptions() -> None:
     doc = Document("tests/data/test-custom-formats.numbers")
 
     cell = doc.sheets[0].tables[0].cell("B4")
+    assert cell._date_format_id is not None
     format_archive = doc._model.table_format(cell._table_id, cell._date_format_id)
     format_uuid = NumbersUUID(format_archive.custom_uid).hex
     format_map = doc._model.custom_format_map()
@@ -195,7 +197,7 @@ def test_range_exceptions() -> None:
         _ = xl_cell_to_rowcol("A0")
     assert "invalid cell reference" in str(e)
 
-    assert xl_col_to_offset(None) == 0
+    assert xl_col_to_offset(None) == 0  # type: ignore[arg-type]
     assert xl_col_to_offset("A") == 0
 
     with pytest.raises(IndexError) as e:
@@ -241,8 +243,8 @@ def test_alignment_and_number_format_edges() -> None:
     assert str(alignment) == "[center,middle]"
     assert repr(alignment) == "[center,middle]"
 
-    assert _decode_number_format(None, None, "test", []) is None
-    assert _format_currency(None, None) is None
+    assert _decode_number_format(None, None, "test", []) is None  # type: ignore[arg-type]
+    assert _format_currency(None, None) is None  # type: ignore[arg-type]
 
 
 def test_additional_flags(configurable_save_file: Path) -> None:
@@ -254,7 +256,7 @@ def test_additional_flags(configurable_save_file: Path) -> None:
     buffer[1] = TSTArchives.genericCellType
     buffer[8:12] = pack("<i", 0x800)
     buffer[12:16] = pack("<i", 1)
-    cell = Cell._from_storage(table._table_id, 0, 0, buffer, doc._model)
+    cell = Cell._from_storage(table._table_id, 0, 0, bytes(buffer), doc._model)
     assert cell.row == 0
     assert cell.col == 0
     assert cell._flags == 0x800
@@ -271,10 +273,14 @@ def test_bad_image_filenames() -> None:
     doc = Document("tests/data/issue-69b.numbers")
     table = doc.sheets[0].tables[0]
     _ = table._model.objects.file_store.pop("Data/numbers_1-16.png")
-    with pytest.warns(RuntimeWarning) as record:
-        assert table.cell(0, 0).style.bg_image is None
+    with pytest.warns(  # noqa: PT031
+        RuntimeWarning,
+        match="Cannot find file 'numbers_1.png' in Numbers archive",
+    ) as record:
+        cell_style = table.cell(0, 0).style
+        assert cell_style is not None
+        assert cell_style.bg_image is None
     assert len(record) == 1
-    assert str(record[0].message) == "Cannot find file 'numbers_1.png' in Numbers archive"
 
 
 def test_set_number_defaults() -> None:
@@ -284,6 +290,7 @@ def test_set_number_defaults() -> None:
     table.write(0, 0, 0.0)
     table.set_cell_formatting(0, 0, "number")
     num_format_id = table.cell(0, 0)._num_format_id
+    assert num_format_id is not None
     format_archive = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
     assert not format_archive.show_thousands_separator
     assert format_archive.negative_style == NegativeNumberStyle.MINUS
@@ -291,22 +298,24 @@ def test_set_number_defaults() -> None:
 
     table.set_cell_formatting(0, 0, "base")
     num_format_id = table.cell(0, 0)._num_format_id
+    assert num_format_id is not None
     format_archive = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
     assert not format_archive.show_thousands_separator
     assert format_archive.base_places == 0
 
     table.set_cell_formatting(0, 0, "currency")
-    num_format_id = table.cell(0, 0)._currency_format_id
-    format_archive = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
+    curr_format_id = table.cell(0, 0)._currency_format_id
+    assert curr_format_id is not None
+    format_archive = doc._model._table_formats.lookup_value(table._table_id, curr_format_id).format
     assert not format_archive.show_thousands_separator
     assert format_archive.decimal_places == 2
 
     with pytest.raises(TypeError) as e:
-        Formatting(type=object())
+        Formatting(type=object())  # type: ignore[arg-type]
     assert "Invalid format type 'object'" in str(e)
 
     with pytest.raises(TypeError) as e:
-        CustomFormatting(type=object())
+        CustomFormatting(type=object())  # type: ignore[arg-type]
     assert "Invalid format type 'object'" in str(e)
 
 
@@ -314,7 +323,7 @@ def test_formatting_empty_cell() -> None:
     """Test formatting of an empty cell."""
     doc = Document()
     assert doc.default_table.cell(0, 0).formatted_value == ""
-    assert _format_decimal(None, object()) == ""
+    assert _format_decimal(None, object()) == ""  # type: ignore[arg-type]
 
 
 def test_custom_format_from_archive(configurable_save_file: Path) -> None:
@@ -396,9 +405,10 @@ def test_add_component_metadata_none_locator() -> None:
     model = doc._model
 
     test_id = 999999
-    model.add_component_metadata(test_id, "CalculationEngine", None)
+    model.add_component_metadata(test_id, "CalculationEngine", None)  # type: ignore[arg-type]
 
-    components = model.objects[PACKAGE_ID].components
+    pkg = cast("Any", model.objects[PACKAGE_ID])
+    components = pkg.components
     added_component = next((c for c in components if c.identifier == test_id), None)
 
     assert added_component is not None
