@@ -69,14 +69,14 @@ def is_repeated(fd: FD) -> bool:
     """Protobuf >= 6 removed FieldDescriptor.label; support both APIs."""
     if hasattr(fd, "is_repeated"):
         return bool(fd.is_repeated)
-    return fd.label == FD.LABEL_REPEATED
+    return getattr(fd, "label", None) == FD.LABEL_REPEATED
 
 
 def is_required(fd: FD) -> bool:
     """Return whether required is available."""
     if hasattr(fd, "is_required"):
         return bool(fd.is_required)
-    return fd.label == FD.LABEL_REQUIRED
+    return getattr(fd, "label", None) == FD.LABEL_REQUIRED
 
 
 def label_of(fd: FD) -> str:
@@ -133,7 +133,7 @@ class Snippet:
 def extract_snippets(rst_path: Path) -> list[Snippet]:
     """Extract snippets."""
     lines = rst_path.read_text(encoding="utf-8").splitlines()
-    snippets = []
+    snippets: list[Snippet] = []
     i = 0
     while i < len(lines):
         if re.match(r"^\.\. code-block::\s+protobuf\s*$", lines[i]):
@@ -379,7 +379,11 @@ def check_live(  # noqa: C901
                 continue
             if f.label == "required" and not inst.HasField(f.name):
                 errors.append(f"{desc.full_name}: required field {f.name} unset")
-            if fd.type == FD.TYPE_MESSAGE and fd.message_type.full_name == "TSP.Reference":
+            if (
+                fd.type == FD.TYPE_MESSAGE
+                and fd.message_type is not None
+                and fd.message_type.full_name == "TSP.Reference"
+            ):
                 if is_repeated(fd):
                     refs = list(getattr(inst, f.name))
                 else:
@@ -391,7 +395,7 @@ def check_live(  # noqa: C901
                             "not found in doc._model.objects",
                         )
         if desc.full_name == "TSP.ArchiveInfo":
-            total = sum(mi.length for mi in inst.message_infos)
+            total = sum(mi.length for mi in getattr(inst, "message_infos", []))
             if total < 0:
                 errors.append("ArchiveInfo: negative payload length")
     for nested in spec.messages:
@@ -436,16 +440,16 @@ def main() -> int:  # noqa: C901
             if desc is None or errors:
                 failures += 1
                 print(f"FAIL {where}")
-                for e in errors:
-                    print(f"     {e}")
+                for err in errors:
+                    print(f"     {err}")
                 continue
             live_errors: list[str] = []
             n = check_live(desc, spec, instances, store, live_errors)
             if live_errors:
                 failures += 1
                 print(f"FAIL {where} -> {desc.full_name}: live document mismatch")
-                for e in sorted(set(live_errors))[:10]:
-                    print(f"     {e}")
+                for err in sorted(set(live_errors))[:10]:
+                    print(f"     {err}")
             else:
                 status = f"{n} live instance(s)" if n else "schema only, no instance in doc"
                 if args.verbose:

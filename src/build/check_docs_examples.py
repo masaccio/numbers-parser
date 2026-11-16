@@ -114,9 +114,14 @@ def make_document_shim(tmpdir: Path) -> type[RealDocument]:
         **kwargs: object,
     ) -> None:
         """Save the value."""
-        return original_save(self, tmpdir / Path(str(filename)).name, *args, **kwargs)
+        return original_save(
+            self,
+            tmpdir / Path(str(filename)).name,
+            *args,  # type: ignore[arg-type]
+            **kwargs,  # type: ignore[arg-type]
+        )
 
-    RealDocument.save = save
+    RealDocument.save = save  # type: ignore[method-assign]
 
     original_init = RealDocument.__init__
 
@@ -127,9 +132,14 @@ def make_document_shim(tmpdir: Path) -> type[RealDocument]:
         **kwargs: object,
     ) -> None:
         """Redirect document construction to the example fixture."""
-        original_init(self, None if filename is None else DATA_FILE, *args, **kwargs)
+        original_init(
+            self,
+            None if filename is None else DATA_FILE,
+            *args,  # type: ignore[arg-type]
+            **kwargs,  # type: ignore[arg-type]
+        )
 
-    RealDocument.__init__ = init
+    RealDocument.__init__ = init  # type: ignore[method-assign]
     return RealDocument
 
 
@@ -141,13 +151,14 @@ def open_from_data(
     """open() replacement that resolves relative filenames in tests/data."""
     if isinstance(file, (str, os.PathLike)) and not Path(file).is_absolute():
         file = DATA_DIR / file
-    return open(file, *args, **kwargs)
+    return open(file, *args, **kwargs)  # type: ignore[call-overload]
 
 
 def stored_and_loaded(code: str) -> tuple[set[str], set[str]]:
     """Return names assigned and referenced by a code block."""
     tree = ast.parse(code)
-    stored, loaded = set(), set()
+    stored: set[str] = set()
+    loaded: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Name):
             (stored if isinstance(node.ctx, ast.Store) else loaded).add(node.id)
