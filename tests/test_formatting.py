@@ -3,6 +3,7 @@
 from collections.abc import Generator
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 import pytest
 import pytest_check as check
@@ -409,7 +410,7 @@ def test_custom_formatting_stress(pytestconfig: pytest.Config) -> None:
 def test_standard_formatting_stress() -> None:
     """Stress test standard cell formatting."""
 
-    def chunks(cells: list[Cell]) -> Generator[tuple[int, Cell, str]]:
+    def chunks(cells: tuple[Cell, ...]) -> Generator[tuple[int, Cell, str | None]]:
         for ii in range(0, len(cells), 2):
             yield (ii, cells[ii], cells[ii + 1].formatted_value)
 
@@ -679,7 +680,7 @@ def test_write_mixed_number_formats(configurable_save_file: Path) -> None:
 
     for base in [10, 2, 8, 16, 36]:
         col = 0
-        values = {
+        base_values = {
             0: True,
             1234: True,
             -1234: True,
@@ -687,7 +688,7 @@ def test_write_mixed_number_formats(configurable_save_file: Path) -> None:
             -(0x1F0000007F): False,
             (-0x7FFFFFFFFFF): False,
         }
-        for value, base_use_minus_sign in values.items():
+        for value, base_use_minus_sign in base_values.items():
             for base_places in [0, 8]:
                 if base not in [2, 8, 16] and not base_use_minus_sign:
                     continue
@@ -759,9 +760,9 @@ def test_write_mixed_number_formats(configurable_save_file: Path) -> None:
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
     for row, cells in enumerate(OTHER_FORMAT_REF):
-        for col, ref_value in enumerate(cells):
-            value = table.cell(row, col).formatted_value
-            check.equal(f"[{row},{col}]:{value}", f"[{row},{col}]:{ref_value}")
+        for col, expected_str in enumerate(cells):
+            formatted_str = table.cell(row, col).formatted_value
+            check.equal(f"[{row},{col}]:{formatted_str}", f"[{row},{col}]:{expected_str}")
 
 
 def test_currency_symbols() -> None:
@@ -794,9 +795,9 @@ def test_write_custom_numbers(configurable_save_file: Path, pytestconfig: pytest
     assert custom_format.name == "Custom Format 2"
 
     doc = Document("tests/data/custom-formats2.numbers")
-    with pytest.raises(KeyError) as e:
+    with pytest.raises(KeyError) as key_err:
         custom_format = doc.add_custom_format(name="Custom Format 1")
-    assert "'Custom Format 1' already exists" in str(e)
+    assert "'Custom Format 1' already exists" in str(key_err)
     with pytest.raises(TypeError) as e:
         custom_format = doc.add_custom_format(type="error")
     assert "unsupported cell format type 'ERROR'" in str(e)
@@ -811,9 +812,9 @@ def test_write_custom_numbers(configurable_save_file: Path, pytestconfig: pytest
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(0, 0, "custom", format=object())
     assert "format must be a CustomFormatting object or format name" in str(e)
-    with pytest.raises(KeyError) as e:
+    with pytest.raises(KeyError) as key_err:
         table.set_cell_formatting(0, 0, "custom", format="invalid")
-    assert "format 'invalid' does not exist" in str(e)
+    assert "format 'invalid' does not exist" in str(key_err)
 
     table.write(2, 0, datetime(2022, 1, 1))
     table.write(2, 1, "test")
@@ -867,9 +868,9 @@ def test_write_custom_numbers(configurable_save_file: Path, pytestconfig: pytest
 
     ref_doc = Document("tests/data/custom-format-stress.numbers")
     table = ref_doc.sheets[0].tables[0]
-    ref_values = {}
+    ref_values: dict[str, Any] = {}
     for _, cells in enumerate(table.iter_rows(min_row=2), start=3):
-        key = cells[0].value + ":" + cells[6].formatted_value
+        key = f"{cells[0].value}:{cells[6].formatted_value}"
         if cells[9].value:
             ref_values[key] = None
         else:
@@ -879,13 +880,13 @@ def test_write_custom_numbers(configurable_save_file: Path, pytestconfig: pytest
     table = ref_doc.sheets[0].tables[0]
     fails = 0
     for i, cells in enumerate(table.iter_rows(min_row=2), start=3):
-        key = cells[0].value + ":" + cells[6].formatted_value
-        ref = ref_values[cells[0].value + ":" + cells[6].formatted_value]
+        key = f"{cells[0].value}:{cells[6].formatted_value}"
+        ref = ref_values[key]
         if ref is None:
             continue
-        value = cells[7].formatted_value
-        check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'", cells[0].value)
-        if value != ref:
+        formatted_val = cells[7].formatted_value
+        check.equal(f"@{i}:'{formatted_val}'", f"@{i}:'{ref}'", cells[0].value)
+        if formatted_val != ref:
             fails += 1
         if max_check_fails > 0 and fails >= max_check_fails:
             raise AssertionError
@@ -1006,9 +1007,9 @@ def test_write_interactive_formats(configurable_save_file: Path) -> None:
         table.set_cell_formatting(3, 0, "popup", popup_values=["unknown"])
     assert "current cell value 'Dog' does not match any popup values" in str(e)
 
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(TypeError) as type_err:
         table.set_cell_formatting(2, 2, "stepper", control_format="unknown")
-    assert "unsupported number format 'unknown' for stepper" in str(e)
+    assert "unsupported number format 'unknown' for stepper" in str(type_err)
 
     doc.save(configurable_save_file)
 
