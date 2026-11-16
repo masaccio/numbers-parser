@@ -917,7 +917,8 @@ class Table(Cacheable):
         max_row: int | None = None,
         min_col: int | None = None,
         max_col: int | None = None,
-        values_only: Literal[True] = True,
+        *,
+        values_only: Literal[True],
     ) -> Iterator[tuple[_CellValue, ...]]: ...
 
     def iter_rows(
@@ -998,6 +999,27 @@ class Table(Cacheable):
             else:
                 yield tuple(row[min_col : max_col + 1])
 
+    @overload
+    def iter_cols(
+        self,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        values_only: Literal[False] = False,
+    ) -> Iterator[tuple[Cell, ...]]: ...
+
+    @overload
+    def iter_cols(
+        self,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        *,
+        values_only: Literal[True],
+    ) -> Iterator[tuple[_CellValue, ...]]: ...
+
     def iter_cols(
         self,
         min_col: int | None = None,
@@ -1076,6 +1098,27 @@ class Table(Cacheable):
                 yield tuple(row[col].value for row in rows)
             else:
                 yield tuple(row[col] for row in rows)
+
+    @overload
+    def iter_cells(
+        self,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        values_only: Literal[False] = False,
+    ) -> Iterator[Cell]: ...
+
+    @overload
+    def iter_cells(
+        self,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        *,
+        values_only: Literal[True],
+    ) -> Iterator[_CellValue]: ...
 
     def iter_cells(
         self,

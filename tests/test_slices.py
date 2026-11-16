@@ -1,8 +1,10 @@
 """Tests for cell lookups and table iterators."""
 
+from typing import cast
+
 import pytest
 
-from numbers_parser import Document
+from numbers_parser import Cell, Document
 
 
 def test_exceptions() -> None:
@@ -21,7 +23,7 @@ def test_exceptions() -> None:
         _ = table.cell(0, 5)
     assert "out of range" in str(e.value)
     with pytest.raises(IndexError) as e:
-        _ = table.cell(0, 5, 2)
+        _ = table.cell(0, 5, 2)  # type: ignore[call-overload]
     assert "invalid cell reference" in str(e.value)
     with pytest.raises(IndexError) as e:
         _ = table.cell(-1, 0)
@@ -153,13 +155,13 @@ def test_row_iterator() -> None:
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_2"]
-    val = 0
+    val = 0.0
     for row in table.iter_rows():
         val += row[0].value if row[0] is not None else 0.0
     assert val == 252
     val = 0.0
-    for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
-        val += row[2] or 0.0
+    for val_row in table.iter_rows(min_row=2, max_row=7, values_only=True):
+        val += cast("float", val_row[2]) or 0.0
     assert val == 978.0
     val = 0.0
     for row in table.iter_rows(min_row=5, max_row=6, min_col=1, max_col=2):
@@ -173,17 +175,20 @@ def test_col_iterator() -> None:
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_2"]
-    val = 0
+    val = 0.0
     for col in table.iter_cols():
-        val += col[2].value if col[2] is not None else 0.0
+        cell_2 = cast("Cell", col[2])
+        val += cell_2.value if cell_2 is not None else 0.0
     assert val == 164.224
     val = 0.0
-    for col in table.iter_cols(min_col=1, max_col=3, values_only=True):
-        val += col[8] or 0.0
+    for val_col in table.iter_cols(min_col=1, max_col=3, values_only=True):
+        val += cast("float", val_col[8]) or 0.0
     assert val == 336.572
     val = 0.0
-    for row in table.iter_cols(min_row=5, max_row=6, min_col=1, max_col=2):
-        val += row[0].value + row[1].value
+    for col in table.iter_cols(min_row=5, max_row=6, min_col=1, max_col=2):
+        c0 = cast("Cell", col[0])
+        c1 = cast("Cell", col[1])
+        val += c0.value + c1.value
     assert val == 522.108
 
 
@@ -194,10 +199,12 @@ def test_cell_iterator() -> None:
     tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_2"]
 
-    val = sum(cell.value or 0.0 for cell in table.iter_cells())
+    val = sum(cast("float", cast("Cell", cell).value or 0.0) for cell in table.iter_cells())
     assert val == 1792.802
 
-    val = sum(val or 0.0 for val in table.iter_cells(min_col=1, max_col=3, values_only=True))
+    val = sum(
+        cast("float", v or 0.0) for v in table.iter_cells(min_col=1, max_col=3, values_only=True)
+    )
     assert val == 1540.802
 
     doc = Document("tests/data/test-categories.numbers")
