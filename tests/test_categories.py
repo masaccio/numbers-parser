@@ -309,17 +309,17 @@ def test_group_lookups() -> None:
     assert grouped_table.cell("A5").value == "Car"
     assert grouped_table.cell("C5").value == 30
 
-    data = [x[0] for x in grouped_table.iter_rows(min_row=3, max_row=5, values_only=True)]
-    assert data == ["Bus", "Car", "Helicopter"]
+    row_data = [x[0] for x in grouped_table.iter_rows(min_row=3, max_row=5, values_only=True)]
+    assert row_data == ["Bus", "Car", "Helicopter"]
 
-    data = grouped_table.iter_cols(
+    col_data = grouped_table.iter_cols(
         min_col=0,
         max_col=0,
         min_row=3,
         max_row=5,
         values_only=True,
     )
-    assert list(data) == [("Bus", "Car", "Helicopter")]
+    assert list(col_data) == [("Bus", "Car", "Helicopter")]
 
     table = doc.sheets[0].tables["Maximal Nesting"]
     assert table.cell("D8").value == "Transport"
@@ -381,7 +381,7 @@ def test_category_trees() -> None:
     categories = sheet.tables["Uncategorized"].categorized_data()
     assert categories is None
 
-    table_to_ref_data = {
+    table_to_ref_data: dict[str, Any] = {
         "Categories": TEXT_CATEGORIES,
         "Nested Categories": NESTED_BOOL_CATEGORIES,
         "Number Categories": NUMBER_CATEGORIES,
@@ -395,16 +395,17 @@ def test_category_trees() -> None:
         categories = sheet.tables[table_name].categorized_data(values_only=True)
         assert categories == ref_data
 
-    table_to_ref_data = {
+    date_table_to_ref = {
         "Date Year-Quarter": ["2010-Q1", "2010-Q4", "2010-Q3"],
         "Date Year-Month": ["February 2010", "November 2010", "December 2010"],
         "Date Year-Week": ["2010-W6", "2010-W44", "2010-W50"],
         "Date Year-Month-Day": ["14/2/2010", "5/11/2010", "17/12/2010"],
         "Date Weekday": ["Sunday", "Friday", "Wednesday"],
     }
-    for table_name, ref_data in table_to_ref_data.items():
+    for table_name, ref_keys in date_table_to_ref.items():
         categories = sheet.tables[table_name].categorized_data()
-        assert list(categories.keys())[0:3] == ref_data
+        assert categories is not None
+        assert list(categories.keys())[0:3] == ref_keys
 
 
 def test_old_numbers() -> None:
@@ -413,8 +414,10 @@ def test_old_numbers() -> None:
 
     table = doc.sheets["Formatting"].tables[0]
 
-    assert table.cell(0, 0).value == "Styled text"
-    style = table.cell(0, 0).style
+    cell_0_0 = table.cell(0, 0)
+    assert cell_0_0.value == "Styled text"
+    style = cell_0_0.style
+    assert style is not None
     assert repr(style.alignment) == "[center,middle]"
     assert style.bg_color == RGB(253, 199, 0)
     assert style.font_color == RGB(181, 26, 0)
@@ -422,7 +425,11 @@ def test_old_numbers() -> None:
     assert style.italic
     assert style.strikethrough
     assert style.underline
-    assert table.cell(0, 0).border.bottom.width == 5.0
+
+    border = cell_0_0.border
+    assert border is not None
+    assert border.bottom is not None
+    assert border.bottom.width == 5.0
 
     # TODO: these should pass
     # assert table.cell(1, 0).formatted_value == "2.55E+02"
