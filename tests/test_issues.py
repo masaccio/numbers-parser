@@ -12,6 +12,8 @@ from numbers_parser import (
     RGB,
     BackgroundImage,
     Border,
+    Cell,
+    CellBorder,
     Document,
     EmptyCell,
     ErrorCell,
@@ -30,6 +32,26 @@ from numbers_parser.constants import (
     DEFAULT_ROW_HEIGHT,
 )
 from numbers_parser.xrefs import CellRange
+
+
+def _style(cell: Cell) -> Style:
+    """Return a cell's style after asserting it is not None."""
+    assert cell.style is not None
+    return cell.style
+
+
+def _bg_image(cell: Cell) -> BackgroundImage:
+    """Return a cell's background image after asserting it is not None."""
+    bg_img = _style(cell).bg_image
+    assert bg_img is not None
+    return bg_img
+
+
+def _border(cell: Cell) -> CellBorder:
+    """Return a cell's border after asserting it is not None."""
+    assert cell.border is not None
+    return cell.border
+
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"
@@ -100,8 +122,8 @@ def test_issue_3() -> None:
     assert ref == ISSUE_3_REF
 
     ref = []
-    for row in tables[0].iter_rows(values_only=True):
-        ref.append(row)
+    for val_row in tables[0].iter_rows(values_only=True):
+        ref.append(val_row)
     assert ref == ISSUE_3_REF
 
 
@@ -125,8 +147,12 @@ def test_issue_7() -> None:
     table = tables[0]
     assert table.cell(1, 1).value == ISSUE_7_REF_1
     assert table.cell(2, 1).value == ISSUE_7_REF_2
-    assert table.cell(1, 1).bullets[0] == ISSUE_7_REF_1.split("\n", maxsplit=1)[0]
-    assert table.cell(2, 1).bullets[2] == ISSUE_7_REF_2.split("\n")[2]
+    bullets_1_1 = table.cell(1, 1).bullets
+    bullets_2_1 = table.cell(2, 1).bullets
+    assert bullets_1_1 is not None
+    assert bullets_2_1 is not None
+    assert bullets_1_1[0] == ISSUE_7_REF_1.split("\n", maxsplit=1)[0]
+    assert bullets_2_1[2] == ISSUE_7_REF_2.split("\n")[2]
 
 
 def test_issue_9() -> None:
@@ -248,17 +274,19 @@ def test_issue_43() -> None:
     table = doc.sheets[0].tables[0]
     cell = table.cell("A1")
     assert isinstance(cell, EmptyCell)
-    assert "PNG image data" in magic.from_buffer(cell.style.bg_image.data)
-    assert len(cell.style.bg_image.data) == 87857
-    assert cell.style.bg_image.filename == "pasted-image.png"
+    bg_a1 = _bg_image(cell)
+    assert "PNG image data" in magic.from_buffer(bg_a1.data)
+    assert len(bg_a1.data) == 87857
+    assert bg_a1.filename == "pasted-image.png"
 
     cell = table.cell("B1")
     assert cell.value == "text "
-    assert "TIFF image data" in magic.from_buffer(cell.style.bg_image.data)
-    assert len(cell.style.bg_image.data) == 365398
-    assert cell.style.bg_image.filename == "pasted-image.tiff"
+    bg_b1 = _bg_image(cell)
+    assert "TIFF image data" in magic.from_buffer(bg_b1.data)
+    assert len(bg_b1.data) == 365398
+    assert bg_b1.filename == "pasted-image.tiff"
 
-    assert table.cell("C1").style.bg_image is None
+    assert _style(table.cell("C1")).bg_image is None
 
 
 def test_issue_44(script_runner: ScriptRunner) -> None:
@@ -352,9 +380,9 @@ def test_issue_56(tmp_path: Path) -> None:
     """Test issue 56."""
     doc = Document("tests/data/issue-56.numbers")
     table = doc.sheets[0].tables[0]
-    assert table.cell("A2").style.bg_color == (255, 149, 202)
-    assert table.cell("B2").style.alignment.horizontal.name == "RIGHT"
-    assert table.cell("B2").style.alignment.vertical.name == "TOP"
+    assert _style(table.cell("A2")).bg_color == (255, 149, 202)
+    assert _style(table.cell("B2")).alignment.horizontal.name == "RIGHT"
+    assert _style(table.cell("B2")).alignment.vertical.name == "TOP"
 
     new_filename = tmp_path / "issue-56-new.numbers"
     doc.save(new_filename)
@@ -363,10 +391,10 @@ def test_issue_56(tmp_path: Path) -> None:
     new_table = new_doc.sheets[0].tables[0]
     assert new_table.col_width(0) == 98
     assert new_table.col_width(1) == 162
-    assert new_table.cell("A2").style.font_name == "Helvetica Neue"
-    assert new_table.cell("A2").style.bg_color == (255, 149, 202)
-    assert new_table.cell("B2").style.alignment.horizontal.name == "RIGHT"
-    assert new_table.cell("B2").style.alignment.vertical.name == "TOP"
+    assert _style(new_table.cell("A2")).font_name == "Helvetica Neue"
+    assert _style(new_table.cell("A2")).bg_color == (255, 149, 202)
+    assert _style(new_table.cell("B2")).alignment.horizontal.name == "RIGHT"
+    assert _style(new_table.cell("B2")).alignment.vertical.name == "TOP"
 
 
 def test_issue_59() -> None:
@@ -393,9 +421,9 @@ def test_issue_60(configurable_multi_save_file: list[Path]) -> None:
 
     doc = Document("tests/data/issue-60.numbers")
     table = doc.sheets[0].tables[0]
-    bg_color = table.cell("A2").style.bg_color
+    bg_color = _style(table.cell("A2")).bg_color
     table.write("A2", "Item 2")
-    table.cell("A2").style.bg_color = bg_color
+    _style(table.cell("A2")).bg_color = bg_color
     doc.save(test_2_filename)
     test_2_doc = Document(test_2_filename)
     test_table_2 = test_2_doc.sheets[0].tables[0]
@@ -431,21 +459,21 @@ def test_issue_69() -> None:
     """Test issue 69."""
     doc = Document("tests/data/issue-69b.numbers")
     table = doc.sheets[0].tables[0]
-    assert table.cell(0, 0).style.bg_image.filename == "numbers_1.png"
-    assert table.cell(1, 0).style.bg_image.filename == "numbers_2.png"
-    assert table.cell(2, 0).style.bg_image.filename == "numbers_3.png"
-    assert len(table.cell(0, 0).style.bg_image.data) == 10608
-    assert len(table.cell(1, 0).style.bg_image.data) == 19269
-    assert len(table.cell(2, 0).style.bg_image.data) == 19256
+    assert _bg_image(table.cell(0, 0)).filename == "numbers_1.png"
+    assert _bg_image(table.cell(1, 0)).filename == "numbers_2.png"
+    assert _bg_image(table.cell(2, 0)).filename == "numbers_3.png"
+    assert len(_bg_image(table.cell(0, 0)).data) == 10608
+    assert len(_bg_image(table.cell(1, 0)).data) == 19269
+    assert len(_bg_image(table.cell(2, 0)).data) == 19256
 
     doc = Document("tests/data/issue-69.numbers")
     table = doc.sheets[0].tables[0]
     if version_info.minor >= 11:  # noqa: YTT204
-        assert table.cell(0, 0).style.bg_image.filename == "sssssss的副本.jpeg"
-        assert table.cell(9, 4).style.bg_image.filename == "sssssss的副本.jpeg"
+        assert _bg_image(table.cell(0, 0)).filename == "sssssss的副本.jpeg"
+        assert _bg_image(table.cell(9, 4)).filename == "sssssss的副本.jpeg"
     else:
         with pytest.warns(RuntimeWarning) as record:
-            assert table.cell(0, 0).style.bg_image is None
+            assert _style(table.cell(0, 0)).bg_image is None
         assert len(record) == 1
         assert str(record[0].message) == "Cannot find file 'sssssss的副本.jpeg' in Numbers archive"
 
@@ -490,8 +518,8 @@ def test_issue_75(configurable_save_file: Path) -> None:
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
-    assert all(table.cell(1, col).style.bg_image.filename == "cat.jpg" for col in range(1, 6))
-    assert all(table.cell(2, col).style.bg_image.filename == "cat.jpg" for col in range(1, 6))
+    assert all(_bg_image(table.cell(1, col)).filename == "cat.jpg" for col in range(1, 6))
+    assert all(_bg_image(table.cell(2, col)).filename == "cat.jpg" for col in range(1, 6))
 
 
 def test_issue_76(configurable_save_file: Path) -> None:
@@ -501,7 +529,9 @@ def test_issue_76(configurable_save_file: Path) -> None:
 
     doc = Document(configurable_save_file)
     assert "Metadata/Properties.plist" in doc._model.objects._file_store
-    assert doc._model.objects._file_store["Metadata/Properties.plist"][0:6] == b"bplist"
+    plist_data = doc._model.objects._file_store["Metadata/Properties.plist"]
+    assert isinstance(plist_data, bytes)
+    assert plist_data[0:6] == b"bplist"
 
 
 def test_issue_77() -> None:
@@ -520,7 +550,7 @@ def test_issue_78(configurable_save_file: Path) -> None:
     table2 = doc.sheets[0].tables[1]
 
     image_filename = "tests/data/cat.jpg"
-    image_data = open(image_filename, mode="rb").read()
+    image_data = Path(image_filename).read_bytes()
     bg_image = BackgroundImage(image_data, image_filename)
     cats_bg_style = doc.add_style(bg_image=bg_image)
 
@@ -531,8 +561,8 @@ def test_issue_78(configurable_save_file: Path) -> None:
 
     doc = Document(configurable_save_file)
     assert (
-        doc.sheets[0].tables[0].cell(0, 0).style.bg_image.data
-        == doc.sheets[0].tables[1].cell(0, 0).style.bg_image.data
+        _bg_image(doc.sheets[0].tables[0].cell(0, 0)).data
+        == _bg_image(doc.sheets[0].tables[1].cell(0, 0)).data
     )
 
 
@@ -632,9 +662,9 @@ def test_issue_99() -> None:
     doc = Document("tests/data/issue-99.numbers")
     table = doc.default_table
     with pytest.warns(UnsupportedWarning) as record:  # noqa: PT031
-        style = table.cell(1, 0).style
+        style = _style(table.cell(1, 0))
         # Second time doesn't warn
-        style = table.cell(0, 0).style
+        style = _style(table.cell(0, 0))
     assert len(record) == 1
     assert (
         str(
@@ -721,7 +751,7 @@ def test_issue_152(configurable_save_file: Path) -> None:
 
     for row in range(size):
         for col in range(size):
-            border = table.cell(row, col).border
+            border = _border(table.cell(row, col))
             if (row % 3) == 0 and (col % 3) == 0:
                 assert border.left == cyan_dashed
                 assert border.right == magenta_dashed
@@ -735,37 +765,38 @@ def test_issue_152(configurable_save_file: Path) -> None:
     for row in range(table.num_rows):
         for col in range(table.num_cols):
             cell = table.cell(row, col)
+            cb = _border(cell)
             assert cell.value == xl_rowcol_to_cell(row, col)
             if (row % 3) == 0 and (col % 3 == 0):
-                assert cell.border.left == cyan_dashed
-                assert cell.border.right == magenta_dashed
-                assert cell.border.top == orange_dashed
-                assert cell.border.bottom == green_dashed
+                assert cb.left == cyan_dashed
+                assert cb.right == magenta_dashed
+                assert cb.top == orange_dashed
+                assert cb.bottom == green_dashed
             elif (row % 3) == 0 and (col % 3 == 1):
-                assert cell.border.left == magenta_dashed
-                assert cell.border.right == black
-                assert cell.border.top == black
-                assert cell.border.bottom == black
+                assert cb.left == magenta_dashed
+                assert cb.right == black
+                assert cb.top == black
+                assert cb.bottom == black
             elif (row % 3) == 0 and (col % 3 == 2):
-                assert cell.border.left == black
-                assert cell.border.right == cyan_dashed
-                assert cell.border.top == black
-                assert cell.border.bottom == black
+                assert cb.left == black
+                assert cb.right == cyan_dashed
+                assert cb.top == black
+                assert cb.bottom == black
             elif (row % 3) == 1 and (col % 3 == 0):
-                assert cell.border.left == black
-                assert cell.border.right == black
-                assert cell.border.top == green_dashed
-                assert cell.border.bottom == black
+                assert cb.left == black
+                assert cb.right == black
+                assert cb.top == green_dashed
+                assert cb.bottom == black
             elif (row % 3) == 2 and (col % 3 == 0):
-                assert cell.border.left == black
-                assert cell.border.right == black
-                assert cell.border.top == black
-                assert cell.border.bottom == orange_dashed
+                assert cb.left == black
+                assert cb.right == black
+                assert cb.top == black
+                assert cb.bottom == orange_dashed
             else:
-                assert cell.border.left == black
-                assert cell.border.right == black
-                assert cell.border.top == black
-                assert cell.border.bottom == black
+                assert cb.left == black
+                assert cb.right == black
+                assert cb.top == black
+                assert cb.bottom == black
 
     fat_border = magenta_dashed = Border(10.0, RGB(255, 0, 180), "solid")
     doc = Document("tests/data/test-border-widths.numbers")
@@ -804,18 +835,18 @@ def test_issue_174(configurable_save_file: Path) -> None:
     assert "font 'UnknownFont' does not exist" in str(e)
 
     table.write(1, 0, "Avenir")
-    table.set_cell_style(1, 0, Style(font_name=("Avenir", "Heavy Oblique")))
+    table.set_cell_style(1, 0, Style(font_name=("Avenir", "Heavy Oblique")))  # type: ignore[arg-type]
     doc.save(configurable_save_file)
 
     doc2 = Document(configurable_save_file)
     table2 = doc2.sheets[0].tables[0]
     for i in range(4):
-        cell = table2.cell(0, i)
-        assert cell.style.name == styles[i].name
-        assert cell.style.font_name == styles[i].font_name
-        assert cell.style.bold == styles[i].bold
-        assert cell.style.italic == styles[i].italic
-        assert cell.style.font_size == styles[i].font_size
+        cell_style = _style(table2.cell(0, i))
+        assert cell_style.name == styles[i].name
+        assert cell_style.font_name == styles[i].font_name
+        assert cell_style.bold == styles[i].bold
+        assert cell_style.italic == styles[i].italic
+        assert cell_style.font_size == styles[i].font_size
 
 
 def test_issue_236(configurable_save_file: Path) -> None:
@@ -831,19 +862,23 @@ def test_issue_236(configurable_save_file: Path) -> None:
         ref_cell = doc.default_table.cell(row, 0)
         new_cell = new_doc.default_table.cell(row, 0)
         assert str(new_cell) == str(ref_cell)
-        assert new_cell.border.top == ref_cell.border.top
+        assert _border(new_cell).top == _border(ref_cell).top
         assert new_cell.style == ref_cell.style
         assert new_cell.formula == ref_cell.formula
         assert new_cell.formatted_value == ref_cell.formatted_value
 
     cells = list(doc.default_table.iter_cells())
-    for ii, new_cell in enumerate(new_doc.default_table.iter_cells()):
-        ref_cell = cells[ii]
-        assert type(new_cell) is type(ref_cell)
-        assert new_cell.value == ref_cell.value
-        assert new_cell._flags == ref_cell._flags
-        assert new_cell._extra_bits == ref_cell._extra_bits
-        assert _CellStorageFlags.__repr__(ref_cell) == _CellStorageFlags.__repr__(new_cell)
+    for ii, iter_new_cell in enumerate(new_doc.default_table.iter_cells()):
+        iter_ref_cell = cells[ii]
+        assert isinstance(iter_new_cell, Cell)
+        assert isinstance(iter_ref_cell, Cell)
+        assert type(iter_new_cell) is type(iter_ref_cell)
+        assert iter_new_cell.value == iter_ref_cell.value
+        assert iter_new_cell._flags == iter_ref_cell._flags
+        assert iter_new_cell._extra_bits == iter_ref_cell._extra_bits
+        assert _CellStorageFlags.__repr__(iter_ref_cell) == _CellStorageFlags.__repr__(
+            iter_new_cell,
+        )
 
 
 def test_issue_249(configurable_save_file: Path) -> None:
