@@ -291,6 +291,8 @@ class NumbersModel(Cacheable):
         self._custom_format_uuids: dict[str, TSPMessages.UUID] = {}
         self.name_ref_cache = ScopedNameRefCache(self)
         self.missing_fonts: dict[str, bool] = {}
+        self._table_id_to_base_id: dict[int, str | None] = {}
+        self._table_base_id_to_formula_owner_id: dict[str, int] = {}
         self.calculate_table_uuid_map()
 
     def save(
@@ -305,7 +307,7 @@ class NumbersModel(Cacheable):
         self.objects.save(filepath, package, password, hint)
 
     def get_object(self, key: int, expected_type: type[_ProtoT]) -> _ProtoT:
-        """Fetch an object from the object store and cast it to the expected Protobuf class."""
+        """Fetch an object from the object store and validate its expected Protobuf class."""
         return self.objects.get_as(key, expected_type)
 
     def find_refs(self, ref: str) -> list[int]:
@@ -329,8 +331,6 @@ class NumbersModel(Cacheable):
             ce_id = self.find_refs("CalculationEngineArchive")
             return ce_id[0]
         except IndexError as e:
-            # Issue #17 breaks but the CalculationEngine is fundamental
-            # to the function of numbers-parser
             msg = "Documents without a CalculationEngine archive are unsupported"
             raise UnsupportedError(msg) from e
 
@@ -360,7 +360,7 @@ class NumbersModel(Cacheable):
         self._table_data[table_id] = data
 
     def table_info_id(self, table_id: int) -> int:
-        """Return the TableInfoArchive ID for a given tale ID."""
+        """Return the TableInfoArchive ID for a given table ID."""
         ids = [
             table_info_id
             for table_info_id in self.objects.find_refs("TableInfoArchive")
@@ -436,8 +436,8 @@ class NumbersModel(Cacheable):
             table_info.super.caption_hidden = not enabled
             return False
         caption_info_id = table_info.super.caption.identifier
-        caption_archive = self.get_object(caption_info_id, TSDArchives.StandinCaptionArchive)
-        if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":
+        caption_archive = self.objects[caption_info_id]
+        if isinstance(caption_archive, TSDArchives.StandinCaptionArchive):
             return False
         return not table_info.super.caption_hidden
 
@@ -587,9 +587,9 @@ class NumbersModel(Cacheable):
         """Return the text displayed in the table caption."""
         table_info = self.table_info(table_id=table_id)
         caption_info_id = table_info.super.caption.identifier
-        caption_archive = self.get_object(caption_info_id, TSAArchives.CaptionInfoArchive)
+        caption_archive = self.objects[caption_info_id]
 
-        if caption_archive.DESCRIPTOR.name == "StandinCaptionArchive":
+        if isinstance(caption_archive, TSDArchives.StandinCaptionArchive):
             if caption is None:
                 return "Caption"
             self.create_caption_archive(table_id)
@@ -869,9 +869,6 @@ class NumbersModel(Cacheable):
         Return the mapping from integer owner IDs to 128-bit UUID strings.
         """
         calc_engine = self.calc_engine()
-        if calc_engine is None:
-            return {}
-
         owner_id_map = {}
         for e in calc_engine.dependency_tracker.owner_id_map.map_entry:
             owner_id_map[e.internal_owner_id] = NumbersUUID(e.owner_id).hex
@@ -1350,9 +1347,9 @@ class NumbersModel(Cacheable):
     @cache()
     def metadata_component_info(
         self,
-        reference: str | int | None = None,
+        reference: str | int,
     ) -> TSPArchiveMessages.ComponentInfo:
-        """Return the component info of an object in the document metadata given it's name or ID."""
+        """Return the component info of an object in the document metadata given its name or ID."""
         component_map = {c.identifier: c for c in self.package_metadata.components}
         if isinstance(reference, str):
             component_ids = [
@@ -1360,9 +1357,14 @@ class NumbersModel(Cacheable):
             ]
         else:
             component_ids = [x for x, c in component_map.items() if c.identifier == reference]
-        return cast("TSPArchiveMessages.ComponentInfo", component_map[component_ids[0]])
+        return component_map[component_ids[0]]
 
-    def add_component_metadata(self, object_id: int, parent: str, locator: str) -> None:
+    def add_component_metadata(
+        self,
+        object_id: int,
+        parent: str,
+        locator: str | None = None,
+    ) -> None:
         """Add a new ComponentInfo record to the parent object in the document metadata."""
         if locator is not None:
             component_info = TSPArchiveMessages.ComponentInfo(
@@ -1394,7 +1396,8 @@ class NumbersModel(Cacheable):
         is_weak: bool = False,
     ) -> None:
         """Add an external reference to an object in a metadata component."""
-        component = self.metadata_component_info(location or component_id)
+        ref_target = location if location is not None else cast("int", component_id)
+        component = self.metadata_component_info(ref_target)
         params: dict[str, Any] = (
             {"object_identifier": object_id, "component_identifier": component_id}
             if component_id is not None
@@ -2248,8 +2251,9 @@ class NumbersModel(Cacheable):
             TSSArchives.StylesheetArchive,
         ).identifier_to_style_map:
             style_id = style_entry.style.identifier
+            style_obj = self.objects[style_id]
             style_name = getattr(
-                self.get_object(style_id, TSWPArchives.ShapeStyleArchive).super,
+                getattr(style_obj, "super", None),
                 "name",
                 "",
             )

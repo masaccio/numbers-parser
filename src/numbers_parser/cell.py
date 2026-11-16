@@ -66,7 +66,7 @@ from numbers_parser.constants import (
     PaddingType,
 )
 from numbers_parser.currencies import CURRENCIES, CURRENCY_SYMBOLS
-from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
+from numbers_parser.exceptions import FileFormatError, UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
@@ -370,7 +370,7 @@ class Style:
             italic=model.cell_is_italic(cell),
             strikethrough=model.cell_is_strikethrough(cell),
             underline=model.cell_is_underline(cell),
-            name=cast("str", model.cell_style_name(cell)),
+            name=model.cell_style_name(cell),
             first_indent=model.cell_first_indent(cell),
             left_indent=model.cell_left_indent(cell),
             right_indent=model.cell_right_indent(cell),
@@ -384,7 +384,7 @@ class Style:
     def __post_init__(self) -> None:
         """Validate and initialize the instance state."""
         self.bg_color = rgb_color(self.bg_color)
-        self.font_color = cast("RGB", rgb_color(self.font_color))
+        self.font_color = _single_rgb(self.font_color)
 
         if not isinstance(self.font_size, (float, int)):
             msg = "size must be a float number of points"
@@ -413,8 +413,10 @@ class Style:
 
         Mark styles for writing when the document is saved.
         """
-        if name in ["bg_color", "font_color"]:
+        if name == "bg_color":
             value = rgb_color(value)
+        elif name == "font_color":
+            value = _single_rgb(value)
         if name == "alignment":
             value = alignment(value)
         if name in Style._text_attrs():
@@ -426,21 +428,23 @@ class Style:
             self.__dict__[name] = value
 
 
+def _single_rgb(color: object) -> RGB:
+    """Validate and return a single RGB color."""
+    if isinstance(color, RGB):
+        return color
+    if isinstance(color, tuple) and len(color) == 3 and all(isinstance(x, int) for x in color):
+        return RGB(color[0], color[1], color[2])
+    msg = "RGB color must be an RGB or a tuple of 3 integers"
+    raise TypeError(msg)
+
+
 def rgb_color(color: object) -> RGB | list[RGB] | None:
     """Raise a TypeError if a color is not a valid RGB value."""
     if color is None:
         return None
-    if isinstance(color, RGB):
-        return color
-    if isinstance(color, tuple):
-        if not (len(color) == 3 and all(isinstance(x, int) for x in color)):
-            msg = "RGB color must be an RGB or a tuple of 3 integers"
-            raise TypeError(msg)
-        return RGB(*color)
     if isinstance(color, list):
-        return [cast("RGB", rgb_color(c)) for c in color]
-    msg = "RGB color must be an RGB or a tuple of 3 integers"
-    raise TypeError(msg)
+        return [_single_rgb(c) for c in color]
+    return _single_rgb(color)
 
 
 def alignment(value: object) -> Alignment:
@@ -522,7 +526,7 @@ class Border:  # noqa: PLW1641
         if color is None:
             object.__setattr__(self, "color", RGB(*DEFAULT_BORDER_COLOR))
         else:
-            object.__setattr__(self, "color", rgb_color(color))
+            object.__setattr__(self, "color", _single_rgb(color))
 
         current_style = style
         if current_style is None:
@@ -648,7 +652,7 @@ class MergeReference:
 class MergeAnchor:
     """Cell reference for the merged cell."""
 
-    def __init__(self, size: tuple) -> None:
+    def __init__(self, size: tuple[int, int]) -> None:
         """Initialize the instance state."""
         self.size = size
 
@@ -719,6 +723,7 @@ class Cell(_CellStorageFlags, Cacheable):
         self._formula_id: int | None = None
         self._storage: Any = None
         self._style: Style | None = None
+        self._border: CellBorder = CellBorder()
         self._d128: float | None = None
         self._double: float | None = None
         self._seconds: float | None = None
@@ -765,7 +770,7 @@ class Cell(_CellStorageFlags, Cacheable):
             DeprecationWarning,
             stacklevel=2,
         )
-        if self.style is not None and self.style.bg_image is not None:
+        if self.style.bg_image is not None:
             return self.style.bg_image.filename
         return None
 
@@ -778,7 +783,7 @@ class Cell(_CellStorageFlags, Cacheable):
             DeprecationWarning,
             stacklevel=2,
         )
-        if self.style is not None and self.style.bg_image is not None:
+        if self.style.bg_image is not None:
             return self.style.bg_image.data
         return None
 
@@ -882,9 +887,9 @@ class Cell(_CellStorageFlags, Cacheable):
         return str(self.value).upper() if isinstance(self.value, bool) else str(self.value)
 
     @property
-    def style(self) -> Style | None:
+    def style(self) -> Style:
         """
-        Style | None: The :class:`Style` associated with the cell or ``None``.
+        Style: The :class:`Style` associated with the cell.
 
         Warns
         -----
@@ -906,9 +911,9 @@ class Cell(_CellStorageFlags, Cacheable):
         )
 
     @property
-    def border(self) -> CellBorder | None:
+    def border(self) -> CellBorder:
         """
-        CellBorder| None: The :class:`CellBorder` associated with the cell or ``None``.
+        CellBorder: The :class:`CellBorder` associated with the cell.
 
         Warns
         -----
@@ -1075,8 +1080,9 @@ class Cell(_CellStorageFlags, Cacheable):
         elif cell_type == TSTArchives.textCellType:
             cell = TextCell(row, col, model.table_string(table_id, storage_flags._string_id or 0))
         elif cell_type == TSTArchives.dateCellType:
-            cell = DateCell(row, col, EPOCH + timedelta(seconds=seconds or 0.0))
-            cell._datetime = cast("datetime", cell._value)
+            dt_val = EPOCH + timedelta(seconds=seconds or 0.0)
+            cell = DateCell(row, col, dt_val)
+            cell._datetime = dt_val
         elif cell_type == TSTArchives.boolCellType:
             cell = BoolCell(row, col, (double or 0.0) > 0.0)
         elif cell_type == TSTArchives.durationCellType:
@@ -1202,7 +1208,7 @@ class Cell(_CellStorageFlags, Cacheable):
             flags = 4
             length += 8
             cell_type = TSTArchives.dateCellType
-            date_val = cast("datetime", self._value)
+            date_val = self.value
             if date_val.tzinfo is None:
                 date_delta = date_val - EPOCH
             else:
@@ -1217,7 +1223,7 @@ class Cell(_CellStorageFlags, Cacheable):
             flags = 2
             length += 8
             cell_type = TSTArchives.durationCellType
-            duration_val = cast("timedelta", self.value)
+            duration_val = self.value
             value = pack("<d", float(duration_val.total_seconds()))
         elif isinstance(self, EmptyCell):
             flags = 0
@@ -1334,8 +1340,8 @@ class Cell(_CellStorageFlags, Cacheable):
         """Update value."""
         if cell._type == CellType.NUMBER:
             self._d128 = value or 0.0
-        elif cell._type == CellType.DATE:
-            self._datetime = cast("datetime", value)
+        elif cell._type == CellType.DATE and isinstance(value, datetime):
+            self._datetime = value
         self._value = value
 
     @property
@@ -1362,7 +1368,10 @@ class Cell(_CellStorageFlags, Cacheable):
                 stacklevel=3,
             )
             return None
-        image_data = cast("bytes", self._model.objects.file_store[image_pathnames[0]])
+        image_data = self._model.objects.file_store[image_pathnames[0]]
+        if not isinstance(image_data, bytes):
+            msg = f"Expected raw bytes for image '{preferred_filename}'"
+            raise FileFormatError(msg)
         digest = sha1(image_data).digest()  # noqa: S324
         if digest not in self._model.images:
             self._model.images[digest] = image_id
@@ -1399,22 +1408,19 @@ class Cell(_CellStorageFlags, Cacheable):
             elif custom_format.format_type == FormatType.CUSTOM_TEXT:
                 formatted_value = _decode_text_format(
                     custom_format,
-                    self._model.table_string(self._table_id, cast("int", self._string_id)),
+                    self._model.table_string(self._table_id, self._string_id or 0),
                 )
             else:
-                return (
-                    _decode_number_format(
-                        custom_format,
-                        d128,
-                        format_map[format_uuid].name,
-                        format_map[format_uuid].conditions,
-                    )
-                    or ""
+                return _decode_number_format(
+                    custom_format,
+                    d128,
+                    format_map[format_uuid].name,
+                    format_map[format_uuid].conditions,
                 )
         elif custom_format.format_type == FormatType.DECIMAL:
             return _format_decimal(d128, custom_format)
         elif custom_format.format_type == FormatType.CURRENCY:
-            return cast("str", _format_currency(d128, custom_format))
+            return _format_currency(d128, custom_format)
         elif custom_format.format_type == FormatType.BOOLEAN:
             return "TRUE" if self.value else "FALSE"
         elif custom_format.format_type == FormatType.PERCENT:
@@ -1435,7 +1441,9 @@ class Cell(_CellStorageFlags, Cacheable):
 
     def _date_format(self) -> str:
         """Return the formatted date or time value."""
-        date_format = self._model.table_format(self._table_id, cast("int", self._date_format_id))
+        if self._date_format_id is None or self._datetime is None:
+            return ""
+        date_format = self._model.table_format(self._table_id, self._date_format_id)
         if date_format.HasField("custom_uid"):
             format_uuid = NumbersUUID(date_format.custom_uid).hex
             format_map = self._model.custom_format_map()
@@ -1444,7 +1452,7 @@ class Cell(_CellStorageFlags, Cacheable):
             if custom_format.format_type == FormatType.CUSTOM_DATE:
                 formatted_value = _decode_date_format(
                     custom_format_string,
-                    cast("datetime", self._datetime),
+                    self._datetime,
                 )
             else:
                 warn(
@@ -1456,15 +1464,17 @@ class Cell(_CellStorageFlags, Cacheable):
         else:
             formatted_value = _decode_date_format(
                 date_format.date_time_format,
-                cast("datetime", self._datetime),
+                self._datetime,
             )
         return formatted_value
 
     def _duration_format(self) -> str:  # noqa: C901
         """Return the formatted duration value."""
+        if self._duration_format_id is None:
+            return ""
         duration_format = self._model.table_format(
             self._table_id,
-            cast("int", self._duration_format_id),
+            self._duration_format_id,
         )
         debug(
             "duration_format: @[%d,%d]: table_id=%d, duration_format_id=%d, duration_style=%s",
@@ -1604,6 +1614,8 @@ class NumberCell(Cell):
     style, border, or number format.
     """
 
+    _value: float
+
     def __init__(
         self,
         row: int,
@@ -1618,7 +1630,7 @@ class NumberCell(Cell):
     @property
     def value(self) -> float:
         """Return or update the value represented by the cell."""
-        return cast("float", self._value)
+        return self._value
 
 
 class TextCell(Cell):
@@ -1628,6 +1640,8 @@ class TextCell(Cell):
     Text cells are created while reading a document or by :meth:`Table.write`.
     """
 
+    _value: str
+
     def __init__(self, row: int, col: int, value: str) -> None:
         """Initialize the instance state."""
         self._type = CellType.TEXT
@@ -1636,7 +1650,7 @@ class TextCell(Cell):
     @property
     def value(self) -> str:
         """Return or update the value represented by the cell."""
-        return cast("str", self._value)
+        return self._value
 
 
 class RichTextCell(Cell):
@@ -1648,12 +1662,14 @@ class RichTextCell(Cell):
         Do not instantiate directly. Cells are created by :py:class:`~numbers_parser.Document`.
     """
 
+    _value: str
+
     def __init__(self, row: int, col: int, value: dict[str, Any]) -> None:
         """Initialize the instance state."""
         super().__init__(row, col, value["text"])
         self._type = CellType.RICH_TEXT
-        self._bullets = value["bullets"]
-        self._hyperlinks = value["hyperlinks"]
+        self._bullets: list[str] = value["bullets"]
+        self._hyperlinks: list[tuple[str, str]] = value["hyperlinks"]
         if value["bulleted"]:
             self._formatted_bullets = [
                 (
@@ -1668,7 +1684,7 @@ class RichTextCell(Cell):
     @property
     def value(self) -> str:
         """Return or update the value represented by the cell."""
-        return cast("str", self._value)
+        return self._value
 
     @property
     def bullets(self) -> list[str]:
@@ -1681,9 +1697,9 @@ class RichTextCell(Cell):
         return self._formatted_bullets
 
     @property
-    def hyperlinks(self) -> list[tuple] | None:
+    def hyperlinks(self) -> list[tuple[str, str]]:
         """
-        List[Tuple] | None: the hyperlinks in a cell or ``None``.
+        List[Tuple[str, str]]: the hyperlinks in a cell.
 
         Numbers does not support hyperlinks to cells within a spreadsheet, but does
         allow embedding links in cells. When cells contain hyperlinks,
@@ -1747,6 +1763,8 @@ class BoolCell(Cell):
     Boolean cells expose a Python ``bool`` and can use tickbox formatting.
     """
 
+    _value: bool
+
     def __init__(self, row: int, col: int, value: bool) -> None:
         """Initialize the instance state."""
         super().__init__(row, col, value)
@@ -1756,7 +1774,7 @@ class BoolCell(Cell):
     @property
     def value(self) -> bool:
         """Return or update the value represented by the cell."""
-        return cast("bool", self._value)
+        return self._value
 
 
 class DateCell(Cell):
@@ -1770,6 +1788,8 @@ class DateCell(Cell):
     Date cells expose a :class:`datetime.datetime` value.
     """
 
+    _value: datetime
+
     def __init__(self, row: int, col: int, value: datetime) -> None:
         """Initialize the instance state."""
         super().__init__(row, col, value)
@@ -1778,11 +1798,13 @@ class DateCell(Cell):
     @property
     def value(self) -> datetime:
         """Return or update the value represented by the cell."""
-        return cast("datetime", self._value)
+        return self._value
 
 
 class DurationCell(Cell):
     """Cell containing a :class:`datetime.timedelta` value."""
+
+    _value: timedelta
 
     def __init__(self, row: int, col: int, value: timedelta) -> None:
         """Initialize the instance state."""
@@ -1792,7 +1814,7 @@ class DurationCell(Cell):
     @property
     def value(self) -> timedelta:
         """Return or update the value represented by the cell."""
-        return cast("timedelta", self._value)
+        return self._value
 
 
 class ErrorCell(Cell):
@@ -1966,14 +1988,13 @@ def _expand_quotes(value: str) -> str:
 
 def _decode_number_format(  # noqa: C901, PLR0912, PLR0915
     number_format: TSKArchives.FormatStructArchive,
-    value: float | None,
+    value: float,
     _name: str,
     conditions: Sequence[TSKArchives.CustomFormatArchive.Condition],
-) -> str | None:
+) -> str:
     """Parse a custom date format string and return a formatted number value."""
-    if value is None:
+    if value is None or number_format is None:
         return None
-
     custom_format_string = number_format.custom_format_string
     sign = "-" if value < 0 else ""
     for condition in conditions:
@@ -2140,12 +2161,12 @@ def _decode_number_format(  # noqa: C901, PLR0912, PLR0915
 
 
 def _format_decimal(
-    value: float | None,
+    value: float,
     number_format: TSKArchives.FormatStructArchive,
     percent: bool = False,
 ) -> str:
     """Format decimal."""
-    if value is None:
+    if value is None or number_format is None:
         return ""
     if value < 0 and number_format.negative_style == 1:
         accounting_style = False
@@ -2186,13 +2207,12 @@ def _format_decimal(
 
 
 def _format_currency(
-    value: float | None,
+    value: float,
     number_format: TSKArchives.FormatStructArchive,
-) -> str | None:
+) -> str:
     """Format currency."""
-    if value is None:
+    if number_format is None:
         return None
-
     formatted_value = _format_decimal(value, number_format)
     if number_format.currency_code in CURRENCY_SYMBOLS:
         symbol = CURRENCY_SYMBOLS[number_format.currency_code]

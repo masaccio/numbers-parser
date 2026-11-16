@@ -4,7 +4,7 @@ import math
 import re
 from collections.abc import Iterator
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, overload
 
 from google.protobuf.message import Message as ProtoMessage
 
@@ -14,11 +14,11 @@ from numbers_parser.constants import (
     PACKAGE_ID,
     SUPPORTED_NUMBERS_VERSIONS,
 )
+from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
 from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
 from numbers_parser.iwork import IWork, IWorkHandler
 
 if TYPE_CHECKING:
-    import numbers_parser.generated.TSPArchiveMessages_pb2 as TSPArchiveMessage
     from numbers_parser.model import NumbersModel
 
 
@@ -113,10 +113,11 @@ class ObjectStore(IWorkHandler):
 
     def store_object(self, filename: str, identifier: int, archive: object) -> None:
         """Store object."""
-        self._objects[identifier] = cast("ProtoMessage", archive)
-        self._object_to_filename_map[identifier] = filename
+        if isinstance(archive, ProtoMessage):
+            self._objects[identifier] = archive
+            self._object_to_filename_map[identifier] = filename
 
-    def store_file(self, filename: str, blob: bytes) -> None:
+    def store_file(self, filename: str, blob: bytes | IWAFile) -> None:
         """Store file."""
         self._file_store[filename] = blob
 
@@ -132,7 +133,7 @@ class ObjectStore(IWorkHandler):
     def new_message_id(self) -> int:
         """Return the next available message ID for object creation."""
         self._max_id += 1
-        metadata = cast("TSPArchiveMessage.PackageMetadata", self._objects[PACKAGE_ID])
+        metadata = self.get_as(PACKAGE_ID, TSPArchiveMessages.PackageMetadata)
         metadata.last_object_identifier = self._max_id
         return self._max_id
 
@@ -148,20 +149,25 @@ class ObjectStore(IWorkHandler):
 
         Return the message ID and object. Create the IWA file if it is missing.
         """
-        paths = [k for k, v in self._file_store.items() if iwa_file in k]
+        paths = [k for k in self._file_store if iwa_file in k]
         iwa_pathname = None if len(paths) == 0 else paths[0]
 
         new_id = self.new_message_id()
         iwa_segment = create_iwa_segment(new_id, cls, object_dict)
 
-        if iwa_pathname is None and not append:
-            iwa_pathname = iwa_file.format(new_id) + ".iwa"
-            chunks = {"chunks": [{"archives": [iwa_segment.to_dict()]}]}
-            self._file_store[iwa_pathname] = IWAFile.from_dict(chunks)
+        if iwa_pathname is None or not append:
+            if iwa_pathname is None:
+                iwa_pathname = iwa_file.format(new_id) + ".iwa"
+                chunks = {"chunks": [{"archives": [iwa_segment.to_dict()]}]}
+                self._file_store[iwa_pathname] = IWAFile.from_dict(chunks)
+            else:
+                iwa_obj = self._file_store[iwa_pathname]
+                if isinstance(iwa_obj, IWAFile):
+                    iwa_obj.chunks[0].archives.append(iwa_segment)
         else:
-            iwa_pathname = cast("str", iwa_pathname)
-            iwa_obj = cast("IWAFile", self._file_store[iwa_pathname])
-            iwa_obj.chunks[0].archives.append(iwa_segment)
+            iwa_obj = self._file_store[iwa_pathname]
+            if isinstance(iwa_obj, IWAFile):
+                iwa_obj.chunks[0].archives.append(iwa_segment)
 
         new_obj = cls(**object_dict)
         self._objects[new_id] = new_obj
@@ -176,10 +182,11 @@ class ObjectStore(IWorkHandler):
         This keeps the file store ready for saving to a new document.
         """
         for obj_id, obj in self._objects.items():
-            iwa_file = cast("IWAFile", self._file_store[self._object_to_filename_map[obj_id]])
-            copy_object_to_iwa_file(iwa_file, obj, obj_id)
+            iwa_file = self._file_store[self._object_to_filename_map[obj_id]]
+            if isinstance(iwa_file, IWAFile):
+                copy_object_to_iwa_file(iwa_file, obj, obj_id)
 
-    def remove_unreferenced_objects(self) -> None:
+    def remove_unreferenced_objects(self) -> None:  # noqa: C901
         """Remove objects from the ObjectStore that are not referenced."""
         referenced_ids = {DOCUMENT_ID, PACKAGE_ID}
 
@@ -200,7 +207,7 @@ class ObjectStore(IWorkHandler):
         for obj in self._objects.values():
             find_references(obj)
 
-        metadata = cast("TSPArchiveMessage.PackageMetadata", self._objects[PACKAGE_ID])
+        metadata = self.get_as(PACKAGE_ID, TSPArchiveMessages.PackageMetadata)
         unreferenced_ids = set(self._objects.keys()) - referenced_ids
         unreferenced_ids -= {c.identifier for c in metadata.components}
 
@@ -209,18 +216,19 @@ class ObjectStore(IWorkHandler):
         for obj_id in unreferenced_ids:
             del self._objects[obj_id]
             filename = self._object_to_filename_map.pop(obj_id)
-            iwa_file = cast("IWAFile", self._file_store[filename])
-            for chunk in iwa_file.chunks:
-                chunk.archives = [
-                    arch for arch in chunk.archives if arch.header.identifier != obj_id
-                ]
+            iwa_file = self._file_store[filename]
+            if isinstance(iwa_file, IWAFile):
+                for chunk in iwa_file.chunks:
+                    chunk.archives = [
+                        arch for arch in chunk.archives if arch.header.identifier != obj_id
+                    ]
 
     @property
     def file_store(self) -> dict[str, bytes | IWAFile]:
         """Return or update the IWA files associated with the object store."""
         return self._file_store
 
-    def __getitem__(self, key: int) -> "ProtoMessage":
+    def __getitem__(self, key: int) -> ProtoMessage:
         """Return a generically typed object from the store."""
         return self._objects[key]
 
@@ -235,10 +243,14 @@ class ObjectStore(IWorkHandler):
     def get_as(
         self,
         key: int,
-        expected_type: type[_ProtoT],  # noqa: ARG002, pylint: disable=unused-argument
+        expected_type: type[_ProtoT],
     ) -> _ProtoT:
-        """Fetch an object from the store and cast it to the expected Protobuf class."""
-        return cast("_ProtoT", self._objects[key])
+        """Fetch an object from the store and verify it matches the expected Protobuf class."""
+        obj = self._objects[key]
+        if not isinstance(obj, expected_type):
+            msg = f"Object {key} has type {type(obj).__name__}, expected {expected_type.__name__}"
+            raise TypeError(msg)
+        return obj
 
     def find_refs(self, ref_name: str) -> list[int]:
         """Find refs."""

@@ -40,7 +40,7 @@ class NumbersUnpacker(IWorkHandler):
     redact_strings: bool = False
     output_dir: str | None = None
 
-    def store_file(self, filename: str, blob: bytes) -> None:
+    def store_file(self, filename: str, blob: bytes | IWAFile) -> None:
         """Store a protobuf archive."""
         filename = re.sub(r".*\.numbers/", "", str(filename))
 

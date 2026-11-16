@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from io import BytesIO
 from os import urandom
 from sys import version_info
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 from warnings import warn
 from zipfile import BadZipFile, ZipFile
 
@@ -34,7 +34,7 @@ class IWorkHandler(ABC):
     """Define the interface for storing iWork archive contents."""
 
     @abstractmethod
-    def store_file(self, filename: str, blob: bytes) -> None:
+    def store_file(self, filename: str, blob: bytes | IWAFile) -> None:
         """Store a protobuf archive."""
 
     @abstractmethod
@@ -469,7 +469,7 @@ class IWork:
                 debug("store IWA: filename=%s", filename)
                 self._handler.store_object(filename, identifier, archive.objects[0])
 
-            self._handler.store_file(filename, cast("bytes", iwaf))
+            self._handler.store_file(filename, iwaf)
         else:
             debug("store blob: filename=%s", filename)
             self._handler.store_file(filename, blob)

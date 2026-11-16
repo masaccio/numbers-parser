@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Iterator  # noqa: TC003
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Literal, cast, overload
+from typing import Any, Literal, overload
 from warnings import warn
 
 from numbers_parser.cell import (
@@ -339,11 +339,11 @@ class Document:
             raise IndexError(msg)
 
         if "bg_image" in kwargs and kwargs["bg_image"] is not None:
-            if not isinstance(kwargs["bg_image"], BackgroundImage):
+            img = kwargs["bg_image"]
+            if not isinstance(img, BackgroundImage):
                 msg = "bg_image must be a BackgroundImage object"
                 raise TypeError(msg)
-            bg_image = cast("BackgroundImage", kwargs["bg_image"])
-            self._model.store_image(bg_image.data, bg_image.filename)
+            self._model.store_image(img.data, img.filename)
 
         style = Style(**kwargs)
         if style.name is None:
@@ -599,14 +599,15 @@ class Table(Cacheable):
         for row in range(self.num_rows):
             self._data.append([])
             for col in range(self.num_cols):
+                cell: Cell
                 if merge_cells.is_merge_reference((row, col)):
-                    cell = cast("Cell", Cell._merged_cell(table_id, row, col, model))
+                    cell = Cell._merged_cell(table_id, row, col, model)
                 else:
                     buffer = self._model.storage_buffer(table_id, row, col)
                     if buffer is None:
-                        cell = cast("Cell", Cell._empty_cell(table_id, row, col, model))
+                        cell = Cell._empty_cell(table_id, row, col, model)
                     else:
-                        cell = cast("Cell", Cell._from_storage(table_id, row, col, buffer, model))
+                        cell = Cell._from_storage(table_id, row, col, buffer, model)
                 self._data[row].append(cell)
 
     @property
@@ -827,10 +828,9 @@ class Table(Cacheable):
         merge_cells = set()
         for row, cells in enumerate(self._data):
             for col, cell in enumerate(cells):
-                if cell.is_merged:
-                    size = cast("tuple[int, int]", cell.size)
+                if cell.is_merged and cell.size is not None:
                     merge_cells.add(
-                        xl_range(row, col, row + size[0] - 1, col + size[1] - 1),
+                        xl_range(row, col, row + cell.size[0] - 1, col + cell.size[1] - 1),
                     )
         return sorted(merge_cells)
 
@@ -881,11 +881,10 @@ class Table(Cacheable):
         """
         if isinstance(args[0], str):
             (row, col) = xl_cell_to_rowcol(args[0])
-        elif len(args) != 2:
+        elif len(args) != 2 or not isinstance(args[0], int) or not isinstance(args[1], int):
             raise IndexError("invalid cell reference " + str(args))
         else:
-            row = cast("int", args[0])
-            col = cast("int", args[1])
+            row, col = args[0], args[1]
 
         if row >= self.num_rows or row < 0:
             msg = f"row {row} out of range"
@@ -927,7 +926,7 @@ class Table(Cacheable):
         max_row: int | None = None,
         min_col: int | None = None,
         max_col: int | None = None,
-        values_only: bool | None = False,
+        values_only: bool = False,
     ) -> Iterator[tuple[Cell | _CellValue, ...]]:
         """
         Yield cells from the table one row at a time.
@@ -1026,7 +1025,7 @@ class Table(Cacheable):
         max_col: int | None = None,
         min_row: int | None = None,
         max_row: int | None = None,
-        values_only: bool | None = False,
+        values_only: bool = False,
     ) -> Iterator[tuple[Cell | _CellValue, ...]]:
         """
         Yield cells from the table one column at a time.
@@ -1126,7 +1125,7 @@ class Table(Cacheable):
         max_row: int | None = None,
         min_col: int | None = None,
         max_col: int | None = None,
-        values_only: bool | None = False,
+        values_only: bool = False,
     ) -> Iterator[Cell | _CellValue]:
         """
         Yield cells from the table in row-major order.
@@ -1423,7 +1422,7 @@ class Table(Cacheable):
 
     def add_row(  # noqa: C901
         self,
-        num_rows: int | None = 1,
+        num_rows: int = 1,
         start_row: int | None = None,
         default: str | float | bool | datetime | timedelta | None = None,
     ) -> None:
@@ -1471,7 +1470,7 @@ class Table(Cacheable):
         self.num_rows += num_rows
         self._model.number_of_rows(self._table_id, self.num_rows)
 
-        rows = []
+        rows: list[list[Cell]] = []
         for row in range(start_row, start_row + num_rows):
             rows.append(  # noqa: PERF401
                 [
@@ -1479,7 +1478,7 @@ class Table(Cacheable):
                     for col in range(self.num_cols)
                 ],
             )
-        self._data[start_row:start_row] = cast("list[list[Cell]]", rows)
+        self._data[start_row:start_row] = rows
 
         for row in range(start_row, self.num_rows):
             for col in range(self.num_cols):
@@ -1493,7 +1492,7 @@ class Table(Cacheable):
 
     def add_column(
         self,
-        num_cols: int | None = 1,
+        num_cols: int = 1,
         start_col: int | None = None,
         default: str | float | bool | datetime | timedelta | None = None,
     ) -> None:
@@ -1557,7 +1556,7 @@ class Table(Cacheable):
 
     def delete_row(
         self,
-        num_rows: int | None = 1,
+        num_rows: int = 1,
         start_row: int | None = None,
     ) -> None:
         """
@@ -1604,7 +1603,7 @@ class Table(Cacheable):
 
     def delete_column(
         self,
-        num_cols: int | None = 1,
+        num_cols: int = 1,
         start_col: int | None = None,
     ) -> None:
         """
@@ -1865,6 +1864,7 @@ class Table(Cacheable):
         cell = self._data[row][col]
         if (
             cell.is_merged
+            and cell.size is not None
             and ((side == "right" and cell.size[1] > 1) or (side == "bottom" and cell.size[0] > 1))
         ) or (
             isinstance(cell, MergedCell)

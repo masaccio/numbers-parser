@@ -11,24 +11,24 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from numbers_parser import RGB, Document, FileError, FileFormatError
-from numbers_parser.iwork import IWork, IWorkCrypto, IWorkHandler
+from numbers_parser.iwork import IWAFile, IWork, IWorkCrypto, IWorkHandler
 
 
 class NullHandler(IWorkHandler):
     """Dummy handler for testing."""
 
-    def store_file(self, filename: str, blob: bytes) -> None:
+    def store_file(self, filename: str, blob: bytes | IWAFile) -> None:
         """Dummy handler for testing."""  # noqa: D401
 
     def store_object(self, filename: str, identifier: int, archive: object) -> None:
         """Dummy handler for testing."""  # noqa: D401
 
     def allowed_format(self, _extension: str) -> bool:
-        """Dummy handler for testing."""  # noqa: D401
+        """bool: Return ``True`` if the filename extension is supported by the handler."""
         return True
 
     def allowed_version(self, _version: str) -> bool:
-        """Dummy handler for testing."""  # noqa: D401
+        """bool: Return ``True`` if the document version is allowed."""
         return True
 
 
@@ -38,7 +38,6 @@ def test_encrypted_read() -> None:
     sheets = doc.sheets
     table = sheets[0].tables[0]
     assert table.cell(0, 0).value == "Decryption"
-
     style_0_0 = table.cell(0, 0).style
     style_0_1 = table.cell(0, 1).style
     style_1_1 = table.cell(1, 1).style
