@@ -42,9 +42,7 @@ def test_cell_classes() -> None:
     doc = Document("tests/data/test-9.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
-    data = []
-    for row in tables[0].iter_rows():
-        data.append([type(c).__name__ for c in row])
+    data = [[type(c).__name__ for c in row] for row in tables[0].iter_rows()]
     assert data == XXX_TABLE_1_CLASSES
 
 
@@ -105,7 +103,7 @@ def test_invalid_merge_ranges_exceptions() -> None:
     table = doc.sheets[0].tables[0]
 
     with pytest.raises(TypeError, match="cell ranges must be strings"):
-        table.merge_cells(0.1234)
+        table.merge_cells(0.1234)  # type: ignore[arg-type]
 
     with pytest.raises(ValueError, match="invalid cell range A1:A2:A3"):
         table.merge_cells("A1:A2:A3")

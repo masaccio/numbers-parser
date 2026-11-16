@@ -323,11 +323,11 @@ def test_group_lookups() -> None:
 
     table = doc.sheets[0].tables["Maximal Nesting"]
     assert table.cell("D8").value == "Transport"
-    assert table.cell("B9").value == False  # noqa: E712
+    assert not table.cell("B9").value
     assert table.cell("C10").value == datetime(2011, 1, 30)
 
 
-def ref_data_to_types(item: Any) -> Any:
+def ref_data_to_types(item: Any) -> Any:  # noqa: ANN401
     """Convert reference data recursively into Python types."""
     if isinstance(item, dict):
         return {k: ref_data_to_types(v) for k, v in item.items()}
@@ -338,7 +338,7 @@ def ref_data_to_types(item: Any) -> Any:
     return type(item)
 
 
-def data_to_types(item: Any) -> Any:  # noqa: PLR0911
+def data_to_types(item: Any) -> Any:  # noqa: ANN401
     """Convert cell data recursively into corresponding value types."""
     if isinstance(item, dict):
         return {k: data_to_types(v) for k, v in item.items()}
@@ -408,6 +408,9 @@ def test_category_trees() -> None:
         assert list(categories.keys())[0:3] == ref_keys
 
 
+# ruff: noqa: ERA001
+
+
 def test_old_numbers() -> None:
     """Test first version of Numbers with categories."""
     doc = Document("tests/data/test-4.2.3.numbers")
@@ -436,7 +439,7 @@ def test_old_numbers() -> None:
     # assert table.cell(2, 0).formatted_value == "US$  100.50"
     assert table.cell(3, 0).formatted_value == "3/4"
 
-    sheet = doc.sheets["Categories"]
-    categories = sheet.tables["Categories"].categorized_data()
+    # sheet = doc.sheets["Categories"]
+    # categories = sheet.tables["Categories"].categorized_data()
     # TODO: these should pass
     # assert categories == TEXT_CATEGORIES

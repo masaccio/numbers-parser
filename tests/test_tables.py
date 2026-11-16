@@ -48,9 +48,9 @@ def test_file_exceptions() -> None:
     with pytest.raises(FileError) as e:
         _ = Document("tests/data/test-1.not-found")
     assert str(e.value) == "no such file or directory"
-    with pytest.raises(FileFormatError) as e:
+    with pytest.raises(FileFormatError) as fmt_err:
         _ = Document("tests/conftest.py")
-    assert str(e.value) == "invalid Numbers document (not a .numbers package/file)"
+    assert str(fmt_err.value) == "invalid Numbers document (not a .numbers package/file)"
 
 
 def test_sheet_exceptions() -> None:
@@ -60,12 +60,12 @@ def test_sheet_exceptions() -> None:
     with pytest.raises(IndexError) as e:
         _ = sheets[3]
     assert "out of range" in str(e.value)
-    with pytest.raises(KeyError) as e:
+    with pytest.raises(KeyError) as key_err:
         _ = sheets["invalid"]
-    assert "no sheet named" in str(e.value)
-    with pytest.raises(LookupError) as e:
-        _ = sheets[float(1)]
-    assert "invalid index" in str(e.value)
+    assert "no sheet named" in str(key_err.value)
+    with pytest.raises(LookupError) as lookup_err:
+        _ = sheets[float(1)]  # type: ignore[call-overload]
+    assert "invalid index" in str(lookup_err.value)
 
 
 def test_names_refs() -> None:

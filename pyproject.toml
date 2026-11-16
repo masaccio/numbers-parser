@@ -201,8 +201,10 @@ ban-relative-imports = "all"
   "T201",     # print() allowed in debug scripts
   ]
 "tests/**" = [
-  "C901",     # Function complexity can be high
+  "C901",     # Allow complex test functions
   "DTZ001",   # Numbers stores data in UTC
+  "PLR0911",  # Allow complex test functions (returns)
+  "PLR0912",  # Allow complex test functions (branches)
   "PLR2004",  # Allow checking for specific numbers
   "S101",     # Allow assert in tests
   "SLF001",   # Tests need to access internal data for coverage

@@ -10,6 +10,7 @@ ASTNODEARRAYARCHIVE
 ASTNODETYPE
 autoremove
 Avenir
+bgcolour
 capsys
 CFPF
 CFUUID
@@ -19,6 +20,7 @@ codesigning
 collab
 colorama
 colorset
+Colours
 Connell
 copybutton
 COUNTA
@@ -77,6 +79,7 @@ Neue
 nftt
 no cover
 nonspace
+numberz
 numrows
 optionflags
 osascript
@@ -123,6 +126,7 @@ strftime
 strikethru
 stylesheet
 submessages
+SUMIF
 TICKBOX
 tileid
 toks

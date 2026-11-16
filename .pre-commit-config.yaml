@@ -5,7 +5,7 @@ repos:
       - id: ruff-check
         entry: uv run --active ruff check
         args: [--config, pyproject.toml, --fix]
-        files: ^src/(numbers_parser|build)/.*\.py$
+        files: ^(src/(numbers_parser|build)|tests)/.*\.py$
         exclude: ^(src/numbers_parser/generated/.*\.py|src/build/protodump\.py)$
 
   - repo: https://github.com/pylint-dev/pylint
@@ -14,7 +14,7 @@ repos:
       - id: pylint
         entry: uv run --active pylint
         args: [--rcfile, pyproject.toml]
-        files: ^src/(numbers_parser|build)/.*\.py$
+        files: ^(src/(numbers_parser|build)|tests)/.*\.py$
         exclude: ^(src/numbers_parser/generated/.*\.py|src/build/protodump\.py)$
         additional_dependencies:
           [
@@ -41,5 +41,5 @@ repos:
       - id: mypy
         entry: uv run --active mypy
         args: [--config-file, pyproject.toml]
-        files: ^src/numbers_parser/[^/]+\.py$
+        files: ^(src/(numbers_parser|build)|tests)/.*\.py$
         exclude: ^(src/numbers_parser/generated/.*\.py|src/build/protodump\.py)$

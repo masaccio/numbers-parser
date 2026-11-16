@@ -19,9 +19,7 @@ def test_to_roman() -> None:
     assert to_roman(3999) == "MMMCMXCIX"
     assert to_roman(0) == "N"
 
-    with pytest.raises(ValueError, match="Number out of range for Roman numerals") as e:
+    with pytest.raises(ValueError, match="Number out of range for Roman numerals"):
         _ = to_roman(4000)
-    assert "Number out of range for Roman numerals" in str(e)
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError, match="Number out of range for Roman numerals"):
         _ = to_roman(-1)
-    assert "Number out of range for Roman numerals" in str(e)

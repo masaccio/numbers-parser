@@ -91,8 +91,11 @@ def test_zip_encryption_missing_verifier() -> None:
         zipf.writestr(".iwph", b"No hint")
     archive.seek(0)
 
-    with pytest.raises(FileError, match=r"invalid Numbers document \(missing encryption files\)"):
-        IWork(NullHandler())._read_objects_from_zipfile(ZipFile(archive))
+    with (
+        pytest.raises(FileError, match=r"invalid Numbers document \(missing encryption files\)"),
+        ZipFile(archive) as zipf,
+    ):
+        IWork(NullHandler())._read_objects_from_zipfile(zipf)
 
 
 def test_encrypted_save(configurable_save_file: Path) -> None:

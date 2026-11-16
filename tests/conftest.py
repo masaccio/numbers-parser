@@ -39,7 +39,7 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
 
 @pytest.fixture(name="configurable_save_file")
 def configurable_save_file_fixture(
-    request: pytest.FixtureRequest,  # noqa: ARG001
+    request: pytest.FixtureRequest,  # noqa: ARG001 # pylint: disable=unused-argument
     tmp_path: Path,
     pytestconfig: pytest.Config,
 ) -> Path | str:

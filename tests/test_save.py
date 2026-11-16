@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from numbers_parser import Document, EmptyCell, MergedCell, NumberCell, TextCell
+from numbers_parser import Document, EmptyCell, MergedCell, NumberCell, Table, TextCell
 from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
     DEFAULT_ROW_COUNT,
@@ -132,7 +132,7 @@ def test_create_sheet(configurable_save_file: Path) -> None:
     sheets = doc.sheets
 
     with pytest.raises(IndexError) as e:
-        _ = doc.add_sheet("SheeT 1")
+        doc.add_sheet("SheeT 1")
     assert "sheet 'SheeT 1' already exists" in str(e.value)
 
     doc.add_sheet("New Sheet", "New Table")
@@ -273,7 +273,7 @@ def test_edit_table_rows_columns(configurable_save_file: Path) -> None:
     table_num_rows = table.num_rows
     table_num_cols = table.num_cols
 
-    def check_cell_cords(table: object) -> None:
+    def check_cell_cords(table: Table) -> None:
         for row in range(table.num_rows):
             for col in range(table.num_cols):
                 if table.cell(row, col).row != row or table.cell(row, col).col != col:
@@ -282,11 +282,11 @@ def test_edit_table_rows_columns(configurable_save_file: Path) -> None:
                 assert table.cell(row, col).col == col
 
     def add_row(
-        table: object,
+        table: Table,
         table_num_rows: int,
         num_rows: int = 1,
         start_row: int | None = None,
-        default: object = None,
+        default: str | float | bool | datetime | timedelta | None = None,
     ) -> int:
         table.add_row(num_rows, start_row, default)
         table_num_rows += num_rows
@@ -295,11 +295,11 @@ def test_edit_table_rows_columns(configurable_save_file: Path) -> None:
         return table_num_rows
 
     def add_column(
-        table: object,
+        table: Table,
         table_num_cols: int,
         num_cols: int = 1,
         start_col: int | None = None,
-        default: object = None,
+        default: str | float | bool | datetime | timedelta | None = None,
     ) -> int:
         table.add_column(num_cols, start_col, default)
         table_num_cols += num_cols
@@ -308,7 +308,7 @@ def test_edit_table_rows_columns(configurable_save_file: Path) -> None:
         return table_num_cols
 
     def delete_row(
-        table: object,
+        table: Table,
         table_num_rows: int,
         num_rows: int = 1,
         start_row: int | None = None,
@@ -320,7 +320,7 @@ def test_edit_table_rows_columns(configurable_save_file: Path) -> None:
         return table_num_rows
 
     def delete_column(
-        table: object,
+        table: Table,
         table_num_cols: int,
         num_cols: int = 1,
         start_col: int | None = None,
@@ -344,7 +344,7 @@ def test_edit_table_rows_columns(configurable_save_file: Path) -> None:
 
     doc.save(configurable_save_file)
 
-    ref_values = []
+    ref_values: list[list[str]] = []
     for row in range(NUM_ROW_COLS):
         ref_values.append([])
         for col in range(NUM_ROW_COLS):

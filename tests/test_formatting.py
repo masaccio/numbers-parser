@@ -381,7 +381,7 @@ def test_custom_formatting(pytestconfig: pytest.Config) -> None:
             check.equal(f"@{i}:{value}", f"@{i}:{ref}")
             if value != ref:
                 fails += 1
-            if max_check_fails > 0 and fails >= max_check_fails:
+            if 0 < fails >= max_check_fails:
                 raise AssertionError
 
 
@@ -403,7 +403,7 @@ def test_custom_formatting_stress(pytestconfig: pytest.Config) -> None:
         check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'", row[0].value)
         if value != ref:
             fails += 1
-        if max_check_fails > 0 and fails >= max_check_fails:
+        if 0 < fails >= max_check_fails:
             raise AssertionError
 
 
@@ -468,8 +468,8 @@ def test_write_date_format(configurable_save_file: Path) -> None:
         table.set_cell_formatting("A1", "number", date_time_format="yyyy")
     assert "cannot use number formatting for cells of type TextCell" in str(e)
 
-    for row in range(len(DATE_FORMATS)):
-        for col in range(len(TIME_FORMATS)):
+    for row in range(len(DATE_FORMATS)):  # pylint: disable=consider-using-enumerate
+        for col in range(len(TIME_FORMATS)):  # pylint: disable=consider-using-enumerate
             date_time_format = " ".join([DATE_FORMATS[row], TIME_FORMATS[col]]).strip()
             table.write(row, col, ref_date)
             table.set_cell_formatting(row, col, "datetime", date_time_format=date_time_format)
@@ -673,17 +673,15 @@ def test_write_mixed_number_formats(configurable_save_file: Path) -> None:
                     col += 1
             row += 1
 
-    with pytest.raises(TypeError) as e:
-        table.write(row, 0, -1234)
+    table.write(row, 0, -1234)
+    with pytest.raises(TypeError, match="base_use_minus_sign must be True for base 10"):
         table.set_cell_formatting(row, 0, "base", base=10, base_use_minus_sign=False)
-    assert "base_use_minus_sign must be True for base 10" in str(e)
 
     for base in [10, 2, 8, 16, 36]:
         col = 0
         base_values = {
             0: True,
             1234: True,
-            -1234: True,
             -1234: False,  # False formats as two's complement
             -(0x1F0000007F): False,
             (-0x7FFFFFFFFFF): False,
@@ -888,7 +886,7 @@ def test_write_custom_numbers(configurable_save_file: Path, pytestconfig: pytest
         check.equal(f"@{i}:'{formatted_val}'", f"@{i}:'{ref}'", cells[0].value)
         if formatted_val != ref:
             fails += 1
-        if max_check_fails > 0 and fails >= max_check_fails:
+        if 0 < fails >= max_check_fails:
             raise AssertionError
 
 
@@ -945,7 +943,7 @@ def run_test_interactive_formats(filename: str | Path) -> None:
     assert table.cell(1, 2).formatted_value == STAR_RATING_VALUE * 5
 
 
-def test_interactive_formats(configurable_save_file: Path) -> None:
+def test_interactive_formats() -> None:
     """Test reading interactive control formats."""
     run_test_interactive_formats("tests/data/test-actions.numbers")
 
@@ -955,8 +953,8 @@ def test_write_interactive_formats(configurable_save_file: Path) -> None:
     doc = Document()
     table = doc.sheets[0].tables[0]
 
-    table.write(0, 0, False)
-    table.write(0, 1, True)
+    table.write(0, 0, False)  # noqa: FBT003
+    table.write(0, 1, True)  # noqa: FBT003
     table.set_cell_formatting(0, 0, "tickbox")
     table.set_cell_formatting(0, 1, "tickbox")
 

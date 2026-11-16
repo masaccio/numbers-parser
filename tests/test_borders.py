@@ -18,7 +18,7 @@ def check_border(cell: Cell, side: str, test_value: str) -> bool:
     else:
         values = test_value.split(",")
         width = float(values[0])
-        color = eval(values[1].replace(";", ","))  # noqa: S307
+        color = eval(values[1].replace(";", ","))  # pylint: disable=eval-used # noqa: S307
         style = values[2]
         if border_value is None:
             return False
@@ -292,7 +292,7 @@ def invert_border_test(test: str) -> tuple[str | None, Border | None]:
         return None, None
     values = test.split(",")
     width = float(values[0])
-    color = eval(values[1].replace(";", ","))  # noqa: S307
+    color = eval(values[1].replace(";", ","))  # pylint: disable=eval-used # noqa: S307
     style = values[2]
     width = round(width * 2.0, 1) if width < 4.0 else round(width / 2.0, 1)
 
@@ -328,7 +328,7 @@ def invert_tests(tests: dict[str, Any]) -> tuple[str, list[Border | None]]:
             new_borders.append(border)
             test_string += BORDER_TO_TAG_MAP[side] + "=" + str(new_tests[-1]) + "\n"
         else:
-            for i in range(len(test)):
+            for i in range(len(test)):  # pylint: disable=consider-using-enumerate
                 (new_test, border) = invert_border_test(test[i])
                 new_tests.append(new_test)
                 new_borders.append(border)
@@ -438,7 +438,11 @@ def test_resave_borders(configurable_save_file: Path) -> None:
                                     border = borders.pop(0)
                                     if border is not None:
                                         table.set_cell_border(
-                                            row + height - 1, col, side, border, 1
+                                            row + height - 1,
+                                            col,
+                                            side,
+                                            border,
+                                            1,
                                         )
                             case "left":
                                 for offset in range(height):

@@ -118,12 +118,12 @@ STYLE_DEFAULTS = {
 }
 
 
-def check_style(style: Style, **kwargs: Any) -> bool:
+def check_style(style: Style, **kwargs: Any) -> bool:  # noqa: ANN401
     """Check if a Style object matches expected attributes."""
     matches = []
-    for attr in STYLE_DEFAULTS:
-        ref = kwargs[attr] if attr in kwargs else STYLE_DEFAULTS[attr]
-        matches.append(check.equal(getattr(style, attr), ref))
+    matches = []
+    for attr, default_val in STYLE_DEFAULTS.items():
+        matches.append(check.equal(getattr(style, attr), kwargs.get(attr, default_val)))
     return all(matches)
 
 
@@ -134,12 +134,12 @@ def decode_style_attrs(attrs: str) -> dict[str, Any]:
     if "=" in attrs:
         (attr, ref) = attrs.split("=")
         if isinstance(ref, str):
-            if "color" in attr:
-                ref = eval(ref.replace(";", ","))  # noqa: S307
+            if "color" in attr:  # pylint: disable=eval-used
+                ref = eval(ref.replace(";", ","))  # pylint: disable=eval-used # noqa: S307
             elif "alignment" in attr:
-                ref = eval(f"Alignment({ref.replace(';', ',')})")  # noqa: S307
+                ref = eval(f"Alignment({ref.replace(';', ',')})")  # pylint: disable=eval-used # noqa: S307
             else:
-                ref = eval(ref)  # noqa: S307
+                ref = eval(ref)  # pylint: disable=eval-used # noqa: S307
 
         return {attr: ref}
     return {attrs: True}
@@ -280,16 +280,15 @@ def test_style_exceptions() -> None:
     """Test exceptions raised by invalid style parameters."""
     doc = Document()
     table = doc.sheets[0].tables[0]
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(TypeError, match="RGB color must be an RGB"):
         doc.add_style(bg_color=(0, 0, 0, 0))  # type: ignore[arg-type]
-    assert "RGB color must be an RGB" in str(e)
-    with pytest.raises(TypeError) as e:
+
+    with pytest.raises(TypeError, match="RGB color must be an RGB"):
         doc.add_style(bg_color=(0, 0, 1.0))  # type: ignore[arg-type]
-    assert "RGB color must be an RGB" in str(e)
-    with pytest.raises(TypeError) as e:
-        style = Style(bg_color=(0, 0, 0))  # type: ignore[arg-type]
+
+    style = Style(bg_color=(0, 0, 0))  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="RGB color must be an RGB"):
         style.bg_color = object()  # type: ignore[assignment]
-    assert "RGB color must be an RGB" in str(e)
 
     style = doc.add_style(bg_color=(100, 100, 100))  # type: ignore[arg-type]
     assert style.bg_color == RGB(100, 100, 100)
@@ -349,7 +348,7 @@ def test_style_exceptions() -> None:
     assert "font name must be a string" in str(e)
 
     for field in ["bold", "italic", "underline", "strikethrough"]:
-        with pytest.raises(TypeError) as e:
+        with pytest.raises(TypeError) as e:  # noqa: PT012
             attrs: dict[str, Any] = {field: "invalid"}
             _ = Style(**attrs)
         assert f"{field} argument must be boolean" in str(e)

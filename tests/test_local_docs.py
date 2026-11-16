@@ -4,6 +4,7 @@ import os
 import traceback
 import warnings
 from collections.abc import Generator
+from typing import cast
 
 import pytest
 
@@ -11,7 +12,7 @@ from numbers_parser import Cell, Document
 from numbers_parser.constants import DEFAULT_FONT
 
 ALL_DOCS_DIRS = [
-    os.path.join(os.environ.get("HOME"), x)
+    os.path.join(cast("str", os.environ.get("HOME")), x)
     for x in [
         "Documents",
         "Library/Mobile Documents/com~apple~Numbers/Documents",
@@ -83,7 +84,7 @@ def test_local_docs() -> None:
                 for test in tests:
                     test(doc)
                     test_ok_count += 1
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             exc = e
         else:
             captured_warnings = [w for w in captured_warnings if not allowed_warning(w)]

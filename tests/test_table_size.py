@@ -49,29 +49,23 @@ def test_header_size(configurable_save_file: Path) -> None:
     doc = Document()
     table = doc.sheets[0].tables[0]
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError, match="Number of headers cannot be negative"):
         table.num_header_rows = -10
-    assert str(e.value) == "Number of headers cannot be negative"
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError, match="Number of headers cannot exceed the number of rows"):
         table.num_header_rows = 20
-    assert str(e.value) == "Number of headers cannot exceed the number of rows"
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError, match="Number of headers cannot exceed 5 rows"):
         table.num_header_rows = 6
-    assert str(e.value) == "Number of headers cannot exceed 5 rows"
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError, match="Number of headers cannot be negative"):
         table.num_header_cols = -10
-    assert str(e.value) == "Number of headers cannot be negative"
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError, match="Number of headers cannot exceed the number of columns"):
         table.num_header_cols = 20
-    assert str(e.value) == "Number of headers cannot exceed the number of columns"
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError, match="Number of headers cannot exceed 5 columns"):
         table.num_header_cols = 6
-    assert str(e.value) == "Number of headers cannot exceed 5 columns"
 
     assert table.num_header_rows == 1
     assert table.num_header_cols == 1
@@ -103,15 +97,21 @@ def test_new_doc(configurable_save_file: Path) -> None:
     )
     doc.save(configurable_save_file)
     new_doc = Document(configurable_save_file)
+    table = new_doc.sheets[0].tables[0]
     assert new_doc.sheets[0].name == "Test Sheet"
-    assert new_doc.sheets[0].tables[0].name == "Test Table"
-    assert new_doc.sheets[0].tables[0].num_header_rows == 2
-    assert new_doc.sheets[0].tables[0].num_rows == 10
-    assert new_doc.sheets[0].tables[0].num_cols == 5
-    assert new_doc.sheets[0].tables[0].cell("A1").style.bold
-    assert new_doc.sheets[0].tables[0].cell("B1").style.bold
-    assert new_doc.sheets[0].tables[0].cell("B2").style.bold
-    assert not new_doc.sheets[0].tables[0].cell("C3").style.bold
+    assert table.name == "Test Table"
+    assert table.num_header_rows == 2
+    assert table.num_rows == 10
+    assert table.num_cols == 5
+
+    for ref in ("A1", "B1", "B2"):
+        style = table.cell(ref).style
+        assert style is not None
+        assert style.bold
+
+    c3_style = table.cell("C3").style
+    assert c3_style is not None
+    assert not c3_style.bold
 
 
 def test_table_options(configurable_save_file: Path) -> None:

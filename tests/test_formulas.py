@@ -1,11 +1,11 @@
 """Tests for cell formulas."""
 
-from pathlib import Path
 from typing import Any
 
 import pytest
 import pytest_check as check
 
+import numbers_parser.generated.TSTArchives_pb2 as TSTArchives
 from numbers_parser import Document, Table, UnsupportedWarning
 
 TABLE_1_FORMULAS = [
@@ -68,14 +68,16 @@ def test_table_functions() -> None:
     compare_tables(table, TABLE_2_FORMULAS)
 
 
-def test_exceptions(configurable_save_file: Path) -> None:
+def test_exceptions() -> None:
     """Test warnings for unsupported or malformed formula AST nodes."""
 
-    def get_formula(doc: Document) -> Any:
+    def get_formula(doc: Document) -> Any:  # noqa: ANN401
         table_id = doc.sheets[0].tables[0]._table_id
-        base_data_store = doc._model.objects[table_id].base_data_store
-        formula_table_id = base_data_store.formula_table.identifier
-        formula_table = doc._model.objects[formula_table_id]
+        base_data_store = doc._model.table_model(table_id).base_data_store
+        formula_table = doc._model.get_object(
+            base_data_store.formula_table.identifier,
+            TSTArchives.TableDataList,
+        )
         return formula_table.entries[0].formula
 
     doc = Document("tests/data/simple-func.numbers")

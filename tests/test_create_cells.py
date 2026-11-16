@@ -17,15 +17,14 @@ def test_edit_cell_values(configurable_save_file: Path) -> None:
     table = tables[0]
 
     with pytest.raises(IndexError) as e:
-        table.write(0)
+        table.write(0)  # type: ignore[call-overload]
     assert "invalid cell reference" in str(e.value)
-    with pytest.raises(ValueError) as e:
-        table.write(0, 0, object())
-    assert "determine cell type from type" in str(e.value)
+    with pytest.raises(ValueError, match="determine cell type from type"):
+        table.write(0, 0, object())  # type: ignore[call-overload]
 
     table.write("B2", "new_b2")
     table.write(1, 2, "new_c2")
-    table.write(2, 0, True)
+    table.write(2, 0, True)  # noqa: FBT003
     table.write(2, 1, 7890)
     table.write(2, 2, 78.90)
     table.write(4, 3, datetime(2021, 6, 15))
@@ -88,21 +87,17 @@ def test_large_table(configurable_save_file: Path) -> None:
     for i in range(300):
         table.write(i, i, "wide")
 
-    with pytest.raises(ValueError) as e:  # noqa: PT011
+    with pytest.raises(ValueError, match="rows cannot exceed"):
         table.add_row(MAX_ROW_COUNT - table.num_rows + 1)
-    assert "rows cannot exceed" in str(e.value)
 
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(IndexError, match="exceeds maximum row"):
         table.write(MAX_ROW_COUNT, 0, "")
-    assert "exceeds maximum row" in str(e.value)
 
-    with pytest.raises(ValueError) as e:  # noqa: PT011
+    with pytest.raises(ValueError, match="columns cannot exceed"):
         table.add_column(MAX_COL_COUNT - table.num_cols + 1)
-    assert "columns cannot exceed" in str(e.value)
 
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(IndexError, match="exceeds maximum column"):
         table.write(0, MAX_COL_COUNT, "")
-    assert "exceeds maximum column" in str(e.value)
 
     doc.save(configurable_save_file)
 

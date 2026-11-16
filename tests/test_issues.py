@@ -116,9 +116,7 @@ def test_issue_3() -> None:
     doc = Document("tests/data/issue-3.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
-    ref = []
-    for row in tables[0].iter_rows():
-        ref.append(tuple([x.value for x in row]))
+    ref = [tuple([x.value for x in row]) for row in tables[0].iter_rows()]
     assert ref == ISSUE_3_REF
 
     ref = []
