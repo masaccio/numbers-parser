@@ -99,7 +99,7 @@ exclude = ["*tests*", "numbers_parser.data"]
 namespaces = false  # disable scanning PEP 420 namespaces
 
 [tool.setuptools.package-data]
-"numbers_parser" = ["data/*"]
+"numbers_parser" = ["data/*", "py.typed"]
 
 [tool.coverage.run]
 branch = true
@@ -239,6 +239,7 @@ disable = [
 ignored-modules = ["Cocoa", "lldb"]
 
 [tool.mypy]
+mypy_path = "src"
 exclude = [
     "src/numbers_parser/generated/",
     "src/debug/lldbutil.py",
