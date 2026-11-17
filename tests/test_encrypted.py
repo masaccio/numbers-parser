@@ -9,6 +9,7 @@ import pytest
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from google.protobuf.message import Message as ProtoMessage
 
 from numbers_parser import RGB, Document, FileError, FileFormatError
 from numbers_parser.iwork import IWAFile, IWork, IWorkCrypto, IWorkHandler
@@ -20,7 +21,7 @@ class NullHandler(IWorkHandler):
     def store_file(self, filename: str, blob: bytes | IWAFile) -> None:
         """Dummy handler for testing."""  # noqa: D401
 
-    def store_object(self, filename: str, identifier: int, archive: object) -> None:
+    def store_object(self, filename: str, identifier: int, archive: ProtoMessage) -> None:
         """Dummy handler for testing."""  # noqa: D401
 
     def allowed_format(self, _extension: str) -> bool:

@@ -64,6 +64,17 @@ def test_containers() -> None:
     assert len(doc._model.objects) == 738
 
 
+def test_invalid_object_lookup() -> None:
+    """Test object lookup type checks."""
+    doc = Document("tests/data/test-1.numbers")
+    table_id = doc.default_table._table_id
+    with pytest.raises(
+        TypeError,
+        match=f"Object {table_id} has type TableModelArchive, expected FormatStructArchive",
+    ):
+        _ = doc._model.get_object(table_id, TSKArchives.FormatStructArchive)
+
+
 def test_ranges() -> None:
     """Test Excel range and column name conversions."""
     assert xl_range(2, 2, 2, 2) == "C3"

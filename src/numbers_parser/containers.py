@@ -4,7 +4,7 @@ import math
 import re
 from collections.abc import Iterator
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, cast, overload
 
 from google.protobuf.message import Message as ProtoMessage
 
@@ -111,11 +111,10 @@ class ObjectStore(IWorkHandler):
         """Save the value."""
         self._iwork.save(filepath, self._file_store, package, password, hint)
 
-    def store_object(self, filename: str, identifier: int, archive: object) -> None:
+    def store_object(self, filename: str, identifier: int, archive: ProtoMessage) -> None:
         """Store object."""
-        if isinstance(archive, ProtoMessage):
-            self._objects[identifier] = archive
-            self._object_to_filename_map[identifier] = filename
+        self._objects[identifier] = archive
+        self._object_to_filename_map[identifier] = filename
 
     def store_file(self, filename: str, blob: bytes | IWAFile) -> None:
         """Store file."""
@@ -161,13 +160,11 @@ class ObjectStore(IWorkHandler):
                 chunks = {"chunks": [{"archives": [iwa_segment.to_dict()]}]}
                 self._file_store[iwa_pathname] = IWAFile.from_dict(chunks)
             else:
-                iwa_obj = self._file_store[iwa_pathname]
-                if isinstance(iwa_obj, IWAFile):
-                    iwa_obj.chunks[0].archives.append(iwa_segment)
-        else:
-            iwa_obj = self._file_store[iwa_pathname]
-            if isinstance(iwa_obj, IWAFile):
+                iwa_obj = cast("IWAFile", self._file_store[iwa_pathname])
                 iwa_obj.chunks[0].archives.append(iwa_segment)
+        else:
+            iwa_obj = cast("IWAFile", self._file_store[iwa_pathname])
+            iwa_obj.chunks[0].archives.append(iwa_segment)
 
         new_obj = cls(**object_dict)
         self._objects[new_id] = new_obj
@@ -182,11 +179,10 @@ class ObjectStore(IWorkHandler):
         This keeps the file store ready for saving to a new document.
         """
         for obj_id, obj in self._objects.items():
-            iwa_file = self._file_store[self._object_to_filename_map[obj_id]]
-            if isinstance(iwa_file, IWAFile):
-                copy_object_to_iwa_file(iwa_file, obj, obj_id)
+            iwa_file = cast("IWAFile", self._file_store[self._object_to_filename_map[obj_id]])
+            copy_object_to_iwa_file(iwa_file, obj, obj_id)
 
-    def remove_unreferenced_objects(self) -> None:  # noqa: C901
+    def remove_unreferenced_objects(self) -> None:
         """Remove objects from the ObjectStore that are not referenced."""
         referenced_ids = {DOCUMENT_ID, PACKAGE_ID}
 
@@ -216,12 +212,11 @@ class ObjectStore(IWorkHandler):
         for obj_id in unreferenced_ids:
             del self._objects[obj_id]
             filename = self._object_to_filename_map.pop(obj_id)
-            iwa_file = self._file_store[filename]
-            if isinstance(iwa_file, IWAFile):
-                for chunk in iwa_file.chunks:
-                    chunk.archives = [
-                        arch for arch in chunk.archives if arch.header.identifier != obj_id
-                    ]
+            iwa_file = cast("IWAFile", self._file_store[filename])
+            for chunk in iwa_file.chunks:
+                chunk.archives = [
+                    arch for arch in chunk.archives if arch.header.identifier != obj_id
+                ]
 
     @property
     def file_store(self) -> dict[str, bytes | IWAFile]:

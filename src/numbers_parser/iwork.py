@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from io import BytesIO
 from os import urandom
 from sys import version_info
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from warnings import warn
 from zipfile import BadZipFile, ZipFile
 
@@ -26,6 +26,8 @@ from numbers_parser.iwafile import IWAFile, is_iwa_file
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from google.protobuf.message import Message as ProtoMessage
+
 logger = logging.getLogger(__name__)
 debug = logger.debug
 
@@ -38,7 +40,7 @@ class IWorkHandler(ABC):
         """Store a protobuf archive."""
 
     @abstractmethod
-    def store_object(self, filename: str, identifier: int, archive: object) -> None:
+    def store_object(self, filename: str, identifier: int, archive: ProtoMessage) -> None:
         """Store a binary blob of data from the iWork package."""
 
     @abstractmethod
@@ -467,7 +469,11 @@ class IWork:
             for archive in iwaf.chunks[0].archives:
                 identifier = archive.header.identifier
                 debug("store IWA: filename=%s", filename)
-                self._handler.store_object(filename, identifier, archive.objects[0])
+                self._handler.store_object(
+                    filename,
+                    identifier,
+                    cast("ProtoMessage", archive.objects[0]),
+                )
 
             self._handler.store_file(filename, iwaf)
         else:

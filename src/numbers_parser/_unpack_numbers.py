@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import cast
 
 from compact_json import Formatter
+from google.protobuf.message import Message as ProtoMessage
 
 from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser import _get_version
@@ -78,7 +79,7 @@ class NumbersUnpacker(IWorkHandler):
             with open(target_path, "wb") as out:
                 out.write(blob)
 
-    def store_object(self, filename: str, identifier: int, archive: object) -> None:
+    def store_object(self, filename: str, identifier: int, archive: ProtoMessage) -> None:
         """Store object."""
 
     def ensure_directory_exists(self, path: str) -> None:
