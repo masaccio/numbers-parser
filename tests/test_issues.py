@@ -487,7 +487,6 @@ def test_issue_73(configurable_save_file: Path) -> None:
         match="Pivot table 'Table 1 Pivot' may be corrupted by save.",
     ):
         doc.save(configurable_save_file)
-    doc.save(configurable_save_file)
 
 
 def test_issue_74_1(configurable_save_file: Path) -> None:
