@@ -136,7 +136,7 @@ deps = [
   "colorama"
 ]
 commands = [
-  ["pytest", "tests/", "--import-mode", "importlib", "-n", "logical", "--no-cov"]
+  ["pytest", "-qq", "tests/", "--import-mode", "importlib", "-n", "logical", "--no-cov"]
 ]
 
 [tool.isort]
