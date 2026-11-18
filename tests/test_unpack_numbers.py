@@ -334,6 +334,6 @@ def test_unpack_path_traversal_prevention(tmp_path: Path) -> None:
         with zipfile.ZipFile(evil_file, "r") as z:
             for filename in z.namelist():
                 blob = z.read(filename)
-                unpacker.store_file(filename, blob)
+                unpacker.store_blob(filename, blob)
 
     assert not (escape_target_dir / "PWNED").exists()

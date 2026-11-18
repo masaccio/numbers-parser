@@ -355,7 +355,7 @@ def collect_instances(doc: Document) -> dict[str, list[ProtoMessage]]:
     for obj_id in store._objects:
         for m in iter_messages(store[obj_id]):
             instances.setdefault(m.DESCRIPTOR.full_name, []).append(m)
-    for iwa in store.file_store.values():
+    for iwa in store.archive_store.values():
         for chunk in getattr(iwa, "chunks", []):
             for archive in chunk.archives:
                 for m in iter_messages(archive.header):

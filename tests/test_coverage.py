@@ -287,7 +287,7 @@ def test_bad_image_filenames() -> None:
     """Test missing background image file warning."""
     doc = Document("tests/data/issue-69b.numbers")
     table = doc.sheets[0].tables[0]
-    _ = table._model.objects.file_store.pop("Data/numbers_1-16.png")
+    _ = table._model.objects.blob_store.pop("Data/numbers_1-16.png")
     with pytest.warns(  # noqa: PT031
         RuntimeWarning,
         match="Cannot find file 'numbers_1.png' in Numbers archive",
@@ -296,6 +296,12 @@ def test_bad_image_filenames() -> None:
         assert cell_style is not None
         assert cell_style.bg_image is None
     assert len(record) == 1
+
+
+def test_archive_store() -> None:
+    """Check archive_store method (only used in docs build)."""
+    doc = Document("tests/data/test-1.numbers")
+    assert len(doc._model.objects.archive_store) == 97
 
 
 def test_set_number_defaults() -> None:

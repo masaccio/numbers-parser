@@ -1358,7 +1358,7 @@ class Cell(_CellStorageFlags, Cacheable):
         datas = self._model.package_metadata.datas
         stored_filename = next(x.file_name for x in datas if x.identifier == image_id)
         preferred_filename = next(x.preferred_file_name for x in datas if x.identifier == image_id)
-        all_paths = self._model.objects.file_store.keys()
+        all_paths = self._model.objects.blob_store.keys()
         image_pathnames = [x for x in all_paths if x == f"Data/{stored_filename}"]
 
         if len(image_pathnames) == 0:
@@ -1368,7 +1368,7 @@ class Cell(_CellStorageFlags, Cacheable):
                 stacklevel=3,
             )
             return None
-        image_data = self._model.objects.file_store[image_pathnames[0]]
+        image_data = self._model.objects.blob_store[image_pathnames[0]]
         if not isinstance(image_data, bytes):
             msg = f"Expected raw bytes for image '{preferred_filename}'"
             raise FileFormatError(msg)

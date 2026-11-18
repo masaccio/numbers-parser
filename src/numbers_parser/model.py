@@ -3043,10 +3043,10 @@ class NumbersModel(Cacheable):
     def store_image(self, data: bytes, filename: str) -> None:
         """Store image data in the file store."""
         stored_filename = f"Data/{filename}"
-        if stored_filename in self.objects.file_store:
+        if stored_filename in self.objects.blob_store:
             msg = f"{filename}: image already exists in document"
             raise IndexError(msg)
-        self.objects.file_store[stored_filename] = data
+        self.objects.blob_store[stored_filename] = data
 
     def next_image_identifier(self) -> int:
         """Return the next available ID in the list of images in the document."""

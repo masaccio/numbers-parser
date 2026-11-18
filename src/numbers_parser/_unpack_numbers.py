@@ -41,48 +41,54 @@ class NumbersUnpacker(IWorkHandler):
     redact_strings: bool = False
     output_dir: str | None = None
 
-    def store_file(self, filename: str, blob: bytes | IWAFile) -> None:
+    def store_archive(self, filename: str, iwa: IWAFile) -> None:
         """Store a protobuf archive."""
+        target_path = self._resolve_pathname(filename).replace(".iwa", ".json")
+        with open(target_path, "w", encoding="utf-8") as out:
+            if self.redact_strings:
+                for chunk in iwa.chunks:
+                    for archive in chunk.archives:
+                        archive.redact_strings()
+            data = iwa.to_dict()
+            if self.hex_uuids or self.pretty:
+                self.prettify_uuids(data)
+            if self.pretty_storage or self.pretty:
+                self.prettify_cell_storage(data)
+            if self.compact_json or self.pretty:
+                formatter = Formatter()
+                formatter.indent_spaces = 2
+                formatter.max_inline_length = 180
+                pretty_json = formatter.serialize(data)
+                out.write(pretty_json)
+            else:
+                json.dump(data, out, sort_keys=True, indent=2)
+
+    def store_blob(self, filename: str, blob: bytes) -> None:
+        """Store a binary blob."""
+        if filename.endswith("/"):
+            return
+
+        target_path = self._resolve_pathname(filename)
+        with open(target_path, "wb") as out:
+            out.write(blob)
+
+    def store_object(self, filename: str, identifier: int, archive: ProtoMessage) -> None:
+        """Store a decoded protobuf message."""
+
+    def _resolve_pathname(self, filename: str) -> str:
+        """Resolve absolute paths to prevent Zip Slip."""
         filename = re.sub(r".*\.numbers/", "", str(filename))
 
-        # Resolve absolute paths to prevent Zip Slip
         out_abs = os.path.realpath(str(self.output_dir))
         target_abs = os.path.realpath(os.path.join(out_abs, filename))
         if os.path.commonpath([out_abs, target_abs]) != out_abs:
             msg = f"Path traversal attempt detected in archive member: {filename}"
             raise FileFormatError(msg)
 
-        self.ensure_directory_exists(target_abs)
-        target_path = os.path.join(str(self.output_dir), filename)
-        if isinstance(blob, IWAFile):
-            target_path = target_path.replace(".iwa", "")
-            target_path += ".json"
-            with open(target_path, "w", encoding="utf-8") as out:
-                if self.redact_strings:
-                    for chunk in blob.chunks:
-                        for archive in chunk.archives:
-                            archive.redact_strings()
-                data = blob.to_dict()
-                if self.hex_uuids or self.pretty:
-                    self.prettify_uuids(data)
-                if self.pretty_storage or self.pretty:
-                    self.prettify_cell_storage(data)
-                if self.compact_json or self.pretty:
-                    formatter = Formatter()
-                    formatter.indent_spaces = 2
-                    formatter.max_inline_length = 180
-                    pretty_json = formatter.serialize(data)
-                    out.write(pretty_json)
-                else:
-                    json.dump(data, out, sort_keys=True, indent=2)
-        elif not filename.endswith("/"):
-            with open(target_path, "wb") as out:
-                out.write(blob)
+        self._ensure_directory_exists(target_abs)
+        return os.path.join(str(self.output_dir), filename)
 
-    def store_object(self, filename: str, identifier: int, archive: ProtoMessage) -> None:
-        """Store object."""
-
-    def ensure_directory_exists(self, path: str) -> None:
+    def _ensure_directory_exists(self, path: str) -> None:
         """Ensure that a path's directory exists."""
         parts = os.path.split(path)
         with contextlib.suppress(OSError):

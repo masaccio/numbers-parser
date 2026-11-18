@@ -4,7 +4,7 @@ import math
 import re
 from collections.abc import Iterator
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, overload
 
 from google.protobuf.message import Message as ProtoMessage
 
@@ -92,7 +92,8 @@ class ObjectStore(IWorkHandler):
     def __init__(self, filepath: Path, password: str | None) -> None:
         """Initialize the instance state."""
         self._objects: dict[int, ProtoMessage] = {}
-        self._file_store: dict[str, IWAFile | bytes] = {}
+        self._blob_store: dict[str, bytes] = {}
+        self._archive_store: dict[str, IWAFile] = {}
         self._object_to_filename_map: dict[int, str] = {}
         self._dirty: dict[int, bool] = {}
         self._iwork = IWork(handler=self)
@@ -109,16 +110,20 @@ class ObjectStore(IWorkHandler):
         hint: str = DEFAULT_PASSWORD_HINT,
     ) -> None:
         """Save the value."""
-        self._iwork.save(filepath, self._file_store, package, password, hint)
+        self._iwork.save(filepath, self._archive_store, self._blob_store, package, password, hint)
 
     def store_object(self, filename: str, identifier: int, archive: ProtoMessage) -> None:
         """Store object."""
         self._objects[identifier] = archive
         self._object_to_filename_map[identifier] = filename
 
-    def store_file(self, filename: str, blob: bytes | IWAFile) -> None:
-        """Store file."""
-        self._file_store[filename] = blob
+    def store_archive(self, filename: str, iwa: IWAFile) -> None:
+        """Store an IWA file."""
+        self._archive_store[filename] = iwa
+
+    def store_blob(self, filename: str, blob: bytes) -> None:
+        """Store a binary blob."""
+        self._blob_store[filename] = blob
 
     def allowed_format(self, extension: str) -> bool:
         """bool: Return ``True`` if the filename extension is supported by the handler."""
@@ -148,7 +153,7 @@ class ObjectStore(IWorkHandler):
 
         Return the message ID and object. Create the IWA file if it is missing.
         """
-        paths = [k for k in self._file_store if iwa_file in k]
+        paths = [k for k in self._archive_store if iwa_file in k]
         iwa_pathname = None if len(paths) == 0 else paths[0]
 
         new_id = self.new_message_id()
@@ -158,13 +163,13 @@ class ObjectStore(IWorkHandler):
             if iwa_pathname is None:
                 iwa_pathname = iwa_file.format(new_id) + ".iwa"
                 chunks = {"chunks": [{"archives": [iwa_segment.to_dict()]}]}
-                self._file_store[iwa_pathname] = IWAFile.from_dict(chunks)
+                self._archive_store[iwa_pathname] = IWAFile.from_dict(chunks)
             else:
-                iwa_obj = cast("IWAFile", self._file_store[iwa_pathname])
-                iwa_obj.chunks[0].archives.append(iwa_segment)
+                iwa = self._archive_store[iwa_pathname]
+                iwa.chunks[0].archives.append(iwa_segment)
         else:
-            iwa_obj = cast("IWAFile", self._file_store[iwa_pathname])
-            iwa_obj.chunks[0].archives.append(iwa_segment)
+            iwa = self._archive_store[iwa_pathname]
+            iwa.chunks[0].archives.append(iwa_segment)
 
         new_obj = cls(**object_dict)
         self._objects[new_id] = new_obj
@@ -179,8 +184,8 @@ class ObjectStore(IWorkHandler):
         This keeps the file store ready for saving to a new document.
         """
         for obj_id, obj in self._objects.items():
-            iwa_file = cast("IWAFile", self._file_store[self._object_to_filename_map[obj_id]])
-            copy_object_to_iwa_file(iwa_file, obj, obj_id)
+            iwa = self._archive_store[self._object_to_filename_map[obj_id]]
+            copy_object_to_iwa_file(iwa, obj, obj_id)
 
     def remove_unreferenced_objects(self) -> None:
         """Remove objects from the ObjectStore that are not referenced."""
@@ -212,16 +217,21 @@ class ObjectStore(IWorkHandler):
         for obj_id in unreferenced_ids:
             del self._objects[obj_id]
             filename = self._object_to_filename_map.pop(obj_id)
-            iwa_file = cast("IWAFile", self._file_store[filename])
-            for chunk in iwa_file.chunks:
+            iwa = self._archive_store[filename]
+            for chunk in iwa.chunks:
                 chunk.archives = [
                     arch for arch in chunk.archives if arch.header.identifier != obj_id
                 ]
 
     @property
-    def file_store(self) -> dict[str, bytes | IWAFile]:
+    def archive_store(self) -> dict[str, IWAFile]:
         """Return or update the IWA files associated with the object store."""
-        return self._file_store
+        return self._archive_store
+
+    @property
+    def blob_store(self) -> dict[str, bytes]:
+        """Return or update the binary blob."""
+        return self._blob_store
 
     def __getitem__(self, key: int) -> ProtoMessage:
         """Return a generically typed object from the store."""

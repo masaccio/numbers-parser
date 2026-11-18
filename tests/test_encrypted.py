@@ -18,7 +18,10 @@ from numbers_parser.iwork import IWAFile, IWork, IWorkCrypto, IWorkHandler
 class NullHandler(IWorkHandler):
     """Dummy handler for testing."""
 
-    def store_file(self, filename: str, blob: bytes | IWAFile) -> None:
+    def store_archive(self, filename: str, iwa: IWAFile) -> None:
+        """Dummy handler for testing."""  # noqa: D401
+
+    def store_blob(self, filename: str, blob: bytes) -> None:
         """Dummy handler for testing."""  # noqa: D401
 
     def store_object(self, filename: str, identifier: int, archive: ProtoMessage) -> None:

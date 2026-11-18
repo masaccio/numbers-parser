@@ -36,6 +36,7 @@ decryptor
 docstrings
 drawables
 dstr
+encryptor
 envlist
 excinfo
 extendee

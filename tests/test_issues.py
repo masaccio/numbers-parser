@@ -524,8 +524,8 @@ def test_issue_76(configurable_save_file: Path) -> None:
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
-    assert "Metadata/Properties.plist" in doc._model.objects._file_store
-    plist_data = doc._model.objects._file_store["Metadata/Properties.plist"]
+    assert "Metadata/Properties.plist" in doc._model.objects._blob_store
+    plist_data = doc._model.objects._blob_store["Metadata/Properties.plist"]
     assert isinstance(plist_data, bytes)
     assert plist_data[0:6] == b"bplist"
 

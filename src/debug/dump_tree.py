@@ -97,7 +97,7 @@ for filename in args.numbers:
                     max_depth=args.max_depth,
                 )
     elif args.iwa:
-        filenames = [x for x in doc._model.file_store if args.iwa in x]
+        filenames = [x for x in doc._model.archive_store if args.iwa in x]
         for sub_filename in filenames:
             object_ids = [
                 obj_id
