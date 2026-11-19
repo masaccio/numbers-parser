@@ -114,11 +114,13 @@ SUPPORTED_NUMBERS_VERSIONS = [
     "14.5",
     "15.4",
     # Numbers Creator Studio
+    "16.0",
     "26.0",
     "26.1",
     "26.2",
     "26.3",
     "26.4",
+    "27.0",
 ]
 
 

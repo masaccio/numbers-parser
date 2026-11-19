@@ -161,6 +161,7 @@ message DataInfo {
   optional .TSP.DataUploadStatus upload_status = 16 [default = DataUploadStatus_Pending];
   optional double remote_data_mtime = 17;
   optional uint64 materialized_length = 18;
+  optional .TSP.DataAttributes watermarking_attributes = 19;
   optional string pasteboard_external_file_path = 99;
 }
 
