@@ -1468,7 +1468,6 @@ dev = [
 ]
 docs = [
     { name = "docutils" },
-    { name = "enum-tools" },
     { name = "filelock" },
     { name = "pandas" },
     { name = "sphinx" },
@@ -1534,7 +1533,6 @@ dev = [
 ]
 docs = [
     { name = "docutils", specifier = ">=0.21.2" },
-    { name = "enum-tools", specifier = ">=0.11" },
     { name = "filelock", specifier = ">=3.20.1" },
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "sphinx", specifier = ">=7.3,<10.0" },

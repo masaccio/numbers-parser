@@ -7,13 +7,19 @@ Enumerations
 
 .. _negative_formats:
 
-.. autoenum:: NegativeNumberStyle
-    :members:
+.. autoclass:: NegativeNumberStyle
+   :members:
+   :undoc-members:
+   :member-order: bysource
 
 .. _fraction_formats:
 
-.. autoenum:: FractionAccuracy
-    :members:
+.. autoclass:: FractionAccuracy
+   :members:
+   :undoc-members:
+   :member-order: bysource
 
-.. autoenum:: PaddingType
-    :members:
+.. autoclass:: PaddingType
+   :members:
+   :undoc-members:
+   :member-order: bysource
