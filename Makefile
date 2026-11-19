@@ -13,7 +13,7 @@ LLDB_PYTHON_PATH := ${shell lldb --python-path}
 PACKAGE=numbers-parser
 package_c := $(subst -,_,$(PACKAGE))
 
-.PHONY: all readme bootstrap clean veryclean test profile dist upload docs visualcheck
+.PHONY: all readme bootstrap clean veryclean test profile dist upload docs visualcheck check_prereqs
 
 TTY_GREEN  := $(shell tput setaf 2)
 TTY_RESET  := $(shell tput init)
@@ -28,7 +28,6 @@ all:
 	@echo "    docs        - rebuild markdown and HTML docs from source"
 	@echo "    profile     - run pytest and generate a profile graph"
 	@echo "    dist        - build distributions"
-	@echo "    upload      - upload package to PyPI"
 	@echo "    clean       - delete temporary files for test, coverage, etc."
 	@echo "    veryclean   - delete all auto-generated files (requires new bootstrap)"
 	@echo "    bootstrap   - rebuild all auto-generated files for new Numbers version"
@@ -37,12 +36,6 @@ all:
 dist: readme
 	-rm -rf dist
 	uv build
-
-upload:
-	-rm -rf dist
-	tox
-	uv build
-	uv publish
 
 DOCS_SOURCES = $(shell find docs -name \*.rst) \
 			   docs/conf.py \
@@ -97,11 +90,25 @@ BOOTSTRAP_FILES = src/protos/TNArchives.proto \
 				  src/$(package_c)/generated/__init__.py
 				  
 
-bootstrap: check_identity $(BOOTSTRAP_FILES)
+bootstrap: check_prereqs check_identity $(BOOTSTRAP_FILES)
 
 check_identity::
 	@if [ "$(IDENTITY)" == "" ]; then \
 		$(call error_message,"failure: no code signing identity found"); \
+		exit 1; \
+	fi
+
+check_prereqs:
+	@if ! command -v codesign >/dev/null 2>&1 || ! codesign -d "$$(command -v codesign)" >/dev/null 2>&1; then \
+		$(call error_message,"failure: codesign is not on PATH or not working"); \
+		exit 1; \
+	fi
+	@if ! "$(PROTOC)" --version >/dev/null 2>&1; then \
+		$(call error_message,"failure: protoc not found or not working at $(PROTOC)"); \
+		exit 1; \
+	fi
+	@if [ ! -d $(NUMBERS) ]; then \
+		$(call error_message,"failure: Numbers.app not found at $(NUMBERS)"); \
 		exit 1; \
 	fi
 
