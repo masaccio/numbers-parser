@@ -54,7 +54,7 @@ dev = [
     "types-protobuf>=7.35.1.20260906",
 ]
 docs = [
-    "sphinx<9.0,>=7.3",
+    "sphinx>=7.3,<10.0",
     "enum-tools>=0.11",
     "sphinx-toolbox>=3.5",
     "sphinx-nefertiti>=0.7",
