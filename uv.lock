@@ -2516,14 +2516,14 @@ wheels = [
 
 [[package]]
 name = "sphinx-nefertiti"
-version = "0.9.10"
+version = "0.9.11"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "sphinx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d0/48/de6e48a830279a4d9e40f97b3f9b48c8376da3d40f6624af44c18dd5690b/sphinx_nefertiti-0.9.10.tar.gz", hash = "sha256:4f51c8ca0967817807188f894f1fc1d31059e7f9aa01a2c9a315adb5cefde508", size = 9486377, upload-time = "2026-10-07T13:04:21.854Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5e/83/7d3bdba18df76cc287b82948d6dfcb6f51b8571d01d7d154eaaf7c466df5/sphinx_nefertiti-0.9.11.tar.gz", hash = "sha256:843ff00faf8bf8b3e51aeaaa053542bd948b1cb9cb03335ae68f19b2686efbca", size = 4706781, upload-time = "2026-11-02T14:23:36.155Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/90/2a8e352b8cfae818c998e0733d75a63a19af147611fbd30b226cb49aa233/sphinx_nefertiti-0.9.10-py3-none-any.whl", hash = "sha256:73b0a408a823f8a4d140275bfa85acdd834d86402eff1ef9b39a48bb54b60c20", size = 9516781, upload-time = "2026-10-07T13:04:19.894Z" },
+    { url = "https://files.pythonhosted.org/packages/cd/f2/47a06571f6e3e6d841c588062adf10dfb94a92ee9fa885014416855c9a3f/sphinx_nefertiti-0.9.11-py3-none-any.whl", hash = "sha256:85d1d5585cd41f69b7bf4879aa0256413f4f9b0d42326e3a586590274819f328", size = 4724519, upload-time = "2026-11-02T14:23:34.252Z" },
 ]
 
 [[package]]
