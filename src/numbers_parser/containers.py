@@ -4,7 +4,7 @@ import math
 import re
 from collections.abc import Iterator
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, cast, overload
 
 from google.protobuf.message import Message as ProtoMessage
 
@@ -15,7 +15,13 @@ from numbers_parser.constants import (
     SUPPORTED_NUMBERS_VERSIONS,
 )
 from numbers_parser.generated import TSPArchiveMessages_pb2 as TSPArchiveMessages
-from numbers_parser.iwafile import IWAFile, copy_object_to_iwa_file, create_iwa_segment
+from numbers_parser.iwafile import (
+    IWACompressedChunk,
+    IWAFile,
+    copy_object_to_iwa_file,
+    create_iwa_segment,
+    find_references,
+)
 from numbers_parser.iwork import IWork, IWorkHandler
 
 if TYPE_CHECKING:
@@ -146,7 +152,6 @@ class ObjectStore(IWorkHandler):
         iwa_file: str,
         object_dict: dict[str, Any],
         cls: type[_ProtoT],
-        append: bool = False,
     ) -> tuple[int, _ProtoT]:
         """
         Create and store an object with its IWA segment.
@@ -159,19 +164,14 @@ class ObjectStore(IWorkHandler):
         new_id = self.new_message_id()
         iwa_segment = create_iwa_segment(new_id, cls, object_dict)
 
-        if iwa_pathname is None or not append:
-            if iwa_pathname is None:
-                iwa_pathname = iwa_file.format(new_id) + ".iwa"
-                chunks = {"chunks": [{"archives": [iwa_segment.to_dict()]}]}
-                self._archive_store[iwa_pathname] = IWAFile.from_dict(chunks)
-            else:
-                iwa = self._archive_store[iwa_pathname]
-                iwa.chunks[0].archives.append(iwa_segment)
+        if iwa_pathname is None:
+            iwa_pathname = iwa_file.format(new_id) + ".iwa"
+            self._archive_store[iwa_pathname] = IWAFile([IWACompressedChunk([iwa_segment])])
         else:
             iwa = self._archive_store[iwa_pathname]
             iwa.chunks[0].archives.append(iwa_segment)
 
-        new_obj = cls(**object_dict)
+        new_obj = cast("_ProtoT", iwa_segment.objects[0])
         self._objects[new_id] = new_obj
         self._object_to_filename_map[new_id] = iwa_pathname
 
@@ -189,24 +189,11 @@ class ObjectStore(IWorkHandler):
 
     def remove_unreferenced_objects(self) -> None:
         """Remove objects from the ObjectStore that are not referenced."""
-        referenced_ids = {DOCUMENT_ID, PACKAGE_ID}
-
-        def find_references(msg: ProtoMessage) -> None:
-            """Recursively find all TSP.Reference messages in protobuf."""
-            if hasattr(msg, "identifier") and msg.DESCRIPTOR.name == "Reference":
-                referenced_ids.add(msg.identifier)
-
-            for field_desc, value in msg.ListFields():
-                if field_desc.type != field_desc.TYPE_MESSAGE:
-                    continue
-                if field_desc.is_repeated:
-                    for item in value:
-                        find_references(item)
-                else:
-                    find_references(value)
-
+        referenced_ids: set[int] = {DOCUMENT_ID, PACKAGE_ID}
+        refs: list[int] = []
         for obj in self._objects.values():
-            find_references(obj)
+            find_references(obj, refs)
+        referenced_ids.update(refs)
 
         metadata = self.get_as(PACKAGE_ID, TSPArchiveMessages.PackageMetadata)
         unreferenced_ids = set(self._objects.keys()) - referenced_ids
