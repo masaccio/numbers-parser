@@ -1,10 +1,16 @@
-# ruff: noqa: SLF001
+"""Additional tests to ensure code coverage."""
 
 from datetime import datetime
+from pathlib import Path
 from struct import pack
+from typing import TYPE_CHECKING, cast
 from unittest.mock import patch
 
 import pytest
+
+if TYPE_CHECKING:
+    from typing import Any
+
 
 from numbers_parser import (
     Alignment,
@@ -52,38 +58,51 @@ from numbers_parser.xrefs import (
 )
 
 
-def test_containers():
+def test_containers() -> None:
+    """Test model object container count."""
     doc = Document("tests/data/test-1.numbers")
     assert len(doc._model.objects) == 738
 
 
-def test_ranges():
+def test_invalid_object_lookup() -> None:
+    """Test object lookup type checks."""
+    doc = Document("tests/data/test-1.numbers")
+    table_id = doc.default_table._table_id
+    with pytest.raises(
+        TypeError,
+        match=f"Object {table_id} has type TableModelArchive, expected FormatStructArchive",
+    ):
+        _ = doc._model.get_object(table_id, TSKArchives.FormatStructArchive)
+
+
+def test_ranges() -> None:
+    """Test Excel range and column name conversions."""
     assert xl_range(2, 2, 2, 2) == "C3"
     assert xl_col_to_name(25) == "Z"
     assert xl_col_to_name(26) == "AA"
 
 
-def test_cell_storage(tmp_path):
+def test_cell_storage(tmp_path: Path) -> None:
+    """Test cell storage edge cases and unsupported types."""
     doc = Document()
-    doc.sheets[0].tables[0]
 
     model = doc.default_table._model
     table_id = doc.default_table._table_id
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
     buffer[1] = 255
     with pytest.raises(UnsupportedError) as e:
-        _ = Cell._from_storage(table_id, 0, 0, buffer, model)
+        _ = Cell._from_storage(table_id, 0, 0, bytes(buffer), model)
     assert "Cell type ID 255 is not recognized" in str(e)
 
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
     buffer[0] = 4
     with pytest.raises(UnsupportedError) as e:
-        _ = Cell._from_storage(table_id, 0, 0, buffer, model)
+        _ = Cell._from_storage(table_id, 0, 0, bytes(buffer), model)
     assert "Cell storage version 4 is unsupported" in str(e)
 
-    class DummyCell(Cell):
-        def __init__(self, *args) -> None:
-            super().__init__(*args)
+    class DummyCell(Cell):  # pylint: disable=missing-class-docstring
+        def __init__(self, *args: object) -> None:
+            super().__init__(*args)  # type: ignore[arg-type]
             self._border = CellBorder()
 
     doc = Document()
@@ -138,10 +157,12 @@ def test_cell_storage(tmp_path):
     assert str(e.value) == "Pre-BNC storage is unsupported"
 
 
-def test_formatting_exceptions():
+def test_formatting_exceptions() -> None:
+    """Test warnings for unsupported custom and date formats."""
     doc = Document("tests/data/test-custom-formats.numbers")
 
     cell = doc.sheets[0].tables[0].cell("B4")
+    assert cell._date_format_id is not None
     format_archive = doc._model.table_format(cell._table_id, cell._date_format_id)
     format_uuid = NumbersUUID(format_archive.custom_uid).hex
     format_map = doc._model.custom_format_map()
@@ -154,20 +175,21 @@ def test_formatting_exceptions():
     assert "Unexpected custom format type 299" in str(record[0])
 
     with pytest.warns(UnsupportedWarning) as record:
-        result = _decode_date_format("ZZZ YYY", datetime(2001, 1, 1))
+        _ = _decode_date_format("ZZZ YYY", datetime(2001, 1, 1))
     assert len(record) == 2
     assert str(record[0].message) == "Unsupported field code 'ZZZ'"
-    print(result)
 
 
-def test_pretty_uuids():
+def test_pretty_uuids() -> None:
+    """Test prettifying UUIDs in nested lists."""
     obj = [[1, 2, 3], [4, 5, 6]]
     unpacker = NumbersUnpacker()
     unpacker.prettify_uuids(obj)
     assert str(obj) == "[[1, 2, 3], [4, 5, 6]]"
 
 
-def test_range_exceptions():
+def test_range_exceptions() -> None:
+    """Test exceptions raised by invalid cell and column references."""
     with pytest.raises(IndexError) as e:
         _ = xl_rowcol_to_cell(-2, 0)
     assert "row reference -2 below zero" in str(e)
@@ -190,7 +212,7 @@ def test_range_exceptions():
         _ = xl_cell_to_rowcol("A0")
     assert "invalid cell reference" in str(e)
 
-    assert xl_col_to_offset(None) == 0
+    assert xl_col_to_offset(None) == 0  # type: ignore[arg-type]
     assert xl_col_to_offset("A") == 0
 
     with pytest.raises(IndexError) as e:
@@ -198,7 +220,8 @@ def test_range_exceptions():
     assert "column reference -2 below zero" in str(e)
 
 
-def test_datalists():
+def test_datalists() -> None:
+    """Test table string lookup operations."""
     doc = Document("tests/data/test-1.numbers")
     table_id = doc.sheets[0].tables[0]._table_id
     assert doc._model.table_string(table_id, 1) == "YYY_2_1"
@@ -207,7 +230,8 @@ def test_datalists():
     assert doc._model._table_strings.lookup_value(table_id, 19).string == "TEST"
 
 
-def test_merge(configurable_save_file):
+def test_merge(configurable_save_file: Path) -> None:
+    """Test merging cells and verifying the merge rectangle."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.merge_cells("A1:A4")
@@ -218,7 +242,8 @@ def test_merge(configurable_save_file):
     assert new_doc._model.merge_cells(table._table_id).rect((3, 0)) == (0, 0, 3, 0)
 
 
-def test_experimental():
+def test_experimental() -> None:
+    """Test enabling and disabling experimental features."""
     assert experimental_features() == ExperimentalFeatures.NONE
     enable_experimental_feature(ExperimentalFeatures.TESTING)
     assert ExperimentalFeatures.TESTING in experimental_features()
@@ -226,17 +251,19 @@ def test_experimental():
     assert experimental_features() == ExperimentalFeatures.NONE
 
 
-def test_alignment_and_number_format_edges():
+def test_alignment_and_number_format_edges() -> None:
+    """Test Alignment representation and number format edge cases."""
     alignment = Alignment("center", "middle")
     assert alignment == Alignment("center", "middle")
     assert str(alignment) == "[center,middle]"
     assert repr(alignment) == "[center,middle]"
 
-    assert _decode_number_format(None, None, "test", []) is None
-    assert _format_currency(None, None) is None
+    assert _decode_number_format(None, None, "test", []) is None  # type: ignore[arg-type]
+    assert _format_currency(None, None) is None  # type: ignore[arg-type]
 
 
-def test_additional_flags(configurable_save_file):
+def test_additional_flags(configurable_save_file: Path) -> None:
+    """Test cell storage flags and conditional style IDs."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     buffer = bytearray(EMPTY_STORAGE_BUFFER)
@@ -244,7 +271,7 @@ def test_additional_flags(configurable_save_file):
     buffer[1] = TSTArchives.genericCellType
     buffer[8:12] = pack("<i", 0x800)
     buffer[12:16] = pack("<i", 1)
-    cell = Cell._from_storage(table._table_id, 0, 0, buffer, doc._model)
+    cell = Cell._from_storage(table._table_id, 0, 0, bytes(buffer), doc._model)
     assert cell.row == 0
     assert cell.col == 0
     assert cell._flags == 0x800
@@ -256,22 +283,35 @@ def test_additional_flags(configurable_save_file):
     assert new_doc.default_table.cell(1, 3)._cond_rule_style_id is not None
 
 
-def test_bad_image_filenames():
+def test_bad_image_filenames() -> None:
+    """Test missing background image file warning."""
     doc = Document("tests/data/issue-69b.numbers")
     table = doc.sheets[0].tables[0]
-    _ = table._model.objects.file_store.pop("Data/numbers_1-16.png")
-    with pytest.warns(RuntimeWarning) as record:
-        assert table.cell(0, 0).style.bg_image is None
+    _ = table._model.objects.blob_store.pop("Data/numbers_1-16.png")
+    with pytest.warns(  # noqa: PT031
+        RuntimeWarning,
+        match="Cannot find file 'numbers_1.png' in Numbers archive",
+    ) as record:
+        cell_style = table.cell(0, 0).style
+        assert cell_style is not None
+        assert cell_style.bg_image is None
     assert len(record) == 1
-    assert str(record[0].message) == "Cannot find file 'numbers_1.png' in Numbers archive"
 
 
-def test_set_number_defaults():
+def test_archive_store() -> None:
+    """Check archive_store method (only used in docs build)."""
+    doc = Document("tests/data/test-1.numbers")
+    assert len(doc._model.objects.archive_store) == 97
+
+
+def test_set_number_defaults() -> None:
+    """Test default cell formatting settings and invalid format types."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.write(0, 0, 0.0)
     table.set_cell_formatting(0, 0, "number")
     num_format_id = table.cell(0, 0)._num_format_id
+    assert num_format_id is not None
     format_archive = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
     assert not format_archive.show_thousands_separator
     assert format_archive.negative_style == NegativeNumberStyle.MINUS
@@ -279,32 +319,36 @@ def test_set_number_defaults():
 
     table.set_cell_formatting(0, 0, "base")
     num_format_id = table.cell(0, 0)._num_format_id
+    assert num_format_id is not None
     format_archive = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
     assert not format_archive.show_thousands_separator
     assert format_archive.base_places == 0
 
     table.set_cell_formatting(0, 0, "currency")
-    num_format_id = table.cell(0, 0)._currency_format_id
-    format_archive = doc._model._table_formats.lookup_value(table._table_id, num_format_id).format
+    curr_format_id = table.cell(0, 0)._currency_format_id
+    assert curr_format_id is not None
+    format_archive = doc._model._table_formats.lookup_value(table._table_id, curr_format_id).format
     assert not format_archive.show_thousands_separator
     assert format_archive.decimal_places == 2
 
     with pytest.raises(TypeError) as e:
-        Formatting(type=object())
+        Formatting(type=object())  # type: ignore[arg-type]
     assert "Invalid format type 'object'" in str(e)
 
     with pytest.raises(TypeError) as e:
-        CustomFormatting(type=object())
+        CustomFormatting(type=object())  # type: ignore[arg-type]
     assert "Invalid format type 'object'" in str(e)
 
 
-def test_formatting_empty_cell():
+def test_formatting_empty_cell() -> None:
+    """Test formatting of an empty cell."""
     doc = Document()
     assert doc.default_table.cell(0, 0).formatted_value == ""
-    assert _format_decimal(None, object()) == ""
+    assert _format_decimal(None, object()) == ""  # type: ignore[arg-type]
 
 
-def test_custom_format_from_archive(configurable_save_file):
+def test_custom_format_from_archive(configurable_save_file: Path) -> None:
+    """Test adding, saving, and applying custom formats."""
     doc = Document()
     doc.add_custom_format(type="datetime", name="date_format")
     doc.add_custom_format(type="text", name="text_format")
@@ -343,19 +387,21 @@ def test_custom_format_from_archive(configurable_save_file):
     assert table.cell(0, 4).formatted_value == "0000001"
 
 
-def test_cell_repr():
+def test_cell_repr() -> None:
+    """Test string and repr outputs for Sheet, Table, and Cell."""
     doc = Document("tests/data/test-1.numbers")
     assert repr(doc.sheets[0]) == "numbers_parser.document.Sheet(name='ZZZ_Sheet_1')"
     assert repr(doc.sheets[0].tables[0]) == "numbers_parser.document.Table(name='ZZZ_Table_1')"
     cell = doc.default_table.cell(1, 1)
     assert (
-        repr(cell)
-        == "numbers_parser.cell.TextCell(sheet_name='ZZZ_Sheet_1', table_name='ZZZ_Table_1', value='YYY_1_1', row=1, col=1)"
+        repr(cell) == "numbers_parser.cell.TextCell("
+        "sheet_name='ZZZ_Sheet_1', table_name='ZZZ_Table_1', value='YYY_1_1', row=1, col=1)"
     )
     assert str(cell) == "YYY_1_1"
 
 
-def test_invalid_format():
+def test_invalid_format() -> None:
+    """Test custom format fallback and invalid zip file error."""
     doc = Document("tests/data/test-1.numbers")
     cell = doc.default_table.cell(1, 1)
     cell._text_format_id = None
@@ -366,11 +412,41 @@ def test_invalid_format():
     assert "invalid Numbers document" in str(e)
 
 
+def test_xref_quoting() -> None:
+    """Test quoting of column names in formulas."""
+    doc = Document("tests/data/test-xref-coverage.numbers")
+    table = doc.default_table
+    assert table.cell("C2").formula == "SUM(Column '''A''')"
+    assert table.cell("C3").formula == "COUNTA('Column X & Y')"
+
+
+def test_add_component_metadata_none_locator() -> None:
+    """Test adding component metadata with a None locator."""
+    doc = Document()
+    model = doc._model
+
+    test_id = 999999
+    model.add_component_metadata(test_id, "CalculationEngine", None)  # type: ignore[arg-type]
+
+    pkg = cast("Any", model.objects[PACKAGE_ID])
+    components = pkg.components
+    added_component = next((c for c in components if c.identifier == test_id), None)
+
+    assert added_component is not None
+    assert added_component.preferred_locator == "CalculationEngine"
+    assert added_component.locator == ""
+
+
+# pylint: disable=import-outside-toplevel
+# ruff: noqa: PLC0415
+
+
 @pytest.mark.script_launch_mode("inprocess")
-def test_cli_main_blocks(capsys):
-    from numbers_parser._cat_numbers import main as cat_main  # noqa: PLC0415
-    from numbers_parser._csv2numbers import main as csv2_main  # noqa: PLC0415
-    from numbers_parser._unpack_numbers import main as unpack_main  # noqa: PLC0415
+def test_cli_main_blocks(capsys: pytest.CaptureFixture[str]) -> None:
+    """Test CLI main entry points."""
+    from numbers_parser._cat_numbers import main as cat_main
+    from numbers_parser._csv2numbers import main as csv2_main
+    from numbers_parser._unpack_numbers import main as unpack_main
 
     with (
         patch("numbers_parser._cat_numbers.__name__", "test"),
@@ -402,25 +478,3 @@ def test_cli_main_blocks(capsys):
     assert callable(csv2_main)
     assert callable(cat_main)
     assert callable(unpack_main)
-
-
-def test_xref_quoting():
-    doc = Document("tests/data/test-xref-coverage.numbers")
-    table = doc.default_table
-    assert table.cell("C2").formula == "SUM(Column '''A''')"
-    assert table.cell("C3").formula == "COUNTA('Column X & Y')"
-
-
-def test_add_component_metadata_none_locator():
-    doc = Document()
-    model = doc._model
-
-    test_id = 999999
-    model.add_component_metadata(test_id, "CalculationEngine", None)
-
-    components = model.objects[PACKAGE_ID].components
-    added_component = next((c for c in components if c.identifier == test_id), None)
-
-    assert added_component is not None
-    assert added_component.preferred_locator == "CalculationEngine"
-    assert added_component.locator == ""

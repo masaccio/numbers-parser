@@ -6,9 +6,12 @@ from __future__ import annotations
 from collections.abc import Iterator  # noqa: TC003
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any, Literal, overload
 from warnings import warn
 
 from numbers_parser.cell import (
+    RGB,
+    Alignment,
     BackgroundImage,
     Border,
     Cell,
@@ -18,12 +21,14 @@ from numbers_parser.cell import (
     Formatting,
     FormattingType,
     MergedCell,
+    PaddingType,
     Style,
     TextCell,
 )
 from numbers_parser.constants import (
     CUSTOM_FORMATTING_ALLOWED_CELLS,
     DEFAULT_COLUMN_COUNT,
+    DEFAULT_PASSWORD_HINT,
     DEFAULT_ROW_COUNT,
     FORMATTING_ACTION_CELLS,
     FORMATTING_ALLOWED_CELLS,
@@ -32,8 +37,8 @@ from numbers_parser.constants import (
     MAX_ROW_COUNT,
 )
 from numbers_parser.containers import ItemsList
-from numbers_parser.model import _NumbersModel
-from numbers_parser.numbers_cache import _Cacheable
+from numbers_parser.model import NumbersModel
+from numbers_parser.numbers_cache import Cacheable
 from numbers_parser.xrefs import xl_cell_to_rowcol, xl_range
 
 __all__ = ["Document", "Sheet", "Table"]
@@ -84,16 +89,16 @@ class Document:
     def __init__(  # noqa: PLR0917
         self,
         filename: str | Path | None = None,
-        sheet_name: str | None = "Sheet 1",
-        table_name: str | None = "Table 1",
-        num_header_rows: int | None = 1,
-        num_header_cols: int | None = 1,
-        num_rows: int | None = DEFAULT_ROW_COUNT,
-        num_cols: int | None = DEFAULT_COLUMN_COUNT,
+        sheet_name: str = "Sheet 1",
+        table_name: str = "Table 1",
+        num_header_rows: int = 1,
+        num_header_cols: int = 1,
+        num_rows: int = DEFAULT_ROW_COUNT,
+        num_cols: int = DEFAULT_COLUMN_COUNT,
         password: str | None = None,
     ) -> None:
         """Initialize the instance state."""
-        self._model = _NumbersModel(None if filename is None else Path(filename), password)
+        self._model = NumbersModel(None if filename is None else Path(filename), password)
         refs = self._model.sheet_ids()
         self._sheets = ItemsList(self._model, refs, Sheet)
         self.filename = filename
@@ -140,7 +145,7 @@ class Document:
         filename: str | Path,
         package: bool = False,
         password: str | None = None,
-        hint: str = "No hint",
+        hint: str = DEFAULT_PASSWORD_HINT,
     ) -> None:
         """
         Save the document in the specified filename.
@@ -188,9 +193,9 @@ class Document:
     def add_sheet(
         self,
         sheet_name: str | None = None,
-        table_name: str | None = "Table 1",
-        num_rows: int | None = DEFAULT_ROW_COUNT,
-        num_cols: int | None = DEFAULT_COLUMN_COUNT,
+        table_name: str = "Table 1",
+        num_rows: int = DEFAULT_ROW_COUNT,
+        num_cols: int = DEFAULT_COLUMN_COUNT,
     ) -> None:
         """
         Add a new sheet to the current document.
@@ -243,7 +248,26 @@ class Document:
         )
         self._sheets.append(new_sheet)
 
-    def add_style(self, **kwargs: object) -> Style:
+    def add_style(  # pylint: disable=unused-argument
+        self,
+        *,
+        alignment: Alignment | None = None,
+        bg_image: BackgroundImage | None = None,
+        bg_color: RGB | list[RGB] | None = None,
+        font_color: RGB | None = None,
+        font_size: float | None = None,
+        font_name: str | None = None,
+        bold: bool | None = None,
+        italic: bool | None = None,
+        strikethrough: bool | None = None,
+        underline: bool | None = None,
+        first_indent: float | None = None,
+        left_indent: float | None = None,
+        right_indent: float | None = None,
+        text_inset: float | None = None,
+        text_wrap: bool | None = None,
+        name: str | None = None,
+    ) -> Style:
         r"""
         Add a new style to the current document.
 
@@ -266,8 +290,38 @@ class Document:
 
         Parameters
         ----------
-        kwargs: dict, optional
-            Key-value pairs to pass to the :py:class:`~numbers_parser.Style` constructor.
+        alignment: Alignment, optional, default: Alignment("auto", "top")
+            Horizontal and vertical alignment of the cell
+        bg_image: BackgroundImage, optional, default: None
+            Background image for the cell
+        bg_color: RGB | List[RGB], optional, default: None
+            Background color or list of colors for gradients
+        bold: bool, optional, default: False
+            ``True`` if the cell font is bold
+        font_color: RGB, optional, default: RGB(0, 0, 0)
+            Font color
+        font_size: float, optional, default: DEFAULT_FONT_SIZE
+            Font size in points
+        font_name: str | tuple[str, str], optional, default: DEFAULT_FONT
+            Font name or a tuple of font family and style
+        italic: bool, optional, default: False
+            ``True`` if the cell font is italic
+        name: str, optional
+            Style name
+        underline: bool, optional, default: False
+            ``True`` if the cell font is underlined
+        strikethrough: bool, optional, default: False
+            ``True`` if the cell font uses strikethrough
+        first_indent: float, optional, default: 0.0
+            First-line indent in points
+        left_indent: float, optional, default: 0.0
+            Left indent in points
+        right_indent: float, optional, default: 0.0
+            Right indent in points
+        text_inset: float, optional, default: DEFAULT_TEXT_INSET
+            Text inset in points
+        text_wrap: bool, optional, default: True
+            ``True`` if text wrapping is enabled
 
         Raises
         ------
@@ -279,15 +333,17 @@ class Document:
             or if any of the ``bool`` parameters are invalid.
 
         """
+        kwargs = {k: v for k, v in locals().items() if k != "self" and v is not None}
         if "name" in kwargs and kwargs["name"] is not None and kwargs["name"] in self._model.styles:
             msg = f"style '{kwargs['name']}' already exists"
             raise IndexError(msg)
 
         if "bg_image" in kwargs and kwargs["bg_image"] is not None:
-            if not isinstance(kwargs["bg_image"], BackgroundImage):
+            img = kwargs["bg_image"]
+            if not isinstance(img, BackgroundImage):
                 msg = "bg_image must be a BackgroundImage object"
                 raise TypeError(msg)
-            self._model.store_image((kwargs["bg_image"].data), kwargs["bg_image"].filename)
+            self._model.store_image(img.data, img.filename)
 
         style = Style(**kwargs)
         if style.name is None:
@@ -296,7 +352,18 @@ class Document:
         self._model.styles[style.name] = style
         return style
 
-    def add_custom_format(self, **kwargs: object) -> CustomFormatting:
+    def add_custom_format(  # pylint: disable=unused-argument
+        self,
+        *,
+        type: str = "number",  # noqa: A002
+        name: str | None = None,
+        integer_format: PaddingType = PaddingType.NONE,
+        decimal_format: PaddingType = PaddingType.NONE,
+        num_integers: int = 0,
+        num_decimals: int = 0,
+        show_thousands_separator: bool = False,
+        format: str = "%s",  # noqa: A002
+    ) -> CustomFormatting:
         r"""
         Add a new custom format to the current document.
 
@@ -350,6 +417,7 @@ class Document:
             KeyError: If the named custom format already exists.
 
         """
+        kwargs = {k: v for k, v in locals().items() if k != "self" and v is not None}
         if (
             "name" in kwargs
             and kwargs["name"] is not None
@@ -358,13 +426,12 @@ class Document:
             msg = f"format '{kwargs['name']}' already exists"
             raise KeyError(msg)
 
-        if "type" in kwargs:
+        try:
             format_type = kwargs["type"].upper()
-            try:
-                kwargs["type"] = CustomFormattingType[format_type]
-            except (KeyError, AttributeError):
-                msg = f"unsupported cell format type '{format_type}'"
-                raise TypeError(msg) from None
+            kwargs["type"] = CustomFormattingType[format_type]
+        except (KeyError, AttributeError):
+            msg = f"unsupported cell format type '{format_type}'"
+            raise TypeError(msg) from None
 
         custom_format = CustomFormatting(**kwargs)
         if custom_format.name is None:
@@ -381,12 +448,17 @@ class Document:
 class Sheet:
     """Represent a sheet and its tables in a Numbers document."""
 
-    def __init__(self, model: _NumbersModel, sheet_id: int) -> None:
+    def __init__(self, model: NumbersModel, sheet_id: int) -> None:
         """Initialize the instance state."""
         self._sheet_id = sheet_id
         self._model = model
         refs = self._model.table_ids(self._sheet_id)
         self._tables = ItemsList(self._model, refs, Table)
+
+    def __repr__(self) -> str:
+        """Return a developer-friendly representation."""
+        class_name = f"{self.__class__.__module__}.{self.__class__.__name__}"
+        return f"{class_name}(name='{self.name}')"
 
     @property
     def tables(self) -> ItemsList[Table]:
@@ -398,11 +470,6 @@ class Sheet:
         """str: The name of the sheet."""
         return self._model.sheet_name(self._sheet_id)
 
-    def __repr__(self) -> str:
-        """Return a developer-friendly representation."""
-        class_name = f"{self.__class__.__module__}.{self.__class__.__name__}"
-        return f"{class_name}(name='{self.name}')"
-
     @name.setter
     def name(self, value: str) -> None:
         """Return or update the name of the sheet or table."""
@@ -413,10 +480,10 @@ class Sheet:
         table_name: str | None = None,
         x: float | None = None,
         y: float | None = None,
-        num_rows: int | None = DEFAULT_ROW_COUNT,
-        num_cols: int | None = DEFAULT_COLUMN_COUNT,
-        num_header_rows: int | None = 1,
-        num_header_cols: int | None = 1,
+        num_rows: int = DEFAULT_ROW_COUNT,
+        num_cols: int = DEFAULT_COLUMN_COUNT,
+        num_header_rows: int = 1,
+        num_header_cols: int = 1,
     ) -> Table:
         """
         Add a new table to the current sheet.
@@ -482,10 +549,10 @@ class Sheet:
         from_table_id: int,
         x: float | None,
         y: float | None,
-        num_rows: int | None,
-        num_cols: int | None,
-        num_header_rows: int | None,
-        num_header_cols: int | None,
+        num_rows: int,
+        num_cols: int,
+        num_header_rows: int,
+        num_header_cols: int,
     ) -> Table:
         """Add table."""
         if table_name is not None:
@@ -513,10 +580,10 @@ class Sheet:
         return self._tables[-1]
 
 
-class Table(_Cacheable):
+class Table(Cacheable):
     """Represent a table and its cells in a Numbers sheet."""
 
-    def __init__(self, model: _NumbersModel, table_id: int) -> None:
+    def __init__(self, model: NumbersModel, table_id: int) -> None:
         """Initialize the instance state."""
         super().__init__()
         self._model = model
@@ -525,13 +592,14 @@ class Table(_Cacheable):
         self.num_cols = self._model.number_of_columns(self._table_id)
         # Cache all data now to facilitate write(). Performance impact
         # of computing all cells is minimal compared to file IO
-        self._data = []
+        self._data: list[list[Cell]] = []
         self._model.set_table_data(table_id, self._data)
         merge_cells = self._model.merge_cells(table_id)
 
         for row in range(self.num_rows):
             self._data.append([])
             for col in range(self.num_cols):
+                cell: Cell
                 if merge_cells.is_merge_reference((row, col)):
                     cell = Cell._merged_cell(table_id, row, col, model)
                 else:
@@ -715,7 +783,13 @@ class Table(_Cacheable):
         """tuple[float, float]: The table's x and y offsets in points."""
         return self._model.table_coordinates(self._table_id)
 
-    def rows(self, values_only: bool = False) -> list[list[Cell]] | list[list[object]]:
+    @overload
+    def rows(self, values_only: Literal[False] = False) -> list[list[Cell]]: ...
+
+    @overload
+    def rows(self, values_only: Literal[True]) -> list[list[_CellValue]]: ...
+
+    def rows(self, values_only: bool = False) -> list[list[Cell]] | list[list[_CellValue]]:
         """
         Return all rows of cells for the Table.
 
@@ -726,7 +800,7 @@ class Table(_Cacheable):
 
         Returns
         -------
-        List[List[Cell]] | List[List[object]]:
+        list[list[Cell]] | list[list[Any]]:
             List of rows; each row is a list of :class:`Cell` objects, or cell values.
 
         """
@@ -754,10 +828,17 @@ class Table(_Cacheable):
         merge_cells = set()
         for row, cells in enumerate(self._data):
             for col, cell in enumerate(cells):
-                if cell.is_merged:
-                    size = cell.size
-                    merge_cells.add(xl_range(row, col, row + size[0] - 1, col + size[1] - 1))
+                if cell.is_merged and cell.size is not None:
+                    merge_cells.add(
+                        xl_range(row, col, row + cell.size[0] - 1, col + cell.size[1] - 1),
+                    )
         return sorted(merge_cells)
+
+    @overload
+    def cell(self, row: int, col: int, /) -> Cell | MergedCell: ...
+
+    @overload
+    def cell(self, rc: str, /) -> Cell | MergedCell: ...
 
     def cell(self, *args: int | str) -> Cell | MergedCell:  # noqa: D417
         """
@@ -800,10 +881,10 @@ class Table(_Cacheable):
         """
         if isinstance(args[0], str):
             (row, col) = xl_cell_to_rowcol(args[0])
-        elif len(args) != 2:
+        elif len(args) != 2 or not isinstance(args[0], int) or not isinstance(args[1], int):
             raise IndexError("invalid cell reference " + str(args))
         else:
-            (row, col) = args
+            row, col = args[0], args[1]
 
         if row >= self.num_rows or row < 0:
             msg = f"row {row} out of range"
@@ -818,13 +899,34 @@ class Table(_Cacheable):
             return self._data[row_mapper[row]][col]
         return self._data[row][col]
 
+    @overload
     def iter_rows(
         self,
         min_row: int | None = None,
         max_row: int | None = None,
         min_col: int | None = None,
         max_col: int | None = None,
-        values_only: bool | None = False,
+        values_only: Literal[False] = False,
+    ) -> Iterator[tuple[Cell, ...]]: ...
+
+    @overload
+    def iter_rows(
+        self,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        *,
+        values_only: Literal[True],
+    ) -> Iterator[tuple[_CellValue, ...]]: ...
+
+    def iter_rows(
+        self,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        values_only: bool = False,
     ) -> Iterator[tuple[Cell | _CellValue, ...]]:
         """
         Yield cells from the table one row at a time.
@@ -896,13 +998,34 @@ class Table(_Cacheable):
             else:
                 yield tuple(row[min_col : max_col + 1])
 
+    @overload
     def iter_cols(
         self,
         min_col: int | None = None,
         max_col: int | None = None,
         min_row: int | None = None,
         max_row: int | None = None,
-        values_only: bool | None = False,
+        values_only: Literal[False] = False,
+    ) -> Iterator[tuple[Cell, ...]]: ...
+
+    @overload
+    def iter_cols(
+        self,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        *,
+        values_only: Literal[True],
+    ) -> Iterator[tuple[_CellValue, ...]]: ...
+
+    def iter_cols(
+        self,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        values_only: bool = False,
     ) -> Iterator[tuple[Cell | _CellValue, ...]]:
         """
         Yield cells from the table one column at a time.
@@ -975,13 +1098,34 @@ class Table(_Cacheable):
             else:
                 yield tuple(row[col] for row in rows)
 
+    @overload
     def iter_cells(
         self,
         min_row: int | None = None,
         max_row: int | None = None,
         min_col: int | None = None,
         max_col: int | None = None,
-        values_only: bool | None = False,
+        values_only: Literal[False] = False,
+    ) -> Iterator[Cell]: ...
+
+    @overload
+    def iter_cells(
+        self,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        *,
+        values_only: Literal[True],
+    ) -> Iterator[_CellValue]: ...
+
+    def iter_cells(
+        self,
+        min_row: int | None = None,
+        max_row: int | None = None,
+        min_col: int | None = None,
+        max_col: int | None = None,
+        values_only: bool = False,
     ) -> Iterator[Cell | _CellValue]:
         """
         Yield cells from the table in row-major order.
@@ -1052,10 +1196,7 @@ class Table(_Cacheable):
             for cell in row[min_col : max_col + 1]:
                 yield cell.value if values_only else cell
 
-    def _validate_cell_coords(
-        self,
-        *args: int | str | _CellValue | Style | Border | list[str],
-    ) -> tuple[int | str | _CellValue | Style | Border | list[str], ...]:
+    def _validate_cell_coords(self, *args: Any) -> Any:  # noqa: ANN401
         """Validate cell coords."""
         if isinstance(args[0], str):
             (row, col) = xl_cell_to_rowcol(args[0])
@@ -1085,11 +1226,30 @@ class Table(_Cacheable):
         for _ in range(self.num_cols, col + 1):
             self.add_column()
 
-        return (row, col, *tuple(values))
+        return (row, col, *values)
+
+    @overload
+    def write(
+        self,
+        row: int,
+        col: int,
+        value: _CellValue,
+        /,
+        style: Style | str | None = None,
+    ) -> None: ...
+
+    @overload
+    def write(
+        self,
+        rc: str,
+        value: _CellValue,
+        /,
+        style: Style | str | None = None,
+    ) -> None: ...
 
     def write(
         self,
-        *args: int | str | _CellValue,
+        *args: Any,
         style: Style | str | None = None,
     ) -> None:
         """
@@ -1139,7 +1299,8 @@ class Table(_Cacheable):
 
         """
         # TODO: write needs to retain/init the border
-        (row, col, value) = self._validate_cell_coords(*args)  # pylint: disable=unbalanced-tuple-unpacking
+        (row, col, *rest) = self._validate_cell_coords(*args)
+        value = rest[0]
         self._data[row][col] = Cell._from_value(row, col, value)
         self._data[row][col]._update_value(value, self._data[row][col])
 
@@ -1155,6 +1316,23 @@ class Table(_Cacheable):
 
         if style is not None:
             self.set_cell_style(row, col, style)
+
+    @overload
+    def set_cell_style(
+        self,
+        row: int,
+        col: int,
+        style: Style | str,
+        /,
+    ) -> None: ...
+
+    @overload
+    def set_cell_style(
+        self,
+        rc: str,
+        style: Style | str,
+        /,
+    ) -> None: ...
 
     def set_cell_style(self, *args: int | str | Style) -> None:
         """
@@ -1172,7 +1350,8 @@ class Table(_Cacheable):
             If the style is neither a :class:`Style` nor a style name.
 
         """
-        (row, col, style) = self._validate_cell_coords(*args)  # pylint: disable=unbalanced-tuple-unpacking
+        (row, col, *rest) = self._validate_cell_coords(*args)
+        style = rest[0]
         if isinstance(style, Style):
             if style.name is None:
                 style.name = self._model.custom_style_name()
@@ -1187,7 +1366,7 @@ class Table(_Cacheable):
             msg = "style must be a Style object or style name"
             raise TypeError(msg)
 
-    def categorized_data(self, values_only: bool = False) -> dict | None:
+    def categorized_data(self, values_only: bool = False) -> dict[str, dict | list] | None:
         """
         Return the table's categorized data, or ``None`` if categories are disabled.
 
@@ -1225,7 +1404,7 @@ class Table(_Cacheable):
 
         """
 
-        def data_to_values(item: dict[object, object] | list[object] | Cell) -> object:
+        def data_to_values(item: list | dict | Cell) -> dict[str, dict | list] | Any:  # noqa: ANN401
             """Convert a row of cells to their Python values."""
             if isinstance(item, dict):
                 return {k: data_to_values(v) for k, v in item.items()}
@@ -1237,13 +1416,13 @@ class Table(_Cacheable):
 
         self._model.calculate_table_categories(self._table_id)
         data = self._model.table_categories_data[self._table_id]
-        if values_only:
+        if values_only and data is not None:
             return data_to_values(data)
         return data
 
     def add_row(  # noqa: C901
         self,
-        num_rows: int | None = 1,
+        num_rows: int = 1,
         start_row: int | None = None,
         default: str | float | bool | datetime | timedelta | None = None,
     ) -> None:
@@ -1291,7 +1470,7 @@ class Table(_Cacheable):
         self.num_rows += num_rows
         self._model.number_of_rows(self._table_id, self.num_rows)
 
-        rows = []
+        rows: list[list[Cell]] = []
         for row in range(start_row, start_row + num_rows):
             rows.append(  # noqa: PERF401
                 [
@@ -1313,7 +1492,7 @@ class Table(_Cacheable):
 
     def add_column(
         self,
-        num_cols: int | None = 1,
+        num_cols: int = 1,
         start_col: int | None = None,
         default: str | float | bool | datetime | timedelta | None = None,
     ) -> None:
@@ -1377,7 +1556,7 @@ class Table(_Cacheable):
 
     def delete_row(
         self,
-        num_rows: int | None = 1,
+        num_rows: int = 1,
         start_row: int | None = None,
     ) -> None:
         """
@@ -1424,7 +1603,7 @@ class Table(_Cacheable):
 
     def delete_column(
         self,
-        num_cols: int | None = 1,
+        num_cols: int = 1,
         start_col: int | None = None,
     ) -> None:
         """
@@ -1491,7 +1670,7 @@ class Table(_Cacheable):
 
         """
         ranges = cell_range if isinstance(cell_range, list) else [cell_range]
-        parsed_ranges = []
+        parsed_ranges: list[tuple[int, int, int, int]] = []
         for range_ref in ranges:
             if not isinstance(range_ref, str):
                 msg = "cell ranges must be strings"
@@ -1546,6 +1725,27 @@ class Table(_Cacheable):
                 for col, cell in enumerate(cells):
                     cell._set_merge(merge_cells.get((row, col)))
 
+    @overload
+    def add_comment(
+        self,
+        row: int,
+        col: int,
+        text: str = ...,
+        /,
+        author: str = ...,
+        reply: bool = ...,
+    ) -> None: ...
+
+    @overload
+    def add_comment(
+        self,
+        cell_ref: str,
+        text: str = ...,
+        /,
+        author: str = ...,
+        reply: bool = ...,
+    ) -> None: ...
+
     def add_comment(
         self,
         *args: int | str,
@@ -1572,10 +1772,10 @@ class Table(_Cacheable):
             comment to a cell that already has comments and ``reply`` is ``False``.
 
         """
-        (row, col, *args) = self._validate_cell_coords(*args)
-        if len(args) == 1:
-            text = args[0]
-        elif len(args) > 1:
+        (row, col, *rest) = self._validate_cell_coords(*args)
+        if len(rest) == 1:
+            text = rest[0]
+        elif len(rest) > 1:
             msg = "too many positional arguments to add_comment"
             raise TypeError(msg)
         else:
@@ -1638,12 +1838,12 @@ class Table(_Cacheable):
             If any of the sides to which the border is applied have been merged.
 
         """
-        (row, col, *args) = self._validate_cell_coords(*args)
-        if len(args) == 2:
-            (side, border_value) = args  # pylint: disable=unbalanced-tuple-unpacking
+        (row, col, *rest) = self._validate_cell_coords(*args)
+        if len(rest) == 2:
+            (side, border_value) = rest  # pylint: disable=unbalanced-tuple-unpacking
             length = 1
-        elif len(args) == 3:
-            (side, border_value, length) = args  # pylint: disable=unbalanced-tuple-unpacking
+        elif len(rest) == 3:
+            (side, border_value, length) = rest  # pylint: disable=unbalanced-tuple-unpacking
         else:
             msg = "invalid number of arguments to border_value()"
             raise TypeError(msg)
@@ -1664,6 +1864,7 @@ class Table(_Cacheable):
         cell = self._data[row][col]
         if (
             cell.is_merged
+            and cell.size is not None
             and ((side == "right" and cell.size[1] > 1) or (side == "bottom" and cell.size[0] > 1))
         ) or (
             isinstance(cell, MergedCell)
@@ -1883,10 +2084,10 @@ class Table(_Cacheable):
 
 
         """
-        (row, col, *args) = self._validate_cell_coords(*args)
-        if len(args) == 1:
-            format_type = args[0]
-        elif len(args) > 1:
+        (row, col, *rest) = self._validate_cell_coords(*args)
+        if len(rest) == 1:
+            format_type = rest[0]
+        elif len(rest) > 1:
             msg = "too many positional arguments to set_cell_formatting"
             raise TypeError(msg)
         else:
@@ -1898,7 +2099,7 @@ class Table(_Cacheable):
         else:
             self._set_cell_data_format(row, col, format_type, **kwargs)
 
-    def _set_cell_custom_format(self, row: int, col: int, **kwargs: object) -> None:
+    def _set_cell_custom_format(self, row: int, col: int, **kwargs: Any) -> None:  # noqa: ANN401
         """Set cell custom format."""
         if "format" not in kwargs:
             msg = "no format provided for custom format"
@@ -1933,7 +2134,7 @@ class Table(_Cacheable):
         row: int,
         col: int,
         format_type_name: str,
-        **kwargs: object,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Set cell data format."""
         try:
@@ -1983,7 +2184,9 @@ class Table(_Cacheable):
                     msg,
                 )
 
-            popup_format_type = FormattingType.TEXT if isinstance(cell, TextCell) else True
+            popup_format_type = (
+                FormattingType.TEXT if isinstance(cell, TextCell) else FormattingType.NUMBER
+            )
             format_id = self._model.format_archive(self._table_id, popup_format_type, formatting)
         else:
             format_id = self._model.format_archive(self._table_id, format_type, formatting)

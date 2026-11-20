@@ -1,4 +1,8 @@
+"""Tests for cell borders."""
+
 from collections import defaultdict
+from pathlib import Path
+from typing import Any
 
 import pytest
 from pytest_check import check
@@ -7,17 +11,18 @@ from numbers_parser import RGB, Border, BorderType, Cell, Document, MergedCell, 
 
 
 def check_border(cell: Cell, side: str, test_value: str) -> bool:
+    """Check if a cell's border matches the expected test value."""
     border_value = getattr(cell.border, side, None)
     if test_value == "None":
         valid = check.is_none(border_value)
-        ref = "None"
     else:
         values = test_value.split(",")
-        values[0] = float(values[0])
-        values[1] = eval(values[1].replace(";", ","))  # noqa: S307
+        width = float(values[0])
+        color = eval(values[1].replace(";", ","))  # pylint: disable=eval-used # noqa: S307
+        style = values[2]
         if border_value is None:
             return False
-        ref = Border(values[0], values[1], values[2])
+        ref = Border(width, color, style)
         cell_name = xl_rowcol_to_cell(cell.row, cell.col)
         sheet_name = cell._model.sheet_name(cell._model.table_id_to_sheet_id(cell._table_id))
         valid = check.equal(
@@ -33,7 +38,8 @@ BORDER_TO_TAG_MAP = {v: k for k, v in TAG_TO_BORDER_MAP.items()}
 ALL_BORDERS = ["top", "right", "bottom", "left"]
 
 
-def unpack_test_string(test_value):
+def unpack_test_string(test_value: str) -> dict[str, Any]:
+    """Unpack border test specification string into a dictionary."""
     # Cell test values are of the form:
     #
     # T=1,(0;162;255),dashes
@@ -43,7 +49,7 @@ def unpack_test_string(test_value):
     #
     # Merge cells have multiple values T0, T1, etc.
     tests = test_value.split("\n")
-    test_values = {}
+    test_values: dict[str, Any] = {}
     for test in tests:
         tag = TAG_TO_BORDER_MAP[test[0]]
         if test[1] == "=":
@@ -56,13 +62,14 @@ def unpack_test_string(test_value):
     return test_values
 
 
-def test_exceptions():
+def test_exceptions() -> None:
+    """Test exceptions raised by invalid border parameters."""
     with pytest.raises(TypeError) as e:
-        _ = Border(width="invalid")
+        _ = Border(width="invalid")  # type: ignore[arg-type]
     assert "width must be a float number" in str(e)
 
     with pytest.raises(TypeError) as e:
-        _ = Border(width="invalid")
+        _ = Border(width="invalid")  # type: ignore[arg-type]
     assert "width must be a float number" in str(e)
 
     with pytest.raises(TypeError) as e:
@@ -78,7 +85,7 @@ def test_exceptions():
     assert "invalid border style" in str(e)
 
     with pytest.raises(TypeError) as e:
-        _ = Border(style=999)
+        _ = Border(style=999)  # type: ignore[arg-type]
     assert "invalid border style value" in str(e)
 
     border = Border(style=BorderType(3))
@@ -99,7 +106,7 @@ def test_exceptions():
     assert "side must be a valid border segment" in str(e)
 
     with pytest.raises(TypeError) as e:
-        doc.sheets[0].tables[0].set_cell_border("A1", "left", object())
+        doc.sheets[0].tables[0].set_cell_border("A1", "left", object())  # type: ignore[arg-type]
     assert "border value must be a Border object" in str(e)
 
     with pytest.raises(TypeError) as e:
@@ -112,44 +119,46 @@ def test_exceptions():
     assert "border length must be an int" in str(e)
 
     table = doc.sheets[0].tables[0]
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(IndexError) as idx_err:
         table.set_cell_border(0, 6, "bottom", Border(1.0, RGB(0, 0, 0), "solid"), 5)
-    assert "column 10 out of range" in str(e)
-    assert f"table has {table.num_cols} columns" in str(e)
+    assert "column 10 out of range" in str(idx_err)
+    assert f"table has {table.num_cols} columns" in str(idx_err)
 
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(IndexError) as idx_err:
         table.set_cell_border(0, 6, "top", Border(1.0, RGB(0, 0, 0), "solid"), 5)
-    assert "column 10 out of range" in str(e)
-    assert f"table has {table.num_cols} columns" in str(e)
+    assert "column 10 out of range" in str(idx_err)
+    assert f"table has {table.num_cols} columns" in str(idx_err)
 
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(IndexError) as idx_err:
         table.set_cell_border(10, 0, "right", Border(1.0, RGB(0, 0, 0), "solid"), 5)
-    assert "row 14 out of range" in str(e)
-    assert f"table has {table.num_rows} rows" in str(e)
+    assert "row 14 out of range" in str(idx_err)
+    assert f"table has {table.num_rows} rows" in str(idx_err)
 
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(IndexError) as idx_err:
         table.set_cell_border(10, 0, "left", Border(1.0, RGB(0, 0, 0), "solid"), 5)
-    assert "row 14 out of range" in str(e)
-    assert f"table has {table.num_rows} rows" in str(e)
+    assert "row 14 out of range" in str(idx_err)
+    assert f"table has {table.num_rows} rows" in str(idx_err)
 
 
-def run_border_tests(filename):
+def run_border_tests(filename: str | Path) -> None:
+    """Run border verification tests against a Numbers document."""
     doc = Document(filename)
 
     for sheet_name in ["Borders", "Large Borders"]:
         table = doc.sheets[sheet_name].tables[0]
 
         with pytest.warns() as record:
-            table.cell(0, 0).border = object()
+            table.cell(0, 0).border = object()  # type: ignore[assignment]
         assert len(record) == 1
         assert "cell border values cannot be set" in str(record[0])
 
         for row, cells in enumerate(table.iter_rows()):
             for col, cell in enumerate(cells):
-                if not cell.value or isinstance(cell, MergedCell):
+                if cell is None or not cell.value or isinstance(cell, MergedCell):
                     continue
                 tests = unpack_test_string(cell.value)
                 if cell.is_merged:
+                    assert cell.size is not None
                     valid = []
                     row_start = row
                     row_end = row + cell.size[0] - 1
@@ -177,26 +186,48 @@ def run_border_tests(filename):
                 assert valid
 
 
-def test_borders():
+def test_borders() -> None:
+    """Test borders in standard test document."""
     run_border_tests("tests/data/test-styles.numbers")
 
 
-def test_empty_borders():
+def test_empty_borders() -> None:
+    """Test cells with empty borders."""
     doc = Document("tests/data/test-styles.numbers")
     sheet = doc.sheets["Large Borders"]
     table = sheet.tables[0]
 
-    assert table.cell("F10").border.right is None
-    assert table.cell("F10").border.bottom is None
-    assert table.cell("F13").border.top is None
-    assert table.cell("F13").border.right is None
-    assert table.cell("H10").border.left is None
-    assert table.cell("H10").border.bottom is None
-    assert table.cell("H13").border.left is None
-    assert table.cell("H13").border.top is None
+    cell_f10 = table.cell("F10")
+    assert cell_f10 is not None
+    border_f10 = cell_f10.border
+    assert border_f10 is not None
+    assert border_f10.right is None
+    assert border_f10.bottom is None
+
+    cell_f13 = table.cell("F13")
+    assert cell_f13 is not None
+    border_f13 = cell_f13.border
+    assert border_f13 is not None
+    assert border_f13.top is None
+    assert border_f13.right is None
+
+    cell_h10 = table.cell("H10")
+    assert cell_h10 is not None
+    border_h10 = cell_h10.border
+    assert border_h10 is not None
+    assert border_h10.left is None
+    assert border_h10.bottom is None
+
+    cell_h13 = table.cell("H13")
+    assert cell_h13 is not None
+    border_h13 = cell_h13.border
+    assert border_h13 is not None
+    assert border_h13.left is None
+    assert border_h13.top is None
 
 
-def test_edit_borders(configurable_save_file):
+def test_edit_borders(configurable_save_file: Path) -> None:
+    """Test editing and saving cell borders."""
     doc = Document()
     sheet = doc.sheets[0]
     table = sheet.tables[0]
@@ -226,26 +257,42 @@ def test_edit_borders(configurable_save_file):
     new_doc = Document(configurable_save_file)
     sheet = new_doc.sheets[0]
     table = sheet.tables[0]
-    assert table.cell("B7").border.left == Border(8.0, RGB(29, 177, 0), "solid")
-    assert table.cell("B8").border.right == Border(5.0, RGB(29, 177, 0), "dashes")
+
+    b7_border = table.cell("B7").border
+    assert b7_border is not None
+    assert b7_border.left == Border(8.0, RGB(29, 177, 0), "solid")
+
+    b8_border = table.cell("B8").border
+    assert b8_border is not None
+    assert b8_border.right == Border(5.0, RGB(29, 177, 0), "dashes")
 
     for merge_ref in ["C4", "D4", "E4", "F4"]:
-        assert table.cell(merge_ref).border.top is None
+        m_border = table.cell(merge_ref).border
+        assert m_border is not None
+        assert m_border.top is None
     for merge_ref in ["C4", "D4", "E4"]:
-        assert table.cell(merge_ref).border.right is None
+        m_border = table.cell(merge_ref).border
+        assert m_border is not None
+        assert m_border.right is None
 
-    assert table.cell("C5").border.bottom == Border(4.0, RGB(29, 177, 0), "solid")
-    assert table.cell("D5").border.bottom == Border(4.0, RGB(0, 0, 0), "solid")
-    assert table.cell("E5").border.bottom == Border(4.0, RGB(0, 162, 255), "solid")
-    assert table.cell("F5").border.bottom == Border(4.0, RGB(212, 24, 118), "solid")
+    for ref, expected in [
+        ("C5", Border(4.0, RGB(29, 177, 0), "solid")),
+        ("D5", Border(4.0, RGB(0, 0, 0), "solid")),
+        ("E5", Border(4.0, RGB(0, 162, 255), "solid")),
+        ("F5", Border(4.0, RGB(212, 24, 118), "solid")),
+    ]:
+        c_border = table.cell(ref).border
+        assert c_border is not None
+        assert c_border.bottom == expected
 
 
-def invert_border_test(test):
+def invert_border_test(test: str) -> tuple[str | None, Border | None]:
+    """Invert a single border test specification."""
     if test == "None":
         return None, None
     values = test.split(",")
     width = float(values[0])
-    color = eval(values[1].replace(";", ","))  # noqa: S307
+    color = eval(values[1].replace(";", ","))  # pylint: disable=eval-used # noqa: S307
     style = values[2]
     width = round(width * 2.0, 1) if width < 4.0 else round(width / 2.0, 1)
 
@@ -264,12 +311,13 @@ def invert_border_test(test):
 
     border = Border(width, color, style)
 
-    color = "(" + ";".join([str(x) for x in color]) + ")"
-    test_value = ",".join([str(width), color, style])
+    color_str = "(" + ";".join([str(x) for x in color]) + ")"
+    test_value = ",".join([str(width), color_str, style])
     return test_value, border
 
 
-def invert_tests(tests):
+def invert_tests(tests: dict[str, Any]) -> tuple[str, list[Border | None]]:
+    """Invert all border test specifications for a cell."""
     new_tests = []
     new_borders = []
     test_string = ""
@@ -280,7 +328,7 @@ def invert_tests(tests):
             new_borders.append(border)
             test_string += BORDER_TO_TAG_MAP[side] + "=" + str(new_tests[-1]) + "\n"
         else:
-            for i in range(len(test)):
+            for i in range(len(test)):  # pylint: disable=consider-using-enumerate
                 (new_test, border) = invert_border_test(test[i])
                 new_tests.append(new_test)
                 new_borders.append(border)
@@ -288,7 +336,8 @@ def invert_tests(tests):
     return test_string.strip(), new_borders
 
 
-def test_extra_borders(configurable_save_file):
+def test_extra_borders(configurable_save_file: Path) -> None:
+    """Test setting and saving extra border configurations."""
     doc = Document("tests/data/test-extra-borders.numbers")
     table = doc.sheets[0].tables[0]
     dots_border = Border(3.0, RGB(0, 162, 255), "dots")
@@ -329,13 +378,14 @@ def test_extra_borders(configurable_save_file):
             assert getattr(table.cell(row, col).border, side) == border
 
 
-def test_resave_borders(configurable_save_file):
+def test_resave_borders(configurable_save_file: Path) -> None:
+    """Test inverting, resaving, and re-verifying all borders."""
     doc = Document("tests/data/test-styles.numbers")
 
     style = doc.add_style(font_size=8.0, bold=False, name="Border Test Style")
     for sheet_name in ["Borders", "Large Borders"]:
         table = doc.sheets[sheet_name].tables[0]
-        merge_edges = []
+        merge_edges: list[dict[str, Any]] = []
         for row, cells in enumerate(table.iter_rows()):
             for col, cell in enumerate(cells):
                 if not cell.value:
@@ -344,6 +394,7 @@ def test_resave_borders(configurable_save_file):
                 (test_string, borders) = invert_tests(tests)
                 table.write(row, col, test_string, style=style)
                 if cell.is_merged:
+                    assert cell.size is not None
                     for side in ALL_BORDERS:
                         height = cell.size[0]
                         width = cell.size[1]
@@ -351,7 +402,8 @@ def test_resave_borders(configurable_save_file):
                             case "top":
                                 for offset in range(width):
                                     border = borders.pop(0)
-                                    table.set_cell_border(row, col + offset, side, border, 1)
+                                    if border is not None:
+                                        table.set_cell_border(row, col + offset, side, border, 1)
                             case "right":
                                 if height > 1:
                                     for offset in range(height):
@@ -367,7 +419,8 @@ def test_resave_borders(configurable_save_file):
                                         )
                                 else:
                                     border = borders.pop(0)
-                                    table.set_cell_border(row, col + width, side, border, 1)
+                                    if border is not None:
+                                        table.set_cell_border(row, col + width, side, border, 1)
                             case "bottom":
                                 if width > 1:
                                     for offset in range(width):
@@ -383,18 +436,27 @@ def test_resave_borders(configurable_save_file):
                                         )
                                 else:
                                     border = borders.pop(0)
-                                    table.set_cell_border(row + height - 1, col, side, border, 1)
+                                    if border is not None:
+                                        table.set_cell_border(
+                                            row + height - 1,
+                                            col,
+                                            side,
+                                            border,
+                                            1,
+                                        )
                             case "left":
                                 for offset in range(height):
                                     border = borders.pop(0)
-                                    table.set_cell_border(row + offset, col, side, border, 1)
+                                    if border is not None:
+                                        table.set_cell_border(row + offset, col, side, border, 1)
                 else:
                     for side, border in zip(ALL_BORDERS, borders, strict=True):
                         if border is not None:
                             table.set_cell_border(row, col, side, border, 1)
 
         for edge in merge_edges:
-            table.set_cell_border(edge["row"], edge["col"], edge["side"], edge["border"], 1)
+            if edge["border"] is not None:
+                table.set_cell_border(edge["row"], edge["col"], edge["side"], edge["border"], 1)
 
     doc.save(configurable_save_file)
     run_border_tests(configurable_save_file)

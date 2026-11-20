@@ -83,6 +83,8 @@ message UIStateArchive {
   optional bool editing_disabled = 31;
   optional bool sidebar_visible = 32;
   optional float sidebar_width = 33;
+  optional bool alpine_visible = 34;
+  optional float alpine_width = 35;
 }
 
 message SheetSelectionArchive {

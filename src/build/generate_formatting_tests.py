@@ -1,6 +1,7 @@
 """Generate Numbers documents covering formatting corner cases."""
 # pragma: noqa: DTZ001
 
+from collections.abc import Callable
 from datetime import datetime
 from typing import Any
 
@@ -37,7 +38,7 @@ def _populate_stress_sheet(  # noqa: PLR0917
     fmt_type: str,
     test_cases: list[tuple[str, Any]],
     subtests: list[tuple[str, dict[str, Any]]],
-    ref_generator: callable | None = None,
+    ref_generator: Callable[[str, Any], str] | None = None,
 ) -> None:
     """
     Populate a sheet using the paired-column layout expected by test_fraction_stress.
@@ -71,6 +72,7 @@ def _populate_stress_sheet(  # noqa: PLR0917
             table.write(row_idx, val_col, canonical_val)
             table.set_cell_formatting(row_idx, val_col, fmt_type, **kwargs)
 
+            formatted: str
             if ref_generator is not None:
                 formatted = ref_generator(subtest_name, canonical_val)
             else:
@@ -130,7 +132,9 @@ def add_fraction_stress_tests(doc: Document) -> None:
         ("3-digit max denom 998/999 (12 sig figs)", 0.998998998999),
         ("Negative 3-digit max denom -998/999 (12 sig figs)", -0.998998998999),
     ]
-    subtests = [(acc.name, {"fraction_accuracy": acc}) for acc in FractionAccuracy]
+    subtests: list[tuple[str, dict[str, Any]]] = [
+        (acc.name, {"fraction_accuracy": acc}) for acc in FractionAccuracy
+    ]
     _populate_stress_sheet(doc, "fraction", "fraction", test_cases, subtests)
 
 
@@ -150,7 +154,7 @@ def add_base_stress_tests(doc: Document) -> None:
         ("Negative float (-15.6 -> -16)", -15.6),
         ("Large integer (65535)", 65535),
     ]
-    subtests = [
+    subtests: list[tuple[str, dict[str, Any]]] = [
         ("base_2_0_places", {"base": 2, "base_places": 0, "base_use_minus_sign": True}),
         ("base_2_8_places_twos_comp", {"base": 2, "base_places": 8, "base_use_minus_sign": False}),
         ("base_8_default", {"base": 8, "base_places": 4, "base_use_minus_sign": True}),
@@ -181,7 +185,7 @@ def add_currency_stress_tests(doc: Document) -> None:
         ("Millions with fractions (10 sig figs)", 9876543.215),
         ("Negative millions (10 sig figs)", -9876543.215),
     ]
-    subtests = [
+    subtests: list[tuple[str, dict[str, Any]]] = [
         (
             "GBP_2dec_minus",
             {
@@ -241,7 +245,7 @@ def add_datetime_stress_tests(doc: Document) -> None:
         ("End of year midnight", datetime(2026, 12, 31, 23, 59, 59)),  # noqa: DTZ001
         ("Single digit day and month", datetime(2026, 3, 5, 8, 4, 9)),  # noqa: DTZ001
     ]
-    subtests = [
+    subtests: list[tuple[str, dict[str, Any]]] = [
         ("iso_date", {"date_time_format": "yyyy-MM-dd"}),
         ("uk_long_date", {"date_time_format": "EEEE, d MMMM yyyy"}),
         ("short_date_time", {"date_time_format": "d MMM y HH:mm:ss"}),
@@ -294,7 +298,7 @@ def add_number_stress_tests(doc: Document) -> None:
         ("Large number (13 sig figs)", 12345678.90123),
         ("Large negative number (13 sig figs)", -12345678.90123),
     ]
-    subtests = [
+    subtests: list[tuple[str, dict[str, Any]]] = [
         ("default_2dec", {"decimal_places": 2}),
         ("0dec_thousands", {"decimal_places": 0, "show_thousands_separator": True}),
         (
@@ -325,7 +329,7 @@ def add_percentage_stress_tests(doc: Document) -> None:
         ("Negative fractional percent (-12.345%)", -0.12345),
         ("Large multiplier (12345.67%)", 123.4567),
     ]
-    subtests = [
+    subtests: list[tuple[str, dict[str, Any]]] = [
         ("0dec", {"decimal_places": 0}),
         ("2dec_default", {"decimal_places": 2}),
         (
@@ -356,7 +360,7 @@ def add_scientific_stress_tests(doc: Document) -> None:
         ("Mantissa rounding overflow (9.999 -> 1.00E+01)", 9.999),
         ("Negative mantissa overflow (-9.999)", -9.999),
     ]
-    subtests = [
+    subtests: list[tuple[str, dict[str, Any]]] = [
         ("0dec", {"decimal_places": 0}),
         ("2dec", {"decimal_places": 2}),
         ("4dec", {"decimal_places": 4}),
@@ -374,7 +378,7 @@ def add_tickbox_stress_tests(doc: Document) -> None:
         ("False boolean", False),
         ("True boolean", True),
     ]
-    subtests = [
+    subtests: list[tuple[str, dict[str, Any]]] = [
         ("default_tickbox", {}),
     ]
     _populate_stress_sheet(doc, "tickbox", "tickbox", test_cases, subtests)
@@ -391,7 +395,7 @@ def add_rating_stress_tests(doc: Document) -> None:
         ("Three stars", 3),
         ("Five stars (max)", 5),
     ]
-    subtests = [
+    subtests: list[tuple[str, dict[str, Any]]] = [
         ("default_rating", {}),
     ]
     _populate_stress_sheet(doc, "rating", "rating", test_cases, subtests)
@@ -407,7 +411,7 @@ def add_slider_stress_tests(doc: Document) -> None:
         ("Midpoint fraction (5.5)", 5.5),
         ("Maximum bound (100.0)", 100.0),
     ]
-    subtests = [
+    subtests: list[tuple[str, dict[str, Any]]] = [
         (
             "number_slider",
             {
@@ -485,7 +489,7 @@ def add_stepper_stress_tests(doc: Document) -> None:
         ("Fractional step (12.75)", 12.75),
         ("Max bound (50.0)", 50.0),
     ]
-    subtests = [
+    subtests: list[tuple[str, dict[str, Any]]] = [
         (
             "number_stepper",
             {
@@ -563,7 +567,7 @@ def add_popup_stress_tests(doc: Document) -> None:
         ("Numeric string item", "123"),
     ]
     popup_items = ["Alpha", "Beta", "123"]
-    subtests = [
+    subtests: list[tuple[str, dict[str, Any]]] = [
         ("allow_none_true", {"popup_values": popup_items, "allow_none": True}),
         ("allow_none_false", {"popup_values": popup_items, "allow_none": False}),
     ]
@@ -599,7 +603,7 @@ def add_custom_stress_tests(doc: Document) -> None:
         ("Negative float", -42.125),
         ("Large float (9 sig figs)", 12345.6789),
     ]
-    num_subtests = [
+    num_subtests: list[tuple[str, dict[str, Any]]] = [
         ("custom_num_zeros", {"format": num_pad_zeros}),
         ("custom_num_spaces", {"format": num_pad_spaces}),
     ]
@@ -614,7 +618,7 @@ def add_custom_stress_tests(doc: Document) -> None:
         ("Leap day", datetime(2024, 2, 29, 9, 5)),  # noqa: DTZ001
         ("Year end", datetime(2026, 12, 31, 23, 45)),  # noqa: DTZ001
     ]
-    dt_subtests = [
+    dt_subtests: list[tuple[str, dict[str, Any]]] = [
         ("custom_datetime_iso", {"format": dt_custom}),
     ]
 
@@ -640,7 +644,7 @@ def add_custom_stress_tests(doc: Document) -> None:
         ("Simple word", "Token"),
         ("Symbols", "A&B"),
     ]
-    txt_subtests = [
+    txt_subtests: list[tuple[str, dict[str, Any]]] = [
         ("custom_text_wrap", {"format": txt_custom}),
     ]
 

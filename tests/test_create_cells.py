@@ -1,4 +1,7 @@
+"""Tests for creating and editing cells."""
+
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 
@@ -6,22 +9,22 @@ from numbers_parser import Document, EmptyCell
 from numbers_parser.constants import EPOCH, MAX_COL_COUNT, MAX_ROW_COUNT
 
 
-def test_edit_cell_values(configurable_save_file):
+def test_edit_cell_values(configurable_save_file: Path) -> None:
+    """Test editing cell values and saving the document."""
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
     table = tables[0]
 
     with pytest.raises(IndexError) as e:
-        table.write(0)
+        table.write(0)  # type: ignore[call-overload]
     assert "invalid cell reference" in str(e.value)
-    with pytest.raises(ValueError) as e:
-        table.write(0, 0, object())
-    assert "determine cell type from type" in str(e.value)
+    with pytest.raises(ValueError, match="determine cell type from type"):
+        table.write(0, 0, object())  # type: ignore[call-overload]
 
     table.write("B2", "new_b2")
     table.write(1, 2, "new_c2")
-    table.write(2, 0, True)
+    table.write(2, 0, True)  # noqa: FBT003
     table.write(2, 1, 7890)
     table.write(2, 2, 78.90)
     table.write(4, 3, datetime(2021, 6, 15))
@@ -55,7 +58,8 @@ def test_edit_cell_values(configurable_save_file):
     assert table.cell(5, 5).value == "7890"
 
 
-def test_negative_cell_coordinates_are_rejected():
+def test_negative_cell_coordinates_are_rejected() -> None:
+    """Test that negative row and column coordinates raise IndexError."""
     doc = Document()
     table = doc.default_table
 
@@ -67,13 +71,15 @@ def test_negative_cell_coordinates_are_rejected():
 
 
 @pytest.mark.parametrize(("num_rows", "num_cols"), [(1, 1), (1, 8), (12, 1)])
-def test_document_supports_single_row_or_column(num_rows, num_cols):
+def test_document_supports_single_row_or_column(num_rows: int, num_cols: int) -> None:
+    """Test creating documents with a single row or column."""
     doc = Document(num_rows=num_rows, num_cols=num_cols)
     assert doc.default_table.num_rows == num_rows
     assert doc.default_table.num_cols == num_cols
 
 
-def test_large_table(configurable_save_file):
+def test_large_table(configurable_save_file: Path) -> None:
+    """Test writing and saving a large table."""
     doc = Document()
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -81,21 +87,17 @@ def test_large_table(configurable_save_file):
     for i in range(300):
         table.write(i, i, "wide")
 
-    with pytest.raises(ValueError) as e:  # noqa: PT011
+    with pytest.raises(ValueError, match="rows cannot exceed"):
         table.add_row(MAX_ROW_COUNT - table.num_rows + 1)
-    assert "rows cannot exceed" in str(e.value)
 
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(IndexError, match="exceeds maximum row"):
         table.write(MAX_ROW_COUNT, 0, "")
-    assert "exceeds maximum row" in str(e.value)
 
-    with pytest.raises(ValueError) as e:  # noqa: PT011
+    with pytest.raises(ValueError, match="columns cannot exceed"):
         table.add_column(MAX_COL_COUNT - table.num_cols + 1)
-    assert "columns cannot exceed" in str(e.value)
 
-    with pytest.raises(IndexError) as e:
+    with pytest.raises(IndexError, match="exceeds maximum column"):
         table.write(0, MAX_COL_COUNT, "")
-    assert "exceeds maximum column" in str(e.value)
 
     doc.save(configurable_save_file)
 

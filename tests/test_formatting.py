@@ -1,5 +1,9 @@
+"""Tests for cell formatting."""
+
 from collections.abc import Generator
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any
 
 import pytest
 import pytest_check as check
@@ -334,7 +338,8 @@ OTHER_FORMAT_REF = [
 ]
 
 
-def test_duration_formatting():
+def test_duration_formatting() -> None:
+    """Test duration cell formatting."""
     doc = Document("tests/data/duration_112.numbers")
     for sheet in doc.sheets:
         table = sheet.tables[0]
@@ -345,7 +350,8 @@ def test_duration_formatting():
                 check.equal(duration, ref)
 
 
-def test_date_formatting():
+def test_date_formatting() -> None:
+    """Test date cell formatting."""
     doc = Document("tests/data/date_formats.numbers")
     for sheet in doc.sheets:
         table = sheet.tables[0]
@@ -358,7 +364,8 @@ def test_date_formatting():
                 check.equal(date, ref)
 
 
-def test_custom_formatting(pytestconfig):
+def test_custom_formatting(pytestconfig: pytest.Config) -> None:
+    """Test custom cell formatting."""
     if pytestconfig.getoption("max_check_fails") is not None:
         max_check_fails = pytestconfig.getoption("max_check_fails")
     else:
@@ -374,11 +381,12 @@ def test_custom_formatting(pytestconfig):
             check.equal(f"@{i}:{value}", f"@{i}:{ref}")
             if value != ref:
                 fails += 1
-            if max_check_fails > 0 and fails >= max_check_fails:
+            if 0 < fails >= max_check_fails:
                 raise AssertionError
 
 
-def test_custom_formatting_stress(pytestconfig):
+def test_custom_formatting_stress(pytestconfig: pytest.Config) -> None:
+    """Stress test custom number formatting."""
     if pytestconfig.getoption("max_check_fails") is not None:
         max_check_fails = pytestconfig.getoption("max_check_fails")
     else:
@@ -395,12 +403,14 @@ def test_custom_formatting_stress(pytestconfig):
         check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'", row[0].value)
         if value != ref:
             fails += 1
-        if max_check_fails > 0 and fails >= max_check_fails:
+        if 0 < fails >= max_check_fails:
             raise AssertionError
 
 
-def test_standard_formatting_stress():
-    def chunks(cells: list[Cell]) -> Generator[tuple[int, Cell, str]]:
+def test_standard_formatting_stress() -> None:
+    """Stress test standard cell formatting."""
+
+    def chunks(cells: tuple[Cell, ...]) -> Generator[tuple[int, Cell, str | None]]:
         for ii in range(0, len(cells), 2):
             yield (ii, cells[ii], cells[ii + 1].formatted_value)
 
@@ -424,7 +434,8 @@ def test_standard_formatting_stress():
                 )
 
 
-def test_write_date_format(configurable_save_file):
+def test_write_date_format(configurable_save_file: Path) -> None:
+    """Test writing and saving date and duration formats."""
     doc = Document(
         num_header_cols=0,
         num_header_rows=0,
@@ -457,8 +468,8 @@ def test_write_date_format(configurable_save_file):
         table.set_cell_formatting("A1", "number", date_time_format="yyyy")
     assert "cannot use number formatting for cells of type TextCell" in str(e)
 
-    for row in range(len(DATE_FORMATS)):
-        for col in range(len(TIME_FORMATS)):
+    for row in range(len(DATE_FORMATS)):  # pylint: disable=consider-using-enumerate
+        for col in range(len(TIME_FORMATS)):  # pylint: disable=consider-using-enumerate
             date_time_format = " ".join([DATE_FORMATS[row], TIME_FORMATS[col]]).strip()
             table.write(row, col, ref_date)
             table.set_cell_formatting(row, col, "datetime", date_time_format=date_time_format)
@@ -485,7 +496,8 @@ def test_write_date_format(configurable_save_file):
     check.equal(table.cell(row + 1, 0).formatted_value, "1 day 2 hours 0 minutes")
 
 
-def test_write_numbers_format(configurable_save_file):
+def test_write_numbers_format(configurable_save_file: Path) -> None:
+    """Test writing and saving number and currency formats."""
     doc = Document(num_header_cols=0, num_header_rows=0, num_cols=8, num_rows=10)
     table = doc.sheets[0].tables[0]
 
@@ -624,7 +636,8 @@ def test_write_numbers_format(configurable_save_file):
             check.equal(table.cell(row + 10, col).formatted_value, ref_value)
 
 
-def test_write_mixed_number_formats(configurable_save_file):
+def test_write_mixed_number_formats(configurable_save_file: Path) -> None:
+    """Test writing percentage, base, fraction, and scientific formats."""
     doc = Document(
         num_header_cols=0,
         num_header_rows=0,
@@ -660,22 +673,20 @@ def test_write_mixed_number_formats(configurable_save_file):
                     col += 1
             row += 1
 
-    with pytest.raises(TypeError) as e:
-        table.write(row, 0, -1234)
+    table.write(row, 0, -1234)
+    with pytest.raises(TypeError, match="base_use_minus_sign must be True for base 10"):
         table.set_cell_formatting(row, 0, "base", base=10, base_use_minus_sign=False)
-    assert "base_use_minus_sign must be True for base 10" in str(e)
 
     for base in [10, 2, 8, 16, 36]:
         col = 0
-        values = {
+        base_values = {
             0: True,
             1234: True,
-            -1234: True,
             -1234: False,  # False formats as two's complement
             -(0x1F0000007F): False,
             (-0x7FFFFFFFFFF): False,
         }
-        for value, base_use_minus_sign in values.items():
+        for value, base_use_minus_sign in base_values.items():
             for base_places in [0, 8]:
                 if base not in [2, 8, 16] and not base_use_minus_sign:
                     continue
@@ -747,12 +758,13 @@ def test_write_mixed_number_formats(configurable_save_file):
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
     for row, cells in enumerate(OTHER_FORMAT_REF):
-        for col, ref_value in enumerate(cells):
-            value = table.cell(row, col).formatted_value
-            check.equal(f"[{row},{col}]:{value}", f"[{row},{col}]:{ref_value}")
+        for col, expected_str in enumerate(cells):
+            formatted_str = table.cell(row, col).formatted_value
+            check.equal(f"[{row},{col}]:{formatted_str}", f"[{row},{col}]:{expected_str}")
 
 
-def test_currency_symbols():
+def test_currency_symbols() -> None:
+    """Test currency symbol and accounting style formatting."""
     doc = Document()
     table = doc.sheets[0].tables[0]
     table.write(0, 0, -12.50)
@@ -767,7 +779,8 @@ def test_currency_symbols():
     assert table.cell(0, 0).formatted_value == "€\t(12.5)"
 
 
-def test_write_custom_numbers(configurable_save_file, pytestconfig):
+def test_write_custom_numbers(configurable_save_file: Path, pytestconfig: pytest.Config) -> None:
+    """Test creating, saving, and validating custom number formats."""
     if pytestconfig.getoption("max_check_fails") is not None:
         max_check_fails = pytestconfig.getoption("max_check_fails")
     else:
@@ -780,9 +793,9 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
     assert custom_format.name == "Custom Format 2"
 
     doc = Document("tests/data/custom-formats2.numbers")
-    with pytest.raises(KeyError) as e:
+    with pytest.raises(KeyError) as key_err:
         custom_format = doc.add_custom_format(name="Custom Format 1")
-    assert "'Custom Format 1' already exists" in str(e)
+    assert "'Custom Format 1' already exists" in str(key_err)
     with pytest.raises(TypeError) as e:
         custom_format = doc.add_custom_format(type="error")
     assert "unsupported cell format type 'ERROR'" in str(e)
@@ -797,9 +810,9 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
     with pytest.raises(TypeError) as e:
         table.set_cell_formatting(0, 0, "custom", format=object())
     assert "format must be a CustomFormatting object or format name" in str(e)
-    with pytest.raises(KeyError) as e:
+    with pytest.raises(KeyError) as key_err:
         table.set_cell_formatting(0, 0, "custom", format="invalid")
-    assert "format 'invalid' does not exist" in str(e)
+    assert "format 'invalid' does not exist" in str(key_err)
 
     table.write(2, 0, datetime(2022, 1, 1))
     table.write(2, 1, "test")
@@ -853,9 +866,9 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
 
     ref_doc = Document("tests/data/custom-format-stress.numbers")
     table = ref_doc.sheets[0].tables[0]
-    ref_values = {}
+    ref_values: dict[str, Any] = {}
     for _, cells in enumerate(table.iter_rows(min_row=2), start=3):
-        key = cells[0].value + ":" + cells[6].formatted_value
+        key = f"{cells[0].value}:{cells[6].formatted_value}"
         if cells[9].value:
             ref_values[key] = None
         else:
@@ -865,19 +878,20 @@ def test_write_custom_numbers(configurable_save_file, pytestconfig):
     table = ref_doc.sheets[0].tables[0]
     fails = 0
     for i, cells in enumerate(table.iter_rows(min_row=2), start=3):
-        key = cells[0].value + ":" + cells[6].formatted_value
-        ref = ref_values[cells[0].value + ":" + cells[6].formatted_value]
+        key = f"{cells[0].value}:{cells[6].formatted_value}"
+        ref = ref_values[key]
         if ref is None:
             continue
-        value = cells[7].formatted_value
-        check.equal(f"@{i}:'{value}'", f"@{i}:'{ref}'", cells[0].value)
-        if value != ref:
+        formatted_val = cells[7].formatted_value
+        check.equal(f"@{i}:'{formatted_val}'", f"@{i}:'{ref}'", cells[0].value)
+        if formatted_val != ref:
             fails += 1
-        if max_check_fails > 0 and fails >= max_check_fails:
+        if 0 < fails >= max_check_fails:
             raise AssertionError
 
 
-def test_write_text_custom_formatting(configurable_save_file):
+def test_write_text_custom_formatting(configurable_save_file: Path) -> None:
+    """Test creating and saving custom text formats."""
     doc = Document(num_header_cols=0, num_header_rows=0)
 
     with pytest.raises(TypeError) as e:
@@ -895,7 +909,8 @@ def test_write_text_custom_formatting(configurable_save_file):
     assert table.cell(0, 0).formatted_value == "before test after"
 
 
-def test_write_datetime_custom_formatting(configurable_save_file):
+def test_write_datetime_custom_formatting(configurable_save_file: Path) -> None:
+    """Test creating and saving custom datetime formats."""
     doc = Document(num_header_cols=0, num_header_rows=0)
     string_format = doc.add_custom_format(type="datetime", format="dd MMMM, yyyy")
     table = doc.sheets[0].tables[0]
@@ -911,7 +926,8 @@ def test_write_datetime_custom_formatting(configurable_save_file):
     assert table.cell(0, 1).formatted_value == "02 April, 2023"
 
 
-def run_test_interactive_formats(filename):
+def run_test_interactive_formats(filename: str | Path) -> None:
+    """Verify interactive control formatting in a document."""
     doc = Document(filename)
     table = doc.sheets[0].tables[0]
     assert table.cell(0, 0).value is False
@@ -927,16 +943,18 @@ def run_test_interactive_formats(filename):
     assert table.cell(1, 2).formatted_value == STAR_RATING_VALUE * 5
 
 
-def test_interactive_formats(configurable_save_file):
+def test_interactive_formats() -> None:
+    """Test reading interactive control formats."""
     run_test_interactive_formats("tests/data/test-actions.numbers")
 
 
-def test_write_interactive_formats(configurable_save_file):
+def test_write_interactive_formats(configurable_save_file: Path) -> None:
+    """Test writing and saving interactive control formats."""
     doc = Document()
     table = doc.sheets[0].tables[0]
 
-    table.write(0, 0, False)
-    table.write(0, 1, True)
+    table.write(0, 0, False)  # noqa: FBT003
+    table.write(0, 1, True)  # noqa: FBT003
     table.set_cell_formatting(0, 0, "tickbox")
     table.set_cell_formatting(0, 1, "tickbox")
 
@@ -987,16 +1005,17 @@ def test_write_interactive_formats(configurable_save_file):
         table.set_cell_formatting(3, 0, "popup", popup_values=["unknown"])
     assert "current cell value 'Dog' does not match any popup values" in str(e)
 
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(TypeError) as type_err:
         table.set_cell_formatting(2, 2, "stepper", control_format="unknown")
-    assert "unsupported number format 'unknown' for stepper" in str(e)
+    assert "unsupported number format 'unknown' for stepper" in str(type_err)
 
     doc.save(configurable_save_file)
 
     run_test_interactive_formats(configurable_save_file)
 
 
-def test_no_space_date_formats():
+def test_no_space_date_formats() -> None:
+    """Test date formats without spaces."""
     doc = Document("tests/data/date-format-nospace.numbers")
     for row in doc.default_table.rows():
         if row[0].formula is None:

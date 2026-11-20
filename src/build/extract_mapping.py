@@ -13,10 +13,13 @@ Copyright 2022 SheetJS LLC
 import json
 import os
 import sys
+import time
 
-import lldb
+import lldb  # type: ignore[import-not-found]
 
-from debug.lldbutil import print_stacktrace
+from debug.lldbutil import print_stacktrace  # type: ignore[import-untyped]
+
+TIMEOUT_SECONDS = 10
 
 if len(sys.argv) != 3:
     msg = f"Usage: {sys.argv[0]} exe-file output.json"
@@ -48,8 +51,8 @@ target.BreakpointCreateByName("[CKContainer containerWithIdentifier:]")
 # It will break again for sure.
 target.BreakpointCreateByRegex("___lldb_unnamed_symbol[0-9]+", "CloudKit")
 
-
 process = target.LaunchSimple(None, None, os.getcwd())
+deadline = time.monotonic() + TIMEOUT_SECONDS
 if not process:
     raise ValueError("Failed to launch process: " + exe)
 
@@ -59,6 +62,13 @@ if process.GetState() == lldb.eStateExited:
 
 try:
     while process.GetState() == lldb.eStateStopped:
+        if time.monotonic() >= deadline:
+            print(  # noqa: T201
+                f"Error: LLDB timed out after {TIMEOUT_SECONDS}s waiting for breakpoint",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
         thread = process.GetThreadAtIndex(0)
         frame = thread.GetSelectedFrame()
         if frame.name == "-[NSApplication _crashOnException:]":

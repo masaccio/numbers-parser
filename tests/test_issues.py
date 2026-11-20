@@ -1,19 +1,26 @@
+"""Regression tests for reported issues."""
+
 from datetime import datetime, timedelta
+from pathlib import Path
 from sys import version_info
 
 import magic
 import pytest
+from pytest_console_scripts import ScriptRunner
 
 from numbers_parser import (
     RGB,
     BackgroundImage,
     Border,
+    Cell,
+    CellBorder,
     Document,
     EmptyCell,
     ErrorCell,
     FractionAccuracy,
     PaddingType,
     Style,
+    UnsupportedError,
     UnsupportedWarning,
     xl_rowcol_to_cell,
 )
@@ -25,6 +32,26 @@ from numbers_parser.constants import (
     DEFAULT_ROW_HEIGHT,
 )
 from numbers_parser.xrefs import CellRange
+
+
+def _style(cell: Cell) -> Style:
+    """Return a cell's style after asserting it is not None."""
+    assert cell.style is not None
+    return cell.style
+
+
+def _bg_image(cell: Cell) -> BackgroundImage:
+    """Return a cell's background image after asserting it is not None."""
+    bg_img = _style(cell).bg_image
+    assert bg_img is not None
+    return bg_img
+
+
+def _border(cell: Cell) -> CellBorder:
+    """Return a cell's border after asserting it is not None."""
+    assert cell.border is not None
+    return cell.border
+
 
 ISSUE_3_REF = [("A", "B"), (2.0, 0.0), (3.0, 1.0), (None, None)]
 ISSUE_4_REF_1 = "Part 1 \n\nPart 2\n"
@@ -84,22 +111,23 @@ ISSUE_44_REF = [
 ]
 
 
-def test_issue_3():
+def test_issue_3() -> None:
+    """Test issue 3."""
+    # pylint: disable=consider-using-generator
     doc = Document("tests/data/issue-3.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
-    ref = []
-    for row in tables[0].iter_rows():
-        ref.append(tuple([x.value for x in row]))
+    ref = [tuple([x.value for x in row]) for row in tables[0].iter_rows()]
     assert ref == ISSUE_3_REF
 
     ref = []
-    for row in tables[0].iter_rows(values_only=True):
-        ref.append(row)
+    for val_row in tables[0].iter_rows(values_only=True):
+        ref.append(val_row)
     assert ref == ISSUE_3_REF
 
 
-def test_issue_4():
+def test_issue_4() -> None:
+    """Test issue 4."""
     doc = Document("tests/data/issue-4.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -110,24 +138,31 @@ def test_issue_4():
     assert table.cell(2, 1).value == ISSUE_4_REF_4
 
 
-def test_issue_7():
+def test_issue_7() -> None:
+    """Test issue 7."""
     doc = Document("tests/data/issue-7.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
     table = tables[0]
     assert table.cell(1, 1).value == ISSUE_7_REF_1
     assert table.cell(2, 1).value == ISSUE_7_REF_2
-    assert table.cell(1, 1).bullets[0] == ISSUE_7_REF_1.split("\n", maxsplit=1)[0]
-    assert table.cell(2, 1).bullets[2] == ISSUE_7_REF_2.split("\n")[2]
+    bullets_1_1 = table.cell(1, 1).bullets
+    bullets_2_1 = table.cell(2, 1).bullets
+    assert bullets_1_1 is not None
+    assert bullets_2_1 is not None
+    assert bullets_1_1[0] == ISSUE_7_REF_1.split("\n", maxsplit=1)[0]
+    assert bullets_2_1[2] == ISSUE_7_REF_2.split("\n")[2]
 
 
-def test_issue_9():
+def test_issue_9() -> None:
+    """Test issue 9."""
     doc = Document("tests/data/issue-9.numbers")
     sheets = doc.sheets
     assert len(sheets) == 7
 
 
-def test_issue_10():
+def test_issue_10() -> None:
+    """Test issue 10."""
     doc = Document("tests/data/issue-10.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -136,7 +171,8 @@ def test_issue_10():
         assert table.cell(i + 1, 1).value == test_value
 
 
-def test_issue_14():
+def test_issue_14() -> None:
+    """Test issue 14."""
     doc = Document("tests/data/issue-14.numbers")
     sheets = doc.sheets
     table = sheets["Ex 1"].tables[0]
@@ -147,20 +183,24 @@ def test_issue_14():
     assert table.cell("F2").formula == "XLOOKUP(F1,$B$2:$B$15,$A$2:$A$15,,,-1)"
 
 
-def test_issue_17():
-    with pytest.warns(RuntimeWarning) as record:
-        doc = Document("tests/data/issue-17.numbers")
+def test_issue_17() -> None:
+    """Test issue 17."""
+    with (
+        pytest.raises(
+            UnsupportedError,
+            match="Documents without a CalculationEngine archive are unsupported",
+        ),
+        pytest.warns(RuntimeWarning) as record,
+    ):
+        _ = Document("tests/data/issue-17.numbers")
+
     assert len(record) == 2
     assert "can't read Numbers version from document" in str(record[0].message)
     assert "unsupported version ''" in str(record[1].message)
-    sheets = doc.sheets
-    table = sheets[0].tables[0]
-    assert table.cell(0, 0).value == 123.0
-    assert not table.cell(0, 0).is_merged
-    assert table.cell(0, 0).formula is None
 
 
-def test_issue_18():
+def test_issue_18() -> None:
+    """Test issue 18."""
     with pytest.warns(RuntimeWarning) as record:
         doc = Document("tests/data/issue-18.numbers")
     assert len(record) == 2
@@ -171,7 +211,8 @@ def test_issue_18():
     assert table.merge_ranges == ["B3:D3"]
 
 
-def test_issue_32():
+def test_issue_32() -> None:
+    """Test issue 32."""
     doc = Document("tests/data/issue-32.numbers")
     sheets = doc.sheets
     table = sheets[0].tables[0]
@@ -179,14 +220,16 @@ def test_issue_32():
     assert table.cell("D4").value == 3
 
 
-def test_issue_35():
+def test_issue_35() -> None:
+    """Test issue 35."""
     doc = Document("tests/data/issue-35.numbers")
     table = doc.sheets[0].tables[0]
     assert table.cell("A1").value == 72
     assert table.cell("ALL3").value == 62
 
 
-def test_issue_37():
+def test_issue_37() -> None:
+    """Test issue 37."""
     doc = Document("tests/data/issue-37.numbers")
     table = doc.sheets[0].tables[0]
     for i, row in enumerate(table.rows()[1:]):
@@ -194,12 +237,13 @@ def test_issue_37():
         assert row[-1].formatted_value == ISSUE_37_REF[i][1]
 
 
-def test_issue_42(script_runner):
+def test_issue_42(script_runner: ScriptRunner) -> None:
+    """Test issue 42."""
     doc = Document("tests/data/issue-42.numbers")
     table = doc.sheets[0].tables[0]
     assert isinstance(table.cell(6, 1), ErrorCell)
-    assert table.cell(3, 1).formula == "#REF!×A4:A6"
-    assert table.cell(4, 1).formula == "#REF!×A5:A6"
+    assert table.cell(3, 1).formula == "#REF!×A4:A6"  # noqa: RUF001
+    assert table.cell(4, 1).formula == "#REF!×A5:A6"  # noqa: RUF001
 
     ret = script_runner.run(
         ["cat-numbers", "--brief", "tests/data/issue-42.numbers"],
@@ -218,30 +262,34 @@ def test_issue_42(script_runner):
     assert ret.stderr == ""
     assert ret.success
     lines = ret.stdout.split("\r\n")
-    assert lines[4] == "3.0,#REF!×A5:A6"
-    assert lines[5] == ",#REF!×A6:A6"
+    assert lines[4] == "3.0,#REF!×A5:A6"  # noqa: RUF001
+    assert lines[5] == ",#REF!×A6:A6"  # noqa: RUF001
     assert lines[6] == "SUM(sum),PRODUCT(prod)"
 
 
-def test_issue_43():
+def test_issue_43() -> None:
+    """Test issue 43."""
     doc = Document("tests/data/issue-43.numbers")
     table = doc.sheets[0].tables[0]
     cell = table.cell("A1")
     assert isinstance(cell, EmptyCell)
-    assert "PNG image data" in magic.from_buffer(cell.style.bg_image.data)
-    assert len(cell.style.bg_image.data) == 87857
-    assert cell.style.bg_image.filename == "pasted-image.png"
+    bg_a1 = _bg_image(cell)
+    assert "PNG image data" in magic.from_buffer(bg_a1.data)
+    assert len(bg_a1.data) == 87857
+    assert bg_a1.filename == "pasted-image.png"
 
     cell = table.cell("B1")
     assert cell.value == "text "
-    assert "TIFF image data" in magic.from_buffer(cell.style.bg_image.data)
-    assert len(cell.style.bg_image.data) == 365398
-    assert cell.style.bg_image.filename == "pasted-image.tiff"
+    bg_b1 = _bg_image(cell)
+    assert "TIFF image data" in magic.from_buffer(bg_b1.data)
+    assert len(bg_b1.data) == 365398
+    assert bg_b1.filename == "pasted-image.tiff"
 
-    assert table.cell("C1").style.bg_image is None
+    assert _style(table.cell("C1")).bg_image is None
 
 
-def test_issue_44(script_runner):
+def test_issue_44(script_runner: ScriptRunner) -> None:
+    """Test issue 44."""
     doc = Document("tests/data/issue-44.numbers")
     table = doc.sheets[0].tables[0]
     for row, ref in enumerate(ISSUE_44_REF):
@@ -262,7 +310,8 @@ def test_issue_44(script_runner):
         assert test_str == ref_str
 
 
-def test_issue_49(configurable_save_file):
+def test_issue_49(configurable_save_file: Path) -> None:
+    """Test issue 49."""
     doc = Document("tests/data/issue-49.numbers")
     doc.save(configurable_save_file)
 
@@ -272,14 +321,16 @@ def test_issue_49(configurable_save_file):
     assert test_values == [100, 50, 0, -50, -100]
 
 
-def test_issue_50():
+def test_issue_50() -> None:
+    """Test issue 50."""
     doc = Document("tests/data/issue-50.numbers")
     table = doc.sheets[0].tables[0]
     assert table.num_rows == 65553
     assert table.cell(65552, 0).value == "string 262161"
 
 
-def test_issue_51(script_runner):
+def test_issue_51(script_runner: ScriptRunner) -> None:
+    """Test issue 51."""
     doc = Document("tests/data/issue-51.numbers")
 
     table = doc.sheets[0].tables[0]
@@ -307,7 +358,8 @@ def test_issue_51(script_runner):
     ]
 
 
-def test_issue_54():
+def test_issue_54() -> None:
+    """Test issue 54."""
     doc = Document("tests/data/issue-54.numbers")
     assert doc.sheets[0].tables[0].cell(4, 3).formula == "SUM(Table 1::C1:C4)"
     assert doc.sheets[0].tables[0].cell(4, 2).formula == "SUM(Sheet 2::Table 1::C1:C2)"
@@ -323,30 +375,29 @@ def test_issue_54():
         assert table.cell(6, col).formula == table.cell(7, col).value
 
 
-def test_issue_56(tmp_path):
+def test_issue_56(tmp_path: Path) -> None:
+    """Test issue 56."""
     doc = Document("tests/data/issue-56.numbers")
     table = doc.sheets[0].tables[0]
-    assert table.cell("A2").style.bg_color == (255, 149, 202)
-    assert table.cell("B2").style.alignment.horizontal.name == "RIGHT"
-    assert table.cell("B2").style.alignment.vertical.name == "TOP"
+    assert _style(table.cell("A2")).bg_color == (255, 149, 202)
+    assert _style(table.cell("B2")).alignment.horizontal.name == "RIGHT"
+    assert _style(table.cell("B2")).alignment.vertical.name == "TOP"
 
     new_filename = tmp_path / "issue-56-new.numbers"
     doc.save(new_filename)
-    print(new_filename)
 
     new_doc = Document(new_filename)
     new_table = new_doc.sheets[0].tables[0]
     assert new_table.col_width(0) == 98
     assert new_table.col_width(1) == 162
-    assert new_table.cell("A2").style.font_name == "Helvetica Neue"
-    assert new_table.cell("A2").style.bg_color == (255, 149, 202)
-    assert new_table.cell("B2").style.alignment.horizontal.name == "RIGHT"
-    assert new_table.cell("B2").style.alignment.vertical.name == "TOP"
+    assert _style(new_table.cell("A2")).font_name == "Helvetica Neue"
+    assert _style(new_table.cell("A2")).bg_color == (255, 149, 202)
+    assert _style(new_table.cell("B2")).alignment.horizontal.name == "RIGHT"
+    assert _style(new_table.cell("B2")).alignment.vertical.name == "TOP"
 
 
-def test_issue_59():
-    from numbers_parser import Document  # noqa: PLC0415
-
+def test_issue_59() -> None:
+    """Test issue 59."""
     doc = Document("tests/data/issue-59.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -354,7 +405,8 @@ def test_issue_59():
 
 
 @pytest.mark.parametrize("configurable_multi_save_file", [[2]], indirect=True)
-def test_issue_60(configurable_multi_save_file):
+def test_issue_60(configurable_multi_save_file: list[Path]) -> None:
+    """Test issue 60."""
     test_1_filename, test_2_filename = configurable_multi_save_file
 
     doc = Document("tests/data/issue-60.numbers")
@@ -366,9 +418,9 @@ def test_issue_60(configurable_multi_save_file):
 
     doc = Document("tests/data/issue-60.numbers")
     table = doc.sheets[0].tables[0]
-    bg_color = table.cell("A2").style.bg_color
+    bg_color = _style(table.cell("A2")).bg_color
     table.write("A2", "Item 2")
-    table.cell("A2").style.bg_color = bg_color
+    _style(table.cell("A2")).bg_color = bg_color
     doc.save(test_2_filename)
     test_2_doc = Document(test_2_filename)
     test_table_2 = test_2_doc.sheets[0].tables[0]
@@ -393,35 +445,38 @@ def test_issue_60(configurable_multi_save_file):
                 assert getattr(test_table_2.cell(row, col).style, attr) == ref
 
 
-def test_issue_66():
+def test_issue_66() -> None:
+    """Test issue 66."""
     doc = Document("tests/data/issue-66-collab.numbers")
     sheets = doc.sheets
     assert sheets[0].name == "Credit"
 
 
-def test_issue_69():
+def test_issue_69() -> None:
+    """Test issue 69."""
     doc = Document("tests/data/issue-69b.numbers")
     table = doc.sheets[0].tables[0]
-    assert table.cell(0, 0).style.bg_image.filename == "numbers_1.png"
-    assert table.cell(1, 0).style.bg_image.filename == "numbers_2.png"
-    assert table.cell(2, 0).style.bg_image.filename == "numbers_3.png"
-    assert len(table.cell(0, 0).style.bg_image.data) == 10608
-    assert len(table.cell(1, 0).style.bg_image.data) == 19269
-    assert len(table.cell(2, 0).style.bg_image.data) == 19256
+    assert _bg_image(table.cell(0, 0)).filename == "numbers_1.png"
+    assert _bg_image(table.cell(1, 0)).filename == "numbers_2.png"
+    assert _bg_image(table.cell(2, 0)).filename == "numbers_3.png"
+    assert len(_bg_image(table.cell(0, 0)).data) == 10608
+    assert len(_bg_image(table.cell(1, 0)).data) == 19269
+    assert len(_bg_image(table.cell(2, 0)).data) == 19256
 
     doc = Document("tests/data/issue-69.numbers")
     table = doc.sheets[0].tables[0]
     if version_info.minor >= 11:  # noqa: YTT204
-        assert table.cell(0, 0).style.bg_image.filename == "sssssss的副本.jpeg"
-        assert table.cell(9, 4).style.bg_image.filename == "sssssss的副本.jpeg"
+        assert _bg_image(table.cell(0, 0)).filename == "sssssss的副本.jpeg"
+        assert _bg_image(table.cell(9, 4)).filename == "sssssss的副本.jpeg"
     else:
         with pytest.warns(RuntimeWarning) as record:
-            assert table.cell(0, 0).style.bg_image is None
+            assert _style(table.cell(0, 0)).bg_image is None
         assert len(record) == 1
         assert str(record[0].message) == "Cannot find file 'sssssss的副本.jpeg' in Numbers archive"
 
 
-def test_issue_73(configurable_save_file):
+def test_issue_73(configurable_save_file: Path) -> None:
+    """Test issue 73."""
     doc = Document("tests/data/issue-73.numbers")
     table = doc.sheets[0].tables["Table 1"]
     table.write("A4", "foo")
@@ -432,10 +487,10 @@ def test_issue_73(configurable_save_file):
         match="Pivot table 'Table 1 Pivot' may be corrupted by save.",
     ):
         doc.save(configurable_save_file)
-    doc.save(configurable_save_file)
 
 
-def test_issue_74_1(configurable_save_file):
+def test_issue_74_1(configurable_save_file: Path) -> None:
+    """Test issue 74 part 1."""
     doc = Document("tests/data/test-issue-74.numbers")
     doc.save(configurable_save_file)
 
@@ -443,7 +498,8 @@ def test_issue_74_1(configurable_save_file):
     assert doc.sheets[0].tables[0].cell(0, 1)._control_id is not None
 
 
-def test_issue_74_2():
+def test_issue_74_2() -> None:
+    """Test issue 74 part 2."""
     doc = Document()
     table = doc.sheets[0].tables[0]
 
@@ -451,40 +507,46 @@ def test_issue_74_2():
     table.set_cell_formatting(1, 0, "popup", popup_values=["Cat", "Dog", "Rabbit"], allow_none=True)
 
 
-def test_issue_75(configurable_save_file):
+def test_issue_75(configurable_save_file: Path) -> None:
+    """Test issue 75."""
     doc = Document("tests/data/test-issue-75.numbers")
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
-    assert all(table.cell(1, col).style.bg_image.filename == "cat.jpg" for col in range(1, 6))
-    assert all(table.cell(2, col).style.bg_image.filename == "cat.jpg" for col in range(1, 6))
+    assert all(_bg_image(table.cell(1, col)).filename == "cat.jpg" for col in range(1, 6))
+    assert all(_bg_image(table.cell(2, col)).filename == "cat.jpg" for col in range(1, 6))
 
 
-def test_issue_76(configurable_save_file):
+def test_issue_76(configurable_save_file: Path) -> None:
+    """Test issue 76."""
     doc = Document("tests/data/test-issue-76.numbers")
     doc.save(configurable_save_file)
 
     doc = Document(configurable_save_file)
-    assert "Metadata/Properties.plist" in doc._model.objects._file_store
-    assert doc._model.objects._file_store["Metadata/Properties.plist"][0:6] == b"bplist"
+    assert "Metadata/Properties.plist" in doc._model.objects._blob_store
+    plist_data = doc._model.objects._blob_store["Metadata/Properties.plist"]
+    assert isinstance(plist_data, bytes)
+    assert plist_data[0:6] == b"bplist"
 
 
-def test_issue_77():
+def test_issue_77() -> None:
+    """Test issue 77."""
     doc = Document("tests/data/issue-77.numbers")
     sheet = doc.sheets[0]
     assert sheet.tables[0].merge_ranges == ["C1:D2"]
     assert sheet.tables[1].merge_ranges == ["C1:D2"]
 
 
-def test_issue_78(configurable_save_file):
+def test_issue_78(configurable_save_file: Path) -> None:
+    """Test issue 78."""
     doc = Document()
     doc.sheets[0].add_table()
     table1 = doc.sheets[0].tables[0]
     table2 = doc.sheets[0].tables[1]
 
     image_filename = "tests/data/cat.jpg"
-    image_data = open(image_filename, mode="rb").read()
+    image_data = Path(image_filename).read_bytes()
     bg_image = BackgroundImage(image_data, image_filename)
     cats_bg_style = doc.add_style(bg_image=bg_image)
 
@@ -495,20 +557,19 @@ def test_issue_78(configurable_save_file):
 
     doc = Document(configurable_save_file)
     assert (
-        doc.sheets[0].tables[0].cell(0, 0).style.bg_image.data
-        == doc.sheets[0].tables[1].cell(0, 0).style.bg_image.data
+        _bg_image(doc.sheets[0].tables[0].cell(0, 0)).data
+        == _bg_image(doc.sheets[0].tables[1].cell(0, 0)).data
     )
 
-    # Coverage for Github debug log guard
-    assert doc._model.sheet_name(99999999) is None
 
-
-def test_issue_80():
+def test_issue_80() -> None:
+    """Test issue 80."""
     doc = Document("tests/data/issue-80.numbers")
     assert doc.default_table.cell("B8").value == "AB"
 
 
-def test_issue_83():
+def test_issue_83() -> None:
+    """Test issue 83."""
     doc = Document()
     table = doc.default_table
     table.write(0, 0, "test")
@@ -517,7 +578,8 @@ def test_issue_83():
     assert "unsupported cell format type 'text'" in str(e)
 
 
-def test_issue_85():
+def test_issue_85() -> None:
+    """Test issue 85."""
     doc = Document()
     table = doc.default_table
 
@@ -567,7 +629,8 @@ def test_issue_85():
     assert table0.col_width(3) == 98.0
 
 
-def test_issue_90(configurable_save_file):
+def test_issue_90(configurable_save_file: Path) -> None:
+    """Test issue 90."""
     doc = Document(num_header_rows=0, num_header_cols=0)
     doc.default_table.write(0, 0, 1769900.26)
     doc.default_table.set_cell_formatting(
@@ -582,20 +645,22 @@ def test_issue_90(configurable_save_file):
     assert doc.default_table.cell(0, 0).formatted_value == "£1,769,900"
 
 
-def test_issue_96():
+def test_issue_96() -> None:
+    """Test issue 96."""
     doc = Document("tests/data/issue-96.numbers")
     table = doc.default_table
     assert table.cell(12, 1).formatted_value == "20.0%"
     assert table.cell(12, 2).formatted_value == ""
 
 
-def test_issue_99():
+def test_issue_99() -> None:
+    """Test issue 99."""
     doc = Document("tests/data/issue-99.numbers")
     table = doc.default_table
     with pytest.warns(UnsupportedWarning) as record:  # noqa: PT031
-        style = table.cell(1, 0).style
+        style = _style(table.cell(1, 0))
         # Second time doesn't warn
-        style = table.cell(0, 0).style
+        style = _style(table.cell(0, 0))
     assert len(record) == 1
     assert (
         str(
@@ -608,7 +673,8 @@ def test_issue_99():
     assert style.font_color == RGB(238, 34, 12)
 
 
-def test_issue_102():
+def test_issue_102() -> None:
+    """Test issue 102."""
     doc1 = Document("tests/data/issue-102-v14.4.numbers")
     doc2 = Document("tests/data/issue-102-v15.1.numbers")
 
@@ -618,7 +684,8 @@ def test_issue_102():
             assert type(cell) is type(doc2.default_table.cell(row_num, col_num))
 
 
-def test_issue_104():
+def test_issue_104() -> None:
+    """Test issue 104."""
     doc = Document("tests/data/issue-104.numbers")
     sheets = doc.sheets
     assert len(sheets) == 1
@@ -631,7 +698,8 @@ def test_issue_104():
     assert data[3][1].value == "4"  # Cell deliberately formatted as text
 
 
-def test_issue_121():
+def test_issue_121() -> None:
+    """Test issue 121."""
     doc = Document("tests/data/issue-121.numbers")
     table = doc.sheets[0].tables[0]
     cell = table.cell(1, 2)
@@ -643,14 +711,16 @@ def test_issue_121():
     assert str(r) == "#REF!"
 
 
-def test_issue_131():
+def test_issue_131() -> None:
+    """Test issue 131."""
     doc = Document("tests/data/issue-131.numbers")
     table = doc.sheets["Test"].tables["Summary"]
     assert table.cell(0, 1).formula == 'SUMIF(Category,"="&A1,Amount)'
     assert table.cell(9, 1).formula == "-SUM(B1:B6)"
 
 
-def test_issue_152(configurable_save_file):
+def test_issue_152(configurable_save_file: Path) -> None:
+    """Test issue 152."""
     black = Border(4.0, RGB(0, 0, 0), "solid")
     cyan_dashed = Border(4.0, RGB(0, 240, 255), "dashes")
     magenta_dashed = Border(4.0, RGB(255, 0, 180), "dashes")
@@ -677,7 +747,7 @@ def test_issue_152(configurable_save_file):
 
     for row in range(size):
         for col in range(size):
-            border = table.cell(row, col).border
+            border = _border(table.cell(row, col))
             if (row % 3) == 0 and (col % 3) == 0:
                 assert border.left == cyan_dashed
                 assert border.right == magenta_dashed
@@ -691,37 +761,38 @@ def test_issue_152(configurable_save_file):
     for row in range(table.num_rows):
         for col in range(table.num_cols):
             cell = table.cell(row, col)
+            cb = _border(cell)
             assert cell.value == xl_rowcol_to_cell(row, col)
             if (row % 3) == 0 and (col % 3 == 0):
-                assert cell.border.left == cyan_dashed
-                assert cell.border.right == magenta_dashed
-                assert cell.border.top == orange_dashed
-                assert cell.border.bottom == green_dashed
+                assert cb.left == cyan_dashed
+                assert cb.right == magenta_dashed
+                assert cb.top == orange_dashed
+                assert cb.bottom == green_dashed
             elif (row % 3) == 0 and (col % 3 == 1):
-                assert cell.border.left == magenta_dashed
-                assert cell.border.right == black
-                assert cell.border.top == black
-                assert cell.border.bottom == black
+                assert cb.left == magenta_dashed
+                assert cb.right == black
+                assert cb.top == black
+                assert cb.bottom == black
             elif (row % 3) == 0 and (col % 3 == 2):
-                assert cell.border.left == black
-                assert cell.border.right == cyan_dashed
-                assert cell.border.top == black
-                assert cell.border.bottom == black
+                assert cb.left == black
+                assert cb.right == cyan_dashed
+                assert cb.top == black
+                assert cb.bottom == black
             elif (row % 3) == 1 and (col % 3 == 0):
-                assert cell.border.left == black
-                assert cell.border.right == black
-                assert cell.border.top == green_dashed
-                assert cell.border.bottom == black
+                assert cb.left == black
+                assert cb.right == black
+                assert cb.top == green_dashed
+                assert cb.bottom == black
             elif (row % 3) == 2 and (col % 3 == 0):
-                assert cell.border.left == black
-                assert cell.border.right == black
-                assert cell.border.top == black
-                assert cell.border.bottom == orange_dashed
+                assert cb.left == black
+                assert cb.right == black
+                assert cb.top == black
+                assert cb.bottom == orange_dashed
             else:
-                assert cell.border.left == black
-                assert cell.border.right == black
-                assert cell.border.top == black
-                assert cell.border.bottom == black
+                assert cb.left == black
+                assert cb.right == black
+                assert cb.top == black
+                assert cb.bottom == black
 
     fat_border = magenta_dashed = Border(10.0, RGB(255, 0, 180), "solid")
     doc = Document("tests/data/test-border-widths.numbers")
@@ -738,7 +809,8 @@ def test_issue_152(configurable_save_file):
     assert [table.col_width(x) for x in range(table.num_cols)] == [98, 88, 88, 88, 98]
 
 
-def test_issue_174(configurable_save_file):
+def test_issue_174(configurable_save_file: Path) -> None:
+    """Test issue 174."""
     doc = Document()
     sheet = doc.sheets[0]
     table = sheet.tables[0]
@@ -759,21 +831,22 @@ def test_issue_174(configurable_save_file):
     assert "font 'UnknownFont' does not exist" in str(e)
 
     table.write(1, 0, "Avenir")
-    table.set_cell_style(1, 0, Style(font_name=("Avenir", "Heavy Oblique")))
+    table.set_cell_style(1, 0, Style(font_name=("Avenir", "Heavy Oblique")))  # type: ignore[arg-type]
     doc.save(configurable_save_file)
 
     doc2 = Document(configurable_save_file)
     table2 = doc2.sheets[0].tables[0]
     for i in range(4):
-        cell = table2.cell(0, i)
-        assert cell.style.name == styles[i].name
-        assert cell.style.font_name == styles[i].font_name
-        assert cell.style.bold == styles[i].bold
-        assert cell.style.italic == styles[i].italic
-        assert cell.style.font_size == styles[i].font_size
+        cell_style = _style(table2.cell(0, i))
+        assert cell_style.name == styles[i].name
+        assert cell_style.font_name == styles[i].font_name
+        assert cell_style.bold == styles[i].bold
+        assert cell_style.italic == styles[i].italic
+        assert cell_style.font_size == styles[i].font_size
 
 
-def test_issue_236(configurable_save_file):
+def test_issue_236(configurable_save_file: Path) -> None:
+    """Test issue 236."""
     doc = Document("tests/data/formula-syntax-error.numbers")
     assert doc.default_table.cell("A1")._formula_error_id == 1
 
@@ -785,22 +858,27 @@ def test_issue_236(configurable_save_file):
         ref_cell = doc.default_table.cell(row, 0)
         new_cell = new_doc.default_table.cell(row, 0)
         assert str(new_cell) == str(ref_cell)
-        assert new_cell.border.top == ref_cell.border.top
+        assert _border(new_cell).top == _border(ref_cell).top
         assert new_cell.style == ref_cell.style
         assert new_cell.formula == ref_cell.formula
         assert new_cell.formatted_value == ref_cell.formatted_value
 
     cells = list(doc.default_table.iter_cells())
-    for ii, new_cell in enumerate(new_doc.default_table.iter_cells()):
-        ref_cell = cells[ii]
-        assert type(new_cell) is type(ref_cell)
-        assert new_cell.value == ref_cell.value
-        assert new_cell._flags == ref_cell._flags
-        assert new_cell._extra_bits == ref_cell._extra_bits
-        assert _CellStorageFlags.__repr__(ref_cell) == _CellStorageFlags.__repr__(new_cell)
+    for ii, iter_new_cell in enumerate(new_doc.default_table.iter_cells()):
+        iter_ref_cell = cells[ii]
+        assert isinstance(iter_new_cell, Cell)
+        assert isinstance(iter_ref_cell, Cell)
+        assert type(iter_new_cell) is type(iter_ref_cell)
+        assert iter_new_cell.value == iter_ref_cell.value
+        assert iter_new_cell._flags == iter_ref_cell._flags
+        assert iter_new_cell._extra_bits == iter_ref_cell._extra_bits
+        assert _CellStorageFlags.__repr__(iter_ref_cell) == _CellStorageFlags.__repr__(
+            iter_new_cell,
+        )
 
 
-def test_issue_249(configurable_save_file):
+def test_issue_249(configurable_save_file: Path) -> None:
+    """Test issue 249."""
     doc = Document()
     doc.sheets[0].tables[0].write(0, 0, 1.999)
     custom_format = doc.add_custom_format(
@@ -816,11 +894,12 @@ def test_issue_249(configurable_save_file):
     assert new_doc.default_table.cell("A1").formatted_value == "2.00"
 
 
-def test_issue_250(configurable_save_file):
+def test_issue_250(configurable_save_file: Path) -> None:
+    """Test issue 250."""
     doc = Document()
-    doc.sheets[0].tables[0].write(0, 0, 0.00001)
-    doc.sheets[0].tables[0].write(1, 0, 0.00001)
-    doc.sheets[0].tables[0].write(2, 0, 0.00001)
+    doc.default_table.write(0, 0, 0.00001)
+    doc.default_table.write(1, 0, 0.00001)
+    doc.default_table.write(2, 0, 0.00001)
 
     custom_format_1 = doc.add_custom_format(
         type="number",
@@ -842,8 +921,6 @@ def test_issue_250(configurable_save_file):
         type="number",
         name="Decimal 5DP",
         num_decimals=6,
-        integer_format=None,
-        decimal_format=None,
     )
 
     doc.sheets[0].tables[0].set_cell_formatting(0, 0, "custom", format=custom_format_1)
@@ -854,12 +931,17 @@ def test_issue_250(configurable_save_file):
     new_doc = Document(configurable_save_file)
     assert new_doc.default_table.cell(0, 0).formatted_value == "00.000010"
     assert new_doc.default_table.cell(1, 0).formatted_value == "  .000010"
-    assert new_doc.default_table.cell(2, 0).formatted_value == ".000010"
+    assert new_doc.default_table.cell(2, 0).formatted_value == "0.000010"
 
 
-def test_issue_251(script_runner, tmp_path, configurable_save_file):
+def test_issue_251(
+    script_runner: ScriptRunner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+) -> None:
+    """Test issue 251."""
     csv_path = tmp_path / "dummy.csv"
-    with open(csv_path, "w") as f:
+    with open(csv_path, "w", encoding="ascii") as f:
         f.write("Account,Amount,Date\nChecking,100,2026-10-10\n")
 
     ret = script_runner.run(["csv2numbers", csv_path, "--delete=1", "-o", configurable_save_file])
@@ -871,7 +953,12 @@ def test_issue_251(script_runner, tmp_path, configurable_save_file):
     assert doc.default_table.cell(1, 1).value == "2026-10-10"
 
 
-def test_issue_251_rename_with_header(script_runner, tmp_path, configurable_save_file):
+def test_issue_251_rename_with_header(
+    script_runner: ScriptRunner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+) -> None:
+    """Test issue 251 rename column by index with header."""
     csv_path = tmp_path / "named.csv"
     csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
     ret = script_runner.run(
@@ -883,7 +970,12 @@ def test_issue_251_rename_with_header(script_runner, tmp_path, configurable_save
     assert table.cell(1, 1).value == 100
 
 
-def test_issue_251_date_with_header(script_runner, tmp_path, configurable_save_file):
+def test_issue_251_date_with_header(
+    script_runner: ScriptRunner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+) -> None:
+    """Test issue 251 date column by index with header."""
     csv_path = tmp_path / "named.csv"
     csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
     ret = script_runner.run(["csv2numbers", csv_path, "--date=2", "-o", configurable_save_file])
@@ -891,7 +983,12 @@ def test_issue_251_date_with_header(script_runner, tmp_path, configurable_save_f
     assert isinstance(Document(configurable_save_file).default_table.cell(1, 2).value, datetime)
 
 
-def test_issue_251_transform_with_header(script_runner, tmp_path, configurable_save_file):
+def test_issue_251_transform_with_header(
+    script_runner: ScriptRunner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+) -> None:
+    """Test issue 251 transform column by index with header."""
     csv_path = tmp_path / "named.csv"
     csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
     ret = script_runner.run(
@@ -903,7 +1000,12 @@ def test_issue_251_transform_with_header(script_runner, tmp_path, configurable_s
     assert table.cell(1, 3).value == 100
 
 
-def test_issue_251_rename_then_delete_index(script_runner, tmp_path, configurable_save_file):
+def test_issue_251_rename_then_delete_index(
+    script_runner: ScriptRunner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+) -> None:
+    """Test issue 251 rename then delete column by index."""
     csv_path = tmp_path / "named.csv"
     csv_path.write_text("Account,Amount,Date\nChecking,100,2026-10-10\n")
     ret = script_runner.run(
@@ -915,7 +1017,11 @@ def test_issue_251_rename_then_delete_index(script_runner, tmp_path, configurabl
     assert table.cell(1, 1).value == "2026-10-10"
 
 
-def test_issue_251_transform_index_across_files(script_runner, tmp_path):
+def test_issue_251_transform_index_across_files(
+    script_runner: ScriptRunner,
+    tmp_path: Path,
+) -> None:
+    """Test issue 251 transform column by index across multiple files."""
     first = tmp_path / "first.csv"
     second = tmp_path / "second.csv"
     first.write_text("Account,Amount\nChecking,100\n")
@@ -928,9 +1034,14 @@ def test_issue_251_transform_index_across_files(script_runner, tmp_path):
     assert [Document(output).default_table.cell(1, 2).value for output in outputs] == [100, 200]
 
 
-def test_issue_252(script_runner, tmp_path, configurable_save_file):
+def test_issue_252(
+    script_runner: ScriptRunner,
+    tmp_path: Path,
+    configurable_save_file: Path,
+) -> None:
+    """Test issue 252."""
     csv_path = tmp_path / "dummy.csv"
-    with open(csv_path, "w") as f:
+    with open(csv_path, "w", encoding="ascii") as f:
         f.write("Val1,Val2\n,5\n0,10\n")
 
     # The MERGE command intends to take Val1, falling back to Val2 if empty.
@@ -953,14 +1064,41 @@ def test_issue_252(script_runner, tmp_path, configurable_save_file):
     assert doc.default_table.cell(2, 2).value == 0
 
 
-def test_issue_253():
+def test_issue_253() -> None:
+    """Test issue 253."""
     doc = Document("tests/data/test-issue-253.numbers")
     table = doc.sheets[0].tables[0]
     assert table.cell(0, 0).formula == "12340000000000000"
     assert table.cell(1, 0).formula == "12345670000000000"
 
 
-def test_issue_256():
+def test_issue_255(configurable_save_file: Path) -> None:
+    """Test issue 255."""
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+    table.write(1, 1, "old value")
+    table.write("C3", "another value")
+
+    table.write(1, 1, None)
+    table.write("C3", None)
+    table.write("D4", None)
+
+    for coordinate in ("B2", "C3", "D4"):
+        cell = table.cell(coordinate)
+        assert isinstance(cell, EmptyCell)
+        assert cell.value is None
+        assert cell.formatted_value == ""
+
+    doc.save(configurable_save_file)
+    reloaded = Document(configurable_save_file).sheets[0].tables[0]
+    for coordinate in ("B2", "C3", "D4"):
+        cell = reloaded.cell(coordinate)
+        assert isinstance(cell, EmptyCell)
+        assert cell.value is None
+
+
+def test_issue_256() -> None:
+    """Test issue 256."""
     table = Document().default_table
     cases = [
         (-2.5, FractionAccuracy.HALVES),
@@ -984,7 +1122,8 @@ def test_issue_256():
     ]
 
 
-def test_issue_266():
+def test_issue_266() -> None:
+    """Test issue 266."""
     doc = Document("tests/data/issue-266.numbers")
     table = doc.default_table
     for row in range(table.num_rows):

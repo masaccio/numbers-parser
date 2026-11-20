@@ -1,9 +1,17 @@
+"""Tests for cell lookups and table iterators."""
+
+from typing import TYPE_CHECKING, cast
+
 import pytest
 
 from numbers_parser import Document
 
+if TYPE_CHECKING:
+    from numbers_parser import Cell
 
-def test_exceptions():
+
+def test_exceptions() -> None:
+    """Test exceptions raised by invalid cell coordinates."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -18,7 +26,7 @@ def test_exceptions():
         _ = table.cell(0, 5)
     assert "out of range" in str(e.value)
     with pytest.raises(IndexError) as e:
-        _ = table.cell(0, 5, 2)
+        _ = table.cell(0, 5, 2)  # type: ignore[call-overload]
     assert "invalid cell reference" in str(e.value)
     with pytest.raises(IndexError) as e:
         _ = table.cell(-1, 0)
@@ -28,7 +36,8 @@ def test_exceptions():
     assert "column -1 out of range" in str(e.value)
 
 
-def test_iter_row_exceptions():
+def test_iter_row_exceptions() -> None:
+    """Test exceptions raised by out-of-range iter_rows bounds."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -53,7 +62,8 @@ def test_iter_row_exceptions():
     assert str(e.value) == "column -1 out of range"
 
 
-def test_iter_col_exceptions():
+def test_iter_col_exceptions() -> None:
+    """Test exceptions raised by out-of-range iter_cols bounds."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -78,7 +88,8 @@ def test_iter_col_exceptions():
     assert str(e.value) == "column -1 out of range"
 
 
-def test_cell_lookup():
+def test_cell_lookup() -> None:
+    """Test cell lookup by row and column index."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -90,7 +101,8 @@ def test_cell_lookup():
     assert table.cell(3, 4).value == "XXX_3_5"
 
 
-def test_sheet_and_table_lookup_matches_case_insensitive_membership():
+def test_sheet_and_table_lookup_matches_case_insensitive_membership() -> None:
+    """Test case-insensitive lookup and membership for sheets and tables."""
     doc = Document()
     sheet = doc.sheets[0]
     table = sheet.tables[0]
@@ -101,7 +113,8 @@ def test_sheet_and_table_lookup_matches_case_insensitive_membership():
     assert "table 1" in sheet.tables
 
 
-def test_items_list_rejects_out_of_range_negative_indexes():
+def test_items_list_rejects_out_of_range_negative_indexes() -> None:
+    """Test that out-of-range negative indexes raise IndexError."""
     doc = Document()
     with pytest.raises(IndexError):
         _ = doc.sheets[-2]
@@ -109,7 +122,8 @@ def test_items_list_rejects_out_of_range_negative_indexes():
         _ = doc.sheets[0].tables[-2]
 
 
-def test_cell_ref_lookup():
+def test_cell_ref_lookup() -> None:
+    """Test cell lookup by A1-style reference."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
@@ -125,30 +139,32 @@ def test_cell_ref_lookup():
     assert "out of range" in str(e.value)
 
 
-def test_cell_wide_ref():
+def test_cell_wide_ref() -> None:
+    """Test cell lookup across multi-letter column references."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_2"].tables
     table = tables["XXX_Table_1"]
-    assert table.cell("").value == "excepteur"  #  defaults to [0, 0]
+    assert table.cell("").value == "excepteur"  #  defaults to [0, 0]
     assert table.cell("A1").value == "excepteur"
     assert table.cell("Z1").value == "ea"
     assert table.cell("BA1").value == "veniam"
     assert table.cell("CZ1").value == "dolore"
 
 
-def test_row_iterator():
+def test_row_iterator() -> None:
+    """Test iterating over table rows."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_2"]
-    val = 0
+    val = 0.0
     for row in table.iter_rows():
         val += row[0].value if row[0] is not None else 0.0
     assert val == 252
     val = 0.0
-    for row in table.iter_rows(min_row=2, max_row=7, values_only=True):
-        val += row[2] or 0.0
+    for val_row in table.iter_rows(min_row=2, max_row=7, values_only=True):
+        val += cast("float", val_row[2]) or 0.0
     assert val == 978.0
     val = 0.0
     for row in table.iter_rows(min_row=5, max_row=6, min_col=1, max_col=2):
@@ -156,35 +172,42 @@ def test_row_iterator():
     assert val == 522.108
 
 
-def test_col_iterator():
+def test_col_iterator() -> None:
+    """Test iterating over table columns."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_2"]
-    val = 0
+    val = 0.0
     for col in table.iter_cols():
-        val += col[2].value if col[2] is not None else 0.0
+        cell_2 = cast("Cell", col[2])
+        val += cell_2.value if cell_2 is not None else 0.0
     assert val == 164.224
     val = 0.0
-    for col in table.iter_cols(min_col=1, max_col=3, values_only=True):
-        val += col[8] or 0.0
+    for val_col in table.iter_cols(min_col=1, max_col=3, values_only=True):
+        val += cast("float", val_col[8]) or 0.0
     assert val == 336.572
     val = 0.0
-    for row in table.iter_cols(min_row=5, max_row=6, min_col=1, max_col=2):
-        val += row[0].value + row[1].value
+    for col in table.iter_cols(min_row=5, max_row=6, min_col=1, max_col=2):
+        c0 = cast("Cell", col[0])
+        c1 = cast("Cell", col[1])
+        val += c0.value + c1.value
     assert val == 522.108
 
 
-def test_cell_iterator():
+def test_cell_iterator() -> None:
+    """Test iterating over individual table cells."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_2"]
 
-    val = sum(cell.value or 0.0 for cell in table.iter_cells())
+    val = sum(cast("float", cast("Cell", cell).value or 0.0) for cell in table.iter_cells())
     assert val == 1792.802
 
-    val = sum(val or 0.0 for val in table.iter_cells(min_col=1, max_col=3, values_only=True))
+    val = sum(
+        cast("float", v or 0.0) for v in table.iter_cells(min_col=1, max_col=3, values_only=True)
+    )
     assert val == 1540.802
 
     doc = Document("tests/data/test-categories.numbers")
@@ -201,7 +224,8 @@ def test_cell_iterator():
     assert list(data) == ["Bus", "Car", "Helicopter"]
 
 
-def test_iter_cell_exceptions():
+def test_iter_cell_exceptions() -> None:
+    """Test exceptions raised by out-of-range iter_cells bounds."""
     doc = Document("tests/data/test-7.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables

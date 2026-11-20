@@ -1,3 +1,7 @@
+"""Tests for reading and modifying tables and sheets."""
+
+from pathlib import Path
+
 import pytest
 
 from numbers_parser import Document, TextCell
@@ -39,30 +43,33 @@ EMPTY_ROWS_REF = [
 ]
 
 
-def test_file_exceptions():
+def test_file_exceptions() -> None:
+    """Test exceptions raised when opening missing or invalid files."""
     with pytest.raises(FileError) as e:
         _ = Document("tests/data/test-1.not-found")
     assert str(e.value) == "no such file or directory"
-    with pytest.raises(FileFormatError) as e:
+    with pytest.raises(FileFormatError) as fmt_err:
         _ = Document("tests/conftest.py")
-    assert str(e.value) == "invalid Numbers document (not a .numbers package/file)"
+    assert str(fmt_err.value) == "invalid Numbers document (not a .numbers package/file)"
 
 
-def test_sheet_exceptions():
+def test_sheet_exceptions() -> None:
+    """Test exceptions raised when indexing sheets invalidly."""
     doc = Document("tests/data/test-1.numbers")
     sheets = doc.sheets
     with pytest.raises(IndexError) as e:
         _ = sheets[3]
     assert "out of range" in str(e.value)
-    with pytest.raises(KeyError) as e:
+    with pytest.raises(KeyError) as key_err:
         _ = sheets["invalid"]
-    assert "no sheet named" in str(e.value)
-    with pytest.raises(LookupError) as e:
-        _ = sheets[float(1)]
-    assert "invalid index" in str(e.value)
+    assert "no sheet named" in str(key_err.value)
+    with pytest.raises(LookupError) as lookup_err:
+        _ = sheets[float(1)]  # type: ignore[call-overload]
+    assert "invalid index" in str(lookup_err.value)
 
 
-def test_names_refs():
+def test_names_refs() -> None:
+    """Test sheet and table names and dimensions."""
     doc = Document("tests/data/test-1.numbers")
     sheets = doc.sheets
     assert len(sheets) == 2
@@ -76,7 +83,8 @@ def test_names_refs():
     assert tables["ZZZ_Table_1"].num_rows == 5
 
 
-def test_table_contents():
+def test_table_contents() -> None:
+    """Test reading table rows as values."""
     doc = Document("tests/data/test-1.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -86,7 +94,8 @@ def test_table_contents():
     assert data == ZZZ_TABLE_2_REF
 
 
-def test_table_contents_as_cells():
+def test_table_contents_as_cells() -> None:
+    """Test reading table rows as Cell objects."""
     doc = Document("tests/data/test-1.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -96,7 +105,8 @@ def test_table_contents_as_cells():
         assert data == ZZZ_TABLE_1_REF[index]
 
 
-def test_cell():
+def test_cell() -> None:
+    """Test looking up a single cell by reference."""
     doc = Document("tests/data/test-1.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -104,7 +114,8 @@ def test_cell():
     assert tables[0].cell("A2").value == "YYY_ROW_1"
 
 
-def test_empty_cells():
+def test_empty_cells() -> None:
+    """Test reading a table containing empty cells."""
     doc = Document("tests/data/test-1.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_2"].tables
@@ -115,7 +126,8 @@ def test_empty_cells():
     assert table.rows(values_only=True) == XXX_TABLE_1_REF
 
 
-def test_empty_rows():
+def test_empty_rows() -> None:
+    """Test reading a table containing empty rows."""
     doc = Document("tests/data/test-empty-rows.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -123,12 +135,14 @@ def test_empty_rows():
     assert table.rows(values_only=True) == EMPTY_ROWS_REF
 
 
-def test_default_table():
+def test_default_table() -> None:
+    """Test default_table property on a new Document."""
     doc = Document()
     assert doc.default_table.name == "Table 1"
 
 
-def table_titles_test_runner(doc):
+def table_titles_test_runner(doc: Document) -> None:
+    """Verify table title and caption properties across a document."""
     for table in doc.sheets[0].tables:
         test_type = table.cell(0, 0).value
         assert table.name == test_type
@@ -149,7 +163,8 @@ def table_titles_test_runner(doc):
             assert table.caption == "test: caption"
 
 
-def test_table_titles(configurable_save_file):
+def test_table_titles(configurable_save_file: Path) -> None:
+    """Test reading, toggling, and saving table titles and captions."""
     doc = Document("tests/data/test-titles.numbers")
     table_titles_test_runner(doc)
 
@@ -182,7 +197,8 @@ def test_table_titles(configurable_save_file):
     table_titles_test_runner(new_doc)
 
 
-def test_stub_captions(configurable_save_file):
+def test_stub_captions(configurable_save_file: Path) -> None:
+    """Test default and modified captions on tables."""
     doc = Document("tests/data/test-1.numbers")
     table0 = doc.sheets[0].tables[0]
     assert table0.caption == "Caption"

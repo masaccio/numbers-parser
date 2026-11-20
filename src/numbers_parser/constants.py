@@ -2,8 +2,8 @@
 
 from datetime import datetime
 from enum import IntEnum, auto
-from importlib.resources import files
 from math import ceil
+from pathlib import Path
 
 import enum_tools.documentation
 
@@ -24,7 +24,7 @@ __all__ = [
 ]
 
 
-DEFAULT_DOCUMENT = files("numbers_parser") / "data" / "empty.numbers"
+DEFAULT_DOCUMENT = Path(__file__).resolve().parent / "data" / "empty.numbers"
 
 # New document defaults
 DEFAULT_COLUMN_COUNT = 8
@@ -34,6 +34,7 @@ DEFAULT_ROW_COUNT = 12
 DEFAULT_ROW_HEIGHT = 20.0
 DEFAULT_TABLE_OFFSET = 80.0
 DEFAULT_TILE_SIZE = 256
+DEFAULT_PASSWORD_HINT = "No hint"  # noqa: S105
 
 # Style defaults
 DEFAULT_ALIGNMENT = ("auto", "top")
@@ -91,6 +92,7 @@ CUSTOM_TEXT_PLACEHOLDER = "\ue421"
 
 # Supported versions
 SUPPORTED_NUMBERS_VERSIONS = [
+    "4.2",
     "10.0",
     "10.1",
     "10.2",
@@ -110,12 +112,15 @@ SUPPORTED_NUMBERS_VERSIONS = [
     "14.3",
     "14.4",
     "14.5",
+    "15.4",
     # Numbers Creator Studio
+    "16.0",
     "26.0",
     "26.1",
     "26.2",
     "26.3",
     "26.4",
+    "27.0",
 ]
 
 
@@ -495,8 +500,8 @@ class PaddingType(IntEnum):
 
 
 FONT_MAP = GENERATED_FONT_MAP
-FONT_TUPLE_MAP: dict[tuple[str, str], str] = {}
-FONT_FAMILY_DEFAULT: dict[str, str] = {}
+FONT_TUPLE_MAP: dict[tuple[str, str], dict[str, str]] = {}
+FONT_FAMILY_DEFAULT: dict[str, dict[str, str]] = {}
 
 
 def update_font_maps(font_map: dict) -> None:

@@ -1,3 +1,6 @@
+"""Tests for large tables and performance profiling."""
+
+from pathlib import Path
 from random import randint
 
 import pytest
@@ -5,17 +8,18 @@ import pytest
 from numbers_parser import RGB, Alignment, Border, Document, xl_rowcol_to_cell
 
 
-def test_many_rows():
+def test_many_rows() -> None:
+    """Test reading a table with many rows."""
     doc = Document("tests/data/test-3.numbers")
     sheets = doc.sheets
     tables = sheets["Sheet_1"].tables
     data = tables[0].rows(values_only=True)
-    ref = []
-    _ = [ref.append(["ROW" + str(x)]) for x in range(1, 601)]
+    ref = [["ROW" + str(x)] for x in range(1, 601)]
     assert data == ref
 
 
-def test_many_columns():
+def test_many_columns() -> None:
+    """Test reading a table with many columns."""
     doc = Document("tests/data/test-3.numbers")
     sheets = doc.sheets
     tables = sheets["Sheet_2"].tables
@@ -24,13 +28,15 @@ def test_many_columns():
     assert data == ref
 
 
-def ref_cell_text(row, col):
+def ref_cell_text(row: int, col: int) -> str:
+    """Return reference text for a cell coordinate."""
     return "CELL [" + str(row + 1) + "," + str(col + 1) + "]"
 
 
-def test_large_table():
-    row = [None for i in range(270)]
-    ref = [row.copy() for i in range(90)]
+def test_large_table() -> None:
+    """Test reading a large multi-row, multi-column table."""
+    row: list[str | None] = [None for _ in range(270)]
+    ref = [row.copy() for _ in range(90)]
     for i in range(90):
         ref[i][i] = ref_cell_text(i, i)
         ref[i][90 + i] = ref_cell_text(i, 90 + i)
@@ -44,7 +50,8 @@ def test_large_table():
 
 
 @pytest.mark.experimental
-def test_profiling_tables(configurable_save_file):
+def test_profiling_tables(configurable_save_file: Path) -> None:
+    """Profile creating multiple sheets and tables."""
     doc = Document()
     for _ in range(10):
         doc.add_sheet()
@@ -55,7 +62,8 @@ def test_profiling_tables(configurable_save_file):
 
 
 @pytest.mark.experimental
-def test_profiling_borders(configurable_save_file):
+def test_profiling_borders(configurable_save_file: Path) -> None:
+    """Profile setting borders across a large grid."""
     doc = Document()
     table = doc.default_table
     for row in range(100):
@@ -68,7 +76,8 @@ def test_profiling_borders(configurable_save_file):
 
 
 @pytest.mark.experimental
-def test_profiling_styles(configurable_save_file):
+def test_profiling_styles(configurable_save_file: Path) -> None:
+    """Profile adding and applying styles across a large grid."""
     doc = Document()
     style_idx = 1
     table = doc.default_table

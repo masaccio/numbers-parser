@@ -1705,6 +1705,38 @@ class ImageDataAttributes(_message.Message):
 Global___ImageDataAttributes: _TypeAlias = ImageDataAttributes  # noqa: Y015
 
 @_typing.final
+class WatermarkingDataAttributes(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    MEDIA_LIBRARY_ASSET_ID_FIELD_NUMBER: _builtins.int
+    MAY_NEED_WATERMARK_FIELD_NUMBER: _builtins.int
+    INSERTION_TIMESTAMP_FIELD_NUMBER: _builtins.int
+    IS_DERIVED_FROM_ORIGINAL_ASSET_FIELD_NUMBER: _builtins.int
+    may_need_watermark: _builtins.bool
+    is_derived_from_original_asset: _builtins.bool
+    @_builtins.property
+    def media_library_asset_id(self) -> _TSPMessages_pb2.UUID: ...
+    @_builtins.property
+    def insertion_timestamp(self) -> _TSPMessages_pb2.Date: ...
+    WATERMARKING_DATA_ATTRIBUTES_FIELD_NUMBER: _builtins.int
+    watermarking_data_attributes: _extension_dict._ExtensionFieldDescriptor[_TSPMessages_pb2.DataAttributes, Global___WatermarkingDataAttributes]
+    def __init__(
+        self,
+        *,
+        media_library_asset_id: _TSPMessages_pb2.UUID | None = ...,
+        may_need_watermark: _builtins.bool | None = ...,
+        insertion_timestamp: _TSPMessages_pb2.Date | None = ...,
+        is_derived_from_original_asset: _builtins.bool | None = ...,
+    ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["insertion_timestamp", b"insertion_timestamp", "is_derived_from_original_asset", b"is_derived_from_original_asset", "may_need_watermark", b"may_need_watermark", "media_library_asset_id", b"media_library_asset_id"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["insertion_timestamp", b"insertion_timestamp", "is_derived_from_original_asset", b"is_derived_from_original_asset", "may_need_watermark", b"may_need_watermark", "media_library_asset_id", b"media_library_asset_id"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
+
+Global___WatermarkingDataAttributes: _TypeAlias = WatermarkingDataAttributes  # noqa: Y015
+
+@_typing.final
 class MovieArchive(_message.Message):
     DESCRIPTOR: _descriptor.Descriptor
 

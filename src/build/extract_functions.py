@@ -43,7 +43,7 @@ framework = sys.argv[1]
 output_map = sys.argv[2]
 
 if framework.endswith(".s"):
-    with open(framework, "rb") as fh:
+    with open(framework, encoding="latin1") as fh:
         disassembly = fh.readlines()
 else:
     with Popen(  # noqa: S603, SIM117
@@ -60,7 +60,8 @@ else:
         stdout=PIPE,
     ) as objdump:
         with Popen(["c++filt"], stdin=objdump.stdout, stdout=PIPE) as cxxfilt:  # noqa: S607
-            objdump.stdout.close()
+            if objdump.stdout is not None:
+                objdump.stdout.close()
             disassembly = str(cxxfilt.communicate()[0]).split("\\n")
 
 formula_creation_name = None
@@ -69,8 +70,6 @@ tsce_functions = {}
 
 previous_line = ""
 for line in disassembly:
-    if isinstance(line, bytes):
-        line = line.decode(encoding="latin1")  # noqa: PLW2901
     line = line.replace("\\t", " ").strip()  # noqa: PLW2901
 
     if m := re.search(r"^TSCEFormulaCreationMagic::(.*?)\(", line):
