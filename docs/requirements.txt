@@ -8,7 +8,7 @@ setuptools
 sigfig
 six
 sortedcontainers
-sphinx>=8.0,<9.0
+sphinx>=8.0,<10.0
 sphinx_copybutton
 sphinx_toolbox
 sphinx_nefertiti

@@ -14,9 +14,9 @@ import json
 import os
 import sys
 
-import lldb
+import lldb  # type: ignore[import-not-found]
 
-from debug.lldbutil import print_stacktrace
+from debug.lldbutil import print_stacktrace  # type: ignore[import-untyped]
 
 if len(sys.argv) != 3:
     msg = f"Usage: {sys.argv[0]} exe-file output.json"

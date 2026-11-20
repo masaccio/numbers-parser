@@ -1,9 +1,14 @@
+"""Tests for Numbers package validation and saving."""
+
+from pathlib import Path
+
 import pytest
 
 from numbers_parser import RGB, Document, FileFormatError
 
 
-def test_invalid_packages(configurable_save_file):
+def test_invalid_packages(configurable_save_file: Path) -> None:
+    """Test exceptions and warnings for invalid Numbers packages."""
     with pytest.raises(FileFormatError) as e:
         _ = Document("tests/data/corrupted-zip.numbers")
     assert "invalid Numbers document" in str(e)
@@ -18,7 +23,6 @@ def test_invalid_packages(configurable_save_file):
 
     with pytest.warns(RuntimeWarning) as record:
         _ = Document("tests/data/invalid-ver.numbers")
-    # assert len(record) == 1
     assert "unsupported version '99.9'" in str(record[0])
 
     with pytest.raises(FileFormatError) as e:
@@ -27,7 +31,7 @@ def test_invalid_packages(configurable_save_file):
 
     doc = Document()
     with pytest.raises(FileFormatError) as e:
-        _ = doc.save("tests/data/invalid.numberz", package=True)
+        doc.save("tests/data/invalid.numberz", package=True)
     assert "invalid Numbers document (not a Numbers package)" in str(e)
 
     with pytest.raises(FileFormatError) as e:
@@ -38,21 +42,27 @@ def test_invalid_packages(configurable_save_file):
         doc.save("tests/data/invalid-props.numbers", package=True)
     assert "invalid Numbers document (missing files)" in str(e)
 
-    with pytest.raises(FileFormatError) as e:
+    with pytest.raises(FileFormatError) as e:  # noqa: PT012
         doc.save(configurable_save_file)
         doc.save(configurable_save_file, package=True)
     assert "cannot overwrite Numbers document file with package" in str(e)
 
 
-def test_package_save(configurable_save_file):
+def test_package_save(configurable_save_file: Path) -> None:
+    """Test saving a document as a package."""
     doc = Document("tests/data/test-package.numbers")
     doc.save(configurable_save_file, package=True)
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]
-    assert table.cell(0, 0).style.bg_image.filename == "cat.jpg"
+    style_0_0 = table.cell(0, 0).style
+    assert style_0_0 is not None
+    assert style_0_0.bg_image is not None
+    assert style_0_0.bg_image.filename == "cat.jpg"
+
     assert table.cell(0, 1).value == "Cat"
     style = table.cell(1, 1).style
+    assert style is not None
     assert style.font_color == RGB(255, 255, 255)
     assert style.bg_color == RGB(238, 34, 12)
     assert style.bold

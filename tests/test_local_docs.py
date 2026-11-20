@@ -1,14 +1,18 @@
+"""Tests for local Numbers documents on the filesystem."""
+
 import os
 import traceback
 import warnings
+from collections.abc import Generator
+from typing import cast
 
 import pytest
 
-from numbers_parser import BoolCell, Document, MergedCell
+from numbers_parser import Cell, Document
 from numbers_parser.constants import DEFAULT_FONT
 
 ALL_DOCS_DIRS = [
-    os.path.join(os.environ.get("HOME"), x)
+    os.path.join(cast("str", os.environ.get("HOME")), x)
     for x in [
         "Documents",
         "Library/Mobile Documents/com~apple~Numbers/Documents",
@@ -17,14 +21,16 @@ ALL_DOCS_DIRS = [
 
 
 @pytest.mark.experimental
-def test_local_docs():
-    def all_doc_cells(doc: Document):
+def test_local_docs() -> None:
+    """Test reading all local Numbers documents in user directories."""
+
+    def all_doc_cells(doc: Document) -> Generator[Cell, None, None]:
         for sheet in doc.sheets:
             for table in sheet.tables:
                 for row in table.rows():
                     yield from row
 
-    def all_docs_paths():
+    def all_docs_paths() -> Generator[str, None, None]:
         for docs_dir in ALL_DOCS_DIRS:
             for root, dirs, files in os.walk(docs_dir):
                 for file in files + dirs:
@@ -33,59 +39,29 @@ def test_local_docs():
                     path = os.path.join(root, file)
                     yield path
 
-    def check_cell_values(doc: Document):
+    def check_cell_values(doc: Document) -> None:
         for cell in all_doc_cells(doc):
             _ = cell.value
 
-    def check_cell_formatted_values(doc: Document):
+    def check_cell_formatted_values(doc: Document) -> None:
         for cell in all_doc_cells(doc):
             _ = cell.formatted_value
 
-    def check_cell_formulas(doc: Document):
+    def check_cell_formulas(doc: Document) -> None:
         for cell in all_doc_cells(doc):
             if cell.is_formula:
                 _ = cell.formula
 
-    def check_cell_style(doc: Document):
+    def check_cell_style(doc: Document) -> None:
         for cell in all_doc_cells(doc):
             _ = cell.style
 
-    def check_cell_borders(doc: Document):
+    def check_cell_borders(doc: Document) -> None:
         for cell in all_doc_cells(doc):
             _ = cell.border
 
-    def allowed_warning(w):
+    def allowed_warning(w: warnings.WarningMessage) -> bool:
         return f"falling back to {DEFAULT_FONT}" in str(w.message)
-
-    def check_extra_bits(doc: Document):
-        for cell in all_doc_cells(doc):
-            extra_bits_ok = True
-            if (
-                cell._bool_format_id is not None
-                and not (cell._extra_bits & 0x20)
-                and not isinstance(cell, BoolCell)
-            ):
-                extra_bits_ok = False
-            if cell._duration_format_id is not None and not (cell._extra_bits & 0x4):
-                extra_bits_ok = False
-            if not extra_bits_ok:
-                table_id = cell._table_id
-                sheet_id = cell._model.table_id_to_sheet_id(table_id)
-                sheet_name = cell._model.sheet_name(sheet_id)
-                table_name = cell._model.table_name(table_id)
-                ref = f"{doc.filename}:{sheet_name}:{table_name}:[{cell.row},{cell.col}]"
-                print(f"{ref}: extras={cell._extra_bits:#08x}")
-
-    def print_extra_bits(doc: Document):
-        for cell in all_doc_cells(doc):
-            if isinstance(cell, MergedCell):
-                continue
-            table_id = cell._table_id
-            sheet_id = cell._model.table_id_to_sheet_id(table_id)
-            sheet_name = cell._model.sheet_name(sheet_id)
-            table_name = cell._model.table_name(table_id)
-            ref = f"{doc.filename}:{sheet_name}:{table_name}:[{cell.row},{cell.col}]"
-            print(f"{ref}: {cell}")
 
     tests = [
         check_cell_values,
@@ -93,11 +69,9 @@ def test_local_docs():
         check_cell_formulas,
         check_cell_style,
         check_cell_borders,
-        # print_extra_bits,
-        # check_extra_bits,
     ]
 
-    print("\n*** Testing local docs")
+    print("\n*** Testing local docs")  # noqa: T201
     for doc_path in all_docs_paths():
         test_ok_count = 0
         captured_warnings = []
@@ -105,12 +79,12 @@ def test_local_docs():
         try:
             with warnings.catch_warnings(record=True) as captured_warnings:
                 warnings.simplefilter("always")
-                print(doc_path)
+                print(doc_path)  # noqa: T201
                 doc = Document(doc_path)
                 for test in tests:
                     test(doc)
                     test_ok_count += 1
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught # noqa: BLE001
             exc = e
         else:
             captured_warnings = [w for w in captured_warnings if not allowed_warning(w)]

@@ -6,10 +6,10 @@ import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 
-import pymupdf
-from PIL import Image
-from pixelmatch.contrib.PIL import pixelmatch
-from rich import print  # noqa: A004
+import pymupdf  # type: ignore[import-not-found]
+from PIL import Image  # type: ignore[import-not-found]
+from pixelmatch.contrib.PIL import pixelmatch  # type: ignore[import-not-found]
+from rich import print  # type: ignore[import-not-found]  # noqa: A004
 
 from numbers_parser import (
     RGB,
@@ -293,6 +293,7 @@ def check_api_tests(filename: Path) -> None:
     style_cell = table.cell(1, 0)
     assert style_cell.value == "Styled Text"
     s = style_cell.style
+    assert s is not None
     assert s.name == "CustomStyle1"
     assert s.font_color == RGB(29, 177, 0)
     assert s.font_size == 10.0
@@ -312,7 +313,9 @@ def check_api_tests(filename: Path) -> None:
 
     # Check Borders
     border_cell = table.cell(2, 0)
+    assert border_cell.border is not None
     b = border_cell.border.top
+    assert b is not None
     assert b.width == 5
     assert b.color == RGB(255, 0, 0)
     assert b.style == BorderType.DASHES
@@ -334,6 +337,7 @@ def check_api_tests(filename: Path) -> None:
 
     # Check Datetime Formatting
     dt_cell = table.cell(6, 0)
+    assert dt_cell.formatted_value is not None
     assert "2026-01-01 12:00" in dt_cell.formatted_value
 
     # Check Duration Formatting
@@ -367,18 +371,21 @@ def check_api_tests(filename: Path) -> None:
     assert c_num.type == CustomFormattingType.NUMBER
     c_num_cell = table.cell(13, 0)
     assert c_num_cell.value == 42.1
+    assert c_num_cell.formatted_value is not None
     assert "42" in c_num_cell.formatted_value
 
     assert "MyCustomDate" in doc.custom_formats
     c_date = doc.custom_formats["MyCustomDate"]
     assert c_date.type == CustomFormattingType.DATETIME
     c_date_cell = table.cell(14, 0)
+    assert c_date_cell.formatted_value is not None
     assert "2026" in c_date_cell.formatted_value
 
     assert "MyCustomText" in doc.custom_formats
     c_text = doc.custom_formats["MyCustomText"]
     assert c_text.type == CustomFormattingType.TEXT
     c_text_cell = table.cell(15, 0)
+    assert c_text_cell.formatted_value is not None
     assert "Prefix: Test string" in c_text_cell.formatted_value
 
     # Check Merging
@@ -402,6 +409,7 @@ def check_api_tests(filename: Path) -> None:
     bg_cell = table.cell(19, 0)
     assert bg_cell.value == "Cat Image"
     s_bg = bg_cell.style
+    assert s_bg is not None
     assert s_bg.name == "CatBackground"
     assert s_bg.bg_image is not None
     assert s_bg.bg_image.filename == "cat.jpg"
@@ -489,8 +497,8 @@ def compare_pdfs_visually(
         ref_pix = ref_page.get_pixmap(matrix=matrix, alpha=True)
         test_pix = test_doc[page_num].get_pixmap(matrix=matrix, alpha=True)
 
-        ref_img = Image.frombytes("RGBA", [ref_pix.width, ref_pix.height], ref_pix.samples)
-        test_img = Image.frombytes("RGBA", [test_pix.width, test_pix.height], test_pix.samples)
+        ref_img = Image.frombytes("RGBA", (ref_pix.width, ref_pix.height), ref_pix.samples)
+        test_img = Image.frombytes("RGBA", (test_pix.width, test_pix.height), test_pix.samples)
 
         # Force the test image to exactly match the reference image dimensions
         if ref_img.size != test_img.size:
@@ -550,7 +558,7 @@ def main() -> None:
     pivot_doc_filepath = tempdir / "pivot-test.numbers"
     pivot_pdf_filepath = tempdir / "pivot-test.pdf"
     print("[green]Generating updated pivot table sources:[/green]", pivot_doc_filepath)
-    update_pivot_tables_doc("tests/data/test-pivot.numbers", pivot_doc_filepath)
+    update_pivot_tables_doc(Path("tests/data/test-pivot.numbers"), pivot_doc_filepath)
 
     print("[green]Triggering AppleScript PDF Export to:[/green]", pivot_pdf_filepath)
     open_numbers_and_export_pdf(pivot_doc_filepath, pivot_pdf_filepath, "Sales Pivot")

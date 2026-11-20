@@ -1,4 +1,5 @@
 """Generate Python protobuf mappings from extracted registry data."""
+
 import json
 import os
 import sys
@@ -15,7 +16,7 @@ module_import_output = ""
 module_files_output = ""
 mapping_output = ""
 for filename in os.listdir("src/numbers_parser/generated"):
-    if "pb2" in filename:
+    if filename.endswith("pb2.py"):
         module = filename.replace("_pb2.py", "")
         modules.append(module)
         module_import_output += f"from numbers_parser.generated import {module}_pb2 as {module}\n"

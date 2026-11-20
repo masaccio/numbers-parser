@@ -585,6 +585,7 @@ class DataInfo(_message.Message):
     UPLOAD_STATUS_FIELD_NUMBER: _builtins.int
     REMOTE_DATA_MTIME_FIELD_NUMBER: _builtins.int
     MATERIALIZED_LENGTH_FIELD_NUMBER: _builtins.int
+    WATERMARKING_ATTRIBUTES_FIELD_NUMBER: _builtins.int
     PASTEBOARD_EXTERNAL_FILE_PATH_FIELD_NUMBER: _builtins.int
     identifier: _builtins.int
     digest: _builtins.bytes
@@ -608,6 +609,8 @@ class DataInfo(_message.Message):
     def encryption_info(self) -> Global___EncryptionInfo: ...
     @_builtins.property
     def unmaterialized_ranges(self) -> _TSPMessages_pb2.IndexSet: ...
+    @_builtins.property
+    def watermarking_attributes(self) -> _TSPMessages_pb2.DataAttributes: ...
     def __init__(
         self,
         *,
@@ -629,11 +632,12 @@ class DataInfo(_message.Message):
         upload_status: _TSPMessages_pb2.DataUploadStatus.ValueType | None = ...,
         remote_data_mtime: _builtins.float | None = ...,
         materialized_length: _builtins.int | None = ...,
+        watermarking_attributes: _TSPMessages_pb2.DataAttributes | None = ...,
         pasteboard_external_file_path: _builtins.str | None = ...,
     ) -> None: ...
-    _HasFieldArgType: _TypeAlias = _typing.Literal["attributes", b"attributes", "can_download", b"can_download", "digest", b"digest", "document_resource_locator", b"document_resource_locator", "download_priority", b"download_priority", "encryption_info", b"encryption_info", "file_name", b"file_name", "identifier", b"identifier", "last_mismatched_digest", b"last_mismatched_digest", "materialized_length", b"materialized_length", "pasteboard_external_file_path", b"pasteboard_external_file_path", "preferred_file_name", b"preferred_file_name", "remote_data_has_package_storage", b"remote_data_has_package_storage", "remote_data_length", b"remote_data_length", "remote_data_mtime", b"remote_data_mtime", "remote_url", b"remote_url", "source_bookmark_data", b"source_bookmark_data", "unmaterialized_ranges", b"unmaterialized_ranges", "upload_status", b"upload_status"]  # noqa: Y015
+    _HasFieldArgType: _TypeAlias = _typing.Literal["attributes", b"attributes", "can_download", b"can_download", "digest", b"digest", "document_resource_locator", b"document_resource_locator", "download_priority", b"download_priority", "encryption_info", b"encryption_info", "file_name", b"file_name", "identifier", b"identifier", "last_mismatched_digest", b"last_mismatched_digest", "materialized_length", b"materialized_length", "pasteboard_external_file_path", b"pasteboard_external_file_path", "preferred_file_name", b"preferred_file_name", "remote_data_has_package_storage", b"remote_data_has_package_storage", "remote_data_length", b"remote_data_length", "remote_data_mtime", b"remote_data_mtime", "remote_url", b"remote_url", "source_bookmark_data", b"source_bookmark_data", "unmaterialized_ranges", b"unmaterialized_ranges", "upload_status", b"upload_status", "watermarking_attributes", b"watermarking_attributes"]  # noqa: Y015
     def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
-    _ClearFieldArgType: _TypeAlias = _typing.Literal["attributes", b"attributes", "can_download", b"can_download", "digest", b"digest", "document_resource_locator", b"document_resource_locator", "download_priority", b"download_priority", "encryption_info", b"encryption_info", "file_name", b"file_name", "identifier", b"identifier", "last_mismatched_digest", b"last_mismatched_digest", "materialized_length", b"materialized_length", "pasteboard_external_file_path", b"pasteboard_external_file_path", "preferred_file_name", b"preferred_file_name", "remote_data_has_package_storage", b"remote_data_has_package_storage", "remote_data_length", b"remote_data_length", "remote_data_mtime", b"remote_data_mtime", "remote_url", b"remote_url", "source_bookmark_data", b"source_bookmark_data", "unmaterialized_ranges", b"unmaterialized_ranges", "upload_status", b"upload_status"]  # noqa: Y015
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["attributes", b"attributes", "can_download", b"can_download", "digest", b"digest", "document_resource_locator", b"document_resource_locator", "download_priority", b"download_priority", "encryption_info", b"encryption_info", "file_name", b"file_name", "identifier", b"identifier", "last_mismatched_digest", b"last_mismatched_digest", "materialized_length", b"materialized_length", "pasteboard_external_file_path", b"pasteboard_external_file_path", "preferred_file_name", b"preferred_file_name", "remote_data_has_package_storage", b"remote_data_has_package_storage", "remote_data_length", b"remote_data_length", "remote_data_mtime", b"remote_data_mtime", "remote_url", b"remote_url", "source_bookmark_data", b"source_bookmark_data", "unmaterialized_ranges", b"unmaterialized_ranges", "upload_status", b"upload_status", "watermarking_attributes", b"watermarking_attributes"]  # noqa: Y015
     def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
     def WhichOneof(self, oneof_group: _Never) -> None: ...
 

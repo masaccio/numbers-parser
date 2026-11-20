@@ -240,7 +240,7 @@ On read, ``IWork.open`` opens a ZIP file or package, reads metadata and
 optional encryption state, and stores resources. ``ObjectStore`` identifies
 IWA files, decompresses their chunks, parses archive segments using the
 generated type registry, and indexes each typed protobuf by its
-``ArchiveInfo.identifier``. ``_NumbersModel`` then follows references from
+``ArchiveInfo.identifier``. ``NumbersModel`` then follows references from
 the document and tables, builds cached lookup tables for strings, styles,
 formats and formulas, and extracts individual cell records from tile rows.
 The public ``Document``, ``Sheet`` and ``Table`` classes project that model
@@ -495,7 +495,7 @@ value fields (:src_proto:`TSTArchives.proto`):
      repeated .TST.TableDataList.ListEntry entries = 3;
    }
 
-In the implementation, ``_NumbersModel`` creates a ``DataLists`` cache for
+In the implementation, ``NumbersModel`` creates a ``DataLists`` cache for
 the table's string, style, formula, format, and control-spec references.
 Lookups use both the table id and list key: ``table_string`` resolves a text
 cell's string id, ``table_style`` resolves a style reference, and
@@ -546,7 +546,7 @@ hyperlink attributes:
      optional string url_ref = 2;
    }
 
-``_NumbersModel.table_rich_text`` follows those references through
+``NumbersModel.table_rich_text`` follows those references through
 ``self.objects`` and recognizes ``HyperlinkFieldArchive`` objects. Each
 ``character_index`` begins a linked text run that ends at the next smart-field
 entry or at the end of the text; the model returns the run text together with
@@ -869,7 +869,7 @@ typed nodes rather than formula text:
      repeated .TSCE.ASTNodeArrayArchive.ASTNodeArchive AST_node = 1;
    }
 
-``_NumbersModel.formula_ast`` follows the table model's ``base_data_store`` to
+``NumbersModel.formula_ast`` follows the table model's ``base_data_store`` to
 the formula list and indexes the embedded AST node sequence by ``entry.key``.
 ``Cell.formula`` passes its formula id and row/column to ``TableFormulas``.
 That renderer visits the stored nodes and feeds operands and operators to a
@@ -880,7 +880,7 @@ through the generated function map; unsupported node or function ids produce
 also reported as unsupported. The result is a formula string for the API,
 not a recalculated cell value.
 
-Cell and range reference nodes are resolved by ``_NumbersModel.node_to_ref``.
+Cell and range reference nodes are resolved by ``NumbersModel.node_to_ref``.
 Local row and column coordinates combine their absolute/relative flags with
 the formula cell's location. Cross-table nodes carry a table UUID; the model
 maps that UUID back to a table before building the reference. UUID-based
@@ -929,7 +929,7 @@ then inherit unset properties from their parent style
      optional .TSD.StrokeArchive left_stroke = 13;
    }
 
-``ParagraphStyleArchive`` and ``CellStyleArchive`` both link to parent styles via their ``super.parent`` references, inheriting any styling attributes that are not explicitly overridden. The table model automatically maps cells to default text styles based on region via the ``body_text_style``, ``header_row_text_style``, ``header_column_text_style``, and ``footer_row_text_style`` references. ``_NumbersModel.table_style`` follows the style-list entry's reference through
+``ParagraphStyleArchive`` and ``CellStyleArchive`` both link to parent styles via their ``super.parent`` references, inheriting any styling attributes that are not explicitly overridden. The table model automatically maps cells to default text styles based on region via the ``body_text_style``, ``header_row_text_style``, ``header_column_text_style``, and ``footer_row_text_style`` references. ``NumbersModel.table_style`` follows the style-list entry's reference through
 ``self.objects``. ``cell_text_style`` chooses a cell-specific text-style key,
 or falls back to the table defaults. Its ``char_property``, ``para_property`` and ``cell_property``
 helpers retrieve explicitly set values and otherwise follow the style's
@@ -1050,7 +1050,7 @@ defined in :src_proto:`TSTArchives.proto`. :src_pkg:`model.py` recognizes the re
 it encounters, and :src_pkg:`cell.py` exposes a merged anchor and covered-cell
 references to the higher-level API.
 
-Numbers has stored merges in three different places, and ``_NumbersModel.merge_cells``
+Numbers has stored merges in three different places, and ``NumbersModel.merge_cells``
 tries them in this order, stopping at the first one that yields any ranges:
 
 1. **Merge-owner formula store** (current Numbers). ``TableModelArchive.merge_owner``
@@ -1494,7 +1494,7 @@ its ``TST.PivotOwnerArchive`` (:src_proto:`TSTArchives.proto`):
      // ...
    }
 
-On save, ``_NumbersModel.refresh_pivot_tables`` walks all tables in the
+On save, ``NumbersModel.refresh_pivot_tables`` walks all tables in the
 document and locates those where ``is_a_pivot_table`` is true. For each pivot
 table, it resolves the ``pivot_owner`` reference and assigns a newly generated
 ``refresh_uid`` alongside an updated ``refresh_timestamp`` (seconds relative to

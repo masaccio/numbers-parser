@@ -35,14 +35,14 @@ class LinkParser(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         """Collect links, resources, and anchors from an HTML start tag."""
-        attrs = dict(attrs)
+        attr_dict = dict(attrs)
         for name in ("id", "name"):
-            if attrs.get(name):
-                self.anchors.add(attrs[name])
-        if tag in ("a", "link") and attrs.get("href"):
-            self.links.append(attrs["href"])
-        elif tag in ("img", "script") and attrs.get("src"):
-            self.links.append(attrs["src"])
+            if val := attr_dict.get(name):
+                self.anchors.add(val)
+        if tag in ("a", "link") and (href := attr_dict.get("href")):
+            self.links.append(href)
+        elif tag in ("img", "script") and (src := attr_dict.get("src")):
+            self.links.append(src)
 
 
 def parse(path: Path) -> LinkParser:
@@ -89,9 +89,9 @@ def main() -> int:  # noqa: C901
         print(f"Links check: no HTML files found in {root}", file=sys.stderr)
         return 1
 
-    parsed = {}
-    errors = []
-    external = {}  # url -> [source files]
+    parsed: dict[Path, LinkParser] = {}
+    errors: list[str] = []
+    external: dict[str, list[Path]] = {}  # url -> [source files]
 
     def anchors_for(path: Path) -> set[str]:
         """Return the fragment identifiers defined in an HTML page."""

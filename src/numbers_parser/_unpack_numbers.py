@@ -14,8 +14,10 @@ from base64 import b64decode
 from binascii import hexlify
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 from compact_json import Formatter
+from google.protobuf.message import Message as ProtoMessage
 
 from numbers_parser import __name__ as numbers_parser_name
 from numbers_parser import _get_version
@@ -37,56 +39,62 @@ class NumbersUnpacker(IWorkHandler):
     pretty: bool = False
     compact_json: bool = False
     redact_strings: bool = False
-    output_dir: str = None
+    output_dir: str | None = None
 
-    def store_file(self, filename: str, blob: bytes) -> None:
+    def store_archive(self, filename: str, iwa: IWAFile) -> None:
         """Store a protobuf archive."""
+        target_path = self._resolve_pathname(filename).replace(".iwa", ".json")
+        with open(target_path, "w", encoding="utf-8") as out:
+            if self.redact_strings:
+                for chunk in iwa.chunks:
+                    for archive in chunk.archives:
+                        archive.redact_strings()
+            data = iwa.to_dict()
+            if self.hex_uuids or self.pretty:
+                self.prettify_uuids(data)
+            if self.pretty_storage or self.pretty:
+                self.prettify_cell_storage(data)
+            if self.compact_json or self.pretty:
+                formatter = Formatter()
+                formatter.indent_spaces = 2
+                formatter.max_inline_length = 180
+                pretty_json = formatter.serialize(data)
+                out.write(pretty_json)
+            else:
+                json.dump(data, out, sort_keys=True, indent=2)
+
+    def store_blob(self, filename: str, blob: bytes) -> None:
+        """Store a binary blob."""
+        if filename.endswith("/"):
+            return
+
+        target_path = self._resolve_pathname(filename)
+        with open(target_path, "wb") as out:
+            out.write(blob)
+
+    def store_object(self, filename: str, identifier: int, archive: ProtoMessage) -> None:
+        """Store a decoded protobuf message."""
+
+    def _resolve_pathname(self, filename: str) -> str:
+        """Resolve absolute paths to prevent Zip Slip."""
         filename = re.sub(r".*\.numbers/", "", str(filename))
 
-        # Resolve absolute paths to prevent Zip Slip
-        out_abs = os.path.realpath(self.output_dir)
+        out_abs = os.path.realpath(str(self.output_dir))
         target_abs = os.path.realpath(os.path.join(out_abs, filename))
         if os.path.commonpath([out_abs, target_abs]) != out_abs:
             msg = f"Path traversal attempt detected in archive member: {filename}"
             raise FileFormatError(msg)
 
-        self.ensure_directory_exists(target_abs)
-        target_path = os.path.join(self.output_dir, filename)
-        if isinstance(blob, IWAFile):
-            target_path = target_path.replace(".iwa", "")
-            target_path += ".json"
-            with open(target_path, "w", encoding="utf-8") as out:
-                if self.redact_strings:
-                    for chunk in blob.chunks:
-                        for archive in chunk.archives:
-                            archive.redact_strings()
-                data = blob.to_dict()
-                if self.hex_uuids or self.pretty:
-                    self.prettify_uuids(data)
-                if self.pretty_storage or self.pretty:
-                    self.prettify_cell_storage(data)
-                if self.compact_json or self.pretty:
-                    formatter = Formatter()
-                    formatter.indent_spaces = 2
-                    formatter.max_inline_length = 180
-                    pretty_json = formatter.serialize(data)
-                    out.write(pretty_json)
-                else:
-                    json.dump(data, out, sort_keys=True, indent=2)
-        elif not filename.endswith("/"):
-            with open(target_path, "wb") as out:
-                out.write(blob)
+        self._ensure_directory_exists(target_abs)
+        return os.path.join(str(self.output_dir), filename)
 
-    def store_object(self, filename: str, identifier: int, archive: object) -> None:
-        """Store object."""
-
-    def ensure_directory_exists(self, path: str) -> None:
+    def _ensure_directory_exists(self, path: str) -> None:
         """Ensure that a path's directory exists."""
         parts = os.path.split(path)
         with contextlib.suppress(OSError):
-            os.makedirs(os.path.join(*([self.output_dir, *list(parts[:-1])])))
+            os.makedirs(os.path.join(*([str(self.output_dir), *list(parts[:-1])])))
 
-    def prettify_uuids(self, obj: object) -> None:
+    def prettify_uuids(self, obj: dict | list) -> None:
         """Replace UUID values with readable labels in extracted data."""
         if isinstance(obj, dict):
             for k, v in obj.items():
@@ -97,8 +105,8 @@ class NumbersUnpacker(IWorkHandler):
                         self.prettify_uuids(v)
                 elif isinstance(v, list):
                     self.prettify_uuids(v)
-        else:  # list
-            for i, v in enumerate(obj):
+        else:  # must be a list
+            for i, v in enumerate(cast("list", obj)):
                 if isinstance(v, dict):
                     try:
                         obj[i] = str(NumbersUUID(v))
@@ -107,7 +115,7 @@ class NumbersUnpacker(IWorkHandler):
                 elif isinstance(v, list):
                     self.prettify_uuids(v)
 
-    def prettify_cell_storage(self, obj: object) -> None:
+    def prettify_cell_storage(self, obj: dict | list) -> None:
         """Format cell storage fields for readable output."""
         if isinstance(obj, dict):
             for k, v in obj.items():
@@ -120,8 +128,8 @@ class NumbersUnpacker(IWorkHandler):
                     offsets = array("h", b64decode(obj[k])).tolist()
                     obj[k] = ",".join([str(x) for x in offsets])
                     obj[k] = re.sub(r"(?:,-1)+$", ",[...]", obj[k])
-        else:  # list
-            for v in obj:
+        else:  # must be a list
+            for v in cast("list", obj):
                 if isinstance(v, (dict, list)):
                     self.prettify_cell_storage(v)
 

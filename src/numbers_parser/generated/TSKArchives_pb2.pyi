@@ -539,11 +539,13 @@ class CommandArchive(_message.Message):
     REMOTE_FIELD_NUMBER: _builtins.int
     SHOULD_HOLD_UNTIL_GROUP_COMMIT_FIELD_NUMBER: _builtins.int
     SERVER_ORIGINATED_FIELD_NUMBER: _builtins.int
+    OFFLINE_COMMAND_APPLIER_ORIGINATED_FIELD_NUMBER: _builtins.int
     shadowed_by_transform: _builtins.bool
     shadowed_by_commit: _builtins.bool
     remote: _builtins.bool
     should_hold_until_group_commit: _builtins.bool
     server_originated: _builtins.bool
+    offline_command_applier_originated: _builtins.bool
     @_builtins.property
     @_deprecated("""This field has been marked as deprecated using proto field options.""")
     def undoRedoState(self) -> _TSPMessages_pb2.Reference: ...
@@ -559,10 +561,11 @@ class CommandArchive(_message.Message):
         remote: _builtins.bool | None = ...,
         should_hold_until_group_commit: _builtins.bool | None = ...,
         server_originated: _builtins.bool | None = ...,
+        offline_command_applier_originated: _builtins.bool | None = ...,
     ) -> None: ...
-    _HasFieldArgType: _TypeAlias = _typing.Literal["remote", b"remote", "server_originated", b"server_originated", "shadowed_by_commit", b"shadowed_by_commit", "shadowed_by_transform", b"shadowed_by_transform", "should_hold_until_group_commit", b"should_hold_until_group_commit", "undoCollection", b"undoCollection", "undoRedoState", b"undoRedoState"]  # noqa: Y015
+    _HasFieldArgType: _TypeAlias = _typing.Literal["offline_command_applier_originated", b"offline_command_applier_originated", "remote", b"remote", "server_originated", b"server_originated", "shadowed_by_commit", b"shadowed_by_commit", "shadowed_by_transform", b"shadowed_by_transform", "should_hold_until_group_commit", b"should_hold_until_group_commit", "undoCollection", b"undoCollection", "undoRedoState", b"undoRedoState"]  # noqa: Y015
     def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
-    _ClearFieldArgType: _TypeAlias = _typing.Literal["remote", b"remote", "server_originated", b"server_originated", "shadowed_by_commit", b"shadowed_by_commit", "shadowed_by_transform", b"shadowed_by_transform", "should_hold_until_group_commit", b"should_hold_until_group_commit", "undoCollection", b"undoCollection", "undoRedoState", b"undoRedoState"]  # noqa: Y015
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["offline_command_applier_originated", b"offline_command_applier_originated", "remote", b"remote", "server_originated", b"server_originated", "shadowed_by_commit", b"shadowed_by_commit", "shadowed_by_transform", b"shadowed_by_transform", "should_hold_until_group_commit", b"should_hold_until_group_commit", "undoCollection", b"undoCollection", "undoRedoState", b"undoRedoState"]  # noqa: Y015
     def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
     def WhichOneof(self, oneof_group: _Never) -> None: ...
 
@@ -1500,9 +1503,15 @@ class OutgoingCommandQueueItem(_message.Message):
     CONTAINS_LARGE_PENDING_UPLOAD_DATA_FIELD_NUMBER: _builtins.int
     UUID_TO_DATA_MAP_ENTRIES_FIELD_NUMBER: _builtins.int
     LARGE_DATA_LIST_FIELD_NUMBER: _builtins.int
+    IS_ENQUEUED_BY_OFFLINE_COMMAND_APPLIER_FIELD_NUMBER: _builtins.int
+    END_DOCSERVERLESS_IF_REJECTED_FIELD_NUMBER: _builtins.int
+    PREVENT_PRUNING_AND_COALESCING_FIELD_NUMBER: _builtins.int
     serialized_json_without_data_base64_encoded_string: _builtins.str
     did_rollback_reapply: _builtins.bool
     contains_large_pending_upload_data: _builtins.bool
+    is_enqueued_by_offline_command_applier: _builtins.bool
+    end_docserverless_if_rejected: _builtins.bool
+    prevent_pruning_and_coalescing: _builtins.bool
     @_builtins.property
     def command(self) -> _TSPMessages_pb2.Reference: ...
     @_builtins.property
@@ -1521,10 +1530,13 @@ class OutgoingCommandQueueItem(_message.Message):
         contains_large_pending_upload_data: _builtins.bool | None = ...,
         uuid_to_data_map_entries: _abc.Iterable[Global___OutgoingCommandQueueItemUUIDToDataMapEntry] | None = ...,
         large_data_list: _abc.Iterable[_TSPMessages_pb2.DataReference] | None = ...,
+        is_enqueued_by_offline_command_applier: _builtins.bool | None = ...,
+        end_docserverless_if_rejected: _builtins.bool | None = ...,
+        prevent_pruning_and_coalescing: _builtins.bool | None = ...,
     ) -> None: ...
-    _HasFieldArgType: _TypeAlias = _typing.Literal["command", b"command", "contains_large_pending_upload_data", b"contains_large_pending_upload_data", "did_rollback_reapply", b"did_rollback_reapply", "serialized_json_without_data_base64_encoded_data", b"serialized_json_without_data_base64_encoded_data", "serialized_json_without_data_base64_encoded_string", b"serialized_json_without_data_base64_encoded_string"]  # noqa: Y015
+    _HasFieldArgType: _TypeAlias = _typing.Literal["command", b"command", "contains_large_pending_upload_data", b"contains_large_pending_upload_data", "did_rollback_reapply", b"did_rollback_reapply", "end_docserverless_if_rejected", b"end_docserverless_if_rejected", "is_enqueued_by_offline_command_applier", b"is_enqueued_by_offline_command_applier", "prevent_pruning_and_coalescing", b"prevent_pruning_and_coalescing", "serialized_json_without_data_base64_encoded_data", b"serialized_json_without_data_base64_encoded_data", "serialized_json_without_data_base64_encoded_string", b"serialized_json_without_data_base64_encoded_string"]  # noqa: Y015
     def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
-    _ClearFieldArgType: _TypeAlias = _typing.Literal["command", b"command", "contains_large_pending_upload_data", b"contains_large_pending_upload_data", "did_rollback_reapply", b"did_rollback_reapply", "large_data_list", b"large_data_list", "serialized_json_without_data_base64_encoded_data", b"serialized_json_without_data_base64_encoded_data", "serialized_json_without_data_base64_encoded_string", b"serialized_json_without_data_base64_encoded_string", "uuid_to_data_map_entries", b"uuid_to_data_map_entries"]  # noqa: Y015
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["command", b"command", "contains_large_pending_upload_data", b"contains_large_pending_upload_data", "did_rollback_reapply", b"did_rollback_reapply", "end_docserverless_if_rejected", b"end_docserverless_if_rejected", "is_enqueued_by_offline_command_applier", b"is_enqueued_by_offline_command_applier", "large_data_list", b"large_data_list", "prevent_pruning_and_coalescing", b"prevent_pruning_and_coalescing", "serialized_json_without_data_base64_encoded_data", b"serialized_json_without_data_base64_encoded_data", "serialized_json_without_data_base64_encoded_string", b"serialized_json_without_data_base64_encoded_string", "uuid_to_data_map_entries", b"uuid_to_data_map_entries"]  # noqa: Y015
     def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
     def WhichOneof(self, oneof_group: _Never) -> None: ...
 

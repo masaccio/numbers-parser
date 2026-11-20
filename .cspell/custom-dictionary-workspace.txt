@@ -1,12 +1,16 @@
 abstractmethod
+addinivalue
+addoption
 addopts
 adipiscing
 amet
+anglegradient
 applescript
 ASTNODEARRAYARCHIVE
 ASTNODETYPE
 autoremove
 Avenir
+bgcolour
 capsys
 CFPF
 CFUUID
@@ -16,9 +20,11 @@ codesigning
 collab
 colorama
 colorset
+Colours
 Connell
 copybutton
 COUNTA
+cramjam
 csvfile
 csvreader
 datalist
@@ -30,6 +36,7 @@ decryptor
 docstrings
 drawables
 dstr
+encryptor
 envlist
 excinfo
 extendee
@@ -63,6 +70,7 @@ llys
 Lucida
 makedirs
 Menlo
+modifyitems
 multifile
 muppy
 mydoc
@@ -72,6 +80,7 @@ Neue
 nftt
 no cover
 nonspace
+numberz
 numrows
 optionflags
 osascript
@@ -118,6 +127,7 @@ strftime
 strikethru
 stylesheet
 submessages
+SUMIF
 TICKBOX
 tileid
 toks

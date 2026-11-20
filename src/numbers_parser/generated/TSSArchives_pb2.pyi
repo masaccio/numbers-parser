@@ -199,6 +199,7 @@ class StylesheetArchive(_message.Message):
     STYLES_FOR_15_2_FIELD_NUMBER: _builtins.int
     STYLES_FOR_15_3_FIELD_NUMBER: _builtins.int
     STYLES_FOR_15_4_FIELD_NUMBER: _builtins.int
+    STYLES_FOR_16_0_FIELD_NUMBER: _builtins.int
     is_locked: _builtins.bool
     can_cull_styles: _builtins.bool
     @_builtins.property
@@ -251,6 +252,8 @@ class StylesheetArchive(_message.Message):
     def styles_for_15_3(self) -> Global___StylesheetArchive.VersionedStyles: ...
     @_builtins.property
     def styles_for_15_4(self) -> Global___StylesheetArchive.VersionedStyles: ...
+    @_builtins.property
+    def styles_for_16_0(self) -> Global___StylesheetArchive.VersionedStyles: ...
     def __init__(
         self,
         *,
@@ -281,10 +284,11 @@ class StylesheetArchive(_message.Message):
         styles_for_15_2: Global___StylesheetArchive.VersionedStyles | None = ...,
         styles_for_15_3: Global___StylesheetArchive.VersionedStyles | None = ...,
         styles_for_15_4: Global___StylesheetArchive.VersionedStyles | None = ...,
+        styles_for_16_0: Global___StylesheetArchive.VersionedStyles | None = ...,
     ) -> None: ...
-    _HasFieldArgType: _TypeAlias = _typing.Literal["can_cull_styles", b"can_cull_styles", "is_locked", b"is_locked", "parent", b"parent", "styles_for_10_0", b"styles_for_10_0", "styles_for_10_1", b"styles_for_10_1", "styles_for_10_2", b"styles_for_10_2", "styles_for_11_0", b"styles_for_11_0", "styles_for_11_1", b"styles_for_11_1", "styles_for_11_2", b"styles_for_11_2", "styles_for_12_0", b"styles_for_12_0", "styles_for_12_1", b"styles_for_12_1", "styles_for_12_2", b"styles_for_12_2", "styles_for_13_0", b"styles_for_13_0", "styles_for_13_1", b"styles_for_13_1", "styles_for_13_2", b"styles_for_13_2", "styles_for_14_0", b"styles_for_14_0", "styles_for_14_1", b"styles_for_14_1", "styles_for_14_2", b"styles_for_14_2", "styles_for_14_4", b"styles_for_14_4", "styles_for_15_1", b"styles_for_15_1", "styles_for_15_2", b"styles_for_15_2", "styles_for_15_3", b"styles_for_15_3", "styles_for_15_4", b"styles_for_15_4", "styles_for_accidental_15_0", b"styles_for_accidental_15_0"]  # noqa: Y015
+    _HasFieldArgType: _TypeAlias = _typing.Literal["can_cull_styles", b"can_cull_styles", "is_locked", b"is_locked", "parent", b"parent", "styles_for_10_0", b"styles_for_10_0", "styles_for_10_1", b"styles_for_10_1", "styles_for_10_2", b"styles_for_10_2", "styles_for_11_0", b"styles_for_11_0", "styles_for_11_1", b"styles_for_11_1", "styles_for_11_2", b"styles_for_11_2", "styles_for_12_0", b"styles_for_12_0", "styles_for_12_1", b"styles_for_12_1", "styles_for_12_2", b"styles_for_12_2", "styles_for_13_0", b"styles_for_13_0", "styles_for_13_1", b"styles_for_13_1", "styles_for_13_2", b"styles_for_13_2", "styles_for_14_0", b"styles_for_14_0", "styles_for_14_1", b"styles_for_14_1", "styles_for_14_2", b"styles_for_14_2", "styles_for_14_4", b"styles_for_14_4", "styles_for_15_1", b"styles_for_15_1", "styles_for_15_2", b"styles_for_15_2", "styles_for_15_3", b"styles_for_15_3", "styles_for_15_4", b"styles_for_15_4", "styles_for_16_0", b"styles_for_16_0", "styles_for_accidental_15_0", b"styles_for_accidental_15_0"]  # noqa: Y015
     def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
-    _ClearFieldArgType: _TypeAlias = _typing.Literal["can_cull_styles", b"can_cull_styles", "identifier_to_style_map", b"identifier_to_style_map", "is_locked", b"is_locked", "parent", b"parent", "parent_to_children_style_map", b"parent_to_children_style_map", "styles", b"styles", "styles_for_10_0", b"styles_for_10_0", "styles_for_10_1", b"styles_for_10_1", "styles_for_10_2", b"styles_for_10_2", "styles_for_11_0", b"styles_for_11_0", "styles_for_11_1", b"styles_for_11_1", "styles_for_11_2", b"styles_for_11_2", "styles_for_12_0", b"styles_for_12_0", "styles_for_12_1", b"styles_for_12_1", "styles_for_12_2", b"styles_for_12_2", "styles_for_13_0", b"styles_for_13_0", "styles_for_13_1", b"styles_for_13_1", "styles_for_13_2", b"styles_for_13_2", "styles_for_14_0", b"styles_for_14_0", "styles_for_14_1", b"styles_for_14_1", "styles_for_14_2", b"styles_for_14_2", "styles_for_14_4", b"styles_for_14_4", "styles_for_15_1", b"styles_for_15_1", "styles_for_15_2", b"styles_for_15_2", "styles_for_15_3", b"styles_for_15_3", "styles_for_15_4", b"styles_for_15_4", "styles_for_accidental_15_0", b"styles_for_accidental_15_0"]  # noqa: Y015
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["can_cull_styles", b"can_cull_styles", "identifier_to_style_map", b"identifier_to_style_map", "is_locked", b"is_locked", "parent", b"parent", "parent_to_children_style_map", b"parent_to_children_style_map", "styles", b"styles", "styles_for_10_0", b"styles_for_10_0", "styles_for_10_1", b"styles_for_10_1", "styles_for_10_2", b"styles_for_10_2", "styles_for_11_0", b"styles_for_11_0", "styles_for_11_1", b"styles_for_11_1", "styles_for_11_2", b"styles_for_11_2", "styles_for_12_0", b"styles_for_12_0", "styles_for_12_1", b"styles_for_12_1", "styles_for_12_2", b"styles_for_12_2", "styles_for_13_0", b"styles_for_13_0", "styles_for_13_1", b"styles_for_13_1", "styles_for_13_2", b"styles_for_13_2", "styles_for_14_0", b"styles_for_14_0", "styles_for_14_1", b"styles_for_14_1", "styles_for_14_2", b"styles_for_14_2", "styles_for_14_4", b"styles_for_14_4", "styles_for_15_1", b"styles_for_15_1", "styles_for_15_2", b"styles_for_15_2", "styles_for_15_3", b"styles_for_15_3", "styles_for_15_4", b"styles_for_15_4", "styles_for_16_0", b"styles_for_16_0", "styles_for_accidental_15_0", b"styles_for_accidental_15_0"]  # noqa: Y015
     def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
     def WhichOneof(self, oneof_group: _Never) -> None: ...
 

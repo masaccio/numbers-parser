@@ -1,3 +1,5 @@
+"""Tests for reading folder-based Numbers packages."""
+
 from numbers_parser import Document
 
 XXX_TABLE_1_REF = [
@@ -8,7 +10,8 @@ XXX_TABLE_1_REF = [
 ]
 
 
-def test_read_folder():
+def test_read_folder() -> None:
+    """Test reading a Numbers package stored as a directory."""
     doc = Document("tests/data/test-5.numbers")
     sheets = doc.sheets
     tables = sheets["ZZZ_Sheet_1"].tables

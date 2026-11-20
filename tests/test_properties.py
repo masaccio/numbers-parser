@@ -1,3 +1,5 @@
+"""Tests for cell properties and types."""
+
 from datetime import datetime, timedelta
 
 from numbers_parser import Document
@@ -40,7 +42,8 @@ YYY_TABLE_1_REF = [
 ]
 
 
-def test_cell_merging():
+def test_cell_merging() -> None:
+    """Test cell merging values in a table."""
     doc = Document("tests/data/test-4.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -48,7 +51,8 @@ def test_cell_merging():
     assert data == ZZZ_TABLE_1_REF
 
 
-def test_cell_types():
+def test_cell_types() -> None:
+    """Test reading various cell data types."""
     doc = Document("tests/data/test-4.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables

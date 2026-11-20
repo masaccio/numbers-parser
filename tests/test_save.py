@@ -1,8 +1,11 @@
+"""Tests for saving and modifying documents, sheets, and tables."""
+
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import pytest
 
-from numbers_parser import Document, EmptyCell, MergedCell, NumberCell, TextCell
+from numbers_parser import Document, EmptyCell, MergedCell, NumberCell, Table, TextCell
 from numbers_parser.constants import (
     DEFAULT_COLUMN_COUNT,
     DEFAULT_ROW_COUNT,
@@ -11,7 +14,8 @@ from numbers_parser.constants import (
 )
 
 
-def test_empty_document(configurable_save_file):
+def test_empty_document(configurable_save_file: Path) -> None:
+    """Test creating and saving an empty document."""
     doc = Document()
     data = doc.sheets[0].tables[0].rows()
     assert len(data) == DEFAULT_ROW_COUNT
@@ -29,7 +33,8 @@ def test_empty_document(configurable_save_file):
     assert doc.sheets[0].tables[0].num_header_cols == 1
 
 
-def test_save_document(tmp_path):
+def test_save_document(tmp_path: Path) -> None:
+    """Test renaming sheets and tables and saving the document."""
     doc = Document("tests/data/test-1.numbers")
     sheets = doc.sheets
     tables = sheets[0].tables
@@ -49,7 +54,8 @@ def test_save_document(tmp_path):
     assert cell_values == new_cell_values
 
 
-def test_save_merges(configurable_save_file):
+def test_save_merges(configurable_save_file: Path) -> None:
+    """Test merging cells and saving the document."""
     doc = Document("tests/data/test-save-1.numbers")
     sheets = doc.sheets
     table = sheets[0].tables[0]
@@ -87,7 +93,8 @@ def test_save_merges(configurable_save_file):
     assert all(isinstance(table.cell(row, 4), MergedCell) for row in range(1, 4))
 
 
-def test_create_table(configurable_save_file):
+def test_create_table(configurable_save_file: Path) -> None:
+    """Test adding a new table and saving the document."""
     doc = Document()
     sheets = doc.sheets
 
@@ -119,12 +126,13 @@ def test_create_table(configurable_save_file):
     assert table.cell("D2").value == "lamb"
 
 
-def test_create_sheet(configurable_save_file):
+def test_create_sheet(configurable_save_file: Path) -> None:
+    """Test adding a new sheet and saving the document."""
     doc = Document()
     sheets = doc.sheets
 
     with pytest.raises(IndexError) as e:
-        _ = doc.add_sheet("SheeT 1")
+        doc.add_sheet("SheeT 1")
     assert "sheet 'SheeT 1' already exists" in str(e.value)
 
     doc.add_sheet("New Sheet", "New Table")
@@ -154,7 +162,8 @@ def test_create_sheet(configurable_save_file):
     assert table.cell(1, 3).value == 3000
 
 
-def test_create_multi(configurable_save_file):
+def test_create_multi(configurable_save_file: Path) -> None:
+    """Test creating multiple sheets and tables with custom offsets."""
     doc = Document()
 
     doc.sheets[0].tables[0].write(0, 0, "S0T1 A1")
@@ -189,7 +198,8 @@ def test_create_multi(configurable_save_file):
     assert len(doc.sheets[2].tables) == 4
 
 
-def test_duplicate_name():
+def test_duplicate_name() -> None:
+    """Test error when adding a table with a duplicate name."""
     doc = Document()
     doc.sheets[0].add_table("Test")
     with pytest.raises(IndexError) as e:
@@ -197,7 +207,8 @@ def test_duplicate_name():
     assert "table 'Test' already exists" in str(e)
 
 
-def test_save_formats(configurable_save_file):
+def test_save_formats(configurable_save_file: Path) -> None:
+    """Test preserving cell formats across a save operation."""
     doc = Document("tests/data/test-format-save.numbers")
     doc.save(configurable_save_file)
     doc = Document(configurable_save_file)
@@ -211,7 +222,8 @@ def test_save_formats(configurable_save_file):
 NUM_ROW_COLS = 12
 
 
-def test_edit_table_rows_columns(configurable_save_file):
+def test_edit_table_rows_columns(configurable_save_file: Path) -> None:
+    """Test adding and deleting rows and columns in a table."""
     doc = Document(num_cols=12, num_rows=NUM_ROW_COLS, num_header_cols=0, num_header_rows=0)
     table = doc.sheets[0].tables[0]
 
@@ -261,7 +273,7 @@ def test_edit_table_rows_columns(configurable_save_file):
     table_num_rows = table.num_rows
     table_num_cols = table.num_cols
 
-    def check_cell_cords(table: object):
+    def check_cell_cords(table: Table) -> None:
         for row in range(table.num_rows):
             for col in range(table.num_cols):
                 if table.cell(row, col).row != row or table.cell(row, col).col != col:
@@ -270,11 +282,11 @@ def test_edit_table_rows_columns(configurable_save_file):
                 assert table.cell(row, col).col == col
 
     def add_row(
-        table: object,
+        table: Table,
         table_num_rows: int,
         num_rows: int = 1,
         start_row: int | None = None,
-        default: object = None,
+        default: str | float | bool | datetime | timedelta | None = None,
     ) -> int:
         table.add_row(num_rows, start_row, default)
         table_num_rows += num_rows
@@ -283,11 +295,11 @@ def test_edit_table_rows_columns(configurable_save_file):
         return table_num_rows
 
     def add_column(
-        table: object,
+        table: Table,
         table_num_cols: int,
         num_cols: int = 1,
         start_col: int | None = None,
-        default: object = None,
+        default: str | float | bool | datetime | timedelta | None = None,
     ) -> int:
         table.add_column(num_cols, start_col, default)
         table_num_cols += num_cols
@@ -296,7 +308,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         return table_num_cols
 
     def delete_row(
-        table: object,
+        table: Table,
         table_num_rows: int,
         num_rows: int = 1,
         start_row: int | None = None,
@@ -308,7 +320,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         return table_num_rows
 
     def delete_column(
-        table: object,
+        table: Table,
         table_num_cols: int,
         num_cols: int = 1,
         start_col: int | None = None,
@@ -332,7 +344,7 @@ def test_edit_table_rows_columns(configurable_save_file):
 
     doc.save(configurable_save_file)
 
-    ref_values = []
+    ref_values: list[list[str]] = []
     for row in range(NUM_ROW_COLS):
         ref_values.append([])
         for col in range(NUM_ROW_COLS):
@@ -350,8 +362,7 @@ def test_edit_table_rows_columns(configurable_save_file):
         del ref_values[row][6:8]
         del ref_values[row][-2:]
     ref_values.append(["1.234" for _ in ref_values[0]])
-    for row, _ in enumerate(ref_values):
-        ref_values[row].append("5.678")
+    ref_values = [[*row, "5.678"] for row in ref_values]
 
     doc = Document(configurable_save_file)
     table = doc.sheets[0].tables[0]

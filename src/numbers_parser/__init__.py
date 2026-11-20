@@ -28,7 +28,7 @@ def _get_version() -> str:
     return __version__
 
 
-def _check_installed_numbers_version() -> str:
+def _check_installed_numbers_version() -> str | None:
     """Check installed numbers version."""
     try:
         with open(

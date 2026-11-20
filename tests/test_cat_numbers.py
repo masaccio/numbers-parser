@@ -1,3 +1,5 @@
+"""Tests for the cat-numbers CLI tool."""
+
 import csv
 import runpy
 import sys
@@ -5,10 +7,11 @@ from unittest.mock import patch
 
 import pytest
 import pytest_check as check
+from pytest_console_scripts import ScriptRunner
 
 from numbers_parser import __version__
 
-ZZZ_TABLE_1_REF = [
+ZZZ_TABLE_1_REF: list[list[str | None]] = [
     [None, "YYY_COL_1", "YYY_COL_2"],
     ["YYY_ROW_1", "YYY_1_1", "YYY_1_2"],
     ["YYY_ROW_2", "YYY_2_1", "YYY_2_2"],
@@ -16,14 +19,14 @@ ZZZ_TABLE_1_REF = [
     ["YYY_ROW_4", "YYY_4_1", "YYY_4_2"],
 ]
 
-ZZZ_TABLE_2_REF = [
+ZZZ_TABLE_2_REF: list[list[str | None]] = [
     [None, "ZZZ_COL_1", "ZZZ_COL_2", "ZZZ_COL_3"],
     ["ZZZ_ROW_1", "ZZZ_1_1", "ZZZ_1_2", "ZZZ_1_3"],
     ["ZZZ_ROW_2", "ZZZ_2_1", "ZZZ_2_2", "ZZZ_2_3"],
     ["ZZZ_ROW_3", "ZZZ_3_1", "ZZZ_3_2", "ZZZ_3_3"],
 ]
 
-XXX_TABLE_1_REF = [
+XXX_TABLE_1_REF: list[list[str | None]] = [
     [None, "XXX_COL_1", "XXX_COL_2", "XXX_COL_3", "XXX_COL_4", "XXX_COL_5"],
     ["XXX_ROW_1", "XXX_1_1", "XXX_1_2", "XXX_1_3", "XXX_1_4", "XXX_1_5"],
     ["XXX_ROW_2", "XXX_2_1", "XXX_2_2", None, "XXX_2_4", "XXX_2_5"],
@@ -34,7 +37,8 @@ DOCUMENT = "tests/data/test-1.numbers"
 
 
 @pytest.mark.script_launch_mode("subprocess")
-def test_no_documents(script_runner):
+def test_no_documents(script_runner: ScriptRunner) -> None:
+    """Test running cat-numbers with no documents."""
     ret = script_runner.run(["cat-numbers", "--brief"], print_result=False)
     assert ret.success
     assert "usage: cat-numbers" in ret.stdout
@@ -42,7 +46,8 @@ def test_no_documents(script_runner):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_version(script_runner):
+def test_version(script_runner: ScriptRunner) -> None:
+    """Test version output of cat-numbers."""
     ret = script_runner.run(["cat-numbers", "--version"], print_result=False)
     assert ret.success
     assert ret.stdout.replace("\r\n", "\n") == __version__ + "\n"
@@ -50,7 +55,8 @@ def test_version(script_runner):
 
 
 @pytest.mark.script_launch_mode("subprocess")
-def test_help(script_runner):
+def test_help(script_runner: ScriptRunner) -> None:
+    """Test help output of cat-numbers."""
     ret = script_runner.run(["cat-numbers", "--help"], print_result=False)
     assert ret.success
     assert "List the names of tables" in ret.stdout
@@ -59,7 +65,8 @@ def test_help(script_runner):
 
 
 @pytest.mark.script_launch_mode("subprocess")
-def test_full_contents(script_runner):
+def test_full_contents(script_runner: ScriptRunner) -> None:
+    """Test full contents output of cat-numbers."""
     ref = ""
     for row in ZZZ_TABLE_1_REF:
         ref += (
@@ -86,7 +93,8 @@ def test_full_contents(script_runner):
 
 
 @pytest.mark.script_launch_mode("subprocess")
-def test_brief_contents(script_runner):
+def test_brief_contents(script_runner: ScriptRunner) -> None:
+    """Test brief contents output of cat-numbers."""
     ref = ""
     for row in ZZZ_TABLE_1_REF:
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
@@ -101,7 +109,8 @@ def test_brief_contents(script_runner):
 
 
 @pytest.mark.script_launch_mode("subprocess")
-def test_encrypted_contents(script_runner):
+def test_encrypted_contents(script_runner: ScriptRunner) -> None:
+    """Test reading an encrypted document with cat-numbers."""
     ret = script_runner.run(
         [
             "cat-numbers",
@@ -120,7 +129,8 @@ def test_encrypted_contents(script_runner):
 
 
 @pytest.mark.script_launch_mode("subprocess")
-def test_encrypted_invalid_password(script_runner):
+def test_encrypted_invalid_password(script_runner: ScriptRunner) -> None:
+    """Test reading an encrypted document with an invalid password."""
     ret = script_runner.run(
         [
             "cat-numbers",
@@ -137,7 +147,8 @@ def test_encrypted_invalid_password(script_runner):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_select_sheet(script_runner):
+def test_select_sheet(script_runner: ScriptRunner) -> None:
+    """Test selecting a specific sheet in cat-numbers."""
     ref = ""
     for row in ZZZ_TABLE_1_REF:
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
@@ -153,7 +164,8 @@ def test_select_sheet(script_runner):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_select_table(script_runner):
+def test_select_table(script_runner: ScriptRunner) -> None:
+    """Test selecting a specific table in cat-numbers."""
     ref = ""
     for row in XXX_TABLE_1_REF:
         ref += ",".join(["" if v is None else v for v in row]) + "\n"
@@ -167,7 +179,8 @@ def test_select_table(script_runner):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_list_sheets(script_runner):
+def test_list_sheets(script_runner: ScriptRunner) -> None:
+    """Test listing sheets in cat-numbers."""
     ret = script_runner.run(["cat-numbers", "-S", DOCUMENT], print_result=False)
     assert ret.success
     assert ret.stdout == (f"{DOCUMENT}: ZZZ_Sheet_1\ntests/data/test-1.numbers: ZZZ_Sheet_2\n")
@@ -175,7 +188,8 @@ def test_list_sheets(script_runner):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_list_tables(script_runner):
+def test_list_tables(script_runner: ScriptRunner) -> None:
+    """Test listing tables in cat-numbers."""
     ret = script_runner.run(["cat-numbers", "-T", DOCUMENT], print_result=False)
     assert ret.success
     assert ret.stdout == (
@@ -187,7 +201,8 @@ def test_list_tables(script_runner):
 
 
 @pytest.mark.script_launch_mode("subprocess")
-def test_without_formulas(script_runner):
+def test_without_formulas(script_runner: ScriptRunner) -> None:
+    """Test cat-numbers output without formulas."""
     ret = script_runner.run(
         ["cat-numbers", "-b", "-t", "Table 2", "tests/data/test-10.numbers"],
         print_result=False,
@@ -212,7 +227,8 @@ def test_without_formulas(script_runner):
 
 
 @pytest.mark.script_launch_mode("subprocess")
-def test_with_formulas(script_runner):
+def test_with_formulas(script_runner: ScriptRunner) -> None:
+    """Test cat-numbers output with formulas enabled."""
     ret = script_runner.run(
         [
             "cat-numbers",
@@ -235,14 +251,15 @@ def test_with_formulas(script_runner):
         'XXX_6,"FIND(""_"",A6)"',
         'XXX_7,"FIND(""YYY"",A7)"',
         'XXX_8,"IF(FIND(""_"",A8)>2,A1,A2)"',
-        "0.25,100×(A9×2)%",
+        "0.25,100×(A9×2)%",  # noqa: RUF001
         '2.0,"IF(A10<5,""smaller"",""larger"")"',
         '10.0,"IF(A11≤5,""smaller"",""larger"")"',
     ]
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_duration_formatting(script_runner):
+def test_duration_formatting(script_runner: ScriptRunner) -> None:
+    """Test duration formatting in cat-numbers."""
     ret = script_runner.run(
         ["cat-numbers", "-b", "--formatting", "tests/data/duration_112.numbers"],
         print_result=False,
@@ -256,7 +273,8 @@ def test_duration_formatting(script_runner):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_date_formatting(script_runner):
+def test_date_formatting(script_runner: ScriptRunner) -> None:
+    """Test date formatting in cat-numbers."""
     ret = script_runner.run(
         ["cat-numbers", "-b", "--formatting", "tests/data/date_formats.numbers"],
         print_result=False,
@@ -270,7 +288,8 @@ def test_date_formatting(script_runner):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_debug(script_runner):
+def test_debug(script_runner: ScriptRunner) -> None:
+    """Test debug and experimental flags in cat-numbers."""
     ret = script_runner.run(
         [
             "cat-numbers",
@@ -288,7 +307,8 @@ def test_debug(script_runner):
 @pytest.mark.filterwarnings(
     "ignore:'numbers_parser._cat_numbers' found in sys.modules:RuntimeWarning",
 )
-def test_main(capsys):
+def test_main(capsys: pytest.CaptureFixture[str]) -> None:
+    """Test running _cat_numbers module as __main__."""
     with patch.object(sys, "argv", ["_cat_numbers.py", "--help"]):
         with pytest.raises(SystemExit) as excinfo:
             # Use runpy instead of script_runner to ensure coverage
@@ -303,7 +323,8 @@ def test_main(capsys):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_errors(script_runner):
+def test_errors(script_runner: ScriptRunner) -> None:
+    """Test error handling in cat-numbers."""
     ret = script_runner.run(["cat-numbers", "tests/data/corrupted.numbers"], print_result=False)
     assert not ret.success
     assert "Index/Metadata.iwa: invalid" in ret.stderr

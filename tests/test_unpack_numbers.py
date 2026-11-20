@@ -1,3 +1,5 @@
+"""Tests for the unpack-numbers CLI tool."""
+
 import json
 import plistlib
 import runpy
@@ -8,20 +10,23 @@ from unittest.mock import patch
 
 import magic
 import pytest
+from pytest_console_scripts import ScriptRunner
 
 from numbers_parser import __version__
 from numbers_parser._unpack_numbers import NumbersUnpacker
 from numbers_parser.exceptions import FileFormatError
 
 
-def test_version(script_runner):
+def test_version(script_runner: ScriptRunner) -> None:
+    """Test version output of unpack-numbers."""
     ret = script_runner.run(["unpack-numbers", "--version"], print_result=False)
     assert ret.stdout == __version__ + "\n"
     assert ret.stderr == ""
     assert ret.success
 
 
-def test_help(script_runner):
+def test_help(script_runner: ScriptRunner) -> None:
+    """Test help output of unpack-numbers."""
     ret = script_runner.run(["unpack-numbers", "--help"], print_result=False)
     assert "directory name to unpack into" in ret.stdout
     assert "document" in ret.stdout
@@ -35,14 +40,16 @@ def test_help(script_runner):
     assert ret.success
 
 
-def test_multi_doc_error(script_runner):
+def test_multi_doc_error(script_runner: ScriptRunner) -> None:
+    """Test error when specifying an output directory with multiple input files."""
     ret = script_runner.run(["unpack-numbers", "--output", "tmp", "foo", "bar"], print_result=False)
     assert not ret.success
     assert ret.stdout == ""
     assert "output directory only valid" in ret.stderr
 
 
-def test_unpack_file(script_runner, tmp_path):
+def test_unpack_file(script_runner: ScriptRunner, tmp_path: Path) -> None:
+    """Test unpacking a Numbers file archive."""
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         ["unpack-numbers", "--output", str(output_dir), "tests/data/test-1.numbers"],
@@ -54,7 +61,7 @@ def test_unpack_file(script_runner, tmp_path):
     assert "JPEG image data" in magic.from_file(str(output_dir / "preview.jpg"))
     assert (output_dir / "Index/CalculationEngine.json").exists()
     assert (output_dir / "Index/Tables/DataList-954857.json").exists()
-    with open(str(output_dir / "Index/Tables/DataList-954857.json")) as f:
+    with open(str(output_dir / "Index/Tables/DataList-954857.json"), encoding="utf-8") as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"]
     strings = [x["string"] for x in objects[0]["entries"]]
@@ -63,7 +70,8 @@ def test_unpack_file(script_runner, tmp_path):
     assert "ZZZ_ROW_3" in strings
 
 
-def test_unpack_encrypted_file(script_runner, tmp_path):
+def test_unpack_encrypted_file(script_runner: ScriptRunner, tmp_path: Path) -> None:
+    """Test unpacking an encrypted Numbers file."""
     output_dir = tmp_path / "encrypted"
     ret = script_runner.run(
         [
@@ -80,7 +88,7 @@ def test_unpack_encrypted_file(script_runner, tmp_path):
     assert ret.stdout == ""
     assert ret.stderr == ""
 
-    with open(str(output_dir / "Index/Tables/DataList-904541.json")) as f:
+    with open(str(output_dir / "Index/Tables/DataList-904541.json"), encoding="utf-8") as f:
         data = json.load(f)
     strings = [
         entry["string"] for entry in data["chunks"][0]["archives"][0]["objects"][0]["entries"]
@@ -103,7 +111,8 @@ def test_unpack_encrypted_file(script_runner, tmp_path):
     assert "tests/data/encrypted.numbers: Invalid password. Hint is 's3cr3t'" in invalid_ret.stderr
 
 
-def test_unpack_dir(script_runner, tmp_path):
+def test_unpack_dir(script_runner: ScriptRunner, tmp_path: Path) -> None:
+    """Test unpacking a Numbers package directory."""
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         ["unpack-numbers", "--output", str(output_dir), "tests/data/test-5.numbers"],
@@ -115,7 +124,7 @@ def test_unpack_dir(script_runner, tmp_path):
     assert "JPEG image data" in magic.from_file(str(output_dir / "preview.jpg"))
     assert (output_dir / "Index/CalculationEngine.json").exists()
     assert (output_dir / "Index/Tables/DataList-875166.json").exists()
-    with open(str(output_dir / "Index/Tables/DataList-875166.json")) as f:
+    with open(str(output_dir / "Index/Tables/DataList-875166.json"), encoding="utf-8") as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"]
     strings = [x["string"] for x in objects[0]["entries"]]
@@ -125,7 +134,8 @@ def test_unpack_dir(script_runner, tmp_path):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_unpack_redacted(script_runner, tmp_path):
+def test_unpack_redacted(script_runner: ScriptRunner, tmp_path: Path) -> None:
+    """Test unpacking a document with string redaction enabled."""
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         [
@@ -139,7 +149,7 @@ def test_unpack_redacted(script_runner, tmp_path):
     )
     assert ret.success
     assert ret.stdout == ""
-    with open(str(output_dir / "Index/CalculationEngine.json")) as f:
+    with open(str(output_dir / "Index/CalculationEngine.json"), encoding="utf-8") as f:
         data = json.load(f)
     table_model_archive = next(
         x["objects"][0]
@@ -149,14 +159,18 @@ def test_unpack_redacted(script_runner, tmp_path):
     assert table_model_archive["table_name"].startswith("REDACT-")
 
     string_table_id = table_model_archive["base_data_store"]["stringTable"]["identifier"]
-    with open(str(output_dir / f"Index/Tables/DataList-{string_table_id}.json")) as f:
+    with open(
+        str(output_dir / f"Index/Tables/DataList-{string_table_id}.json"),
+        encoding="utf-8",
+    ) as f:
         data = json.load(f)
     string_table = data["chunks"][0]["archives"][0]["objects"][0]
     assert all(x["string"].startswith("REDACT-") for x in string_table["entries"])
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_unpack_hex(script_runner, tmp_path):
+def test_unpack_hex(script_runner: ScriptRunner, tmp_path: Path) -> None:
+    """Test unpacking a document with hex UUID formatting enabled."""
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         [
@@ -170,7 +184,7 @@ def test_unpack_hex(script_runner, tmp_path):
     )
     assert ret.success
     assert ret.stdout == ""
-    with open(str(output_dir / "Index/CalculationEngine.json")) as f:
+    with open(str(output_dir / "Index/CalculationEngine.json"), encoding="utf-8") as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][1]["objects"][0]
     assert objects["base_owner_uid"] == "83aa364c-869c-498a-b749-dbddb35f99d7"
@@ -181,7 +195,8 @@ def test_unpack_hex(script_runner, tmp_path):
     )
 
 
-def test_pretty_storage(script_runner, tmp_path):
+def test_pretty_storage(script_runner: ScriptRunner, tmp_path: Path) -> None:
+    """Test unpacking a document with pretty cell storage formatting enabled."""
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         [
@@ -196,7 +211,7 @@ def test_pretty_storage(script_runner, tmp_path):
     assert ret.stderr == ""
     assert ret.stdout == ""
     assert ret.success
-    with open(str(output_dir / "Index/Tables/Tile-875165.json")) as f:
+    with open(str(output_dir / "Index/Tables/Tile-875165.json"), encoding="utf-8") as f:
         data = json.load(f)
     objects = data["chunks"][0]["archives"][0]["objects"][0]
     rowinfo = objects["rowInfos"][0]
@@ -206,7 +221,8 @@ def test_pretty_storage(script_runner, tmp_path):
     assert rowinfo["cell_storage_buffer_pre_bnc"][0:26] == "04:03:00:00:14:00:00:00:00"
 
 
-def test_compact_json(script_runner, tmp_path):
+def test_compact_json(script_runner: ScriptRunner, tmp_path: Path) -> None:
+    """Test unpacking a document with compact JSON formatting enabled."""
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         [
@@ -221,7 +237,7 @@ def test_compact_json(script_runner, tmp_path):
     assert ret.success
     assert ret.stdout == ""
 
-    with open(str(output_dir / "Index/CalculationEngine.json")) as f:
+    with open(str(output_dir / "Index/CalculationEngine.json"), encoding="utf-8") as f:
         data = f.read()
     assert '"formula_owner_id": {"uuid_w0": 666, "uuid_w1": 0, "uuid_w2": 0, "uuid_w3": 0},' in data
 
@@ -229,7 +245,8 @@ def test_compact_json(script_runner, tmp_path):
 @pytest.mark.filterwarnings(
     "ignore:'numbers_parser._unpack_numbers' found in sys.modules:RuntimeWarning",
 )
-def test_main(capsys):
+def test_main(capsys: pytest.CaptureFixture[str]) -> None:
+    """Test running _unpack_numbers module as __main__."""
     with patch.object(sys, "argv", ["_unpack_numbers.py", "--help"]):
         with pytest.raises(SystemExit) as excinfo:
             # Use runpy instead of script_runner to ensure coverage
@@ -243,7 +260,8 @@ def test_main(capsys):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_corrupted(script_runner, tmp_path):
+def test_corrupted(script_runner: ScriptRunner, tmp_path: Path) -> None:
+    """Test unpacking corrupted and invalid Numbers documents."""
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         ["unpack-numbers", "--output", str(output_dir), "tests/data/corrupted.numbers"],
@@ -262,7 +280,8 @@ def test_corrupted(script_runner, tmp_path):
     assert ret.stdout == ""
 
 
-def test_debug(script_runner, tmp_path):
+def test_debug(script_runner: ScriptRunner, tmp_path: Path) -> None:
+    """Test debug logging in unpack-numbers."""
     output_dir = tmp_path / "test"
     ret = script_runner.run(
         [
@@ -280,7 +299,8 @@ def test_debug(script_runner, tmp_path):
 
 
 @pytest.mark.script_launch_mode("subprocess")
-def test_default_output_dir(script_runner, tmp_path):
+def test_default_output_dir(script_runner: ScriptRunner, tmp_path: Path) -> None:
+    """Test unpacking into the default output directory."""
     tmp_file = tmp_path / "test-1.numbers"
     src_file = Path("tests/data/test-1.numbers")
     tmp_file.write_bytes(src_file.read_bytes())
@@ -296,7 +316,8 @@ def test_default_output_dir(script_runner, tmp_path):
     assert Path.exists(tmp_path / "test-1/Metadata/Properties.plist")
 
 
-def test_unpack_path_traversal_prevention(tmp_path):
+def test_unpack_path_traversal_prevention(tmp_path: Path) -> None:
+    """Test that path traversal attempts in zip archives are rejected."""
     evil_file = tmp_path / "evil.numbers"
     with zipfile.ZipFile(evil_file, "w") as z:
         z.writestr("Metadata/Properties.plist", plistlib.dumps({}))
@@ -313,6 +334,6 @@ def test_unpack_path_traversal_prevention(tmp_path):
         with zipfile.ZipFile(evil_file, "r") as z:
             for filename in z.namelist():
                 blob = z.read(filename)
-                unpacker.store_file(filename, blob)
+                unpacker.store_blob(filename, blob)
 
     assert not (escape_target_dir / "PWNED").exists()

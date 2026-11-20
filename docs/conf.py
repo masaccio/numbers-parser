@@ -17,7 +17,6 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx.ext.extlinks",
-    "enum_tools.autoenum",
     "sphinx_copybutton",
     "sphinxcontrib.mermaid",
 ]

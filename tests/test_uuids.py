@@ -1,10 +1,13 @@
+"""Test Numbers UUID class."""
+
 import pytest
 
 from numbers_parser import UnsupportedError
 from numbers_parser.numbers_uuid import NumbersUUID
 
 
-def test_uuid():
+def test_uuid() -> None:
+    """Test Numbers UUID class."""
     uuid = NumbersUUID()
     assert str(uuid).count("-") == 4
 
@@ -18,20 +21,25 @@ def test_uuid():
     assert NumbersUUID(uuid.protobuf2).int == uuid.int
     assert NumbersUUID(uuid.protobuf2).protobuf4.uuid_w0 == 0x11111111
 
-    ref = {"uuid_w0": 0x1234, "uuid_w1": 0xFFFF, "uuid_w2": 0, "uuid_w3": 0x1111}
-    uuid = NumbersUUID(ref)
+    ref4: dict[str, int | str] = {
+        "uuid_w0": 0x1234,
+        "uuid_w1": 0xFFFF,
+        "uuid_w2": 0,
+        "uuid_w3": 0x1111,
+    }
+    uuid = NumbersUUID(ref4)
     assert uuid.hex == "00001111000000000000ffff00001234"
-    assert uuid.dict4 == ref
+    assert uuid.dict4 == ref4
 
-    ref = {"upper": 0x1234, "lower": 0xFFFF}
-    uuid = NumbersUUID(ref)
+    ref2: dict[str, int | str] = {"upper": 0x1234, "lower": 0xFFFF}
+    uuid = NumbersUUID(ref2)
     assert uuid.hex == "0000000000001234000000000000ffff"
-    assert uuid.dict2 == ref
+    assert uuid.dict2 == ref2
 
     with pytest.raises(UnsupportedError) as e:
         _ = NumbersUUID({"a": 1, "b": 2})
     assert str(e.value) == "Unsupported UUID dict structure"
 
     with pytest.raises(UnsupportedError) as e:
-        _ = NumbersUUID(3.14)
+        _ = NumbersUUID(3.14)  # type: ignore[arg-type]
     assert str(e.value) == "Unsupported UUID init type float"
