@@ -50,6 +50,7 @@ frombytes
 functionmap
 FURB
 gprof
+gradientangle
 hexlify
 HMAC
 imagedata

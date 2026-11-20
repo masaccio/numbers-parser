@@ -2419,35 +2419,47 @@ class NumbersModel(Cacheable):
         storage_id = self.find_refs("AnnotationAuthorStorageArchive")[0]
         storage = self.get_object(storage_id, TSKArchives.AnnotationAuthorStorageArchive)
 
+        target_author_id = None
         for author_ref in storage.annotation_author:
             author = self.get_object(author_ref.identifier, TSKArchives.AnnotationAuthorArchive)
             if author.name == author_name:
-                return author_ref.identifier
+                target_author_id = author_ref.identifier
+                break
 
-        # Append new authors to the same file that holds the Author Storage array
-        new_author_id, _ = self.objects.create_object_from_dict(
-            "AnnotationAuthorStorage",
-            {
-                "name": author_name,
-                "color": {
-                    "model": "rgb",
-                    "r": 0.0,
-                    "g": 0.0,
-                    "b": 0.0,
-                    "a": 1.0,
-                    "rgbspace": "srgb",
+        if target_author_id is None:
+            target_author_id, _ = self.objects.create_object_from_dict(
+                "AnnotationAuthorStorage",
+                {
+                    "name": author_name,
+                    "color": {
+                        "model": "rgb",
+                        "r": 0.0,
+                        "g": 0.0,
+                        "b": 0.0,
+                        "a": 1.0,
+                        "rgbspace": "srgb",
+                    },
                 },
-            },
-            TSKArchives.AnnotationAuthorArchive,
+                TSKArchives.AnnotationAuthorArchive,
+            )
+            storage.annotation_author.append(TSPMessages.Reference(identifier=target_author_id))
+
+        base_data_store = self.table_model(table_id).base_data_store
+
+        component = self.metadata_component_info(base_data_store.commentStorageTable.identifier)
+        reference_exists = any(
+            ref.object_identifier == target_author_id and ref.component_identifier == storage_id
+            for ref in component.external_references
         )
-        storage.annotation_author.append(TSPMessages.Reference(identifier=new_author_id))
-        bds = self.table_model(table_id).base_data_store
-        self.add_component_reference(
-            object_id=new_author_id,
-            location=bds.commentStorageTable.identifier,
-            component_id=storage_id,
-        )
-        return new_author_id
+
+        if not reference_exists:
+            self.add_component_reference(
+                object_id=target_author_id,
+                location=base_data_store.commentStorageTable.identifier,
+                component_id=storage_id,
+            )
+
+        return target_author_id
 
     def add_comment_to_cell(  # noqa: PLR0917
         self,

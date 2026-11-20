@@ -8,6 +8,7 @@ import magic
 import pytest
 from pytest_console_scripts import ScriptRunner
 
+import numbers_parser.generated.TSKArchives_pb2 as TSKArchives
 from numbers_parser import (
     RGB,
     BackgroundImage,
@@ -1128,3 +1129,43 @@ def test_issue_266() -> None:
     table = doc.default_table
     for row in range(table.num_rows):
         assert table.cell(row, 1).formatted_value == table.cell(row, 2).value
+
+
+def test_issue_283(configurable_save_file: Path) -> None:
+    """Test issue 286."""
+    doc = Document("tests/data/issue-283.numbers")
+    doc.sheets[0].tables[0].add_comment(0, 0, "comment on table 1", author="Bot")
+    doc.sheets[1].tables[0].add_comment(0, 0, "comment on table 2", author="Bot")
+    doc.save(configurable_save_file)
+
+    new_doc = Document(configurable_save_file)
+
+    assert new_doc.sheets[0].tables[0].cell(0, 0).comments[0].text == "comment on table 1"
+    assert new_doc.sheets[0].tables[0].cell(0, 0).comments[0].author == "Bot"
+    assert new_doc.sheets[1].tables[0].cell(0, 0).comments[0].text == "comment on table 2"
+    assert new_doc.sheets[1].tables[0].cell(0, 0).comments[0].author == "Bot"
+
+    # The fix is invisible to the API, so look into the data storage.
+    model = new_doc._model
+    author_storage_id = model.find_refs("AnnotationAuthorStorageArchive")[0]
+    author_storage = model.get_object(author_storage_id, TSKArchives.AnnotationAuthorStorageArchive)
+
+    bot_authors = [
+        ref.identifier
+        for ref in author_storage.annotation_author
+        if model.get_object(ref.identifier, TSKArchives.AnnotationAuthorArchive).name == "Bot"
+    ]
+    assert len(bot_authors) == 1
+    bot_author_id = bot_authors[0]
+
+    for sheet_index in (0, 1):
+        table_id = new_doc.sheets[sheet_index].tables[0]._table_id
+        base_data_store = model.table_model(table_id).base_data_store
+        component = model.metadata_component_info(base_data_store.commentStorageTable.identifier)
+        author_refs = [
+            ref
+            for ref in component.external_references
+            if ref.object_identifier == bot_author_id
+            and ref.component_identifier == author_storage_id
+        ]
+        assert len(author_refs) == 1, f"Missing author reference in sheet {sheet_index}"
