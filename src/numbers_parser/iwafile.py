@@ -5,11 +5,13 @@ from __future__ import annotations
 
 import logging
 import struct
+from enum import IntEnum
 from functools import partial
 from struct import unpack
 from typing import TYPE_CHECKING, Any, cast
 
 import snappy
+from google.protobuf.descriptor import FieldDescriptor
 from google.protobuf.internal.decoder import _DecodeVarint32  # type: ignore[attr-defined]
 from google.protobuf.internal.encoder import _VarintBytes  # type: ignore[attr-defined]
 from google.protobuf.json_format import MessageToDict, ParseDict
@@ -75,6 +77,13 @@ class IWACompressedChunk:  # noqa: PLW1641
     def __init__(self, archives: list[IWAArchiveSegment]) -> None:
         """Initialize the instance state."""
         self.archives = archives
+        self._archive_map: dict[int, IWAArchiveSegment] | None = None
+
+    def get_archive(self, obj_id: int) -> IWAArchiveSegment | None:
+        """Return the archive segment with the given identifier, or None."""
+        if self._archive_map is None or len(self._archive_map) != len(self.archives):
+            self._archive_map = {a.header.identifier: a for a in self.archives}
+        return self._archive_map.get(obj_id)
 
     def __eq__(self, other: object) -> bool:  # pragma: no cover
         """Compare this instance with another value."""
@@ -388,6 +397,72 @@ def create_iwa_segment(
     return IWAArchiveSegment.from_dict(archive_dict)
 
 
+class _RefKind(IntEnum):
+    """Classification of whether a protobuf descriptor can hold TSP.Reference values."""
+
+    NONE = 0
+    MAY_CONTAIN = 1
+    REFERENCE = 2
+
+
+_TYPE_MESSAGE = FieldDescriptor.TYPE_MESSAGE
+_REF_KIND_CACHE: dict[Any, _RefKind] = {}
+
+
+def _ref_kind(desc: Any) -> _RefKind:  # noqa: ANN401
+    """Return whether a protobuf descriptor is or can contain a TSP.Reference."""
+    kind = _REF_KIND_CACHE.get(desc)
+    if kind is not None:
+        return kind
+
+    if desc.full_name == "TSP.Reference":
+        _REF_KIND_CACHE[desc] = _RefKind.REFERENCE
+        return _RefKind.REFERENCE
+
+    visited: set[Any] = {desc}
+    stack: list[Any] = [desc]
+    found = False
+    while stack:
+        current = stack.pop()
+        if current.extension_ranges:
+            found = True
+            break
+        for field in current.fields:
+            if field.type == _TYPE_MESSAGE and field.message_type is not None:
+                msg_type = field.message_type
+                if msg_type.full_name == "TSP.Reference":
+                    found = True
+                    break
+                if msg_type not in visited:
+                    visited.add(msg_type)
+                    stack.append(msg_type)
+        if found:
+            break
+
+    kind = _RefKind.MAY_CONTAIN if found else _RefKind.NONE
+    _REF_KIND_CACHE[desc] = kind
+    return kind
+
+
+def _collect_references(msg: ProtoMessage, references: list[int]) -> None:
+    """Recursively collect TSP.Reference identifiers from a protobuf message."""
+    for field, value in msg.ListFields():
+        if field.type != _TYPE_MESSAGE or field.message_type is None:
+            continue
+        kind = _ref_kind(field.message_type)
+        if kind is _RefKind.REFERENCE:
+            if field.is_repeated:
+                references.extend(item.identifier for item in value)
+            else:
+                references.append(value.identifier)
+        elif kind is _RefKind.MAY_CONTAIN:
+            if field.is_repeated:
+                for item in value:
+                    _collect_references(item, references)
+            else:
+                _collect_references(value, references)
+
+
 def find_references(
     obj: ProtoMessage | ProtobufPatch,
     references: list[int] | None = None,
@@ -399,36 +474,28 @@ def find_references(
     target = obj.data if isinstance(obj, ProtobufPatch) else obj
     if not hasattr(target, "DESCRIPTOR"):
         return
-    if type(target).__name__ == "Reference":
+
+    kind = _ref_kind(target.DESCRIPTOR)
+    if kind is _RefKind.REFERENCE:
         references.append(target.identifier)  # type: ignore[attr-defined]
-        return
-    for field_desc in target.ListFields():
-        _, field = field_desc
-        if type(field).__name__ == "Reference":
-            references.append(field.identifier)  # type: ignore[attr-defined]
-        elif "Repeated" in type(field).__name__:
-            for item in field:
-                find_references(item, references)
-        elif hasattr(field, "DESCRIPTOR"):
-            find_references(field, references)
+    elif kind is _RefKind.MAY_CONTAIN:
+        _collect_references(target, references)
 
 
 def copy_object_to_iwa_file(iwa_file: IWAFile, obj: ProtoMessage, obj_id: int) -> None:
     """Copy object to iwa file."""
-    for archive in iwa_file.chunks[0].archives:
-        if archive.header.identifier == obj_id:
-            target_obj = archive.objects[0]
-            if not isinstance(target_obj, ProtobufPatch):
-                target_obj.CopyFrom(obj)
+    archive = iwa_file.chunks[0].get_archive(obj_id)
+    if archive is None:
+        return
 
-            references: list[int] = []
-            find_references(target_obj, references)
-            if len(references) > 0:
-                msg_info = archive.header.message_infos[0]
-                while len(msg_info.object_references) > 0:
-                    _ = msg_info.object_references.pop()
-                for reference in references:
-                    msg_info.object_references.append(reference)
+    target_obj = archive.objects[0]
+    if not isinstance(target_obj, ProtobufPatch) and target_obj is not obj:
+        target_obj.CopyFrom(obj)
+
+    references: list[int] = []
+    find_references(target_obj, references)
+    if references:
+        archive.header.message_infos[0].object_references[:] = references
 
 
 def is_iwa_file(data: bytes) -> bool:

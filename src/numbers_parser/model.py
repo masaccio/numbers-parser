@@ -671,7 +671,6 @@ class NumbersModel(Cacheable):
             f"Index/Tables/DataList-{parent_id}",
             {"tsce_item": tsce_items},
             TSTArchives.PopUpMenuModel,
-            True,  # noqa: FBT003
         )
         return popup_menu_id
 
@@ -2494,7 +2493,6 @@ class NumbersModel(Cacheable):
                 "storage_uuid": NumbersUUID().dict2,
             },
             TSDArchives.CommentStorageArchive,
-            append=True,
         )
         new_comment_ref = TSPMessages.Reference(identifier=new_comment_id)
         if reply:
