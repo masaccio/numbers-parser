@@ -2444,9 +2444,9 @@ class NumbersModel(Cacheable):
             )
             storage.annotation_author.append(TSPMessages.Reference(identifier=target_author_id))
 
-        bds = self.objects[table_id].base_data_store
+        base_data_store = self.table_model(table_id).base_data_store
 
-        component = self.metadata_component(bds.commentStorageTable.identifier)
+        component = self.metadata_component_info(base_data_store.commentStorageTable.identifier)
         reference_exists = any(
             ref.object_identifier == target_author_id and ref.component_identifier == storage_id
             for ref in component.external_references
@@ -2455,7 +2455,7 @@ class NumbersModel(Cacheable):
         if not reference_exists:
             self.add_component_reference(
                 object_id=target_author_id,
-                location=bds.commentStorageTable.identifier,
+                location=base_data_store.commentStorageTable.identifier,
                 component_id=storage_id,
             )
 
