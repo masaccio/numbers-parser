@@ -8,6 +8,22 @@ from unittest.mock import patch
 
 import pytest
 
+from numbers_parser import Document, PaddingType
+from numbers_parser.cell import (
+    _decode_date_format,
+    _decode_number_format,
+    _format_currency,
+    _format_decimal,
+)
+from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
+from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
+from numbers_parser.iwafile import (
+    IWAFile,
+    copy_object_to_iwa_file,
+    find_references,
+)
+from numbers_parser.model import MergeCells, get_storage_buffers_for_row
+
 if TYPE_CHECKING:
     from typing import Any
 
@@ -17,10 +33,8 @@ from numbers_parser import (
     Cell,
     CellBorder,
     CustomFormatting,
-    Document,
     FileFormatError,
     Formatting,
-    PaddingType,
     UnsupportedError,
     UnsupportedWarning,
 )
@@ -28,10 +42,7 @@ from numbers_parser._unpack_numbers import NumbersUnpacker
 from numbers_parser.cell import (
     DurationUnits,
     _auto_units,
-    _decode_number_format,
     _float_to_n_digit_fraction,
-    _format_currency,
-    _format_decimal,
 )
 from numbers_parser.constants import (
     DECIMAL_PLACES_AUTO,
@@ -45,9 +56,7 @@ from numbers_parser.experimental import (
     enable_experimental_feature,
     experimental_features,
 )
-from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
-from numbers_parser.model import _decode_date_format
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.xrefs import (
     xl_cell_to_rowcol,
@@ -435,6 +444,121 @@ def test_add_component_metadata_none_locator() -> None:
     assert added_component is not None
     assert added_component.preferred_locator == "CalculationEngine"
     assert added_component.locator == ""
+
+
+def test_iwafile_from_dict_roundtrip() -> None:
+    """Cover IWAFile.from_dict (line 58) and IWACompressedChunk.from_dict (line 137)."""
+    doc = Document()
+    iwa = next(iter(doc._model.objects.archive_store.values()))
+    as_dict = iwa.to_dict()
+    rebuilt = IWAFile.from_dict(as_dict)
+    assert len(rebuilt.chunks) == len(iwa.chunks)
+
+
+def test_find_references_edge_cases() -> None:
+    """Cover default references=None, non-protobuf target, and direct Reference."""
+    ref = TSPMessages.Reference(identifier=42)
+
+    find_references(ref)
+
+    refs: list[int] = []
+    find_references("not-a-protobuf", refs)  # type: ignore[arg-type]
+    assert not refs
+
+    find_references(ref, refs)
+    assert refs == [42]
+
+
+def test_copy_object_to_iwa_file_missing_id() -> None:
+    """Cover early return when obj_id is not found in the chunk (line 493)."""
+    doc = Document()
+    iwa = next(iter(doc._model.objects.archive_store.values()))
+    copy_object_to_iwa_file(iwa, TSPMessages.Reference(identifier=1), obj_id=999_999_999)
+
+
+def test_cell_date_trailing_quote() -> None:
+    """Cover trailing single-quote break in _decode_date_format (line 1168)."""
+    result = _decode_date_format("yyyy-MM-dd'", datetime(2026, 1, 15))
+    assert result == "2026-01-15"
+
+
+def test_cell_custom_number_scientific_decimal(tmp_path: Path) -> None:
+    """Cover 'e' in str(decimal) branches in _decode_number_format (lines 1373-1374)."""
+    doc = Document()
+    table = doc.sheets[0].tables[0]
+
+    space_fmt = doc.add_custom_format(
+        name="TinySpace",
+        type="number",
+        num_integers=1,
+        num_decimals=5,
+        decimal_format=PaddingType.SPACES,
+    )
+    none_fmt = doc.add_custom_format(
+        name="TinyNone",
+        type="number",
+        num_integers=1,
+        num_decimals=5,
+        decimal_format=PaddingType.NONE,
+    )
+
+    table.write(0, 0, 0.00001)
+    table.set_cell_formatting(0, 0, "custom", format=space_fmt)
+    table.write(0, 1, 0.00001)
+    table.set_cell_formatting(0, 1, "custom", format=none_fmt)
+
+    out = tmp_path / "tiny-decimals.numbers"
+    doc.save(out)
+    reloaded = Document(out)
+    t = reloaded.sheets[0].tables[0]
+    assert t.cell(0, 0).formatted_value == ".00001"
+    assert t.cell(0, 1).formatted_value == "0.00001"
+
+
+def test_cell_format_none_guards() -> None:
+    """Cover None guards in _format_decimal (line 1445) and _format_currency (line 1474)."""
+    fmt = TSKArchives.FormatStructArchive()
+    assert _format_decimal(None, fmt) == ""  # type: ignore[arg-type]
+    assert _format_decimal(1.0, None) == ""  # type: ignore[arg-type]
+    assert _format_currency(1.0, None) is None  # type: ignore[arg-type]
+    assert _decode_number_format(None, 1.0, "", []) is None  # type: ignore[arg-type]
+
+
+def test_merge_cells_missing_entries() -> None:
+    """Cover MergeCells.size() fallback (line 145) and MergeCells.rect() fallback (line 152)."""
+    merges = MergeCells()
+    assert merges.size((99, 99)) == (0, 0)
+    assert merges.rect((99, 99)) is None
+
+
+def test_model_shrink_table_metadata_ranges(tmp_path: Path) -> None:
+    """Cover shrinking col_uuids / row_uuids in update_table_metadata_ranges."""
+    doc = Document()
+    model = doc._model
+    table_id = model.table_ids()[0]
+    num_rows = model.number_of_rows(table_id)
+    num_cols = model.number_of_columns(table_id)
+
+    model.update_table_metadata_ranges(table_id, num_rows - 1, num_cols - 1)
+    out = tmp_path / "shrunk.numbers"
+    doc.save(out)
+
+
+def test_get_storage_buffers_short_offsets() -> None:
+    """Cover short offset_list break and trailing empty cells in get_storage_buffers_for_row."""
+    # 2 offsets for a 4-column row: col 0 at byte 0, col 1 empty (-1), cols 2-3 missing
+    buf = b"\x05" + b"\x00" * 31
+    offsets = b"\x00\x00\xff\xff"  # struct.pack("<2h", 0, -1)
+    result = get_storage_buffers_for_row(buf, offsets, num_cols=4, has_wide_offsets=True)
+    assert result == [buf, None]
+
+
+def test_coverage_fixture_loads() -> None:
+    """Exercise the generated protobuf edge-case."""
+    doc = Document("tests/data/coverage-edge-cases.numbers")
+    table = doc.sheets[0].tables[0]
+    assert table.cell(1, 0).formatted_value == ".00001"
+    assert table.cell(1, 1).formatted_value == "0.00001"
 
 
 # pylint: disable=import-outside-toplevel

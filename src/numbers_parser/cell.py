@@ -1164,8 +1164,6 @@ class Cell(_CellStorageFlags, Cacheable):
             self.size = (1, 1)
             self.merge_range = None
             self.rect = None
-            if getattr(self, "_border", None) is None:
-                self._border = CellBorder()
 
     def _to_buffer(self) -> bytes | None:  # noqa: C901, PLR0912, PLR0915
         """Create a storage buffer for a cell using v5 (modern) layout."""
