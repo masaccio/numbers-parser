@@ -80,6 +80,7 @@ bootstrap = [
     "mypy-protobuf>=5.1.0",
 ]
 visualcheck = [
+    "coverage>=7.14.0",
     "osascript>=0.0.27",
     "pillow>=13.0.0",
     "pixelmatch>=0.4.0",

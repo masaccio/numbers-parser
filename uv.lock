@@ -1439,6 +1439,7 @@ profile = [
     { name = "pytest-profiling" },
 ]
 visualcheck = [
+    { name = "coverage" },
     { name = "osascript" },
     { name = "pillow" },
     { name = "pixelmatch" },
@@ -1504,6 +1505,7 @@ profile = [
     { name = "pytest-profiling" },
 ]
 visualcheck = [
+    { name = "coverage", specifier = ">=7.14.0" },
     { name = "osascript", specifier = ">=0.0.27" },
     { name = "pillow", specifier = ">=13.0.0" },
     { name = "pixelmatch", specifier = ">=0.4.0" },

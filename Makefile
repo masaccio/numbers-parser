@@ -74,7 +74,12 @@ profile:
 	done
 
 visualcheck:
-	uv run --group visualcheck python3 src/build/check_visual_document.py
+	@rm -f .coverage
+	uv run --group visualcheck --with coverage coverage run --branch \
+		--source=numbers_parser \
+		--omit="*/numbers_parser/_*.py,*/numbers_parser/generated/*" \
+		src/build/check_visual_document.py
+	uv run --with coverage coverage html
 
 # --- Docs & Distribution ---
 
