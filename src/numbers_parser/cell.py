@@ -82,35 +82,6 @@ logger = logging.getLogger(numbers_parser_name)
 debug = logger.debug
 
 
-__all__ = [
-    "RGB",
-    "Alignment",
-    "BackgroundImage",
-    "BoolCell",
-    "Border",
-    "BorderType",
-    "BulletedTextCell",
-    "Cell",
-    "CellBorder",
-    "Comment",
-    "CustomFormatting",
-    "DateCell",
-    "DurationCell",
-    "EmptyCell",
-    "ErrorCell",
-    "Formatting",
-    "HorizontalJustification",
-    "MergeAnchor",
-    "MergeReference",
-    "MergedCell",
-    "NumberCell",
-    "RichTextCell",
-    "Style",
-    "TextCell",
-    "VerticalJustification",
-]
-
-
 class BackgroundImage:
     """
     A named document style that can be applied to cells.
@@ -513,7 +484,7 @@ class Border:  # noqa: PLW1641
     def __init__(
         self,
         width: float = DEFAULT_BORDER_WIDTH,
-        color: RGB | tuple | None = None,
+        color: RGB | tuple[int, int, int] | None = None,
         style: BorderType | str | None = None,
     ) -> None:
         """Validate and initialize the instance state."""
