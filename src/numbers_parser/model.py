@@ -1624,6 +1624,12 @@ class NumbersModel(Cacheable):
 
         # Build a minimal table duplicating references from the source table
         from_table_refs = field_references(from_table)
+        uid_map_id, _ = self.objects.create_object_from_dict(
+            "CalculationEngine",
+            {},
+            TSTArchives.ColumnRowUIDMapArchive,
+        )
+        from_table_refs["base_column_row_uids"] = {"identifier": uid_map_id}
         table_model_id, table_model = self.objects.create_object_from_dict(
             "CalculationEngine",
             {

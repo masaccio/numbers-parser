@@ -32,6 +32,7 @@ from numbers_parser.constants import (
     DEFAULT_ROW_COUNT,
     DEFAULT_ROW_HEIGHT,
 )
+from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
 from numbers_parser.xrefs import CellRange
 
 
@@ -1169,3 +1170,27 @@ def test_issue_283(configurable_save_file: Path) -> None:
             and ref.component_identifier == author_storage_id
         ]
         assert len(author_refs) == 1, f"Missing author reference in sheet {sheet_index}"
+
+
+def test_issue_305(configurable_save_file: Path) -> None:
+    """Adding a smaller table must not truncate the first table's UID map."""
+    doc = Document(num_rows=10, num_cols=4)
+    doc.sheets[0].add_table("Second Table", num_rows=3, num_cols=2)
+
+    doc.save(configurable_save_file)
+
+    reloaded = Document(configurable_save_file)
+    t1 = reloaded.sheets[0].tables[0]
+    t2 = reloaded.sheets[0].tables["Second Table"]
+
+    t1_uid_id = reloaded._model.table_model(t1._table_id).base_column_row_uids.identifier
+    t2_uid_id = reloaded._model.table_model(t2._table_id).base_column_row_uids.identifier
+    assert t1_uid_id != t2_uid_id
+
+    t1_uid_map = reloaded._model.get_object(t1_uid_id, TSTArchives.ColumnRowUIDMapArchive)
+    t2_uid_map = reloaded._model.get_object(t2_uid_id, TSTArchives.ColumnRowUIDMapArchive)
+
+    assert len(t1_uid_map.sorted_row_uids) == 10
+    assert len(t1_uid_map.sorted_column_uids) == 4
+    assert len(t2_uid_map.sorted_row_uids) == 3
+    assert len(t2_uid_map.sorted_column_uids) == 2
