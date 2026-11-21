@@ -66,7 +66,7 @@ from numbers_parser.constants import (
     PaddingType,
 )
 from numbers_parser.currencies import CURRENCIES, CURRENCY_SYMBOLS
-from numbers_parser.exceptions import FileFormatError, UnsupportedError, UnsupportedWarning
+from numbers_parser.exceptions import UnsupportedError, UnsupportedWarning
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.generated import TSTArchives_pb2 as TSTArchives
@@ -1367,9 +1367,6 @@ class Cell(_CellStorageFlags, Cacheable):
             )
             return None
         image_data = self._model.objects.blob_store[image_pathnames[0]]
-        if not isinstance(image_data, bytes):
-            msg = f"Expected raw bytes for image '{preferred_filename}'"
-            raise FileFormatError(msg)
         digest = sha1(image_data).digest()  # noqa: S324
         if digest not in self._model.images:
             self._model.images[digest] = image_id
@@ -1439,9 +1436,11 @@ class Cell(_CellStorageFlags, Cacheable):
 
     def _date_format(self) -> str:
         """Return the formatted date or time value."""
-        if self._date_format_id is None or self._datetime is None:
-            return ""
-        date_format = self._model.table_format(self._table_id, self._date_format_id)
+        # Cannot be logically be None in valid documents
+        date_format_id = cast("int", self._date_format_id)
+        cell_datetime = cast("datetime", self._datetime)
+
+        date_format = self._model.table_format(self._table_id, date_format_id)
         if date_format.HasField("custom_uid"):
             format_uuid = NumbersUUID(date_format.custom_uid).hex
             format_map = self._model.custom_format_map()
@@ -1450,7 +1449,7 @@ class Cell(_CellStorageFlags, Cacheable):
             if custom_format.format_type == FormatType.CUSTOM_DATE:
                 formatted_value = _decode_date_format(
                     custom_format_string,
-                    self._datetime,
+                    cell_datetime,
                 )
             else:
                 warn(
@@ -1462,24 +1461,24 @@ class Cell(_CellStorageFlags, Cacheable):
         else:
             formatted_value = _decode_date_format(
                 date_format.date_time_format,
-                self._datetime,
+                cell_datetime,
             )
         return formatted_value
 
     def _duration_format(self) -> str:  # noqa: C901
         """Return the formatted duration value."""
-        if self._duration_format_id is None:
-            return ""
+        # Cannot be logically be None in valid documents
+        duration_format_id = cast("int", self._duration_format_id)
         duration_format = self._model.table_format(
             self._table_id,
-            self._duration_format_id,
+            duration_format_id,
         )
         debug(
             "duration_format: @[%d,%d]: table_id=%d, duration_format_id=%d, duration_style=%s",
             self.row,
             self.col,
             self._table_id,
-            self._duration_format_id,
+            duration_format_id,
             duration_format.duration_style,
         )
 

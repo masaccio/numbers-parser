@@ -482,18 +482,14 @@ def find_references(
         _collect_references(target, references)
 
 
-def copy_object_to_iwa_file(iwa_file: IWAFile, obj: ProtoMessage, obj_id: int) -> None:
+def copy_object_to_iwa_file(iwa_file: IWAFile, obj_id: int) -> None:
     """Copy object to iwa file."""
     archive = iwa_file.chunks[0].get_archive(obj_id)
     if archive is None:
         return
 
-    target_obj = archive.objects[0]
-    if not isinstance(target_obj, ProtobufPatch) and target_obj is not obj:
-        target_obj.CopyFrom(obj)
-
     references: list[int] = []
-    find_references(target_obj, references)
+    find_references(archive.objects[0], references)
     if references:
         archive.header.message_infos[0].object_references[:] = references
 

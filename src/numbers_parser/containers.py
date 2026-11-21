@@ -183,9 +183,9 @@ class ObjectStore(IWorkHandler):
 
         This keeps the file store ready for saving to a new document.
         """
-        for obj_id, obj in self._objects.items():
+        for obj_id in self._objects:
             iwa = self._archive_store[self._object_to_filename_map[obj_id]]
-            copy_object_to_iwa_file(iwa, obj, obj_id)
+            copy_object_to_iwa_file(iwa, obj_id)
 
     def remove_unreferenced_objects(self) -> None:
         """Remove objects from the ObjectStore that are not referenced."""

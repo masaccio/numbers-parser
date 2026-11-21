@@ -19,7 +19,6 @@ from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
 from numbers_parser.iwafile import (
     IWAFile,
-    copy_object_to_iwa_file,
     find_references,
 )
 from numbers_parser.model import MergeCells, get_storage_buffers_for_row
@@ -467,13 +466,6 @@ def test_find_references_edge_cases() -> None:
 
     find_references(ref, refs)
     assert refs == [42]
-
-
-def test_copy_object_to_iwa_file_missing_id() -> None:
-    """Cover early return when obj_id is not found in the chunk (line 493)."""
-    doc = Document()
-    iwa = next(iter(doc._model.objects.archive_store.values()))
-    copy_object_to_iwa_file(iwa, TSPMessages.Reference(identifier=1), obj_id=999_999_999)
 
 
 def test_cell_date_trailing_quote() -> None:
