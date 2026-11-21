@@ -1,3 +1,29 @@
+on refreshPivotTable()
+    -- Trigger 'Refresh Pivot Table' from the Organise/Organize menu
+    tell application "System Events"
+        tell process "Numbers"
+            set frontmost to true
+            if exists menu bar item "Organise" of menu bar 1 then
+                set orgMenu to menu 1 of menu bar item "Organise" of menu bar 1
+            else
+                set orgMenu to menu 1 of menu bar item "Organize" of menu bar 1
+            end if
+
+            -- Wait briefly for Numbers to enable the menu item after selection
+            repeat 15 times
+                if enabled of menu item "Refresh Pivot Table" of orgMenu then
+                    click menu item "Refresh Pivot Table" of orgMenu
+                    exit repeat
+                end if
+                delay 0.2
+            end repeat
+        end tell
+    end tell
+
+    -- Allow the pivot table layout and calculation engine to settle
+    delay 0.5
+end refreshPivotTable
+
 on run argv
     if (count of argv) < 3 then
         error "Usage: osascript script.scpt <doc_filepath> <pdf_filepath> <has_pivot_table> [pivot_table_name] [metrics_table_name]"
@@ -34,62 +60,32 @@ on run argv
         -- Only execute the refresh logic if the document actually has a pivot table
         if hasPivotTable is "true" then
             tell targetDoc
-                tell active sheet
-                    -- Force formula recalculation if a metrics table was provided
-                    if metricsTableName is not "" then
-                        try
-                            tell table metricsTableName
-                                repeat with i from 1 to count of cells
+                -- Force formula recalculation and refresh matching pivot tables across all sheets
+                repeat with s in sheets
+                    repeat with t in tables of s
+                        if pivotTableName is not "" and (name of t as text) is pivotTableName then
+                            try
+                                set active sheet to s
+                                set selection range of t to range "A1" of t
+                                my refreshPivotTable()
+                            end try
+                        else
+                            try
+                                repeat with i from 1 to count of cells of t
                                     try
-                                        set f to formula of cell i
+                                        set f to formula of cell i of t
                                         if f is not missing value then
-                                            -- Rewriting the formula triggers the calculation engine
-                                            set value of cell i to f
+                                            set value of cell i of t to f
                                         end if
                                     end try
                                 end repeat
-                            end tell
-                        end try
-                    end if
-                    
-                    -- Select a cell inside the Pivot Table so the Refresh menu item is enabled
-                    if pivotTableName is not "" then
-                        try
-                            set selection range of table pivotTableName to range "A1" of table pivotTableName
-                        end try
-                    end if
-                end tell
-            end tell
-        end if
-    end tell
-
-    if hasPivotTable is "true" then
-        -- Trigger 'Refresh Pivot Table' from the Organise/Organize menu
-        tell application "System Events"
-            tell process "Numbers"
-                set frontmost to true
-                if exists menu bar item "Organise" of menu bar 1 then
-                    set orgMenu to menu 1 of menu bar item "Organise" of menu bar 1
-                else
-                    set orgMenu to menu 1 of menu bar item "Organize" of menu bar 1
-                end if
-                
-                -- Wait briefly for Numbers to enable the menu item after selection
-                repeat 15 times
-                    if enabled of menu item "Refresh Pivot Table" of orgMenu then
-                        click menu item "Refresh Pivot Table" of orgMenu
-                        exit repeat
-                    end if
-                    delay 0.2
+                            end try
+                        end if
+                    end repeat
                 end repeat
             end tell
-        end tell
+        end if
 
-        -- Allow the pivot table layout and calculation engine to settle before export
-        delay 0.5
-    end if
-
-    tell application "Numbers"
         export front document to POSIX file pdfFilePath as PDF
         close front document saving no
         quit

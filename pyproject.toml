@@ -83,7 +83,7 @@ visualcheck = [
     "osascript>=0.0.27",
     "pillow>=13.0.0",
     "pixelmatch>=0.4.0",
-    "pymupdf>=1.28.2",
+    "pymupdf-lite>=2.1",
     "rich>=15.0.0",
 ]
 
