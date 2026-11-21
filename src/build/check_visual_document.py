@@ -3,6 +3,7 @@
 
 import subprocess
 import tempfile
+import warnings
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -32,16 +33,24 @@ from numbers_parser import (
     xl_range,
 )
 from numbers_parser.cell import CustomFormattingType
-from numbers_parser.constants import CHECKBOX_TRUE_VALUE, STAR_RATING_VALUE
+from numbers_parser.constants import (
+    CHECKBOX_FALSE_VALUE,
+    CHECKBOX_TRUE_VALUE,
+    STAR_RATING_VALUE,
+    NegativeNumberStyle,
+)
 
 
-def generate_doc_with_all_apis(filename: Path) -> None:
+def generate_doc_with_all_apis(filename: Path) -> None:  # noqa: PLR0915
     """Generate doc with all apis."""
-    doc = Document(num_header_rows=0, num_header_cols=0, num_cols=2, num_rows=20)
+    doc = Document(num_header_rows=0, num_header_cols=0, num_cols=2, num_rows=35)
     sheet = doc.sheets[0]
     sheet.name = "API Test Sheet"
     table = sheet.tables[0]
     table.name = "API Exporter Reference"
+    table.table_name_enabled = True
+    table.caption_enabled = True
+    table.caption = "Visual API Test Caption"
 
     # Pre-allocate rows to avoid auto-expansion resizing issues
     table.col_width(0, 150)
@@ -54,7 +63,7 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     table.write(0, 0, "Rendered Feature")
     table.write(0, 1, "Explanation / API Usage")
 
-    # --- Styles ---
+    # --- Styles (row 1) ---
     style1 = doc.add_style(
         name="CustomStyle1",
         font_color=RGB(29, 177, 0),
@@ -82,20 +91,26 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     )
     row += 1
 
-    # --- Borders ---
+    # --- Borders (row 2) ---
     border1 = Border(width=5.0, color=RGB(255, 0, 0), style=BorderType.DASHES)
     table.write(row, 0, "Bordered Top")
     table.set_cell_border(row, 0, "top", border1)
     table.write(row, 1, "Border(width=5, color=RGB(255, 0, 0), [top]style=BorderType.DASHES)")
     row += 1
 
-    # --- Base Formatting ---
+    # --- Base Formatting: minus sign (row 3) ---
     table.write(row, 0, -255)
     table.set_cell_formatting(row, 0, "base", base=16, base_places=4, base_use_minus_sign=True)
     table.write(row, 1, "type=BASE, base=16, base_places=4, base_use_minus_sign=True")
     row += 1
 
-    # --- Currency Formatting ---
+    # --- Base Formatting: two's complement (row 4) ---
+    table.write(row, 0, -42)
+    table.set_cell_formatting(row, 0, "base", base=16, base_use_minus_sign=False)
+    table.write(row, 1, "type=BASE, base=16, base_use_minus_sign=False (two's complement)")
+    row += 1
+
+    # --- Currency Formatting: accounting style (row 5) ---
     table.write(row, 0, -100.5)
     table.set_cell_formatting(
         row,
@@ -114,19 +129,78 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     )
     row += 1
 
-    # --- Fraction Formatting ---
+    # --- Currency Formatting: non-accounting, non-symbol code (row 6) ---
+    table.write(row, 0, 1234.5)
+    table.set_cell_formatting(
+        row,
+        0,
+        "currency",
+        currency_code="CHF",
+        show_thousands_separator=True,
+        use_accounting_style=False,
+    )
+    table.write(
+        row,
+        1,
+        'type=CURRENCY: currency_code="CHF", show_thousands_separator=True, '
+        "use_accounting_style=False",
+    )
+    row += 1
+
+    # --- Percentage Formatting (row 7) ---
+    table.write(row, 0, 0.1234)
+    table.set_cell_formatting(
+        row,
+        0,
+        "percentage",
+        decimal_places=1,
+        show_thousands_separator=True,
+    )
+    table.write(row, 1, "type=PERCENTAGE: decimal_places=1, show_thousands_separator=True")
+    row += 1
+
+    # --- Scientific Formatting (row 8) ---
+    table.write(row, 0, 123456.789)
+    table.set_cell_formatting(row, 0, "scientific", decimal_places=2)
+    table.write(row, 1, "type=SCIENTIFIC: decimal_places=2")
+    row += 1
+
+    # --- Number Formatting: negative parentheses (row 9) ---
+    table.write(row, 0, -1234.56)
+    table.set_cell_formatting(
+        row,
+        0,
+        "number",
+        decimal_places=2,
+        show_thousands_separator=True,
+        negative_style=NegativeNumberStyle.PARENTHESES,
+    )
+    table.write(
+        row,
+        1,
+        "type=NUMBER: decimal_places=2, show_thousands_separator=True, negative_style=PARENTHESES",
+    )
+    row += 1
+
+    # --- Fraction Formatting: quarters (row 10) ---
     table.write(row, 0, 0.75)
     table.set_cell_formatting(row, 0, "fraction", fraction_accuracy=FractionAccuracy.QUARTERS)
     table.write(row, 1, "type=FRACTION: fraction_accuracy=FractionAccuracy.QUARTERS")
     row += 1
 
-    # --- Datetime Formatting ---
+    # --- Fraction Formatting: n-digit negative mixed (row 11) ---
+    table.write(row, 0, -1.375)
+    table.set_cell_formatting(row, 0, "fraction", fraction_accuracy=FractionAccuracy.THREE)
+    table.write(row, 1, "type=FRACTION: fraction_accuracy=FractionAccuracy.THREE (negative mixed)")
+    row += 1
+
+    # --- Datetime Formatting (row 12) ---
     table.write(row, 0, datetime(2026, 1, 1, 12, 0))
     table.set_cell_formatting(row, 0, "datetime", date_time_format="yyyy-MM-dd HH:mm")
     table.write(row, 1, 'type=DATETIME: date_time_format="yyyy-MM-dd HH:mm"')
     row += 1
 
-    # --- Duration Formatting ---
+    # --- Duration Formatting: LONG (row 13) ---
     table.write(row, 0, timedelta(days=1, hours=2))
     table.set_cell_formatting(
         row,
@@ -139,23 +213,59 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     table.write(
         row,
         1,
-        "type=duration_style=LONG, duration_unit_largest=DAY, duration_unit_smallest=MINUTE]",
+        "type=DURATION: style=LONG, largest=DAY, smallest=MINUTE",
     )
     row += 1
 
-    # --- Tickbox Formatting ---
+    # --- Duration Formatting: COMPACT with ms (row 14) ---
+    table.write(row, 0, timedelta(minutes=5, seconds=9, milliseconds=42))
+    table.set_cell_formatting(
+        row,
+        0,
+        "duration",
+        duration_style=DurationStyle.COMPACT,
+        duration_unit_largest=DurationUnits.MINUTE,
+        duration_unit_smallest=DurationUnits.MILLISECOND,
+    )
+    table.write(
+        row,
+        1,
+        "type=DURATION: style=COMPACT, largest=MINUTE, smallest=MILLISECOND",
+    )
+    row += 1
+
+    # --- Duration Formatting: SHORT with weeks (row 15) ---
+    table.write(row, 0, timedelta(weeks=2, days=3, hours=4))
+    table.set_cell_formatting(
+        row,
+        0,
+        "duration",
+        duration_style=DurationStyle.SHORT,
+        duration_unit_largest=DurationUnits.WEEK,
+        duration_unit_smallest=DurationUnits.HOUR,
+    )
+    table.write(row, 1, "type=DURATION: style=SHORT, largest=WEEK, smallest=HOUR")
+    row += 1
+
+    # --- Tickbox Formatting: True (row 16) ---
     table.write(row, 0, True)  # noqa: FBT003
     table.set_cell_formatting(row, 0, "tickbox")
     table.write(row, 1, 'type=TICKBOX: bool value (True) with "tickbox" format')
     row += 1
 
-    # --- Rating Formatting ---
+    # --- Tickbox Formatting: False (row 17) ---
+    table.write(row, 0, False)  # noqa: FBT003
+    table.set_cell_formatting(row, 0, "tickbox")
+    table.write(row, 1, 'type=TICKBOX: bool value (False) with "tickbox" format')
+    row += 1
+
+    # --- Rating Formatting (row 18) ---
     table.write(row, 0, 3)
     table.set_cell_formatting(row, 0, "rating")
     table.write(row, 1, 'type=RATING: numeric value (3) with "rating" format')
     row += 1
 
-    # --- Slider Formatting ---
+    # --- Slider Formatting: number (row 19) ---
     table.write(row, 0, 50)
     table.set_cell_formatting(
         row,
@@ -173,7 +283,26 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     )
     row += 1
 
-    # --- Stepper Formatting ---
+    # --- Slider Formatting: currency (row 20) ---
+    table.write(row, 0, 25.0)
+    table.set_cell_formatting(
+        row,
+        0,
+        "slider",
+        control_format=ControlFormattingType.CURRENCY,
+        currency_code="GBP",
+        minimum=0.0,
+        maximum=100.0,
+        increment=5.0,
+    )
+    table.write(
+        row,
+        1,
+        'type=SLIDER: control_format=CURRENCY, currency_code="GBP", min=0, max=100, inc=5',
+    )
+    row += 1
+
+    # --- Stepper Formatting (row 21) ---
     table.write(row, 0, 5)
     table.set_cell_formatting(
         row,
@@ -191,7 +320,7 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     )
     row += 1
 
-    # --- Popup Formatting ---
+    # --- Popup Formatting: text (row 22) ---
     table.write(row, 0, "Option A")
     table.set_cell_formatting(
         row,
@@ -203,7 +332,19 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     table.write(row, 1, 'type=POPUP: popup_values=["Option A", "Option B"], allow_none=False')
     row += 1
 
-    # --- Custom Number Formatting ---
+    # --- Popup Formatting: numeric with allow_none (row 23) ---
+    table.write(row, 0, 20)
+    table.set_cell_formatting(
+        row,
+        0,
+        "popup",
+        popup_values=[10, 20, 30],
+        allow_none=True,
+    )
+    table.write(row, 1, "type=POPUP: popup_values=[10, 20, 30], allow_none=True")
+    row += 1
+
+    # --- Custom Number Formatting: zeros/spaces (row 24) ---
     custom_num = doc.add_custom_format(
         name="MyCustomNum",
         type="number",
@@ -223,7 +364,27 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     )
     row += 1
 
-    # --- Custom Datetime Formatting ---
+    # --- Custom Number Formatting: by name, space-padded integers (row 25) ---
+    doc.add_custom_format(
+        name="SpacedCustomNum",
+        type="number",
+        integer_format=PaddingType.SPACES,
+        decimal_format=PaddingType.NONE,
+        num_integers=5,
+        num_decimals=2,
+        show_thousands_separator=True,
+    )
+    table.write(row, 0, 1234.5)
+    table.set_cell_formatting(row, 0, "custom", format="SpacedCustomNum")
+    table.write(
+        row,
+        1,
+        "NUMBER (by name): name='SpacedCustomNum', integer_format=SPACES, "
+        "show_thousands_separator=True",
+    )
+    row += 1
+
+    # --- Custom Datetime Formatting (row 26) ---
     custom_date = doc.add_custom_format(
         name="MyCustomDate",
         type="datetime",
@@ -234,14 +395,48 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     table.write(row, 1, 'DATETIME: format="EEEE, d MMMM yyyy"')
     row += 1
 
-    # --- Custom Text Formatting ---
+    # --- Custom Datetime Formatting: quoted literal (row 27) ---
+    doc.add_custom_format(
+        name="QuotedCustomDate",
+        type="datetime",
+        format="yyyy-MM-dd 'at' HH:mm",
+    )
+    table.write(row, 0, datetime(2026, 6, 15, 9, 30))
+    table.set_cell_formatting(row, 0, "custom", format="QuotedCustomDate")
+    table.write(row, 1, "DATETIME (quoted literal): format=\"yyyy-MM-dd 'at' HH:mm\"")
+    row += 1
+
+    # --- Custom Text Formatting (row 28) ---
     custom_text = doc.add_custom_format(name="MyCustomText", type="text", format="Prefix: %s")
     table.write(row, 0, "Test string")
     table.set_cell_formatting(row, 0, "custom", format=custom_text)
     table.write(row, 1, 'TEXT: format="Prefix: %s"')
     row += 1
 
-    # --- Merging and Comments ---
+    # --- Gradient Fill & Multi-Side Borders (row 29) ---
+    grad_style = doc.add_style(
+        name="GradientStyle",
+        bg_color=[RGB(255, 220, 220), RGB(220, 220, 255)],
+        alignment=Alignment("right", "bottom"),
+    )
+    table.write(row, 0, "Gradient & Borders", style=grad_style)
+    table.set_cell_border(row, 0, ["left", "right"], Border(3.0, RGB(0, 0, 255), "dots"))
+    table.set_cell_border(row, 0, "bottom", Border(2.0, RGB(0, 128, 0), "solid"), 2)
+    table.write(
+        row,
+        1,
+        'bg_color=[RGB(255,220,220), RGB(220,220,255)], alignment=("right","bottom"), '
+        'borders=["left","right"] dots + "bottom" solid len=2',
+    )
+    row += 1
+
+    # --- Style by Name (row 30) ---
+    table.write(row, 0, "Style by Name")
+    table.set_cell_style(row, 0, "CustomStyle1")
+    table.write(row, 1, 'table.set_cell_style(row, 0, "CustomStyle1")')
+    row += 1
+
+    # --- Merging and Comments (rows 31-32) ---
     table.write(row, 0, "Merged Anchor")
     table.merge_cells(f"A{row + 1}:A{row + 2}")
     table.add_comment(f"A{row + 1}", "Comment on merged anchor", author="API Tester")
@@ -254,7 +449,7 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     )
     row += 2
 
-    # --- XREFs and Utilities ---
+    # --- XREFs and Utilities (row 33) ---
     table.write(row, 0, "Xrefs test")
     table.write(
         row,
@@ -266,7 +461,7 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     )
     row += 1
 
-    # --- Background Image ---
+    # --- Background Image (row 34) ---
     with open("tests/data/cat.jpg", "rb") as f:
         cat_data = f.read()
     cat_bg = BackgroundImage(cat_data, "cat.jpg")
@@ -280,16 +475,37 @@ def generate_doc_with_all_apis(filename: Path) -> None:
     table.row_height(row, 100)  # Give the cat room to breathe visually
     row += 1
 
+    # --- Second Table positioned via coordinates & height ---
+    x, y = table.coordinates
+    second_table = sheet.add_table(
+        "Second Table",
+        x,
+        y + table.height + 50,
+        num_rows=3,
+        num_cols=2,
+    )
+    second_table.write(0, 0, "Item")
+    second_table.write(0, 1, "Value")
+    second_table.write(1, 0, "Alpha")
+    second_table.write(1, 1, 100)
+    second_table.write(2, 0, "Beta")
+    second_table.write(2, 1, 200)
+
     doc.save(filename)
 
 
-def check_api_tests(filename: Path) -> None:
+def check_api_tests(filename: Path) -> None:  # noqa: PLR0915
     """Check api tests."""
     doc = Document(filename)
     sheet = doc.sheets["API Test Sheet"]
     table = sheet.tables["API Exporter Reference"]
 
-    # Check Styles
+    # Check Table Name & Caption
+    assert table.table_name_enabled is True
+    assert table.caption_enabled is True
+    assert table.caption == "Visual API Test Caption"
+
+    # Check Styles (row 1)
     style_cell = table.cell(1, 0)
     assert style_cell.value == "Styled Text"
     s = style_cell.style
@@ -311,7 +527,7 @@ def check_api_tests(filename: Path) -> None:
     assert s.text_inset == 1.0
     assert s.text_wrap is False
 
-    # Check Borders
+    # Check Borders (row 2)
     border_cell = table.cell(2, 0)
     assert border_cell.border is not None
     b = border_cell.border.top
@@ -320,78 +536,148 @@ def check_api_tests(filename: Path) -> None:
     assert b.color == RGB(255, 0, 0)
     assert b.style == BorderType.DASHES
 
-    # Check Base Formatting
+    # Check Base Formatting (rows 3-4)
     base_cell = table.cell(3, 0)
     assert base_cell.value == -255
     assert base_cell.formatted_value == "-00FF"
 
-    # Check Currency Formatting
-    curr_cell = table.cell(4, 0)
+    twos_cell = table.cell(4, 0)
+    assert twos_cell.value == -42
+    assert twos_cell.formatted_value == "FFFFFFD6"
+
+    # Check Currency Formatting (rows 5-6)
+    curr_cell = table.cell(5, 0)
     assert curr_cell.value == -100.5
     assert curr_cell.formatted_value == "$\t(100.50)"
 
-    # Check Fraction Formatting
-    frac_cell = table.cell(5, 0)
-    assert frac_cell.value == 0.75
+    chf_cell = table.cell(6, 0)
+    assert chf_cell.value == 1234.5
+    assert "1,234.50" in chf_cell.formatted_value
+
+    # Check Percentage, Scientific & Negative Number (rows 7-9)
+    pct_cell = table.cell(7, 0)
+    assert round(pct_cell.value, 4) == 0.1234
+    assert pct_cell.formatted_value == "12.3%"
+
+    sci_cell = table.cell(8, 0)
+    assert round(sci_cell.value, 3) == 123456.789
+    assert sci_cell.formatted_value == "1.23E+05"
+
+    neg_cell = table.cell(9, 0)
+    assert round(neg_cell.value, 2) == -1234.56
+    assert neg_cell.formatted_value == "(1,234.56)"
+
+    # Check Fraction Formatting (rows 10-11)
+    frac_cell = table.cell(10, 0)
+    assert round(frac_cell.value, 2) == 0.75
     assert frac_cell.formatted_value == "3/4"
 
-    # Check Datetime Formatting
-    dt_cell = table.cell(6, 0)
+    frac_n_cell = table.cell(11, 0)
+    assert round(frac_n_cell.value, 3) == -1.375
+    assert frac_n_cell.formatted_value == "-1 3/8"
+
+    # Check Datetime Formatting (row 12)
+    dt_cell = table.cell(12, 0)
     assert dt_cell.formatted_value is not None
     assert "2026-01-01 12:00" in dt_cell.formatted_value
 
-    # Check Duration Formatting
-    dur_cell = table.cell(7, 0)
+    # Check Duration Formatting (rows 13-15)
+    dur_cell = table.cell(13, 0)
     assert dur_cell.value == timedelta(days=1, hours=2)
     assert dur_cell.formatted_value == "1 day 2 hours 0 minutes"
 
-    # Check Tickbox Formatting
-    tick_cell = table.cell(8, 0)
+    dur_compact = table.cell(14, 0)
+    assert dur_compact.value == timedelta(minutes=5, seconds=9, milliseconds=42)
+    assert dur_compact.formatted_value == "05:09.042"
+
+    dur_short = table.cell(15, 0)
+    assert dur_short.value == timedelta(weeks=2, days=3, hours=4)
+    assert dur_short.formatted_value == "2w 3d 4h"
+
+    # Check Tickbox Formatting (rows 16-17)
+    tick_cell = table.cell(16, 0)
     assert tick_cell.value is True
     assert tick_cell.formatted_value == CHECKBOX_TRUE_VALUE
 
-    # Check Rating Formatting
-    rat_cell = table.cell(9, 0)
+    tick_false_cell = table.cell(17, 0)
+    assert tick_false_cell.value is False
+    assert tick_false_cell.formatted_value == CHECKBOX_FALSE_VALUE
+
+    # Check Rating Formatting (row 18)
+    rat_cell = table.cell(18, 0)
     assert rat_cell.value == 3
     assert rat_cell.formatted_value == STAR_RATING_VALUE * 3
 
-    # Check Slider & Stepper
-    slid_cell = table.cell(10, 0)
+    # Check Sliders & Stepper (rows 19-21)
+    slid_cell = table.cell(19, 0)
     assert slid_cell.formatted_value == "50.0"
-    step_cell = table.cell(11, 0)
+
+    slid_curr_cell = table.cell(20, 0)
+    assert round(slid_curr_cell.value, 1) == 25.0
+    assert "£25" in slid_curr_cell.formatted_value
+
+    step_cell = table.cell(21, 0)
     assert step_cell.formatted_value == "5"
 
-    # Check Popup Formatting
-    pop_cell = table.cell(12, 0)
+    # Check Popup Formatting (rows 22-23)
+    pop_cell = table.cell(22, 0)
     assert pop_cell.value == "Option A"
 
-    # Check Custom Formats inside doc.custom_formats
+    pop_num_cell = table.cell(23, 0)
+    assert pop_num_cell.value == 20.0
+
+    # Check Custom Formats inside doc.custom_formats (rows 24-28)
     assert "MyCustomNum" in doc.custom_formats
     c_num = doc.custom_formats["MyCustomNum"]
     assert c_num.type == CustomFormattingType.NUMBER
-    c_num_cell = table.cell(13, 0)
+    c_num_cell = table.cell(24, 0)
     assert c_num_cell.value == 42.1
     assert c_num_cell.formatted_value is not None
     assert "42" in c_num_cell.formatted_value
 
+    assert "SpacedCustomNum" in doc.custom_formats
+    c_spaced_cell = table.cell(25, 0)
+    assert c_spaced_cell.value == 1234.5
+    assert "1,234.5" in c_spaced_cell.formatted_value
+
     assert "MyCustomDate" in doc.custom_formats
     c_date = doc.custom_formats["MyCustomDate"]
     assert c_date.type == CustomFormattingType.DATETIME
-    c_date_cell = table.cell(14, 0)
+    c_date_cell = table.cell(26, 0)
     assert c_date_cell.formatted_value is not None
     assert "2026" in c_date_cell.formatted_value
+
+    assert "QuotedCustomDate" in doc.custom_formats
+    c_quoted_date_cell = table.cell(27, 0)
+    assert c_quoted_date_cell.formatted_value == "2026-06-15 at 09:30"
 
     assert "MyCustomText" in doc.custom_formats
     c_text = doc.custom_formats["MyCustomText"]
     assert c_text.type == CustomFormattingType.TEXT
-    c_text_cell = table.cell(15, 0)
+    c_text_cell = table.cell(28, 0)
     assert c_text_cell.formatted_value is not None
     assert "Prefix: Test string" in c_text_cell.formatted_value
 
-    # Check Merging
-    assert "A17:A18" in table.merge_ranges
-    anchor_cell = table.cell("A17")
-    merged_cell = table.cell("A18")
+    # Check Gradient Fill & Multi-Side Borders (row 29)
+    grad_cell = table.cell(29, 0)
+    assert grad_cell.style.bg_color == [RGB(255, 220, 220), RGB(220, 220, 255)]
+    assert grad_cell.style.alignment == Alignment(
+        HorizontalJustification.RIGHT,
+        VerticalJustification.BOTTOM,
+    )
+    assert grad_cell.border.left == Border(3.0, RGB(0, 0, 255), BorderType.DOTS)
+    assert grad_cell.border.right == Border(3.0, RGB(0, 0, 255), BorderType.DOTS)
+    assert grad_cell.border.bottom == Border(2.0, RGB(0, 128, 0), BorderType.SOLID)
+    assert table.cell(29, 1).border.bottom == Border(2.0, RGB(0, 128, 0), BorderType.SOLID)
+
+    # Check Style by Name (row 30)
+    named_style_cell = table.cell(30, 0)
+    assert named_style_cell.style.name == "CustomStyle1"
+
+    # Check Merging (rows 31-32 -> A32:A33)
+    assert "A32:A33" in table.merge_ranges
+    anchor_cell = table.cell("A32")
+    merged_cell = table.cell("A33")
     assert merged_cell.is_merged is False
     assert anchor_cell.size == (2, 1)
     assert isinstance(merged_cell, MergedCell)
@@ -405,8 +691,8 @@ def check_api_tests(filename: Path) -> None:
     assert comments[0].replies[0].text == "Reply to comment"
     assert comments[0].replies[0].author == "API Tester"
 
-    # Check Background Image
-    bg_cell = table.cell(19, 0)
+    # Check Background Image (row 34)
+    bg_cell = table.cell(34, 0)
     assert bg_cell.value == "Cat Image"
     s_bg = bg_cell.style
     assert s_bg is not None
@@ -415,6 +701,30 @@ def check_api_tests(filename: Path) -> None:
     assert s_bg.bg_image.filename == "cat.jpg"
     with open("tests/data/cat.jpg", "rb") as f:
         assert s_bg.bg_image.data == f.read()
+
+    # Check Second Table & Iteration APIs
+    second_table = sheet.tables["Second Table"]
+    assert second_table.num_rows == 3
+    assert second_table.num_cols == 2
+    assert second_table.rows(values_only=True) == [
+        ["Item", "Value"],
+        ["Alpha", 100.0],
+        ["Beta", 200.0],
+    ]
+    assert list(second_table.iter_rows(min_row=1, values_only=True)) == [
+        ("Alpha", 100.0),
+        ("Beta", 200.0),
+    ]
+    assert len(list(second_table.iter_rows(min_row=1))) == 2
+    assert list(second_table.iter_cols(min_row=1, max_col=0, values_only=True)) == [
+        ("Alpha", "Beta"),
+    ]
+    assert len(list(second_table.iter_cols(min_row=1, max_col=0))) == 1
+    assert list(second_table.iter_cells(min_row=1, min_col=1, values_only=True)) == [
+        100.0,
+        200.0,
+    ]
+    assert len(list(second_table.iter_cells(min_row=1, min_col=1))) == 2
 
 
 def update_pivot_tables_doc(doc_filepath: Path, new_doc_filepath: Path) -> None:
@@ -440,7 +750,14 @@ def update_pivot_tables_doc(doc_filepath: Path, new_doc_filepath: Path) -> None:
     table.set_cell_formatting(14, 2, "number", show_thousands_separator=True)
     table.set_cell_formatting(15, 2, "number", show_thousands_separator=True)
     table.set_cell_formatting(16, 2, "number", show_thousands_separator=True)
-    doc.save(new_doc_filepath)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=r"Pivot table .* may be corrupted by save\.",
+            category=RuntimeWarning,
+        )
+        doc.save(new_doc_filepath)
 
 
 def open_numbers_and_export_pdf(

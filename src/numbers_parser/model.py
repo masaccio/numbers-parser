@@ -3246,7 +3246,7 @@ class NumbersModel(Cacheable):
         """Keep UID maps and dependency bounds in sync with data dimensions."""
         table_model = self.table_model(table_id)
 
-        def _update_map(uid_map_ref: TSPMessages.Reference) -> None:  # noqa: C901
+        def _update_map(uid_map_ref: TSPMessages.Reference) -> None:
             """Update map."""
             if not uid_map_ref or uid_map_ref.identifier == 0:
                 return
@@ -3259,13 +3259,9 @@ class NumbersModel(Cacheable):
 
             if num_cols > len(col_uuids):
                 col_uuids.extend([NumbersUUID() for _ in range(num_cols - len(col_uuids))])
-            elif num_cols < len(col_uuids):
-                col_uuids = col_uuids[:num_cols]
 
             if num_rows > len(row_uuids):
                 row_uuids.extend([NumbersUUID() for _ in range(num_rows - len(row_uuids))])
-            elif num_rows < len(row_uuids):
-                row_uuids = row_uuids[:num_rows]
 
             sorted_col_uuids = sorted(col_uuids, key=lambda x: x.int)
             sorted_row_uuids = sorted(row_uuids, key=lambda x: x.int)
