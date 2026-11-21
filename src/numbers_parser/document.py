@@ -1298,10 +1298,17 @@ class Table(Cacheable):
             If the cell type cannot be determined from the type of ``value``.
 
         """
-        # TODO: write needs to retain/init the border
         (row, col, *rest) = self._validate_cell_coords(*args)
         value = rest[0]
+
+        prev_cell = self._data[row][col]
         self._data[row][col] = Cell._from_value(row, col, value)
+        self._data[row][col]._border = prev_cell._border
+        self._data[row][col]._comment_id = prev_cell._comment_id
+        if style is None:
+            self._data[row][col]._style = prev_cell._style
+            self._data[row][col]._cell_style_id = prev_cell._cell_style_id
+            self._data[row][col]._text_style_id = prev_cell._text_style_id
         self._data[row][col]._update_value(value, self._data[row][col])
 
         merge_cells = self._model.merge_cells(self._table_id)
