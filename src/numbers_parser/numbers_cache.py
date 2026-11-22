@@ -47,6 +47,7 @@ def cache(
         @wraps(func)
         def inner_multi_args(
             self: C,
+            /,
             *args: P.args,
             **kwargs: P.kwargs,
         ) -> R:
@@ -60,7 +61,7 @@ def cache(
             return value
 
         @wraps(func)
-        def inner_no_args(self: C, *args: P.args, **kwargs: P.kwargs) -> R:
+        def inner_no_args(self: C, /, *args: P.args, **kwargs: P.kwargs) -> R:
             """Return a cached result for a method without arguments."""
             method = func.__name__
             if method not in self._cache:

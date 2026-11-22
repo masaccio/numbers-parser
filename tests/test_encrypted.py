@@ -12,7 +12,8 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from google.protobuf.message import Message as ProtoMessage
 
 from numbers_parser import RGB, Document, FileError, FileFormatError
-from numbers_parser.iwork import IWAFile, IWork, IWorkCrypto, IWorkHandler
+from numbers_parser.iwafile import IWAFile
+from numbers_parser.iwork import IWork, IWorkCrypto, IWorkHandler
 
 
 class NullHandler(IWorkHandler):

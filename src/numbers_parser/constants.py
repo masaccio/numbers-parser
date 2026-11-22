@@ -4,6 +4,7 @@ from datetime import datetime
 from enum import IntEnum, auto
 from math import ceil
 from pathlib import Path
+from typing import cast
 
 import enum_tools.documentation
 
@@ -484,17 +485,17 @@ class PaddingType(IntEnum):
     """Pad integers with leading spaces and decimals with trailing spaces."""
 
 
-FONT_MAP = GENERATED_FONT_MAP
-FONT_TUPLE_MAP: dict[tuple[str, str], dict[str, str]] = {}
-FONT_FAMILY_DEFAULT: dict[str, dict[str, str]] = {}
+FONT_MAP: dict[str, dict[str, str | bool]] = GENERATED_FONT_MAP
+FONT_TUPLE_MAP: dict[tuple[str, str], dict[str, str | bool]] = {}
+FONT_FAMILY_DEFAULT: dict[str, dict[str, str | bool]] = {}
 
 
-def update_font_maps(font_map: dict) -> None:
+def update_font_maps(font_map: dict[str, dict[str, str | bool]]) -> None:
     """Update font maps."""
     seen = {}
     for v in font_map.values():
-        family = v["family"]
-        FONT_TUPLE_MAP[(family, v["style"])] = v
+        family = cast("str", v["family"])
+        FONT_TUPLE_MAP[(family, cast("str", v["style"]))] = v
         if family not in seen:
             FONT_FAMILY_DEFAULT[family] = v
             seen[family] = True

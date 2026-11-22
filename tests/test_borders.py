@@ -73,11 +73,11 @@ def test_exceptions() -> None:
     assert "width must be a float number" in str(e)
 
     with pytest.raises(TypeError) as e:
-        _ = Border(color=(0, 0, 0, 0))
+        _ = Border(color=(0, 0, 0, 0))  # type: ignore[arg-type]
     assert "RGB color must be an RGB" in str(e)
 
     with pytest.raises(TypeError) as e:
-        _ = Border(color=(0, 0, 1.0))
+        _ = Border(color=(0, 0, 1.0))  # type: ignore[arg-type]
     assert "RGB color must be an RGB" in str(e)
 
     with pytest.raises(TypeError) as e:

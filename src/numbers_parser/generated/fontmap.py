@@ -1,4 +1,6 @@
-GENERATED_FONT_MAP = {
+"""Generated system font information."""
+
+GENERATED_FONT_MAP : dict[str, dict[str, str | bool]]= {
    "AcademyEngravedLetPlain": {
         "name": "AcademyEngravedLetPlain",
         "family": "Academy Engraved LET",

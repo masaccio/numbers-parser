@@ -40,6 +40,6 @@ repos:
     hooks:
       - id: mypy
         entry: uv run --active mypy
-        args: [--config-file, pyproject.toml]
+        args: [--config-file, pyproject.toml, --strict]
         files: ^(src/(numbers_parser|build)|tests)/.*\.py$
         exclude: ^(src/numbers_parser/generated/.*\.py|src/build/protodump\.py)$

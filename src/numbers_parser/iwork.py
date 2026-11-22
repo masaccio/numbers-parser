@@ -263,7 +263,7 @@ class IWork:
             # Numbers allows malformed Properties.plist but not missing files
             doc_version = ""
             warn("can't read Numbers version from document", RuntimeWarning, stacklevel=2)
-        return doc_version
+        return str(doc_version)
 
     def open(self, filepath: Path, password: str | None) -> None:
         """

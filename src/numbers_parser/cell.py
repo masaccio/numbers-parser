@@ -77,8 +77,7 @@ from numbers_parser.numbers_cache import Cacheable, cache
 from numbers_parser.numbers_uuid import NumbersUUID
 from numbers_parser.xrefs import xl_range
 
-numbers_parser_name = __package__  # pylint: disable=invalid-name
-logger = logging.getLogger(numbers_parser_name)
+logger = logging.getLogger(__package__)  # pylint: disable=invalid-name
 debug = logger.debug
 
 
@@ -285,7 +284,7 @@ class Style:
     text_inset: float = DEFAULT_TEXT_INSET
     text_wrap: bool = DEFAULT_TEXT_WRAP
     name: str | None = None
-    _font_details: dict[str, str] | None = None
+    _font_details: dict[str, Any] | None = None
     _text_style_obj_id: int | None = None
     _cell_style_obj_id: int | None = None
     _update_cell_style: bool = False

@@ -1,4 +1,5 @@
 """Generate the bundled font map using macOS font metadata."""
+
 import sys
 
 import Cocoa
@@ -9,7 +10,9 @@ if len(sys.argv) != 2:
 
 mapping_py = sys.argv[1]
 with open(mapping_py, "w", encoding="utf-8") as fh:
-    print("GENERATED_FONT_MAP = {", file=fh)
+    print('"""Generated system font information."""', file=fh)
+    print("\n", file=fh)
+    print("GENERATED_FONT_MAP : dict[str, dict[str, str | bool]]= {", file=fh)
 
     manager = Cocoa.NSFontManager.sharedFontManager()
     font_families = list(manager.availableFontFamilies())

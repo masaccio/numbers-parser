@@ -11,6 +11,7 @@ ASTNODETYPE
 autoremove
 Avenir
 bgcolour
+Calibri
 capsys
 CFPF
 CFUUID
@@ -107,6 +108,7 @@ pytestconfig
 PYTHONPATH
 rcfile
 refuri
+resaving
 rgbspace
 Roboto
 rowcol

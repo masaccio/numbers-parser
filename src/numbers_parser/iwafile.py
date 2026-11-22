@@ -333,9 +333,9 @@ class IWAArchiveSegment:  # noqa: PLW1641
 
 def message_to_dict(message: ProtoMessage | ProtobufPatch) -> dict[str, Any]:
     """Convert a protobuf message to a dictionary."""
-    if hasattr(message, "to_dict"):
-        return message.to_dict()  # type: ignore[union-attr]
-    output = MessageToDict(message, preserving_proto_field_name=True)  # type: ignore[arg-type]
+    if isinstance(message, ProtobufPatch):
+        return message.to_dict()
+    output = MessageToDict(message, preserving_proto_field_name=True)
     output["_pbtype"] = type(message).DESCRIPTOR.full_name
     return output
 
@@ -352,7 +352,10 @@ def dict_to_message(_dict: dict[str, Any]) -> ProtoMessage:
     """Create a protobuf message from a dictionary."""
     _type = _dict["_pbtype"]
     del _dict["_pbtype"]
-    return ParseDict(_dict, NAME_CLASS_MAP[_type](), ignore_unknown_fields=True)
+    return cast(
+        "ProtoMessage",
+        ParseDict(_dict, NAME_CLASS_MAP[_type](), ignore_unknown_fields=True),
+    )
 
 
 def dict_to_header(_dict: dict[str, Any]) -> ArchiveInfo:
@@ -521,4 +524,4 @@ def find_extension(obj: ProtoMessage, name: str) -> MutableSequence[TSPMessages.
     """Find extension."""
     all_extensions = extensions(obj)
     filtered = [getattr(x, name) for x in all_extensions if getattr(x, name, None) is not None]
-    return filtered[0]
+    return cast("MutableSequence[TSPMessages.Reference]", filtered[0])

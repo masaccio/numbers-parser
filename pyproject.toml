@@ -240,6 +240,7 @@ ignored-modules = ["Cocoa", "lldb"]
 
 [tool.mypy]
 mypy_path = "src"
+strict = true
 exclude = [
     "src/numbers_parser/generated/",
     "src/debug/lldbutil.py",

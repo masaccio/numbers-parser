@@ -14,7 +14,7 @@ from base64 import b64decode
 from binascii import hexlify
 from dataclasses import dataclass
 from pathlib import Path
-from typing import cast
+from typing import Any
 
 from compact_json import Formatter
 from google.protobuf.message import Message as ProtoMessage
@@ -94,7 +94,7 @@ class NumbersUnpacker(IWorkHandler):
         with contextlib.suppress(OSError):
             os.makedirs(os.path.join(*([str(self.output_dir), *list(parts[:-1])])))
 
-    def prettify_uuids(self, obj: dict | list) -> None:
+    def prettify_uuids(self, obj: dict[str, Any] | list[Any]) -> None:
         """Replace UUID values with readable labels in extracted data."""
         if isinstance(obj, dict):
             for k, v in obj.items():
@@ -106,7 +106,7 @@ class NumbersUnpacker(IWorkHandler):
                 elif isinstance(v, list):
                     self.prettify_uuids(v)
         else:  # must be a list
-            for i, v in enumerate(cast("list", obj)):
+            for i, v in enumerate(obj):
                 if isinstance(v, dict):
                     try:
                         obj[i] = str(NumbersUUID(v))
@@ -115,7 +115,7 @@ class NumbersUnpacker(IWorkHandler):
                 elif isinstance(v, list):
                     self.prettify_uuids(v)
 
-    def prettify_cell_storage(self, obj: dict | list) -> None:
+    def prettify_cell_storage(self, obj: dict[str, Any] | list[Any]) -> None:
         """Format cell storage fields for readable output."""
         if isinstance(obj, dict):
             for k, v in obj.items():
@@ -129,7 +129,7 @@ class NumbersUnpacker(IWorkHandler):
                     obj[k] = ",".join([str(x) for x in offsets])
                     obj[k] = re.sub(r"(?:,-1)+$", ",[...]", obj[k])
         else:  # must be a list
-            for v in cast("list", obj):
+            for v in obj:
                 if isinstance(v, (dict, list)):
                     self.prettify_cell_storage(v)
 

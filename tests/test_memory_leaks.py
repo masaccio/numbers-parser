@@ -23,7 +23,7 @@ def test_memory_leaks() -> None:
         del doc
         gc.collect()
 
-        interim_summary = summary.summarize(muppy.get_objects())
+        interim_summary = summary.summarize(muppy.get_objects())  # type: ignore[no-untyped-call]
         num_objects = sum(r[1] for r in interim_summary)
         num_bytes = sum(r[2] for r in interim_summary)
 

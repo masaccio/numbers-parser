@@ -10,10 +10,19 @@ import pytest
 
 from numbers_parser import Document, PaddingType
 from numbers_parser.cell import (
+    _auto_units,
     _decode_date_format,
     _decode_number_format,
+    _float_to_n_digit_fraction,
     _format_currency,
     _format_decimal,
+)
+from numbers_parser.constants import (
+    DECIMAL_PLACES_AUTO,
+    EMPTY_STORAGE_BUFFER,
+    PACKAGE_ID,
+    DurationUnits,
+    NegativeNumberStyle,
 )
 from numbers_parser.generated import TSKArchives_pb2 as TSKArchives
 from numbers_parser.generated import TSPMessages_pb2 as TSPMessages
@@ -38,17 +47,6 @@ from numbers_parser import (
     UnsupportedWarning,
 )
 from numbers_parser._unpack_numbers import NumbersUnpacker
-from numbers_parser.cell import (
-    DurationUnits,
-    _auto_units,
-    _float_to_n_digit_fraction,
-)
-from numbers_parser.constants import (
-    DECIMAL_PLACES_AUTO,
-    EMPTY_STORAGE_BUFFER,
-    PACKAGE_ID,
-    NegativeNumberStyle,
-)
 from numbers_parser.experimental import (
     ExperimentalFeatures,
     disable_experimental_feature,
@@ -434,7 +432,7 @@ def test_add_component_metadata_none_locator() -> None:
     model = doc._model
 
     test_id = 999999
-    model.add_component_metadata(test_id, "CalculationEngine", None)  # type: ignore[arg-type]
+    model.add_component_metadata(test_id, "CalculationEngine", None)
 
     pkg = cast("Any", model.objects[PACKAGE_ID])
     components = pkg.components

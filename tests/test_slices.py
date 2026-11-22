@@ -1,13 +1,10 @@
 """Tests for cell lookups and table iterators."""
 
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 import pytest
 
 from numbers_parser import Document
-
-if TYPE_CHECKING:
-    from numbers_parser import Cell
 
 
 def test_exceptions() -> None:
@@ -180,8 +177,7 @@ def test_col_iterator() -> None:
     table = tables["XXX_Table_2"]
     val = 0.0
     for col in table.iter_cols():
-        cell_2 = cast("Cell", col[2])
-        val += cell_2.value if cell_2 is not None else 0.0
+        val += col[2].value if col[2] is not None else 0.0
     assert val == 164.224
     val = 0.0
     for val_col in table.iter_cols(min_col=1, max_col=3, values_only=True):
@@ -189,9 +185,7 @@ def test_col_iterator() -> None:
     assert val == 336.572
     val = 0.0
     for col in table.iter_cols(min_row=5, max_row=6, min_col=1, max_col=2):
-        c0 = cast("Cell", col[0])
-        c1 = cast("Cell", col[1])
-        val += c0.value + c1.value
+        val += col[0].value + col[1].value
     assert val == 522.108
 
 
@@ -202,11 +196,12 @@ def test_cell_iterator() -> None:
     tables = sheets["ZZZ_Sheet_1"].tables
     table = tables["XXX_Table_2"]
 
-    val = sum(cast("float", cast("Cell", cell).value or 0.0) for cell in table.iter_cells())
+    val = sum((cast("float", cell.value or 0.0) for cell in table.iter_cells()), 0.0)
     assert val == 1792.802
 
     val = sum(
-        cast("float", v or 0.0) for v in table.iter_cells(min_col=1, max_col=3, values_only=True)
+        (cast("float", v or 0.0) for v in table.iter_cells(min_col=1, max_col=3, values_only=True)),
+        0.0,
     )
     assert val == 1540.802
 

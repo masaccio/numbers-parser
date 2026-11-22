@@ -15,13 +15,9 @@ from numbers_parser.cell import (
     BackgroundImage,
     Border,
     Cell,
-    ControlFormattingType,
     CustomFormatting,
-    CustomFormattingType,
     Formatting,
-    FormattingType,
     MergedCell,
-    PaddingType,
     Style,
     TextCell,
 )
@@ -35,6 +31,10 @@ from numbers_parser.constants import (
     MAX_COL_COUNT,
     MAX_HEADER_COUNT,
     MAX_ROW_COUNT,
+    ControlFormattingType,
+    CustomFormattingType,
+    FormattingType,
+    PaddingType,
 )
 from numbers_parser.containers import ItemsList
 from numbers_parser.model import NumbersModel
@@ -1371,7 +1371,10 @@ class Table(Cacheable):
             msg = "style must be a Style object or style name"
             raise TypeError(msg)
 
-    def categorized_data(self, values_only: bool = False) -> dict[str, dict | list] | None:
+    def categorized_data(
+        self,
+        values_only: bool = False,
+    ) -> dict[str, dict[str, Any] | list[str]] | None:
         """
         Return the table's categorized data, or ``None`` if categories are disabled.
 
@@ -1409,7 +1412,9 @@ class Table(Cacheable):
 
         """
 
-        def data_to_values(item: list | dict | Cell) -> dict[str, dict | list] | Any:  # noqa: ANN401
+        def data_to_values(
+            item: Cell | list[Cell] | dict[str, Any],
+        ) -> dict[str, dict[str, Any] | list[str]] | Any:  # noqa: ANN401
             """Convert a row of cells to their Python values."""
             if isinstance(item, dict):
                 return {k: data_to_values(v) for k, v in item.items()}

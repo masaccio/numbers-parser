@@ -53,7 +53,7 @@ class NumbersUUID(UUID):
             raise UnsupportedError(msg)
 
     @property
-    def dict2(self) -> dict:
+    def dict2(self) -> dict[str, int]:
         """Create a UUID from the two-part dictionary representation."""
         upper = self.int >> 64
         lower = self.int & 0xFFFFFFFFFFFFFFFF

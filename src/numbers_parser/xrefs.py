@@ -159,7 +159,6 @@ class CellRange:
 
         # Handle column-only ranges
         if self.row_start is None:
-            self.col_start = cast("int", self.col_start)
             col_range = self._model.name_ref_cache.col_ranges[self.to_table_id]
             return self._format_col_range(self.col_start, self.col_end, col_range)
 

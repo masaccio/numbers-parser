@@ -9,18 +9,12 @@ import sys
 
 from sigfig import round as sigfig
 
-from numbers_parser import (
-    Cell,
-    Document,
-    ErrorCell,
-    FileError,
-    FileFormatError,
-    NumberCell,
-    UnsupportedError,
-    _get_version,
-)
 from numbers_parser import __name__ as numbers_parser_name
+from numbers_parser import _get_version
+from numbers_parser.cell import Cell, ErrorCell, NumberCell
 from numbers_parser.constants import MAX_SIGNIFICANT_DIGITS
+from numbers_parser.document import Document
+from numbers_parser.exceptions import FileError, FileFormatError, UnsupportedError
 from numbers_parser.experimental import ExperimentalFeatures, enable_experimental_feature
 
 logger = logging.getLogger(numbers_parser_name)
@@ -100,13 +94,13 @@ def command_line_parser() -> argparse.ArgumentParser:
 
 def print_sheet_names(filename: str, password: str | None) -> None:
     """Print sheet names."""
-    for sheet in Document(filename, password=password).sheets:  # type: ignore[attr-defined]
+    for sheet in Document(filename, password=password).sheets:
         print(f"{filename}: {sheet.name}")
 
 
 def print_table_names(filename: str, password: str | None) -> None:
     """Print table names."""
-    for sheet in Document(filename, password=password).sheets:  # type: ignore[attr-defined]
+    for sheet in Document(filename, password=password).sheets:
         for table in sheet.tables:
             print(f"{filename}: {sheet.name}: {table.name}")
 
@@ -120,7 +114,7 @@ def cell_as_string(args: argparse.Namespace, cell: Cell) -> str:
     if args.formatting and cell.formatted_value is not None:
         return cell.formatted_value
     if isinstance(cell, NumberCell):
-        return sigfig(cell.value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False)
+        return str(sigfig(cell.value, sigfigs=MAX_SIGNIFICANT_DIGITS, warn=False))
     if getattr(cell, "value", None) is None:
         return ""
     return str(getattr(cell, "value", ""))
@@ -133,7 +127,7 @@ def print_table(
 ) -> None:
     """Print table."""
     writer = csv.writer(sys.stdout, dialect="excel")
-    for sheet in Document(filename, password=password).sheets:  # type: ignore[attr-defined]
+    for sheet in Document(filename, password=password).sheets:
         if args.sheet is not None and sheet.name not in args.sheet:
             continue
         for table in sheet.tables:

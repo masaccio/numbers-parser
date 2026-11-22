@@ -18,7 +18,6 @@ from numbers_parser import (
     BackgroundImage,
     Border,
     BorderType,
-    ControlFormattingType,
     Document,
     DurationStyle,
     DurationUnits,
@@ -32,11 +31,12 @@ from numbers_parser import (
     xl_col_to_offset,
     xl_range,
 )
-from numbers_parser.cell import CustomFormattingType
 from numbers_parser.constants import (
     CHECKBOX_FALSE_VALUE,
     CHECKBOX_TRUE_VALUE,
     STAR_RATING_VALUE,
+    ControlFormattingType,
+    CustomFormattingType,
     NegativeNumberStyle,
 )
 

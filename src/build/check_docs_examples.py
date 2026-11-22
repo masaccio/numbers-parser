@@ -151,7 +151,7 @@ def open_from_data(
     """open() replacement that resolves relative filenames in tests/data."""
     if isinstance(file, (str, os.PathLike)) and not Path(file).is_absolute():
         file = DATA_DIR / file
-    return open(file, *args, **kwargs)  # type: ignore[call-overload]
+    return open(file, *args, **kwargs)  # type: ignore[call-overload, no-any-return]
 
 
 def stored_and_loaded(code: str) -> tuple[set[str], set[str]]:
@@ -209,7 +209,7 @@ class AddressChecker(doctest.OutputChecker):
         )
 
 
-def run_session(example: Example, ns: dict) -> str | None:
+def run_session(example: Example, ns: dict[str, object]) -> str | None:
     """Run session."""
     parser = doctest.DocTestParser()
     test = parser.get_doctest(example.text, ns, example.where, str(example.path), example.line)
@@ -223,7 +223,7 @@ def run_session(example: Example, ns: dict) -> str | None:
     return out.getvalue() if runner.failures else None
 
 
-def run_code(example: Example, ns: dict) -> str | None:
+def run_code(example: Example, ns: dict[str, object]) -> str | None:
     """Run code."""
     try:
         with contextlib.redirect_stdout(io.StringIO()):

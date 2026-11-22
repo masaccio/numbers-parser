@@ -17,7 +17,7 @@ import time
 
 import lldb  # type: ignore[import-not-found]
 
-from debug.lldbutil import print_stacktrace  # type: ignore[import-untyped]
+from debug.lldbutil import print_stacktrace
 
 TIMEOUT_SECONDS = 10
 
@@ -78,7 +78,7 @@ try:
         stop_reason = thread.GetStopReason()
 
         if stop_reason == lldb.eStopReasonException:
-            print_stacktrace(thread)
+            print_stacktrace(thread)  # type: ignore[no-untyped-call]
             function = frame.GetFunction()
             function_or_symbol = function or frame.GetSymbol()
             msg = f"Exception at {frame.name}"

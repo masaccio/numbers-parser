@@ -44,12 +44,10 @@ def configurable_save_file_fixture(
     pytestconfig: pytest.Config,
 ) -> Path | str:
     """Return a temporary or user-configured file path for saving documents."""
-    if pytestconfig.getoption("save_file") is not None:
-        new_filename = pytestconfig.getoption("save_file")
-    else:
-        new_filename = tmp_path / "test-save-new.numbers"
-
-    return new_filename
+    save_file = pytestconfig.getoption("save_file")
+    if save_file is not None:
+        return str(save_file)
+    return tmp_path / "test-save-new.numbers"
 
 
 @pytest.fixture(name="configurable_multi_save_file", params="num_files")

@@ -39,6 +39,7 @@
     ],
     "mypy-type-checker.importStrategy": "fromEnvironment",
     "mypy-type-checker.args": [
+        "--strict",
         "--config-file=${workspaceFolder}/pyproject.toml"
     ],
     "mypy-type-checker.ignorePatterns": [
