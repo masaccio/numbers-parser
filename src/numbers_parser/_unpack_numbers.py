@@ -65,9 +65,6 @@ class NumbersUnpacker(IWorkHandler):
 
     def store_blob(self, filename: str, blob: bytes) -> None:
         """Store a binary blob."""
-        if filename.endswith("/"):
-            return
-
         target_path = self._resolve_pathname(filename)
         with open(target_path, "wb") as out:
             out.write(blob)

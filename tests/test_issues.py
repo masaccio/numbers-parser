@@ -1233,3 +1233,11 @@ def test_issue_307(configurable_save_file: Path) -> None:
     assert t.cell(3, 0).value == "Updated comment cell"
     assert len(t.cell(3, 0).comments) == 1
     assert t.cell(3, 0).comments[0].text == "Keep this comment"
+
+
+def test_issue_309() -> None:
+    """Test against zip file recursion."""
+    doc = Document("tests/data/issue-309.numbers")
+    blob_store = doc._model.objects.blob_store
+    assert "Index/Index.zip" in blob_store
+    assert "Images.zip" in blob_store

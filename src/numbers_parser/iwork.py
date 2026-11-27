@@ -206,6 +206,7 @@ class IWork:
         self._crypto: IWorkCrypto | None = None
         self._password: str | None = None
         self._is_package = False
+        self._seen_index_zip = False
 
     @property
     def is_encrypted(self) -> bool:
@@ -390,7 +391,8 @@ class IWork:
         for sub_filepath in filepath.iterdir():
             if sub_filepath.is_dir():
                 self._read_objects_from_package(sub_filepath)
-            elif sub_filepath.name.lower() == "index.zip":
+            elif not self._seen_index_zip and sub_filepath.name.lower() == "index.zip":
+                self._seen_index_zip = True
                 zipf = self._open_zipfile(sub_filepath)
                 self._read_objects_from_zipfile(zipf)
             elif sub_filepath.name in (".iwph", ".iwpv2"):
@@ -450,10 +452,11 @@ class IWork:
             if self._crypto is not None and filename.endswith(".iwa"):
                 blob = self._crypto.decrypt_iwa(blob)
 
-            if filename.lower().endswith(".zip"):
+            if not self._seen_index_zip and filename.lower().endswith("index.zip"):
+                self._seen_index_zip = True
                 index_data = BytesIO(blob)
                 self._read_objects_from_zipfile(self._open_zipfile(index_data))
-            else:
+            elif not filename.endswith("/"):
                 self._store_blob(filename, blob)
 
     def _store_blob(self, filename: str, blob: bytes) -> None:
