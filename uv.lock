@@ -162,16 +162,16 @@ wheels = [
 
 [[package]]
 name = "beautifulsoup4"
-version = "4.13.4"
+version = "4.15.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "soupsieve" },
     { name = "typing-extensions", version = "4.14.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
     { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d8/e4/0c4c39e18fd76d6a628d4dd8da40543d136ce2d1752bd6eeeab0791f4d6b/beautifulsoup4-4.13.4.tar.gz", hash = "sha256:dbb3c4e1ceae6aefebdaf2423247260cd062430a410e38c66f2baa50a8437195", size = 621067, upload-time = "2025-04-15T17:05:13.836Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/43/65/318323f98dbee45d42dff61d8f047181bc6f2268a9068cfad035a46be5af/beautifulsoup4-4.15.0.tar.gz", hash = "sha256:288e3ca7d54b06f2ac191970bc275c1939cb46d450b255bf6718b04aa37ab4f7", size = 632571, upload-time = "2026-06-07T16:44:20.453Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/50/cd/30110dc0ffcf3b131156077b90e9f60ed75711223f306da4db08eff8403b/beautifulsoup4-4.13.4-py3-none-any.whl", hash = "sha256:9bbbb14bfde9d79f38b8cd5f8c7c85f4b8f2523190ebed90e950a8dea4cb1c4b", size = 187285, upload-time = "2025-04-15T17:05:12.221Z" },
+    { url = "https://files.pythonhosted.org/packages/88/c6/92fcd42f1ba33e1184263f25bfabf3d27c383410470f169e4b8163bf9c17/beautifulsoup4-4.15.0-py3-none-any.whl", hash = "sha256:d6f88de62e1d4e38ecb1077eb9724cd0eff29d2a08ca16a401e9b9e93f117cf9", size = 109924, upload-time = "2026-06-07T16:44:21.566Z" },
 ]
 
 [[package]]
@@ -1444,6 +1444,7 @@ dev = [
     { name = "types-protobuf" },
 ]
 docs = [
+    { name = "beautifulsoup4" },
     { name = "docutils" },
     { name = "filelock" },
     { name = "pandas" },
@@ -1510,14 +1511,15 @@ dev = [
     { name = "types-protobuf", specifier = ">=7.35.1.20260906" },
 ]
 docs = [
+    { name = "beautifulsoup4", specifier = ">=4.15" },
     { name = "docutils", specifier = ">=0.21.2" },
     { name = "filelock", specifier = ">=3.20.1" },
     { name = "pandas", specifier = ">=2.3.3" },
-    { name = "sphinx", specifier = ">=7.3,<10.0" },
+    { name = "sphinx", specifier = ">=9.0,<10.0" },
     { name = "sphinx-copybutton", specifier = ">=0.5.2" },
     { name = "sphinx-markdown-builder", specifier = ">=0.6" },
     { name = "sphinx-nefertiti", specifier = ">=0.7" },
-    { name = "sphinx-toolbox", specifier = ">=3.5" },
+    { name = "sphinx-toolbox", specifier = ">=4.4" },
     { name = "sphinxcontrib-mermaid", specifier = ">=2.1.1" },
     { name = "urllib3", specifier = ">=2.7.0" },
 ]
@@ -2584,7 +2586,7 @@ wheels = [
 
 [[package]]
 name = "sphinx-toolbox"
-version = "4.3.1"
+version = "4.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apeye" },
@@ -2607,9 +2609,9 @@ dependencies = [
     { name = "typing-extensions", version = "4.14.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
     { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/92/79/aad9e89d9a34ed8a960e424b947cd9340688062997f1ebe35e21d840052e/sphinx_toolbox-4.3.1.tar.gz", hash = "sha256:05c5fd3add7e60ef0626e52ad57439d695bde89518a85cb5a88bd8fac71be28b", size = 118103, upload-time = "2026-09-14T19:22:05.601Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b4/60/2ef5b3dd69efba49f09e87829f1990b311604cbc7a58a29f95027e8aff1c/sphinx_toolbox-4.4.0.tar.gz", hash = "sha256:ec9d80dc4b670ebed49394cc0e051b3676772234437554b3c36eb2aedadecacb", size = 117866, upload-time = "2026-11-24T23:20:12.083Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/91/d9/ae9a20ef44c3263b7309073c0c62a16d29b24270752d73c26e042c7dcf50/sphinx_toolbox-4.3.1-py3-none-any.whl", hash = "sha256:f4ee0ff79f2c1b4dbe2d5e118dbbd32e146f3ca6a2a9d0ea27933ced2042d921", size = 198660, upload-time = "2026-09-14T19:22:04.42Z" },
+    { url = "https://files.pythonhosted.org/packages/fc/f5/85172a5287252da2b1fe01dcbb91f71aabe53bed6c7ed6e0d5170ccd5ab9/sphinx_toolbox-4.4.0-py3-none-any.whl", hash = "sha256:2efafbce188e6db87425ea89632690217c6560caf5583c5ac0234d6bef807f6f", size = 198988, upload-time = "2026-11-24T23:20:10.951Z" },
 ]
 
 [[package]]

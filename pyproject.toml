@@ -54,13 +54,14 @@ dev = [
     "types-protobuf>=7.35.1.20260906",
 ]
 docs = [
-    "sphinx>=7.3,<10.0",
-    "sphinx-toolbox>=3.5",
+    "sphinx>=9.0,<10.0",
+    "sphinx-toolbox>=4.4",
     "sphinx-nefertiti>=0.7",
     "sphinx-markdown-builder>=0.6",
     "sphinx-copybutton>=0.5.2",
     "sphinxcontrib-mermaid>=2.1.1",
     # Security updates
+    "beautifulsoup4>=4.15",
     "urllib3>=2.7.0",
     "filelock>=3.20.1",
     "docutils>=0.21.2",
